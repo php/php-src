@@ -145,8 +145,8 @@ PHP_MINIT_FUNCTION(sysvshm)
    Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
-	long arg_key, arg_size, arg_flag;
-	long shm_size, shm_flag;
+	long arg_key, arg_size, arg_flag = 0;
+	long shm_size = 0, shm_flag;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;

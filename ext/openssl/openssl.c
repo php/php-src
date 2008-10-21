@@ -1527,7 +1527,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	STACK_OF(X509) * untrustedchain = NULL;
 	long purpose;
 	char * untrusted = NULL;
-	int untrusted_len, ret;
+	int untrusted_len = 0, ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl|a!s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len) == FAILURE) {
 		return;
@@ -3133,7 +3133,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	zval **cert;
 	EVP_PKEY *pkey;
 	char * passphrase = "";
-	int passphrase_len;
+	int passphrase_len = sizeof("")-1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s", &cert, &passphrase, &passphrase_len) == FAILURE) {
 		return;
@@ -3265,9 +3265,9 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	BIO * in = NULL, * datain = NULL, * dataout = NULL;
 	long flags = 0;
 	char * filename; int filename_len;
-	char * extracerts = NULL; int extracerts_len;
-	char * signersfilename = NULL; int signersfilename_len;
-	char * datafilename = NULL; int datafilename_len;
+	char * extracerts = NULL; int extracerts_len = 0;
+	char * signersfilename = NULL; int signersfilename_len = 0;
+	char * datafilename = NULL; int datafilename_len = 0;
 	
 	RETVAL_LONG(-1);
 
@@ -4078,7 +4078,7 @@ PHP_FUNCTION(openssl_seal)
 	unsigned char *buf = NULL, **eks;
 	char * data; int data_len;
 	char *method =NULL;
-	int method_len;
+	int method_len = 0;
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX ctx;
 
@@ -4204,7 +4204,7 @@ PHP_FUNCTION(openssl_open)
 	char * data;	int data_len;
 	char * ekey;	int ekey_len;
 	char *method =NULL;
-	int method_len;
+	int method_len = 0;
 	const EVP_CIPHER *cipher;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szsZ|s", &data, &data_len, &opendata, &ekey, &ekey_len, &privkey, &method, &method_len) == FAILURE) {

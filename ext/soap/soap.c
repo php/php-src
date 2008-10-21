@@ -951,7 +951,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 PHP_METHOD(SoapFault, SoapFault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
-	int fault_string_len, fault_actor_len, name_len, fault_code_len = 0;
+	int fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s!z!s!z",
@@ -1052,7 +1052,7 @@ PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
-	int stype_len, ns_len, name_len, namens_len;
+	int stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|ssss", &data, &type, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
 		return;
@@ -1616,7 +1616,7 @@ PHP_METHOD(SoapServer, handle)
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	char *arg = NULL;
-	int arg_len;
+	int arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
@@ -2154,7 +2154,7 @@ fail:
 PHP_METHOD(SoapServer, fault)
 {
 	char *code, *string, *actor=NULL, *name=NULL;
-	int code_len, string_len, actor_len, name_len;
+	int code_len, string_len, actor_len = 0, name_len = 0;
 	zval* details = NULL;
 
 	SOAP_SERVER_BEGIN_CODE();
@@ -3290,7 +3290,7 @@ PHP_METHOD(SoapClient, __setCookie)
 {
 	char *name;
 	char *val = NULL;
-	int  name_len, val_len;
+	int  name_len, val_len = 0;
 	zval **cookies;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len, &val, &val_len) == FAILURE) {
@@ -3368,7 +3368,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 PHP_METHOD(SoapClient, __setLocation)
 {
 	char *location = NULL;
-	int  location_len;
+	int  location_len = 0;
 	zval **tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &location, &location_len) == FAILURE) {
