@@ -809,8 +809,8 @@ PHP_FUNCTION(clearstatcache)
 {
 	zend_bool   clear_realpath_cache = 0;
 	char       *filename             = NULL;
-	zend_uchar  filename_type;
-	int         filename_len;
+	zend_uchar  filename_type        = 0;
+	int         filename_len         = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bt", &clear_realpath_cache, &filename, &filename_len, &filename_type) == FAILURE) {
 		return;

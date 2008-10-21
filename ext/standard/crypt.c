@@ -137,7 +137,7 @@ PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL;
-	int str_len, salt_in_len;
+	int str_len, salt_in_len = 0;
 
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 

@@ -2165,14 +2165,14 @@ PHP_FUNCTION(array_unshift)
 PHP_FUNCTION(array_splice)
 {
 	zval *array,				/* Input array */
-		 *repl_array,			/* Replacement array */
+		 *repl_array = NULL,	/* Replacement array */
 		 ***repl = NULL;		/* Replacement elements */
 	HashTable *new_hash = NULL,	/* Output array's hash */
 	         **rem_hash = NULL;	/* Removed elements' hash */
 	Bucket *p;					/* Bucket used for traversing hash */
 	long	i,
 			offset,
-			length,
+			length = 0,
 			repl_num = 0;		/* Number of replacement elements */
 	int		num_in;				/* Number of elements in the input array */
 
@@ -2245,7 +2245,7 @@ PHP_FUNCTION(array_splice)
 PHP_FUNCTION(array_slice)
 {
 	zval	 *input,		/* Input array */
-			**z_length,		/* How many elements to get */ 
+			**z_length = NULL, /* How many elements to get */ 
 			**entry;		/* An array entry */
 	long	 offset,		/* Offset to get elements from */
 			 length = 0;
@@ -4233,7 +4233,7 @@ PHP_FUNCTION(array_reduce)
 	zval *retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	zval *initial;
+	zval *initial = NULL;
 	HashPosition pos;
 	HashTable *htbl;
 

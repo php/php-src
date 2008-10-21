@@ -2340,8 +2340,8 @@ SPL_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
-	char *delim, *enclo, *esc;
-	int d_len, e_len, esc_len;
+	char *delim = NULL, *enclo = NULL, *esc = NULL;
+	int d_len = 0, e_len = 0, esc_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
@@ -2381,8 +2381,8 @@ SPL_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char delimiter = ',', enclosure = '"', escape='\\';
-	char *delim, *enclo, *esc;
-	int d_len, e_len, esc_len;
+	char *delim = NULL, *enclo = NULL, *esc = NULL;
+	int d_len = 0, e_len = 0, esc_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())

@@ -326,7 +326,7 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 PHP_FUNCTION(get_browser)
 {
 	char *agent_name = NULL;
-	int agent_name_len;
+	int agent_name_len = 0;
 	zend_bool return_array = 0;
 	zval **agent, **z_agent_name;
 	zval *found_browser_entry, *tmp_copy;
