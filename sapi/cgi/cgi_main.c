@@ -1619,11 +1619,18 @@ consult the installation file that came with this distribution, or visit \n\
 #ifndef PHP_WIN32
 	/* Pre-fork, if required */
 	if (getenv("PHP_FCGI_CHILDREN")) {
-		children = atoi(getenv("PHP_FCGI_CHILDREN"));
+		char * children_str = getenv("PHP_FCGI_CHILDREN");
+		children = atoi(children_str);
 		if (children < 0) {
 			fprintf(stderr, "PHP_FCGI_CHILDREN is not valid\n");
 			return FAILURE;
 		}
+		fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, children_str, strlen(children_str));
+		/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
+		fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
+	} else {
+		fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
+		fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 	}
 
 	if (children) {
