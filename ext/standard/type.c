@@ -356,7 +356,7 @@ PHP_FUNCTION(is_scalar)
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
-	zval *var, **callable_name;
+	zval *var, **callable_name = NULL;
 	char *name;
 	zend_bool retval;
 	zend_bool syntax_only = 0;

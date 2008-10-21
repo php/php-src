@@ -1371,7 +1371,7 @@ done:
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len, len;
+	int str_len, hint_charset_len = 0, len;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
 
