@@ -1,3 +1,115 @@
+2008-10-20  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c:
+      MFH Fix bug #46331 - The internal magic db is const memory and segfaults
+      when you try to do byte swapping
+      on big endian machines. This fixes it by copying the memory for those
+      processors, but this isn't ideal as
+      it wastes memory. Perhaps using a static cache would be better.
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      Fix bug #46331 - The internal magic db is const memory and segfaults when
+      you try to do byte swapping
+      on big endian machines. This fixes it by copying the memory for those
+      processors, but this isn't ideal as
+      it wastes memory. Perhaps using a static cache would be better.
+
+2008-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/filter/logical_filters.c:
+      
+      MFB: Fixed bug #46343 (IPv6 address filter accepts invalid address)
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/logical_filters.c:
+      
+      MFB:Fixed bug #46343 (IPv6 address filter accepts invalid address)
+
+    * (PHP_5_3)
+      ext/filter/logical_filters.c:
+      Fixed bug #46343 (IPv6 address filter accepts invalid address)
+
+2008-10-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c:
+      MFH: fix bug #46323 (compilation of simplexml for NetWare breaks)
+
+    * ext/simplexml/simplexml.c:
+      fix bug #46323 (compilation of simplexml for NetWare breaks)
+
+2008-10-20  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/rfc1867.c
+      tests/basic/bug46313-win.phpt
+      tests/basic/bug46313.phpt:
+      MFB PHP_5_3: Fixed #46313 (Magic quotes broke $_FILES)
+
+    * (PHP_5_3)
+      main/rfc1867.c:
+      WS
+
+    * (PHP_5_3)
+      main/rfc1867.c:
+      Better fix for #46313
+
+    * (PHP_5_3)
+      main/rfc1867.c
+      tests/basic/bug46313-win.phpt
+      tests/basic/bug46313-win.phpt
+      tests/basic/bug46313-win.phpt
+      tests/basic/bug46313.phpt
+      tests/basic/bug46313.phpt
+      tests/basic/bug46313.phpt:
+      Fixed #46313 (Magic quotes broke $_FILES)
+
+2008-10-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/config.w32:
+      - add strto*i64 (VC6, decent compilers/crt have them)
+
+    * win32/php_strtoi64.h
+      win32/php_strtoi64.h
+      win32/strtoi64.c
+      win32/strtoi64.c:
+      
+      file php_strtoi64.h was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ext/fileinfo/config.w32
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/softmagic.c:
+      - support for VC6 and some other platforms (before some other cleanup)
+
+2008-10-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      ext/dom/text.c
+      ext/dom/text.c
+      ext/dom/tests/bug46335.phpt
+      ext/dom/tests/bug46335.phpt:
+      MFH: fix bug #46335 (DOMText::splitText doesn't handle multibyte
+      characters)
+      add test
+
+    * ext/dom/text.c
+      ext/dom/tests/bug46335.phpt
+      ext/dom/tests/bug46335.phpt
+      ext/dom/tests/bug46335.phpt:
+      fix bug #46335 (DOMText::splitText doesn't handle multibyte characters)
+      add test
+
 2008-10-19  Felipe Pena  <felipensp@gmail.com>
 
     * ext/pdo_mysql/tests/bug_43371.phpt
