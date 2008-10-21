@@ -1511,7 +1511,7 @@ PHP_FUNCTION(idate)
 {
 	char   *format;
 	int     format_len;
-	long    ts;
+	long    ts = 0;
 	int ret; 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
@@ -1574,7 +1574,7 @@ PHP_FUNCTION(strtotime)
 	char *times, *initial_ts;
 	int   time_len, error1, error2;
 	struct timelib_error_container *error;
-	long  preset_ts, ts;
+	long  preset_ts = 0, ts;
 
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
@@ -1631,7 +1631,7 @@ PHP_FUNCTION(strtotime)
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	long hou, min, sec, mon, day, yea, dst = -1;
+	long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	long ts, adjust_seconds = 0;
@@ -1760,7 +1760,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	char                *format, *buf;
 	int                  format_len;
-	long                 timestamp;
+	long                 timestamp = 0;
 	struct tm            ta;
 	int                  max_reallocs = 5;
 	size_t               buf_len = 64, real_len;
@@ -3962,7 +3962,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
 	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
-	char                           *option;
+	char                           *option = NULL;
 	int                             option_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ls", &what, &option, &option_len) == FAILURE) {
@@ -4068,10 +4068,10 @@ PHP_FUNCTION(date_default_timezone_get)
  */
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
 {
-	double latitude, longitude, zenith, gmt_offset = 0, altitude;
+	double latitude = 0.0, longitude = 0.0, zenith = 0.0, gmt_offset = 0, altitude;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
-	long time, retformat;
+	long time, retformat = 0;
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;

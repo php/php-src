@@ -1143,8 +1143,8 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 {
 	zval * zip;
 	zval * zip_entry;
-	char *mode;
-	int mode_len;
+	char *mode = NULL;
+	int mode_len = 0;
 	zip_read_rsrc * zr_rsrc;
 	zip_rsrc *z_rsrc;
 
@@ -1486,10 +1486,10 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	struct zip *intern;
 	zval *this = getThis();
 	char *pattern;
-	char *path;
+	char *path = NULL;
 	char *remove_path = NULL;
 	char *add_path = NULL;
-	int pattern_len, add_path_len, remove_path_len, path_len;
+	int pattern_len, add_path_len, remove_path_len, path_len = 0;
 	long remove_all_path = 0;
 	long flags = 0;
 	zval *options = NULL;
