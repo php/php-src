@@ -133,18 +133,7 @@ typedef union _sa_t {
 	struct sockaddr_in  sa_inet;
 } sa_t;
 
-typedef struct _fcgi_mgmt_rec {
-	char*  name;
-	char   name_len;
-	char   val;
-} fcgi_mgmt_rec;
-
-static const fcgi_mgmt_rec fcgi_mgmt_vars[] = {
-	{"FCGI_MAX_CONNS",  sizeof("FCGI_MAX_CONNS")-1,  1},
-	{"FCGI_MAX_REQS",   sizeof("FCGI_MAX_REQS")-1,   1},
-	{"FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, 0}
-};
-
+static HashTable fcgi_mgmt_vars;
 
 static int is_initialized = 0;
 static int is_fastcgi = 0;
@@ -193,12 +182,17 @@ int fcgi_in_shutdown(void)
 
 void fcgi_shutdown(void)
 {
+	if (is_initialized) {
+		zend_hash_destroy(&fcgi_mgmt_vars);
+	}
 	is_fastcgi = 0;
 }
 
 int fcgi_init(void)
 {
 	if (!is_initialized) {
+		zend_hash_init(&fcgi_mgmt_vars, 0, NULL, fcgi_free_mgmt_var_cb, 1);
+		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
 #ifdef _WIN32
 # if 0
 		/* TODO: Support for TCP sockets */
@@ -750,8 +744,13 @@ static int fcgi_read_request(fcgi_request *req)
 			padding = hdr.paddingLength;
 		}
 	} else if (hdr.type == FCGI_GET_VALUES) {
-		int j;
 		unsigned char *p = buf + sizeof(fcgi_header);
+		HashPosition pos;
+		char * str_index;
+		uint str_length;
+		ulong num_index;
+		int key_type;
+		zval ** value;
 
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			req->keep = 0;
@@ -763,11 +762,41 @@ static int fcgi_read_request(fcgi_request *req)
 			return 0;
 		}
 
-		for (j = 0; j < sizeof(fcgi_mgmt_vars)/sizeof(fcgi_mgmt_vars[0]); j++) {
-			if (zend_hash_exists(req->env, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].name_len+1) == 0) {
-                sprintf((char*)p, "%c%c%s%c", fcgi_mgmt_vars[j].name_len, 1, fcgi_mgmt_vars[j].name, fcgi_mgmt_vars[j].val);
-                p += fcgi_mgmt_vars[j].name_len + 3;
+		zend_hash_internal_pointer_reset_ex(req->env, &pos);
+		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+			int zlen;
+			zend_hash_move_forward_ex(req->env, &pos);
+			if (key_type != HASH_KEY_IS_STRING) {
+				continue;
 			}
+			if (zend_hash_find(&fcgi_mgmt_vars, str_index, str_length, (void**) &value) != SUCCESS) {
+				continue;
+			}
+			--str_length;
+			zlen = Z_STRLEN_PP(value);
+			if ((p + 4 + 4 + str_length + zlen) >= (buf + sizeof(buf))) {
+				break;
+			}
+			if (str_length < 0x80) {
+				*p++ = str_length;
+			} else {
+				*p++ = ((str_length >> 24) & 0xff) | 0x80;
+				*p++ = (str_length >> 16) & 0xff;
+				*p++ = (str_length >> 8) & 0xff;
+				*p++ = str_length & 0xff;
+			}
+			if (zlen < 0x80) {
+				*p++ = zlen;
+			} else {
+				*p++ = ((zlen >> 24) & 0xff) | 0x80;
+				*p++ = (zlen >> 16) & 0xff;
+				*p++ = (zlen >> 8) & 0xff;
+				*p++ = zlen & 0xff;
+			}
+			memcpy(p, str_index, str_length);
+			p += str_length;
+			memcpy(p, Z_STRVAL_PP(value), zlen);
+			p += zlen;
 		}
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
@@ -1231,6 +1260,23 @@ void fcgi_impersonate(void)
 	}
 }
 #endif
+
+void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
+{
+	zval * zvalue;
+	zvalue = pemalloc(sizeof(*zvalue), 1);
+	Z_TYPE_P(zvalue) = IS_STRING;
+	Z_STRVAL_P(zvalue) = pestrndup(value, value_len, 1);
+	Z_STRLEN_P(zvalue) = value_len;
+	zend_hash_add(&fcgi_mgmt_vars, name, name_len + 1, &zvalue, sizeof(zvalue), NULL);
+}
+
+void fcgi_free_mgmt_var_cb(void * ptr)
+{
+	zval ** var = (zval **)ptr;
+	pefree(Z_STRVAL_PP(var), 1);
+	pefree(*var, 1);
+}
 
 /*
  * Local variables:
