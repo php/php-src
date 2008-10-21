@@ -3892,7 +3892,7 @@ PHP_FUNCTION(exif_read_data)
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str=0, *s;
 	char *filename;
-	int filename_len, sections_str_len;
+	int filename_len, sections_str_len = 0;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 

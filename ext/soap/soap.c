@@ -1211,9 +1211,9 @@ PHP_METHOD(SoapFault, SoapFault)
 	zstr fault_actor = NULL_ZSTR;
 	zstr name = NULL_ZSTR;
 	char *fault_code = NULL, *fault_code_ns = NULL;
-	int fault_string_len, fault_actor_len, name_len;
+	int fault_string_len = 0, fault_actor_len = 0, name_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL;
-	zend_uchar name_type, fault_string_type, fault_actor_type;
+	zend_uchar name_type = 0, fault_string_type = 0, fault_actor_type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zt|t!z!t!z",
 		&code,
@@ -1342,8 +1342,8 @@ PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type;
 	zstr stype = NULL_ZSTR, ns = NULL_ZSTR, name = NULL_ZSTR, namens = NULL_ZSTR;
-	int stype_len, ns_len, name_len, namens_len;
-	zend_uchar stype_type, ns_type, name_type, namens_type;
+	int stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
+	zend_uchar stype_type = 0, ns_type = 0, name_type = 0, namens_type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|tttt",
 			&data, &type,
@@ -1940,7 +1940,7 @@ PHP_METHOD(SoapServer, handle)
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	zstr arg = NULL_ZSTR;
-	int arg_len;
+	int arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
@@ -2478,8 +2478,8 @@ PHP_METHOD(SoapServer, fault)
 	zstr code, string;
 	zstr actor=NULL_ZSTR;
 	zstr name=NULL_ZSTR;
-	int code_len, string_len, actor_len, name_len;
-	zend_uchar code_type, string_type, actor_type, name_type;
+	int code_len, string_len, actor_len = 0, name_len = 0;
+	zend_uchar code_type, string_type, actor_type = 0, name_type = 0;
 	zval* details = NULL;
 
 	SOAP_SERVER_BEGIN_CODE();
@@ -3695,8 +3695,8 @@ PHP_METHOD(SoapClient, __setCookie)
 {
 	zstr name;
 	zstr val = NULL_ZSTR;
-	int  name_len, val_len;
-	zend_uchar name_type, val_type;
+	int  name_len, val_len = 0;
+	zend_uchar name_type, val_type = 0;
 	soap_client_object *client;
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
@@ -3796,8 +3796,8 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 PHP_METHOD(SoapClient, __setLocation)
 {
 	void* location = NULL;
-	int  location_len;
-	zend_uchar location_type;
+	int  location_len = 0;
+	zend_uchar location_type = 0;
 	soap_client_object *client;
 
 	client = (soap_client_object*)zend_object_store_get_object(this_ptr TSRMLS_CC);
