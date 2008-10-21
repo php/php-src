@@ -262,7 +262,7 @@ PHP_FUNCTION(assert)
    Set/get the various assert flags */
 PHP_FUNCTION(assert_options)
 {
-	zval **value;
+	zval **value = NULL;
 	long what;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();

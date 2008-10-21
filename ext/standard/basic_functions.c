@@ -5010,9 +5010,9 @@ error options:
 PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
-	int message_len, opt_len, headers_len;
+	int message_len, opt_len = 0, headers_len = 0;
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
-	long erropt;
+	long erropt = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|lss", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
@@ -6031,7 +6031,7 @@ PHP_FUNCTION(connection_status)
 PHP_FUNCTION(ignore_user_abort)
 {
 	char *arg = NULL;
-	int arg_len;
+	int arg_len = 0;
 	int old_setting;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &arg, &arg_len, UG(ascii_conv)) == FAILURE) {

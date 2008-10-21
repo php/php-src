@@ -214,10 +214,8 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	void *s1, *s2;
 	int len1, len2;
 	zend_uchar type1, type2;
-	long start, len; /* For UNICODE, these are codepoint units */
+	long start = 0, len = 0; /* For UNICODE, these are codepoint units */
 
-	start = 0;
-	len = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|ll",
 							  &s1, &len1, &type1, &s2, &len2, &type2,
 							  &start, &len) == FAILURE) {
@@ -4297,8 +4295,8 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
-	zstr str, to;
-	int str_len, to_len;
+	zstr str, to = NULL_ZSTR;
+	int str_len, to_len = 0;
 	zend_uchar str_type, to_type;
 	zval **from;
 	int ac = ZEND_NUM_ARGS();
@@ -5683,7 +5681,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval *subject, *search, *replace, **subject_entry, *zcount;
+	zval *subject, *search, *replace, **subject_entry, *zcount = NULL;
 	zval *result;
 	zstr string_key;
 	uint string_key_len;
@@ -7736,7 +7734,7 @@ static int php_str_word_count(char *str, int str_len, long type, char *char_list
 PHP_FUNCTION(str_word_count)
 {
 	zstr str, char_list = NULL_ZSTR;
-	int str_len, char_list_len, word_count = 0;
+	int str_len, char_list_len = 0, word_count = 0;
 	zend_uchar str_type;
 	long type = 0;
 

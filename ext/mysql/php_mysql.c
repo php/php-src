@@ -1160,7 +1160,7 @@ PHP_FUNCTION(mysql_get_server_info)
    Returns a string containing information about the most recent query */
 PHP_FUNCTION(mysql_info)
 {
-	zval *mysql_link;
+	zval *mysql_link = NULL;
 	int id = -1;
 	char *str;
 	php_mysql_conn *mysql;
@@ -2040,8 +2040,8 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 #endif
 
 	if (into_object) {
-		char *class_name;
-		int class_name_len;
+		char *class_name = NULL;
+		int class_name_len = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s&z", &res, &class_name, &class_name_len, UG(utf8_conv), &ctor_params) == FAILURE) {
 			return;

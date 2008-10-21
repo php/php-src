@@ -1418,7 +1418,7 @@ PHP_FUNCTION(html_entity_decode)
 {
 	zstr str;
 	char *hint_charset = NULL;
-	int str_len, hint_charset_len, len;
+	int str_len, hint_charset_len = 0, len;
 	char *str_utf8;
 	int str_utf8_len;
 	zend_uchar type;

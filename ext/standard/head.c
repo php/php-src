@@ -201,7 +201,7 @@ PHP_FUNCTION(setrawcookie)
    Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
-	zval *arg1, *arg2;
+	zval *arg1 = NULL, *arg2 = NULL;
 	char *file="";
 	int line=0;
 

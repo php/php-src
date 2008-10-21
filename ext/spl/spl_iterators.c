@@ -1339,8 +1339,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		}
 		case DIT_IteratorIterator: {
 			zend_class_entry **pce_cast;
-			char * class_name;
-			int class_name_len;
+			char * class_name = NULL;
+			int class_name_len = 0;
 
 			/* UTODO: class_name must be zstr */
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|s", &zobject, ce_inner, &class_name, &class_name_len) == FAILURE) {
