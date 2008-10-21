@@ -2,8 +2,8 @@
 Test fnmatch() function: Variations
 --SKIPIF--
 <?php
-if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) )
-  die("skip do not run on MacOS/Windows");
+if(substr(PHP_OS, 0, 3) == 'WIN')
+  die("skip do not run on Windows");
 ?>
 --FILE--
 <?php
