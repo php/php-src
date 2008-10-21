@@ -204,10 +204,8 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	char *s11, *s22;
 	int len1, len2;
-	long start, len;
+	long start = 0, len = 0;
 	
-	start = 0;
-	len = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
 		return;
@@ -2060,7 +2058,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
    Returns split line */
 PHP_FUNCTION(chunk_split) 
 {
-	zval **p_chunklen, **p_ending;
+	zval **p_chunklen = NULL, **p_ending = NULL;
 	char *str;
 	char *result;
 	char *end    = "\r\n";
@@ -2119,7 +2117,7 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	char *str;
-	long l, f;
+	long l = 0, f;
 	int str_len;
 	int argc = ZEND_NUM_ARGS();
 	
@@ -2720,8 +2718,8 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 PHP_FUNCTION(strtr)
 {								
 	zval **from;
-	char *str, *to;
-	int str_len, to_len;
+	char *str, *to = NULL;
+	int str_len, to_len = 0;
 	int ac = ZEND_NUM_ARGS();
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|s", &str, &str_len, &from, &to, &to_len) == FAILURE) {
@@ -2833,7 +2831,7 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 PHP_FUNCTION(similar_text)
 {
 	char *t1, *t2;
-	zval **percent;
+	zval **percent = NULL;
 	int ac = ZEND_NUM_ARGS();
 	int sim;
 	int t1_len, t2_len;
@@ -3610,7 +3608,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval **subject, **search, **replace, **subject_entry, **zcount;
+	zval **subject, **search, **replace, **subject_entry, **zcount = NULL;
 	zval *result;
 	char *string_key;
 	uint string_key_len;
@@ -4702,7 +4700,7 @@ PHP_FUNCTION(strnatcasecmp)
 PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
-	long offset = 0, length;
+	long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
 	int haystack_len, needle_len;
@@ -4944,7 +4942,7 @@ PHP_FUNCTION(str_shuffle)
 PHP_FUNCTION(str_word_count)
 {
 	char *buf, *str, *char_list = NULL, *p, *e, *s, ch[256];
-	int str_len, char_list_len, word_count = 0;
+	int str_len, char_list_len = 0, word_count = 0;
 	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &type, &char_list, &char_list_len) == FAILURE) {

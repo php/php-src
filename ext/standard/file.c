@@ -1223,7 +1223,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	int arg2len;
 	int ret;
 	int num_bytes;
-	long arg3;
+	long arg3 = 0;
 	char *buffer = NULL;
 	php_stream *stream;
 
@@ -1441,7 +1441,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	long arg1;
+	long arg1 = 0;
 	int oldumask;
 	int arg_count = ZEND_NUM_ARGS();
 
@@ -1879,7 +1879,7 @@ PHP_FUNCTION(fputcsv)
 	int ret;
 	zval *fp = NULL, *fields = NULL, **field_tmp = NULL, field;
 	char *delimiter_str = NULL, *enclosure_str = NULL;
-	int delimiter_str_len, enclosure_str_len;
+	int delimiter_str_len = 0, enclosure_str_len = 0;
 	HashPosition pos;
 	int count, i = 0;
 	smart_str csvline = {0};
