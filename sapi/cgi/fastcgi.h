@@ -131,6 +131,10 @@ int fcgi_flush(fcgi_request *req, int close);
 #ifdef PHP_WIN32
 void fcgi_impersonate(void);
 #endif
+
+void fcgi_set_mgmt_var(char * name, size_t name_len, const char * value, size_t value_len);
+void fcgi_free_mgmt_var_cb(void * ptr);
+
 /*
  * Local variables:
  * tab-width: 4
