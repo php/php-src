@@ -20,8 +20,6 @@ PHP                                                                        NEWS
 
 - Fixed bug #46238 (Segmentation fault on static call with empty string method).
   (Felipe)
-- Fixed bug #46206 (pg_query_params/pg_execute convert passed values to
-  strings). (Ilia) 
 - Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
   (Dmitry)
 - Fixed bug #46194 (SIGSEGV when requested file is not found). (Greg)
