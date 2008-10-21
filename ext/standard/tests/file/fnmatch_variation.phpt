@@ -2,8 +2,11 @@
 Test fnmatch() function: Variations
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == 'WIN')
-  die("skip do not run on Windows");
+if (substr(PHP_OS, 0, 3) == 'WIN')
+    die("skip do not run on Windows");
+
+if (!function_exists('fnmatch'))
+    die("skip fnmatch() function is not available");
 ?>
 --FILE--
 <?php
