@@ -2715,11 +2715,11 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	long quality, type;
+	long quality = 0, type = 0;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	int file_len, argc = ZEND_NUM_ARGS();
+	int file_len = 0, argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
@@ -3472,7 +3472,7 @@ PHP_FUNCTION(imagecolorstotal)
 PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
-	long COL;
+	long COL = 0;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3496,7 +3496,7 @@ PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
 	int argc = ZEND_NUM_ARGS();
-	long INT;
+	long INT = 0;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &INT) == FAILURE) {
@@ -4453,7 +4453,7 @@ PHP_FUNCTION(imagepstext)
 PHP_FUNCTION(imagepsbbox)
 {
 	zval *fnt;
-	long sz = 0, sp, wd;
+	long sz = 0, sp = 0, wd = 0;
 	char *str;
 	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
@@ -4461,7 +4461,7 @@ PHP_FUNCTION(imagepsbbox)
 	int *f_ind;
 	int str_len, per_char = 0;
 	int argc = ZEND_NUM_ARGS();
-	double angle, sin_a = 0, cos_a = 0;
+	double angle = 0, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
 	if (argc != 3 && argc != 6) {

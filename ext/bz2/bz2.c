@@ -482,8 +482,8 @@ static PHP_FUNCTION(bzerror)
 static PHP_FUNCTION(bzcompress)
 {
 	char             *source;          /* Source data to compress */
-	long              zblock_size;     /* Optional block size to use */
-	long              zwork_factor;    /* Optional work factor to use */
+	long              zblock_size = 0; /* Optional block size to use */
+	long              zwork_factor = 0;/* Optional work factor to use */
 	char             *dest = NULL;     /* Destination to place the compressed data into */
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
