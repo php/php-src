@@ -1,3 +1,130 @@
+2008-10-21  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/curl/interface.c
+      ext/date/php_date.c
+      ext/dom/domimplementation.c
+      ext/exif/exif.c
+      ext/gd/gd.c
+      ext/iconv/iconv.c
+      ext/mysql/php_mysql.c
+      ext/openssl/openssl.c
+      ext/pcre/php_pcre.c
+      ext/simplexml/simplexml.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/crypt.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/info.c
+      ext/standard/mail.c
+      ext/standard/proc_open.c
+      ext/standard/rand.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/standard/versioning.c
+      ext/zip/php_zip.c:
+      initialize optional vars
+
+2008-10-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      NEWS:
+      Already in 5.2
+
+2008-10-21  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN moved to PHP_5_2
+
+    * (PHP_5_2)
+      NEWS
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h
+      sapi/cgi/fastcgi.h:
+      MFH: Fixed FCGI_GET_VALUES requests (fixes #45522)
+
+2008-10-21  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      MFB: skip tests on systems without fnmatch() function (f.e.: old darwin)
+
+    * (PHP_5_3)
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      skip tests on systems without fnmatch() function (f.e.: old darwin)
+
+    * ext/phar/tests/phar_oo_005.phpt:
+      MFB: proper check for php-version
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_oo_005.phpt:
+      proper check for php-version
+
+    * ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      MFB: these tests work just fine on macos-x
+
+    * (PHP_5_3)
+      ext/standard/tests/file/copy_variation15.phpt
+      ext/standard/tests/file/copy_variation9.phpt
+      ext/standard/tests/file/fnmatch_basic.phpt
+      ext/standard/tests/file/fnmatch_error.phpt
+      ext/standard/tests/file/fnmatch_variation.phpt:
+      these tests work just fine on macos-x
+
+    * (PHP_5_3)
+      ext/phar/tests/phar_oo_005.phpt:
+      fixed wrong check for version
+
+2008-10-21  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      ext/date/tests/strtotime_basic.phpt:
+      Committing test for till
+
+    * ext/date/tests/strtotime_basic.phpt
+      ext/date/tests/strtotime_basic.phpt:
+      
+      Committing test for till
+
+    * ext/date/tests/strtotime_basic.phpt
+      ext/date/tests/strtotime_basic.phpt:
+      
+      file strtotime_basic.phpt was initially added on branch PHP_5_3.
+
+2008-10-21  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      typo
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/fastcgi.c
+      sapi/cgi/fastcgi.h:
+      Fixed FCGI_GET_VALUES requests (fixes #45522)
+
 2008-10-20  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
