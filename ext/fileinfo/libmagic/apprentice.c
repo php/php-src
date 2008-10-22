@@ -1834,6 +1834,9 @@ eatsize(const char **p)
 
 /*
  * handle a compiled file.
+ * return -1 = error
+ * return 1  = memory structure you can free
+ * return 3  = bundled library from PHP
  */
 private int
 apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
@@ -1845,7 +1848,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	char *dbname = NULL;
 	void *mm = NULL;
 	int   ret = 0;
-	php_stream *stream;
+	php_stream *stream = NULL;
 	php_stream_statbuf st;
 
 
@@ -1900,12 +1903,15 @@ internal_loaded:
 			goto error1;
 		}
 		needsbyteswap = 1;
-	} else
+	} else {
 		needsbyteswap = 0;
+	}
+
 	if (needsbyteswap)
 		version = swap4(ptr[1]);
 	else
 		version = ptr[1];
+
 	if (version != VERSIONNO) {
 		file_error(ms, 0, "File %d.%d supports only %d version magic "
 		    "files. `%s' is version %d", FILE_VERSION_MAJOR, patchlevel,
@@ -1945,14 +1951,17 @@ error1:
 	if (stream) {
 		php_stream_close(stream);
 	}
-	if (mm) {
+
+	if (mm && ret == 1) {
 		efree(mm);
 	} else {
 		*magicp = NULL;
 		*nmagicp = 0;
 	}
 error2:
-	efree(dbname);
+	if (dbname) {
+		efree(dbname);
+	}
 	return -1;
 }
 
