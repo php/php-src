@@ -26,7 +26,6 @@
 #include "zend_ini.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
-#include <ctype.h>
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -455,7 +454,7 @@ ZEND_FUNCTION(error_reporting)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
-	char *name, *p;
+	char *name;
 	int name_len;
 	zval *val;
 	zval *val_free = NULL;
@@ -465,40 +464,6 @@ ZEND_FUNCTION(define)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &name, &name_len, &val, &non_cs) == FAILURE) {
 		return;
-	}
-
-	/* check if class constant */
-	if ((p = memchr(name, ':', name_len))) {
-		char *s = name;
-		zend_class_entry **ce;
-
-		if (*(p + 1) != ':') { /* invalid constant specifier */
-			RETURN_FALSE;
-		} else if ((p + 2) >= (name + name_len)) { /* constant name length < 1 */
-			zend_error(E_WARNING, "Constants name cannot be empty");
-			RETURN_FALSE;
-		} else if (zend_lookup_class(s, (p - s), &ce TSRMLS_CC) != SUCCESS) { /* invalid class name */
-			zend_error(E_WARNING, "Class does not exists");
-			RETURN_FALSE;
-		} else { /* check of constant name contains invalid chars */
-			int ok = 1;
-			p += 2; /* move beyond :: to 1st char of constant's name */
-
-			if (!isalpha(*p) && *p != '_') {
-				ok = 0;
-			}
-
-			while (ok && *++p) {
-				if (!isalnum(*p) && *p != '_') {
-					ok = 0;
-					break;
-				}
-			}
-
-			if (!ok) {
-				RETURN_FALSE;
-			}
-		}
 	}
 
 	if(non_cs) {

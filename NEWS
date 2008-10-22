@@ -2,8 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2008, PHP 5.2.7RC2
 - Fixed bug #46343 (IPv6 address filter accepts invalid address). (Ilia)
-- Fixed bug #46341 (Added missing validation checks into define() for class
-  constants). (Ilia)
 - Fixed bug #46335 (DOMText::splitText doesn't handle multibyte characters).
   (Rob)
 - Fixed bug #46323 (compilation of simplexml for NetWare breaks). 
