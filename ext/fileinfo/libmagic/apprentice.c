@@ -251,9 +251,12 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 	}
 
 	if ((rv = apprentice_map(ms, &magic, &nmagic, fn)) == -1) {
-		if (ms->flags & MAGIC_CHECK)
-			file_magwarn(ms, "using regular magic file `%s'", fn);
-		rv = apprentice_load(ms, &magic, &nmagic, fn, action);
+		if (fn) {
+			if (ms->flags & MAGIC_CHECK)
+				file_magwarn(ms, "using regular magic file `%s'", fn);
+			rv = apprentice_load(ms, &magic, &nmagic, fn, action);
+		}
+
 		if (rv != 0)
 			return -1;
 	}
