@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #37100 (data is returned truncated with BINARY CURSOR). (Tony)
 - Fixed bug #24679 (pg_* functions doesn't work using schema). (Felipe)
+- Fixed extraction of zip files or directories when the entry name is 
+  a relative path. (Pierre)
+- Fixed read or write errors for large zip archives. (Pierre)
+- Update libzip to 0.9.0. (Pierre)
 
 09 Oct 2008, PHP 5.2.7RC1
 - Reverted fix for bug #44197 due to behaviour change in minor version.
