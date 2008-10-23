@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   (Arnaud)
 - Fixed bug #44251, #41125 (PDO + quote() + prepare() can result in segfault).
   (tsteiner at nerdclub dot net)
+- Fixed bug #43925 (Incorrect argument counter in prepared statements with 
+  pgsql). (Felipe)
 - Fixed bug #43723 (SOAP not sent properly from client for <choice>). (Dmitry)
 - Fixed bug #42862 (IMAP toolkit crash: rfc822.c legacy routine buffer
   overflow). (Dmitry)
