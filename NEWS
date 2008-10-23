@@ -18,8 +18,6 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 
-- Fixed bug #46360 (TCP_NODELAY constant for socket_{get,set}_option). 
-  (bugs at trick dot vanstaveren dot us)
 - Fixed bug #46238 (Segmentation fault on static call with empty string method).
   (Felipe)
 - Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
