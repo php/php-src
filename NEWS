@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   a relative path. (Pierre)
 - Fixed read or write errors for large zip archives. (Pierre)
 
+- Fixed bug #46360 (TCP_NODELAY constant for socket_{get,set}_option). 
+  (bugs at trick dot vanstaveren dot us)
 - Fixed bug #46343 (IPv6 address filter accepts invalid address). (Ilia)
 - Fixed bug #46335 (DOMText::splitText doesn't handle multibyte characters).
   (Rob)
