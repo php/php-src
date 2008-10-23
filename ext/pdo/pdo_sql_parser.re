@@ -302,6 +302,7 @@ rewrite:
 		char idxbuf[32];
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
 		char *name;
+		int bind_no = 1;
 		
 		newbuffer_len = inquery_len;
 
@@ -317,7 +318,7 @@ rewrite:
 
 			/* check if bound parameter is already available */
 			if (!strcmp(name, "?") || zend_hash_find(stmt->bound_param_map, name, plc->len + 1, (void**) &p) == FAILURE) {
-				snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
+				snprintf(idxbuf, sizeof(idxbuf), tmpl, bind_no++);
 			} else {
 				memset(idxbuf, 0, sizeof(idxbuf));
 				memcpy(idxbuf, p, sizeof(idxbuf));
