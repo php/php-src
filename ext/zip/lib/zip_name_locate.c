@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_name_locate.c,v 1.19 2005/06/09 19:57:10 dillo Exp $
-
   zip_name_locate.c -- get index by name
-  Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -19,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,12 +35,11 @@
 
 #include <string.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 
 
-PHPZIPAPI int
+ZIP_EXTERN(int)
 zip_name_locate(struct zip *za, const char *fname, int flags)
 {
     return _zip_name_locate(za, fname, flags, &za->error);
@@ -50,7 +47,7 @@ zip_name_locate(struct zip *za, const char *fname, int flags)
 
 
 
-PHPZIPAPI int
+int
 _zip_name_locate(struct zip *za, const char *fname, int flags,
 		 struct zip_error *error)
 {
@@ -62,11 +59,8 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	_zip_error_set(error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-#ifdef PHP_WIN32
-	cmp = (flags & ZIP_FL_NOCASE) ? stricmp : strcmp;
-#else
-	cmp = (flags & ZIP_FL_NOCASE) ? strcasecmp : strcmp;
-#endif
+
+    cmp = (flags & ZIP_FL_NOCASE) ? strcmpi : strcmp;
 
     n = (flags & ZIP_FL_UNCHANGED) ? za->cdir->nentry : za->nentry;
     for (i=0; i<n; i++) {
@@ -78,7 +72,7 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	/* newly added (partially filled) entry */
 	if (fn == NULL)
 	    continue;
-	
+
 	if (flags & ZIP_FL_NODIR) {
 	    p = strrchr(fn, '/');
 	    if (p)
@@ -89,6 +83,7 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	    return i;
     }
 
-    _zip_error_set(error, ZIP_ER_NOENT, 0);
+/* Look for an entry should not raise an error  */
+/*    _zip_error_set(error, ZIP_ER_NOENT, 0);*/
     return -1;
 }

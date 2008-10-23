@@ -2,13 +2,11 @@
 #define _HAD_ZIP_H
 
 /*
-  $NiH: zip.h,v 1.57 2006/04/24 14:04:19 dillo Exp $
-
   zip.h -- exported declarations.
   Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -38,23 +36,25 @@
 
 
 #include "main/php.h"
-/* #defines that rename all zip_ functions and structs */
-#include "zip_alias.h"
+
 #ifdef PHP_WIN32
-#include "zip_win32.h"
+#	include "zip_win32.h"
 # ifdef PHP_ZIP_EXPORTS
-#  define PHPZIPAPI __declspec(dllexport)
+#		define ZIP_EXTERN(rt) __declspec(dllexport)rt _stdcall
 # else
-#  define PHPZIPAPI
+#		define ZIP_EXTERN(rt) rt
 # endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define ZIP_EXTERN(rt) __attribute__ ((visibility("default"))) rt
 #else
-#define PHPZIPAPI
+#	define ZIP_EXTERN(rt) rt
 #endif
+
 BEGIN_EXTERN_C()
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <time.h>
-
 
 /* flags for zip_open */
 
@@ -70,6 +70,11 @@ BEGIN_EXTERN_C()
 #define ZIP_FL_NODIR		2 /* ignore directory component */
 #define ZIP_FL_COMPRESSED	4 /* read compressed data */
 #define ZIP_FL_UNCHANGED	8 /* use original data, ignoring changes */
+#define ZIP_FL_RECOMPRESS      16 /* force recompression of data */
+
+/* archive global flags flags */
+
+#define ZIP_AFL_TORRENT		1 /* torrent zipped */
 
 /* libzip error codes */
 
@@ -121,6 +126,13 @@ BEGIN_EXTERN_C()
 #define ZIP_CM_PKWARE_IMPLODE 10  /* PKWARE imploding */
 /* 11 - Reserved by PKWARE */
 #define ZIP_CM_BZIP2          12  /* compressed using BZIP2 algorithm */
+/* 13 - Reserved by PKWARE */
+#define ZIP_CM_LZMA	      14  /* LZMA (EFS) */
+/* 15-17 - Reserved by PKWARE */
+#define ZIP_CM_TERSE	      18  /* compressed using IBM TERSE (new) */
+#define ZIP_CM_LZ77           19  /* IBM LZ77 z Architecture (PFS) */
+#define ZIP_CM_WAVPACK	      97  /* WavPack compressed data */
+#define ZIP_CM_PPMD	      98  /* PPMd version I, Rev 1 */
 
 /* encryption methods */
 
@@ -170,46 +182,51 @@ struct zip_source;
 
 
 
-PHPZIPAPI int zip_add(struct zip *, const char *, struct zip_source *);
-PHPZIPAPI int zip_add_dir(struct zip *, const char *);
-PHPZIPAPI int zip_close(struct zip *);
-PHPZIPAPI int zip_delete(struct zip *, int);
-PHPZIPAPI void zip_error_clear(struct zip *);
-PHPZIPAPI void zip_error_get(struct zip *, int *, int *);
-PHPZIPAPI int zip_error_get_sys_type(int);
-PHPZIPAPI int zip_error_to_str(char *, size_t, int, int);
-PHPZIPAPI int zip_fclose(struct zip_file *);
-PHPZIPAPI void zip_file_error_clear(struct zip_file *);
-PHPZIPAPI void zip_file_error_get(struct zip_file *, int *, int *);
-PHPZIPAPI const char *zip_file_strerror(struct zip_file *);
-PHPZIPAPI struct zip_file *zip_fopen(struct zip *, const char *, int);
-PHPZIPAPI struct zip_file *zip_fopen_index(struct zip *, int, int);
-PHPZIPAPI ssize_t zip_fread(struct zip_file *, void *, size_t);
-PHPZIPAPI const char *zip_get_archive_comment(struct zip *, int *, int);
-PHPZIPAPI const char *zip_get_file_comment(struct zip *, int, int *, int);
-PHPZIPAPI const char *zip_get_name(struct zip *, int, int);
-PHPZIPAPI int zip_get_num_files(struct zip *);
-PHPZIPAPI int zip_name_locate(struct zip *, const char *, int);
-PHPZIPAPI struct zip *zip_open(const char *, int, int *);
-PHPZIPAPI int zip_rename(struct zip *, int, const char *);
-PHPZIPAPI int zip_replace(struct zip *, int, struct zip_source *);
-PHPZIPAPI int zip_set_archive_comment(struct zip *, const char *, int);
-PHPZIPAPI int zip_set_file_comment(struct zip *, int, const char *, int);
-PHPZIPAPI struct zip_source *zip_source_buffer(struct zip *, const void *, off_t, int);
-PHPZIPAPI struct zip_source *zip_source_file(struct zip *, const char *, off_t, off_t);
-PHPZIPAPI struct zip_source *zip_source_filep(struct zip *, FILE *, off_t, off_t);
-PHPZIPAPI void zip_source_free(struct zip_source *);
-PHPZIPAPI struct zip_source *zip_source_function(struct zip *,
+ZIP_EXTERN(int) zip_add(struct zip *, const char *, struct zip_source *);
+ZIP_EXTERN(int) zip_add_dir(struct zip *, const char *);
+ZIP_EXTERN(int) zip_close(struct zip *);
+ZIP_EXTERN(int) zip_delete(struct zip *, int);
+ZIP_EXTERN(void) zip_error_clear(struct zip *);
+ZIP_EXTERN(void) zip_error_get(struct zip *, int *, int *);
+ZIP_EXTERN(int) zip_error_get_sys_type(int);
+ZIP_EXTERN(int) zip_error_to_str(char *, size_t, int, int);
+ZIP_EXTERN(int) zip_fclose(struct zip_file *);
+ZIP_EXTERN(void) zip_file_error_clear(struct zip_file *);
+ZIP_EXTERN(void) zip_file_error_get(struct zip_file *, int *, int *);
+ZIP_EXTERN(const char *)zip_file_strerror(struct zip_file *);
+ZIP_EXTERN(struct zip_file *)zip_fopen(struct zip *, const char *, int);
+ZIP_EXTERN(struct zip_file *)zip_fopen_index(struct zip *, int, int);
+ZIP_EXTERN(ssize_t) zip_fread(struct zip_file *, void *, size_t);
+ZIP_EXTERN(const char *)zip_get_archive_comment(struct zip *, int *, int);
+ZIP_EXTERN(int) zip_get_archive_flag(struct zip *, int, int);
+ZIP_EXTERN(const char *)zip_get_file_comment(struct zip *, int, int *, int);
+ZIP_EXTERN(const char *)zip_get_name(struct zip *, int, int);
+ZIP_EXTERN(int) zip_get_num_files(struct zip *);
+ZIP_EXTERN(int) zip_name_locate(struct zip *, const char *, int);
+ZIP_EXTERN(struct zip *)zip_open(const char *, int, int *);
+ZIP_EXTERN(int) zip_rename(struct zip *, int, const char *);
+ZIP_EXTERN(int) zip_replace(struct zip *, int, struct zip_source *);
+ZIP_EXTERN(int) zip_set_archive_comment(struct zip *, const char *, int);
+ZIP_EXTERN(int) zip_set_archive_flag(struct zip *, int, int);
+ZIP_EXTERN(int) zip_set_file_comment(struct zip *, int, const char *, int);
+ZIP_EXTERN(struct zip_source *)zip_source_buffer(struct zip *, const void *,
+						off_t, int);
+ZIP_EXTERN(struct zip_source *)zip_source_file(struct zip *, const char *,
+					      off_t, off_t);
+ZIP_EXTERN(struct zip_source *)zip_source_filep(struct zip *, FILE *,
+					       off_t, off_t);
+ZIP_EXTERN(void) zip_source_free(struct zip_source *);
+ZIP_EXTERN(struct zip_source *)zip_source_function(struct zip *,
 				       zip_source_callback, void *);
-PHPZIPAPI struct zip_source *zip_source_zip(struct zip *, struct zip *, int, int,
-				  off_t, off_t);
-PHPZIPAPI int zip_stat(struct zip *, const char *, int, struct zip_stat *);
-PHPZIPAPI int zip_stat_index(struct zip *, int, int, struct zip_stat *);
-PHPZIPAPI void zip_stat_init(struct zip_stat *);
-PHPZIPAPI const char *zip_strerror(struct zip *);
-PHPZIPAPI int zip_unchange(struct zip *, int);
-PHPZIPAPI int zip_unchange_all(struct zip *);
-PHPZIPAPI int zip_unchange_archive(struct zip *);
+ZIP_EXTERN(struct zip_source *)zip_source_zip(struct zip *, struct zip *,
+					     int, int, off_t, off_t);
+ZIP_EXTERN(int) zip_stat(struct zip *, const char *, int, struct zip_stat *);
+ZIP_EXTERN(int) zip_stat_index(struct zip *, int, int, struct zip_stat *);
+ZIP_EXTERN(void) zip_stat_init(struct zip_stat *);
+ZIP_EXTERN(const char *)zip_strerror(struct zip *);
+ZIP_EXTERN(int) zip_unchange(struct zip *, int);
+ZIP_EXTERN(int) zip_unchange_all(struct zip *);
+ZIP_EXTERN(int) zip_unchange_archive(struct zip *);
 
 END_EXTERN_C();
 #endif /* _HAD_ZIP_H */

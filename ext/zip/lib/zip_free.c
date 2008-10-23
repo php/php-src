@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_free.c,v 1.17 2005/06/09 19:57:10 dillo Exp $
-
   zip_free.c -- free struct zip
-  Copyright (C) 1999, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -36,7 +34,7 @@
 
 
 #include <stdlib.h>
-#include "zip.h"
+
 #include "zipint.h"
 
 
@@ -45,7 +43,7 @@
    frees the space allocated to a zipfile struct, and closes the
    corresponding file. */
 
-PHPZIPAPI void
+void
 _zip_free(struct zip *za)
 {
     int i;
@@ -58,9 +56,6 @@ _zip_free(struct zip *za)
 
     if (za->zp)
 	fclose(za->zp);
-
-    if (za->ch_comment)
-	free(za->ch_comment);
 
     _zip_cdir_free(za->cdir);
 

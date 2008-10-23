@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_source_function.c,v 1.4 2006/02/21 09:41:00 dillo Exp $
-
   zip_source_function.c -- create zip data source from callback function
-  Copyright (C) 1999, 2003, 2004 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -37,12 +35,11 @@
 
 #include <stdlib.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 
 
-PHPZIPAPI struct zip_source *
+ZIP_EXTERN(struct zip_source *)
 zip_source_function(struct zip *za, zip_source_callback zcb, void *ud)
 {
     struct zip_source *zs;

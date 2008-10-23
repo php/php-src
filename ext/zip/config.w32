@@ -18,7 +18,8 @@ if (PHP_ZIP != "no") {
                      zip_error_get_sys_type.c zip_file_get_offset.c \
                      zip_get_name.c zip_replace.c zip_source_function.c \
                      zip_unchange.c zip_dirent.c zip_error_strerror.c \
-                     zip_file_strerror.c zip_get_num_files.c \
+                     zip_filerange_crc.c zip_file_strerror.c zip_get_num_files.c \
+                     zip_get_archive_flag.c zip_set_archive_flag.c \
                      zip_set_name.c zip_source_zip.c zip_unchange_data.c \
                      zip_entry_free.c zip_error_to_str.c zip_fopen.c \
                      zip_name_locate.c zip_source_buffer.c zip_stat.c \
@@ -31,7 +32,6 @@ if (PHP_ZIP != "no") {
 
 		AC_DEFINE('HAVE_ZLIB', 1);
 		AC_DEFINE('HAVE_ZIP', 1);
-		ADD_FLAG("CFLAGS_ZIP", "/D PHP_ZIP_EXPORTS ");
 	} else {
 		WARNING("zip not enabled; libraries and headers not found");
 	}

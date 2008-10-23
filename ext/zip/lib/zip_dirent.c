@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_dirent.c,v 1.9 2006/04/23 14:51:45 wiz Exp $
-
   zip_dirent.c -- read directory entry (local or central), clean dirent
-  Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2008 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -33,18 +31,15 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "main/php_reentrancy.h"
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 static time_t _zip_d2u_time(int, int);
@@ -56,7 +51,7 @@ static void _zip_write4(unsigned int, FILE *);
 
 
 
-PHPZIPAPI void
+void
 _zip_cdir_free(struct zip_cdir *cd)
 {
     int i;
@@ -73,7 +68,7 @@ _zip_cdir_free(struct zip_cdir *cd)
 
 
 
-PHPZIPAPI struct zip_cdir *
+struct zip_cdir *
 _zip_cdir_new(int nentry, struct zip_error *error)
 {
     struct zip_cdir *cd;
@@ -102,19 +97,19 @@ _zip_cdir_new(int nentry, struct zip_error *error)
 
 
 
-PHPZIPAPI int
+int
 _zip_cdir_write(struct zip_cdir *cd, FILE *fp, struct zip_error *error)
 {
     int i;
 
-    cd->offset = ftell(fp);
+    cd->offset = ftello(fp);
 
     for (i=0; i<cd->nentry; i++) {
 	if (_zip_dirent_write(cd->entry+i, fp, 0, error) != 0)
 	    return -1;
     }
 
-    cd->size = ftell(fp) - cd->offset;
+    cd->size = ftello(fp) - cd->offset;
     
     /* clearerr(fp); */
     fwrite(EOCD_MAGIC, 1, 4, fp);
@@ -136,7 +131,7 @@ _zip_cdir_write(struct zip_cdir *cd, FILE *fp, struct zip_error *error)
 
 
 
-PHPZIPAPI void
+void
 _zip_dirent_finalize(struct zip_dirent *zde)
 {
     free(zde->filename);
@@ -149,7 +144,7 @@ _zip_dirent_finalize(struct zip_dirent *zde)
 
 
 
-PHPZIPAPI void
+void
 _zip_dirent_init(struct zip_dirent *de)
 {
     de->version_madeby = 0;
@@ -188,7 +183,7 @@ _zip_dirent_init(struct zip_dirent *de)
    returned.
 */
 
-PHPZIPAPI int
+int
 _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 		 unsigned char **bufp, unsigned int left, int localp,
 		 struct zip_error *error)
@@ -323,6 +318,63 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 
 
 
+/* _zip_dirent_torrent_normalize(de);
+   Set values suitable for torrentzip.
+*/
+
+void
+_zip_dirent_torrent_normalize(struct zip_dirent *de)
+{
+    static struct tm torrenttime;
+    static time_t last_mod = 0;
+
+    if (last_mod == 0) {
+#ifdef HAVE_STRUCT_TM_TM_ZONE
+	time_t now;
+	struct tm *l;
+#endif
+
+	torrenttime.tm_sec = 0;
+	torrenttime.tm_min = 32;
+	torrenttime.tm_hour = 23;
+	torrenttime.tm_mday = 24;
+	torrenttime.tm_mon = 11;
+	torrenttime.tm_year = 96;
+	torrenttime.tm_wday = 0;
+	torrenttime.tm_yday = 0;
+	torrenttime.tm_isdst = 0;
+
+#ifdef HAVE_STRUCT_TM_TM_ZONE
+	time(&now);
+	l = localtime(&now);
+	torrenttime.tm_gmtoff = l->tm_gmtoff;
+	torrenttime.tm_zone = l->tm_zone;
+#endif
+
+	last_mod = mktime(&torrenttime);
+    }
+    
+    de->version_madeby = 0;
+    de->version_needed = 20; /* 2.0 */
+    de->bitflags = 2; /* maximum compression */
+    de->comp_method = ZIP_CM_DEFLATE;
+    de->last_mod = last_mod;
+
+    de->disk_number = 0;
+    de->int_attrib = 0;
+    de->ext_attrib = 0;
+    de->offset = 0;
+
+    free(de->extrafield);
+    de->extrafield = NULL;
+    de->extrafield_len = 0;
+    free(de->comment);
+    de->comment = NULL;
+    de->comment_len = 0;
+}
+
+
+
 /* _zip_dirent_write(zde, fp, localp, error):
    Writes zip directory entry zde to file fp.
 
@@ -333,7 +385,7 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
    returned.
 */
 
-PHPZIPAPI int
+int
 _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 		  struct zip_error *error)
 {
@@ -390,11 +442,13 @@ _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 static time_t
 _zip_d2u_time(int dtime, int ddate)
 {
-    struct tm *tm, tmbuf;
+    struct tm *tm;
     time_t now;
 
     now = time(NULL);
-    tm = php_localtime_r(&now, &tmbuf);
+    tm = localtime(&now);
+    /* let mktime decide if DST is in effect */
+    tm->tm_isdst = -1;
     
     tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
     tm->tm_mon = ((ddate>>5)&15) - 1;
@@ -409,7 +463,7 @@ _zip_d2u_time(int dtime, int ddate)
 
 
 
-PHPZIPAPI unsigned short
+unsigned short
 _zip_read2(unsigned char **a)
 {
     unsigned short ret;
@@ -422,7 +476,7 @@ _zip_read2(unsigned char **a)
 
 
 
-PHPZIPAPI unsigned int
+unsigned int
 _zip_read4(unsigned char **a)
 {
     unsigned int ret;
@@ -519,9 +573,9 @@ _zip_write4(unsigned int i, FILE *fp)
 static void
 _zip_u2d_time(time_t time, unsigned short *dtime, unsigned short *ddate)
 {
-    struct tm *tm, tmbuf;
+    struct tm *tm;
 
-    tm = php_localtime_r(&time, &tmbuf);
+    tm = localtime(&time);
     *ddate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5)
 	+ tm->tm_mday;
     *dtime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5)

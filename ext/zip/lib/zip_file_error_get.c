@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_file_error_get.c,v 1.1 2004/11/18 15:06:21 wiz Exp $
-
   zip_file_error_get.c -- get zip file error
-  Copyright (C) 1999, 2003 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -35,12 +33,11 @@
 
 
 
-#include "zip.h"
 #include "zipint.h"
 
 
 
-PHPZIPAPI void
+ZIP_EXTERN(void)
 zip_file_error_get(struct zip_file *zf, int *zep, int *sep)
 {
     _zip_error_get(&zf->error, zep, sep);

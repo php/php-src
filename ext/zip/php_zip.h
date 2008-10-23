@@ -32,6 +32,19 @@ extern zend_module_entry zip_module_entry;
 
 #define PHP_ZIP_VERSION_STRING "1.8.11"
 
+#ifndef ZEND_ENGINE_2_1
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0) || PHP_MAJOR_VERSION == 6
+#  define ZEND_ENGINE_2_1
+# endif
+#endif
+
+#ifndef  Z_SET_REFCOUNT_P
+# if PHP_MAJOR_VERSION < 6 && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
+#  define Z_SET_REFCOUNT_P(pz, rc)  pz->refcount = rc 
+#  define Z_UNSET_ISREF_P(pz) pz->is_ref = 0 
+# endif
+#endif
+
 /* {{{ OPENBASEDIR_CHECKPATH(filename) */
 #if (PHP_MAJOR_VERSION < 6)
 #define OPENBASEDIR_CHECKPATH(filename) \
@@ -55,6 +68,7 @@ typedef struct _ze_zip_read_rsrc {
 	struct zip_stat sb;
 } zip_read_rsrc;
 
+#ifdef ZEND_ENGINE_2_1
 #define ZIPARCHIVE_ME(name, arg_info, flags)	ZEND_FENTRY(name, c_ziparchive_ ##name, arg_info, flags)
 #define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_##name)
 
@@ -73,6 +87,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, char *path, char 
 php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_DC TSRMLS_DC);
 
 extern php_stream_wrapper php_stream_zip_wrapper;
+#endif
 
 #endif	/* PHP_ZIP_H */
 

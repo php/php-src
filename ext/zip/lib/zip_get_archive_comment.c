@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_get_archive_comment.c,v 1.4 2006/04/23 16:11:33 wiz Exp $
-
   zip_get_archive_comment.c -- get archive comment
-  Copyright (C) 2006 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -35,12 +33,11 @@
 
 
 
-#include "zip.h"
 #include "zipint.h"
 
 
 
-PHPZIPAPI const char *
+ZIP_EXTERN(const char *)
 zip_get_archive_comment(struct zip *za, int *lenp, int flags)
 {
     if ((flags & ZIP_FL_UNCHANGED)
@@ -50,6 +47,11 @@ zip_get_archive_comment(struct zip *za, int *lenp, int flags)
 				*lenp = za->cdir->comment_len;
 			return za->cdir->comment;
 		}
+	else {
+	    if (lenp != NULL)
+		*lenp = -1;
+	    return NULL;
+	}
     }
     
     if (lenp != NULL)

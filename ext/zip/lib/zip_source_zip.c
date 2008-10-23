@@ -1,11 +1,9 @@
 /*
-  $NiH: zip_source_zip.c,v 1.7 2006/02/21 09:41:00 dillo Exp $
-
   zip_source_zip.c -- create data source from zip file
-  Copyright (C) 1999, 2003, 2004, 2005 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
-  The authors can be contacted at <nih@giga.or.at>
+  The authors can be contacted at <libzip@nih.at>
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -38,7 +36,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zip.h"
 #include "zipint.h"
 
 struct read_zip {
@@ -52,13 +49,15 @@ static ssize_t read_zip(void *st, void *data, size_t len,
 
 
 
-PHPZIPAPI struct zip_source *
+ZIP_EXTERN(struct zip_source *)
 zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
 	       off_t start, off_t len)
 {
     struct zip_error error;
     struct zip_source *zs;
     struct read_zip *p;
+
+    /* XXX: ZIP_FL_RECOMPRESS */
 
     if (za == NULL)
 	return NULL;
@@ -77,7 +76,7 @@ zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
     if (len == 0)
 	len = -1;
 
-    if (start == 0 && len == -1)
+    if (start == 0 && len == -1 && (flags & ZIP_FL_RECOMPRESS) == 0)
 	flags |= ZIP_FL_COMPRESSED;
     else
 	flags &= ~ZIP_FL_COMPRESSED;
