@@ -1,3 +1,90 @@
+2008-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c:
+      
+      MFB: revert define() fix for now
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      Revert define() fix, it needs further review
+
+2008-10-22  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/pdo_oci/config.m4
+      ext/pdo_oci/config.m4:
+      fix instantclient detection
+
+2008-10-22  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/sockets/sockets.c:
+      MFH: Fixed bug #46360 (TCP_NODELAY constant for socket_{get,set}_option)
+
+    * ext/sockets/sockets.c:
+      Fixed bug #46360 (TCP_NODELAY constant for socket_{get,set}_option)
+
+2008-10-22  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c:
+      MFH: Fix a stat on a null when the internal database is used.
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      Fix a stat on a null when the internal database is used.
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/apprentice.c:
+      MFH: When using the internal database and there is an error it could try
+      free some invalid things. This was causing a bus error on ppc.
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      When using the internal database and there is an error it could try free
+      some invalid things. This was causing a bus error on ppc.
+
+2008-10-22  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_diff_ukey_error.phpt
+      ext/standard/tests/array/array_diff_ukey_variation1.phpt
+      ext/standard/tests/array/array_diff_ukey_variation10.phpt
+      ext/standard/tests/array/array_diff_ukey_variation2.phpt
+      ext/standard/tests/array/array_diff_ukey_variation3.phpt
+      ext/standard/tests/array/array_diff_ukey_variation4.phpt
+      ext/standard/tests/array/array_diff_ukey_variation5.phpt
+      ext/standard/tests/array/array_diff_ukey_variation6.phpt
+      ext/standard/tests/array/array_diff_ukey_variation7.phpt
+      ext/standard/tests/array/array_diff_ukey_variation8.phpt
+      ext/standard/tests/array/array_diff_ukey_variation9.phpt:
+      New PHP testcases for array_diff_ukey function
+
+    * ext/standard/tests/array/array_diff_ukey_error.phpt
+      ext/standard/tests/array/array_diff_ukey_error.phpt
+      ext/standard/tests/array/array_diff_ukey_variation1.phpt
+      ext/standard/tests/array/array_diff_ukey_variation1.phpt
+      ext/standard/tests/array/array_diff_ukey_variation10.phpt
+      ext/standard/tests/array/array_diff_ukey_variation10.phpt
+      ext/standard/tests/array/array_diff_ukey_variation2.phpt
+      ext/standard/tests/array/array_diff_ukey_variation2.phpt
+      ext/standard/tests/array/array_diff_ukey_variation3.phpt
+      ext/standard/tests/array/array_diff_ukey_variation3.phpt
+      ext/standard/tests/array/array_diff_ukey_variation4.phpt
+      ext/standard/tests/array/array_diff_ukey_variation4.phpt
+      ext/standard/tests/array/array_diff_ukey_variation5.phpt
+      ext/standard/tests/array/array_diff_ukey_variation5.phpt
+      ext/standard/tests/array/array_diff_ukey_variation6.phpt
+      ext/standard/tests/array/array_diff_ukey_variation6.phpt
+      ext/standard/tests/array/array_diff_ukey_variation7.phpt
+      ext/standard/tests/array/array_diff_ukey_variation7.phpt
+      ext/standard/tests/array/array_diff_ukey_variation8.phpt
+      ext/standard/tests/array/array_diff_ukey_variation8.phpt
+      ext/standard/tests/array/array_diff_ukey_variation9.phpt
+      ext/standard/tests/array/array_diff_ukey_variation9.phpt:
+      
+      New PHP testcases for array_diff_ukey function
+
 2008-10-21  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * ext/curl/interface.c

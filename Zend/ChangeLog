@@ -1,3 +1,14 @@
+2008-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      
+      MFB: revert define() fix for now
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      Revert define() fix, it needs further review
+
 2008-10-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
