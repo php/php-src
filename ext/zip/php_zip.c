@@ -95,51 +95,102 @@ static int le_zip_entry;
 # define add_ascii_assoc_long add_assoc_long
 #endif
 
+/* Flatten a path by making a relative path (to .)*/
+static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
+{
+	char *path_begin = path;
+	int prev_is_slash = 0;
+	char *e = path + path_len - 1;
+	size_t pos = path_len - 1;
+	size_t i;
+
+	if (IS_SLASH(path[0])) {
+		return path + 1;
+	}
+
+	if (path_len < 1 || path == NULL) {
+		return NULL;
+	}
+
+	i = path_len;
+
+	while (1) {
+		while (i > 0 && !IS_SLASH(path[i])) {
+			i--;
+		}
+
+		if (!i) {
+			return path;
+		}
+
+		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
+			/* i is the position of . or :, add 1 for / */
+			path_begin = path + i + 1;
+			break;
+		}
+		i--;
+	}
+
+	return path_begin;
+}
+/* }}} */
+
 #ifdef ZEND_ENGINE_2_1
 /* {{{ php_zip_extract_file */
-/* TODO: Simplify it */
 static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len TSRMLS_DC)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char b[8192];
-
 	int n, len, ret;
-
 	php_stream *stream;
-
 	char *fullpath;
 	char *file_dirname_fullpath;
 	char file_dirname[MAXPATHLEN];
 	size_t dir_len;
-
 	char *file_basename;
 	size_t file_basename_len;
 	int is_dir_only = 0;
+	char *path_cleaned;
+	size_t path_cleaned_len;
+	cwd_state new_state;
 
-	if (file_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
+	new_state.cwd = (char*)malloc(1);
+	new_state.cwd[0] = '\0';
+	new_state.cwd_length = 0;
+
+	/* Clean/normlize the path and then transform any path (absolute or relative)
+		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
+	 */
+	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
+	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
+	path_cleaned_len = strlen(path_cleaned);
+
+	if (path_cleaned_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
 		return 0;
 	}
+
 	/* it is a directory only, see #40228 */
-	if (file_len > 1 && file[file_len - 1] == '/') {
+	if (path_cleaned_len > 1 && IS_SLASH(path_cleaned[path_cleaned_len - 1])) {
 		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file);
 		is_dir_only = 1;
 	} else {
-		memcpy(file_dirname, file, file_len);
-		dir_len = php_dirname(file_dirname, file_len);
+		memcpy(file_dirname, path_cleaned, path_cleaned_len);
+		dir_len = php_dirname(file_dirname, path_cleaned_len);
 
-		if (dir_len > 0) {
-			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
-		} else {
+		if (dir_len <= 0 || (dir_len == 1 && file_dirname[0] == '.')) {
 			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
+		} else {
+			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
 		}
 
-		php_basename(file, file_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
+		php_basename(path_cleaned, path_cleaned_len, NULL, 0, &file_basename, (unsigned int *)&file_basename_len TSRMLS_CC);
 
 		if (OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
 			efree(file_basename);
+			free(new_state.cwd);
 			return 0;
 		}
 	}
@@ -158,28 +209,32 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		}
 #endif
 
-		ret = php_stream_mkdir(file_dirname_fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+		ret = php_stream_mkdir(file_dirname_fullpath, 0777,  PHP_STREAM_MKDIR_RECURSIVE|REPORT_ERRORS, NULL);
 		if (!ret) {
 			efree(file_dirname_fullpath);
-			efree(file_basename);
+			if (!is_dir_only) {
+				efree(file_basename);
+				free(new_state.cwd);
+			}
 			return 0;
 		}
 	}
 
 	/* it is a standalone directory, job done */
-	if (file[file_len - 1] == '/') {
+	if (is_dir_only) {
 		efree(file_dirname_fullpath);
-		if (!is_dir_only) {
-			efree(file_basename);
-		}
+		free(new_state.cwd);
 		return 1;
 	}
 
-	len = spprintf(&fullpath, 0, "%s/%s/%s", dest, file_dirname, file_basename);
+	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, file_basename);
 	if (!len) {
 		efree(file_dirname_fullpath);
 		efree(file_basename);
+		free(new_state.cwd);
 		return 0;
+	} else if (len > MAXPATHLEN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 	}
 
 	/* check again the full path, not sure if it
@@ -187,8 +242,10 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	 * safemode status as its parent folder?
 	 */
 	if (OPENBASEDIR_CHECKPATH(fullpath)) {
+		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
+		free(new_state.cwd);
 		return 0;
 	}
 
@@ -197,8 +254,10 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
+		free(new_state.cwd);
 		return 0;
 	}
+
 #if (PHP_MAJOR_VERSION < 6)
 	stream = php_stream_open_wrapper(fullpath, "w+b", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
@@ -214,6 +273,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	efree(fullpath);
 	efree(file_basename);
 	efree(file_dirname_fullpath);
+	free(new_state.cwd);
 
 	if (n<0) {
 		return 0;
@@ -472,10 +532,7 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
 	strncpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
-	if (PG(safe_mode) && (!php_checkuid(cwd, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return -1;
-	}
-	if (php_check_open_basedir(cwd TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(cwd)) {
 		return -1;
 	}
 
@@ -537,14 +594,10 @@ int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *r
 	} 
 #endif
 
-	/* we assume that any glob pattern will match files from one directory only
-	   so checking the dirname of the first match should be sufficient */
-	if (PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (OPENBASEDIR_CHECKPATH(path)) {
 		return -1;
 	}
-	if (php_check_open_basedir(path TSRMLS_CC)) {
-		return -1;
-	}
+
 	files_cnt = php_stream_scandir(path, &namelist, NULL, (void *) php_stream_dirent_alphasort);
 
 	if (files_cnt > 0) {
@@ -670,7 +723,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ zend_function_entry */
-static zend_function_entry zip_functions[] = {
+static const zend_function_entry zip_functions[] = {
 	ZEND_RAW_FENTRY("zip_open", zif_zip_open, arginfo_zip_open, 0)
 	ZEND_RAW_FENTRY("zip_close", zif_zip_close, arginfo_zip_close, 0)
 	ZEND_RAW_FENTRY("zip_read", zif_zip_read, arginfo_zip_read, 0)
@@ -1091,6 +1144,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 {
 	char     *filename;
 	int       filename_len;
+	char resolved_path[MAXPATHLEN + 1];
 	zip_rsrc *rsrc_int;
 	int err = 0;
 
@@ -1098,13 +1152,22 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 		return;
 	}
 
+	if (filename_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string as source");
+		RETURN_FALSE;
+	}
+
 	if (OPENBASEDIR_CHECKPATH(filename)) {
+		RETURN_FALSE;
+	}
+
+	if(!expand_filepath(filename, resolved_path TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
 	rsrc_int = (zip_rsrc *)emalloc(sizeof(zip_rsrc));
 
-	rsrc_int->za = zip_open(filename, 0, &err);
+	rsrc_int->za = zip_open(resolved_path, 0, &err);
 	if (rsrc_int->za == NULL) {
 		efree(rsrc_int);
 		RETURN_LONG((long)err);
@@ -1402,6 +1465,7 @@ static ZIPARCHIVE_METHOD(open)
 		efree(ze_obj->filename);
 		ze_obj->filename = NULL;
 	}
+
 	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {
 		RETURN_LONG((long)err);
@@ -1486,10 +1550,10 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 				&dirname, &dirname_len) == FAILURE) {
 		return;
 	}
+
 	if (dirname_len<1) {
 		RETURN_FALSE;
 	}
-
 
 	if (dirname[dirname_len-1] != '/') {
 		s=(char *)emalloc(dirname_len+2);
@@ -2360,7 +2424,6 @@ static ZIPARCHIVE_METHOD(extractTo)
             }
         }
     }
-
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2420,6 +2483,7 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	buffer = safe_emalloc(len, 1, 2);
 	n = zip_fread(zf, buffer, len);
 	if (n < 1) {
+		efree(buffer);
 		RETURN_EMPTY_STRING();
 	}
 

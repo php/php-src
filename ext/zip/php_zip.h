@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) 1997-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,6 @@
 
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry
-
-#ifdef PHP_WIN32
-#define PHP_ZIP_API __declspec(dllexport)
-#else
-#define PHP_ZIP_API
-#endif
 
 #ifdef ZTS
 #include "TSRM.h"
