@@ -48,43 +48,36 @@ ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO(arginfo_pcntl_void, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_waitpid, 0, 0, 2)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wait, 0, 0, 1)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
 	ZEND_ARG_INFO(0, signo)
 	ZEND_ARG_INFO(0, handler)
 	ZEND_ARG_INFO(0, restart_syscalls)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, set)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigwaitinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, set)
 	ZEND_ARG_INFO(1, info)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
 	ZEND_ARG_INFO(0, set)
 	ZEND_ARG_INFO(1, info)
@@ -92,50 +85,41 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
 	ZEND_ARG_INFO(0, nanoseconds)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifstopped, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexitstatus, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wtermsig, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wstopsig, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_exec, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, args)
 	ZEND_ARG_INFO(0, envs)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_alarm, 0, 0, 1)
 	ZEND_ARG_INFO(0, seconds)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GETPRIORITY
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_getpriority, 0, 0, 0)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(0, process_identifier)
@@ -143,7 +127,6 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_SETPRIORITY
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
 	ZEND_ARG_INFO(0, priority)
 	ZEND_ARG_INFO(0, pid)

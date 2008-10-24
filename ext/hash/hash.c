@@ -867,13 +867,11 @@ PHP_MINFO_FUNCTION(hash)
 
 /* {{{ arginfo */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
@@ -881,34 +879,29 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, data)
@@ -916,7 +909,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, filename)
@@ -924,61 +916,51 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_update, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_stream, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_copy, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
 ZEND_END_ARG_INFO()
 
 /* BC Land */
 #ifdef PHP_MHASH_BC
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
 	ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_hash_name, 0)
 	ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
 	ZEND_ARG_INFO(0, hash)
 	ZEND_ARG_INFO(0, input_password)
@@ -986,11 +968,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
 	ZEND_ARG_INFO(0, bytes)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_count, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mhash, 0, 0, 2)
 	ZEND_ARG_INFO(0, hash)
 	ZEND_ARG_INFO(0, data)

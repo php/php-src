@@ -28,56 +28,46 @@
 #include "ext/libxml/php_libxml.h"
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_import_stylesheet, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_transform_to_doc, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_transform_to_uri, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_transform_to_xml, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_set_parameter, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespace)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_get_parameter, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespace)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_remove_parameter, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespace)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_has_exslt_support, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_register_php_functions, 0, 0, 0)
 	ZEND_ARG_INFO(0, restrict)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xsl_xsltprocessor_set_profiling, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO();

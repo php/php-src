@@ -28,12 +28,10 @@
 #include "php_dom.h"
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_string_extend_find_offset16, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset32)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_string_extend_find_offset32, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset16)
 ZEND_END_ARG_INFO();
