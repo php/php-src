@@ -271,7 +271,7 @@ void DoThreads() {
 	for (i=0; i< numThreads; i++) {
 		CloseHandle(threads[i]);
 	}
-	delete threads;
+	delete [] threads;
 }
 
 void DoFileList(const char *filelist, const char *environment)
