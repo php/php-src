@@ -1057,7 +1057,11 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 	/* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	flags = !block;
 	if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", WSAGetLastError());
+		char *error_string;
+		
+		error_string = php_socket_strerror(WSAGetLastError(), NULL, 0);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", error_string);
+		efree(error_string);
 		ret = FAILURE;
 	}
 #else
