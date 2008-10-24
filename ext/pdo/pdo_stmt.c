@@ -38,44 +38,37 @@
 #include "php_memory_streams.h"
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_execute, 0, 0, 0)
 	ZEND_ARG_INFO(0, bound_input_params) /* array */
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetch, 0, 0, 0)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, orientation)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchobject, 0, 0, 0)
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, ctor_args) /* array */
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchcolumn, 0, 0, 0)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_fetchall, 0, 0, 0)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, ctor_args) /* array */
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindvalue, 0, 0, 2)
 	ZEND_ARG_INFO(0, paramno)
 	ZEND_ARG_INFO(0, param)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, paramno)
 	ZEND_ARG_INFO(1, param)
@@ -84,7 +77,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, driverdata)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindcolumn, 0, 0, 2)
 	ZEND_ARG_INFO(0, column)
 	ZEND_ARG_INFO(1, param)
@@ -93,23 +85,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_bindcolumn, 0, 0, 2)
 	ZEND_ARG_INFO(0, driverdata)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_setattribute, 0)
 	ZEND_ARG_INFO(0, attribute)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getattribute, 0)
 	ZEND_ARG_INFO(0, attribute)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_pdostatement_getcolumnmeta, 0)
 	ZEND_ARG_INFO(0, column)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_setfetchmode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, params)

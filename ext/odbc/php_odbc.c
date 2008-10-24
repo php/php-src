@@ -67,48 +67,40 @@ static int le_result, le_conn, le_pconn;
 #define SAFE_SQL_NTS(n) ((SQLSMALLINT) ((n)?(SQL_NTS):0))
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO(arginfo_odbc_close_all, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_binmode, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_longreadlen, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_prepare, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_execute, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, parameters_array)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_cursor, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_SQLDATASOURCES
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_data_source, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, fetch_type)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_exec, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, query)
@@ -116,50 +108,42 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_exec, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, rownumber)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, rownumber)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_into, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, result_array)
 	ZEND_ARG_INFO(0, rownumber)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, row_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_result_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_free_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, user)
@@ -167,7 +151,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, cursor_option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_pconnect, 0, 0, 3)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, user)
@@ -175,85 +158,70 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_pconnect, 0, 0, 3)
 	ZEND_ARG_INFO(0, cursor_option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_next_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_len, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_scale, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_num, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field_name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_autocommit, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, onoff)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_commit, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_rollback, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_error, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_errormsg, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_setoption, 0, 0, 4)
 	ZEND_ARG_INFO(0, conn_id)
 	ZEND_ARG_INFO(0, which)
@@ -261,7 +229,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_setoption, 0, 0, 4)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -270,7 +237,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, table_types)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_columns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -279,13 +245,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_columns, 0, 0, 1)
 	ZEND_ARG_INFO(0, column_name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_gettypeinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, data_type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_primarykeys, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -295,7 +259,6 @@ ZEND_END_ARG_INFO()
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 #if !defined(HAVE_BIRDSTEP)
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedurecolumns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -305,7 +268,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedurecolumns, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedures, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -313,7 +275,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedures, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_foreignkeys, 0, 0, 7)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, pk_qualifier)
@@ -325,7 +286,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_foreignkeys, 0, 0, 7)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 7)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, type)
@@ -336,7 +296,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_specialcolumns, 0, 0, 7)
 	ZEND_ARG_INFO(0, nullable)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_statistics, 0, 0, 6)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -347,7 +306,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_statistics, 0, 0, 6)
 ZEND_END_ARG_INFO()
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tableprivileges, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -355,7 +313,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tableprivileges, 0, 0, 4)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_columnprivileges, 0, 0, 5)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, catalog)
