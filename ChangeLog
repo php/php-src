@@ -1,3 +1,158 @@
+2008-10-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.7RC2
+
+2008-10-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/php_zip.c:
+      - MFB: flatten path and make them relative before extraction
+
+2008-10-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN moved to PHP_5_2
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/sockets/sockets.c:
+      MFH: Fixed bug #46360 (TCP_NODELAY constant for socket_{get,set}_option)
+      [DOC] Added TCP_NODELAY constant to sockets extension, to be used with
+      socket_set_option() to disable TCP's Nagle algorithm. Avail in PHP>=5.2.7.
+
+2008-10-23  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #43925
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo_pgsql/tests/bug43925.phpt
+      ext/pdo_pgsql/tests/bug43925.phpt:
+      - MFH: Fixed bug #43925 (Incorrect argument counter in prepared statements
+      with pgsql)
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re
+      ext/pdo_pgsql/tests/bug43925.phpt
+      ext/pdo_pgsql/tests/bug43925.phpt
+      ext/pdo_pgsql/tests/bug43925.phpt:
+      - Fixed bug #43925 (Incorrect argument counter in prepared statements with
+      pgsql)
+
+2008-10-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      - It is past, not command. Reorder.
+
+2008-10-23  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - entries for zip changes
+
+    * (PHP_5_2)
+      ext/zip/lib/mkstemp.c
+      ext/zip/lib/unistd.h
+      ext/zip/lib/zip_alias.h
+      ext/zip/lib/zipint_alias.h:
+      - remove unused files
+
+    * (PHP_5_2)
+      ext/zip/lib/zip_filerange_crc.c
+      ext/zip/lib/zip_get_archive_flag.c
+      ext/zip/lib/zip_set_archive_flag.c:
+      - add missing files
+
+    * (PHP_5_2)
+      ext/zip/config.m4
+      ext/zip/config.w32
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/lib/.cvsignore
+      ext/zip/lib/zip.h
+      ext/zip/lib/zip_add.c
+      ext/zip/lib/zip_add_dir.c
+      ext/zip/lib/zip_close.c
+      ext/zip/lib/zip_delete.c
+      ext/zip/lib/zip_dirent.c
+      ext/zip/lib/zip_entry_free.c
+      ext/zip/lib/zip_entry_new.c
+      ext/zip/lib/zip_err_str.c
+      ext/zip/lib/zip_error.c
+      ext/zip/lib/zip_error_clear.c
+      ext/zip/lib/zip_error_get.c
+      ext/zip/lib/zip_error_get_sys_type.c
+      ext/zip/lib/zip_error_strerror.c
+      ext/zip/lib/zip_error_to_str.c
+      ext/zip/lib/zip_fclose.c
+      ext/zip/lib/zip_file_error_clear.c
+      ext/zip/lib/zip_file_error_get.c
+      ext/zip/lib/zip_file_get_offset.c
+      ext/zip/lib/zip_file_strerror.c
+      ext/zip/lib/zip_fopen.c
+      ext/zip/lib/zip_fopen_index.c
+      ext/zip/lib/zip_fread.c
+      ext/zip/lib/zip_free.c
+      ext/zip/lib/zip_get_archive_comment.c
+      ext/zip/lib/zip_get_file_comment.c
+      ext/zip/lib/zip_get_name.c
+      ext/zip/lib/zip_get_num_files.c
+      ext/zip/lib/zip_memdup.c
+      ext/zip/lib/zip_name_locate.c
+      ext/zip/lib/zip_new.c
+      ext/zip/lib/zip_open.c
+      ext/zip/lib/zip_rename.c
+      ext/zip/lib/zip_replace.c
+      ext/zip/lib/zip_set_archive_comment.c
+      ext/zip/lib/zip_set_file_comment.c
+      ext/zip/lib/zip_set_name.c
+      ext/zip/lib/zip_source_buffer.c
+      ext/zip/lib/zip_source_file.c
+      ext/zip/lib/zip_source_filep.c
+      ext/zip/lib/zip_source_free.c
+      ext/zip/lib/zip_source_function.c
+      ext/zip/lib/zip_source_zip.c
+      ext/zip/lib/zip_stat.c
+      ext/zip/lib/zip_stat_index.c
+      ext/zip/lib/zip_stat_init.c
+      ext/zip/lib/zip_strerror.c
+      ext/zip/lib/zip_unchange.c
+      ext/zip/lib/zip_unchange_all.c
+      ext/zip/lib/zip_unchange_archive.c
+      ext/zip/lib/zip_unchange_data.c
+      ext/zip/lib/zip_win32.h
+      ext/zip/lib/zipint.h:
+      - MFH
+       - Update ziplib
+       - flatten path and make them relative before extraction
+       - remove unnecessary export
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h:
+      - flatten path and make them relative before extraction
+      - remove unnecessary export
+
 2008-10-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
