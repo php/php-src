@@ -16,4 +16,4 @@ $test->test();
 echo "Done\n";
 ?>
 --EXPECTF--	
-Done
+Fatal error: Non-static method ArrayIterator::current() cannot be called statically, assuming $this from incompatible context in %s on line %d
