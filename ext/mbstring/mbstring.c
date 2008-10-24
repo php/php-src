@@ -200,60 +200,49 @@ static const struct mb_overload_def mb_ovld[] = {
 /* }}} */
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_language, 0, 0, 0)
 	ZEND_ARG_INFO(0, language)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_internal_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_http_input, 0, 0, 0)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_http_output, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_detect_order, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substitute_character, 0, 0, 0)
 	ZEND_ARG_INFO(0, substchar)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_preferred_mime_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_parse_str, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_output_handler, 0, 0, 2)
 	ZEND_ARG_INFO(0, contents)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strlen, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -261,7 +250,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -269,7 +257,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -277,7 +264,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -285,7 +271,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strstr, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -293,7 +278,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strstr, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrchr, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -301,7 +285,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrchr, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stristr, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -309,7 +292,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_stristr, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrichr, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -317,14 +299,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strrichr, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr_count, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, start)
@@ -332,7 +312,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strcut, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, start)
@@ -340,13 +319,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strcut, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strwidth, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strimwidth, 0, 0, 3)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, start)
@@ -355,49 +332,41 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strimwidth, 0, 0, 3)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_encoding, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, from)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_case, 0, 0, 2)
 	ZEND_ARG_INFO(0, sourcestring)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strtoupper, 0, 0, 1)
 	ZEND_ARG_INFO(0, sourcestring)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strtolower, 0, 0, 1)
 	ZEND_ARG_INFO(0, sourcestring)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_detect_encoding, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, encoding_list)
 	ZEND_ARG_INFO(0, strict)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_list_encodings, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encoding_aliases, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_mimeheader, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, charset)
@@ -406,40 +375,34 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_mimeheader, 0, 0, 1)
 	ZEND_ARG_INFO(0, indent)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_mimeheader, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_kana, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 1, 0, 3)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, from)
 	ZEND_ARG_INFO(1, ...)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, convmap)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_numericentity, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, convmap)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_send_mail, 0, 0, 3)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, subject)
@@ -448,37 +411,31 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_send_mail, 0, 0, 3)
 	ZEND_ARG_INFO(0, additional_parameters)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_get_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_check_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, registers)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_eregi, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, registers)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, replacement)
@@ -486,66 +443,55 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_eregi_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, replacement)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_split, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_match, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search, 0, 0, 0)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_pos, 0, 0, 0)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_regs, 0, 0, 0)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mb_ereg_search_getregs, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_mb_ereg_search_getpos, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_search_setpos, 0, 0, 1)
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_set_options, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()

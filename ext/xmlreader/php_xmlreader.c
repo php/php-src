@@ -1224,125 +1224,100 @@ PHP_METHOD(xmlreader, expand)
 }
 /* }}} */
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_close, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_getAttribute, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_getAttributeNo, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_getAttributeNs, 0)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, namespaceURI)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_getParserProperty, 0)
 	ZEND_ARG_INFO(0, property)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_isValid, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_lookupNamespace, 0)
 ZEND_ARG_INFO(0, prefix)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToAttribute, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToAttributeNo, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToAttributeNs, 0)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, namespaceURI)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToElement, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToFirstAttribute, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_moveToNextAttribute, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_read, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlreader_next, 0, 0, 0)
 	ZEND_ARG_INFO(0, localname)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlreader_open, 0, 0, 1)
 	ZEND_ARG_INFO(0, URI)
 	ZEND_ARG_INFO(0, encoding)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_readInnerXml, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_readOuterXml, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_readString, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_setSchema, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_setParserProperty, 0)
 	ZEND_ARG_INFO(0, property)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_setRelaxNGSchema, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_setRelaxNGSchemaSource, 0)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlreader_XML, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, encoding)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlreader_expand, 0)
 ZEND_END_ARG_INFO()
 /* }}} */

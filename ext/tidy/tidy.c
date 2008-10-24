@@ -287,22 +287,18 @@ STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_o
 PHP_INI_END()
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_error_buffer, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_output, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, config_options)
@@ -310,18 +306,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, use_include_path)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_clean_repair, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, config_file)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, config_file)
@@ -329,76 +322,59 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, use_include_path)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_diagnose, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_release, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_TIDYOPTGETDOC
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
 	ZEND_ARG_INFO(0, resource)
 	ZEND_ARG_INFO(0, optname)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_config, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_status, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html_ver, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xhtml, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xml, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_error_count, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_warning_count, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_access_count, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_config_count, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 1)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_root, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_head, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
 	ZEND_ARG_INFO(0, tidy)
 ZEND_END_ARG_INFO()

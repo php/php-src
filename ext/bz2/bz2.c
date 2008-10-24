@@ -52,41 +52,34 @@ static PHP_FUNCTION(bzcompress);
 static PHP_FUNCTION(bzdecompress);
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzread, 0, 0, 1)
 	ZEND_ARG_INFO(0, bz)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_bzopen, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_bzerrno, 0)
 	ZEND_ARG_INFO(0, bz)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_bzerrstr, 0)
 	ZEND_ARG_INFO(0, bz)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_bzerror, 0)
 	ZEND_ARG_INFO(0, bz)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 2)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, blocksize)
 	ZEND_ARG_INFO(0, workfactor)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bzdecompress, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, small)

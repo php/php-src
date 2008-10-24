@@ -1357,76 +1357,61 @@ PHP_METHOD(sqlite3result, finalize)
 /* }}} */
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_open, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, encryption_key)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_close, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_exec, 0)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_version, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_lastinsertrowid, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_lasterrorcode, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_lasterrormsg, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_loadextension, 0)
 	ZEND_ARG_INFO(0, shared_library)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_changes, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_escapestring, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_prepare, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_querysingle, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, entire_row)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createfunction, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, callback)
 	ZEND_ARG_INFO(0, argument_count)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, step_callback)
@@ -1434,64 +1419,51 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
 	ZEND_ARG_INFO(0, argument_count)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_paramcount, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_close, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_reset, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_clear, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_execute, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(1, param)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindvalue, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(0, param)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3result_numcolumns, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_columnname, 0, 0, 1)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_columntype, 0, 0, 1)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_fetcharray, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3result_reset, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3result_finalize, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
