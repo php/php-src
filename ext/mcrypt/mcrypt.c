@@ -50,7 +50,6 @@ typedef struct _php_mcrypt {
 } php_mcrypt;
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, cipher_directory)
@@ -58,161 +57,132 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, mode_directory)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_init, 0, 0, 3)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic, 0, 0, 2)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mdecrypt_generic, 0, 0, 2)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_supported_key_sizes, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_self_test, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_deinit, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_block_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_key_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_iv_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_algorithms_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_modes_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_self_test, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_block_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_key_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_supported_key_sizes, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_algorithms, 0, 0, 0)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_modes, 0, 0, 0)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_key_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_block_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_iv_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_cipher_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, cipher)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_encrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -221,7 +191,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_encrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -230,7 +199,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -239,7 +207,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -248,7 +215,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -257,7 +223,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -266,7 +231,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 2)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, source)

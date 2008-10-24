@@ -89,22 +89,18 @@ zend_object_value Collator_object_create(
        the procedural API.
 */
 
-static
 ZEND_BEGIN_ARG_INFO_EX( collator_0_args, 0, 0, 0 )
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX( collator_1_arg, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, arg1 )
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX( collator_2_args, 0, 0, 2 )
 	ZEND_ARG_INFO( 0, arg1 )
 	ZEND_ARG_INFO( 0, arg2 )
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX( collator_sort_args, 0, 0, 1 )
 	ZEND_ARG_ARRAY_INFO( 1, arr, 0 )
 	ZEND_ARG_INFO( 0, flags )

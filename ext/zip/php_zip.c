@@ -668,55 +668,45 @@ int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *r
 #endif
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_open, 0, 0, 2)
 	ZEND_ARG_INFO(0, zip_dp)
 	ZEND_ARG_INFO(0, zip_entry)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_ent)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_entry)
 	ZEND_ARG_INFO(0, len)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_entry)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressedsize, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_entry)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_filesize, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_entry)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressionmethod, 0, 0, 1)
 	ZEND_ARG_INFO(0, zip_entry)
 ZEND_END_ARG_INFO()

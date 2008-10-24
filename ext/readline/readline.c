@@ -69,67 +69,54 @@ PHP_RSHUTDOWN_FUNCTION(readline);
 /* }}} */
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline, 0, 0, 0)
 	ZEND_ARG_INFO(0, prompt)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, varname)
 	ZEND_ARG_INFO(0, newvalue)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_add_history, 0, 0, 1)
 	ZEND_ARG_INFO(0, prompt)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_clear_history, 0)
 ZEND_END_ARG_INFO()
 
 #ifndef HAVE_LIBEDIT
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_list_history, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_read_history, 0, 0, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_write_history, 0, 0, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_completion_function, 0, 0, 1)
 	ZEND_ARG_INFO(0, funcname)
 ZEND_END_ARG_INFO()
 
 #if HAVE_RL_CALLBACK_READ_CHAR
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_callback_handler_install, 0, 0, 2)
 	ZEND_ARG_INFO(0, prompt)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_read_char, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_handler_remove, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_redisplay, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_readline_on_new_line, 0)
 ZEND_END_ARG_INFO()
 #endif
