@@ -170,16 +170,13 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
 
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_nsapi_virtual, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_nsapi_request_headers, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_nsapi_response_headers, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
