@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7RC3
+- Fixed bug #46082 (stream_set_blocking() can cause a crash in some
+  circumstances). (Felipe)
 
 23 Oct 2008, PHP 5.2.7RC2
 - Upgraded bundled libzip to 0.9.0. (Pierre)
