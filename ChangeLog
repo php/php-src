@@ -1,3 +1,309 @@
+2008-10-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      sapi/isapi/stresstest/stresstest.cpp
+      sapi/isapi/stresstest/stresstest.cpp:
+      - MFH: Fixed bug #46382 (Mismatching allocation and deallocation in
+      stresstest.cpp) (dvice_null at yahoo dot com)
+
+    * sapi/isapi/stresstest/stresstest.cpp:
+      - Fixed bug #46382 (Mismatching allocation and deallocation in
+      stresstest.cpp) (dvice_null at yahoo dot com)
+
+2008-10-24  Antony Dovgal  <tony@daylessday.org>
+
+    * ZendEngine2/tests/bug46381.phpt
+      ZendEngine2/tests/bug46381.phpt:
+      add test
+
+    * (PHP_5_2)
+      ZendEngine2/tests/bug46381.phpt:
+      fix test
+
+2008-10-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner_defs.h
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/fileinfo/fileinfo.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_fe.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/basic_functions.c
+      ext/standard/user_filters.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - MFH: Added 'static' into ZEND_BEGIN_ARG_INFO_EX macro
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fileinfo/fileinfo.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_fe.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/basic_functions.c
+      ext/standard/user_filters.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - Added 'static' into ZEND_BEGIN_ARG_INFO_EX macro
+
+2008-10-24  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * ZendEngine2/tests/bug46381.phpt
+      ZendEngine2/tests/bug46381.phpt
+      ZendEngine2/tests/bug46381.phpt:
+        1.1.4;
+      file bug46381.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix bug #46381 (wrong $this passed to internal methods causes segfault)
+
+2008-10-24  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      main/network.c
+      main/network.c:
+      - MFH: Fixed bug #46082 (stream_set_blocking() can cause a crash in some
+      circumstances)
+
+    * main/network.c:
+      - Fixed bug #46082 (stream_set_blocking() can cause a crash in some
+      circumstances)
+
+    * (PHP_5_2)
+      ext/standard/var.c
+      ext/standard/var.c:
+      - MFH: Removed unnecessary check for array (#46273, noticed by serovov at
+      gmail dot com)
+
+    * ext/standard/var.c:
+      - Removed unnecessary check for array (#46273, noticed by serovov at gmail
+      dot com)
+
 2008-10-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
