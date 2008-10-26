@@ -1035,6 +1035,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	/* check whether we have meta data, zero check works regardless of byte order */
 	if (mydata->is_persistent) {
 		PHAR_GET_32(buffer, mydata->metadata_len);
+		if (!mydata->metadata_len) buffer -= 4;
 		if (phar_parse_metadata(&buffer, &mydata->metadata, mydata->metadata_len TSRMLS_CC) == FAILURE) {
 			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
 		}
@@ -1114,7 +1115,9 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		}
 
 		if (entry.is_persistent) {
-			if (phar_parse_metadata(&buffer, &entry.metadata, 0 TSRMLS_CC) == FAILURE) {
+			PHAR_GET_32(buffer, entry.metadata_len);
+			if (!entry.metadata_len) buffer -= 4;
+			if (phar_parse_metadata(&buffer, &entry.metadata, entry.metadata_len TSRMLS_CC) == FAILURE) {
 				pefree(entry.filename, entry.is_persistent);
 				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 			}
