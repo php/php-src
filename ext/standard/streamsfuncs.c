@@ -871,12 +871,13 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 		INIT_ZVAL(zvs[i]);
 		ps[i] = &zvs[i];
 		ptps[i] = &ps[i];
+		MAKE_STD_ZVAL(ps[i]);
 	}
 		
 	ZVAL_LONG(ps[0], notifycode);
 	ZVAL_LONG(ps[1], severity);
 	if (xmsg) {
-		ZVAL_RT_STRING(ps[2], xmsg, ZSTR_AUTOFREE);
+		ZVAL_RT_STRING(ps[2], xmsg, ZSTR_DUPLICATE);
 	} else {
 		ZVAL_NULL(ps[2]);
 	}
@@ -886,6 +887,9 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 
 	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, ptps, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user notifier");
+	}
+	for (i = 0; i < 6; i++) {
+		zval_ptr_dtor(&ps[i]);
 	}
 	if (retval) {
 		zval_ptr_dtor(&retval);
