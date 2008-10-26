@@ -323,7 +323,8 @@ PHP                                                                        NEWS
     . date_create_from_format() / DateTime::createFromFormat()
     . date_parse_from_format().
   . support for abbreviation and offset based timezone specifiers for
-    DateTime::getOffset() and DateTime::getName().
+    the 'e' format specifier, DateTime::__construct(), DateTime::getTimeZone()
+    and DateTimeZone::getName().
   . support for selectively listing timezone identifiers by continent or
     country code through timezone_identifiers_list() /
     DateTimezone::listIdentifiers().
@@ -349,7 +350,7 @@ PHP                                                                        NEWS
   . proper support for "this week", "previous week"/"last week" and "next week"
     phrases so that they actually mean the week and not a seven day period
     around the current day.
-  . support for "<xth> <weekday of" and "last <weekday> of" phrases to be used
+  . support for "<xth> <weekday> of" and "last <weekday> of" phrases to be used
     with months - like in "last saturday of februari 2008".
   . support for "back of <hour>" and "front of <hour>" phrases that are used in
     Scotland.
