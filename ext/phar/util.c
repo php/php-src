@@ -2198,7 +2198,7 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 }
 /* }}} */
 
-static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
+static int phar_update_cached_entry(void *data, void *argument) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)data;
 	TSRMLS_FETCH();
@@ -2221,7 +2221,7 @@ static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 		if (entry->metadata_len) {
 			char *buf = estrndup((char *) entry->metadata, entry->metadata_len);
 			/* assume success, we would have failed before */
-			phar_parse_metadata((char **) &entry->metadata, &entry->metadata, entry->metadata_len TSRMLS_CC);
+			phar_parse_metadata((char **) &buf, &entry->metadata, entry->metadata_len TSRMLS_CC);
 			efree(buf);
 		} else {
 			zval *t;
@@ -2239,6 +2239,7 @@ static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 			entry->metadata_str.len = 0;
 		}
 	}
+	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
