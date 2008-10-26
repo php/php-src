@@ -13,6 +13,7 @@ $is_debug = preg_match("/^debug/i", $build_dir);
 echo "Making dist for $build_dir\n";
 
 $dist_dir = $build_dir . "/php-" . phpversion();
+$test_dir = $build_dir . "/php-test-pack-" . phpversion();
 $pecl_dir = $build_dir . "/pecl-" . phpversion();
 
 @mkdir($dist_dir);
@@ -344,6 +345,58 @@ function copy_dir($source, $dest)
 		}
 	}
 	closedir($d);
+}
+
+
+
+function copy_test_dir($directory, $dest)
+{
+	if(substr($directory,-1) == '/') {
+		$directory = substr($directory,0,-1);
+	}
+
+	if ($directory == 'tests') {
+		mkdir($dest . '/tests', 0775, true);
+		copy_dir($directory, $dest . '/tests/');
+
+		return false;
+	}
+
+	if(!file_exists($directory) || !is_dir($directory)) {
+		echo "failed... $directory\n";
+		return FALSE;
+	}
+
+	$directory_list = opendir($directory);
+
+	while (FALSE !== ($file = readdir($directory_list))) {
+		$full_path = $directory . '/' . $file;
+		if($file != '.' && $file != '..' && $file != 'CVS' && is_dir($full_path)) {
+			if ($file == 'tests') {
+				mkdir($dest . '/' . $full_path , 0775, true);
+				copy_dir($full_path, $dest . '/' . $full_path . '/');
+				continue;
+			} else {
+				copy_test_dir($full_path, $dest);
+			}
+		}
+	}
+
+	closedir($directory_list); 
+}
+
+if (!is_dir($test_dir)) {
+	mkdir($test_dir);
+}
+
+$dirs = array(
+	'ext',
+	'Sapi',
+	'Zend',
+	'tests'
+);
+foreach ($dirs as $dir) {
+	copy_test_dir($dir, $test_dir);
 }
 
 /* change this next line to true to use good-old
