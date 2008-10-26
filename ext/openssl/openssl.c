@@ -3439,7 +3439,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		}
 	}
 
-	BIO_reset(infile);
+	(void)BIO_reset(infile);
 
 	/* write the encrypted data */
 	SMIME_write_PKCS7(outfile, p7, infile, flags);
@@ -3528,7 +3528,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	BIO_reset(infile);
+	(void)BIO_reset(infile);
 
 	/* tack on extra headers */
 	if (zheaders) {
