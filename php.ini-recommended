@@ -95,7 +95,8 @@
 ; - magic_quotes_gpc = Off         [Performance]
 ;     Input data is no longer escaped with slashes so that it can be sent into
 ;     SQL databases without further manipulation.  Instead, you should use the
-;     function addslashes() on each input element you wish to send to a database.
+;     database vendor specific escape string function on each input element you 
+;     wish to send to a database.
 ; - variables_order = "GPCS"       [Performance]
 ;     The environment variables are not hashed into the $_ENV.  To access
 ;     environment variables, you can use getenv() instead.
