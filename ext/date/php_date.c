@@ -1920,13 +1920,7 @@ PHP_FUNCTION(date_modify)
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
 	tmp_time = timelib_strtotime(modify, modify_len, NULL, DATE_TIMEZONEDB);
-	dateobj->time->relative.y = tmp_time->relative.y;
-	dateobj->time->relative.m = tmp_time->relative.m;
-	dateobj->time->relative.d = tmp_time->relative.d;
-	dateobj->time->relative.h = tmp_time->relative.h;
-	dateobj->time->relative.i = tmp_time->relative.i;
-	dateobj->time->relative.s = tmp_time->relative.s;
-	dateobj->time->relative.weekday = tmp_time->relative.weekday;
+	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->have_weekday_relative = tmp_time->have_weekday_relative;
 	dateobj->time->sse_uptodate = 0;
@@ -1993,6 +1987,7 @@ PHP_FUNCTION(date_timezone_set)
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(timezone_object TSRMLS_CC);
 	if (tzobj->type != TIMELIB_ZONETYPE_ID) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only do this for zones with ID for now");
+		return;
 	}
 	timelib_set_timezone(dateobj->time, tzobj->tzi.tz);
 	timelib_unixtime2local(dateobj->time, dateobj->time->sse);

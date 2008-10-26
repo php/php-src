@@ -79,7 +79,7 @@ array(15) {
   ["month"]=>
   int(12)
   ["day"]=>
-  bool(false)
+  int(1)
   ["hour"]=>
   bool(false)
   ["minute"]=>
@@ -171,7 +171,7 @@ array(12) {
   ["month"]=>
   int(3)
   ["day"]=>
-  bool(false)
+  int(1)
   ["hour"]=>
   bool(false)
   ["minute"]=>

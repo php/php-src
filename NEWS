@@ -7,6 +7,17 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #46082 (stream_set_blocking() can cause a crash in some
   circumstances). (Felipe)
+- Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone() behave
+  different). (Derick)
+- Fixed bug #43452 (strings containing a weekday, or a number plus weekday
+  behaved incorrect of the current day-of-week was the same as the one in the
+  phrase).(Derick)
+- Fixed weekdays adding/subtracting algorithm. (Derick)
+- Fixed some ambiguities in the date parser. (Derick)
+- Fixed a bug with the YYYY-MM format not resetting the day correctly. (Derick)
+- Fixed a bug in the DateTime->modify() methods, it would not use the advanced
+  relative time strings. (Derick)
+
 
 23 Oct 2008, PHP 5.2.7RC2
 - Upgraded bundled libzip to 0.9.0. (Pierre)

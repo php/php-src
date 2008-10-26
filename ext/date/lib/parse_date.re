@@ -732,7 +732,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 		}
 #endif
 		/* If we have a TimeZone identifier to start with, use it */
-		if (strstr(tz_abbr, "/")) {
+		if (strstr(tz_abbr, "/") || strcmp(tz_abbr, "UTC") == 0) {
 			if ((res = timelib_parse_tzfile(tz_abbr, tzdb)) != NULL) {
 				t->tz_info = res;
 				t->zone_type = TIMELIB_ZONETYPE_ID;
@@ -792,7 +792,7 @@ tzcorrection = [+-] hour24 ":"? minute?;
 daysuf = "st" | "nd" | "rd" | "th";
 
 month = "0"? [0-9] | "1"[0-2];
-day   = ([0-2]?[0-9] | "3"[01]) daysuf?;
+day   = (([0-2]?[0-9]) | ("3"[01])) daysuf?;
 year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
@@ -842,11 +842,11 @@ iso8601date2     = year2 "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 pointeddate4     = day [.\t-] month [.-] year4;
-pointeddate2     = day [.\t-] month [.-] year2;
+pointeddate2     = day [.\t] month "." year2;
 datefull         = day ([ \t.-])* monthtext ([ \t.-])* year;
 datenoday        = monthtext ([ .\t-])* year4;
 datenodayrev     = year4 ([ .\t-])* monthtext;
-datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]* year;
+datetextual      = monthtext ([ .\t-])* day [,.stndrh\t ]+ year;
 datenoyear       = monthtext ([ .\t-])* day [,.stndrh\t ]*;
 datenoyearrev    = day ([ .\t-])* monthtext;
 datenocolon      = year4 monthlz daylz;
@@ -1125,6 +1125,7 @@ relativetext = reltextnumber space reltextunit;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = 1;
 		TIMELIB_PROCESS_YEAR(s->time->y);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
@@ -1406,7 +1407,9 @@ relativetext = reltextnumber space reltextunit;
 		TIMELIB_UNHAVE_TIME();
 		relunit = timelib_lookup_relunit((char**) &ptr);
 		s->time->relative.weekday = relunit->multiplier;
-		s->time->relative.weekday_behavior = 1;
+		if (s->time->relative.weekday_behavior != 2) {
+			s->time->relative.weekday_behavior = 1;
+		}
 		
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEKDAY;
@@ -1517,7 +1520,7 @@ relativetext = reltextnumber space reltextunit;
 		while(*ptr) {
 			i = timelib_get_unsigned_nr((char **) &ptr, 24);
 			timelib_eat_spaces((char **) &ptr);
-			timelib_set_relative((char **) &ptr, i, 0, s);
+			timelib_set_relative((char **) &ptr, i, 1, s);
 		}
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
