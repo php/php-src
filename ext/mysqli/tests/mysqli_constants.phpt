@@ -48,6 +48,9 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_BINARY_FLAG"				=> true,
 		"MYSQLI_PART_KEY_FLAG"				=> true,
 		"MYSQLI_GROUP_FLAG"					=> true,
+		"MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED"=> true,
+		"MYSQLI_SERVER_QUERY_NO_INDEX_USED"	=> true,
+		
 		"MYSQLI_TYPE_DECIMAL"				=> true,
 		"MYSQLI_TYPE_TINY"					=> true,
 		"MYSQLI_TYPE_SHORT"					=> true,
@@ -84,8 +87,8 @@ require_once('skipifconnectfailure.inc');
 	);
 
 	/* depends on the build - experimental */
-	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT')) {
-		$expected_constants['MYSQLI_OPT_INT_AND_YEARS_AS_INT'] = true;
+	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
+		$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
 	}
 
 	if ($IS_MYSQLND) {
@@ -101,6 +104,9 @@ require_once('skipifconnectfailure.inc');
 	if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
 		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
 	}
+	if ($version > 60005 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;	
+	} 
 
 	if ($version > 50002) {
 		$expected_constants = array_merge($expected_constants, array(
