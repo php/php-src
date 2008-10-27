@@ -859,7 +859,7 @@ mysqlnd.collect_memory_statistics=1
 	print "done!";
 ?>
 --EXPECTF--
-array(61) {
+array(119) {
   ["bytes_sent"]=>
   string(1) "0"
   ["bytes_received"]=>
@@ -872,6 +872,36 @@ array(61) {
   string(1) "0"
   ["protocol_overhead_out"]=>
   string(1) "0"
+  ["bytes_received_ok_packet"]=>
+  string(1) "0"
+  ["bytes_received_eof_packet"]=>
+  string(1) "0"
+  ["bytes_received_rset_header_packet"]=>
+  string(1) "0"
+  ["bytes_received_rset_field_meta_packet"]=>
+  string(1) "0"
+  ["bytes_received_rset_row_packet"]=>
+  string(1) "0"
+  ["bytes_received_prepare_response_packet"]=>
+  string(1) "0"
+  ["bytes_received_change_user_packet"]=>
+  string(1) "0"
+  ["packets_sent_command"]=>
+  string(1) "0"
+  ["packets_received_ok"]=>
+  string(1) "0"
+  ["packets_received_eof"]=>
+  string(1) "0"
+  ["packets_received_rset_header"]=>
+  string(1) "0"
+  ["packets_received_rset_field_meta"]=>
+  string(1) "0"
+  ["packets_received_rset_row"]=>
+  string(1) "0"
+  ["packets_received_prepare_response"]=>
+  string(1) "0"
+  ["packets_received_change_user"]=>
+  string(1) "0"
   ["result_set_queries"]=>
   string(1) "0"
   ["non_result_set_queries"]=>
@@ -879,6 +909,8 @@ array(61) {
   ["no_index_used"]=>
   string(1) "0"
   ["bad_index_used"]=>
+  string(1) "0"
+  ["slow_queries"]=>
   string(1) "0"
   ["buffered_sets"]=>
   string(1) "0"
@@ -976,11 +1008,95 @@ array(61) {
   string(1) "0"
   ["mem_calloc_ammount"]=>
   string(1) "0"
-  ["mem_realloc_calloc"]=>
+  ["mem_realloc_count"]=>
   string(1) "0"
   ["mem_realloc_ammount"]=>
   string(1) "0"
   ["mem_free_count"]=>
+  string(1) "0"
+  ["proto_text_fetched_null"]=>
+  string(1) "0"
+  ["proto_text_fetched_bit"]=>
+  string(1) "0"
+  ["proto_text_fetched_tinyint"]=>
+  string(1) "0"
+  ["proto_text_fetched_short"]=>
+  string(1) "0"
+  ["proto_text_fetched_int24"]=>
+  string(1) "0"
+  ["proto_text_fetched_int"]=>
+  string(1) "0"
+  ["proto_text_fetched_bigint"]=>
+  string(1) "0"
+  ["proto_text_fetched_decimal"]=>
+  string(1) "0"
+  ["proto_text_fetched_float"]=>
+  string(1) "0"
+  ["proto_text_fetched_double"]=>
+  string(1) "0"
+  ["proto_text_fetched_date"]=>
+  string(1) "0"
+  ["proto_text_fetched_year"]=>
+  string(1) "0"
+  ["proto_text_fetched_time"]=>
+  string(1) "0"
+  ["proto_text_fetched_datetime"]=>
+  string(1) "0"
+  ["proto_text_fetched_timestamp"]=>
+  string(1) "0"
+  ["proto_text_fetched_string"]=>
+  string(1) "0"
+  ["proto_text_fetched_blob"]=>
+  string(1) "0"
+  ["proto_text_fetched_enum"]=>
+  string(1) "0"
+  ["proto_text_fetched_set"]=>
+  string(1) "0"
+  ["proto_text_fetched_geometry"]=>
+  string(1) "0"
+  ["proto_text_fetched_other"]=>
+  string(1) "0"
+  ["proto_binary_fetched_null"]=>
+  string(1) "0"
+  ["proto_binary_fetched_bit"]=>
+  string(1) "0"
+  ["proto_binary_fetched_tinyint"]=>
+  string(1) "0"
+  ["proto_binary_fetched_short"]=>
+  string(1) "0"
+  ["proto_binary_fetched_int24"]=>
+  string(1) "0"
+  ["proto_binary_fetched_int"]=>
+  string(1) "0"
+  ["proto_binary_fetched_bigint"]=>
+  string(1) "0"
+  ["proto_binary_fetched_decimal"]=>
+  string(1) "0"
+  ["proto_binary_fetched_float"]=>
+  string(1) "0"
+  ["proto_binary_fetched_double"]=>
+  string(1) "0"
+  ["proto_binary_fetched_date"]=>
+  string(1) "0"
+  ["proto_binary_fetched_year"]=>
+  string(1) "0"
+  ["proto_binary_fetched_time"]=>
+  string(1) "0"
+  ["proto_binary_fetched_datetime"]=>
+  string(1) "0"
+  ["proto_binary_fetched_timestamp"]=>
+  string(1) "0"
+  ["proto_binary_fetched_string"]=>
+  string(1) "0"
+  ["proto_binary_fetched_blob"]=>
+  string(1) "0"
+  ["proto_binary_fetched_enum"]=>
+  string(1) "0"
+  ["proto_binary_fetched_set"]=>
+  string(1) "0"
+  ["proto_binary_fetched_geometry"]=>
+  string(1) "0"
+  ["proto_binary_fetched_other"]=>
   string(1) "0"
 }
 Testing buffered normal...
@@ -996,7 +1112,7 @@ Testing unbuffered Prepared Statements... - fetching all but one
 ... done with fetch statistics
 done!
 --UEXPECTF--
-array(61) {
+array(119) {
   [u"bytes_sent"]=>
   unicode(1) "0"
   [u"bytes_received"]=>
@@ -1009,6 +1125,36 @@ array(61) {
   unicode(1) "0"
   [u"protocol_overhead_out"]=>
   unicode(1) "0"
+  [u"bytes_received_ok_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_eof_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_rset_header_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_rset_field_meta_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_rset_row_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_prepare_response_packet"]=>
+  unicode(1) "0"
+  [u"bytes_received_change_user_packet"]=>
+  unicode(1) "0"
+  [u"packets_sent_command"]=>
+  unicode(1) "0"
+  [u"packets_received_ok"]=>
+  unicode(1) "0"
+  [u"packets_received_eof"]=>
+  unicode(1) "0"
+  [u"packets_received_rset_header"]=>
+  unicode(1) "0"
+  [u"packets_received_rset_field_meta"]=>
+  unicode(1) "0"
+  [u"packets_received_rset_row"]=>
+  unicode(1) "0"
+  [u"packets_received_prepare_response"]=>
+  unicode(1) "0"
+  [u"packets_received_change_user"]=>
+  unicode(1) "0"
   [u"result_set_queries"]=>
   unicode(1) "0"
   [u"non_result_set_queries"]=>
@@ -1016,6 +1162,8 @@ array(61) {
   [u"no_index_used"]=>
   unicode(1) "0"
   [u"bad_index_used"]=>
+  unicode(1) "0"
+  [u"slow_queries"]=>
   unicode(1) "0"
   [u"buffered_sets"]=>
   unicode(1) "0"
@@ -1113,11 +1261,95 @@ array(61) {
   unicode(1) "0"
   [u"mem_calloc_ammount"]=>
   unicode(1) "0"
-  [u"mem_realloc_calloc"]=>
+  [u"mem_realloc_count"]=>
   unicode(1) "0"
   [u"mem_realloc_ammount"]=>
   unicode(1) "0"
   [u"mem_free_count"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_null"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_bit"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_tinyint"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_short"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_int24"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_int"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_bigint"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_decimal"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_float"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_double"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_date"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_year"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_time"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_datetime"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_timestamp"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_unicode"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_blob"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_enum"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_set"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_geometry"]=>
+  unicode(1) "0"
+  [u"proto_text_fetched_other"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_null"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_bit"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_tinyint"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_short"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_int24"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_int"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_bigint"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_decimal"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_float"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_double"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_date"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_year"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_time"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_datetime"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_timestamp"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_unicode"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_blob"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_enum"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_set"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_geometry"]=>
+  unicode(1) "0"
+  [u"proto_binary_fetched_other"]=>
   unicode(1) "0"
 }
 Testing buffered normal...
