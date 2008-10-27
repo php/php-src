@@ -121,7 +121,9 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (!socket_len || !socket) {
 		socket = MyG(default_socket);
 	}
-
+	if (!port){
+		port = MyG(default_port);
+	}
 	if (!passwd) {
 		passwd = MyG(default_pw);
 		passwd_len = strlen(SAFE_STR(passwd));
