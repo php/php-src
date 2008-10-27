@@ -52,7 +52,7 @@ object(mysqli)#%d (%d) {
   ["field_count"]=>
   int(0)
   ["host_info"]=>
-  string(42) "MySQL host info: Localhost via UNIX socket"
+  string(%d) "MySQL host info: %s via %s%s"
   ["info"]=>
   NULL
   ["insert_id"]=>
