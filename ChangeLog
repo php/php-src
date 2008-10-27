@@ -1,3 +1,142 @@
+2008-10-26  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/hash/tests/skip_mhash.inc:
+      - Fixed condition
+
+    * ext/hash/tests/skip_mhash.inc
+      tests/basic/bug46313.phpt
+      tests/basic/bug46313.phpt:
+      - Fixed test
+
+2008-10-26  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_2)
+      php.ini-recommended:
+      MFB: Fixed #44748 (php.ini comments on magic_quotes_gpc promote bad
+      practices)
+
+    * (PHP_5_3)
+      php.ini-recommended:
+      Fixed #44748 (php.ini comments on magic_quotes_gpc promote bad practices)
+
+2008-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      
+      MFB: Fixed compiler warning
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      MFB: Fixed compiler warning
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c:
+      Fixed compiler warning
+
+2008-10-26  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c:
+      - MFH: Fixed bug #46388 (stream_notification_callback inside of object
+      destroys object variables)
+
+    * ext/standard/streamsfuncs.c:
+      - Fixed bug #46388 (stream_notification_callback inside of object destroys
+      object variables)
+
+2008-10-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      NEWS:
+      - Fixed NEWS entries.
+
+    * (PHP_5_2)
+      NEWS
+      ext/date/php_date.c
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/lib/parse_tz.c
+      ext/date/lib/tm2unixtime.c
+      ext/date/lib/unixtime2tm.c
+      ext/date/tests/bug43452.phpt
+      ext/date/tests/date_parse_001.phpt
+      ext/date/tests/strtotime_basic.phpt:
+      - MFH: Fixed weekdays adding/subtracting algorithm.
+      - MFH: Fixed some ambiguities in the date parser.
+      - MFH: Fixed bug #45529 (new DateTimeZone() and
+      date_create()->getTimezone()
+        behave different).
+      - MFH: Fixed bug #43452 (strings containing a weekday, or a number plus
+      weekday
+        behaved incorrect of the current day-of-week was the same as the one in
+      the
+        phrase).
+      - MFH: Fixed a bug with the YYYY-MM format not resetting the day
+      correctly.
+      - MFH: Fixed a bug in the DateTime->modify() methods, it would not use the
+        advanced relative time strings.
+      - MFH: Fixed a segfault - simply a forgotten return;
+
+2008-10-26  Greg Beaver  <greg@chiaraquartet.net>
+
+    * ext/phar/phar.c:
+      last commit was an old patch, revert faulty line
+
+    * ext/phar/phar.c
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      MFB: fix several errors found by valgrind
+      1 - entry metadata not properly processed or retrieved from cached phars
+      2 - copy on write was using a void return value instead of int, a
+      dangerous oversight in phar_update_cached_entry
+      3 - metadata creation in entries for cached phars was causing an invalid
+      read
+
+    * (PHP_5_3)
+      ext/phar/phar.c
+      ext/phar/phar_object.c
+      ext/phar/util.c:
+      fix several errors found by valgrind
+      1 - entry metadata not properly processed or retrieved from cached phars
+      2 - copy on write was using a void return value instead of int, a
+      dangerous oversight in phar_update_cached_entry
+      3 - metadata creation in entries for cached phars was causing an invalid
+      read
+
+2008-10-26  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #46389
+
+    * (PHP_5_2)
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c:
+      - MFH: Fixed bug #46389 (NetWare needs small patch for _timezone) (patch by
+      guenter at php.net)
+
+    * ext/soap/php_encoding.c:
+      - Fixed bug #46389 (NetWare needs small patch for _timezone) (patch by
+      guenter at php.net)
+
+2008-10-26  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/build/Makefile
+      win32/build/mkdist.php:
+      - MFH: add php-test-pack-[version].zip to nmake snap so we can distribute
+      the tests as single zip
+        TODO: add run-tests.bat to the package
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/mkdist.php:
+      - add php-test-pack-[version].zip to nmake snap so we can distribute the
+      tests as single zip
+        TODO: add run-tests.bat to the package
+
 2008-10-24  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
