@@ -12,6 +12,8 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		'MYSQL_ATTR_USE_BUFFERED_QUERY'		=> true,
 		'MYSQL_ATTR_LOCAL_INFILE'					=> true,
 		'MYSQL_ATTR_DIRECT_QUERY'					=> true,
+		'MYSQL_ATTR_FOUND_ROWS'							=> true,
+		'MYSQL_ATTR_IGNORE_SPACE'					=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {
