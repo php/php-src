@@ -192,12 +192,12 @@ ZEND_API size_t _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_D
 #define zend_mm_alloc(heap, size)			_zend_mm_alloc((heap), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define zend_mm_free(heap, p)				_zend_mm_free((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define zend_mm_realloc(heap, p, size)		_zend_mm_realloc((heap), (p), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define zend_mm_block_size(heap, p)			_zend_mm_block_size((heap), (p), ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mm_block_size(heap, p)			_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 #define zend_mm_alloc_rel(heap, size)		_zend_mm_alloc((heap), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mm_free_rel(heap, p)			_zend_mm_free((heap), (p) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mm_realloc_rel(heap, p, size)	_zend_mm_realloc((heap), (p), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p), ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 /* Heaps with user defined storage */
 typedef struct _zend_mm_storage zend_mm_storage;
