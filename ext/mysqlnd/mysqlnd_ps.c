@@ -39,7 +39,8 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 enum_func_status mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 										const char * const arg, size_t arg_len,
 										enum php_mysql_packet_type ok_packet,
-										zend_bool silent TSRMLS_DC);
+										zend_bool silent, zend_bool ignore_upsert_status
+										TSRMLS_DC);
 
 /* Exported by mysqlnd_ps_codec.c */
 zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
@@ -420,7 +421,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * co
 	}
 
 	if (FAIL == mysqlnd_simple_command(stmt_to_prepare->conn, COM_STMT_PREPARE, query,
-									   query_len, PROT_LAST, FALSE TSRMLS_CC) ||
+									   query_len, PROT_LAST, FALSE, TRUE TSRMLS_CC) ||
 		FAIL == mysqlnd_stmt_read_prepare_response(stmt_to_prepare TSRMLS_CC)) {
 		goto fail;
 	}
@@ -682,7 +683,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 	ret = mysqlnd_simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
 								 PROT_LAST /* we will handle the response packet*/,
-								 FALSE TSRMLS_CC);
+								 FALSE, FALSE TSRMLS_CC);
 
 	if (free_request) {
 		mnd_efree(request);
@@ -990,7 +991,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	if (FAIL == mysqlnd_simple_command(stmt->conn, COM_STMT_FETCH, (char *)buf, sizeof(buf),
 									   PROT_LAST /* we will handle the response packet*/,
-									   FALSE TSRMLS_CC)) {
+									   FALSE, TRUE TSRMLS_CC)) {
 		stmt->error_info = stmt->conn->error_info;
 		DBG_RETURN(FAIL);
 	}
@@ -1182,7 +1183,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const stmt TSRMLS_DC)
 		if (CONN_GET_STATE(conn) == CONN_READY &&
 			FAIL == (ret = mysqlnd_simple_command(conn, COM_STMT_RESET, (char *)cmd_buf,
 												  sizeof(cmd_buf), PROT_OK_PACKET,
-												  FALSE TSRMLS_CC))) {
+												  FALSE, TRUE TSRMLS_CC))) {
 			stmt->error_info = conn->error_info;
 		}
 		stmt->upsert_status = conn->upsert_status;
@@ -1254,7 +1255,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 
 		/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
 		ret = mysqlnd_simple_command(conn, cmd, (char *)cmd_buf, packet_len,
-									 PROT_LAST , FALSE TSRMLS_CC);
+									 PROT_LAST , FALSE, TRUE TSRMLS_CC);
 		mnd_efree(cmd_buf);
 		if (FAIL == ret) {
 			stmt->error_info = conn->error_info;
@@ -2023,7 +2024,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 		if (CONN_GET_STATE(conn) == CONN_READY &&
 			FAIL == mysqlnd_simple_command(conn, COM_STMT_CLOSE, (char *)cmd_buf, sizeof(cmd_buf),
 										   PROT_LAST /* COM_STMT_CLOSE doesn't send an OK packet*/,
-										   FALSE TSRMLS_CC)) {
+										   FALSE, TRUE TSRMLS_CC)) {
 			stmt->error_info = conn->error_info;
 			DBG_RETURN(FAIL);
 		}
