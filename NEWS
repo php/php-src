@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 - Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Ilia)
 - Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
   (vnegrier at optilian dot com, Ilia)
+- Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
+  chx1975 at gmail dot com)
 - Fixed bug #46192 (ArrayObject with objects as storage serialization).
   (Etienne)
 
