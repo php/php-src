@@ -61,6 +61,14 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	zend_rsrc_list_entry	*le;
 	mysqli_plist_entry *plist = NULL;
 
+#if !defined(MYSQL_USE_MYSQLND)
+	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+						"Headers and client library minor version mismatch. Headers:%d Library:%d",
+						MYSQL_VERSION_ID, mysql_get_client_version());
+	}
+#endif
+
 	if (getThis() && !ZEND_NUM_ARGS() && in_ctor) {
 		RETURN_NULL();
 	}
