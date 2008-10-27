@@ -56,14 +56,20 @@ PHP_FUNCTION(mysqli_connect)
 	/* TODO: safe mode handling */
 	if (PG(sql_safe_mode)){
 	} else {
+		if (!socket_len || !socket) {
+			socket = MyG(default_socket);
+		}
+		if (!port) {
+			port = MyG(default_port);
+		}
 		if (!passwd) {
 			passwd = MyG(default_pw);
-			if (!username){
-				username = MyG(default_user);
-				if (!hostname) {
-					hostname = MyG(default_host);
-				}
-			}
+		}
+		if (!username){
+			username = MyG(default_user);
+		}
+		if (!hostname) {
+			hostname = MyG(default_host);
 		}
 	}
 
