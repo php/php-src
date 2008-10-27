@@ -214,11 +214,15 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 		current_buffer->free_chunk(current_buffer, TRUE TSRMLS_CC);
 	}
 	DBG_INF("Freeing data & row_buffer");
-	pefree(set->data, set->persistent);
-	pefree(set->row_buffers, set->persistent);
-	set->data			= NULL;
-	set->row_buffers	= NULL;
-	set->data_cursor	= NULL;
+	if (set->data) {
+		pefree(set->data, set->persistent);
+		set->data = NULL;
+	}
+	if (set->row_buffers) {
+		pefree(set->row_buffers, set->persistent);
+		set->row_buffers	= NULL;
+	}
+	set->data_cursor = NULL;
 	set->row_count	= 0;
 	if (set->qcache) {
 		mysqlnd_qcache_free_cache_reference(&set->qcache);
@@ -1175,7 +1179,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 /* }}} */
 
 
-#define STORE_RESULT_PREALLOCATED_SET 10
+#define STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY 2
 
 /* {{{ mysqlnd_store_result_fetch_data */
 enum_func_status
@@ -1186,20 +1190,23 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 {
 	enum_func_status ret;
 	php_mysql_packet_row *row_packet;
-	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET, free_rows;
+	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
 	MYSQLND_RES_BUFFERED *set;
 
 	DBG_ENTER("mysqlnd_store_result_fetch_data");
 	DBG_INF_FMT("conn=%llu binary_proto=%d to_cache=%d",
 				conn->thread_id, binary_protocol, to_cache);
 
-	free_rows = next_extend;
-
 	result->stored_data	= set = mnd_pecalloc(1, sizeof(MYSQLND_RES_BUFFERED), to_cache);
-	set->row_buffers= mnd_pemalloc(STORE_RESULT_PREALLOCATED_SET * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
+	if (free_rows) {
+		set->row_buffers = mnd_pemalloc(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
+	}
 	set->persistent	= to_cache;
 	set->qcache		= to_cache? mysqlnd_qcache_get_cache_reference(conn->qcache):NULL;
 	set->references	= 1;
+
+	result->m.row_decoder = binary_protocol? php_mysqlnd_rowp_read_binary_protocol:
+											 php_mysqlnd_rowp_read_text_protocol;
 
 	/* non-persistent */
 	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, FALSE);
@@ -1213,17 +1220,14 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
 		if (!free_rows) {
-			uint64 total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
-			total_rows += set->row_count;
+			uint64 total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
+			total_allocated_rows += set->row_count;
 			set->row_buffers = mnd_perealloc(set->row_buffers,
-											 total_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
+											 total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
 											 set->persistent);
 		}
 		free_rows--;
 		set->row_buffers[set->row_count] = row_packet->row_buffer;
-
-		result->m.row_decoder = binary_protocol? php_mysqlnd_rowp_read_binary_protocol:
-												 php_mysqlnd_rowp_read_text_protocol;
 
 		set->row_count++;
 
@@ -1239,7 +1243,12 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 		*/
 	}
 	/* Overflow ? */
-	set->data = mnd_pecalloc(set->row_count * meta->field_count, sizeof(zval *), to_cache);
+	if (set->row_count) {
+		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+		set->data = mnd_pemalloc(set->row_count * meta->field_count * sizeof(zval *), to_cache);
+		memset(set->data, 0, set->row_count * meta->field_count * sizeof(zval *));
+	}
+
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats,
 									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
 														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
