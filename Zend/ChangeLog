@@ -1,3 +1,8 @@
+2008-10-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * zend_alloc.h:
+      Fix compile error
+
 2008-10-24  Antony Dovgal  <tony@daylessday.org>
 
     * tests/bug46381.phpt

@@ -1,3 +1,136 @@
+2008-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c:
+      
+      Fixed compiler warning
+
+2008-10-27  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Fix NEWS
+
+    * (PHP_5_3)
+      NEWS
+      ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt:
+      MFH: Fix #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS)
+
+    * ext/pdo_mysql/mysql_driver.c
+      ext/pdo_mysql/pdo_mysql.c
+      ext/pdo_mysql/php_pdo_mysql_int.h
+      ext/pdo_mysql/tests/pdo_mysql_class_constants.phpt:
+      Fix #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS)
+
+    * (PHP_5_3)
+      NEWS:
+      BFN
+
+    * (PHP_5_3)
+      ext/mysqli/tests/mysqli_insert_id_variation.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_ps.c:
+      MFH: Fix #46285 (lastInsertId() returns "0" when a deferenced PDOStatement
+      is
+      executed)
+
+    * ext/mysqli/tests/mysqli_insert_id_variation.phpt
+      ext/mysqli/tests/mysqli_insert_id_variation.phpt:
+      
+      Fix #46285 (lastInsertId() returns "0" when a deferenced PDOStatement is
+      executed)
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_ps.c:
+      Fix #46285 (lastInsertId() returns "0" when a deferenced PDOStatement is
+      executed)
+
+2008-10-27  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_result.c:
+      MFH:
+      Fix overusage of memory when the result set is empty. Then no memory will
+      be
+      allocated compared to before. Also grow (realloc) the rset with 10%
+      instead
+      of 33% - more reallocs but better memory usage. Of course later theres is
+      a
+      realloc to shrink the rset t ofree it from unused rows but its better to
+      to eat too much at once.
+
+    * ext/mysqlnd/mysqlnd_result.c:
+      Fix overusage of memory when the result set is empty. Then no memory will
+      be
+      allocated compared to before. Also grow (realloc) the rset with 10%
+      instead
+      of 33% - more reallocs but better memory usage. Of course later theres is
+      a
+      realloc to shrink the rset t ofree it from unused rows but its better to
+      to eat too much at once.
+
+2008-10-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ZendEngine2/zend_alloc.h:
+      Fix compile error
+
+2008-10-27  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.c:
+      Fix a name
+
+    * (PHP_5_2)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      MFH: Fix an issue with mysql.default_port not being used
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/mysqli_connect_oo_defaults.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_get_client_stats.phpt:
+      MFH: Fix an issue with mysqli.default_port not being used
+
+    * ext/mysqli/tests/bug34810.phpt
+      ext/mysqli/tests/mysqli_connect_oo_defaults.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_get_client_stats.phpt:
+      Fix tests
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Fix bug found in a test. mysqli.default_port wasn't used
+
+2008-10-27  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * tests/basic/bug20539.phpt:
+      Improve test and remove the temporary session file created by the skipif
+      check
+
+2008-10-27  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c:
+      MFH:
+      Warning if the library API version differs from the headers used to
+      compile.
+      Patch versions are not considered but major.minor
+      Fix build of ext/mysql with 4.0.x and pre.
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c:
+      Warning if the library API version differs from the headers used to
+      compile.
+      Patch versions are not considered but major.minor
+      Fix build of ext/mysql with 4.0.x and pre.
+
 2008-10-26  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
