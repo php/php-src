@@ -64,7 +64,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #if !defined(MYSQL_USE_MYSQLND)
 	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-						"Headers and client library minor version mismatch. Headers:%d Library:%d",
+						"Headers and client library minor version mismatch. Headers:%d Library:%ld",
 						MYSQL_VERSION_ID, mysql_get_client_version());
 	}
 #endif
