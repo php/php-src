@@ -29,25 +29,59 @@
 #include <float.h>
 #include <stdlib.h>
 
-#ifndef PHP_ROUND_FUZZ
-# ifndef PHP_WIN32
-#  define PHP_ROUND_FUZZ 0.50000000001
-# else
-#  define PHP_ROUND_FUZZ 0.5
-# endif
-#endif
+/*
+ * Pertains to some of the code found in the php_round() function
+ * Ref: http://www.freebsd.org/cgi/query-pr.cgi?pr=59797
+ * 
+ * Copyright (c) 2003, Steven G. Kargl
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice unmodified, this list of conditions, and the following
+ *    disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+static double php_round(double val, int places) {
+	double t;
+	double f = pow(10.0, (double) places);
+	double x = val * f;
+  
+	if (zend_isinf(x) || zend_isnan(x)) {
+		return val;
+	}
 
-#define PHP_ROUND_WITH_FUZZ(val, places) {			\
-	double tmp_val=val, f = pow(10.0, (double) places);	\
-	tmp_val *= f;					\
-	if (tmp_val >= 0.0) {				\
-		tmp_val = floor(tmp_val + PHP_ROUND_FUZZ);	\
-	} else {					\
-		tmp_val = ceil(tmp_val - PHP_ROUND_FUZZ);	\
-	}						\
-	tmp_val /= f;					\
-	val = !zend_isnan(tmp_val) ? tmp_val : val;	\
-}							\
+	if (x >= 0.0) {
+		t = ceil(x);
+		if ((t - x) > 0.50000000001) {
+			t -= 1.0;
+		}
+	} else {
+		t = ceil(-x);
+		if ((t x) > 0.50000000001) {
+			t -= 1.0;
+		}
+		t = -t; 
+	}
+	x = t / f;
+
+	return !zend_isnan(x) ? x : t;
+}
 
 /* {{{ php_asinh
 */
@@ -204,7 +238,7 @@ PHP_FUNCTION(round)
 			return_val = (Z_TYPE_P(value) == IS_LONG) ?
 							(double)Z_LVAL_P(value) : Z_DVAL_P(value);
 
-			PHP_ROUND_WITH_FUZZ(return_val, places);
+			return_val = php_round(return_val, places);
 
 			RETURN_DOUBLE(return_val);
 			break;
@@ -968,7 +1002,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	}
 
 	dec = MAX(0, dec);
-	PHP_ROUND_WITH_FUZZ(d, dec);
+	d = php_round(d, dec);
 
 	tmplen = spprintf(&tmpbuf, 0, "%.*f", dec, d);
 
