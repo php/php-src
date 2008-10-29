@@ -135,6 +135,13 @@ zend_module_entry php_gettext_module_entry = {
 ZEND_GET_MODULE(php_gettext)
 #endif
 
+#define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
+#define PHP_GETTEXT_DOMAIN_LENGTH_CHECK \
+	if (domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "domain passed too long"); \
+		RETURN_FALSE; \
+	}
+
 PHP_MINFO_FUNCTION(php_gettext)
 {
 	php_info_print_table_start();
@@ -152,6 +159,8 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &domain, &domain_len) == FAILURE) {
 		return;
 	}
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
 	if (strcmp(domain, "") && strcmp(domain, "0")) {
 		domain_name = domain;
@@ -193,6 +202,8 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 		return;
 	}
 
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	msgstr = dgettext(domain, msgid);
 
 	RETURN_STRING(msgstr, 1);
@@ -211,6 +222,8 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 		return;
 	}
 
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	msgstr = dcgettext(domain, msgid, category);
 
 	RETURN_STRING(msgstr, 1);
@@ -228,6 +241,8 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
 		return;
 	}
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
 	if (domain[0] == '\0') {
 		php_error(E_WARNING, "The first parameter of bindtextdomain must not be empty");
@@ -283,6 +298,8 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 		return;
 	}
 
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	msgstr = dngettext(domain, msgid1, msgid2, count);
 	if (msgstr) {
 		RETVAL_STRING(msgstr, 1);
@@ -307,6 +324,8 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 		return;
 	}
 
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	msgstr = dcngettext(domain, msgid1, msgid2, count, category);
 
 	if (msgstr) {
@@ -328,6 +347,8 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
 		return;
 	}
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
 	retval = bind_textdomain_codeset(domain, codeset);
 
