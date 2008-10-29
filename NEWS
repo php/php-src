@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   dynamicly created property). (Felipe)
 - Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone() behave
   different). (Derick)
+- Fixed bug #44938 (gettext functions crash with overly long domain).
+  (Christian Schneider, Ilia)
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
