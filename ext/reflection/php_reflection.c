@@ -4295,7 +4295,7 @@ ZEND_METHOD(reflection_property, __construct)
 			}
 		}
 		if (dynam_prop == 0) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Property %s::$%v does not exist", ce->name, name_str);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Property %v::$%v does not exist", ce->name, name_str);
 			return;
 		}
 	}
