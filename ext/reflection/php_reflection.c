@@ -1395,6 +1395,9 @@ ZEND_METHOD(reflection, getModifierNames)
 	if (modifiers & (ZEND_ACC_FINAL | ZEND_ACC_FINAL_CLASS)) {
 		add_next_index_stringl(return_value, "final", sizeof("final")-1, 1);
 	}
+	if (modifiers & ZEND_ACC_IMPLICIT_PUBLIC) {
+		add_next_index_stringl(return_value, "public", sizeof("public")-1, 1);
+	}
 
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {
@@ -3378,9 +3381,25 @@ ZEND_METHOD(reflection_class, getProperty)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
-		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
-		return;
+	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS) {
+		if ((property_info->flags & ZEND_ACC_SHADOW) == 0) {
+			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+			return;
+		}
+	} else if (intern->obj) {
+		/* Check for dynamic properties */
+		if (zend_hash_exists(Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC), name, name_len+1)) {
+			zend_property_info property_info_tmp;
+			property_info_tmp.flags = ZEND_ACC_IMPLICIT_PUBLIC;
+			property_info_tmp.name = name;
+			property_info_tmp.name_length = name_len;
+			property_info_tmp.h = zend_get_hash_value(name, name_len+1);
+			property_info_tmp.doc_comment = NULL;
+			property_info_tmp.ce = ce;
+
+			reflection_property_factory(ce, &property_info_tmp, return_value TSRMLS_CC);
+			return;
+		}
 	}
 	if ((tmp = strstr(name, "::")) != NULL) {
 		classname_len = tmp - name;
@@ -4094,12 +4113,12 @@ ZEND_METHOD(reflection_property, __construct)
 {
 	zval *propname, *classname;
 	char *name_str, *class_name, *prop_name;
-	int name_len;
+	int name_len, dynam_prop = 0;
 	zval *object;
 	reflection_object *intern;
 	zend_class_entry **pce;
 	zend_class_entry *ce;
-	zend_property_info *property_info;
+	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
@@ -4133,12 +4152,19 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE || (property_info->flags & ZEND_ACC_SHADOW)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Property %s::$%s does not exist", ce->name, name_str);
-		return;
+		/* Check for dynamic properties */
+		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT && Z_OBJ_HT_P(classname)->get_properties) {
+			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(classname TSRMLS_CC), name_str, name_len+1)) {
+				dynam_prop = 1;
+			}
+		}
+		if (dynam_prop == 0) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Property %s::$%s does not exist", ce->name, name_str);
+			return;
+		}
 	}
 	
-	if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
+	if (dynam_prop == 0 && (property_info->flags & ZEND_ACC_PRIVATE) == 0) {
 		/* we have to search the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
@@ -4154,14 +4180,27 @@ ZEND_METHOD(reflection_property, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
 	MAKE_STD_ZVAL(propname);
-	ZVAL_STRING(propname, prop_name, 1);
+	if (dynam_prop == 0) {
+		zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
+		ZVAL_STRING(propname, prop_name, 1);
+	} else {
+		ZVAL_STRINGL(propname, name_str, name_len, 1);
+	}
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
+	if (dynam_prop) {
+		reference->prop.flags = ZEND_ACC_IMPLICIT_PUBLIC;
+		reference->prop.name = Z_STRVAL_P(propname);
+		reference->prop.name_length = Z_STRLEN_P(propname);
+		reference->prop.h = zend_get_hash_value(name_str, name_len+1);
+		reference->prop.doc_comment = NULL;
+		reference->prop.ce = ce;
+	} else {
+		reference->prop = *property_info;
+	}
 	reference->ce = ce;
-	reference->prop = *property_info;
 	reference->ignore_visibility = 0;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
@@ -4208,7 +4247,7 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
    Returns whether this property is public */
 ZEND_METHOD(reflection_property, isPublic)
 {
-	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC);
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC);
 }
 /* }}} */
 
@@ -4270,7 +4309,7 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && ref->ignore_visibility == 0) {
+	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && ref->ignore_visibility == 0) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %s::%s", intern->ce->name, Z_STRVAL(name));
