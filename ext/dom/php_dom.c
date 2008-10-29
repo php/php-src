@@ -163,7 +163,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 		if (ce) {
 			return zend_u_hash_update(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1, &ce, sizeof(ce), NULL);
 		} else {
-			return zend_u_hash_del(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1);
+			zend_u_hash_del(doc_props->classmap, UG(unicode)?IS_UNICODE:IS_STRING, basece->name, basece->name_length + 1);
 		}
 	}
 	return SUCCESS;
