@@ -73,7 +73,7 @@ static double php_round(double val, int places) {
 		}
 	} else {
 		t = ceil(-x);
-		if ((t x) > 0.50000000001) {
+		if ((t + x) > 0.50000000001) {
 			t -= 1.0;
 		}
 		t = -t; 
