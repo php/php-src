@@ -135,6 +135,13 @@ zend_module_entry php_gettext_module_entry = {
 ZEND_GET_MODULE(php_gettext)
 #endif
 
+#define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
+#define PHP_GETTEXT_DOMAIN_LENGTH_CHECK \
+	if (domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "domain passed too long"); \
+		RETURN_FALSE; \
+	}
+
 PHP_MINFO_FUNCTION(php_gettext)
 {
 	php_info_print_table_start();
@@ -162,6 +169,8 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 		return;
 	}
 	
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	if (!domain_len || (domain_len == 1 && *domain_str == '0')) {
 		domain_str = NULL;
 	}
@@ -193,6 +202,9 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv))) {
 		return;
 	}
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	RETURN_STRING(dgettext(domain_str, msgid_str), ZSTR_DUPLICATE);
 }
 /* }}} */
@@ -208,6 +220,9 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str, &msgid_len, UG(ascii_conv), &category)) {
 		return;
 	}
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	RETURN_STRING(dcgettext(domain_str, msgid_str, category), ZSTR_DUPLICATE);
 }
 /* }}} */
@@ -222,7 +237,9 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &dir_str, &dir_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)))) {
 		return;
 	}
-	
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	if (!domain_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the first parameter must not be empty");
 		RETURN_FALSE;
@@ -272,7 +289,9 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count)) {
 		RETURN_FALSE;
 	}
-	
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	if ((msgstr = dngettext(domain_str, msgid_str1, msgid_str2, count))) {
 		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
 	} else {
@@ -294,7 +313,9 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&ll", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count, &category)) {
 		RETURN_FALSE;
 	}
-	
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	if ((msgstr = dcngettext(domain_str, msgid_str1, msgid_str2, count, category))) {
 		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
 	} else {
@@ -315,7 +336,9 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &codeset_str, &codeset_len, UG(ascii_conv))) {
 		return;
 	}
-	
+
+	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+
 	if (!codeset_len) {
 		codeset_str = NULL;
 	}
