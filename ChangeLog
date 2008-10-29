@@ -1,3 +1,78 @@
+2008-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      NEWS
+
+2008-10-28  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * ext/date/tests/strtotime_variation_scottish.phpt:
+      scottish time variation
+
+    * ext/date/tests/strtotime_variation_scottish.phpt
+      ext/date/tests/strtotime_variation_scottish.phpt:
+      
+      file strtotime_variation_scottish.phpt was initially added on branch
+      PHP_5_3.
+
+2008-10-28  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli_nonapi.c:
+      Fix that instance too - mysql_get_client_version() returns unsigned long
+
+    * ext/mysql/php_mysql.c
+      ext/mysqli/mysqli_nonapi.c:
+      Fix compiler warning (MFB: Ilia)
+
+2008-10-28  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_intersect_uassoc_error.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation9.phpt:
+      New testcases for array_intersect_uassoc function
+
+    * ext/standard/tests/array/array_intersect_uassoc_error.phpt
+      ext/standard/tests/array/array_intersect_uassoc_error.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation1.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation10.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation2.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation3.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation4.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation5.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation6.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation7.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation8.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation9.phpt
+      ext/standard/tests/array/array_intersect_uassoc_variation9.phpt:
+      
+      New testcases for array_intersect_uassoc function
+
+2008-10-28  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h
+      ext/date/lib/timezonedb.h:
+      - Updated to version 2008.9 (2008i)
+
 2008-10-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_3)
