@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug #46082 (stream_set_blocking() can cause a crash in some
   circumstances). (Felipe)
+- Fixed bug #46064 (Exception when creating ReflectionProperty object on 
+  dynamicly created property). (Felipe)
 - Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone() behave
   different). (Derick)
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
