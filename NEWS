@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
+- Fixed bug #42294 (Unified solution for round() based on C99 round). (Ilia)
 - Fixed weekdays adding/subtracting algorithm. (Derick)
 - Fixed some ambiguities in the date parser. (Derick)
 - Fixed a bug with the YYYY-MM format not resetting the day correctly. (Derick)
