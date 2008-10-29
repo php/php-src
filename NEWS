@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Nov 2008, PHP 5.2.7RC3
 - Updated timezone database to version 2008.9. (Derick)
 
+- Fixed bug #46406 (Unregistering nodeclass throws E_FATAL). (Rob)
 - Fixed bug #46389 (NetWare needs small patch for _timezone).
   (patch by guenter@php.net)
 - Fixed bug #46388 (stream_notification_callback inside of object destroys 
