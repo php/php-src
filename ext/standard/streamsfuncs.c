@@ -408,7 +408,7 @@ PHP_FUNCTION(stream_get_contents)
 
 	php_stream_from_zval(stream, &zsrc);
 
-	if (pos >= 0 && php_stream_seek(stream, pos, SEEK_SET) < 0) {
+	if ((pos > 0 || (pos == 0 && ZEND_NUM_ARGS() > 2)) && php_stream_seek(stream, pos, SEEK_SET) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
 		RETURN_FALSE;
 	}
