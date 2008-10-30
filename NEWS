@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7RC3
-- Fixed ability to use "internal" heaps in extensions. (Felipe, Dmitry)
+- Fixed ability to use "internal" heaps in extensions. (Arnaud, Dmitry)
 - Updated timezone database to version 2008.9. (Derick)
 
 - Fixed bug #46406 (Unregistering nodeclass throws E_FATAL). (Rob)
