@@ -1,11 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7RC3
-- Fixed ability to use "internal" heaps in extensions. (Arnaud, Dmitry)
 - Updated timezone database to version 2008.9. (Derick)
 
-- Fixed bug #46426 (3rd parameter offset of stream_get_contents not works for 
-  "0"). (Felipe)
+- Fixed bug #46426 (offset parameter of stream_get_contents() does not work
+  for "0"). (Felipe)
 - Fixed bug #46406 (Unregistering nodeclass throws E_FATAL). (Rob)
 - Fixed bug #46389 (NetWare needs small patch for _timezone).
   (patch by guenter@php.net)
@@ -25,6 +24,8 @@ PHP                                                                        NEWS
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
 - Fixed bug #42294 (Unified solution for round() based on C99 round). (Ilia)
+
+- Fixed ability to use "internal" heaps in extensions. (Arnaud, Dmitry)
 - Fixed weekdays adding/subtracting algorithm. (Derick)
 - Fixed some ambiguities in the date parser. (Derick)
 - Fixed a bug with the YYYY-MM format not resetting the day correctly. (Derick)
