@@ -136,11 +136,34 @@ ZEND_GET_MODULE(php_gettext)
 #endif
 
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
+#define PHP_GETTEXT_MAX_MSGID_LENGTH 4096
+
 #define PHP_GETTEXT_DOMAIN_LENGTH_CHECK \
 	if (domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "domain passed too long"); \
 		RETURN_FALSE; \
 	}
+
+#define PHP_GETTEXT_MSGID_LENGTH_CHECK \
+	char *check_name = "msgid"; \
+	int check_len   = msgid_len; \
+	PHP_GETTEXT_LENGTH_CHECK
+
+#define PHP_GETTEXT_LENGTH_CHECK \
+	if (check_len > PHP_GETTEXT_MAX_MSGID_LENGTH) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s passed too long", check_name); \
+		RETURN_FALSE; \
+	}
+
+#define PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK \
+	int check_len; \
+	char *check_name; \
+	check_name = "msgid1"; \
+	check_len = msgid1_len; \
+	PHP_GETTEXT_LENGTH_CHECK \
+	check_name = "msgid2"; \
+	check_len = msgid2_len; \
+	PHP_GETTEXT_LENGTH_CHECK
 
 PHP_MINFO_FUNCTION(php_gettext)
 {
@@ -185,6 +208,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 		return;
 	}
 
+	PHP_GETTEXT_MSGID_LENGTH_CHECK
 	msgstr = gettext(msgid);
 
 	RETURN_STRING(msgstr, 1);
@@ -203,6 +227,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+	PHP_GETTEXT_MSGID_LENGTH_CHECK
 
 	msgstr = dgettext(domain, msgid);
 
@@ -223,6 +248,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+	PHP_GETTEXT_MSGID_LENGTH_CHECK
 
 	msgstr = dcgettext(domain, msgid, category);
 
@@ -248,7 +274,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 		php_error(E_WARNING, "The first parameter of bindtextdomain must not be empty");
 		RETURN_FALSE;
 	}
-	
+
 	if (dir[0] != '\0' && strcmp(dir, "0")) {
 		if (!VCWD_REALPATH(dir, dir_name)) {
 			RETURN_FALSE;
@@ -276,6 +302,8 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 		return;
 	}
 
+	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
+
 	msgstr = ngettext(msgid1, msgid2, count);
 	if (msgstr) {
 		RETVAL_STRING(msgstr, 1);
@@ -292,13 +320,14 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
 	int domain_len, msgid1_len, msgid2_len;
 	long count;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl", &domain, &domain_len,
 		&msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
 		return;
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
 
 	msgstr = dngettext(domain, msgid1, msgid2, count);
 	if (msgstr) {
@@ -310,7 +339,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 
 #if HAVE_DCNGETTEXT
 /* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, int n, int category)
-   Plural version of dcgettext() */								
+   Plural version of dcgettext() */
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
@@ -325,6 +354,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
+	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
 
 	msgstr = dcngettext(domain, msgid1, msgid2, count, category);
 
