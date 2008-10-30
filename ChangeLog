@@ -1,3 +1,139 @@
+2008-10-29  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite3/tests/sqlite3stmt_paramCount_basic.phpt
+      ext/sqlite3/tests/sqlite3stmt_paramCount_error.phpt:
+      MFH: Tests for SQLite3Stmt::paramCount().
+
+    * ext/sqlite3/tests/sqlite3stmt_paramCount_basic.phpt
+      ext/sqlite3/tests/sqlite3stmt_paramCount_basic.phpt
+      ext/sqlite3/tests/sqlite3stmt_paramCount_error.phpt
+      ext/sqlite3/tests/sqlite3stmt_paramCount_error.phpt:
+      
+      Tests for SQLite3Stmt::paramCount().
+
+    * ext/standard/math.c:
+      Fix typo.
+
+2008-10-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c:
+      MFH: fix bug #46406 (Unregistering nodeclass throws E_FATAL)
+
+    * ext/dom/php_dom.c:
+      fix bug #46406 (Unregistering nodeclass throws E_FATAL)
+
+2008-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/gettext/gettext.c
+      ext/gettext/gettext.c:
+      MFB: Fixed bug #44938 (gettext functions crash with overly long domain).
+
+    * (PHP_5_3)
+      ext/gettext/gettext.c:
+      Fixed bug #44938 (gettext functions crash with overly long domain)
+
+    * ext/standard/math.c:
+      
+      
+      MFB: Fixed bug #42294 (Unified solution for round() based on C99 round).
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/math.c:
+      
+      MFB: Fixed bug #42294 (Unified solution for round() based on C99 round).
+
+    * (PHP_5_3)
+      ext/standard/math.c:
+      Fixed bug #42294 (Unified solution for round() based on C99 round)
+      [DOC] New implementation of round() to work-around inconsistencies for
+      win32
+      and 64 bit platforms.
+      
+      This solution is very roughly based on BSD's implmentation of round(),
+      which
+      itself is an implementation of C99 standard. We take the absolute value of
+      number
+      we want to round time the 10 to the power of the number of decimal spaces
+      we are
+      rounding to. The resulting value is rounded up and the pre-rounded value
+      is
+      subtracted from it. If the difference is greater then 0.5000000001 we
+      round up,
+      otherwise we round down.
+
+2008-10-29  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #46064
+
+    * (PHP_5_2)
+      ext/reflection/php_reflection.c
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/bug46064.phpt
+      ext/reflection/tests/bug46064.phpt
+      ext/reflection/tests/bug46064_2.phpt
+      ext/reflection/tests/bug46064_2.phpt:
+      - MFH: Fixed bug #46064 (Exception when creating ReflectionProperty object
+      on dynamicly created property)
+
+    * ext/reflection/php_reflection.c:
+      - Fixed char formatter
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/bug46064.phpt
+      ext/reflection/tests/bug46064.phpt
+      ext/reflection/tests/bug46064.phpt
+      ext/reflection/tests/bug46064_2.phpt
+      ext/reflection/tests/bug46064_2.phpt
+      ext/reflection/tests/bug46064_2.phpt:
+      - Fixed bug #46064 (Exception when creating ReflectionProperty object on
+      dynamicly created property)
+
+2008-10-29  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite/tests/sqlite_exec_basic.phpt
+      ext/sqlite/tests/sqlite_exec_error.phpt
+      ext/sqlite/tests/sqlite_last_error_basic.phpt
+      ext/sqlite/tests/sqlite_last_error_error.phpt
+      ext/sqlite/tests/sqlite_popen_basic.phpt
+      ext/sqlite/tests/sqlite_popen_error.phpt
+      ext/sqlite/tests/sqlite_session_001.phpt
+      ext/sqlite/tests/sqlite_session_002.phpt:
+      MFH: Various tests for the sqlite ext.
+      The sqlite session tests are by Mats Lindh <mats at lindh.no>.
+
+    * ext/sqlite/tests/sqlite_exec_basic.phpt
+      ext/sqlite/tests/sqlite_exec_basic.phpt
+      ext/sqlite/tests/sqlite_exec_error.phpt
+      ext/sqlite/tests/sqlite_exec_error.phpt
+      ext/sqlite/tests/sqlite_last_error_basic.phpt
+      ext/sqlite/tests/sqlite_last_error_basic.phpt
+      ext/sqlite/tests/sqlite_last_error_error.phpt
+      ext/sqlite/tests/sqlite_last_error_error.phpt
+      ext/sqlite/tests/sqlite_popen_basic.phpt
+      ext/sqlite/tests/sqlite_popen_basic.phpt
+      ext/sqlite/tests/sqlite_popen_error.phpt
+      ext/sqlite/tests/sqlite_popen_error.phpt
+      ext/sqlite/tests/sqlite_session_001.phpt
+      ext/sqlite/tests/sqlite_session_001.phpt
+      ext/sqlite/tests/sqlite_session_002.phpt
+      ext/sqlite/tests/sqlite_session_002.phpt:
+      
+      Various tests for the sqlite ext.
+      The sqlite session tests are by Mats Lindh <mats at lindh.no>.
+
 2008-10-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
