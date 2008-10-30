@@ -1095,16 +1095,26 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	}
 	if (internal) {
 		int i;
-		zend_mm_free_block *p;
+		zend_mm_free_block *p, *q, *orig;
 		zend_mm_heap *mm_heap = _zend_mm_alloc_int(heap, sizeof(zend_mm_heap)  ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 
 		*mm_heap = *heap;
 
 		p = ZEND_MM_SMALL_FREE_BUCKET(mm_heap, 0);
+		orig = ZEND_MM_SMALL_FREE_BUCKET(heap, 0);
 		for (i = 0; i < ZEND_MM_NUM_BUCKETS; i++) {
-			p->prev_free_block->next_free_block = p;
-			p->next_free_block->prev_free_block = p;
+			q = p;
+			while (q->prev_free_block != orig) {
+				q = q->prev_free_block;
+			}
+			q->prev_free_block = p;
+			q = p;
+			while (q->next_free_block != orig) {
+				q = q->next_free_block;
+			}
+			q->next_free_block = p;
 			p = (zend_mm_free_block*)((char*)p + sizeof(zend_mm_free_block*) * 2);
+			orig = (zend_mm_free_block*)((char*)orig + sizeof(zend_mm_free_block*) * 2);
 			if (mm_heap->large_free_buckets[i]) {
 				mm_heap->large_free_buckets[i]->parent = &mm_heap->large_free_buckets[i];
 			}
