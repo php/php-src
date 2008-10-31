@@ -1372,7 +1372,7 @@ MYSQLND_METHOD(mysqlnd_conn, field_count)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::insert_id */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
 {
 	return conn->upsert_status.last_insert_id;
@@ -1381,7 +1381,7 @@ MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::affected_rows */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_conn, affected_rows)(const MYSQLND * const conn)
 {
 	return conn->upsert_status.affected_rows;
@@ -1460,7 +1460,7 @@ MYSQLND_METHOD(mysqlnd_conn, charset_name)(const MYSQLND * const conn)
 
 
 /* {{{ mysqlnd_conn::thread_id */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_conn, thread_id)(const MYSQLND * const conn)
 {
 	return conn->thread_id;
