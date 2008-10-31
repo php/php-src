@@ -1,3 +1,10 @@
+2008-10-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.c
+      zend_alloc.c:
+      Fixed ability to use "internal" heaps in extensions.
+
 2008-10-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * zend_alloc.h:

@@ -1,3 +1,110 @@
+2008-10-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_get_contents_001.phpt:
+      - MFB: Fixed memory leak when using offset out of range.
+      (php_stream_copy_to_mem returns 0, but the empty string is alloced)
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_get_contents_001.phpt:
+      - Fixed memory leak when using offset out of range. (php_stream_copy_to_mem
+      returns 0, but the empty string is alloced)
+
+    * ext/standard/tests/streams/stream_get_contents_001.phpt
+      ext/standard/tests/streams/stream_get_contents_001.phpt
+      ext/standard/tests/streams/stream_get_contents_001.phpt:
+        1.1.4;
+      - New test
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug46426.phpt:
+      - Fix the fix
+      - Improved test
+
+    * ext/standard/tests/streams/bug46426.phpt:
+      - Improved test
+
+    * ext/standard/streamsfuncs.c:
+      - Fix the fix (thanks Hannes!)
+
+2008-10-30  Lars Strojny  <lars@strojny.net>
+
+    * ext/gettext/gettext.c
+      ext/gettext/tests/44938.phpt
+      ext/gettext/tests/44938.phpt
+      ext/gettext/tests/44938.phpt:
+      The real fix for the gettext overflow bug
+       - The overflow issue was not limited to domains, but also present for
+      msgids
+       - [DOC] msgids are now limited to 4096 chars, domains to 1024
+
+2008-10-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      NEWS:
+      - had nothing else to do :)
+
+2008-10-30  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/date/tests/gettimeofday_basic.phpt
+      ext/date/tests/gettimeofday_error.phpt
+      ext/date/tests/gettimeofday_variation1.phpt:
+      New testcases for gettimeofday function
+
+    * ext/date/tests/gettimeofday_basic.phpt
+      ext/date/tests/gettimeofday_basic.phpt
+      ext/date/tests/gettimeofday_error.phpt
+      ext/date/tests/gettimeofday_error.phpt
+      ext/date/tests/gettimeofday_variation1.phpt
+      ext/date/tests/gettimeofday_variation1.phpt:
+      
+      New testcases for gettimeofday function
+
+2008-10-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug46426.phpt
+      ext/standard/tests/streams/bug46426.phpt:
+      - MFH: Fixed bug #46426 (3rd parameter offset of stream_get_contents not
+      works for "0")
+
+    * ext/standard/tests/streams/bug46426.phpt
+      ext/standard/tests/streams/bug46426.phpt
+      ext/standard/tests/streams/bug46426.phpt:
+        1.1.4;
+      - Fixed bug #46426 (3rd parameter offset of stream_get_contents not works
+      for "0")
+
+    * ext/standard/streamsfuncs.c:
+      - Fixed bug #46426 (3rd parameter offset of stream_get_contents not works
+      for "0")
+
+2008-10-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      Fixed contributors
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.c:
+      Fixed ability to use "internal" heaps in extensions.
+
+2008-10-30  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/gettext/tests/dcngettext.phpt:
+      fix test
+
 2008-10-29  Felix De Vliegher  <felix.devliegher@gmail.com>
 
     * (PHP_5_3)
