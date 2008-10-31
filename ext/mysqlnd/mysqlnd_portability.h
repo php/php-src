@@ -280,7 +280,7 @@ typedef uint64_t ulonglong;
               *(((uchar *)(T))+4))=(uchar) (((A) >> 32)); \
               *(((uchar *)(T))+5))=(uchar) (((A) >> 40)); }
 
-#define int8_tstore(T,A)    *((ulonglong *) (T))= (ulonglong) (A)
+#define int8store(T,A)    *((ulonglong *) (T))= (ulonglong) (A)
 
 typedef union {
   double v;
