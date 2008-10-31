@@ -31,7 +31,7 @@
 #define MYSQL_ROW				MYSQLND_ROW_C
 #define MYSQL					MYSQLND
 #define my_bool					zend_bool
-#define my_ulonglong			uint64
+#define my_ulonglong			uint64_t
 
 #define MYSQL_VERSION_ID		MYSQLND_VERSION_ID
 #define MYSQL_SERVER_VERSION	MYSQLND_VERSION
