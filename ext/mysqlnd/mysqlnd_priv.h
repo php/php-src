@@ -98,7 +98,7 @@
 #define MAX_CHARSET_LEN			32
 
 
-#define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status.affected_rows = (uint64) ~0
+#define SET_ERROR_AFF_ROWS(s)	(s)->upsert_status.affected_rows = (uint64_t) ~0
 
 /* Error handling */
 #define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \

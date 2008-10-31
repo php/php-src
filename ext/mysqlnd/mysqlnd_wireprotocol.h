@@ -27,10 +27,6 @@
 
 #define MYSQLND_NULL_LENGTH	(unsigned long) ~0
 
-typedef zend_uchar	mysqlnd_1b;
-typedef zend_ushort mysqlnd_2b;
-typedef zend_uint	mysqlnd_4b;
-
 /* Used in mysqlnd_debug.c */
 extern char * mysqlnd_read_header_name;
 extern char * mysqlnd_read_body_name;
@@ -137,19 +133,19 @@ typedef struct st_mysqlnd_packet_header {
 /* Server greets the client */
 typedef struct st_php_mysql_packet_greet {
 	mysqlnd_packet_header		header;
-	mysqlnd_1b		protocol_version;
-	char			*server_version;
-	mysqlnd_4b		thread_id;
-	zend_uchar		scramble_buf[SCRAMBLE_LENGTH];
+	uint8_t		protocol_version;
+	char		*server_version;
+	uint32_t	thread_id;
+	zend_uchar	scramble_buf[SCRAMBLE_LENGTH];
 	/* 1 byte pad */
-	mysqlnd_2b		server_capabilities;
-	mysqlnd_1b		charset_no;
-	mysqlnd_2b		server_status;
+	uint16_t	server_capabilities;
+	uint8_t		charset_no;
+	uint16_t	server_status;
 	/* 13 byte pad*/
-	zend_bool		pre41;
+	zend_bool	pre41;
 	/* If error packet, we use these */
-	char 			error[MYSQLND_ERRMSG_SIZE+1];
-	char 			sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	char 		error[MYSQLND_ERRMSG_SIZE+1];
+	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
 } php_mysql_packet_greet;
 
@@ -157,9 +153,9 @@ typedef struct st_php_mysql_packet_greet {
 /* Client authenticates */
 typedef struct st_php_mysql_packet_auth {
 	mysqlnd_packet_header		header;
-	mysqlnd_4b	client_flags;
-	uint32		max_packet_size;
-	mysqlnd_1b	charset_no;
+	uint32_t	client_flags;
+	uint32_t	max_packet_size;
+	uint8_t	charset_no;
 	/* 23 byte pad */
 	const char	*user;
 	/* 8 byte scramble */
@@ -176,16 +172,16 @@ typedef struct st_php_mysql_packet_auth {
 /* OK packet */
 typedef struct st_php_mysql_packet_ok {
 	mysqlnd_packet_header		header;
-	mysqlnd_1b		field_count; /* always 0x0 */
-	uint64	affected_rows;
-	uint64	last_insert_id;
-	mysqlnd_2b		server_status;
-	mysqlnd_2b		warning_count;
-	char			*message;
-	size_t			message_len;
+	uint8_t		field_count; /* always 0x0 */
+	uint64_t	affected_rows;
+	uint64_t	last_insert_id;
+	uint16_t	server_status;
+	uint16_t	warning_count;
+	char		*message;
+	size_t		message_len;
 	/* If error packet, we use these */
-	char 			error[MYSQLND_ERRMSG_SIZE+1];
-	char 			sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	char 		error[MYSQLND_ERRMSG_SIZE+1];
+	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
 } php_mysql_packet_ok;
 
@@ -202,12 +198,12 @@ typedef struct st_php_mysql_packet_command {
 /* EOF packet */
 typedef struct st_php_mysql_packet_eof {
 	mysqlnd_packet_header		header;
-	mysqlnd_1b		field_count; /* 0xFE */
-	mysqlnd_2b		warning_count;
-	mysqlnd_2b		server_status;
+	uint8_t		field_count; /* 0xFE */
+	uint16_t	warning_count;
+	uint16_t	server_status;
 	/* If error packet, we use these */
-	char 			error[MYSQLND_ERRMSG_SIZE+1];
-	char 			sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
+	char 		error[MYSQLND_ERRMSG_SIZE+1];
+	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
 } php_mysql_packet_eof;
 /* EOF packet */
@@ -227,13 +223,13 @@ typedef struct st_php_mysql_packet_rset_header {
 	  These are filled if no SELECT query. For SELECT warning_count
 	  and server status are in the last row packet, the EOF packet.
 	*/
-	mysqlnd_2b			warning_count;
-	mysqlnd_2b			server_status;
-	uint64		affected_rows;
-	uint64		last_insert_id;
+	uint16_t	warning_count;
+	uint16_t	server_status;
+	uint64_t	affected_rows;
+	uint64_t	last_insert_id;
 	/* This is for both LOAD DATA or info, when no result set */
-	char				*info_or_local_file;
-	size_t				info_or_local_file_len;
+	char		*info_or_local_file;
+	size_t		info_or_local_file_len;
 	/* If error packet, we use these */
 	mysqlnd_error_info	error_info;
 } php_mysql_packet_rset_header;
@@ -252,15 +248,15 @@ typedef struct st_php_mysql_packet_res_field {
 /* Row packet */
 struct st_php_mysql_packet_row {
 	mysqlnd_packet_header	header;
-	zval			**fields;
-	mysqlnd_4b		field_count;
-	zend_bool		eof;
+	zval		**fields;
+	uint32_t	field_count;
+	zend_bool	eof;
 	/*
 	  These are, of course, only for SELECT in the EOF packet,
 	  which is detected by this packet
 	*/
-	mysqlnd_2b		warning_count;
-	mysqlnd_2b		server_status;
+	uint16_t	warning_count;
+	uint16_t	server_status;
 
 	struct st_mysqlnd_memory_pool_chunk	*row_buffer;
 
@@ -304,10 +300,10 @@ typedef struct st_php_mysql_packet_prepare_response {
 /* Statistics packet */
 typedef struct st_php_mysql_packet_chg_user_resp {
 	mysqlnd_packet_header	header;
-	mysqlnd_4b			field_count;
+	uint32_t			field_count;
 	
 	/* message_len is not part of the packet*/
-	mysqlnd_2b			server_capabilities;
+	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	mysqlnd_error_info	error_info;
 } php_mysql_packet_chg_user_resp;
@@ -323,7 +319,7 @@ size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_s
 void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
-zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64 length);
+zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 
 extern char * const mysqlnd_empty_string;
 
