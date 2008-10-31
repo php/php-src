@@ -1,7 +1,14 @@
 --TEST--
 Bug #42548 PROCEDURE xxx can't return a result set in the given context (works in 5.2.3!!)
 --SKIPIF--
-<?php if (!extension_loaded("mysqli")) print "skip"; ?>
+<?php 
+require_once('skipif.inc');
+
+if (mysqli_get_server_version($con) <= 50000) {
+	die(sprintf('skip Needs MySQL 5.0+, found version %d.', mysqli_get_server_version($con)));
+}
+
+?>
 --FILE--
 <?php
 include "connect.inc";
