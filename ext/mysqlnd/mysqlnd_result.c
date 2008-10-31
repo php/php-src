@@ -1030,7 +1030,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 		unsigned int i;
 
 		if (NULL == current_row[0]) {
-			uint64 row_num = (set->data_cursor - set->data) / result->meta->field_count;
+			uint64_t row_num = (set->data_cursor - set->data) / result->meta->field_count;
 			set->initialized_rows++;
 			result->m.row_decoder(set->row_buffers[row_num],
 								  current_row,
@@ -1096,7 +1096,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 		struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
 
 		if (NULL == current_row[0]) {
-			uint64 row_num = (set->data_cursor - set->data) / result->meta->field_count;
+			uint64_t row_num = (set->data_cursor - set->data) / result->meta->field_count;
 			set->initialized_rows++;
 			result->m.row_decoder(set->row_buffers[row_num],
 								  current_row,
@@ -1220,7 +1220,7 @@ mysqlnd_store_result_fetch_data(MYSQLND * const conn, MYSQLND_RES *result,
 
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
 		if (!free_rows) {
-			uint64 total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
+			uint64_t total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
 			total_allocated_rows += set->row_count;
 			set->row_buffers = mnd_perealloc(set->row_buffers,
 											 total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *),
@@ -1361,7 +1361,7 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 
 	/* At the point we are still under LOCK */
 	if (set->data_cursor && (set->data_cursor - set->data) < (set->row_count)) {
-		uint64 row_num = set->data_cursor - set->data;
+		uint64_t row_num = set->data_cursor - set->data;
 		zval **current_row = *set->data_cursor++;
 		set->initialized_rows++;
 		/* We don't forget to release the lock */
@@ -1482,8 +1482,8 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 	while (FAIL != (ret = PACKET_READ(row_packet, conn)) && !row_packet->eof) {
 		tsrm_mutex_lock(set->LOCK);
 		if (!free_rows) {
-			uint64 total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
-			uint64 old_size;
+			uint64_t total_rows = free_rows = next_extend = next_extend * 5 / 3; /* extend with 33% */
+			uint64_t old_size;
 			total_rows += set->row_count;
 
 			old_size = set->data_size;
@@ -1698,7 +1698,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES *result, zend_bool implicit
 
 /* {{{ mysqlnd_res::data_seek */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64 row TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64_t row TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::data_seek");
 	DBG_INF_FMT("row=%lu", row);
@@ -1720,7 +1720,7 @@ MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64 row TSRMLS_DC
 
 
 /* {{{ mysqlnd_res::num_rows */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result)
 {
 	/* Be compatible with libmysql. We count row_count, but will return 0 */

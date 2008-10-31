@@ -724,7 +724,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 			zval **current_row = set->data_cursor;
 
 			if (NULL == current_row[0]) {
-				uint64 row_num = (set->data_cursor - set->data) / field_count;
+				uint64_t row_num = (set->data_cursor - set->data) / field_count;
 				set->initialized_rows++;
 				result->m.row_decoder(set->row_buffers[row_num],
 									  current_row,
@@ -1284,7 +1284,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
-							 "smaller chunks of data. Answer was %u bytes long.", packet_len);
+							 "smaller chunks of data. Answer was "MYSQLND_SZ_T_SPEC" bytes long.", packet_len);
 			SET_STMT_ERROR(stmt, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE,
 							"Server responded to COM_STMT_SEND_LONG_DATA.");
 			ret = FAIL;
@@ -1564,7 +1564,7 @@ MYSQLND_METHOD(mysqlnd_stmt, set_result_bind_dtor)(MYSQLND_STMT * const stmt,
 
 
 /* {{{ mysqlnd_stmt::insert_id */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->upsert_status.last_insert_id;
@@ -1573,7 +1573,7 @@ MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
 
 
 /* {{{ mysqlnd_stmt::affected_rows */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->upsert_status.affected_rows;
@@ -1582,7 +1582,7 @@ MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
 
 
 /* {{{ mysqlnd_stmt::num_rows */
-static uint64
+static uint64_t
 MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->result? mysqlnd_num_rows(stmt->result):0;
@@ -1646,7 +1646,7 @@ MYSQLND_METHOD(mysqlnd_stmt, sqlstate)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::data_seek */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const stmt, uint64 row TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const stmt, uint64_t row TSRMLS_DC)
 {
 	return stmt->result? stmt->result->m.seek_data(stmt->result, row TSRMLS_CC) : FAIL;
 }
