@@ -1,3 +1,73 @@
+2008-10-31  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/mysqli/tests/bug42548.phpt:
+      - Fixed test (#46438)
+
+2008-10-31  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_portability.h:
+      Fix the build
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      MFB:
+      64bit fixes:
+      - fixes to sprintf modifiers, cleaning warnings
+      - use _t types, like uint64_t instead of uint64, thus skipping series of
+      typedefs.
+
+    * ext/mysqli/mysqli_prop.c:
+      Fix warnings in printf
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_block_alloc.h
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_enum_n_def.h
+      ext/mysqlnd/mysqlnd_libmysql_compat.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_palloc.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_qcache.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_result.h
+      ext/mysqlnd/mysqlnd_result_meta.c
+      ext/mysqlnd/mysqlnd_result_meta.h
+      ext/mysqlnd/mysqlnd_statistics.c
+      ext/mysqlnd/mysqlnd_statistics.h
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h
+      ext/mysqlnd/php_mysqlnd.c
+      ext/mysqlnd/php_mysqlnd.h:
+      64bit fixes:
+      - fixes to sprintf modifiers, cleaning warnings
+      - use _t types, like uint64_t instead of uint64, thus skipping series of
+      typedefs.
+
+2008-10-31  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/tests/008.phpt:
+      - Fixed test
+
 2008-10-30  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)

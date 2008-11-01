@@ -1,3 +1,9 @@
+2008-10-31  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/008.phpt:
+      - Fixed test
+
 2008-10-30  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_alloc.c
