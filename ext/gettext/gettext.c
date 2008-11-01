@@ -144,26 +144,11 @@ ZEND_GET_MODULE(php_gettext)
 		RETURN_FALSE; \
 	}
 
-#define PHP_GETTEXT_MSGID_LENGTH_CHECK \
-	char *check_name = "msgid"; \
-	int check_len   = msgid_len; \
-	PHP_GETTEXT_LENGTH_CHECK
-
-#define PHP_GETTEXT_LENGTH_CHECK \
+#define PHP_GETTEXT_LENGTH_CHECK(check_name, check_len) \
 	if (check_len > PHP_GETTEXT_MAX_MSGID_LENGTH) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s passed too long", check_name); \
 		RETURN_FALSE; \
 	}
-
-#define PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK \
-	int check_len; \
-	char *check_name; \
-	check_name = "msgid1"; \
-	check_len = msgid_len1; \
-	PHP_GETTEXT_LENGTH_CHECK \
-	check_name = "msgid2"; \
-	check_len = msgid_len2; \
-	PHP_GETTEXT_LENGTH_CHECK
 
 PHP_MINFO_FUNCTION(php_gettext)
 {
@@ -212,7 +197,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 		return;
 	}
 
-	PHP_GETTEXT_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
 
 	RETURN_STRING(gettext(msgid_str), ZSTR_DUPLICATE);
 }
@@ -230,7 +215,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
-	PHP_GETTEXT_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
 
 	RETURN_STRING(dgettext(domain_str, msgid_str), ZSTR_DUPLICATE);
 }
@@ -249,7 +234,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
-	PHP_GETTEXT_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid", msgid_len)
 
 	RETURN_STRING(dcgettext(domain_str, msgid_str, category), ZSTR_DUPLICATE);
 }
@@ -296,7 +281,8 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 		RETURN_FALSE;
 	}
 
-	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid1", msgid1_len)
+	PHP_GETTEXT_LENGTH_CHECK("msgid2", msgid2_len)
 
 	if ((msgstr = ngettext(msgid_str1, msgid_str2, count))) {
 		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
@@ -321,7 +307,8 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
-	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid1", msgid1_len)
+	PHP_GETTEXT_LENGTH_CHECK("msgid2", msgid2_len)
 
 	if ((msgstr = dngettext(domain_str, msgid_str1, msgid_str2, count))) {
 		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
@@ -346,7 +333,8 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
-	PHP_GETTEXT_MULTI_MSGID_LENGTH_CHECK
+	PHP_GETTEXT_LENGTH_CHECK("msgid1", msgid1_len)
+	PHP_GETTEXT_LENGTH_CHECK("msgid2", msgid2_len)
 
 	if ((msgstr = dcngettext(domain_str, msgid_str1, msgid_str2, count, category))) {
 		RETURN_STRING(msgstr, ZSTR_DUPLICATE);
