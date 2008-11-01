@@ -1,13 +1,7 @@
 --TEST--
 SPL: Test shape of interface Countable.
 --SKIPIF--
-<?php 
-// Skip the test case if Standard PHP Library(spl) is not installed
-  if( !extension_loaded('spl'))
-  {
-     die('skip spl is not installed');
-  }
-?>
+<?php if (!extension_loaded('spl') || !extension_loaded('reflection')) print 'skip'; ?>
 --FILE--
 <?php
 ReflectionClass::export('Countable');
