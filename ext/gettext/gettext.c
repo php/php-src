@@ -274,10 +274,10 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 PHP_NAMED_FUNCTION(zif_ngettext)
 {
 	char *msgid_str1, *msgid_str2, *msgstr;
-	int msgid_len1, msgid_len2;
+	int msgid1_len, msgid2_len;
 	long count;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&l", &msgid_str1, &msgid1_len, UG(ascii_conv), &msgid_str2, &msgid2_len, UG(ascii_conv), &count)) {
 		RETURN_FALSE;
 	}
 
@@ -299,10 +299,10 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
 	char *domain_str, *msgid_str1, *msgid_str2, *msgstr;
-	int domain_len, msgid_len1, msgid_len2;
+	int domain_len, msgid1_len, msgid2_len;
 	long count;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&l", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid1_len, UG(ascii_conv), &msgid_str2, &msgid2_len, UG(ascii_conv), &count)) {
 		RETURN_FALSE;
 	}
 
@@ -325,10 +325,10 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
 	char *domain_str, *msgid_str1, *msgid_str2, *msgstr;
-	int domain_len, msgid_len1, msgid_len2;
+	int domain_len, msgid1_len, msgid2_len;
 	long count, category;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&ll", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid_len1, UG(ascii_conv), &msgid_str2, &msgid_len2, UG(ascii_conv), &count, &category)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s&s&ll", &domain_str, &domain_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), &msgid_str1, &msgid1_len, UG(ascii_conv), &msgid_str2, &msgid2_len, UG(ascii_conv), &count, &category)) {
 		RETURN_FALSE;
 	}
 
