@@ -59,7 +59,6 @@ FILE_RCSID("@(#)$File: ascmagic.c,v 1.62 2008/03/01 22:21:48 rrt Exp $")
 private int looks_ascii(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_utf8_with_BOM(const unsigned char *, size_t, unichar *,
     size_t *);
-protected int file_looks_utf8(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_ucs16(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_latin1(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_extended(const unsigned char *, size_t, unichar *, size_t *);

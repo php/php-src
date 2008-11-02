@@ -102,12 +102,26 @@
 #define MAXstring 32		/* max leng of "string" types */
 
 #define MAGICNO		0xF11E041C
-#define VERSIONNO	5
+#define VERSIONNO	6
 #define FILE_MAGICSIZE	(32 * 6)
 
 #define	FILE_LOAD	0
 #define FILE_CHECK	1
 #define FILE_COMPILE	2
+
+union VALUETYPE {
+	uint8_t b;
+	uint16_t h;
+	uint32_t l;
+	uint64_t q;
+	uint8_t hs[2];	/* 2 bytes of a fixed-endian "short" */
+	uint8_t hl[4];	/* 4 bytes of a fixed-endian "long" */
+	uint8_t hq[8];	/* 8 bytes of a fixed-endian "quad" */
+	char s[MAXstring];	/* the search string or regex pattern */
+	unsigned char us[MAXstring];
+	float f;
+	double d;
+};
 
 struct magic {
 	/* Word 1 */
@@ -122,7 +136,7 @@ struct magic {
                                    for top-level tests) */
 #define TEXTTEST	0	/* for passing to file_softmagic */
 
-	uint8_t dummy1;
+	uint8_t factor;
 
 	/* Word 2 */
 	uint8_t reln;		/* relation (0=eq, '>'=gt, etc) */
@@ -191,11 +205,15 @@ struct magic {
 	uint8_t mask_op;	/* operator for mask */
 #ifdef ENABLE_CONDITIONALS
 	uint8_t cond;		/* conditional type */
-	uint8_t dummy2;	
 #else
-	uint8_t dummy2;	
-	uint8_t dummy3;	
+	uint8_t dummy;	
 #endif
+	uint8_t factor_op;	
+#define		FILE_FACTOR_OP_PLUS	'+'
+#define		FILE_FACTOR_OP_MINUS	'-'
+#define		FILE_FACTOR_OP_TIMES	'*'
+#define		FILE_FACTOR_OP_DIV	'/'
+#define		FILE_FACTOR_OP_NONE	'\0'
 
 #define				FILE_OPS	"&|^+-*/%"
 #define				FILE_OPAND	0
@@ -237,20 +255,8 @@ struct magic {
 #define num_mask _u._mask
 #define str_range _u._s._count
 #define str_flags _u._s._flags
-
 	/* Words 9-16 */
-	union VALUETYPE {
-		uint8_t b;
-		uint16_t h;
-		uint32_t l;
-		uint64_t q;
-		uint8_t hs[2];	/* 2 bytes of a fixed-endian "short" */
-		uint8_t hl[4];	/* 4 bytes of a fixed-endian "long" */
-		uint8_t hq[8];	/* 8 bytes of a fixed-endian "quad" */
-		char s[MAXstring];	/* the search string or regex pattern */
-		float f;
-		double d;
-	} value;		/* either number or string */
+	union VALUETYPE value; /* either number of string */
 	/* Words 17..31 */
 	char desc[MAXDESC];	/* description */
 	/* Words 32..47 */
@@ -282,18 +288,20 @@ struct mlist {
 	struct mlist *next, *prev;
 };
 
+struct level_info {
+	int32_t off;
+	int got_match;
+#ifdef ENABLE_CONDITIONALS
+	int last_match;
+	int last_cond;	/* used for error checking by parse() */
+#endif
+} *li;
+
 struct magic_set {
 	struct mlist *mlist;
 	struct cont {
 		size_t len;
-		struct level_info {
-			int32_t off;
-			int got_match;
-#ifdef ENABLE_CONDITIONALS
-			int last_match;
-			int last_cond;	/* used for error checking by parse() */
-#endif
-		} *li;
+		struct level_info *li;
 	} c;
 	struct out {
 		char *buf;		/* Accumulation buffer */
@@ -378,6 +386,7 @@ extern char *sys_errlist[];
 #define O_BINARY	0
 #endif
 
+#ifndef __cplusplus
 #ifdef __GNUC__
 static const char *rcsid(const char *) __attribute__((__used__));
 #endif
@@ -385,5 +394,8 @@ static const char *rcsid(const char *) __attribute__((__used__));
 static const char *rcsid(const char *p) { \
 	return rcsid(p = id); \
 }
+#else
+#define FILE_RCSID(id)
+#endif
 
 #endif /* __file_h__ */

@@ -35,7 +35,7 @@
 	switch (type) {
 #ifdef ELFCORE
 	case ET_CORE:
-		if (dophn_core(ms, class, swap, fd,
+		if (dophn_core(ms, clazz, swap, fd,
 		    (off_t)elf_getu(swap, elfhdr.e_phoff),
 		    elf_getu16(swap, elfhdr.e_phnum), 
 		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
@@ -45,19 +45,21 @@
 #endif
 	case ET_EXEC:
 	case ET_DYN:
-		if (dophn_exec(ms, class, swap, fd,
+		if (dophn_exec(ms, clazz, swap, fd,
 		    (off_t)elf_getu(swap, elfhdr.e_phoff),
 		    elf_getu16(swap, elfhdr.e_phnum), 
 		    (size_t)elf_getu16(swap, elfhdr.e_phentsize),
-		    fsize, &flags) == -1)
+		    fsize, &flags, elf_getu16(swap, elfhdr.e_shnum))
+		    == -1)
 			return -1;
 		/*FALLTHROUGH*/
 	case ET_REL:
-		if (doshn(ms, class, swap, fd,
+		if (doshn(ms, clazz, swap, fd,
 		    (off_t)elf_getu(swap, elfhdr.e_shoff),
 		    elf_getu16(swap, elfhdr.e_shnum),
 		    (size_t)elf_getu16(swap, elfhdr.e_shentsize),
-		    &flags) == -1)
+		    &flags,
+		    elf_getu16(swap, elfhdr.e_machine)) == -1)
 			return -1;
 		break;
 

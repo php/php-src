@@ -101,10 +101,19 @@ typedef struct {
 #define ET_DYN		3
 #define ET_CORE		4
 
+/* e_machine (used only for SunOS 5.x hardware capabilities) */
+#define	EM_SPARC	2
+#define	EM_386		3
+#define	EM_SPARC32PLUS	18
+#define	EM_SPARCV9	43
+#define	EM_IA_64	50
+#define	EM_AMD64	62
+
 /* sh_type */
 #define SHT_SYMTAB	2
 #define SHT_NOTE	7
 #define SHT_DYNSYM	11
+#define SHT_SUNW_cap	0x6ffffff5	/* SunOS 5.x hw/sw capabilites */
 
 /* elf type */
 #define ELFDATANONE	0		/* e_ident[EI_DATA] */
@@ -232,5 +241,72 @@ typedef struct {
 #define GNU_OS_SOLARIS	2
 #define GNU_OS_KFREEBSD	3
 #define GNU_OS_KNETBSD	4
+
+/* SunOS 5.x hardware/software capabilities */
+typedef struct {
+	Elf32_Word	c_tag;
+	union {
+		Elf32_Word	c_val;
+		Elf32_Addr	c_ptr;
+	} c_un;
+} Elf32_Cap;
+
+typedef struct {
+	Elf64_Xword	c_tag;
+	union {
+		Elf64_Xword	c_val;
+		Elf64_Addr	c_ptr;
+	} c_un;
+} Elf64_Cap;
+
+/* SunOS 5.x hardware/software capability tags */
+#define	CA_SUNW_NULL	0
+#define	CA_SUNW_HW_1	1
+#define	CA_SUNW_SF_1	2
+
+/* SunOS 5.x software capabilities */
+#define	SF1_SUNW_FPKNWN	0x01
+#define	SF1_SUNW_FPUSED	0x02
+#define	SF1_SUNW_MASK	0x03
+
+/* SunOS 5.x hardware capabilities: sparc */
+#define	AV_SPARC_MUL32		0x0001
+#define	AV_SPARC_DIV32		0x0002
+#define	AV_SPARC_FSMULD		0x0004
+#define	AV_SPARC_V8PLUS		0x0008
+#define	AV_SPARC_POPC		0x0010
+#define	AV_SPARC_VIS		0x0020
+#define	AV_SPARC_VIS2		0x0040
+#define	AV_SPARC_ASI_BLK_INIT	0x0080
+#define	AV_SPARC_FMAF		0x0100
+#define	AV_SPARC_FJFMAU		0x4000
+#define	AV_SPARC_IMA		0x8000
+
+/* SunOS 5.x hardware capabilities: 386 */
+#define	AV_386_FPU		0x00000001
+#define	AV_386_TSC		0x00000002
+#define	AV_386_CX8		0x00000004
+#define	AV_386_SEP		0x00000008
+#define	AV_386_AMD_SYSC		0x00000010
+#define	AV_386_CMOV		0x00000020
+#define	AV_386_MMX		0x00000040
+#define	AV_386_AMD_MMX		0x00000080
+#define	AV_386_AMD_3DNow	0x00000100
+#define	AV_386_AMD_3DNowx	0x00000200
+#define	AV_386_FXSR		0x00000400
+#define	AV_386_SSE		0x00000800
+#define	AV_386_SSE2		0x00001000
+#define	AV_386_PAUSE		0x00002000
+#define	AV_386_SSE3		0x00004000
+#define	AV_386_MON		0x00008000
+#define	AV_386_CX16		0x00010000
+#define	AV_386_AHF		0x00020000
+#define	AV_386_TSCP		0x00040000
+#define	AV_386_AMD_SSE4A	0x00080000
+#define	AV_386_POPCNT		0x00100000
+#define	AV_386_AMD_LZCNT	0x00200000
+#define	AV_386_SSSE3		0x00400000
+#define	AV_386_SSE4_1		0x00800000
+#define	AV_386_SSE4_2		0x01000000
 
 #endif
