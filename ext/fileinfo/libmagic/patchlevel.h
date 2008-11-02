@@ -1,13 +1,19 @@
 #define	FILE_VERSION_MAJOR	4
-#define	patchlevel		24
+#define	patchlevel		25
 
 /*
  * Patchlevel file for Ian Darwin's MAGIC command.
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
  *
  * $Log$
+ * Revision 1.1  2008/07/11 14:13:50  derick
+ * - Move lib to libmagic
+ *
  * Revision 1.1  2008/07/11 14:10:50  derick
  * - Step one for bundling the libmagic library. Some config.m4 issues left.
+ *
+ * Revision 1.69  2008/07/02 15:27:05  christos
+ * welcome to 4.25
  *
  * Revision 1.68  2008/03/22 21:39:43  christos
  * file 4.24
