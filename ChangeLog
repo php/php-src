@@ -1,3 +1,38 @@
+2008-11-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gettext/gettext.c:
+      - Fixed the fix (bug #46460)
+
+    * (PHP_5_2)
+      ext/spl/tests/bug46115.phpt
+      ext/spl/tests/countable_class_basic1.phpt:
+      - Fix skip conditions
+
+    * (PHP_5_2)
+      run-tests.php:
+      MF53: Sync with HEAD and PHP_5_3
+
+    * (PHP_5_2)
+      ext/standard/file.c:
+      [DOC] MF53: Forward compatibility
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/007.phpt:
+      - Fix for real: Actually one of these "let's not commit to other branches"
+      fixes some people like to do..
+
+    * (PHP_5_2)
+      ext/standard/tests/strings/006.phpt
+      ext/standard/tests/strings/007.phpt:
+      - Fix tests
+
+2008-11-01  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/config-win.h:
+      Fix windows build
+
 2008-10-31  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
