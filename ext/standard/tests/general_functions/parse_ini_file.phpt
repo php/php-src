@@ -105,6 +105,18 @@ INI;
 file_put_contents($filename, $ini);
 var_dump(parse_ini_file($filename, true));
 
+/* #44575, comments starting with '#' */
+$ini = <<<'INI'
+foo=bar1
+; comment
+_foo=bar2
+# comment
+foo_=bar3
+INI;
+file_put_contents($filename, $ini);
+var_dump(parse_ini_file($filename, true));
+
+
 @unlink($filename);
 echo "Done\n";
 ?>
@@ -185,6 +197,16 @@ array(1) {
     string(5) "value"
   }
 }
+array(3) {
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
+}
+
+Deprecated: Comments starting with '#' are deprecated in %s
 array(3) {
   ["foo"]=>
   string(4) "bar1"
