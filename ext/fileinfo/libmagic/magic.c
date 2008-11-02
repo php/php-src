@@ -97,7 +97,7 @@ protected int file_os2_apptype(struct magic_set *ms, const char *fn,
 private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
-private int info_from_stat(struct magic_set *, mode_t);
+private int unreadable_info(struct magic_set *, mode_t, const char *);
 private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO
@@ -150,13 +150,13 @@ free_mlist(struct mlist *mlist)
 }
 
 private int
-info_from_stat(struct magic_set *ms, mode_t md)
+unreadable_info(struct magic_set *ms, mode_t md, const char *file)
 {
 	/* We cannot open it, but we were able to stat it. */
-	if (md & 0222)
+	if (access(file, W_OK) == 0)
 		if (file_printf(ms, "writable, ") == -1)
 			return -1;
-	if (md & 0111)
+	if (access(file, X_OK) == 0)
 		if (file_printf(ms, "executable, ") == -1)
 			return -1;
 	if (S_ISREG(md))
@@ -310,8 +310,13 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	}
 
 	if (!stream) {
-		fprintf(stderr, "couldn't open file\n");
-		if (info_from_stat(ms, sb.st_mode) == -1)
+				if (unreadable_info(ms, sb.st_mode,
+#ifdef __CYGWIN
+						    tmp
+#else
+						    inname
+#endif
+						    ) == -1)
 			goto done;
 		rv = 0;
 		goto done;

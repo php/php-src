@@ -46,8 +46,9 @@ private int dophn_core(struct magic_set *, int, int, int, off_t, int, size_t,
     off_t, int *);
 #endif
 private int dophn_exec(struct magic_set *, int, int, int, off_t, int, size_t,
-    off_t, int *);
-private int doshn(struct magic_set *, int, int, int, off_t, int, size_t, int *);
+    off_t, int *, int);
+private int doshn(struct magic_set *, int, int, int, off_t, int, size_t, int *,
+    int);
 private size_t donote(struct magic_set *, unsigned char *, size_t, size_t, int,
     int, size_t, int *);
 
@@ -134,62 +135,74 @@ getu64(int swap, uint64_t value)
 # define elf_getu64(swap, value) getu64(swap, value)
 #endif
 
-#define xsh_addr	(class == ELFCLASS32			\
+#define xsh_addr	(clazz == ELFCLASS32			\
 			 ? (void *) &sh32			\
 			 : (void *) &sh64)
-#define xsh_sizeof	(class == ELFCLASS32			\
+#define xsh_sizeof	(clazz == ELFCLASS32			\
 			 ? sizeof sh32				\
 			 : sizeof sh64)
-#define xsh_size	(class == ELFCLASS32			\
+#define xsh_size	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, sh32.sh_size)	\
 			 : elf_getu64(swap, sh64.sh_size))
-#define xsh_offset	(class == ELFCLASS32			\
+#define xsh_offset	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, sh32.sh_offset)	\
 			 : elf_getu64(swap, sh64.sh_offset))
-#define xsh_type	(class == ELFCLASS32			\
+#define xsh_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, sh32.sh_type)	\
 			 : elf_getu32(swap, sh64.sh_type))
-#define xph_addr	(class == ELFCLASS32			\
+#define xph_addr	(clazz == ELFCLASS32			\
 			 ? (void *) &ph32			\
 			 : (void *) &ph64)
-#define xph_sizeof	(class == ELFCLASS32			\
+#define xph_sizeof	(clazz == ELFCLASS32			\
 			 ? sizeof ph32				\
 			 : sizeof ph64)
-#define xph_type	(class == ELFCLASS32			\
+#define xph_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, ph32.p_type)	\
 			 : elf_getu32(swap, ph64.p_type))
-#define xph_offset	(off_t)(class == ELFCLASS32		\
+#define xph_offset	(off_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_offset)	\
 			 : elf_getu64(swap, ph64.p_offset))
-#define xph_align	(size_t)((class == ELFCLASS32		\
+#define xph_align	(size_t)((clazz == ELFCLASS32		\
 			 ? (off_t) (ph32.p_align ? 		\
 			    elf_getu32(swap, ph32.p_align) : 4) \
 			 : (off_t) (ph64.p_align ?		\
 			    elf_getu64(swap, ph64.p_align) : 4)))
-#define xph_filesz	(size_t)((class == ELFCLASS32		\
+#define xph_filesz	(size_t)((clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_filesz)	\
 			 : elf_getu64(swap, ph64.p_filesz)))
-#define xnh_addr	(class == ELFCLASS32			\
+#define xnh_addr	(clazz == ELFCLASS32			\
 			 ? (void *) &nh32			\
 			 : (void *) &nh64)
-#define xph_memsz	(size_t)((class == ELFCLASS32		\
+#define xph_memsz	(size_t)((clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_memsz)	\
 			 : elf_getu64(swap, ph64.p_memsz)))
-#define xnh_sizeof	(class == ELFCLASS32			\
+#define xnh_sizeof	(clazz == ELFCLASS32			\
 			 ? sizeof nh32				\
 			 : sizeof nh64)
-#define xnh_type	(class == ELFCLASS32			\
+#define xnh_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, nh32.n_type)	\
 			 : elf_getu32(swap, nh64.n_type))
-#define xnh_namesz	(class == ELFCLASS32			\
+#define xnh_namesz	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, nh32.n_namesz)	\
 			 : elf_getu32(swap, nh64.n_namesz))
-#define xnh_descsz	(class == ELFCLASS32			\
+#define xnh_descsz	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, nh32.n_descsz)	\
 			 : elf_getu32(swap, nh64.n_descsz))
-#define prpsoffsets(i)	(class == ELFCLASS32			\
+#define prpsoffsets(i)	(clazz == ELFCLASS32			\
 			 ? prpsoffsets32[i]			\
 			 : prpsoffsets64[i])
+#define xcap_addr	(clazz == ELFCLASS32			\
+			 ? (void *) &cap32			\
+			 : (void *) &cap64)
+#define xcap_sizeof	(clazz == ELFCLASS32			\
+			 ? sizeof cap32				\
+			 : sizeof cap64)
+#define xcap_tag	(clazz == ELFCLASS32			\
+			 ? elf_getu32(swap, cap32.c_tag)	\
+			 : elf_getu64(swap, cap64.c_tag))
+#define xcap_val	(clazz == ELFCLASS32			\
+			 ? elf_getu32(swap, cap32.c_un.c_val)	\
+			 : elf_getu64(swap, cap64.c_un.c_val))
 
 #ifdef ELFCORE
 /*
@@ -229,7 +242,7 @@ static const size_t	prpsoffsets64[] = {
 #define	NOFFSETS32	(sizeof prpsoffsets32 / sizeof prpsoffsets32[0])
 #define NOFFSETS64	(sizeof prpsoffsets64 / sizeof prpsoffsets64[0])
 
-#define NOFFSETS	(class == ELFCLASS32 ? NOFFSETS32 : NOFFSETS64)
+#define NOFFSETS	(clazz == ELFCLASS32 ? NOFFSETS32 : NOFFSETS64)
 
 /*
  * Look through the program headers of an executable image, searching
@@ -275,7 +288,7 @@ private const char os_style_names[][8] = {
 #define FLAGS_DID_CORE_STYLE	4
 
 private int
-dophn_core(struct magic_set *ms, int class, int swap, int fd, off_t off,
+dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
     int num, size_t size, off_t fsize, int *flags)
 {
 	Elf32_Phdr ph32;
@@ -340,7 +353,7 @@ dophn_core(struct magic_set *ms, int class, int swap, int fd, off_t off,
 			if (offset >= (size_t)bufsize)
 				break;
 			offset = donote(ms, nbuf, offset, (size_t)bufsize,
-			    class, swap, 4, flags);
+			    clazz, swap, 4, flags);
 			if (offset == 0)
 				break;
 
@@ -352,7 +365,7 @@ dophn_core(struct magic_set *ms, int class, int swap, int fd, off_t off,
 
 private size_t
 donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
-    int class, int swap, size_t align, int *flags)
+    int clazz, int swap, size_t align, int *flags)
 {
 	Elf32_Nhdr nh32;
 	Elf64_Nhdr nh64;
@@ -750,15 +763,67 @@ core:
 	return offset;
 }
 
+/* SunOS 5.x hardware capability descriptions */
+typedef struct cap_desc {
+	uint64_t cd_mask;
+	const char *cd_name;
+} cap_desc_t;
+
+static const cap_desc_t cap_desc_sparc[] = {
+	{ AV_SPARC_MUL32,		"MUL32" },
+	{ AV_SPARC_DIV32,		"DIV32" },
+	{ AV_SPARC_FSMULD,		"FSMULD" },
+	{ AV_SPARC_V8PLUS,		"V8PLUS" },
+	{ AV_SPARC_POPC,		"POPC" },
+	{ AV_SPARC_VIS,			"VIS" },
+	{ AV_SPARC_VIS2,		"VIS2" },
+	{ AV_SPARC_ASI_BLK_INIT,	"ASI_BLK_INIT" },
+	{ AV_SPARC_FMAF,		"FMAF" },
+	{ AV_SPARC_FJFMAU,		"FJFMAU" },
+	{ AV_SPARC_IMA,			"IMA" },
+	{ 0, NULL }
+};
+
+static const cap_desc_t cap_desc_386[] = {
+	{ AV_386_FPU,			"FPU" },
+	{ AV_386_TSC,			"TSC" },
+	{ AV_386_CX8,			"CX8" },
+	{ AV_386_SEP,			"SEP" },
+	{ AV_386_AMD_SYSC,		"AMD_SYSC" },
+	{ AV_386_CMOV,			"CMOV" },
+	{ AV_386_MMX,			"MMX" },
+	{ AV_386_AMD_MMX,		"AMD_MMX" },
+	{ AV_386_AMD_3DNow,		"AMD_3DNow" },
+	{ AV_386_AMD_3DNowx,		"AMD_3DNowx" },
+	{ AV_386_FXSR,			"FXSR" },
+	{ AV_386_SSE,			"SSE" },
+	{ AV_386_SSE2,			"SSE2" },
+	{ AV_386_PAUSE,			"PAUSE" },
+	{ AV_386_SSE3,			"SSE3" },
+	{ AV_386_MON,			"MON" },
+	{ AV_386_CX16,			"CX16" },
+	{ AV_386_AHF,			"AHF" },
+	{ AV_386_TSCP,			"TSCP" },
+	{ AV_386_AMD_SSE4A,		"AMD_SSE4A" },
+	{ AV_386_POPCNT,		"POPCNT" },
+	{ AV_386_AMD_LZCNT,		"AMD_LZCNT" },
+	{ AV_386_SSSE3,			"SSSE3" },
+	{ AV_386_SSE4_1,		"SSE4.1" },
+	{ AV_386_SSE4_2,		"SSE4.2" },
+	{ 0, NULL }
+};
+
 private int
-doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
-    size_t size, int *flags)
+doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
+    size_t size, int *flags, int mach)
 {
 	Elf32_Shdr sh32;
 	Elf64_Shdr sh64;
 	int stripped = 1;
 	void *nbuf;
 	off_t noff;
+	uint64_t cap_hw1 = 0;	/* SunOS 5.x hardware capabilites */
+	uint64_t cap_sf1 = 0;	/* SunOS 5.x software capabilites */
 
 	if (size != xsh_sizeof) {
 		if (file_printf(ms, ", corrupted section header size") == -1)
@@ -808,7 +873,7 @@ doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
 				if (noff >= (size_t)xsh_size)
 					break;
 				noff = donote(ms, nbuf, (size_t)noff,
-				    (size_t)xsh_size, class, swap, 4,
+				    (size_t)xsh_size, clazz, swap, 4,
 				    flags);
 				if (noff == 0)
 					break;
@@ -820,10 +885,115 @@ doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
 			}
 			efree(nbuf);
 			break;
+		case SHT_SUNW_cap:
+		    {
+			off_t coff;
+			if ((off = lseek(fd, (off_t)0, SEEK_CUR)) ==
+			    (off_t)-1) {
+				file_badread(ms);
+				return -1;
+			}
+			if (lseek(fd, (off_t)xsh_offset, SEEK_SET) ==
+			    (off_t)-1) {
+				file_badread(ms);
+				return -1;
+			}
+			coff = 0;
+			for (;;) {
+				Elf32_Cap cap32;
+				Elf64_Cap cap64;
+				char cbuf[MAX(sizeof cap32, sizeof cap64)];
+				if ((coff += xcap_sizeof) >= (size_t)xsh_size)
+					break;
+				if (read(fd, cbuf, (size_t)xcap_sizeof) !=
+				    (ssize_t)xcap_sizeof) {
+					file_badread(ms);
+					return -1;
+				}
+				(void)memcpy(xcap_addr, cbuf, xcap_sizeof);
+				switch (xcap_tag) {
+				case CA_SUNW_NULL:
+					break;
+				case CA_SUNW_HW_1:
+					cap_hw1 |= xcap_val;
+					break;
+				case CA_SUNW_SF_1:
+					cap_sf1 |= xcap_val;
+					break;
+				default:
+					if (file_printf(ms,
+					    ", with unknown capability "
+					    "0x%llx = 0x%llx",
+					    xcap_tag, xcap_val) == -1)
+						return -1;
+					break;
+				}
+			}
+			if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+				file_badread(ms);
+				return -1;
+			}
+			break;
+		    }
 		}
 	}
 	if (file_printf(ms, ", %sstripped", stripped ? "" : "not ") == -1)
 		return -1;
+	if (cap_hw1) {
+		const cap_desc_t *cdp;
+		switch (mach) {
+		case EM_SPARC:
+		case EM_SPARC32PLUS:
+		case EM_SPARCV9:
+			cdp = cap_desc_sparc;
+			break;
+		case EM_386:
+		case EM_IA_64:
+		case EM_AMD64:
+			cdp = cap_desc_386;
+			break;
+		default:
+			cdp = NULL;
+			break;
+		}
+		if (file_printf(ms, ", uses") == -1)
+			return -1;
+		if (cdp) {
+			while (cdp->cd_name) {
+				if (cap_hw1 & cdp->cd_mask) {
+					if (file_printf(ms,
+					    " %s", cdp->cd_name) == -1)
+						return -1;
+					cap_hw1 &= ~cdp->cd_mask;
+				}
+				++cdp;
+			}
+			if (cap_hw1)
+				if (file_printf(ms,
+				    " unknown hardware capability 0x%llx",
+				    cap_hw1) == -1)
+					return -1;
+		} else {
+			if (file_printf(ms,
+			    " hardware capability 0x%llx", cap_hw1) == -1)
+				return -1;
+		}
+	}
+	if (cap_sf1) {
+		if (cap_sf1 & SF1_SUNW_FPUSED) {
+			if (file_printf(ms,
+			    (cap_sf1 & SF1_SUNW_FPKNWN)
+			    ? ", uses frame pointer"
+			    : ", not known to use frame pointer") == -1)
+				return -1;
+		}
+		cap_sf1 &= ~SF1_SUNW_MASK;
+		if (cap_sf1)
+			if (file_printf(ms,
+			    ", with unknown software capability 0x%llx",
+			    cap_sf1) == -1)
+				return -1;
+	}
 	return 0;
 }
 
@@ -833,8 +1003,8 @@ doshn(struct magic_set *ms, int class, int swap, int fd, off_t off, int num,
  * otherwise it's statically linked.
  */
 private int
-dophn_exec(struct magic_set *ms, int class, int swap, int fd, off_t off,
-    int num, size_t size, off_t fsize, int *flags)
+dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
+    int num, size_t size, off_t fsize, int *flags, int sh_num)
 {
 	Elf32_Phdr ph32;
 	Elf64_Phdr ph64;
@@ -903,6 +1073,8 @@ dophn_exec(struct magic_set *ms, int class, int swap, int fd, off_t off,
 					return -1;
 				align = 4;
 			}
+			if (sh_num)
+				break;
 			/*
 			 * This is a PT_NOTE section; loop through all the notes
 			 * in the section.
@@ -923,7 +1095,7 @@ dophn_exec(struct magic_set *ms, int class, int swap, int fd, off_t off,
 				if (offset >= (size_t)bufsize)
 					break;
 				offset = donote(ms, nbuf, offset,
-				    (size_t)bufsize, class, swap, align,
+				    (size_t)bufsize, clazz, swap, align,
 				    flags);
 				if (offset == 0)
 					break;
@@ -952,7 +1124,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 		int32_t l;
 		char c[sizeof (int32_t)];
 	} u;
-	int class;
+	int clazz;
 	int swap;
 	struct stat st;
 	off_t fsize;
@@ -987,9 +1159,9 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 	}
 	fsize = st.st_size;
 
-	class = buf[EI_CLASS];
+	clazz = buf[EI_CLASS];
 
-	switch (class) {
+	switch (clazz) {
 	case ELFCLASS32:
 #undef elf_getu
 #define elf_getu(a, b)	elf_getu32(a, b)
@@ -1003,7 +1175,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 #define elfhdr elf64hdr
 #include "elfclass.h"
 	default:
-	    if (file_printf(ms, ", unknown class %d", class) == -1)
+	    if (file_printf(ms, ", unknown class %d", clazz) == -1)
 		    return -1;
 	    break;
 	}
