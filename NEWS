@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.2. (Scott)
 - Changed error level E_ERROR into E_WARNING in Soap extension methods 
   parameter validation. (Felipe)
+  
+- Added str_getcsv() function. (Sara)
 
 - Changed openssl info to show the shared library version number. (Scott)
 
