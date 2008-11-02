@@ -480,6 +480,13 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 	return END_OF_LINE;
 }
 
+<INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
+	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", ini_filename, SCNG(lineno));
+	BEGIN(INITIAL);
+	SCNG(lineno)++;
+	return END_OF_LINE;
+}
+
 <ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
 	return END_OF_LINE;
