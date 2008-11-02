@@ -1126,20 +1126,24 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 }
 /* }}} */
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_heap_insert, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_heap_compare, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_pqueue_insert, 0)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, priority)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_pqueue_setflags, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()

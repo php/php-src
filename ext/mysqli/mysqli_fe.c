@@ -32,15 +32,18 @@
 #include "php_mysqli_structs.h"
 
 
+static
 ZEND_BEGIN_ARG_INFO(second_arg_force_by_ref_rest, 1)
 	ZEND_ARG_PASS_INFO(0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO(third_arg_force_by_ref_rest, 1)
 	ZEND_ARG_PASS_INFO(0)
 	ZEND_ARG_PASS_INFO(0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
 ZEND_END_ARG_INFO();
 

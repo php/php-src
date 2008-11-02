@@ -67,11 +67,13 @@ ZEND_DECLARE_MODULE_GLOBALS(recode);
 static PHP_GINIT_FUNCTION(recode);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recode_string, 0, 0, 2)
 	ZEND_ARG_INFO(0, request)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recode_file, 0, 0, 3)
 	ZEND_ARG_INFO(0, request)
 	ZEND_ARG_INFO(0, input)

@@ -848,6 +848,7 @@ static sapi_module_struct cgi_sapi_module = {
 /* }}} */
 
 /* {{{ arginfo ext/standard/dl.c */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 	ZEND_ARG_INFO(0, extension_filename)
 ZEND_END_ARG_INFO()

@@ -29,6 +29,7 @@ zend_class_entry *Normalizer_ce_ptr = NULL;
 
 /* {{{ Normalizer methods arguments info */
 
+static
 ZEND_BEGIN_ARG_INFO_EX( normalizer_3_args, 0, 0, 3 )
 	ZEND_ARG_INFO( 0, arg1 )
 	ZEND_ARG_INFO( 0, arg2 )

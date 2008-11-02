@@ -48,6 +48,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 static void _mssql_bind_hash_dtor(void *data);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, servername)
 	ZEND_ARG_INFO(0, username)
@@ -55,71 +56,86 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, newlink)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_select_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, batch_size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_batch, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_rows_affected, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_mssql_get_last_message, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_fetch_assoc, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_field_length, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_data_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_identifier)
 	ZEND_ARG_INFO(0, row_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_result, 0, 0, 3)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_min_error_severity, 0, 0, 1)
 	ZEND_ARG_INFO(0, severity)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, sp_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_bind, 0, 0, 4)
 	ZEND_ARG_INFO(0, stmt)
 	ZEND_ARG_INFO(0, param_name)
@@ -130,15 +146,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_bind, 0, 0, 4)
 	ZEND_ARG_INFO(0, maxlen)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_execute, 0, 0, 1)
 	ZEND_ARG_INFO(0, stmt)
 	ZEND_ARG_INFO(0, skip_results)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_free_statement, 0, 0, 1)
 	ZEND_ARG_INFO(0, stmt)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mssql_guid_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, binary)
 	ZEND_ARG_INFO(0, short_format)

@@ -38,24 +38,29 @@
 ZEND_DECLARE_MODULE_GLOBALS(calendar);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
 	ZEND_ARG_INFO(0, timestamp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jdtounix, 0)
 	ZEND_ARG_INFO(0, jday)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cal_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, calendar)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_cal_days_in_month, 0)
 	ZEND_ARG_INFO(0, calendar)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_cal_to_jd, 0)
 	ZEND_ARG_INFO(0, calendar)
 	ZEND_ARG_INFO(0, month)
@@ -63,67 +68,80 @@ ZEND_BEGIN_ARG_INFO(arginfo_cal_to_jd, 0)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_cal_from_jd, 0)
 	ZEND_ARG_INFO(0, jd)
 	ZEND_ARG_INFO(0, calendar)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jdtogregorian, 0)
 	ZEND_ARG_INFO(0, juliandaycount)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gregoriantojd, 0)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jdtojulian, 0)
 	ZEND_ARG_INFO(0, juliandaycount)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_juliantojd, 0)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_jdtojewish, 0, 0, 1)
 	ZEND_ARG_INFO(0, juliandaycount)
 	ZEND_ARG_INFO(0, hebrew)
 	ZEND_ARG_INFO(0, fl)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jewishtojd, 0)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jdtofrench, 0)
 	ZEND_ARG_INFO(0, juliandaycount)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_frenchtojd, 0)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_jddayofweek, 0, 0, 1)
 	ZEND_ARG_INFO(0, juliandaycount)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jdmonthname, 0)
 	ZEND_ARG_INFO(0, juliandaycount)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_date, 0, 0, 0)
 	ZEND_ARG_INFO(0, year)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_days, 0, 0, 0)
 	ZEND_ARG_INFO(0, year)
 	ZEND_ARG_INFO(0, method)

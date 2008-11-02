@@ -105,6 +105,7 @@ ZEND_GET_MODULE(oci8)
 /* }}} */
 
 /* {{{ Function arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_name)
@@ -112,6 +113,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_by_name, 0, 0, 3)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_name)
@@ -120,6 +122,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_by_name, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_array_by_name, 0, 0, 4)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_name)
@@ -129,99 +132,119 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_bind_array_by_name, 0, 0, 4)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_descriptor, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_save, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_import, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_load, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_read, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_eof, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_rewind, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, whence)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_append, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor_to)
 	ZEND_ARG_INFO(0, lob_descriptor_from)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_truncate, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_erase, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_flush, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ocisetbufferinglob, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ocigetbufferinglob, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_copy, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor_to)
 	ZEND_ARG_INFO(0, lob_descriptor_from)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_is_equal, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, lob_descriptor)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, lob_descriptor)
 	ZEND_ARG_INFO(0, filename)
@@ -229,77 +252,93 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_descriptor, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_rollback, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_commit, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_scale, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_precision, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_type_raw, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_field_is_null, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_internal_debug, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_execute, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_cancel, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ocifetchinto, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(1, result)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_all, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(1, output)
@@ -308,31 +347,38 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_all, 0, 0, 2)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_assoc, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_statement, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -341,6 +387,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, session_mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -349,6 +396,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, session_mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_pconnect, 0, 0, 2)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -357,24 +405,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_pconnect, 0, 0, 2)
 	ZEND_ARG_INFO(0, session_mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_error, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection_or_statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_parse, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_INFO(0, sql_text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_prefetch, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, number_of_rows)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_resource_or_connection_string)
 	ZEND_ARG_INFO(0, username)
@@ -382,65 +435,79 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
 	ZEND_ARG_INFO(0, new_password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_cursor, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, statement_resource)
 	ZEND_ARG_INFO(0, column_number_or_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_server_version, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_statement_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_collection, 0, 0, 1)
 	ZEND_ARG_INFO(0, collection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection_to)
 	ZEND_ARG_INFO(0, collection_from)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign, 0, 0, 3)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, collection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_max, 0, 0, 1)
 	ZEND_ARG_INFO(0, collection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim, 0, 0, 2)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_new_collection, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection_resource)
 	ZEND_ARG_INFO(0, type_name)
@@ -449,113 +516,141 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ LOB Method arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_save_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_import_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_load_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_read_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_eof_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_tell_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_rewind_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_seek_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, whence)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_size_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_append_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, lob_descriptor_from)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_truncate_method, 0, 0, 0)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_erase_method, 0, 0, 0)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_flush_method, 0, 0, 0)
 	ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_setbuffering_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_getbuffering_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_export_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_lob_write_temporary_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_lob_close_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_free_descriptor_method, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Collection Method arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_free_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, collection_from)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign_method, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_size_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_max_method, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()

@@ -103,30 +103,36 @@ typedef struct {
 static void php_wddx_process_data(void *user_data, const XML_Char *s, int len);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, comment)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, var_name)
 	ZEND_ARG_INFO(0, ...)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
 	ZEND_ARG_INFO(0, comment)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_packet_end, 0, 0, 1)
 	ZEND_ARG_INFO(0, packet_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
 	ZEND_ARG_INFO(0, packet_id)
 	ZEND_ARG_INFO(0, var_name)
 	ZEND_ARG_INFO(0, ...)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_unserialize, 0, 0, 1)
 	ZEND_ARG_INFO(0, packet)
 ZEND_END_ARG_INFO()
