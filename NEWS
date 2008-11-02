@@ -19,7 +19,11 @@ PHP                                                                        NEWS
 - Deprecated define_syslog_variables(). (Kalle)
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
+- Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
+- Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
 
+- Fixed bug #46331 - (Segfault when using internal fileinfo magic file on big
+  endian systems). (Scott)
 - Fixed bug #46285 (lastInsertId() returns "0" when a deferenced PDOStatement is
   executed). (Johannes)
 - Fixed bug #46238 (Segmentation fault on static call with empty string method).
