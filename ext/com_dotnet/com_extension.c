@@ -40,101 +40,122 @@ zend_class_entry
 	*php_com_saproxy_class_entry;
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, variant)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cat, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_sub, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mul, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_and, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_div, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_eqv, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_idiv, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_imp, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mod, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_or, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_pow, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_xor, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_abs, 0, 0, 1)
 	ZEND_ARG_INFO(0, left)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_fix, 0, 0, 1)
 	ZEND_ARG_INFO(0, left)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_int, 0, 0, 1)
 	ZEND_ARG_INFO(0, left)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_neg, 0, 0, 1)
 	ZEND_ARG_INFO(0, left)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_not, 0, 0, 1)
 	ZEND_ARG_INFO(0, left)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_round, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, decimals)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cmp, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
@@ -142,52 +163,63 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cmp, 0, 0, 2)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_to_timestamp, 0, 0, 1)
 	ZEND_ARG_INFO(0, variant)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_from_timestamp, 0, 0, 1)
 	ZEND_ARG_INFO(0, timestamp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_get_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, variant)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_set_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, variant)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cast, 0, 0, 2)
 	ZEND_ARG_INFO(0, variant)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_com_get_active_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, progid)
 	ZEND_ARG_INFO(0, code_page)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_com_create_guid, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_com_event_sink, 0, 0, 2)
 	ZEND_ARG_INFO(0, comobject)
 	ZEND_ARG_INFO(0, sinkobject)
 	ZEND_ARG_INFO(0, sinkinterface)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_com_print_typeinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, comobject)
 	ZEND_ARG_INFO(0, dispinterface)
 	ZEND_ARG_INFO(0, wantsink)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_com_message_pump, 0, 0, 0)
 	ZEND_ARG_INFO(0, timeoutms)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_com_load_typelib, 0, 0, 1)
 	ZEND_ARG_INFO(0, typelib_name)
 	ZEND_ARG_INFO(0, case_insensitive)

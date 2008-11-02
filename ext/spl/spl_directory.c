@@ -1734,20 +1734,24 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, v
 
 /* {{{ declare method parameters */
 /* supply a name and default to call by parameter */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_info___construct, 0) 
 	ZEND_ARG_INFO(0, file_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_info_openFile, 0, 0, 0)
 	ZEND_ARG_INFO(0, open_mode)
 	ZEND_ARG_INFO(0, use_include_path)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_info_optinalFileClass, 0, 0, 0)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_optinalSuffix, 0, 0, 0)
 	ZEND_ARG_INFO(0, suffix)
 ZEND_END_ARG_INFO()
@@ -1788,10 +1792,12 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_dir_it_seek, 0) 
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO();
@@ -1814,15 +1820,18 @@ static const zend_function_entry spl_DirectoryIterator_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir___construct, 0, 0, 1) 
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_hasChildren, 0, 0, 0)
 	ZEND_ARG_INFO(0, allow_links)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_r_dir_setFlags, 0, 0, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
@@ -2612,6 +2621,7 @@ SPL_METHOD(SplFileObject, seek)
 } /* }}} */
 
 /* {{{ Function/Class/Method definitions */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, file_name)
 	ZEND_ARG_INFO(0, open_mode)
@@ -2619,46 +2629,56 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_file_object_setFlags, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_file_object_setMaxLineLen, 0)
 	ZEND_ARG_INFO(0, max_len)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0)
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
 	ZEND_ARG_INFO(0, operation)
 	ZEND_ARG_INFO(1, wouldblock)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1) 
 	ZEND_ARG_INFO(0, pos)
 	ZEND_ARG_INFO(0, whence)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0) 
 	ZEND_ARG_INFO(0, allowable_tags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1) 
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1) 
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1) 
 	ZEND_ARG_INFO(0, size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1) 
 	ZEND_ARG_INFO(0, line_pos)
 ZEND_END_ARG_INFO()
@@ -2699,6 +2719,7 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_temp_file_object___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, max_memory)
 ZEND_END_ARG_INFO()

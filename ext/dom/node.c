@@ -28,84 +28,104 @@
 #include "php_dom.h"
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_insert_before, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO(0, refChild, DOMNode, 1)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_replace_child, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_remove_child, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_append_child, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_child_nodes, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 1)
 	ZEND_ARG_INFO(0, deep)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_normalize, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_supported, 0, 0, 2)
 	ZEND_ARG_INFO(0, feature)
 	ZEND_ARG_INFO(0, version)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_attributes, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_compare_document_position, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_same_node, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_prefix, 0, 0, 1)
 	ZEND_ARG_INFO(0, namespaceURI)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_default_namespace, 0, 0, 1)
 	ZEND_ARG_INFO(0, namespaceURI)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_namespace_uri, 0, 0, 1)
 	ZEND_ARG_INFO(0, prefix)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_equal_node, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, arg, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_feature, 0, 0, 2)
 	ZEND_ARG_INFO(0, feature)
 	ZEND_ARG_INFO(0, version)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_set_user_data, 0, 0, 3)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, handler)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_user_data, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getNodePath, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclusive)
 	ZEND_ARG_INFO(0, with_comments)
@@ -113,6 +133,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14NFile, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 	ZEND_ARG_INFO(0, exclusive)

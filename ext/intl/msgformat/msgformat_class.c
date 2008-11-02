@@ -77,28 +77,34 @@ zend_object_value MessageFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
  */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_messageformatter_geterrormessage, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_formatmessage, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_setpattern, 0, 0, 1)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_messageformatter_parse, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()

@@ -38,194 +38,234 @@
 static int le_gmp;
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, number)
 	ZEND_ARG_INFO(0, base)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_intval, 0)
 	ZEND_ARG_INFO(0, gmpnumber)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_strval, 0, 0, 1)
 	ZEND_ARG_INFO(0, gmpnumber)
 	ZEND_ARG_INFO(0, base)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_add, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_sub, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_mul, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_qr, 0, 0, 2)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 	ZEND_ARG_INFO(0, round)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_r, 0, 0, 2)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 	ZEND_ARG_INFO(0, round)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_div_q, 0, 0, 2)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 	ZEND_ARG_INFO(0, round)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_mod, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_divexact, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_neg, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_abs, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_fact, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_pow, 0)
 	ZEND_ARG_INFO(0, base)
 	ZEND_ARG_INFO(0, exp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_powm, 0)
 	ZEND_ARG_INFO(0, base)
 	ZEND_ARG_INFO(0, exp)
 	ZEND_ARG_INFO(0, mod)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_sqrt, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_sqrtrem, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_perfect_square, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_prob_prime, 0, 0, 1)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, reps)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_gcd, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_gcdext, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_invert, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_jacobi, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_legendre, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_cmp, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_sign, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
 	ZEND_ARG_INFO(0, limiter)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_and, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_or, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_com, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_nextprime, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_xor, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_setbit, 0, 0, 2)
 	ZEND_ARG_INFO(1, a)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, set_clear)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_clrbit, 0)
 	ZEND_ARG_INFO(1, a)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-	ZEND_BEGIN_ARG_INFO(arginfo_gmp_testbit, 0)
+static
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_testbit, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_popcount, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_hamdist, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan0, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, start)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan1, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, start)

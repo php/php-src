@@ -41,11 +41,13 @@
 static int le_sysvmsg;
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_get_queue, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, perms)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_send, 0, 0, 3)
 	ZEND_ARG_INFO(0, queue)
 	ZEND_ARG_INFO(0, msgtype)
@@ -55,6 +57,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_send, 0, 0, 3)
 	ZEND_ARG_INFO(1, errorcode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
 	ZEND_ARG_INFO(0, queue)
 	ZEND_ARG_INFO(0, desiredmsgtype)
@@ -66,19 +69,23 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
 	ZEND_ARG_INFO(1, errorcode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_remove_queue, 0, 0, 1)
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_set_queue, 0, 0, 2)
 	ZEND_ARG_INFO(0, queue)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_queue_exists, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()

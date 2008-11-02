@@ -189,101 +189,121 @@ char *DigestPassword(char *user, char *password)
 }
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_pconnect, 0, 0, 0)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_transaction, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, locking)
 	ZEND_ARG_INFO(0, isolation)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_autocommit, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, OnOff)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_commit, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_rollback, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_blob, 0, 0, 1)
 	ZEND_ARG_INFO(0, blob_data)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_clob, 0, 0, 1)
 	ZEND_ARG_INFO(0, clob_data)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_lob_mode, 0)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, lob_mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_read_blob, 0, 0, 1)
 	ZEND_ARG_INFO(0, blob_handle)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_read_clob, 0, 0, 1)
 	ZEND_ARG_INFO(0, clob_handle)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_blob_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, blob_handle)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_clob_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, clob_handle)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_hostname, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, host_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_database, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, database)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_database_password, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, database_password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_username, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, username)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_password, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_password, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, user)
@@ -291,17 +311,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_fbsql_set_password, 0)
 	ZEND_ARG_INFO(0, old_password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_select_db, 0, 0, 0)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_set_characterset, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, charcterset)
 	ZEND_ARG_INFO(0, in_out_both)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_change_user, 0, 0, 2)
 	ZEND_ARG_INFO(0, user)
 	ZEND_ARG_INFO(0, password)
@@ -309,173 +332,209 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_change_user, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_create_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, database_options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_drop_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_start_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, database_options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_stop_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_db_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, batch_size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_db_query, 0, 0, 2)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_dbs, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_tables, 0, 0, 1)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_list_fields, 0, 0, 2)
 	ZEND_ARG_INFO(0, database_name)
 	ZEND_ARG_INFO(0, table_name)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_error, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_errno, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_warnings, 0, 0, 0)
 	ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_affected_rows, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_rows_fetched, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_insert_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_next_result, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_num_rows, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_num_fields, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_row, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_assoc, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_data_seek, 0)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_fetch_lengths, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_fetch_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_seek, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_table, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_len, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_field_flags, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_table_name, 0)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_fbsql_free_result, 0)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fbsql_get_autostart_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()

@@ -44,142 +44,175 @@ struct _idsIterator {
 #define DOM_LOAD_FILE 1
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_element, 0, 0, 1)
 	ZEND_ARG_INFO(0, tagName)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_document_fragment, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_text_node, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_comment, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_cdatasection, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_processing_instruction, 0, 0, 2)
 	ZEND_ARG_INFO(0, target)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_attribute, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_entity_reference, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_get_elements_by_tag_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, tagName)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_import_node, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, importedNode, DOMNode, 0)
 	ZEND_ARG_INFO(0, deep)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_element_ns, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, qualifiedName)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_attribute_ns, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, qualifiedName)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_get_elements_by_tag_name_ns, 0, 0, 2)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_get_element_by_id, 0, 0, 1)
 	ZEND_ARG_INFO(0, elementId)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_adopt_node, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, source, DOMNode, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_normalize_document, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_rename_node, 0, 0, 3)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, qualifiedName)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_load, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_save, 0, 0, 1)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadxml, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savexml, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 1)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, version)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_validate, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_xinclude, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadhtml, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadhtmlfile, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savehtml, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savehtmlfile, 0, 0, 1)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_schema_validate_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_schema_validate_xml, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_relaxNG_validate_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_relaxNG_validate_xml, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_registernodeclass, 0, 0, 2)
 	ZEND_ARG_INFO(0, baseClass)
 	ZEND_ARG_INFO(0, extendedClass)
