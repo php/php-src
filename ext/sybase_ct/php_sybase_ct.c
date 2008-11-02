@@ -42,6 +42,7 @@ static PHP_GINIT_FUNCTION(sybase);
 static PHP_GSHUTDOWN_FUNCTION(sybase);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, user)
@@ -50,6 +51,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, appname)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_pconnect, 0, 0, 0)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, user)
@@ -58,95 +60,116 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_pconnect, 0, 0, 0)
 	ZEND_ARG_INFO(0, appname)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_select_db, 0, 0, 1)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, link_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, link_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_unbuffered_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, link_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_free_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_get_last_message, 0, 0, 1)
 	ZEND_ARG_INFO(0, d)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_assoc, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_data_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_fetch_field, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_field_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_result, 0, 0, 3)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_affected_rows, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_min_client_severity, 0, 0, 1)
 	ZEND_ARG_INFO(0, severity)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_min_server_severity, 0, 0, 1)
 	ZEND_ARG_INFO(0, severity)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_deadlock_retry_count, 0, 0, 1)
 	ZEND_ARG_INFO(0, retry_count)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_set_message_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, error_func)
 	ZEND_ARG_INFO(0, connection)

@@ -96,28 +96,33 @@ PHP_FUNCTION(openssl_decrypt);
 PHP_FUNCTION(openssl_dh_compute_key);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 0, 2)
     ZEND_ARG_INFO(0, x509)
     ZEND_ARG_INFO(0, outfilename)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
     ZEND_ARG_INFO(0, x509)
     ZEND_ARG_INFO(1, out)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
     ZEND_ARG_INFO(0, cert)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_parse, 0)
     ZEND_ARG_INFO(0, x509)
     ZEND_ARG_INFO(0, shortname)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 3)
     ZEND_ARG_INFO(0, x509cert)
     ZEND_ARG_INFO(0, purpose)
@@ -125,14 +130,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 3)
     ZEND_ARG_INFO(0, untrustedfile)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_read, 0)
     ZEND_ARG_INFO(0, cert)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_free, 0)
     ZEND_ARG_INFO(0, x509)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 0, 4)
     ZEND_ARG_INFO(0, x509)
     ZEND_ARG_INFO(0, filename)
@@ -141,6 +149,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 0, 4)
     ZEND_ARG_INFO(0, args) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs12_export, 0)
     ZEND_ARG_INFO(0, x509)
     ZEND_ARG_INFO(1, out)
@@ -149,24 +158,28 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs12_export, 0)
     ZEND_ARG_INFO(0, args) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs12_read, 0)
     ZEND_ARG_INFO(0, PKCS12)
     ZEND_ARG_INFO(1, certs) /* array */
     ZEND_ARG_INFO(0, pass)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_export_to_file, 0, 0, 2)
     ZEND_ARG_INFO(0, csr)
     ZEND_ARG_INFO(0, outfilename)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_export, 0, 0, 2)
     ZEND_ARG_INFO(0, csr)
     ZEND_ARG_INFO(1, out)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_sign, 0, 0, 4)
     ZEND_ARG_INFO(0, csr)
     ZEND_ARG_INFO(0, x509)
@@ -176,6 +189,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_sign, 0, 0, 4)
     ZEND_ARG_INFO(0, serial)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
     ZEND_ARG_INFO(0, dn) /* array */
     ZEND_ARG_INFO(1, privkey)
@@ -183,18 +197,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
     ZEND_ARG_INFO(0, extraattribs)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_csr_get_subject, 0)
     ZEND_ARG_INFO(0, csr)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_csr_get_public_key, 0)
     ZEND_ARG_INFO(0, csr)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_new, 0, 0, 0)
     ZEND_ARG_INFO(0, configargs) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export_to_file, 0, 0, 2)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, outfilename)
@@ -202,6 +220,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export_to_file, 0, 0, 2)
     ZEND_ARG_INFO(0, config_args) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export, 0, 0, 2)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(1, out)
@@ -209,23 +228,28 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export, 0, 0, 2)
     ZEND_ARG_INFO(0, config_args) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_public, 0)
     ZEND_ARG_INFO(0, cert)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_free, 0)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_private, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, passphrase)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
     ZEND_ARG_INFO(0, filename)
     ZEND_ARG_INFO(0, flags)
@@ -235,6 +259,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
     ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_encrypt, 0, 0, 4)
     ZEND_ARG_INFO(0, infile)
     ZEND_ARG_INFO(0, outfile)
@@ -244,6 +269,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_encrypt, 0, 0, 4)
     ZEND_ARG_INFO(0, cipher)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_sign, 0, 0, 5)
     ZEND_ARG_INFO(0, infile)
     ZEND_ARG_INFO(0, outfile)
@@ -254,6 +280,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_sign, 0, 0, 5)
     ZEND_ARG_INFO(0, extracertsfilename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, infilename)
     ZEND_ARG_INFO(0, outfilename)
@@ -261,6 +288,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, recipkey)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, crypted)
@@ -268,6 +296,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, crypted)
@@ -275,6 +304,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_private_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, crypted)
@@ -282,6 +312,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, crypted)
@@ -289,9 +320,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_public_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, padding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_error_string, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_sign, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, signature)
@@ -299,6 +332,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_sign, 0, 0, 3)
     ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_verify, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, signature)
@@ -306,6 +340,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_verify, 0, 0, 3)
     ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_seal, 0)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, sealdata)
@@ -313,6 +348,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_seal, 0)
     ZEND_ARG_INFO(0, pubkeys) /* array */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(1, opendata)
@@ -320,20 +356,24 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
     ZEND_ARG_INFO(0, privkey)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_get_md_methods, 0, 0, 0)
     ZEND_ARG_INFO(0, aliases)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_get_cipher_methods, 0, 0, 0)
     ZEND_ARG_INFO(0, aliases)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_digest, 0, 0, 2)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, method)
     ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, method)
@@ -341,6 +381,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, method)
@@ -348,6 +389,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, raw_input)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
     ZEND_ARG_INFO(0, pub_key)
     ZEND_ARG_INFO(0, dh_key)

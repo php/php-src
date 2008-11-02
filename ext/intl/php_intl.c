@@ -84,39 +84,47 @@
 ZEND_DECLARE_MODULE_GLOBALS( intl )
 
 /* {{{ Arguments info */
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_static_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_static_2_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_0_args, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_1_arg, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_2_args, 0, 0, 3)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_ARRAY_INFO(1, arr, 0)
 	ZEND_ARG_INFO(0, sort_flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
@@ -124,6 +132,7 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
@@ -131,24 +140,29 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(locale_0_args, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(locale_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(locale_2_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(locale_3_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
 	ZEND_ARG_INFO(0, arg3)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(locale_4_args, 0, 0, 4)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
@@ -159,33 +173,39 @@ ZEND_END_ARG_INFO()
 #define intl_0_args collator_static_0_args
 #define intl_1_arg collator_static_1_arg
 
+static
 ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(grapheme_search_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(grapheme_substr_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(grapheme_strstr_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, before_needle)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(grapheme_extract_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg1)
 	ZEND_ARG_INFO(0, arg2)
@@ -194,120 +214,143 @@ ZEND_BEGIN_ARG_INFO_EX(grapheme_extract_args, 0, 0, 2)
 	ZEND_ARG_INFO(1, arg5)  /* 1 = pass by reference */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, style)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_error_code, 0, 0, 1)
 	ZEND_ARG_INFO(0, nf)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, num)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format_currency, 0, 0, 3)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, num)
 	ZEND_ARG_INFO(0, currency)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_attribute, 0, 0, 2)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, attr)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_attribute, 0, 0, 3)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, attr)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_symbol, 0, 0, 3)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, attr)
 	ZEND_ARG_INFO(0, symbol)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_pattern, 0, 0, 2)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_create, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_code, 0, 0, 1)
 	ZEND_ARG_INFO(0, nf)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_message, 0, 0, 1)
 	ZEND_ARG_INFO(0, coll)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format_message, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse, 0, 0, 2)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_parse_message, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_set_pattern, 0, 0, 2)
 	ZEND_ARG_INFO(0, mf)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, mf)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_pattern, 0, 0, 2)
 	ZEND_ARG_INFO(0, mf)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_calendar, 0, 0, 2)
 	ZEND_ARG_INFO(0, mf)
 	ZEND_ARG_INFO(0, calendar)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format, 0, 0, 0)
 	ZEND_ARG_INFO(0, args)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, date_type)

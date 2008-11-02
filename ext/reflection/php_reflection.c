@@ -4790,10 +4790,12 @@ static const zend_function_entry reflection_exception_functions[] = {
 };
 
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_getModifierNames, 0)
 	ZEND_ARG_INFO(0, modifiers)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_export, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, reflector, Reflector, 0)
 	ZEND_ARG_INFO(0, return)
@@ -4811,19 +4813,23 @@ static const zend_function_entry reflector_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_function_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_function___construct, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invoke, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invokeArgs, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
@@ -4863,22 +4869,26 @@ static const zend_function_entry reflection_function_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_method_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_method___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_or_method)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invoke, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invokeArgs, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
@@ -4906,73 +4916,90 @@ static const zend_function_entry reflection_method_functions[] = {
 };
 
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, argument)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class___construct, 0)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getStaticPropertyValue, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, default)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_setStaticPropertyValue, 0)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasMethod, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getMethod, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getMethods, 0, 0, 0)
 	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasProperty, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getProperty, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_getProperties, 0, 0, 0)
 	ZEND_ARG_INFO(0, filter)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_hasConstant, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getConstant, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_newInstanceArgs, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isSubclassOf, 0)
 	ZEND_ARG_INFO(0, class)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ARG_INFO(0, interface)
 ZEND_END_ARG_INFO()
@@ -5026,11 +5053,13 @@ static const zend_function_entry reflection_class_functions[] = {
 };
 
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_object_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, argument)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_object___construct, 0)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
@@ -5042,24 +5071,29 @@ static const zend_function_entry reflection_object_functions[] = {
 };
 
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, argument)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_property___construct, 0)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_getValue, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setValue, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setAccessible, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -5084,12 +5118,14 @@ static const zend_function_entry reflection_property_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_parameter_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
 	ZEND_ARG_INFO(0, parameter)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter___construct, 0)
 	ZEND_ARG_INFO(0, function)
 	ZEND_ARG_INFO(0, parameter)
@@ -5114,11 +5150,13 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_extension_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_extension___construct, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
