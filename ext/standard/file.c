@@ -2180,7 +2180,9 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								memcpy(tptr, line_end, line_end_len);
 								tptr += line_end_len;
 
-								if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+								if (stream == NULL) {
+									goto quit_loop_2;
+								} else if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
 									/* we've got an unterminated enclosure,
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
@@ -2341,7 +2343,9 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 out:
 	efree(temp);
-	efree(buf);
+	if (stream) {
+		efree(buf);
+	}
 }
 /* }}} */
 
