@@ -159,9 +159,6 @@ PHP                                                                        NEWS
     (Etienne Kneuss)
   . Improved checks for callbacks. (Marcus)
   . Added __DIR__ constant. (Lars Strojny)
-  . Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
-    PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants.
-    (Pierre)
   . Added new error modes E_USER_DEPRECATED and E_DEPRECATED.
     E_DEPRECATED is used to inform about stuff being scheduled for removal
     in future PHP versions. (Lars Strojny, Felipe, Marcus)
