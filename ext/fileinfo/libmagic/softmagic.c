@@ -637,13 +637,14 @@ mconvert(struct magic_set *ms, struct magic *m)
 	case FILE_STRING:
 	case FILE_BESTRING16:
 	case FILE_LESTRING16: {
-		size_t len;
-		
 		/* Null terminate and eat *trailing* return */
 		p->s[sizeof(p->s) - 1] = '\0';
+#if 0
+		/* Why? breaks magic numbers that end with \xa */
 		len = strlen(p->s);
 		if (len-- && p->s[len] == '\n')
 			p->s[len] = '\0';
+#endif
 		return 1;
 	}
 	case FILE_PSTRING: {
@@ -654,9 +655,12 @@ mconvert(struct magic_set *ms, struct magic *m)
 		while (len--)
 			*ptr1++ = *ptr2++;
 		*ptr1 = '\0';
+#if 0
+		/* Why? breaks magic numbers that end with \xa */
 		len = strlen(p->s);
 		if (len-- && p->s[len] == '\n')
 			p->s[len] = '\0';
+#endif
 		return 1;
 	}
 	case FILE_BESHORT:
