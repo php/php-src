@@ -36,35 +36,41 @@ static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsub, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmul, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_bcmod, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
@@ -72,23 +78,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpow, 0, 0, 2)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsqrt, 0, 0, 1)
 	ZEND_ARG_INFO(0, operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_bcscale, 0)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()

@@ -57,107 +57,132 @@ ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_kill, 0, 0, 2)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(0, sig)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getpid, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getppid, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getuid, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setuid, 0, 0, 1)
 	ZEND_ARG_INFO(0, uid)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_geteuid, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_SETEUID
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_seteuid, 0, 0, 1)
 	ZEND_ARG_INFO(0, uid)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getgid, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setgid, 0, 0, 1)
 	ZEND_ARG_INFO(0, gid)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getegid, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_SETEGID
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setegid, 0, 0, 1)
 	ZEND_ARG_INFO(0, gid)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GETGROUPS
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getgroups, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GETLOGIN
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getlogin, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getpgrp, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_SETSID
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_setsid, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setpgid, 0, 0, 2)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(0, pgid)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GETPGID
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpgid, 0, 0, 1)
 	ZEND_ARG_INFO(0, pid)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GETSID
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getsid, 0, 0, 1)
 	ZEND_ARG_INFO(0, pid)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_uname, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_times, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_CTERMID
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_ctermid, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_ttyname, 0, 0, 1)
 	ZEND_ARG_INFO(0, fd)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_isatty, 0, 0, 1)
 	ZEND_ARG_INFO(0, fd)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getcwd, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_MKFIFO
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mkfifo, 0, 0, 2)
 	ZEND_ARG_INFO(0, pathname)
 	ZEND_ARG_INFO(0, mode)
@@ -165,6 +190,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_MKNOD
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mknod, 0, 0, 2)
 	ZEND_ARG_INFO(0, pathname)
 	ZEND_ARG_INFO(0, mode)
@@ -173,40 +199,49 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mknod, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_access, 0, 0, 1)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrnam, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrgid, 0, 0, 1)
 	ZEND_ARG_INFO(0, gid)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwnam, 0, 0, 1)
 	ZEND_ARG_INFO(0, username)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwuid, 0, 0, 1)
 	ZEND_ARG_INFO(0, uid)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GETRLIMIT
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_getrlimit, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_posix_get_last_error, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_strerror, 0, 0, 1)
 	ZEND_ARG_INFO(0, errno)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_INITGROUPS
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_initgroups, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, base_group_id)

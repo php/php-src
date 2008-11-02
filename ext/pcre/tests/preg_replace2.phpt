@@ -1,11 +1,5 @@
 --TEST--
 preg_replace()
---SKIPIF--
-<?php
-if (@preg_match_all('/./u', "", $matches) === false) {
-	die("skip no utf8 support in PCRE library");
-}
-?>
 --FILE--
 <?php
 

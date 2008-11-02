@@ -45,6 +45,7 @@ static int	le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, port)
@@ -52,6 +53,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_connect, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #if HAVE_OPENSSL_EXT
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, port)
@@ -59,72 +61,86 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_ssl_connect, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_login, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_pwd, 0)
 	ZEND_ARG_INFO(0, ftp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_cdup, 0)
 	ZEND_ARG_INFO(0, ftp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_chdir, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_exec, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, command)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_raw, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, command)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_mkdir, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_rmdir, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_chmod, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_alloc, 0, 0, 2)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(1, response)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_nlist, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_rawlist, 0, 0, 2)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, directory)
 	ZEND_ARG_INFO(0, recursive)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_systype, 0)
 	ZEND_ARG_INFO(0, ftp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fget, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, fp)
@@ -133,6 +149,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fget, 0, 0, 4)
 	ZEND_ARG_INFO(0, resumepos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fget, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, fp)
@@ -141,11 +158,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fget, 0, 0, 4)
 	ZEND_ARG_INFO(0, resumepos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_pasv, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, pasv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_get, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, local_file)
@@ -154,6 +173,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_get, 0, 0, 4)
 	ZEND_ARG_INFO(0, resume_pos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_get, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, local_file)
@@ -162,10 +182,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_get, 0, 0, 4)
 	ZEND_ARG_INFO(0, resume_pos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_nb_continue, 0)
 	ZEND_ARG_INFO(0, ftp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fput, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, remote_file)
@@ -174,6 +196,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_fput, 0, 0, 4)
 	ZEND_ARG_INFO(0, startpos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fput, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, remote_file)
@@ -182,6 +205,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fput, 0, 0, 4)
 	ZEND_ARG_INFO(0, startpos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, remote_file)
@@ -190,6 +214,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, startpos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, remote_file)
@@ -198,42 +223,50 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_put, 0, 0, 4)
 	ZEND_ARG_INFO(0, startpos)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_size, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_mdtm, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_rename, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, src)
 	ZEND_ARG_INFO(0, dest)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_delete, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_site, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, cmd)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_close, 0)
 	ZEND_ARG_INFO(0, ftp)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_set_option, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ftp_get_option, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, option)

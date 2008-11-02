@@ -54,6 +54,7 @@ static int le_bucket;
 PHP_FUNCTION(user_filter_nop)
 {
 }
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
 	ZEND_ARG_INFO(0, in)
 	ZEND_ARG_INFO(0, out)
@@ -61,9 +62,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
 	ZEND_ARG_INFO(0, closing)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onCreate, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onClose, 0)
 ZEND_END_ARG_INFO()
 

@@ -90,6 +90,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_string)
 	ZEND_ARG_INFO(0, connect_type)
@@ -100,6 +101,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, database)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_pconnect, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_string)
 	ZEND_ARG_INFO(0, host)
@@ -110,54 +112,66 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_pconnect, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQPARAMETERSTATUS
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_parameter_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, param_name)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_dbname, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_error, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_options, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_port, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_tty, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_host, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_version, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_ping, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQEXECPARAMS
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_query_params, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
@@ -166,6 +180,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_PQPREPARE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_prepare, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -174,6 +189,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_PQEXECPREPARED
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_execute, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -181,25 +197,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_execute, 0, 0, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQCMDTUPLES
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_affected_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_notice, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_PQFTABLE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_table, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_number)
@@ -207,54 +228,64 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_table, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_name, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_type, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_type_oid, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_num, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, field_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row_number)
 	ZEND_ARG_INFO(0, field_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_assoc, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_array, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
@@ -263,108 +294,129 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, ctor_params)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_fetch_all_columns, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, column_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_prtlen, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, field_name_or_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_field_is_null, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, row)
 	ZEND_ARG_INFO(0, field_name_or_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_free_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_last_oid, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_trace, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_untrace, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, large_object_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_unlink, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, large_object_oid)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_open, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, large_object_oid)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_INFO(0, len)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_write, 0, 0, 2)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_INFO(0, buf)
 	ZEND_ARG_INFO(0, len)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_read_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_import, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, large_object_oid)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_export, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, objoid)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_seek, 0, 0, 2)
 	ZEND_ARG_INFO(0, large_object)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, whence)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQSETERRORVERBOSITY
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, verbosity)
@@ -372,25 +424,30 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_PQCLIENTENCODING
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_client_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_client_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_end_copy, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_put_line, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_to, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, table_name)
@@ -398,6 +455,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_to, 0, 0, 2)
 	ZEND_ARG_INFO(0, null_as)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_from, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, table_name)
@@ -407,60 +465,72 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_copy_from, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQESCAPE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_string, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_escape_bytea, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_unescape_bytea, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQRESULTERRORFIELD
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_error_field, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, fieldcode)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connnection)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PGTRANSACTIONSTATUS
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_transaction_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, connnection)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_reset, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_cancel_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connection_busy, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query, 0, 0, 2)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
 #if HAVE_PQSENDQUERYPARAMS
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_query_params, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
@@ -469,6 +539,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_PQSENDPREPARE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_prepare, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -477,6 +548,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_PQSENDQUERYPREPARED
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_execute, 0, 0, 3)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, stmtname)
@@ -484,29 +556,35 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_send_execute, 0, 0, 3)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_result_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, result_type)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_notify, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, e)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_pid, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_meta_data, 0, 0, 2)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_convert, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
@@ -514,6 +592,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_convert, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_insert, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
@@ -521,6 +600,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_insert, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_update, 0, 0, 4)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
@@ -529,6 +609,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_update, 0, 0, 4)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_delete, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)
@@ -536,6 +617,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_delete, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_select, 0, 0, 3)
 	ZEND_ARG_INFO(0, db)
 	ZEND_ARG_INFO(0, table)

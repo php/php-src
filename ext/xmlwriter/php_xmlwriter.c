@@ -173,44 +173,54 @@ static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRML
 	}	\
 	
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_xmlwriter_void, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_resource, 0, 0, 1)
 	ZEND_ARG_INFO(0, xmlwriter)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_open_uri, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_set_indent, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, indent)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_set_indent, 0, 0, 1)
 	ZEND_ARG_INFO(0, indent)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_set_indent_string, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, indentString)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_set_indent_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, indentString)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_attribute, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_attribute, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_attribute_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, prefix)
@@ -218,12 +228,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_attribute_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_attribute_ns, 0, 0, 3)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_attribute_ns, 0, 0, 5)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, prefix)
@@ -232,6 +244,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_attribute_ns, 0, 0, 5)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_attribute_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, name)
@@ -239,26 +252,31 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_attribute_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_attribute, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_attribute, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_element, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_element, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_element_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, prefix)
@@ -266,23 +284,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_element_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_element_ns, 0, 0, 3)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_element, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_element, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_element_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, prefix)
@@ -291,6 +313,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_element_ns, 0, 0, 4)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_element_ns, 0, 0, 3)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, name)
@@ -298,53 +321,64 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_element_ns, 0, 0, 3)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_pi, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, target)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_pi, 0, 0, 1)
 	ZEND_ARG_INFO(0, target)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_pi, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, target)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_pi, 0, 0, 2)
 	ZEND_ARG_INFO(0, target)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_cdata, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_cdata, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_text, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_text, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_raw, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_raw, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_document, 0, 0, 1)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, version)
@@ -352,21 +386,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_document, 0, 0, 1)
 	ZEND_ARG_INFO(0, standalone)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_document, 0, 0, 0)
 	ZEND_ARG_INFO(0, version)
 	ZEND_ARG_INFO(0, encoding)
 	ZEND_ARG_INFO(0, standalone)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_comment, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_comment, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, qualifiedName)
@@ -374,12 +412,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd, 0, 0, 2)
 	ZEND_ARG_INFO(0, systemId)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd, 0, 0, 1)
 	ZEND_ARG_INFO(0, qualifiedName)
 	ZEND_ARG_INFO(0, publicId)
 	ZEND_ARG_INFO(0, systemId)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
@@ -388,6 +428,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd, 0, 0, 2)
 	ZEND_ARG_INFO(0, subset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, publicId)
@@ -395,82 +436,98 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd, 0, 0, 1)
 	ZEND_ARG_INFO(0, subset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_element, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, qualifiedName)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_element, 0, 0, 1)
 	ZEND_ARG_INFO(0, qualifiedName)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_element, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_element, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_attlist, 0, 0, 2)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_attlist, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_attlist, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_attlist, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_dtd_entity, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, isparam)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_start_dtd_entity, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, isparam)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_write_dtd_entity, 0, 0, 3)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_write_dtd_entity, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_output_memory, 0, 0, 1)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, flush)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_output_memory, 0, 0, 0)
 	ZEND_ARG_INFO(0, flush)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_flush, 0, 0, 1)
 	ZEND_ARG_INFO(0, xmlwriter)
 	ZEND_ARG_INFO(0, empty)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_method_flush, 0, 0, 0)
 	ZEND_ARG_INFO(0, empty)
 ZEND_END_ARG_INFO()
