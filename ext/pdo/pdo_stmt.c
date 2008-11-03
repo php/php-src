@@ -2623,11 +2623,8 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	int colno = -1;
 
-	if ((Z_TYPE_P(member) == IS_STRING || Z_TYPE_P(member) == IS_UNICODE) &&
-		memcmp(Z_UNIVAL_P(member).v, "queryString", sizeof("queryString")-1)) {
-		return std_object_handlers.read_property(object, member, IS_STRING TSRMLS_CC);
-	}
 	MAKE_STD_ZVAL(return_value);
+	RETVAL_NULL();
 		
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
@@ -2640,8 +2637,13 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 		for (colno = 0; colno < stmt->column_count; colno++) {
 			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
 				fetch_value(stmt, return_value, colno, NULL TSRMLS_CC);
-				break;
+				Z_SET_REFCOUNT_P(return_value, 0);
+				Z_UNSET_ISREF_P(return_value);
+				return return_value;
 			}
+		}
+		if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+			return std_object_handlers.read_property(object, member, IS_STRING TSRMLS_CC);
 		}
 	}
 
