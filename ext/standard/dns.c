@@ -446,13 +446,22 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			cp += n;
 			break;
 		case DNS_T_TXT:
-			add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
-			n = cp[0];
-			tp = emalloc(n + 1);
-			memcpy(tp, cp + 1, n);
-			tp[n] = '\0';
-			cp += dlen;
-			add_ascii_assoc_rt_stringl(*subarray, "txt", (char*)tp, n, ZSTR_AUTOFREE);
+			{
+				int ll = 0;
+
+				add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
+				tp = emalloc(dlen + 1);
+				
+				while (ll < dlen) {
+					n = cp[ll];
+					memcpy(tp + ll , cp + ll + 1, n);
+					ll = ll + n + 1;
+				}
+				tp[dlen] = '\0';
+				cp += dlen;
+
+				add_ascii_assoc_rt_stringl(*subarray, "txt", tp, dlen, ZSTR_AUTOFREE);
+			}
 			break;
 		case DNS_T_SOA:
 			add_ascii_assoc_rt_string(*subarray, "type", "SOA", ZSTR_DUPLICATE);
