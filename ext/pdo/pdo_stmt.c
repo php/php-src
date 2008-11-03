@@ -2211,6 +2211,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				param->is_param,
 				param->param_type);
 			
+			zend_hash_move_forward_ex(stmt->bound_params, &pos);
 		}
 	}
 
