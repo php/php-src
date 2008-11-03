@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   different). (Derick)
 - Fixed bug #44938 (gettext functions crash with overly long domain).
   (Christian Schneider, Ilia)
+- Fixed bug #44327 (PDORow::queryString property & numeric offsets / Crash).
+  (Felipe)
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
