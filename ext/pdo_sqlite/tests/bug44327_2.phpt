@@ -26,25 +26,25 @@ var_dump($y, $y->queryString);
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  ["queryString"]=>
-  string(23) "select 1 as queryString"
+  [u"queryString"]=>
+  unicode(23) "select 1 as queryString"
 }
-string(23) "select 1 as queryString"
+unicode(23) "select 1 as queryString"
 array(2) {
-  ["queryString"]=>
-  string(1) "1"
+  [u"queryString"]=>
+  unicode(1) "1"
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
 }
 NULL
 --------------------------------------------
 object(PDOStatement)#%d (1) {
-  ["queryString"]=>
-  string(23) "select 1 as queryString"
+  [u"queryString"]=>
+  unicode(23) "select 1 as queryString"
 }
-string(23) "select 1 as queryString"
+unicode(23) "select 1 as queryString"
 object(PDORow)#%d (1) {
-  ["queryString"]=>
-  string(1) "1"
+  [u"queryString"]=>
+  unicode(1) "1"
 }
-string(1) "1"
+unicode(1) "1"
