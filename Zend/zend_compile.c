@@ -1460,7 +1460,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	zend_op       *current_op;
 
 	function_name.op_type = IS_CONST;
-	ZVAL_ASCII_STRING(&function_name.u.constant, "", ZSTR_DUPLICATE);
+	ZVAL_ASCII_STRING(&function_name.u.constant, "{closure}", ZSTR_DUPLICATE);
 
 	zend_do_begin_function_declaration(function_token, &function_name, 0, return_reference, NULL TSRMLS_CC);
 
@@ -1475,7 +1475,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	if (is_static) {
 	    CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
 	}
-    CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
+	CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
 }
 /* }}} */
 
