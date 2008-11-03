@@ -5,7 +5,7 @@
 # error dont edit with MSVC
 #endif
 
-#include "winres.h"
+#include "winresrc.h"
 #include "main/php_version.h"
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
