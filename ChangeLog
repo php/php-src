@@ -1,3 +1,384 @@
+2008-11-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h:
+      sync zend_ini_scanner.c
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/tests/general_functions/parse_ini_file.phpt:
+      Fixed bug #44575 (parse_ini_file comment # line problems)
+      [DOC] parse_ini_file(): comments starting with # are deprecated in PHP 5.3
+            (comments starting with ; should be used instead)
+
+2008-11-02  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      Add some missing news entries
+
+2008-11-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/filter/filter.c
+      ext/filter/filter.c
+      ext/filter/tests/bug42718-2.phpt
+      ext/filter/tests/bug42718-2.phpt
+      ext/filter/tests/bug42718-2.phpt
+      ext/filter/tests/bug42718-2.phpt
+      ext/filter/tests/bug42718.phpt
+      ext/filter/tests/bug42718.phpt:
+      MFH: Fixed bug #42718 (FILTER_UNSAFE_RAW not applied when configured as
+      default filter)
+
+    * ext/filter/filter.c
+      ext/filter/tests/bug42718.phpt
+      ext/filter/tests/bug42718.phpt
+      ext/filter/tests/bug42718.phpt:
+      Fixed bug #42718 (FILTER_UNSAFE_RAW not applied when configured as
+      default filter)
+
+2008-11-02  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pcre/tests/skip.ini
+      ext/pcre/tests/skip.ini
+      ext/pcre/tests/skip_001.inc
+      ext/pcre/tests/skip_001.inc
+      ext/pcre/tests/skip_002.inc
+      ext/pcre/tests/skip_002.inc
+      ext/pcre/tests/skip_003.inc
+      ext/pcre/tests/skip_003.inc
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c:
+      
+      file skip.ini was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      run-tests.php
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.c
+      ext/bcmath/bcmath.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dba/dba.c
+      ext/dom/attr.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/fileinfo.c
+      ext/filter/filter.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/interbase/interbase.c
+      ext/intl/php_intl.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator_class.c
+      ext/intl/collator/collator_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/json/json.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/msql/php_msql.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_fe.c
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/007.phpt
+      ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/bug27103.phpt
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/pcre/tests/invalid_utf8_offset.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/preg_replace2.phpt
+      ext/pcre/tests/recursion_limit.phpt
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/user_filters.c
+      ext/standard/user_filters.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/milter/php_milter.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      - Revert ZEND_BEGIN_ARG_INFO change
+
+2008-11-02  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/gettext/gettext.c:
+      fix build
+
+2008-11-02  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug46196.phpt:
+      MFH: XFAIL test for bug #46196 on restore_error_handler().
+
+    * ZendEngine2/tests/bug46196.phpt
+      ZendEngine2/tests/bug46196.phpt:
+      
+      XFAIL test for bug #46196 on restore_error_handler().
+
+2008-11-02  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Backported str_getcsv() into 5.3
+
+    * NEWS:
+      - Remove str_getcsv() entry. (Backported to 5.3)
+
+    * ext/standard/tests/strings/str_getcsv_001.phpt
+      ext/standard/tests/strings/str_getcsv_001.phpt:
+      
+      - New test
+
+2008-11-02  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/fileinfo/data_file.c
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/libmagic/elfclass.h
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/patchlevel.h
+      ext/fileinfo/libmagic/readelf.c
+      ext/fileinfo/libmagic/readelf.h
+      ext/fileinfo/libmagic/softmagic.c
+      ext/fileinfo/tests/finfo_file_basic.phpt
+      ext/fileinfo/tests/magic:
+      MFH: Sync libmagic with 4.26 and add support for the new v6 magic file
+      format
+
+    * ext/fileinfo/data_file.c
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/ascmagic.c
+      ext/fileinfo/libmagic/elfclass.h
+      ext/fileinfo/libmagic/file.h
+      ext/fileinfo/libmagic/magic.c
+      ext/fileinfo/libmagic/patchlevel.h
+      ext/fileinfo/libmagic/readelf.c
+      ext/fileinfo/libmagic/readelf.h
+      ext/fileinfo/libmagic/softmagic.c
+      ext/fileinfo/tests/finfo_file_basic.phpt
+      ext/fileinfo/tests/magic:
+      Update libmagic to 4.26 and add support for v6 of the magic file format.
+
+2008-11-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      tests/basic/.cvsignore:
+      - Ignore crap
+
+    * (PHP_5_3)
+      NEWS:
+      - Done in 5.2.7
+
+    * (PHP_5_2)
+      NEWS
+      main/main.c:
+      MF53: added missing constants
+
 2008-11-01  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/gettext/gettext.c:

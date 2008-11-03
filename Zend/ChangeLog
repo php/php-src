@@ -1,3 +1,39 @@
+2008-11-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h:
+      sync zend_ini_scanner.c
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      Fixed bug #44575 (parse_ini_file comment # line problems)
+      [DOC] parse_ini_file(): comments starting with # are deprecated in PHP 5.3
+            (comments starting with ; should be used instead)
+
+2008-11-02  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_interfaces.c
+      zend_interfaces.c:
+      - Revert ZEND_BEGIN_ARG_INFO change
+
+2008-11-02  Felix De Vliegher  <felix.devliegher@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug46196.phpt:
+      MFH: XFAIL test for bug #46196 on restore_error_handler().
+
+    * tests/bug46196.phpt
+      tests/bug46196.phpt:
+      
+      XFAIL test for bug #46196 on restore_error_handler().
+
 2008-10-31  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
