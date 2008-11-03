@@ -1964,7 +1964,7 @@ consult the installation file that came with this distribution, or visit \n\
 			/* #!php support */
 			c = fgetc(file_handle.handle.fp);
 			if (c == '#') {
-				while (c != '\n' && c != '\r') {
+				while (c != '\n' && c != '\r' && c != EOF) {
 					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
 				}
 				/* handle situations where line is terminated by \r\n */

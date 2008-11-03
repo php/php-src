@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed bug #46406 (Unregistering nodeclass throws E_FATAL). (Rob)
 - Fixed bug #46389 (NetWare needs small patch for _timezone).
   (patch by guenter@php.net)
+- Fixed bug #46379 (Infinite loop when parsing '#' in one line file). (Arnaud)
 - Fixed bug #46388 (stream_notification_callback inside of object destroys 
   object variables). (Felipe)
 - Fixed bug #46381 (wrong $this passed to internal methods causes segfault). 
