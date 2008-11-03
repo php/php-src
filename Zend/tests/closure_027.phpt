@@ -25,7 +25,7 @@ NULL
 
 Notice: Undefined variable: y in %s on line %d
 
-Warning: Missing argument 1 for (), called in %s on line %d and defined in %s on line %d
+Warning: Missing argument 1 for {closure}(), called in %s on line %d and defined in %s on line %d
 NULL
 
 Catchable fatal error: Argument 1 passed to test() must be an instance of Closure, instance of stdClass given, called in %s on line %d and defined in %s on line %d
