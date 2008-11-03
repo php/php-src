@@ -1,5 +1,11 @@
 --TEST--
 preg_replace() and invalid UTF8 offset
+--SKIPIF--
+<?php
+if (@preg_match('/./u', '') === false) {
+	die('skip no utf8 support in PCRE library');
+}
+?>
 --FILE--
 <?php
 
