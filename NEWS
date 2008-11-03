@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   (Arnaud)
 - Fixed bug #44938 (gettext functions crash with overly long domain).
   (Christian Schneider, Ilia)
+- Fixed bug #44607 (stream_get_line unable to correctly identify the "ending"
+  in the stream content). (Arnaud)
 - Fixed bug #44327 (PDORow::queryString property & numeric offsets / Crash).
   (Felipe)
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
