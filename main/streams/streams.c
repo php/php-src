@@ -551,16 +551,16 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 		efree(chunk_buf);
 	} else {	/* Unfiltered Binary stream */
+		/* reduce buffer memory consumption if possible, to avoid a realloc */
+		if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
+			memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
+			stream->writepos -= stream->readpos;
+			stream->readpos = 0;
+		}
 		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
+		while (stream->writepos - stream->readpos < (off_t)size) {
 			size_t justread = 0;
-
-			/* reduce buffer memory consumption if possible, to avoid a realloc */
-			if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
-				stream->writepos -= stream->readpos;
-				stream->readpos = 0;
-			}
+			size_t toread;
 
 			/* grow the buffer if required
 			 * TODO: this can fail for persistent streams */
@@ -569,9 +569,14 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 				stream->readbuf.s = (char*)perealloc(stream->readbuf.s, stream->readbuflen, stream->is_persistent);
 			}
 
-			justread = stream->ops->read(stream, stream->readbuf.s + stream->writepos, stream->readbuflen - stream->writepos TSRMLS_CC);
-			if (justread != (size_t)-1 && justread != 0) {
+			toread = stream->readbuflen - stream->writepos;
+			justread = stream->ops->read(stream, stream->readbuf.s + stream->writepos, toread TSRMLS_CC);
+
+			if (justread != (size_t)-1) {
 				stream->writepos += justread;
+			}
+			if (stream->eof || justread != toread) {
+				break;
 			}
 		}
 	}
