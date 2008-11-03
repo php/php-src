@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
+- Fixed bug #42855 (dns_get_record() doesn't return all text from TXT record).
+  (a dot u dot savchuk at gmail dot com)
 - Fixed bug #42718 (FILTER_UNSAFE_RAW not applied when configured as default
   filter). (Arnaud)
 - Fixed bug #42294 (Unified solution for round() based on C99 round). (Ilia)
