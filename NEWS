@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   dynamicly created property). (Felipe)
 - Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone() behave
   different). (Derick)
+- Fixed bug #45303 (Opening php:// wrapper in append mode results in a warning).
+  (Arnaud)
 - Fixed bug #44938 (gettext functions crash with overly long domain).
   (Christian Schneider, Ilia)
 - Fixed bug #44327 (PDORow::queryString property & numeric offsets / Crash).
