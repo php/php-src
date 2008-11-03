@@ -14,6 +14,7 @@ var_dump(strlen(stream_get_line($fd, 15000, $eol)));
 fseek($fd, 1, SEEK_SET);
 var_dump(strlen(stream_get_line($fd, 15000, $eol)));
 var_dump(strlen(stream_get_line($fd, 15000, $eol)));
+unlink($tempnam);
 ?>
 --EXPECT--
 int(14000)
