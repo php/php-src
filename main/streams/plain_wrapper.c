@@ -239,6 +239,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 #ifdef ESPIPE
 			if (stream->position == (off_t)-1 && errno == ESPIPE) {
 				stream->position = 0;
+				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 				self->is_pipe = 1;
 			}
 #endif
