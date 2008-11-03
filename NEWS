@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   filter). (Arnaud)
 - Fixed bug #42294 (Unified solution for round() based on C99 round). (Ilia)
 
+- Fixed endless loop in PDOStatement::debugDumpParams().
+  (jonah.harris at gmail dot com)
 - Fixed ability to use "internal" heaps in extensions. (Arnaud, Dmitry)
 - Fixed weekdays adding/subtracting algorithm. (Derick)
 - Fixed some ambiguities in the date parser. (Derick)
