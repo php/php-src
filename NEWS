@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   in the stream content). (Arnaud)
 - Fixed bug #44327 (PDORow::queryString property & numeric offsets / Crash).
   (Felipe)
+- Fixed bug #43731 (socket_getpeername: cannot use on stdin with inetd).
+  (Arnaud)
 - Fixed bug #43452 (strings containing a weekday, or a number plus weekday
   behaved incorrect of the current day-of-week was the same as the one in the
   phrase).(Derick)
