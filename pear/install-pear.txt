@@ -1,6 +1,6 @@
 +----------------------------------------------------------------------+
-| The installation process is incomplete. The following resources were |
-| not installed:                                                       |
+| The installation process is not complete. The following resources    |
+| were not installed:                                                  |
 |                                                                      |
 |   PEAR: PHP Extension and Application Repository                     |
 |                                                                      |
