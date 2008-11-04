@@ -1,3 +1,202 @@
+2008-11-03  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/tests/bug44327_3.phpt
+      ext/pdo_sqlite/tests/bug44327_3.phpt
+      ext/pdo_sqlite/tests/bug44327_3.phpt:
+      - Improved fix
+
+2008-11-03  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/tests/file/bug44607.phpt
+      ext/standard/tests/file/bug44607.phpt
+      ext/standard/tests/file/bug44607.phpt:
+      cleanup
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug44607.phpt
+      ext/standard/tests/file/bug44607.phpt
+      main/streams/streams.c
+      main/streams/streams.c:
+      MFH: Fixed bug #44607 (stream_get_line unable to correctly identify the
+      "ending" in the stream content)
+
+    * ext/standard/tests/file/bug44607.phpt
+      ext/standard/tests/file/bug44607.phpt
+      ext/standard/tests/file/bug44607.phpt
+      main/streams/streams.c:
+        1.1.4;
+      Fixed bug #44607 (stream_get_line unable to correctly identify the
+      "ending" in the stream content)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Fixed bug #46379 (Infinite loop when parsing '#' in one line file)
+
+2008-11-03  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo_sqlite/tests/bug44327_2.phpt:
+      - Fix test (string -> unicode)
+
+    * (PHP_5_2)
+      ext/pdo_sqlite/tests/bug44327_2.phpt
+      ext/pdo_sqlite/tests/bug44327_2.phpt:
+      - New test
+
+    * ext/pdo_sqlite/tests/bug44327_2.phpt
+      ext/pdo_sqlite/tests/bug44327_2.phpt
+      ext/pdo_sqlite/tests/bug44327_2.phpt:
+        1.1.4;
+      - New test
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt:
+      MFH:
+      - Fixed endless loop in PDOStatement::debugDumpParams()
+        patch by: Jonah H. Harris <jonah.harris at gmail dot com>
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt:
+      - Fixed endless loop in PDOStatement::debugDumpParams()
+        patch by: Jonah H. Harris <jonah.harris at gmail dot com>
+
+2008-11-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/closure_027.phpt
+      ZendEngine2/tests/closure_032.phpt:
+      MFH: Use a better function name for closure related errors and
+      debug_backtrace()
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/closure_027.phpt
+      ZendEngine2/tests/closure_032.phpt
+      ZendEngine2/tests/closure_032.phpt:
+      Use a better function name for closure related errors and debug_backtrace()
+
+2008-11-03  Elizabeth Marie Smith  <emsmith@elizabethmariesmith.com>
+
+    * win32/build/template.rc:
+      Actual name of the file is WinResRc.h - silly to make people rename their
+      header files
+
+2008-11-03  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/config-win.h:
+      Fix the windows build
+
+2008-11-03  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pgsql/pgsql.c:
+      - Fixed compiler warning
+
+2008-11-03  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug45303.phpt
+      ext/standard/tests/file/bug45303.phpt
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      MFH: Fixed bug #45303 (Opening php:// wrapper in append mode results
+      in a warning)
+
+    * ext/standard/tests/file/bug45303.phpt
+      ext/standard/tests/file/bug45303.phpt
+      ext/standard/tests/file/bug45303.phpt:
+        1.1.4;
+      Fixed bug #45303 (Opening php:// wrapper in append mode results
+      in a warning)
+
+    * main/streams/plain_wrapper.c:
+      Fixed bug #45303 (Opening php:// wrapper in append mode results
+      in a warning)
+
+    * (PHP_5_2)
+      NEWS:
+      credit
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/file/bug43353.phpt
+      ext/standard/tests/file/bug43353.phpt
+      main/streams/streams.c
+      main/streams/streams.c:
+      MFH: Fixed bug #43353 (wrong detection of 'data' wrapper causes notice)
+
+    * ext/standard/tests/file/bug43353.phpt
+      ext/standard/tests/file/bug43353.phpt
+      ext/standard/tests/file/bug43353.phpt
+      main/streams/streams.c:
+        1.1.4;
+      Fixed bug #43353 (wrong detection of 'data' wrapper causes notice)
+
+2008-11-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug44327.phpt
+      ext/pdo_mysql/tests/bug44327.phpt:
+      - MFH: Fixed bug #44327 (PDORow::queryString property & numeric offsets /
+      Crash)
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_mysql/tests/bug44327.phpt
+      ext/pdo_mysql/tests/bug44327.phpt
+      ext/pdo_mysql/tests/bug44327.phpt:
+      - Fixed bug #44327 (PDORow::queryString property & numeric offsets / Crash)
+
+    * (PHP_5_3)
+      run-tests.php
+      ext/pcre/tests/007.phpt
+      ext/pcre/tests/backtrack_limit.phpt
+      ext/pcre/tests/bug27103.phpt
+      ext/pcre/tests/invalid_utf8.phpt
+      ext/pcre/tests/invalid_utf8_offset.phpt
+      ext/pcre/tests/locales.phpt
+      ext/pcre/tests/pcre_anchored.phpt
+      ext/pcre/tests/preg_replace2.phpt
+      ext/pcre/tests/recursion_limit.phpt:
+      - Opss, reverted accidental changes
+
+2008-11-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      NEWS:
+      - Fix order (this is not rocket science.. >:-p )
+
+2008-11-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/dns.c:
+      - MFH: Fixed bug #42855 (dns_get_record() doesn't return all text from TXT
+      record)
+        patch by: a dot u dot savchuk at gmail dot com
+
+    * (PHP_5_3)
+      ext/standard/dns.c:
+      - MFH: Fixed bug #42855 (dns_get_record() doesn't return all text from TXT
+      record)
+        patch by: misc at e2007 dot cynergi dot com
+
+    * ext/standard/dns.c:
+      - Fixed bug #42855 (dns_get_record() doesn't return all text from TXT
+      record)
+        patch by: misc at e2007 dot cynergi dot com
+
 2008-11-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)
