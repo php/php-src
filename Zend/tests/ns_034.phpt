@@ -10,19 +10,19 @@ class Foo {
 function f1($x=Foo::C) {
 	echo $x;
 }
-function f2($x=A::Foo::C) {
+function f2($x=A\Foo::C) {
 	echo $x;
 }
-function f3($x=B::Foo::C) {
+function f3($x=B\Foo::C) {
 	echo $x;
 }
-function f4($x=::A::Foo::C) {
+function f4($x=\A\Foo::C) {
 	echo $x;
 }
 echo Foo::C;
-echo A::Foo::C;
-echo B::Foo::C;
-echo ::A::Foo::C;
+echo A\Foo::C;
+echo B\Foo::C;
+echo \A\Foo::C;
 f1();
 f2();
 f3();

@@ -4,7 +4,7 @@
 <?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
-namespace test::ns1;
+namespace test\ns1;
 
 class Foo implements SplObserver {
 	function update(SplSubject $x) {

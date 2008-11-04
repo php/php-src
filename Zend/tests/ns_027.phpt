@@ -15,10 +15,10 @@ class Foo {
 
 $x = new Foo;
 Foo::Bar();
-$x = new Foo::Bar::Foo;
-Foo::Bar::Foo::Bar();
+$x = new Foo\Bar\Foo;
+Foo\Bar\Foo::Bar();
 --EXPECT--
 Foo
 Foo
-Foo::Bar::Foo
-Foo::Bar::Foo
+Foo\Bar\Foo
+Foo\Bar\Foo

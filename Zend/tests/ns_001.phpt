@@ -2,7 +2,7 @@
 001: Class in namespace
 --FILE--
 <?php
-namespace test::ns1;
+namespace test\ns1;
 
 class Foo {
 
@@ -22,13 +22,13 @@ class Foo {
 $x = new Foo;
 $x->bar();
 Foo::baz();
-$y = new test::ns1::Foo;
+$y = new \test\ns1\Foo;
 $y->bar();
-test::ns1::Foo::baz();
+\test\ns1\Foo::baz();
 --EXPECT--
-test::ns1::Foo
-test::ns1::Foo
-test::ns1::Foo
-test::ns1::Foo
-test::ns1::Foo
-test::ns1::Foo
+test\ns1\Foo
+test\ns1\Foo
+test\ns1\Foo
+test\ns1\Foo
+test\ns1\Foo
+test\ns1\Foo

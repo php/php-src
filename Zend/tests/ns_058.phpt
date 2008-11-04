@@ -10,7 +10,7 @@ function foo() {
 
 class foo {
 	const C = "const ok\n";
-	const C2 = namespace::C;
+	const C2 = namespace\C;
 	static $var = "var ok\n";
 	function __construct() {
 		echo "class ok\n";
@@ -20,26 +20,26 @@ class foo {
 	}
 }
 
-function f1($x=namespace::C) {
+function f1($x=namespace\C) {
 	return $x;
 }
-function f2($x=namespace::foo::C) {
+function f2($x=namespace\foo::C) {
 	return $x;
 }
 
-function f3(namespace::foo $x) {
+function f3(namespace\foo $x) {
 	return "ok\n";
 }
 
-echo namespace::C;
-echo namespace::foo();
-echo namespace::foo::C;
-echo namespace::foo::C2;
-echo namespace::foo::$var;
-echo namespace::foo::bar();
-echo namespace::f1();
-echo namespace::f2();
-echo namespace::f3(new namespace::foo());
+echo namespace\C;
+echo namespace\foo();
+echo namespace\foo::C;
+echo namespace\foo::C2;
+echo namespace\foo::$var;
+echo namespace\foo::bar();
+echo namespace\f1();
+echo namespace\f2();
+echo namespace\f3(new namespace\foo());
 ?>
 --EXPECT--
 const ok

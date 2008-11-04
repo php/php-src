@@ -2,19 +2,19 @@
 055: typehints in namespaces
 --FILE--
 <?php
-namespace test::ns1;
+namespace test\ns1;
 
 class Foo {
 	function test1(Foo $x) {
 		echo "ok\n";
 	}
-	function test2(test::ns1::Foo $x) {
+	function test2(\test\ns1\Foo $x) {
 		echo "ok\n";
 	}
 	function test3(Exception $x) {
 		echo "ok\n";
 	}
-	function test4(::Exception $x) {
+	function test4(\Exception $x) {
 		echo "ok\n";
 	}
 }

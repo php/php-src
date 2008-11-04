@@ -1,5 +1,5 @@
---TEST--                            	
-ZE2 Late Static Binding access to static::const through defined() anf get_constant()
+--TEST--
+ZE2 Late Static Binding access to static::const through defined() and get_constant()
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Bug #43344.12 (Wrong error message for undefined namespace constant)
 --FILE--
 <?php
-function f($a=array(namespace::bar)) {
+function f($a=array(namespace\bar)) {
 	return $a[0];
 }
 echo f()."\n";

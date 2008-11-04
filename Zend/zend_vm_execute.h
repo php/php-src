@@ -768,11 +768,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		}
 		function_name_strval = Z_STRVAL_P(function_name);
 		function_name_strlen = Z_STRLEN_P(function_name);
-		if (function_name_strval[0] == ':' &&
-		    function_name_strval[1] == ':') {
+		if (function_name_strval[0] == '\\') {
 
-		    function_name_strlen -= 2;
-			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
+		    function_name_strlen -= 1;
+			lcname = zend_str_tolower_dup(function_name_strval + 1, function_name_strlen);
 		} else {
 			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
@@ -798,7 +797,7 @@ static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPC
 
 	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc))==FAILURE) {
 		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==FAILURE ||
-		    EX(fbc)->type != ZEND_INTERNAL_FUNCTION) {
+		    (Z_BVAL(op_data->op2.u.constant) && EX(fbc)->type != ZEND_INTERNAL_FUNCTION)) {
 			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL(opline->op2.u.constant));
 		}
 	}
@@ -966,11 +965,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 		}
 		function_name_strval = Z_STRVAL_P(function_name);
 		function_name_strlen = Z_STRLEN_P(function_name);
-		if (function_name_strval[0] == ':' &&
-		    function_name_strval[1] == ':') {
+		if (function_name_strval[0] == '\\') {
 
-		    function_name_strlen -= 2;
-			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
+		    function_name_strlen -= 1;
+			lcname = zend_str_tolower_dup(function_name_strval + 1, function_name_strlen);
 		} else {
 			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
@@ -1072,11 +1070,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		}
 		function_name_strval = Z_STRVAL_P(function_name);
 		function_name_strlen = Z_STRLEN_P(function_name);
-		if (function_name_strval[0] == ':' &&
-		    function_name_strval[1] == ':') {
+		if (function_name_strval[0] == '\\') {
 
-		    function_name_strlen -= 2;
-			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
+		    function_name_strlen -= 1;
+			lcname = zend_str_tolower_dup(function_name_strval + 1, function_name_strlen);
 		} else {
 			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
@@ -1206,11 +1203,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		}
 		function_name_strval = Z_STRVAL_P(function_name);
 		function_name_strlen = Z_STRLEN_P(function_name);
-		if (function_name_strval[0] == ':' &&
-		    function_name_strval[1] == ':') {
+		if (function_name_strval[0] == '\\') {
 
-		    function_name_strlen -= 2;
-			lcname = zend_str_tolower_dup(function_name_strval + 2, function_name_strlen);
+		    function_name_strlen -= 1;
+			lcname = zend_str_tolower_dup(function_name_strval + 1, function_name_strlen);
 		} else {
 			lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 		}
@@ -2604,15 +2600,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -2738,46 +2727,50 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 	zend_op *opline = EX(opline);
 
 	if (IS_CONST == IS_UNUSED) {
-		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+		/* namespaced constant */
+		if (!zend_get_constant_ex(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+			char *actual = Z_STRVAL(opline->op2.u.constant);
+
+			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
+				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
+				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
+				efree(Z_STRVAL(opline->op2.u.constant));
+				Z_STRVAL(opline->op2.u.constant) = actual;
 			}
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRVAL(opline->op2.u.constant));
-			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			if (Z_STRVAL(opline->op2.u.constant)[0] == '\\') {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant)+1,
+						Z_STRVAL(opline->op2.u.constant)+1);
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant)+1,
+					Z_STRVAL(opline->op2.u.constant)+1);
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+				++Z_STRVAL(EX_T(opline->result.u.var).tmp_var);
+				--Z_STRLEN(EX_T(opline->result.u.var).tmp_var);
+			} else {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant),
+						Z_STRVAL(opline->op2.u.constant));
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant),
+					Z_STRVAL(opline->op2.u.constant));
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			}
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
+		/* class constant */
 		zend_class_entry *ce;
 		zval **value;
 
 		if (IS_CONST == IS_CONST) {
-			zend_op *op_data = opline + 1;
-			zend_constant *c;
 
-			ZEND_VM_INC_OPCODE();
-
-			/* try a constant in namespace */
-			if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
-				EX_T(opline->result.u.var).tmp_var = c->value;
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				ZEND_VM_NEXT_OPCODE();
-			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
-				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						Z_STRVAL(opline->op2.u.constant),
-						Z_STRVAL(opline->op2.u.constant));
-					EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
-					zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				}
-				ZEND_VM_NEXT_OPCODE();
-			}
-
-			/* no constant found. try a constant in class */
 			ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 			if (!ce) {
 				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));
@@ -3200,15 +3193,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST && IS_TMP_VAR == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -3676,15 +3662,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST && IS_VAR == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -3908,15 +3887,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST && IS_UNUSED == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -4352,15 +4324,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_CONST == IS_CONST && IS_CV == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -10345,15 +10310,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST && IS_CONST == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -10479,46 +10437,50 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 	zend_op *opline = EX(opline);
 
 	if (IS_VAR == IS_UNUSED) {
-		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+		/* namespaced constant */
+		if (!zend_get_constant_ex(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+			char *actual = Z_STRVAL(opline->op2.u.constant);
+
+			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
+				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
+				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
+				efree(Z_STRVAL(opline->op2.u.constant));
+				Z_STRVAL(opline->op2.u.constant) = actual;
 			}
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRVAL(opline->op2.u.constant));
-			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			if (Z_STRVAL(opline->op2.u.constant)[0] == '\\') {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant)+1,
+						Z_STRVAL(opline->op2.u.constant)+1);
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant)+1,
+					Z_STRVAL(opline->op2.u.constant)+1);
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+				++Z_STRVAL(EX_T(opline->result.u.var).tmp_var);
+				--Z_STRLEN(EX_T(opline->result.u.var).tmp_var);
+			} else {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant),
+						Z_STRVAL(opline->op2.u.constant));
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant),
+					Z_STRVAL(opline->op2.u.constant));
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			}
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
+		/* class constant */
 		zend_class_entry *ce;
 		zval **value;
 
 		if (IS_VAR == IS_CONST) {
-			zend_op *op_data = opline + 1;
-			zend_constant *c;
 
-			ZEND_VM_INC_OPCODE();
-
-			/* try a constant in namespace */
-			if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
-				EX_T(opline->result.u.var).tmp_var = c->value;
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				ZEND_VM_NEXT_OPCODE();
-			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
-				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						Z_STRVAL(opline->op2.u.constant),
-						Z_STRVAL(opline->op2.u.constant));
-					EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
-					zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				}
-				ZEND_VM_NEXT_OPCODE();
-			}
-
-			/* no constant found. try a constant in class */
 			ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 			if (!ce) {
 				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));
@@ -12199,15 +12161,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST && IS_TMP_VAR == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -14033,15 +13988,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST && IS_VAR == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -14960,15 +14908,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST && IS_UNUSED == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -16481,15 +16422,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (IS_VAR == IS_CONST && IS_CV == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
 
 		ZEND_VM_INC_OPCODE();
-
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
 
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
@@ -17850,46 +17784,50 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 	zend_op *opline = EX(opline);
 
 	if (IS_UNUSED == IS_UNUSED) {
-		if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-			if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-				zend_error_noreturn(E_ERROR, "Undefined constant '%s'", Z_STRVAL(opline->op2.u.constant));
+		/* namespaced constant */
+		if (!zend_get_constant_ex(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
+			char *actual = Z_STRVAL(opline->op2.u.constant);
+
+			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
+				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
+				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
+				efree(Z_STRVAL(opline->op2.u.constant));
+				Z_STRVAL(opline->op2.u.constant) = actual;
 			}
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-				Z_STRVAL(opline->op2.u.constant),
-				Z_STRVAL(opline->op2.u.constant));
-			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			if (Z_STRVAL(opline->op2.u.constant)[0] == '\\') {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant)+1,
+						Z_STRVAL(opline->op2.u.constant)+1);
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant)+1,
+					Z_STRVAL(opline->op2.u.constant)+1);
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+				++Z_STRVAL(EX_T(opline->result.u.var).tmp_var);
+				--Z_STRLEN(EX_T(opline->result.u.var).tmp_var);
+			} else {
+				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+						Z_STRVAL(opline->op2.u.constant),
+						Z_STRVAL(opline->op2.u.constant));
+				}
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					Z_STRVAL(opline->op2.u.constant),
+					Z_STRVAL(opline->op2.u.constant));
+				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+			}
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
+		/* class constant */
 		zend_class_entry *ce;
 		zval **value;
 
 		if (IS_UNUSED == IS_CONST) {
-			zend_op *op_data = opline + 1;
-			zend_constant *c;
 
-			ZEND_VM_INC_OPCODE();
-
-			/* try a constant in namespace */
-			if (zend_hash_quick_find(EG(zend_constants), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &c)==SUCCESS) {
-				EX_T(opline->result.u.var).tmp_var = c->value;
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				ZEND_VM_NEXT_OPCODE();
-			} else if ((opline->extended_value & IS_CONSTANT_RT_NS_CHECK) != 0) {
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zend_error_noreturn(E_ERROR, "Undefined constant '%s::%s'", Z_STRVAL(opline->op1.u.constant), Z_STRVAL(opline->op2.u.constant));
-				} else if (!zend_get_constant(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						Z_STRVAL(opline->op2.u.constant),
-						Z_STRVAL(opline->op2.u.constant));
-					EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
-					zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
-				}
-				ZEND_VM_NEXT_OPCODE();
-			}
-
-			/* no constant found. try a constant in class */
 			ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 			if (!ce) {
 				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));

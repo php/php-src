@@ -1,5 +1,5 @@
 <?php
-namespace Foo::Bar;
+namespace Foo\Bar;
 
 class Foo {
   function __construct() {

@@ -359,6 +359,7 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
+void zend_resolve_non_class_name(znode *element_name, ulong *fetch_type, int type, int check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
 ZEND_API char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
@@ -427,7 +428,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, const znode *expr TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
-void zend_do_build_full_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
+void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
