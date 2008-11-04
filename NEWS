@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   circumstances). (Felipe)
 - Fixed bug #46064 (Exception when creating ReflectionProperty object on 
   dynamicly created property). (Felipe)
+- Fixed bug #46024 (stream_select() doesn't return the correct number).
+  (Arnaud)
 - Fixed bug #45529 (new DateTimeZone() and date_create()->getTimezone() behave
   different). (Derick)
 - Fixed bug #45303 (Opening php:// wrapper in append mode results in a warning).
