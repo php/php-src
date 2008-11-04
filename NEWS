@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Upgraded bundled PCRE to version 7.8. (Nuno)
 - Upgraded bundled sqlite to version 3.6.2. (Scott)
 
-- Changed error level E_ERROR into E_WARNING in Soap extension methods 
+- Changed error level E_ERROR into E_WARNING in Soap extension methods
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
 
@@ -61,6 +61,8 @@ PHP                                                                        NEWS
 - Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
 - Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
   chx1975 at gmail dot com)
+- Moved ext/msql extension to PECL (Derick/Lukas):
+
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
 - Removed special treatment of "/tmp" in sessions for open_basedir.
@@ -100,7 +102,7 @@ PHP                                                                        NEWS
 - Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
 - Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
   (Hannes)
-- Fixed bug #45743 (property_exists fails to find static protected member in 
+- Fixed bug #45743 (property_exists fails to find static protected member in
   child class). (Felipe)
 - Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
   (Derick)
@@ -112,10 +114,10 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #45447 (Filesystem time functions on Vista and server 2008).
   (Pierre)
-- Fixed bug #45384 (parse_ini_file will result in parse error with no trailing 
+- Fixed bug #45384 (parse_ini_file will result in parse error with no trailing
   newline). (Arnaud)
 - Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
-- Fixed bug #44842 (parse_ini_file keys that start/end with underscore). 
+- Fixed bug #44842 (parse_ini_file keys that start/end with underscore).
   (Arnaud)
 - Fixed bug #44100 (Inconsistent handling of static array declarations with
   duplicate keys). (Dmitry)
@@ -266,7 +268,7 @@ PHP                                                                        NEWS
   . Added access to internal values of DSA, RSA and DH keys. (Dmitry)
   . Fixed a memory leak on openssl_decrypt(). (Henrique)
   . Fixed segfault caused by openssl_pkey_new(). (Henrique)
-  . Fixed bug caused by uninitilized variables in openssl_pkcs7_encrypt() and 
+  . Fixed bug caused by uninitilized variables in openssl_pkcs7_encrypt() and
     openssl_pkcs7_sign(). (Henrique)
   . Fixed error message in openssl_seal(). (Henrique)
 
@@ -307,8 +309,8 @@ PHP                                                                        NEWS
 - Improved crypt() function: (Pierre)
   . Added Blowfish and extended DES support. (Using Blowfish implementation
     from Solar Designer).
-  . Made crypt features portable by providing our own implementations 
-    for crypt_r and the algorithms which are used when OS does not provide 
+  . Made crypt features portable by providing our own implementations
+    for crypt_r and the algorithms which are used when OS does not provide
     them. PHP implementations are always used for Windows builds.
 
 - Added new extensions:
@@ -415,7 +417,7 @@ PHP                                                                        NEWS
 - Fixed bug #45179 (--with-mysql-sock fails to compile & work). (Andrey)
 - Fixed bug #45038 (Crash when using DateTimeZone object returned by
   Date::getTimezone). (Joe Orton, Derick)
-- Fixed bug #45030 (Destination image alpha channel noise when using 
+- Fixed bug #45030 (Destination image alpha channel noise when using
   imagecopyresampled). (Pierre)
 - Fixed bug #44769 (declaring private magic methods should throw error).
   (Felipe)
