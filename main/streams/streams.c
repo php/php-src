@@ -881,6 +881,9 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		}
 
 		if (!e) {
+			if (seek_len < maxlen && !stream->eof) {
+				return NULL;
+			}
 			toread = maxlen;
 		} else {
 			toread = e - (char *) stream->readbuf - stream->readpos;
