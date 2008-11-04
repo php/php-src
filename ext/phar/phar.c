@@ -3671,6 +3671,9 @@ static zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("standard")
+#if HAVE_HASH
+	ZEND_MOD_REQUIRED("hash")
+#endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif
