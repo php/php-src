@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Upgraded bundled PCRE to version 7.8. (Nuno)
 - Upgraded bundled sqlite to version 3.6.2. (Scott)
 
+- Moved ext/msql to PECL. (Derick, Lukas)
+
 - Changed error level E_ERROR into E_WARNING in Soap extension methods
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
@@ -61,7 +63,6 @@ PHP                                                                        NEWS
 - Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
 - Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
   chx1975 at gmail dot com)
-- Moved ext/msql extension to PECL (Derick/Lukas):
 
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
