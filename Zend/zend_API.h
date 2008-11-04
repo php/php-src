@@ -60,7 +60,7 @@ typedef struct _zend_fcall_info_cache {
 	zval **object_pp;
 } zend_fcall_info_cache;
 
-#define ZEND_NS_NAME(ns, name)			ns"::"name
+#define ZEND_NS_NAME(ns, name)			ns"\\"name
 
 #define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name

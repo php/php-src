@@ -11,19 +11,19 @@ function test1(bar $bar) {
 	echo "ok\n";
 }
 
-function test2(foo::bar $bar) {
+function test2(\foo\bar $bar) {
         echo "ok\n";
 }
-function test3(::foo::bar $bar) {
+function test3(\foo\bar $bar) {
         echo "ok\n";
 }
-function test4(::Exception $e) {
+function test4(\Exception $e) {
 	echo "ok\n";
 }
 function test5(Exception $e) {
 	echo "ok\n";
 }
-function test6(::bar $bar) {
+function test6(\bar $bar) {
         echo "bug\n";
 }
 
@@ -42,4 +42,4 @@ ok
 ok
 ok
 
-Catchable fatal error: Argument 1 passed to foo::test6() must be an instance of bar, instance of foo::bar given, called in %sbug42802.php on line 23
+Catchable fatal error: Argument 1 passed to foo\test6() must be an instance of bar, instance of foo\bar given, called in %sbug42802.php on line 23

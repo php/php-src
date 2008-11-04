@@ -10,4 +10,4 @@ const foo = 2;
 
 ?>
 --EXPECTF--
-Notice: Constant foo::foo already defined in %s on line %d
+Notice: Constant foo\foo already defined in %s on line %d

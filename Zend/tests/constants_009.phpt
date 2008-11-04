@@ -3,7 +3,7 @@ Accessing constants inside namespace
 --FILE--
 <?php
 
-namespace foo::x;
+namespace foo\x;
 
 const x = 2;
 
@@ -12,8 +12,10 @@ class x {
 }
 
 
-var_dump(namespace::x, x::x, namespace::x::x);
-var_dump(defined('foo::x::x'));
+var_dump(namespace\x,
+x::x,
+namespace\x::x);
+var_dump(defined('foo\x\x'));
 
 ?>
 --EXPECT--

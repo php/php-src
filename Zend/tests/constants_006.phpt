@@ -26,7 +26,7 @@ var_dump(__namespace__);
 string(%d) "%s"
 string(%d) "%s"
 int(%d)
-string(22) "test::foo::__construct"
-string(9) "test::foo"
+string(21) "test\foo::__construct"
+string(8) "test\foo"
 string(11) "__construct"
 string(4) "test"

@@ -1794,8 +1794,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 	if (scope) {
 		class_name_len = strlen(scope->name);
-		if ((lc_class_name = zend_memrchr(scope->name, ':', class_name_len))) {
-			lc_class_name++;
+		if ((lc_class_name = zend_memrchr(scope->name, '\\', class_name_len))) {
+			++lc_class_name;
 			class_name_len -= (lc_class_name - scope->name);
 			lc_class_name = zend_str_tolower_dup(lc_class_name, class_name_len);
 		} else {
@@ -2394,13 +2394,11 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	fcc->function_handler = NULL;
 
 	if (!ce_org) {
-		/* Skip leading :: */
-		if (Z_STRVAL_P(callable)[0] == ':' &&
-			Z_STRVAL_P(callable)[1] == ':'
-		) {
-			mlen = Z_STRLEN_P(callable) - 2;
-			mname = Z_STRVAL_P(callable) + 2;
-			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 2, mlen);
+		/* Skip leading \ */
+		if (Z_STRVAL_P(callable)[0] == '\\') {
+			mlen = Z_STRLEN_P(callable) - 1;
+			mname = Z_STRVAL_P(callable) + 1;
+			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 1, mlen);
 		} else {
 			mlen = Z_STRLEN_P(callable);
 			mname = Z_STRVAL_P(callable);

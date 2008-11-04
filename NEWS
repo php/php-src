@@ -157,7 +157,7 @@ PHP                                                                        NEWS
   . Improved syntax highlighting and consistency for variables in double-quoted
     strings and literal text in HEREDOCs and backticks. (Matt)
   . Added "?:" operator. (Marcus)
-  . Added support for namespaces. (Dmitry, Stas, Gregory)
+  . Added support for namespaces. (Dmitry, Stas, Gregory, Marcus)
   . Added support for Late Static Binding. (Dmitry, Etienne Kneuss)
   . Added support for __callStatic() magic method. (Sara)
   . Added forward_static_call(_array) to complete LSB. (Mike Lively)

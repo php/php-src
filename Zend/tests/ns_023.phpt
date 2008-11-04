@@ -2,10 +2,10 @@
 023: __NAMESPACE__ constant
 --FILE--
 <?php
-namespace test::foo;
+namespace test\foo;
 
 var_dump(__NAMESPACE__);
 --EXPECT--
-string(9) "test::foo"
+string(8) "test\foo"
 --UEXPECT--
-unicode(9) "test::foo"
+unicode(8) "test\foo"

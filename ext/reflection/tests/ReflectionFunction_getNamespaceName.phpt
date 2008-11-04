@@ -2,7 +2,7 @@
 ReflectionFunction::getNamespaceName()
 --FILE--
 <?php
-namespace A::B;
+namespace A\B;
 function foo() {}
 
 $function = new ReflectionFunction('sort');
@@ -11,7 +11,7 @@ var_dump($function->getName());
 var_dump($function->getNamespaceName());
 var_dump($function->getShortName());
 
-$function = new ReflectionFunction('A::B::foo');
+$function = new ReflectionFunction('A\\B\\foo');
 var_dump($function->inNamespace());
 var_dump($function->getName());
 var_dump($function->getNamespaceName());
@@ -23,7 +23,7 @@ string(4) "sort"
 string(0) ""
 string(4) "sort"
 bool(true)
-string(9) "A::B::foo"
-string(4) "A::B"
+string(7) "A\B\foo"
+string(3) "A\B"
 string(3) "foo"
 

@@ -15,9 +15,9 @@ function foo() {
 }
 
 foo();
-test::foo();
-test::test::foo();
+\test\foo();
+\test\test::foo();
 --EXPECT--
-test::foo
-test::foo
-test::Test::foo
+test\foo
+test\foo
+test\Test::foo

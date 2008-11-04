@@ -2,7 +2,7 @@
 025: Name ambiguity (class name & part of namespace name)
 --FILE--
 <?php
-namespace Foo::Bar;
+namespace Foo\Bar;
 
 class Foo {
   function __construct() {
@@ -15,10 +15,10 @@ class Foo {
 
 $x = new Foo;
 Foo::Bar();
-$x = new Foo::Bar::Foo;
-Foo::Bar::Foo::Bar();
+$x = new \Foo\Bar\Foo;
+\Foo\Bar\Foo::Bar();
 --EXPECT--
-Foo::Bar::Foo
-Foo::Bar::Foo
-Foo::Bar::Foo
-Foo::Bar::Foo
+Foo\Bar\Foo
+Foo\Bar\Foo
+Foo\Bar\Foo
+Foo\Bar\Foo

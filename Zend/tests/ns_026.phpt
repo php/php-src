@@ -18,13 +18,16 @@ function Bar() {
 }
 
 $x = new Foo;
-Foo::Bar();
-$x = new Foo::Foo;
-Foo::Foo::Bar();
-::Foo::Bar();
---EXPECT--
-Method - Foo::Foo::__construct
-Func   - Foo::Bar
-Method - Foo::Foo::__construct
-Method - Foo::Foo::Bar
-Func   - Foo::Bar
+\Foo\Bar();
+$x = new \Foo\Foo;
+\Foo\Foo::Bar();
+\Foo\Bar();
+Foo\Bar();
+--EXPECTF--
+Method - Foo\Foo::__construct
+Func   - Foo\Bar
+Method - Foo\Foo::__construct
+Method - Foo\Foo::Bar
+Func   - Foo\Bar
+
+Fatal error: Call to undefined function Foo\Foo\Bar() in %sns_026.php on line %d

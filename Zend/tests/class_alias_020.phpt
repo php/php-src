@@ -9,25 +9,25 @@ namespace foo;
 class foo {
 }
 
-class_alias(__NAMESPACE__ .'::foo', 'foo');
+class_alias(__NAMESPACE__ .'\foo', 'foo');
 
-namespace foo::bar;
+namespace foo\bar;
 
 class foo { 
 }
 
-class_alias(__NAMESPACE__ .'::foo', 'bar');
+class_alias(__NAMESPACE__ .'\foo', 'bar');
 
 
-var_dump(new ::foo, new ::bar);
+var_dump(new \foo, new \bar);
 
-var_dump(new foo::foo, new foo::bar);
+var_dump(new \foo\foo, new \foo\bar);
 
 ?>
 --EXPECTF--
-object(foo::foo)#1 (0) {
+object(foo\foo)#1 (0) {
 }
-object(foo::bar::foo)#2 (0) {
+object(foo\bar\foo)#2 (0) {
 }
 
-Fatal error: Class 'foo::bar' not found in %s on line %d
+Fatal error: Class 'foo\bar' not found in %s on line %d

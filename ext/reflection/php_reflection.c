@@ -2714,8 +2714,8 @@ ZEND_METHOD(reflection_function, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (colon = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -2728,17 +2728,17 @@ ZEND_METHOD(reflection_function, inNamespace)
 ZEND_METHOD(reflection_function, getNamespaceName)
 {
 	zval **name;
-	char *colon;
+	char *backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(Z_STRVAL_PP(name), colon - Z_STRVAL_PP(name) - 1, 1);
+		RETURN_STRINGL(Z_STRVAL_PP(name), backslash - Z_STRVAL_PP(name), 1);
 	}
 	RETURN_EMPTY_STRING();
 }
@@ -2749,17 +2749,17 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 ZEND_METHOD(reflection_function, getShortName)
 {
 	zval **name;
-	char *colon;
+	char *backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(colon + 1, Z_STRLEN_PP(name) - (colon - Z_STRVAL_PP(name) + 1), 1);
+		RETURN_STRINGL(backslash + 1, Z_STRLEN_PP(name) - (backslash - Z_STRVAL_PP(name) + 1), 1);
 	}
 	RETURN_ZVAL(*name, 1, 0);
 }
@@ -4032,8 +4032,8 @@ ZEND_METHOD(reflection_class, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (colon = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -4046,17 +4046,17 @@ ZEND_METHOD(reflection_class, inNamespace)
 ZEND_METHOD(reflection_class, getNamespaceName)
 {
 	zval **name;
-	char *colon;
+	char *backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(Z_STRVAL_PP(name), colon - Z_STRVAL_PP(name) - 1, 1);
+		RETURN_STRINGL(Z_STRVAL_PP(name), backslash - Z_STRVAL_PP(name), 1);
 	}
 	RETURN_EMPTY_STRING();
 }
@@ -4067,17 +4067,17 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 ZEND_METHOD(reflection_class, getShortName)
 {
 	zval **name;
-	char *colon;
+	char *backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon > Z_STRVAL_PP(name) && *(colon-1) == ':')
+		&& (backslash = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(colon + 1, Z_STRLEN_PP(name) - (colon - Z_STRVAL_PP(name) + 1), 1);
+		RETURN_STRINGL(backslash + 1, Z_STRLEN_PP(name) - (backslash - Z_STRVAL_PP(name) + 1), 1);
 	}
 	RETURN_ZVAL(*name, 1, 0);
 }

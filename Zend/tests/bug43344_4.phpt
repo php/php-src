@@ -9,4 +9,4 @@ function f($a=array(Foo::bar)) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Class 'Foo::Foo' not found in %sbug43344_4.php on line %d
+Fatal error: Class 'Foo\Foo' not found in %sbug43344_4.php on line %d
