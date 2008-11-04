@@ -1,3 +1,18 @@
+2008-11-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/closure_027.phpt
+      tests/closure_032.phpt:
+      MFH: Use a better function name for closure related errors and
+      debug_backtrace()
+
+    * zend_compile.c
+      tests/closure_027.phpt
+      tests/closure_032.phpt
+      tests/closure_032.phpt:
+      Use a better function name for closure related errors and debug_backtrace()
+
 2008-11-02  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)
