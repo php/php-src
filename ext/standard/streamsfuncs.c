@@ -836,6 +836,12 @@ PHP_FUNCTION(stream_select)
 
 		retval = stream_array_emulate_read_fd_set(r_array TSRMLS_CC);
 		if (retval > 0) {
+			if (w_array != NULL) {
+				zend_hash_clean(Z_ARRVAL_P(w_array));
+			}
+			if (e_array != NULL) {
+				zend_hash_clean(Z_ARRVAL_P(e_array));
+			}
 			RETURN_LONG(retval);
 		}
 	}
