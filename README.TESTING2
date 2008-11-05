@@ -1,11 +1,11 @@
 [IMPORTANT NOTICE]
 ------------------
 This is an addendum to README.TESTING with additional information 
-specific to run-tests2.php.
+specific to server-tests.php.
 
-run-tests2.php is backward compatible with tests developed for
-the original run-tests.php script.  run-tests2 is *not* used by
-'make test'.  run-tests2 was developed to provide support for
+server-tests.php is backward compatible with tests developed for
+the original run-tests.php script.  server-tests is *not* used by
+'make test'.  server-tests was developed to provide support for
 testing PHP under it's primary environment, HTTP, and can run the
 PHP tests under any of the SAPI modules that are direct executables, 
 or are accessable via HTTP.
@@ -13,12 +13,12 @@ or are accessable via HTTP.
 [New features]
 ----------------
 * Command line interface:
-  You can run 'php run-tests2.php -h' to get all the possible options.
+  You can run 'php server-tests.php -h' to get all the possible options.
 * Configuration file:
   the -c argument will allow you to use a configuration file.  This is
   handy if you are testing multiple environments and need various options
   depending on the environment.
-  see run-tests-config.php for details.
+  see server-tests-config.php for details.
 * CGI Emulation:
   Will emulate a CGI environment when testing with the cgi sapi executable.
 * HTTP testing:
@@ -39,23 +39,23 @@ make testing work.
 Some (but not all!) examples of usage:
 
 1. run tests from the php source directory
-    php run-tests2.php -p /path/to/php-cli
+    php server-tests.php -p /path/to/php-cli
 
 2. run tests using cgi emulation
-    php run-tests2.php -p /path/to/php-cgi
+    php server-tests.php -p /path/to/php-cgi
 
 3. run tests over http, copying test files into document root
-    php run-tests2.php -w -u http://localhost/test -m /path/to/htdocs/test
+    php server-tests.php -w -u http://localhost/test -m /path/to/htdocs/test
 
 4. run tests over http, php sources have been aliased in web server
-    php run-tests2.php -w -u http://localhost/test
+    php server-tests.php -w -u http://localhost/test
     
 5. run tests using configuration file
-    php run-tests2.php -c /path/to/run-tests-config.php
+    php server-tests.php -c /path/to/server-tests-config.php
 
 6. run tests using configuration file, but overriding some settings:
    (config file must be first)
-    php run-tests2.php -c /path/to/run-tests-config.php -w -t 3 -d /path/to/testdir
+    php server-tests.php -c /path/to/server-tests-config.php -w -t 3 -d /path/to/testdir
 
 NOTE: configuration as described in README.TESTING still works.
 
@@ -63,7 +63,7 @@ NOTE: configuration as described in README.TESTING still works.
 ----------------
 In addition to the traditional test sections 
 (see http://qa.php.net/write-test.php), several new sections are available 
-under run-tests2.
+under server-tests.
 
 --POST--
 This is not a new section, but not multipart posts are supported for testing
@@ -97,7 +97,7 @@ include:
   $scriptname   this is what will become SCRIPT_NAME unless you override it
   $docroot      the equivelant of DOCUMENT_ROOT under Apache
   $cwd          the directory that the test is being initiated from
-  $this->conf   all run-tests2 configuration vars
+  $this->conf   all server-tests configuration vars
   $this->env    all environment variables that will get passed to the test
 
 
