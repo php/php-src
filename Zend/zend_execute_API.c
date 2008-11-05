@@ -520,7 +520,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				char *save = actual;
 				int actual_len = Z_STRLEN_P(p);
 				if (Z_TYPE_P(p) & IS_CONSTANT_RT_NS_CHECK) {
-					actual = zend_memrchr(actual, '\\', actual_len) + 1;
+					actual = (char *)zend_memrchr(actual, '\\', actual_len) + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						actual = estrndup(actual, actual_len);
@@ -613,7 +613,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					str_index = colon;
 				} else {
 					if (str_index[str_index_len - 2] & IS_CONSTANT_RT_NS_CHECK) {
-						actual = zend_memrchr(str_index, '\\', str_index_len - 3) + 1;
+						actual = (char *)zend_memrchr(str_index, '\\', str_index_len - 3) + 1;
 						str_index_len -= (actual - str_index);
 						str_index = actual;
 					}

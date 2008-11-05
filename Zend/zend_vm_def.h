@@ -2977,7 +2977,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			char *actual = Z_STRVAL(opline->op2.u.constant);
 
 			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
-				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				actual = (char *)zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
 				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
 				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
 				efree(Z_STRVAL(opline->op2.u.constant));

@@ -2732,7 +2732,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			char *actual = Z_STRVAL(opline->op2.u.constant);
 
 			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
-				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				actual = (char *)zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
 				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
 				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
 				efree(Z_STRVAL(opline->op2.u.constant));
@@ -10442,7 +10442,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			char *actual = Z_STRVAL(opline->op2.u.constant);
 
 			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
-				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				actual = (char *)zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
 				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
 				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
 				efree(Z_STRVAL(opline->op2.u.constant));
@@ -17789,7 +17789,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			char *actual = Z_STRVAL(opline->op2.u.constant);
 
 			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
-				actual = zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
+				actual = (char *)zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
 				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
 				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
 				efree(Z_STRVAL(opline->op2.u.constant));
