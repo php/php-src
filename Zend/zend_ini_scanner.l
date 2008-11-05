@@ -188,7 +188,7 @@ int zend_ini_scanner_get_lineno(TSRMLS_D)
 */
 char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
-	return ini_filename;
+	return ini_filename ? ini_filename : "Unknown";
 }
 /* }}} */
 
@@ -481,7 +481,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 }
 
 <INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
-	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", ini_filename, SCNG(lineno));
+	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(TSRMLS_C), SCNG(lineno));
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
 	return END_OF_LINE;
