@@ -1,3 +1,143 @@
+2008-11-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug43332_2.phpt:
+      - Fixed tests
+
+2008-11-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug42802.phpt
+      tests/bug42819.phpt
+      tests/bug42820.phpt
+      tests/bug42859.phpt
+      tests/bug43183.phpt
+      tests/bug43332_1.phpt
+      tests/bug43332_2.phpt
+      tests/bug43343.phpt
+      tests/bug43344_10.phpt
+      tests/bug43344_11.phpt
+      tests/bug43344_12.phpt
+      tests/bug43344_13.phpt
+      tests/bug43344_2.phpt
+      tests/bug43344_3.phpt
+      tests/bug43344_4.phpt
+      tests/bug43344_5.phpt
+      tests/bug43344_6.phpt
+      tests/bug43344_7.phpt
+      tests/bug43344_8.phpt
+      tests/bug43344_9.phpt
+      tests/bug43651.phpt
+      tests/bug44653.phpt
+      tests/class_alias_012.phpt
+      tests/class_alias_013.phpt
+      tests/class_alias_015.phpt
+      tests/class_alias_016.phpt
+      tests/class_alias_019.phpt
+      tests/class_alias_020.phpt
+      tests/class_alias_021.phpt
+      tests/class_constants_004.phpt
+      tests/class_exists_001.phpt
+      tests/constants_003.phpt
+      tests/constants_004.phpt
+      tests/constants_006.phpt
+      tests/constants_009.phpt
+      tests/inter_02.phpt
+      tests/interface_exists_002.phpt
+      tests/lsb_014.phpt
+      tests/ns_001.phpt
+      tests/ns_002.phpt
+      tests/ns_003.phpt
+      tests/ns_004.phpt
+      tests/ns_005.phpt
+      tests/ns_006.phpt
+      tests/ns_007.phpt
+      tests/ns_008.phpt
+      tests/ns_009.phpt
+      tests/ns_010.phpt
+      tests/ns_011.phpt
+      tests/ns_012.phpt
+      tests/ns_013.phpt
+      tests/ns_014.phpt
+      tests/ns_015.phpt
+      tests/ns_016.phpt
+      tests/ns_017.phpt
+      tests/ns_018.phpt
+      tests/ns_019.phpt
+      tests/ns_020.phpt
+      tests/ns_021.phpt
+      tests/ns_022.phpt
+      tests/ns_023.phpt
+      tests/ns_025.phpt
+      tests/ns_026.phpt
+      tests/ns_027.inc
+      tests/ns_027.phpt
+      tests/ns_028.phpt
+      tests/ns_029.phpt
+      tests/ns_030.phpt
+      tests/ns_031.phpt
+      tests/ns_032.phpt
+      tests/ns_034.phpt
+      tests/ns_035.phpt
+      tests/ns_036.phpt
+      tests/ns_037.phpt
+      tests/ns_038.phpt
+      tests/ns_040.phpt
+      tests/ns_041.phpt
+      tests/ns_042.phpt
+      tests/ns_043.phpt
+      tests/ns_044.phpt
+      tests/ns_045.phpt
+      tests/ns_046.phpt
+      tests/ns_047.phpt
+      tests/ns_048.phpt
+      tests/ns_049.phpt
+      tests/ns_050.phpt
+      tests/ns_051.phpt
+      tests/ns_052.phpt
+      tests/ns_053.phpt
+      tests/ns_054.phpt
+      tests/ns_055.phpt
+      tests/ns_056.phpt
+      tests/ns_057.phpt
+      tests/ns_058.phpt
+      tests/ns_060.phpt
+      tests/ns_061.phpt
+      tests/ns_062.phpt
+      tests/ns_064.phpt
+      tests/ns_065.inc
+      tests/ns_065.phpt
+      tests/ns_066.phpt
+      tests/ns_067.inc
+      tests/ns_067.phpt:
+      - Next step in namespaces, using / as namespace separator.
+
+    * tests/bug43128.phpt:
+      - Fix test
+
+    * tests/ns_027.inc
+      tests/ns_065.inc
+      tests/ns_067.inc:
+      - MFB dos2unix
+
+    * (PHP_5_3)
+      tests/ns_027.inc
+      tests/ns_065.inc
+      tests/ns_067.inc:
+      - Fix tests: dos2unix
+
 2008-11-03  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
