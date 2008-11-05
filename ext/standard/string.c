@@ -2260,8 +2260,10 @@ PHP_FUNCTION(substr)
 	}
 	
 	f = Z_LVAL_PP(from);
-	if (f > Z_STRLEN_PP(str) || (f < 0 && -f > Z_STRLEN_PP(str))) {
+	if (f > Z_STRLEN_PP(str)) {
 		RETURN_FALSE;
+	} else if (f < 0 && -f > Z_STRLEN_PP(str)) {
+		f = 0;
 	}
 
 	if (l < 0 && (l + Z_STRLEN_PP(str) - f) < 0) {
