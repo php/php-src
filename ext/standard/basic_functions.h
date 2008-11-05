@@ -126,6 +126,7 @@ PHP_FUNCTION(move_uploaded_file);
 
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
+PHP_FUNCTION(parse_ini_string);
 #if ZEND_DEBUG
 PHP_FUNCTION(config_get_hash);
 #endif
