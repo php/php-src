@@ -1,3 +1,322 @@
+2008-11-04  Lukas Smith  <smith@pooteeweet.org>
+
+    * (PHP_5_3)
+      NEWS:
+      fixed ext/msql NEWS entry
+
+    * README.RELEASE_PROCESS:
+      added note about running scripts/dev/credits
+
+    * (PHP_5_3)
+      NEWS:
+      ext/msql is now in PECL starting alpha3 [DOC]
+
+    * ext/msql/.cvsignore
+      ext/msql/CREDITS
+      ext/msql/config.m4
+      ext/msql/config.w32
+      ext/msql/msql.dsp
+      ext/msql/php_msql.c
+      ext/msql/php_msql.h:
+      ext/msql has been moved from php-src to PECL adhead of PHP 5.3
+
+2008-11-04  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN
+
+    * (PHP_5_2)
+      ext/standard/php_fopen_wrapper.c
+      sapi/cli/tests/022.inc
+      sapi/cli/tests/022.phpt:
+      MFH: Open STDIN and php://stdin streams with the relevant
+      wrapper when the file descriptor is a socket (inetd, etc)
+      Fixes bug #43731
+
+    * ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      sapi/cli/tests/022.inc
+      sapi/cli/tests/022.inc
+      sapi/cli/tests/022.inc
+      sapi/cli/tests/022.inc
+      sapi/cli/tests/022.phpt
+      sapi/cli/tests/022.phpt
+      sapi/cli/tests/022.phpt
+      sapi/cli/tests/022.phpt:
+      Open STDIN and php://stdin streams with the relevant
+      wrapper when the file descriptor is a socket (inetd, etc)
+      Fixes bug #43731
+
+    * main/network.c:
+      initialize memory
+
+2008-11-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c:
+      - add png and jpeg version info
+
+2008-11-04  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c:
+      - MFH
+      - Bug #44154: [DOC] Return 3 elements at all times. If the dbh stmt
+      doesn't have
+        an error code we used to return an array with one element. For the sake
+        of consistency and verification of returned values at userland we are
+      now
+        returning an array with 3 elements. Note the two last elements are null
+      but
+        present
+      
+      - Bug #4413: [DOC] If the error code returned by the DBH is null, we
+      return
+        a null value. This is used in order to help with empty error codes.
+
+    * ext/pdo/pdo_dbh.c:
+      - Bug #44154: [DOC] Return 3 elements at all times. If the dbh stmt doesn't
+      have
+        an error code we used to return an array with one element. For the sake
+        of consistency and verification of returned values at userland we are
+      now
+        returning an array with 3 elements. Note the two last elements are null
+      but
+        present
+      
+      - Bug #44153: [DOC] If the error code returned by the DBH is null, we
+      return
+        a null value. This is used in order to help with empty error codes.
+
+2008-11-04  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/bug43332_2.phpt
+      ext/standard/tests/serialize/bug42919.phpt:
+      - Fixed tests
+
+2008-11-04  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/streams/stream_get_line_nb.phpt
+      ext/standard/tests/streams/stream_get_line_nb.phpt
+      main/streams/streams.c
+      main/streams/streams.c:
+      MFH: Fixed stream_get_line() to behave as documented on non-blocking
+      streams
+
+    * ext/standard/tests/streams/stream_get_line_nb.phpt
+      ext/standard/tests/streams/stream_get_line_nb.phpt
+      ext/standard/tests/streams/stream_get_line_nb.phpt
+      main/streams/streams.c:
+        1.1.4;
+      Fixed stream_get_line() to behave as documented on non-blocking streams
+
+    * (PHP_5_2)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_socket_pair.phpt:
+      MFH: Avoids fclose() from complaining that stream_socket_pair() streams
+      have not been closed
+
+    * (PHP_5_3)
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_socket_pair.phpt:
+      MDH: Avoids fclose() from complaining that stream_socket_pair() streams
+      have not been closed
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/stream_socket_pair.phpt
+      ext/standard/tests/streams/stream_socket_pair.phpt
+      ext/standard/tests/streams/stream_socket_pair.phpt:
+      Avoids fclose() from complaining that stream_socket_pair() streams
+      have not been closed
+
+2008-11-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner_defs.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42802.phpt
+      ZendEngine2/tests/bug42819.phpt
+      ZendEngine2/tests/bug42820.phpt
+      ZendEngine2/tests/bug42859.phpt
+      ZendEngine2/tests/bug43183.phpt
+      ZendEngine2/tests/bug43332_1.phpt
+      ZendEngine2/tests/bug43332_2.phpt
+      ZendEngine2/tests/bug43343.phpt
+      ZendEngine2/tests/bug43344_10.phpt
+      ZendEngine2/tests/bug43344_11.phpt
+      ZendEngine2/tests/bug43344_12.phpt
+      ZendEngine2/tests/bug43344_13.phpt
+      ZendEngine2/tests/bug43344_2.phpt
+      ZendEngine2/tests/bug43344_3.phpt
+      ZendEngine2/tests/bug43344_4.phpt
+      ZendEngine2/tests/bug43344_5.phpt
+      ZendEngine2/tests/bug43344_6.phpt
+      ZendEngine2/tests/bug43344_7.phpt
+      ZendEngine2/tests/bug43344_8.phpt
+      ZendEngine2/tests/bug43344_9.phpt
+      ZendEngine2/tests/bug43651.phpt
+      ZendEngine2/tests/bug44653.phpt
+      ZendEngine2/tests/class_alias_012.phpt
+      ZendEngine2/tests/class_alias_013.phpt
+      ZendEngine2/tests/class_alias_015.phpt
+      ZendEngine2/tests/class_alias_016.phpt
+      ZendEngine2/tests/class_alias_019.phpt
+      ZendEngine2/tests/class_alias_020.phpt
+      ZendEngine2/tests/class_alias_021.phpt
+      ZendEngine2/tests/class_constants_004.phpt
+      ZendEngine2/tests/class_exists_001.phpt
+      ZendEngine2/tests/constants_003.phpt
+      ZendEngine2/tests/constants_004.phpt
+      ZendEngine2/tests/constants_006.phpt
+      ZendEngine2/tests/constants_009.phpt
+      ZendEngine2/tests/inter_02.phpt
+      ZendEngine2/tests/interface_exists_002.phpt
+      ZendEngine2/tests/lsb_014.phpt
+      ZendEngine2/tests/ns_001.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_003.phpt
+      ZendEngine2/tests/ns_004.phpt
+      ZendEngine2/tests/ns_005.phpt
+      ZendEngine2/tests/ns_006.phpt
+      ZendEngine2/tests/ns_007.phpt
+      ZendEngine2/tests/ns_008.phpt
+      ZendEngine2/tests/ns_009.phpt
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_011.phpt
+      ZendEngine2/tests/ns_012.phpt
+      ZendEngine2/tests/ns_013.phpt
+      ZendEngine2/tests/ns_014.phpt
+      ZendEngine2/tests/ns_015.phpt
+      ZendEngine2/tests/ns_016.phpt
+      ZendEngine2/tests/ns_017.phpt
+      ZendEngine2/tests/ns_018.phpt
+      ZendEngine2/tests/ns_019.phpt
+      ZendEngine2/tests/ns_020.phpt
+      ZendEngine2/tests/ns_021.phpt
+      ZendEngine2/tests/ns_022.phpt
+      ZendEngine2/tests/ns_023.phpt
+      ZendEngine2/tests/ns_025.phpt
+      ZendEngine2/tests/ns_026.phpt
+      ZendEngine2/tests/ns_027.inc
+      ZendEngine2/tests/ns_027.phpt
+      ZendEngine2/tests/ns_028.phpt
+      ZendEngine2/tests/ns_029.phpt
+      ZendEngine2/tests/ns_030.phpt
+      ZendEngine2/tests/ns_031.phpt
+      ZendEngine2/tests/ns_032.phpt
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_035.phpt
+      ZendEngine2/tests/ns_036.phpt
+      ZendEngine2/tests/ns_037.phpt
+      ZendEngine2/tests/ns_038.phpt
+      ZendEngine2/tests/ns_040.phpt
+      ZendEngine2/tests/ns_041.phpt
+      ZendEngine2/tests/ns_042.phpt
+      ZendEngine2/tests/ns_043.phpt
+      ZendEngine2/tests/ns_044.phpt
+      ZendEngine2/tests/ns_045.phpt
+      ZendEngine2/tests/ns_046.phpt
+      ZendEngine2/tests/ns_047.phpt
+      ZendEngine2/tests/ns_048.phpt
+      ZendEngine2/tests/ns_049.phpt
+      ZendEngine2/tests/ns_050.phpt
+      ZendEngine2/tests/ns_051.phpt
+      ZendEngine2/tests/ns_052.phpt
+      ZendEngine2/tests/ns_053.phpt
+      ZendEngine2/tests/ns_054.phpt
+      ZendEngine2/tests/ns_055.phpt
+      ZendEngine2/tests/ns_056.phpt
+      ZendEngine2/tests/ns_057.phpt
+      ZendEngine2/tests/ns_058.phpt
+      ZendEngine2/tests/ns_060.phpt
+      ZendEngine2/tests/ns_061.phpt
+      ZendEngine2/tests/ns_062.phpt
+      ZendEngine2/tests/ns_064.phpt
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_065.phpt
+      ZendEngine2/tests/ns_066.phpt
+      ZendEngine2/tests/ns_067.inc
+      ZendEngine2/tests/ns_067.phpt
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/ReflectionFunction_getNamespaceName.phpt
+      ext/reflection/tests/reflectionClass_getNamespaceName.phpt
+      ext/standard/credits.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      - Next step in namespaces, using / as namespace separator.
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      - MFH We only rely on hash if it is built-in
+
+    * (PHP_5_3)
+      ext/phar/phar.c:
+      - MFH Add hash dependency at module source level
+
+2008-11-04  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/zip/tests/bug38943.inc
+      ext/zip/tests/bug38943.inc
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/pecl12414.phpt
+      ext/zip/tests/pecl12414.phpt
+      ext/zip/tests/pecl12414.zip
+      ext/zip/tests/pecl12414.zip:
+      
+      file bug38943.inc was initially added on branch PHP_5_3.
+
+2008-11-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * ZendEngine2/tests/bug43128.phpt:
+      - Fix test
+
+    * ZendEngine2/tests/ns_027.inc
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_067.inc:
+      - MFB dos2unix
+
+2008-11-04  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug46024.phpt
+      ext/standard/tests/streams/bug46024.phpt:
+      MFH: Fixed bug #46024 (stream_select() doesn't return the correct number)
+
+    * ext/standard/streamsfuncs.c
+      ext/standard/tests/streams/bug46024.phpt
+      ext/standard/tests/streams/bug46024.phpt
+      ext/standard/tests/streams/bug46024.phpt:
+      Fixed bug #46024 (stream_select() doesn't return the correct number)
+
+2008-11-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * sapi/cli/tests/001.phpt:
+      - Cleanup
+
+    * (PHP_5_3)
+      ZendEngine2/tests/ns_027.inc
+      ZendEngine2/tests/ns_065.inc
+      ZendEngine2/tests/ns_067.inc:
+      - Fix tests: dos2unix
+
 2008-11-03  Felipe Pena  <felipensp@gmail.com>
 
     * ext/pdo/pdo_stmt.c
