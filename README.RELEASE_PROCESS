@@ -70,7 +70,7 @@ branch if you're rolling 4.4.x releases).
 10. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-11. Copy those two tarballs to www.php.net, in your homedir their should be a
+11. Copy those two tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick.
 
