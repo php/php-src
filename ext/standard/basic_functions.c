@@ -982,6 +982,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, scanner_mode)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_string, 0, 0, 1)
+    ZEND_ARG_INFO(0, ini_string)
+    ZEND_ARG_INFO(0, process_sections)
+    ZEND_ARG_INFO(0, scanner_mode)
+ZEND_END_ARG_INFO()
+
 #if ZEND_DEBUG
 static
 ZEND_BEGIN_ARG_INFO(arginfo_config_get_hash, 0)
@@ -3474,6 +3481,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(connection_status,												arginfo_connection_status)
 	PHP_FE(ignore_user_abort,												arginfo_ignore_user_abort)
 	PHP_FE(parse_ini_file,													arginfo_parse_ini_file)
+	PHP_FE(parse_ini_string,												arginfo_parse_ini_string)
 #if ZEND_DEBUG
 	PHP_FE(config_get_hash,													arginfo_config_get_hash)
 #endif
@@ -6492,6 +6500,43 @@ PHP_FUNCTION(parse_ini_file)
 		efree(Z_ARRVAL_P(return_value));
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto array parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]]) U
+   Parse configuration string */
+PHP_FUNCTION(parse_ini_string)
+{
+	char *string = NULL, *str = NULL;
+	int str_len = 0;
+	zend_bool process_sections = 0;
+	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	zend_ini_parser_cb_t ini_parser_cb;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &str, &str_len, &process_sections, &scanner_mode) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	/* Set callback function */
+	if (process_sections) {
+		BG(active_ini_file_section) = NULL;
+		ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
+	} else {
+		ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
+	}
+
+	/* Setup string */
+	string = (char *) emalloc(str_len + ZEND_MMAP_AHEAD);
+	memcpy(string, str, str_len);
+	memset(string + str_len, 0, ZEND_MMAP_AHEAD);
+
+	array_init(return_value);
+	if (zend_parse_ini_string(string, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
+		zend_hash_destroy(Z_ARRVAL_P(return_value));
+		efree(Z_ARRVAL_P(return_value));
+		RETVAL_FALSE;
+	}
+	efree(string);
 }
 /* }}} */
 

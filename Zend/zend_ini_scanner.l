@@ -188,7 +188,7 @@ int zend_ini_scanner_get_lineno(TSRMLS_D)
 */
 char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
-	return ini_filename;
+	return ini_filename ? ini_filename : "Unknown";
 }
 /* }}} */
 
