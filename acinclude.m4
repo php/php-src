@@ -2766,6 +2766,22 @@ AC_DEFUN([PHP_DETECT_ICC],
   )
 ])
 
+dnl PHP_DETECT_SUNCC
+dnl Detect if the systems default compiler is suncc.
+dnl We also set some usefull CFLAGS if the user didn't set any
+AC_DEFUN([PHP_DETECT_SUNCC],[
+  SUNCC="no"
+  AC_MSG_CHECKING([for suncc])
+  AC_EGREP_CPP([^__SUNPRO_C], [__SUNPRO_C],
+    SUNCC="no"
+    AC_MSG_RESULT([no]),
+    SUNCC="yes"
+    test -n "$auto_cflags" && CFLAGS="-fsimple=2 -xnorunpath -xO4 -xalias_level=basic -xipo=1 -xlibmopt -xprefetch_level=1 -xprefetch=auto -xstrconst -xtarget=native -zlazyload"
+    GCC=""
+    AC_MSG_RESULT([yes])
+  )
+])
+
 dnl
 dnl PHP_CRYPT_R_STYLE
 dnl detect the style of crypt_r() is any is available

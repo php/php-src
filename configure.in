@@ -142,6 +142,7 @@ dnl -------------------------------------------------------------------------
 
 AC_PROG_CC
 PHP_DETECT_ICC
+PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
@@ -214,6 +215,10 @@ case $host_cpu in
       CFLAGS="$CFLAGS -ieee"
     fi
     ;;
+  sparc*)
+    if test "$SUNCC" = "yes"; then
+      CFLAGS="$CFLAGS -xmemalign=8s"
+    fi
 esac
 
 dnl activate some gcc specific optimizations for gcc >= 4
@@ -787,6 +792,15 @@ if test "$PHP_DEBUG" = "yes"; then
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -O0"
+  fi
+  if test "$SUNCC" = "yes"; then
+    if -n "$auto_cflags"; then
+      CFLAGS="-g"
+      CXXFLAGS="-g"
+    else
+      CFLAGS="$CFLAGS -g"
+      CXXFLAGS="$CFLAGS -g"
+    fi
   fi
 else
   PHP_DEBUG=0
