@@ -221,7 +221,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 	intern->_path_len = strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
-	if (intern->_path_len && IS_SLASH_AT(path, intern->_path_len-1)) {
+	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len-1)) {
 		intern->_path = estrndup(path, --intern->_path_len);
 	} else {
 		intern->_path = estrndup(path, intern->_path_len);
@@ -258,7 +258,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
 	}
 
-	if (intern->file_name_len && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
+	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
 
@@ -349,7 +349,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->file_name = use_copy ? estrndup(path, len) : path;
 	intern->file_name_len = len;
 
-	while(IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
+	while(IS_SLASH_AT(intern->file_name, intern->file_name_len-1) && intern->file_name_len > 1) {
 		intern->file_name[intern->file_name_len-1] = 0;
 		intern->file_name_len--;
 	}
@@ -1965,7 +1965,7 @@ SPL_METHOD(SplFileObject, __construct)
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
 		tmp_path_len = strlen(intern->u.file.stream->orig_path);
 
-		if (tmp_path_len && IS_SLASH_AT(intern->u.file.stream->orig_path, tmp_path_len-1)) {
+		if (tmp_path_len > 1 && IS_SLASH_AT(intern->u.file.stream->orig_path, tmp_path_len-1)) {
 			tmp_path_len--;
 		}
 
