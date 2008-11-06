@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   different). (Derick)
 - Fixed bug #45303 (Opening php:// wrapper in append mode results in a warning).
   (Arnaud)
+- Fixed bug #45166 (substr() overflow changes). (Felipe)
 - Fixed bug #44938 (gettext functions crash with overly long domain).
   (Christian Schneider, Ilia)
 - Fixed bug #44607 (stream_get_line unable to correctly identify the "ending"
