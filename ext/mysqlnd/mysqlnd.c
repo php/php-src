@@ -439,7 +439,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 	char buffer[2];
 	DBG_ENTER("mysqlnd_conn::set_server_option");
 
-	int2store(buffer, (uint) option);
+	int2store(buffer, (unsigned int) option);
 	ret = mysqlnd_simple_command(conn, COM_SET_OPTION, buffer, sizeof(buffer),
 								 PROT_EOF_PACKET, FALSE, TRUE TSRMLS_CC);
 	DBG_RETURN(ret);
@@ -758,12 +758,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 		mysqlnd_local_infile_default(conn);
 		{
-			uint buf_size;
-			buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to uint*/
+			unsigned int buf_size;
+			buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
 			conn->m->set_client_option(conn, MYSQLND_OPT_NET_READ_BUFFER_SIZE,
 								   		(char *)&buf_size TSRMLS_CC);
 
-			buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to uint*/
+			buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
 			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE,
 								   		(char *)&buf_size TSRMLS_CC);			
 		}
@@ -781,7 +781,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		conn->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 6
 		{
-			uint as_unicode = 1;
+			unsigned int as_unicode = 1;
 			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE,
 									   (char *)&as_unicode TSRMLS_CC);
 			DBG_INF("unicode set");
@@ -1702,11 +1702,11 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 	switch (option) {
 #if PHP_MAJOR_VERSION >= 6
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
-			conn->options.numeric_and_datetime_as_unicode = *(uint*) value;
+			conn->options.numeric_and_datetime_as_unicode = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
-			conn->net.cmd_buffer.length = *(uint*) value;
+			conn->net.cmd_buffer.length = *(unsigned int*) value;
 			if (!conn->net.cmd_buffer.buffer) {
 				conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
 			} else {
@@ -1716,26 +1716,26 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			}
 			break;
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-			conn->options.net_read_buffer_size = *(uint*) value;
+			conn->options.net_read_buffer_size = *(unsigned int*) value;
 			break;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
-			conn->options.int_and_float_native = *(uint*) value;
+			conn->options.int_and_float_native = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_CONNECT_TIMEOUT:
-			conn->options.timeout_connect = *(uint*) value;
+			conn->options.timeout_connect = *(unsigned int*) value;
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
-			conn->options.timeout_read = *(uint*) value;
+			conn->options.timeout_read = *(unsigned int*) value;
 			break;
 		case MYSQL_OPT_WRITE_TIMEOUT:
-			conn->options.timeout_write = *(uint*) value;
+			conn->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			if (!value || (*(uint*) value) ? 1 : 0) {
+			if (!value || (*(unsigned int*) value) ? 1 : 0) {
 				conn->options.flags |= CLIENT_LOCAL_FILES;
 			} else {
 				conn->options.flags &= ~CLIENT_LOCAL_FILES;

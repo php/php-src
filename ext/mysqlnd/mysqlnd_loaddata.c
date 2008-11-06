@@ -86,7 +86,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 /* {{{ mysqlnd_local_infile_read */
 static
-int mysqlnd_local_infile_read(void *ptr, char *buf, uint buf_len TSRMLS_DC)
+int mysqlnd_local_infile_read(void *ptr, char *buf, unsigned int buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int count;
@@ -107,7 +107,7 @@ int mysqlnd_local_infile_read(void *ptr, char *buf, uint buf_len TSRMLS_DC)
 
 /* {{{ mysqlnd_local_infile_error */
 static
-int	mysqlnd_local_infile_error(void *ptr, char *error_buf, uint error_buf_len TSRMLS_DC)
+int	mysqlnd_local_infile_error(void *ptr, char *error_buf, unsigned int error_buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 
@@ -177,7 +177,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	char				*buf;
 	char				empty_packet[MYSQLND_HEADER_SIZE];
 	enum_func_status	result = FAIL;
-	uint				buflen = 4096;
+	unsigned int				buflen = 4096;
 	void				*info = NULL;
 	int					bufsize;
 	size_t				ret;
