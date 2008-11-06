@@ -185,8 +185,8 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 		if (file_check_mem(ms, ++cont_level) == -1)
 			return -1;
 
-		while (magic[magindex+1].cont_level != 0 &&
-		    ++magindex < nmagic) {
+		while (magindex < nmagic - 1 && magic[magindex + 1].cont_level != 0) {
+			magindex++;
 			m = &magic[magindex];
 			ms->line = m->lineno; /* for messages */
 
@@ -783,6 +783,7 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const char *c;
 			const char *last;	/* end of search region */
 			const char *buf;	/* start of search region */
+			const char *end;
 			size_t lines;
 
 			if (s == NULL) {
@@ -791,10 +792,10 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				return 0;
 			}
 			buf = (const char *)s + offset;
-			last = (const char *)s + nbytes;
+			end = last = (const char *)s + nbytes;
 			/* mget() guarantees buf <= last */
 			for (lines = linecnt, b = buf;
-			     lines && ((b = strchr(c = b, '\n')) || (b = strchr(c, '\r')));
+			     lines && ((b = memchr(c = b, '\n', end - b)) || (b = memchr(c, '\r', end - c)));
 			     lines--, b++) {
 				last = b;
 				if (b[0] == '\r' && b[1] == '\n')
