@@ -32,7 +32,6 @@
 #include "spl_array.h"
 #include "spl_directory.h"
 #include "spl_iterators.h"
-#include "spl_sxe.h"
 #include "spl_exceptions.h"
 #include "spl_observer.h"
 #include "spl_dllist.h"
@@ -185,7 +184,6 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RegexIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplDoublyLinkedList, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileInfo, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileObject, z_list, sub, allow, ce_flags); \
@@ -864,7 +862,6 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_dllist)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
@@ -897,23 +894,10 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-#ifdef HAVE_SIMPLEXML
-static const zend_module_dep spl_deps[] = {
-	ZEND_MOD_REQUIRED("libxml")
-	ZEND_MOD_REQUIRED("simplexml")
-	{NULL, NULL, NULL}
-};
-#endif
-
 /* {{{ spl_module_entry
  */
 zend_module_entry spl_module_entry = {
-#ifdef HAVE_SIMPLEXML
-	STANDARD_MODULE_HEADER_EX, NULL,
-	spl_deps,
-#else
 	STANDARD_MODULE_HEADER,
-#endif
 	"SPL",
 	spl_functions,
 	PHP_MINIT(spl),
