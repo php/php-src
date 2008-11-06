@@ -231,7 +231,7 @@ typedef unsigned long long uint64_t;
 **  (low byte first)
 */
 
-/* Optimized store functions for Intel x86, non-valid for WIN64 */
+/* Optimized store functions for Intel x86, non-valid for WIN64. __i386__ is GCC */
 #if defined(__i386__) && !defined(_WIN64)
 #define sint2korr(A)    (*((int16_t *) (A)))
 #define sint3korr(A)    ((int32_t) ((((uchar) (A)[2]) & 128) ? \
