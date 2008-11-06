@@ -607,7 +607,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 	} else {
 
 		/* read and parse this file */
-		for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &line_len)) != NULL; ms->line++) {
+		for (ms->line = 1; (line = php_stream_get_line(stream, ZSTR(buffer), BUFSIZ, &line_len)) != NULL; ms->line++) {
 			if (line_len == 0) /* null line, garbage, etc */
 				continue;
 
