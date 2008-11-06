@@ -3,6 +3,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Defines for Win32 to make it compatible for MySQL */
 
+#ifndef _MYSQLND_CONFIG_WIN_H
+#define _MYSQLND_CONFIG_WIN_H
+
 #include <sys/locking.h>
 #include <windows.h>
 #include <math.h>			/* Because of rint() */
@@ -10,7 +13,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
-#include "win32/php_stdint.h"
+#include <win32/php_stdint.h>
 
 #ifndef HAVE_INT8_T
 #define HAVE_INT8_T
@@ -61,35 +64,35 @@ This file is public domain and comes with NO WARRANTY of any kind */
 /* Optimized store functions for Intel x86 */
 
 #define sint2korr(A)	(*((int16_t *) (A)))
-#define sint3korr(A)	((int32_t) ((((uchar) (A)[2]) & 128) ? \
+#define sint3korr(A)	((int32_t) ((((zend_uchar) (A)[2]) & 128) ? \
 										(((uint32_t) 255L << 24) | \
-										(((uint32_t) (uchar) (A)[2]) << 16) |\
-										(((uint32_t) (uchar) (A)[1]) << 8) | \
-										((uint32_t) (uchar) (A)[0])) : \
-										(((uint32_t) (uchar) (A)[2]) << 16) |\
-										(((uint32_t) (uchar) (A)[1]) << 8) | \
-										((uint32_t) (uchar) (A)[0])))
+										(((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+										(((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+										((uint32_t) (zend_uchar) (A)[0])) : \
+										(((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+										(((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+										((uint32_t) (zend_uchar) (A)[0])))
 #define sint4korr(A)	(*((int32_t *) (A)))
 #define uint2korr(A)	(*((uint16_t *) (A)))
 #define uint3korr(A)	(int32_t) (*((uint32_t *) (A)) & 0xFFFFFF)
 #define uint4korr(A)	(*((uint32_t *) (A)))
-#define uint5korr(A)	((uint64_t)(((uint32_t) ((uchar) (A)[0])) +\
-									(((uint32_t) ((uchar) (A)[1])) << 8) +\
-									(((uint32_t) ((uchar) (A)[2])) << 16) +\
-									(((uint32_t) ((uchar) (A)[3])) << 24)) +\
-									(((uint64_t) ((uchar) (A)[4])) << 32))
+#define uint5korr(A)	((uint64_t)(((uint32_t) ((zend_uchar) (A)[0])) +\
+									(((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
+									(((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
+									(((uint32_t) ((zend_uchar) (A)[3])) << 24)) +\
+									(((uint64_t) ((zend_uchar) (A)[4])) << 32))
 #define uint8korr(A)	(*((uint64_t *) (A)))
 #define sint8korr(A)	(*((int64_t *) (A)))
 #define int2store(T,A)	*((uint16_t*) (T))= (uint16_t) (A)
-#define int3store(T,A)		{	*(T)=  (uchar) ((A));\
-								*(T+1)=(uchar) (((uint32_t) (A) >> 8));\
-								*(T+2)=(uchar) (((A) >> 16)); }
+#define int3store(T,A)		{	*(T)=  (zend_uchar) ((A));\
+								*(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
+								*(T+2)=(zend_uchar) (((A) >> 16)); }
 #define int4store(T,A)	*((int32_t *) (T))= (int32_t) (A)
-#define int5store(T,A)	{	*(T)= (uchar)((A));\
-							*((T)+1)=(uchar) (((A) >> 8));\
-							*((T)+2)=(uchar) (((A) >> 16));\
-							*((T)+3)=(uchar) (((A) >> 24)); \
-							*((T)+4)=(uchar) (((A) >> 32)); }
+#define int5store(T,A)	{	*(T)= (zend_uchar)((A));\
+							*((T)+1)=(zend_uchar) (((A) >> 8));\
+							*((T)+2)=(zend_uchar) (((A) >> 16));\
+							*((T)+3)=(zend_uchar) (((A) >> 24)); \
+							*((T)+4)=(zend_uchar) (((A) >> 32)); }
 #define int8store(T,A)	*((uint64_t *) (T))= (uint64_t) (A)
 
 #define float8get(V,M)	{	*((int32_t *) &V) = *((int32_t*) M); \
@@ -99,3 +102,14 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define float4get(V,M) { *((int32_t *) &(V)) = *((int32_t*) (M)); }
 
 #endif /* _WIN64 */
+
+#endif /* _MYSQLND_CONFIG_WIN_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

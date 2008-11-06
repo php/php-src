@@ -268,7 +268,7 @@ static unsigned int mysqlnd_mbcharlen_ucs2(unsigned int ucs2 __attribute((unused
 
 static unsigned int check_mb_ujis(const char *start, const char *end)
 {
-	if (*(uchar*)start < 0x80) {
+	if (*(zend_uchar*)start < 0x80) {
 		return 0;	/* invalid ujis character */
 	}
 	if (valid_ujis(*(start)) && valid_ujis(*((start)+1))) {

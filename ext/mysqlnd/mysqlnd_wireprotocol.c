@@ -662,7 +662,7 @@ void php_mysqlnd_greet_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 static
 void php_mysqlnd_crypt(zend_uchar *buffer, const zend_uchar *s1, const zend_uchar *s2, size_t len)
 {
-	const unsigned char *s1_end = s1 + len;
+	const zend_uchar *s1_end = s1 + len;
 	while (s1 < s1_end) {
 		*buffer++= *s1++ ^ *s2++;
 	}
@@ -675,8 +675,8 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 						  const zend_uchar * const password)
 {
 	PHP_SHA1_CTX context;
-	unsigned char sha1[SHA1_MAX_LENGTH];
-	unsigned char sha2[SHA1_MAX_LENGTH];
+	zend_uchar sha1[SHA1_MAX_LENGTH];
+	zend_uchar sha2[SHA1_MAX_LENGTH];
 	
 
 	/* Phase 1: hash password */
@@ -686,17 +686,17 @@ void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const sc
 
 	/* Phase 2: hash sha1 */
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, (unsigned char*)sha1, SHA1_MAX_LENGTH);
+	PHP_SHA1Update(&context, (zend_uchar*)sha1, SHA1_MAX_LENGTH);
 	PHP_SHA1Final(sha2, &context);
 
 	/* Phase 3: hash scramble + sha2 */
 	PHP_SHA1Init(&context);
 	PHP_SHA1Update(&context, scramble, SCRAMBLE_LENGTH);
-	PHP_SHA1Update(&context, (unsigned char*)sha2, SHA1_MAX_LENGTH);
+	PHP_SHA1Update(&context, (zend_uchar*)sha2, SHA1_MAX_LENGTH);
 	PHP_SHA1Final(buffer, &context);
 
 	/* let's crypt buffer now */
-	php_mysqlnd_crypt(buffer, (const uchar *)buffer, (const uchar *)sha1, SHA1_MAX_LENGTH);
+	php_mysqlnd_crypt(buffer, (const zend_uchar *)buffer, (const zend_uchar *)sha1, SHA1_MAX_LENGTH);
 }
 /* }}} */
 
@@ -744,8 +744,7 @@ size_t php_mysqlnd_auth_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 		/* In 4.1 we use CLIENT_SECURE_CONNECTION and thus the len of the buf should be passed */
 		int1store(p, 20);
 		p++;
-		php_mysqlnd_scramble((unsigned char*)p, packet->server_scramble_buf,
-							 (unsigned char *)packet->password);
+		php_mysqlnd_scramble((zend_uchar*)p, packet->server_scramble_buf, (zend_uchar*)packet->password);
 		p+= 20;
 	} else {
 		/* Zero length */
