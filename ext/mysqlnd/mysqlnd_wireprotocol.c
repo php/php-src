@@ -195,7 +195,7 @@ zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 
 	if (length < (uint64_t) L64(65536)) {
 		*packet++ = 252;
-		int2store(packet,(uint) length);
+		int2store(packet,(unsigned int) length);
 		return packet + 2;
 	}
 
@@ -1356,7 +1356,7 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
 void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										   uint field_count, MYSQLND_FIELD *fields_metadata,
+										   unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										   MYSQLND *conn TSRMLS_DC)
 {
 	int i;
@@ -1455,7 +1455,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 uint field_count, MYSQLND_FIELD *fields_metadata,
+										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										 MYSQLND *conn TSRMLS_DC)
 {
 	int i;

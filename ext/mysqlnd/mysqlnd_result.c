@@ -95,11 +95,11 @@ void * mysqlnd_fetch_thread(void *arg)
 /* {{{ mysqlnd_res_initialize_result_set_rest */
 void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC)
 {
-	uint i;
+	unsigned int i;
 	zval **data_cursor = result->stored_data->data;
 	zval **data_begin = result->stored_data->data;
-	uint field_count = result->meta->field_count;
-	uint row_count = result->stored_data->row_count;
+	unsigned int field_count = result->meta->field_count;
+	unsigned int row_count = result->stored_data->row_count;
 	if (!data_cursor || row_count == result->stored_data->initialized_rows) {
 		return;
 	}
@@ -1500,7 +1500,7 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 		set->data[set->row_count] = row_packet->fields;
 
 		if (set->decode_in_foreground == FALSE) {
-			uint i;
+			unsigned int i;
 			result->m.row_decoder(set->row_buffers[set->row_count],
 								  set->data[set->row_count],
 								  result->meta->field_count,
@@ -1902,7 +1902,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags,
 		DBG_VOID_RETURN;
 	}	
 
-	mysqlnd_array_init(return_value, (uint) set->row_count);
+	mysqlnd_array_init(return_value, (unsigned int) set->row_count);
 
 	while (set->data_cursor &&
 		   (set->data_cursor - set->data) < (set->row_count * result->meta->field_count))

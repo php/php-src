@@ -33,14 +33,14 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 struct st_mysqlnd_memory_pool
 {
 	zend_uchar *arena;
-	uint refcount;
-	uint arena_size;
-	uint free_size;
+	unsigned int refcount;
+	unsigned int arena_size;
+	unsigned int free_size;
 
 	MYSQLND_MEMORY_POOL_CHUNK* free_chunk_list[MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE];
-	uint free_chunk_list_elements;
+	unsigned int free_chunk_list_elements;
 
-	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC);
+	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size TSRMLS_DC);
 };
 
 struct st_mysqlnd_memory_pool_chunk
@@ -48,8 +48,8 @@ struct st_mysqlnd_memory_pool_chunk
 	uint64_t			app;
 	MYSQLND_MEMORY_POOL *pool;
 	zend_uchar			*ptr;
-	uint				size;
-	void				(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS_DC);
+	unsigned int				size;
+	void				(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
 	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC);
 	zend_bool			from_pool;
 };
@@ -124,14 +124,14 @@ typedef struct st_mysqlnd_infile_info
 /* character set information */
 typedef struct st_mysqlnd_charset
 {
-	uint		nr;
+	unsigned int		nr;
 	const char	*name;
 	const char	*collation;
-	uint		char_minlen;
-	uint		char_maxlen;
+	unsigned int		char_minlen;
+	unsigned int		char_maxlen;
 	const char	*comment;
-	uint 		(*mb_charlen)(uint c);
-	uint 		(*mb_valid)(const char *start, const char *end);
+	unsigned int 		(*mb_charlen)(unsigned int c);
+	unsigned int 		(*mb_valid)(const char *start, const char *end);
 } MYSQLND_CHARSET;
 
 
@@ -139,8 +139,8 @@ typedef struct st_mysqlnd_charset
 typedef struct st_mysqlnd_infile
 {
 	int		(*local_infile_init)(void **ptr, char *filename, void **userdata TSRMLS_DC);
-	int		(*local_infile_read)(void *ptr, char *buf, uint buf_len TSRMLS_DC);
-	int		(*local_infile_error)(void *ptr, char *error_msg, uint error_msg_len TSRMLS_DC);
+	int		(*local_infile_read)(void *ptr, char *buf, unsigned int buf_len TSRMLS_DC);
+	int		(*local_infile_error)(void *ptr, char *error_msg, unsigned int error_msg_len TSRMLS_DC);
 	void	(*local_infile_end)(void *ptr TSRMLS_DC);
 	zval	*callback;
 	void	*userdata;
@@ -149,14 +149,14 @@ typedef struct st_mysqlnd_infile
 typedef struct st_mysqlnd_option
 {
 	/* timeouts */
-	uint		timeout_connect;
-	uint		timeout_read;
-	uint		timeout_write;
+	unsigned int		timeout_connect;
+	unsigned int		timeout_read;
+	unsigned int		timeout_write;
 
 	ulong		flags;
 
 	/* init commands - we need to send them to server directly after connect */
-	uint		num_commands;
+	unsigned int		num_commands;
 	char		**init_commands;
 
 	/* configuration file information */
@@ -320,7 +320,7 @@ struct st_mysqlnd_res_methods
 	void 				(*free_result_contents)(MYSQLND_RES *result TSRMLS_DC);
 
 	/* for decoding - binary or text protocol */	
-	void 				(*row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields, uint field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
+	void 				(*row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields, unsigned int field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
 };
 
 
@@ -359,7 +359,7 @@ struct st_mysqlnd_stmt_methods
 	enum_func_status	(*refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC);
 	void				(*set_param_bind_dtor)(MYSQLND_STMT * const stmt, void (*param_bind_dtor)(MYSQLND_PARAM_BIND *)  TSRMLS_DC);
 	enum_func_status	(*bind_result)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * const result_bind TSRMLS_DC);
-	enum_func_status	(*bind_one_result)(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC);
+	enum_func_status	(*bind_one_result)(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 	void				(*set_result_bind_dtor)(MYSQLND_STMT * const stmt, void (*result_bind_dtor)(MYSQLND_RESULT_BIND *) TSRMLS_DC);
 	enum_func_status	(*send_long_data)(MYSQLND_STMT * const stmt, unsigned int param_num,
 										  const char * const data, unsigned long length TSRMLS_DC);
