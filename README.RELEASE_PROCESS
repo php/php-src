@@ -129,6 +129,9 @@ function to include the new RC and commit.
 
  a. ``cvs commit include/version.inc include/releases.inc``
 
+5. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the 
+INSTALL and win32/install.txt files which are generated from the PHP manual sources.
+
 Rolling a stable release
 ------------------------
 
