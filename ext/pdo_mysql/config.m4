@@ -19,8 +19,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  PHP_MYSQLND_ENABLED=yes
-
   AC_DEFUN([PDO_MYSQL_LIB_CHK], [
     str="$PDO_MYSQL_DIR/$1/libmysqlclient*"
     for j in `echo $str`; do
@@ -33,7 +31,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   if test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
-    PHP_MYSQL_ENABLED=yes
+    PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
   else
     AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
