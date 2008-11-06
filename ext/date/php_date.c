@@ -564,54 +564,21 @@ PHP_INI_END()
 
 zend_class_entry *date_ce_date, *date_ce_timezone, *date_ce_interval, *date_ce_period;
 
+
+PHPAPI zend_class_entry *php_date_get_date_ce(void)
+{
+	return date_ce_date;
+}
+
+PHPAPI zend_class_entry *php_date_get_timezone_ce(void)
+{
+	return date_ce_timezone;
+}
+
 static zend_object_handlers date_object_handlers_date;
 static zend_object_handlers date_object_handlers_timezone;
 static zend_object_handlers date_object_handlers_interval;
 static zend_object_handlers date_object_handlers_period;
-
-typedef struct _php_date_obj php_date_obj;
-typedef struct _php_timezone_obj php_timezone_obj;
-typedef struct _php_interval_obj php_interval_obj;
-typedef struct _php_period_obj php_period_obj;
-
-struct _php_date_obj {
-	zend_object   std;
-	timelib_time *time;
-	HashTable    *props;
-};
-
-struct _php_timezone_obj {
-	zend_object     std;
-	int             initialized;
-	int             type;
-	union {
-		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
-		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
-		struct                      /* TIMELIB_ZONETYPE_ABBR */
-		{
-			timelib_sll  utc_offset;
-			char        *abbr;
-			int          dst;
-		} z;
-	} tzi;
-};
-
-struct _php_interval_obj {
-	zend_object       std;
-	timelib_rel_time *diff;
-	HashTable        *props;
-	int               initialized;
-};
-
-struct _php_period_obj {
-	zend_object       std;
-	timelib_time     *start;
-	timelib_time     *end;
-	timelib_rel_time *interval;
-	int               recurrences;
-	int               initialized;
-	int               include_start_date;
-};
 
 #define DATE_SET_CONTEXT \
 	zval *object; \
@@ -2746,7 +2713,7 @@ PHP_METHOD(DateTime, __wakeup)
 /* }}} */
 
 /* Helper function used to add an associative array of warnings and errors to a zval */
-void zval_from_error_container(zval *z, timelib_error_container *error)
+static void zval_from_error_container(zval *z, timelib_error_container *error)
 {
 	int   i;
 	zval *element;
