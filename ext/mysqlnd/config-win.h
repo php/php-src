@@ -10,13 +10,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
-#if defined(__NT__)
-#define	SYSTEM_TYPE	"NT"
-#elif defined(__WIN2000__)
-#define	SYSTEM_TYPE	"WIN2000"
-#else
-#define	SYSTEM_TYPE	"Win95/Win98"
-#endif
 
 #ifndef _WIN64
 #ifndef _WIN32
@@ -27,20 +20,10 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 #endif /* _WIN64 */
 #ifndef __WIN__
-#define __WIN__                       /* To make it easier in VC++ */
+#define __WIN__				/* To make it easier in VC++ */
 #endif
 
-#define LONGLONG_MIN	((__int64) 0x8000000000000000)
-#define LONGLONG_MAX	((__int64) 0x7FFFFFFFFFFFFFFF)
-#define LL(A)		((__int64) A)
-
 /* Type information */
-
-/*
-typedef unsigned int    uint;
-*/
-typedef int sigset_t;
-#define longlong_defined
 
 #define SIZEOF_CHAR		1
 #define SIZEOF_LONG		4
