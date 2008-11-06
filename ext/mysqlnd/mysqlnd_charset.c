@@ -25,7 +25,7 @@
 
 /* {{{ utf8 functions */
 
-static uint check_mb_utf8_sequence(const char *start, const char *end)
+static unsigned int check_mb_utf8_sequence(const char *start, const char *end)
 {
 	zend_uchar	c;
 
@@ -63,13 +63,13 @@ static uint check_mb_utf8_sequence(const char *start, const char *end)
 	return 0;
 }
 
-static uint check_mb_utf8_valid(const char *start, const char *end)
+static unsigned int check_mb_utf8_valid(const char *start, const char *end)
 {
-	uint len = check_mb_utf8_sequence(start, end);
+	unsigned int len = check_mb_utf8_sequence(start, end);
 	return (len > 1)? len:0;
 }
 
-static uint mysqlnd_mbcharlen_utf8(uint utf8)
+static unsigned int mysqlnd_mbcharlen_utf8(unsigned int utf8)
 {
 	if (utf8 < 0x80) {
 		return 1;		/* single byte character */
@@ -91,19 +91,19 @@ static uint mysqlnd_mbcharlen_utf8(uint utf8)
 
 
 /* {{{ big5 functions */
-#define valid_big5head(c)	(0xA1 <= (uint)(c) && (uint)(c) <= 0xF9)
-#define valid_big5tail(c)	((0x40 <= (uint)(c) && (uint)(c) <= 0x7E) || \
-							(0xA1 <= (uint)(c) && (uint)(c) <= 0xFE))
+#define valid_big5head(c)	(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xF9)
+#define valid_big5tail(c)	((0x40 <= (unsigned int)(c) && (unsigned int)(c) <= 0x7E) || \
+							(0xA1 <= (unsigned int)(c) && (unsigned int)(c) <= 0xFE))
 
 #define isbig5code(c,d) (isbig5head(c) && isbig5tail(d))
 
-static uint check_mb_big5(const char *start, const char *end)
+static unsigned int check_mb_big5(const char *start, const char *end)
 {
 	return (valid_big5head(*(start)) && (end - start) > 1 && valid_big5tail(*(start + 1)) ? 2 : 0);
 }
 
 
-static uint mysqlnd_mbcharlen_big5(uint big5)
+static unsigned int mysqlnd_mbcharlen_big5(unsigned int big5)
 {
 	return (valid_big5head(big5)) ? 2 : 1;
 }
@@ -115,14 +115,14 @@ static uint mysqlnd_mbcharlen_big5(uint big5)
 #define valid_cp932tail(c) ((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && c <= 0xFC))
 
 
-static uint check_mb_cp932(const char *start, const char *end)
+static unsigned int check_mb_cp932(const char *start, const char *end)
 {
 	return (valid_cp932head((zend_uchar)start[0]) && (end - start >  1) &&
 			valid_cp932tail((zend_uchar)start[1])) ? 2 : 0;
 }
 
 
-static uint mysqlnd_mbcharlen_cp932(uint cp932)
+static unsigned int mysqlnd_mbcharlen_cp932(unsigned int cp932)
 {
 	return (valid_cp932head((zend_uchar)cp932)) ? 2 : 1;
 }
@@ -132,7 +132,7 @@ static uint mysqlnd_mbcharlen_cp932(uint cp932)
 /* {{{ euckr functions */
 #define valid_euckr(c)	((0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE))
 
-static uint check_mb_euckr(const char *start, const char *end)
+static unsigned int check_mb_euckr(const char *start, const char *end)
 {
 	if (end - start <= 1) {
 		return 0;	/* invalid length */
@@ -147,7 +147,7 @@ static uint check_mb_euckr(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_euckr(uint kr)
+static unsigned int mysqlnd_mbcharlen_euckr(unsigned int kr)
 {
 	return (valid_euckr(kr)) ? 2 : 1;
 }
@@ -160,7 +160,7 @@ static uint mysqlnd_mbcharlen_euckr(uint kr)
 #define valid_eucjpms_ss2(c)	(((c) & 0xFF) == 0x8E)
 #define valid_eucjpms_ss3(c)	(((c) & 0xFF) == 0x8F)
 
-static uint check_mb_eucjpms(const char *start, const char *end)
+static unsigned int check_mb_eucjpms(const char *start, const char *end)
 {
 	if (*((zend_uchar *)start) < 0x80) {
 		return 0;	/* invalid eucjpms character */
@@ -179,7 +179,7 @@ static uint check_mb_eucjpms(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_eucjpms(uint jpms)
+static unsigned int mysqlnd_mbcharlen_eucjpms(unsigned int jpms)
 {
 	if (valid_eucjpms(jpms) || valid_eucjpms_ss2(jpms)) {
 		return 2;
@@ -197,14 +197,14 @@ static uint mysqlnd_mbcharlen_eucjpms(uint jpms)
 #define valid_gb2312_tail(c)	(0xA1 <= (zend_uchar)(c) && (zend_uchar)(c) <= 0xFE)
 
 
-static uint check_mb_gb2312(const char *start, const char *end)
+static unsigned int check_mb_gb2312(const char *start, const char *end)
 {
-	return (valid_gb2312_head((uint)start[0]) && end - start > 1 && 
-			valid_gb2312_tail((uint)start[1])) ? 2 : 0;
+	return (valid_gb2312_head((unsigned int)start[0]) && end - start > 1 && 
+			valid_gb2312_tail((unsigned int)start[1])) ? 2 : 0;
 }
 
 
-static uint mysqlnd_mbcharlen_gb2312(uint gb)
+static unsigned int mysqlnd_mbcharlen_gb2312(unsigned int gb)
 {
 	return (valid_gb2312_head(gb)) ? 2 : 1;
 }
@@ -215,12 +215,12 @@ static uint mysqlnd_mbcharlen_gb2312(uint gb)
 #define valid_gbk_head(c)	(0x81<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE)
 #define valid_gbk_tail(c)	((0x40<=(zend_uchar)(c) && (zend_uchar)(c)<=0x7E) || (0x80<=(zend_uchar)(c) && (zend_uchar)(c)<=0xFE))
 
-static uint check_mb_gbk(const char *start, const char *end)
+static unsigned int check_mb_gbk(const char *start, const char *end)
 {
 	return (valid_gbk_head(start[0]) && (end) - (start) > 1 && valid_gbk_tail(start[1])) ? 2 : 0;
 }
 
-static uint mysqlnd_mbcharlen_gbk(uint gbk)
+static unsigned int mysqlnd_mbcharlen_gbk(unsigned int gbk)
 {
 	return (valid_gbk_head(gbk) ? 2 : 1);
 }
@@ -234,13 +234,13 @@ static uint mysqlnd_mbcharlen_gbk(uint gbk)
 							 (0x80 <= (c) && (c) <= 0x7C))
 
 
-static uint check_mb_sjis(const char *start, const char *end)
+static unsigned int check_mb_sjis(const char *start, const char *end)
 {
 	return (valid_sjis_head((zend_uchar)start[0]) && (end - start) > 1 && valid_sjis_tail((zend_uchar)start[1])) ? 2 : 0;
 }
 
 
-static uint mysqlnd_mbcharlen_sjis(uint sjis)
+static unsigned int mysqlnd_mbcharlen_sjis(unsigned int sjis)
 {
 	return (valid_sjis_head((zend_uchar)sjis)) ? 2 : 1;
 }
@@ -248,12 +248,12 @@ static uint mysqlnd_mbcharlen_sjis(uint sjis)
 
 
 /* {{{ ucs2 functions */
-static uint check_mb_ucs2(const char *start __attribute((unused)), const char *end __attribute((unused)))
+static unsigned int check_mb_ucs2(const char *start __attribute((unused)), const char *end __attribute((unused)))
 {
 	return 2; /* always 2 */
 }
 
-static uint mysqlnd_mbcharlen_ucs2(uint ucs2 __attribute((unused)))
+static unsigned int mysqlnd_mbcharlen_ucs2(unsigned int ucs2 __attribute((unused)))
 {
 	return 2; /* always 2 */
 }
@@ -266,7 +266,7 @@ static uint mysqlnd_mbcharlen_ucs2(uint ucs2 __attribute((unused)))
 #define valid_ujis_ss2(c) 	(((c)&0xFF) == 0x8E)
 #define valid_ujis_ss3(c) 	(((c)&0xFF) == 0x8F)
 
-static uint check_mb_ujis(const char *start, const char *end)
+static unsigned int check_mb_ujis(const char *start, const char *end)
 {
 	if (*(uchar*)start < 0x80) {
 		return 0;	/* invalid ujis character */
@@ -284,7 +284,7 @@ static uint check_mb_ujis(const char *start, const char *end)
 }
 
 
-static uint mysqlnd_mbcharlen_ujis(uint ujis)
+static unsigned int mysqlnd_mbcharlen_ujis(unsigned int ujis)
 {
 	return (valid_ujis(ujis)? 2: valid_ujis_ss2(ujis)? 2: valid_ujis_ss3(ujis)? 3: 1);
 }
@@ -430,7 +430,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 
 
 /* {{{ mysqlnd_find_charset_nr */
-PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(uint charsetnr)
+PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetnr)
 {
 	const MYSQLND_CHARSET * c = mysqlnd_charsets;
 
@@ -473,7 +473,7 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 	DBG_ENTER("mysqlnd_cset_escape_quotes");
 
 	for (;escapestr < end; escapestr++) {
-		uint len = 0;
+		unsigned int len = 0;
 		/* check unicode characters */
 		
 		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
@@ -528,7 +528,7 @@ PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, cha
 	
 	for (;escapestr < end; escapestr++) {
 		char esc = '\0';
-		uint len = 0;
+		unsigned int len = 0;
 
 		/* check unicode characters */
 		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {

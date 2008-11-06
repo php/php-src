@@ -54,7 +54,7 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
 /* {{{ ps_fetch_from_1_to_8_bytes */
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
-								uint pack_len, zend_uchar **row, zend_bool as_unicode,
+								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
 								unsigned int byte_count TSRMLS_DC)
 {
 	char tmp[22];
@@ -137,7 +137,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_null */
 static
 void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
-				   uint pack_len, zend_uchar **row,
+				   unsigned int pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	ZVAL_NULL(zv);
@@ -148,7 +148,7 @@ void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int8 */
 static
 void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
-				   uint pack_len, zend_uchar **row,
+				   unsigned int pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1 TSRMLS_CC);
@@ -159,7 +159,7 @@ void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int16 */
 static
 void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
-					uint pack_len, zend_uchar **row,
+					unsigned int pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2 TSRMLS_CC);
@@ -170,7 +170,7 @@ void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int32 */
 static
 void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
-					uint pack_len, zend_uchar **row,
+					unsigned int pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4 TSRMLS_CC);
@@ -181,7 +181,7 @@ void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int64 */
 static
 void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
-					uint pack_len, zend_uchar **row,
+					unsigned int pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
@@ -192,7 +192,7 @@ void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_float */
 static
 void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
-					uint pack_len, zend_uchar **row,
+					unsigned int pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	float value;
@@ -209,7 +209,7 @@ void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_double */
 static
 void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
-					uint pack_len, zend_uchar **row,
+					unsigned int pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	double value;
@@ -226,7 +226,7 @@ void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_time */
 static
 void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
-				   uint pack_len, zend_uchar **row,
+				   unsigned int pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
@@ -284,7 +284,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_date */
 static
 void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
-				   uint pack_len, zend_uchar **row,
+				   unsigned int pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t = {0};
@@ -335,7 +335,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_datetime */
 static
 void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
-					   uint pack_len, zend_uchar **row,
+					   unsigned int pack_len, zend_uchar **row,
 					   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
@@ -394,7 +394,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_string */
 static
 void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
-					 uint pack_len, zend_uchar **row,
+					 unsigned int pack_len, zend_uchar **row,
 					 zend_bool as_unicode TSRMLS_DC)
 {
 	/*
@@ -424,7 +424,7 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_bit */
 static
 void ps_fetch_bit(zval *zv, const MYSQLND_FIELD * const field,
-				  uint pack_len, zend_uchar **row,
+				  unsigned int pack_len, zend_uchar **row,
 				  zend_bool as_unicode TSRMLS_DC)
 {
 	unsigned long length= php_mysqlnd_net_field_length(row);
@@ -578,7 +578,7 @@ void _mysqlnd_init_ps_subsystem()
 
 /* {{{ mysqlnd_stmt_copy_it */
 static void
-mysqlnd_stmt_copy_it(zval *** copies, zval *original, uint param_count, uint current)
+mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current)
 {
 	if (!*copies) {
 		*copies = ecalloc(param_count, sizeof(zval *));					
