@@ -151,6 +151,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 {
 	int m;
 	int mime = ms->flags & MAGIC_MIME;
+	const unsigned char *ubuf = buf;
 
 	if (nb == 0) {
 		if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
@@ -182,15 +183,15 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 #if PHP_FILEINFO_UNCOMPRESS
 	/* try compression stuff */
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) != 0 ||
-		(m = file_zmagic(ms, stream, inname, buf, nb)) == 0) 
+		(m = file_zmagic(ms, stream, inname, ubuf, nb)) == 0) 
 #endif
 	{
 		/* Check if we have a tar file */
-		if ((ms->flags & MAGIC_NO_CHECK_TAR) != 0 || (m = file_is_tar(ms, buf, nb)) == 0) {
+		if ((ms->flags & MAGIC_NO_CHECK_TAR) != 0 || (m = file_is_tar(ms, ubuf, nb)) == 0) {
 			/* try tests in /etc/magic (or surrogate magic file) */
-			if ((ms->flags & MAGIC_NO_CHECK_SOFT) != 0 || (m = file_softmagic(ms, buf, nb, BINTEST)) == 0) {
+			if ((ms->flags & MAGIC_NO_CHECK_SOFT) != 0 || (m = file_softmagic(ms, ubuf, nb, BINTEST)) == 0) {
 				/* try known keywords, check whether it is ASCII */
-				if ((ms->flags & MAGIC_NO_CHECK_ASCII) != 0 || (m = file_ascmagic(ms, buf, nb)) == 0) {
+				if ((ms->flags & MAGIC_NO_CHECK_ASCII) != 0 || (m = file_ascmagic(ms, ubuf, nb)) == 0) {
 					/* abandon hope, all ye who remain here */
 					if ((!mime || (mime & MAGIC_MIME_TYPE)) && file_printf(ms, mime ? "application/octet-stream" : "data") == -1) {
 						return -1;
@@ -210,7 +211,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		 * information from the ELF headers that cannot easily
 		 * be extracted with rules in the magic file.
 		 */
-		(void)file_tryelf(ms, stream, buf, nb);
+		(void)file_tryelf(ms, stream, ubuf, nb);
 	}
 #endif
 	return m;
