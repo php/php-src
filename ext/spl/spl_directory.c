@@ -241,7 +241,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar ty
 	intern->_path_len = path_len;
 	intern->u.dir.dirp = php_stream_u_opendir(type, path, path_len, options, NULL);
 
-	if (intern->_path_len && IS_SLASH_AT(type, path, intern->_path_len-1)) {
+	if (intern->_path_len > 1 && IS_SLASH_AT(type, path, intern->_path_len-1)) {
 		intern->_path = ezstrndup(type, path, --intern->_path_len);
 	} else {
 		intern->_path = ezstrndup(type, path, intern->_path_len);
@@ -278,7 +278,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
 	}
 
-	if (intern->file_name_len && IS_SLASH_AT(intern->file_name_type, intern->file_name, intern->file_name_len-1)) {
+	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name_type, intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
 	}
 
@@ -396,7 +396,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 			
 			if (type == IS_UNICODE) {
 				slash_pos.u = (p1.u > p2.u ? p1.u : p2.u);
-				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1)) {
+				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1) && intern->file_name_len > 1) {
 					intern->file_name_len = slash_pos.u - intern->file_name.u;
 					intern->file_name.u[intern->file_name_len] = 0;
 					continue;
@@ -404,7 +404,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend_uchar 
 				intern->_path_len = slash_pos.u - intern->file_name.u;
 			} else {
 				slash_pos.s = (p1.s > p2.s ? p1.s : p2.s);
-				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1)) {
+				if (IS_SLASH_AT(type, intern->file_name, intern->file_name_len-1) && intern->file_name_len > 1) {
 					intern->file_name_len = slash_pos.s - intern->file_name.s;
 					intern->file_name.s[intern->file_name_len] = 0;
 					continue;
@@ -2113,7 +2113,7 @@ SPL_METHOD(SplFileObject, __construct)
 	if (spl_filesystem_file_open(intern, use_include_path, 0 TSRMLS_CC) == SUCCESS) {
 		tmp_path_len  = strlen(intern->u.file.stream->orig_path);
 
-		if (tmp_path_len && IS_SLASH_AT(IS_STRING, ZSTR(intern->u.file.stream->orig_path), tmp_path_len-1)) {
+		if (tmp_path_len > 1 && IS_SLASH_AT(IS_STRING, ZSTR(intern->u.file.stream->orig_path), tmp_path_len-1)) {
 			tmp_path_len--;
 		}
 
