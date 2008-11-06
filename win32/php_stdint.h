@@ -116,19 +116,42 @@ typedef uint64_t  uintmax_t;
 #if !defined(__cplusplus) || defined(__STDC_LIMIT_MACROS) // [   See footnote 220 at page 257 and footnote 221 at page 259
 
 // 7.18.2.1 Limits of exact-width integer types
-#define INT8_MIN     ((int8_t)_I8_MIN)
-#define INT8_MAX     _I8_MAX
-#define INT16_MIN    ((int16_t)_I16_MIN)
-#define INT16_MAX    _I16_MAX
-#define INT32_MIN    ((int32_t)_I32_MIN)
-#define INT32_MAX    _I32_MAX
-#define INT64_MIN    ((int64_t)_I64_MIN)
-#define INT64_MAX    _I64_MAX
-#define UINT8_MAX    _UI8_MAX
-#define UINT16_MAX   _UI16_MAX
-#define UINT32_MAX   _UI32_MAX
-#define UINT64_MAX   _UI64_MAX
-
+#ifndef INT8_MIN
+# define INT8_MIN     ((int8_t)_I8_MIN)
+#endif
+#ifndef INT8_MAX
+# define INT8_MAX     _I8_MAX
+#endif
+#ifndef INT16_MIN
+# define INT16_MIN    ((int16_t)_I16_MIN)
+#endif
+#ifndef INT16_MAX
+# define INT16_MAX    _I16_MAX
+#endif
+#ifndef INT32_MIN
+# define INT32_MIN    ((int32_t)_I32_MIN)
+#endif
+#ifndef INT32_MAX
+# define INT32_MAX    _I32_MAX
+#endif
+#ifndef INT64_MIN
+# define INT64_MIN    ((int64_t)_I64_MIN)
+#endif
+#ifndef INT64_MAX
+# define INT64_MAX    _I64_MAX
+#endif
+#ifndef UINT8_MAX
+# define UINT8_MAX    _UI8_MAX
+#endif
+#ifndef UINT16_MAX
+# define UINT16_MAX   _UI16_MAX
+#endif
+#ifndef UINT32_MAX
+# define UINT32_MAX   _UI32_MAX
+#endif
+#ifndef UINT64_MAX
+# define UINT64_MAX   _UI64_MAX
+#endif
 // 7.18.2.2 Limits of minimum-width integer types
 #define INT_LEAST8_MIN    INT8_MIN
 #define INT_LEAST8_MAX    INT8_MAX
@@ -217,13 +240,16 @@ typedef uint64_t  uintmax_t;
 #define INT8_C(val)  val##i8
 #define INT16_C(val) val##i16
 #define INT32_C(val) val##i32
-#define INT64_C(val) val##i64
+#ifndef INT64_C
+# define INT64_C(val) val##i64
+#endif
 
 #define UINT8_C(val)  val##ui8
 #define UINT16_C(val) val##ui16
 #define UINT32_C(val) val##ui32
-#define UINT64_C(val) val##ui64
-
+#ifndef UINT64_C
+# define UINT64_C(val) val##ui64
+#endif
 // 7.18.4.2 Macros for greatest-width integer constants
 #define INTMAX_C   INT64_C
 #define UINTMAX_C  UINT64_C
