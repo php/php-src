@@ -34,8 +34,6 @@ standard problems.
    <file role="src" name="spl_functions.h"/>
    <file role="src" name="spl_iterators.c"/>
    <file role="src" name="spl_iterators.h"/>
-   <file role="src" name="spl_sxe.c"/>
-   <file role="src" name="spl_sxe.h"/>
    <file role="doc" name="CREDITS"/>
    <file role="doc" name="README"/>
    <file role="doc" name="TODO"/>
