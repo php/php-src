@@ -69,7 +69,6 @@ typedef int8 int8_t;				/* Signed integer >= 8    bits */
 #endif
 #endif
 
-
 #ifndef HAVE_UINT8_T
 #ifndef HAVE_UINT8
 typedef unsigned char uint8_t;		/* Unsigned integer >= 8    bits */
@@ -110,7 +109,6 @@ error "Neither int nor long is of 4 bytes width"
 #endif
 #endif /* HAVE_INT32_T */
 
-
 #ifndef HAVE_UINT32_T
 #ifdef HAVE_UINT32
 typedef uint32 uint32_t;
@@ -122,7 +120,6 @@ typedef unsigned long uint32_t;
 #error "Neither int nor long is of 4 bytes width"
 #endif
 #endif /* HAVE_UINT32_T */
-
 
 #ifndef HAVE_INT64_T
 #ifdef HAVE_INT64
@@ -141,7 +138,6 @@ typedef signed long long int64_t;
 #error "Neither int nor long nor long long is of 8 bytes width"
 #endif
 #endif /* HAVE_INT64_T */
-
 
 #ifndef HAVE_UINT64_T
 #ifdef HAVE_UINT64
@@ -179,7 +175,7 @@ typedef unsigned long long uint64_t;
 #endif
 
 
-#define int1store(T,A)	do { *((zend_uchar*) (T)) = (A); } while(0)
+#define int1store(T,A)	do { *((int8_t*) (T)) = (A); } while(0)
 #define uint1korr(A)	(*(((uint8_t*)(A))))
 
 /* Bit values are sent in reverted order of bytes, compared to normal !!! */
