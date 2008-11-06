@@ -17,7 +17,7 @@ PHP                                                                        NEWS
 - Added concatenation option to bz2.decompress stream filter.
   (Keisial at gmail dot com, Greg)
 - Added support for using compressed connections with PDO_mysql. (Johannes)
-- Added missing suncc compiler flags as requested by feature request #46513.
+- Implemented FR #46513 (Missing compiler flags for suncc). 
   (David Soria Parra)
 
 - Deprecated define_syslog_variables(). (Kalle)
