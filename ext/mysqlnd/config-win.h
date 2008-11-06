@@ -10,6 +10,33 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
+#include "win32/php_stdint.h"
+
+#ifndef HAVE_INT8_T
+#define HAVE_INT8_T
+#endif
+#ifndef HAVE_UINT8_T
+#define HAVE_UINT8_T
+#endif
+#ifndef HAVE_INT16_T
+#define HAVE_INT16_T
+#endif
+#ifndef HAVE_UINT16_T
+#define HAVE_UINT16_T
+#endif
+#ifndef HAVE_INT32_T
+#define HAVE_INT32_T
+#endif
+#ifndef HAVE_UINT32_T
+#define HAVE_UINT32_T
+#endif
+#ifndef HAVE_INT64_T
+#define HAVE_INT64_T
+#endif
+#ifndef HAVE_UINT64_T
+#define HAVE_UINT64_T
+#endif
+
 
 #ifndef _WIN64
 #ifndef _WIN32

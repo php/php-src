@@ -60,7 +60,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 /* Typdefs for easyier portability */
-
+#if 0
 #ifndef HAVE_INT8_T
 #ifndef HAVE_INT8
 typedef signed char int8_t;			/* Signed integer >= 8    bits */
@@ -68,7 +68,6 @@ typedef signed char int8_t;			/* Signed integer >= 8    bits */
 typedef int8 int8_t;				/* Signed integer >= 8    bits */
 #endif
 #endif
-
 
 #ifndef HAVE_UINT8_T
 #ifndef HAVE_UINT8
@@ -110,7 +109,6 @@ error "Neither int nor long is of 4 bytes width"
 #endif
 #endif /* HAVE_INT32_T */
 
-
 #ifndef HAVE_UINT32_T
 #ifdef HAVE_UINT32
 typedef uint32 uint32_t;
@@ -122,7 +120,6 @@ typedef unsigned long uint32_t;
 #error "Neither int nor long is of 4 bytes width"
 #endif
 #endif /* HAVE_UINT32_T */
-
 
 #ifndef HAVE_INT64_T
 #ifdef HAVE_INT64
@@ -142,7 +139,6 @@ typedef signed long long int64_t;
 #endif
 #endif /* HAVE_INT64_T */
 
-
 #ifndef HAVE_UINT64_T
 #ifdef HAVE_UINT64
 typedef uint64 uint64_t;
@@ -161,6 +157,7 @@ typedef unsigned long long uint64_t;
 #endif
 #endif /* HAVE_INT64_T */
 
+#endif
 
 #ifdef PHP_WIN32
 #define MYSQLND_LLU_SPEC "%I64u"
@@ -179,7 +176,7 @@ typedef unsigned long long uint64_t;
 #endif
 
 
-#define int1store(T,A)	do { *((zend_uchar*) (T)) = (A); } while(0)
+#define int1store(T,A)	do { *((int8_t*) (T)) = (A); } while(0)
 #define uint1korr(A)	(*(((uint8_t*)(A))))
 
 /* Bit values are sent in reverted order of bytes, compared to normal !!! */
@@ -231,7 +228,7 @@ typedef unsigned long long uint64_t;
 **  (low byte first)
 */
 
-/* Optimized store functions for Intel x86, non-valid for WIN64 */
+/* Optimized store functions for Intel x86, non-valid for WIN64. __i386__ is GCC */
 #if defined(__i386__) && !defined(_WIN64)
 #define sint2korr(A)    (*((int16_t *) (A)))
 #define sint3korr(A)    ((int32_t) ((((uchar) (A)[2]) & 128) ? \
