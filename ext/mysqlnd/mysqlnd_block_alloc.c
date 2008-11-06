@@ -31,7 +31,7 @@
 static void
 mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 {
-	uint i;
+	unsigned int i;
 	DBG_ENTER("mysqlnd_mempool_dtor");
 	for (i = 0; i < pool->free_chunk_list_elements; i++) {
 		MYSQLND_MEMORY_POOL_CHUNK * chunk = pool->free_chunk_list[i];
@@ -76,7 +76,7 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it
 
 /* {{{ mysqlnd_mempool_resize_chunk */
 static void
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS_DC)
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
 	if (chunk->from_pool) {
@@ -124,7 +124,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, uint size TSRMLS
 
 /* {{{ mysqlnd_mempool_get_chunk */
 static
-MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, uint size TSRMLS_DC)
+MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, unsigned int size TSRMLS_DC)
 {
 	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");

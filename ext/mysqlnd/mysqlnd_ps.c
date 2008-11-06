@@ -58,7 +58,7 @@ enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param,
 											   zend_bool *fetched_anything TSRMLS_DC);
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
-static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC);
+static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
 
 static void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const stmt TSRMLS_DC);
 static enum_func_status mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const stmt TSRMLS_DC);
@@ -653,7 +653,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	}
 
 	if (stmt->param_count) {
-		uint i, not_bound = 0;
+		unsigned int i, not_bound = 0;
 		if (!stmt->param_bind) {
 			SET_STMT_ERROR(stmt, CR_PARAMS_NOT_BOUND, UNKNOWN_SQLSTATE,
 							 "No data supplied for parameters in prepared statement");
@@ -708,7 +708,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 {
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
-	uint field_count = result->meta->field_count;
+	unsigned int field_count = result->meta->field_count;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_buffered");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -1477,7 +1477,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 	SET_EMPTY_ERROR(stmt->conn->error_info);
 
 	if (stmt->field_count) {
-		uint i = 0;
+		unsigned int i = 0;
 
 		if (!result_bind) {
 			DBG_ERR("no result bind passed");
@@ -1508,7 +1508,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 
 /* {{{ mysqlnd_stmt::bind_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt::bind_result");
 	DBG_INF_FMT("stmt=%lu field_count=%u", stmt->stmt_id, stmt->field_count);
@@ -1887,7 +1887,7 @@ void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 
 /* {{{ mysqlnd_stmt_separate_one_result_bind */
-void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC)
+void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
 	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%d",

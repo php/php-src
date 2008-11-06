@@ -36,7 +36,7 @@ struct st_mysqlnd_debug_methods
 	enum_func_status (*log_va)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
 							   unsigned int level, const char * type, const char *format, ...);
 	zend_bool (*func_enter)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
-							char * func_name, uint func_name_len);
+							char * func_name, unsigned int func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file);
 	enum_func_status (*close)(MYSQLND_DEBUG *self);
 	enum_func_status (*free_handle)(MYSQLND_DEBUG *self);
@@ -65,14 +65,14 @@ MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D);
 
 void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
 void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-void *	_mysqlnd_ecalloc(uint nmemb, size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_pecalloc(uint nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
 void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
 void 	_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
 void 	_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
 void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_calloc(uint nmemb, size_t size MYSQLND_MEM_D);
+void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
 void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 
