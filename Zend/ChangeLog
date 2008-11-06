@@ -1,3 +1,36 @@
+2008-11-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_ini_scanner_defs.h:
+      sync zend_ini_scanner.c
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      MFH: Added parse_ini_string() function (grange at lemonde dot fr, Arnaud)
+      [DOC] new function parse_ini_string()
+            proto array parse_ini_string(string ini_string
+                [, bool process_sections [, int scanner_mode]])
+            Same as parse_ini_file() except that it takes a string instead of a
+            filename.
+
+    * zend_ini_scanner.l:
+      Added parse_ini_string() function (grange at lemonde dot fr, Arnaud)
+      [DOC] new function parse_ini_string()
+            proto array parse_ini_string(string ini_string
+                [, bool process_sections [, int scanner_mode]])
+            Same as parse_ini_file() except that it takes a string instead of a
+            filename.
+
+2008-11-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Fixed Windows build
+
 2008-11-04  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
