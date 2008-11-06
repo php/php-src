@@ -584,7 +584,7 @@ private void
 load_1(struct magic_set *ms, int action, const char *fn, int *errs,
    struct magic_entry **marray, uint32_t *marraycount)
 {
-	zstr buffer;
+	char buffer[BUFSIZ + 1];
 	char *line;
 	size_t line_len;
 	size_t lineno = 0;
@@ -598,13 +598,14 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 #else
 	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
 #endif
+
 	if (stream == NULL) {
 		if (errno != ENOENT)
 			file_error(ms, errno, "cannot read magic file `%s'",
 				   fn);
 		(*errs)++;
 	} else {
-		buffer.v = emalloc(BUFSIZ+1);
+
 		/* read and parse this file */
 		for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &line_len)) != NULL; ms->line++) {
 			if (line_len == 0) /* null line, garbage, etc */
@@ -652,7 +653,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 			if (parse(ms, marray, marraycount, line, lineno, action) != 0)
 				(*errs)++;
 		}
-		efree(buffer.v);
+
 		php_stream_close(stream);
 	}
 }

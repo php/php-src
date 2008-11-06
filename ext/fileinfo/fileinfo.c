@@ -324,7 +324,7 @@ PHP_FUNCTION(finfo_open)
 		RETURN_FALSE;
 	}
 
-	if (file && *file) { /* user specified filed, perform open_basedir checks */
+	if (file && *file) { /* user specified file, perform open_basedir checks */
 		if (!VCWD_REALPATH(file, resolved_path)) {
 			RETURN_FALSE;
 		}
@@ -533,9 +533,6 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
 
 				if (!stream) {
-					if (mimetype_emu) {
-						magic_close(magic);
-					}
 					RETVAL_FALSE;
 					goto clean;
 				}
@@ -545,6 +542,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			}
 			break;
 		}
+
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only process string or stream arguments");
  	}
