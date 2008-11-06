@@ -59,8 +59,8 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define HAVE_LONG_LONG 1
 #endif
 
+
 /* Typdefs for easyier portability */
-#if 0
 #ifndef HAVE_INT8_T
 #ifndef HAVE_INT8
 typedef signed char int8_t;			/* Signed integer >= 8    bits */
@@ -93,9 +93,6 @@ typedef uint16 uint16_t;			/* Signed integer >= 16 bits */
 #endif
 #endif
 
-#ifndef HAVE_UCHAR
-typedef unsigned char uchar;		/* Short for unsigned char */
-#endif
 
 #ifndef HAVE_INT32_T
 #ifdef HAVE_INT32
@@ -157,7 +154,6 @@ typedef unsigned long long uint64_t;
 #endif
 #endif /* HAVE_INT64_T */
 
-#endif
 
 #ifdef PHP_WIN32
 #define MYSQLND_LLU_SPEC "%I64u"
@@ -180,47 +176,47 @@ typedef unsigned long long uint64_t;
 #define uint1korr(A)	(*(((uint8_t*)(A))))
 
 /* Bit values are sent in reverted order of bytes, compared to normal !!! */
-#define bit_uint2korr(A) ((uint16_t) (((uint16_t) (((uchar*) (A))[1])) +\
-									((uint16_t) (((uchar*) (A))[0]) << 8)))
-#define bit_uint3korr(A) ((uint32_t) (((uint32_t) (((uchar*) (A))[2])) +\
-									(((uint32_t) (((uchar*) (A))[1])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[0])) << 16)))
+#define bit_uint2korr(A) ((uint16_t) (((uint16_t) (((zend_uchar*) (A))[1])) +\
+									((uint16_t) (((zend_uchar*) (A))[0]) << 8)))
+#define bit_uint3korr(A) ((uint32_t) (((uint32_t) (((zend_uchar*) (A))[2])) +\
+									(((uint32_t) (((zend_uchar*) (A))[1])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[0])) << 16)))
 
-#define bit_uint4korr(A) ((uint32_t) (((uint32_t) (((uchar*) (A))[3])) +\
-									(((uint32_t) (((uchar*) (A))[2])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[1])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[0])) << 24)))
+#define bit_uint4korr(A) ((uint32_t) (((uint32_t) (((zend_uchar*) (A))[3])) +\
+									(((uint32_t) (((zend_uchar*) (A))[2])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[1])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[0])) << 24)))
 
-#define bit_uint5korr(A)  ((uint64_t)(((uint32_t) ((uchar) (A)[4])) +\
-                                  (((uint32_t) ((uchar) (A)[3])) << 8) +\
-                                  (((uint32_t) ((uchar) (A)[2])) << 16) +\
-                                  (((uint32_t) ((uchar) (A)[1])) << 24)) +\
-                               (((uint64_t) ((uchar) (A)[0])) << 32))
+#define bit_uint5korr(A)  ((uint64_t)(((uint32_t) ((zend_uchar) (A)[4])) +\
+                                  (((uint32_t) ((zend_uchar) (A)[3])) << 8) +\
+                                  (((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
+                                  (((uint32_t) ((zend_uchar) (A)[1])) << 24)) +\
+                               (((uint64_t) ((zend_uchar) (A)[0])) << 32))
 
-#define bit_uint6korr(A)	((uint64_t)(((uint32_t) (((uchar*) (A))[5])) +\
-									(((uint32_t) (((uchar*) (A))[4])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[3])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[2])) << 24)) +\
-									(((uint64_t) (((uint32_t) (((uchar*) (A))[1])) +\
-									(((uint32_t) (((uchar*) (A))[0]) << 8)))) << 32))
+#define bit_uint6korr(A)	((uint64_t)(((uint32_t) (((zend_uchar*) (A))[5])) +\
+									(((uint32_t) (((zend_uchar*) (A))[4])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[3])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[2])) << 24)) +\
+									(((uint64_t) (((uint32_t) (((zend_uchar*) (A))[1])) +\
+									(((uint32_t) (((zend_uchar*) (A))[0]) << 8)))) << 32))
 
-#define bit_uint7korr(A)	((uint64_t)(((uint32_t) (((uchar*) (A))[6])) +\
-									(((uint32_t) (((uchar*) (A))[5])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[4])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[3])) << 24)) +\
-									(((uint64_t) (((uint32_t) (((uchar*) (A))[2])) +\
-									(((uint32_t) (((uchar*) (A))[1])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[0])) << 16))) << 32))
+#define bit_uint7korr(A)	((uint64_t)(((uint32_t) (((zend_uchar*) (A))[6])) +\
+									(((uint32_t) (((zend_uchar*) (A))[5])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[4])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[3])) << 24)) +\
+									(((uint64_t) (((uint32_t) (((zend_uchar*) (A))[2])) +\
+									(((uint32_t) (((zend_uchar*) (A))[1])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[0])) << 16))) << 32))
 
 
-#define bit_uint8korr(A) ((uint64_t)(((uint32_t) (((uchar*) (A))[7])) +\
-									(((uint32_t) (((uchar*) (A))[6])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[5])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[4])) << 24)) +\
-									(((uint64_t) (((uint32_t) (((uchar*) (A))[3])) +\
-									(((uint32_t) (((uchar*) (A))[2])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[1])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[0])) << 24))) << 32))
+#define bit_uint8korr(A) ((uint64_t)(((uint32_t) (((zend_uchar*) (A))[7])) +\
+									(((uint32_t) (((zend_uchar*) (A))[6])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[5])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[4])) << 24)) +\
+									(((uint64_t) (((uint32_t) (((zend_uchar*) (A))[3])) +\
+									(((uint32_t) (((zend_uchar*) (A))[2])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[1])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[0])) << 24))) << 32))
 
 
 /*
@@ -231,20 +227,20 @@ typedef unsigned long long uint64_t;
 /* Optimized store functions for Intel x86, non-valid for WIN64. __i386__ is GCC */
 #if defined(__i386__) && !defined(_WIN64)
 #define sint2korr(A)    (*((int16_t *) (A)))
-#define sint3korr(A)    ((int32_t) ((((uchar) (A)[2]) & 128) ? \
+#define sint3korr(A)    ((int32_t) ((((zend_uchar) (A)[2]) & 128) ? \
                    (((uint32_t) 255L << 24) | \
-                   (((uint32_t) (uchar) (A)[2]) << 16) |\
-                   (((uint32_t) (uchar) (A)[1]) << 8) | \
-                    ((uint32_t) (uchar) (A)[0])) : \
-                   (((uint32_t) (uchar) (A)[2]) << 16) |\
-                   (((uint32_t) (uchar) (A)[1]) << 8) | \
-                    ((uint32_t) (uchar) (A)[0])))
+                   (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+                   (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+                    ((uint32_t) (zend_uchar) (A)[0])) : \
+                   (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+                   (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+                    ((uint32_t) (zend_uchar) (A)[0])))
 #define sint4korr(A)  (*((long *) (A)))
 
 #define uint2korr(A)  (*((uint16_t *) (A)))
-#define uint3korr(A)  (uint32_t) (((uint32_t) ((uchar) (A)[0])) +\
-                               (((uint32_t) ((uchar) (A)[1])) << 8) +\
-                               (((uint32_t) ((uchar) (A)[2])) << 16))
+#define uint3korr(A)  (uint32_t) (((uint32_t) ((zend_uchar) (A)[0])) +\
+                               (((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
+                               (((uint32_t) ((zend_uchar) (A)[2])) << 16))
 #define uint4korr(A)  (*((unsigned long *) (A)))
 
 
@@ -253,25 +249,25 @@ typedef unsigned long long uint64_t;
 #define sint8korr(A)    (*((int64_t *) (A)))
 #define int2store(T,A)    *((uint16_t*) (T))= (uint16_t) (A)
 #define int3store(T,A)   { \
-                  *(T)=  (uchar) ((A));\
-                  *(T+1)=(uchar) (((uint32_t) (A) >> 8));\
-                  *(T+2)=(uchar) (((A) >> 16)); }
+                  *(T)=  (zend_uchar) ((A));\
+                  *(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
+                  *(T+2)=(zend_uchar) (((A) >> 16)); }
 #define int4store(T,A)    *((long *) (T))= (long) (A)
 #define int5store(T,A)    { \
-              *((uchar *)(T))= (uchar)((A));\
-              *(((uchar *)(T))+1)=(uchar) (((A) >> 8));\
-              *(((uchar *)(T))+2)=(uchar) (((A) >> 16));\
-              *(((uchar *)(T))+3)=(uchar) (((A) >> 24)); \
-              *(((uchar *)(T))+4)=(uchar) (((A) >> 32)); }
+              *((zend_uchar *)(T))= (zend_uchar)((A));\
+              *(((zend_uchar *)(T))+1)=(zend_uchar) (((A) >> 8));\
+              *(((zend_uchar *)(T))+2)=(zend_uchar) (((A) >> 16));\
+              *(((zend_uchar *)(T))+3)=(zend_uchar) (((A) >> 24)); \
+              *(((zend_uchar *)(T))+4)=(zend_uchar) (((A) >> 32)); }
 
 /* From Andrey Hristov, based on int5store() */
 #define int6store(T,A)    { \
-              *(((uchar *)(T)))= (uchar)((A));\
-              *(((uchar *)(T))+1))=(uchar) (((A) >> 8));\
-              *(((uchar *)(T))+2))=(uchar) (((A) >> 16));\
-              *(((uchar *)(T))+3))=(uchar) (((A) >> 24)); \
-              *(((uchar *)(T))+4))=(uchar) (((A) >> 32)); \
-              *(((uchar *)(T))+5))=(uchar) (((A) >> 40)); }
+              *(((zend_uchar *)(T)))= (zend_uchar)((A));\
+              *(((zend_uchar *)(T))+1))=(zend_uchar) (((A) >> 8));\
+              *(((zend_uchar *)(T))+2))=(zend_uchar) (((A) >> 16));\
+              *(((zend_uchar *)(T))+3))=(zend_uchar) (((A) >> 24)); \
+              *(((zend_uchar *)(T))+4))=(zend_uchar) (((A) >> 32)); \
+              *(((zend_uchar *)(T))+5))=(zend_uchar) (((A) >> 40)); }
 
 #define int8store(T,A)    *((uint64_t *) (T))= (uint64_t) (A)
 
@@ -291,55 +287,55 @@ typedef union {
 
 /* If we haven't defined sint2korr, which is because the platform is not x86 or it's WIN64 */
 #ifndef sint2korr
-#define sint2korr(A)    (int16_t) (((int16_t) ((uchar) (A)[0])) +\
+#define sint2korr(A)    (int16_t) (((int16_t) ((zend_uchar) (A)[0])) +\
                                  ((int16_t) ((int16_t) (A)[1]) << 8))
-#define sint3korr(A)    ((int32_t) ((((uchar) (A)[2]) & 128) ? \
+#define sint3korr(A)    ((int32_t) ((((zend_uchar) (A)[2]) & 128) ? \
                   (((uint32_t) 255L << 24) | \
-                  (((uint32_t) (uchar) (A)[2]) << 16) |\
-                  (((uint32_t) (uchar) (A)[1]) << 8) | \
-                   ((uint32_t) (uchar) (A)[0])) : \
-                  (((uint32_t) (uchar) (A)[2]) << 16) |\
-                  (((uint32_t) (uchar) (A)[1]) << 8) | \
-                  ((uint32_t) (uchar) (A)[0])))
-#define sint4korr(A)  (int32_t) (((int32_t) ((uchar) (A)[0])) +\
-                              (((int32_t) ((uchar) (A)[1]) << 8)) +\
-                              (((int32_t) ((uchar) (A)[2]) << 16)) +\
+                  (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+                  (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+                   ((uint32_t) (zend_uchar) (A)[0])) : \
+                  (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
+                  (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
+                  ((uint32_t) (zend_uchar) (A)[0])))
+#define sint4korr(A)  (int32_t) (((int32_t) ((zend_uchar) (A)[0])) +\
+                              (((int32_t) ((zend_uchar) (A)[1]) << 8)) +\
+                              (((int32_t) ((zend_uchar) (A)[2]) << 16)) +\
                               (((int32_t) ((int16_t) (A)[3]) << 24)))
 
 #define sint8korr(A)  (int64_t) uint8korr(A)
-#define uint2korr(A)  (uint16_t) (((uint16_t) ((uchar) (A)[0])) +\
-                               ((uint16_t) ((uchar) (A)[1]) << 8))
-#define uint3korr(A)  (uint32_t) (((uint32_t) ((uchar) (A)[0])) +\
-                               (((uint32_t) ((uchar) (A)[1])) << 8) +\
-                               (((uint32_t) ((uchar) (A)[2])) << 16))
-#define uint4korr(A)  (uint32_t) (((uint32_t) ((uchar) (A)[0])) +\
-                               (((uint32_t) ((uchar) (A)[1])) << 8) +\
-                               (((uint32_t) ((uchar) (A)[2])) << 16) +\
-                               (((uint32_t) ((uchar) (A)[3])) << 24))
+#define uint2korr(A)  (uint16_t) (((uint16_t) ((zend_uchar) (A)[0])) +\
+                               ((uint16_t) ((zend_uchar) (A)[1]) << 8))
+#define uint3korr(A)  (uint32_t) (((uint32_t) ((zend_uchar) (A)[0])) +\
+                               (((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
+                               (((uint32_t) ((zend_uchar) (A)[2])) << 16))
+#define uint4korr(A)  (uint32_t) (((uint32_t) ((zend_uchar) (A)[0])) +\
+                               (((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
+                               (((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
+                               (((uint32_t) ((zend_uchar) (A)[3])) << 24))
 
 
-#define bit_uint8korr(A) ((uint64_t)(((uint32_t) (((uchar*) (A))[7])) +\
-									(((uint32_t) (((uchar*) (A))[6])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[5])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[4])) << 24)) +\
-									(((uint64_t) (((uint32_t) (((uchar*) (A))[3])) +\
-									(((uint32_t) (((uchar*) (A))[2])) << 8) +\
-									(((uint32_t) (((uchar*) (A))[1])) << 16) +\
-									(((uint32_t) (((uchar*) (A))[0])) << 24))) << 32))
+#define bit_uint8korr(A) ((uint64_t)(((uint32_t) (((zend_uchar*) (A))[7])) +\
+									(((uint32_t) (((zend_uchar*) (A))[6])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[5])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[4])) << 24)) +\
+									(((uint64_t) (((uint32_t) (((zend_uchar*) (A))[3])) +\
+									(((uint32_t) (((zend_uchar*) (A))[2])) << 8) +\
+									(((uint32_t) (((zend_uchar*) (A))[1])) << 16) +\
+									(((uint32_t) (((zend_uchar*) (A))[0])) << 24))) << 32))
 
-#define uint8korr(A)	((uint64_t)(((uint32_t) ((uchar) (A)[0])) +\
-									(((uint32_t) ((uchar) (A)[1])) << 8) +\
-									(((uint32_t) ((uchar) (A)[2])) << 16) +\
-									(((uint32_t) ((uchar) (A)[3])) << 24)) +\
-									(((uint64_t) (((uint32_t) ((uchar) (A)[4])) +\
-									(((uint32_t) ((uchar) (A)[5])) << 8) +\
-									(((uint32_t) ((uchar) (A)[6])) << 16) +\
-									(((uint32_t) ((uchar) (A)[7])) << 24))) << 32))
+#define uint8korr(A)	((uint64_t)(((uint32_t) ((zend_uchar) (A)[0])) +\
+									(((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
+									(((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
+									(((uint32_t) ((zend_uchar) (A)[3])) << 24)) +\
+									(((uint64_t) (((uint32_t) ((zend_uchar) (A)[4])) +\
+									(((uint32_t) ((zend_uchar) (A)[5])) << 8) +\
+									(((uint32_t) ((zend_uchar) (A)[6])) << 16) +\
+									(((uint32_t) ((zend_uchar) (A)[7])) << 24))) << 32))
 
 
 #define int2store(T,A)  do { uint32_t def_temp= (uint32_t) (A) ;\
-                  *((uchar*) (T))  =  (uchar)(def_temp); \
-                  *((uchar*) (T+1)) = (uchar)((def_temp >> 8)); } while (0)
+                  *((zend_uchar*) (T))  =  (zend_uchar)(def_temp); \
+                  *((zend_uchar*) (T+1)) = (zend_uchar)((def_temp >> 8)); } while (0)
 #define int3store(T,A)  do { /*lint -save -e734 */\
                   *(((char *)(T)))   = (char) ((A));\
                   *(((char *)(T))+1) = (char) (((A) >> 8));\
