@@ -29,15 +29,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_GD_PNG
-/* needs to be first */
-#include <png.h>
-#endif
-#ifdef HAVE_GD_JPG
-/* needs to be first */
-#include <jpeglib.h>
-#endif
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/head.h"
@@ -1395,15 +1386,16 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #ifdef HAVE_GD_JPG
 	{
-		char tmp[256];
-		snprintf(tmp, sizeof(tmp), "%d", JPEG_LIB_VERSION);
+		char tmp[12];
+		snprintf(tmp, sizeof(tmp), "%d", gdJpegGetVersionInt());
 		php_info_print_table_row(2, "JPG Support", "enabled");
-		php_info_print_table_row(2, "libJPEG Version", tmp);
+		php_info_print_table_row(2, "libPNG Version", tmp);
 	}
 #endif
+
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-	php_info_print_table_row(2, "libPNG Version", PNG_LIBPNG_VER_STRING);
+	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
 #endif
 #ifdef HAVE_GD_WBMP
 	php_info_print_table_row(2, "WBMP Support", "enabled");
