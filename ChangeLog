@@ -1,3 +1,117 @@
+2008-11-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/pdo/pdo_stmt.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt:
+      MFH:
+      - Fixed wrong check
+      - Improved test
+
+    * ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt:
+      - Fixed wrong check
+      - Improved test
+
+2008-11-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner.c
+      ZendEngine2/zend_ini_scanner_defs.h
+      ZendEngine2/zend_ini_scanner_defs.h:
+      sync zend_ini_scanner.c
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_ini_scanner.l
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/tests/general_functions/parse_ini_string_001.phpt
+      ext/standard/tests/general_functions/parse_ini_string_002.phpt:
+      MFH: Added parse_ini_string() function (grange at lemonde dot fr, Arnaud)
+      [DOC] new function parse_ini_string()
+            proto array parse_ini_string(string ini_string
+                [, bool process_sections [, int scanner_mode]])
+            Same as parse_ini_file() except that it takes a string instead of a
+            filename.
+
+    * ZendEngine2/zend_ini_scanner.l
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/tests/general_functions/parse_ini_string_001.phpt
+      ext/standard/tests/general_functions/parse_ini_string_001.phpt
+      ext/standard/tests/general_functions/parse_ini_string_002.phpt
+      ext/standard/tests/general_functions/parse_ini_string_002.phpt:
+      Added parse_ini_string() function (grange at lemonde dot fr, Arnaud)
+      [DOC] new function parse_ini_string()
+            proto array parse_ini_string(string ini_string
+                [, bool process_sections [, int scanner_mode]])
+            Same as parse_ini_file() except that it takes a string instead of a
+            filename.
+
+2008-11-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/standard/string.c:
+      - Fixed bug #45166 (substr() overflow changes) (now synced with other
+      branches)
+
+2008-11-05  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * README.TESTING2
+      README.TESTING2
+      README.TESTING2:
+      Fixed bug#46445 (run-tests2.php is missing or README.TESTING2 is unneeded)
+
+2008-11-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Fixed Windows build
+
+2008-11-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/date-parse-by-format001.phpt:
+      - MFH: Fixed an issue with the * format specifier for parsing from a
+        user-defined format.
+
+    * ext/date/lib/parse_date.c
+      ext/date/lib/parse_date.re
+      ext/date/tests/date-parse-by-format001.phpt
+      ext/date/tests/date-parse-by-format001.phpt:
+      - Fixed an issue with the * format specifier for parsing from a
+      user-defined
+        format.
+
+2008-11-05  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * ext/standard/tests/misc/syslog_vars_variation1.phpt
+      ext/standard/tests/misc/syslog_vars_variation1.phpt
+      ext/standard/tests/misc/syslog_vars_variation2.phpt
+      ext/standard/tests/misc/syslog_vars_variation2.phpt:
+        1.1.4;
+      file syslog_vars_variation1.phpt was initially added on branch PHP_5_3.
+
+    * ext/standard/tests/misc/syslog_basic.phpt
+      ext/standard/tests/misc/syslog_basic.phpt
+      ext/standard/tests/misc/syslog_basic.phpt
+      ext/standard/tests/misc/syslog_parameters.phpt
+      ext/standard/tests/misc/syslog_parameters.phpt
+      ext/standard/tests/misc/syslog_parameters.phpt:
+        1.1.4;
+      New tests for syslog
+
+2008-11-05  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.RELEASE_PROCESS:
+      typo fix (thx chris jones for spotting)
+
 2008-11-04  Lukas Smith  <smith@pooteeweet.org>
 
     * (PHP_5_3)
