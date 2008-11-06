@@ -246,6 +246,9 @@ gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
 gdImagePtr gdImageCreateFromJpeg(FILE *infile, int ignore_warning);
 gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile, int ignore_warning);
 
+int gdJpegGetVersionInt();
+const char * gdPngGetVersionString();
+
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
         of bytes fetched. 0 is EOF, not an error! */
