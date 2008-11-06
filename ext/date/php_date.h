@@ -105,6 +105,50 @@ PHP_MINIT_FUNCTION(date);
 PHP_MSHUTDOWN_FUNCTION(date);
 PHP_MINFO_FUNCTION(date);
 
+typedef struct _php_date_obj php_date_obj;
+typedef struct _php_timezone_obj php_timezone_obj;
+typedef struct _php_interval_obj php_interval_obj;
+typedef struct _php_period_obj php_period_obj;
+
+struct _php_date_obj {
+	zend_object   std;
+	timelib_time *time;
+	HashTable    *props;
+};
+
+struct _php_timezone_obj {
+	zend_object     std;
+	int             initialized;
+	int             type;
+	union {
+		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
+		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
+		struct                      /* TIMELIB_ZONETYPE_ABBR */
+		{
+			timelib_sll  utc_offset;
+			char        *abbr;
+			int          dst;
+		} z;
+	} tzi;
+};
+
+struct _php_interval_obj {
+	zend_object       std;
+	timelib_rel_time *diff;
+	HashTable        *props;
+	int               initialized;
+};
+
+struct _php_period_obj {
+	zend_object       std;
+	timelib_time     *start;
+	timelib_time     *end;
+	timelib_rel_time *interval;
+	int               recurrences;
+	int               initialized;
+	int               include_start_date;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(date)
 	char      *default_timezone;
 	char      *timezone;
@@ -131,5 +175,9 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
 PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
+
+/* Grabbing CE's so that other exts can use the date objects too */
+PHPAPI zend_class_entry *php_date_get_date_ce(void);
+PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 #endif /* PHP_DATE_H */
