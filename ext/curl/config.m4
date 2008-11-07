@@ -75,7 +75,7 @@ if test "$PHP_CURL" != "no"; then
     }
    ],[
     AC_MSG_RESULT([yes])
-    AC_CHECK_HEADER([openssl/crypto.h], [
+    AC_CHECK_HEADERS([openssl/crypto.h], [
      AC_DEFINE([HAVE_CURL_OPENSSL], [1], [Have cURL with OpenSSL support])
     ])
    ], [
