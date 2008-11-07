@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
+- Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
+  (jd at cpanel dot net)
 
 06 Nov 2008, PHP 5.2.7RC3
 - Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
