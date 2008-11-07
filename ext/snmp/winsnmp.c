@@ -57,34 +57,32 @@ DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; }
 
 /* {{{ _php_snmp
  */
-void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
-	zval *a1, *a2, *a3;
-	INT	operation;
-    LPSTR              agent;
-    LPSTR              community;
-    RFC1157VarBindList variableBindings;
-    LPSNMP_MGR_SESSION session;
+void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
+{
+	INT operation;
 
-    INT        timeout = TIMEOUT;
-    INT        retries = RETRIES;
+	RFC1157VarBindList variableBindings;
+	LPSNMP_MGR_SESSION session;
 
-    BYTE       requestType;
-    AsnInteger errorStatus;
-    AsnInteger errorIndex;
-    AsnObjectIdentifier oid;
-   char        *chkPtr = NULL;
+	char *agent, *community, *object_id;
+	int agent_len, community_len, object_id_len;
 
-	if (zend_get_parameters_ex(3, &a1, &a2, &a3) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	INT timeout = TIMEOUT;
+	INT retries = RETRIES;
+
+	BYTE requestType;
+	AsnInteger errorStatus;
+	AsnInteger errorIndex;
+	AsnObjectIdentifier oid;
+
+	char *chkPtr = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &agent, &agent_len, &community, &community_len, &object_id, &object_id_len) == FAILURE) {
+		 return;
 	}
-	convert_to_string_ex(a1);
-	convert_to_string_ex(a2);
-	convert_to_string_ex(a3);
 
-	agent=Z_STRVAL_PP(a1);
-	community=Z_STRVAL_PP(a2);
-	operation=st;
-	SnmpMgrStrToOid(Z_STRVAL_PP(a3), &oid);
+	operation = st;
+	SnmpMgrStrToOid(object_id, &oid);
 
 /* 
    I've limited this to only one oid, but we can create a
