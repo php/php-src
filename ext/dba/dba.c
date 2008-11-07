@@ -207,33 +207,28 @@ ZEND_GET_MODULE(dba)
 /* {{{ macromania */
 
 #define DBA_ID_PARS 											\
-	zval **id; 													\
+	zval *id; 													\
 	dba_info *info = NULL; 										\
 	int ac = ZEND_NUM_ARGS()
 
 /* these are used to get the standard arguments */
 
-#define DBA_GET1 												\
-	if(ac != 1 || zend_get_parameters_ex(ac, &id) != SUCCESS) { \
-		WRONG_PARAM_COUNT; 										\
-	}
-
 /* {{{ php_dba_myke_key */
-static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRMLS_DC)
+static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS_DC)
 {
-	if (Z_TYPE_PP(key) == IS_ARRAY) {
+	if (Z_TYPE_P(key) == IS_ARRAY) {
 		zval **group, **name;
 		HashPosition pos;
 		size_t len;
 	
-		if (zend_hash_num_elements(Z_ARRVAL_PP(key)) != 2) {
+		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
 			return -1;
 		}
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(key), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_PP(key), (void **) &group, &pos);
-		zend_hash_move_forward_ex(Z_ARRVAL_PP(key), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_PP(key), (void **) &name, &pos);
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(key), (void **) &group, &pos);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(key), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(key), (void **) &name, &pos);
 		convert_to_string_ex(group);
 		convert_to_string_ex(name);
 		if (Z_STRLEN_PP(group) == 0) {
@@ -245,43 +240,42 @@ static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRML
 		*key_free = *key_str;
 		return len;
 	} else {
-		convert_to_string_ex(key);
-		*key_str = Z_STRVAL_PP(key);
 		*key_free = NULL;
-		return Z_STRLEN_PP(key);
+
+		convert_to_string(key);
+		*key_str = Z_STRVAL_P(key);
+
+		return Z_STRLEN_P(key);
 	}
 }
 /* }}} */
 
 #define DBA_GET2 												\
-	zval **key; 												\
+	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	if(ac != 2 || zend_get_parameters_ex(ac, &key, &id) != SUCCESS) { 	\
-		WRONG_PARAM_COUNT; 										\
+	if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { 	\
+		return; 												\
 	} 															\
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
 #define DBA_GET2_3												\
-	zval **key; 												\
+	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	zval **tmp; 												\
 	int skip = 0;  												\
 	switch(ac) {												\
 	case 2: 													\
-		if (zend_get_parameters_ex(ac, &key, &id) != SUCCESS) { \
-			WRONG_PARAM_COUNT; 									\
+		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
+			return;												\
 		} 														\
 		break;  												\
 	case 3: 													\
-		if (zend_get_parameters_ex(ac, &key, &tmp, &id) != SUCCESS) { \
-			WRONG_PARAM_COUNT; 									\
+		if (zend_parse_parameters(ac TSRMLS_CC, "zlr", &key, &skip, &id) == FAILURE) { \
+			return;												\
 		} 														\
-		convert_to_long_ex(tmp);								\
-		skip = Z_LVAL_PP(tmp);  								\
 		break;  												\
 	default:													\
 		WRONG_PARAM_COUNT; 										\
@@ -290,25 +284,12 @@ static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRML
 		RETURN_FALSE;											\
 	}
 
-#define DBA_GET3 												\
-	zval **key, **val;											\
-	char *key_str, *key_free;									\
-	size_t key_len; 											\
-	if(ac != 3 || zend_get_parameters_ex(ac, &key, &val, &id) != SUCCESS) { 	\
-		WRONG_PARAM_COUNT; 										\
-	} 															\
-	convert_to_string_ex(val);									\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
-		RETURN_FALSE;											\
-	}
 
-#define DBA_ID_GET 												\
+#define DBA_FETCH_RESOURCE(info, id)	\
 	ZEND_FETCH_RESOURCE2(info, dba_info *, id, -1, "DBA identifier", le_db, le_pdb);
-	
-#define DBA_ID_GET1   DBA_ID_PARS; DBA_GET1;   DBA_ID_GET
-#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_ID_GET
-#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_ID_GET
-#define DBA_ID_GET3   DBA_ID_PARS; DBA_GET3;   DBA_ID_GET
+
+#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE(info, &id)
+#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE(info, &id)
 
 #define DBA_ID_DONE												\
 	if (key_free) efree(key_free)
@@ -565,11 +546,28 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	DBA_ID_GET3;
+	int val_len;
+	zval *id;
+	dba_info *info = NULL;
+	int ac = ZEND_NUM_ARGS();
+	zval *key;
+	char *val;
+	char *key_str, *key_free;
+	size_t key_len;
+
+	if (zend_parse_parameters(ac TSRMLS_CC, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+		return;
+	}
+
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {
+		RETURN_FALSE;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
 
 	DBA_WRITE_CHECK;
 	
-	if(info->hnd->update(info, key_str, key_len, VALLEN(val), mode TSRMLS_CC) == SUCCESS)
+	if(info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS)
 	{
 		DBA_ID_DONE;
 		RETURN_TRUE;
@@ -966,9 +964,16 @@ PHP_FUNCTION(dba_open)
    Closes database */
 PHP_FUNCTION(dba_close)
 {
-	DBA_ID_GET1;
-	
-	zend_list_delete(Z_RESVAL_PP(id));
+	zval *id;
+	dba_info *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+		return;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
+
+	zend_list_delete(Z_RESVAL_P(id));
 }
 /* }}} */
 
@@ -1064,11 +1069,20 @@ PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
 	int len;
-	DBA_ID_GET1;
+	zval *id;
+	dba_info *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+		return;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
 
 	fkey = info->hnd->firstkey(info, &len TSRMLS_CC);
-	if(fkey)
+
+	if (fkey)
 		RETURN_STRINGL(fkey, len, 0);
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1079,11 +1093,20 @@ PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
 	int len;
-	DBA_ID_GET1;
+	zval *id;
+	dba_info *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+		return;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
 
 	nkey = info->hnd->nextkey(info, &len TSRMLS_CC);
-	if(nkey)
+
+	if (nkey)
 		RETURN_STRINGL(nkey, len, 0);
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1129,12 +1152,21 @@ PHP_FUNCTION(dba_replace)
    Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
 {
-	DBA_ID_GET1;
-	
+	zval *id;
+	dba_info *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+		return;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
+
 	DBA_WRITE_CHECK;
-	if(info->hnd->optimize(info TSRMLS_CC) == SUCCESS) {
+
+	if (info->hnd->optimize(info TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1143,11 +1175,19 @@ PHP_FUNCTION(dba_optimize)
    Synchronizes database */
 PHP_FUNCTION(dba_sync)
 {
-	DBA_ID_GET1;
-	
-	if(info->hnd->sync(info TSRMLS_CC) == SUCCESS) {
+	zval *id;
+	dba_info *info = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+		return;
+	}
+
+	DBA_FETCH_RESOURCE(info, &id);
+
+	if (info->hnd->sync(info TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	}
+
 	RETURN_FALSE;
 }
 /* }}} */
