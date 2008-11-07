@@ -1,3 +1,304 @@
+2008-11-06  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS:
+      Use right format
+
+    * (PHP_5_3)
+      NEWS:
+      Refer to a feature request that contains a better description of the flags
+
+2008-11-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.2.7RC3
+
+2008-11-06  Philip Olson  <philipolson@gmail.com>
+
+    * README.RELEASE_PROCESS:
+      MFB: Added the "update INSTALL and win32/install.txt" tasks
+
+    * (PHP_5_3)
+      README.RELEASE_PROCESS:
+      Added the "update INSTALL and win32/install.txt" tasks
+
+2008-11-06  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS
+      acinclude.m4
+      configure.in:
+      MFH: Detect Sun C compiler and set default flags if it is used
+
+    * acinclude.m4
+      configure.in:
+      Detect Sun C compiler and set default flags if it is used
+
+2008-11-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      MFB: More Windows types cleanup
+
+    * ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c:
+      More type fixes for Windows
+
+2008-11-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      - fix build
+
+2008-11-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd_portability.h:
+      MFH: Use win32/php_stdint.h for stdint types on Windows
+
+    * ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd_portability.h:
+      Rely on win32/php_stdint.h on Windows for stdint types
+
+2008-11-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * win32/inet.h:
+      - MFH, has this feature before Vista/2k8 (use the same test in 5.3)
+
+    * win32/php_stdint.h:
+      - prevent warning when some types or macros are already defines (ICU
+      defines many of them already)
+
+    * ext/fileinfo/config.w32
+      ext/fileinfo/fileinfo.c
+      ext/fileinfo/libmagic/apprentice.c
+      ext/fileinfo/libmagic/softmagic.c:
+      - MFH
+       - add 64bit typedef support
+       - fix vc6 build (1/2)
+       - still broken/does not build cleanly, more to come
+
+    * win32/php5ts_cli.rc2
+      win32/php5ts_cli.rc2:
+      - revert previous commit (borked editor)
+
+    * win32/php5ts_cli.rc2:
+      - MFB: bump year
+
+    * (PHP_5_3)
+      win32/php5ts_cli.rc2:
+      - bump year
+
+2008-11-06  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd_ps.c:
+      More cleanup of config-win.h and missed merge, which actually occured in
+      5_3
+
+2008-11-06  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/pdo_mysql/config.m4:
+      MFH: Don't enable mysqlnd when pdo_mysql is being built with libmysql
+
+    * ext/pdo_mysql/config.m4:
+      Don't enable mysqlnd when pdo_mysql is being built with libmysql
+
+2008-11-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      MFH:
+      Get rid of many defines (which simplifies the code a lot),
+      as well as uint->unsigned int
+
+    * ext/mysqlnd/config-win.h
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_block_alloc.c
+      ext/mysqlnd/mysqlnd_charset.c
+      ext/mysqlnd/mysqlnd_debug.c
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_loaddata.c
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_priv.h
+      ext/mysqlnd/mysqlnd_ps_codec.c
+      ext/mysqlnd/mysqlnd_result.c
+      ext/mysqlnd/mysqlnd_structs.h
+      ext/mysqlnd/mysqlnd_wireprotocol.c
+      ext/mysqlnd/mysqlnd_wireprotocol.h:
+      Get rid of many defines (which simplifies the code a lot),
+      as well as uint->unsigned int
+
+2008-11-06  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c:
+      - MFH:
+       - Fix linux build (static)
+       - add gd[Format]Version[Int|String] first methods to work around the png
+         header issues
+
+    * (PHP_5_3)
+      ext/gd/gd.c:
+      - typo
+
+    * (PHP_5_3)
+      ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c:
+      - fix build on linux (static)
+      - add gd[Format]Version[Int|String] first methods to work around the png
+        header issues
+
+2008-11-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      ext/date/php_date.c
+      ext/date/php_date.h
+      ext/date/lib/parse_date.c:
+      - MFH: Export DateTime and DateTimeZone class entries so that external
+        extensions can make use of it as well.
+
+    * ext/date/php_date.c
+      ext/date/php_date.h:
+      - Export DateTime and DateTimeZone class entries so that external
+      extensions
+        can make use of it as well.
+
+2008-11-06  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      run-tests.php:
+      MFH: Support versions of valgrind from SVN. The version is shown as
+      3.4.0.SVN
+
+    * run-tests.php:
+      Support versions of valgrind from SVN. The version is shown as 3.4.0.SVN
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/softmagic.c:
+      MFH: Fix buffer overread in libmagic and sync a skipped change from 4.26
+
+    * ext/fileinfo/libmagic/funcs.c
+      ext/fileinfo/libmagic/softmagic.c:
+      Fix buffer overread in libmagic and sync a skipped change from 4.26
+
+2008-11-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Reorder
+
+    * (PHP_5_2)
+      NEWS:
+      BFN #45166
+
+2008-11-06  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS:
+      Add references to #46421 #45976
+
+    * ext/spl/spl_directory.c:
+      Fix #46421 (Take care about /)
+
+    * (PHP_5_3)
+      ext/simplexml/config.m4
+      ext/simplexml/config.w32
+      ext/simplexml/simplexml.c
+      ext/simplexml/sxe.c
+      ext/simplexml/sxe.h
+      ext/simplexml/tests/bug42259.phpt
+      ext/simplexml/tests/sxe_001.phpt
+      ext/simplexml/tests/sxe_002.phpt
+      ext/simplexml/tests/sxe_003.phpt
+      ext/simplexml/tests/sxe_004.phpt
+      ext/simplexml/tests/sxe_005.phpt
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/package.xml
+      ext/spl/php_spl.c
+      ext/spl/spl_sxe.c
+      ext/spl/spl_sxe.h
+      ext/spl/tests/bug42259.phpt
+      ext/spl/tests/sxe_001.phpt
+      ext/spl/tests/sxe_002.phpt
+      ext/spl/tests/sxe_003.phpt
+      ext/spl/tests/sxe_004.phpt
+      ext/spl/tests/sxe_005.phpt:
+      MFH: Fix #45976 (Move SXE from SPL to SimpleXML)
+
+    * ext/simplexml/tests/bug42259.phpt
+      ext/simplexml/tests/bug42259.phpt
+      ext/simplexml/tests/sxe_001.phpt
+      ext/simplexml/tests/sxe_001.phpt
+      ext/simplexml/tests/sxe_002.phpt
+      ext/simplexml/tests/sxe_002.phpt
+      ext/simplexml/tests/sxe_003.phpt
+      ext/simplexml/tests/sxe_003.phpt
+      ext/simplexml/tests/sxe_004.phpt
+      ext/simplexml/tests/sxe_004.phpt
+      ext/simplexml/tests/sxe_005.phpt
+      ext/simplexml/tests/sxe_005.phpt:
+      
+      Fix #45976 (Move SXE from SPL to SimpleXML)
+
+    * ext/simplexml/config.m4
+      ext/simplexml/config.w32
+      ext/simplexml/simplexml.c
+      ext/simplexml/sxe.c
+      ext/simplexml/sxe.c
+      ext/simplexml/sxe.h
+      ext/simplexml/sxe.h
+      ext/spl/config.m4
+      ext/spl/config.w32
+      ext/spl/package.xml
+      ext/spl/php_spl.c
+      ext/spl/spl_sxe.c
+      ext/spl/spl_sxe.h
+      ext/spl/tests/bug42259.phpt
+      ext/spl/tests/sxe_001.phpt
+      ext/spl/tests/sxe_002.phpt
+      ext/spl/tests/sxe_003.phpt
+      ext/spl/tests/sxe_004.phpt
+      ext/spl/tests/sxe_005.phpt:
+      Fix #45976 (Move SXE from SPL to SimpleXML)
+
 2008-11-05  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
