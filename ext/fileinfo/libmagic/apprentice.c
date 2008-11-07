@@ -38,6 +38,9 @@
 
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
+#if _MSC_VER <= 1300
+# include "win32/php_strtoi64.h"
+#endif
 #define strtoull _strtoui64
 #else
 #include <unistd.h>
