@@ -26,15 +26,15 @@ Sybase-CT server message handler
 ?>
 --EXPECTF--
 Nonexistant:     
-Warning: sybase_set_message_handler(): First argumented is expected to be a valid callback, 'function_does_not_exist' was given in %stest.inc on line %d
-bool(false)
+Warning: sybase_set_message_handler() expects parameter 1 to be a valid callback, function 'function_does_not_exist' not found or invalid function name in %stest.inc on line %d
+NULL
 Static method:   bool(true)
 Instance method: bool(true)
 Lambda function: bool(true)
 Unset:           bool(true)
 Incorrect type:  
-Warning: sybase_set_message_handler(): First argumented is expected to be either NULL, an array or string, integer given in %stest.inc on line %d
-bool(false)
+Warning: sybase_set_message_handler() expects parameter 1 to be a valid callback, no array or string given in %stest.inc on line %d
+NULL
 Function:        bool(true)
 >>> Query: select getdate(NULL)
 *** Caught Sybase Server Message #%d [Severity %d, state %d] at line %d
