@@ -273,6 +273,21 @@ static int _clean_invalid_results(zend_rsrc_list_entry *le TSRMLS_DC)
 #define efree_n(x)  { efree(x); x = NULL; }
 #define efree_if(x) if (x) efree_n(x)
 
+#ifdef PHP_SYBASE_DEBUG
+#define FREE_SYBASE_RESULT(result)                                                            \
+	if (result) {                                                                             \
+	    fprintf(stderr, "_free_sybase_result(%p) called from line #%d\n", result, __LINE__);  \
+		fflush(stderr);                                                                       \
+		_free_sybase_result(result);                                                          \
+		result = NULL;                                                                        \
+	}
+#else
+#define FREE_SYBASE_RESULT(result)                                                            \
+	if (result) {                                                                             \
+		_free_sybase_result(result);                                                          \
+		result = NULL;                                                                        \
+	}
+#endif
 static void _free_sybase_result(sybase_result *result)
 {
 	int i, j;
@@ -326,7 +341,7 @@ static void php_free_sybase_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		php_sybase_finish_results(result TSRMLS_CC);
 	}
 
-	_free_sybase_result(result);
+	FREE_SYBASE_RESULT(result);
 }
 
 static void _close_sybase_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -1166,8 +1181,6 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 			
 		case CS_CANCELED:
 		default:
-			_free_sybase_result(result);
-			result = NULL;
 			retcode = CS_FAIL;
 			break;
 	}
@@ -1273,7 +1286,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 			break;
 			
 		default:
-			_free_sybase_result(result);
+			FREE_SYBASE_RESULT(result);
 			result = NULL;
 			retcode = CS_FAIL;		/* Just to be sure */
 			break;
@@ -1463,17 +1476,9 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		INIT_PZVAL(tmp);
 		ZEND_FETCH_RESOURCE(result, sybase_result *, &tmp, -1, "Sybase result", le_result);
 		
-		/* Causes the following segfault:
-		   Program received signal SIGSEGV, Segmentation fault.
-		   0x8144380 in _efree (ptr=0x81fe024, __zend_filename=0x81841a0 "php4/ext/sybase_ct/php_sybase_ct.c", 
-		   __zend_lineno=946, __zend_orig_filename=0x0, __zend_orig_lineno=0) at php4/Zend/zend_alloc.c:229
-		   php4/Zend/zend_alloc.c:229:7284:beg:0x8144380
-		*/
-		#if O_TIMM
 		if (result) {
 			php_sybase_finish_results(result TSRMLS_CC);
 		}
-		#endif
 		
 		zval_ptr_dtor(&tmp);
 		zend_list_delete(sybase_ptr->active_result_index);
@@ -1628,9 +1633,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		/* Retry deadlocks up until deadlock_retry_count times */		
 		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %ld], giving up", deadlock_count- 1, SybCtG(deadlock_retry_count));
-			if (result != NULL) {
-				_free_sybase_result(result);
-			}
+			FREE_SYBASE_RESULT(result);
 			break;
 		}
 
@@ -1649,9 +1652,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		 * optimization, we could try not to fetch results in known
 		 * deadlock conditions, but deadlock is (should be) rare.
 		 */
-		if (result != NULL) {
-			_free_sybase_result(result);
-		}
+		FREE_SYBASE_RESULT(result);
 	}
 
 	if (status == Q_SUCCESS) {
@@ -1659,9 +1660,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	}
 
 	if (status == Q_FAILURE) {
-		if (result != NULL) {
-			_free_sybase_result(result);
-		}
+		FREE_SYBASE_RESULT(result);
 		RETURN_FALSE;
 	}
 
