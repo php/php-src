@@ -1431,12 +1431,12 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	}
 
 	if (!store && !buffered) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "cannot use non-storing mode with buffered queries");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Cannot use non-storing mode with buffered queries");
 		store = 1;
 	}
 
 	if (php_sybase_connection_id(sybase_link_index, &id TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  No connection to close");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  No connection");
 		RETURN_FALSE;
 	}
 
@@ -1451,7 +1451,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	if (sybase_ptr->active_result_index) {
 		zval *tmp = NULL;
 		
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "called without first fetching all rows from a previous unbuffered query");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Called without first fetching all rows from a previous unbuffered query");
 		if (sybase_ptr->cmd) {
 			ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 		}
