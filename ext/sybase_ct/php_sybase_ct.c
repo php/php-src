@@ -1200,7 +1200,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	}
 	
 	if (numrows!=-1) numrows+= result->num_rows;
-	while ((retcode=ct_fetch(result->sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED) {
+	while ((retcode=ct_fetch(result->sybase_ptr->cmd, CS_UNUSED, CS_UNUSED, CS_UNUSED, NULL))==CS_SUCCEED || retcode == CS_ROW_FAIL) {
 		result->num_rows++;
 		i= result->store ? result->num_rows- 1 : 0;
 		if (i >= result->blocks_initialized*SYBASE_ROWS_BLOCK) {
