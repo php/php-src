@@ -1,3 +1,60 @@
+2008-11-07  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/config.m4
+      ext/curl/config.m4:
+      MFH:
+      - Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment)
+        Noticed by: jd at cpanel dot net
+
+    * ext/curl/config.m4:
+      - Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment)
+        Noticed by: jd at cpanel dot net
+
+2008-11-07  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/fileinfo/libmagic/apprentice.c:
+      - MFB: fix VC6 build, use our own strtoi64 implementation for VC6
+
+    * win32/php_strtoi64.h
+      win32/strtoi64.c
+      win32/build/config.w32:
+      - MFB: strtoi64 forward compatible replacement for VC6
+
+2008-11-07  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/sqlite3.h:
+      MFB fix VC6 build
+
+2008-11-07  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * ext/dba/dba.c
+      sapi/apache2filter/php_functions.c:
+      MFB: new parameter-parsing API
+
+    * (PHP_5_3)
+      ext/dba/dba.c
+      sapi/apache2filter/php_functions.c:
+      new parameter-parsing API
+
+2008-11-07  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * ext/snmp/winsnmp.c:
+      New parameter parsing API
+
+2008-11-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y:
+      fix typo causing invalid reads
+
+2008-11-07  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * (PHP_5_3)
+      main/main.c:
+      added const, as required by struct-definition
+
 2008-11-06  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_3)

@@ -1,3 +1,9 @@
+2008-11-07  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_language_parser.y:
+      fix typo causing invalid reads
+
 2008-11-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * zend_ini_scanner.c
