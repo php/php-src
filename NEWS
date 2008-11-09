@@ -1,11 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
-- Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
-  (jd at cpanel dot net)
 
 - Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
 
+- Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
+  (jd at cpanel dot net)
 - Fixed bug #30312 (sybase_unbuffered_query calls). (Timm)
 
 06 Nov 2008, PHP 5.2.7RC3
