@@ -1,3 +1,9 @@
+2008-11-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_language_parser.y:
+      fix more invalid reads
+
 2008-11-07  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
