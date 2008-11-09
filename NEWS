@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
 - Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
 
+- Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
+
+- Fixed bug #30312 (sybase_unbuffered_query calls). (Timm)
 - Fixed bug #46421 (SplFileInfo not correctly handling /). (Etienne)
 - Fixed bug #46331 - (Segfault when using internal fileinfo magic file on big
   endian systems). (Scott)
