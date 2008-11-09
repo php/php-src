@@ -455,6 +455,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 				}
 			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 && 
 					strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0) {
+				h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				continue;
 			} else {
 				PHPWRITE_H(h->header, h->header_len);
