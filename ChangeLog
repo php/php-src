@@ -1,3 +1,106 @@
+2008-11-08  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_3)
+      sapi/cgi/cgi_main.c:
+      Fix for bug #46525
+
+    * (PHP_5_2)
+      sapi/cgi/cgi_main.c:
+      Potential fix for bug #46525
+
+2008-11-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/skipif.inc
+      ext/sybase_ct/tests/skipif.inc:
+      - MFH: Added connection checking on SKIPIF
+
+    * ext/sybase_ct/tests/skipif.inc:
+      - Added connection checking on SKIPIF
+
+2008-11-08  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt:
+      - MFB: Initial release
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/bug30312.phpt:
+      - MFB: Made this test independent of date format
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      - MFB: Fixed problems with segmentation faults when using unbuffered
+      queries
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/bug29064.phpt
+      ext/sybase_ct/tests/bug29064.phpt:
+      - Adjusted tests to reality
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed problems with segmentation faults when using unbuffered queries
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/bug30312.phpt:
+      - Made this test independent of date format
+
+    * ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt
+      ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt
+      ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt:
+        1.1.4;
+      file test_unbuffered_no_full_fetch.phpt was initially added on branch
+      PHP_5_3.
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - QA: Unified error messages in php_sybase_query()
+
+    * (PHP_5_2)
+      ext/sybase_ct/php_sybase_ct.c:
+      - MFB: Changed while loop in php_sybase_fetch_result_row() to also read
+      rows with
+        retcode == CS_ROW_FAIL.
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Changed while loop in php_sybase_fetch_result_row() to also read rows
+      with
+        retcode == CS_ROW_FAIL.
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test_appname.phpt:
+      - MFB: Made this test independent of field types in master..sysprocesses
+
+    * (PHP_5_2)
+      ext/sybase_ct/tests/test.inc
+      ext/sybase_ct/tests/test.inc:
+      - Changed source to read host, user and password from environment
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/test_appname.phpt:
+      - Made this test independent of field types in master..sysprocesses
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/test_msghandler.phpt:
+      - Fixed expected warning messages
+
+2008-11-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y:
+      fix more invalid reads
+
+2008-11-08  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_2)
+      run-tests.php:
+      MFH: Support versions of valgrind from SVN. The version is shown as
+      3.4.0.SVN
+      
+      Save the bunnies
+
 2008-11-07  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
