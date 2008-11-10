@@ -72,6 +72,8 @@ array(1) {
 now the same with native PS
 [005] Execute has failed, 'HY093' array (
   0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
 )
 array(0) {
 }
