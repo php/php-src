@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
 
+- Added optional parameter "new" to sybase_connect() (Timm)
 - Added parse_ini_string() function. (grange at lemonde dot fr, Arnaud) 
 - Added str_getcsv() function. (Sara)
 - Added ability to send user defined HTTP headers with SOAP request.
