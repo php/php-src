@@ -132,6 +132,9 @@ If you don't see your messages in ChangeLog right away, don't worry!
 These files are updated once a day, so your stuff will not show up until
 somewhat later.
 
+When you change the NEWS file for a bug fix, then please keep the bugs 
+sorted in decreasing order under the fixed version.
+
 You can use LXR (http://lxr.php.net/) and Bonsai (http://bonsai.php.net/)
 to look at PHP CVS repository in various ways.
 
