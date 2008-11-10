@@ -88,7 +88,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 			ZVAL_LONG(*retval, l);\
 		} else { \
 			char *ret; \
-			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, (my_ulonglong)l); \
+			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
 			ZVAL_STRINGL(*retval, ret, ret_len, 0); \
 		} \
 	}\
