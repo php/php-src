@@ -14,6 +14,11 @@ if ($pid == -1) {
 	die('failed');
 } else if ($pid) {
 	pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,(string)SIGTERM));
+	$oldset = array();
+	pcntl_sigprocmask(SIG_BLOCK, array(), $oldset);
+	var_dump(in_array(SIGCHLD, $oldset));
+	var_dump(in_array(SIGTERM, $oldset));
+
 	posix_kill(posix_getpid(), SIGTERM);
 	$signo = pcntl_sigwaitinfo(array(SIGTERM), $siginfo);
 	echo "signo == SIGTERM\n";
@@ -68,6 +73,8 @@ if ($pid == -1) {
 
 ?>
 --EXPECTF--
+bool(true)
+bool(true)
 signo == SIGTERM
 bool(true)
 code === SI_USER || SI_NOINFO

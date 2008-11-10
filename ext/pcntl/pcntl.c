@@ -76,6 +76,7 @@ static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, set)
+	ZEND_ARG_INFO(1, oldset)
 ZEND_END_ARG_INFO()
 
 static
@@ -760,20 +761,20 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 /* }}} */
 
 #ifdef HAVE_SIGPROCMASK
-/* {{{ proto bool pcntl_sigprocmask(int how, array set)
+/* {{{ proto bool pcntl_sigprocmask(int how, array set[, array &oldset])
    Examine and change blocked signals */
 PHP_FUNCTION(pcntl_sigprocmask)
 {
 	long          how, signo;
-	zval         *user_set, **user_signo;
-	sigset_t      set;
+	zval         *user_set, *user_oldset = NULL, **user_signo;
+	sigset_t      set, oldset;
 	HashPosition  pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la", &how, &user_set) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
 	}
 
-	if (sigemptyset(&set) != 0) {
+	if (sigemptyset(&set) != 0 || sigemptyset(&oldset) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -793,9 +794,24 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
 	}
 
-	if (sigprocmask(how, &set, NULL) != 0) {
+	if (sigprocmask(how, &set, &oldset) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
+	}
+
+	if (user_oldset != NULL) {
+		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
+			zval_dtor(user_oldset);
+			array_init(user_oldset);
+		} else {
+			zend_hash_clean(Z_ARRVAL_P(user_oldset));
+		}
+		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
+			if (sigismember(&oldset, signo) != 1) {
+				continue;
+			}
+			add_next_index_long(user_oldset, signo);
+		}
 	}
 
 	RETURN_TRUE;
@@ -859,6 +875,8 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
 			array_init(user_siginfo);
+		} else {
+			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
 		}
 		add_ascii_assoc_long_ex(user_siginfo, "signo", sizeof("signo"), siginfo.si_signo);
 		add_ascii_assoc_long_ex(user_siginfo, "errno", sizeof("errno"), siginfo.si_errno);
