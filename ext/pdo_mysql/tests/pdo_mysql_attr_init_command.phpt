@@ -38,7 +38,7 @@ error_reporting=E_ALL
 ?>
 --EXPECTF--
 string(58) "CREATE TABLE test_%s(id INT)"
-array(1) {
+array(3) {
   [0]=>
   string(5) "00000"
   [1]=>
