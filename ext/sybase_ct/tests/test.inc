@@ -5,9 +5,9 @@
  */
 
   // Change if needed
-  define('HOST',     '****');
-  define('USER',     '****');
-  define('PASSWORD', '****');
+  define('HOST',     getenv('PHP_SYBASE_HOST'));
+  define('USER',     getenv('PHP_SYBASE_USER'));
+  define('PASSWORD', getenv('PHP_SYBASE_PASS'));
   define('TEMPDB',   'tempdb');
 
   // {{{ bool sybase_msg_handler(int msgnumber, int severity, int state, int line, string text)
@@ -49,11 +49,11 @@
     var_dump(sybase_set_message_handler($handler));
   }
   
-  // {{{ resource sybase_connect_ex(string charset= NULL, string appname= NULL)
+  // {{{ resource sybase_connect_ex(string charset= NULL, string appname= NULL, bool new= FALSE)
   //     Connect to the sybase server using the defines HOST, USER and PASSWORD
-  function sybase_connect_ex($charset= NULL, $appname= NULL) {
+  function sybase_connect_ex($charset= NULL, $appname= NULL, $new= FALSE) {
     sybase_min_server_severity(11);       // Suppress "changed database context"
-    if (!($db= sybase_connect(HOST, USER, PASSWORD, $charset ? $charset : 'iso_1', $appname))) {
+    if (!($db= sybase_connect(HOST, USER, PASSWORD, $charset ? $charset : 'iso_1', $appname, $new))) {
       die('Connect to '.USER.'@'.HOST.' failed (using password: '.(PASSWORD ? 'yes' : 'no').')');
     }
     return $db;
