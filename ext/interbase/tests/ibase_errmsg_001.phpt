@@ -17,6 +17,6 @@ var_dump(ibase_errmsg());
 
 ?>
 --EXPECTF--
-Warning: ibase_query(): Dynamic SQL Error SQL error code = -104 Unexpected end of command  in %s on line %d
-string(66) "Dynamic SQL Error SQL error code = -104 Unexpected end of command "
+Warning: ibase_query(): Dynamic SQL Error SQL error code = -104 Unexpected end of command %s on line %d
+string(%d) "Dynamic SQL Error SQL error code = -104 Unexpected end of command %s"
 bool(false)
