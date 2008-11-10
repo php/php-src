@@ -49,6 +49,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sybase_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, charset)
 	ZEND_ARG_INFO(0, appname)
+	ZEND_ARG_INFO(0, new)
 ZEND_END_ARG_INFO()
 
 static
@@ -753,13 +754,19 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user, *passwd, *host, *charset, *appname;
 	char *hashed_details;
-	int hashed_details_length;
-	int len;
+	int hashed_details_length, len;
+	zend_bool new = 0;
 	sybase_link *sybase_ptr;
 
 	host= user= passwd= charset= appname= NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssss", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len) == FAILURE) {
-		return;
+	if (persistent) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!s!s!", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!s!s!b", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len, &new) == FAILURE) {
+			return;
+		}
 	}
 	hashed_details_length = spprintf(
 		&hashed_details, 
@@ -865,7 +872,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new sybase link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1, (void **) &index_ptr)==SUCCESS) {
+		if (!new && zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1, (void **) &index_ptr)==SUCCESS) {
 			int type, link;
 			void *ptr;
 
@@ -929,7 +936,7 @@ static int php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-/* {{{ proto int sybase_connect([string host [, string user [, string password [, string charset [, string appname]]]]])
+/* {{{ proto int sybase_connect([string host [, string user [, string password [, string charset [, string appname [, bool new]]]]]])
    Open Sybase server connection */
 PHP_FUNCTION(sybase_connect)
 {
