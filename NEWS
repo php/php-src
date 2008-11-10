@@ -3,8 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
 
-- Added optional parameter "new" to sybase_connect() (Timm)
-
 - Changed dl() to be disabled by default. Enabled only when explicitly
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
 - Changed opendir/dir/scandir to use default context
@@ -52,7 +50,4 @@ PHP                                                                        NEWS
   . stream_resolve_include_path(). (Sara)
 - Added shm_has_var() function. (Mike)
 
-- Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
-
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
-- Fixed bug #30312 (sybase_unbuffered_query calls). (Timm)
