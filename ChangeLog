@@ -1,3 +1,61 @@
+2008-11-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/cgi/cgi_main.c:
+      Fix for bug #46525 which fixes Ilia's fix for bug #46319
+
+2008-11-09  Lukas Smith  <smith@pooteeweet.org>
+
+    * README.CVS-RULES:
+      PHP 4.4 is no longer active, clarify that all changes should go to HEAD
+      first and that NEWS entries should only go into one branch
+
+2008-11-09  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      Fix NEWS
+
+2008-11-09  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed sybase_close() to actually close connections
+
+    * ext/sybase_ct/tests/test_close.phpt
+      ext/sybase_ct/tests/test_close.phpt
+      ext/sybase_ct/tests/test_close_default.phpt
+      ext/sybase_ct/tests/test_close_default.phpt
+      ext/sybase_ct/tests/test_close_notopen.phpt
+      ext/sybase_ct/tests/test_close_notopen.phpt:
+      
+      file test_close.phpt was initially added on branch PHP_5_3.
+
+    * ext/sybase_ct/tests/test_connection_caching.phpt
+      ext/sybase_ct/tests/test_connection_caching.phpt:
+      
+      file test_connection_caching.phpt was initially added on branch PHP_5_3.
+
+    * ext/sybase_ct/tests/bug43578.phpt
+      ext/sybase_ct/tests/bug43578.phpt:
+      
+      file bug43578.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      - Added note on bugfix for #30312
+      - Added entry on CS_ROW_FAIL patch fix
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt:
+      - Added test for sybase_free_result() without full fetch
+
+    * ext/sybase_ct/tests/bug30312-withfree.phpt
+      ext/sybase_ct/tests/bug30312-withfree.phpt:
+      
+      file bug30312-withfree.phpt was initially added on branch PHP_5_3.
+
 2008-11-08  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_3)
