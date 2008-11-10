@@ -59,6 +59,8 @@ MySQLPDOTest::skip();
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d
 [003] Execute has failed, 'HY093' array (
   0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
 )
 array(0) {
 }
@@ -69,6 +71,8 @@ Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: num
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line 33
 [005] Execute has failed, 'HY093' array (
   0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
 )
 array(0) {
 }

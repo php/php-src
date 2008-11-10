@@ -195,7 +195,7 @@ array(2) {
   ["label"]=>
   string(1) "z"
 }
-[026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000
+[026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000  
 [028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?
 string(5) "00000"
 done!
