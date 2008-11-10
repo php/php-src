@@ -22,6 +22,13 @@
 #ifndef PHP_SIGNAL_H
 #define PHP_SIGNAL_H
 
+#ifndef NSIG
+# define NSIG 32
+#endif
+#ifndef SIGRTMAX
+# define SIGRTMAX 64
+#endif
+
 typedef void Sigfunc(int);
 Sigfunc *php_signal(int signo, Sigfunc *func, int restart);
 
