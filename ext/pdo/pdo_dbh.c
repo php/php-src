@@ -1002,11 +1002,16 @@ static PHP_METHOD(PDO, errorCode)
    Fetch extended error information associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorInfo)
 {
+	int error_count;
+	int error_count_diff     = 0;
+	int error_expected_count = 3;
+
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
 	PDO_CONSTRUCT_CHECK;
 
 	array_init(return_value);
@@ -1015,11 +1020,27 @@ static PHP_METHOD(PDO, errorInfo)
 		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
 	} else {
 		add_next_index_string(return_value, dbh->error_code, 1);
-		add_next_index_null(return_value);
-		add_next_index_null(return_value);
 	}
+
 	if (dbh->methods->fetch_err) {
 		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value TSRMLS_CC);
+	}
+
+	/**
+	 * In order to be consistent, we have to make sure we add the good amount
+	 * of null elements depending on the current number of elements. We make
+	 * a simple difference and add the needed elements to reach the expected
+	 * count.
+	 */
+	error_count = zend_hash_num_elements(Z_ARRVAL_P(return_value));
+	
+	if (error_expected_count > error_count) {
+		error_count_diff = error_expected_count - error_count;
+		
+		int current_index;
+		for (current_index = 0; current_index > error_count_diff; current_index++) {
+			add_next_index_null(return_value);
+		}
 	}
 }
 /* }}} */
