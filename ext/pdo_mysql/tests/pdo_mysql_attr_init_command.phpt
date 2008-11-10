@@ -35,11 +35,16 @@ error_reporting=E_ALL
 
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 	print "done!\n";
+?>
 --EXPECTF--
 string(58) "CREATE TABLE test_%s(id INT)"
 array(1) {
   [0]=>
   string(5) "00000"
+  [1]=>
+  NULL
+  [2]=>
+  NULL
 }
 array(1) {
   [0]=>
