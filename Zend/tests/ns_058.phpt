@@ -40,8 +40,9 @@ echo namespace\foo::bar();
 echo namespace\f1();
 echo namespace\f2();
 echo namespace\f3(new namespace\foo());
+echo namespace\unknown;
 ?>
---EXPECT--
+--EXPECTF--
 const ok
 func ok
 const ok
@@ -52,3 +53,5 @@ const ok
 const ok
 class ok
 ok
+
+Fatal error: Undefined constant 'unknown' in %sns_058.php on line %d

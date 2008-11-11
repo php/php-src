@@ -42,6 +42,7 @@ echo namespace\foo::bar();
 echo namespace\f1();
 echo namespace\f2();
 echo namespace\f3(new namespace\foo());
+echo namespace\unknown;
 ?>
 --EXPECTF--
 const ok
@@ -54,3 +55,5 @@ const ok
 const ok
 class ok
 ok
+
+Fatal error: Undefined constant 'Test\ns1\unknown' in %sns_057.php on line %d

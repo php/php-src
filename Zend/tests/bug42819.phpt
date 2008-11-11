@@ -15,6 +15,7 @@ const C = "foo\\foo\\foo::C\n";
 }
 
 namespace foo;
+use \ArrayObject;
 
 const C = "foo\\C\n";
 const I = 11;
@@ -89,7 +90,6 @@ echo foo::C;
 echo \foo\foo::C;
 echo ArrayObject::STD_PROP_LIST . "\n";
 echo E_ERROR . "\n";
-
 echo "second\n";
 echo \foo\foo::C1;
 echo \foo\foo::C2;

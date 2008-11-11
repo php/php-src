@@ -5,6 +5,8 @@
 --FILE--
 <?php
 namespace A;
+use \ArrayObject;
+
 function f1($x = ArrayObject::STD_PROP_LIST) {
 	var_dump($x);
 }

@@ -11,7 +11,7 @@ class bar {
 	}
 }
 
-new bar(new stdclass);
+new bar(new \stdclass);
 new bar(null);
 
 ?>

@@ -359,7 +359,7 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-void zend_resolve_non_class_name(znode *element_name, ulong *fetch_type, int type, int check_namespace TSRMLS_DC);
+void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name, ulong *fetch_type, int check_ns_name TSRMLS_DC);
 ZEND_API char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
@@ -636,8 +636,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
 #define ZEND_FETCH_CLASS_MASK        0x0f
-#define ZEND_FETCH_CLASS_RT_NS_CHECK 0x20
-#define ZEND_FETCH_CLASS_RT_NS_NAME  0x40
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 

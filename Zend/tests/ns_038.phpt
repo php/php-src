@@ -7,7 +7,7 @@ function foo() {
   echo "ok\n";
 }
 \Exception\foo();
-Exception::bar();
+\Exception::bar();
 --EXPECTF--
 ok
 
