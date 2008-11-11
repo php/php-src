@@ -1,3 +1,40 @@
+2008-11-10  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/ns_071.phpt
+      tests/ns_071.phpt
+      tests/ns_072.phpt
+      tests/ns_072.phpt:
+      - Fixed tests (thanks Timm)
+
+2008-11-10  Derick Rethans  <php@derickrethans.nl>
+
+    * acinclude.m4
+      acinclude.m4:
+      - Make it work with bison 2.4.
+
+2008-11-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/ns_070.phpt
+      tests/ns_071.phpt
+      tests/ns_072.phpt
+      tests/ns_073.phpt
+      tests/ns_074.phpt:
+      - New tests
+
+    * tests/ns_070.phpt
+      tests/ns_070.phpt
+      tests/ns_071.phpt
+      tests/ns_071.phpt
+      tests/ns_072.phpt
+      tests/ns_072.phpt
+      tests/ns_073.phpt
+      tests/ns_073.phpt
+      tests/ns_074.phpt
+      tests/ns_074.phpt:
+      
+      - New tests
+
 2008-11-08  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
