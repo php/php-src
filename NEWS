@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Fixed bug #44818 (php://memory writeable when opened read only). (Arnaud)
 - Fixed bug #30312 (sybase_unbuffered_query calls). (Timm)
 
+- Fixed stream_get_contents() when using $maxlength and socket is not
+  closed. indeyets@php.net on #46049. (Arnaud)
+
 06 Nov 2008, PHP 5.2.7RC3
 - Added PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION,
   PHP_EXTRA_VERSION, PHP_VERSION_ID, PHP_ZTS and PHP_DEBUG constants. (Pierre)
