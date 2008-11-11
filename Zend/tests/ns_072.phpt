@@ -22,7 +22,7 @@ class test implements foo {
 
 new bar(new test);
 new bar(null);
-new bar(new stdclass);
+new bar(new \stdclass);
 
 ?>
 --EXPECTF--

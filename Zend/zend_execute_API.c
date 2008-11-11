@@ -519,7 +519,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			} else {
 				char *save = actual;
 				int actual_len = Z_STRLEN_P(p);
-				if (Z_TYPE_P(p) & IS_CONSTANT_RT_NS_CHECK) {
+				if (Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) {
 					actual = (char *)zend_memrchr(actual, '\\', actual_len) + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
@@ -537,7 +537,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					}
 					--actual_len;
 				}
-				if (Z_TYPE_P(p) & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					int fix_save = 0;
 					if (save[0] == '\\') {
 						save++;
@@ -612,7 +612,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					str_index_len -= ((colon - str_index) + 1);
 					str_index = colon;
 				} else {
-					if (str_index[str_index_len - 2] & IS_CONSTANT_RT_NS_CHECK) {
+					if (str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
 						actual = (char *)zend_memrchr(str_index, '\\', str_index_len - 3) + 1;
 						str_index_len -= (actual - str_index);
 						str_index = actual;
@@ -624,7 +624,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (save[0] == '\\') {
 						++save;
 					}
-					if (str_index[str_index_len - 2] & ZEND_FETCH_CLASS_RT_NS_CHECK) {
+					if ((str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
 						zend_error(E_ERROR, "Undefined constant '%s'", save);
 					}
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
@@ -1472,7 +1472,6 @@ zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, 
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
-	int rt_ns_check  = (fetch_type & ZEND_FETCH_CLASS_RT_NS_CHECK) ? 1 : 0;
 	int silent       = (fetch_type & ZEND_FETCH_CLASS_SILENT) != 0;
 
 	fetch_type &= ZEND_FETCH_CLASS_MASK;
@@ -1506,36 +1505,14 @@ check_fetch_type:
 			break;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, (!rt_ns_check & use_autoload), &pce TSRMLS_CC) == FAILURE) {
-		if (rt_ns_check) {
-			/* Check if we have internal class with the same name */
-			char *php_name;
-			uint php_name_len;
-
-			php_name = zend_memrchr(class_name, '\\', class_name_len);
-			if (php_name) {
-				php_name++;
-				php_name_len = class_name_len - (php_name - class_name);
-				php_name = zend_str_tolower_dup(php_name, php_name_len);
-				if (zend_hash_find(EG(class_table), php_name, php_name_len + 1, (void **) &pce) == SUCCESS &&
-					(*pce)->type == ZEND_INTERNAL_CLASS
-				) {
-					efree(php_name);
-					return *pce;
-				}
-				efree(php_name);
-			}
-		}
+	if (zend_lookup_class_ex(class_name, class_name_len, use_autoload, &pce TSRMLS_CC) == FAILURE) {
 		if (use_autoload) {
-			if (rt_ns_check && zend_lookup_class_ex(class_name, class_name_len, 1, &pce TSRMLS_CC) == SUCCESS) {
-				return *pce;
-			}
 			if (!silent && !EG(exception)) {
 				if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 					zend_error(E_ERROR, "Interface '%s' not found", class_name);
 				} else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
-				}
+				}	
 			}
 		}
 		return NULL;

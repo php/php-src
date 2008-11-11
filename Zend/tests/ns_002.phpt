@@ -15,7 +15,7 @@ use test\ns1 as ns2;
 use test\ns1;
 
 Foo::bar();
-test\ns1\Foo::bar();
+\test\ns1\Foo::bar();
 Bar::bar();
 ns2\Foo::bar();
 ns1\Foo::bar();

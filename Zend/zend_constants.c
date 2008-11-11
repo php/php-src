@@ -281,11 +281,10 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 	char *class_name;
 	zval **ret_constant;
 
-	/* Skip leading :: */
+	/* Skip leading \\ */
 	if (name[0] == '\\') {
 		name += 1;
 		name_len -= 1;
-		flags &= ZEND_FETCH_CLASS_SILENT;
 	}
 
 
@@ -335,10 +334,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 			efree(lcname);
 		} else {
 			efree(lcname);
-			if ((flags & IS_CONSTANT_RT_NS_CHECK) == 0) {
-				/* Check for class */
-				ce = zend_fetch_class(class_name, class_name_len, flags TSRMLS_CC);
-			}
+			ce = zend_fetch_class(class_name, class_name_len, flags TSRMLS_CC);
 		}
 		if (retval && ce) {
 			if (zend_hash_find(&ce->constants_table, constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
@@ -350,34 +346,28 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		} else if (!ce) {
 			retval = 0;
 		}
+		efree(class_name);
 		goto finish;
 	}
 
-	if ((colon = zend_memrchr(name, '\\', name_len)) &&
-	    colon > name) {
+	/* non-class constant */
+	if ((colon = zend_memrchr(name, '\\', name_len)) != NULL) {
 		/* compound constant name */
-		int class_name_len = colon - name;
-		int const_name_len = name_len - class_name_len - 1;
+		int prefix_len = colon - name;
+		int const_name_len = name_len - prefix_len - 1;
 		char *constant_name = colon + 1;
 		char *lcname;
-		char *nsname;
-		unsigned int nsname_len;
 
-		class_name = estrndup(name, class_name_len);
-		lcname = zend_str_tolower_dup(class_name, class_name_len);
+		lcname = zend_str_tolower_dup(name, prefix_len);
 		/* Check for namespace constant */
 
 		/* Concatenate lowercase namespace name and constant name */
-		lcname = erealloc(lcname, class_name_len + 1 + const_name_len + 1);
-		lcname[class_name_len] = '\\';
-		memcpy(lcname + class_name_len + 1, constant_name, const_name_len + 1);
+		lcname = erealloc(lcname, prefix_len + 1 + const_name_len + 1);
+		lcname[prefix_len] = '\\';
+		memcpy(lcname + prefix_len + 1, constant_name, const_name_len + 1);
 
-		nsname = lcname;
-		nsname_len = class_name_len + 1 + const_name_len;
-
-		if (zend_hash_find(EG(zend_constants), nsname, nsname_len+1, (void **) &c) == SUCCESS) {
+		if (zend_hash_find(EG(zend_constants), lcname, prefix_len + 1 + const_name_len + 1, (void **) &c) == SUCCESS) {
 			efree(lcname);
-			efree(class_name);
 			*result = c->value;
 			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
 			zval_copy_ctor(result);
@@ -387,17 +377,14 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		}
 
 		efree(lcname);
-
-		if ((flags & IS_CONSTANT_RT_NS_CHECK) != 0) {
+		/* name requires runtime resolution, need to check non-namespaced name */
+		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
 			name = constant_name;
 			name_len = const_name_len;
-			efree(class_name);
 			return zend_get_constant(name, name_len, result TSRMLS_CC);
 		}
 		retval = 0;
 finish:
-		efree(class_name);
-
 		if (retval) {
 			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
 			*result = **ret_constant;

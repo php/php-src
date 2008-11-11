@@ -2108,8 +2108,8 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
 	if (zend_hash_quick_find(EG(function_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant)+1, opline->extended_value, (void **) &EX(fbc))==FAILURE) {
-		if (zend_hash_quick_find(EG(function_table), Z_STRVAL(op_data->op1.u.constant), Z_STRLEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==FAILURE ||
-		    (Z_BVAL(op_data->op2.u.constant) && EX(fbc)->type != ZEND_INTERNAL_FUNCTION)) {
+		char *short_name = Z_STRVAL(opline->op1.u.constant)+Z_LVAL(op_data->op1.u.constant);
+		if (zend_hash_quick_find(EG(function_table), short_name, Z_STRLEN(opline->op1.u.constant)-Z_LVAL(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==FAILURE) {
 			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL(opline->op2.u.constant));
 		}
 	}
@@ -2974,39 +2974,21 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 	if (OP1_TYPE == IS_UNUSED) {
 		/* namespaced constant */
 		if (!zend_get_constant_ex(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var, NULL, opline->extended_value TSRMLS_CC)) {
-			char *actual = Z_STRVAL(opline->op2.u.constant);
-
-			if (opline->extended_value & IS_CONSTANT_RT_NS_CHECK) {
-				actual = (char *)zend_memrchr(actual, '\\', Z_STRLEN(opline->op2.u.constant)) + 1;
-				Z_STRLEN(opline->op2.u.constant) -= (actual - Z_STRVAL(opline->op2.u.constant));
-				actual = estrndup(actual, Z_STRLEN(opline->op2.u.constant));
-				efree(Z_STRVAL(opline->op2.u.constant));
-				Z_STRVAL(opline->op2.u.constant) = actual;
-			}
-			if (Z_STRVAL(opline->op2.u.constant)[0] == '\\') {
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
-						Z_STRVAL(opline->op2.u.constant)+1,
-						Z_STRVAL(opline->op2.u.constant)+1);
+			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
+				char *actual = (char *)zend_memrchr(Z_STRVAL(opline->op2.u.constant), '\\', Z_STRLEN(opline->op2.u.constant));
+				if(!actual) {
+					actual = Z_STRVAL(opline->op2.u.constant);
+				} else {
+					actual++;
 				}
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-					Z_STRVAL(opline->op2.u.constant)+1,
-					Z_STRVAL(opline->op2.u.constant)+1);
-				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
-				++Z_STRVAL(EX_T(opline->result.u.var).tmp_var);
-				--Z_STRLEN(EX_T(opline->result.u.var).tmp_var);
+				/* non-qualified constant - allow text substitution */
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
+				ZVAL_STRING(&EX_T(opline->result.u.var).tmp_var, actual, Z_STRLEN(opline->op2.u.constant)-(actual - Z_STRVAL(opline->op2.u.constant)));
+				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 			} else {
-				if (opline->extended_value & ZEND_FETCH_CLASS_RT_NS_CHECK) {
-					zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
-						Z_STRVAL(opline->op2.u.constant),
-						Z_STRVAL(opline->op2.u.constant));
-				}
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-					Z_STRVAL(opline->op2.u.constant),
-					Z_STRVAL(opline->op2.u.constant));
-				EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
+				zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
+							Z_STRVAL(opline->op2.u.constant), Z_STRVAL(opline->op2.u.constant));
 			}
-			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
