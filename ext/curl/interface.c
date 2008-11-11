@@ -336,9 +336,131 @@ ZEND_GET_MODULE (curl)
  */
 PHP_MINFO_FUNCTION(curl)
 {
+	curl_version_info_data *d;
+	char **p;
+	char str[1024];
+	size_t n = 0;
+
+
+	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
 	php_info_print_table_row(2, "cURL support",    "enabled");
-	php_info_print_table_row(2, "cURL Information", curl_version());
+	php_info_print_table_row(2, "cURL Information", d->version);
+	sprintf(str, "%d", d->age);
+	php_info_print_table_row(2, "Age", str);
+
+
+#ifdef CURL_VERSION_IPV6
+	if (d->features & CURL_VERSION_IPV6) {
+		n = sprintf(str, "%s", "IPv6-enabled, ");
+	}
+#endif
+
+#ifdef CURL_VERSION_KERBEROS4
+	if (d->features & CURL_VERSION_KERBEROS4) {
+			n += sprintf(str + n, "%s", "kerberos auth is supported, ");
+	}
+#endif
+
+#ifdef CURL_VERSION_SSL
+	if (d->features & CURL_VERSION_SSL) {
+			n += sprintf(str + n, "%s", "SSL options are present, ");
+	}
+#endif
+
+#ifdef CURL_VERSION_LIBZ
+	if (d->features & CURL_VERSION_LIBZ) {
+			n += sprintf(str + n, "%s", "libz features are present, ");
+	}
+#endif
+
+#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
+	if (d->features & CURL_VERSION_NTLM) {
+			n += sprintf(str + n, "%s", "NTLM auth is supported, ");
+	}
+	if (d->features & CURL_VERSION_GSSNEGOTIATE) {
+			n += sprintf(str + n, "%s", "Negotiate auth support, ");
+	}
+	if (d->features & CURL_VERSION_DEBUG) {
+			n += sprintf(str + n, "%s", "built with debug capabilities, ");
+	}
+#endif
+
+#if LIBCURL_VERSION_NUM > 0x070a06 /* 7.10.7 */
+	if (d->features & CURL_VERSION_ASYNCHDNS) {
+			n += sprintf(str + n, "%s", "asynchronous dns resolves, ");
+	}
+#endif
+#if LIBCURL_VERSION_NUM > 0x070a07 /* 7.10.8 */
+	if (d->features & CURL_VERSION_SPNEGO) {
+			n += sprintf(str + n, "%s", "SPNEGO auth, ");
+	}
+#endif
+#if LIBCURL_VERSION_NUM > 0x070a09 /* 7.10.1 */
+	if (d->features & CURL_VERSION_LARGEFILE) {
+			n += sprintf(str + n, "%s", "supports files bigger than 2GB, ");
+	}
+#endif
+#if LIBCURL_VERSION_NUM > 0x070b02 /* 7.12.0 */
+	if (d->features & CURL_VERSION_IDN) {
+			n += sprintf(str + n, "%s", "International Domain Names support, ");
+	}
+#endif
+#if LIBCURL_VERSION_NUM > 0x070d01 /* 7.13.2 */
+	if (d->features & CURL_VERSION_SSPI) {
+			n += sprintf(str + n, "%s", "SSPI is supported, ");
+	}
+#endif
+#if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
+	if (d->features & CURL_VERSION_CONV) {                   
+			n += sprintf(str + n, "%s", "character conversions are supported, ");
+	}
+#endif
+
+	if (n > 3) {
+		str[n - 2] = '\0';
+	}
+	php_info_print_table_row(2, "Features", str);
+	n = 0;
+	p = (char **) d->protocols;
+	while (*p != NULL) {
+			n += sprintf(str + n, "%s%s", *p, *(p + 1) != NULL ? ", " : "");
+			p++;
+	}
+	php_info_print_table_row(2, "Protocols", str);
+
+	php_info_print_table_row(2, "Host", d->host);
+
+	if (d->ssl_version) {
+		php_info_print_table_row(2, "SSL Version", d->ssl_version);
+	}
+
+	if (d->libz_version) {
+		php_info_print_table_row(2, "ZLib Version", d->libz_version);
+	}
+
+#if defined(CURLVERSION_SECOND) && CURLVERSION_NOW >= CURLVERSION_SECOND
+	if (d->ares) {
+		php_info_print_table_row(2, "ZLib Version", d->ares);
+	}
+#endif
+
+#if defined(CURLVERSION_THIRD) && CURLVERSION_NOW >= CURLVERSION_THIRD
+	if (d->libidn) {
+		php_info_print_table_row(2, "libIDN Version", d->libidn);
+	}
+#endif
+
+#if defined(CURLVERSION_FOURTH) &&  CURLVERSION_NOW >= CURLVERSION_FOURTH
+
+	if (d->iconv_ver_num) {
+		php_info_print_table_row(2, "IconV Version", d->iconv_ver_num);
+	}
+
+	if (d->libssh_version) {
+		php_info_print_table_row(2, "libSSH Version", d->libssh_version);
+	}
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
