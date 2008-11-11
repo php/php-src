@@ -4770,12 +4770,13 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 				zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
 			}
 		}
+		efree(val->u.constant.value.str.val);
 #else  /* !ZEND_MULTIBYTE */
 	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
 		/* Do not generate any kind of warning for encoding declares */
 		/* zend_error(E_COMPILE_WARNING, "Declare encoding [%s] not supported", val->u.constant.value.str.val); */
+		zval_dtor(&val->u.constant);
 #endif /* ZEND_MULTIBYTE */
-		efree(val->u.constant.value.str.val);
 	} else {
 		zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", var->u.constant.value.str.val);
 		zval_dtor(&val->u.constant);
