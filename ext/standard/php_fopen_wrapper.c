@@ -186,11 +186,21 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 				return NULL;
 			}
 		}
-		return php_stream_temp_create(TEMP_STREAM_DEFAULT, max_memory);		
+		if (strpbrk(mode, "wa+")) {
+			mode_rw = TEMP_STREAM_DEFAULT;
+		} else {
+			mode_rw = TEMP_STREAM_READONLY;
+		}
+		return php_stream_temp_create(mode_rw, max_memory);		
 	}
 	
 	if (!strcasecmp(path, "memory")) {
-		return php_stream_memory_create(TEMP_STREAM_DEFAULT);
+		if (strpbrk(mode, "wa+")) {
+			mode_rw = TEMP_STREAM_DEFAULT;
+		} else {
+			mode_rw = TEMP_STREAM_READONLY;
+		}
+		return php_stream_memory_create(mode_rw);
 	}
 	
 	if (!strcasecmp(path, "output")) {
