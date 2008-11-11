@@ -1,9 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
-
 - Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
 
+- Fixed bug #46543 (ibase_trans() memory leaks when using wrong parameters).
+  (Felipe)
 - Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
   (jd at cpanel dot net)
 - Fixed bug #44818 (php://memory writeable when opened read only). (Arnaud)
