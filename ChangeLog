@@ -1,3 +1,342 @@
+2008-11-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      - MFH: make the curl phpinfo more verbose
+
+    * ext/curl/interface.c:
+      - make the curl phpinfo more verbose
+
+2008-11-10  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt:
+      - Make expected result compatible with recent Firebird version
+
+2008-11-10  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * (PHP_5_3)
+      README.CVS-RULES:
+      MFH: State that bugs should be sorted desc.
+
+    * README.CVS-RULES:
+      State that bugs should be sorted desc.
+
+2008-11-10  David Coallier  <david.coallier@gmail.com>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c:
+      - MFB (Which was an MFH)
+      - Bug #44153 (ErrorCode returns NULL when no error)
+      - Bug #44154 (ErrorInfo to ALWAYS have 3 elements)
+
+2008-11-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_prop.c:
+      Remove unneeded cast
+
+2008-11-10  Sean Coates  <sean@caedmon.net>
+
+    * tests/classes/arrayobject_001.phpt:
+      (MFB because I'm a bad person) test to ensure that ArrayObject can act as
+      an array
+
+2008-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_prop.c:
+      Fixed compiler warnings
+
+2008-11-10  Sean Coates  <sean@caedmon.net>
+
+    * tests/classes/arrayobject_001.phpt
+      tests/classes/arrayobject_001.phpt:
+      
+      file arrayobject_001.phpt was initially added on branch PHP_5_3.
+
+2008-11-10  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Added resolution of bug #44153, #44154
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c:
+      - After readying Johannes's mail, the conclusion that a "smarter" system
+        to find out if the return_value had the correct number of elements was
+        definitely needed. Simply added a difference to both dbh and stmt to
+        make sure that the error info always has 3 elements.
+      
+      - Bug #44154 (pdo->errorInfo doesn't always return three elements)
+      - Now pdo->errorInfo() AND stmt->errorInfo() return three elements.
+      
+      - [DOC] Make sure that not only the pdo->errorInfo() is returning 3 elms,
+      but
+        also the PDOStatement object
+
+    * (PHP_5_3)
+      ext/pdo_mysql/tests/bug41125.phpt
+      ext/pdo_mysql/tests/bug_41997.phpt
+      ext/pdo_mysql/tests/pdo_mysql_begintransaction.phpt
+      ext/pdo_mysql/tests/pdo_mysql_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_anonymous.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_emulated_placeholder_everywhere.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_dup_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_prepare_native_named_placeholder.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_errorinfo.phpt
+      ext/pdo_mysql/tests/pdo_mysql_stmt_multiquery.phpt
+      ext/pdo_mysql/tests/pecl_bug_5780.phpt:
+      - Make test conform to the error reporting that always returns
+        three elements. Adjusted all bugs and tests that were using
+        errorInfo() and errorCode() (dbh & stmt)
+
+2008-11-10  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_free_query_001.phpt
+      ext/interbase/tests/ibase_free_query_001.phpt
+      ext/interbase/tests/ibase_free_query_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_trans_001.phpt
+      ext/interbase/tests/ibase_trans_001.phpt
+      ext/interbase/tests/ibase_trans_001.phpt
+      ext/interbase/tests/ibase_trans_002.phpt
+      ext/interbase/tests/ibase_trans_002.phpt
+      ext/interbase/tests/ibase_trans_002.phpt:
+        1.1.4;
+      - New tests
+
+    * ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_072.phpt
+      ZendEngine2/tests/ns_072.phpt:
+      - Fixed tests (thanks Timm)
+
+2008-11-10  Timm Friebe  <php@thekid.de>
+
+    * NEWS:
+      - Reverted my last commit
+
+    * (PHP_5_3)
+      NEWS:
+      - Removed notes about fixes to sybase_ct that are already announced in PHP
+      5.2 news
+
+2008-11-10  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      ext/pdo_mysql/tests/pdo_mysql_attr_init_command.phpt:
+      - Hrphm, sorry about that, forgot the array value. Now the test runs fine
+
+    * (PHP_5_3)
+      ext/pdo_mysql/tests/pdo_mysql_attr_init_command.phpt:
+      - Adjusted test to make sure it reflects the behavior of the method
+
+2008-11-10  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/acinclude.m4
+      ZendEngine2/acinclude.m4:
+      - Make it work with bison 2.4.
+
+2008-11-10  Timm Friebe  <php@thekid.de>
+
+    * NEWS:
+      - Documented changes / fixes to sybase_ct
+
+    * ext/sybase_ct/tests/test_msghandler.phpt:
+      - MFB: Fixed expected warning messages
+
+    * ext/sybase_ct/tests/test_appname.phpt:
+      - MFB: Made this test independent of field types in master..sysprocesses
+
+    * ext/sybase_ct/tests/bug30312.phpt:
+      - MFB: Made this test independent of date format
+
+    * ext/sybase_ct/tests/bug29064.phpt:
+      - Adjusted tests to reality
+
+    * ext/sybase_ct/tests/test.inc:
+      - MFB: Changed source to read host, user and password from environment
+
+    * ext/sybase_ct/tests/bug30312-withfree.phpt
+      ext/sybase_ct/tests/bug43578.phpt
+      ext/sybase_ct/tests/test_close.phpt
+      ext/sybase_ct/tests/test_close_default.phpt
+      ext/sybase_ct/tests/test_close_notopen.phpt
+      ext/sybase_ct/tests/test_connection_caching.phpt
+      ext/sybase_ct/tests/test_unbuffered_no_full_fetch.phpt:
+      - MFB: Initial release
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - MFB: Added optional parameter "new" to sybase_connect()
+      - MFB: Fixed crash in sybase_unbuffered_query()
+      - MFB: Migrated to new parameter parsing API
+      - MFB: Made sybase_fetch_*() functions also read rows with CS_ROW_FAIL
+      - MFB: Adjusted function protos to use "resource" instead of "int"
+
+2008-11-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/tests/ns_070.phpt
+      ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_072.phpt
+      ZendEngine2/tests/ns_073.phpt
+      ZendEngine2/tests/ns_074.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_affected_rows_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_free_query_001.phpt
+      ext/interbase/tests/ibase_free_query_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_trans_001.phpt
+      ext/interbase/tests/ibase_trans_001.phpt
+      ext/interbase/tests/ibase_trans_002.phpt
+      ext/interbase/tests/ibase_trans_002.phpt:
+      - New tests
+
+    * ZendEngine2/tests/ns_070.phpt
+      ZendEngine2/tests/ns_070.phpt
+      ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_072.phpt
+      ZendEngine2/tests/ns_072.phpt
+      ZendEngine2/tests/ns_073.phpt
+      ZendEngine2/tests/ns_073.phpt
+      ZendEngine2/tests/ns_074.phpt
+      ZendEngine2/tests/ns_074.phpt:
+      
+      - New tests
+
+2008-11-10  Timm Friebe  <php@thekid.de>
+
+    * (PHP_5_3)
+      NEWS:
+      - Documented sybase_connect()'s new optional parameter 'new'
+
+    * (PHP_5_3)
+      ext/sybase_ct/tests/test.inc
+      ext/sybase_ct/tests/test_connection_caching.phpt:
+      - Added test for optional parameter "new" to sybase_connect()
+
+    * (PHP_5_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Added optional parameter "new" to sybase_connect
+
+2008-11-10  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/date/tests/date_sunset_error.phpt
+      ext/date/tests/date_sunset_variation1.phpt
+      ext/date/tests/date_sunset_variation2.phpt
+      ext/date/tests/date_sunset_variation3.phpt
+      ext/date/tests/date_sunset_variation4.phpt
+      ext/date/tests/date_sunset_variation5.phpt
+      ext/date/tests/date_sunset_variation6.phpt
+      ext/date/tests/date_sunset_variation7.phpt
+      ext/date/tests/date_sunset_variation8.phpt
+      ext/date/tests/date_sunset_variation9.phpt:
+      New testcases for date_sunset function
+
+    * ext/date/tests/date_sunset_error.phpt
+      ext/date/tests/date_sunset_error.phpt
+      ext/date/tests/date_sunset_variation1.phpt
+      ext/date/tests/date_sunset_variation1.phpt
+      ext/date/tests/date_sunset_variation2.phpt
+      ext/date/tests/date_sunset_variation2.phpt
+      ext/date/tests/date_sunset_variation3.phpt
+      ext/date/tests/date_sunset_variation3.phpt
+      ext/date/tests/date_sunset_variation4.phpt
+      ext/date/tests/date_sunset_variation4.phpt
+      ext/date/tests/date_sunset_variation5.phpt
+      ext/date/tests/date_sunset_variation5.phpt
+      ext/date/tests/date_sunset_variation6.phpt
+      ext/date/tests/date_sunset_variation6.phpt
+      ext/date/tests/date_sunset_variation7.phpt
+      ext/date/tests/date_sunset_variation7.phpt
+      ext/date/tests/date_sunset_variation8.phpt
+      ext/date/tests/date_sunset_variation8.phpt
+      ext/date/tests/date_sunset_variation9.phpt
+      ext/date/tests/date_sunset_variation9.phpt:
+      
+      New testcases for date_sunset function
+
+2008-11-10  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/pcntl/CREDITS:
+      credits
+
+    * (PHP_5_3)
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_signal.h
+      ext/pcntl/tests/002.phpt:
+      MFH: Added the oldset parameter to pcntl_sigprocmask().
+      Already documented.
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_signal.h
+      ext/pcntl/tests/002.phpt:
+      Added the oldset parameter to pcntl_sigprocmask().
+      Already documented.
+
+2008-11-10  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/date/tests/date_sunrise_error.phpt
+      ext/date/tests/date_sunrise_variation1.phpt
+      ext/date/tests/date_sunrise_variation2.phpt
+      ext/date/tests/date_sunrise_variation3.phpt
+      ext/date/tests/date_sunrise_variation4.phpt
+      ext/date/tests/date_sunrise_variation5.phpt
+      ext/date/tests/date_sunrise_variation6.phpt
+      ext/date/tests/date_sunrise_variation7.phpt
+      ext/date/tests/date_sunrise_variation8.phpt
+      ext/date/tests/date_sunrise_variation9.phpt:
+      New testcases for date_sunrise function
+
+    * ext/date/tests/date_sunrise_error.phpt
+      ext/date/tests/date_sunrise_error.phpt
+      ext/date/tests/date_sunrise_variation1.phpt
+      ext/date/tests/date_sunrise_variation1.phpt
+      ext/date/tests/date_sunrise_variation2.phpt
+      ext/date/tests/date_sunrise_variation2.phpt
+      ext/date/tests/date_sunrise_variation3.phpt
+      ext/date/tests/date_sunrise_variation3.phpt
+      ext/date/tests/date_sunrise_variation4.phpt
+      ext/date/tests/date_sunrise_variation4.phpt
+      ext/date/tests/date_sunrise_variation5.phpt
+      ext/date/tests/date_sunrise_variation5.phpt
+      ext/date/tests/date_sunrise_variation6.phpt
+      ext/date/tests/date_sunrise_variation6.phpt
+      ext/date/tests/date_sunrise_variation7.phpt
+      ext/date/tests/date_sunrise_variation7.phpt
+      ext/date/tests/date_sunrise_variation8.phpt
+      ext/date/tests/date_sunrise_variation8.phpt
+      ext/date/tests/date_sunrise_variation9.phpt
+      ext/date/tests/date_sunrise_variation9.phpt:
+      
+      New testcases for date_sunrise function
+
 2008-11-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * sapi/cgi/cgi_main.c:
