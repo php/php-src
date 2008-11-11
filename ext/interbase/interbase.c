@@ -1098,30 +1098,24 @@ PHP_FUNCTION(ibase_pconnect)
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	zval **link_arg = NULL;
+	zval *link_arg = NULL;
 	ibase_db_link *ib_link;
 	int link_id;
 
 	RESET_ERRMSG;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			link_id = IBG(default_link);
-			IBG(default_link) = -1;
-			break;
-		case 1:
-			if (zend_get_parameters_ex(1, &link_arg) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(link_arg);
-			link_id = Z_LVAL_PP(link_arg);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
+		return;
+	}
+	
+	if (ZEND_NUM_ARGS() == 0) {
+		link_id = IBG(default_link);
+		IBG(default_link) = -1;
+	} else {
+		link_id = Z_RESVAL_P(link_arg);
 	}
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &link_arg, link_id, LE_LINK, le_link, le_plink);
 	zend_list_delete(link_id);
 	RETURN_TRUE;
 }
@@ -1131,31 +1125,25 @@ PHP_FUNCTION(ibase_close)
    Drop an InterBase database */
 PHP_FUNCTION(ibase_drop_db)
 {
-	zval **link_arg = NULL;
+	zval *link_arg = NULL;
 	ibase_db_link *ib_link;
 	ibase_tr_list *l;
 	int link_id;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		case 0:
-			link_id = IBG(default_link);
-			IBG(default_link) = -1;
-			break;
-		case 1:
-			if (zend_get_parameters_ex(1, &link_arg) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(link_arg);
-			link_id = Z_LVAL_PP(link_arg);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
+		return;
 	}
 	
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
+	if (ZEND_NUM_ARGS() == 0) {
+		link_id = IBG(default_link);
+		IBG(default_link) = -1;
+	} else {
+		link_id = Z_RESVAL_P(link_arg);
+	}
+	
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &link_arg, link_id, LE_LINK, le_link, le_plink);
 
 	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
 		_php_ibase_error(TSRMLS_C);
@@ -1197,9 +1185,9 @@ PHP_FUNCTION(ibase_trans)
 		long trans_argl = 0;
 		char *tpb;
 		ISC_TEB *teb;
-		zval ***args = (zval ***) safe_emalloc(sizeof(zval **),argn,0);
+		zval ***args = NULL;
 
-		if (zend_get_parameters_array_ex(argn, args) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argn) == FAILURE) {
 			efree(args);
 			efree(ib_link);
 			RETURN_FALSE;
@@ -1367,55 +1355,42 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	ibase_trans *trans = NULL;
 	int res_id = 0;
 	ISC_STATUS result;
+	ibase_db_link *ib_link;
+	zval *arg = NULL;
+	int type;
 
 	RESET_ERRMSG;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
+		return;
+	}
 
-	switch (ZEND_NUM_ARGS()) {
+	if (ZEND_NUM_ARGS() == 0) {
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
+		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
+			/* this link doesn't have a default transaction */
+			_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
+			RETURN_FALSE;
+		}
+		trans = ib_link->tr_list->trans;
+	} else {
+		/* one id was passed, could be db or trans id */
+		if (zend_list_find(Z_RESVAL_P(arg), &type) && type == le_trans) {
+			ZEND_FETCH_RESOURCE(trans, ibase_trans *, &arg, -1, LE_TRANS, le_trans);
+			res_id = Z_RESVAL_P(arg);
+		} else {
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &arg, -1, LE_LINK, le_link, le_plink);
 
-		ibase_db_link *ib_link;
-		zval **arg;
-		int type;
-
-		case 0:
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, 
-				le_link, le_plink);
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
-				_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
+				_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
 				RETURN_FALSE;
 			}
 			trans = ib_link->tr_list->trans;
-			break;
-
-		case 1: 
-			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
-				RETURN_FALSE;
-			}
-			/* one id was passed, could be db or trans id */
-			if (zend_list_find(Z_LVAL_PP(arg), &type) && type == le_trans) {			
-				ZEND_FETCH_RESOURCE(trans, ibase_trans *, arg, -1, LE_TRANS, le_trans);
-
-				convert_to_long_ex(arg);
-				res_id = Z_LVAL_PP(arg);
-			} else {
-				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, arg, -1, LE_LINK, le_link, le_plink);
-
-				if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
-					/* this link doesn't have a default transaction */
-					_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
-					RETURN_FALSE;
-				}
-				trans = ib_link->tr_list->trans;
-			}
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+		}
 	}
 
 	switch (commit) {
-		
 		default: /* == case ROLLBACK: */
 			result = isc_rollback_transaction(IB_STATUS, &trans->handle);
 			break;
@@ -1436,7 +1411,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	}
 
 	/* Don't try to destroy implicitly opened transaction from list... */
-	if ( (commit & RETAIN) == 0 && res_id != 0) {
+	if ((commit & RETAIN) == 0 && res_id != 0) {
 		zend_list_delete(res_id);
 	}
 	RETURN_TRUE;
