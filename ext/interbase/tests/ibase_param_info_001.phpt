@@ -51,3 +51,5 @@ bool(false)
 
 Warning: Wrong parameter count for ibase_param_info() in %s on line %d
 NULL
+
+Warning: Unknown: invalid statement handle  in Unknown on line 0

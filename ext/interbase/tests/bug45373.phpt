@@ -45,3 +45,5 @@ Warning: ibase_execute(): Statement expects 2 arguments, 1 given in %sbug45373.p
 
 Warning: ibase_fetch_assoc(): supplied argument is not a valid Firebird/InterBase result resource in %sbug45373.php on line %d
 bool(false)
+
+Warning: Unknown: invalid statement handle  in Unknown on line 0
