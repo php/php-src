@@ -1984,19 +1984,11 @@ PHPAPI PHP_FUNCTION(fread)
 		int buflen = len;
 		UChar *buf = php_stream_read_unicode_chars(stream, &buflen);
 
-		if (!buf) {
-			RETURN_FALSE;
-		}
-
 		RETURN_UNICODEL(buf, buflen, 0);
 	} else { /* IS_STRING */
 		char *buf = emalloc(len + 1);
 		int buflen = php_stream_read(stream, buf, len);
 
-		if (!buflen) {
-			efree(buf);
-			RETURN_FALSE;
-		}
 		buf[buflen] = 0;
 		RETURN_STRINGL(buf, buflen, 0);
 	}
