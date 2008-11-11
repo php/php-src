@@ -2983,8 +2983,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 				}
 				/* non-qualified constant - allow text substitution */
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
-				ZVAL_STRING(&EX_T(opline->result.u.var).tmp_var, actual, Z_STRLEN(opline->op2.u.constant)-(actual - Z_STRVAL(opline->op2.u.constant)));
-				zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
+				ZVAL_STRINGL(&EX_T(opline->result.u.var).tmp_var, actual, Z_STRLEN(opline->op2.u.constant)-(actual - Z_STRVAL(opline->op2.u.constant)), 1);
 			} else {
 				zend_error_noreturn(E_ERROR, "Undefined constant '%s'",
 							Z_STRVAL(opline->op2.u.constant), Z_STRVAL(opline->op2.u.constant));
