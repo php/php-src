@@ -1629,6 +1629,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	if (ns_call) {
 		char *slash;
+		int prefix_len, name_len;
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
 		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
@@ -1639,18 +1640,20 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		Z_STRVAL(opline->op1.u.constant) = zend_str_tolower_dup(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant));
 		Z_STRLEN(opline->op1.u.constant) = Z_STRLEN(opline->op2.u.constant);
 		opline->extended_value = zend_hash_func(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant) + 1);
+		slash = zend_memrchr(Z_STRVAL(opline->op1.u.constant), '\\', Z_STRLEN(opline->op1.u.constant));
+		prefix_len = slash-Z_STRVAL(opline->op1.u.constant)+1;
+		name_len = Z_STRLEN(opline->op1.u.constant)-prefix_len;
 		opline2 = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline2->opcode = ZEND_OP_DATA;
 		opline2->op1.op_type = IS_CONST;
 		Z_TYPE(opline2->op1.u.constant) = IS_LONG;
-		slash = zend_memrchr(Z_STRVAL(opline->op1.u.constant), '\\', Z_STRLEN(opline->op1.u.constant));
 		if(!slash) {
 			zend_error(E_CORE_ERROR, "Namespaced name %s should contain slash", Z_STRVAL(opline->op1.u.constant));
 		}
 		/* this is the length of namespace prefix */
-		Z_LVAL(opline2->op1.u.constant) = slash-Z_STRVAL(opline->op1.u.constant)+1;
+		Z_LVAL(opline2->op1.u.constant) = prefix_len;
 		/* this is the hash of the non-prefixed part, lowercased */
-		opline2->extended_value = zend_hash_func(slash+1, Z_STRLEN(opline->op1.u.constant)-Z_LVAL(opline2->op1.u.constant)+1);
+		opline2->extended_value = zend_hash_func(slash+1, name_len+1);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *function_name;
