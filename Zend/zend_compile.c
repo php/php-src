@@ -609,10 +609,13 @@ void zend_do_assign(znode *result, znode *variable, const znode *value TSRMLS_DC
 			    last_op->result.u.var == variable->u.var) {
 				if (last_op->opcode == ZEND_FETCH_OBJ_W) {
 					if (n > 0) {
+						int opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
 						*opline = *last_op;
 						MAKE_NOP(last_op);
-						last_op = opline;
+						/* last_op = opline; */
 						opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+						/* get_next_op can realloc, we need to move last_op */
+						last_op = &CG(active_op_array)->opcodes[opline_no];
 					}
 					last_op->opcode = ZEND_ASSIGN_OBJ;
 					zend_do_op_data(opline, value TSRMLS_CC);
@@ -621,10 +624,14 @@ void zend_do_assign(znode *result, znode *variable, const znode *value TSRMLS_DC
 					return;
 				} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
 					if (n > 0) {
+						int opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
 						*opline = *last_op;
 						MAKE_NOP(last_op);
-						last_op = opline;
+						/* last_op = opline; */
+						/* TBFixed: this can realloc opcodes, leaving last_op pointing wrong */
 						opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+						/* get_next_op can realloc, we need to move last_op */
+						last_op = &CG(active_op_array)->opcodes[opline_no];
 					}
 					last_op->opcode = ZEND_ASSIGN_DIM;
 					zend_do_op_data(opline, value TSRMLS_CC);
