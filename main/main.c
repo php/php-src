@@ -1480,7 +1480,7 @@ void php_request_shutdown(void *dummy)
 	zend_try {
 		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
 		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-				!OG(active_ob_buffer).chunk_size && PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)) {
+				OG(ob_nesting_level) && !OG(active_ob_buffer).chunk_size && PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)) {
 			send_buffer = 0;
 		}
 		php_end_ob_buffers(send_buffer TSRMLS_CC);
