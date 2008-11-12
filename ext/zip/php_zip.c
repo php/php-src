@@ -99,9 +99,6 @@ static int le_zip_entry;
 static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
 {
 	char *path_begin = path;
-	int prev_is_slash = 0;
-	char *e = path + path_len - 1;
-	size_t pos = path_len - 1;
 	size_t i;
 
 	if (IS_SLASH(path[0])) {
