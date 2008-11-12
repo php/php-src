@@ -517,10 +517,10 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					Z_STRVAL_P(p) = colon + 1;
 				}
 			} else {
-				char *save = actual;
+				char *save = actual, *slash;
 				int actual_len = Z_STRLEN_P(p);
-				if (Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) {
-					actual = (char *)zend_memrchr(actual, '\\', actual_len) + 1;
+				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
+					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						actual = estrndup(actual, actual_len);
