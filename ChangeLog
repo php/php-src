@@ -1,3 +1,203 @@
+2008-11-11  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix memleak
+
+    * (PHP_5_3)
+      ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug42802.phpt
+      ZendEngine2/tests/bug42819.phpt
+      ZendEngine2/tests/bug43332_1.phpt
+      ZendEngine2/tests/class_alias_021.phpt
+      ZendEngine2/tests/ns_002.phpt
+      ZendEngine2/tests/ns_004.phpt
+      ZendEngine2/tests/ns_010.phpt
+      ZendEngine2/tests/ns_034.phpt
+      ZendEngine2/tests/ns_035.phpt
+      ZendEngine2/tests/ns_036.phpt
+      ZendEngine2/tests/ns_037.phpt
+      ZendEngine2/tests/ns_038.phpt
+      ZendEngine2/tests/ns_054.phpt
+      ZendEngine2/tests/ns_055.phpt
+      ZendEngine2/tests/ns_056.phpt
+      ZendEngine2/tests/ns_057.phpt
+      ZendEngine2/tests/ns_058.phpt
+      ZendEngine2/tests/ns_070.phpt
+      ZendEngine2/tests/ns_071.phpt
+      ZendEngine2/tests/ns_072.phpt
+      ZendEngine2/tests/ns_073.phpt
+      ZendEngine2/tests/ns_074.phpt:
+      Namespace resolution streamlining patch
+      [DOC] new resolution rules should be documented soon
+
+    * ZendEngine2/tests/ns_075.phpt
+      ZendEngine2/tests/ns_075.phpt
+      ZendEngine2/tests/ns_076.phpt
+      ZendEngine2/tests/ns_076.phpt
+      ZendEngine2/tests/ns_077_1.phpt
+      ZendEngine2/tests/ns_077_1.phpt
+      ZendEngine2/tests/ns_077_2.phpt
+      ZendEngine2/tests/ns_077_2.phpt
+      ZendEngine2/tests/ns_077_3.phpt
+      ZendEngine2/tests/ns_077_3.phpt
+      ZendEngine2/tests/ns_077_4.phpt
+      ZendEngine2/tests/ns_077_4.phpt
+      ZendEngine2/tests/ns_077_5.phpt
+      ZendEngine2/tests/ns_077_5.phpt
+      ZendEngine2/tests/ns_077_6.phpt
+      ZendEngine2/tests/ns_077_6.phpt
+      ZendEngine2/tests/ns_077_7.phpt
+      ZendEngine2/tests/ns_077_7.phpt
+      ZendEngine2/tests/ns_077_8.phpt
+      ZendEngine2/tests/ns_077_8.phpt:
+      
+      file ns_075.phpt was initially added on branch PHP_5_3.
+
+2008-11-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/interbase/tests/bug45373.phpt
+      ext/interbase/tests/ibase_close_001.phpt
+      ext/interbase/tests/ibase_drop_db_001.phpt
+      ext/interbase/tests/ibase_errmsg_001.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt
+      ext/interbase/tests/ibase_rollback_001.phpt:
+      - Fixes and new tests
+
+    * (PHP_5_3)
+      ext/interbase/tests/ibase_close_001.phpt
+      ext/interbase/tests/ibase_drop_db_001.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt
+      ext/interbase/tests/ibase_rollback_001.phpt:
+      - New tests
+
+    * ext/interbase/interbase.c:
+      - New parameter parsing API
+
+    * ext/interbase/tests/ibase_close_001.phpt
+      ext/interbase/tests/ibase_close_001.phpt
+      ext/interbase/tests/ibase_close_001.phpt
+      ext/interbase/tests/ibase_drop_db_001.phpt
+      ext/interbase/tests/ibase_drop_db_001.phpt
+      ext/interbase/tests/ibase_drop_db_001.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt
+      ext/interbase/tests/ibase_rollback_001.phpt
+      ext/interbase/tests/ibase_rollback_001.phpt
+      ext/interbase/tests/ibase_rollback_001.phpt:
+        1.1.4;
+      - New tests
+
+    * (PHP_5_2)
+      ZendEngine2/tests/declare_001.phpt:
+      - New test
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/declare_001.phpt:
+      - Fixed bug #46546 (Segmentation fault when using declare statement with
+      non-string value)
+
+    * ZendEngine2/tests/declare_001.phpt
+      ZendEngine2/tests/declare_001.phpt
+      ZendEngine2/tests/declare_001.phpt:
+        1.1.4;
+      - New test
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN #46543
+
+    * (PHP_5_2)
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_list.h
+      ext/interbase/interbase.c
+      ext/interbase/interbase.c
+      ext/interbase/tests/bug46543.phpt
+      ext/interbase/tests/bug46543.phpt:
+      MFH:
+      - Added ZEND_FETCH_RESOURCE2_NO_RETURN() (a version of
+      ZEND_FETCH_RESOURCE2 but without the ZEND_VERIFY_RESOURCE() which contains
+      RETURN_FALSE)
+      - Fixed bug #46543 (ibase_trans() memory leaks when using wrong
+      parameters)
+
+    * ZendEngine2/zend_list.h
+      ext/interbase/interbase.c
+      ext/interbase/tests/bug46543.phpt
+      ext/interbase/tests/bug46543.phpt
+      ext/interbase/tests/bug46543.phpt:
+      - Added ZEND_FETCH_RESOURCE2_NO_RETURN() (a version of ZEND_FETCH_RESOURCE2
+      but without the ZEND_VERIFY_RESOURCE() which contains RETURN_FALSE)
+      - Fixed bug #46543 (ibase_trans() memory leaks when using wrong
+      parameters)
+
+2008-11-11  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      - MFH: fix build with all curl versions, even very old (thx Felipe for
+      having found all versions info)
+
+    * ext/curl/interface.c:
+      - fix build with all curl versions, even very old (thx Felipe for having
+      found all versions info)
+
+2008-11-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/curl/interface.c
+      ext/curl/interface.c:
+      fix build
+
+2008-11-11  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/tests/streams/stream_get_contents_002.phpt
+      ext/standard/tests/streams/stream_get_contents_002.phpt
+      main/streams/streams.c
+      main/streams/streams.c:
+      MFH: Fixed stream_get_contents() when using $maxlength and socket is not
+      closed. indeyets@php.net on #46049.
+
+    * ext/standard/tests/streams/stream_get_contents_002.phpt
+      ext/standard/tests/streams/stream_get_contents_002.phpt
+      ext/standard/tests/streams/stream_get_contents_002.phpt
+      main/streams/streams.c:
+        1.1.4;
+      Fixed stream_get_contents() when using $maxlength and socket is not
+      closed. indeyets@php.net on #46049.
+
+    * (PHP_5_2)
+      NEWS
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/tests/streams/bug44818.phpt
+      ext/standard/tests/streams/bug44818.phpt:
+      MFH: Fixed bug #44818 (php://memory writeable when opened read only)
+
+    * ext/standard/php_fopen_wrapper.c
+      ext/standard/tests/streams/bug44818.phpt
+      ext/standard/tests/streams/bug44818.phpt
+      ext/standard/tests/streams/bug44818.phpt:
+      Fixed bug #44818 (php://memory writeable when opened read only)
+
+    * ext/standard/file.c
+      ext/standard/tests/file/bug45585.phpt:
+      Fixed bug #45585 (fread() return value for EOF inconsistent
+      between PHP 5 and 6)
+
 2008-11-10  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)

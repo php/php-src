@@ -1,3 +1,101 @@
+2008-11-11  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      fix memleak
+
+    * (PHP_5_3)
+      zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug42802.phpt
+      tests/bug42819.phpt
+      tests/bug43332_1.phpt
+      tests/class_alias_021.phpt
+      tests/ns_002.phpt
+      tests/ns_004.phpt
+      tests/ns_010.phpt
+      tests/ns_034.phpt
+      tests/ns_035.phpt
+      tests/ns_036.phpt
+      tests/ns_037.phpt
+      tests/ns_038.phpt
+      tests/ns_054.phpt
+      tests/ns_055.phpt
+      tests/ns_056.phpt
+      tests/ns_057.phpt
+      tests/ns_058.phpt
+      tests/ns_070.phpt
+      tests/ns_071.phpt
+      tests/ns_072.phpt
+      tests/ns_073.phpt
+      tests/ns_074.phpt:
+      Namespace resolution streamlining patch
+      [DOC] new resolution rules should be documented soon
+
+    * tests/ns_075.phpt
+      tests/ns_075.phpt
+      tests/ns_076.phpt
+      tests/ns_076.phpt
+      tests/ns_077_1.phpt
+      tests/ns_077_1.phpt
+      tests/ns_077_2.phpt
+      tests/ns_077_2.phpt
+      tests/ns_077_3.phpt
+      tests/ns_077_3.phpt
+      tests/ns_077_4.phpt
+      tests/ns_077_4.phpt
+      tests/ns_077_5.phpt
+      tests/ns_077_5.phpt
+      tests/ns_077_6.phpt
+      tests/ns_077_6.phpt
+      tests/ns_077_7.phpt
+      tests/ns_077_7.phpt
+      tests/ns_077_8.phpt
+      tests/ns_077_8.phpt:
+      
+      file ns_075.phpt was initially added on branch PHP_5_3.
+
+2008-11-11  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/declare_001.phpt:
+      - New test
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/declare_001.phpt:
+      - Fixed bug #46546 (Segmentation fault when using declare statement with
+      non-string value)
+
+    * tests/declare_001.phpt
+      tests/declare_001.phpt
+      tests/declare_001.phpt:
+        1.1.4;
+      - New test
+
+    * (PHP_5_2)
+      zend_list.h
+      zend_list.h:
+      MFH:
+      - Added ZEND_FETCH_RESOURCE2_NO_RETURN() (a version of
+      ZEND_FETCH_RESOURCE2 but without the ZEND_VERIFY_RESOURCE() which contains
+      RETURN_FALSE)
+      - Fixed bug #46543 (ibase_trans() memory leaks when using wrong
+      parameters)
+
+    * zend_list.h:
+      - Added ZEND_FETCH_RESOURCE2_NO_RETURN() (a version of ZEND_FETCH_RESOURCE2
+      but without the ZEND_VERIFY_RESOURCE() which contains RETURN_FALSE)
+      - Fixed bug #46543 (ibase_trans() memory leaks when using wrong
+      parameters)
+
 2008-11-10  Felipe Pena  <felipensp@gmail.com>
 
     * tests/ns_071.phpt
