@@ -135,7 +135,7 @@ static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 /* {{{ php_zip_extract_file */
 static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len TSRMLS_DC)
 {
@@ -740,7 +740,7 @@ static const zend_function_entry zip_functions[] = {
 /* }}} */
 
 /* {{{ ZE2 OO definitions */
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 static zend_class_entry *zip_class_entry;
 static zend_object_handlers zip_object_handlers;
 
@@ -760,7 +760,7 @@ typedef struct _zip_prop_handler {
 #endif
 /* }}} */
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, zip_read_int_t read_int_func, zip_read_const_char_t read_char_func, zip_read_const_char_from_ze_t read_char_from_obj_func, int rettype TSRMLS_DC) /* {{{ */
 {
 	zip_prop_handler hnd;
@@ -1423,7 +1423,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
 }
 /* }}} */
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 /* {{{ proto mixed ZipArchive::open(string source [, int flags]) U
 Create new zip using source uri for output, return TRUE on success or the error code */
 static ZIPARCHIVE_METHOD(open)
@@ -2413,15 +2413,15 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-    if (php_stream_stat_path(pathto, &ssb) < 0) {
-        ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
-        if (!ret) {
-            RETURN_FALSE;
-        }
-    }
+	if (php_stream_stat_path(pathto, &ssb) < 0) {
+		ret = php_stream_mkdir(pathto, 0777,  PHP_STREAM_MKDIR_RECURSIVE, NULL);
+		if (!ret) {
+			RETURN_FALSE;
+		}
+	}
 
 	ZIP_FROM_OBJECT(intern, this);
-	if (zval_files) {
+	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_UNICODE:
 				if (FAILURE == php_stream_path_param_encode(&zval_files, &file, &file_len, REPORT_ERRORS, FG(default_context))) {
@@ -2443,6 +2443,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 					RETURN_FALSE;
 				}
 				break;
+
 			case IS_ARRAY:
 				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
 				if (nelems == 0 ) {
@@ -2476,7 +2477,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 					}
 				}
 				break;
-			case IS_LONG:
+
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect string or array of strings");
 				break;
@@ -2659,7 +2660,7 @@ static const zend_function_entry zip_class_functions[] = {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(zip)
 {
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 	zend_class_entry ce;
 
 	memcpy(&zip_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -2742,7 +2743,7 @@ static PHP_MINIT_FUNCTION(zip)
  */
 static PHP_MSHUTDOWN_FUNCTION(zip)
 {
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 	zend_hash_destroy(&zip_prop_handlers);
 	php_unregister_url_stream_wrapper("zip" TSRMLS_CC);
 #endif

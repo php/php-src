@@ -42,6 +42,10 @@ extern zend_module_entry zip_module_entry;
 #endif
 /* }}} */
 
+#if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
+# define PHP_ZIP_USE_OO 1
+#endif
+
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
 	int index_current;

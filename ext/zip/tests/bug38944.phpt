@@ -26,15 +26,15 @@ int(0)
 string(0) ""
 string(0) ""
 object(ZipArchive)#1 (5) {
-  [u"status"]=>
+  ["status"]=>
   int(0)
-  [u"statusSys"]=>
+  ["statusSys"]=>
   int(0)
-  [u"numFiles"]=>
+  ["numFiles"]=>
   int(0)
-  [u"filename"]=>
+  ["filename"]=>
   string(0) ""
-  [u"comment"]=>
+  ["comment"]=>
   string(0) ""
 }
 Done
