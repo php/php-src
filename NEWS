@@ -58,6 +58,8 @@ PHP                                                                        NEWS
 - Fixed bug #42718 (FILTER_UNSAFE_RAW not applied when configured as default
   filter). (Arnaud)
 - Fixed bug #42294 (Unified solution for round() based on C99 round). (Ilia)
+- Fixed bug #14962 (PECL) (::extractTo 2nd argument is not really optional)
+  (Mark van Der Velden)
 
 - Fixed stream_get_line() to behave as documented on non-blocking streams.
   (Arnaud)
