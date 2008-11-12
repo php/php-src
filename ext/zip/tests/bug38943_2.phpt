@@ -1,14 +1,14 @@
 --TEST--
-#38943, properties in extended class cannot be set (< 5.3)
+#38943, properties in extended class cannot be set (5.3)
 --SKIPIF--
 <?php
 /* $Id$ */
 if(!extension_loaded('zip')) die('skip');
-if (!defined('PHP_VERSION_MAJOR')) die('skip');
+if (!defined('PHP_VERSION_MAJOR')) die('skip test for5.3+ only');
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) . '/bug38943.inc';
+include 'bug38943.inc';
 ?>
 --EXPECTF--
 array(1) {
@@ -16,11 +16,11 @@ array(1) {
   int(1)
 }
 object(myZip)#1 (%d) {
-  ["test:private"]=>
+  ["test":"myZip":private]=>
   int(0)
   ["testp"]=>
   string(6) "foobar"
-  ["testarray:private"]=>
+  ["testarray":"myZip":private]=>
   array(1) {
     [0]=>
     int(1)

@@ -32,10 +32,8 @@ extern zend_module_entry zip_module_entry;
 
 #define PHP_ZIP_VERSION_STRING "1.8.11"
 
-#ifndef ZEND_ENGINE_2_1
-# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0) || PHP_MAJOR_VERSION == 6
-#  define ZEND_ENGINE_2_1
-# endif
+#if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
+# define PHP_ZIP_USE_OO 1
 #endif
 
 #ifndef  Z_SET_REFCOUNT_P
@@ -68,7 +66,7 @@ typedef struct _ze_zip_read_rsrc {
 	struct zip_stat sb;
 } zip_read_rsrc;
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 #define ZIPARCHIVE_ME(name, arg_info, flags)	ZEND_FENTRY(name, c_ziparchive_ ##name, arg_info, flags)
 #define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_##name)
 

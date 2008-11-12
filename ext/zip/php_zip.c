@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Piere-Alain Joye <pierre@php.net                             |
+  | Author: Piere-Alain Joye <pierre@php.net>                            |
   +----------------------------------------------------------------------+
 */
 
@@ -473,7 +473,7 @@ static zend_function_entry zip_functions[] = {
 /* }}} */
 
 /* {{{ ZE2 OO definitions */
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 static zend_class_entry *zip_class_entry;
 static zend_object_handlers zip_object_handlers;
 
@@ -493,7 +493,7 @@ typedef struct _zip_prop_handler {
 #endif
 /* }}} */
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, zip_read_int_t read_int_func, zip_read_const_char_t read_char_func, zip_read_const_char_from_ze_t read_char_from_obj_func, int rettype TSRMLS_DC) /* {{{ */
 {
 	zip_prop_handler hnd;
@@ -1137,7 +1137,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_compressionmethod)
 }
 /* }}} */
 
-#ifdef ZEND_ENGINE_2_1
+#ifdef PHP_ZIP_USE_OO 
 /* {{{ proto mixed ZipArchive::open(string source [, int flags])
 Create new zip using source uri for output, return TRUE on success or the error code */
 static ZIPARCHIVE_METHOD(open)
@@ -1975,7 +1975,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
-	if (zval_files) {
+	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_STRING:
 				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_files), Z_STRLEN_P(zval_files) TSRMLS_CC)) {
