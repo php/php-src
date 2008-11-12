@@ -1534,7 +1534,6 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 {
 	zend_function *function;
 	char *lcname;
-	int prefix_len = 0;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
 
 	zend_resolve_non_class_name(function_name, check_namespace TSRMLS_CC);
@@ -3879,7 +3878,6 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	int type;
 	char *compound;
 	ulong fetch_type = 0;
-	int unknown_should_fail = 0;
 
 	if (constant_container) {
 		switch (mode) {
