@@ -71,6 +71,7 @@
 #define TORRENT_MEM_LEVEL	8
 #define CDENTRYSIZE         46u
 #define LENTRYSIZE          30
+#undef MAXCOMLEN /* defined as 19 on BSD for max command name */
 #define MAXCOMLEN        65536
 #define EOCDLEN             22
 #define CDBUFSIZE       (MAXCOMLEN+EOCDLEN)
