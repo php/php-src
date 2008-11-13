@@ -99,7 +99,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 static int
-php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	php_struct *ctx;
 	ap_filter_t *f;
@@ -108,29 +108,44 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 	ctx = SG(server_context);
 	f = ctx->r->output_filters;
 
-	val = strchr(sapi_header->header, ':');
+	switch(op) {
+		case SAPI_HEADER_DELETE:
+			apr_table_unset(ctx->r->headers_out, sapi_header->header);
+			return 0;
 
-	if (!val) {
-		sapi_free_header(sapi_header);
-		return 0;
+		case SAPI_HEADER_DELETE_ALL:
+			apr_table_clear(ctx->r->headers_out);
+			return 0;
+
+		case SAPI_HEADER_ADD:
+		case SAPI_HEADER_REPLACE:
+			val = strchr(sapi_header->header, ':');
+
+			if (!val) {
+				sapi_free_header(sapi_header);
+				return 0;
+			}
+			ptr = val;
+
+			*val = '\0';
+			
+			do {
+				val++;
+			} while (*val == ' ');
+
+			if (!strcasecmp(sapi_header->header, "content-type"))
+				ctx->r->content_type = apr_pstrdup(ctx->r->pool, val);
+			else if (op == SAPI_HEADER_REPLACE)
+				apr_table_set(ctx->r->headers_out, sapi_header->header, val);
+			else
+				apr_table_add(ctx->r->headers_out, sapi_header->header, val);
+			
+			*ptr = ':';
+			return SAPI_HEADER_ADD;
+
+		default:
+			return 0;
 	}
-	ptr = val;
-
-	*val = '\0';
-	
-	do {
-		val++;
-	} while (*val == ' ');
-
-	if (!strcasecmp(sapi_header->header, "content-type"))
-		ctx->r->content_type = apr_pstrdup(ctx->r->pool, val);
-	else if (sapi_header->replace)
-		apr_table_set(ctx->r->headers_out, sapi_header->header, val);
-	else
-		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
-	
-	*ptr = ':';
-	return SAPI_HEADER_ADD;
 }
 
 static int
