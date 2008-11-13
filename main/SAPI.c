@@ -520,7 +520,8 @@ static void sapi_update_response_code(int ncode TSRMLS_DC)
 
 static int sapi_find_matching_header(void *element1, void *element2)
 {
-	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, strlen((char*)element2)) == 0;
+	int len = strlen((char*)element2);
+	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, len) == 0 && ((sapi_header_struct*)element1)->header[len] == ':';
 }
 
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
@@ -548,7 +549,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	long myuid = 0L;
 	char *header_line;
 	uint header_line_len;
-	zend_bool replace;
 	int http_response_code;
 	
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
@@ -569,8 +569,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		sapi_update_response_code((int)(zend_intptr_t) arg TSRMLS_CC);
 		return SUCCESS;
 
+	case SAPI_HEADER_ADD:
 	case SAPI_HEADER_REPLACE:
-	case SAPI_HEADER_ADD: {
+	case SAPI_HEADER_DELETE: {
 		sapi_header_line *p = arg;
 		
 		if (!p->line || !p->line_len) {
@@ -579,9 +580,15 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		header_line = p->line;
 		header_line_len = p->line_len;
 		http_response_code = p->response_code;
-		replace = (op == SAPI_HEADER_REPLACE);
 		break;
 		}
+
+	case SAPI_HEADER_DELETE_ALL:
+		if (sapi_module.header_handler) {
+			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
+		}
+		zend_llist_clean(&SG(sapi_headers).headers);
+		return SUCCESS;
 	
 	default:
 		return FAILURE;
@@ -593,8 +600,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	while(header_line_len && isspace(header_line[header_line_len-1])) 
 		  header_line[--header_line_len]='\0';
 	
-	/* new line safety check */
-	{
+	if (op == SAPI_HEADER_DELETE) {
+		if (strchr(header_line, ':')) {
+			efree(header_line);
+			sapi_module.sapi_error(E_WARNING, "Header to delete may not contain colon.");
+			return FAILURE;
+		}
+	} else {
+		/* new line safety check */
 		char *s = header_line, *e = header_line + header_line_len, *p;
 		while (s < e && (p = memchr(s, '\n', (e - s)))) {
 			if (*(p + 1) == ' ' || *(p + 1) == '\t') {
@@ -609,7 +622,15 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
-	sapi_header.replace = replace;
+
+	if (op == SAPI_HEADER_DELETE) {
+		if (sapi_module.header_handler) {
+			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
+		}
+		zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
+		sapi_free_header(&sapi_header);
+		return SUCCESS;
+	}
 
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
@@ -688,20 +709,16 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		sapi_update_response_code(http_response_code TSRMLS_CC);
 	}
 	if (sapi_module.header_handler) {
-		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers) TSRMLS_CC);
+		retval = sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
 	} else {
 		retval = SAPI_HEADER_ADD;
 	}
-	if (retval & SAPI_HEADER_DELETE_ALL) {
-		zend_llist_clean(&SG(sapi_headers).headers);
-	}
 	if (retval & SAPI_HEADER_ADD) {
 		/* in replace mode first remove the header if it already exists in the headers llist */
-		if (replace) {
+		if (op == SAPI_HEADER_REPLACE) {
 			colon_offset = strchr(sapi_header.header, ':');
 			if (colon_offset) {
 				char sav;
-				colon_offset++;
 				sav = *colon_offset;
 				*colon_offset = 0;
 				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
@@ -710,6 +727,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		}
 
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
+	} else {
+		sapi_free_header(&sapi_header);
 	}
 	return SUCCESS;
 }
