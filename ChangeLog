@@ -1,3 +1,96 @@
+2008-11-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/zip/lib/zipint.h
+      ext/zip/lib/zipint.h:
+      - MFH: Fixed a macro redefinition on BSD for different purpose
+
+    * ext/zip/lib/zipint.h:
+      - Fixed a macro redefinition on BSD for different purpose
+
+    * ext/zip/php_zip.c:
+      - Removed unused variables
+
+    * ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug38943_2.phpt:
+      - Fix test
+
+    * (PHP_5_3)
+      main/main.c:
+      - Silent valgrind
+
+2008-11-12  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - update NEWS for #14962
+
+    * (PHP_5_2)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/tests/bug14962.phpt
+      ext/zip/tests/bug38943.inc
+      ext/zip/tests/bug38943.phpt
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug7658.phpt
+      ext/zip/tests/oo_delete.phpt:
+      - MFH:
+       - #14962, makes extractTo 2nd argument really optional
+       - replace ZEND_ENGINE_2_1 by PHP_ZIP_USE_OO
+       - sync tests
+
+    * (PHP_5_3)
+      ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/tests/bug14962.phpt:
+      - MFH:
+       - #14962, makes extractTo 2nd argument really optional
+       - replace ZEND_ENGINE_2_1 by PHP_ZIP_USE_OO
+
+    * ext/zip/php_zip.c
+      ext/zip/php_zip.h
+      ext/zip/tests/bug14962.phpt
+      ext/zip/tests/bug14962.phpt
+      ext/zip/tests/bug14962.phpt
+      ext/zip/tests/bug38943.inc
+      ext/zip/tests/bug38943.inc
+      ext/zip/tests/bug38943.phpt
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug38943_2.phpt
+      ext/zip/tests/bug38944.phpt
+      ext/zip/tests/bug7658.phpt:
+      - fix #14962 (makes 2nd argument really optional)
+      - replace ZEND_ENGINE_2_1 test with PHP_ZIP_USE_OO, version independent
+      - sync tests with 5.3
+
+    * ext/zip/lib/mkstemp.c
+      ext/zip/lib/unistd.h:
+      - not necessary anymore
+
+2008-11-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      make sure the slash is actually thre before reading past it
+
+2008-11-12  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      fix potential crash in zend_do_assign due to opcodes realloc
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      fix crash - using old opline after realloc
+
+2008-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_compile.c:
+      
+      Removed unused vars
+
 2008-11-11  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
