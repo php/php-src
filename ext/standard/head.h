@@ -23,6 +23,7 @@
 
 extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(header);
+PHP_FUNCTION(header_remove);
 PHP_FUNCTION(setcookie);
 PHP_FUNCTION(setrawcookie);
 PHP_FUNCTION(headers_sent);
