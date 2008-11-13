@@ -351,11 +351,8 @@ static char* sapi_cli_read_cookies(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static int sapi_cli_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
+static int sapi_cli_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
 {
-	/* free allocated header line */
-	efree(h->header);
-	/* avoid pushing headers into SAPI headers list */
 	return 0;
 }
 /* }}} */

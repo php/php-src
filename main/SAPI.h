@@ -50,7 +50,6 @@
 typedef struct {
 	char *header;
 	uint header_len;
-	zend_bool replace;
 } sapi_header_struct;
 
 
@@ -170,6 +169,8 @@ typedef struct {
 typedef enum {					/* Parameter: 			*/
 	SAPI_HEADER_REPLACE,		/* sapi_header_line* 	*/
 	SAPI_HEADER_ADD,			/* sapi_header_line* 	*/
+	SAPI_HEADER_DELETE,			/* sapi_header_line* 	*/
+	SAPI_HEADER_DELETE_ALL,		/* void					*/
 	SAPI_HEADER_SET_STATUS		/* int 					*/
 } sapi_header_op_enum;
 
@@ -228,7 +229,7 @@ struct _sapi_module_struct {
 
 	void (*sapi_error)(int type, const char *error_msg, ...);
 
-	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
+	int (*header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC);
 	int (*send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC);
 
@@ -277,8 +278,6 @@ struct _sapi_post_entry {
 
 /* header_handler() constants */
 #define SAPI_HEADER_ADD			(1<<0)
-#define SAPI_HEADER_DELETE_ALL	(1<<1)
-#define SAPI_HEADER_SEND_NOW	(1<<2)
 
 
 #define SAPI_HEADER_SENT_SUCCESSFULLY	1

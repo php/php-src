@@ -35,7 +35,7 @@ static void php_save_umask(void);
 static void php_restore_umask(void);
 static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC);
 static char *sapi_apache_read_cookies(TSRMLS_D);
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC);
 static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC);
 static int send_php(request_rec *r, int display_source_mode, char *filename);
 static int send_parsed_php(request_rec * r);
@@ -163,41 +163,54 @@ static char *sapi_apache_read_cookies(TSRMLS_D)
 
 /* {{{ sapi_apache_header_handler
  */
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
 	if(!r) {
-		efree(sapi_header->header);
-		return 0;
-	}
-      
-	header_name = sapi_header->header;
-
-	header_content = p = strchr(header_name, ':');
-	if (!p) {
-		efree(sapi_header->header);
 		return 0;
 	}
 
-	*p = 0;
-	do {
-		header_content++;
-	} while (*header_content==' ');
+	switch(op) {
+		case SAPI_HEADER_DELETE_ALL:
+			clear_table(r->headers_out);
+			return 0;
 
-	if (!strcasecmp(header_name, "Content-Type")) {
-		r->content_type = pstrdup(r->pool, header_content);
-	} else if (!strcasecmp(header_name, "Set-Cookie")) {
-		table_add(r->headers_out, header_name, header_content);
-	} else if (sapi_header->replace) {
-		table_set(r->headers_out, header_name, header_content);
-	} else {
-		table_add(r->headers_out, header_name, header_content);
+		case SAPI_HEADER_DELETE:
+			table_unset(r->headers_out, sapi_header->header);
+			return 0;
+
+		case SAPI_HEADER_ADD:
+		case SAPI_HEADER_REPLACE:
+			header_name = sapi_header->header;
+
+			header_content = p = strchr(header_name, ':');
+			if (!p) {
+				return 0;
+			}
+
+			*p = 0;
+			do {
+				header_content++;
+			} while (*header_content==' ');
+
+			if (!strcasecmp(header_name, "Content-Type")) {
+				r->content_type = pstrdup(r->pool, header_content);
+			} else if (!strcasecmp(header_name, "Set-Cookie")) {
+				table_add(r->headers_out, header_name, header_content);
+			} else if (op == SAPI_HEADER_REPLACE) {
+				table_set(r->headers_out, header_name, header_content);
+			} else {
+				table_add(r->headers_out, header_name, header_content);
+			}
+
+			*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
+
+			return SAPI_HEADER_ADD;
+
+		default:
+			return 0;
 	}
-
-	*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
-
-	return SAPI_HEADER_ADD;
 }
 /* }}} */
 

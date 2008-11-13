@@ -50,6 +50,20 @@ PHP_FUNCTION(header)
 }
 /* }}} */
 
+/* {{{ proto void header_remove([string name]) U
+   Removes an HTTP header previously set using header() */
+PHP_FUNCTION(header_remove)
+{
+	sapi_header_line ctr = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &ctr.line,
+	                          &ctr.line_len, UG(ascii_conv)) == FAILURE)
+		return;
+
+	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
+}
+/* }}} */
+
 PHPAPI int php_header(TSRMLS_D) /* {{{ */
 {
 	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {

@@ -1679,6 +1679,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_header, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_header_remove, 0, 0, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
@@ -3479,6 +3484,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
 	PHP_FE(header,															arginfo_header)
+	PHP_FE(header_remove,													arginfo_header_remove)
 	PHP_FE(headers_sent,													arginfo_headers_sent)
 	PHP_FE(headers_list,													arginfo_headers_list)
 
