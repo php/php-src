@@ -5023,6 +5023,7 @@ error options:
 	1 = send via email to 3rd parameter 4th option = additional headers
 	2 = send via tcp/ip to 3rd parameter (name or ip:port)
 	3 = save to file in 3rd parameter
+	4 = send to SAPI logger directly
 */
 
 /* {{{ proto bool error_log(string message [, int message_type [, string destination [, string extra_headers]]])
@@ -5076,7 +5077,13 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 			php_stream_write(stream, message, strlen(message));
 			php_stream_close(stream);
 			break;
-
+		case 4: /* send to SAPI */
+			if (sapi_module.log_message) {
+				sapi_module.log_message(message);
+			} else {
+				return FAILURE;
+			}
+			break;
 		default:
 			php_log_err(message TSRMLS_CC);
 			break;
