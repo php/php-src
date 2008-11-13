@@ -1,3 +1,26 @@
+2008-11-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      make sure the slash is actually thre before reading past it
+
+2008-11-12  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      fix potential crash in zend_do_assign due to opcodes realloc
+
+    * (PHP_5_3)
+      zend_compile.c:
+      fix crash - using old opline after realloc
+
+2008-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      
+      Removed unused vars
+
 2008-11-11  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
