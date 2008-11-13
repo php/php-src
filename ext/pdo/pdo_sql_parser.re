@@ -321,7 +321,7 @@ rewrite:
 				snprintf(idxbuf, sizeof(idxbuf), tmpl, bind_no++);
 			} else {
 				memset(idxbuf, 0, sizeof(idxbuf));
-				memcpy(idxbuf, p, sizeof(idxbuf));
+				memcpy(idxbuf, p, strlen(p));
 				skip_map = 1;
 			}
 
