@@ -46,6 +46,7 @@ PHP_FUNCTION(stream_wrapper_unregister);
 PHP_FUNCTION(stream_wrapper_restore);
 PHP_FUNCTION(stream_context_create);
 PHP_FUNCTION(stream_context_set_params);
+PHP_FUNCTION(stream_context_get_params);
 PHP_FUNCTION(stream_context_set_option);
 PHP_FUNCTION(stream_context_get_options);
 PHP_FUNCTION(stream_context_get_default);
