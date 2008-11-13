@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
 - Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
+- Fixed a bug inside dba_replace() that could cause file truncation with
+  invalid keys. (Ilia)
 
 - Fixed bug #46543 (ibase_trans() memory leaks when using wrong parameters).
   (Felipe)
