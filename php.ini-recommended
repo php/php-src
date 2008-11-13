@@ -405,6 +405,11 @@ report_memleaks = On
 ; Store the last error/warning message in $php_errormsg (boolean).
 track_errors = Off
 
+; Turn off normal error reporting and emit XML-RPC error XML
+;xmlrpc_errors = 0
+; An XML-RPC faultCode
+;xmlrpc_error_number = 0
+
 ; Disable the inclusion of HTML tags in error messages.
 ; Note: Never use this feature for production boxes.
 ;html_errors = Off
@@ -724,10 +729,6 @@ default_socket_timeout = 60
 
 [sqlite]
 ;sqlite.assoc_case = 0
-
-[xmlrpc]
-;xmlrpc_error_number = 0
-;xmlrpc_errors = 0
 
 [Pcre]
 ;PCRE library backtracking limit.
