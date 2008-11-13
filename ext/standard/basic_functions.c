@@ -2387,6 +2387,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_context_set_params, 0)
 ZEND_END_ARG_INFO()
 
 static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_get_params, 0, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, stream_or_context)
+ZEND_END_ARG_INFO()
+
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_get_default, 0, 0, 0)
 	ZEND_ARG_INFO(0, options) /* ARRAY_INFO(0, options, 1) */
 ZEND_END_ARG_INFO()
@@ -3564,6 +3569,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_select,													arginfo_stream_select)
 	PHP_FE(stream_context_create,											arginfo_stream_context_create)
 	PHP_FE(stream_context_set_params,										arginfo_stream_context_set_params)
+	PHP_FE(stream_context_get_params,										arginfo_stream_context_get_params)
 	PHP_FE(stream_context_set_option,										arginfo_stream_context_set_option)
 	PHP_FE(stream_context_get_options,										arginfo_stream_context_get_options)
 	PHP_FE(stream_context_get_default,										arginfo_stream_context_get_default)
