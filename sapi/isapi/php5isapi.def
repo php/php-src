@@ -1,5 +1,0 @@
-EXPORTS
-HttpFilterProc
-GetFilterVersion
-HttpExtensionProc
-GetExtensionVersion
