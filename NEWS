@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
 
+- Added stream_context_get_params() function. (Arnaud)
 - Added optional parameter "new" to sybase_connect() (Timm)
 - Added parse_ini_string() function. (grange at lemonde dot fr, Arnaud) 
 - Added str_getcsv() function. (Sara)
