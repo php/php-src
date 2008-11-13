@@ -55,15 +55,6 @@
 
 #if HAVE_LIBGD
 
-#ifdef HAVE_GD_PNG
-/* needs to be first */
-# include <png.h>
-#endif
-
-#ifdef HAVE_GD_JPG
-# include <jpeglib.h>
-#endif
-
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
 #include <t1lib.h>
