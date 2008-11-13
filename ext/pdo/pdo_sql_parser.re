@@ -299,9 +299,8 @@ rewrite:
 
 	} else if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 		/* rewrite ? to :pdoX */
-		char idxbuf[32];
+		char *name, *idxbuf;
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
-		char *name;
 		int bind_no = 1;
 		
 		newbuffer_len = inquery_len;
@@ -318,21 +317,19 @@ rewrite:
 
 			/* check if bound parameter is already available */
 			if (!strcmp(name, "?") || zend_hash_find(stmt->bound_param_map, name, plc->len + 1, (void**) &p) == FAILURE) {
-				snprintf(idxbuf, sizeof(idxbuf), tmpl, bind_no++);
+				spprintf(&idxbuf, 0, tmpl, bind_no++);
 			} else {
-				memset(idxbuf, 0, sizeof(idxbuf));
-				memcpy(idxbuf, p, sizeof(idxbuf));
+				idxbuf = estrdup(p);
 				skip_map = 1;
 			}
 
-			plc->quoted = estrdup(idxbuf);
+			plc->quoted = idxbuf;
 			plc->qlen = strlen(plc->quoted);
 			plc->freeq = 1;
 			newbuffer_len += plc->qlen;
 
 			if (!skip_map && stmt->named_rewrite_template) {
 				/* create a mapping */
-				
 				zend_hash_update(stmt->bound_param_map, name, plc->len + 1, idxbuf, plc->qlen + 1, NULL);
 			}
 
