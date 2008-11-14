@@ -1,3 +1,121 @@
+2008-11-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      add error_log change
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      Add option to send error_log directly to SAPI
+
+2008-11-13  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Document the xmlrpc_errors option, it is totally unrelated to the extension
+
+2008-11-13  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c:
+      MFB - Add error_log option to log directly to SAPI
+
+    * (PHP_5_3)
+      ext/standard/basic_functions.c:
+      [DOC] Add option for error_log to send directly to SAPI logger
+
+2008-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      ext/dba/libinifile/inifile.c:
+      MFB: Fixed a bug inside dba_replace() that could cause file truncation with
+      invalid keys
+
+    * ext/dba/libinifile/inifile.c:
+      
+      MFB: Fixed a bug inside dba_replace() that could cause file truncation
+      with
+      invalid keys
+
+    * (PHP_5_3)
+      ext/dba/libinifile/inifile.c:
+      Fixed a bug inside dba_replace() that could cause file truncation with
+      invalid keys
+
+2008-11-13  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      - Better fix
+
+    * (PHP_5_2)
+      ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      - Reverted last change, only in this branch
+
+2008-11-13  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c:
+      - declarations go first....
+
+2008-11-13  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c:
+      MFB: Updated header_handler in apache2filter and apache_hooks
+
+    * (PHP_5_3)
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c:
+      Updated header_handler in apache2filter and apache_hooks
+
+2008-11-13  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/pdo/pdo_sql_parser.c
+      ext/pdo/pdo_sql_parser.re:
+      - Fixed invalid reads
+
+    * ext/gd/gd.c:
+      - Fix build
+
+2008-11-13  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/head.h
+      main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/cgi/tests/011.phpt
+      sapi/cli/php_cli.c:
+      MFB: Added header_remove() (chsc at peytz dotdk, Arnaud)
+
+    * sapi/cgi/tests/011.phpt:
+      
+      file 011.phpt was initially added on branch PHP_5_3.
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/streams/stream_context_get_params_001.phpt
+      ext/standard/tests/streams/stream_context_get_params_001.phpt:
+      Added stream_context_get_params()
+      [DOC] proto bool stream_context_get_params(resource context|stream)
+            Get parameters of a file context (parameters set by
+            stream_context_set_params())
+
+2008-11-13  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/reflection/tests/ReflectionFunction_getNamespaceName.phpt
+      ext/reflection/tests/reflectionClass_getNamespaceName.phpt:
+      - Fixed tests
+
+    * TSRM/tsrm_virtual_cwd.c:
+      - Fixed macro redefinition warning
+
 2008-11-12  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
