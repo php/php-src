@@ -371,7 +371,11 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (ce->num_interfaces) {
 		zend_uint i;
 
-		string_printf(str, " implements %s", ce->interfaces[0]->name);
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			string_printf(str, " extends %s", ce->interfaces[0]->name);
+		} else {
+			string_printf(str, " implements %s", ce->interfaces[0]->name);
+		}
 		for (i = 1; i < ce->num_interfaces; ++i) {
 			string_printf(str, ", %s", ce->interfaces[i]->name);
 		}
