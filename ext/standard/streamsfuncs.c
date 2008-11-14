@@ -1038,7 +1038,7 @@ PHP_FUNCTION(stream_context_set_params)
 }
 /* }}} */
 
-/* {{{ proto bool stream_context_get_params(resource context|resource stream)
+/* {{{ proto array stream_context_get_params(resource context|resource stream)
    Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
 {
