@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
 
+- Added stream_cast() and stream_set_options() to user-space stream wrappers,
+  allowing stream_select(), stream_set_blocking(), stream_set_timeout() and 
+  stream_set_write_buffer() to work with user-space stream wrappers. (Arnaud)
 - Added header_remove() function. (chsc at peytz dot dk, Arnaud)
 - Added stream_context_get_params() function. (Arnaud)
 - Added optional parameter "new" to sybase_connect() (Timm)
