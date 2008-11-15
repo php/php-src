@@ -1,3 +1,77 @@
+2008-11-14  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c:
+      MFH: Interfaces extend other interfaces, not implement
+
+    * ext/reflection/php_reflection.c:
+      Interfaces extend other interfaces, not implement
+
+2008-11-14  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/date/tests/gmdate_basic.phpt
+      ext/date/tests/gmdate_error.phpt
+      ext/date/tests/gmdate_variation1.phpt
+      ext/date/tests/gmdate_variation10.phpt
+      ext/date/tests/gmdate_variation11.phpt
+      ext/date/tests/gmdate_variation12.phpt
+      ext/date/tests/gmdate_variation13.phpt
+      ext/date/tests/gmdate_variation14.phpt
+      ext/date/tests/gmdate_variation2.phpt
+      ext/date/tests/gmdate_variation3.phpt
+      ext/date/tests/gmdate_variation4.phpt
+      ext/date/tests/gmdate_variation5.phpt
+      ext/date/tests/gmdate_variation6.phpt
+      ext/date/tests/gmdate_variation7.phpt
+      ext/date/tests/gmdate_variation8.phpt
+      ext/date/tests/gmdate_variation9.phpt:
+      New testcases for gmdate function
+
+    * ext/date/tests/gmdate_basic.phpt
+      ext/date/tests/gmdate_basic.phpt
+      ext/date/tests/gmdate_error.phpt
+      ext/date/tests/gmdate_error.phpt
+      ext/date/tests/gmdate_variation1.phpt
+      ext/date/tests/gmdate_variation1.phpt
+      ext/date/tests/gmdate_variation10.phpt
+      ext/date/tests/gmdate_variation10.phpt
+      ext/date/tests/gmdate_variation11.phpt
+      ext/date/tests/gmdate_variation11.phpt
+      ext/date/tests/gmdate_variation12.phpt
+      ext/date/tests/gmdate_variation12.phpt
+      ext/date/tests/gmdate_variation13.phpt
+      ext/date/tests/gmdate_variation13.phpt
+      ext/date/tests/gmdate_variation14.phpt
+      ext/date/tests/gmdate_variation14.phpt
+      ext/date/tests/gmdate_variation2.phpt
+      ext/date/tests/gmdate_variation9.phpt
+      ext/date/tests/gmdate_variation9.phpt:
+      
+      New testcases for gmdate function
+
+    * (PHP_5_3)
+      ext/date/tests/gmdate_variation2.phpt
+      ext/date/tests/gmdate_variation3.phpt
+      ext/date/tests/gmdate_variation3.phpt
+      ext/date/tests/gmdate_variation4.phpt
+      ext/date/tests/gmdate_variation4.phpt
+      ext/date/tests/gmdate_variation5.phpt
+      ext/date/tests/gmdate_variation5.phpt
+      ext/date/tests/gmdate_variation6.phpt
+      ext/date/tests/gmdate_variation6.phpt
+      ext/date/tests/gmdate_variation7.phpt
+      ext/date/tests/gmdate_variation7.phpt
+      ext/date/tests/gmdate_variation8.phpt
+      ext/date/tests/gmdate_variation8.phpt:
+      file gmdate_variation2.phpt was added on branch PHP_5_3 on 2008-11-14
+      09:16:00 +0000
+
+2008-11-14  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/standard/streamsfuncs.c:
+      Fix proto line
+
 2008-11-13  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
