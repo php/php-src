@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect data).
   (Greg)
+- Fixed bug #46127 (php_openssl_tcp_sockop_accept forgets to set context
+  on accepted stream) (Mark Karpeles, Pierre)
 - Fixed bug #46115 (Memory leak when calling a method using Reflection).
   (Dmitry)
 - Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
