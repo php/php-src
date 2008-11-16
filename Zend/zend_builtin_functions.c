@@ -347,7 +347,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(func_num_args,		arginfo_func_num_args)
 	ZEND_FE(func_get_arg,		arginfo_func_get_arg)
 	ZEND_FE(func_get_args,		arginfo_func_get_args)
-	{ "strlen", zend_if_strlen, arginfo_strlen },
+	{"strlen", zend_if_strlen,	arginfo_strlen, (zend_uint) (sizeof(arginfo_strlen) / sizeof(struct _zend_arg_info)-1), 0},
 	ZEND_FE(strcmp,				arginfo_strcmp)
 	ZEND_FE(strncmp,			arginfo_strncmp)
 	ZEND_FE(strcasecmp,			arginfo_strcasecmp)
