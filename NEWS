@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
 - Fixed a bug inside dba_replace() that could cause file truncation with
   invalid keys. (Ilia)
+- Fixed memory leak inside readline_callback_handler_install() function.
+  (Ilia)
 
 - Fixed bug #46543 (ibase_trans() memory leaks when using wrong parameters).
   (Felipe)
