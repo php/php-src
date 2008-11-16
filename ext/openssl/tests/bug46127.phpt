@@ -2,7 +2,8 @@
 openssl_sign/verify: accept different algos 
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip, openssl required");
+if (!extension_loaded("pcntl")) die("skip, pcntl required");
 if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
 ?>
 --FILE--
