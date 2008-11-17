@@ -208,7 +208,9 @@ struct sqlite3_api_routines {
 */
 #ifndef SQLITE_CORE
 #define sqlite3_aggregate_context      sqlite3_api->aggregate_context
+#ifndef SQLITE_OMIT_DEPRECATED
 #define sqlite3_aggregate_count        sqlite3_api->aggregate_count
+#endif
 #define sqlite3_bind_blob              sqlite3_api->bind_blob
 #define sqlite3_bind_double            sqlite3_api->bind_double
 #define sqlite3_bind_int               sqlite3_api->bind_int
@@ -264,14 +266,18 @@ struct sqlite3_api_routines {
 #define sqlite3_errmsg                 sqlite3_api->errmsg
 #define sqlite3_errmsg16               sqlite3_api->errmsg16
 #define sqlite3_exec                   sqlite3_api->exec
+#ifndef SQLITE_OMIT_DEPRECATED
 #define sqlite3_expired                sqlite3_api->expired
+#endif
 #define sqlite3_finalize               sqlite3_api->finalize
 #define sqlite3_free                   sqlite3_api->free
 #define sqlite3_free_table             sqlite3_api->free_table
 #define sqlite3_get_autocommit         sqlite3_api->get_autocommit
 #define sqlite3_get_auxdata            sqlite3_api->get_auxdata
 #define sqlite3_get_table              sqlite3_api->get_table
+#ifndef SQLITE_OMIT_DEPRECATED
 #define sqlite3_global_recover         sqlite3_api->global_recover
+#endif
 #define sqlite3_interrupt              sqlite3_api->interruptx
 #define sqlite3_last_insert_rowid      sqlite3_api->last_insert_rowid
 #define sqlite3_libversion             sqlite3_api->libversion
@@ -309,7 +315,9 @@ struct sqlite3_api_routines {
 #define sqlite3_thread_cleanup         sqlite3_api->thread_cleanup
 #define sqlite3_total_changes          sqlite3_api->total_changes
 #define sqlite3_trace                  sqlite3_api->trace
+#ifndef SQLITE_OMIT_DEPRECATED
 #define sqlite3_transfer_bindings      sqlite3_api->transfer_bindings
+#endif
 #define sqlite3_update_hook            sqlite3_api->update_hook
 #define sqlite3_user_data              sqlite3_api->user_data
 #define sqlite3_value_blob             sqlite3_api->value_blob
