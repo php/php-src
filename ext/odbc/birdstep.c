@@ -50,67 +50,55 @@
 #include "php_ini.h"
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_connect, 0, 0, 3)
 	ZEND_ARG_INFO(0, server)
 	ZEND_ARG_INFO(0, user)
 	ZEND_ARG_INFO(0, pass)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_exec, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, exec_str)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fetch, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_freeresult, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_autocommit, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_off_autocommit, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_commit, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_rollback, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fieldname, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_birdstep_fieldnum, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()

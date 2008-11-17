@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
 - Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
 
+- Fixed bug #46546 (Segmentation fault when using declare statement with
+  non-string value). (Felipe)
 - Fixed bug #46421 (SplFileInfo not correctly handling /). (Etienne)
 - Fixed bug #46331 - (Segfault when using internal fileinfo magic file on big
   endian systems). (Scott)
