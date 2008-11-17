@@ -113,7 +113,6 @@ static PHP_GINIT_FUNCTION(snmp);
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -122,7 +121,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpgetnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -131,7 +129,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpgetnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -140,7 +137,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmprealwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -149,29 +145,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmprealwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get_quick_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, d)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_quick_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, quick_print)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_NET_SNMP
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_enum_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, enum_print)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, oid_format)
 ZEND_END_ARG_INFO()
 #endif
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -182,7 +173,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -191,7 +181,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_getnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -200,7 +189,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_getnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -209,7 +197,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_real_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -218,7 +205,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_real_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_set, 0, 0, 5)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -229,13 +215,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_set, 0, 0, 5)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_php_snmpv3, 0, 0, 2)
 	ZEND_ARG_INFO(0, s)
 	ZEND_ARG_INFO(0, st)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -249,7 +233,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_getnext, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -263,7 +246,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_getnext, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -277,7 +259,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_real_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -291,7 +272,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_real_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -307,16 +287,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_valueretrieval, 0, 0, 1)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_snmp_get_valueretrieval, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_read_mib, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
