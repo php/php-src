@@ -183,8 +183,8 @@ use_declarations:
 use_declaration:
 		namespace_name 			{ zend_do_use(&$1, NULL, 0 TSRMLS_CC); }
 	|	namespace_name T_AS T_STRING	{ zend_do_use(&$1, &$3, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR T_STRING { zend_do_use(&$2, NULL, 1 TSRMLS_CC); }
-	|	T_NS_SEPARATOR T_STRING T_AS T_STRING { zend_do_use(&$2, &$4, 1 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { zend_do_use(&$2, NULL, 1 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name T_AS T_STRING { zend_do_use(&$2, &$4, 1 TSRMLS_CC); }
 ;
 
 constant_declaration:
