@@ -839,19 +839,16 @@ static zend_object_value spl_RecursiveTreeIterator_new(zend_class_entry *class_t
 }
 /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it_getSubIterator, 0, 0, 0)
 	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_it_setMaxDepth, 0, 0, 0)
 	ZEND_ARG_INFO(0, max_depth)
 ZEND_END_ARG_INFO();
@@ -1098,7 +1095,6 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	RETVAL_STRINGL(str, str_len, 0);
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_tree_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, flags)
@@ -1106,7 +1102,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_tree_it___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_tree_it_setPrefixPart, 0, 0, 2)
 	ZEND_ARG_INFO(0, part)
 	ZEND_ARG_INFO(0, value)
@@ -1951,7 +1946,6 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 }
 /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_filter_it___construct, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
@@ -1968,7 +1962,6 @@ static const zend_function_entry spl_funcs_FilterIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_parent_it___construct, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 ZEND_END_ARG_INFO();
@@ -1987,7 +1980,6 @@ static const zend_function_entry spl_funcs_ParentIterator[] = {
 };
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, regex)
@@ -1996,17 +1988,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_mode, 0, 0, 1) 
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_flags, 0, 0, 1) 
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_preg_flags, 0, 0, 1) 
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
@@ -2023,7 +2012,6 @@ static const zend_function_entry spl_funcs_RegexIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_rec_regex_it___construct, 0, 0, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 	ZEND_ARG_INFO(0, regex)
@@ -2159,7 +2147,6 @@ SPL_METHOD(LimitIterator, getPosition)
 	RETURN_LONG(intern->current.pos);
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_seekable_it_seek, 0) 
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO();
@@ -2169,14 +2156,12 @@ static const zend_function_entry spl_funcs_SeekableIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_limit_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, count)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_limit_it_seek, 0) 
 	ZEND_ARG_INFO(0, position)
 ZEND_END_ARG_INFO();
@@ -2555,23 +2540,19 @@ SPL_METHOD(CachingIterator, count)
 }
 /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_it___construct, 0, 0, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_caching_it_setFlags, 0) 
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_caching_it_offsetGet, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_caching_it_offsetSet, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, newval)
@@ -2631,7 +2612,6 @@ SPL_METHOD(RecursiveCachingIterator, getChildren)
 	}
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE, 1) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, flags)
@@ -2651,7 +2631,6 @@ SPL_METHOD(IteratorIterator, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_IteratorIterator, zend_ce_traversable, DIT_IteratorIterator);
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_iterator_it___construct, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 ZEND_END_ARG_INFO();
@@ -2740,7 +2719,6 @@ SPL_METHOD(NoRewindIterator, next)
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator TSRMLS_CC);
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_norewind_it___construct, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
@@ -2973,7 +2951,6 @@ SPL_METHOD(AppendIterator, getArrayIterator)
 	RETURN_ZVAL(intern->u.append.zarrayit, 1, 0);
 } /* }}} */
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();

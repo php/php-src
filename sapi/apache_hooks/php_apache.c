@@ -59,48 +59,38 @@ PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(apache);
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_virtual, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_request_headers, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_response_headers, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_setenv, 0, 0, 2)
 	ZEND_ARG_INFO(0, variable)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, walk_to_top)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_lookup_uri, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_get_version, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_get_modules, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_request_run, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apachehooks_child_terminate, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apachehooks_note, 0, 0, 1)
 	ZEND_ARG_INFO(0, note_name)
 	ZEND_ARG_INFO(0, note_value)

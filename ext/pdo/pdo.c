@@ -118,7 +118,6 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ arginfo */
-static
 ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
