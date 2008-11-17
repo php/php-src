@@ -56,50 +56,40 @@ PHP_FUNCTION(apache_reset_timeout);
 
 PHP_MINFO_FUNCTION(apache);
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_child_terminate, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apache_note, 0, 0, 1)
 	ZEND_ARG_INFO(0, note_name)
 	ZEND_ARG_INFO(0, note_value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apache_virtual, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_request_headers, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_response_headers, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apache_setenv, 0, 0, 2)
 	ZEND_ARG_INFO(0, variable)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, walk_to_top)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_apache_lookup_uri, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_get_version, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_get_modules, 0)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO(arginfo_apache_reset_timeout, 0)
 ZEND_END_ARG_INFO()
 

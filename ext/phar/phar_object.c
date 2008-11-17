@@ -4954,7 +4954,6 @@ PHP_METHOD(PharFileInfo, decompress)
 
 /* {{{ phar methods */
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, flags)
@@ -4962,36 +4961,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_createDS, 0, 0, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, webindex)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_loadPhar, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, alias)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mount, 0, 0, 2)
 	ZEND_ARG_INFO(0, inphar)
 	ZEND_ARG_INFO(0, externalfile)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
 	ZEND_ARG_INFO(0, munglist)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, alias)
 	ZEND_ARG_INFO(0, index)
@@ -5000,127 +4993,105 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_webPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 1)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_ua, 0, 0, 1)
 	ZEND_ARG_INFO(0, archive)
 ZEND_END_ARG_INFO()
 
 #if HAVE_SPL
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_build, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
 	ZEND_ARG_INFO(0, base_directory)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_conv, 0, 0, 0)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, compression_type)
 	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_comps, 0, 0, 1)
 	ZEND_ARG_INFO(0, compression_type)
 	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_decomp, 0, 0, 0)
 	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_comp, 0, 0, 1)
 	ZEND_ARG_INFO(0, compression_type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_compo, 0, 0, 0)
 	ZEND_ARG_INFO(0, compression_type)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
 	ZEND_ARG_INFO(0, newfile)
 	ZEND_ARG_INFO(0, oldfile)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_delete, 0, 0, 1)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromdir, 0, 0, 1)
 	ZEND_ARG_INFO(0, base_dir)
 	ZEND_ARG_INFO(0, regex)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetExists, 0, 0, 1)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setAlias, 0, 0, 1)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setMetadata, 0, 0, 1)
 	ZEND_ARG_INFO(0, metadata)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setSigAlgo, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, privatekey)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
 	ZEND_ARG_INFO(0, maxlen)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_emptydir, 0, 0, 0)
 	ZEND_ARG_INFO(0, dirname)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_extract, 0, 0, 1)
 	ZEND_ARG_INFO(0, pathto)
 	ZEND_ARG_INFO(0, files)
 	ZEND_ARG_INFO(0, overwrite)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_addfile, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, localname)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromstring, 0, 0, 1)
 	ZEND_ARG_INFO(0, localname)
 	ZEND_ARG_INFO(0, contents)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_isff, 0, 0, 1)
 	ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
@@ -5193,12 +5164,10 @@ zend_function_entry php_archive_methods[] = {
 };
 
 #if HAVE_SPL
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_chmod, 0, 0, 1)
 	ZEND_ARG_INFO(0, perms)
 ZEND_END_ARG_INFO()
