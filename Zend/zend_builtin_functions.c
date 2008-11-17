@@ -33,7 +33,7 @@ static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
 static ZEND_FUNCTION(func_get_args);
-static ZEND_NAMED_FUNCTION(zend_if_strlen);
+static ZEND_FUNCTION(strlen);
 static ZEND_FUNCTION(strcmp);
 static ZEND_FUNCTION(strncmp);
 static ZEND_FUNCTION(strcasecmp);
@@ -93,17 +93,11 @@ static ZEND_FUNCTION(gc_disable);
 /* }}} */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_zend_version, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_func_num_args, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_zend__void, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_func_get_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg_num)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_func_get_args, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strlen, 0, 0, 1)
@@ -116,17 +110,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strcmp, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_strncmp, 0, 0, 3)
-	ZEND_ARG_INFO(0, str1)
-	ZEND_ARG_INFO(0, str2)
-	ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strcasecmp, 0, 0, 2)
-	ZEND_ARG_INFO(0, str1)
-	ZEND_ARG_INFO(0, str2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strncasecmp, 0, 0, 3)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 	ZEND_ARG_INFO(0, len)
@@ -154,19 +137,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_get_called_class, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_is_subclass_of, 0, 0, 2)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, class_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_a, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
@@ -198,11 +169,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_exists, 0, 0, 1)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_interface_exists, 0, 0, 1)
-	ZEND_ARG_INFO(0, classname)
-	ZEND_ARG_INFO(0, autoload)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_function_exists, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
@@ -211,9 +177,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_alias, 0, 0, 2)
 	ZEND_ARG_INFO(0, user_class_name)
 	ZEND_ARG_INFO(0, alias_name)
 	ZEND_ARG_INFO(0, autoload)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_get_included_files, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trigger_error, 0, 0, 1)
@@ -226,26 +189,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, error_types)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_restore_error_handler, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, exception_handler)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_restore_exception_handler, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_get_declared_classes, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_get_declared_interfaces, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_get_defined_functions, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_get_defined_vars, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_create_function, 0, 0, 2)
@@ -265,9 +210,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_constants, 0, 0, 0)
 	ZEND_ARG_INFO(0, categorize)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_debug_print_backtrace, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_backtrace, 0, 0, 0)
 	ZEND_ARG_INFO(0, provide_object)
 ZEND_END_ARG_INFO()
@@ -279,41 +221,29 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_extension_funcs, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gc_collect_cycles, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gc_enabled, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gc_enable, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gc_disable, 0)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
-	ZEND_FE(zend_version,		arginfo_zend_version)
-	ZEND_FE(func_num_args,		arginfo_func_num_args)
+	ZEND_FE(zend_version,		arginfo_zend__void)
+	ZEND_FE(func_num_args,		arginfo_zend__void)
 	ZEND_FE(func_get_arg,		arginfo_func_get_arg)
-	ZEND_FE(func_get_args,		arginfo_func_get_args)
-	{"strlen", zend_if_strlen,	arginfo_strlen, (zend_uint) (sizeof(arginfo_strlen) / sizeof(struct _zend_arg_info)-1), 0},
+	ZEND_FE(func_get_args,		arginfo_zend__void)
+	ZEND_FE(strlen,				arginfo_strlen)
 	ZEND_FE(strcmp,				arginfo_strcmp)
 	ZEND_FE(strncmp,			arginfo_strncmp)
-	ZEND_FE(strcasecmp,			arginfo_strcasecmp)
-	ZEND_FE(strncasecmp,		arginfo_strncasecmp)
+	ZEND_FE(strcasecmp,			arginfo_strcmp)
+	ZEND_FE(strncasecmp,		arginfo_strncmp)
 	ZEND_FE(each,				arginfo_each)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,				arginfo_define)
 	ZEND_FE(defined,			arginfo_defined)
 	ZEND_FE(get_class,			arginfo_get_class)
-	ZEND_FE(get_called_class,	arginfo_get_called_class)
-	ZEND_FE(get_parent_class,	arginfo_get_parent_class)
+	ZEND_FE(get_called_class,	arginfo_zend__void)
+	ZEND_FE(get_parent_class,	arginfo_get_class)
 	ZEND_FE(method_exists,		arginfo_method_exists)
 	ZEND_FE(property_exists,	arginfo_property_exists)
 	ZEND_FE(class_exists,		arginfo_class_exists)
-	ZEND_FE(interface_exists,	arginfo_interface_exists)
+	ZEND_FE(interface_exists,	arginfo_class_exists)
 	ZEND_FE(function_exists,	arginfo_function_exists)
 	ZEND_FE(class_alias,		arginfo_class_alias)
 #if ZEND_DEBUG
@@ -322,41 +252,41 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(crash,				NULL)
 #endif
 #endif
-	ZEND_FE(get_included_files,	arginfo_get_included_files)
-	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_get_included_files)
+	ZEND_FE(get_included_files,	arginfo_zend__void)
+	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_zend__void)
 	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
-	ZEND_FE(is_a,				arginfo_is_a)
+	ZEND_FE(is_a,				arginfo_is_subclass_of)
 	ZEND_FE(get_class_vars,		arginfo_get_class_vars)
 	ZEND_FE(get_object_vars,	arginfo_get_object_vars)
 	ZEND_FE(get_class_methods,	arginfo_get_class_methods)
 	ZEND_FE(trigger_error,		arginfo_trigger_error)
 	ZEND_FALIAS(user_error,		trigger_error,		arginfo_trigger_error)
-	ZEND_FE(set_error_handler,		arginfo_set_error_handler)
-	ZEND_FE(restore_error_handler,	arginfo_restore_error_handler)
+	ZEND_FE(set_error_handler,			arginfo_set_error_handler)
+	ZEND_FE(restore_error_handler,		arginfo_zend__void)
 	ZEND_FE(set_exception_handler,		arginfo_set_exception_handler)
-	ZEND_FE(restore_exception_handler,	arginfo_restore_exception_handler)
-	ZEND_FE(get_declared_classes, arginfo_get_declared_classes)
-	ZEND_FE(get_declared_interfaces, arginfo_get_declared_interfaces)
-	ZEND_FE(get_defined_functions, arginfo_get_defined_functions)
-	ZEND_FE(get_defined_vars,	arginfo_get_defined_vars)
-	ZEND_FE(create_function,	arginfo_create_function)
-	ZEND_FE(get_resource_type,	arginfo_get_resource_type)
+	ZEND_FE(restore_exception_handler,	arginfo_zend__void)
+	ZEND_FE(get_declared_classes, 		arginfo_zend__void)
+	ZEND_FE(get_declared_interfaces, 	arginfo_zend__void)
+	ZEND_FE(get_defined_functions, 		arginfo_zend__void)
+	ZEND_FE(get_defined_vars,			arginfo_zend__void)
+	ZEND_FE(create_function,			arginfo_create_function)
+	ZEND_FE(get_resource_type,			arginfo_get_resource_type)
 	ZEND_FE(get_loaded_extensions,		arginfo_get_loaded_extensions)
 	ZEND_FE(extension_loaded,			arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs,		arginfo_get_extension_funcs)
 	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
-	ZEND_FE(debug_backtrace, arginfo_debug_backtrace)
-	ZEND_FE(debug_print_backtrace, arginfo_debug_print_backtrace)
+	ZEND_FE(debug_backtrace, 			arginfo_debug_backtrace)
+	ZEND_FE(debug_print_backtrace, 		arginfo_zend__void)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
 #endif
-	ZEND_FE(gc_collect_cycles, arginfo_gc_collect_cycles)
-	ZEND_FE(gc_enabled, arginfo_gc_enabled)
-	ZEND_FE(gc_enable, arginfo_gc_enable)
-	ZEND_FE(gc_disable, arginfo_gc_disable)
+	ZEND_FE(gc_collect_cycles, 	arginfo_zend__void)
+	ZEND_FE(gc_enabled, 		arginfo_zend__void)
+	ZEND_FE(gc_enable, 			arginfo_zend__void)
+	ZEND_FE(gc_disable, 		arginfo_zend__void)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -467,7 +397,7 @@ ZEND_FUNCTION(func_get_args)
 
 /* {{{ proto int strlen(string str) U
    Get string length */
-ZEND_NAMED_FUNCTION(zend_if_strlen)
+ZEND_FUNCTION(strlen)
 {
 	zstr s1;
 	int s1_len;
