@@ -140,7 +140,7 @@ esac
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
-AC_PROG_CC
+AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
