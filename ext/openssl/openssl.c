@@ -91,6 +91,7 @@ PHP_FUNCTION(openssl_encrypt);
 PHP_FUNCTION(openssl_decrypt);
 
 PHP_FUNCTION(openssl_dh_compute_key);
+PHP_FUNCTION(openssl_random_pseudo_bytes);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 0, 2)
@@ -349,6 +350,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
     ZEND_ARG_INFO(0, pub_key)
     ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 0, 1)
+    ZEND_ARG_INFO(0, length)
+    ZEND_ARG_INFO(1, returned_strong_result)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
@@ -413,6 +419,7 @@ const zend_function_entry openssl_functions[] = {
 
 	PHP_FE(openssl_dh_compute_key,      arginfo_openssl_dh_compute_key)
 
+	PHP_FE(openssl_random_pseudo_bytes,    arginfo_openssl_random_pseudo_bytes)
 	PHP_FE(openssl_error_string, arginfo_openssl_error_string)
 	{NULL, NULL, NULL}
 };
@@ -4965,6 +4972,52 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	}
 
 	BN_free(pub);
+}
+/* }}} */
+
+/* {{{ proto string openssl_random_pseudo_bytes(integer length [, &bool returned_strong_result]) U
+   Returns a string of the length specified filled with random pseudo bytes */
+PHP_FUNCTION(openssl_random_pseudo_bytes)
+{
+	long buffer_length;
+	unsigned char *buffer = NULL;
+	zval *zstrong_result_returned = NULL;
+	int strong_result = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
+		return;
+	}
+
+	if (buffer_length <= 0) {
+		RETURN_FALSE;
+	}
+
+	if (zstrong_result_returned) {
+		zval_dtor(zstrong_result_returned);
+		ZVAL_BOOL(zstrong_result_returned, 0);
+	}
+
+	buffer = emalloc(buffer_length);
+
+	if (!buffer) {
+		RETURN_FALSE;
+	}
+
+#ifdef WINDOWS
+        RAND_screen();
+#endif
+
+	if ((strong_result = RAND_pseudo_bytes(buffer, buffer_length)) < 0) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_STRINGL((char *)buffer, buffer_length, 1);
+
+		if (zstrong_result_returned) {
+			ZVAL_BOOL(zstrong_result_returned, strong_result);
+		}
+
+	}
+	efree(buffer);
 }
 /* }}} */
 
