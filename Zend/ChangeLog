@@ -1,3 +1,13 @@
+2008-11-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      - MFH: Fixed strlen function entry (missing arginfo struct size, thanks
+      Philip!)
+
+    * zend_builtin_functions.c:
+      - Fixed strlen function entry (missing arginfo struct size, thanks Philip!)
+
 2008-11-12  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)

@@ -1,3 +1,66 @@
+2008-11-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/openssl/tests/bug46127.phpt
+      ext/openssl/tests/bug46127.phpt:
+      - MFB: skip if pcntl is not present
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug46127.phpt:
+      - skip if pcntl is missing
+
+    * (PHP_5_3)
+      NEWS:
+      - entry for #46127
+
+    * (PHP_5_3)
+      ext/openssl/xp_ssl.c
+      ext/openssl/tests/bug46127.pem
+      ext/openssl/tests/bug46127.phpt:
+      - MFH: #46127, php_openssl_tcp_sockop_accept forgets to set context on
+      accepted stream
+
+    * (PHP_5_2)
+      ext/openssl/xp_ssl.c
+      ext/openssl/tests/bug46127.pem
+      ext/openssl/tests/bug46127.phpt:
+      - MFH: manage references of stream context properly (Tony)
+      - add tests for bug #46127
+
+    * ext/openssl/xp_ssl.c
+      ext/openssl/tests/bug46127.pem
+      ext/openssl/tests/bug46127.pem
+      ext/openssl/tests/bug46127.pem
+      ext/openssl/tests/bug46127.phpt
+      ext/openssl/tests/bug46127.phpt
+      ext/openssl/tests/bug46127.phpt:
+      - #46127, php_openssl_tcp_sockop_accept forgets to set context on accepted
+      stream
+
+2008-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/readline/readline.c:
+      MFB: Fixed memory leak inside readline_callback_handler_install() function
+
+    * (PHP_5_2)
+      NEWS
+      ext/readline/readline.c:
+      
+      MFB: Fixed memory leak inside readline_callback_handler_install() function
+
+    * (PHP_5_3)
+      ext/readline/readline.c:
+      Fixed memory leak inside readline_callback_handler_install() function
+
+2008-11-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      - MFH: Fixed strlen function entry (missing arginfo struct size, thanks
+      Philip!)
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fixed strlen function entry (missing arginfo struct size, thanks Philip!)
+
 2008-11-15  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)
