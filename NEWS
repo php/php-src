@@ -14,7 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
   (jd at cpanel dot net)
 - Fixed bug #44818 (php://memory writeable when opened read only). (Arnaud)
-- Fixed bug #30312 (sybase_unbuffered_query calls). (Timm)
+- Fixed bug #30312 (crash in sybase_unbuffered_query() function). (Timm)
 
 - Fixed stream_get_contents() when using $maxlength and socket is not
   closed. indeyets@php.net on #46049. (Arnaud)
