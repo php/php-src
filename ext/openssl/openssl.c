@@ -56,6 +56,7 @@
 #define OPENSSL_ALGO_MD5	2
 #define OPENSSL_ALGO_MD4	3
 #define OPENSSL_ALGO_MD2	4
+#define OPENSSL_ALGO_DSS1	5
 
 #define DEBUG_SMIME	0
 
@@ -641,6 +642,9 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 		case OPENSSL_ALGO_MD2:
 			mdtype = (EVP_MD *) EVP_md2();
 			break;
+		case OPENSSL_ALGO_DSS1:
+			mdtype = (EVP_MD *) EVP_dss1();
+			break;
 		default:
 			return NULL;
 			break;
@@ -692,6 +696,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
 
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
@@ -1200,7 +1205,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	STACK_OF(X509) * untrustedchain = NULL;
 	long purpose;
 	char * untrusted = NULL;
-	int untrusted_len;
+	int untrusted_len, ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl|a!s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len)
 			== FAILURE) {
@@ -1224,7 +1229,15 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	if (cert == NULL) {
 		goto clean_exit;
 	}
-	RETVAL_LONG(check_cert(cainfo, cert, untrustedchain, purpose));
+
+	ret = check_cert(cainfo, cert, untrustedchain, purpose);
+
+        if (ret != 0 && ret != 1) {
+                RETVAL_LONG(ret);
+        } else {
+                RETVAL_BOOL(ret);
+        }
+
 
 clean_exit:
 	if (certresource == 1 && cert) {
