@@ -115,12 +115,18 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_num_rows,								NULL)
 	PHP_FE(mysqli_options, 								NULL)
 	PHP_FE(mysqli_ping,									NULL)
+#if defined(MYSQLI_USE_MYSQLND)
+	PHP_FE(mysqli_poll,									NULL)
+#endif
 	PHP_FE(mysqli_prepare,								NULL)
 	PHP_FE(mysqli_report,								NULL)
 	PHP_FE(mysqli_query,								NULL)
 	PHP_FE(mysqli_real_connect,							NULL)
 	PHP_FE(mysqli_real_escape_string,					NULL)
 	PHP_FE(mysqli_real_query,							NULL)
+#if defined(MYSQLI_USE_MYSQLND)
+	PHP_FE(mysqli_reap_async_query,						NULL)
+#endif
 	PHP_FE(mysqli_rollback,								NULL)
 	PHP_FE(mysqli_select_db,							NULL)
 #ifdef HAVE_MYSQLI_SET_CHARSET
@@ -221,6 +227,10 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(query,mysqli_query,NULL)
 	PHP_FALIAS(real_connect,mysqli_real_connect,NULL)
 	PHP_FALIAS(real_escape_string,mysqli_real_escape_string,NULL)
+#if defined(MYSQLI_USE_MYSQLND)
+	PHP_FALIAS(poll,mysqli_poll,NULL)
+	PHP_FALIAS(reap_async_query,mysqli_reap_async_query,NULL)
+#endif
 	PHP_FALIAS(escape_string, mysqli_real_escape_string,NULL)
 	PHP_FALIAS(real_query,mysqli_real_query,NULL)
 	PHP_FALIAS(rollback,mysqli_rollback,NULL)

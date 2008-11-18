@@ -96,6 +96,7 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_DEBUG_TRACE_ENABLED'] = true;
+		$expected_constants['MYSQLI_ASYNC'] = true;
 
 	} else {
 		$version = mysqli_get_client_version();

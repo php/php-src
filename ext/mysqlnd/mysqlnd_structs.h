@@ -237,6 +237,8 @@ struct st_mysqlnd_conn_methods
 	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 	enum_func_status	(*set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
 	enum_func_status	(*query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
+	enum_func_status	(*send_query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
+	enum_func_status	(*reap_query)(MYSQLND *conn TSRMLS_DC);
 	MYSQLND_RES *		(*use_result)(MYSQLND * const conn TSRMLS_DC);
 	MYSQLND_RES *		(*store_result)(MYSQLND * const conn TSRMLS_DC);
 	MYSQLND_RES *		(*background_store_result)(MYSQLND * const conn TSRMLS_DC);

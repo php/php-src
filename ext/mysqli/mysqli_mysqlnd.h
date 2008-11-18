@@ -38,5 +38,6 @@
 #define mysqli_stmt_close(c, implicit)	mysqlnd_stmt_close((c), (implicit))
 #define mysqli_free_result(r, implicit)	mysqlnd_free_result((r), (implicit))
 #define mysqli_bg_store_result(r)		mysqlnd_bg_store_result((r))
+#define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
 
 #endif

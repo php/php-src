@@ -2,8 +2,8 @@
 mysqli_get_charset()
 --SKIPIF--
 <?php
-require_once('skipifemb.inc');
 require_once('skipif.inc');
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_charset'))
 	die("skip: function not available");
