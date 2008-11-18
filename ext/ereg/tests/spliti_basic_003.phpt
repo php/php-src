@@ -20,22 +20,31 @@ var_dump(spliti('[:alpha:]', '--- x ---'));
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(7) "-- 0 --"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(11) "--- aaa ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(10) "--- ba ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(10) "--- ba ---"
 }
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(9) "--- x ---"

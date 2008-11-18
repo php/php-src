@@ -86,93 +86,118 @@ Error: 8 - Undefined variable: undefined_var, %s(65)
 Error: 8 - Undefined variable: unset_var, %s(68)
 
 Arg value 0 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 int(1)
 
 Arg value 12345 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value -2345 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value 10.5 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value -10.5 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value 101234567000 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value 0.5 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 int(1)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi() is deprecated, %s(75)
 int(1)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(74)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(75)
 Error: 8 - Object of class stdClass to string conversion, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi() is deprecated, %s(75)
 Error: 2 - eregi(): REG_EMPTY, %s(75)
 bool(false)
 Done

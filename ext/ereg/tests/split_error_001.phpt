@@ -31,11 +31,15 @@ echo "Done";
 
 -- Testing split() function with more than expected no. of arguments --
 
-Warning: split() expects at most 3 parameters, 4 given in %s on line 17
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing split() function with less than expected no. of arguments --
 
-Warning: split() expects at least 2 parameters, 1 given in %s on line 22
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done

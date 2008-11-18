@@ -35,11 +35,15 @@ echo "Done";
 
 -- Testing eregi() function with more than expected no. of arguments --
 
-Warning: eregi() expects at most 3 parameters, 4 given in %s on line 21
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing eregi() function with less than expected no. of arguments --
 
-Warning: eregi() expects at least 2 parameters, 1 given in %s on line 26
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 Done

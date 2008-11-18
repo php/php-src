@@ -85,91 +85,116 @@ Error: 8 - Undefined variable: undefined_var, %s(64)
 Error: 8 - Undefined variable: unset_var, %s(67)
 
 Arg value 0 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value 12345 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value -2345 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value 10.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value -10.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value 101234567000 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value 0.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value Array 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value Array 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value Array 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value Array 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(8) "original"
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 8 - Object of class stdClass could not be converted to int, %s(74)
 string(8) "original"
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 Error: 2 - eregi_replace(): REG_EMPTY, %s(74)
 bool(false)
 Done
