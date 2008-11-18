@@ -176,7 +176,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_LONG(*retval, rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (my_ulonglong) rc);
+			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}
@@ -294,7 +294,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_LONG(*retval, rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (my_ulonglong) rc);
+			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}

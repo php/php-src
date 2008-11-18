@@ -97,8 +97,11 @@ typedef struct {
 	char			*hash_key;
 	zval			*li_read;
 	php_stream		*li_stream;
-	zend_bool		persistent;
 	unsigned int 	multi_query;
+	zend_bool		persistent;
+#if defined(MYSQLI_USE_MYSQLND)
+	int				async_result_fetch_type;				
+#endif
 } MY_MYSQL;
 
 typedef struct {
@@ -299,7 +302,13 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
 #ifdef MYSQLI_USE_MYSQLND
-#define MYSQLI_BG_STORE_RESULT 	101
+#ifdef MYSQLND_THREADED
+#define MYSQLI_BG_STORE_RESULT 	4
+#endif
+#define MYSQLI_ASYNC	 	8
+#else
+/* libmysql */
+#define MYSQLI_ASYNC	 	0
 #endif
 
 /* for mysqli_fetch_assoc */
@@ -433,6 +442,7 @@ PHP_FUNCTION(mysqli_num_fields);
 PHP_FUNCTION(mysqli_num_rows);
 PHP_FUNCTION(mysqli_options);
 PHP_FUNCTION(mysqli_ping);
+PHP_FUNCTION(mysqli_poll);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
 PHP_FUNCTION(mysqli_stmt_result_metadata);
@@ -441,6 +451,7 @@ PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
 PHP_FUNCTION(mysqli_real_query);
 PHP_FUNCTION(mysqli_real_escape_string);
+PHP_FUNCTION(mysqli_reap_async_query);
 PHP_FUNCTION(mysqli_rollback);
 PHP_FUNCTION(mysqli_row_seek);
 PHP_FUNCTION(mysqli_select_db);

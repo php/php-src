@@ -163,8 +163,42 @@ typedef unsigned long long uint64_t;
 #define L64(x) x##i64
 #endif
 #else
+
+#if __i386__
+#define MYSQLND_LL_SPEC	"%lli"
 #define MYSQLND_LLU_SPEC "%llu"
-#define MYSQLND_LL_SPEC "%lld"
+#endif
+
+#if __ia64__
+#define MYSQLND_LL_SPEC	"%li"
+#define MYSQLND_LLU_SPEC "%lu"
+#endif
+
+#if __powerpc64__
+#define MYSQLND_LL_SPEC	"%li"
+#define MYSQLND_LLU_SPEC "%lu"
+#endif
+
+#if __x86_64__
+#define MYSQLND_LL_SPEC	"%li"
+#define MYSQLND_LLU_SPEC "%lu"
+#endif
+
+#if __s390x__
+#define MYSQLND_LL_SPEC	"%li"
+#define MYSQLND_LLU_SPEC "%lu"
+#endif
+
+#if __powerpc__ && !__powerpc64__
+#define MYSQLND_LL_SPEC	"%lli"
+#define MYSQLND_LLU_SPEC "%llu"
+#endif
+
+#if __s390__ && !__s390x__
+#define MYSQLND_LL_SPEC	"%lli"
+#define MYSQLND_LLU_SPEC "%llu"
+#endif
+
 #define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL

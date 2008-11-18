@@ -870,6 +870,217 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 /* }}} */
 
 
+/* {{{ mysqlnd_conn::send_query */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, send_query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("mysqlnd_conn::send_query");
+	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
+
+	ret = mysqlnd_simple_command(conn, COM_QUERY, query, query_len,
+								 PROT_LAST /* we will handle the OK packet*/,
+								 FALSE, FALSE TSRMLS_CC);
+	CONN_SET_STATE(conn, CONN_QUERY_SENT);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn::send_query */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, reap_query)(MYSQLND * conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::reap_query");
+	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
+	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connection not opened, clear or has been closed");
+		DBG_RETURN(FAIL);	
+	}
+	DBG_RETURN(mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC));
+}
+/* }}} */
+
+
+#include "php_network.h"
+
+MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS_DC)
+{
+	int cnt = 0;
+	MYSQLND **p = conn_array, **p_p;
+	MYSQLND **ret = NULL;
+
+	while (*p) {
+		if (CONN_GET_STATE(*p) <= CONN_READY || CONN_GET_STATE(*p) == CONN_QUIT_SENT) {
+			cnt++;
+		}
+		p++;
+	}
+	if (cnt) {
+		MYSQLND **ret_p = ret = ecalloc(cnt + 1, sizeof(MYSQLND *));
+		p_p = p = conn_array;
+		while (*p) {
+			if (CONN_GET_STATE(*p) <= CONN_READY || CONN_GET_STATE(*p) == CONN_QUIT_SENT) {
+				*ret_p = *p;
+				*p = NULL;
+				ret_p++;
+			} else {
+				*p_p = *p;
+				p_p++;
+			}
+			p++;
+		}
+		*ret_p = NULL; 
+	}
+	return ret;
+}
+
+
+/* {{{ stream_select mysqlnd_stream_array_to_fd_set functions */
+static int mysqlnd_stream_array_to_fd_set(MYSQLND **conn_array, fd_set *fds, php_socket_t *max_fd TSRMLS_DC)
+{
+	php_socket_t this_fd;
+	int cnt = 0;
+	MYSQLND **p = conn_array;
+
+	while (*p) {
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 * */
+		if (SUCCESS == php_stream_cast((*p)->net.stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+										(void*)&this_fd, 1) && this_fd >= 0) {
+			
+			PHP_SAFE_FD_SET(this_fd, fds);
+
+			if (this_fd > *max_fd) {
+				*max_fd = this_fd;
+			}
+			cnt++;
+		}
+		p++;
+	}
+	return cnt ? 1 : 0;
+}
+
+static int mysqlnd_stream_array_from_fd_set(MYSQLND **conn_array, fd_set *fds TSRMLS_DC)
+{
+	php_socket_t this_fd;
+	int ret = 0;
+	zend_bool disproportion = FALSE;
+
+
+	MYSQLND **fwd = conn_array, **bckwd = conn_array;
+
+	while (*fwd) {
+		if (SUCCESS == php_stream_cast((*fwd)->net.stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+										(void*)&this_fd, 1) && this_fd >= 0) {
+			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
+				if (disproportion) {
+					*bckwd = *fwd;
+				}
+				bckwd++;
+				fwd++;
+				ret++;
+				continue;
+			}
+		}
+		disproportion = TRUE;
+		fwd++;
+	}
+	*bckwd = NULL;/* NULL-terminate the list */
+	
+	return ret;
+}
+
+
+#ifndef PHP_WIN32
+#define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+#else
+#include "win32/select.h"
+#endif
+
+/* {{{ _mysqlnd_poll */
+enum_func_status
+_mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC)
+{
+
+	struct timeval	tv;
+	struct timeval *tv_p = NULL;
+	fd_set			rfds, wfds, efds;
+	php_socket_t	max_fd = 0;
+	int				retval, sets = 0;
+	int				set_count, max_set_count = 0;
+	DBG_ENTER("mysqlnd_poll");
+
+	if (sec < 0 || usec < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Negative values passed for sec and/or usec");
+		DBG_RETURN(FAIL);
+	}
+
+	*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
+
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+
+	if (r_array != NULL) {
+		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (e_array != NULL) {
+		set_count = mysqlnd_stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+		if (set_count > max_set_count) {
+			max_set_count = set_count;
+		}
+		sets += set_count;
+	}
+
+	if (!sets) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, *dont_poll ? "All arrays passed are clear":"No stream arrays were passed");
+		DBG_RETURN(FAIL);
+	}
+
+	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+
+	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
+	if (usec > 999999) {
+		tv.tv_sec = sec + (usec / 1000000);
+		tv.tv_usec = usec % 1000000;			
+	} else {
+		tv.tv_sec = sec;
+		tv.tv_usec = usec;
+	}
+
+	tv_p = &tv;
+	
+	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
+
+	if (retval == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+						errno, strerror(errno), max_fd);
+		DBG_RETURN(FAIL);
+	}
+
+	if (r_array != NULL) {
+		mysqlnd_stream_array_from_fd_set(r_array, &rfds TSRMLS_CC);
+	}
+	if (e_array != NULL) {
+		mysqlnd_stream_array_from_fd_set(e_array, &efds TSRMLS_CC);
+	}
+
+	*desc_num = retval;
+
+	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
 /*
   COM_FIELD_LIST is special, different from a SHOW FIELDS FROM :
   - There is no result set header - status from the command, which
@@ -1910,6 +2121,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, escape_string),
 	MYSQLND_METHOD(mysqlnd_conn, set_charset),
 	MYSQLND_METHOD(mysqlnd_conn, query),
+	MYSQLND_METHOD(mysqlnd_conn, send_query),
+	MYSQLND_METHOD(mysqlnd_conn, reap_query),
 	MYSQLND_METHOD(mysqlnd_conn, use_result),
 	MYSQLND_METHOD(mysqlnd_conn, store_result),
 	MYSQLND_METHOD(mysqlnd_conn, background_store_result),
