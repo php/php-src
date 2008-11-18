@@ -1205,9 +1205,10 @@ PHP_METHOD(sqlite3stmt, __construct)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	zval *db_zval;
-	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 	char *sql;
 	int sql_len, errcode;
+
+	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
 
