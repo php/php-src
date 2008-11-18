@@ -1,3 +1,398 @@
+2008-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      More detailed bug fix description
+
+2008-11-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_builtin_functions.c:
+      MFH:
+      - Changed 'strlen' to use ZEND_FUNCTION(strlen)
+      - Removed duplicated arginfo structs
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Changed 'strlen' to use ZEND_FUNCTION(strlen)
+      - Removed duplicated arginfo structs
+
+2008-11-17  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/openssl/tests/openssl_random_pseudo_bytes.phpt:
+      Missed test for previous commit
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c:
+      MFH Add openssl_random_pseudo_bytes() in order to expose access to a PRG,
+      this wraps around whatever the OS provides.
+      
+      - OpenBSD uses arc4random()
+      - Windows uses the Windows Crypto API
+      - FreeBSD, Linux, etc use /dev/random or /dev/urandom if available
+      [DOC]
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/openssl_random_pseudo_bytes.phpt
+      ext/openssl/tests/openssl_random_pseudo_bytes.phpt:
+      Add openssl_random_pseudo_bytes() in order to expose access to a PRG, this
+      wraps around whatever the OS provides.
+      
+      - OpenBSD uses arc4random()
+      - Windows uses the Windows Crypto API
+      - FreeBSD, Linux, etc use /dev/random or /dev/urandom if available
+      [DOC]
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c:
+      MFH Fix #46033 - Segfault when instantiating SQLite3stmt and SQLite3Result
+      directly.
+
+    * ext/sqlite3/sqlite3.c:
+      Fix #46033 - Segfault when instantiating SQLite3stmt and SQLite3Result
+      directly.
+
+2008-11-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/tests/ns_078.phpt
+      ZendEngine2/tests/ns_078.phpt:
+      
+      file ns_078.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      ZendEngine2/zend_language_parser.y:
+      Improve use syntax
+      [DOC] use \foo\bar is the same as use foo\bar
+
+2008-11-17  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Sync libsqlite to 3.6.5
+
+2008-11-17  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in:
+      MFH: Feature request #46595. Use cc as default compiler and fallback to
+      gcc.
+
+    * configure.in:
+      Feature request #46595. Use cc as default compiler and fallback to gcc.
+      [DOC]
+
+2008-11-17  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/reflection/tests/reflectionClass_export_basic1.phpt
+      ext/reflection/tests/reflectionClass_export_basic1.phpt
+      ext/reflection/tests/reflectionClass_export_basic2.phpt
+      ext/reflection/tests/reflectionClass_export_basic2.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_basic.phpt
+      ext/reflection/tests/reflectionClass_getModifiers_basic.phpt
+      ext/reflection/tests/reflectionClass_hasMethod_basic.phpt
+      ext/reflection/tests/reflectionClass_isInterface_basic.phpt
+      ext/reflection/tests/reflectionObject___toString_basic1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic2.phpt
+      ext/reflection/tests/reflectionObject___toString_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic1.phpt
+      ext/reflection/tests/reflectionObject_export_basic1.phpt
+      ext/reflection/tests/reflectionObject_export_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic3.phpt
+      ext/reflection/tests/reflectionObject_export_basic3.phpt
+      ext/reflection/tests/reflectionProperty_constructor_variation1.phpt
+      ext/reflection/tests/reflectionProperty_constructor_variation1.phpt:
+      Commit tests for ext/reflection
+
+2008-11-17  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/fileinfo/fileinfo.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_fe.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/basic_functions.c
+      ext/standard/user_filters.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - MFH: Added 'static' into ZEND_BEGIN_ARG_INFO_EX macro
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_interfaces.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/calendar.c
+      ext/com_dotnet/com_extension.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/date/php_date.c
+      ext/dba/dba.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/ereg/ereg.c
+      ext/exif/exif.c
+      ext/fbsql/php_fbsql.c
+      ext/fileinfo/fileinfo.c
+      ext/filter/filter.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hash/hash.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/intl/php_intl.c
+      ext/intl/collator/collator_class.c
+      ext/intl/dateformat/dateformat_class.c
+      ext/intl/formatter/formatter_class.c
+      ext/intl/locale/locale_class.c
+      ext/intl/msgformat/msgformat_class.c
+      ext/intl/normalizer/normalizer_class.c
+      ext/json/json.c
+      ext/ldap/ldap.c
+      ext/libxml/libxml.c
+      ext/mbstring/mbstring.c
+      ext/mcrypt/mcrypt.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_fe.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/pdo/pdo.c
+      ext/pdo/pdo_stmt.c
+      ext/pgsql/pgsql.c
+      ext/phar/phar_object.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/reflection/php_reflection.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/soap/soap.c
+      ext/sockets/sockets.c
+      ext/spl/php_spl.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_dllist.c
+      ext/spl/spl_fixedarray.c
+      ext/spl/spl_heap.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/standard/basic_functions.c
+      ext/standard/user_filters.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvshm/sysvshm.c
+      ext/tidy/tidy.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/xmlreader/php_xmlreader.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlwriter/php_xmlwriter.c
+      ext/xsl/xsltprocessor.c
+      ext/zip/php_zip.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c:
+      - Added 'static' into ZEND_BEGIN_ARG_INFO_EX macro (again!)
+
+2008-11-17  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/reflection/tests/reflectionClass_export_basic1.phpt
+      ext/reflection/tests/reflectionClass_export_basic1.phpt
+      ext/reflection/tests/reflectionClass_export_basic1.phpt
+      ext/reflection/tests/reflectionClass_export_basic2.phpt
+      ext/reflection/tests/reflectionClass_export_basic2.phpt
+      ext/reflection/tests/reflectionClass_export_basic2.phpt
+      ext/reflection/tests/reflectionClass_getExtensionName_variation.phpt
+      ext/reflection/tests/reflectionClass_getExtension_basic.phpt
+      ext/reflection/tests/reflectionClass_getExtension_variation.phpt
+      ext/reflection/tests/reflectionClass_getInterfaceNames_basic.phpt
+      ext/reflection/tests/reflectionClass_getParentClass.phpt
+      ext/reflection/tests/reflectionClass_hasConstant_basic.phpt
+      ext/reflection/tests/reflectionClass_hasProperty_basic.phpt
+      ext/reflection/tests/reflectionClass_isAbstract_basic.phpt
+      ext/reflection/tests/reflectionClass_isFinal_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_basic.phpt
+      ext/reflection/tests/reflectionClass_isIterateable_variation1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic1.phpt
+      ext/reflection/tests/reflectionObject___toString_basic2.phpt
+      ext/reflection/tests/reflectionObject___toString_basic2.phpt
+      ext/reflection/tests/reflectionObject___toString_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic2.phpt
+      ext/reflection/tests/reflectionObject_export_basic3.phpt
+      ext/reflection/tests/reflectionObject_export_basic3.phpt
+      ext/reflection/tests/reflectionObject_export_basic3.phpt:
+        1.1.4;
+      file reflectionClass_export_basic1.phpt was initially added on branch
+      PHP_5_2.
+
+    * ext/reflection/tests/reflectionObject_export_basic1.phpt
+      ext/reflection/tests/reflectionObject_export_basic1.phpt
+      ext/reflection/tests/reflectionObject_export_basic1.phpt
+      ext/reflection/tests/reflectionProperty_constructor_variation1.phpt
+      ext/reflection/tests/reflectionProperty_constructor_variation1.phpt
+      ext/reflection/tests/reflectionProperty_constructor_variation1.phpt:
+        1.1.4;
+      file reflectionObject_export_basic1.phpt was initially added on branch
+      PHP_5_2.
+
 2008-11-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/openssl/tests/bug46127.phpt
