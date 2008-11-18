@@ -890,9 +890,10 @@ MYSQLND_METHOD(mysqlnd_conn, send_query)(MYSQLND *conn, const char *query, unsig
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, reap_query)(MYSQLND * conn TSRMLS_DC)
 {
+	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
 	DBG_ENTER("mysqlnd_conn::reap_query");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
-	enum_mysqlnd_connection_state state = CONN_GET_STATE(conn);
+
 	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connection not opened, clear or has been closed");
 		DBG_RETURN(FAIL);	
