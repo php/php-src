@@ -18,7 +18,7 @@ if (ini_get('unicode.semantics')) {
 	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$cs = array();
-	$cs[] = $mysql->set_charset("latin5");
+	$cs[] = $mysql->set_charset("latin1");
 	$cs[] = $mysql->character_set_name();
 
 	$cs[] = $mysql->set_charset("utf8");
@@ -35,7 +35,7 @@ array(6) {
   [0]=>
   bool(true)
   [1]=>
-  string(6) "latin5"
+  string(6) "latin1"
   [2]=>
   bool(true)
   [3]=>
