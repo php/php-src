@@ -11,7 +11,8 @@ Test Regular expression register support in ereg
   echo $registers[2];
   echo "\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function ereg() is deprecated in %s on line %d
 32
 This is a nice and simple string
 is

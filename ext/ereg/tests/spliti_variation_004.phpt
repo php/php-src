@@ -25,14 +25,17 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing spliti() : usage variations ***
+Error: 8192 - Function spliti() is deprecated, %s(16)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
+Error: 8192 - Function spliti() is deprecated, %s(17)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
+Error: 8192 - Function spliti() is deprecated, %s(18)
 array(5) {
   [0]=>
   string(1) "1"

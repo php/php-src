@@ -32,11 +32,15 @@ echo "Done";
 
 -- Testing ereg_replace() function with more than expected no. of arguments --
 
-Warning: ereg_replace() expects exactly 3 parameters, 4 given in %s on line 17
+Deprecated: Function ereg_replace() is deprecated in %s on line %d
+
+Warning: ereg_replace() expects exactly 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing ereg_replace() function with less than expected no. of arguments --
 
-Warning: ereg_replace() expects exactly 3 parameters, 2 given in %s on line 23
+Deprecated: Function ereg_replace() is deprecated in %s on line %d
+
+Warning: ereg_replace() expects exactly 3 parameters, 2 given in %s on line %d
 NULL
 Done

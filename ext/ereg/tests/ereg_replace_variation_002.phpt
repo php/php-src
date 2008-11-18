@@ -85,79 +85,104 @@ Error: 8 - Undefined variable: undefined_var, %s(64)
 Error: 8 - Undefined variable: unset_var, %s(67)
 
 Arg value 0 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value 1 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value 12345 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(6) "h9o%21"
 
 Arg value -2345 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%D7o%21"
 
 Arg value 10.5 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%0Ao%21"
 
 Arg value -10.5 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%F6o%21"
 
 Arg value 101234567000 
-string(%d) "h%so%21"
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
+string(8) "h%FFo%21"
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value 0.5 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value Array 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value Array 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value Array 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value Array 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value Array 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value 1 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value 1 
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 Error: 8 - Object of class stdClass could not be converted to int, %s(74)
 string(8) "h%01o%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 
 Arg value  
+Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
 Done

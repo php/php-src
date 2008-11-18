@@ -21,26 +21,37 @@ var_dump(split('[:alpha:]', '--- x ---'));
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(7) "-- a --"
 }
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(7) "-- 0 --"
 }
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(11) "--- aaa ---"
 }
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(10) "--- ba ---"
 }
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(10) "--- ba ---"
 }
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(9) "--- x ---"

@@ -40,49 +40,79 @@ echo "Done";
 --EXPECTF--
 *** Testing split() : error conditions ***
 
-Warning: split(): REG_EMPTY in %s on line 16
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_EPAREN in %s on line 17
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: split(): REG_EBRACK in %s on line 18
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EBRACK in %s on line %d
 bool(false)
 
-Warning: split(): REG_EPAREN in %s on line 19
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 20
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 21
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 22
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split() expects parameter 3 to be long, string given in %s on line 23
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
-Warning: split(): REG_BADBR in %s on line 24
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: split(): REG_EMPTY in %s on line 25
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_EMPTY in %s on line 26
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADBR in %s on line 27
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: split(): REG_ERANGE in %s on line 28
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_ERANGE in %s on line %d
 bool(false)
 
-Warning: split(): REG_EESCAPE in %s on line 29
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: split() expects parameter 3 to be long, string given in %s on line 30
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split() expects parameter 3 to be long, string given in %s on line %d
 NULL
 string(8) "original"
 Done

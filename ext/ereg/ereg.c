@@ -33,31 +33,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
 	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_eregi, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_ereg_replace, 0)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, replacement)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_eregi_replace, 0)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, replacement)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(0, limit)  
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_spliti, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string) 
 	ZEND_ARG_INFO(0, limit)  
@@ -70,13 +52,13 @@ ZEND_END_ARG_INFO()
 
 /* {{{ Function table */
 const zend_function_entry ereg_functions[] = {
-	PHP_FE(ereg,						arginfo_ereg)  
-	PHP_FE(ereg_replace,				arginfo_ereg_replace)
-	PHP_FE(eregi,						arginfo_eregi)
-	PHP_FE(eregi_replace,				arginfo_eregi_replace)   
-	PHP_FE(split,						arginfo_split)
-	PHP_FE(spliti,						arginfo_spliti)
-	PHP_FE(sql_regcase,					arginfo_sql_regcase)
+	PHP_DEP_FE(ereg,			arginfo_ereg)
+	PHP_DEP_FE(ereg_replace,	arginfo_ereg_replace)
+	PHP_DEP_FE(eregi,			arginfo_ereg)
+	PHP_DEP_FE(eregi_replace,	arginfo_ereg_replace)
+	PHP_DEP_FE(split,			arginfo_split)
+	PHP_DEP_FE(spliti,			arginfo_split)
+	PHP_DEP_FE(sql_regcase,		arginfo_sql_regcase)
 	{NULL, NULL, NULL}
 };
 /* }}} */

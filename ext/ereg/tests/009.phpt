@@ -9,7 +9,8 @@ test");
           echo $a[$i] . "\n";
         }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function split() is deprecated in %s on line %d
 4
 this
 is

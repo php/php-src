@@ -83,84 +83,109 @@ Error: 8 - Undefined variable: undefined_var, %s(62)
 Error: 8 - Undefined variable: unset_var, %s(65)
 
 Arg value 0 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(1) "0"
 
 Arg value 1 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(1) "1"
 
 Arg value 12345 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(5) "12345"
 
 Arg value -2345 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(5) "-2345"
 
 Arg value 10.5 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(4) "10.5"
 
 Arg value -10.5 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(5) "-10.5"
 
 Arg value 101234567000 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(12) "101234567000"
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(16) "1.07654321[Ee]-9"
 
 Arg value 0.5 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(3) "0.5"
 
 Arg value Array 
-Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
 
 Arg value Array 
-Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
 
 Arg value Array 
-Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
 
 Arg value Array 
-Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
 
 Arg value Array 
-Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value 1 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(1) "1"
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value 1 
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(1) "1"
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(71)
 
 Arg value  
-Error: 2 - sql_regcase() expects parameter 1 to be string, object given, %s.php(72)
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
+Error: 2 - sql_regcase() expects parameter 1 to be string, object given, %s(72)
 NULL
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(0) ""
 Done

@@ -28,6 +28,7 @@ PHP                                                                        NEWS
   (David Soria Parra)
 
 - Deprecated define_syslog_variables(). (Kalle)
+- Deprecated ereg extension. (Felipe)
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 - Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)

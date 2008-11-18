@@ -40,49 +40,79 @@ echo "Done";
 --EXPECTF--
 *** Testing ereg() : error conditions ***
 
-Warning: ereg(): REG_EMPTY in %s on line 16
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EPAREN in %s on line 17
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EBRACK in %s on line 18
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EBRACK in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EPAREN in %s on line 19
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADRPT in %s on line 20
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADRPT in %s on line 21
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADRPT in %s on line 22
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADRPT in %s on line 23
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADBR in %s on line 24
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EMPTY in %s on line 25
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EMPTY in %s on line 26
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_BADBR in %s on line 27
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_ERANGE in %s on line 28
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_ERANGE in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_EESCAPE in %s on line 29
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: ereg(): REG_ERANGE in %s on line 30
+Deprecated: Function ereg() is deprecated in %s on line %d
+
+Warning: ereg(): REG_ERANGE in %s on line %d
 bool(false)
 string(8) "original"
 Done

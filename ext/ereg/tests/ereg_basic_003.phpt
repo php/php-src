@@ -19,7 +19,10 @@ var_dump(count($regs));
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function ereg() is deprecated in %s on line %d
 int(1)
+
+Deprecated: Function ereg() is deprecated in %s on line %d
 int(2048)
 int(2049)
 Done

@@ -82,6 +82,7 @@ echo "Done";
 *** Testing spliti() : usage variations ***
 
 Arg value 10.5 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(5) {
   [0]=>
   string(1) "1"
@@ -96,107 +97,128 @@ array(5) {
 }
 
 Arg value -10.5 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value 0.5 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value Array 
-Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+Error: 8192 - Function spliti() is deprecated, %s(73)
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s(73)
 NULL
 
 Arg value Array 
-Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+Error: 8192 - Function spliti() is deprecated, %s(73)
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s(73)
 NULL
 
 Arg value Array 
-Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+Error: 8192 - Function spliti() is deprecated, %s(73)
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s(73)
 NULL
 
 Arg value Array 
-Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+Error: 8192 - Function spliti() is deprecated, %s(73)
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s(73)
 NULL
 
 Arg value Array 
-Error: 2 - spliti() expects parameter 3 to be long, array given, %s.php(73)
+Error: 8192 - Function spliti() is deprecated, %s(73)
+Error: 2 - spliti() expects parameter 3 to be long, array given, %s(73)
 NULL
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value 1 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value 1 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
 NULL
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
 NULL
 
 Arg value string 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
 NULL
 
 Arg value string 
+Error: 8192 - Function spliti() is deprecated, %s(73)
 Error: 2 - spliti() expects parameter 3 to be long, string given, %s(73)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 Error: 2 - spliti() expects parameter 3 to be long, object given, %s(73)
 NULL
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
 
 Arg value  
+Error: 8192 - Function spliti() is deprecated, %s(73)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"

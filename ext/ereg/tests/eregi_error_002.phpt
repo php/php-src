@@ -40,49 +40,79 @@ echo "Done";
 --EXPECTF--
 *** Testing eregi() : error conditions ***
 
-Warning: eregi(): REG_EMPTY in %s on line 16
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EPAREN in %s on line 17
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EBRACK in %s on line 18
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EBRACK in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EPAREN in %s on line 19
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADRPT in %s on line 20
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADRPT in %s on line 21
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADRPT in %s on line 22
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADRPT in %s on line 23
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADBR in %s on line 24
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EMPTY in %s on line 25
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EMPTY in %s on line 26
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_BADBR in %s on line 27
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_ERANGE in %s on line 28
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_ERANGE in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_EESCAPE in %s on line 29
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: eregi(): REG_ERANGE in %s on line 30
+Deprecated: Function eregi() is deprecated in %s on line %d
+
+Warning: eregi(): REG_ERANGE in %s on line %d
 bool(false)
 string(8) "original"
 Done

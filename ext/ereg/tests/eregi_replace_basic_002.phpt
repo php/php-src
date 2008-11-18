@@ -20,9 +20,18 @@ var_dump(eregi_replace('[:alpha:]', $replacement, 'x'));
 echo "Done";
 ?>
 --EXPECTF--
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(1) "0"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(3) "aaa"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(2) "ba"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(2) "ba"
+
+Deprecated: Function eregi_replace() is deprecated in %s on line %d
 string(1) "x"
 Done
