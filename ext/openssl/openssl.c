@@ -58,6 +58,7 @@
 #define OPENSSL_ALGO_MD5	2
 #define OPENSSL_ALGO_MD4	3
 #define OPENSSL_ALGO_MD2	4
+#define OPENSSL_ALGO_DSS1	5
 
 #define DEBUG_SMIME	0
 
@@ -904,6 +905,9 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 		case OPENSSL_ALGO_MD2:
 			mdtype = (EVP_MD *) EVP_md2();
 			break;
+		case OPENSSL_ALGO_DSS1:
+			mdtype = (EVP_MD *) EVP_dss1();
+			break;
 		default:
 			return NULL;
 			break;
@@ -983,6 +987,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
 
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
@@ -1470,7 +1475,6 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 		return 0;
 	}
 	X509_STORE_CTX_init(csc, ctx, x, untrustedchain);
-
 	if(purpose >= 0) {
 		X509_STORE_CTX_set_purpose(csc, purpose);
 	}
