@@ -4,7 +4,7 @@
 ARG_WITH("curl", "cURL support", "no");
 
 if (PHP_CURL != "no") {
-	if (CHECK_LIB("libcurl.lib", "curl", PHP_CURL) &&
+	if (CHECK_LIB("libcurl_a.lib;libcurl.lib", "curl", PHP_CURL) &&
 			CHECK_HEADER_ADD_INCLUDE("curl/easy.h", "CFLAGS_CURL") &&
 			CHECK_LIB("ssleay32.lib", "curl", PHP_CURL) &&
 			CHECK_LIB("libeay32.lib", "curl", PHP_CURL) 
