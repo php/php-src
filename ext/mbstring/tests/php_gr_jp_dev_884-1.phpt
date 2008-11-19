@@ -12,7 +12,8 @@ var_dump(ereg_replace(".*", "b", "a"));
 var_dump(preg_replace("/.*/", "b", "a"));
 var_dump(mb_ereg_replace(".*", "b", "a"));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function ereg_replace() is deprecated in %s on line %d
 string(2) "bb"
 string(2) "bb"
 string(2) "bb"
