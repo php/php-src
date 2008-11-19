@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   endian systems). (Scott)
 - Fixed bug #46285 (lastInsertId() returns "0" when a deferenced PDOStatement is
   executed). (Johannes)
+- Fixed bug #46241 (stacked error handlers, error handling in genera). 
+  (Etienne)
 - Fixed bug #46238 (Segmentation fault on static call with empty string method).
   (Felipe)
 - Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
