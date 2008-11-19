@@ -5,774 +5,780 @@ Bug #37569 (WDDX incorrectly encodes high-ascii characters)
 --FILE--
 <?php
 for ($i = 65; $i < 256; $i++) {
-	$v = chr($i);
+	if ($i >= 0xc0) {
+		$v = chr(0xc3) . chr($i - 64);
+	} elseif ($i >= 0x80) {
+		$v = chr(0xc2) . chr($i);
+	} else {
+		$v = chr($i); // make it UTF-8
+	}
 	$ret = wddx_serialize_value($v);
 	echo $ret . "\n";
-	var_dump(ord($v), ord(wddx_deserialize($ret)), $v == wddx_deserialize($ret));
+	var_dump(bin2hex($v), bin2hex(wddx_deserialize($ret)), $v == wddx_deserialize($ret));
 }
 ?>
 --EXPECT--
 <wddxPacket version='1.0'><header/><data><string>A</string></data></wddxPacket>
-int(65)
-int(65)
+string(2) "41"
+string(2) "41"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>B</string></data></wddxPacket>
-int(66)
-int(66)
+string(2) "42"
+string(2) "42"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>C</string></data></wddxPacket>
-int(67)
-int(67)
+string(2) "43"
+string(2) "43"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>D</string></data></wddxPacket>
-int(68)
-int(68)
+string(2) "44"
+string(2) "44"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>E</string></data></wddxPacket>
-int(69)
-int(69)
+string(2) "45"
+string(2) "45"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>F</string></data></wddxPacket>
-int(70)
-int(70)
+string(2) "46"
+string(2) "46"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>G</string></data></wddxPacket>
-int(71)
-int(71)
+string(2) "47"
+string(2) "47"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>H</string></data></wddxPacket>
-int(72)
-int(72)
+string(2) "48"
+string(2) "48"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>I</string></data></wddxPacket>
-int(73)
-int(73)
+string(2) "49"
+string(2) "49"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>J</string></data></wddxPacket>
-int(74)
-int(74)
+string(2) "4a"
+string(2) "4a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>K</string></data></wddxPacket>
-int(75)
-int(75)
+string(2) "4b"
+string(2) "4b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>L</string></data></wddxPacket>
-int(76)
-int(76)
+string(2) "4c"
+string(2) "4c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>M</string></data></wddxPacket>
-int(77)
-int(77)
+string(2) "4d"
+string(2) "4d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>N</string></data></wddxPacket>
-int(78)
-int(78)
+string(2) "4e"
+string(2) "4e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>O</string></data></wddxPacket>
-int(79)
-int(79)
+string(2) "4f"
+string(2) "4f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>P</string></data></wddxPacket>
-int(80)
-int(80)
+string(2) "50"
+string(2) "50"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Q</string></data></wddxPacket>
-int(81)
-int(81)
+string(2) "51"
+string(2) "51"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>R</string></data></wddxPacket>
-int(82)
-int(82)
+string(2) "52"
+string(2) "52"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>S</string></data></wddxPacket>
-int(83)
-int(83)
+string(2) "53"
+string(2) "53"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>T</string></data></wddxPacket>
-int(84)
-int(84)
+string(2) "54"
+string(2) "54"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>U</string></data></wddxPacket>
-int(85)
-int(85)
+string(2) "55"
+string(2) "55"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>V</string></data></wddxPacket>
-int(86)
-int(86)
+string(2) "56"
+string(2) "56"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>W</string></data></wddxPacket>
-int(87)
-int(87)
+string(2) "57"
+string(2) "57"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>X</string></data></wddxPacket>
-int(88)
-int(88)
+string(2) "58"
+string(2) "58"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Y</string></data></wddxPacket>
-int(89)
-int(89)
+string(2) "59"
+string(2) "59"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Z</string></data></wddxPacket>
-int(90)
-int(90)
+string(2) "5a"
+string(2) "5a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>[</string></data></wddxPacket>
-int(91)
-int(91)
+string(2) "5b"
+string(2) "5b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>\</string></data></wddxPacket>
-int(92)
-int(92)
+string(2) "5c"
+string(2) "5c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>]</string></data></wddxPacket>
-int(93)
-int(93)
+string(2) "5d"
+string(2) "5d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>^</string></data></wddxPacket>
-int(94)
-int(94)
+string(2) "5e"
+string(2) "5e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>_</string></data></wddxPacket>
-int(95)
-int(95)
+string(2) "5f"
+string(2) "5f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>`</string></data></wddxPacket>
-int(96)
-int(96)
+string(2) "60"
+string(2) "60"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>a</string></data></wddxPacket>
-int(97)
-int(97)
+string(2) "61"
+string(2) "61"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>b</string></data></wddxPacket>
-int(98)
-int(98)
+string(2) "62"
+string(2) "62"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>c</string></data></wddxPacket>
-int(99)
-int(99)
+string(2) "63"
+string(2) "63"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>d</string></data></wddxPacket>
-int(100)
-int(100)
+string(2) "64"
+string(2) "64"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>e</string></data></wddxPacket>
-int(101)
-int(101)
+string(2) "65"
+string(2) "65"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>f</string></data></wddxPacket>
-int(102)
-int(102)
+string(2) "66"
+string(2) "66"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>g</string></data></wddxPacket>
-int(103)
-int(103)
+string(2) "67"
+string(2) "67"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>h</string></data></wddxPacket>
-int(104)
-int(104)
+string(2) "68"
+string(2) "68"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>i</string></data></wddxPacket>
-int(105)
-int(105)
+string(2) "69"
+string(2) "69"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>j</string></data></wddxPacket>
-int(106)
-int(106)
+string(2) "6a"
+string(2) "6a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>k</string></data></wddxPacket>
-int(107)
-int(107)
+string(2) "6b"
+string(2) "6b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>l</string></data></wddxPacket>
-int(108)
-int(108)
+string(2) "6c"
+string(2) "6c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>m</string></data></wddxPacket>
-int(109)
-int(109)
+string(2) "6d"
+string(2) "6d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>n</string></data></wddxPacket>
-int(110)
-int(110)
+string(2) "6e"
+string(2) "6e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>o</string></data></wddxPacket>
-int(111)
-int(111)
+string(2) "6f"
+string(2) "6f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>p</string></data></wddxPacket>
-int(112)
-int(112)
+string(2) "70"
+string(2) "70"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>q</string></data></wddxPacket>
-int(113)
-int(113)
+string(2) "71"
+string(2) "71"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>r</string></data></wddxPacket>
-int(114)
-int(114)
+string(2) "72"
+string(2) "72"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>s</string></data></wddxPacket>
-int(115)
-int(115)
+string(2) "73"
+string(2) "73"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>t</string></data></wddxPacket>
-int(116)
-int(116)
+string(2) "74"
+string(2) "74"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>u</string></data></wddxPacket>
-int(117)
-int(117)
+string(2) "75"
+string(2) "75"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>v</string></data></wddxPacket>
-int(118)
-int(118)
+string(2) "76"
+string(2) "76"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>w</string></data></wddxPacket>
-int(119)
-int(119)
+string(2) "77"
+string(2) "77"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>x</string></data></wddxPacket>
-int(120)
-int(120)
+string(2) "78"
+string(2) "78"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>y</string></data></wddxPacket>
-int(121)
-int(121)
+string(2) "79"
+string(2) "79"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>z</string></data></wddxPacket>
-int(122)
-int(122)
+string(2) "7a"
+string(2) "7a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>{</string></data></wddxPacket>
-int(123)
-int(123)
+string(2) "7b"
+string(2) "7b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>|</string></data></wddxPacket>
-int(124)
-int(124)
+string(2) "7c"
+string(2) "7c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>}</string></data></wddxPacket>
-int(125)
-int(125)
+string(2) "7d"
+string(2) "7d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>~</string></data></wddxPacket>
-int(126)
-int(126)
+string(2) "7e"
+string(2) "7e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(127)
-int(127)
+string(2) "7f"
+string(2) "7f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(128)
-int(128)
+string(4) "c280"
+string(4) "c280"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(129)
-int(129)
+string(4) "c281"
+string(4) "c281"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(130)
-int(130)
+string(4) "c282"
+string(4) "c282"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(131)
-int(131)
+string(4) "c283"
+string(4) "c283"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(132)
-int(132)
+string(4) "c284"
+string(4) "c284"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(133)
-int(133)
+string(4) "c285"
+string(4) "c285"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(134)
-int(134)
+string(4) "c286"
+string(4) "c286"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(135)
-int(135)
+string(4) "c287"
+string(4) "c287"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(136)
-int(136)
+string(4) "c288"
+string(4) "c288"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(137)
-int(137)
+string(4) "c289"
+string(4) "c289"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(138)
-int(138)
+string(4) "c28a"
+string(4) "c28a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(139)
-int(139)
+string(4) "c28b"
+string(4) "c28b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(140)
-int(140)
+string(4) "c28c"
+string(4) "c28c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(141)
-int(141)
+string(4) "c28d"
+string(4) "c28d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(142)
-int(142)
+string(4) "c28e"
+string(4) "c28e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(143)
-int(143)
+string(4) "c28f"
+string(4) "c28f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(144)
-int(144)
+string(4) "c290"
+string(4) "c290"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(145)
-int(145)
+string(4) "c291"
+string(4) "c291"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(146)
-int(146)
+string(4) "c292"
+string(4) "c292"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(147)
-int(147)
+string(4) "c293"
+string(4) "c293"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(148)
-int(148)
+string(4) "c294"
+string(4) "c294"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(149)
-int(149)
+string(4) "c295"
+string(4) "c295"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(150)
-int(150)
+string(4) "c296"
+string(4) "c296"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(151)
-int(151)
+string(4) "c297"
+string(4) "c297"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(152)
-int(152)
+string(4) "c298"
+string(4) "c298"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(153)
-int(153)
+string(4) "c299"
+string(4) "c299"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(154)
-int(154)
+string(4) "c29a"
+string(4) "c29a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(155)
-int(155)
+string(4) "c29b"
+string(4) "c29b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(156)
-int(156)
+string(4) "c29c"
+string(4) "c29c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(157)
-int(157)
+string(4) "c29d"
+string(4) "c29d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(158)
-int(158)
+string(4) "c29e"
+string(4) "c29e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
-int(159)
-int(159)
+string(4) "c29f"
+string(4) "c29f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string> </string></data></wddxPacket>
-int(160)
-int(160)
+string(4) "c2a0"
+string(4) "c2a0"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¡</string></data></wddxPacket>
-int(161)
-int(161)
+string(4) "c2a1"
+string(4) "c2a1"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¢</string></data></wddxPacket>
-int(162)
-int(162)
+string(4) "c2a2"
+string(4) "c2a2"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>£</string></data></wddxPacket>
-int(163)
-int(163)
+string(4) "c2a3"
+string(4) "c2a3"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¤</string></data></wddxPacket>
-int(164)
-int(164)
+string(4) "c2a4"
+string(4) "c2a4"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¥</string></data></wddxPacket>
-int(165)
-int(165)
+string(4) "c2a5"
+string(4) "c2a5"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¦</string></data></wddxPacket>
-int(166)
-int(166)
+string(4) "c2a6"
+string(4) "c2a6"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>§</string></data></wddxPacket>
-int(167)
-int(167)
+string(4) "c2a7"
+string(4) "c2a7"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¨</string></data></wddxPacket>
-int(168)
-int(168)
+string(4) "c2a8"
+string(4) "c2a8"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>©</string></data></wddxPacket>
-int(169)
-int(169)
+string(4) "c2a9"
+string(4) "c2a9"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ª</string></data></wddxPacket>
-int(170)
-int(170)
+string(4) "c2aa"
+string(4) "c2aa"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>«</string></data></wddxPacket>
-int(171)
-int(171)
+string(4) "c2ab"
+string(4) "c2ab"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¬</string></data></wddxPacket>
-int(172)
-int(172)
+string(4) "c2ac"
+string(4) "c2ac"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>­</string></data></wddxPacket>
-int(173)
-int(173)
+string(4) "c2ad"
+string(4) "c2ad"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>®</string></data></wddxPacket>
-int(174)
-int(174)
+string(4) "c2ae"
+string(4) "c2ae"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¯</string></data></wddxPacket>
-int(175)
-int(175)
+string(4) "c2af"
+string(4) "c2af"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>°</string></data></wddxPacket>
-int(176)
-int(176)
+string(4) "c2b0"
+string(4) "c2b0"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>±</string></data></wddxPacket>
-int(177)
-int(177)
+string(4) "c2b1"
+string(4) "c2b1"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>²</string></data></wddxPacket>
-int(178)
-int(178)
+string(4) "c2b2"
+string(4) "c2b2"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>³</string></data></wddxPacket>
-int(179)
-int(179)
+string(4) "c2b3"
+string(4) "c2b3"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>´</string></data></wddxPacket>
-int(180)
-int(180)
+string(4) "c2b4"
+string(4) "c2b4"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>µ</string></data></wddxPacket>
-int(181)
-int(181)
+string(4) "c2b5"
+string(4) "c2b5"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¶</string></data></wddxPacket>
-int(182)
-int(182)
+string(4) "c2b6"
+string(4) "c2b6"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>·</string></data></wddxPacket>
-int(183)
-int(183)
+string(4) "c2b7"
+string(4) "c2b7"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¸</string></data></wddxPacket>
-int(184)
-int(184)
+string(4) "c2b8"
+string(4) "c2b8"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¹</string></data></wddxPacket>
-int(185)
-int(185)
+string(4) "c2b9"
+string(4) "c2b9"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>º</string></data></wddxPacket>
-int(186)
-int(186)
+string(4) "c2ba"
+string(4) "c2ba"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>»</string></data></wddxPacket>
-int(187)
-int(187)
+string(4) "c2bb"
+string(4) "c2bb"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¼</string></data></wddxPacket>
-int(188)
-int(188)
+string(4) "c2bc"
+string(4) "c2bc"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>½</string></data></wddxPacket>
-int(189)
-int(189)
+string(4) "c2bd"
+string(4) "c2bd"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¾</string></data></wddxPacket>
-int(190)
-int(190)
+string(4) "c2be"
+string(4) "c2be"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>¿</string></data></wddxPacket>
-int(191)
-int(191)
+string(4) "c2bf"
+string(4) "c2bf"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>À</string></data></wddxPacket>
-int(192)
-int(192)
+string(4) "c380"
+string(4) "c380"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Á</string></data></wddxPacket>
-int(193)
-int(193)
+string(4) "c381"
+string(4) "c381"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Â</string></data></wddxPacket>
-int(194)
-int(194)
+string(4) "c382"
+string(4) "c382"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ã</string></data></wddxPacket>
-int(195)
-int(195)
+string(4) "c383"
+string(4) "c383"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ä</string></data></wddxPacket>
-int(196)
-int(196)
+string(4) "c384"
+string(4) "c384"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Å</string></data></wddxPacket>
-int(197)
-int(197)
+string(4) "c385"
+string(4) "c385"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Æ</string></data></wddxPacket>
-int(198)
-int(198)
+string(4) "c386"
+string(4) "c386"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ç</string></data></wddxPacket>
-int(199)
-int(199)
+string(4) "c387"
+string(4) "c387"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>È</string></data></wddxPacket>
-int(200)
-int(200)
+string(4) "c388"
+string(4) "c388"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>É</string></data></wddxPacket>
-int(201)
-int(201)
+string(4) "c389"
+string(4) "c389"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ê</string></data></wddxPacket>
-int(202)
-int(202)
+string(4) "c38a"
+string(4) "c38a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ë</string></data></wddxPacket>
-int(203)
-int(203)
+string(4) "c38b"
+string(4) "c38b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ì</string></data></wddxPacket>
-int(204)
-int(204)
+string(4) "c38c"
+string(4) "c38c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Í</string></data></wddxPacket>
-int(205)
-int(205)
+string(4) "c38d"
+string(4) "c38d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Î</string></data></wddxPacket>
-int(206)
-int(206)
+string(4) "c38e"
+string(4) "c38e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ï</string></data></wddxPacket>
-int(207)
-int(207)
+string(4) "c38f"
+string(4) "c38f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ð</string></data></wddxPacket>
-int(208)
-int(208)
+string(4) "c390"
+string(4) "c390"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ñ</string></data></wddxPacket>
-int(209)
-int(209)
+string(4) "c391"
+string(4) "c391"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ò</string></data></wddxPacket>
-int(210)
-int(210)
+string(4) "c392"
+string(4) "c392"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ó</string></data></wddxPacket>
-int(211)
-int(211)
+string(4) "c393"
+string(4) "c393"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ô</string></data></wddxPacket>
-int(212)
-int(212)
+string(4) "c394"
+string(4) "c394"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Õ</string></data></wddxPacket>
-int(213)
-int(213)
+string(4) "c395"
+string(4) "c395"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ö</string></data></wddxPacket>
-int(214)
-int(214)
+string(4) "c396"
+string(4) "c396"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>×</string></data></wddxPacket>
-int(215)
-int(215)
+string(4) "c397"
+string(4) "c397"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ø</string></data></wddxPacket>
-int(216)
-int(216)
+string(4) "c398"
+string(4) "c398"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ù</string></data></wddxPacket>
-int(217)
-int(217)
+string(4) "c399"
+string(4) "c399"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ú</string></data></wddxPacket>
-int(218)
-int(218)
+string(4) "c39a"
+string(4) "c39a"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Û</string></data></wddxPacket>
-int(219)
-int(219)
+string(4) "c39b"
+string(4) "c39b"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ü</string></data></wddxPacket>
-int(220)
-int(220)
+string(4) "c39c"
+string(4) "c39c"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Ý</string></data></wddxPacket>
-int(221)
-int(221)
+string(4) "c39d"
+string(4) "c39d"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>Þ</string></data></wddxPacket>
-int(222)
-int(222)
+string(4) "c39e"
+string(4) "c39e"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ß</string></data></wddxPacket>
-int(223)
-int(223)
+string(4) "c39f"
+string(4) "c39f"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>à</string></data></wddxPacket>
-int(224)
-int(224)
+string(4) "c3a0"
+string(4) "c3a0"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>á</string></data></wddxPacket>
-int(225)
-int(225)
+string(4) "c3a1"
+string(4) "c3a1"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>â</string></data></wddxPacket>
-int(226)
-int(226)
+string(4) "c3a2"
+string(4) "c3a2"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ã</string></data></wddxPacket>
-int(227)
-int(227)
+string(4) "c3a3"
+string(4) "c3a3"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ä</string></data></wddxPacket>
-int(228)
-int(228)
+string(4) "c3a4"
+string(4) "c3a4"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>å</string></data></wddxPacket>
-int(229)
-int(229)
+string(4) "c3a5"
+string(4) "c3a5"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>æ</string></data></wddxPacket>
-int(230)
-int(230)
+string(4) "c3a6"
+string(4) "c3a6"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ç</string></data></wddxPacket>
-int(231)
-int(231)
+string(4) "c3a7"
+string(4) "c3a7"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>è</string></data></wddxPacket>
-int(232)
-int(232)
+string(4) "c3a8"
+string(4) "c3a8"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>é</string></data></wddxPacket>
-int(233)
-int(233)
+string(4) "c3a9"
+string(4) "c3a9"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ê</string></data></wddxPacket>
-int(234)
-int(234)
+string(4) "c3aa"
+string(4) "c3aa"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ë</string></data></wddxPacket>
-int(235)
-int(235)
+string(4) "c3ab"
+string(4) "c3ab"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ì</string></data></wddxPacket>
-int(236)
-int(236)
+string(4) "c3ac"
+string(4) "c3ac"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>í</string></data></wddxPacket>
-int(237)
-int(237)
+string(4) "c3ad"
+string(4) "c3ad"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>î</string></data></wddxPacket>
-int(238)
-int(238)
+string(4) "c3ae"
+string(4) "c3ae"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ï</string></data></wddxPacket>
-int(239)
-int(239)
+string(4) "c3af"
+string(4) "c3af"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ð</string></data></wddxPacket>
-int(240)
-int(240)
+string(4) "c3b0"
+string(4) "c3b0"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ñ</string></data></wddxPacket>
-int(241)
-int(241)
+string(4) "c3b1"
+string(4) "c3b1"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ò</string></data></wddxPacket>
-int(242)
-int(242)
+string(4) "c3b2"
+string(4) "c3b2"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ó</string></data></wddxPacket>
-int(243)
-int(243)
+string(4) "c3b3"
+string(4) "c3b3"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ô</string></data></wddxPacket>
-int(244)
-int(244)
+string(4) "c3b4"
+string(4) "c3b4"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>õ</string></data></wddxPacket>
-int(245)
-int(245)
+string(4) "c3b5"
+string(4) "c3b5"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ö</string></data></wddxPacket>
-int(246)
-int(246)
+string(4) "c3b6"
+string(4) "c3b6"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>÷</string></data></wddxPacket>
-int(247)
-int(247)
+string(4) "c3b7"
+string(4) "c3b7"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ø</string></data></wddxPacket>
-int(248)
-int(248)
+string(4) "c3b8"
+string(4) "c3b8"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ù</string></data></wddxPacket>
-int(249)
-int(249)
+string(4) "c3b9"
+string(4) "c3b9"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ú</string></data></wddxPacket>
-int(250)
-int(250)
+string(4) "c3ba"
+string(4) "c3ba"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>û</string></data></wddxPacket>
-int(251)
-int(251)
+string(4) "c3bb"
+string(4) "c3bb"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ü</string></data></wddxPacket>
-int(252)
-int(252)
+string(4) "c3bc"
+string(4) "c3bc"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ý</string></data></wddxPacket>
-int(253)
-int(253)
+string(4) "c3bd"
+string(4) "c3bd"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>þ</string></data></wddxPacket>
-int(254)
-int(254)
+string(4) "c3be"
+string(4) "c3be"
 bool(true)
 <wddxPacket version='1.0'><header/><data><string>ÿ</string></data></wddxPacket>
-int(255)
-int(255)
+string(4) "c3bf"
+string(4) "c3bf"
 bool(true)
