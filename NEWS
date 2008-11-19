@@ -71,6 +71,7 @@ PHP                                                                        NEWS
 - Fixed bug #46060 (Phar::addEmptyDir() breaks) (Greg)
 - Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
   (Ilia)
+- Fixed bug #46039 (ArrayObject iteration is slow). (Arnaud)
 - Fixed bug #45976 (Moved SXE from SPL to SimpleXML). (Etienne)
 - Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
   (Christian Schneider, Arnaud)
