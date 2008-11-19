@@ -2557,11 +2557,13 @@ PHP_METHOD(DateTime, __construct)
 	zval *timezone_object = NULL;
 	char *time_str = NULL;
 	int time_str_len = 0;
+	zend_error_handling error_handling;
 	
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO", &time_str, &time_str_len, &timezone_object, date_ce_timezone)) {
 		date_initialize(zend_object_store_get_object(getThis() TSRMLS_CC), time_str, time_str_len, NULL, timezone_object, 1 TSRMLS_CC);
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 
@@ -3259,8 +3261,9 @@ PHP_METHOD(DateTimeZone, __construct)
 	int tz_len;
 	timelib_tzinfo *tzi = NULL;
 	php_timezone_obj *tzobj;
+	zend_error_handling error_handling;
 	
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tz, &tz_len)) {
 		if (SUCCESS == timezone_initialize(&tzi, tz TSRMLS_CC)) {
 			tzobj = zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -3271,6 +3274,7 @@ PHP_METHOD(DateTimeZone, __construct)
 			ZVAL_NULL(getThis());
 		}
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 
@@ -3610,8 +3614,9 @@ PHP_METHOD(DateInterval, __construct)
 	int   interval_string_length;
 	php_interval_obj *diobj;
 	timelib_rel_time *reltime;
+	zend_error_handling error_handling;
 	
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &interval_string, &interval_string_length) == SUCCESS) {
 		if (date_interval_initialize(&reltime, interval_string, interval_string_length TSRMLS_CC) == SUCCESS) {
 			diobj = zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -3621,6 +3626,7 @@ PHP_METHOD(DateInterval, __construct)
 			ZVAL_NULL(getThis());
 		}
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 
@@ -3763,12 +3769,14 @@ PHP_METHOD(DatePeriod, __construct)
 	char *isostr = NULL;
 	int   isostr_len = 0;
 	timelib_time *clone;
+	zend_error_handling error_handling;
 	
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_date, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_date, &interval, date_ce_interval, &end, date_ce_date, &options) == FAILURE) {
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &isostr, &isostr_len, &options) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTime, DateInterval, int) OR (DateTime, DateInterval, DateTime) OR (string) as arguments.");
+				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return;
 			}
 		}
@@ -3835,6 +3843,7 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->recurrences = recurrences + dpobj->include_start_date;
 
 	dpobj->initialized = 1;
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 

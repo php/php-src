@@ -83,7 +83,7 @@ static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
 	/* FIXME */
-	zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC);
+	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC); */
 	return SUCCESS;
 }
 /* }}} */

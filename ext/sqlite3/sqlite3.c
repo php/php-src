@@ -1207,12 +1207,14 @@ PHP_METHOD(sqlite3stmt, __construct)
 	zval *db_zval;
 	char *sql;
 	int sql_len, errcode;
+	zend_error_handling error_handling;
 
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os", &db_zval, php_sqlite3_sc_entry, &sql, &sql_len) == FAILURE) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
@@ -1220,6 +1222,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 
 	SQLITE3_CHECK_INITIALIZED(db_obj->initialised, SQLite3)
 
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 	if (!sql_len) {
 		RETURN_FALSE;
 	}
@@ -1407,10 +1410,13 @@ PHP_METHOD(sqlite3result, __construct)
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
 	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
+	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, NULL, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite3Result cannot be directly instantiated");
+
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 }
 /* }}} */

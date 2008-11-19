@@ -2238,6 +2238,7 @@ SXE_METHOD(__construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|lbs&b", &data, &data_len, &data_type, &options, &is_url, &ns, &ns_len, UG(utf8_conv), &isprefix) == FAILURE) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
