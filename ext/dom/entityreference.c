@@ -58,6 +58,7 @@ PHP_METHOD(domentityreference, __construct)
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_entityreference_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);

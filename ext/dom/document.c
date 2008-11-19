@@ -1443,6 +1443,7 @@ PHP_METHOD(domdocument, __construct)
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s&s&", &id, dom_document_class_entry, &version, &version_len, UG(utf8_conv), &encoding, &encoding_len, UG(utf8_conv)) == FAILURE) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
