@@ -1620,10 +1620,12 @@ PHP_FUNCTION(sqlite_open)
 	int filename_len;
 	zval *errmsg = NULL;
 	zval *object = getThis();
+	zend_error_handling error_handling;
 
-	zend_replace_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception, NULL TSRMLS_CC);
+	zend_replace_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception, &error_handling TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 	if (errmsg) {
@@ -1634,6 +1636,7 @@ PHP_FUNCTION(sqlite_open)
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			if (object) {
 				RETURN_NULL();
 			} else {
@@ -1644,6 +1647,7 @@ PHP_FUNCTION(sqlite_open)
 		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
 				php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			if (object) {
 				RETURN_NULL();
 			} else {
@@ -1657,6 +1661,7 @@ PHP_FUNCTION(sqlite_open)
 	if (fullpath) {
 		efree(fullpath);
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 
@@ -1668,10 +1673,12 @@ PHP_FUNCTION(sqlite_factory)
 	char *filename, *fullpath = NULL;
 	int filename_len;
 	zval *errmsg = NULL;
+	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, sqlite_ce_exception, NULL TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, sqlite_ce_exception, &error_handling TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		RETURN_NULL();
 	}
 	if (errmsg) {
@@ -1682,12 +1689,14 @@ PHP_FUNCTION(sqlite_factory)
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			RETURN_NULL();
 		}
 
 		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
 				php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			RETURN_NULL();
 		}
 	}
@@ -1696,6 +1705,7 @@ PHP_FUNCTION(sqlite_factory)
 	if (fullpath) {
 		efree(fullpath);
 	}
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 /* }}} */
 
@@ -2356,6 +2366,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zend_replace_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception, &error_handling TSRMLS_CC);
 	if (object) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szb", &class_name, &class_name_len, &ctor_params, &decode_binary)) {
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			return;
 		}
 		RES_FROM_OBJECT(res, object);
@@ -2366,6 +2377,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		}
 	} else {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|szb", &zres, &class_name, &class_name_len, &ctor_params, &decode_binary)) {
+			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			return;
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
@@ -2378,12 +2390,14 @@ PHP_FUNCTION(sqlite_fetch_object)
 
 	if (!ce) {
 		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
 	if (res->curr_row < res->nrows) {
 		php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
 	} else {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		RETURN_FALSE;
 	}
 

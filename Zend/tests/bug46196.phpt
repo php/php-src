@@ -2,8 +2,6 @@
 Test restore_error_handler() function : bug #46196
 --CREDITS--
 Olivier Doucet
---XFAIL--
-This test will fail until bug #46196 is fixed
 --FILE--
 <?php
 /* Prototype  : void restore_error_handler(void)
