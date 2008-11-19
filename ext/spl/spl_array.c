@@ -96,8 +96,8 @@ static void spl_array_rewind(spl_array_object *intern TSRMLS_DC);
 
 static void spl_array_update_pos(spl_array_object* intern) /* {{{ */
 {
-	Bucket *pos;
-	if ((pos = intern->pos)) {
+	Bucket *pos = intern->pos;
+	if (pos != NULL) {
 		intern->pos_h = pos->h;
 	}
 } /* }}} */
