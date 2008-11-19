@@ -3,7 +3,7 @@ similar_text(), basic tests
 --CREDITS--
 Mats Lindh <mats at lindh.no>
 #Testfest php.no
---INIT--
+--INI--
 precision=14
 --FILE--
 <?php
