@@ -1733,9 +1733,17 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 	  in mysqlnd_store_result() or mysqlnd_fetch_row_unbuffered()
 	*/
 	if (FAIL == (ret = mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC))) {
-		DBG_ERR_FMT("Serious error. %s::%d", __FILE__, __LINE__);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
-		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		/*
+		  There can be an error in the middle of a multi-statement, which will cancel the multi-statement.
+		  So there are no more results and we should just return FALSE, error_no has been set
+		*/
+		if (!conn->error_info.error_no) {
+			DBG_ERR_FMT("Serious error. %s::%d", __FILE__, __LINE__);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		} else {
+			DBG_INF_FMT("Error from the server : (%d) %s", conn->error_info.error_no, conn->error_info.error);
+		}
 	}
 
 	DBG_RETURN(ret);
