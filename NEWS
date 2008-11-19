@@ -13,7 +13,7 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #46521 (Curl ZTS OpenSSL, error in config.m4 fragment).
   (jd at cpanel dot net)
-- Fixed bug #46497 (wddx_serialize treats input as ISO-8859-1). (Mark Karpeles)
+- Fixed bug #46496 (wddx_serialize treats input as ISO-8859-1). (Mark Karpeles)
 - Fixed bug #46127 (php_openssl_tcp_sockop_accept forgets to set context
   on accepted stream) (Mark Karpeles, Pierre)
 - Fixed bug #44818 (php://memory writeable when opened read only). (Arnaud)
