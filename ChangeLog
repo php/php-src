@@ -1,3 +1,495 @@
+2008-11-18  Alexey Zakhlestin  <indeyets@gmail.com>
+
+    * sapi/apache_hooks/php_apache.c:
+      MFB: new parameter-parsing api
+
+    * (PHP_5_3)
+      sapi/apache_hooks/php_apache.c:
+      new parameter-parsing api
+
+2008-11-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/mbstring/oniguruma/win32/config.h:
+      - mac eol to win eol
+
+2008-11-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c:
+      Fix windows build - pure C compiler
+
+2008-11-18  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/ereg/ereg.c
+      ext/ereg/tests/001.phpt
+      ext/ereg/tests/002.phpt
+      ext/ereg/tests/003.phpt
+      ext/ereg/tests/004.phpt
+      ext/ereg/tests/005.phpt
+      ext/ereg/tests/006.phpt
+      ext/ereg/tests/007.phpt
+      ext/ereg/tests/008.phpt
+      ext/ereg/tests/009.phpt
+      ext/ereg/tests/010.phpt
+      ext/ereg/tests/011.phpt
+      ext/ereg/tests/012.phpt
+      ext/ereg/tests/013.phpt
+      ext/ereg/tests/014.phpt
+      ext/ereg/tests/015.phpt
+      ext/ereg/tests/016.phpt
+      ext/ereg/tests/ereg_basic_001.phpt
+      ext/ereg/tests/ereg_basic_002.phpt
+      ext/ereg/tests/ereg_basic_003.phpt
+      ext/ereg/tests/ereg_basic_004.phpt
+      ext/ereg/tests/ereg_error_001.phpt
+      ext/ereg/tests/ereg_error_002.phpt
+      ext/ereg/tests/ereg_replace_basic_001.phpt
+      ext/ereg/tests/ereg_replace_basic_002.phpt
+      ext/ereg/tests/ereg_replace_error_001.phpt
+      ext/ereg/tests/ereg_replace_error_002.phpt
+      ext/ereg/tests/ereg_replace_variation_001.phpt
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/ereg_replace_variation_003.phpt
+      ext/ereg/tests/ereg_variation_001.phpt
+      ext/ereg/tests/ereg_variation_002.phpt
+      ext/ereg/tests/ereg_variation_003.phpt
+      ext/ereg/tests/ereg_variation_004.phpt
+      ext/ereg/tests/eregi_basic.phpt
+      ext/ereg/tests/eregi_basic_001.phpt
+      ext/ereg/tests/eregi_basic_002.phpt
+      ext/ereg/tests/eregi_basic_003.phpt
+      ext/ereg/tests/eregi_basic_004.phpt
+      ext/ereg/tests/eregi_error_001.phpt
+      ext/ereg/tests/eregi_error_002.phpt
+      ext/ereg/tests/eregi_replace_basic.phpt
+      ext/ereg/tests/eregi_replace_basic_001.phpt
+      ext/ereg/tests/eregi_replace_basic_002.phpt
+      ext/ereg/tests/eregi_replace_error_001.phpt
+      ext/ereg/tests/eregi_replace_error_002.phpt
+      ext/ereg/tests/eregi_replace_variation_001.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_003.phpt
+      ext/ereg/tests/eregi_variation_001.phpt
+      ext/ereg/tests/eregi_variation_002.phpt
+      ext/ereg/tests/eregi_variation_003.phpt
+      ext/ereg/tests/eregi_variation_004.phpt
+      ext/ereg/tests/split_basic_001.phpt
+      ext/ereg/tests/split_basic_002.phpt
+      ext/ereg/tests/split_basic_003.phpt
+      ext/ereg/tests/split_error_001.phpt
+      ext/ereg/tests/split_error_002.phpt
+      ext/ereg/tests/split_variation_001.phpt
+      ext/ereg/tests/split_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/split_variation_004.phpt
+      ext/ereg/tests/spliti_basic_001.phpt
+      ext/ereg/tests/spliti_basic_002.phpt
+      ext/ereg/tests/spliti_basic_003.phpt
+      ext/ereg/tests/spliti_basic_004.phpt
+      ext/ereg/tests/spliti_error_001.phpt
+      ext/ereg/tests/spliti_error_002.phpt
+      ext/ereg/tests/spliti_variation_001.phpt
+      ext/ereg/tests/spliti_variation_002.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/ereg/tests/spliti_variation_004.phpt
+      ext/ereg/tests/sql_regcase_basic_001.phpt
+      ext/ereg/tests/sql_regcase_error_001.phpt
+      ext/ereg/tests/sql_regcase_variation_001.phpt:
+      - Deprecate ereg
+
+2008-11-18  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/bug37090.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_poll.phpt
+      ext/mysqli/tests/mysqli_poll_kill.phpt
+      ext/mysqli/tests/mysqli_poll_mixing_insert_select.phpt
+      ext/mysqli/tests/mysqli_poll_reference.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_structs.h:
+      MFH:
+      Asynchronous queries for mysqli, when mysqlnd is enabled.
+      Includes 4 tests for mysqli_poll
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_mysqlnd.h
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli_structs.h
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/bug37090.phpt
+      ext/mysqli/tests/mysqli_autocommit.phpt
+      ext/mysqli/tests/mysqli_character_set.phpt
+      ext/mysqli/tests/mysqli_class_mysqli_interface.phpt
+      ext/mysqli/tests/mysqli_constants.phpt
+      ext/mysqli/tests/mysqli_get_charset.phpt
+      ext/mysqli/tests/mysqli_poll.phpt
+      ext/mysqli/tests/mysqli_poll.phpt
+      ext/mysqli/tests/mysqli_poll_kill.phpt
+      ext/mysqli/tests/mysqli_poll_kill.phpt
+      ext/mysqli/tests/mysqli_poll_mixing_insert_select.phpt
+      ext/mysqli/tests/mysqli_poll_mixing_insert_select.phpt
+      ext/mysqli/tests/mysqli_poll_reference.phpt
+      ext/mysqli/tests/mysqli_poll_reference.phpt
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_portability.h
+      ext/mysqlnd/mysqlnd_structs.h:
+      Asynchronous queries for mysqli, when mysqlnd is enabled.
+      Includes 4 tests for mysqli_poll
+
+2008-11-18  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/reflection/tests/ReflectionClass_getDefaultProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_001.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_001.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_002.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_001.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_001.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_003.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_003.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_004.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_004.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_003.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_003.phpt
+      ext/reflection/tests/ReflectionClass_getParentClass_001.phpt
+      ext/reflection/tests/ReflectionClass_getParentClass_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_004.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_004.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_001.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_001.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_002.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_002.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_implementsInterface_001.phpt
+      ext/reflection/tests/ReflectionClass_implementsInterface_001.phpt
+      ext/reflection/tests/ReflectionClass_isIterateable_001.phpt
+      ext/reflection/tests/ReflectionClass_isIterateable_001.phpt
+      ext/reflection/tests/ReflectionClass_isSubclassOf_002.phpt
+      ext/reflection/tests/ReflectionClass_isSubclassOf_002.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_001.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_001.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_002.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstance_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstance_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_003.phpt
+      ext/reflection/tests/ReflectionClass_toString_003.phpt
+      ext/reflection/tests/ReflectionFunction_001.phpt
+      ext/reflection/tests/ReflectionFunction_001.phpt
+      ext/reflection/tests/ReflectionFunction_construct.001.phpt
+      ext/reflection/tests/ReflectionFunction_construct.001.phpt
+      ext/reflection/tests/ReflectionFunction_getDocComment.001.phpt
+      ext/reflection/tests/ReflectionFunction_getDocComment.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.002.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.002.phpt
+      ext/reflection/tests/ReflectionMethod_006.phpt
+      ext/reflection/tests/ReflectionMethod_006.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error1.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error1.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error2.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error2.phpt
+      ext/reflection/tests/ReflectionObject_isSubclassOf.002.phpt
+      ext/reflection/tests/ReflectionObject_isSubclassOf.002.phpt
+      ext/reflection/tests/ReflectionParameter_001.phpt
+      ext/reflection/tests/ReflectionParameter_001.phpt
+      ext/reflection/tests/ReflectionParameter_002.phpt
+      ext/reflection/tests/ReflectionParameter_002.phpt
+      ext/reflection/tests/ReflectionParameter_003.phpt
+      ext/reflection/tests/ReflectionParameter_003.phpt
+      ext/reflection/tests/ReflectionProperty_getModifiers.001.phpt
+      ext/reflection/tests/ReflectionProperty_getModifiers.001.phpt
+      ext/reflection/tests/included4.inc
+      ext/reflection/tests/included4.inc:
+      Reflection tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and
+      Linux 64 bit).
+
+    * ext/reflection/tests/ReflectionClass_getInterfaces_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_004.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_004.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_004.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_002.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_002.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_002.phpt
+      ext/reflection/tests/ReflectionClass_isIterateable_001.phpt
+      ext/reflection/tests/ReflectionClass_isIterateable_001.phpt
+      ext/reflection/tests/ReflectionClass_isIterateable_001.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_002.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_002.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstance_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstance_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstance_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_003.phpt
+      ext/reflection/tests/ReflectionClass_toString_003.phpt
+      ext/reflection/tests/ReflectionClass_toString_003.phpt
+      ext/reflection/tests/ReflectionFunction_001.phpt
+      ext/reflection/tests/ReflectionFunction_001.phpt
+      ext/reflection/tests/ReflectionFunction_001.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error2.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error2.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error2.phpt:
+        1.1.4;
+      file ReflectionClass_getInterfaces_002.phpt was initially added on branch
+      PHP_5_2.
+
+    * ext/reflection/tests/ReflectionClass_getDefaultProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getDefaultProperties_002.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_001.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_001.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_001.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_002.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_002.phpt
+      ext/reflection/tests/ReflectionClass_getDocComment_002.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_001.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_001.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_001.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_003.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_003.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_003.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_004.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_004.phpt
+      ext/reflection/tests/ReflectionClass_getInterfaces_004.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_001.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_002.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_003.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_003.phpt
+      ext/reflection/tests/ReflectionClass_getMethods_003.phpt
+      ext/reflection/tests/ReflectionClass_getParentClass_001.phpt
+      ext/reflection/tests/ReflectionClass_getParentClass_001.phpt
+      ext/reflection/tests/ReflectionClass_getParentClass_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_001.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperties_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_003.phpt
+      ext/reflection/tests/ReflectionClass_getProperty_003.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_getStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_001.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_001.phpt
+      ext/reflection/tests/ReflectionClass_hasConstant_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_001.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_hasMethod_002.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_001.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_hasProperty_002.phpt
+      ext/reflection/tests/ReflectionClass_implementsInterface_001.phpt
+      ext/reflection/tests/ReflectionClass_implementsInterface_001.phpt
+      ext/reflection/tests/ReflectionClass_implementsInterface_001.phpt
+      ext/reflection/tests/ReflectionClass_isSubclassOf_002.phpt
+      ext/reflection/tests/ReflectionClass_isSubclassOf_002.phpt
+      ext/reflection/tests/ReflectionClass_isSubclassOf_002.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_001.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_001.phpt
+      ext/reflection/tests/ReflectionClass_modifiers_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_001.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_002.phpt
+      ext/reflection/tests/ReflectionClass_newInstanceArgs_002.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_001.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_setStaticPropertyValue_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_001.phpt
+      ext/reflection/tests/ReflectionClass_toString_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_002.phpt
+      ext/reflection/tests/ReflectionClass_toString_002.phpt
+      ext/reflection/tests/ReflectionFunction_construct.001.phpt
+      ext/reflection/tests/ReflectionFunction_construct.001.phpt
+      ext/reflection/tests/ReflectionFunction_construct.001.phpt
+      ext/reflection/tests/ReflectionFunction_getDocComment.001.phpt
+      ext/reflection/tests/ReflectionFunction_getDocComment.001.phpt
+      ext/reflection/tests/ReflectionFunction_getDocComment.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.001.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.002.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.002.phpt
+      ext/reflection/tests/ReflectionFunction_getFileName.002.phpt
+      ext/reflection/tests/ReflectionMethod_006.phpt
+      ext/reflection/tests/ReflectionMethod_006.phpt
+      ext/reflection/tests/ReflectionMethod_006.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error1.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error1.phpt
+      ext/reflection/tests/ReflectionMethod_constructor_error1.phpt
+      ext/reflection/tests/ReflectionObject_isSubclassOf.002.phpt
+      ext/reflection/tests/ReflectionObject_isSubclassOf.002.phpt
+      ext/reflection/tests/ReflectionObject_isSubclassOf.002.phpt
+      ext/reflection/tests/ReflectionParameter_001.phpt
+      ext/reflection/tests/ReflectionParameter_001.phpt
+      ext/reflection/tests/ReflectionParameter_001.phpt
+      ext/reflection/tests/ReflectionParameter_002.phpt
+      ext/reflection/tests/ReflectionParameter_002.phpt
+      ext/reflection/tests/ReflectionParameter_002.phpt
+      ext/reflection/tests/ReflectionParameter_003.phpt
+      ext/reflection/tests/ReflectionParameter_003.phpt
+      ext/reflection/tests/ReflectionParameter_003.phpt
+      ext/reflection/tests/ReflectionProperty_getModifiers.001.phpt
+      ext/reflection/tests/ReflectionProperty_getModifiers.001.phpt
+      ext/reflection/tests/ReflectionProperty_getModifiers.001.phpt
+      ext/reflection/tests/included4.inc
+      ext/reflection/tests/included4.inc
+      ext/reflection/tests/included4.inc:
+        1.1.4;
+      file ReflectionClass_getDefaultProperties_001.phpt was initially added on
+      branch PHP_5_2.
+
+2008-11-18  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sqlite3/sqlite3.c:
+      - declaration has to be first...
+
+    * (PHP_5_2)
+      NEWS:
+      - #41033
+
+    * ext/openssl/tests/bug46127.phpt:
+      - mfb: fix title
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug41033.pem
+      ext/openssl/tests/bug41033.phpt
+      ext/openssl/tests/bug41033pub.pem:
+      - MFB: #41033, enable signing with DSA keys
+
+    * (PHP_5_3)
+      ext/openssl/tests/bug46127.phpt:
+      - MFB: fix title
+
+    * (PHP_5_2)
+      ext/openssl/tests/bug46127.phpt:
+      - fix title
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug41033.pem
+      ext/openssl/tests/bug41033.phpt
+      ext/openssl/tests/bug41033pub.pem:
+      - MFH: #41033, enable signing with DSA keys
+
+    * (PHP_5_3)
+      ext/openssl/openssl.c
+      ext/openssl/tests/bug41033.pem
+      ext/openssl/tests/bug41033.pem
+      ext/openssl/tests/bug41033.pem
+      ext/openssl/tests/bug41033.phpt
+      ext/openssl/tests/bug41033.phpt
+      ext/openssl/tests/bug41033.phpt
+      ext/openssl/tests/bug41033pub.pem
+      ext/openssl/tests/bug41033pub.pem
+      ext/openssl/tests/bug41033pub.pem:
+      - #41033, enable signing with DSA keys
+
 2008-11-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
