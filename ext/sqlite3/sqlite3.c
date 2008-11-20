@@ -1409,8 +1409,9 @@ PHP_METHOD(sqlite3result, __construct)
 {
 	php_sqlite3_result *result_obj;
 	zval *object = getThis();
-	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 	zend_error_handling error_handling;
+
+	result_obj = (php_sqlite3_result *)zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
