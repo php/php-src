@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 
 - Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
 - Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
+- Fixed memory leak inside wddx_add_vars() function. (Felipe)
 - Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
 
 - Fixed bug #46546 (Segmentation fault when using declare statement with
