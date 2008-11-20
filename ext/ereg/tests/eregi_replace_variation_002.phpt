@@ -110,7 +110,7 @@ string(8) "h%F6o%21"
 
 Arg value 101234567000 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
-string(8) "h%FFo%21"
+string(%d) "h%so%21"
 
 Arg value 1.07654321E-9 
 Error: 8192 - Function eregi_replace() is deprecated, %s(74)
