@@ -169,8 +169,10 @@ PHP_MINIT_FUNCTION(readline)
 
 PHP_RSHUTDOWN_FUNCTION(readline)
 {
-	if (_readline_completion) 
+	if (_readline_completion) {
+		zval_dtor(_readline_completion);
 		FREE_ZVAL(_readline_completion);
+	}
 #if HAVE_RL_CALLBACK_READ_CHAR
 	if (_prepped_callback) {
 		rl_callback_handler_remove();
@@ -494,6 +496,7 @@ PHP_FUNCTION(readline_completion_function)
 	zval_dtor(&name);
 
 	if (_readline_completion) {
+		zval_dtor(_readline_completion);
 		FREE_ZVAL(_readline_completion);
 	}
 
