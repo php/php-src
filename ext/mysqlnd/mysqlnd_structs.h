@@ -247,8 +247,8 @@ struct st_mysqlnd_conn_methods
 
 	MYSQLND_STMT *		(*stmt_init)(MYSQLND * const conn TSRMLS_DC);
 
-	enum_func_status	(*shutdown_server)(MYSQLND * const conn, unsigned long level TSRMLS_DC);
-	enum_func_status	(*refresh_server)(MYSQLND * const conn, unsigned long options TSRMLS_DC);
+	enum_func_status	(*shutdown_server)(MYSQLND * const conn, uint8_t level TSRMLS_DC);
+	enum_func_status	(*refresh_server)(MYSQLND * const conn, uint8_t options TSRMLS_DC);
 
 	enum_func_status	(*ping)(MYSQLND * const conn TSRMLS_DC);
 	enum_func_status	(*kill_connection)(MYSQLND *conn, unsigned int pid TSRMLS_DC);

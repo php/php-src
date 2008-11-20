@@ -866,7 +866,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)
-							 && (result->meta->fields[i].max_length < Z_STRLEN_P(data)))
+							 && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data)))
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
@@ -1034,7 +1034,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)
-							 && (result->meta->fields[i].max_length < Z_STRLEN_P(data)))
+							 && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data)))
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
