@@ -1274,7 +1274,10 @@ PHP_FUNCTION(wddx_add_vars)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
+	if (!ZEND_FETCH_RESOURCE_NO_RETURN(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx)) {
+		efree(args);
+		RETURN_FALSE;
+	}
 
 	if (!packet) {
 		efree(args);
