@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   invalid keys. (Ilia)
 - Fixed memory leak inside readline_callback_handler_install() function.
   (Ilia)
+- Fixed memory leak inside readline_completion_function() function. (Felipe)
 
 - Fixed bug #46543 (ibase_trans() memory leaks when using wrong parameters).
   (Felipe)
