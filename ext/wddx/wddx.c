@@ -430,7 +430,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	char *key;
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
-	HashTable *objhash;
+	HashTable *objhash, *sleephash;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(fname);
@@ -441,7 +441,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 * array of property names to be serialized.
 	 */
 	if (call_user_function_ex(CG(function_table), &obj, fname, &retval, 0, 0, 1, NULL TSRMLS_CC) == SUCCESS) {
-		if (retval && (objhash = HASH_OF(retval))) {
+		if (retval && (sleephash = HASH_OF(retval))) {
 			PHP_CLASS_ATTRIBUTES;
 			
 			PHP_SET_CLASS_ATTRIBUTES(obj);
@@ -455,10 +455,12 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
 
 			PHP_CLEANUP_CLASS_ATTRIBUTES();
+
+			objhash = HASH_OF(obj);
 			
-			for (zend_hash_internal_pointer_reset(objhash);
-				 zend_hash_get_current_data(objhash, (void **)&varname) == SUCCESS;
-				 zend_hash_move_forward(objhash)) {
+			for (zend_hash_internal_pointer_reset(sleephash);
+				 zend_hash_get_current_data(sleephash, (void **)&varname) == SUCCESS;
+				 zend_hash_move_forward(sleephash)) {
 				if (Z_TYPE_PP(varname) != IS_STRING) {
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 					continue;
