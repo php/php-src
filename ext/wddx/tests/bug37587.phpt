@@ -5,8 +5,8 @@ Bug #37587 (var without attribute causes segfault)
 --FILE--
 <?php
 
-var_dump(wddx_deserialize(file_get_contents(<<<EOF
-data:,<wddxPacket version='1.0'>
+var_dump(wddx_deserialize(<<<EOF
+<wddxPacket version='1.0'>
 <header/>
 <data>
   <array length='1'>
@@ -19,7 +19,7 @@ data:,<wddxPacket version='1.0'>
 </data>
 </wddxPacket>
 EOF
-)));
+));
 
 ?>
 ===DONE===
