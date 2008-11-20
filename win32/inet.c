@@ -1,5 +1,5 @@
 #include "config.w32.h"
-#if (_WIN32_WINNT < 0x0600) /* Vita/2k8 have these functions */
+#if (_WIN32_WINNT < 0x0600) /* Vista/2k8 have these functions */
 #include "php.h"
 #include <winsock2.h>
 #include <windows.h>
@@ -7,8 +7,7 @@
 
 #include "inet.h"
 
-PHPAPI int
-inet_pton(int af, const char* src, void* dst)
+PHPAPI int inet_pton(int af, const char* src, void* dst)
 {
 	int address_length;
 	struct sockaddr_storage sa;
