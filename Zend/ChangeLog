@@ -1,3 +1,24 @@
+2008-11-19  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug46196.phpt
+      tests/bug46241.phpt:
+      MFH: Fix #46241 (stacked error_handlers, error_handling in general)
+
+    * tests/bug46241.phpt
+      tests/bug46241.phpt:
+      
+      Fix #46241 (stacked error_handlers, error_handling in general)
+
+    * zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug46196.phpt:
+      Fix #46241 (stacked error_handlers, error_handling in general)
+
 2008-11-17  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)

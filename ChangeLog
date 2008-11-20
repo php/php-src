@@ -1,3 +1,140 @@
+2008-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Proper bug id
+
+2008-11-19  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * ext/spl/spl_array.c
+      ext/spl/spl_array.c:
+      CS
+
+2008-11-19  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c:
+      MFH:
+      Fix a small bug that mysqlnd::next_result didn't care about an error in a
+      multi-statement. In an inner layer the error has been already set, thus it
+      needed better massage on the top level.
+
+    * ext/mysqlnd/mysqlnd.c:
+      Fix a small bug that mysqlnd::next_result didn't care about an error in a
+      multi-statement. In an inner layer the error has been already set, thus it
+      needed better massage on the top level.
+
+2008-11-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - #46497
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug37569.phpt
+      ext/wddx/tests/bug37587.phpt:
+      - #46497, wddx_serialize treats input as ISO-8859-1 (Mark Karpeles)
+
+2008-11-19  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/json/tests/bug41567.phpt:
+      - Fixed test
+
+    * ext/json/tests/bug41567.phpt
+      ext/json/tests/bug41567.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/php_gr_jp_10830.phpt
+      ext/mbstring/tests/php_gr_jp_dev_884-1.phpt
+      ext/mbstring/tests/php_gr_jp_dev_884-2.phpt
+      ext/standard/tests/strings/similar_text_basic.phpt
+      ext/standard/tests/strings/similar_text_basic.phpt:
+      - Fixed tests
+
+2008-11-19  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/spl/spl_array.c
+      ext/spl/spl_array.c:
+      Improved ArrayObject performance (made spl_hash_verify_pos() an O(1)
+      and removed some spl_array_get_hash_table() calls). Fixes #46039
+
+2008-11-19  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/curl/config.w32:
+      - new naming and allow libcurl static build
+      - c/p error for zlib
+
+    * (PHP_5_3)
+      ext/curl/config.w32:
+      - new naming and allow libcurl static build
+
+2008-11-19  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      NEWS:
+      typo
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug46196.phpt
+      ZendEngine2/tests/bug46241.phpt
+      ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/mysqli/mysqli_driver.c
+      ext/simplexml/simplexml.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c:
+      MFH: Fix #46241 (stacked error_handlers, error_handling in general)
+
+    * ZendEngine2/tests/bug46241.phpt
+      ZendEngine2/tests/bug46241.phpt
+      ext/date/php_date.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/mysqli/mysqli_driver.c
+      ext/simplexml/simplexml.c
+      ext/spl/spl_array.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_iterators.c
+      ext/spl/spl_observer.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c:
+      
+      Fix #46241 (stacked error_handlers, error_handling in general)
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug46196.phpt:
+      Fix #46241 (stacked error_handlers, error_handling in general)
+
 2008-11-18  Alexey Zakhlestin  <indeyets@gmail.com>
 
     * sapi/apache_hooks/php_apache.c:
