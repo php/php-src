@@ -18,7 +18,7 @@ $td = mcrypt_module_open ("blowfish", "", MCRYPT_MODE_ECB, "");
 foreach($vectors as $data) {
     $data = trim($data);
     if ($data) {
-        list($key,$plain,$crypt) = split("[[:space:]]+",$data);
+        list($key,$plain,$crypt) = preg_split("/[[:space:]]+/",$data);
         printf("%s  %s  ",
             $key,
             $plain
