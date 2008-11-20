@@ -48,6 +48,7 @@ $wddx = <<<WDX
 </wddxpacket>
 WDX;
 
+var_dump($wddx);
 var_dump(wddx_deserialize($wddx));
 ?>
 --EXPECT--
