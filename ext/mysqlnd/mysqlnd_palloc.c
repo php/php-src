@@ -492,7 +492,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 					thd_cache->gc_list.last_added,
 					*thd_cache->gc_list.last_added,
 					cache->free_list.canary1, cache->free_list.canary2);
-		if ((thd_cache->gc_list.last_added - thd_cache->gc_list.ptr_line) > cache->max_items) {
+		if ((thd_cache->gc_list.last_added - thd_cache->gc_list.ptr_line) > (int) cache->max_items) {
 			DBG_ERR("Buffer overflow follows");
 			DBG_ERR_FMT("parent->max_items=%d parent->free_items=%d diff=%d",
 						cache->max_items, cache->free_items,

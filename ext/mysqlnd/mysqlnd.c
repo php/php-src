@@ -1382,7 +1382,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_charset)(MYSQLND * const conn, const char * con
 
 /* {{{ mysqlnd_conn::refresh */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, refresh)(MYSQLND * const conn, unsigned long options TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, refresh)(MYSQLND * const conn, uint8_t options TSRMLS_DC)
 {
 	zend_uchar bits[1];
 	DBG_ENTER("mysqlnd_conn::refresh");
@@ -1397,7 +1397,7 @@ MYSQLND_METHOD(mysqlnd_conn, refresh)(MYSQLND * const conn, unsigned long option
 
 /* {{{ mysqlnd_conn::shutdown */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, shutdown)(MYSQLND * const conn, unsigned long level TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, shutdown)(MYSQLND * const conn, uint8_t level TSRMLS_DC)
 {
 	zend_uchar bits[1];
 	DBG_ENTER("mysqlnd_conn::shutdown");
