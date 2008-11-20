@@ -92,13 +92,13 @@ char *	mysqlnd_get_backtrace(TSRMLS_D);
 #elif MYSQLND_DBG_ENABLED == 0
 
 
-static inline void DBG_INF(char *msg) {}
-static inline void DBG_ERR(char *msg) {}
-static inline void DBG_INF_FMT(char *format, ...) {}
-static inline void DBG_ERR_FMT(char *format, ...) {}
-static inline void DBG_ENTER(char *func_name) {}
+static inline void DBG_INF(const char * const msg) {}
+static inline void DBG_ERR(const char * const msg) {}
+static inline void DBG_INF_FMT(const char * const format, ...) {}
+static inline void DBG_ERR_FMT(const char * const format, ...) {}
+static inline void DBG_ENTER(const char * const func_name) {}
 #define DBG_RETURN(value)	return (value)
-#define DBG_VOID_RETURN		return;
+#define DBG_VOID_RETURN		return
 #endif
 
 
