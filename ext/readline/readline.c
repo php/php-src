@@ -516,7 +516,8 @@ PHP_FUNCTION(readline_callback_handler_install)
 
 	if (_prepped_callback) {
 		rl_callback_handler_remove();
-		zval_ptr_dtor(&_prepped_callback);
+		zval_dtor(_prepped_callback);
+		FREE_ZVAL(_prepped_callback);
 	}
 
 	MAKE_STD_ZVAL(_prepped_callback);
@@ -545,6 +546,7 @@ PHP_FUNCTION(readline_callback_handler_remove)
 {
 	if (_prepped_callback) {
 		rl_callback_handler_remove();
+		zval_dtor(_prepped_callback);
 		FREE_ZVAL(_prepped_callback);
 		_prepped_callback = 0;
 		RETURN_TRUE;
