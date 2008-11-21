@@ -1,5 +1,7 @@
 --TEST--
 readline_add_history(): Basic test
+--SKIPIF--
+<?php if (!extension_loaded("readline")) die("skip"); ?>
 --FILE--
 <?php
 
