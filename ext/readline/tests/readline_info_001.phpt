@@ -31,7 +31,7 @@ array(10) {
   ["terminal_name"]=>
   string(0) ""
   ["library_version"]=>
-  string(3) "5.2"
+  string(%d) "%s"
   ["readline_name"]=>
   string(5) "other"
 }
