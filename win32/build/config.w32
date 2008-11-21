@@ -234,6 +234,7 @@ if (PHP_PHP_BUILD == 'no') {
 		}
 	}
 }
+DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
