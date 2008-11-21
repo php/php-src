@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2008, PHP 5.2.7
+20 Nov 2008, PHP 5.2.7RC4
 - Added logging option for error_log to send directly to SAPI. (Stas)
 
 - Fixed sybase_fetch_*() to continue reading after CS_ROW_FAIL status (Timm)
