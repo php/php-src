@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.80 2008-09-25 14:59:10 pajoye Exp $
+// $Id: confutils.js,v 1.81 2008-11-21 14:03:23 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1476,8 +1476,10 @@ function write_summary()
 	output_as_table(["Sapi Name"], sapi_enabled);
 	STDOUT.WriteBlankLines(2);
 
-	ar[0] = ['Compiler', VC_VERSIONS[VCVERS]];
-	ar[1] = ['Architecture', X64 ? 'x64' : 'x86'];
+	ar[0] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
+	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
+	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
+	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);
