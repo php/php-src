@@ -1,3 +1,13 @@
+2008-11-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_list.h
+      zend_list.h:
+      - MFH: Added ZEND_FETCH_RESOURCE_NO_RETURN
+
+    * zend_list.h:
+      - Added ZEND_FETCH_RESOURCE_NO_RETURN
+
 2008-11-19  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
