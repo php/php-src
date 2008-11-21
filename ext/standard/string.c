@@ -6538,7 +6538,10 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 
 		case 0x22: /* '"' */
 		case 0x27: /* '\'' */
-			if (state == 2 && prev1 != 0x5C) { /* '\\' */
+			if (state == 4){
+				/* Inside <!-- comment --> */
+				break;
+			} else if (state == 2 && prev1 != 0x5C) { /* '\\' */
 				if (last == ch) {
 					last = 0x00;
 				} else if (last != 0x5C) {
@@ -6779,7 +6782,10 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 
 			case '"':
 			case '\'':
-				if (state == 2 && *(p-1) != '\\') {
+				if (state == 4) {
+					/* Inside <!-- comment --> */
+					break;
+				} else if (state == 2 && *(p-1) != '\\') {
 					if (lc == c) {
 						lc = '\0';
 					} else if (lc != '\\') {
