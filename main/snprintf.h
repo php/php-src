@@ -82,6 +82,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...);
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap);
 PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...);
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
+PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(register char format, register double num,
@@ -108,6 +109,11 @@ END_EXTERN_C()
 #undef vsnprintf
 #endif
 #define vsnprintf ap_php_vsnprintf
+
+#ifdef vasprintf
+#undef vasprintf
+#endif
+#define vasprintf ap_php_vasprintf
 
 #ifdef sprintf
 #undef sprintf
