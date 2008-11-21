@@ -1,3 +1,169 @@
+2008-11-20  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/mcrypt/tests/blowfish.phpt
+      ext/mcrypt/tests/blowfish.phpt:
+      - Changed split() to preg_split()
+
+    * (PHP_5_2)
+      NEWS
+      NEWS:
+      - BFN
+
+    * (PHP_5_2)
+      ext/readline/readline.c
+      ext/readline/readline.c:
+      - MFH: Fixed memory leaks in readline_completion_function()
+
+    * ext/readline/readline.c:
+      - Fixed memory leaks in readline_completion_function()
+
+2008-11-20  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      mysqlnd fixes for Windows :
+      - less warnings
+      - PHPAPI for mysqlnd_poll
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd.c
+      ext/mysqlnd/mysqlnd.h
+      ext/mysqlnd/mysqlnd_debug.h
+      ext/mysqlnd/mysqlnd_palloc.c
+      ext/mysqlnd/mysqlnd_ps.c
+      ext/mysqlnd/mysqlnd_structs.h:
+      MFH:
+      Windows fixes for mysqlnd
+      Less warnings + PHPAPI for mysqlnd_poll
+
+2008-11-20  Kalle Sommer Nielsen  <kalle.php@gmail.com>
+
+    * win32/inet.c:
+      Fix typo
+
+2008-11-20  Mark Karpeles  <mark@hell.ne.jp>
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c
+      ext/wddx/tests/002.phpt
+      ext/wddx/tests/003.phpt
+      ext/wddx/tests/004.phpt
+      ext/wddx/tests/005.phpt:
+      - MFH: ext/wddx: classes providing __sleep() are stored without properties
+      (fixed)
+      - ext/wddx: fixed wddx_add_vars() ignoring first var in php 5.3
+
+2008-11-20  Iain Lewis  <ilewis@uk.ibm.com>
+
+    * ext/standard/tests/array/array_product_error.phpt
+      ext/standard/tests/array/array_product_error.phpt
+      ext/standard/tests/array/array_product_variation1.phpt
+      ext/standard/tests/array/array_product_variation1.phpt
+      ext/standard/tests/array/array_product_variation2.phpt
+      ext/standard/tests/array/array_product_variation2.phpt
+      ext/standard/tests/array/array_product_variation3.phpt
+      ext/standard/tests/array/array_product_variation3.phpt
+      ext/standard/tests/array/array_product_variation4.phpt
+      ext/standard/tests/array/array_product_variation4.phpt
+      ext/standard/tests/array/array_product_variation5.phpt
+      ext/standard/tests/array/array_product_variation5.phpt:
+      
+      file array_product_error.phpt was initially added on branch PHP_5_2.
+
+2008-11-20  Mark Karpeles  <mark@hell.ne.jp>
+
+    * ext/wddx/tests/003.phpt
+      ext/wddx/tests/003.phpt:
+      
+      - MFB: ext/wddx: fixed test 003 which depended on arch (32bits vs 64bits)
+
+    * (PHP_5_2)
+      ext/wddx/tests/003.phpt:
+      - ext/wddx: fixed test 003 which depended on arch (32bits vs 64bits)
+
+2008-11-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_list.h:
+      - MFH: Added ZEND_FETCH_RESOURCE_NO_RETURN
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c:
+      - MFH: Fixed memory leak in wddx_add_vars()
+
+    * ext/wddx/wddx.c:
+      - Fixed memory leak in wddx_add_vars()
+
+    * ZendEngine2/zend_list.h:
+      - Added ZEND_FETCH_RESOURCE_NO_RETURN
+
+2008-11-20  Mark Karpeles  <mark@hell.ne.jp>
+
+    * (PHP_5_2)
+      ext/wddx/wddx.c
+      ext/wddx/tests/002.phpt
+      ext/wddx/tests/003.phpt
+      ext/wddx/tests/004.phpt
+      ext/wddx/tests/005.phpt:
+      - MFH: ext/wddx: classes providing __sleep() are stored without properties
+      (fixed)
+
+    * ext/wddx/tests/002.phpt
+      ext/wddx/tests/002.phpt
+      ext/wddx/tests/002.phpt
+      ext/wddx/tests/003.phpt
+      ext/wddx/tests/003.phpt
+      ext/wddx/tests/004.phpt
+      ext/wddx/tests/004.phpt
+      ext/wddx/tests/004.phpt
+      ext/wddx/tests/005.phpt
+      ext/wddx/tests/005.phpt
+      ext/wddx/tests/005.phpt
+      ext/wddx/tests/bug35410_64bit.phpt:
+        1.1.4;
+      - ext/wddx: classes providing __sleep() are stored without properties
+      (fixed)
+
+    * ext/wddx/wddx.c:
+      - ext/wddx: classes providing __sleep() are stored without properties
+      (fixed)
+
+    * (PHP_5_3)
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug37569.phpt
+      ext/wddx/tests/bug37587.phpt:
+      - MFH: #46496, wddx_serialize treats input as ISO-8859-1 (Mark Karpeles)
+
+2008-11-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt:
+      - Fixed tests
+
+    * (PHP_5_3)
+      ext/mcrypt/tests/blowfish.phpt:
+      - Fixed test
+
+2008-11-20  Mark Karpeles  <mark@hell.ne.jp>
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug35410_64bit.phpt
+      ext/wddx/tests/bug37569.phpt
+      ext/wddx/tests/bug37587.phpt:
+      - MFB (PHP_5_2): #46496, wddx_serialize treats input as ISO-8859-1 (Mark
+      Karpeles)
+
+2008-11-20  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sqlite3/sqlite3.c:
+      - declarations must be.. 1st
+
 2008-11-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
