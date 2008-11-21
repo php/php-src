@@ -22,6 +22,7 @@ LD="$(LINK)"
 MC="$(MC)"
 MT="$(MT)"
 RE2C="$(RE2C)"
+PHP_BUILD=$(PHP_BUILD)
 
 MCFILE=$(BUILD_DIR)\wsyslog.rc
 
@@ -118,6 +119,7 @@ $(BUILD_DIR)\php.exe -d open_basedir= -d output_buffering=0 run-tests.php $(TEST
 <<NOKEEP
 
 build-snap: generated_files
+	SET PATH=$(PATH);$(PHP_BUILD)\bin
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
