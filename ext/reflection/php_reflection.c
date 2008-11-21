@@ -3488,8 +3488,8 @@ ZEND_METHOD(reflection_class, getProperty)
 	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS) {
 		if ((property_info->flags & ZEND_ACC_SHADOW) == 0) {
 			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+			return;
 		}
-		return;
 	} else if (intern->obj) {
 		/* Check for dynamic properties */
 		if (zend_u_hash_exists(Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC), name_type, name, name_len+1)) {
