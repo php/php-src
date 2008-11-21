@@ -10,5 +10,5 @@ var_dump(readline_clear_history(1));
 --EXPECTF--
 bool(true)
 
-Warning: readline_clear_history() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Wrong parameter count for readline_clear_history() in %s on line %d
 NULL

@@ -26,5 +26,5 @@ array(2) {
 }
 bool(true)
 
-Warning: readline_add_history() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for readline_add_history() in %s on line %d
 NULL
