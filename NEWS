@@ -51,5 +51,3 @@ PHP                                                                        NEWS
 - Added shm_has_var() function. (Mike)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
-- Fixed bug #46615 (Make SplHeap->key() returns the key count -1 instead
-  of the key count). (David C.)
