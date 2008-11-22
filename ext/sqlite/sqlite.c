@@ -160,15 +160,19 @@ PHP_INI_END()
 		} \
 	}
 
-#define RES_FROM_OBJECT(res, object) \
+#define RES_FROM_OBJECT_RESTORE_ERH(res, object, error_handling) \
 	{ \
 		sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC); \
 		res = obj->u.res; \
 		if (!res) { \
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No result set available"); \
+			if (error_handling) \
+				zend_restore_error_handling(error_handling TSRMLS_CC); \
 			RETURN_NULL(); \
 		} \
 	}
+
+#define RES_FROM_OBJECT(res, object) RES_FROM_OBJECT_RESTORE_ERH(res, object, NULL)
 
 #define PHP_SQLITE_EMPTY_QUERY \
 	if (!sql_len) { \
@@ -2573,7 +2577,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			zend_restore_error_handling(&error_handling TSRMLS_CC);
 			return;
 		}
-		RES_FROM_OBJECT(res, object);
+		RES_FROM_OBJECT_RESTORE_ERH(res, object, &error_handling);
 		if (!ZEND_NUM_ARGS()) {
 			ce = zend_standard_class_def;
 		} else {
