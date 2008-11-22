@@ -253,7 +253,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
-	if (!domain_len) {
+	if (!domain_len || !*domain_str) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the first parameter must not be empty");
 		RETURN_FALSE;
 	}
