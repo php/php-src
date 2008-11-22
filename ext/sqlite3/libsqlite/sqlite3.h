@@ -107,8 +107,8 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.5"
-#define SQLITE_VERSION_NUMBER  3006005
+#define SQLITE_VERSION         "3.6.6"
+#define SQLITE_VERSION_NUMBER  3006006
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers {H10020} <S60100>
@@ -1274,7 +1274,10 @@ struct sqlite3_mem_methods {
 **
 ** <dt>SQLITE_CONFIG_PAGECACHE</dt>
 ** <dd>This option specifies a static memory buffer that SQLite can use for
-** the database page cache.  There are three arguments: A pointer to the
+** the database page cache with the default page cache implemenation.  
+** This configuration should not be used if an application-define page
+** cache implementation is loaded using the SQLITE_CONFIG_PCACHE option.
+** There are three arguments to this option: A pointer to the
 ** memory, the size of each page buffer (sz), and the number of pages (N).
 ** The sz argument must be a power of two between 512 and 32768.  The first
 ** argument should point to an allocation of at least sz*N bytes of memory.
@@ -1319,6 +1322,17 @@ struct sqlite3_mem_methods {
 ** size of each lookaside buffer slot and the second is the number of
 ** slots allocated to each database connection.</dd>
 **
+** <dt>SQLITE_CONFIG_PCACHE</dt>
+** <dd>This option takes a single argument which is a pointer to
+** an [sqlite3_pcache_methods] object.  This object specifies the interface
+** to a custom page cache implementation.  SQLite makes a copy of the
+** object and uses it for page cache memory allocations.</dd>
+**
+** <dt>SQLITE_CONFIG_GETPCACHE</dt>
+** <dd>This option takes a single argument which is a pointer to an
+** [sqlite3_pcache_methods] object.  SQLite copies of the current
+** page cache implementation into that object.</dd>
+**
 ** </dl>
 */
 #define SQLITE_CONFIG_SINGLETHREAD  1  /* nil */
@@ -1334,6 +1348,8 @@ struct sqlite3_mem_methods {
 #define SQLITE_CONFIG_GETMUTEX     11  /* sqlite3_mutex_methods* */
 /* previously SQLITE_CONFIG_CHUNKALLOC 12 which is now unused. */ 
 #define SQLITE_CONFIG_LOOKASIDE    13  /* int int */
+#define SQLITE_CONFIG_PCACHE       14  /* sqlite3_pcache_methods* */
+#define SQLITE_CONFIG_GETPCACHE    15  /* sqlite3_pcache_methods* */
 
 /*
 ** CAPI3REF: Configuration Options {H10170} <S20000>
@@ -6554,6 +6570,149 @@ SQLITE_EXPERIMENTAL int sqlite3_stmt_status(sqlite3_stmt*, int op,int resetFlg);
 */
 #define SQLITE_STMTSTATUS_FULLSCAN_STEP     1
 #define SQLITE_STMTSTATUS_SORT              2
+
+/*
+** CAPI3REF: Custom Page Cache Object
+** EXPERIMENTAL
+**
+** The sqlite3_pcache type is opaque.  It is implemented by
+** the pluggable module.  The SQLite core has no knowledge of
+** its size or internal structure and never deals with the
+** sqlite3_pcache object except by holding and passing pointers
+** to the object.
+**
+** See [sqlite3_pcache_methods] for additional information.
+*/
+typedef struct sqlite3_pcache sqlite3_pcache;
+
+/*
+** CAPI3REF: Application Defined Page Cache.
+** EXPERIMENTAL
+**
+** The [sqlite3_config]([SQLITE_CONFIG_PCACHE], ...) interface can
+** register an alternative page cache implementation by passing in an 
+** instance of the sqlite3_pcache_methods structure. The majority of the 
+** heap memory used by sqlite is used by the page cache to cache data read 
+** from, or ready to be written to, the database file. By implementing a 
+** custom page cache using this API, an application can control more 
+** precisely the amount of memory consumed by sqlite, the way in which 
+** said memory is allocated and released, and the policies used to 
+** determine exactly which parts of a database file are cached and for 
+** how long.
+**
+** The contents of the structure are copied to an internal buffer by sqlite
+** within the call to [sqlite3_config].
+**
+** The xInit() method is called once for each call to [sqlite3_initialize()]
+** (usually only once during the lifetime of the process). It is passed
+** a copy of the sqlite3_pcache_methods.pArg value. It can be used to set
+** up global structures and mutexes required by the custom page cache 
+** implementation. The xShutdown() method is called from within 
+** [sqlite3_shutdown()], if the application invokes this API. It can be used
+** to clean up any outstanding resources before process shutdown, if required.
+**
+** The xCreate() method is used to construct a new cache instance. The
+** first parameter, szPage, is the size in bytes of the pages that must
+** be allocated by the cache. szPage will not be a power of two. The
+** second argument, bPurgeable, is true if the cache being created will
+** be used to cache database pages read from a file stored on disk, or
+** false if it is used for an in-memory database. The cache implementation
+** does not have to do anything special based on the value of bPurgeable,
+** it is purely advisory. 
+**
+** The xCachesize() method may be called at any time by SQLite to set the
+** suggested maximum cache-size (number of pages stored by) the cache
+** instance passed as the first argument. This is the value configured using
+** the SQLite "[PRAGMA cache_size]" command. As with the bPurgeable parameter,
+** the implementation is not required to do anything special with this
+** value, it is advisory only.
+**
+** The xPagecount() method should return the number of pages currently
+** stored in the cache supplied as an argument.
+** 
+** The xFetch() method is used to fetch a page and return a pointer to it. 
+** A 'page', in this context, is a buffer of szPage bytes aligned at an
+** 8-byte boundary. The page to be fetched is determined by the key. The
+** mimimum key value is 1. After it has been retrieved using xFetch, the page 
+** is considered to be pinned.
+**
+** If the requested page is already in the page cache, then a pointer to
+** the cached buffer should be returned with its contents intact. If the
+** page is not already in the cache, then the expected behaviour of the
+** cache is determined by the value of the createFlag parameter passed
+** to xFetch, according to the following table:
+**
+** <table border=1 width=85% align=center>
+**   <tr><th>createFlag<th>Expected Behaviour
+**   <tr><td>0<td>NULL should be returned. No new cache entry is created.
+**   <tr><td>1<td>If createFlag is set to 1, this indicates that 
+**                SQLite is holding pinned pages that can be unpinned
+**                by writing their contents to the database file (a
+**                relatively expensive operation). In this situation the
+**                cache implementation has two choices: it can return NULL,
+**                in which case SQLite will attempt to unpin one or more 
+**                pages before re-requesting the same page, or it can
+**                allocate a new page and return a pointer to it. If a new
+**                page is allocated, then it must be completely zeroed before 
+**                it is returned.
+**   <tr><td>2<td>If createFlag is set to 2, then SQLite is not holding any
+**                pinned pages associated with the specific cache passed
+**                as the first argument to xFetch() that can be unpinned. The
+**                cache implementation should attempt to allocate a new
+**                cache entry and return a pointer to it. Again, the new
+**                page should be zeroed before it is returned. If the xFetch()
+**                method returns NULL when createFlag==2, SQLite assumes that
+**                a memory allocation failed and returns SQLITE_NOMEM to the
+**                user.
+** </table>
+**
+** xUnpin() is called by SQLite with a pointer to a currently pinned page
+** as its second argument. If the third parameter, discard, is non-zero,
+** then the page should be evicted from the cache. In this case SQLite 
+** assumes that the next time the page is retrieved from the cache using
+** the xFetch() method, it will be zeroed. If the discard parameter is
+** zero, then the page is considered to be unpinned. The cache implementation
+** may choose to reclaim (free or recycle) unpinned pages at any time.
+** SQLite assumes that next time the page is retrieved from the cache
+** it will either be zeroed, or contain the same data that it did when it
+** was unpinned.
+**
+** The cache is not required to perform any reference counting. A single 
+** call to xUnpin() unpins the page regardless of the number of prior calls 
+** to xFetch().
+**
+** The xRekey() method is used to change the key value associated with the
+** page passed as the second argument from oldKey to newKey. If the cache
+** previously contains an entry associated with newKey, it should be
+** discarded. Any prior cache entry associated with newKey is guaranteed not
+** to be pinned.
+**
+** When SQLite calls the xTruncate() method, the cache must discard all
+** existing cache entries with page numbers (keys) greater than or equal
+** to the value of the iLimit parameter passed to xTruncate(). If any
+** of these pages are pinned, they are implicitly unpinned, meaning that
+** they can be safely discarded.
+**
+** The xDestroy() method is used to delete a cache allocated by xCreate().
+** All resources associated with the specified cache should be freed. After
+** calling the xDestroy() method, SQLite considers the [sqlite3_pcache*]
+** handle invalid, and will not use it with any other sqlite3_pcache_methods
+** functions.
+*/
+typedef struct sqlite3_pcache_methods sqlite3_pcache_methods;
+struct sqlite3_pcache_methods {
+  void *pArg;
+  int (*xInit)(void*);
+  void (*xShutdown)(void*);
+  sqlite3_pcache *(*xCreate)(int szPage, int bPurgeable);
+  void (*xCachesize)(sqlite3_pcache*, int nCachesize);
+  int (*xPagecount)(sqlite3_pcache*);
+  void *(*xFetch)(sqlite3_pcache*, unsigned key, int createFlag);
+  void (*xUnpin)(sqlite3_pcache*, void*, int discard);
+  void (*xRekey)(sqlite3_pcache*, void*, unsigned oldKey, unsigned newKey);
+  void (*xTruncate)(sqlite3_pcache*, unsigned iLimit);
+  void (*xDestroy)(sqlite3_pcache*);
+};
 
 /*
 ** Undo the hack that converts floating point types to integer for
