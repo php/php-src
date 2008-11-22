@@ -1,3 +1,236 @@
+2008-11-21  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/reflection/php_reflection.c:
+      - Fixed bug #46604 (ReflectionClass::getProperty() fails) [only in this
+      branch]
+
+    * ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt:
+      - Missing SKIPIF :(
+
+    * (PHP_5_2)
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt:
+      - Fixed tests
+
+    * (PHP_5_2)
+      ext/readline/readline.c
+      ext/readline/readline.c:
+      - MFH: Fixed memory leak in readline_callback_handler_remove()
+
+    * ext/readline/readline.c:
+      - Fixed memory leak in readline_callback_handler_remove()
+
+2008-11-21  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      main/snprintf.c
+      main/snprintf.h:
+      MFH Add vasprintf() so the buffer can be automatically calculated, you need
+      to efree this when done though!
+
+    * main/snprintf.c
+      main/snprintf.h:
+      Add vasprintf() so the buffer can be automatically calculated, you need to
+      efree this when done though!
+
+2008-11-21  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt:
+      file readline_callback_handler_install_001.phpt was added on branch PHP_5_2
+      on 2008-11-21 21:44:32 +0000
+
+    * ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt:
+      - Fix test
+
+    * (PHP_5_2)
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_callback_handler_remove_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_read_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt:
+      - New tests
+
+    * ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_add_history_001.phpt
+      ext/readline/tests/readline_callback_handler_install_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_clear_history_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_info_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_list_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt
+      ext/readline/tests/readline_write_history_001.phpt:
+        1.1.4;
+      - New tests
+
+    * (PHP_5_3)
+      NEWS:
+      - BFN #46578
+
+    * (PHP_5_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/bug46578.phpt:
+      - MFH: Fixed bug #46578 (strip_tags() does not honor end-of-comment when it
+      encounters a single quote)
+
+    * ext/standard/tests/strings/bug46578.phpt
+      ext/standard/tests/strings/bug46578.phpt:
+      
+      - Fixed bug #46578 (strip_tags() does not honor end-of-comment when it
+      encounters a single quote)
+
+    * ext/standard/string.c:
+      - Fixed bug #46578 (strip_tags() does not honor end-of-comment when it
+      encounters a single quote)
+
+2008-11-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/snmp/winsnmp.c
+      win32/php5dll.dsp
+      win32/php5dllts.dsp:
+      - Nuke unused file
+
+2008-11-21  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      win32/build/Makefile
+      win32/build/config.w32:
+      - MFH:
+       - expose PHP_BUILD in the Makefile
+       - ICU 3.8/4.0 are dynamically linked, add $PHP_BUILD\bin to the PATH so
+      php.exe can find them (nmake test, nmake snaps)
+
+    * (PHP_5_3)
+      win32/build/confutils.js:
+      - MFH: add build type (debug/release) and TS info to the summary
+
+    * win32/build/Makefile
+      win32/build/config.w32:
+      - expose PHP_BUILD in the Makefile
+      - ICU 3.8/4.0 are dynamically linked, add $PHP_BUILD\bin to the PATH so
+      php.exe can find them (nmake test, nmake snaps)
+
+    * win32/build/confutils.js:
+      - add build type (debug/release) and TS info to the summary
+
+2008-11-21  Iain Lewis  <ilewis@uk.ibm.com>
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_product_error.phpt
+      ext/standard/tests/array/array_product_variation1.phpt
+      ext/standard/tests/array/array_product_variation2.phpt
+      ext/standard/tests/array/array_product_variation3.phpt
+      ext/standard/tests/array/array_product_variation4.phpt
+      ext/standard/tests/array/array_product_variation5.phpt:
+      Adding some tests for array_product
+
+2008-11-21  Sanjay Mantoor  <smantoor@in.ibm.com>
+
+    * (PHP_5_3)
+      ext/date/tests/gmmktime_basic.phpt
+      ext/date/tests/gmmktime_error.phpt
+      ext/date/tests/gmmktime_variation1.phpt
+      ext/date/tests/gmmktime_variation2.phpt
+      ext/date/tests/gmmktime_variation3.phpt
+      ext/date/tests/gmmktime_variation4.phpt
+      ext/date/tests/gmmktime_variation5.phpt
+      ext/date/tests/gmmktime_variation6.phpt
+      ext/date/tests/gmmktime_variation7.phpt
+      ext/date/tests/gmmktime_variation8.phpt
+      ext/date/tests/gmmktime_variation9.phpt:
+      New testcases for gmmktime function
+
+    * ext/date/tests/gmmktime_basic.phpt
+      ext/date/tests/gmmktime_basic.phpt
+      ext/date/tests/gmmktime_error.phpt
+      ext/date/tests/gmmktime_error.phpt
+      ext/date/tests/gmmktime_variation1.phpt
+      ext/date/tests/gmmktime_variation1.phpt
+      ext/date/tests/gmmktime_variation2.phpt
+      ext/date/tests/gmmktime_variation2.phpt
+      ext/date/tests/gmmktime_variation3.phpt
+      ext/date/tests/gmmktime_variation3.phpt
+      ext/date/tests/gmmktime_variation4.phpt
+      ext/date/tests/gmmktime_variation4.phpt
+      ext/date/tests/gmmktime_variation5.phpt
+      ext/date/tests/gmmktime_variation5.phpt
+      ext/date/tests/gmmktime_variation6.phpt
+      ext/date/tests/gmmktime_variation6.phpt
+      ext/date/tests/gmmktime_variation7.phpt
+      ext/date/tests/gmmktime_variation7.phpt
+      ext/date/tests/gmmktime_variation8.phpt
+      ext/date/tests/gmmktime_variation8.phpt
+      ext/date/tests/gmmktime_variation9.phpt
+      ext/date/tests/gmmktime_variation9.phpt:
+      
+      New testcases for gmmktime function
+
+2008-11-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.7RC4
+
 2008-11-20  Felipe Pena  <felipensp@gmail.com>
 
     * ext/mcrypt/tests/blowfish.phpt
