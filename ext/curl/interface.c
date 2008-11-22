@@ -1161,7 +1161,8 @@ PHP_FUNCTION(curl_version)
 		array_init(protocol_list);
 
 		while (*p != NULL) {
-			add_next_index_ascii_string(protocol_list, *p++, 1);
+			add_next_index_ascii_string(protocol_list, *p, 1);
+			*p++;
 		}
 		CAAZ("protocols", protocol_list);
 	}
