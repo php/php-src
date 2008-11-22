@@ -86,6 +86,8 @@ PHP                                                                        NEWS
 - Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
 - Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
   chx1975 at gmail dot com)
+- Fixed bug #46615 (Make SplHeap->key() returns the key count -1 instead
+  of the key count). (David C.)
 
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
