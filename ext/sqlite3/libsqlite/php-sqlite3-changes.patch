@@ -1,0 +1,37 @@
+--- sqlite3.c.orig	2008-11-22 15:31:05.000000000 +0000
++++ sqlite3.c	2008-11-22 15:32:21.000000000 +0000
+@@ -1,3 +1,7 @@
++#if defined(_MSC_VER) && _MSC_VER < 1300
++#pragma optimize("", off)
++#endif
++
+ /******************************************************************************
+ ** This file is an amalgamation of many separate C source files from SQLite
+ ** version 3.6.6.  By combining all the individual C code files into this 
+@@ -397,16 +401,12 @@
+ ** If none of the above are defined, then set SQLITE_SYSTEM_MALLOC as
+ ** the default.
+ */
+-#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+\
+-    defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+\
+-    defined(SQLITE_POW2_MEMORY_SIZE)>1
++#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+defined(SQLITE_POW2_MEMORY_SIZE)>1
+ # error "At most one of the following compile-time configuration options\
+  is allows: SQLITE_SYSTEM_MALLOC, SQLITE_MEMDEBUG, SQLITE_MEMORY_SIZE,\
+  SQLITE_MMAP_HEAP_SIZE, SQLITE_POW2_MEMORY_SIZE"
+ #endif
+-#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+\
+-    defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+\
+-    defined(SQLITE_POW2_MEMORY_SIZE)==0
++#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+defined(SQLITE_POW2_MEMORY_SIZE)==0
+ # define SQLITE_SYSTEM_MALLOC 1
+ #endif
+ 
+@@ -98713,3 +98713,7 @@
+ #endif /* !defined(SQLITE_CORE) || defined(SQLITE_ENABLE_FTS3) */
+ 
+ /************** End of fts3_icu.c ********************************************/
++
++#if defined(_MSC_VER) && _MSC_VER < 1300
++#pragma optimize("", on)
++#endif
