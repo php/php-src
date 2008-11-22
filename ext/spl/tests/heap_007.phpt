@@ -12,6 +12,7 @@ $h->insert(4);
 $h->rewind();
 echo "count(\$h) = ".count($h)."\n";
 echo "\$h->count() = ".$h->count()."\n";
+
 while ($h->valid()) {
     $k = $h->key();
     $v = $h->current();
@@ -24,8 +25,8 @@ while ($h->valid()) {
 --EXPECTF--
 count($h) = 4
 $h->count() = 4
-4=>5
-3=>4
-2=>1
-1=>0
+3=>5
+2=>4
+1=>1
+0=>0
 ===DONE===

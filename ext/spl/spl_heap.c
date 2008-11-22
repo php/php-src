@@ -970,8 +970,8 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{
 SPL_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	RETURN_LONG(intern->heap->count);
+	
+	RETURN_LONG(intern->heap->count - 1);
 }
 /* }}} */
 
