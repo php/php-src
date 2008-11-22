@@ -173,6 +173,14 @@ typedef unsigned int socklen_t;
 # endif
 #endif
 
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
+# else
+#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
+# endif
+#endif
+
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
