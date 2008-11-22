@@ -86,8 +86,10 @@ PHP                                                                        NEWS
 - Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
 - Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
   chx1975 at gmail dot com)
-- Fixed bug #46615 (Make SplHeap->key() returns the key count -1 instead
-  of the key count). (David C.)
+- Fixed bug #44153 (pdo->errorCode() returns NULL when there are no errors). 
+  (David C.)
+- Fixed bug #44154 (pdo->errorInfo() always have three elements in the
+  returned array). (David C.)
 
 
 02 Sep 2008, PHP 5.3.0 Alpha 2
@@ -3594,7 +3596,3 @@ PHP                                                                        NEWS
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 - Fixed bug #28512 (Allocate enough space to store MSSQL data). (Frank)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
-- Fixed bug #44153 (pdo->errorCode() returns NULL when there are no errors). 
-  (David C.)
-- Fixed bug #44154 (pdo->errorInfo() always have three elements in the
-  returned array). (David C.)
