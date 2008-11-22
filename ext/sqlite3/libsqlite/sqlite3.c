@@ -401,16 +401,12 @@ SQLITE_PRIVATE   void sqlite3Coverage(int);
 ** If none of the above are defined, then set SQLITE_SYSTEM_MALLOC as
 ** the default.
 */
-#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+\
-    defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+\
-    defined(SQLITE_POW2_MEMORY_SIZE)>1
+#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+defined(SQLITE_POW2_MEMORY_SIZE)>1
 # error "At most one of the following compile-time configuration options\
  is allows: SQLITE_SYSTEM_MALLOC, SQLITE_MEMDEBUG, SQLITE_MEMORY_SIZE,\
  SQLITE_MMAP_HEAP_SIZE, SQLITE_POW2_MEMORY_SIZE"
 #endif
-#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+\
-    defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+\
-    defined(SQLITE_POW2_MEMORY_SIZE)==0
+#if defined(SQLITE_SYSTEM_MALLOC)+defined(SQLITE_MEMDEBUG)+defined(SQLITE_MEMORY_SIZE)+defined(SQLITE_MMAP_HEAP_SIZE)+defined(SQLITE_POW2_MEMORY_SIZE)==0
 # define SQLITE_SYSTEM_MALLOC 1
 #endif
 
