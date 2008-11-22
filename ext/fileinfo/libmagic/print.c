@@ -29,6 +29,8 @@
  * print.c - debugging printout routines
  */
 
+#include "php.h"
+
 #include "file.h"
 #include <stdio.h>
 #include <errno.h>
@@ -51,18 +53,16 @@ protected void
 file_magwarn(struct magic_set *ms, const char *f, ...)
 {
 	va_list va;
+	char *expanded_format;
+	TSRMLS_FETCH();
 
-	/* cuz we use stdout for most, stderr here */
-	(void) fflush(stdout); 
-
-	if (ms->file)
-		(void) fprintf(stderr, "%s, %lu: ", ms->file,
-		    (unsigned long)ms->line);
-	(void) fprintf(stderr, "Warning: ");
 	va_start(va, f);
-	(void) vfprintf(stderr, f, va);
+	vasprintf(&expanded_format, f, va);
 	va_end(va);
-	(void) fputc('\n', stderr);
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Warning: %s", expanded_format);
+
+	efree(expanded_format);
 }
 
 protected const char *
