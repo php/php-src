@@ -565,6 +565,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 					CG(active_op_array)->vars[value->u.var].name, 
 					CG(active_op_array)->vars[value->u.var].name_len, 1);
 				SET_UNUSED(opline->op2);
+				opline->op2.u.EA.type = ZEND_FETCH_LOCAL;
 				value = &opline->result;
 			}
 		}
