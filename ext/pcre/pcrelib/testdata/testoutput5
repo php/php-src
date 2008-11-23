@@ -1608,4 +1608,37 @@ No match
 /[[:a\x{100}b:]]/8
 Failed: unknown POSIX class name at offset 3
 
+/a[^]b/<JS>8
+    a\x{1234}b
+ 0: a\x{1234}b
+    a\nb 
+ 0: a\x{0a}b
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS>8
+    aXb
+ 0: aXb
+    a\nX\nX\x{1234}b 
+ 0: a\x{0a}X\x{0a}X\x{1234}b
+    ** Failers
+No match
+    ab  
+No match
+
+/(\x{de})\1/
+    \x{de}\x{de}
+ 0: \xde\xde
+ 1: \xde
+    \x{123} 
+** Character \x{123} is greater than 255 and UTF-8 mode is not enabled.
+** Truncation will probably give the wrong result.
+No match
+
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+ 0: X
+
 / End of testinput5 /

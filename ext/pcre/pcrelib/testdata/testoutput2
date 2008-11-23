@@ -1126,7 +1126,7 @@ Need char = 'X'
 /.*X/IDZs
 ------------------------------------------------------------------
         Bra
-        Any*
+        AllAny*
         X
         Ket
         End
@@ -1160,7 +1160,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         CBra 1
-        Any*
+        AllAny*
         X
         Alt
         ^
@@ -1179,7 +1179,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         CBra 1
-        Any*
+        AllAny*
         X
         Alt
         ^
@@ -1199,7 +1199,7 @@ No need char
         Bra
         Bra
      04 Opt
-        Any*
+        AllAny*
         X
         Alt
      04 Opt
@@ -1212,8 +1212,8 @@ No need char
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Partial matching not supported
-No options
-First char at start or follows newline
+Options: anchored
+No first char
 No need char
 
 /\Biss\B/I+
@@ -7851,7 +7851,7 @@ No match
 No match
 
 /^abc./mgx<any>
-    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
  0: abc1
  0: abc2
  0: abc3
@@ -7861,7 +7861,7 @@ No match
  0: abc7
 
 /abc.$/mgx<any>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7 abc9
  0: abc1
  0: abc2
  0: abc3
@@ -8074,13 +8074,13 @@ No match
 Failed: reference to non-existent subpattern at offset 7
 
 /^(a)\g/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /^(a)\g{0}/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 7
+Failed: a numbered reference must not be zero at offset 8
 
 /^(a)\g{3/
-Failed: \g is not followed by a braced name or an optionally braced non-zero number at offset 8
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 8
 
 /^(a)\g{4a}/
 Failed: reference to non-existent subpattern at offset 9
@@ -8163,7 +8163,7 @@ No match
  0+ 
 
 /abc.$/mgx<anycrlf>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc9
  0: abc1
  0: abc4
  0: abc5
@@ -8217,13 +8217,13 @@ No match
 No match
     
 /x(?-0)y/
-Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /x(?-1)y/
 Failed: reference to non-existent subpattern at offset 5
 
 /x(?+0)y/ 
-Failed: (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number at offset 5
+Failed: a numbered reference must not be zero at offset 5
 
 /x(?+1)y/
 Failed: reference to non-existent subpattern at offset 5
@@ -9384,5 +9384,258 @@ Failed: unknown POSIX class name at offset 6
 
 /[[:a\dz:]]/
 Failed: unknown POSIX class name at offset 3
+
+/^(?<name>a|b\g<name>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g<1>c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/^(a|b\g'-1'c)/
+    aaaa
+ 0: a
+ 1: a
+    bacxxx
+ 0: bac
+ 1: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+
+/(^(a|b\g<-1>c))/
+    aaaa
+ 0: a
+ 1: a
+ 2: a
+    bacxxx
+ 0: bac
+ 1: bac
+ 2: bac
+    bbaccxxx 
+ 0: bbacc
+ 1: bbacc
+ 2: bbacc
+    bbbacccxx
+ 0: bbbaccc
+ 1: bbbaccc
+ 2: bbbaccc
+
+/(^(a|b\g<-1'c))/
+Failed: \g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number at offset 15
+
+/(^(a|b\g{-1}))/
+    bacxxx
+No match
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+ 0: aa
+ 1: a
+    ** Failers 
+No match
+    XAAX 
+No match
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+ 0: aa
+ 1: a
+    XAAX 
+ 0: AA
+ 1: A
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+ 0: abc
+ 1: a
+   accccbbb 
+ 0: accccbbb
+ 1: a
+
+/^(?+1)(?<a>x|y){0}z/
+    xzxx
+ 0: xz
+ 1: <unset>
+    yzyy 
+ 0: yz
+ 1: <unset>
+    ** Failers
+No match
+    xxz  
+No match
+
+/(\3)(\1)(a)/
+    cat
+No match
+
+/(\3)(\1)(a)/<JS>
+    cat
+ 0: a
+ 1: 
+ 2: 
+ 3: a
+    
+/TA]/
+    The ACTA] comes 
+ 0: TA]
+
+/TA]/<JS>
+Failed: ] is an invalid data character in JavaScript compatibility mode at offset 2
+
+/(?2)[]a()b](abc)/
+Failed: reference to non-existent subpattern at offset 3
+
+/(?2)[^]a()b](abc)/
+Failed: reference to non-existent subpattern at offset 3
+
+/(?1)[]a()b](abc)/
+    abcbabc
+ 0: abcbabc
+ 1: abc
+    ** Failers 
+No match
+    abcXabc
+No match
+
+/(?1)[^]a()b](abc)/
+    abcXabc
+ 0: abcXabc
+ 1: abc
+    ** Failers 
+No match
+    abcbabc
+No match
+
+/(?2)[]a()b](abc)(xyz)/
+    xyzbabcxyz
+ 0: xyzbabcxyz
+ 1: abc
+ 2: xyz
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+Failed: reference to non-existent subpattern at offset 4
+
+/(?&N)[]a(?<N>)](abc)/
+Failed: reference to non-existent subpattern at offset 4
+
+/a[]b/
+Failed: missing terminating ] for character class at offset 4
+
+/a[^]b/
+Failed: missing terminating ] for character class at offset 5
+
+/a[]b/<JS>
+    ** Failers
+No match
+    ab
+No match
+
+/a[]+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[]*+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[^]b/<JS>
+    aXb
+ 0: aXb
+    a\nb 
+ 0: a\x0ab
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS> 
+    aXb
+ 0: aXb
+    a\nX\nXb 
+ 0: a\x0aX\x0aXb
+    ** Failers
+No match
+    ab  
+No match
+
+/a(?!)+b/
+Failed: nothing to repeat at offset 5
+
+/a(*FAIL)+b/
+Failed: nothing to repeat at offset 8
+
+/(abc|pqr|123){0}[xyz]/SI
+Capturing subpattern count = 1
+No options
+No first char
+No need char
+Starting byte set: x y z 
 
 / End of testinput2 /

@@ -6805,7 +6805,7 @@ No match
 No match
 
 /^abc./mgx<any>
-    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
  0: abc1
  0: abc2
  0: abc3
@@ -6815,7 +6815,7 @@ No match
  0: abc7
 
 /abc.$/mgx<any>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc9
  0: abc1
  0: abc2
  0: abc3
@@ -7210,6 +7210,48 @@ No match
     a\x85\85b\<bsr_anycrlf>
 No match
     a\x0b\0bb\<bsr_anycrlf>
+No match
+    
+/a(?!)|\wbc/
+    abc 
+ 0: abc
+
+/a[]b/<JS>
+    ** Failers
+No match
+    ab
+No match
+
+/a[]+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[]*+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[^]b/<JS>
+    aXb
+ 0: aXb
+    a\nb 
+ 0: a\x0ab
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS> 
+    aXb
+ 0: aXb
+    a\nX\nXb 
+ 0: a\x0aX\x0aXb
+    ** Failers
+No match
+    ab  
 No match
 
 / End of testinput7 /

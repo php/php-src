@@ -461,4 +461,23 @@ can't tell the difference.) --/
 
 /[[:a\x{100}b:]]/8
 
+/a[^]b/<JS>8
+    a\x{1234}b
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS>8
+    aXb
+    a\nX\nX\x{1234}b 
+    ** Failers
+    ab  
+
+/(\x{de})\1/
+    \x{de}\x{de}
+    \x{123} 
+
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+
 / End of testinput5 /

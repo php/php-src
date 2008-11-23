@@ -58,6 +58,7 @@ function recurse($path)
 
 
 		if (!is_file($newfile)) {
+			continue;
 			die("$newfile is not available any more\n");
 		}
 

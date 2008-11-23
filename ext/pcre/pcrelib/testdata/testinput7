@@ -4151,10 +4151,10 @@
     a\rb\<any>   
 
 /^abc./mgx<any>
-    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
 
 /abc.$/mgx<any>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc9
 
 /^a\Rb/<bsr_unicode>
     a\nb
@@ -4364,5 +4364,32 @@
     a\r\r\r\r\rb 
     a\x85\85b\<bsr_anycrlf>
     a\x0b\0bb\<bsr_anycrlf>
+    
+/a(?!)|\wbc/
+    abc 
+
+/a[]b/<JS>
+    ** Failers
+    ab
+
+/a[]+b/<JS>
+    ** Failers
+    ab 
+
+/a[]*+b/<JS>
+    ** Failers
+    ab 
+
+/a[^]b/<JS>
+    aXb
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS> 
+    aXb
+    a\nX\nXb 
+    ** Failers
+    ab  
 
 / End of testinput7 /

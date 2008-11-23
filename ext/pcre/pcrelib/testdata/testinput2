@@ -1988,10 +1988,10 @@ a random value. /Ix
     a\rb\<anycrlf>
 
 /^abc./mgx<any>
-    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
 
 /abc.$/mgx<any>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7 abc9
 
 /a/<cr><any>
 
@@ -2147,7 +2147,7 @@ a random value. /Ix
     abc\r\n\r\n
 
 /abc.$/mgx<anycrlf>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc9
 
 /^X/m
     XABC
@@ -2588,5 +2588,142 @@ a random value. /Ix
 /[abc[:x\]pqr:]]/
 
 /[[:a\dz:]]/
+
+/^(?<name>a|b\g<name>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(?<name>a|b\g'name'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g<1>c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/^(a|b\g'-1'c)/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1>c))/
+    aaaa
+    bacxxx
+    bbaccxxx 
+    bbbacccxx
+
+/(^(a|b\g<-1'c))/
+
+/(^(a|b\g{-1}))/
+    bacxxx
+
+/(?-i:\g<name>)(?i:(?<name>a))/
+    XaaX
+    XAAX 
+
+/(?i:\g<name>)(?-i:(?<name>a))/
+    XaaX
+    ** Failers 
+    XAAX 
+
+/(?-i:\g<+1>)(?i:(a))/
+    XaaX
+    XAAX 
+
+/(?=(?<regex>(?#simplesyntax)\$(?<name>[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\[(?<index>[a-zA-Z0-9_\x{7f}-\x{ff}]+|\$\g<name>)\]|->\g<name>(\(.*?\))?)?|(?#simple syntax withbraces)\$\{(?:\g<name>(?<indices>\[(?:\g<index>|'(?:\\.|[^'\\])*'|"(?:\g<regex>|\\.|[^"\\])*")\])?|\g<complex>|\$\{\g<complex>\})\}|(?#complexsyntax)\{(?<complex>\$(?<segment>\g<name>(\g<indices>*|\(.*?\))?)(?:->\g<segment>)*|\$\g<complex>|\$\{\g<complex>\})\}))\{/
+
+/(?<n>a|b|c)\g<n>*/
+   abc
+   accccbbb 
+
+/^(?+1)(?<a>x|y){0}z/
+    xzxx
+    yzyy 
+    ** Failers
+    xxz  
+
+/(\3)(\1)(a)/
+    cat
+
+/(\3)(\1)(a)/<JS>
+    cat
+    
+/TA]/
+    The ACTA] comes 
+
+/TA]/<JS>
+    The ACTA] comes 
+
+/(?2)[]a()b](abc)/
+    abcbabc
+
+/(?2)[^]a()b](abc)/
+    abcbabc
+
+/(?1)[]a()b](abc)/
+    abcbabc
+    ** Failers 
+    abcXabc
+
+/(?1)[^]a()b](abc)/
+    abcXabc
+    ** Failers 
+    abcbabc
+
+/(?2)[]a()b](abc)(xyz)/
+    xyzbabcxyz
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+   abc<abc
+
+/(?&N)[]a(?<N>)](abc)/
+   abc<abc
+
+/a[]b/
+
+/a[^]b/
+
+/a[]b/<JS>
+    ** Failers
+    ab
+
+/a[]+b/<JS>
+    ** Failers
+    ab 
+
+/a[]*+b/<JS>
+    ** Failers
+    ab 
+
+/a[^]b/<JS>
+    aXb
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS> 
+    aXb
+    a\nX\nXb 
+    ** Failers
+    ab  
+
+/a(?!)+b/
+
+/a(*FAIL)+b/
+
+/(abc|pqr|123){0}[xyz]/SI
 
 / End of testinput2 /

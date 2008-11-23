@@ -1,14 +1,11 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("pcre-regex", "Perl Compatible Regular Expressions", "yes");
-
-if (PHP_PCRE_REGEX == "yes") {
-	EXTENSION("pcre", "php_pcre.c",	PHP_PCRE_REGEX_SHARED,
+EXTENSION("pcre", "php_pcre.c", false /* never shared */,
 		"-DNO_RECURSE -Iext/pcre/pcrelib");
-	ADD_SOURCES("ext/pcre/pcrelib", "pcre_chartables.c pcre_ucp_searchfuncs.c pcre_compile.c pcre_config.c pcre_exec.c pcre_fullinfo.c pcre_get.c pcre_globals.c pcre_info.c pcre_maketables.c pcre_newline.c pcre_ord2utf8.c pcre_refcount.c pcre_study.c pcre_tables.c pcre_try_flipped.c pcre_valid_utf8.c pcre_version.c pcre_xclass.c", "pcre");
-	ADD_DEF_FILE("ext\\pcre\\php_pcre.def");
+ADD_SOURCES("ext/pcre/pcrelib", "pcre_chartables.c pcre_ucd.c pcre_compile.c pcre_config.c pcre_exec.c pcre_fullinfo.c pcre_get.c pcre_globals.c pcre_info.c pcre_maketables.c pcre_newline.c pcre_ord2utf8.c pcre_refcount.c pcre_study.c pcre_tables.c pcre_try_flipped.c pcre_valid_utf8.c pcre_version.c pcre_xclass.c", "pcre");
+ADD_DEF_FILE("ext\\pcre\\php_pcre.def");
 
-	AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Using bundled PCRE library');
-	AC_DEFINE('HAVE_PCRE', 1, 'Have PCRE library');
-}
+AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Using bundled PCRE library');
+AC_DEFINE('HAVE_PCRE', 1, 'Have PCRE library');
+PHP_PCRE="yes";

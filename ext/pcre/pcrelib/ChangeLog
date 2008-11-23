@@ -1,6 +1,192 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.8 05-Sep-08
+---------------------
+
+1.  Replaced UCP searching code with optimized version as implemented for Ad
+    Muncher (http://www.admuncher.com/) by Peter Kankowski. This uses a two-
+    stage table and inline lookup instead of a function, giving speed ups of 2
+    to 5 times on some simple patterns that I tested. Permission was given to
+    distribute the MultiStage2.py script that generates the tables (it's not in
+    the tarball, but is in the Subversion repository).
+
+2.  Updated the Unicode datatables to Unicode 5.1.0. This adds yet more
+    scripts.
+
+3.  Change 12 for 7.7 introduced a bug in pcre_study() when a pattern contained
+    a group with a zero qualifier. The result of the study could be incorrect,
+    or the function might crash, depending on the pattern.
+
+4.  Caseless matching was not working for non-ASCII characters in back
+    references. For example, /(\x{de})\1/8i was not matching \x{de}\x{fe}.
+    It now works when Unicode Property Support is available.
+
+5.  In pcretest, an escape such as \x{de} in the data was always generating
+    a UTF-8 string, even in non-UTF-8 mode. Now it generates a single byte in
+    non-UTF-8 mode. If the value is greater than 255, it gives a warning about
+    truncation.
+
+6.  Minor bugfix in pcrecpp.cc (change "" == ... to NULL == ...).
+
+7.  Added two (int) casts to pcregrep when printing the difference of two
+    pointers, in case they are 64-bit values.
+
+8.  Added comments about Mac OS X stack usage to the pcrestack man page and to
+    test 2 if it fails.
+
+9.  Added PCRE_CALL_CONVENTION just before the names of all exported functions,
+    and a #define of that name to empty if it is not externally set. This is to
+    allow users of MSVC to set it if necessary.
+
+10. The PCRE_EXP_DEFN macro which precedes exported functions was missing from
+    the convenience functions in the pcre_get.c source file.
+
+11. An option change at the start of a pattern that had top-level alternatives
+    could cause overwriting and/or a crash. This command provoked a crash in
+    some environments:
+
+      printf "/(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8\n" | pcretest
+
+    This potential security problem was recorded as CVE-2008-2371.
+
+12. For a pattern where the match had to start at the beginning or immediately
+    after a newline (e.g /.*anything/ without the DOTALL flag), pcre_exec() and
+    pcre_dfa_exec() could read past the end of the passed subject if there was
+    no match. To help with detecting such bugs (e.g. with valgrind), I modified
+    pcretest so that it places the subject at the end of its malloc-ed buffer.
+
+13. The change to pcretest in 12 above threw up a couple more cases when pcre_
+    exec() might read past the end of the data buffer in UTF-8 mode.
+
+14. A similar bug to 7.3/2 existed when the PCRE_FIRSTLINE option was set and
+    the data contained the byte 0x85 as part of a UTF-8 character within its
+    first line. This applied both to normal and DFA matching.
+
+15. Lazy qualifiers were not working in some cases in UTF-8 mode. For example,
+    /^[^d]*?$/8 failed to match "abc".
+
+16. Added a missing copyright notice to pcrecpp_internal.h.
+
+17. Make it more clear in the documentation that values returned from
+    pcre_exec() in ovector are byte offsets, not character counts.
+
+18. Tidied a few places to stop certain compilers from issuing warnings.
+
+19. Updated the Virtual Pascal + BCC files to compile the latest v7.7, as
+    supplied by Stefan Weber. I made a further small update for 7.8 because
+    there is a change of source arrangements: the pcre_searchfuncs.c module is
+    replaced by pcre_ucd.c.
+
+
+Version 7.7 07-May-08
+---------------------
+
+1.  Applied Craig's patch to sort out a long long problem: "If we can't convert
+    a string to a long long, pretend we don't even have a long long." This is
+    done by checking for the strtoq, strtoll, and _strtoi64 functions.
+
+2.  Applied Craig's patch to pcrecpp.cc to restore ABI compatibility with
+    pre-7.6 versions, which defined a global no_arg variable instead of putting
+    it in the RE class. (See also #8 below.)
+
+3.  Remove a line of dead code, identified by coverity and reported by Nuno
+    Lopes.
+
+4.  Fixed two related pcregrep bugs involving -r with --include or --exclude:
+
+    (1) The include/exclude patterns were being applied to the whole pathnames
+        of files, instead of just to the final components.
+
+    (2) If there was more than one level of directory, the subdirectories were
+        skipped unless they satisfied the include/exclude conditions. This is
+        inconsistent with GNU grep (and could even be seen as contrary to the
+        pcregrep specification - which I improved to make it absolutely clear).
+        The action now is always to scan all levels of directory, and just
+        apply the include/exclude patterns to regular files.
+
+5.  Added the --include_dir and --exclude_dir patterns to pcregrep, and used
+    --exclude_dir in the tests to avoid scanning .svn directories.
+
+6.  Applied Craig's patch to the QuoteMeta function so that it escapes the
+    NUL character as backslash + 0 rather than backslash + NUL, because PCRE
+    doesn't support NULs in patterns.
+
+7.  Added some missing "const"s to declarations of static tables in
+    pcre_compile.c and pcre_dfa_exec.c.
+
+8.  Applied Craig's patch to pcrecpp.cc to fix a problem in OS X that was
+    caused by fix #2  above. (Subsequently also a second patch to fix the
+    first patch. And a third patch - this was a messy problem.)
+
+9.  Applied Craig's patch to remove the use of push_back().
+
+10. Applied Alan Lehotsky's patch to add REG_STARTEND support to the POSIX
+    matching function regexec().
+
+11. Added support for the Oniguruma syntax \g<name>, \g<n>, \g'name', \g'n',
+    which, however, unlike Perl's \g{...}, are subroutine calls, not back
+    references. PCRE supports relative numbers with this syntax (I don't think
+    Oniguruma does).
+
+12. Previously, a group with a zero repeat such as (...){0} was completely
+    omitted from the compiled regex. However, this means that if the group
+    was called as a subroutine from elsewhere in the pattern, things went wrong
+    (an internal error was given). Such groups are now left in the compiled
+    pattern, with a new opcode that causes them to be skipped at execution
+    time.
+
+13. Added the PCRE_JAVASCRIPT_COMPAT option. This makes the following changes
+    to the way PCRE behaves:
+
+    (a) A lone ] character is dis-allowed (Perl treats it as data).
+
+    (b) A back reference to an unmatched subpattern matches an empty string
+        (Perl fails the current match path).
+
+    (c) A data ] in a character class must be notated as \] because if the
+        first data character in a class is ], it defines an empty class. (In
+        Perl it is not possible to have an empty class.) The empty class []
+        never matches; it forces failure and is equivalent to (*FAIL) or (?!).
+        The negative empty class [^] matches any one character, independently
+        of the DOTALL setting.
+
+14. A pattern such as /(?2)[]a()b](abc)/ which had a forward reference to a
+    non-existent subpattern following a character class starting with ']' and
+    containing () gave an internal compiling error instead of "reference to
+    non-existent subpattern". Fortunately, when the pattern did exist, the
+    compiled code was correct. (When scanning forwards to check for the
+    existencd of the subpattern, it was treating the data ']' as terminating
+    the class, so got the count wrong. When actually compiling, the reference
+    was subsequently set up correctly.)
+
+15. The "always fail" assertion (?!) is optimzed to (*FAIL) by pcre_compile;
+    it was being rejected as not supported by pcre_dfa_exec(), even though
+    other assertions are supported. I have made pcre_dfa_exec() support
+    (*FAIL).
+
+16. The implementation of 13c above involved the invention of a new opcode,
+    OP_ALLANY, which is like OP_ANY but doesn't check the /s flag. Since /s
+    cannot be changed at match time, I realized I could make a small
+    improvement to matching performance by compiling OP_ALLANY instead of
+    OP_ANY for "." when DOTALL was set, and then removing the runtime tests
+    on the OP_ANY path.
+
+17. Compiling pcretest on Windows with readline support failed without the
+    following two fixes: (1) Make the unistd.h include conditional on
+    HAVE_UNISTD_H; (2) #define isatty and fileno as _isatty and _fileno.
+
+18. Changed CMakeLists.txt and cmake/FindReadline.cmake to arrange for the
+    ncurses library to be included for pcretest when ReadLine support is
+    requested, but also to allow for it to be overridden. This patch came from
+    Daniel Bergström.
+
+19. There was a typo in the file ucpinternal.h where f0_rangeflag was defined
+    as 0x00f00000 instead of 0x00800000. Luckily, this would not have caused
+    any errors with the current Unicode tables. Thanks to Peter Kankowski for
+    spotting this.
+
+
 Version 7.6 28-Jan-08
 ---------------------
 

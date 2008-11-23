@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE_MAJOR          7
-#define PCRE_MINOR          6
+#define PCRE_MINOR          8
 #define PCRE_PRERELEASE     
-#define PCRE_DATE           2008-01-28
+#define PCRE_DATE           2008-09-05
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
@@ -124,6 +124,7 @@ extern "C" {
 #define PCRE_NEWLINE_ANYCRLF    0x00500000
 #define PCRE_BSR_ANYCRLF        0x00800000
 #define PCRE_BSR_UNICODE        0x01000000
+#define PCRE_JAVASCRIPT_COMPAT  0x02000000
 
 /* Exec-time and get/set-time error codes */
 

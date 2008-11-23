@@ -1,9 +1,12 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
-The latest release of PCRE is always available from
+The latest release of PCRE is always available in three alternative formats
+from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.bz2
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.zip
 
 There is a mailing list for discussion about the development of PCRE at
 
@@ -275,6 +278,15 @@ library. You can read more about them in the pcrebuild man page.
   the readline() function. This provides line-editing and history facilities.
   Note that libreadline is GPL-licenced, so if you distribute a binary of
   pcretest linked in this way, there may be licensing issues.
+
+  Setting this option causes the -lreadline option to be added to the pcretest
+  build. In many operating environments with a sytem-installed readline
+  library this is sufficient. However, in some environments (e.g. if an
+  unmodified distribution version of readline is in use), it may be necessary
+  to specify something like LIBS="-lncurses" as well. This is because, to quote
+  the readline INSTALL, "Readline uses the termcap functions, but does not link
+  with the termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library."
 
 The "configure" script builds the following files for the basic C library:
 
@@ -631,7 +643,7 @@ The distribution should contain the following files:
   pcre_study.c            )
   pcre_tables.c           )
   pcre_try_flipped.c      )
-  pcre_ucp_searchfuncs.c  )
+  pcre_ucd.c              )
   pcre_valid_utf8.c       )
   pcre_version.c          )
   pcre_xclass.c           )
@@ -640,9 +652,7 @@ The distribution should contain the following files:
   pcre.h.in               template for pcre.h when built by "configure"
   pcreposix.h             header for the external POSIX wrapper API
   pcre_internal.h         header for internal use
-  ucp.h                   ) headers concerned with
-  ucpinternal.h           )   Unicode property handling
-  ucptable.h              ) (this one is the data table)
+  ucp.h                   header for Unicode property handling
 
   config.h.in             template for config.h, which is built by "configure"
 
@@ -716,6 +726,9 @@ The distribution should contain the following files:
 
 (D) Auxiliary files for cmake support
 
+  cmake/COPYING-CMAKE-SCRIPTS
+  cmake/FindPackageHandleStandardArgs.cmake
+  cmake/FindReadline.cmake
   CMakeLists.txt
   config-cmake.h.in
 
@@ -740,4 +753,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 25 January 2008
+Last updated: 05 September 2008
