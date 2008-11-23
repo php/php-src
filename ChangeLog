@@ -1,3 +1,135 @@
+2008-11-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/mysqlnd/php_mysqlnd.c:
+      - declaration first (fix build win)
+
+2008-11-22  David Coallier  <david.coallier@gmail.com>
+
+    * (PHP_5_3)
+      NEWS:
+      - Removed the "unreleased-fix-feature" entry as per Marcus's request
+      - Made sure to include my PDO fix in the proper 5.3 release
+
+2008-11-22  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/php-sqlite3-changes.patch:
+      MFH Patch file for sqlite3 amalgamation so things don't get missed.
+
+2008-11-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/gettext/gettext.c:
+      - Fixed segfault [only in this branch]
+
+2008-11-22  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/php-sqlite3-changes.patch
+      ext/sqlite3/libsqlite/php-sqlite3-changes.patch:
+      
+      Patch file for sqlite3 amalgamation so things don't get missed.
+
+    * (PHP_5_3)
+      main/php.h
+      win32/build/config.w32.h.in:
+      MFH Better fix for va_copy since some architectures like to do a deep copy.
+
+    * main/php.h
+      win32/build/config.w32.h.in:
+      Better fix for va_copy since some architectures like to do a deep copy.
+
+2008-11-22  David Coallier  <david.coallier@gmail.com>
+
+    * NEWS:
+      - Removed my duplicate news entry
+
+2008-11-22  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/curl/interface.c:
+      - Fixed segfault [only in this branch, because add_next_* are macro]
+
+2008-11-22  David Coallier  <david.coallier@gmail.com>
+
+    * NEWS:
+      - Added the fixed bug #46615
+
+    * (PHP_5_3)
+      NEWS:
+      - Added news item for bug #46615
+
+    * (PHP_5_3)
+      ext/spl/spl_heap.c
+      ext/spl/tests/heap_007.phpt
+      ext/spl/tests/pqueue_003.phpt:
+      - MFH
+      - Bug #46615
+      - Return the count - 1 when invoking SplHeap->key()
+      - Adjusted the tests
+
+    * ext/spl/spl_heap.c:
+      - Return the key - 1
+      - Bug #46615
+
+    * ext/spl/tests/heap_007.phpt
+      ext/spl/tests/pqueue_003.phpt:
+      - Added tests for bug #46615 (Adjustments)
+
+2008-11-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/sqlite3/libsqlite/sqlite3.c:
+      - MFB: Fix windows build
+
+    * (PHP_5_3)
+      ext/sqlite3/libsqlite/sqlite3.c:
+      - Fix windows build
+         please keep the fixes while merging the new versions.
+         if the updates do not contain the fixes, create a little todo list so
+      it is
+         not forgotten (wiki)
+
+    * win32/build/config.w32.h.in:
+      - MFB: make va_copy safer using () around arguments
+
+    * (PHP_5_3)
+      win32/build/config.w32.h.in:
+      - make va_copy safer using () around arguments
+
+2008-11-22  Scott MacVicar  <scott@macvicar.net>
+
+    * win32/build/config.w32.h.in:
+      Fix build on Windows
+
+    * (PHP_5_3)
+      ext/sqlite/sqlite.c:
+      MFH Error handler isn't properly restored when using fetchObject() with
+      SQLite
+
+    * ext/sqlite/sqlite.c:
+      Error handler isn't properly restored when using fetchObject() with SQLite
+
+2008-11-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+2008-11-22  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Update libsqlite to 3.6.6
+
+    * (PHP_5_3)
+      ext/fileinfo/libmagic/print.c
+      ext/fileinfo/tests/finfo_open_error.phpt:
+      MFH Warnings from libmagic should be notices rather than sent to stderr,
+      this fixes a test on Windows
+
+    * ext/fileinfo/libmagic/print.c
+      ext/fileinfo/tests/finfo_open_error.phpt:
+      Warnings from libmagic should be notices rather than sent to stderr, this
+      fixes a test on Windows
+
 2008-11-21  Felipe Pena  <felipensp@gmail.com>
 
     * ext/reflection/php_reflection.c:
