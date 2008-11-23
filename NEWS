@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
 - Fixed memory leak inside readline_callback_handler_remove() function. (Felipe)
+- Fixed bug #46643 (Upgraded PCRE to 7.8)
 
 20 Nov 2008, PHP 5.2.7RC4
 - Added logging option for error_log to send directly to SAPI. (Stas)
