@@ -18,8 +18,8 @@ var_dump(ibase_num_fields());
 --EXPECTF--
 int(2)
 
-Warning: ibase_num_fields(): supplied argument is not a valid Firebird/InterBase result resource in %s on line %d
-bool(false)
+Warning: ibase_num_fields() expects parameter 1 to be resource, integer given in %s on line %d
+NULL
 
-Warning: Wrong parameter count for ibase_num_fields() in %s on line %d
+Warning: ibase_num_fields() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
