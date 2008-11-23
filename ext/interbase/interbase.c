@@ -43,6 +43,8 @@
 #define COMMIT			1
 #define RETAIN			2
 
+#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
+
 ZEND_DECLARE_MODULE_GLOBALS(ibase)
 static PHP_GINIT_FUNCTION(ibase);
 
@@ -1061,6 +1063,7 @@ PHP_FUNCTION(ibase_close)
 	
 	if (ZEND_NUM_ARGS() == 0) {
 		link_id = IBG(default_link);
+		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
 	} else {
 		link_id = Z_RESVAL_P(link_arg);
@@ -1089,6 +1092,7 @@ PHP_FUNCTION(ibase_drop_db)
 	
 	if (ZEND_NUM_ARGS() == 0) {
 		link_id = IBG(default_link);
+		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
 	} else {
 		link_id = Z_RESVAL_P(link_arg);
