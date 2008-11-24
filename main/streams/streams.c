@@ -641,7 +641,7 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 	/* use the configured timeout when checking eof */
 	if (!stream->eof && PHP_STREAM_OPTION_RETURN_ERR ==
 		   	php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS,
-		   	-1, NULL)) {
+		   	0, NULL)) {
 		stream->eof = 1;
 	}
 

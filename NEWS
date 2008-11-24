@@ -269,7 +269,6 @@ PHP                                                                        NEWS
   overlapping needles). (Moriyoshi)
 - Fixed Bug #43958 (class name added into the error message). (Dmitry)
 - Fixed bug #43941 (json_encode silently cuts non-UTF8 strings). (Stas)
-- Fixed bug #43782 (feof() does not detect timeout on socket). (David Soria Parra)
 - Fixed bug #43668 (Added odbc.default_cursortype to control the ODBC
   cursormodel). (Patrick)
 - Fixed bug #43666 (Fixed code to use ODBC 3.52 datatypes for 64bit systems). 
