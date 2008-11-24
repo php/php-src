@@ -1569,8 +1569,11 @@ PHP_FUNCTION(strtok)
 		end = i;
 
 		if (end - start) {
+			RETVAL_UNICODEL(u_p + start, end - start, 1);
+			/* skip matched token */
+			U16_FWD_1(u_p, end, rem_len);
 			BG(strtok_last) = u_p + end;
-			RETURN_UNICODEL(u_p + start, end - start, 1);
+			return;
 		} else {
 			BG(strtok_last) = NULL;
 			RETURN_FALSE;
