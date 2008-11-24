@@ -729,11 +729,11 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_di
 		return 1; /* does not exist in dest, copy from source */
 	}
 
-	if (new_per_dir_entry->type==PHP_INI_SYSTEM
-		&& orig_per_dir_entry->type!=PHP_INI_SYSTEM) {
-		return 1;
-	} else {
+	if (orig_per_dir_entry->type==PHP_INI_SYSTEM
+		&& new_per_dir_entry->type!=PHP_INI_SYSTEM) {
 		return 0;
+	} else {
+		return 1;
 	}
 }
 /* }}} */
@@ -770,9 +770,9 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 
 	/* need a copy of addv to merge */
 	new = php_create_dir(p, "php_merge_dir");
-	zend_hash_copy(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
+	zend_hash_copy(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
 
-	zend_hash_merge_ex(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	zend_hash_merge_ex(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
 	return new;
 }
 /* }}} */
