@@ -3657,6 +3657,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	memset(BG(strtok_table), 0, 256);
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
+	BG(strtok_last) = NULL;
 	BG(locale_string) = NULL;
 	BG(array_walk_fci) = empty_fcall_info;
 	BG(array_walk_fci_cache) = empty_fcall_info_cache;
@@ -5986,7 +5987,7 @@ PHP_FUNCTION(parse_ini_file)
 	zval **pp_filename;
 	char *filename;
 	int filename_len;
-	zend_bool process_sections;
+	zend_bool process_sections = 0;
 	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
