@@ -4766,7 +4766,7 @@ PHP_FUNCTION(call_user_method_array)
 	HashTable *params_ar;
 	int num_elems, element = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/za/", &callback, &object, &params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/zA/", &callback, &object, &params) == FAILURE) {
 		return;
 	}
 
