@@ -1,3 +1,86 @@
+2008-11-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug38469.phpt
+      ZendEngine2/tests/bug38469.phpt:
+      MFH: Fixed bug #46649 (Setting array element with that same array produces
+      inconsistent results)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug38469.phpt:
+      Fixed bug #46649 (Setting array element with that same array produces
+      inconsistent results)
+
+2008-11-23  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/interbase.c
+      ext/interbase/tests/bug45373.phpt
+      ext/interbase/tests/ibase_num_fields_001.phpt:
+      - New parameter parsing API
+
+2008-11-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      BFN: Fixed bug #46643 (Upgraded PCRElib to 7.8)
+
+    * (PHP_5_2)
+      ext/pcre/config.w32
+      ext/pcre/config0.m4
+      ext/pcre/upgrade-pcre.php
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/HACKING
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/config.h
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_ucd.c
+      ext/pcre/pcrelib/pcre_ucp_searchfuncs.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucpinternal.h
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput10
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+      
+      MFB: Fixed bug #46643 (Upgraded PCRElib to 7.8)
+
 2008-11-22  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/mysqlnd/php_mysqlnd.c:
