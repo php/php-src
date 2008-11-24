@@ -1,3 +1,18 @@
+2008-11-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.c
+      tests/bug38469.phpt
+      tests/bug38469.phpt:
+      MFH: Fixed bug #46649 (Setting array element with that same array produces
+      inconsistent results)
+
+    * zend_compile.c
+      tests/bug38469.phpt:
+      Fixed bug #46649 (Setting array element with that same array produces
+      inconsistent results)
+
 2008-11-20  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
