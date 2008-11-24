@@ -1,5 +1,5 @@
 --TEST--
-Test gmmktime() function : usage variation - Passing positive and negetive float values to arguments.
+Test gmmktime() function : usage variation - Passing positive and negative float values to arguments.
 --FILE--
 <?php
 /* Prototype  : int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
@@ -20,8 +20,8 @@ $year = 2008;
 
 $inputs = array(
 
-	  'float 12.3456789000e10' => 12.3456789000e10,
-      'float -12.3456789000e10' => -12.3456789000e10,
+	  'float 123456' => 123456,
+      'float -123456' => -123456,
       'float -10.5' => -10.5,
 );
 
@@ -39,19 +39,19 @@ foreach($inputs as $key =>$value) {
 --EXPECTREGEX--
 \*\*\* Testing gmmktime\(\) : usage variation \*\*\*
 
---float 12.3456789000e10--
-(bool|int)\((false|444445658554088)\)
-(bool|int)\((false|7408625522408)\)
-(bool|int)\((false|124674971880)\)
-(bool|int)\((false|324659998242749288)\)
-(bool|int)\((false|3906586568967811688)\)
+--float 123456--
+int\(1662595688\)
+int\(1225589768\)
+int\(1218306336\)
+(bool|int)\((false|325855037288)\)
+(bool|int)\((false|3844412784488)\)
 
---float -12.3456789000e10--
-(bool|int)\((false|-444443222245912)\)
-(bool|int)\((false|-7406189157592)\)
-int\((-929300768|-122238606120)\)
-(bool|int)\((false|-324659995848460312)\)
-(bool|int)\((false|-3906586693265644312)\)
+--float -123456--
+int\(773712488\)
+int\(1210775048\)
+int\(1218059424\)
+(bool|int)\((false|-323460834712)\)
+(bool|int)\((false|-3968710530712)\)
 
 --float -10.5--
 int\(1218118088\)
