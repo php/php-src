@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed memory leak inside readline_callback_handler_remove() function. (Felipe)
 - Fixed bug #46649 (Setting array element with that same array produces 
   inconsistent results). (Arnaud)
+- Fixed bug #46626 (mb_convert_case does not handle apostrophe correctly).
+  (Ilia)
 
 20 Nov 2008, PHP 5.2.7RC4
 - Added logging option for error_log to send directly to SAPI. (Stas)
