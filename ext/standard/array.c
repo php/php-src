@@ -771,16 +771,17 @@ PHP_FUNCTION(uksort)
    Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
-	zval *array, **entry;
+	HashTable *array;
+	zval **entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	zend_hash_internal_pointer_end(Z_ARRVAL_P(array));
+	zend_hash_internal_pointer_end(array);
 
 	if (return_value_used) {
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -793,16 +794,17 @@ PHP_FUNCTION(end)
    Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
-	zval *array, **entry;
+	HashTable *array;
+	zval **entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	zend_hash_move_backwards(Z_ARRVAL_P(array));
+	zend_hash_move_backwards(array);
 
 	if (return_value_used) {
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -815,16 +817,17 @@ PHP_FUNCTION(prev)
    Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
-	zval *array, **entry;
+	HashTable *array;
+	zval **entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	zend_hash_move_forward(Z_ARRVAL_P(array));
+	zend_hash_move_forward(array);
 
 	if (return_value_used) {
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -837,16 +840,17 @@ PHP_FUNCTION(next)
    Set array argument's internal pointer to the first element and return it */
 PHP_FUNCTION(reset)
 {
-	zval *array, **entry;
+	HashTable *array;
+	zval **entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(array));
+	zend_hash_internal_pointer_reset(array);
 
 	if (return_value_used) {
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -859,13 +863,14 @@ PHP_FUNCTION(reset)
    Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
-	zval *array, **entry;
+	HashTable *array;
+	zval **entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+	if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_ZVAL(*entry, 1, 0);
@@ -876,16 +881,16 @@ PHP_FUNCTION(current)
    Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
-	zval *array;
+	HashTable *array;
 	zstr string_key;
 	uint string_length;
 	ulong num_key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_length, &num_key, 0, NULL)) {
+	switch (zend_hash_get_current_key_ex(array, &string_key, &string_length, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
 			RETVAL_STRINGL(string_key.s, string_length - 1, 1);
 			break;
@@ -1096,21 +1101,21 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
-	zval *array,
-		 *userdata = NULL;
+	HashTable *array;
+	zval *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hf|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 
-	php_array_walk(Z_ARRVAL_P(array), userdata ? &userdata : NULL, 0 TSRMLS_CC);
+	php_array_walk(array, userdata ? &userdata : NULL, 0 TSRMLS_CC);
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -1121,21 +1126,21 @@ PHP_FUNCTION(array_walk)
    Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
 {
-	zval *array,
-		 *userdata = NULL;
+	HashTable *array;
+	zval *userdata = NULL;
 	zend_fcall_info orig_array_walk_fci;
 	zend_fcall_info_cache orig_array_walk_fci_cache;
 
 	orig_array_walk_fci = BG(array_walk_fci);
 	orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Hf|z/", &array, &BG(array_walk_fci), &BG(array_walk_fci_cache), &userdata) == FAILURE) {
 		BG(array_walk_fci) = orig_array_walk_fci;
 		BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		return;
 	}
 
-	php_array_walk(Z_ARRVAL_P(array), userdata ? &userdata : NULL, 1 TSRMLS_CC);
+	php_array_walk(array, userdata ? &userdata : NULL, 1 TSRMLS_CC);
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -4513,27 +4518,27 @@ ukey:
    Checks if the given key or index exists in the array */
 PHP_FUNCTION(array_key_exists)
 {
-	zval *key,					/* key to check for */
-		 *array;				/* array to check in */
+	zval *key;					/* key to check for */
+	HashTable *array;				/* array to check in */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &key, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zH", &key, &array) == FAILURE) {
 		return;
 	}
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
 		case IS_UNICODE:
-			if (zend_u_symtable_exists(Z_ARRVAL_P(array), Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1)) {
+			if (zend_u_symtable_exists(array, Z_TYPE_P(key), Z_UNIVAL_P(key), Z_UNILEN_P(key) + 1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
 		case IS_LONG:
-			if (zend_hash_index_exists(Z_ARRVAL_P(array), Z_LVAL_P(key))) {
+			if (zend_hash_index_exists(array, Z_LVAL_P(key))) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
 		case IS_NULL:
-			if (zend_u_hash_exists(Z_ARRVAL_P(array), (UG(unicode) ? IS_UNICODE : IS_STRING), EMPTY_ZSTR, 1)) {
+			if (zend_u_hash_exists(array, (UG(unicode) ? IS_UNICODE : IS_STRING), EMPTY_ZSTR, 1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
