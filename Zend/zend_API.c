@@ -319,7 +319,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 {
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
-	int return_null = 0;
+	int return_null = 0, obj_array = 0;
 	int alternate_form = 0;
 	int return_orig_type = 0;
 	zend_uchar orig_type;
@@ -686,7 +686,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				}
 			}
 			break;
-
+		case 'A':
+				obj_array = 1;
 		case 'a':
 			{
 				zval **p = va_arg(*va, zval **);
@@ -694,14 +695,15 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					*p = NULL;
 					break;
 				}
-				if (Z_TYPE_PP(arg) == IS_ARRAY) {
+				if (Z_TYPE_PP(arg) == IS_ARRAY || (Z_TYPE_PP(arg) == IS_OBJECT && obj_array != 0)) {
 					*p = *arg;
 				} else {
 					return "array";
 				}
 			}
 			break;
-
+		case 'H':
+				obj_array = 1;
 		case 'h':
 			{
 				HashTable **p = va_arg(*va, HashTable **);
@@ -711,6 +713,11 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 				}
 				if (Z_TYPE_PP(arg) == IS_ARRAY) {
 					*p = Z_ARRVAL_PP(arg);
+				} else if(obj_array && Z_TYPE_PP(arg) == IS_OBJECT) {
+					*p = HASH_OF(*arg);
+					if(*p == NULL) {
+						return "array";
+					}
 				} else {
 					return "array";
 				}
@@ -915,6 +922,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'C': case 'h':
 			case 'U': case 'S':
 			case 'f': case 'x':
+			case 'A': case 'H':
 				max_num_args++;
 				break;
 
