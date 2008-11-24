@@ -3986,7 +3986,7 @@ PHPAPI UChar *php_u_strtr(UChar *str, int len, UChar *str_from, int str_from_len
 	}
 	if (can_optimize) {
 		for (i = trlen; i < str_to_len; i++) {
-			if (str_from[i] > 255) {
+			if (str_to[i] > 255) {
 				can_optimize = 0;
 				break;
 			}
