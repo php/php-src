@@ -117,6 +117,23 @@ static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const ch
 	return NULL;
 }
 
+static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_dir_entry *new_per_dir_entry, zend_hash_key *hash_key, void *pData)
+{
+	php_dir_entry *orig_per_dir_entry;
+
+	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &orig_per_dir_entry)==FAILURE) {
+		return 1; /* does not exist in dest, copy from source */
+	}
+
+	if (new_per_dir_entry->status >= orig_per_dir_entry->status) {
+		/* use new entry */
+		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", hash_key->arKey, new_per_dir_entry->status, orig_per_dir_entry->status));
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
@@ -128,9 +145,12 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	ulong num_index;
 
 	n = create_php_config(p, "merge_php_config");
-	zend_hash_copy(&n->config, &e->config, NULL, NULL, sizeof(php_dir_entry));
-
+	/* copy old config */
+	zend_hash_copy(&n->config, &d->config, NULL, NULL, sizeof(php_dir_entry));
+	/* merge new config */
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
+	zend_hash_merge_ex(&n->config, &e->config, NULL, sizeof(php_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+#if STAS_0
 	for (zend_hash_internal_pointer_reset(&d->config);
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, 
 				&num_index, 0, NULL) == HASH_KEY_IS_STRING;
@@ -140,10 +160,10 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 		if (zend_hash_find(&n->config, str, str_len, (void **) &pe) == SUCCESS) {
 			if (pe->status >= data->status) continue;
 		}
-		zend_hash_update(&n->config, str, str_len, data, sizeof(*data), NULL);
 		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1));
+		zend_hash_update(&n->config, str, str_len, data, sizeof(*data), NULL);
 	}
-
+#endif
 	return n;
 }
 
