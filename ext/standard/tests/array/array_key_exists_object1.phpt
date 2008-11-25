@@ -52,15 +52,11 @@ echo "Done";
 
 -- Do not assign a value to $class1->var3 --
 $key = var1:
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(true)
 $key = var3:
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(true)
 $class1:
-object(myClass)#%d (3) {
+object(myClass)#1 (3) {
   ["var1"]=>
   string(1) "a"
   ["var2"]=>
@@ -71,11 +67,9 @@ object(myClass)#%d (3) {
 
 -- Assign a value to $class2->var3 --
 $key = var3:
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(true)
 $class2:
-object(myClass)#%d (3) {
+object(myClass)#2 (3) {
   ["var1"]=>
   string(1) "x"
   ["var2"]=>

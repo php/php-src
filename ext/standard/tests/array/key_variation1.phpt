@@ -201,9 +201,7 @@ Warning: key() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-
-Warning: key() expects parameter 1 to be array, object given in %s on line %d
-NULL
+string(4) "var1"
 
 -- Iteration 23 --
 
