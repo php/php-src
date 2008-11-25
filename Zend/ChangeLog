@@ -1,3 +1,12 @@
+2008-11-24  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c:
+      add object-compatible array parameters
+
+    * (PHP_5_3)
+      zend_API.c:
+      add object-compatible array modes
+
 2008-11-23  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_2)
