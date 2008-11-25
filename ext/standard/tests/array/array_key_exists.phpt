@@ -280,23 +280,13 @@ Warning: array_key_exists(): The first argument should be either a string or an 
 bool(false)
 
 *** Testing operation on objects ***
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
 bool(true)
 
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
+bool(false)
 Done
