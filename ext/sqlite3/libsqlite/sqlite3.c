@@ -4,7 +4,7 @@
 
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
-** version 3.6.6.  By combining all the individual C code files into this 
+** version 3.6.6.1.  By combining all the individual C code files into this 
 ** single large file, the entire code can be compiled as a one translation
 ** unit.  This allows many compilers to do optimizations that would not be
 ** possible if the files were compiled separately.  Performance improvements
@@ -21,7 +21,7 @@
 ** is also in a separate file.  This file contains only code for the core
 ** SQLite library.
 **
-** This amalgamation was generated on 2008-11-19 21:08:14 UTC.
+** This amalgamation was generated on 2008-11-22 14:31:32 UTC.
 */
 #define SQLITE_CORE 1
 #define SQLITE_AMALGAMATION 1
@@ -564,7 +564,7 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.6"
+#define SQLITE_VERSION         "3.6.6.1"
 #define SQLITE_VERSION_NUMBER  3006006
 
 /*
@@ -17179,7 +17179,10 @@ SQLITE_PRIVATE void sqlite3VXPrintf(
         n += i + 1 + needQuote*2;
         if( n>etBUFSIZE ){
           bufpt = zExtra = sqlite3Malloc( n );
-          if( bufpt==0 ) return;
+          if( bufpt==0 ){
+            pAccum->mallocFailed = 1;
+            return;
+          }
         }else{
           bufpt = buf;
         }
@@ -26863,6 +26866,11 @@ void winDlClose(sqlite3_vfs *pVfs, void *pHandle){
 */
 static int winRandomness(sqlite3_vfs *pVfs, int nBuf, char *zBuf){
   int n = 0;
+  UNUSED_PARAMETER(pVfs);
+#if defined(SQLITE_TEST)
+  n = nBuf;
+  memset(zBuf, 0, nBuf);
+#else
   if( sizeof(SYSTEMTIME)<=nBuf-n ){
     SYSTEMTIME x;
     GetSystemTime(&x);
@@ -26885,6 +26893,7 @@ static int winRandomness(sqlite3_vfs *pVfs, int nBuf, char *zBuf){
     memcpy(&zBuf[n], &i, sizeof(i));
     n += sizeof(i);
   }
+#endif
   return n;
 }
 
@@ -38198,9 +38207,12 @@ static int allocateBtreePage(
 end_allocate_page:
   releasePage(pTrunk);
   releasePage(pPrevTrunk);
-  if( rc==SQLITE_OK && sqlite3PagerPageRefcount((*ppPage)->pDbPage)>1 ){
-    releasePage(*ppPage);
-    return SQLITE_CORRUPT_BKPT;
+  if( rc==SQLITE_OK ){
+    if( sqlite3PagerPageRefcount((*ppPage)->pDbPage)>1 ){
+      releasePage(*ppPage);
+      return SQLITE_CORRUPT_BKPT;
+    }
+    (*ppPage)->isInit = 0;
   }
   return rc;
 }
