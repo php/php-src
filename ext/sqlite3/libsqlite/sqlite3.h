@@ -107,7 +107,7 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.6"
+#define SQLITE_VERSION         "3.6.6.1"
 #define SQLITE_VERSION_NUMBER  3006006
 
 /*
