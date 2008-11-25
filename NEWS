@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
 
+- Added support for namespaces with brackets. (Greg)
 - Added stream_cast() and stream_set_options() to user-space stream wrappers,
   allowing stream_select(), stream_set_blocking(), stream_set_timeout() and 
   stream_set_write_buffer() to work with user-space stream wrappers. (Arnaud)
