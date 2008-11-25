@@ -87,7 +87,7 @@ bool(false)
 Warning: rewind(): supplied argument is not a valid stream resource in %s on line %d
 bool(false)
 -- Testing rewind() with closed/unset file handle --
-Warning: rewind(): 5 is not a valid stream resource in %s on line %d
+Warning: rewind(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: rewind(): supplied argument is not a valid stream resource in %s on line %d

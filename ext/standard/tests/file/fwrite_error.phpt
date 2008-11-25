@@ -112,7 +112,7 @@ Warning: fwrite(): supplied argument is not a valid stream resource in %s on lin
 bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
-Warning: fwrite(): 6 is not a valid stream resource in %s on line %d
+Warning: fwrite(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fwrite(): supplied argument is not a valid stream resource in %s on line %d

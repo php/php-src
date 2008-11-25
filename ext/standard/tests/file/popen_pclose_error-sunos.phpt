@@ -40,8 +40,8 @@ NULL
 
 Warning: Wrong parameter count for popen() in %s on line %d
 NULL
-resource(%d) of type (stream)
 sh: abc.txt: not found
+resource(%d) of type (stream)
 
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL

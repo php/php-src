@@ -16,6 +16,7 @@ echo "*** Testing Invalid file types ***\n";
 $filenames = array(
   /* Invalid filenames */
   -2.34555,
+  " ",
   "",
   TRUE,
   FALSE,
@@ -43,6 +44,7 @@ unlink($file_path."/is_file_variation3.tmp");
 ?>
 --EXPECTF--
 *** Testing Invalid file types ***
+bool(false)
 bool(false)
 bool(false)
 bool(false)

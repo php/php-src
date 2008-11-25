@@ -18,6 +18,7 @@ $dirnames = array(
   TRUE,
   FALSE,
   NULL,
+  " ",
   $dir_handle,
 
   /* scalars */
@@ -35,6 +36,7 @@ echo "\n*** Done ***";
 ?>
 --EXPECTF--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
+bool(false)
 bool(false)
 bool(false)
 bool(false)

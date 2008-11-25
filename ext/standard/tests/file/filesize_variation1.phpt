@@ -32,14 +32,14 @@ echo "Done\n";
 --EXPECTF--
 *** Testing filesize(): usage variations ***
 *** Checking filesize() with different size of files ***
-int(1024)
-int(1025024)
-int(2049024)
-int(3073024)
-int(4097024)
-int(5121024)
-int(6145024)
-int(7169024)
-int(8193024)
-int(9217024)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
+int(%d)
 Done

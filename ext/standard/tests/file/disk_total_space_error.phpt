@@ -46,6 +46,6 @@ NULL
 
 Warning: disk_total_space(): No such file or directory in %s on line %d
 bool(false)
-float(%d)
+float(%f)
 
 --- Done ---

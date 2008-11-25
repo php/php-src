@@ -1,8 +1,16 @@
 --TEST--
 touch() tests
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. only for Non Windows.');
+}
+?>
 --FILE--
 <?php
 
+// This doesn't work for windows, time, atime usage results in very different
+// output to linux. This could be a php.net bug on windows or a windows querk.
 $filename = dirname(__FILE__)."/touch.dat";
 
 var_dump(touch());
@@ -44,6 +52,6 @@ int(100)
 bool(true)
 int(100)
 
-Warning: touch(): Unable to create file /no/such/file/or/directory because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file /no/such/file/or/directory because %s in %s on line %d
 bool(false)
 Done

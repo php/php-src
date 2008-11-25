@@ -11,7 +11,7 @@ $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
         unlink ($filename);
-        die('skip cannot be run as root');
+        die('skip...cannot be run as root\n');
 }
 
 unlink($filename);
@@ -68,18 +68,18 @@ unlink( dirname(__FILE__)."/006_error.tmp");
 --EXPECTF--
 *** Testing error conditions for fileperms(), chmod() ***
 
-Warning: chmod(): %s in %s on line %d
+Warning: chmod(): %s
 bool(false)
-100%d44
+%d
 
-Warning: chmod(): %s in %s on line %d
+Warning: chmod(): %s
 bool(false)
-40755
+%d
 
-Warning: chmod(): No such file or directory in %s on line %d
+Warning: chmod(): %s
 bool(false)
 
-Warning: fileperms(): stat failed for /no/such/file/dir in %s on line %d
+Warning: fileperms(): %s
 bool(false)
 
 

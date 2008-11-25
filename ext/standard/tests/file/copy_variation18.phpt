@@ -32,8 +32,13 @@ var_dump( copy($src_file_name, $dest_file_name) );
 $stat_after_copy = stat($src_file_name);
 clearstatcache();
 
+// compare all stat fields except access time
+$stat_keys_to_compare = array("dev", "ino", "mode", "nlink", "uid", "gid", 
+                       "rdev", "size", "mtime", "ctime",
+                       "blksize", "blocks");
+
 echo "Comparing the stats of file before and after copy operation => ";
-var_dump( compare_stats($stat_before_copy, $stat_after_copy, $all_stat_keys) );
+var_dump( compare_stats($stat_before_copy, $stat_after_copy, $stat_keys_to_compare) );
 
 echo "*** Done ***\n";
 ?>

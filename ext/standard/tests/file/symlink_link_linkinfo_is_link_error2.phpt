@@ -42,6 +42,7 @@ var_dump( link($filename, $linkname, false) );
 //invalid arguments
 var_dump( link(NULL, $linkname) );  // NULL as filename
 var_dump( link('', $linkname) );  // empty string as filename
+var_dump( link(' ', $linkname) );  // space as filename
 var_dump( link(false, $linkname) );  // boolean false as filename
 var_dump( link($filename, NULL) );  // NULL as linkname
 var_dump( link($filename, '') );  // '' as linkname
@@ -57,6 +58,7 @@ var_dump( is_link($linkname, "/") );
 //invalid arguments
 var_dump( is_link(NULL) );  // NULL as linkname
 var_dump( is_link('') );  // empty string as linkname
+var_dump( is_link(' ') );  // space as linkname
 var_dump( is_link(false) );  // boolean false as linkname
 var_dump( is_link($filename) );  // file given to is_link
 
@@ -93,6 +95,9 @@ bool(false)
 Warning: link(): %s in %s on line %d
 bool(false)
 
+Warning: link(): %s in %s on line %d
+bool(false)
+
 *** Testing is_link() for error conditions ***
 
 Warning: Wrong parameter count for is_link() in %s on line %d
@@ -100,6 +105,7 @@ NULL
 
 Warning: Wrong parameter count for is_link() in %s on line %d
 NULL
+bool(false)
 bool(false)
 bool(false)
 bool(false)

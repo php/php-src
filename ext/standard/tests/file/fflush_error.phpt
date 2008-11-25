@@ -24,9 +24,10 @@ if($file_handle == false)
    
 var_dump( fflush($file_handle, $file_handle) );
 fclose($file_handle);
+fflush($file_handle);
 
 // test invalid arguments : non-resources
-echo "-- Testing fflush(): with invalid arguments --\n";
+echo "\n-- Testing fflush(): with invalid arguments --\n";
 $invalid_args = array (
   "string",
   10,
@@ -60,6 +61,9 @@ NULL
 
 Warning: Wrong parameter count for fflush() in %s on line %d
 NULL
+
+Warning: fflush(): %d is not a valid stream resource in %s on line %d
+
 -- Testing fflush(): with invalid arguments --
 -- Iteration 1 --
 

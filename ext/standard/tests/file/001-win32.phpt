@@ -10,7 +10,6 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 chdir(dirname(__FILE__));
 @unlink('test.file');
-@unlink('test.link');
 if (file_exists('test.file')) {
     echo "test.file exists\n";
 } else {
@@ -23,21 +22,10 @@ if (file_exists('test.file')) {
 } else {
     echo "test.file does not exist\n";
 }
-sleep (2);
-if (file_exists('test.link')) {
-    echo "test.link exists\n";
-} else {
-    echo "test.link does not exist\n";
-}
 if (is_link('test.file')) {
     echo "test.file is a symlink\n";
 } else {
     echo "test.file is not a symlink\n";
-}
-if (is_link('test.link')) {
-    echo "test.link is a symlink\n";
-} else {
-    echo "test.link is not a symlink\n";
 }
 if (file_exists('test.file')) {
     echo "test.file exists\n";
@@ -52,7 +40,6 @@ for ($i = 0; $i <= 12; $i++) {
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
-echo "test.link is " . filetype('test.link') . "\n";
 printf ("test.file permissions are 0%o\n", 0777 & fileperms('test.file'));
 echo "test.file size is " . filesize('test.file') . "\n";
 if (is_writeable('test.file')) {
@@ -69,16 +56,6 @@ if (is_file('test.file')) {
     echo "test.file is a regular file\n";
 } else {
     echo "test.file is not a regular file\n";
-}
-if (is_file('test.link')) {
-    echo "test.link is a regular file\n";
-} else {
-    echo "test.link is not a regular file\n";
-}
-if (is_dir('test.link')) {
-    echo "test.link is a directory\n";
-} else {
-    echo "test.link is not a directory\n";
 }
 if (is_dir('../file')) {
     echo "../file is a directory\n";
@@ -106,20 +83,16 @@ if (file_exists('test.file')) {
 --EXPECT--
 test.file does not exist
 test.file exists
-test.link does not exist
 test.file is not a symlink
-test.link is not a symlink
 test.file exists
 test.file is file
-test.link is file
 test.file permissions are 0666
 test.file size is 0
 test.file is writeable
 test.file is readable
 test.file is a regular file
-test.link is not a regular file
-test.link is not a directory
 ../file is a directory
 test.file is not a directory
 test.file does not exist
 test.file does not exist
+

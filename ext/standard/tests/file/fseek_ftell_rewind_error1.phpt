@@ -91,7 +91,7 @@ bool(false)
 Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d
 bool(false)
 -- Testing fseek() with closed/unset file handle --
-Warning: fseek(): 5 is not a valid stream resource in %s on line %d
+Warning: fseek(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fseek(): supplied argument is not a valid stream resource in %s on line %d

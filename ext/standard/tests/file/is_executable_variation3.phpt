@@ -37,6 +37,7 @@ $invalid_files = array(
   TRUE,
   FALSE,
   NULL,
+  " ",
   @array(),
   @$file_handle
 );
@@ -53,6 +54,7 @@ echo "Done\n";
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on invalid files ***
+bool(false)
 bool(false)
 bool(false)
 bool(false)

@@ -20,6 +20,11 @@ var_dump( fpassthru() );
 /* No.of args greaer than expected */
 var_dump( fpassthru("", "") );
 
+/* fpassthru on a closed file */
+$h = fopen(__FILE__,'r');
+fclose($h);
+fpassthru($h);
+
 echo "\n*** Done ***\n";
 
 ?>
@@ -36,5 +41,7 @@ NULL
 
 Warning: Wrong parameter count for fpassthru() in %s on line %d
 NULL
+
+Warning: fpassthru(): %d is not a valid stream resource in %s on line %d
 
 *** Done ***
