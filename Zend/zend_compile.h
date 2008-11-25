@@ -537,7 +537,9 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC);
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
-void zend_do_namespace(const znode *name TSRMLS_DC);
+void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_DC);
+void zend_do_end_namespace(TSRMLS_D);
+void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 

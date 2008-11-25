@@ -166,13 +166,17 @@ namespace_name:
 ;
 
 top_statement:
-		statement
-	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
-	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
+		statement						{ zend_verify_namespace(TSRMLS_C); }
+	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
-	|	T_NAMESPACE namespace_name ';'	{ zend_do_namespace(&$2 TSRMLS_CC); }
-	|	T_USE use_declarations ';'
-	|	constant_declaration ';'
+	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
+	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
+		top_statement_list '}'		    { zend_do_end_namespace(TSRMLS_C); }
+	|	T_NAMESPACE '{'					{ zend_do_begin_namespace(NULL, 1 TSRMLS_CC); }
+		top_statement_list '}'			{ zend_do_end_namespace(TSRMLS_C); }
+	|	T_USE use_declarations ';'      { zend_verify_namespace(TSRMLS_C); }
+	|	constant_declaration ';'		{ zend_verify_namespace(TSRMLS_C); }
 ;
 
 use_declarations:

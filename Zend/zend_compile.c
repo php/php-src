@@ -138,6 +138,8 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	CG(current_namespace) = NULL;
+	CG(in_namespace) = 0;
+	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
 	init_compiler_declarables(TSRMLS_C);
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
@@ -4948,6 +4950,9 @@ again:
 			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1] != '>') {
 				CG(increment_lineno) = 1;
 			}
+			if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
+				goto again;				
+			}
 			retval = ';'; /* implicit ; */
 			break;
 		case T_OPEN_TAG_WITH_ECHO:
@@ -5081,11 +5086,28 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 }
 /* }}} */
 
-void zend_do_namespace(const znode *name TSRMLS_DC) /* {{{ */
+void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC) /* {{{ */
 {
 	char *lcname;
 
-	if (CG(active_op_array)->last > 0) {
+	/* handle mixed syntax declaration or nested namespaces */
+	if (!CG(has_bracketed_namespaces)) {
+		if (CG(current_namespace)) {
+			/* previous namespace declarations were unbracketed */
+			if (with_bracket) {
+				zend_error(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
+			}
+		}
+	} else {
+		/* previous namespace declarations were bracketed */
+		if (!with_bracket) {
+			zend_error(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
+		} else if (CG(current_namespace) || CG(in_namespace)) {
+			zend_error(E_COMPILE_ERROR, "Namespace declarations cannot be nested");
+		}
+	}
+
+	if (((!with_bracket && !CG(current_namespace)) || (with_bracket && !CG(has_bracketed_namespaces))) && CG(active_op_array)->last > 0) {
 		/* ignore ZEND_EXT_STMT and ZEND_TICKS */
 		int num = CG(active_op_array)->last;
 		while (num > 0 &&
@@ -5093,31 +5115,45 @@ void zend_do_namespace(const znode *name TSRMLS_DC) /* {{{ */
 		        CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
 			--num;
 		}
-		if (!CG(current_namespace) && num > 0) {
+		if (num > 0) {
 			zend_error(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
 		}
 	}
-	lcname = zend_str_tolower_dup(Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant));
-	if (((Z_STRLEN(name->u.constant) == sizeof("self")-1) &&
-	      !memcmp(lcname, "self", sizeof("self")-1)) ||
-	    ((Z_STRLEN(name->u.constant) == sizeof("parent")-1) &&
-          !memcmp(lcname, "parent", sizeof("parent")-1))) {
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", Z_STRVAL(name->u.constant));
-	}
-	efree(lcname);
 
-	if (CG(current_namespace)) {
-		zval_dtor(CG(current_namespace));
-	} else {
-		ALLOC_ZVAL(CG(current_namespace));
+	CG(in_namespace) = 1;
+	if (with_bracket) {
+		CG(has_bracketed_namespaces) = 1;
 	}
+
+	if (name) {
+		lcname = zend_str_tolower_dup(Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant));
+		if (((Z_STRLEN(name->u.constant) == sizeof("self")-1) &&
+		      !memcmp(lcname, "self", sizeof("self")-1)) ||
+		    ((Z_STRLEN(name->u.constant) == sizeof("parent")-1) &&
+	          !memcmp(lcname, "parent", sizeof("parent")-1))) {
+			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", Z_STRVAL(name->u.constant));
+		}
+		efree(lcname);
+
+		if (CG(current_namespace)) {
+			zval_dtor(CG(current_namespace));
+		} else {
+			ALLOC_ZVAL(CG(current_namespace));
+		}
+		*CG(current_namespace) = name->u.constant;
+	} else {
+		if (CG(current_namespace)) {
+			zval_dtor(CG(current_namespace));
+			FREE_ZVAL(CG(current_namespace));
+			CG(current_namespace) = NULL;
+		}
+	}
+
 	if (CG(current_import)) {
 		zend_hash_destroy(CG(current_import));
 		efree(CG(current_import));
 		CG(current_import) = NULL;
 	}
-
-	*CG(current_namespace) = name->u.constant;
 }
 /* }}} */
 
@@ -5233,8 +5269,17 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_end_compilation(TSRMLS_D) /* {{{ */
+void zend_verify_namespace(TSRMLS_D) /* {{{ */
 {
+	if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
+		zend_error(E_COMPILE_ERROR, "No code may exist outside of namespace {}");
+	}
+}
+/* }}} */
+
+void zend_do_end_namespace(TSRMLS_D) /* {{{ */
+{
+	CG(in_namespace) = 0;
 	if (CG(current_namespace)) {
 		zval_dtor(CG(current_namespace));
 		FREE_ZVAL(CG(current_namespace));
@@ -5245,6 +5290,13 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 		efree(CG(current_import));
 		CG(current_import) = NULL;
 	}
+}
+/* }}} */
+
+void zend_do_end_compilation(TSRMLS_D) /* {{{ */
+{
+	CG(has_bracketed_namespaces) = 0;
+	zend_do_end_namespace(TSRMLS_C);
 }
 /* }}} */
 
