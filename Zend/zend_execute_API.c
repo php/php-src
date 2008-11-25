@@ -1006,7 +1006,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	zval autoload_function;
 	zval *class_name_ptr;
 	zval *retval_ptr = NULL;
-	int retval;
+	int retval, lc_length;
 	char *lc_name;
 	char *lc_free;
 	zend_fcall_info fcall_info;
@@ -1020,13 +1020,14 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 
 	lc_free = lc_name = do_alloca(name_length + 1, use_heap);
 	zend_str_tolower_copy(lc_name, name, name_length);
+	lc_length = name_length + 1;
 
 	if (lc_name[0] == '\\') {
 		lc_name += 1;
-		name_length -= 1;
+		lc_length -= 1;
 	}
 
-	if (zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce) == SUCCESS) {
+	if (zend_hash_find(EG(class_table), lc_name, lc_length, (void **) ce) == SUCCESS) {
 		free_alloca(lc_free, use_heap);
 		return SUCCESS;
 	}
@@ -1044,7 +1045,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);
 	}
 
-	if (zend_hash_add(EG(in_autoload), lc_name, name_length + 1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
+	if (zend_hash_add(EG(in_autoload), lc_name, lc_length, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		free_alloca(lc_free, use_heap);
 		return FAILURE;
 	}
@@ -1081,7 +1082,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 
 	zval_ptr_dtor(&class_name_ptr);
 
-	zend_hash_del(EG(in_autoload), lc_name, name_length + 1);
+	zend_hash_del(EG(in_autoload), lc_name, lc_length);
 
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
@@ -1092,7 +1093,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		return FAILURE;
 	}
 
-	retval = zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce);
+	retval = zend_hash_find(EG(class_table), lc_name, lc_length, (void **) ce);
 	free_alloca(lc_free, use_heap);
 	return retval;
 }
