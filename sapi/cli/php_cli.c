@@ -260,11 +260,10 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	{
 		ret = sapi_cli_single_write(ptr, remaining);
 		if (!ret) {
-#ifdef PHP_CLI_WIN32_NO_CONSOLE
-			break;
-#else
+#ifndef PHP_CLI_WIN32_NO_CONSOLE
 			php_handle_aborted_connection();
 #endif
+			break;
 		}
 		ptr += ret;
 		remaining -= ret;
