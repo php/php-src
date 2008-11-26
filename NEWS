@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   inconsistent results). (Arnaud)
 - Fixed bug #46626 (mb_convert_case does not handle apostrophe correctly).
   (Ilia)
+- Fixed bug #44182 (extract($a, EXTR_REFS) can fail to split copy-on-write
+  references). (robin_fernandes at uk dot ibm dot com)
+- Fixed bug #44181 (extract($a, EXTR_OVERWRITE|EXTR_REFS) can fail to create 
+  references to $a). (robin_fernandes at uk dot ibm dot com)
 
 20 Nov 2008, PHP 5.2.7RC4
 - Added logging option for error_log to send directly to SAPI. (Stas)
