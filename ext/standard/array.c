@@ -1359,18 +1359,13 @@ PHP_FUNCTION(extract)
 			if (extract_refs) {
 				zval **orig_var;
 
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
+				zval_add_ref(entry);
+
 				if (zend_hash_find(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) &orig_var) == SUCCESS) {
-					SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
-					zval_add_ref(entry);
 					zval_ptr_dtor(orig_var);
 					*orig_var = *entry;
 				} else {
-					if (Z_REFCOUNT_P(var_array) > 1 || *entry == EG(uninitialized_zval_ptr)) {
-						SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
-					} else {
-						Z_SET_ISREF_PP(entry);
-					}
-					zval_add_ref(entry);
 					zend_hash_update(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) entry, sizeof(zval *), NULL);
 				}
 			} else {
