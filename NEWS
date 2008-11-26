@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   references). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #44181 (extract($a, EXTR_OVERWRITE|EXTR_REFS) can fail to create 
   references to $a). (robin_fernandes at uk dot ibm dot com)
+- Fixed bug #42473 (ob_start php://output and headers). (Arnaud)
 
 20 Nov 2008, PHP 5.2.7RC4
 - Added logging option for error_log to send directly to SAPI. (Stas)
