@@ -48,17 +48,11 @@ static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_D
 	return 0;
 }
 
-static int php_stream_output_flush(php_stream *stream TSRMLS_DC)
-{
-	sapi_flush(TSRMLS_C);
-	return 0;
-}
-
 php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
 	php_stream_output_read,
 	php_stream_output_close,
-	php_stream_output_flush,
+	NULL, /* flush */
 	"Output",
 	NULL, /* seek */
 	NULL, /* cast */
