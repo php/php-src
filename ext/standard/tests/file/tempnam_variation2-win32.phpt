@@ -1,9 +1,9 @@
 --TEST--
-Test tempnam() function: usage variations - relative paths
+Test tempnam() function: usage variations - various absolute and relative paths
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
-  die("skip Run only on Windows");
+  die("skip Only valid for Windows");
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
 
-echo "*** Testing tempnam() with relative paths ***\n";
+echo "*** Testing tempnam() with absolute and relative paths ***\n";
 $dir_name = dirname(__FILE__)."/tempnam_variation2";
 mkdir($dir_name);
 $dir_path = $dir_name."/tempnam_variation2_sub";
@@ -23,14 +23,24 @@ $old_dir_path = getcwd();
 chdir(dirname(__FILE__));
 
 $dir_paths = array(
+  // absolute paths
   "$dir_path",
   "$dir_path/",
   "$dir_path/..",
   "$dir_path//../",
   "$dir_path/../.././tempnam_variation2",
   "$dir_path/..///tempnam_variation2_sub//..//../tempnam_variation2",
+  "$dir_path/BADDIR",
+  
+  
+  // relative paths
   ".",
-  "./tempnam_variation2/../tempnam_variation2/tempnam_variation2_sub"
+  "tempname_variation2",
+  "tempname_variation2/",
+  "tempnam_variation2/tempnam_variation2_sub",
+  "tempnam_variation2//tempnam_variation2_sub",  
+  "./tempnam_variation2/../tempnam_variation2/tempnam_variation2_sub",
+  "BADDIR",  
 );
 
 for($i = 0; $i<count($dir_paths); $i++) {
@@ -47,10 +57,28 @@ for($i = 0; $i<count($dir_paths); $i++) {
     echo "File permissions are => ";
     printf("%o", fileperms($file_name) );
     echo "\n";
+    
+    echo "File created in => ";
+    $file_dir = dirname($file_name);
+    $dir_req = $dir_paths[$i];
+        
+    if (realpath($file_dir) == realpath(sys_get_temp_dir()) || realpath($file_dir."\\") == realpath(sys_get_temp_dir())) {
+       echo "temp dir\n";
+    }
+    else if (realpath($file_dir) == realpath($dir_req) || realpath($file_dir."\\") == realpath($dir_req)) {    
+       echo "directory specified\n";
+    }
+    else {
+       echo "unknown location\n";
+    }    
+    
+
   }
-  else
+  else {
     echo "-- File is not created --";
-    unlink($file_name);
+  }
+  
+  unlink($file_name);
 }
 
 chdir($old_dir_path);
@@ -60,38 +88,76 @@ rmdir($dir_name);
 echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
-*** Testing tempnam() with relative paths ***
+*** Testing tempnam() with absolute and relative paths ***
 
 -- Iteration 1 --
-File name is => %s
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 2 --
-File name is => %s
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 3 --
-File name is => %s
+File name is => %s\tempnam_variation2\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 4 --
-File name is => %s
+File name is => %s\tempnam_variation2\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 5 --
-File name is => %s
+File name is => %s\tempnam_variation2\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 6 --
-File name is => %s
+File name is => %s\tempnam_variation2\t%s
 File permissions are => 100666
+File created in => directory specified
 
 -- Iteration 7 --
-File name is => %s
+File name is => %s\t%s
 File permissions are => 100666
+File created in => temp dir
 
 -- Iteration 8 --
-File name is => %s
+File name is => %s\t%s
 File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 9 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+-- Iteration 10 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
+
+-- Iteration 11 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 12 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 13 --
+File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File permissions are => 100666
+File created in => directory specified
+
+-- Iteration 14 --
+File name is => %s\t%s
+File permissions are => 100666
+File created in => temp dir
 
 *** Done ***

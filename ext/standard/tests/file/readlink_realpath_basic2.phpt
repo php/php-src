@@ -34,9 +34,6 @@ $filenames = array (
   "$file_path/readlink_realpath_basic2//home/test//../test/./readlink_realpath_basic2.tmp",
   "$file_path/readlink_realpath_basic2/home//../././readlink_realpath_basic2.tmp",
 
-  // checking for binary safe
-  b"$file_path/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp",
-
   /* filenames with invalid path */
   "$file_path///readlink_realpath_basic2/home//..//././test//readlink_realpath_basic2.tmp",
   "$file_path/readlink_realpath_basic2/home/../home/../test/../readlink_realpath_basic2.tmp",
@@ -79,14 +76,11 @@ string(%d) "%s/readlink_realpath_basic2/home/test/readlink_realpath_basic2.tmp"
 string(%d) "%s/readlink_realpath_basic2/readlink_realpath_basic2.tmp"
 
 -- Iteration 5 --
-string(%d) "%s/readlink_realpath_basic2/home/readlink_realpath_basic2.tmp"
+bool(false)
 
 -- Iteration 6 --
 bool(false)
 
 -- Iteration 7 --
-bool(false)
-
--- Iteration 8 --
 %s
 Done

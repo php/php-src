@@ -94,7 +94,7 @@ NULL
 Warning: flock() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: flock(): 6 is not a valid stream resource in %s on line %d
+Warning: flock(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: flock() expects parameter 1 to be resource, string given in %s on line %d

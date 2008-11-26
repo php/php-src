@@ -25,14 +25,19 @@ $fp = fopen("$dirname/file.text", "w");
 fclose($fp);
 
 // glob() with default arguments
-var_dump( glob($dirname."/*") );
-var_dump( glob($dirname."/*.txt") );
-var_dump( glob($dirname."/*.t?t") );
-var_dump( glob($dirname."/*.t*t") );
-var_dump( glob($dirname."/*.?") );
-var_dump( glob($dirname."/*.*") );
+sort_var_dump( glob($dirname."/*") );
+sort_var_dump( glob($dirname."/*.txt") );
+sort_var_dump( glob($dirname."/*.t?t") );
+sort_var_dump( glob($dirname."/*.t*t") );
+sort_var_dump( glob($dirname."/*.?") );
+sort_var_dump( glob($dirname."/*.*") );
 
 echo "Done\n";
+
+function sort_var_dump($results) {
+   sort($results);
+   var_dump($results);
+}
 ?>
 --CLEAN--
 <?php
