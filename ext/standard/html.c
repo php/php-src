@@ -533,6 +533,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				do {
 					if (this_char < 0x80) {
 						more = 0;
+						if(stat) {
+							/* we didn't finish the UTF sequence correctly */
+							*status = FAILURE;
+						}
 						break;
 					} else if (this_char < 0xc0) {
 						switch (stat) {
