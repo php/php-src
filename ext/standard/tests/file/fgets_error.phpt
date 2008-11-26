@@ -99,9 +99,10 @@ bool(false)
 Warning: fgets() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fgets() with closed/unset file handle --
-Warning: fgets(): 5 is not a valid stream resource in %s on line %d
+Warning: fgets(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
+

@@ -20,22 +20,34 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing tempnam() with dir of permissions from 0000 to 0777 ***\n";
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/tempnam_variation4";
+$prefix = "tempnamVar4.";
+
 mkdir($dir_name);
 
-for($mode = 0000; $mode<=0777; $mode++) {
+for($mode = 0000; $mode <= 0777; $mode++) {
   echo "-- dir perms ";
   printf("%o", $mode);
   echo " --\n";
   chmod($dir_name, $mode);
-  $file_name = tempnam($dir_name, "tempnam_variation4.tmp");
+  $file_name = tempnam($dir_name, $prefix);
 
   if(file_exists($file_name) ) {
-    print($file_name);
-    echo "\n";
+    if (realpath(dirname($file_name)) == realpath(sys_get_temp_dir())) {
+       $msg = " created in temp directory";
+    }
+    else if (dirname($file_name) == $dir_name) {
+       $msg = " created in requested directory";
+    }
+    else {
+       $msg = " created in unexpected directory";
+    }   
+  
+    echo basename($file_name).$msg."\n";
+    unlink($file_name);    
   }
-  else
-    print("-- File is not created --");
-  unlink($file_name);
+  else {
+    print("FAILED: File is not created\n");
+  }
 }
 
 rmdir($dir_name);
@@ -45,1027 +57,1027 @@ echo "*** Done ***\n";
 --EXPECTF--
 *** Testing tempnam() with dir of permissions from 0000 to 0777 ***
 -- dir perms 0 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 1 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 2 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 3 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 4 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 5 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 6 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 7 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 10 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 11 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 12 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 13 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 14 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 15 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 16 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 17 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 20 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 21 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 22 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 23 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 24 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 25 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 26 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 27 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 30 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 31 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 32 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 33 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 34 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 35 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 36 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 37 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 40 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 41 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 42 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 43 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 44 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 45 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 46 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 47 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 50 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 51 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 52 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 53 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 54 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 55 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 56 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 57 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 60 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 61 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 62 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 63 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 64 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 65 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 66 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 67 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 70 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 71 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 72 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 73 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 74 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 75 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 76 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 77 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 100 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 101 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 102 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 103 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 104 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 105 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 106 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 107 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 110 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 111 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 112 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 113 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 114 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 115 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 116 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 117 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 120 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 121 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 122 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 123 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 124 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 125 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 126 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 127 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 130 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 131 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 132 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 133 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 134 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 135 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 136 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 137 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 140 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 141 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 142 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 143 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 144 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 145 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 146 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 147 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 150 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 151 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 152 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 153 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 154 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 155 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 156 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 157 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 160 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 161 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 162 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 163 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 164 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 165 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 166 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 167 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 170 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 171 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 172 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 173 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 174 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 175 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 176 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 177 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 200 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 201 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 202 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 203 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 204 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 205 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 206 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 207 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 210 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 211 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 212 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 213 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 214 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 215 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 216 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 217 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 220 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 221 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 222 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 223 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 224 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 225 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 226 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 227 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 230 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 231 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 232 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 233 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 234 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 235 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 236 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 237 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 240 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 241 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 242 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 243 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 244 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 245 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 246 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 247 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 250 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 251 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 252 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 253 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 254 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 255 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 256 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 257 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 260 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 261 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 262 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 263 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 264 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 265 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 266 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 267 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 270 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 271 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 272 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 273 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 274 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 275 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 276 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 277 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 300 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 301 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 302 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 303 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 304 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 305 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 306 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 307 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 310 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 311 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 312 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 313 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 314 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 315 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 316 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 317 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 320 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 321 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 322 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 323 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 324 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 325 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 326 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 327 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 330 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 331 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 332 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 333 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 334 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 335 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 336 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 337 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 340 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 341 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 342 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 343 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 344 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 345 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 346 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 347 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 350 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 351 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 352 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 353 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 354 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 355 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 356 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 357 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 360 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 361 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 362 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 363 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 364 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 365 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 366 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 367 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 370 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 371 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 372 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 373 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 374 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 375 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 376 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 377 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 400 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 401 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 402 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 403 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 404 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 405 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 406 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 407 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 410 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 411 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 412 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 413 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 414 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 415 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 416 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 417 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 420 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 421 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 422 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 423 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 424 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 425 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 426 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 427 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 430 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 431 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 432 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 433 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 434 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 435 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 436 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 437 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 440 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 441 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 442 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 443 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 444 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 445 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 446 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 447 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 450 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 451 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 452 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 453 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 454 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 455 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 456 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 457 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 460 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 461 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 462 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 463 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 464 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 465 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 466 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 467 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 470 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 471 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 472 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 473 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 474 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 475 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 476 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 477 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 500 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 501 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 502 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 503 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 504 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 505 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 506 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 507 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 510 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 511 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 512 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 513 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 514 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 515 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 516 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 517 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 520 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 521 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 522 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 523 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 524 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 525 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 526 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 527 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 530 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 531 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 532 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 533 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 534 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 535 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 536 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 537 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 540 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 541 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 542 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 543 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 544 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 545 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 546 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 547 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 550 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 551 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 552 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 553 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 554 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 555 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 556 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 557 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 560 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 561 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 562 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 563 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 564 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 565 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 566 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 567 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 570 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 571 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 572 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 573 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 574 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 575 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 576 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 577 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 600 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 601 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 602 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 603 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 604 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 605 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 606 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 607 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 610 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 611 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 612 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 613 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 614 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 615 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 616 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 617 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 620 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 621 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 622 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 623 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 624 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 625 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 626 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 627 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 630 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 631 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 632 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 633 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 634 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 635 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 636 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 637 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 640 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 641 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 642 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 643 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 644 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 645 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 646 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 647 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 650 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 651 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 652 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 653 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 654 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 655 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 656 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 657 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 660 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 661 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 662 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 663 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 664 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 665 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 666 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 667 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 670 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 671 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 672 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 673 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 674 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 675 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 676 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 677 --
-%s
+tempnamVar4.%s created in temp directory
 -- dir perms 700 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 701 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 702 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 703 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 704 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 705 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 706 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 707 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 710 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 711 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 712 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 713 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 714 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 715 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 716 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 717 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 720 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 721 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 722 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 723 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 724 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 725 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 726 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 727 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 730 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 731 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 732 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 733 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 734 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 735 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 736 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 737 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 740 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 741 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 742 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 743 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 744 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 745 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 746 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 747 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 750 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 751 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 752 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 753 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 754 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 755 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 756 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 757 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 760 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 761 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 762 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 763 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 764 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 765 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 766 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 767 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 770 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 771 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 772 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 773 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 774 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 775 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 776 --
-%s
+tempnamVar4.%s created in requested directory
 -- dir perms 777 --
-%s
+tempnamVar4.%s created in requested directory
 *** Done ***

@@ -43,10 +43,10 @@ echo "Done";
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
 
-Warning: fgets(): 6 is not a valid stream resource in %s on line %d
+Warning: fgets(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fgets(): 6 is not a valid stream resource in %s on line %d
+Warning: fgets(): %d is not a valid stream resource in %s on line %d
 bool(false)
 -- Testing fgets() with unset handle --
 
@@ -60,3 +60,4 @@ Notice: Undefined variable: file_handle in %s on line %d
 Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
+

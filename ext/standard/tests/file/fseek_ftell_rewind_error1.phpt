@@ -91,9 +91,10 @@ bool(false)
 Warning: fseek() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Testing fseek() with closed/unset file handle --
-Warning: fseek(): 5 is not a valid stream resource in %s on line %d
+Warning: fseek(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fseek() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
+
