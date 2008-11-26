@@ -1,3 +1,467 @@
+2008-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      
+      MFB: Upgraded bundled sqlite to version 3.6.6.1.
+
+    * (PHP_5_3)
+      NEWS
+      ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      
+      Upgraded bundled sqlite to version 3.6.6.1
+
+2008-11-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      cleanup
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_key_exists.phpt
+      ext/standard/tests/array/array_key_exists_object1.phpt
+      ext/standard/tests/array/array_key_exists_object2.phpt
+      ext/standard/tests/array/array_key_exists_variation2.phpt
+      ext/standard/tests/array/array_walk_object1.phpt
+      ext/standard/tests/array/array_walk_objects.phpt
+      ext/standard/tests/array/array_walk_rec_objects.phpt
+      ext/standard/tests/array/array_walk_recursive_object1.phpt
+      ext/standard/tests/array/current_variation1.phpt
+      ext/standard/tests/array/end_variation1.phpt
+      ext/standard/tests/array/key_variation1.phpt
+      ext/standard/tests/array/next_variation1.phpt
+      ext/standard/tests/array/prev_variation1.phpt
+      ext/standard/tests/array/reset_variation1.phpt:
+      fix tests for array/object BC
+
+2008-11-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ZendEngine2/zend_execute_API.c:
+      - Fixed bug #46665 (Triggering autoload with a variable classname causes
+      truncated autoload param)
+
+2008-11-25  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/standard/tests/file/chmod_variation3.phpt
+      ext/standard/tests/file/chmod_variation3.phpt
+      ext/standard/tests/file/copy_variation12-win32.phpt
+      ext/standard/tests/file/disk_free_space_error.phpt
+      ext/standard/tests/file/feof_basic.phpt
+      ext/standard/tests/file/feof_basic.phpt
+      ext/standard/tests/file/fflush_error.phpt
+      ext/standard/tests/file/fgets_socket_variation1.phpt
+      ext/standard/tests/file/fgets_socket_variation1.phpt
+      ext/standard/tests/file/file_get_contents_variation4.phpt
+      ext/standard/tests/file/file_get_contents_variation4.phpt
+      ext/standard/tests/file/file_variation9.phpt
+      ext/standard/tests/file/file_variation9.phpt
+      ext/standard/tests/file/filegroup_variation1.phpt
+      ext/standard/tests/file/filegroup_variation1.phpt
+      ext/standard/tests/file/fopen_variation17.phpt
+      ext/standard/tests/file/fopen_variation17.phpt
+      ext/standard/tests/file/fpassthru_error.phpt
+      ext/standard/tests/file/is_readable_variation1.phpt
+      ext/standard/tests/file/parse_ini_file_variation1.phpt
+      ext/standard/tests/file/parse_ini_file_variation1.phpt
+      ext/standard/tests/file/pathinfo_basic1.phpt
+      ext/standard/tests/file/pathinfo_basic1.phpt
+      ext/standard/tests/file/pathinfo_variation1.phpt
+      ext/standard/tests/file/pathinfo_variation1.phpt
+      ext/standard/tests/file/rename_variation-win32.phpt
+      ext/standard/tests/file/rename_variation12.phpt
+      ext/standard/tests/file/rename_variation12.phpt
+      ext/standard/tests/file/touch_variation1.phpt
+      ext/standard/tests/file/touch_variation1.phpt
+      ext/standard/tests/file/touch_variation3.phpt
+      ext/standard/tests/file/touch_variation3.phpt
+      ext/standard/tests/file/unlink_variation8.phpt
+      ext/standard/tests/file/unlink_variation8.phpt:
+      
+      file chmod_variation3.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      ext/standard/tests/file/001-win32.phpt
+      ext/standard/tests/file/005_variation2-win32.phpt
+      ext/standard/tests/file/005_variation2-win32.phpt
+      ext/standard/tests/file/006_error.phpt
+      ext/standard/tests/file/007_error.phpt
+      ext/standard/tests/file/basename_error.phpt
+      ext/standard/tests/file/basename_error.phpt
+      ext/standard/tests/file/bug41655_1.phpt
+      ext/standard/tests/file/chmod_variation4.phpt
+      ext/standard/tests/file/chmod_variation4.phpt
+      ext/standard/tests/file/dirname_basic.phpt
+      ext/standard/tests/file/dirname_basic.phpt
+      ext/standard/tests/file/dirname_error.phpt
+      ext/standard/tests/file/dirname_error.phpt
+      ext/standard/tests/file/disk.phpt
+      ext/standard/tests/file/disk_free_space_variation.phpt
+      ext/standard/tests/file/disk_total_space_error.phpt
+      ext/standard/tests/file/disk_total_space_variation.phpt
+      ext/standard/tests/file/fgets_error.phpt
+      ext/standard/tests/file/file_exists_variation1.phpt
+      ext/standard/tests/file/file_exists_variation1.phpt
+      ext/standard/tests/file/file_get_contents_basic.phpt
+      ext/standard/tests/file/file_get_contents_basic.phpt
+      ext/standard/tests/file/file_get_contents_error.phpt
+      ext/standard/tests/file/file_get_contents_error.phpt
+      ext/standard/tests/file/file_get_contents_variation1.phpt
+      ext/standard/tests/file/file_get_contents_variation1.phpt
+      ext/standard/tests/file/file_get_contents_variation5.phpt
+      ext/standard/tests/file/file_get_contents_variation5.phpt
+      ext/standard/tests/file/file_get_contents_variation7-win32.phpt
+      ext/standard/tests/file/file_get_contents_variation7-win32.phpt
+      ext/standard/tests/file/file_get_contents_variation7.phpt
+      ext/standard/tests/file/file_get_contents_variation7.phpt
+      ext/standard/tests/file/file_get_contents_variation8-win32.phpt
+      ext/standard/tests/file/file_get_contents_variation8-win32.phpt
+      ext/standard/tests/file/file_get_contents_variation9.phpt
+      ext/standard/tests/file/file_get_contents_variation9.phpt
+      ext/standard/tests/file/file_put_contents_variation1.phpt
+      ext/standard/tests/file/file_put_contents_variation1.phpt
+      ext/standard/tests/file/file_put_contents_variation2.phpt
+      ext/standard/tests/file/file_put_contents_variation2.phpt
+      ext/standard/tests/file/file_put_contents_variation4.phpt
+      ext/standard/tests/file/file_put_contents_variation4.phpt
+      ext/standard/tests/file/file_put_contents_variation8-win32.phpt
+      ext/standard/tests/file/file_put_contents_variation8-win32.phpt
+      ext/standard/tests/file/file_put_contents_variation9.phpt
+      ext/standard/tests/file/file_put_contents_variation9.phpt
+      ext/standard/tests/file/file_variation8-win32.phpt
+      ext/standard/tests/file/file_variation8-win32.phpt
+      ext/standard/tests/file/filegroup_variation2.phpt
+      ext/standard/tests/file/filegroup_variation2.phpt
+      ext/standard/tests/file/fileinode_variation1.phpt
+      ext/standard/tests/file/fileinode_variation1.phpt
+      ext/standard/tests/file/fileinode_variation2.phpt
+      ext/standard/tests/file/fileinode_variation2.phpt
+      ext/standard/tests/file/fileinode_variation3.phpt
+      ext/standard/tests/file/fileinode_variation3.phpt
+      ext/standard/tests/file/fileowner_variation2.phpt
+      ext/standard/tests/file/fileowner_variation2.phpt
+      ext/standard/tests/file/fileowner_variation3.phpt
+      ext/standard/tests/file/fileowner_variation3.phpt
+      ext/standard/tests/file/fileperms_variation1.phpt
+      ext/standard/tests/file/fileperms_variation1.phpt
+      ext/standard/tests/file/fileperms_variation3.phpt
+      ext/standard/tests/file/fileperms_variation3.phpt
+      ext/standard/tests/file/filesize_variation1.phpt
+      ext/standard/tests/file/filetype_variation2.phpt
+      ext/standard/tests/file/filetype_variation2.phpt
+      ext/standard/tests/file/flock_error.phpt
+      ext/standard/tests/file/flock_variation1.phpt
+      ext/standard/tests/file/flock_variation1.phpt
+      ext/standard/tests/file/fopen_variation10-win32.phpt
+      ext/standard/tests/file/fopen_variation10-win32.phpt
+      ext/standard/tests/file/fopen_variation11-win32.phpt
+      ext/standard/tests/file/fopen_variation11-win32.phpt
+      ext/standard/tests/file/fopen_variation12.phpt
+      ext/standard/tests/file/fopen_variation12.phpt
+      ext/standard/tests/file/fopen_variation13.phpt
+      ext/standard/tests/file/fopen_variation13.phpt
+      ext/standard/tests/file/fopen_variation14-win32.phpt
+      ext/standard/tests/file/fopen_variation14-win32.phpt
+      ext/standard/tests/file/fopen_variation15-win32.phpt
+      ext/standard/tests/file/fopen_variation15-win32.phpt
+      ext/standard/tests/file/fopen_variation15.phpt
+      ext/standard/tests/file/fopen_variation15.phpt
+      ext/standard/tests/file/fopen_variation16.phpt
+      ext/standard/tests/file/fopen_variation16.phpt
+      ext/standard/tests/file/fopen_variation4.phpt
+      ext/standard/tests/file/fopen_variation4.phpt
+      ext/standard/tests/file/fopen_variation6.phpt
+      ext/standard/tests/file/fopen_variation6.phpt
+      ext/standard/tests/file/fopen_variation7.phpt
+      ext/standard/tests/file/fopen_variation7.phpt
+      ext/standard/tests/file/fopen_variation8.phpt
+      ext/standard/tests/file/fopen_variation8.phpt
+      ext/standard/tests/file/fread_error.phpt
+      ext/standard/tests/file/fseek_dir_basic.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error1.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error2.phpt
+      ext/standard/tests/file/fseek_ftell_rewind_error3.phpt
+      ext/standard/tests/file/ftruncate_error.phpt
+      ext/standard/tests/file/glob_error_002-win32.phpt
+      ext/standard/tests/file/glob_error_002-win32.phpt
+      ext/standard/tests/file/is_dir_variation2.phpt
+      ext/standard/tests/file/is_file_variation3.phpt
+      ext/standard/tests/file/is_file_variation4.phpt
+      ext/standard/tests/file/is_writable_variation1.phpt
+      ext/standard/tests/file/lstat_stat_variation22.phpt
+      ext/standard/tests/file/lstat_stat_variation22.phpt
+      ext/standard/tests/file/mkdir_variation1-win32.phpt
+      ext/standard/tests/file/mkdir_variation1-win32.phpt
+      ext/standard/tests/file/mkdir_variation1.phpt
+      ext/standard/tests/file/mkdir_variation1.phpt
+      ext/standard/tests/file/mkdir_variation5-win32.phpt
+      ext/standard/tests/file/mkdir_variation5-win32.phpt
+      ext/standard/tests/file/mkdir_variation5.phpt
+      ext/standard/tests/file/mkdir_variation5.phpt
+      ext/standard/tests/file/move_uploaded_file_basic.phpt
+      ext/standard/tests/file/move_uploaded_file_basic.phpt
+      ext/standard/tests/file/parse_ini_file_variation2.phpt
+      ext/standard/tests/file/parse_ini_file_variation2.phpt
+      ext/standard/tests/file/parse_ini_file_variation3.phpt
+      ext/standard/tests/file/parse_ini_file_variation3.phpt
+      ext/standard/tests/file/parse_ini_file_variation4.phpt
+      ext/standard/tests/file/parse_ini_file_variation4.phpt
+      ext/standard/tests/file/parse_ini_file_variation5.phpt
+      ext/standard/tests/file/parse_ini_file_variation5.phpt
+      ext/standard/tests/file/parse_ini_file_variation6-win32.phpt
+      ext/standard/tests/file/parse_ini_file_variation6-win32.phpt
+      ext/standard/tests/file/parse_ini_file_variation6.phpt
+      ext/standard/tests/file/parse_ini_file_variation6.phpt
+      ext/standard/tests/file/pathinfo_basic2-win32.phpt
+      ext/standard/tests/file/pathinfo_basic2-win32.phpt
+      ext/standard/tests/file/pclose_variation1.phpt
+      ext/standard/tests/file/pclose_variation1.phpt
+      ext/standard/tests/file/popen_pclose_error-sunos.phpt
+      ext/standard/tests/file/readfile_variation10-win32.phpt
+      ext/standard/tests/file/readfile_variation10-win32.phpt
+      ext/standard/tests/file/readfile_variation10.phpt
+      ext/standard/tests/file/readfile_variation10.phpt
+      ext/standard/tests/file/readfile_variation4.phpt
+      ext/standard/tests/file/readfile_variation4.phpt
+      ext/standard/tests/file/readfile_variation5.phpt
+      ext/standard/tests/file/readfile_variation5.phpt
+      ext/standard/tests/file/readfile_variation7.phpt
+      ext/standard/tests/file/readfile_variation7.phpt
+      ext/standard/tests/file/readfile_variation8-win32.phpt
+      ext/standard/tests/file/readfile_variation8-win32.phpt
+      ext/standard/tests/file/readfile_variation9.phpt
+      ext/standard/tests/file/readfile_variation9.phpt
+      ext/standard/tests/file/readlink_variation1.phpt
+      ext/standard/tests/file/readlink_variation1.phpt
+      ext/standard/tests/file/realpath_variation2.phpt
+      ext/standard/tests/file/realpath_variation2.phpt
+      ext/standard/tests/file/rename_variation13.phpt
+      ext/standard/tests/file/rename_variation13.phpt
+      ext/standard/tests/file/rmdir_variation1-win32.phpt
+      ext/standard/tests/file/rmdir_variation1-win32.phpt
+      ext/standard/tests/file/rmdir_variation1.phpt
+      ext/standard/tests/file/rmdir_variation1.phpt
+      ext/standard/tests/file/rmdir_variation2.phpt
+      ext/standard/tests/file/rmdir_variation2.phpt
+      ext/standard/tests/file/rmdir_variation3.phpt
+      ext/standard/tests/file/rmdir_variation3.phpt
+      ext/standard/tests/file/symlink_link_linkinfo_is_link_error2.phpt
+      ext/standard/tests/file/tempnam_variation2-win32.phpt
+      ext/standard/tests/file/tempnam_variation2.phpt
+      ext/standard/tests/file/tempnam_variation3.phpt
+      ext/standard/tests/file/tempnam_variation4.phpt
+      ext/standard/tests/file/tempnam_variation5-win32.phpt
+      ext/standard/tests/file/tempnam_variation5-win32.phpt
+      ext/standard/tests/file/tempnam_variation5.phpt
+      ext/standard/tests/file/tempnam_variation6-win32.phpt
+      ext/standard/tests/file/tempnam_variation6-win32.phpt
+      ext/standard/tests/file/tempnam_variation7-win32.phpt
+      ext/standard/tests/file/tempnam_variation7.phpt
+      ext/standard/tests/file/tempnam_variation8-win32.phpt
+      ext/standard/tests/file/tempnam_variation8-win32.phpt
+      ext/standard/tests/file/touch.phpt
+      ext/standard/tests/file/touch_basic-win32.phpt
+      ext/standard/tests/file/touch_basic-win32.phpt
+      ext/standard/tests/file/touch_error.phpt
+      ext/standard/tests/file/touch_error.phpt
+      ext/standard/tests/file/touch_variation2.phpt
+      ext/standard/tests/file/touch_variation2.phpt
+      ext/standard/tests/file/touch_variation3-win32.phpt
+      ext/standard/tests/file/touch_variation3-win32.phpt
+      ext/standard/tests/file/touch_variation4.phpt
+      ext/standard/tests/file/touch_variation4.phpt
+      ext/standard/tests/file/touch_variation5-win32.phpt
+      ext/standard/tests/file/touch_variation5-win32.phpt
+      ext/standard/tests/file/touch_variation6-win32.phpt
+      ext/standard/tests/file/touch_variation6-win32.phpt
+      ext/standard/tests/file/umask_variation3.phpt
+      ext/standard/tests/file/umask_variation3.phpt
+      ext/standard/tests/file/unlink_variation10.phpt
+      ext/standard/tests/file/unlink_variation10.phpt
+      ext/standard/tests/file/unlink_variation6.phpt
+      ext/standard/tests/file/unlink_variation6.phpt:
+      File system tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and
+      Linux 64 bit). There seems to be an issue with trailing slashes on 5.2.7
+      RC1 which may cause some tests to fail...
+
+    * ext/standard/tests/file/005_variation2.phpt
+      ext/standard/tests/file/005_variation2.phpt
+      ext/standard/tests/file/basename-win32.phpt
+      ext/standard/tests/file/basename-win32.phpt
+      ext/standard/tests/file/basename.phpt
+      ext/standard/tests/file/basename.phpt
+      ext/standard/tests/file/copy_variation13.phpt
+      ext/standard/tests/file/copy_variation18.phpt
+      ext/standard/tests/file/dirname_basic-win32.phpt
+      ext/standard/tests/file/dirname_basic-win32.phpt
+      ext/standard/tests/file/dirname_variation1.phpt
+      ext/standard/tests/file/dirname_variation1.phpt
+      ext/standard/tests/file/disk_free_space_basic.phpt
+      ext/standard/tests/file/disk_total_space_basic.phpt
+      ext/standard/tests/file/fgets_socket_variation2.phpt
+      ext/standard/tests/file/fgets_socket_variation2.phpt
+      ext/standard/tests/file/fgets_variation2.phpt
+      ext/standard/tests/file/file_exists_error.phpt
+      ext/standard/tests/file/file_exists_error.phpt
+      ext/standard/tests/file/file_get_contents_variation2.phpt
+      ext/standard/tests/file/file_get_contents_variation2.phpt
+      ext/standard/tests/file/file_get_contents_variation3.phpt
+      ext/standard/tests/file/file_get_contents_variation3.phpt
+      ext/standard/tests/file/file_get_contents_variation6.phpt
+      ext/standard/tests/file/file_get_contents_variation6.phpt
+      ext/standard/tests/file/file_get_contents_variation8.phpt
+      ext/standard/tests/file/file_get_contents_variation8.phpt
+      ext/standard/tests/file/file_put_contents_variation3.phpt
+      ext/standard/tests/file/file_put_contents_variation3.phpt
+      ext/standard/tests/file/file_put_contents_variation5.phpt
+      ext/standard/tests/file/file_put_contents_variation5.phpt
+      ext/standard/tests/file/file_put_contents_variation6.phpt
+      ext/standard/tests/file/file_put_contents_variation6.phpt
+      ext/standard/tests/file/file_put_contents_variation7-win32.phpt
+      ext/standard/tests/file/file_put_contents_variation7-win32.phpt
+      ext/standard/tests/file/file_put_contents_variation7.phpt
+      ext/standard/tests/file/file_put_contents_variation7.phpt
+      ext/standard/tests/file/file_put_contents_variation8.phpt
+      ext/standard/tests/file/file_put_contents_variation8.phpt
+      ext/standard/tests/file/file_variation8.phpt
+      ext/standard/tests/file/file_variation8.phpt
+      ext/standard/tests/file/filegroup_variation3.phpt
+      ext/standard/tests/file/filegroup_variation3.phpt
+      ext/standard/tests/file/fileowner_variation1.phpt
+      ext/standard/tests/file/fileowner_variation1.phpt
+      ext/standard/tests/file/fileperms_variation2.phpt
+      ext/standard/tests/file/fileperms_variation2.phpt
+      ext/standard/tests/file/filesize_variation5.phpt
+      ext/standard/tests/file/filesize_variation5.phpt
+      ext/standard/tests/file/flock_variation.phpt
+      ext/standard/tests/file/fopen_include_path.inc
+      ext/standard/tests/file/fopen_include_path.inc
+      ext/standard/tests/file/fopen_variation14.phpt
+      ext/standard/tests/file/fopen_variation14.phpt
+      ext/standard/tests/file/fopen_variation19.phpt
+      ext/standard/tests/file/fopen_variation19.phpt
+      ext/standard/tests/file/fopen_variation3.phpt
+      ext/standard/tests/file/fopen_variation3.phpt
+      ext/standard/tests/file/fopen_variation5.phpt
+      ext/standard/tests/file/fopen_variation5.phpt
+      ext/standard/tests/file/fopen_variation9.phpt
+      ext/standard/tests/file/fopen_variation9.phpt
+      ext/standard/tests/file/fpassthru_variation1.phpt
+      ext/standard/tests/file/fpassthru_variation1.phpt
+      ext/standard/tests/file/fread_fwrite_basic.phpt
+      ext/standard/tests/file/fread_fwrite_basic.phpt
+      ext/standard/tests/file/fseek_variation1.phpt
+      ext/standard/tests/file/fseek_variation1.phpt
+      ext/standard/tests/file/fseek_variation2.phpt
+      ext/standard/tests/file/fseek_variation2.phpt
+      ext/standard/tests/file/fseek_variation3.phpt
+      ext/standard/tests/file/fseek_variation3.phpt
+      ext/standard/tests/file/fwrite_error.phpt
+      ext/standard/tests/file/fwrite_variation5.phpt
+      ext/standard/tests/file/fwrite_variation5.phpt
+      ext/standard/tests/file/glob_basic.phpt
+      ext/standard/tests/file/is_dir_variation3.phpt
+      ext/standard/tests/file/is_executable_variation3.phpt
+      ext/standard/tests/file/is_readable_variation3.phpt
+      ext/standard/tests/file/is_uploaded_file_basic.phpt
+      ext/standard/tests/file/is_uploaded_file_basic.phpt
+      ext/standard/tests/file/is_writable_variation3.phpt
+      ext/standard/tests/file/lstat_stat_variation2.phpt
+      ext/standard/tests/file/mkdir_variation2.phpt
+      ext/standard/tests/file/mkdir_variation2.phpt
+      ext/standard/tests/file/mkdir_variation3.phpt
+      ext/standard/tests/file/mkdir_variation3.phpt
+      ext/standard/tests/file/mkdir_variation4.phpt
+      ext/standard/tests/file/mkdir_variation4.phpt
+      ext/standard/tests/file/pathinfo_basic1-win32.phpt
+      ext/standard/tests/file/pathinfo_basic1-win32.phpt
+      ext/standard/tests/file/pathinfo_basic2.phpt
+      ext/standard/tests/file/pathinfo_basic2.phpt
+      ext/standard/tests/file/pathinfo_variation2.phpt
+      ext/standard/tests/file/pathinfo_variation2.phpt
+      ext/standard/tests/file/pathinfo_variation3.phpt
+      ext/standard/tests/file/pathinfo_variation3.phpt
+      ext/standard/tests/file/readfile_variation6.phpt
+      ext/standard/tests/file/readfile_variation6.phpt
+      ext/standard/tests/file/readlink_realpath_basic1.phpt
+      ext/standard/tests/file/readlink_realpath_basic2.phpt
+      ext/standard/tests/file/rename_variation10.phpt
+      ext/standard/tests/file/rename_variation10.phpt
+      ext/standard/tests/file/rename_variation11-win32.phpt
+      ext/standard/tests/file/rename_variation11-win32.phpt
+      ext/standard/tests/file/rename_variation13-win32.phpt
+      ext/standard/tests/file/rename_variation13-win32.phpt
+      ext/standard/tests/file/rmdir_variation3-win32.phpt
+      ext/standard/tests/file/rmdir_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation1-win32.phpt
+      ext/standard/tests/file/tempnam_variation1.phpt
+      ext/standard/tests/file/tempnam_variation3-win32.phpt
+      ext/standard/tests/file/tempnam_variation6.phpt
+      ext/standard/tests/file/touch_basic.phpt
+      ext/standard/tests/file/touch_basic.phpt
+      ext/standard/tests/file/touch_variation4-win32.phpt
+      ext/standard/tests/file/touch_variation4-win32.phpt
+      ext/standard/tests/file/touch_variation5.phpt
+      ext/standard/tests/file/touch_variation5.phpt
+      ext/standard/tests/file/unlink_variation7.phpt
+      ext/standard/tests/file/unlink_variation7.phpt
+      ext/standard/tests/file/unlink_variation8-win32.phpt
+      ext/standard/tests/file/unlink_variation8-win32.phpt
+      ext/standard/tests/file/unlink_variation9-win32.phpt
+      ext/standard/tests/file/unlink_variation9-win32.phpt:
+      
+      file 005_variation2.phpt was initially added on branch PHP_5_2.
+
+2008-11-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/ns_079.phpt
+      ZendEngine2/tests/ns_079.phpt
+      ZendEngine2/tests/ns_080.phpt
+      ZendEngine2/tests/ns_080.phpt
+      ZendEngine2/tests/ns_081.phpt
+      ZendEngine2/tests/ns_081.phpt
+      ZendEngine2/tests/ns_082.phpt
+      ZendEngine2/tests/ns_082.phpt
+      ZendEngine2/tests/ns_083.phpt
+      ZendEngine2/tests/ns_083.phpt
+      ZendEngine2/tests/ns_084.phpt
+      ZendEngine2/tests/ns_084.phpt
+      ZendEngine2/tests/ns_085.phpt
+      ZendEngine2/tests/ns_085.phpt
+      ZendEngine2/tests/ns_086.phpt
+      ZendEngine2/tests/ns_086.phpt
+      ZendEngine2/tests/ns_087.phpt
+      ZendEngine2/tests/ns_087.phpt:
+      
+      file ns_079.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y:
+      Added support for namespaces with brackets. (Greg)
+
+2008-11-25  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      MFH: Fixed endless loop in cli when ignore_user_abort is on
+
+    * sapi/cli/php_cli.c:
+      Fixed endless loop in cli when ignore_user_abort is on
+
+2008-11-25  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache/mod_php.c
+      sapi/apache2handler/apache_config.c:
+      MFB: fix php_value application order for Apache
+
 2008-11-24  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_3)
