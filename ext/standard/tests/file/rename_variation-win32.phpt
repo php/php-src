@@ -71,7 +71,7 @@ bool(true)
 
 Warning: rename(%s/rename_variation/rename_variation.tmp/,%s/rename_variation2.tmp): No such file or directory in %s on line %d
 bool(false)
-bool(true)
+bool(false)
 bool(false)
 
 Warning: unlink(%s/rename_variation2.tmp): No such file or directory in %s on line %d
@@ -84,3 +84,4 @@ bool(true)
 bool(false)
 bool(true)
 Done
+

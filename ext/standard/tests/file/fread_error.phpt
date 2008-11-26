@@ -1,5 +1,7 @@
 --TEST--
 Test fread() function : error conditions
+--XFAIL--
+Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -62,11 +64,11 @@ echo "Done\n";
 -- Testing fread() with zero argument --
 
 Warning: fread() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing fread() with more than expected number of arguments --
 
 Warning: fread() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
+bool(false)
 -- Testing fread() with invalid length arguments --
 
 Warning: fread(): Length parameter must be greater than 0 in %s on line %d
@@ -78,37 +80,38 @@ bool(false)
 -- Iteration 1 --
 
 Warning: fread() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 2 --
 
 Warning: fread() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: fread() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: fread() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: fread() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: fread() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
 Notice: Undefined variable: file_content_type in %s on line %d
 
-Warning: fread(): 5 is not a valid stream resource in %s on line %d
+Warning: fread(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fread() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 Done
+

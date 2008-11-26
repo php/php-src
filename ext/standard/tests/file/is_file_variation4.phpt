@@ -1,5 +1,5 @@
 --TEST--
-Test is_file() function: usage variations - diff. path notations (Bug #42027, #42638)
+Test is_file() function: usage variations - diff. path notations (Bug #42027)
 --FILE--
 <?php
 /* Prototype: bool is_file ( string $filename );
@@ -52,7 +52,7 @@ $dir_name = $file_path."/is_file_variation4";
 unlink($dir_name."/is_file_variation4.tmp");
 rmdir($dir_name);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_file() with different notations of file names ***
 - Iteration 1 -
 bool(true)

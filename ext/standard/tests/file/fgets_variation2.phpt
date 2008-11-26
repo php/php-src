@@ -1,5 +1,7 @@
 --TEST--
 Test fgets() function : usage variations - closed handle
+--XFAIL--
+Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -43,20 +45,21 @@ echo "Done";
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
 
-Warning: fgets(): 6 is not a valid stream resource in %s on line %s
+Warning: fgets(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fgets(): 6 is not a valid stream resource in %s on line %s
+Warning: fgets(): %d is not a valid stream resource in %s on line %d
 bool(false)
 -- Testing fgets() with unset handle --
 
-Notice: Undefined variable: file_handle in %s on line %s
+Notice: Undefined variable: file_handle in %s on line %d
 
-Warning: fgets() expects parameter 1 to be resource, null given in %s on line %s
-NULL
+Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
+bool(false)
 
-Notice: Undefined variable: file_handle in %s on line %s
+Notice: Undefined variable: file_handle in %s on line %d
 
-Warning: fgets() expects parameter 1 to be resource, null given in %s on line %s
-NULL
+Warning: fgets() expects parameter 1 to be resource, null given in %s on line %d
+bool(false)
 Done
+

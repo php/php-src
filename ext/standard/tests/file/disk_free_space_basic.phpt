@@ -7,27 +7,26 @@ memory_limit=32M
 /*
  *  Prototype: float disk_free_space( string directory )
  *  Description: Given a string containing a directory, this function 
- *               will return the number of bytes available on the corresponding 
- *               filesystem or disk partition
+ *  will return the number of bytes available on the corresponding 
+ *  filesystem or disk partition
  */
 
 $file_path = dirname(__FILE__);
+include($file_path."/file.inc");
 
 echo "*** Testing with existing directory ***\n";
 var_dump( disk_free_space($file_path) ); 
 var_dump( diskfreespace($file_path) ); 
+$dir = "/disk_free_space";
 
 echo "*** Testing with newly created directory ***\n";
-$dir = "/disk_free_space";
 mkdir($file_path.$dir);
 echo" \n Free Space before writing to a file\n";
 $space1 =  disk_free_space($file_path.$dir); 
-var_dump( $space1 ); 
+var_dump($space1); 
 
-$fh = fopen($file_path.$dir."/disk_free_space.tmp", "a");
-for( $i=1; $i<=1000; $i++)
-fwrite($fh, (binary)"x");
-fclose($fh);
+fill_buffer($buffer, "text", 3000000);
+file_put_contents($file_path.$dir."/disk_free_space.tmp", $buffer);
 
 echo "\n Free Space after writing to a file\n";
 $space2 =  disk_free_space($file_path.$dir); 
@@ -38,33 +37,29 @@ if( $space1 > $space2 )
 else
   echo "\n Free Space Value Is Incorrect\n";
 
-echo "*** Testing with Binary Input ***\n";
-var_dump( disk_free_space(b"$file_path") ); 
-
-echo"\n--- Done ---";
+echo"\n-- Done --";
 ?>
 
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/disk_free_space/disk_free_space.tmp");
-rmdir($file_path."/disk_free_space");
+$dir = "/disk_free_space";
+unlink($file_path.$dir."/disk_free_space.tmp");
+rmdir($file_path.$dir);
 ?>
 
 --EXPECTF--
 *** Testing with existing directory ***
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 *** Testing with newly created directory ***
  
  Free Space before writing to a file
-float(%d)
+float(%f)
 
  Free Space after writing to a file
-float(%d)
+float(%f)
 
  Free Space Value Is Correct
-*** Testing with Binary Input ***
-float(%d)
 
---- Done ---
+-- Done --

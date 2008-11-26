@@ -1,5 +1,5 @@
 --TEST--
-Test is_file() function: usage variations - invalid arguments
+Test is_file() function: usage variations - invalid filenames
 --FILE--
 <?php
 /* Prototype: bool is_file ( string $filename );
@@ -16,17 +16,18 @@ echo "*** Testing Invalid file types ***\n";
 $filenames = array(
   /* Invalid filenames */
   -2.34555,
+  " ",
   "",
   TRUE,
   FALSE,
   NULL,
   $file_handle,
-
+  
   /* scalars */
   1234,
   0
 );
-
+   
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
   var_dump( is_file($filename) );
@@ -48,6 +49,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
 
 Warning: is_file() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 NULL
@@ -55,3 +57,4 @@ bool(false)
 bool(false)
 
 *** Done ***
+

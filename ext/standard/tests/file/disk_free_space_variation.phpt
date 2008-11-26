@@ -1,5 +1,5 @@
 --TEST--
-Test disk_free_space and its alias diskfreespace() functions : Usage Variations
+Test disk_free_space and its alias diskfreespace() functions : usage variations
 --FILE--
 <?php
 /*
@@ -11,15 +11,16 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 
 $file_path = dirname(__FILE__);
 
-echo "*** Testing with a directory ***\n";
+echo "*** Testing disk_free_space() function with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") ); 
 var_dump( diskfreespace($file_path."/..") ); 
 
-echo "\nTesting for the return type ***\n";
+echo "\n*** Testing for the return type ***\n";
 $return_value = disk_free_space($file_path); 
 var_dump( is_float($return_value) );
 
-echo "\n*** Testing with different directory combinations ***";
+echo "\n*** Testing disk_free_space() function with different styles of file and directory ***";
+
 $dir = "/disk_free_space";
 mkdir($file_path.$dir);
 
@@ -41,15 +42,15 @@ $dirs_arr = array(
   $file_path.$dir.chr(0),
   $file_path."/.".$dir.chr(0),
   ".".chr(0).$file_path.$dir,
-  ".".chr(0).$file_path.$dir.chr(0)
+  ".".chr(0).$file_path.$dir.chr(0) 
 );
 
 $count = 1;
 /* loop through to test each element the above array */
-foreach($dirs_arr as $dir1) {
+foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
-  var_dump( disk_free_space( $dir1 ) );
-  var_dump( diskfreespace( $dir1 ) );
+  var_dump( disk_free_space( $dir ) );
+  var_dump( diskfreespace( $dir ) );
   $count++;
 }
 
@@ -58,66 +59,65 @@ echo"\n--- Done ---";
 
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-rmdir($file_path."/disk_free_space");
+$file_path = dirname(__FILE__)."/disk_free_space";
+rmdir($file_path);
 ?>
 
-
 --EXPECTF--
-*** Testing with a directory ***
-float(%d)
-float(%d)
+*** Testing disk_free_space() function with a directory ***
+float(%f)
+float(%f)
 
-Testing for the return type ***
+*** Testing for the return type ***
 bool(true)
 
-*** Testing with different directory combinations ***
+*** Testing disk_free_space() function with different styles of file and directory ***
 -- Iteration 1 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 2 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 3 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 4 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 5 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 6 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 7 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 8 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 9 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 10 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 11 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Iteration 12 --
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 --- Done ---

@@ -1,5 +1,7 @@
 --TEST--
 Testing fseek() on a directory stream
+--XFAIL--
+Pending completion of Unicode streams
 --FILE--
 <?php
 
@@ -40,9 +42,9 @@ closedir($dh);
 var_dump(rmdir($path));
 
 ?>
---EXPECT--
+--EXPECTF--
 call readdir():
-resource(12) of type (stream)
+resource(%d) of type (stream)
 array(6) {
   [0]=>
   bool(false)

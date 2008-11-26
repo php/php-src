@@ -55,7 +55,7 @@ echo "\n*** Done ***\n";
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing error conditions ***
 
 --- Iteration 0 ---
@@ -91,8 +91,10 @@ Warning: flock() expects parameter 2 to be long, Unicode string given in %s on l
 NULL
 
 --- Iteration 8 ---
-Warning: flock() expects parameter 2 to be long, string given in %s on line %d
-NULL
+Notice: A non well formed numeric value encountered in %s on line %d
+
+Warning: flock(): Illegal operation argument in %s on line %d
+bool(false)
 
 Warning: flock(): 6 is not a valid stream resource in %s on line %d
 bool(false)
@@ -110,3 +112,4 @@ Warning: flock() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 *** Done ***
+

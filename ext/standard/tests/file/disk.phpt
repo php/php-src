@@ -25,7 +25,7 @@ var_dump(disk_total_space("/some/path/here"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: disk_free_space() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
@@ -37,8 +37,8 @@ bool(false)
 
 Warning: disk_total_space(): No such file or directory in %s on line %d
 bool(false)
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 Warning: disk_free_space(): No such file or directory in %s on line %d
 bool(false)
