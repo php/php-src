@@ -1992,10 +1992,11 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	zend_op *opline;
 	ulong fetch_type = 0;
 
+#if 0
 	if (class_name->op_type == IS_CONST &&
 	    Z_TYPE(class_name->u.constant) == IS_STRING &&
 	    Z_STRLEN(class_name->u.constant) == 0) {
-		/* namespace::func() not in namespace */
+		/* namespace\func() not in namespace */
 		zval_dtor(&class_name->u.constant);
 		if (CG(current_namespace)) {
 			znode tmp;
@@ -2008,6 +2009,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 		}
 		return zend_do_begin_function_call(method_name, 0 TSRMLS_CC);
 	}
+#endif
 
 	if (method_name->op_type == IS_CONST) {
 		char *lcname = zend_str_tolower_dup(Z_STRVAL(method_name->u.constant), Z_STRLEN(method_name->u.constant));
@@ -2035,7 +2037,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 
 	if (class_node.op_type == IS_CONST &&
 		method_name->op_type == IS_CONST) {
-		/* Prebuild ns::func name to speedup run-time check.
+		/* Prebuild ns\func name to speedup run-time check.
 		   The additional names are stored in additional OP_DATA opcode. */
 		char *nsname, *fname;
 		unsigned int nsname_len, len;
