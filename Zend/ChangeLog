@@ -1,3 +1,43 @@
+2008-11-25  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c
+      zend_API.c:
+      cleanup
+
+2008-11-25  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      - Fixed bug #46665 (Triggering autoload with a variable classname causes
+      truncated autoload param)
+
+2008-11-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y
+      tests/ns_079.phpt
+      tests/ns_079.phpt
+      tests/ns_080.phpt
+      tests/ns_080.phpt
+      tests/ns_081.phpt
+      tests/ns_081.phpt
+      tests/ns_082.phpt
+      tests/ns_082.phpt
+      tests/ns_083.phpt
+      tests/ns_083.phpt
+      tests/ns_084.phpt
+      tests/ns_084.phpt
+      tests/ns_085.phpt
+      tests/ns_085.phpt
+      tests/ns_086.phpt
+      tests/ns_086.phpt
+      tests/ns_087.phpt
+      tests/ns_087.phpt:
+      Added support for namespaces with brackets. (Greg)
+
 2008-11-24  Stanislav Malyshev  <stas@zend.com>
 
     * zend_API.c:
