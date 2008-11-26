@@ -35,6 +35,12 @@ PHPAPI int php_flock(int fd, int operation);
 PHPAPI int flock(int fd, int operation);
 #endif
 
+/* Userland LOCK_* constants */
+#define PHP_LOCK_SH 1
+#define PHP_LOCK_EX 2
+#define PHP_LOCK_UN 3
+#define PHP_LOCK_NB 4
+
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #	define fsync _commit
