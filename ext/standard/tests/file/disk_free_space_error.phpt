@@ -1,15 +1,15 @@
 --TEST--
-Test disk_free_space and its alias diskfreespace() functions : error conditions.
+Test disk_free_space and its alias diskfreespace() functions : error conditions
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == 'WIN')
-  die("skip Not valid on Windows");
+if(substr(PHP_OS, 0, 3) == 'WIN' )
+  die("skip Not Valid for Windows");
 ?>
 --FILE--
 <?php
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function will 
+ *  Description: Given a string containing a directory, this function will
  *               return the number of bytes available on the corresponding 
  *               filesystem or disk partition
  */
@@ -27,7 +27,7 @@ var_dump( disk_free_space( $file_path."/dir1" )); // Invalid directory
 var_dump( diskfreespace( $file_path."/dir1" ));
 
 $fh = fopen( $file_path."/disk_free_space.tmp", "w" );
-fwrite( $fh, (binary)" Garbage data for the temporary file" );
+fwrite( $fh, " Garbage data for the temporary file" );
 var_dump( disk_free_space( $file_path."/disk_free_space.tmp" )); // file input instead of directory
 var_dump( diskfreespace( $file_path."/disk_free_space.tmp" ));
 fclose($fh);
@@ -55,12 +55,12 @@ NULL
 Warning: diskfreespace() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: disk_free_space(): No such file or directory in %s on line %d
+Warning: disk_free_space(): %s in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): No such file or directory in %s on line %d
+Warning: diskfreespace(): %s in %s on line %d
 bool(false)
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 
 -- Done --

@@ -1,5 +1,10 @@
 --TEST--
 Test tempnam() function: usage variations - existing file
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip Do not run on Windows");
+?>
 --FILE--
 <?php
 /* Prototype:  string tempnam ( string $dir, string $prefix );
@@ -13,7 +18,7 @@ $file_path = dirname(__FILE__);
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
 $dir_name = $file_path."/tempnam_variation6";
 mkdir($dir_name);
-fopen($dir_name."/tempnam_variation6.tmp", "w");
+$h = fopen($dir_name."/tempnam_variation6.tmp", "w");
 
 for($i=1; $i<=3; $i++) {
   echo "-- Iteration $i --\n";
@@ -29,6 +34,7 @@ for($i=1; $i<=3; $i++) {
 
   unlink($created_file);
 }
+fclose($h);
 unlink($dir_name."/tempnam_variation6.tmp");
 rmdir($dir_name);
 
@@ -37,10 +43,10 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Test tempnam() function: by passing an existing filename as prefix ***
 -- Iteration 1 --
-File name is => %s
+File name is => %stempnam_variation6%etempnam_variation6.tmp%s
 -- Iteration 2 --
-File name is => %s
+File name is => %stempnam_variation6%etempnam_variation6.tmp%s
 -- Iteration 3 --
-File name is => %s
+File name is => %stempnam_variation6%etempnam_variation6.tmp%s
 
 *** Done ***

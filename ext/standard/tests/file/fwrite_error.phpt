@@ -1,5 +1,7 @@
 --TEST--
-Test fwrite() function : error conditions (Bug #42057)
+Test fwrite() function : error conditions
+--XFAIL--
+Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -34,7 +36,7 @@ echo "-- Testing fwrite() with invalid length arguments --\n";
 $len = 0;
 var_dump( fwrite($file_handle, $data, $len) );
 $len = -10;
-var_dump( fwrite($file_handle, (binary)$data, $len) );
+var_dump( fwrite($file_handle, $data, $len) );
 
 // test invalid arguments : non-resources
 echo "-- Testing fwrite() with invalid arguments --\n";
@@ -74,14 +76,14 @@ unlink( $filename );
 -- Testing fwrite() with less than expected number of arguments --
 
 Warning: fwrite() expects at least 2 parameters, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+bool(false)
 -- Testing fwrite() with more than expected number of arguments --
 
 Warning: fwrite() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+bool(false)
 -- Testing fwrite() with invalid length arguments --
 int(0)
 int(0)
@@ -89,32 +91,33 @@ int(0)
 -- Iteration 1 --
 
 Warning: fwrite() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+bool(false)
 -- Iteration 2 --
 
 Warning: fwrite() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: fwrite() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: fwrite() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: fwrite() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: fwrite() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
-Warning: fwrite(): 6 is not a valid stream resource in %s on line %d
+Warning: fwrite(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fwrite() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 Done
+

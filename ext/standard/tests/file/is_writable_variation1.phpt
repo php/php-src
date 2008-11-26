@@ -2,8 +2,18 @@
 Test is_writable() and its alias is_writeable() function: usage variations - diff. path notations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only on LINUX');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+
+  // Skip if being run by root (files are always readable, writeable and executable)
+  $filename = dirname(__FILE__)."/is_writable_root_check.tmp";
+  $fp = fopen($filename, 'w');
+  fclose($fp);
+  if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip cannot be run as root');
+  }
+
+  unlink($filename);
 }
 ?>
 --FILE--

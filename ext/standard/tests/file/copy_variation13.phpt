@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - src as dir and dest as an existing file (Bug #42243)
+Test copy() function: usage variations - src as dir and dest as an existing file(Bug #42243)
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );

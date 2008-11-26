@@ -1,5 +1,7 @@
 --TEST--
 Test fgetc() function : usage variations - closed handle
+--XFAIL--
+Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -47,6 +49,6 @@ bool(false)
 
 Notice: Undefined variable: file_handle in %s on line %d
 
-Warning: fgetc(): supplied argument is not a valid stream resource in %s on line %d
+Warning: fgetc() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
