@@ -1419,7 +1419,7 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 	sdlPtr sdl;
 	sdlTypePtr sdlType = type->sdl_type;
 	zend_class_entry *ce = ZEND_STANDARD_CLASS_DEF_PTR;
-	zend_bool redo_any = 0;
+	zval *redo_any = NULL;
 	TSRMLS_FETCH();
 
 	if (pce) {
@@ -1491,10 +1491,7 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 				if (soap_check_xml_ref(&ret, data TSRMLS_CC)) {
 					return ret;
 				}
-				if (get_zval_property(ret, "any" TSRMLS_CC) != NULL) {
-					unset_zval_property(ret, "any" TSRMLS_CC);
-					redo_any = 1;
-				}
+				redo_any = get_zval_property(ret, "any" TSRMLS_CC);
 				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
 					zend_object *zobj = zend_objects_get_address(ret TSRMLS_CC);
 					zobj->ce = ce;
@@ -1520,10 +1517,17 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 			object_init_ex(ret, ce);
 		}
 		if (sdlType->model) {
+			if (redo_any) {
+				redo_any->refcount++;
+				unset_zval_property(ret, "any" TSRMLS_CC);
+			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
-			if (redo_any && get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
-				model_to_zval_any(ret, data->children TSRMLS_CC);
-		  }
+			if (redo_any) {
+				if (get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
+					model_to_zval_any(ret, data->children TSRMLS_CC);
+				}
+				zval_ptr_dtor(&redo_any);
+			}
 		}
 		if (sdlType->attributes) {
 			sdlAttributePtr *attr;
