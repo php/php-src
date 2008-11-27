@@ -171,8 +171,6 @@ string(12) "Hello World!"
 string(0) ""
 
 -- Iteration 24 --
-
-Warning: session_save_path() expects parameter 1 to be string, resource given in %s on line %d
-NULL
+string(0) ""
 Done
 
