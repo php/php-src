@@ -46,7 +46,7 @@ ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, ze
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object_pp = object_pp;
+	fci.object_ptr = object_pp ? *object_pp : NULL;
 	fci.function_name = &z_fname;
 	fci.retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
 	fci.param_count = param_count;
@@ -86,7 +86,7 @@ ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, ze
 		}
 		fcic.calling_scope = obj_ce;
 		fcic.called_scope = object_pp ? obj_ce : EG(called_scope);
-		fcic.object_pp = object_pp;
+		fcic.object_ptr = object_pp ? *object_pp : NULL;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	}
 	if (result == FAILURE) {

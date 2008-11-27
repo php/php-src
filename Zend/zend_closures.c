@@ -213,7 +213,7 @@ static zend_object_value zend_closure_new(zend_class_entry *class_type TSRMLS_DC
 }
 /* }}} */
 
-int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
+int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -228,16 +228,10 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 		if (zobj_ptr) {
 			*zobj_ptr = closure->this_ptr;
 		}
-		if (zobj_ptr_ptr) {
-			*zobj_ptr_ptr = &closure->this_ptr;
-		}
 		*ce_ptr = Z_OBJCE_P(closure->this_ptr);
 	} else {
 		if (zobj_ptr) {
 			*zobj_ptr = NULL;
-		}
-		if (zobj_ptr_ptr) {
-			*zobj_ptr_ptr = NULL;
 		}
 		*ce_ptr = closure->func.common.scope;
 	}

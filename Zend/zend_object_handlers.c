@@ -1318,7 +1318,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 }
 /* }}} */
 
-int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
+int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
 {
 	zstr key;
 	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
@@ -1348,15 +1348,9 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 		if (zobj_ptr) {
 			*zobj_ptr = NULL;
 		}
-		if (zobj_ptr_ptr) {
-			*zobj_ptr_ptr = NULL;
-		}
 	} else {
 		if (zobj_ptr) {
 			*zobj_ptr = obj;
-		}
-		if (zobj_ptr_ptr) {
-			*zobj_ptr_ptr = NULL;
 		}
 	}
 

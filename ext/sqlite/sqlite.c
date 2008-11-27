@@ -2619,7 +2619,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fci.function_table = &ce->function_table;
 		fci.function_name = NULL;
 		fci.symbol_table = NULL;
-		fci.object_pp = &return_value;
+		fci.object_ptr = return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
 		if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 			if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
@@ -2653,7 +2653,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fcc.function_handler = ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		fcc.object_pp = &return_value;
+		fcc.object_ptr = return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);

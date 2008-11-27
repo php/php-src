@@ -48,7 +48,7 @@ typedef struct _zend_fcall_info {
 	zval **retval_ptr_ptr;
 	zend_uint param_count;
 	zval ***params;
-	zval **object_pp;
+	zval *object_ptr;
 	zend_bool no_separation;
 } zend_fcall_info;
 
@@ -57,7 +57,7 @@ typedef struct _zend_fcall_info_cache {
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
-	zval **object_pp;
+	zval *object_ptr;
 } zend_fcall_info_cache;
 
 #define ZEND_NS_NAME(ns, name)			ns"::"name
@@ -284,7 +284,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, zval *callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name TSRMLS_DC);
 ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);

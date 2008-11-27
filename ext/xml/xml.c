@@ -528,7 +528,7 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *
 		fci.function_table = EG(function_table);
 		fci.function_name = handler;
 		fci.symbol_table = NULL;
-		fci.object_pp = &parser->object;
+		fci.object_ptr = parser->object;
 		fci.retval_ptr_ptr = &retval;
 		fci.param_count = argc;
 		fci.params = args;
