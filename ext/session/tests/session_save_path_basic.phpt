@@ -29,6 +29,12 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_save_path() : error functionality ***
+string(0) ""
+string(0) ""
+string(%d) "%s"
+Done
+--UEXPECTF--
+*** Testing session_save_path() : error functionality ***
 unicode(0) ""
 unicode(0) ""
 unicode(%d) "%s"
