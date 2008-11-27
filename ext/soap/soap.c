@@ -2348,6 +2348,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (zend_hash_find(ht, "stream_context", sizeof("stream_context"), (void**)&tmp) == SUCCESS &&
 				Z_TYPE_PP(tmp) == IS_RESOURCE) {
 			context = php_stream_context_from_zval(*tmp, 1);
+			zend_list_addref(context->rsrc_id);
 		}
 
 		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&

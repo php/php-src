@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   inconsistent results). (Arnaud)
 - Fixed bug #46626 (mb_convert_case does not handle apostrophe correctly).
   (Ilia)
+- Fixed bug #46427 (SoapClient() stumbles over its "stream_context" parameter).
+  (Dmitry, Herman Radtke)
 - Fixed bug #44182 (extract($a, EXTR_REFS) can fail to split copy-on-write
   references). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #44181 (extract($a, EXTR_OVERWRITE|EXTR_REFS) can fail to create 
