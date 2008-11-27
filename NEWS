@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2008, PHP 5.2.7
+27 Nov 2008, PHP 5.2.7RC5
 - Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
 
 - Fixed a crash inside gd with invalid fonts (Fixes CVE-2008-3658). (Pierre)
