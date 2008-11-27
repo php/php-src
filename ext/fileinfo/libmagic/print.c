@@ -62,7 +62,7 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
 	
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Warning: %s", expanded_format);
 
-	efree(expanded_format);
+	free(expanded_format);
 }
 
 protected const char *

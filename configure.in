@@ -637,6 +637,8 @@ usleep \
 nanosleep \
 utime \
 vsnprintf \
+vasprintf \
+asprintf \
 )
 
 dnl Check for getaddrinfo, should be a better way, but...
