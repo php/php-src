@@ -1,7 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2008, PHP 5.2.7
-- Upgraded PCRE to version 7.8 (Ilia)
+- Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
+
+- Fixed a crash inside gd with invalid fonts (Fixes CVE-2008-3658). (Pierre)
+- Fixed a possible overflow inside memnstr (Fixes CVE-2008-3659). (Laurent
+  Gaffie)
 
 - Fixed memory leak inside readline_callback_handler_remove() function. (Felipe)
 - Fixed bug #46696 (cURL fails in upload files with specified content-type).
@@ -142,7 +146,7 @@ PHP                                                                        NEWS
   pgsql). (Felipe)
 - Fixed bug #43723 (SOAP not sent properly from client for <choice>). (Dmitry)
 - Fixed bug #42862 (IMAP toolkit crash: rfc822.c legacy routine buffer
-  overflow). (Dmitry)
+  overflow). (Fixes CVE-2008-2829) (Dmitry)
 - Fixed bug #42078 (pg_meta_data mix tables metadata from different schemas).
   (Felipe)
 - Fixed bug #37100 (data is returned truncated with BINARY CURSOR). (Tony)
@@ -249,7 +253,7 @@ PHP                                                                        NEWS
 - Fixed bug #45178 (memory corruption on assignment result of "new" by
   reference). (Dmitry)
 - Fixed bug #45151 (Crash with URI/file..php (filename contains 2 dots)).
-  (Dmitry)
+  (Fixes CVE-2008-3660) (Dmitry)
 - Fixed bug #45139 (ReflectionProperty returns incorrect declaring class).
   (Felipe)
 - Fixed bug #45124 ($_FILES['upload']['size'] sometimes return zero and 
