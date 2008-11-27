@@ -415,7 +415,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_bool prepend = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
-	zval **obj_ptr;
+	zval *obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
@@ -449,7 +449,7 @@ PHP_FUNCTION(spl_autoload_register)
 		if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_STRICT, &zfunc_name, &fcc, &error TSRMLS_CC)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
-			obj_ptr = fcc.object_pp;
+			obj_ptr = fcc.object_ptr;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
@@ -491,7 +491,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
-		obj_ptr = fcc.object_pp;
+		obj_ptr = fcc.object_ptr;
 		if (error) {
 			efree(error);
 		}
@@ -506,9 +506,9 @@ PHP_FUNCTION(spl_autoload_register)
 			zstr lc_name;
 			size_t func_name_len = Z_UNISIZE(zfunc_name);
 			lc_name.v = Z_UNIVAL(zfunc_name).v = erealloc(Z_UNIVAL(zfunc_name).v, func_name_len + 2 + sizeof(zend_object_handle));
-			memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+			memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
-			alfi.obj = *obj_ptr;
+			alfi.obj = obj_ptr;
 			Z_ADDREF_P(alfi.obj);
 			if (Z_TYPE(zfunc_name) == IS_UNICODE) {
 				func_name_len /= sizeof(UChar);
@@ -569,7 +569,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zstr lc_name;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
-	zval **obj_ptr;
+	zval *obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
@@ -584,7 +584,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		zval_dtor(&zfunc_name);
 		RETURN_FALSE;
 	}
-	obj_ptr = fcc.object_pp;
+	obj_ptr = fcc.object_ptr;
 	if (error) {
 		efree(error);
 	}
@@ -606,7 +606,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			if (success != SUCCESS && obj_ptr) {
 				size_t func_name_len = Z_UNISIZE(zfunc_name);
 				lc_name.v = erealloc(lc_name.v, func_name_len + 2 + sizeof(zend_object_handle));
-				memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+				memcpy(lc_name.s + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 				func_name_len += sizeof(zend_object_handle);
 				if (Z_TYPE(zfunc_name) == IS_UNICODE) {
 					func_name_len /= sizeof(UChar);

@@ -1283,7 +1283,7 @@ PHP_METHOD(SoapFault, __toString)
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
 	fci.function_name = &fname;
 	fci.symbol_table = NULL;
-	fci.object_pp = &getThis();
+	fci.object_ptr = getThis();
 	fci.retval_ptr_ptr = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;

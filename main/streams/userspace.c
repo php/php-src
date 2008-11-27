@@ -299,7 +299,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 		fci.function_table = &uwrap->ce->function_table;
 		fci.function_name = NULL;
 		fci.symbol_table = NULL;
-		fci.object_pp = &us->object;
+		fci.object_ptr = us->object;
 		fci.retval_ptr_ptr = &retval_ptr;
 		fci.param_count = 0;
 		fci.params = NULL;
@@ -309,7 +309,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 		fcc.function_handler = uwrap->ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(us->object);
-		fcc.object_pp = &us->object;
+		fcc.object_ptr = us->object;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);

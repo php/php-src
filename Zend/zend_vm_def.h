@@ -2132,7 +2132,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 		if (Z_TYPE_P(function_name) == IS_OBJECT &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
-			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object), NULL TSRMLS_CC) == SUCCESS) {
+			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &EX(called_scope), &EX(fbc), &EX(object) TSRMLS_CC) == SUCCESS) {
 			if (EX(object)) {
 				Z_ADDREF_P(EX(object));
 			}

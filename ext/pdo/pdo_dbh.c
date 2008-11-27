@@ -460,7 +460,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &dbstmt_ce->function_table;
 		fci.function_name = NULL;
-		fci.object_pp = &object;
+		fci.object_ptr = object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
 		if (ctor_args) {
@@ -484,7 +484,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fcc.function_handler = dbstmt_ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(object);
-		fcc.object_pp = &object;
+		fcc.object_ptr = object;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			zval_dtor(object);

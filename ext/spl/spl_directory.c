@@ -1948,7 +1948,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.object_pp = NULL;
+	fci.object_ptr = NULL;
 	fci.function_name = &z_fname;
 	fci.retval_ptr_ptr = &retval;
 	fci.param_count = num_args;
@@ -1960,7 +1960,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
 	fcic.called_scope = NULL;
-	fcic.object_pp = NULL;
+	fcic.object_ptr = NULL;
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	

@@ -777,7 +777,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
 {
-	zval **object = NULL, **method = NULL;
+	zval *object = NULL, **method = NULL;
 	char *fname = NULL, *cname;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
@@ -787,19 +787,19 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 			return 0;
 		}
-		object = (zval**)Z_ARRVAL_P(callable)->pListHead->pData;
+		object = *(zval**)Z_ARRVAL_P(callable)->pListHead->pData;
 		method = (zval**)Z_ARRVAL_P(callable)->pListHead->pListNext->pData;
 
-		if (Z_TYPE_PP(object) == IS_STRING) { /* static call */
-			if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == FAILURE) {
+		if (Z_TYPE_P(object) == IS_STRING) { /* static call */
+			if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not exist" TSRMLS_CC);
 				return 0;
 			} else {
 				ce = *pce;
 			}
 			object = NULL;
-		} else if (Z_TYPE_PP(object) == IS_OBJECT) { /* object call */
-			ce = Z_OBJCE_PP(object);
+		} else if (Z_TYPE_P(object) == IS_OBJECT) { /* object call */
+			ce = Z_OBJCE_P(object);
 		} else {
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback; bogus object/class name" TSRMLS_CC);
 			return 0;
@@ -856,13 +856,13 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 	fci->symbol_table = NULL;
 	fci->param_count = num_args; /* probably less */
 	fci->params = safe_emalloc(sizeof(zval**), num_args, 0);
-	fci->object_pp = object;
+	fci->object_ptr = object;
 
 	fcc->initialized = 1;
 	fcc->function_handler = function_handler;
 	fcc->calling_scope = EG(scope);
-	fcc->called_scope = object ? Z_OBJCE_PP(object) : NULL;
-	fcc->object_pp = object;
+	fcc->called_scope = object ? Z_OBJCE_P(object) : NULL;
+	fcc->object_ptr = object;
 	
 	return 1;
 }
@@ -1035,8 +1035,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						}
 					}
 					if (ce->constructor && (flags & PDO_FETCH_PROPS_LATE)) {
-						stmt->fetch.cls.fci.object_pp = &return_value;
-						stmt->fetch.cls.fcc.object_pp = &return_value;
+						stmt->fetch.cls.fci.object_ptr = return_value;
+						stmt->fetch.cls.fcc.object_ptr = return_value;
 						if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor" TSRMLS_CC);
 							return 0;
@@ -1240,8 +1240,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		switch (how) {
 			case PDO_FETCH_CLASS:
 				if (ce->constructor && !(flags & PDO_FETCH_PROPS_LATE)) {
-					stmt->fetch.cls.fci.object_pp = &return_value;
-					stmt->fetch.cls.fcc.object_pp = &return_value;
+					stmt->fetch.cls.fci.object_ptr = return_value;
+					stmt->fetch.cls.fcc.object_ptr = return_value;
 					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor" TSRMLS_CC);
 						return 0;

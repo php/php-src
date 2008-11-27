@@ -1302,7 +1302,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fci.function_table = NULL;
 	fci.function_name = NULL;
 	fci.symbol_table = NULL;
-	fci.object_pp = &reflector_ptr;
+	fci.object_ptr = reflector_ptr;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = ctor_argc;
 	fci.params = params;
@@ -1312,7 +1312,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fcc.function_handler = ce_ptr->constructor;
 	fcc.calling_scope = ce_ptr;
 	fcc.called_scope = Z_OBJCE_P(reflector_ptr);
-	fcc.object_pp = &reflector_ptr;
+	fcc.object_ptr = reflector_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	
@@ -1337,7 +1337,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	ZVAL_ASCII_STRINGL(&fname, "reflection::export", sizeof("reflection::export") - 1, 1);
 	fci.function_table = &reflection_ptr->function_table;
 	fci.function_name = &fname;
-	fci.object_pp = NULL;
+	fci.object_ptr = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = 2;
 	fci.params = params;
@@ -1684,7 +1684,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.function_table = NULL;
 	fci.function_name = NULL;
 	fci.symbol_table = NULL;
-	fci.object_pp = NULL;
+	fci.object_ptr = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = num_args;
 	fci.params = params;
@@ -1694,7 +1694,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	fcc.object_pp = NULL;
+	fcc.object_ptr = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -1749,7 +1749,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fci.function_table = NULL;
 	fci.function_name = NULL;
 	fci.symbol_table = NULL;
-	fci.object_pp = NULL;
+	fci.object_ptr = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = argc;
 	fci.params = params;
@@ -1759,7 +1759,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	fcc.object_pp = NULL;
+	fcc.object_ptr = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2514,7 +2514,7 @@ ZEND_METHOD(reflection_method, invoke)
 {
 	zval *retval_ptr;
 	zval ***params = NULL;
-	zval **object_pp;
+	zval *object_ptr;
 	reflection_object *intern;
 	zend_function *mptr;
 	int result, num_args = 0;
@@ -2547,14 +2547,14 @@ ZEND_METHOD(reflection_method, invoke)
 		return;
 	}
 	
-	/* In case this is a static method, we should'nt pass an object_pp
+	/* In case this is a static method, we should'nt pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
 	 * first parameter.
 	 *
 	 * Else, we verify that the given object is an instance of the class.
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
-		object_pp = NULL;
+		object_ptr = NULL;
 		obj_ce = mptr->common.scope;
 	} else {
 		if ((Z_TYPE_PP(params[0]) != IS_OBJECT)) {
@@ -2570,14 +2570,14 @@ ZEND_METHOD(reflection_method, invoke)
 			/* Returns from this function */
 		}
 	
-		object_pp = params[0];
+		object_ptr = *params[0];
 	}
 	
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	fci.function_name = NULL;
 	fci.symbol_table = NULL;
-	fci.object_pp = object_pp;
+	fci.object_ptr = object_ptr;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = num_args-1;
 	fci.params = params+1;
@@ -2587,7 +2587,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = obj_ce;
-	fcc.object_pp = object_pp;
+	fcc.object_ptr = object_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	
@@ -2652,7 +2652,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	zend_hash_apply_with_argument(Z_ARRVAL_P(param_array), (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);	
 	params -= argc;
 	
-	/* In case this is a static method, we should'nt pass an object_pp
+	/* In case this is a static method, we should'nt pass an object_ptr
 	 * (which is used as calling context aka $this). We can thus ignore the
 	 * first parameter.
 	 *
@@ -2683,7 +2683,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fci.function_table = NULL;
 	fci.function_name = NULL;
 	fci.symbol_table = NULL;
-	fci.object_pp = &object;
+	fci.object_ptr = object;
 	fci.retval_ptr_ptr = &retval_ptr;
 	fci.param_count = argc;
 	fci.params = params;
@@ -2693,7 +2693,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = obj_ce;
-	fcc.object_pp = object ? &object : NULL;
+	fcc.object_ptr = object;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 	
@@ -3819,7 +3819,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.function_table = EG(function_table);
 		fci.function_name = NULL;
 		fci.symbol_table = NULL;
-		fci.object_pp = &return_value;
+		fci.object_ptr = return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
 		fci.param_count = num_args;
 		fci.params = params;
@@ -3829,7 +3829,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.function_handler = ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		fcc.object_pp = &return_value;
+		fcc.object_ptr = return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
@@ -3898,7 +3898,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fci.function_table = EG(function_table);
 		fci.function_name = NULL;
 		fci.symbol_table = NULL;
-		fci.object_pp = &return_value;
+		fci.object_ptr = return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
 		fci.param_count = argc;
 		fci.params = params;
@@ -3908,7 +3908,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.function_handler = ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		fcc.object_pp = &return_value;
+		fcc.object_ptr = return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			if (params) {

@@ -726,7 +726,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	fci.size = sizeof(fci);
 	fci.function_table = function_table;
-	fci.object_pp = object_pp;
+	fci.object_ptr = object_pp ? *object_pp : NULL;
 	fci.function_name = function_name;
 	fci.retval_ptr_ptr = retval_ptr_ptr;
 	fci.param_count = param_count;
@@ -794,7 +794,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			fci_cache = &fci_cache_local;
  		}
 
-		if (!zend_is_callable_ex(fci->function_name, fci->object_pp, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
+		if (!zend_is_callable_ex(fci->function_name, fci->object_ptr, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
 			if (error) {
 				zend_error(E_WARNING, "Invalid callback %Z, %s", callable_name, error);
 				efree(error);
@@ -815,10 +815,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(function_state).function = fci_cache->function_handler;
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
-	fci->object_pp = fci_cache->object_pp;
-	EX(object) = fci->object_pp ? *fci->object_pp : NULL;
-	if (fci->object_pp && *fci->object_pp && Z_TYPE_PP(fci->object_pp) == IS_OBJECT
-		&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(fci->object_pp)].valid)) {
+	fci->object_ptr = fci_cache->object_ptr;
+	EX(object) = fci->object_ptr;
+	if (fci->object_ptr && Z_TYPE_P(fci->object_ptr) == IS_OBJECT
+		&& (!EG(objects_store).object_buckets || !EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(fci->object_ptr)].valid)) {
 		return FAILURE;
 	}
 
@@ -899,11 +899,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(called_scope) = NULL;
 	}
 
-	if (fci->object_pp) {
+	if (fci->object_ptr) {
 		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			EG(This) = NULL;
 		} else {
-			EG(This) = *fci->object_pp;
+			EG(This) = fci->object_ptr;
 
 			if (!PZVAL_IS_REF(EG(This))) {
 				Z_ADDREF_P(EG(This)); /* For $this pointer */
@@ -960,7 +960,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, (fci->object_pp?*fci->object_pp:NULL), 1 TSRMLS_CC);
+		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		/*	We shouldn't fix bad extensions here,
 		    because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
@@ -980,8 +980,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 
 		/* Not sure what should be done here if it's a static method */
-		if (fci->object_pp) {
-			Z_OBJ_HT_PP(fci->object_pp)->call_method(EX(function_state).function->common.function_name, fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, *fci->object_pp, 1 TSRMLS_CC);
+		if (fci->object_ptr) {
+			Z_OBJ_HT_P(fci->object_ptr)->call_method(EX(function_state).function->common.function_name, fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
@@ -1101,14 +1101,14 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	fcall_info.retval_ptr_ptr = &retval_ptr;
 	fcall_info.param_count = 1;
 	fcall_info.params = args;
-	fcall_info.object_pp = NULL;
+	fcall_info.object_ptr = NULL;
 	fcall_info.no_separation = 1;
 
 	fcall_cache.initialized = EG(autoload_func) ? 1 : 0;
 	fcall_cache.function_handler = EG(autoload_func);
 	fcall_cache.calling_scope = NULL;
 	fcall_cache.called_scope = NULL;
-	fcall_cache.object_pp = NULL;
+	fcall_cache.object_ptr = NULL;
 
 	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);

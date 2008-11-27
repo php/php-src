@@ -332,7 +332,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	fc->fci.function_table = EG(function_table);
 	fc->fci.function_name = cb;
 	fc->fci.symbol_table = NULL;
-	fc->fci.object_pp = NULL;
+	fc->fci.object_ptr = NULL;
 	fc->fci.retval_ptr_ptr = &retval;
 	fc->fci.param_count = fake_argc;
 	
