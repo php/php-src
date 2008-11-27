@@ -1,3 +1,23 @@
+2008-11-26  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug46665.phpt
+      tests/bug46665_autoload.php:
+      - New test
+
+    * tests/bug46665.phpt
+      tests/bug46665.phpt
+      tests/bug46665_autoload.php
+      tests/bug46665_autoload.php:
+      
+      - New test
+
+2008-11-26  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      cleanup from ::->\ change
+
 2008-11-25  Stanislav Malyshev  <stas@zend.com>
 
     * zend_API.c
