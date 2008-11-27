@@ -551,7 +551,7 @@ ZEND_METHOD(exception, __toString)
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		fci.function_name = &fname;
 		fci.symbol_table = NULL;
-		fci.object_pp = &exception;
+		fci.object_ptr = exception;
 		fci.retval_ptr_ptr = &trace;
 		fci.param_count = 0;
 		fci.params = NULL;

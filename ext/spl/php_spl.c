@@ -424,7 +424,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_bool prepend  = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
-	zval **obj_ptr;
+	zval *obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
@@ -446,7 +446,7 @@ PHP_FUNCTION(spl_autoload_register)
 		if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_STRICT, &func_name, &func_name_len, &fcc, &error TSRMLS_CC)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
-			obj_ptr = fcc.object_pp;
+			obj_ptr = fcc.object_ptr;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
@@ -488,7 +488,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
-		obj_ptr = fcc.object_pp;
+		obj_ptr = fcc.object_ptr;
 		if (error) {
 			efree(error);
 		}
@@ -503,10 +503,10 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
 			lc_name[func_name_len] = '\0';
-			alfi.obj = *obj_ptr;
+			alfi.obj = obj_ptr;
 			Z_ADDREF_P(alfi.obj);
 		} else {
 			alfi.obj = NULL;
@@ -558,7 +558,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zval *zcallable;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
-	zval **obj_ptr;
+	zval *obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
@@ -575,7 +575,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 		RETURN_FALSE;
 	}
-	obj_ptr = fcc.object_pp;
+	obj_ptr = fcc.object_ptr;
 	if (error) {
 		efree(error);
 	}
@@ -595,7 +595,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
 			if (success != SUCCESS && obj_ptr) {
 				func_name = erealloc(func_name, func_name_len + 1 + sizeof(zend_object_handle));
-				memcpy(func_name + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
+				memcpy(func_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 				func_name_len += sizeof(zend_object_handle);
 				func_name[func_name_len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);

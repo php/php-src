@@ -850,7 +850,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
-			fci.object_pp = NULL;
+			fci.object_ptr = NULL;
 			fci.function_name = t->func_name;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 2;
@@ -923,7 +923,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
 			fci.function_name = t->func_name;
-			fci.object_pp = NULL;
+			fci.object_ptr = NULL;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 3;
 			fci.params = argv;
@@ -1000,7 +1000,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.function_table = EG(function_table);
 			fci.function_name = t->func_name;
 			fci.symbol_table = NULL;
-			fci.object_pp = NULL;
+			fci.object_ptr = NULL;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 2;
 			fci.params = argv;
