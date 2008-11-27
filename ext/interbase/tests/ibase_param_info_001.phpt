@@ -49,5 +49,5 @@ array(10) {
 bool(false)
 ---
 
-Warning: Wrong parameter count for ibase_param_info() in %s on line %d
+Warning: ibase_param_info() expects exactly 2 parameters, 1 given in %s on line %d
 NULL

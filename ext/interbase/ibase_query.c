@@ -1068,7 +1068,7 @@ PHP_FUNCTION(ibase_query)
 {
 	zval *zlink, *ztrans, ***bind_args = NULL;
 	char *query;
-	int bind_i, query_len;
+	int bind_i, query_len, bind_num;
 	long trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
@@ -1174,11 +1174,9 @@ PHP_FUNCTION(ibase_query)
 			if (bind_n < expected_n) {
 				break;
 			}
-		} else if (bind_n > 0) {
-			bind_args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
-
-			if (FAILURE == zend_get_parameters_array_ex(ZEND_NUM_ARGS(), bind_args)) {
-				break;
+		} else if (bind_n > 0) {		
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &bind_args, &bind_num) == FAILURE) {
+				return;
 			}
 		}
 	
@@ -1484,7 +1482,6 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) /* {{{ */
 {
 	zval *result_arg;
-	long flag_arg;
 	long i, array_cnt = 0, flag = 0;
 	ibase_result *ib_result;
 
@@ -2052,16 +2049,16 @@ PHP_FUNCTION(ibase_field_info)
    Get the number of params in a prepared query */
 PHP_FUNCTION(ibase_num_params)
 {
-	zval **result;
+	zval *result;
 	ibase_query *ib_query;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result, -1, LE_QUERY, le_query);
+	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, &result, -1, LE_QUERY, le_query);
 
 	if (ib_query->in_sqlda == NULL) {
 		RETURN_LONG(0);
@@ -2075,28 +2072,27 @@ PHP_FUNCTION(ibase_num_params)
    Get information about a parameter */
 PHP_FUNCTION(ibase_param_info)
 {
-	zval **result_arg, **field_arg;
+	zval *result_arg;
+	long field_arg;
 	ibase_query *ib_query;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result_arg, &field_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result_arg, &field_arg) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result_arg, -1, LE_QUERY, le_query);
+	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, &result_arg, -1, LE_QUERY, le_query);
 
 	if (ib_query->in_sqlda == NULL) {
 		RETURN_FALSE;
 	}
 
-	convert_to_long_ex(field_arg);
-
-	if (Z_LVAL_PP(field_arg) < 0 || Z_LVAL_PP(field_arg) >= ib_query->in_sqlda->sqld) {
+	if (field_arg < 0 || field_arg >= ib_query->in_sqlda->sqld) {
 		RETURN_FALSE;
 	}
 
-	_php_ibase_field_info(return_value,ib_query->in_sqlda->sqlvar + Z_LVAL_PP(field_arg));
+	_php_ibase_field_info(return_value,ib_query->in_sqlda->sqlvar + field_arg);
 }
 /* }}} */
 

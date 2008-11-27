@@ -126,8 +126,9 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
    Waits for any one of the passed Interbase events to be posted by the database, and returns its name */
 PHP_FUNCTION(ibase_wait_event)
 {
-	zval **args[16];
+	zval ***args;
 	ibase_db_link *ib_link;
+	int num_args;
 	char *event_buffer, *result_buffer, *events[15];
 	unsigned short i = 0, event_count = 0, buffer_size;
 	unsigned long occurred_event[15];
@@ -139,22 +140,25 @@ PHP_FUNCTION(ibase_wait_event)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+		return;
 	}
 
 	if (Z_TYPE_PP(args[0]) == IS_RESOURCE) {
-
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink);
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink)) {
+			efree(args);
+			RETURN_FALSE;
+		}
 		i = 1;
-
 	} else {
-
 		if (ZEND_NUM_ARGS() > 15) {
+			efree(args);
 			WRONG_PARAM_COUNT;
 		}
-
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink)) {
+			efree(args);
+			RETURN_FALSE;
+		}
 	}
 
 	for (; i < ZEND_NUM_ARGS(); ++i) {
@@ -169,6 +173,7 @@ PHP_FUNCTION(ibase_wait_event)
 	if (isc_wait_for_event(IB_STATUS, &ib_link->handle, buffer_size, event_buffer, result_buffer)) {
 		_php_ibase_error(TSRMLS_C);
 		_php_ibase_event_free(event_buffer,result_buffer);
+		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -178,6 +183,7 @@ PHP_FUNCTION(ibase_wait_event)
 		if (occurred_event[i]) {
 			char *result = estrdup(events[i]);
 			_php_ibase_event_free(event_buffer,result_buffer);
+			efree(args);
 			RETURN_STRING(result,0);
 		}
 	}
@@ -185,6 +191,7 @@ PHP_FUNCTION(ibase_wait_event)
 	/* If we reach this line, isc_wait_for_event() did return, but we don't know
 	   which event fired. */
 	_php_ibase_event_free(event_buffer,result_buffer);
+	efree(args);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -261,11 +268,11 @@ PHP_FUNCTION(ibase_set_event_handler)
 	 * used to determine if the event handler should remain set.
 	 */
 	zval cb_name;
-	zval **args[17], **cb_arg;
+	zval ***args, **cb_arg;
 	ibase_db_link *ib_link;
 	ibase_event *event;
 	unsigned short i = 1, buffer_size;
-	int link_res_id;
+	int link_res_id, num_args;
 
 	RESET_ERRMSG;
 	
@@ -274,8 +281,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+		return;
 	}
 
 	/* get a working link */
@@ -284,14 +291,17 @@ PHP_FUNCTION(ibase_set_event_handler)
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 17) {
+			efree(args);
 			WRONG_PARAM_COUNT;
 		}
 
 		cb_arg = args[1];
 		i = 2;
 
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[0], -1,
-			"InterBase link", le_link, le_plink);
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink)) {
+			efree(args);
+			RETURN_FALSE;
+		}
 
 		convert_to_long_ex(args[0]);
 		link_res_id = Z_LVAL_PP(args[0]);
@@ -301,13 +311,16 @@ PHP_FUNCTION(ibase_set_event_handler)
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 16) {
+			efree(args);
 			WRONG_PARAM_COUNT;
 		}
 
 		cb_arg = args[0];
 
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link),
-			"InterBase link", le_link, le_plink);
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink)) {
+			efree(args);
+			RETURN_FALSE;
+		}
 		link_res_id = IBG(default_link);
 	}
 
@@ -315,6 +328,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	if (!zend_is_callable(*cb_arg, 0, &cb_name TSRMLS_CC)) {
 		_php_ibase_module_error("Callback argument %v is not a callable function" TSRMLS_CC, Z_UNIVAL(cb_name));
 		zval_dtor(&cb_name);
+		efree(args);
 		RETURN_FALSE;
 	}
 	zval_dtor(&cb_name);
@@ -348,6 +362,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 		_php_ibase_error(TSRMLS_C);
 		efree(event);
+		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -356,6 +371,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
 	zend_list_addref(Z_LVAL_P(return_value));
+	efree(args);
 }
 /* }}} */
 
