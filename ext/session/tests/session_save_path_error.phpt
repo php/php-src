@@ -102,6 +102,83 @@ ob_end_flush();
 *** Testing session_save_path() : error functionality ***
 
 -- Iteration 1 --
+string(0) ""
+
+-- Iteration 2 --
+string(1) "0"
+
+-- Iteration 3 --
+string(1) "1"
+
+-- Iteration 4 --
+string(5) "12345"
+
+-- Iteration 5 --
+string(5) "-2345"
+
+-- Iteration 6 --
+string(4) "10.5"
+
+-- Iteration 7 --
+string(5) "-10.5"
+
+-- Iteration 8 --
+string(12) "123456789000"
+
+-- Iteration 9 --
+string(13) "1.23456789E-9"
+
+-- Iteration 10 --
+string(3) "0.5"
+
+-- Iteration 11 --
+string(0) ""
+
+-- Iteration 12 --
+string(0) ""
+
+-- Iteration 13 --
+string(1) "1"
+
+-- Iteration 14 --
+string(0) ""
+
+-- Iteration 15 --
+string(1) "1"
+
+-- Iteration 16 --
+string(0) ""
+
+-- Iteration 17 --
+string(0) ""
+
+-- Iteration 18 --
+string(0) ""
+
+-- Iteration 19 --
+string(7) "Nothing"
+
+-- Iteration 20 --
+string(7) "Nothing"
+
+-- Iteration 21 --
+string(12) "Hello World!"
+
+-- Iteration 22 --
+string(12) "Hello World!"
+
+-- Iteration 23 --
+string(0) ""
+
+-- Iteration 24 --
+
+Warning: session_save_path() expects parameter 1 to be string, resource given in %s on line %d
+NULL
+Done
+--UEXPECTF--
+*** Testing session_save_path() : error functionality ***
+
+-- Iteration 1 --
 unicode(0) ""
 
 -- Iteration 2 --
