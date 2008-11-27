@@ -776,6 +776,27 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 
 #ifdef PHP_MHASH_BC
 
+PHP_MINFO_FUNCTION(mhash)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MHASH support", "Enabled");
+	php_info_print_table_row(2, "MHASH API Version", "Emulated Support");
+	php_info_print_table_end();
+}
+
+zend_module_entry mhash_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"mhash",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(mhash),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES,
+};
+
 static void mhash_init(INIT_FUNC_ARGS)
 {
 	char buf[128];
@@ -791,6 +812,8 @@ static void mhash_init(INIT_FUNC_ARGS)
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
 		zend_register_long_constant(buf, len + 1, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC);
 	}
+
+	zend_register_module_ex(&mhash_module_entry TSRMLS_CC);
 }
 
 /* {{{ proto binary mhash(int hash, binary data [, binary key]) U
