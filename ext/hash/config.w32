@@ -2,6 +2,7 @@
 // vim:ft=javascript
 
 ARG_ENABLE("hash", "enable hash support", "yes");
+ARG_WITH("mhash", "mhash support", "no"); 
 
 if (PHP_MHASH != "no") {
 	if (PHP_HASH == "no") {
