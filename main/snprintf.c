@@ -1327,14 +1327,26 @@ PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap) /* {{{ *
 	*buf = NULL;
 
 	if (cc >= 0) {
-		if ((*buf = emalloc(++cc)) != NULL) {
+		if ((*buf = malloc(++cc)) != NULL) {
 			if ((cc = ap_php_vsnprintf(*buf, cc, format, ap)) < 0) {
-				efree(*buf);
+				free(*buf);
 				*buf = NULL;
 			}
 		}
 	}
 
+	return cc;
+}
+/* }}} */
+
+PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) /* {{{ */
+{
+	int cc;
+	va_list ap;
+
+	va_start(ap, format);
+	cc = vasprintf(buf, format, ap);
+	va_end(ap);
 	return cc;
 }
 /* }}} */
