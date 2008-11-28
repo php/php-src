@@ -12,8 +12,8 @@ include_once "connect.inc";
 $tmp    = NULL;
 $link   = NULL;
 
-if (false !== ($tmp = @mysql_list_dbs(NULL)))
-	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_list_dbs(NULL)))
+	printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 if (NULL !== ($tmp = @mysql_list_dbs($link, $link)))
 	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

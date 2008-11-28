@@ -15,8 +15,8 @@ $link   = NULL;
 if (false !== ($tmp = @mysql_insert_id()))
 	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_insert_id($link)))
-	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_insert_id($link)))
+	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 if (!is_null($tmp = @mysql_insert_id($link, 'too many args')))
 	printf("[002a] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
