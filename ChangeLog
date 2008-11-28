@@ -1,3 +1,266 @@
+2008-11-27  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      report fix
+
+2008-11-27  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/hash/config.w32:
+      - fix build..
+
+2008-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      
+      5.2.7RC5
+
+2008-11-27  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      ext/hash/hash.c
+      ext/mhash/CREDITS
+      ext/mhash/config.m4
+      ext/mhash/config.w32
+      ext/mhash/mhash.c
+      ext/mhash/php_mhash.h:
+      MFH Move mhash extension registration code into the hash module startup.
+      This allows extension_loaded('mhash'); to work.
+
+    * ext/hash/hash.c
+      ext/mhash/CREDITS
+      ext/mhash/config.m4
+      ext/mhash/config.w32
+      ext/mhash/mhash.c
+      ext/mhash/php_mhash.h:
+      Move mhash extension registration code into the hash module startup. This
+      allows extension_loaded('mhash'); to work.
+
+    * (PHP_5_3)
+      configure.in
+      ext/fileinfo/libmagic/print.c
+      main/snprintf.c
+      main/snprintf.h:
+      MFH Add asprintf, use regular system malloc and free and add checks in
+      configure.in for the functions
+
+    * configure.in
+      ext/fileinfo/libmagic/print.c
+      main/snprintf.c
+      main/snprintf.h:
+      Add asprintf, use regular system malloc and free and add checks in
+      configure.in for the functions
+
+2008-11-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug46409.phpt
+      ZendEngine2/tests/bug46409.phpt
+      ext/curl/interface.c
+      ext/dom/xpath.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/pgsql/pgsql.c
+      ext/reflection/php_reflection.c:
+      
+      file bug46409.phpt was initially added on branch PHP_5_3.
+
+    * (PHP_5_3)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.c
+      ZendEngine2/zend_closures.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug46409.phpt
+      ext/curl/interface.c
+      ext/dom/xpath.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pdo/pdo_dbh.c
+      ext/pdo/pdo_stmt.c
+      ext/pdo_sqlite/sqlite_driver.c
+      ext/pgsql/pgsql.c
+      ext/reflection/php_reflection.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/spl/php_spl.c
+      ext/spl/php_spl.c
+      ext/spl/spl_directory.c
+      ext/spl/spl_directory.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/sqlite3.c
+      ext/xml/xml.c
+      ext/xml/xml.c
+      ext/xsl/xsltprocessor.c
+      ext/xsl/xsltprocessor.c
+      main/streams/userspace.c
+      main/streams/userspace.c:
+      Fixed bug #46409 (__invoke method called outside of object context when
+      using array_map)
+
+2008-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      Updated NEWS file with CVE #s
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #46696 (cURL fails in upload files with specified
+      content-type)
+
+    * (PHP_5_2)
+      NEWS
+      ext/curl/interface.c:
+      
+      MFB: Fixed bug #46696 (cURL fails in upload files with specified
+      content-type)
+
+    * (PHP_5_3)
+      ext/curl/interface.c:
+      Fixed bug #46696 (cURL fails in upload files with specified content-type)
+
+2008-11-27  Ant Phillips  <antphill@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/standard/tests/directory/DirectoryClass_basic_001.phpt
+      ext/standard/tests/directory/DirectoryClass_basic_001.phpt
+      ext/standard/tests/directory/DirectoryClass_error_001.phpt
+      ext/standard/tests/directory/DirectoryClass_error_001.phpt
+      ext/standard/tests/directory/directory_constants-win32.phpt
+      ext/standard/tests/directory/directory_constants-win32.phpt
+      ext/standard/tests/directory/directory_constants.phpt
+      ext/standard/tests/directory/directory_constants.phpt:
+      Directory tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and
+      Linux 64 bit).
+
+2008-11-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/soap/tests/bugs/bug44882.phpt
+      ext/soap/tests/bugs/bug44882.phpt
+      ext/soap/tests/bugs/bug44882.phpt
+      ext/soap/tests/bugs/bug44882.wsdl
+      ext/soap/tests/bugs/bug44882.wsdl
+      ext/soap/tests/bugs/bug44882.wsdl:
+        1.1.4;
+      file bug44882.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/php_encoding.c
+      ext/soap/tests/bugs/bug44882.phpt
+      ext/soap/tests/bugs/bug44882.phpt
+      ext/soap/tests/bugs/bug44882.wsdl
+      ext/soap/tests/bugs/bug44882.wsdl:
+      Fixed bug #44882 (SOAP extension object decoding bug)
+
+2008-11-27  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/standard/tests/directory/DirectoryClass_basic_001.phpt
+      ext/standard/tests/directory/DirectoryClass_basic_001.phpt
+      ext/standard/tests/directory/DirectoryClass_basic_001.phpt
+      ext/standard/tests/directory/DirectoryClass_error_001.phpt
+      ext/standard/tests/directory/DirectoryClass_error_001.phpt
+      ext/standard/tests/directory/DirectoryClass_error_001.phpt
+      ext/standard/tests/directory/directory_constants-win32.phpt
+      ext/standard/tests/directory/directory_constants-win32.phpt
+      ext/standard/tests/directory/directory_constants-win32.phpt
+      ext/standard/tests/directory/directory_constants.phpt
+      ext/standard/tests/directory/directory_constants.phpt
+      ext/standard/tests/directory/directory_constants.phpt:
+        1.1.4;
+      Directory tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and
+      Linux 64 bit).
+
+    * (PHP_5_3)
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/spliti_variation_003.phpt
+      ext/session/tests/session_save_path_variation4.phpt:
+      Latest and greatest versions of these session tests - checked on 5.2.X snap
+      on Windows, Linux and Linux 64 bit.
+
+    * (PHP_5_3)
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_save_path_variation4.phpt:
+      Latest and greatest versions of these session tests - checked on 5.3 snap
+      on Windows, Linux and Linux 64 bit.
+
+    * ext/session/tests/session_module_name_variation3.phpt
+      ext/session/tests/session_name_basic.phpt
+      ext/session/tests/session_name_error.phpt
+      ext/session/tests/session_name_variation1.phpt
+      ext/session/tests/session_save_path_basic.phpt
+      ext/session/tests/session_save_path_error.phpt
+      ext/session/tests/session_save_path_variation1.phpt
+      ext/session/tests/session_save_path_variation4.phpt
+      ext/session/tests/session_set_save_handler_basic.phpt:
+      Latest and greatest versions of these session tests - checked on 6.0 snap
+      on Windows, Linux and Linux 64 bit.
+
+2008-11-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      NEWS
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/soap.c
+      ext/soap/tests/bugs/bug46427.phpt
+      ext/soap/tests/bugs/bug46427.phpt
+      ext/soap/tests/bugs/bug46427.phpt
+      ext/soap/tests/bugs/bug46427.phpt
+      ext/soap/tests/bugs/bug46427.phpt:
+      Fixed bug #46427 (SoapClient() stumbles over its "stream_context"
+      parameter)
+
+2008-11-27  Scott MacVicar  <scott@macvicar.net>
+
+    * ext/sqlite3/libsqlite/sqlite3.c
+      ext/sqlite3/libsqlite/sqlite3.h
+      ext/sqlite3/libsqlite/sqlite3ext.h:
+      Update libsqlite to 3.6.6.2
+
+2008-11-27  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/interbase/ibase_events.c
+      ext/interbase/ibase_query.c
+      ext/interbase/tests/ibase_num_params_001.phpt
+      ext/interbase/tests/ibase_param_info_001.phpt:
+      - New parameter parsing API
+
 2008-11-26  Ant Phillips  <antphill@uk.ibm.com>
 
     * ext/standard/tests/file/001-win32.phpt

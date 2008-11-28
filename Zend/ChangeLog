@@ -1,3 +1,35 @@
+2008-11-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_closures.c
+      zend_closures.c
+      zend_closures.h
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_interfaces.c
+      zend_interfaces.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_object_handlers.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug46409.phpt:
+      Fixed bug #46409 (__invoke method called outside of object context when
+      using array_map)
+
+    * tests/bug46409.phpt
+      tests/bug46409.phpt:
+      
+      file bug46409.phpt was initially added on branch PHP_5_3.
+
 2008-11-26  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
