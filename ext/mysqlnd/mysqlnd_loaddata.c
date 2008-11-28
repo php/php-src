@@ -244,7 +244,6 @@ infile_error:
 	/* get response from server and update upsert values */
 	if (FAIL == mysqlnd_simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE TSRMLS_CC)) {
 		result = FAIL;
-		goto infile_error;
 	}
 
 	(*conn->infile.local_infile_end)(info TSRMLS_CC);
