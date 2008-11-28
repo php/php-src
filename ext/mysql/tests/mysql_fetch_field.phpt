@@ -16,8 +16,8 @@ require_once('skipifconnectfailure.inc');
 	if (!is_null($tmp = @mysql_fetch_field()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = @mysql_fetch_field($link)))
-		printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+	if (NULL !== ($tmp = @mysql_fetch_field($link)))
+		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 

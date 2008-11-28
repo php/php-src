@@ -15,8 +15,8 @@ $link   = NULL;
 if (false !== ($tmp = @mysql_affected_rows()))
 	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_affected_rows($link)))
-	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (null !== ($tmp = @mysql_affected_rows($link)))
+	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 if (!is_null($tmp = @mysql_affected_rows($link, $link)))
 	printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

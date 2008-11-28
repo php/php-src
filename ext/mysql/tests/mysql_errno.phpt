@@ -15,8 +15,8 @@ $link   = NULL;
 if (false !== ($tmp = @mysql_errno()))
 	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_errno($link)))
-	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (null !== ($tmp = @mysql_errno($link)))
+	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 if (!is_null($tmp = @mysql_errno($link, 'too many args')))
 	printf("[002b] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
