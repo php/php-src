@@ -3917,6 +3917,8 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 	BG(incomplete_class) = incomplete_class_entry;
+	BG(page_uid) = -1;
+	BG(page_gid) = -1;
 }
 
 
@@ -4220,6 +4222,8 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 
 	PHP_RSHUTDOWN(user_filters)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	
+	BG(page_uid) = -1;
+	BG(page_gid) = -1;
 	return SUCCESS;
 }
 
