@@ -34,36 +34,35 @@
 PHP_FUNCTION(mysqli_embedded_server_start)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
+	long start;
+	zval *args;
+	zval *grps;
+
 	int	argc = 0;
 	char **arguments;
 	char **groups;
-	zval **args, **grps, **start;
 	HashPosition pos;
 	int index, rc;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &start, &args, &grps) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "laa", &start, &args, &grps) == FAILURE) {
+		return;
+	}	
 
-	convert_to_long_ex(start);
-	convert_to_array_ex(args);
-	convert_to_array_ex(grps);
-
-	if (!Z_LVAL_PP(start)) {
+	if (!start) {
 		mysql_server_init(-1,NULL, NULL);
 		RETURN_TRUE;
 	}
 	/* get arguments */
-	if ((argc = zend_hash_num_elements(HASH_OF(*args)))) {
+	if ((argc = zend_hash_num_elements(HASH_OF(args)))) {
 		arguments = safe_emalloc(sizeof(char *), argc + 1, 0);
 		arguments[0] = NULL; 
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(*args), &pos);
+		zend_hash_internal_pointer_reset_ex(HASH_OF(args), &pos);
 
-		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*args), &pos))	{
+		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(args), &pos))	{
 			zval **item;
 
-			if (zend_hash_get_current_data_ex(HASH_OF(*args), (void **) &item, &pos) == FAILURE) {
+			if (zend_hash_get_current_data_ex(HASH_OF(args), (void **) &item, &pos) == FAILURE) {
 				break;
 			}
 
@@ -79,12 +78,12 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(*grps)) + 1, 0);
 		groups[0] = NULL; 
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(*grps), &pos);
+		zend_hash_internal_pointer_reset_ex(HASH_OF(grps), &pos);
 
-		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(*grps), &pos))	{
+		for (index = 0;; zend_hash_move_forward_ex(HASH_OF(grps), &pos))	{
 			zval ** item;
 
-			if (zend_hash_get_current_data_ex(HASH_OF(*grps), (void **) &item, &pos) == FAILURE) {
+			if (zend_hash_get_current_data_ex(HASH_OF(grps), (void **) &item, &pos) == FAILURE) {
 				break;
 			}
 
