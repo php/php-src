@@ -31,30 +31,6 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
-static int stream_alive(php_stream *stream  TSRMLS_DC)
-{
-	int socket;
-	char buf;
-
-	/* maybe better to use:
-	 * php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)
-	 * here instead */
-
-	if (stream == NULL || stream->eof || php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void**)&socket, 0) != SUCCESS) {
-		return FALSE;
-	}
-	if (socket == -1) {
-		return FALSE;
-	} else {
-		if (php_pollfd_for_ms(socket, PHP_POLLREADABLE, 0) > 0) {
-			if (0 == recv(socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
-				return FALSE;
-			}
-		}
-	}
-	return TRUE;
-}
-
 /* Proxy HTTP Authentication */
 void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
@@ -363,7 +339,7 @@ try_again:
 	}
 
 	/* Check if keep-alive connection is still opened */
-	if (stream != NULL && !stream_alive(stream TSRMLS_CC)) {
+	if (stream != NULL && php_stream_eof(stream)) {
 		php_stream_close(stream);
 		if (client->url) {
 			php_url_free(client->url);
@@ -917,6 +893,7 @@ try_again:
 		efree(cookie);
 	}
 
+	/* See if the server requested a close */
 	if (http_1_1) {
 		http_close = FALSE;
 		if (use_proxy && !use_ssl) {
@@ -928,8 +905,35 @@ try_again:
 				efree(connection);
 			}
 		}
+		if (http_close == FALSE) {
+			connection = get_http_header_value(http_headers,"Connection: ");
+			if (connection) {
+				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
+					http_close = TRUE;
+				}
+				efree(connection);
+			}
+		}
 	} else {
 		http_close = TRUE;
+		if (use_proxy && !use_ssl) {
+			connection = get_http_header_value(http_headers,"Proxy-Connection: ");
+			if (connection) {
+				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+					http_close = FALSE;
+				}
+				efree(connection);
+			}
+		}
+		if (http_close == TRUE) {
+			connection = get_http_header_value(http_headers,"Connection: ");
+			if (connection) {
+				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+					http_close = FALSE;
+				}
+				efree(connection);
+			}
+		}
 	}
 
 	if (!get_http_body(stream, http_close, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
@@ -947,31 +951,6 @@ try_again:
 	}
 
 	if (request != buf) {efree(request);}
-
-	/* See if the server requested a close */
-	http_close = TRUE;
-	connection = get_http_header_value(http_headers,"Proxy-Connection: ");
-	if (connection) {
-		if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-			http_close = FALSE;
-		}
-		efree(connection);
-/*
-	} else if (http_1_1) {
-		http_close = FALSE;
-*/
-	}
-	connection = get_http_header_value(http_headers,"Connection: ");
-	if (connection) {
-		if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-			http_close = FALSE;
-		}
-		efree(connection);
-/*
-	} else if (http_1_1) {
-		http_close = FALSE;
-*/
-	}
 
 	if (http_close) {
 		php_stream_close(stream);
