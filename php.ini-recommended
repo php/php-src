@@ -387,7 +387,7 @@ log_errors = On
 log_errors_max_len = 1024
 
 ; Do not log repeated messages. Repeated errors must occur in same file on same
-; line until ignore_repeated_source is set true.
+; line unless ignore_repeated_source is set true.
 ignore_repeated_errors = Off
 
 ; Ignore source of message when ignoring repeated messages. When this setting
