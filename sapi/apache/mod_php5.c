@@ -597,6 +597,8 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		return OK;
 	}
 
+	SG(server_context) = r;
+
 	zend_first_try {
 
 		/* Make sure file exists */
@@ -654,8 +656,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		/* Init timeout */
 		hard_timeout("send", r);
 
-		SG(server_context) = r;
-		
 		php_save_umask();
 		add_common_vars(r);
 		add_cgi_vars(r);
