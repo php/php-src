@@ -42,7 +42,7 @@ mysql_close($link);
 print "done!";
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for mysql_field_type() in %s on line %d
+Warning: mysql_field_type() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_type(): Field -1 is invalid for MySQL result index %d in %s on line %d
 string(3) "int"
