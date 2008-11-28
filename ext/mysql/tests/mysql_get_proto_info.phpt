@@ -9,8 +9,8 @@ require_once('skipifconnectfailure.inc');
 <?php
 include_once "connect.inc";
 
-if (false !== ($tmp = @mysql_get_proto_info(NULL)))
-	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_get_proto_info(NULL)))
+	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 require "table.inc";
 if (!is_int($info = mysql_get_proto_info($link)) || (0 === $info))

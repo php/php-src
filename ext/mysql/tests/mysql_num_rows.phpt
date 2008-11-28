@@ -15,8 +15,8 @@ $link   = NULL;
 if (!is_null($tmp = @mysql_num_rows()))
 printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_num_rows($link)))
-printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_num_rows($link)))
+printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 require('table.inc');
 
@@ -40,7 +40,7 @@ function func_test_mysql_num_rows($link, $query, $expected, $offset, $test_free 
 
 func_test_mysql_num_rows($link, "SELECT 1 AS a", 1, 5);
 func_test_mysql_num_rows($link, "SHOW VARIABLES LIKE '%nixnutz%'", 0, 10);
-func_test_mysql_num_rows($link, "INSERT INTO test(id, label) VALUES (100, 'z')", false, 15);
+func_test_mysql_num_rows($link, "INSERT INTO test(id, label) VALUES (100, 'z')", NULL, 15);
 func_test_mysql_num_rows($link, "SELECT id FROM test LIMIT 2", 2, 20, true);
 
 if ($res = mysql_query('SELECT COUNT(id) AS num FROM test', $link)) {
@@ -58,9 +58,9 @@ mysql_close($link);
 print "done!";
 ?>
 --EXPECTF--
-Warning: mysql_num_rows(): supplied argument is not a valid MySQL result resource in %s on line %d
+Warning: mysql_num_rows() expects parameter 1 to be resource, boolean given in %s on line %d
 
-Warning: mysql_free_result(): supplied argument is not a valid MySQL result resource in %s on line %d
+Warning: mysql_free_result() expects parameter 1 to be resource, boolean given in %s on line %d
 
 Warning: mysql_num_rows(): %d is not a valid MySQL result resource in %s on line %d
 done!

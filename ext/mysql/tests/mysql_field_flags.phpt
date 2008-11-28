@@ -136,7 +136,7 @@ mysql_close($link);
 print "done!";
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for mysql_field_flags() in %s on line %d
+Warning: mysql_field_flags() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_flags(): Field -1 is invalid for MySQL result index %d in %s on line %d
 

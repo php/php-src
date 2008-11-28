@@ -21,8 +21,8 @@ if (NULL !== ($tmp = @mysql_list_tables('too', 'many', 'arguments')))
 if (false !== ($tmp = @mysql_list_tables(NULL)))
 	printf("[003] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_list_tables($db, NULL)))
-	printf("[004] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_list_tables($db, NULL)))
+	printf("[004] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 require_once('table.inc');
 

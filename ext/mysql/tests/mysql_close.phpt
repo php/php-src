@@ -23,8 +23,8 @@ if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket))
 		$host, $user, $db, $port, $socket);
 
 $tmp = @mysql_close(NULL);
-if (false !== $tmp)
-	printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (null !== $tmp)
+	printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 $tmp = mysql_close($link);
 if (true !== $tmp)

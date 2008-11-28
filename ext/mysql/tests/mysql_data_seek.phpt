@@ -18,8 +18,8 @@ if (NULL !== ($tmp = @mysql_data_seek()))
 if (NULL !== ($tmp = @mysql_data_seek($link)))
 	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = @mysql_data_seek($link, $link)))
-	printf("[003] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (NULL !== ($tmp = @mysql_data_seek($link, $link)))
+	printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 require('table.inc');
 if (!$res = mysql_query('SELECT * FROM test ORDER BY id LIMIT 4', $link))
