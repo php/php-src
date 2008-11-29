@@ -444,8 +444,6 @@ PHP_FUNCTION(nsapi_response_headers)
 	
 	array_init(return_value);
 
-	php_header(TSRMLS_C);
-
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
 		entry=rc->rq->srvhdrs->ht[i];
 		while (entry) {
@@ -464,9 +462,12 @@ PHP_FUNCTION(nsapi_response_headers)
 static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
 {
 	int retval;
-	nsapi_request_context *rc;
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+	
+	if (!SG(headers_sent)) {
+		sapi_send_headers(TSRMLS_C);
+	}
 
-	rc = (nsapi_request_context *)SG(server_context);
 	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /* -1 */ || retval == IO_EOF /* 0 */) {
 		php_handle_aborted_connection();
@@ -474,38 +475,102 @@ static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_D
 	return retval;
 }
 
-static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+/* modified version of apache2 */
+static void sapi_nsapi_flush(void *server_context)
+{
+	nsapi_request_context *rc = (nsapi_request_context *)server_context;
+	TSRMLS_FETCH();
+
+	if (!rc) {
+		return;
+	}
+
+	if (!SG(headers_sent)) {
+		sapi_send_headers(TSRMLS_C);
+	}
+
+	/* flushing is only supported in iPlanet servers from version 6.1 on, make it conditional */
+#if defined(net_flush)
+	if (net_flush(rc->sn->csd) < 0) {
+		php_handle_aborted_connection();
+	}
+#endif
+}
+
+/* callback for zend_llist_apply on SAPI_HEADER_DELETE_ALL operation */
+static int php_nsapi_remove_header(sapi_header_struct *sapi_header TSRMLS_DC)
+{
+	char *header_name, *p;
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+	
+	/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
+	header_name = nsapi_strdup(sapi_header->header);
+
+	/* extract name, this works, if only the header without ':' is given, too */
+	if (p = strchr(header_name, ':')) {
+		*p = 0;
+	}
+	
+	/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
+	for (p=header_name; *p; p++) {
+		*p=tolower(*p);
+	}
+	
+	/* remove the header */
+	param_free(pblock_remove(header_name, rc->rq->srvhdrs));
+	nsapi_free(header_name);
+	
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	header_name = sapi_header->header;
-	header_content = p = strchr(header_name, ':');
-	if (p == NULL) {
-		efree(sapi_header->header);
-		return 0;
+	switch(op) {
+		case SAPI_HEADER_DELETE_ALL:
+			/* this only deletes headers set or overwritten by PHP, headers previously set by NSAPI are left intact */
+			zend_llist_apply(&sapi_headers->headers, (llist_apply_func_t) php_nsapi_remove_header TSRMLS_CC);
+			return 0;
+
+		case SAPI_HEADER_DELETE:
+			/* reuse the zend_llist_apply callback function for this, too */
+			php_nsapi_remove_header(sapi_header TSRMLS_CC);
+			return 0;
+
+		case SAPI_HEADER_ADD:
+		case SAPI_HEADER_REPLACE:
+			/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
+			header_name = nsapi_strdup(sapi_header->header);
+
+			/* split header and align pointer for content */
+			header_content = strchr(header_name, ':');
+			if (header_content) {
+				*header_content = 0;
+				do {
+					header_content++;
+				} while (*header_content==' ');
+				
+				/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
+				for (p=header_name; *p; p++) {
+					*p=tolower(*p);
+				}
+
+				/* if REPLACE, remove first.  "Content-type" is always removed, as SAPI has a bug according to this */
+				if (op==SAPI_HEADER_REPLACE || strcmp(header_name, "content-type")==0) {
+					param_free(pblock_remove(header_name, rc->rq->srvhdrs));
+				}
+				/* ADD header to nsapi table */
+				pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
+			}
+			
+			nsapi_free(header_name);
+			return SAPI_HEADER_ADD;
+			
+		default:
+			return 0;
 	}
-
-	*p = 0;
-	do {
-		header_content++;
-	} while (*header_content == ' ');
-
-	if (!strcasecmp(header_name, "Content-Type")) {
-		param_free(pblock_remove("content-type", rc->rq->srvhdrs));
-		pblock_nvinsert("content-type", header_content, rc->rq->srvhdrs);
-	} else {
-		/* to lower case because NSAPI reformats the headers and wants lowercase */
-		for (p=header_name; *p; p++) {
-			*p=tolower(*p);
-		}
-		if (sapi_header->replace) param_free(pblock_remove(header_name, rc->rq->srvhdrs));
-		pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
-	}
-
-	sapi_free_header(sapi_header);
-
-	return 0;	/* don't use the default SAPI mechanism, NSAPI duplicates this functionality */
 }
 
 static int sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
@@ -756,7 +821,7 @@ static sapi_module_struct nsapi_sapi_module = {
 	NULL,                                   /* deactivate */
 
 	sapi_nsapi_ub_write,                    /* unbuffered write */
-	NULL,                                   /* flush */
+	sapi_nsapi_flush,                       /* flush */
 	NULL,                                   /* get uid */
 	NULL,                                   /* getenv */
 
