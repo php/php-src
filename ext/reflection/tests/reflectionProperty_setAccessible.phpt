@@ -2,43 +2,81 @@
 Test ReflectionProperty::setAccessible().
 --FILE--
 <?php
-
-class TestClass {
-    public $pub;
-    public $pub2 = 5;
-    static public $stat = "static property";
-    protected $prot = 4;
-    private $priv = "keepOut";
+class A {
+    protected $protected = 'a';
+    protected static $protectedStatic = 'b';
+    private $private = 'c';
+    private static $privateStatic = 'd';
 }
 
-class AnotherClass {
-}
+$a               = new A;
+$protected       = new ReflectionProperty($a, 'protected');
+$protectedStatic = new ReflectionProperty('A', 'protectedStatic');
+$private         = new ReflectionProperty($a, 'private');
+$privateStatic   = new ReflectionProperty('A', 'privateStatic');
 
-$instance = new TestClass();
-
-echo "\nProtected property:\n";
-$propInfo = new ReflectionProperty('TestClass', 'prot');
 try {
-    var_dump($propInfo->getValue($instance));
-}
-catch(Exception $exc) {
-    echo $exc->getMessage(), "\n";
+    var_dump($protected->getValue($a));
 }
 
-$propInfo->setAccessible(true);
-var_dump($propInfo->getValue($instance));
+catch (ReflectionException $e) {
+    var_dump($e->getMessage());
+}
 
-$propInfo->setAccessible(false);
 try {
-    var_dump($propInfo->getValue($instance));
+    var_dump($protectedStatic->getValue());
 }
-catch(Exception $exc) {
-    echo $exc->getMessage(), "\n";
+
+catch (ReflectionException $e) {
+    var_dump($e->getMessage());
 }
+
+try {
+    var_dump($private->getValue($a));
+}
+
+catch (ReflectionException $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    var_dump($privateStatic->getValue());
+}
+
+catch (ReflectionException $e) {
+    var_dump($e->getMessage());
+}
+
+$protected->setAccessible(TRUE);
+$protectedStatic->setAccessible(TRUE);
+$private->setAccessible(TRUE);
+$privateStatic->setAccessible(TRUE);
+
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
+
+$protected->setValue($a, 'e');
+$protectedStatic->setValue('f');
+$private->setValue($a, 'g');
+$privateStatic->setValue('h');
+
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
 ?>
---EXPECTF--
-
-Protected property:
-Cannot access non-public member TestClass::prot
-int(4)
-Cannot access non-public member TestClass::prot
+--EXPECT--
+unicode(44) "Cannot access non-public member A::protected"
+unicode(50) "Cannot access non-public member A::protectedStatic"
+unicode(42) "Cannot access non-public member A::private"
+unicode(48) "Cannot access non-public member A::privateStatic"
+unicode(1) "a"
+unicode(1) "b"
+unicode(1) "c"
+unicode(1) "d"
+unicode(1) "e"
+unicode(1) "f"
+unicode(1) "g"
+unicode(1) "h"
