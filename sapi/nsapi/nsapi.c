@@ -433,8 +433,6 @@ PHP_FUNCTION(nsapi_response_headers)
 
 	array_init(return_value);
 
-	php_header(TSRMLS_C);
-
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
 		entry=rc->rq->srvhdrs->ht[i];
 		while (entry) {
@@ -453,14 +451,39 @@ PHP_FUNCTION(nsapi_response_headers)
 static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
 {
 	int retval;
-	nsapi_request_context *rc;
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+	
+	if (!SG(headers_sent)) {
+		sapi_send_headers(TSRMLS_C);
+	}
 
-	rc = (nsapi_request_context *)SG(server_context);
 	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /* -1 */ || retval == IO_EOF /* 0 */) {
 		php_handle_aborted_connection();
 	}
 	return retval;
+}
+
+/* modified version of apache2 */
+static void sapi_nsapi_flush(void *server_context)
+{
+	nsapi_request_context *rc = (nsapi_request_context *)server_context;
+	TSRMLS_FETCH();
+
+	if (!rc) {
+		return;
+	}
+
+	if (!SG(headers_sent)) {
+		sapi_send_headers(TSRMLS_C);
+	}
+
+	/* flushing is only supported in iPlanet servers from version 6.1 on, make it conditional */
+#if defined(net_flush)
+	if (net_flush(rc->sn->csd) < 0) {
+		php_handle_aborted_connection();
+	}
+#endif
 }
 
 static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
@@ -747,7 +770,7 @@ static sapi_module_struct nsapi_sapi_module = {
 	NULL,                                   /* deactivate */
 
 	sapi_nsapi_ub_write,                    /* unbuffered write */
-	NULL,                                   /* flush */
+	sapi_nsapi_flush,                       /* flush */
 	NULL,                                   /* get uid */
 	NULL,                                   /* getenv */
 
