@@ -470,10 +470,6 @@ static void sapi_nsapi_flush(void *server_context)
 	nsapi_request_context *rc = (nsapi_request_context *)server_context;
 	TSRMLS_FETCH();
 
-	if (!rc) {
-		return;
-	}
-
 	if (!SG(headers_sent)) {
 		sapi_send_headers(TSRMLS_C);
 	}
@@ -913,7 +909,7 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 	int retval;
 	nsapi_request_context *request_context;
 	zend_file_handle file_handle = {0};
-	struct stat fst;
+	struct stat *fst;
 
 	char *path_info;
 	char *query_string    = pblock_findval("query", rq->reqpb);
@@ -985,7 +981,8 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (stat(SG(request_info).path_translated, &fst)==0 && S_ISREG(fst.st_mode)) {
+	fst = request_stat_path(SG(request_info).path_translated, rq);
+	if (fst && S_ISREG(fst->st_mode)) {
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			php_execute_script(&file_handle TSRMLS_CC);
 			php_request_shutdown(NULL);
