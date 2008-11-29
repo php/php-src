@@ -754,6 +754,13 @@ static int php_nsapi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
+static struct stat* sapi_nsapi_get_stat(TSRMLS_D)
+{
+	return request_stat_path(
+		SG(request_info).path_translated,
+		((nsapi_request_context *)SG(server_context))->rq
+	);
+}
 
 static sapi_module_struct nsapi_sapi_module = {
 	"nsapi",                                /* name */
@@ -767,7 +774,7 @@ static sapi_module_struct nsapi_sapi_module = {
 
 	sapi_nsapi_ub_write,                    /* unbuffered write */
 	sapi_nsapi_flush,                       /* flush */
-	NULL,                                   /* get uid */
+	sapi_nsapi_get_stat,                    /* get uid/stat */
 	NULL,                                   /* getenv */
 
 	php_error,                              /* error handler */
