@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2008, PHP 5.2.7
+- Fixed missing initialization of BG(page_uid) and BG(page_gid), 
+  reported by Maksymilian Arciemowicz. (Stas)
+
 - Fixed bug #46366 (bad cwd with / as pathinfo). (Dmitry)
 
 27 Nov 2008, PHP 5.2.7RC5
