@@ -1,3 +1,279 @@
+2008-11-28  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      ext/standard/basic_functions.c:
+      properly initialize BG(page_uid) and BG(page_gid)
+
+    * (PHP_5_2)
+      sapi/apache/mod_php5.c:
+      init SG(server_context) before processing configs
+
+2008-11-28  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/mysqli/mysqli_embedded.c:
+      Change to zend_parse_parameters
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/tests/mysql_affected_rows.phpt
+      ext/mysql/tests/mysql_close.phpt
+      ext/mysql/tests/mysql_data_seek.phpt
+      ext/mysql/tests/mysql_db_name.phpt
+      ext/mysql/tests/mysql_errno.phpt
+      ext/mysql/tests/mysql_error.phpt
+      ext/mysql/tests/mysql_fetch_field.phpt
+      ext/mysql/tests/mysql_fetch_lengths.phpt
+      ext/mysql/tests/mysql_field_flags.phpt
+      ext/mysql/tests/mysql_field_len.phpt
+      ext/mysql/tests/mysql_field_name.phpt
+      ext/mysql/tests/mysql_field_table.phpt
+      ext/mysql/tests/mysql_field_type.phpt
+      ext/mysql/tests/mysql_free_result.phpt
+      ext/mysql/tests/mysql_get_host_info.phpt
+      ext/mysql/tests/mysql_get_proto_info.phpt
+      ext/mysql/tests/mysql_get_server_info.phpt
+      ext/mysql/tests/mysql_insert_id.phpt
+      ext/mysql/tests/mysql_list_dbs.phpt
+      ext/mysql/tests/mysql_list_tables.phpt
+      ext/mysql/tests/mysql_num_fields.phpt
+      ext/mysql/tests/mysql_num_rows.phpt
+      ext/mysql/tests/mysql_tablename.phpt:
+      New param parsing for ext/mysql
+
+2008-11-28  Matt Wilmas  <php_lists@realplain.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Updated description to match docs
+
+2008-11-28  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_2)
+      ext/imap/tests/clean.inc
+      ext/imap/tests/clean.inc
+      ext/imap/tests/imap_include.inc
+      ext/imap/tests/imap_include.inc
+      ext/imap/tests/skipif.inc
+      ext/imap/tests/skipif.inc:
+      Committing include files required for tests. Tests and bug reports to
+      follow.
+
+    * ext/imap/tests/clean.inc
+      ext/imap/tests/clean.inc
+      ext/imap/tests/clean.inc
+      ext/imap/tests/imap_include.inc
+      ext/imap/tests/imap_include.inc
+      ext/imap/tests/imap_include.inc
+      ext/imap/tests/skipif.inc
+      ext/imap/tests/skipif.inc
+      ext/imap/tests/skipif.inc:
+        1.1.4;
+      Committing include files required for tests. Tests and bug reports to
+      follow.
+
+2008-11-28  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/sqlite3_29_createfunction.phpt:
+      - MFH: Fixed memory leaks in createFunction and createAggregate methods
+
+    * ext/sqlite3/sqlite3.c
+      ext/sqlite3/tests/sqlite3_29_createfunction.phpt
+      ext/sqlite3/tests/sqlite3_29_createfunction.phpt:
+      - Fixed memory leaks in createFunction and createAggregate methods
+
+2008-11-28  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      ext/mysqlnd/mysqlnd_loaddata.c:
+      MFH: No infinite loop in case the connection broke
+
+    * ext/mysqlnd/mysqlnd_loaddata.c:
+      No infinite loop in case the connection broke
+
+2008-11-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_http.c
+      ext/soap/php_http.c:
+      Fixed bug #41534 (SoapClient over HTTPS fails to reestablish connection)
+
+    * (PHP_5_2)
+      NEWS
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/cgi_main.c:
+      Fixed bug #46366 (bad cwd with / as pathinfo)
+
+2008-11-28  Ant Phillips  <antphill@uk.ibm.com>
+
+    * tests/lang/func_get_arg.001.phpt
+      tests/lang/func_get_arg.001.phpt
+      tests/lang/func_get_arg.002.phpt
+      tests/lang/func_get_arg.002.phpt
+      tests/lang/func_get_arg.003.phpt
+      tests/lang/func_get_arg.003.phpt
+      tests/lang/func_get_arg.004.phpt
+      tests/lang/func_get_arg.004.phpt
+      tests/lang/func_get_arg.005.phpt
+      tests/lang/func_get_arg.005.phpt
+      tests/lang/func_get_arg_variation.phpt
+      tests/lang/func_get_arg_variation.phpt
+      tests/lang/func_get_args.001.phpt
+      tests/lang/func_get_args.001.phpt
+      tests/lang/func_get_args.002.phpt
+      tests/lang/func_get_args.002.phpt
+      tests/lang/func_get_args.003.phpt
+      tests/lang/func_get_args.003.phpt
+      tests/lang/func_get_args.004.phpt
+      tests/lang/func_get_args.004.phpt
+      tests/lang/func_num_args.001.phpt
+      tests/lang/func_num_args.001.phpt
+      tests/lang/func_num_args.002.phpt
+      tests/lang/func_num_args.002.phpt
+      tests/lang/func_num_args.003.phpt
+      tests/lang/func_num_args.003.phpt
+      tests/lang/func_num_args.004.phpt
+      tests/lang/func_num_args.004.phpt
+      tests/lang/passByReference_001.phpt
+      tests/lang/passByReference_001.phpt
+      tests/lang/passByReference_002.phpt
+      tests/lang/passByReference_002.phpt
+      tests/lang/passByReference_003.phpt
+      tests/lang/passByReference_003.phpt
+      tests/lang/passByReference_004.phpt
+      tests/lang/passByReference_004.phpt
+      tests/lang/passByReference_005.phpt
+      tests/lang/passByReference_005.phpt
+      tests/lang/passByReference_006.phpt
+      tests/lang/passByReference_006.phpt
+      tests/lang/passByReference_007.phpt
+      tests/lang/passByReference_007.phpt
+      tests/lang/passByReference_008.phpt
+      tests/lang/passByReference_008.phpt
+      tests/lang/passByReference_009.phpt
+      tests/lang/passByReference_009.phpt
+      tests/lang/passByReference_010.phpt
+      tests/lang/passByReference_010.phpt
+      tests/lang/short_tags.001.phpt
+      tests/lang/short_tags.001.phpt
+      tests/lang/short_tags.002.phpt
+      tests/lang/short_tags.002.phpt
+      tests/lang/short_tags.003.phpt
+      tests/lang/short_tags.003.phpt
+      tests/lang/short_tags.004.phpt
+      tests/lang/short_tags.004.phpt
+      tests/lang/static_basic_001.phpt
+      tests/lang/static_basic_001.phpt
+      tests/lang/static_basic_002.phpt
+      tests/lang/static_basic_002.phpt
+      tests/lang/static_variation_001.phpt
+      tests/lang/static_variation_001.phpt
+      tests/lang/static_variation_002.phpt
+      tests/lang/static_variation_002.phpt:
+      Language tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and Linux
+      64 bit).
+
+    * tests/lang/func_get_arg.001.phpt
+      tests/lang/func_get_arg.001.phpt
+      tests/lang/func_get_arg.001.phpt
+      tests/lang/func_get_arg.002.phpt
+      tests/lang/func_get_arg.002.phpt
+      tests/lang/func_get_arg.002.phpt
+      tests/lang/func_get_arg.003.phpt
+      tests/lang/func_get_arg.003.phpt
+      tests/lang/func_get_arg.003.phpt
+      tests/lang/func_get_arg.004.phpt
+      tests/lang/func_get_arg.004.phpt
+      tests/lang/func_get_arg.004.phpt
+      tests/lang/func_get_arg.005.phpt
+      tests/lang/func_get_arg.005.phpt
+      tests/lang/func_get_arg.005.phpt
+      tests/lang/func_get_arg_variation.phpt
+      tests/lang/func_get_arg_variation.phpt
+      tests/lang/func_get_arg_variation.phpt
+      tests/lang/func_get_args.001.phpt
+      tests/lang/func_get_args.001.phpt
+      tests/lang/func_get_args.001.phpt
+      tests/lang/func_get_args.002.phpt
+      tests/lang/func_get_args.002.phpt
+      tests/lang/func_get_args.002.phpt
+      tests/lang/func_get_args.003.phpt
+      tests/lang/func_get_args.003.phpt
+      tests/lang/func_get_args.003.phpt
+      tests/lang/func_get_args.004.phpt
+      tests/lang/func_get_args.004.phpt
+      tests/lang/func_get_args.004.phpt
+      tests/lang/func_num_args.001.phpt
+      tests/lang/func_num_args.001.phpt
+      tests/lang/func_num_args.001.phpt
+      tests/lang/func_num_args.002.phpt
+      tests/lang/func_num_args.002.phpt
+      tests/lang/func_num_args.002.phpt
+      tests/lang/func_num_args.003.phpt
+      tests/lang/func_num_args.003.phpt
+      tests/lang/func_num_args.003.phpt
+      tests/lang/func_num_args.004.phpt
+      tests/lang/func_num_args.004.phpt
+      tests/lang/func_num_args.004.phpt
+      tests/lang/passByReference_001.phpt
+      tests/lang/passByReference_001.phpt
+      tests/lang/passByReference_001.phpt
+      tests/lang/passByReference_002.phpt
+      tests/lang/passByReference_002.phpt
+      tests/lang/passByReference_002.phpt
+      tests/lang/passByReference_003.phpt
+      tests/lang/passByReference_003.phpt
+      tests/lang/passByReference_003.phpt
+      tests/lang/passByReference_004.phpt
+      tests/lang/passByReference_004.phpt
+      tests/lang/passByReference_004.phpt
+      tests/lang/passByReference_005.phpt
+      tests/lang/passByReference_005.phpt
+      tests/lang/passByReference_005.phpt
+      tests/lang/passByReference_006.phpt
+      tests/lang/passByReference_006.phpt
+      tests/lang/passByReference_006.phpt
+      tests/lang/passByReference_007.phpt
+      tests/lang/passByReference_007.phpt
+      tests/lang/passByReference_007.phpt
+      tests/lang/passByReference_008.phpt
+      tests/lang/passByReference_008.phpt
+      tests/lang/passByReference_008.phpt
+      tests/lang/passByReference_009.phpt
+      tests/lang/passByReference_009.phpt
+      tests/lang/passByReference_009.phpt
+      tests/lang/passByReference_010.phpt
+      tests/lang/passByReference_010.phpt
+      tests/lang/passByReference_010.phpt
+      tests/lang/short_tags.001.phpt
+      tests/lang/short_tags.001.phpt
+      tests/lang/short_tags.001.phpt
+      tests/lang/short_tags.002.phpt
+      tests/lang/short_tags.002.phpt
+      tests/lang/short_tags.002.phpt
+      tests/lang/short_tags.003.phpt
+      tests/lang/short_tags.003.phpt
+      tests/lang/short_tags.003.phpt
+      tests/lang/short_tags.004.phpt
+      tests/lang/short_tags.004.phpt
+      tests/lang/short_tags.004.phpt
+      tests/lang/static_basic_001.phpt
+      tests/lang/static_basic_001.phpt
+      tests/lang/static_basic_001.phpt
+      tests/lang/static_basic_002.phpt
+      tests/lang/static_basic_002.phpt
+      tests/lang/static_basic_002.phpt
+      tests/lang/static_variation_001.phpt
+      tests/lang/static_variation_001.phpt
+      tests/lang/static_variation_001.phpt
+      tests/lang/static_variation_002.phpt
+      tests/lang/static_variation_002.phpt
+      tests/lang/static_variation_002.phpt:
+        1.1.4;
+      file func_get_arg.001.phpt was initially added on branch PHP_5_2.
+
 2008-11-27  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
