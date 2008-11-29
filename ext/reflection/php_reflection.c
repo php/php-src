@@ -4365,7 +4365,7 @@ ZEND_METHOD(reflection_property, setValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop.flags & ZEND_ACC_PUBLIC)) {
+	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && ref->ignore_visibility == 0) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %s::%s", intern->ce->name, Z_STRVAL(name));
@@ -4409,10 +4409,13 @@ ZEND_METHOD(reflection_property, setValue)
 			zend_hash_quick_update(prop_table, ref->prop.name, ref->prop.name_length+1, ref->prop.h, &value, sizeof(zval *), (void **) &foo);
 		}
 	} else {
+		char *class_name, *prop_name;
+
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 			return;
 		}
-		zend_update_property(Z_OBJCE_P(object), object, ref->prop.name, ref->prop.name_length, value TSRMLS_CC);
+		zend_unmangle_property_name(ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
+		zend_update_property(Z_OBJCE_P(object), object, prop_name, strlen(prop_name), value TSRMLS_CC);
 	}
 }
 /* }}} */
