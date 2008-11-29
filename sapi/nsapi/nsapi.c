@@ -475,7 +475,7 @@ static void sapi_nsapi_flush(void *server_context)
 	}
 
 	/* flushing is only supported in iPlanet servers from version 6.1 on, make it conditional */
-#if defined(net_flush)
+#if NSAPI_VERSION >= 302
 	if (net_flush(rc->sn->csd) < 0) {
 		php_handle_aborted_connection();
 	}
@@ -856,12 +856,10 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 	int threads=128; /* default for server */
 
 	/* fetch max threads from NSAPI and initialize TSRM with it */
-#if defined(pool_maxthreads)
-	threads=pool_maxthreads;
+	threads=conf_getglobals()->Vpool_maxthreads;
 	if (threads<1) {
 		threads=128; /* default for server */
 	}
-#endif
 	tsrm_startup(threads, 1, 0, NULL);
 
 	core_globals = ts_resource(core_globals_id);
