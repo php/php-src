@@ -89,7 +89,7 @@ static zend_class_entry * spl_find_ce_by_name(char *name, int len, zend_bool aut
 	return *ce;
 }
 
-/* {{{ proto array class_parents(object instance)
+/* {{{ proto array class_parents(object instance [, boolean autoload = true])
  Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
