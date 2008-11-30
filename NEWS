@@ -402,7 +402,8 @@ PHP                                                                        NEWS
 
 - Added array_replace() and array_replace_recursive() functions. (Matt)
 - Added ReflectionProperty::setAccessible() method that allows non-public
-  property's values to be read through ::getValue(). (Derick)
+  property's values to be read through ::getValue() and set through
+  ::setValue(). (Derick, Sebastian)
 - Added msg_queue_exists() function to sysvmsg extension. (Benjamin Schulz)
 - Added Firebird specific attributes that can be set via PDO::setAttribute()
   to control formatting of date/timestamp columns: PDO::FB_ATTR_DATE_FORMAT,
