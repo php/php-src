@@ -3535,7 +3535,9 @@ PHP_FUNCTION(openssl_sign)
 		efree(sigbuf);
 		RETVAL_FALSE;
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
 	EVP_MD_CTX_cleanup(&md_ctx);
+#endif
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
 	}
@@ -3575,7 +3577,9 @@ PHP_FUNCTION(openssl_verify)
 	EVP_VerifyInit   (&md_ctx, mdtype);
 	EVP_VerifyUpdate (&md_ctx, data, data_len);
 	err = EVP_VerifyFinal (&md_ctx, (unsigned char *)signature, signature_len, pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
 	EVP_MD_CTX_cleanup(&md_ctx);
+#endif
 
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
