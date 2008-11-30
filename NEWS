@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #46427 (SoapClient() stumbles over its "stream_context" parameter).
   (Dmitry, Herman Radtke)
+- Fixed bug #44900 (OpenSSL extension fails to link with OpenSSL 0.9.6).
+  (jd at cpanel dot net, Pierre)
 - Fixed bug #44882 (SOAP extension object decoding bug). (Dmitry)
 - Fixed bug #44182 (extract($a, EXTR_REFS) can fail to split copy-on-write
   references). (robin_fernandes at uk dot ibm dot com)
