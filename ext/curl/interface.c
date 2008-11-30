@@ -1793,17 +1793,17 @@ type_conflict:
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
-	zval       *zid, *zvalue;
+	zval       *zid, **zvalue;
 	long	   options;
 	php_curl    *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlz", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &zid, &options, &zvalue) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (!_php_curl_setopt(ch, options, &zvalue, return_value TSRMLS_CC)) {
+	if (!_php_curl_setopt(ch, options, zvalue, return_value TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
