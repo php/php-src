@@ -1,3 +1,99 @@
+2008-11-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      MFH: support stat cache of webserver (like apache does)
+
+    * sapi/nsapi/nsapi.c:
+      support stat cache of webserver (like apache does)
+
+2008-11-29  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      ext/ereg/tests/ereg_replace_variation_002.phpt
+      ext/ereg/tests/eregi_replace_variation_002.phpt
+      ext/ereg/tests/split_variation_003.phpt
+      ext/ereg/tests/spliti_variation_003.phpt:
+      - Fixed tests
+
+2008-11-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c:
+      MFH: Some nsapi.h specific ifdefs unified & corrected (same like last
+      commit, only cleanup)
+
+    * (PHP_5_3)
+      sapi/nsapi/nsapi.c:
+      MFH: Some nsapi.h specific ifdefs unified & corrected
+
+    * sapi/nsapi/nsapi.c:
+      Some nsapi.h specific ifdefs unified & corrected
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c:
+      MFH: remove one stat call and replace by cached one
+      (release-manager: the same like with last commit)
+
+    * (PHP_5_3)
+      sapi/nsapi/nsapi.c:
+      MFH: remove one stat call and replace by cached one
+
+    * sapi/nsapi/nsapi.c:
+      remove one stat call and replace by cached one
+
+2008-11-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionProperty_setAccessible.phpt:
+      MFH: Fix #46718: ReflectionProperty::setValue() and
+      ReflectionProperty::setAccessible().
+
+    * ext/reflection/php_reflection.c
+      ext/reflection/tests/reflectionProperty_setAccessible.phpt:
+      Fix #46718: ReflectionProperty::setValue() and
+      ReflectionProperty::setAccessible().
+
+2008-11-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_5_2)
+      sapi/nsapi/nsapi.c:
+      Hallo release manager: This patch is not release critical (affects only
+      NSAPI, but I want it to be fixed in the last version of PHP 5.2). If you
+      do not want to have it in, revert it, a new RC is definitely not needed
+      because of this (and I am sure nobody who tests RCs is using NSAPI :)!
+      
+      MFH: Implement flushing in NSAPI, fix some problems with output buffering
+      if the response was not started (no headers sent) before doing something
+      in ub_write() or flush() - Writing or flushing output will fail in NSAPI,
+      if headers were not sent before.
+
+    * (PHP_5_3)
+      sapi/nsapi/nsapi.c:
+      MFH:
+      - Implement the changes needed for http://news.php.net/php.cvs/54228
+      - Additionally implement flushing in NSAPI and fix some small things
+
+    * sapi/nsapi/nsapi.c:
+      - Implement the changes needed for http://news.php.net/php.cvs/54228
+      - Additionally implement flushing in NSAPI and fix some small things
+
+2008-11-29  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_2)
+      NEWS:
+      report fix
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFB: init BG(page_uid) and BG(page_gid)
+
+    * sapi/apache/mod_php.c
+      sapi/apache/mod_php5.c:
+      MFB: init server context before config variables are processed
+
 2008-11-28  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_2)
