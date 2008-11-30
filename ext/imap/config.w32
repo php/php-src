@@ -15,6 +15,7 @@ if (PHP_IMAP == "yes") {
 
 		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1");
 		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
+		AC_DEFINE('HAVE_RFC822_OUTPUT_ADDRESS_LIST', 1, 'Have IMAP support', true);
 	} else {
 		WARNING("imap not enabled; libraries and headers not found");
 	}
