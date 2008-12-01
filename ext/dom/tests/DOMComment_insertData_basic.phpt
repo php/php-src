@@ -16,6 +16,6 @@ $dom->appendChild($comment);
 echo $dom->saveXML();
 
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0"?>
 <!--test-inserted-comment-->
