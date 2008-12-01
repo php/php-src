@@ -3092,6 +3092,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
+	zval **tmp;
 
 	if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
 		uri_len = strlen(uri);
@@ -3155,6 +3156,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 
 		if (client->stream_context) {
 			context = client->stream_context;
+		} else {
+			context = php_stream_context_alloc();
 		}
 
 		if (client->proxy_host) {
@@ -3185,6 +3188,18 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		}
 
 		basic_authentication(this_ptr, &headers TSRMLS_CC);
+
+		/* Use HTTP/1.1 with "Connection: close" by default */
+		if (php_stream_context_get_option(context, "http", "protocol_version", &tmp) == FAILURE) {
+	    	zval *http_version;
+
+			MAKE_STD_ZVAL(http_version);
+			ZVAL_DOUBLE(http_version, 1.1);
+			php_stream_context_set_option(context, "http", "protocol_version", http_version);
+			zval_ptr_dtor(&http_version);
+			smart_str_appendl(&headers, "Connection: close", sizeof("Connection: close")-1);
+		}
+
 	}
 
 	if (headers.len > 0) {
