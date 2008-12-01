@@ -373,6 +373,15 @@ try_again:
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
 
+		if (context && 
+		    php_stream_context_get_option(context, "http", "protocol_version", &tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_DOUBLE &&
+		    Z_DVAL_PP(tmp) == 1.0) {
+			http_1_1 = 0;
+		} else {
+			http_1_1 = 1;
+		}
+
 		smart_str_append_const(&soap_headers, "POST ");
 		if (use_proxy && !use_ssl) {
 			smart_str_appends(&soap_headers, phpurl->scheme);
@@ -394,19 +403,24 @@ try_again:
 			smart_str_appendc(&soap_headers, '#');
 			smart_str_appends(&soap_headers, phpurl->fragment);
 		}
-		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
-			"Host: ");
+		if (http_1_1) {
+			smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
+		} else {
+			smart_str_append_const(&soap_headers, " HTTP/1.0\r\n");
+		}
+		smart_str_append_const(&soap_headers, "Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);
 		if (phpurl->port != (use_ssl?443:80)) {
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		smart_str_append_const(&soap_headers, "\r\n"
-			"Connection: Keep-Alive\r\n");
-/*
-			"Connection: close\r\n"
-			"Accept: text/html; text/xml; text/plain\r\n"
-*/
+		if (http_1_1) {
+			smart_str_append_const(&soap_headers, "\r\n"
+				"Connection: Keep-Alive\r\n");
+		} else {
+			smart_str_append_const(&soap_headers, "\r\n"
+				"Connection: close\r\n");
+		}
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			if (Z_STRLEN_PP(tmp) > 0) {
