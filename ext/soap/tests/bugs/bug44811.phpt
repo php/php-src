@@ -14,7 +14,7 @@ try {
 }
 die('ok');
 ?>
---EXPECT--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://slashdot.org' : Premature end of data in tag html line 3
+--EXPECTF--
+SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://slashdot.org' : %s
 
 ok
