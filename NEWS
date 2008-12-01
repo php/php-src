@@ -95,6 +95,8 @@ PHP                                                                        NEWS
   (David C.)
 - Fixed bug #44154 (pdo->errorInfo() always have three elements in the
   returned array). (David C.)
+- Fixed bug #43069 (SoapClient causes 505 HTTP Version not supported error
+  message). (Dmitry)
 - Fixed bug #41534 (SoapClient over HTTPS fails to reestablish connection).
   (Dmitry)
 
