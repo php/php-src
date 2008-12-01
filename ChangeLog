@@ -1,3 +1,63 @@
+2008-11-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      ext/imap/config.w32:
+      - MFB:  Enable fix fo #42862 (IMAP toolkit crash: rfc822.c legacy routine
+      buffer overflow) on windows (we use the latest imap)
+
+    * (PHP_5_2)
+      ext/imap/config.w32:
+      - Enable fix fo #42862 (IMAP toolkit crash: rfc822.c legacy routine buffer
+      overflow) on windows (we use the latest imap)
+
+    * ext/dba/dba_db1.c
+      ext/dba/dba_db1.c
+      ext/pdo_odbc/odbc_driver.c
+      ext/pdo_odbc/odbc_stmt.c
+      ext/pdo_odbc/php_pdo_odbc_int.h:
+      - fix line ending
+
+    * (PHP_5_2)
+      NEWS:
+      - #44900
+
+    * (PHP_5_2)
+      ext/openssl/openssl.c:
+      - #44900, OpenSSL extension fails to link with OpenSSL 0.9.6 (5.2 only,
+      5.3+ requires a decent version)
+
+2008-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      
+      MFB: Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops).
+
+    * (PHP_5_3)
+      NEWS:
+      
+      BFN
+
+    * (PHP_5_3)
+      ext/curl/interface.c
+      ext/curl/tests/bug46711.phpt
+      ext/curl/tests/bug46711.phpt:
+      Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops).
+
+2008-11-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_3)
+      NEWS:
+      Update ReflectionProperty::setAccessible() entry.
+
+2008-11-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * ext/spl/php_spl.c
+      ext/spl/php_spl.c:
+      Fix arginfo
+
+    * ext/spl/php_spl.c:
+      Fixed proto
+
 2008-11-29  Uwe Schindler  <uwe@thetaphi.de>
 
     * (PHP_5_2)
