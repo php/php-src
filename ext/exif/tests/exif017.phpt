@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD data in Motorola byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(26) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(1874)
+  int(%d)
   [u"FileType"]=>
   int(8)
   [u"MimeType"]=>
@@ -1618,5 +1620,4 @@ array(26) {
   [u"Copyright"]=>
   unicode(12) "Eric Stewart"
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+

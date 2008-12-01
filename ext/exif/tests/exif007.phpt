@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, baseline JPEG with no IFD, EXIF, GPS or Interoperability data in Intel byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(7) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(283)
+  int(%d)
   [u"FileType"]=>
   int(2)
   [u"MimeType"]=>
@@ -35,5 +37,4 @@ array(7) {
     int(1)
   }
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+

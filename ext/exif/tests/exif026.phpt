@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD0, EXIF, INTEROP data in Intel byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(31) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(1984)
+  int(%d)
   [u"FileType"]=>
   int(7)
   [u"MimeType"]=>
@@ -1628,5 +1630,4 @@ array(31) {
   [u"RelatedImageHeight"]=>
   int(1)
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+

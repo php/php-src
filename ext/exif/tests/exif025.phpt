@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD0, EXIF, INTEROP data in Motorola byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(14) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(417)
+  int(%d)
   [u"FileType"]=>
   int(2)
   [u"MimeType"]=>
@@ -51,5 +53,4 @@ array(14) {
   [u"RelatedImageHeight"]=>
   int(1)
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+

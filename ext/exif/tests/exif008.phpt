@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD data in Intel byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(16) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(527)
+  int(%d)
   [u"FileType"]=>
   int(2)
   [u"MimeType"]=>
@@ -55,11 +57,10 @@ array(16) {
   [u"ResolutionUnit"]=>
   int(2)
   [u"DateTime"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"Artist"]=>
   unicode(12) "Eric Stewart"
   [u"Copyright"]=>
   unicode(12) "Eric Stewart"
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+
