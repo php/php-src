@@ -20,5 +20,5 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 Throws DOMException for -ve offest

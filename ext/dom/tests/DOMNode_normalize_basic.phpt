@@ -1,15 +1,15 @@
 --TEST--
-DomNode::normalize()
+normalize()
 --SKIPIF--
 <?php
 include('skipif.inc');
 ?>
 --FILE--
-<?php
+<?php 
 
 /* Create an XML document
  * with structure
- * <book>
+ * <book> 
  *  <author></author>
  *  <title>This is the title</title>
  * </book>
@@ -57,7 +57,7 @@ echo "Number of child nodes of title after normalizing title = ";
 var_dump($title->childNodes->length);
 
 ?>
---EXPECT--
+--EXPECTF--
 Number of child nodes of title = int(1)
 Number of child nodes of title after adding second title = int(2)
 Number of child nodes of title after normalizing author = int(2)
