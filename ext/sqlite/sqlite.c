@@ -2917,11 +2917,13 @@ static enum callback_prep_t prep_callback_struct(struct php_sqlite_db *db, int i
 	MAKE_STD_ZVAL(alloc_funcs->step);
 	*(alloc_funcs->step)  = *step;
 	zval_copy_ctor(alloc_funcs->step);
+	INIT_PZVAL(alloc_funcs->step);
 
 	if (is_agg) {
 		MAKE_STD_ZVAL(alloc_funcs->fini);
 		*(alloc_funcs->fini) = *fini;
 		zval_copy_ctor(alloc_funcs->fini);
+		INIT_PZVAL(alloc_funcs->fini);
 	} else {
 		alloc_funcs->fini = NULL;
 	}
