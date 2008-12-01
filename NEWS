@@ -18,7 +18,7 @@ PHP                                                                        NEWS
 - Fixed memory leak inside readline_callback_handler_remove() function. (Felipe)
 - Fixed bug #46696 (cURL fails in upload files with specified content-type).
   (Ilia)
-- Fixed bug #46673 (stream_lock call with wrong paramater). (Arnaud)
+- Fixed bug #46673 (stream_lock call with wrong parameter). (Arnaud)
 - Fixed bug #46649 (Setting array element with that same array produces 
   inconsistent results). (Arnaud)
 - Fixed bug #46626 (mb_convert_case does not handle apostrophe correctly).
