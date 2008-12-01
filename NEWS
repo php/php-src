@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
 - Fixed memory leak inside wddx_add_vars() function. (Felipe)
 - Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
+- Fixed check in recode extension to allow builing of recode and mysql
+  extensions when using a recent libmysql. (Johannes)
 
 - Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops).
   (magicaltux [at] php [dot] net)
