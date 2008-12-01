@@ -60,12 +60,6 @@
  * NSAPI includes
  */
 #include "nsapi.h"
-#include "base/pblock.h"
-#include "base/session.h"
-#include "frame/req.h"
-#include "frame/protocol.h"  /* protocol_start_response */
-#include "base/util.h"       /* is_mozilla, getline */
-#include "frame/log.h"       /* log_error */
 
 #define NSLS_D		struct nsapi_request_context *request_context
 #define NSLS_DC		, NSLS_D
