@@ -1,15 +1,15 @@
 --TEST--
-DomNode::normalize()
+normalize()
 --SKIPIF--
 <?php
 include('skipif.inc');
 ?>
 --FILE--
-<?php
+<?php 
 
 /* Create an XML document
  * with structure
- * <book>
+ * <book> 
  *  <author></author>
  *  <title>This is the title</title>
  * </book>

@@ -3,8 +3,6 @@ DOMCharacterData::appendData basic functionality test
 --CREDITS--
 Mike Sullivan <mike@regexia.com>
 #TestFest 2008 (London)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
