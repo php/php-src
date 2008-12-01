@@ -16,7 +16,7 @@ array(28) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(741)
+  int(%d)
   [u"FileType"]=>
   int(2)
   [u"MimeType"]=>
@@ -57,7 +57,7 @@ array(28) {
   [u"ResolutionUnit"]=>
   int(2)
   [u"DateTime"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"Artist"]=>
   unicode(12) "Eric Stewart"
   [u"Copyright"]=>
@@ -71,9 +71,9 @@ array(28) {
   [u"ISOSpeedRatings"]=>
   int(80)
   [u"DateTimeOriginal"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"DateTimeDigitized"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"MeteringMode"]=>
   int(5)
   [u"LightSource"]=>

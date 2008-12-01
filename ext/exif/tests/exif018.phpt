@@ -1,5 +1,7 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD and EXIF data in Intel byte-order.
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -16,7 +18,7 @@ array(37) {
   [u"FileDateTime"]=>
   int(%d)
   [u"FileSize"]=>
-  int(2088)
+  int(%d)
   [u"FileType"]=>
   int(7)
   [u"MimeType"]=>
@@ -1626,9 +1628,9 @@ array(37) {
   [u"ISOSpeedRatings"]=>
   int(80)
   [u"DateTimeOriginal"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"DateTimeDigitized"]=>
-  unicode(19) "2008:06:19 01:47:53"
+  unicode(%d) "%s"
   [u"MeteringMode"]=>
   int(5)
   [u"LightSource"]=>
@@ -1642,5 +1644,4 @@ array(37) {
   [u"ExifImageLength"]=>
   int(1)
 }
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
+
