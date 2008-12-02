@@ -24,64 +24,181 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
+#include "zend_float.h"
 
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
 
-/*
- * Pertains to some of the code found in the php_round() function
- * Ref: http://www.freebsd.org/cgi/query-pr.cgi?pr=59797
- * 
- * Copyright (c) 2003, Steven G. Kargl
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice unmodified, this list of conditions, and the following
- *    disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-static double php_round(double val, int places) {
-	double t;
-	double f = pow(10.0, (double) places);
-	double x = val * f;
-  
-	if (zend_isinf(x) || zend_isnan(x)) {
-		return val;
-	}
+/* {{{ php_intlog10abs
+   Returns floor(log10(fabs(val))), uses fast binary search */
+static inline int php_intlog10abs(double value) {
+	int result;
+	value = fabs(value);
 
-	if (x >= 0.0) {
-		t = ceil(x);
-		if ((t - x) > 0.50000000001) {
-			t -= 1.0;
+	if (value < 1e-8 || value > 1e23) {
+		result = (int)floor(log10(value));
+	} else {
+		static const double values[] = {
+			1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1,
+			1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,
+			1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
+			1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
+		/* Do a binary search with 5 steps */
+		result = 16;
+		if (value < values[result]) {
+			result -= 8;
+		} else {
+			result += 8;
+		}
+		if (value < values[result]) {
+			result -= 4;
+		} else {
+			result += 4;
+		}
+		if (value < values[result]) {
+			result -= 2;
+		} else {
+			result += 2;
+		}
+		if (value < values[result]) {
+			result -= 1;
+		} else {
+			result += 1;
+		}
+		if (value < values[result]) {
+			result -= 1;
+		}
+		result -= 8;
+	}
+	return result;
+}
+/* }}} */
+
+/* {{{ php_intpow10
+       Returns pow(10.0, (double)power), uses fast lookup table for exact powers */
+static inline double php_intpow10(int power) {
+	static const double powers[] = {
+		1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,
+		1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
+		1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
+
+	/* Not in lookup table */
+	if (power < 0 || power > 22) {
+		return pow(10.0, (double)power);
+	}
+	return powers[power];
+}
+/* }}} */
+
+/* {{{ php_round_helper
+       Actually performs the rounding of a value to integer in a certain mode */
+static inline double php_round_helper(double value, int mode) {
+	ZEND_FLOAT_DECLARE
+	double tmp_value;
+
+	ZEND_FLOAT_ENSURE();
+	if (value >= 0.0) {
+		tmp_value = floor(value + 0.5);
+		if ((mode == PHP_ROUND_HALF_DOWN && value == (-0.5 + tmp_value)) ||
+			(mode == PHP_ROUND_HALF_EVEN && value == (0.5 + 2 * floor(tmp_value/2.0))) ||
+			(mode == PHP_ROUND_HALF_ODD  && value == (0.5 + 2 * floor(tmp_value/2.0) - 1.0)))
+		{
+			tmp_value = tmp_value - 1.0;
 		}
 	} else {
-		t = ceil(-x);
-		if ((t + x) > 0.50000000001) {
-			t -= 1.0;
+		tmp_value = ceil(value - 0.5);
+		if ((mode == PHP_ROUND_HALF_DOWN && value == (0.5 + tmp_value)) ||
+			(mode == PHP_ROUND_HALF_EVEN && value == (-0.5 + 2 * ceil(tmp_value/2.0))) ||
+			(mode == PHP_ROUND_HALF_ODD  && value == (-0.5 + 2 * ceil(tmp_value/2.0) + 1.0)))
+		{
+			tmp_value = tmp_value + 1.0;
 		}
-		t = -t; 
 	}
-	x = t / f;
 
-	return !zend_isnan(x) ? x : t;
+	ZEND_FLOAT_RETURN(tmp_value);
 }
+/* }}} */
+
+/* {{{ _php_math_round */
+/*
+ * Rounds a number to a certain number of decimal places in a certain rounding
+ * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
+ */
+PHPAPI double _php_math_round(double value, int places, int mode) {
+	ZEND_FLOAT_DECLARE
+	double f1, f2;
+	double tmp_value;
+	int precision_places;
+
+	ZEND_FLOAT_ENSURE();
+
+	precision_places = 14 - php_intlog10abs(value);
+
+	f1 = php_intpow10(abs(places));
+
+	/* If the decimal precision guaranteed by FP arithmetic is higher than
+	   the requested places BUT is small enough to make sure a non-zero value
+	   is returned, pre-round the result to the precision */
+	if (precision_places > places && precision_places - places < 15) {
+		f2 = php_intpow10(abs(precision_places));
+		if (precision_places >= 0) {
+			tmp_value = value * f2;
+		} else {
+			tmp_value = value / f2;
+		}
+		/* preround the result (tmp_value will always be something * 1e14,
+		   thus never larger than 1e15 here) */
+		tmp_value = php_round_helper(tmp_value, mode);
+		/* now correctly move the decimal point */
+		f2 = php_intpow10(abs(places - precision_places));
+		/* because places < precision_places */
+		tmp_value = tmp_value / f2;
+	} else {
+		/* adjust the value */
+		if (places >= 0) {
+			tmp_value = value * f1;
+		} else {
+			tmp_value = value / f1;
+		}
+		/* This value is beyond our precision, so rounding it is pointless */
+		if (fabs(tmp_value) >= 1e15) {
+			ZEND_FLOAT_RETURN(value);
+		}
+	}
+
+	/* round the temp value */
+	tmp_value = php_round_helper(tmp_value, mode);
+	
+	/* see if it makes sense to use simple division to round the value */
+	if (abs(places) < 23) {
+		if (places > 0) {
+			tmp_value = tmp_value / f1;
+		} else {
+			tmp_value = tmp_value * f1;
+		}
+	} else {
+		/* Simple division can't be used since that will cause wrong results.
+		   Instead, the number is converted to a string and back again using
+		   strtod(). strtod() will return the nearest possible FP value for
+		   that string. */
+
+		/* 40 Bytes should be more than enough for this format string. The
+		   float won't be larger than 1e15 anyway. But just in case, use
+		   snprintf() and make sure the buffer is zero-terminated */
+		char buf[40];
+		snprintf(buf, 39, "%15fe%d", tmp_value, -places);
+		buf[39] = '\0';
+		tmp_value = zend_strtod(buf, NULL);
+		/* couldn't convert to string and back */
+		if (!zend_finite(tmp_value) || zend_isnan(tmp_value)) {
+			tmp_value = value;
+		}
+	}
+
+	ZEND_FLOAT_RETURN(tmp_value);
+}
+/* }}} */
 
 /* {{{ php_asinh
 */
@@ -212,15 +329,16 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-/* {{{ proto float round(float number [, int precision]) U
+/* {{{ proto float round(float number [, int precision [, int mode]]) U
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
 	zval *value;
 	long places = 0;
+	long mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|l", &value, &places) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|ll", &value, &places, &mode) == FAILURE) {
 		return;
 	}
 
@@ -238,7 +356,7 @@ PHP_FUNCTION(round)
 			return_val = (Z_TYPE_P(value) == IS_LONG) ?
 							(double)Z_LVAL_P(value) : Z_DVAL_P(value);
 
-			return_val = php_round(return_val, places);
+			return_val = _php_math_round(return_val, places, mode);
 
 			RETURN_DOUBLE(return_val);
 			break;
@@ -1002,7 +1120,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	}
 
 	dec = MAX(0, dec);
-	d = php_round(d, dec);
+	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
 
 	tmplen = spprintf(&tmpbuf, 0, "%.*f", dec, d);
 
