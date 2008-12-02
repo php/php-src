@@ -11,7 +11,8 @@ $db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
 
 
-$db->sqliteCreateFunction('testing', function($v) { return strtolower($v); });
+function test($v) { return strtolower($v); }
+$db->sqliteCreateFunction('testing', 'test');
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {

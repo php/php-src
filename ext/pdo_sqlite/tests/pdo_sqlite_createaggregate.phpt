@@ -10,7 +10,9 @@ $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
 
-$db->sqliteCreateAggregate('testing', function(&$a, $b) { $a .= $b; return $a; }, function(&$v) { return $v; });
+function test_a(&$a, $b) { $a .= $b; return $a; }
+function test_b(&$a) { return $a; }
+$db->sqliteCreateAggregate('testing', 'test_a', 'test_b');
 
 
 foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {

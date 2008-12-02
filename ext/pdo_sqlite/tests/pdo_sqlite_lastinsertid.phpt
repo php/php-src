@@ -19,12 +19,8 @@ object(PDOStatement)#2 (1) {
   ["queryString"]=>
   %string|unicode%(17) "SELECT * FROM foo"
 }
-array(3) {
+array(1) {
   [0]=>
   %string|unicode%(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 %string|unicode%(1) "2"
