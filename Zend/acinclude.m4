@@ -131,7 +131,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
      double d = div (2877.0, 1000000.0);
      char buf[255];
      sprintf(buf, "%.30f", d);
-     // see if the result is actually in double precision
+     /* see if the result is actually in double precision */
      return strncmp(buf, "0.00287699", 10) == 0 ? 0 : 1;
    }
   ]], [ac_cfp_have__fpu_setcw=yes], [ac_cfp_have__fpu_setcw=no])
@@ -163,7 +163,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
      double d = div (2877.0, 1000000.0);
      char buf[255];
      sprintf(buf, "%.30f", d);
-     // see if the result is actually in double precision
+     /* see if the result is actually in double precision */
      return strncmp(buf, "0.00287699", 10) == 0 ? 0 : 1;
    }
   ]], [ac_cfp_have_fpsetprec=yes], [ac_cfp_have_fpsetprec=no])
@@ -195,7 +195,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
      double d = div (2877.0, 1000000.0);
      char buf[255];
      sprintf(buf, "%.30f", d);
-     // see if the result is actually in double precision
+     /* see if the result is actually in double precision */
      return strncmp(buf, "0.00287699", 10) == 0 ? 0 : 1;
    }
   ]], [ac_cfp_have__controlfp=yes], [ac_cfp_have__controlfp=no])
@@ -228,7 +228,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
      double d = div (2877.0, 1000000.0);
      char buf[255];
      sprintf(buf, "%.30f", d);
-     // see if the result is actually in double precision
+     /* see if the result is actually in double precision */
      return strncmp(buf, "0.00287699", 10) == 0 ? 0 : 1;
    }
   ]], [ac_cfp_have__controlfp_s=yes], [ac_cfp_have__controlfp_s=no])
@@ -263,7 +263,7 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
      double d = div (2877.0, 1000000.0);
      char buf[255];
      sprintf(buf, "%.30f", d);
-     // see if the result is actually in double precision
+     /* see if the result is actually in double precision */
      return strncmp(buf, "0.00287699", 10) == 0 ? 0 : 1;
    }
   ]], [ac_cfp_have_fpu_inline_asm_x86=yes], [ac_cfp_have_fpu_inline_asm_x86=no])
