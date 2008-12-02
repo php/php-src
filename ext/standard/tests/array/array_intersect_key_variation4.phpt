@@ -21,7 +21,7 @@ $input_arrays = array(
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_intersect_key($input_array, $value) );
-      var_dump( array_intersect_key($value, $input_array ) );
+      var_dump( array_intersect_key($value,$input_array ) );
 }
 ?>
 ===DONE===

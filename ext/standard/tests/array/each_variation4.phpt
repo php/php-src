@@ -1,7 +1,5 @@
 --TEST--
 Test each() function : usage variations - Referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array each(array $arr)

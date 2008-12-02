@@ -1,7 +1,5 @@
 --TEST--
 Test rsort() function : usage variations - referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
