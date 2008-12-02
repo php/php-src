@@ -223,31 +223,6 @@ AC_FUNC_FNMATCH
 divert(5)dnl
 
 dnl
-dnl round fuzz
-dnl
-AC_MSG_CHECKING([whether rounding works as expected])
-AC_TRY_RUN([
-#include <math.h>
-  /* keep this out-of-line to prevent use of gcc inline floor() */
-  double somefn(double n) {
-    return floor(n*pow(10,2) + 0.5);
-  }
-  int main() {
-    return somefn(0.045)/10.0 != 0.5;
-  }
-],[
-  PHP_ROUND_FUZZ=0.5
-  AC_MSG_RESULT(yes)
-],[
-  PHP_ROUND_FUZZ=0.50000000001
-  AC_MSG_RESULT(no)
-],[
-  PHP_ROUND_FUZZ=0.50000000001
-  AC_MSG_RESULT(cross compile)
-])
-AC_DEFINE_UNQUOTED(PHP_ROUND_FUZZ, $PHP_ROUND_FUZZ, [ see #24142 ])
-
-dnl
 dnl Check if there is a support means of creating a new process
 dnl and defining which handles it receives
 dnl
