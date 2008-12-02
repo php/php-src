@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   reported by Maksymilian Arciemowicz. (Stas)
 
 - Fixed bug #46366 (bad cwd with / as pathinfo). (Dmitry)
+- Fixed bug #46732 (mktime.year description is wrong). (Derick)
 
 27 Nov 2008, PHP 5.2.7RC5
 - Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
