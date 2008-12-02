@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Changed error level E_ERROR into E_WARNING in Soap extension methods
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
+- Changed floating point behaviour to consistently use double precision on all
+  platforms and with all compilers. (Christian Seiler)
+- Changed round() to act more intuitively when rounding to a certain precision
+  and to correctly round very large and very small exponents. (Christian Seiler)
 
 - Added support for namespaces with brackets. (Greg)
 - Added stream_cast() and stream_set_options() to user-space stream wrappers,
