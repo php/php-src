@@ -54,7 +54,7 @@ array(10) {
   [u"undefined var"]=>
   NULL
   [u"instance of classWithoutToString"]=>
-  object(classWithoutToString)#%d (0) {
+  object(classWithoutToString)#2 (0) {
   }
   [u"float -10.5"]=>
   float(-10.5)
@@ -66,7 +66,7 @@ array(10) {
   array(0) {
   }
   [u"instance of classWithToString"]=>
-  object(classWithToString)#%d (0) {
+  object(classWithToString)#1 (0) {
   }
   [u"string DQ"]=>
   unicode(6) "string"

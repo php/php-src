@@ -104,7 +104,7 @@ foreach($inputs as $key => $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing each() : usage variations ***
 
 -- Iteration 1: int data --

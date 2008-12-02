@@ -201,9 +201,7 @@ Warning: end() expects parameter 1 to be array, Unicode string given in %s on li
 NULL
 
 -- Iteration 22 --
-
-Warning: end() expects parameter 1 to be array, object given in %s on line %d
-NULL
+unicode(12) "hello, world"
 
 -- Iteration 23 --
 
@@ -220,3 +218,4 @@ NULL
 Warning: end() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 ===DONE===
+

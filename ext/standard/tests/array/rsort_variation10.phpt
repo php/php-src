@@ -34,7 +34,7 @@ var_dump($temp_array);
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing rsort() : variation ***
 
 -- Sort flag = default  --

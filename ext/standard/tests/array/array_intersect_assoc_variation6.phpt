@@ -20,17 +20,6 @@ echo "*** Testing array_intersect_assoc() : assoc array with diff keys to \$arr2
 $unset_var = 10;
 unset ($unset_var);
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
-
 // get a heredoc string
 $heredoc = <<<EOT
 Hello world
@@ -60,19 +49,19 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with object, unset variable and resource variable
-/*10*/ array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
+       // array with  unset variable 
+/*10*/ array( @$unset_var => "hello"),
 
        // array with mixed keys
-/*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2,
-             $fp => 'resource', 133 => "int", 444.432 => "float",
+/*11*/ array('hello' => 1, "fruit" => 2.2,
+              133 => "int", 444.432 => "float",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
 // array to be passsed to $arr1 argument
 $arr1 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
               "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
-              "pen\n" => 33, new classA() => 11, 133 => "int");
+              "pen\n" => 33, 133 => "int");
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
@@ -88,23 +77,10 @@ foreach($arrays as $arr2) {
   $iterator++;
 }
 
-// close the file resource used
-fclose($fp);
-
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr2 argument ***
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
 -- Iteration 1 --
 array(0) {
 }

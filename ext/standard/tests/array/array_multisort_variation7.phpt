@@ -53,10 +53,10 @@ array(10) {
   array(0) {
   }
   [u"instance of classWithToString"]=>
-  object(classWithToString)#%d (0) {
+  object(classWithToString)#1 (0) {
   }
   [u"instance of classWithoutToString"]=>
-  object(classWithoutToString)#%d (0) {
+  object(classWithoutToString)#2 (0) {
   }
   [u"lowercase true"]=>
   bool(true)

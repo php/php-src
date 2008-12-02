@@ -24,7 +24,7 @@ echo key($array) . " => " . current($array) . "\n";
 var_dump(next($array));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing next() : basic functionality ***
 0 => zero
 unicode(3) "one"

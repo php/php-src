@@ -47,7 +47,7 @@ foreach ($various_arrays as $array) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing rsort() : variation ***
 
 -- Iteration 1 --

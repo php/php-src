@@ -27,7 +27,6 @@ function key_compare_func($a, $b)
 
 //Test array_diff_uassoc with one more than the expected number of arguments
 echo "\n-- Testing array_diff_uassoc() function with more than expected no. of arguments --\n";
-
 var_dump( array_diff_uassoc($array1, $array2, "key_compare_func", $extra_arg) );
 var_dump( array_diff_uassoc($array1, $array2, $array3, $array4, "key_compare_func", $extra_arg) );
 

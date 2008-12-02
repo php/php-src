@@ -1,5 +1,9 @@
 --TEST--
 Test rsort() function : usage variations - numeric values
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
@@ -38,7 +42,7 @@ $count = 1;
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With default sort flag -\n"; 
+  echo "- With Defualt sort flag -\n"; 
   $temp_array = $array; 
   var_dump(rsort($temp_array) );
   var_dump($temp_array);
@@ -56,11 +60,11 @@ foreach ($various_arrays as $array) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing rsort() : variation ***
 
 -- Iteration 1 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(9) {
   [0]=>
@@ -128,7 +132,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(7) {
   [0]=>
@@ -184,7 +188,7 @@ array(7) {
 }
 
 -- Iteration 3 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(11) {
   [0]=>
@@ -264,7 +268,7 @@ array(11) {
 }
 
 -- Iteration 4 --
-- With default sort flag -
+- With Defualt sort flag -
 bool(true)
 array(7) {
   [0]=>

@@ -201,9 +201,7 @@ Warning: key() expects parameter 1 to be array, Unicode string given in %s on li
 NULL
 
 -- Iteration 22 --
-
-Warning: key() expects parameter 1 to be array, object given in %s on line %d
-NULL
+unicode(4) "var1"
 
 -- Iteration 23 --
 
@@ -220,3 +218,4 @@ NULL
 Warning: key() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 ===DONE===
+

@@ -23,7 +23,7 @@ $value3 = 555;
 // an array containing integer references 
 $unsorted_numerics =  array( &$value1 , &$value2, &$value3);
 
-echo "\n-- 'flag' value is default --\n";
+echo "\n-- 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( rsort($temp_array) );
 var_dump( $temp_array);
@@ -44,7 +44,7 @@ echo "Done";
 Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing rsort() : variation ***
 
--- 'flag' value is default --
+-- 'flag' value is defualt --
 bool(true)
 array(3) {
   [0]=>

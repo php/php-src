@@ -28,7 +28,7 @@ echo key($arr) . " => " . current($arr) . "\n";
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing each() : usage variations ***
 
 -- Current position: --

@@ -33,7 +33,7 @@ var_dump( each($arr[2]));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing each() : usage variations ***
 
 -- Pass each() a two-dimensional array --

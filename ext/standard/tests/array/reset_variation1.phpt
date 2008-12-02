@@ -200,9 +200,7 @@ Warning: reset() expects parameter 1 to be array, Unicode string given in %s on 
 NULL
 
 -- Iteration 22 --
-
-Warning: reset() expects parameter 1 to be array, object given in %s on line %d
-NULL
+bool(false)
 
 -- Iteration 23 --
 
@@ -219,3 +217,4 @@ NULL
 Warning: reset() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 ===DONE===
+

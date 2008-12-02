@@ -92,6 +92,7 @@ $inputs = array(
 );
 
 // loop through each element of the array for arr2
+
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_intersect_key($array1, $value) );
