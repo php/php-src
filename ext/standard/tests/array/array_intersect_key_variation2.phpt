@@ -10,8 +10,8 @@ Test array_intersect_key() function : usage variation - Passing unexpected value
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array1 = array('blue' => 1, 'red' => 2, 'green' => 3, 'purple' => 4);
-$array3 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8);
+$array1 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
+$array3 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 
 //get an unset variable
 $unset_var = 10;
@@ -92,6 +92,7 @@ $inputs = array(
 );
 
 // loop through each element of the array for arr2
+
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_intersect_key($array1, $value) );

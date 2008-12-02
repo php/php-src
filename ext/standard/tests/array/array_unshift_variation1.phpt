@@ -330,9 +330,9 @@ NULL
 -- Iteration 24 --
 Warning: array_unshift() expects parameter 1 to be array, resource given in %s on line %d
 NULL
-resource(5) of type (stream)
+resource(%d) of type (stream)
 
 Warning: array_unshift() expects parameter 1 to be array, resource given in %s on line %d
 NULL
-resource(5) of type (stream)
+resource(%d) of type (stream)
 Done

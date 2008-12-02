@@ -1,5 +1,9 @@
 --TEST--
 Test arsort() function : usage variations - sort integer/float values
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+?>
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
@@ -59,7 +63,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various integer/float arrays --
@@ -273,7 +277,7 @@ array(11) {
 bool(true)
 array(7) {
   [2]=>
-  %s(2147483648)
+  float(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -283,15 +287,15 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  %s(-2147483648)
+  float(-2147483648)
   [7]=>
-  %s(-2147483649)
+  float(-2147483649)
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(7) {
   [2]=>
-  %s(2147483648)
+  float(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -301,15 +305,15 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  %s(-2147483648)
+  float(-2147483648)
   [7]=>
-  %s(-2147483649)
+  float(-2147483649)
 }
 - Sort_flag = SORT_NUMERIC -
 bool(true)
 array(7) {
   [2]=>
-  %s(2147483648)
+  float(2147483648)
   [1]=>
   int(2147483647)
   [6]=>
@@ -319,8 +323,8 @@ array(7) {
   [3]=>
   int(-2147483647)
   [4]=>
-  %s(-2147483648)
+  float(-2147483648)
   [7]=>
-  %s(-2147483649)
+  float(-2147483649)
 }
 Done
