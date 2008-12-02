@@ -30,7 +30,7 @@ var_dump(each($arr));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing each() : basic functionality ***
 
 -- Passed array: --

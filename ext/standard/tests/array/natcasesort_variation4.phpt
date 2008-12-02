@@ -28,7 +28,7 @@ foreach ($inputs as $array_arg) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(11) {
@@ -84,3 +84,4 @@ array(12) {
   unicode(1) "X"
 }
 Done
+

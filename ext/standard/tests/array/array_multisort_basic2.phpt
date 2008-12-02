@@ -30,14 +30,14 @@ array(3) {
   int(1)
   [1]=>
   int(1)
-  [%u|b%"strkey"]=>
+  [u"strkey"]=>
   int(2)
 }
 array(3) {
   [0]=>
-  %unicode|string%(2) "aa"
+  unicode(2) "aa"
   [1]=>
-  %unicode|string%(1) "1"
+  unicode(1) "1"
   [2]=>
   int(2)
 }

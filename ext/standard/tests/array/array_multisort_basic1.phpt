@@ -31,30 +31,30 @@ var_dump($ar2);
 -- Testing array_multisort() function with all normal arguments --
 bool(true)
 array(3) {
-  [%u|b%"row2"]=>
+  [u"row2"]=>
   int(1)
-  [%u|b%"row3"]=>
+  [u"row3"]=>
   int(1)
-  [%u|b%"row1"]=>
+  [u"row1"]=>
   int(2)
 }
 array(3) {
-  [%u|b%"row2"]=>
-  %unicode|string%(2) "aa"
-  [%u|b%"row3"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"row1"]=>
+  [u"row2"]=>
+  unicode(2) "aa"
+  [u"row3"]=>
+  unicode(1) "1"
+  [u"row1"]=>
   int(2)
 }
 
 -- Testing array_multisort() function with one argument --
 bool(true)
 array(3) {
-  [%u|b%"row3"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"row2"]=>
-  %unicode|string%(2) "aa"
-  [%u|b%"row1"]=>
+  [u"row3"]=>
+  unicode(1) "1"
+  [u"row2"]=>
+  unicode(2) "aa"
+  [u"row1"]=>
   int(2)
 }
 ===DONE===

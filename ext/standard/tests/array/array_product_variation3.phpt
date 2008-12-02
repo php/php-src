@@ -1,5 +1,5 @@
 --TEST--
-Test array_product() function : variation - negative numbers
+Test array_product() function : variation
 --FILE--
 <?php
 /* Prototype  : mixed array_product(array input)

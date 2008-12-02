@@ -30,7 +30,7 @@ echo "\$array2: ";
 var_dump(current($array2));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing current() : usage variations ***
 
 -- Initial position of internal pointer --

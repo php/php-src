@@ -104,7 +104,7 @@ foreach($inputs as $key => $input) {
 };
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing key() : usage variations ***
 
 -- Iteration 1 : int data --

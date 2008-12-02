@@ -19,12 +19,12 @@ $unsorted_strings =   array( "l" => "lemon", "o" => "orange", "b" => "banana" );
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 
-echo "\n-- Testing rsort() by supplying string array, 'flag' value is default --\n";
+echo "\n-- Testing rsort() by supplying string array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_strings;
 var_dump( rsort($temp_array) );
 var_dump( $temp_array);
 
-echo "\n-- Testing rsort() by supplying numeric array, 'flag' value is default --\n";
+echo "\n-- Testing rsort() by supplying numeric array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( rsort($temp_array) );
 var_dump( $temp_array);
@@ -52,10 +52,10 @@ var_dump( $temp_array);
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing rsort() : basic functionality ***
 
--- Testing rsort() by supplying string array, 'flag' value is default --
+-- Testing rsort() by supplying string array, 'flag' value is defualt --
 bool(true)
 array(3) {
   [0]=>
@@ -66,7 +66,7 @@ array(3) {
   unicode(6) "banana"
 }
 
--- Testing rsort() by supplying numeric array, 'flag' value is default --
+-- Testing rsort() by supplying numeric array, 'flag' value is defualt --
 bool(true)
 array(4) {
   [0]=>

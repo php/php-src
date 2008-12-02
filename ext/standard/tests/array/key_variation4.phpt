@@ -45,7 +45,7 @@ var_dump(key($multi_array[3][3][3]));
 var_dump(key($multi_array[3][3][3][1]));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing key() : usage variations ***
 
 -- Two Dimensional Array --

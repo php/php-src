@@ -20,7 +20,7 @@ var_dump($unsorted_oct_array);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(9) {

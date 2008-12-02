@@ -46,7 +46,7 @@ var_dump(current($multi_array[3][3][3]));
 var_dump(current($multi_array[3][3][3][1]));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing current() : usage variations ***
 
 -- Two Dimensional Array --

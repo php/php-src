@@ -19,17 +19,6 @@ echo "*** Testing array_intersect() : assoc array with diff keys to \$arr2 argum
 $unset_var = 10;
 unset ($unset_var);
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
-
 // get a heredoc string
 $heredoc = <<<EOT
 Hello world
@@ -59,12 +48,12 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with object, unset variable and resource variable
-/*10*/ array(new classA() => 11, @$unset_var => "hello", $fp => 'resource'),
+       // array with unset variable 
+/*10*/ array( @$unset_var => "hello"),
 
        // array with mixed keys
-/*11*/ array('hello' => 1, new classA() => 2, "fruit" => 2.2,
-             $fp => 'resource', 133 => "int", 444.432 => "float",
+/*11*/ array('hello' => 1,  "fruit" => 2.2,
+             133 => "int", 444.432 => "float",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -85,21 +74,10 @@ foreach($arrays as $arr2) {
   $iterator++;
 }
 
-// close the file resource used
-fclose($fp);
-
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_intersect() : assoc array with diff keys to $arr2 argument ***
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
 -- Iterator 1 --
 array(0) {
 }

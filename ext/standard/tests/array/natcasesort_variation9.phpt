@@ -8,7 +8,7 @@ Test natcasesort() function : usage variations - mixed array
  */
 
 /*
- * Pass an array containing sub-arrays, ints, floats, strings, boolean, null 
+ * Pass an array containing sub-arrays, ints, floats, Unicode strings, boolean, null 
  * and escape characters to test how natcasesort() re-orders it
  */
 

@@ -30,7 +30,7 @@ next($array);
 var_dump(key($array));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing key() : basic functionality ***
 
 -- Initial Position: --
