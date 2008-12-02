@@ -30,6 +30,7 @@
 #include "zend_multiply.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
+#include "zend_float.h"
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
@@ -775,6 +776,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...)
 
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+	ZEND_FLOAT_DECLARE
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
@@ -787,7 +789,9 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 					&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
+					ZEND_FLOAT_ENSURE();
 					ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+					ZEND_FLOAT_RESTORE();
 				} else {
 					ZVAL_LONG(result, lval);
 				}
@@ -795,15 +799,21 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			}
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY): {
@@ -837,6 +847,7 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+	ZEND_FLOAT_DECLARE
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
@@ -849,7 +860,9 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
 					&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
+					ZEND_FLOAT_ENSURE();
 					ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+					ZEND_FLOAT_RESTORE();
 				} else {
 					ZVAL_LONG(result, lval);
 				}
@@ -857,15 +870,21 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 			}
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			default:
@@ -884,6 +903,7 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+	ZEND_FLOAT_DECLARE
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
@@ -892,21 +912,29 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			case TYPE_PAIR(IS_LONG, IS_LONG): {
 				long overflow;
 
+				ZEND_FLOAT_ENSURE();
 				ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1),Z_LVAL_P(op2), Z_LVAL_P(result),Z_DVAL_P(result),overflow);
+				ZEND_FLOAT_RESTORE();
 				Z_TYPE_P(result) = overflow ? IS_DOUBLE : IS_LONG;
 				return SUCCESS;
 
 			}
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			default:
@@ -924,6 +952,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+	ZEND_FLOAT_DECLARE
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
@@ -936,13 +965,17 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					return FAILURE;			/* division by zero */
 				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN) {
 					/* Prevent overflow error/crash */
+					ZEND_FLOAT_ENSURE();
 					ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+					ZEND_FLOAT_RESTORE();
 					return SUCCESS;
 				}
 				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
 					ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
 				} else {
+					ZEND_FLOAT_ENSURE();
 					ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
+					ZEND_FLOAT_RESTORE();
 				}
 				return SUCCESS;
 
@@ -952,7 +985,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
 				}
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
@@ -961,7 +996,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
 				}
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
@@ -970,7 +1007,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
 				}
+				ZEND_FLOAT_ENSURE();
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
+				ZEND_FLOAT_RESTORE();
 				return SUCCESS;
 
 			default:
