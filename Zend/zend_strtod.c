@@ -95,6 +95,7 @@
 #include <unicode/utypes.h>
 #include <unicode/ustdio.h>
 #include <zend_strtod.h>
+#include <zend_float.h>
 
 #ifdef ZTS
 #include <TSRM.h>
@@ -2045,6 +2046,7 @@ ret1:
 
 ZEND_API double zend_strtod (CONST char *s00, char **se) /* {{{ */
 {
+	ZEND_FLOAT_DECLARE
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
 	CONST char *s, *s0, *s1;
@@ -2056,6 +2058,8 @@ ZEND_API double zend_strtod (CONST char *s00, char **se) /* {{{ */
 	double result;
 
 	CONST char decimal_point = '.';
+
+	ZEND_FLOAT_ENSURE();
 
 	sign = nz0 = nz = 0;
 	value(rv) = 0.;
@@ -2587,7 +2591,7 @@ ret:
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 
-	return result;
+	ZEND_FLOAT_RETURN(result);
 }
 /* }}} */
 
