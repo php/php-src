@@ -301,12 +301,12 @@ string(11) "hello world"
 -- Iteration 21 --
 Warning: array_unshift(): The first argument should be an array in %s on line %d
 bool(false)
-object(classA)#%d (0) {
+object(classA)#1 (0) {
 }
 
 Warning: array_unshift(): The first argument should be an array in %s on line %d
 bool(false)
-object(classA)#%d (0) {
+object(classA)#1 (0) {
 }
 
 -- Iteration 22 --
@@ -330,9 +330,10 @@ NULL
 -- Iteration 24 --
 Warning: array_unshift(): The first argument should be an array in %s on line %d
 bool(false)
-resource(%d) of type (stream)
+resource(5) of type (stream)
 
 Warning: array_unshift(): The first argument should be an array in %s on line %d
 bool(false)
-resource(%d) of type (stream)
+resource(5) of type (stream)
 Done
+

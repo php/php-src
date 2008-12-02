@@ -15,7 +15,7 @@ Test array_diff_assoc() function : error conditions - pass array_diff_assoc() to
 echo "*** Testing array_diff_assoc() : error conditions ***\n";
 
 // Zero arguments
-echo "\n-- Testing array_diff() function with zero arguments --\n";
+echo "\n-- Testing array_diff_assoc() function with zero arguments --\n";
 var_dump( array_diff_assoc() );
 
 // Testing array_diff_assoc with one less than the expected number of arguments
@@ -29,7 +29,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_diff_assoc() : error conditions ***
 
--- Testing array_diff() function with zero arguments --
+-- Testing array_diff_assoc() function with zero arguments --
 
 Warning: Wrong parameter count for array_diff_assoc() in %s on line %d
 NULL
@@ -39,3 +39,4 @@ NULL
 Warning: Wrong parameter count for array_diff_assoc() in %s on line %d
 NULL
 Done
+

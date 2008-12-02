@@ -38,7 +38,7 @@ $asso_arrays = array(
 
        // array with special chars as keys
 /*6*/  array('##' => "key1", '&$r' => 'key2', '!' => "key3", '<>' =>'key4',
-             "NULL" => 'key5', "\n" => 'newline as key',
+             "NULL" => 'key5', 
              "\t" => "tab as key", "'" => 'single quote as key',
              '"' => 'double quote as key', "\0" => "null char as key")
 );
