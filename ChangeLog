@@ -1,3 +1,329 @@
+2008-12-01  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      ext/recode/config9.m4:
+      MFH: hash_insert was renamed in MySQL 5.0 so we can safely use recode and
+      mysql
+           with recent libmysql versions [DOC]
+
+    * ext/recode/config9.m4:
+      - hash_insert was renamed in MySQL 5.0 so we can safely use recode and
+      mysql
+        with recent libmysql versions [DOC]
+
+    * (PHP_5_3)
+      ext/mysql/php_mysql.c
+      ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_fetch_assoc.phpt
+      ext/mysql/tests/mysql_fetch_row.phpt:
+      MFH: Fix mysql_fetch_* and tests after param parsing changes
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/tests/mysql_fetch_array.phpt
+      ext/mysql/tests/mysql_fetch_assoc.phpt
+      ext/mysql/tests/mysql_fetch_row.phpt:
+      Fix mysql_fetch_* and tests after param parsing changes
+
+2008-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS:
+      
+      Fixed typo
+
+2008-12-01  Iain Lewis  <ilewis@uk.ibm.com>
+
+    * ext/standard/tests/array/array_multisort_basic1.phpt
+      ext/standard/tests/array/array_multisort_basic1.phpt
+      ext/standard/tests/array/array_multisort_basic2.phpt
+      ext/standard/tests/array/array_multisort_basic2.phpt
+      ext/standard/tests/array/array_multisort_error.phpt
+      ext/standard/tests/array/array_multisort_error.phpt
+      ext/standard/tests/array/array_multisort_variation1.phpt
+      ext/standard/tests/array/array_multisort_variation1.phpt
+      ext/standard/tests/array/array_multisort_variation10.phpt
+      ext/standard/tests/array/array_multisort_variation10.phpt
+      ext/standard/tests/array/array_multisort_variation2.phpt
+      ext/standard/tests/array/array_multisort_variation2.phpt
+      ext/standard/tests/array/array_multisort_variation3.phpt
+      ext/standard/tests/array/array_multisort_variation3.phpt
+      ext/standard/tests/array/array_multisort_variation4.phpt
+      ext/standard/tests/array/array_multisort_variation4.phpt
+      ext/standard/tests/array/array_multisort_variation5.phpt
+      ext/standard/tests/array/array_multisort_variation5.phpt
+      ext/standard/tests/array/array_multisort_variation6.phpt
+      ext/standard/tests/array/array_multisort_variation6.phpt
+      ext/standard/tests/array/array_multisort_variation7.phpt
+      ext/standard/tests/array/array_multisort_variation7.phpt
+      ext/standard/tests/array/array_multisort_variation8.phpt
+      ext/standard/tests/array/array_multisort_variation8.phpt
+      ext/standard/tests/array/array_multisort_variation9.phpt
+      ext/standard/tests/array/array_multisort_variation9.phpt:
+      Adding tests for array_multisort
+
+    * ext/standard/tests/array/array_multisort_basic1.phpt
+      ext/standard/tests/array/array_multisort_basic1.phpt
+      ext/standard/tests/array/array_multisort_basic1.phpt
+      ext/standard/tests/array/array_multisort_basic2.phpt
+      ext/standard/tests/array/array_multisort_basic2.phpt
+      ext/standard/tests/array/array_multisort_basic2.phpt
+      ext/standard/tests/array/array_multisort_error.phpt
+      ext/standard/tests/array/array_multisort_error.phpt
+      ext/standard/tests/array/array_multisort_error.phpt
+      ext/standard/tests/array/array_multisort_variation1.phpt
+      ext/standard/tests/array/array_multisort_variation1.phpt
+      ext/standard/tests/array/array_multisort_variation1.phpt
+      ext/standard/tests/array/array_multisort_variation10.phpt
+      ext/standard/tests/array/array_multisort_variation10.phpt
+      ext/standard/tests/array/array_multisort_variation10.phpt
+      ext/standard/tests/array/array_multisort_variation2.phpt
+      ext/standard/tests/array/array_multisort_variation2.phpt
+      ext/standard/tests/array/array_multisort_variation2.phpt
+      ext/standard/tests/array/array_multisort_variation3.phpt
+      ext/standard/tests/array/array_multisort_variation3.phpt
+      ext/standard/tests/array/array_multisort_variation3.phpt
+      ext/standard/tests/array/array_multisort_variation4.phpt
+      ext/standard/tests/array/array_multisort_variation4.phpt
+      ext/standard/tests/array/array_multisort_variation4.phpt
+      ext/standard/tests/array/array_multisort_variation5.phpt
+      ext/standard/tests/array/array_multisort_variation5.phpt
+      ext/standard/tests/array/array_multisort_variation5.phpt
+      ext/standard/tests/array/array_multisort_variation6.phpt
+      ext/standard/tests/array/array_multisort_variation6.phpt
+      ext/standard/tests/array/array_multisort_variation6.phpt
+      ext/standard/tests/array/array_multisort_variation7.phpt
+      ext/standard/tests/array/array_multisort_variation7.phpt
+      ext/standard/tests/array/array_multisort_variation7.phpt
+      ext/standard/tests/array/array_multisort_variation8.phpt
+      ext/standard/tests/array/array_multisort_variation8.phpt
+      ext/standard/tests/array/array_multisort_variation8.phpt
+      ext/standard/tests/array/array_multisort_variation9.phpt
+      ext/standard/tests/array/array_multisort_variation9.phpt
+      ext/standard/tests/array/array_multisort_variation9.phpt:
+        1.1.4;
+      file array_multisort_basic1.phpt was initially added on branch PHP_5_2.
+
+2008-12-01  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/sqlite/sqlite.c:
+      - Fixed memory leak
+
+2008-12-01  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif007.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif008.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif009.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif010.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif011.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif012.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif013.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif014.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif015.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif016.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif017.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif018.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif020.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif021.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif022.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif023.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif024.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif025.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif026.phpt
+      ext/exif/tests/exif027.phpt
+      ext/exif/tests/exif027.phpt
+      ext/exif/tests/exif_imagetype_basic.phpt
+      ext/exif/tests/exif_imagetype_basic.phpt
+      ext/exif/tests/exif_imagetype_error.phpt
+      ext/exif/tests/exif_imagetype_error.phpt
+      ext/exif/tests/exif_imagetype_variation1.phpt
+      ext/exif/tests/exif_imagetype_variation1.phpt
+      ext/exif/tests/exif_read_exif_data_basic.phpt
+      ext/exif/tests/exif_read_exif_data_basic.phpt
+      ext/exif/tests/exif_tagname_basic.phpt
+      ext/exif/tests/exif_tagname_basic.phpt
+      ext/exif/tests/exif_tagname_error.phpt
+      ext/exif/tests/exif_tagname_error.phpt
+      ext/exif/tests/exif_tagname_variation1.phpt
+      ext/exif/tests/exif_tagname_variation1.phpt
+      ext/exif/tests/image008.jpg
+      ext/exif/tests/image012.jpg
+      ext/exif/tests/image014.jpg
+      ext/exif/tests/image016.tiff
+      ext/exif/tests/image018.tiff
+      ext/exif/tests/image020.tiff
+      ext/exif/tests/image023.tiff:
+      Exif tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and Linux 64
+      bit).
+
+    * ext/exif/tests/exif_imagetype_basic.phpt
+      ext/exif/tests/exif_imagetype_basic.phpt
+      ext/exif/tests/exif_imagetype_basic.phpt
+      ext/exif/tests/exif_imagetype_error.phpt
+      ext/exif/tests/exif_imagetype_error.phpt
+      ext/exif/tests/exif_imagetype_error.phpt
+      ext/exif/tests/exif_imagetype_variation1.phpt
+      ext/exif/tests/exif_imagetype_variation1.phpt
+      ext/exif/tests/exif_imagetype_variation1.phpt
+      ext/exif/tests/exif_read_exif_data_basic.phpt
+      ext/exif/tests/exif_read_exif_data_basic.phpt
+      ext/exif/tests/exif_read_exif_data_basic.phpt
+      ext/exif/tests/exif_tagname_basic.phpt
+      ext/exif/tests/exif_tagname_basic.phpt
+      ext/exif/tests/exif_tagname_basic.phpt
+      ext/exif/tests/exif_tagname_error.phpt
+      ext/exif/tests/exif_tagname_error.phpt
+      ext/exif/tests/exif_tagname_error.phpt
+      ext/exif/tests/exif_tagname_variation1.phpt
+      ext/exif/tests/exif_tagname_variation1.phpt
+      ext/exif/tests/exif_tagname_variation1.phpt
+      ext/exif/tests/image007.jpg
+      ext/exif/tests/image009.jpg
+      ext/exif/tests/image010.jpg
+      ext/exif/tests/image011.jpg
+      ext/exif/tests/image013.jpg
+      ext/exif/tests/image015.jpg
+      ext/exif/tests/image017.tiff
+      ext/exif/tests/image021.tiff
+      ext/exif/tests/image022.tiff
+      ext/exif/tests/image024.jpg
+      ext/exif/tests/image025.jpg
+      ext/exif/tests/image026.tiff
+      ext/exif/tests/image027.tiff:
+        1.1.4;
+      file exif_imagetype_basic.phpt was initially added on branch PHP_5_2.
+
+    * ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMCharacterData_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMComment_appendData_basic_Sullivan.phpt
+      ext/dom/tests/DOMComment_insertData_basic.phpt
+      ext/dom/tests/DOMComment_insertData_basic.phpt
+      ext/dom/tests/DOMComment_insertData_error1.phpt
+      ext/dom/tests/DOMComment_insertData_error1.phpt
+      ext/dom/tests/DOMComment_insertData_error2.phpt
+      ext/dom/tests/DOMComment_insertData_error2.phpt
+      ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_basic.phpt
+      ext/dom/tests/DOMComment_replaceData_error1.phpt
+      ext/dom/tests/DOMComment_replaceData_error1.phpt
+      ext/dom/tests/DOMComment_replaceData_error2.phpt
+      ext/dom/tests/DOMComment_replaceData_error2.phpt
+      ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocumentFragment_appendXML_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_basic.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_error1.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt
+      ext/dom/tests/DOMDocument_createAttribute_variation.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_basic.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt
+      ext/dom/tests/DOMDocument_createProcessingInstruction_error.phpt
+      ext/dom/tests/DOMDocument_loadHTML_basic.phpt
+      ext/dom/tests/DOMDocument_loadHTML_basic.phpt
+      ext/dom/tests/DOMDocument_save_basic.phpt
+      ext/dom/tests/DOMDocument_save_basic.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMElement_hasAttributes_basic.phpt
+      ext/dom/tests/DOMNode_cloneNode_basic.phpt
+      ext/dom/tests/DOMNode_cloneNode_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMNode_issamenode_basic.phpt
+      ext/dom/tests/DOMNode_normalize_basic.phpt
+      ext/dom/tests/DOMNode_normalize_basic.phpt
+      ext/dom/tests/DOMNode_removeChild_basic.phpt
+      ext/dom/tests/DOMNode_removeChild_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt
+      ext/dom/tests/bug42082.phpt
+      ext/dom/tests/bug42082.phpt
+      ext/dom/tests/dom_test.inc:
+      DOM tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and Linux 64
+      bit).
+
+    * ext/dom/tests/DOMNode_cloneNode_basic.phpt
+      ext/dom/tests/DOMNode_cloneNode_basic.phpt
+      ext/dom/tests/DOMNode_cloneNode_basic.phpt
+      ext/dom/tests/DOMNode_hasChildNodes_basic.phpt
+      ext/dom/tests/DOMNode_normalize_basic.phpt
+      ext/dom/tests/DOMNode_removeChild_basic.phpt
+      ext/dom/tests/DOMNode_removeChild_basic.phpt
+      ext/dom/tests/DOMNode_removeChild_basic.phpt
+      ext/dom/tests/DOMNode_replaceChild_basic.phpt
+      ext/dom/tests/DOMText_appendData_basic.phpt:
+        1.1.4;
+      file DOMNode_cloneNode_basic.phpt was initially added on branch PHP_5_2.
+
+2008-12-01  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      remove unneeded includes (not needed since NSAPI 3.0, wich is very old).
+      This is needed for cleanup of the windows build.
+
+2008-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_3)
+      NEWS
+      ext/soap/php_http.c
+      ext/soap/php_http.c
+      ext/soap/php_sdl.c
+      ext/soap/php_sdl.c
+      ext/soap/tests/bugs/bug44811.phpt
+      ext/soap/tests/bugs/bug44811.phpt:
+      Fixed bug #43069 (SoapClient causes 505 HTTP Version not supported error
+      message)
+
+2008-12-01  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/imap/config.w32
+      ext/imap/config.w32
+      ext/imap/config.w32:
+      - c/p fix, correct description
+
+    * ext/imap/config.w32:
+      - MFB:  Enable fix fo #42862 (IMAP toolkit crash: rfc822.c legacy routine
+      buffer overflow) on windows (we use the latest imap)
+
 2008-11-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
