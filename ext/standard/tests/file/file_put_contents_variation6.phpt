@@ -44,7 +44,8 @@ function runtest() {
    file_put_contents($filename, ". This was appended", FILE_USE_INCLUDE_PATH | FILE_APPEND);  
    $line = file_get_contents($firstFile);
    echo "$line\n";
-   unlink($firstFile);  
+   unlink($firstFile); 
+   unlink($filename); 
 }
 
 ?>
