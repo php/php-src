@@ -3174,11 +3174,16 @@ PHP_FUNCTION(imap_fetch_overview)
 		return;
 	}
 
+	if (flags && !(flags & FT_UID)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	array_init(return_value);
-	
-	status = (flags & FT_UID) 
+
+	status = (flags & FT_UID)
 		? mail_uid_sequence(imap_le_struct->imap_stream, sequence)
 		: mail_sequence(imap_le_struct->imap_stream, sequence);
 	

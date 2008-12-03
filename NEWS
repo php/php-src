@@ -42,6 +42,8 @@ PHP                                                                        NEWS
 - Fixed check in recode extension to allow builing of recode and mysql
   extensions when using a recent libmysql. (Johannes)
 
+- Fixed bug #46731 (Missing validation for the options parameter of the
+  imap_fetch_overview() function). (Ilia)
 - Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops).
   (magicaltux [at] php [dot] net)
 - Fixed bug #46578 (strip_tags() does not honor end-of-comment when it 
