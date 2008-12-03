@@ -74,7 +74,7 @@ PHP                                                                        NEWS
 - Fixed bug #46178 (memory leak in ext/phar). (Greg)
 - Fixed bug #46160 (SPL - Memory leak when exception is thrown in offsetSet).
   (Felipe)
-- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect i
+- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect 
   data). (Greg)
 - Fixed bug #46127 (php_openssl_tcp_sockop_accept forgets to set context
   on accepted stream) (Mark Karpeles, Pierre)
