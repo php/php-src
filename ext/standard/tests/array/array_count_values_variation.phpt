@@ -33,6 +33,10 @@ echo "\n";
 echo "Done";
 ?>
 
+--CLEAN--
+<?php
+unlink("array_count_file");
+?>
 --EXPECTF--
 *** Testing array_count_values() : parameter variations ***
 array(3) {
