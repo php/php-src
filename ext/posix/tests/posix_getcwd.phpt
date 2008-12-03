@@ -15,5 +15,5 @@ var_dump(posix_getcwd(1));
 --EXPECTF--
 string(%d) "%s"
 
-Warning: posix_getcwd() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: Wrong parameter count for posix_getcwd() in %s on line %d
 NULL
