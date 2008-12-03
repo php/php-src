@@ -1,7 +1,10 @@
 --TEST--
 posix_isatty(): Basic tests
 --SKIP--
-<?php if (!posix_mknod('posix_isatty')) die('skip posix_isatty() not found'); ?>
+<?php
+if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+if (!function_exists('posix_isatty')) die('skip posix_isatty() not found');
+?>
 --FILE--
 <?php
 

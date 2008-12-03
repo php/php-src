@@ -1,7 +1,10 @@
 --TEST--
 posix_getcwd(): Basic tests
 --SKIP--
-<?php if (!posix_mknod('posix_getcwd')) die('skip posix_getcwd() not found'); ?>
+<?php
+if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+if (!function_exists('posix_getcwd')) die('skip posix_getcwd() not found');
+?>
 --FILE--
 <?php
 
