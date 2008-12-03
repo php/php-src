@@ -89,7 +89,6 @@ static void finfo_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC
 		efree(intern->ptr);
 	}
 
-	zend_object_std_dtor(&intern->zo TSRMLS_CC);
 	efree(intern);
 }
 /* }}} */
@@ -100,13 +99,16 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 {
 	zend_object_value retval;
 	struct finfo_object *intern;
-	zval *tmp;
 
-	intern = emalloc(sizeof(struct finfo_object));
-
-	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
-
+	intern = ecalloc(1, sizeof(struct finfo_object));
+	intern->zo.ce = class_type;
+	intern->zo.properties = NULL;
+#if ZEND_MODULE_API_NO >= 20050922
+	intern->zo.guards = NULL;
+#else
+	intern->zo.in_get = 0;
+	intern->zo.in_set = 0;
+#endif
 	intern->ptr = NULL;
 
 	retval.handle = zend_objects_store_put(intern, finfo_objects_dtor, NULL, NULL TSRMLS_CC);
@@ -117,24 +119,29 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_open, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, arg)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, finfo)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_set_flags, 0, 0, 2)
 	ZEND_ARG_INFO(0, finfo)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_set_flags, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, finfo)
 	ZEND_ARG_INFO(0, filename)
@@ -142,12 +149,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_buffer, 0, 0, 2)
 	ZEND_ARG_INFO(0, finfo)
 	ZEND_ARG_INFO(0, string)
@@ -155,12 +164,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_buffer, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
@@ -426,7 +437,6 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			case IS_STRING:
 				buffer = Z_STRVAL_P(what);
 				buffer_len = Z_STRLEN_P(what);
-				mode = FILEINFO_MODE_FILE;
 				break;
 
 			case IS_RESOURCE:
@@ -441,8 +451,10 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		magic = magic_open(MAGIC_MIME);
 		if (magic_load(magic, NULL) == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database.");
-			goto common;
+			magic_close(magic);
+			RETURN_FALSE;
 		}
+
 	} else if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
@@ -483,8 +495,6 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream_seek(stream, 0, SEEK_SET);
 
 				ret_val = (char *) magic_stream(magic, stream);
-
-				php_stream_seek(stream, streampos, SEEK_SET);
 				break;
 		}
 
@@ -495,21 +505,14 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_wrapper *wrap;
 			struct stat sb;
 
-			if (buffer == NULL || !*buffer) {
+			if (buffer_len < 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty filename or path");
-				RETVAL_FALSE;
-				goto clean;
+				RETURN_FALSE;
 			}
 
-			if (php_sys_stat(buffer, &sb) == 0) {
-					  if (sb.st_mode & _S_IFDIR) {
-								 ret_val = mime_directory;
-								 goto common;
-					  }
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "File or path not found '%s'", buffer);
-				RETVAL_FALSE;
-				goto clean;
+			if (php_sys_stat(buffer, &sb) == 0 && (sb.st_mode & _S_IFDIR)) {
+				ret_val = mime_directory;
+				goto common;
 			}
 
 			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
@@ -520,11 +523,10 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
 				if (!stream) {
-					RETVAL_FALSE;
-					goto clean;
+					RETURN_FALSE;
 				}
 
-				ret_val = (char *)magic_stream(magic, stream);
+				ret_val = magic_stream(magic, stream);
 				php_stream_close(stream);
 			}
 			break;
@@ -532,26 +534,27 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can only process string or stream arguments");
+			RETURN_FALSE;
 	}
 
 common:
-	if (ret_val) {
-		RETVAL_STRING(ret_val, 1);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
-		RETVAL_FALSE;
-	}
-
-clean:
 	if (mimetype_emu) {
-		magic_close(magic);
+		if (magic) {
+			magic_close(magic);
+		}
 	}
 
 	/* Restore options */
 	if (options) {
 		FINFO_SET_OPTION(magic, finfo->options)
 	}
-	return;
+
+	if (!ret_val) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed identify data %d:%s", magic_errno(magic), magic_error(magic));
+		RETURN_FALSE;
+	} else {
+		RETURN_STRING(ret_val, 1);
+	}
 }
 /* }}} */
 

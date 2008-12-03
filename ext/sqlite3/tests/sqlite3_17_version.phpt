@@ -10,7 +10,7 @@ echo "Done\n";
 --EXPECTF--
 Array
 (
-    [versionString] => %s
+    [versionString] => %d.%d.%d
     [versionNumber] => %d
 )
 Done

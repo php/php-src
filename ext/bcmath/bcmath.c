@@ -36,35 +36,41 @@ static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsub, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmul, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_bcmod, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
@@ -72,23 +78,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpow, 0, 0, 2)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsqrt, 0, 0, 1)
 	ZEND_ARG_INFO(0, operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_bcscale, 0)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
@@ -205,7 +215,7 @@ static void php_str2num(bc_num *num, char *str TSRMLS_DC)
 PHP_FUNCTION(bcadd)
 {
 	char *left, *right;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second, result;
 	int left_len, right_len;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
@@ -245,7 +255,7 @@ PHP_FUNCTION(bcsub)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
@@ -284,7 +294,7 @@ PHP_FUNCTION(bcmul)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
@@ -323,7 +333,7 @@ PHP_FUNCTION(bcdiv)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
@@ -447,7 +457,7 @@ PHP_FUNCTION(bcpow)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
@@ -486,7 +496,7 @@ PHP_FUNCTION(bcsqrt)
 {
 	char *left;
 	int left_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num result;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
@@ -523,7 +533,7 @@ PHP_FUNCTION(bccomp)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param;
 	bc_num first, second;
 	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 

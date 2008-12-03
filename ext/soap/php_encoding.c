@@ -361,7 +361,6 @@ static zend_bool soap_check_xml_ref(zval **data, xmlNodePtr node TSRMLS_DC)
 static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xmlNodePtr parent, int check_class_map)
 {
 	xmlNodePtr node = NULL;
-	int add_type = 0;
 	TSRMLS_FETCH();
 
 	/* Special handling of class SoapVar */
@@ -448,21 +447,20 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 				    zend_binary_strncasecmp(ce->name, ce->name_length, Z_STRVAL_PP(tmp), ce->name_length, ce->name_length) == 0 &&
 				    zend_hash_get_current_key_ex(SOAP_GLOBAL(class_map), &type_name, &type_len, &idx, 0, &pos) == HASH_KEY_IS_STRING) {
 
-					/* TODO: namespace isn't stored */
-					encodePtr enc = NULL;
-					if (SOAP_GLOBAL(sdl)) {
-						enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name);
-						if (!enc) {
-							enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name);
-						}
-					}
-					if (enc) {
-						if (encode != enc && style == SOAP_LITERAL) {
-							add_type = 1;			    			
-						}
-						encode = enc;
-					}
-					break;
+				    /* TODO: namespace isn't stored */
+			    	encodePtr enc = NULL;
+			    	if (SOAP_GLOBAL(sdl)) {
+			    		enc = get_encoder(SOAP_GLOBAL(sdl), SOAP_GLOBAL(sdl)->target_ns, type_name);
+			    	}
+			    	if (enc) {
+			    		encode = enc;
+				 	} else if (SOAP_GLOBAL(sdl)) {
+				 		enc = find_encoder_by_type_name(SOAP_GLOBAL(sdl), type_name);
+				    	if (enc) {
+				    		encode = enc;
+				    	}
+				 	}
+			        break;
 				}
 			}
 		}
@@ -487,9 +485,6 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		}
 		if (encode->to_xml) {
 			node = encode->to_xml(&encode->details, data, style, parent);
-			if (add_type) {
-				set_ns_and_type(node, &encode->details);
-			}
 		}
 	}
 	return node;
@@ -1020,15 +1015,7 @@ static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data)
 					Z_DVAL_P(ret) = dval;
 					break;
 				default:
-					if (strncasecmp((char*)data->children->content, "NaN", sizeof("NaN")-1) == 0) {
-						ZVAL_DOUBLE(ret, php_get_nan());
-					} else if (strncasecmp((char*)data->children->content, "INF", sizeof("INF")-1) == 0) {
-						ZVAL_DOUBLE(ret, php_get_inf());
-					} else if (strncasecmp((char*)data->children->content, "-INF", sizeof("-INF")-1) == 0) {
-						ZVAL_DOUBLE(ret, -php_get_inf());
-					} else {
-						soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
-					}
+					soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 			}
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
@@ -1458,7 +1445,7 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 	sdlPtr sdl;
 	sdlTypePtr sdlType = type->sdl_type;
 	zend_class_entry *ce = ZEND_STANDARD_CLASS_DEF_PTR;
-	zval *redo_any = NULL;
+	zend_bool redo_any = 0;
 	TSRMLS_FETCH();
 
 	if (pce) {
@@ -1530,7 +1517,10 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 				if (soap_check_xml_ref(&ret, data TSRMLS_CC)) {
 					return ret;
 				}
-				redo_any = get_zval_property(ret, "any" TSRMLS_CC);
+				if (get_zval_property(ret, "any" TSRMLS_CC) != NULL) {
+					unset_zval_property(ret, "any" TSRMLS_CC);
+					redo_any = 1;
+				}
 				if (Z_TYPE_P(ret) == IS_OBJECT && ce != ZEND_STANDARD_CLASS_DEF_PTR) {
 					zend_object *zobj = zend_objects_get_address(ret TSRMLS_CC);
 					zobj->ce = ce;
@@ -1556,17 +1546,10 @@ static zval *to_zval_object_ex(encodeTypePtr type, xmlNodePtr data, zend_class_e
 			object_init_ex(ret, ce);
 		}
 		if (sdlType->model) {
-			if (redo_any) {
-				Z_ADDREF_P(redo_any);
-				unset_zval_property(ret, "any" TSRMLS_CC);
-			}
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
-			if (redo_any) {
-				if (get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
-					model_to_zval_any(ret, data->children TSRMLS_CC);
-				}
-				zval_ptr_dtor(&redo_any);
-			}
+			if (redo_any && get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
+				model_to_zval_any(ret, data->children TSRMLS_CC);
+		  }
 		}
 		if (sdlType->attributes) {
 			sdlAttributePtr *attr;
@@ -1671,13 +1654,6 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			encodePtr enc;
 
 			data = get_zval_property(object, model->u.element->name TSRMLS_CC);
-			if (data &&
-			    Z_TYPE_P(data) == IS_NULL &&
-			    !model->u.element->nillable &&
-			    model->min_occurs > 0 &&
-			    !strict) {
-				return 0;
-			}
 			if (data) {
 				enc = model->u.element->encode;
 				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
@@ -2993,7 +2969,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 #ifdef HAVE_TM_GMTOFF
 		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
-# if defined(__CYGWIN__) || defined(NETWARE)
+# ifdef __CYGWIN__
 		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? _timezone - 3600:_timezone)>0)?'-':'+', abs((ta->tm_isdst ? _timezone - 3600 : _timezone) / 3600), abs(((ta->tm_isdst ? _timezone - 3600 : _timezone) % 3600) / 60));
 # else
 		snprintf(tzbuf, sizeof(tzbuf), "%c%02d:%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs(((ta->tm_isdst ? timezone - 3600 : timezone) % 3600) / 60));

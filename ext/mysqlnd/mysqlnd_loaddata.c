@@ -27,8 +27,7 @@
 
 enum_func_status mysqlnd_simple_command_handle_response(MYSQLND *conn,
 										enum php_mysql_packet_type ok_packet,
-										zend_bool silent, enum php_mysqlnd_server_command command,
-										zend_bool ignore_upsert_status
+										zend_bool silent, enum php_mysqlnd_server_command command
 									  	TSRMLS_DC);
 
 
@@ -86,7 +85,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 /* {{{ mysqlnd_local_infile_read */
 static
-int mysqlnd_local_infile_read(void *ptr, char *buf, unsigned int buf_len TSRMLS_DC)
+int mysqlnd_local_infile_read(void *ptr, char *buf, uint buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 	int count;
@@ -107,7 +106,7 @@ int mysqlnd_local_infile_read(void *ptr, char *buf, unsigned int buf_len TSRMLS_
 
 /* {{{ mysqlnd_local_infile_error */
 static
-int	mysqlnd_local_infile_error(void *ptr, char *error_buf, unsigned int error_buf_len TSRMLS_DC)
+int	mysqlnd_local_infile_error(void *ptr, char *error_buf, uint error_buf_len TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info = (MYSQLND_INFILE_INFO *)ptr;
 
@@ -177,7 +176,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	char				*buf;
 	char				empty_packet[MYSQLND_HEADER_SIZE];
 	enum_func_status	result = FAIL;
-	unsigned int				buflen = 4096;
+	uint				buflen = 4096;
 	void				*info = NULL;
 	int					bufsize;
 	size_t				ret;
@@ -242,8 +241,9 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 infile_error:
 	/* get response from server and update upsert values */
-	if (FAIL == mysqlnd_simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE TSRMLS_CC)) {
+	if (FAIL == mysqlnd_simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY TSRMLS_CC)) {
 		result = FAIL;
+		goto infile_error;
 	}
 
 	(*conn->infile.local_infile_end)(info TSRMLS_CC);

@@ -229,7 +229,8 @@ PHP_FUNCTION(ibase_service_attach)
 		user, isc_spb_password, (char)plen, pass, host);
 
 	if (spb_len > sizeof(buf) || spb_len == -1) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)" TSRMLS_CC, spb_len);
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
+			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
 
@@ -450,7 +451,8 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	}
 
 	if (spb_len > sizeof(buf) || spb_len <= 0) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)" TSRMLS_CC, spb_len);
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
+			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
 
@@ -558,7 +560,8 @@ options_argument:
 	}
 
 	if (spb_len > sizeof(buf) || spb_len == -1) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)" TSRMLS_CC, spb_len);
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
+			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
 

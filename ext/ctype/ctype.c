@@ -45,46 +45,57 @@ static PHP_FUNCTION(ctype_upper);
 static PHP_FUNCTION(ctype_xdigit);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_alnum, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_alpha, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_cntrl, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_digit, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_lower, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_graph, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_print, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_punct, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_space, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_upper, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ctype_xdigit, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()

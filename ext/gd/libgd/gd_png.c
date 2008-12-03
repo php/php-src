@@ -36,11 +36,6 @@
 
   ---------------------------------------------------------------------------*/
 
-const char * gdPngGetVersionString()
-{
-	return PNG_LIBPNG_VER_STRING;
-}
-
 #ifndef PNG_SETJMP_NOT_SUPPORTED
 typedef struct _jmpbuf_wrapper
 {

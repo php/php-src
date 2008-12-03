@@ -4036,7 +4036,4 @@
     ]
     p    
 
-/.*[op][xyz]/
-    fooabcfoo
-
 / End of testinput1 /

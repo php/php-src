@@ -138,6 +138,14 @@ PHPAPI long php_rand(TSRMLS_D)
 	LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 	NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	The original code included the following notice:
+
+	When you use this, send an email to: matumoto@math.keio.ac.jp
+    with an appropriate reference to your work.
+
+	It would be nice to CC: rjwagner@writeme.com and Cokus@math.washington.edu
+	when you write.
 */
 
 #define N             MT_N                 /* length of state vector */
@@ -230,7 +238,7 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	long seed = 0;
+	long seed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
 		return;
@@ -246,7 +254,7 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	long seed = 0;
+	long seed;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
 		return;

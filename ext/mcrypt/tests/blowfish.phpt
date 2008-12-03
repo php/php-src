@@ -18,7 +18,7 @@ $td = mcrypt_module_open ("blowfish", "", MCRYPT_MODE_ECB, "");
 foreach($vectors as $data) {
     $data = trim($data);
     if ($data) {
-        list($key,$plain,$crypt) = preg_split("/[[:space:]]+/",$data);
+        list($key,$plain,$crypt) = split("[[:space:]]+",$data);
         printf("%s  %s  ",
             $key,
             $plain
@@ -50,7 +50,7 @@ $guess = bin2hex( mcrypt_generic( $td, $plain ) );
 
 echo "\n", $guess, "\n";
 ?>
---EXPECTF--
+--EXPECT--
 key               plain             crypt             guess             stat
 0000000000000000  0000000000000000  4ef997456198dd78  4ef997456198dd78  OK
 FFFFFFFFFFFFFFFF  FFFFFFFFFFFFFFFF  51866fd5b85ecb8a  51866fd5b85ecb8a  OK

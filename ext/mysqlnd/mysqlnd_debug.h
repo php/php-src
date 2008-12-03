@@ -36,7 +36,7 @@ struct st_mysqlnd_debug_methods
 	enum_func_status (*log_va)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
 							   unsigned int level, const char * type, const char *format, ...);
 	zend_bool (*func_enter)(MYSQLND_DEBUG *self, unsigned int line, const char * const file,
-							char * func_name, unsigned int func_name_len);
+							char * func_name, uint func_name_len);
 	enum_func_status (*func_leave)(MYSQLND_DEBUG *self, unsigned int line, const char * const file);
 	enum_func_status (*close)(MYSQLND_DEBUG *self);
 	enum_func_status (*free_handle)(MYSQLND_DEBUG *self);
@@ -65,14 +65,14 @@ MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D);
 
 void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
 void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+void *	_mysqlnd_ecalloc(uint nmemb, size_t size MYSQLND_MEM_D);
+void *	_mysqlnd_pecalloc(uint nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
 void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
 void 	_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
 void 	_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
 void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+void *	_mysqlnd_calloc(uint nmemb, size_t size MYSQLND_MEM_D);
 void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 
@@ -92,13 +92,13 @@ char *	mysqlnd_get_backtrace(TSRMLS_D);
 #elif MYSQLND_DBG_ENABLED == 0
 
 
-static inline void DBG_INF(const char * const msg) {}
-static inline void DBG_ERR(const char * const msg) {}
-static inline void DBG_INF_FMT(const char * const format, ...) {}
-static inline void DBG_ERR_FMT(const char * const format, ...) {}
-static inline void DBG_ENTER(const char * const func_name) {}
+static inline void DBG_INF(char *msg) {}
+static inline void DBG_ERR(char *msg) {}
+static inline void DBG_INF_FMT(char *format, ...) {}
+static inline void DBG_ERR_FMT(char *format, ...) {}
+static inline void DBG_ENTER(char *func_name) {}
 #define DBG_RETURN(value)	return (value)
-#define DBG_VOID_RETURN		return
+#define DBG_VOID_RETURN		return;
 #endif
 
 

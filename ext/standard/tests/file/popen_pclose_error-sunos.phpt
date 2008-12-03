@@ -2,8 +2,8 @@
 Test popen() and pclose function: error conditions
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) != 'Sun')
-  die("skip Only valid for Sun Solaris");
+if(substr(PHP_OS, 0, 3) != 'Sun' )
+  die("skip Only Valid for Sun Solaris");
 ?>
 
 --FILE--
@@ -35,13 +35,13 @@ unlink($file_path."/popen.tmp");
 --EXPECTF--
 *** Testing for error conditions ***
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for popen() in %s on line %d
+Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
-sh: abc.txt: not found
 resource(%d) of type (stream)
+sh: abc.txt: not found
 
 Warning: Wrong parameter count for pclose() in %s on line %d
 NULL

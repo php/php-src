@@ -532,6 +532,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 matched;			/* Has anything matched */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	const char	   **stringlist;		/* Holds list of subpatterns */
+	char			*match;				/* The current match */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	int				 i, rc;
 	int				 subpats_order;		/* Order of subpattern matches */
@@ -610,6 +611,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		}
 	}
 
+	match = NULL;
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
@@ -630,6 +632,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		/* If something has matched */
 		if (count > 0) {
 			matched++;
+			match = subject + offsets[0];
 
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
@@ -894,6 +897,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				} else {
 					esc_match = "";
 					esc_match_len = 0;
+					match_len = 0;
 				}
 				smart_str_appendl(&code, esc_match, esc_match_len);
 
@@ -1286,11 +1290,11 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 				   **replace,
 				   **subject,
 				   **subject_entry,
-				   **zcount = NULL;
+				   **zcount;
 	char			*result;
 	int				 result_len;
 	int				 limit_val = -1;
-	long			limit = -1;
+	long			limit;
 	char			*string_key;
 	ulong			 num_key;
 	char			*callback_name;
@@ -1447,7 +1451,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 start_offset;		/* Where the new search starts */
 	int				 next_offset;		/* End of the last delimiter match + 1 */
 	int				 g_notempty = 0;	/* If the match should not be empty */
-	char			*last_match;		/* Location of last match */
+	char			*match,				/* The current match */
+					*last_match;		/* Location of last match */
 	int				 rc;
 	int				 no_empty;			/* If NO_EMPTY flag is set */
 	int				 delim_capture; 	/* If delimiters should be captured */
@@ -1484,6 +1489,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	start_offset = 0;
 	next_offset = 0;
 	last_match = subject;
+	match = NULL;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
@@ -1503,6 +1509,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 				
 		/* If something matched */
 		if (count > 0) {
+			match = subject + offsets[0];
+
 			if (!no_empty || &subject[offsets[0]] != last_match) {
 
 				if (offset_capture) {
@@ -1607,7 +1615,7 @@ static PHP_FUNCTION(preg_quote)
 	int		 in_str_len;
 	char	*in_str;		/* Input string argument */
 	char	*in_str_end;    /* End of the input string */
-	int		 delim_len = 0;
+	int		 delim_len;
 	char	*delim = NULL;	/* Additional delimiter argument */
 	char	*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
@@ -1819,6 +1827,7 @@ static PHP_FUNCTION(preg_last_error)
 /* {{{ module definition structures */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
@@ -1827,6 +1836,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
@@ -1835,6 +1845,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 2)
     ZEND_ARG_INFO(0, regex)
     ZEND_ARG_INFO(0, replace)
@@ -1843,6 +1854,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 2)
     ZEND_ARG_INFO(1, count)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
     ZEND_ARG_INFO(0, regex)
     ZEND_ARG_INFO(0, callback)
@@ -1851,6 +1863,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
     ZEND_ARG_INFO(1, count)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
@@ -1858,17 +1871,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
     ZEND_ARG_INFO(0, flags) 
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_quote, 0, 0, 1)
     ZEND_ARG_INFO(0, str)
     ZEND_ARG_INFO(0, delim_char)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_grep, 0, 0, 2)
     ZEND_ARG_INFO(0, regex)
     ZEND_ARG_INFO(0, input) /* array */
     ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_preg_last_error, 0)
 ZEND_END_ARG_INFO()
 /* }}} */

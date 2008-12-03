@@ -27,15 +27,11 @@ echo "Done";
 
 -- Testing sql_regcase() function with Zero arguments --
 
-Deprecated: Function sql_regcase() is deprecated in %s on line %d
-
-Warning: sql_regcase() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: sql_regcase() expects exactly 1 parameter, 0 given in %s.php on line 12
 NULL
 
 -- Testing sql_regcase() function with more than expected no. of arguments --
 
-Deprecated: Function sql_regcase() is deprecated in %s on line %d
-
-Warning: sql_regcase() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: sql_regcase() expects exactly 1 parameter, 2 given in %s.php on line 18
 NULL
 Done

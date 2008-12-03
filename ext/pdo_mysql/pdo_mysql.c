@@ -61,7 +61,7 @@ PHP_INI_END()
 
 /* true global environment */
 #ifdef PDO_USE_MYSQLND
-static MYSQLND_ZVAL_PCACHE *pdo_mysqlnd_zval_cache;
+static MYSQLND_ZVAL_PCACHE *mysql_mysqlnd_zval_cache;
 #endif
 		
 		
@@ -80,14 +80,11 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_INIT_COMMAND", (long)PDO_MYSQL_ATTR_INIT_COMMAND);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_FILE", (long)PDO_MYSQL_ATTR_READ_DEFAULT_FILE);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_READ_DEFAULT_GROUP", (long)PDO_MYSQL_ATTR_READ_DEFAULT_GROUP);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_COMPRESS", (long)PDO_MYSQL_ATTR_COMPRESS);
 #endif
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_DIRECT_QUERY", (long)PDO_MYSQL_ATTR_DIRECT_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_FOUND_ROWS", (long)PDO_MYSQL_ATTR_FOUND_ROWS);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_IGNORE_SPACE", (long)PDO_MYSQL_ATTR_IGNORE_SPACE);
 
 #ifdef PDO_USE_MYSQLND
-	pdo_mysqlnd_zval_cache = mysqlnd_palloc_init_cache(PDO_MYSQL_G(cache_size));
+	mysql_mysqlnd_zval_cache = mysqlnd_palloc_init_cache(PDO_MYSQL_G(cache_size));
 #endif
 	
 	return php_pdo_register_driver(&pdo_mysql_driver);
@@ -100,7 +97,6 @@ static PHP_MSHUTDOWN_FUNCTION(pdo_mysql)
 {
 	php_pdo_unregister_driver(&pdo_mysql_driver);
 #if PDO_USE_MYSQLND
-	mysqlnd_palloc_free_cache(pdo_mysqlnd_zval_cache);
 	UNREGISTER_INI_ENTRIES();
 #endif
 
@@ -113,23 +109,23 @@ static PHP_MSHUTDOWN_FUNCTION(pdo_mysql)
 static PHP_MINFO_FUNCTION(pdo_mysql)
 {
 	php_info_print_table_start();
-
-	php_info_print_table_header(2, "PDO Driver for MySQL", "enabled");
-	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
-
 #ifdef PDO_USE_MYSQLND
+	php_info_print_table_header(2, "PDO Driver for MySQL, mysql native driver version", mysql_get_client_info());
+
 	{
 		zval values;
 
-		php_info_print_table_header(2, "Persistent cache", pdo_mysqlnd_zval_cache ? "enabled":"disabled");
+		php_info_print_table_header(2, "Persistent cache", mysql_mysqlnd_zval_cache? "enabled":"disabled");
 		
-		if (pdo_mysqlnd_zval_cache) {
+		if (mysql_mysqlnd_zval_cache) {
 			/* Now report cache status */
-			mysqlnd_palloc_stats(pdo_mysqlnd_zval_cache, &values);
+			mysqlnd_palloc_stats(mysql_mysqlnd_zval_cache, &values);
 			mysqlnd_minfo_print_hash(&values);
 			zval_dtor(&values);
 		}
 	}
+#else
+	php_info_print_table_header(2, "PDO Driver for MySQL, client library version", mysql_get_client_info());
 #endif
 	php_info_print_table_end();
 
@@ -145,7 +141,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
 {
-	PDO_MYSQL_G(mysqlnd_thd_zval_cache) = mysqlnd_palloc_rinit(pdo_mysqlnd_zval_cache);
+	PDO_MYSQL_G(mysqlnd_thd_zval_cache) = mysqlnd_palloc_rinit(mysql_mysqlnd_zval_cache);
 	
 #if PDO_DBG_ENABLED
 	if (PDO_MYSQL_G(debug)) {

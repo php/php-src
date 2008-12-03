@@ -136,8 +136,7 @@ static zend_function *zend_closure_get_method(zval **object_ptr, char *method_na
 static zval *zend_closure_read_property(zval *object, zval *member, int type TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
-	Z_ADDREF(EG(uninitialized_zval));
-	return &EG(uninitialized_zval);
+	return NULL;
 }
 /* }}} */
 
@@ -209,7 +208,7 @@ static zend_object_value zend_closure_new(zend_class_entry *class_type TSRMLS_DC
 }
 /* }}} */
 
-int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
+int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr, zval ***zobj_ptr_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -224,10 +223,16 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 		if (zobj_ptr) {
 			*zobj_ptr = closure->this_ptr;
 		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = &closure->this_ptr;
+		}
 		*ce_ptr = Z_OBJCE_P(closure->this_ptr);
 	} else {
 		if (zobj_ptr) {
 			*zobj_ptr = NULL;
+		}
+		if (zobj_ptr_ptr) {
+			*zobj_ptr_ptr = NULL;
 		}
 		*ce_ptr = closure->func.common.scope;
 	}

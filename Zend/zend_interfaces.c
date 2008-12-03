@@ -46,7 +46,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object_ptr = object_pp ? *object_pp : NULL;
+	fci.object_pp = object_pp;
 	fci.function_name = &z_fname;
 	fci.retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
 	fci.param_count = param_count;
@@ -85,7 +85,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		}
 		fcic.calling_scope = obj_ce;
 		fcic.called_scope = object_pp ? obj_ce : EG(called_scope);
-		fcic.object_ptr = object_pp ? *object_pp : NULL;
+		fcic.object_pp = object_pp;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	}
 	if (result == FAILURE) {
@@ -498,14 +498,17 @@ const zend_function_entry zend_funcs_iterator[] = {
 
 const zend_function_entry *zend_funcs_traversable    = NULL;
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this should be return by ref but atm cannot be */
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, value)
@@ -519,6 +522,7 @@ const zend_function_entry zend_funcs_arrayaccess[] = {
 	{NULL, NULL, NULL}
 };
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO()

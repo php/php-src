@@ -42,7 +42,7 @@ var_dump(rmdir($path));
 ?>
 --EXPECTF--
 call readdir():
-resource(%d) of type (stream)
+resource(12) of type (stream)
 array(6) {
   [0]=>
   bool(false)

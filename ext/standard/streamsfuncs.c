@@ -69,11 +69,6 @@ PHP_FUNCTION(stream_socket_pair)
 	s1 = php_stream_sock_open_from_socket(pair[0], 0);
 	s2 = php_stream_sock_open_from_socket(pair[1], 0);
 
-	/* set the __exposed flag. 
-	 * php_stream_to_zval() does, add_next_index_resource() does not */
-	php_stream_auto_cleanup(s1);
-	php_stream_auto_cleanup(s2);
-
 	add_next_index_resource(return_value, php_stream_get_resource_id(s1));
 	add_next_index_resource(return_value, php_stream_get_resource_id(s2));
 }
@@ -99,7 +94,7 @@ PHP_FUNCTION(stream_socket_client)
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzdlr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzd!lr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -416,21 +411,23 @@ PHP_FUNCTION(stream_get_contents)
 
 	php_stream_from_zval(stream, &zsrc);
 
-	if ((pos > 0 || (pos == 0 && ZEND_NUM_ARGS() > 2)) && php_stream_seek(stream, pos, SEEK_SET) < 0) {
+	if (pos > 0 && php_stream_seek(stream, pos, SEEK_SET) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %ld in the stream", pos);
 		RETURN_FALSE;
 	}
 
-	len = php_stream_copy_to_mem(stream, &contents, maxlen, 0);
-	
-	if (contents) {
-		if (len && PG(magic_quotes_runtime)) {
+	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
+		
+		if (PG(magic_quotes_runtime)) {
 			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
 			len = newlen;
 		}
+
 		RETVAL_STRINGL(contents, len, 0);
-	} else {
+	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
+	} else {
+		RETVAL_FALSE;
 	}
 }
 /* }}} */
@@ -534,14 +531,13 @@ PHP_FUNCTION(stream_get_transports)
 	}
 
 	if ((stream_xport_hash = php_stream_xport_get_hash())) {
-		HashPosition pos;
 		array_init(return_value);
-		zend_hash_internal_pointer_reset_ex(stream_xport_hash, &pos);
+		zend_hash_internal_pointer_reset(stream_xport_hash);
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
-					&num_key, 0, &pos) == HASH_KEY_IS_STRING) {
+					&num_key, 0, NULL) == HASH_KEY_IS_STRING) {
 			add_next_index_stringl(return_value, stream_xport, stream_xport_len - 1, 1);
-			zend_hash_move_forward_ex(stream_xport_hash, &pos);
+			zend_hash_move_forward(stream_xport_hash);
 		}
 	} else {
 		RETURN_FALSE;
@@ -563,11 +559,10 @@ PHP_FUNCTION(stream_get_wrappers)
 	}
 
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
-		HashPosition pos;
 		array_init(return_value);
-		for(zend_hash_internal_pointer_reset_ex(url_stream_wrappers_hash, &pos);
-			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT;
-			zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
+		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
+			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+			zend_hash_move_forward(url_stream_wrappers_hash)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len - 1, 1);
 				}
@@ -797,12 +792,6 @@ PHP_FUNCTION(stream_select)
 
 		retval = stream_array_emulate_read_fd_set(r_array TSRMLS_CC);
 		if (retval > 0) {
-			if (w_array != NULL) {
-				zend_hash_clean(Z_ARRVAL_P(w_array));
-			}
-			if (e_array != NULL) {
-				zend_hash_clean(Z_ARRVAL_P(e_array));
-			}
 			RETURN_LONG(retval);
 		}
 	}
@@ -838,13 +827,12 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 		INIT_ZVAL(zvs[i]);
 		ps[i] = &zvs[i];
 		ptps[i] = &ps[i];
-		MAKE_STD_ZVAL(ps[i]);
 	}
 		
 	ZVAL_LONG(ps[0], notifycode);
 	ZVAL_LONG(ps[1], severity);
 	if (xmsg) {
-		ZVAL_STRING(ps[2], xmsg, 1);
+		ZVAL_STRING(ps[2], xmsg, 0);
 	} else {
 		ZVAL_NULL(ps[2]);
 	}
@@ -854,9 +842,6 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 
 	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, ptps, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user notifier");
-	}
-	for (i = 0; i < 6; i++) {
-		zval_ptr_dtor(&ps[i]);
 	}
 	if (retval) {
 		zval_ptr_dtor(&retval);
@@ -1035,34 +1020,6 @@ PHP_FUNCTION(stream_context_set_params)
 	}
 
 	RETVAL_BOOL(parse_context_params(context, params TSRMLS_CC) == SUCCESS);
-}
-/* }}} */
-
-/* {{{ proto array stream_context_get_params(resource context|resource stream)
-   Get parameters of a file context */
-PHP_FUNCTION(stream_context_get_params)
-{
-	zval *zcontext, *options;
-	php_stream_context *context;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zcontext) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	context = decode_context_param(zcontext TSRMLS_CC);
-	if (!context) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
-		RETURN_FALSE;
-	}
-
-	array_init(return_value);
-	if (context->notifier && context->notifier->ptr && context->notifier->func == user_space_stream_notifier) {
-		add_assoc_zval_ex(return_value, ZEND_STRS("notification"), context->notifier->ptr);
-		Z_ADDREF_P(context->notifier->ptr);
-	}
-	ALLOC_INIT_ZVAL(options);
-	ZVAL_ZVAL(options, context->options, 1, 0);
-	add_assoc_zval_ex(return_value, ZEND_STRS("options"), options);
 }
 /* }}} */
 
@@ -1318,7 +1275,7 @@ PHP_FUNCTION(stream_set_blocking)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;
-	long seconds, microseconds = 0;
+	long seconds, microseconds;
 	struct timeval t;
 	php_stream *stream;
 	int argc = ZEND_NUM_ARGS();
@@ -1388,7 +1345,7 @@ PHP_FUNCTION(stream_set_write_buffer)
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
-	long cryptokind = 0;
+	long cryptokind;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
 	zend_bool enable;

@@ -39,6 +39,9 @@ $linknames = array (
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1//home/test//../test/./readlink_realpath_basic1_link.tmp",
   
+  // checking for binary safe
+  b"$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
+
   /* linknames with invalid linkpath */
   "$file_path///readlink_realpath_basic1/home//..//././test//readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/../home/../test/../readlink_realpath_basic1_link.tmp",
@@ -86,10 +89,8 @@ string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 
 -- Iteration 4 --
-
-Warning: readlink(): No such file or directory in %s on line %d
-bool(false)
-bool(false)
+string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
 
 -- Iteration 5 --
 
@@ -101,9 +102,15 @@ bool(false)
 
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-%s
+bool(false)
 
 -- Iteration 7 --
+
+Warning: readlink(): No such file or directory in %s on line %d
+bool(false)
+%s
+
+-- Iteration 8 --
 
 Warning: readlink(): %s in %s on line %d
 bool(false)

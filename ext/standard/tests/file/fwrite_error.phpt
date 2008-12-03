@@ -112,10 +112,9 @@ Warning: fwrite() expects parameter 1 to be resource, object given in %s on line
 bool(false)
 -- Testing fwrite() with closed/unset file handle --
 
-Warning: fwrite(): %d is not a valid stream resource in %s on line %d
+Warning: fwrite(): 6 is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fwrite() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

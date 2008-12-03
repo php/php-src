@@ -42,7 +42,7 @@ AC_CONFIG_HEADER(main/php_config.h)
 PHP_MAJOR_VERSION=5
 PHP_MINOR_VERSION=3
 PHP_RELEASE_VERSION=0
-PHP_EXTRA_VERSION="alpha3-dev"
+PHP_EXTRA_VERSION="alpha2"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
 
@@ -140,9 +140,8 @@ esac
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
-AC_PROG_CC([cc gcc])
+AC_PROG_CC
 PHP_DETECT_ICC
-PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
@@ -215,10 +214,6 @@ case $host_cpu in
       CFLAGS="$CFLAGS -ieee"
     fi
     ;;
-  sparc*)
-    if test "$SUNCC" = "yes"; then
-      CFLAGS="$CFLAGS -xmemalign=8s"
-    fi
 esac
 
 dnl activate some gcc specific optimizations for gcc >= 4
@@ -637,8 +632,6 @@ usleep \
 nanosleep \
 utime \
 vsnprintf \
-vasprintf \
-asprintf \
 )
 
 dnl Check for getaddrinfo, should be a better way, but...
@@ -794,15 +787,6 @@ if test "$PHP_DEBUG" = "yes"; then
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -O0"
-  fi
-  if test "$SUNCC" = "yes"; then
-    if -n "$auto_cflags"; then
-      CFLAGS="-g"
-      CXXFLAGS="-g"
-    else
-      CFLAGS="$CFLAGS -g"
-      CXXFLAGS="$CFLAGS -g"
-    fi
   fi
 else
   PHP_DEBUG=0

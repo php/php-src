@@ -308,7 +308,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	fc->fci.function_table = EG(function_table);
 	fc->fci.function_name = cb;
 	fc->fci.symbol_table = NULL;
-	fc->fci.object_ptr = NULL;
+	fc->fci.object_pp = NULL;
 	fc->fci.retval_ptr_ptr = &retval;
 	fc->fci.param_count = fake_argc;
 	
@@ -368,8 +368,8 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	}
 
 	/* clean up the params */
-	if (zargs) {
-		for (i = is_agg; i < fake_argc; i++) {
+	if (argc) {
+		for (i = is_agg; i < argc; i++) {
 			zval_ptr_dtor(zargs[i]);
 			efree(zargs[i]);
 		}
@@ -498,7 +498,6 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 		MAKE_STD_ZVAL(func->func);
 		*(func->func) = *callback;
 		zval_copy_ctor(func->func);
-		INIT_PZVAL(func->func);
 		
 		func->argc = argc;
 
@@ -577,12 +576,10 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 		MAKE_STD_ZVAL(func->step);
 		*(func->step) = *step_callback;
 		zval_copy_ctor(func->step);
-		INIT_PZVAL(func->step);
 
 		MAKE_STD_ZVAL(func->fini);
 		*(func->fini) = *fini_callback;
 		zval_copy_ctor(func->fini);
-		INIT_PZVAL(func->fini);
 		
 		func->argc = argc;
 

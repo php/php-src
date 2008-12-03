@@ -12,12 +12,8 @@ var_dump(ereg_replace("C?$", "Z", "ABC"));
 var_dump(mb_ereg_replace("C*$", "Z", "ABC"));
 var_dump(ereg_replace("C*$", "Z", "ABC"));
 ?>
---EXPECTF--
-string(4) "ABZZ"
-
-Deprecated: Function ereg_replace() is deprecated in %s on line %d
+--EXPECT--
 string(4) "ABZZ"
 string(4) "ABZZ"
-
-Deprecated: Function ereg_replace() is deprecated in %s on line %d
+string(4) "ABZZ"
 string(4) "ABZZ"

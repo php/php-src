@@ -347,7 +347,7 @@ log_errors = Off
 log_errors_max_len = 1024
 
 ; Do not log repeated messages. Repeated errors must occur in same file on same
-; line unless ignore_repeated_source is set true.
+; line until ignore_repeated_source is set true.
 ignore_repeated_errors = Off
 
 ; Ignore source of message when ignoring repeated messages. When this setting
@@ -364,11 +364,6 @@ report_memleaks = On
 
 ; Store the last error/warning message in $php_errormsg (boolean).
 track_errors = Off
-
-; Turn off normal error reporting and emit XML-RPC error XML
-;xmlrpc_errors = 0
-; An XML-RPC faultCode
-;xmlrpc_error_number = 0
 
 ; Disable the inclusion of HTML tags in error messages.
 ; Note: Never use this feature for production boxes.
@@ -705,6 +700,10 @@ default_socket_timeout = 60
 
 [sqlite3]
 ;sqlite3.extension_dir =
+
+[xmlrpc]
+;xmlrpc_error_number = 0
+;xmlrpc_errors = 0
 
 [Pcre]
 ;PCRE library backtracking limit.

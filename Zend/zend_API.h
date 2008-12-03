@@ -48,7 +48,7 @@ typedef struct _zend_fcall_info {
 	zval **retval_ptr_ptr;
 	zend_uint param_count;
 	zval ***params;
-	zval *object_ptr;
+	zval **object_pp;
 	zend_bool no_separation;
 } zend_fcall_info;
 
@@ -57,10 +57,10 @@ typedef struct _zend_fcall_info_cache {
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
-	zval *object_ptr;
+	zval **object_pp;
 } zend_fcall_info_cache;
 
-#define ZEND_NS_NAME(ns, name)			ns"\\"name
+#define ZEND_NS_NAME(ns, name)			ns"::"name
 
 #define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name
@@ -101,7 +101,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, 0, allow_null, pass_by_ref, 0, 0 },
 #define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, 1, allow_null, pass_by_ref, 0, 0 },
 #define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)	\
-	static const zend_arg_info name[] = {																		\
+	const zend_arg_info name[] = {																		\
 		{ NULL, 0, NULL, 0, 0, 0, pass_rest_by_reference, return_reference, required_num_args },
 #define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)	\
 	ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, ZEND_RETURN_VALUE, -1)
@@ -277,7 +277,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval **object_pp, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name TSRMLS_DC);
 ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);

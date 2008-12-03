@@ -440,11 +440,6 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
 		if (idata->fp && idata->fp != idata->phar->fp && idata->fp != idata->phar->ufp && idata->fp != idata->internal_file->fp) {
 			php_stream_close(idata->fp);
 		}
-		/* if phar_get_or_create_entry_data returns a sub-directory, we have to free it */
-		if (idata->internal_file->is_temp_dir) {
-			destroy_phar_manifest_entry((void *)idata->internal_file);
-			efree(idata->internal_file);
-		}
 	}
 
 	phar_archive_delref(idata->phar TSRMLS_CC);
@@ -637,7 +632,9 @@ int phar_parse_metadata(char **buffer, zval **metadata, int zip_metadata_len TSR
 			zval_ptr_dtor(metadata);
 			*metadata = (zval *) pemalloc(buf_len, 1);
 			memcpy(*metadata, *buffer, buf_len);
-			*buffer += buf_len;
+			if (!zip_metadata_len) {
+				*buffer += buf_len;
+			}
 			return SUCCESS;
 		}
 	} else {
@@ -836,7 +833,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 				efree(sig);
 			}
 			break;
-#if PHAR_HASH_OK
+#if HAVE_HASH_EXT
 			case PHAR_SIG_SHA512: {
 				unsigned char digest[64];
 
@@ -1034,7 +1031,9 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 
 	/* check whether we have meta data, zero check works regardless of byte order */
 	if (mydata->is_persistent) {
+		char *mysave = buffer;
 		PHAR_GET_32(buffer, mydata->metadata_len);
+		buffer = mysave;
 		if (phar_parse_metadata(&buffer, &mydata->metadata, mydata->metadata_len TSRMLS_CC) == FAILURE) {
 			MAPPHAR_FAIL("unable to read phar metadata in .phar file \"%s\"");
 		}
@@ -1114,9 +1113,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		}
 
 		if (entry.is_persistent) {
-			PHAR_GET_32(buffer, entry.metadata_len);
-			if (!entry.metadata_len) buffer -= 4;
-			if (phar_parse_metadata(&buffer, &entry.metadata, entry.metadata_len TSRMLS_CC) == FAILURE) {
+			if (phar_parse_metadata(&buffer, &entry.metadata, 0 TSRMLS_CC) == FAILURE) {
 				pefree(entry.filename, entry.is_persistent);
 				MAPPHAR_FAIL("unable to read file metadata in .phar file \"%s\"");
 			}
@@ -1704,7 +1701,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 			if (got > 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
-					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error TSRMLS_CC);
+					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, options, pphar, compression, error TSRMLS_CC);
 				}
 			}
 		}
@@ -2560,8 +2557,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		return EOF;
 	}
 
-	zend_hash_clean(&phar->virtual_dirs);
-
 	if (phar->is_zip) {
 		return phar_zip_flush(phar, user_stub, len, convert, error TSRMLS_CC);
 	}
@@ -2739,7 +2734,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		/* after excluding deleted files, calculate manifest size in bytes and number of entries */
 		++new_manifest_count;
-		phar_add_virtual_dirs(phar, entry->filename, entry->filename_len TSRMLS_CC);
 
 		if (entry->is_dir) {
 			/* we use this to calculate API version, 1.1.1 is used for phars with directories */
@@ -2775,7 +2769,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 		if (!phar_get_efp(entry, 0 TSRMLS_CC)) {
 			/* re-open internal file pointer just-in-time */
-			newentry = phar_open_jit(phar, entry, error TSRMLS_CC);
+			newentry = phar_open_jit(phar, entry, oldfile, error, 0 TSRMLS_CC);
 			if (!newentry) {
 				/* major problem re-opening, so we ignore this file and the error */
 				efree(*error);
@@ -3109,7 +3103,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		}
 
 		switch(phar->sig_flags) {
-#ifndef PHAR_HASH_OK
+#if !HAVE_HASH_EXT
 			case PHAR_SIG_SHA512:
 			case PHAR_SIG_SHA256:
 				if (closeoldfile) {
@@ -3277,7 +3271,7 @@ static long phar_stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 #if PHP_VERSION_ID >= 50300
 #define phar_orig_zend_open zend_stream_open_function
-static char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
+char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL TSRMLS_CC);
 }
@@ -3292,9 +3286,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 	int failed;
 	phar_archive_data *phar;
 
-	if (!file_handle || !file_handle->filename) {
-		return phar_orig_compile_file(file_handle, type TSRMLS_CC);
-	}
 	if (strstr(file_handle->filename, ".phar") && !strstr(file_handle->filename, "://")) {
 		if (SUCCESS == phar_open_from_filename(file_handle->filename, strlen(file_handle->filename), NULL, 0, 0, &phar, NULL TSRMLS_CC)) {
 			if (phar->is_zip || phar->is_tar) {
@@ -3546,7 +3537,6 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_GLOBALS->request_ends = 0;
 		PHAR_GLOBALS->request_done = 0;
 		zend_hash_init(&(PHAR_GLOBALS->phar_fname_map), 5, zend_get_hash_value, destroy_phar_data,  0);
-		zend_hash_init(&(PHAR_GLOBALS->phar_persist_map), 5, zend_get_hash_value, NULL,  0);
 		zend_hash_init(&(PHAR_GLOBALS->phar_alias_map), 5, zend_get_hash_value, NULL, 0);
 
 		if (PHAR_G(manifest_cached)) {
@@ -3566,6 +3556,7 @@ void phar_request_initialize(TSRMLS_D) /* {{{ */
 		PHAR_G(cwd) = NULL;
 		PHAR_G(cwd_len) = 0;
 		PHAR_G(cwd_init) = 0;
+		phar_intercept_functions(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -3583,8 +3574,6 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_GLOBALS->phar_alias_map.arBuckets = NULL;
 		zend_hash_destroy(&(PHAR_GLOBALS->phar_fname_map));
 		PHAR_GLOBALS->phar_fname_map.arBuckets = NULL;
-		zend_hash_destroy(&(PHAR_GLOBALS->phar_persist_map));
-		PHAR_GLOBALS->phar_persist_map.arBuckets = NULL;
 		PHAR_GLOBALS->phar_SERVER_mung_list = 0;
 
 		if (PHAR_GLOBALS->cached_fp) {
@@ -3671,9 +3660,6 @@ static zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("standard")
-#if defined(HAVE_HASH) && !defined(COMPILE_DL_HASH)
-	ZEND_MOD_REQUIRED("hash")
-#endif
 #if HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif

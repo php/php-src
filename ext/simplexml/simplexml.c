@@ -34,7 +34,9 @@
 #include "php_simplexml_exports.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "sxe.h"
+#ifdef HAVE_SPL
+#include "ext/spl/spl_sxe.h"
+#endif
 
 #define SXE_ELEMENT_BY_NAME 0
 
@@ -65,7 +67,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
 /* {{{ _node_as_zval()
  */
-static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix TSRMLS_DC)
+static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, xmlChar *nsprefix, int isprefix TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 
@@ -77,7 +79,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 		subnode->iter.name = xmlStrdup((xmlChar *)name);
 	}
 	if (nsprefix && *nsprefix) {
-		subnode->iter.nsprefix = xmlStrdup(nsprefix);
+		subnode->iter.nsprefix = xmlStrdup((xmlChar *)nsprefix);
 		subnode->iter.isprefix = isprefix;
 	}
 
@@ -819,7 +821,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 				while (node) {
 					xmlNodePtr nnext;
 					nnext = node->next;
-					if ((node->type == XML_ELEMENT_NODE) && !xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
+					if (!xmlStrcmp(node->name, (xmlChar *)Z_STRVAL_P(member))) {
 						break;
 					}
 					node = nnext;
@@ -1127,13 +1129,9 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 				SKIP_TEXT(node);
 			} else {
 				if (node->type == XML_TEXT_NODE) {
-					const xmlChar *cur = node->content;
-					
-					if (*cur != 0) {
-						MAKE_STD_ZVAL(value);
-						ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
-						zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
-					}
+					MAKE_STD_ZVAL(value);
+					ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
+					zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 					goto next_iter;
 				}
 			}
@@ -1272,7 +1270,7 @@ SXE_METHOD(xpath)
 			if (nodeptr->type == XML_TEXT_NODE) {
 				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
 			} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
-				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? (xmlChar *)nodeptr->ns->href : NULL, 0 TSRMLS_CC);
+				_node_as_zval(sxe, nodeptr->parent, value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, NULL, 0 TSRMLS_CC);
 			} else {
 				_node_as_zval(sxe, nodeptr, value, SXE_ITER_NONE, NULL, NULL, 0 TSRMLS_CC);
 			}
@@ -1500,7 +1498,7 @@ SXE_METHOD(children)
 {
 	php_sxe_object *sxe;
 	char           *nsprefix = NULL;
-	int             nsprefix_len = 0;
+	int             nsprefix_len;
 	xmlNodePtr      node;
 	zend_bool       isprefix = 0;
 
@@ -1549,7 +1547,7 @@ SXE_METHOD(attributes)
 {
 	php_sxe_object *sxe;
 	char           *nsprefix = NULL;
-	int             nsprefix_len = 0;
+	int             nsprefix_len;
 	xmlNodePtr      node;
 	zend_bool       isprefix = 0;
 
@@ -2182,7 +2180,6 @@ SXE_METHOD(__construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
-		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
@@ -2438,6 +2435,7 @@ PHP_FUNCTION(simplexml_import_dom)
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, class_name)
@@ -2446,6 +2444,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, is_prefix)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, class_name)
@@ -2454,6 +2453,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, is_prefix)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_import_dom, 0, 0, 1)
 	ZEND_ARG_INFO(0, node)
 	ZEND_ARG_INFO(0, class_name)
@@ -2531,10 +2531,13 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
 
+#ifdef HAVE_SPL
+	if (zend_get_module_started("spl") == SUCCESS) {
+		PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
+	}
+#endif /* HAVE_SPL */
 
 	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
-
-	PHP_MINIT(sxe)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }

@@ -31,6 +31,30 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
 
+static int stream_alive(php_stream *stream  TSRMLS_DC)
+{
+	int socket;
+	char buf;
+
+	/* maybe better to use:
+	 * php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)
+	 * here instead */
+
+	if (stream == NULL || stream->eof || php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void**)&socket, 0) != SUCCESS) {
+		return FALSE;
+	}
+	if (socket == -1) {
+		return FALSE;
+	} else {
+		if (php_pollfd_for_ms(socket, PHP_POLLREADABLE, 0) > 0) {
+			if (0 == recv(socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+
 /* Proxy HTTP Authentication */
 void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
@@ -82,11 +106,12 @@ void basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 	}
 }
 
-static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, php_stream_context *context, int *use_proxy TSRMLS_DC)
+static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, int *use_proxy TSRMLS_DC)
 {
 	php_stream *stream;
 	zval **proxy_host, **proxy_port, **tmp;
 	char *host;
+	php_stream_context *context = NULL;
 	char *name;
 	long namelen;
 	int port;
@@ -114,6 +139,11 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 
 	old_error_reporting = EG(error_reporting);
 	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
+
+	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(this_ptr),
+			"_stream_context", sizeof("_stream_context"), (void**)&tmp)) {
+		context = php_stream_context_from_zval(*tmp, 0);
+	}
 
 	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
 
@@ -210,7 +240,6 @@ int make_http_soap_request(zval  *this_ptr,
 	char *content_encoding;
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
-	php_stream_context *context = NULL;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -278,11 +307,6 @@ int make_http_soap_request(zval  *this_ptr,
 		phpurl = php_url_parse(location);
 	}
 
-	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(this_ptr),
-			"_stream_context", sizeof("_stream_context"), (void**)&tmp)) {
-		context = php_stream_context_from_zval(*tmp, 0);
-	}
-
 try_again:
 	if (phpurl == NULL || phpurl->host == NULL) {
 	  if (phpurl != NULL) {php_url_free(phpurl);}
@@ -340,7 +364,7 @@ try_again:
 	}
 
 	/* Check if keep-alive connection is still opened */
-	if (stream != NULL && php_stream_eof(stream)) {
+	if (stream != NULL && !stream_alive(stream TSRMLS_CC)) {
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
@@ -350,7 +374,7 @@ try_again:
 	}
 
 	if (!stream) {
-		stream = http_connect(this_ptr, phpurl, use_ssl, context, &use_proxy TSRMLS_CC);
+		stream = http_connect(this_ptr, phpurl, use_ssl, &use_proxy TSRMLS_CC);
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
@@ -373,15 +397,6 @@ try_again:
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
 
-		if (context && 
-		    php_stream_context_get_option(context, "http", "protocol_version", &tmp) == SUCCESS &&
-		    Z_TYPE_PP(tmp) == IS_DOUBLE &&
-		    Z_DVAL_PP(tmp) == 1.0) {
-			http_1_1 = 0;
-		} else {
-			http_1_1 = 1;
-		}
-
 		smart_str_append_const(&soap_headers, "POST ");
 		if (use_proxy && !use_ssl) {
 			smart_str_appends(&soap_headers, phpurl->scheme);
@@ -403,34 +418,21 @@ try_again:
 			smart_str_appendc(&soap_headers, '#');
 			smart_str_appends(&soap_headers, phpurl->fragment);
 		}
-		if (http_1_1) {
-			smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
-		} else {
-			smart_str_append_const(&soap_headers, " HTTP/1.0\r\n");
-		}
-		smart_str_append_const(&soap_headers, "Host: ");
+		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
+			"Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);
 		if (phpurl->port != (use_ssl?443:80)) {
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		if (http_1_1) {
-			smart_str_append_const(&soap_headers, "\r\n"
-				"Connection: Keep-Alive\r\n");
-		} else {
-			smart_str_append_const(&soap_headers, "\r\n"
-				"Connection: close\r\n");
-		}
+		smart_str_append_const(&soap_headers, "\r\n"
+			"Connection: Keep-Alive\r\n");
+/*
+			"Connection: close\r\n"
+			"Accept: text/html; text/xml; text/plain\r\n"
+*/
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
-			if (Z_STRLEN_PP(tmp) > 0) {
-				smart_str_append_const(&soap_headers, "User-Agent: ");
-				smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-				smart_str_append_const(&soap_headers, "\r\n");
-			}
-		} else if (context && 
-		           php_stream_context_get_option(context, "http", "user_agent", &tmp) == SUCCESS &&
-		           Z_TYPE_PP(tmp) == IS_STRING) {
 			if (Z_STRLEN_PP(tmp) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
 				smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -673,64 +675,6 @@ try_again:
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		}
-
-		if (context &&
-			php_stream_context_get_option(context, "http", "header", &tmp) == SUCCESS &&
-			Z_TYPE_PP(tmp) == IS_STRING && Z_STRLEN_PP(tmp)) {
-			char *s = Z_STRVAL_PP(tmp);
-			char *p;
-			int name_len;
-
-			while (*s) {
-				/* skip leading newlines and spaces */
-				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-					s++;
-				}
-				/* extract header name */
-				p = s;
-				name_len = -1;
-				while (*p) {
-					if (*p == ':') {
-						if (name_len < 0) name_len = p - s;
-						break;
-					} else if (*p == ' ' || *p == '\t') {
-						if (name_len < 0) name_len = p - s;
-					} else if (*p == '\r' || *p == '\n') {
-						break;
-					}
-					p++;
-				}
-				if (*p == ':') {
-					/* extract header value */
-					while (*p && *p != '\r' && *p != '\n') {
-						p++;
-					}
-					/* skip some predefined headers */
-					if ((name_len != sizeof("host")-1 ||
-					     strncasecmp(s, "host", sizeof("host")-1) != 0) &&
-					    (name_len != sizeof("connection")-1 ||
-					     strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
-					    (name_len != sizeof("user-agent")-1 ||
-					     strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
-					    (name_len != sizeof("content-length")-1 ||
-					     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
-					    (name_len != sizeof("content-type")-1 ||
-					     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-					    (name_len != sizeof("cookie")-1 ||
-					     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-					    (name_len != sizeof("authorization")-1 ||
-					     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-					    (name_len != sizeof("proxy-authorization")-1 ||
-					     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
-					    /* add header */
-						smart_str_appendl(&soap_headers, s, p-s);
-						smart_str_append_const(&soap_headers, "\r\n");
-					}
-				}
-				s = (*p) ? (p + 1) : p;
-			}
-		}
-
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
@@ -899,7 +843,6 @@ try_again:
 		efree(cookie);
 	}
 
-	/* See if the server requested a close */
 	if (http_1_1) {
 		http_close = FALSE;
 		if (use_proxy && !use_ssl) {
@@ -911,35 +854,8 @@ try_again:
 				efree(connection);
 			}
 		}
-		if (http_close == FALSE) {
-			connection = get_http_header_value(http_headers,"Connection: ");
-			if (connection) {
-				if (strncasecmp(connection, "close", sizeof("close")-1) == 0) {
-					http_close = TRUE;
-				}
-				efree(connection);
-			}
-		}
 	} else {
 		http_close = TRUE;
-		if (use_proxy && !use_ssl) {
-			connection = get_http_header_value(http_headers,"Proxy-Connection: ");
-			if (connection) {
-				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-					http_close = FALSE;
-				}
-				efree(connection);
-			}
-		}
-		if (http_close == TRUE) {
-			connection = get_http_header_value(http_headers,"Connection: ");
-			if (connection) {
-				if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
-					http_close = FALSE;
-				}
-				efree(connection);
-			}
-		}
 	}	
 
 	if (!get_http_body(stream, http_close, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
@@ -957,6 +873,31 @@ try_again:
 	}
 
 	if (request != buf) {efree(request);}
+
+	/* See if the server requested a close */
+	http_close = TRUE;
+	connection = get_http_header_value(http_headers,"Proxy-Connection: ");
+	if (connection) {
+		if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+			http_close = FALSE;
+		}
+		efree(connection);
+/*
+	} else if (http_1_1) {
+		http_close = FALSE;
+*/
+	}
+	connection = get_http_header_value(http_headers,"Connection: ");
+	if (connection) {
+		if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
+			http_close = FALSE;
+		}
+		efree(connection);
+/*
+	} else if (http_1_1) {
+		http_close = FALSE;
+*/
+	}
 
 	if (http_close) {
 		php_stream_close(stream);

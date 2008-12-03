@@ -48,49 +48,45 @@ Do not use abbreviations for alpha and beta.
 
 3. Commit those changes
 
-4. run the "scripts/dev/credits" script in php-src and commit the changes in the
-credits files in ext/standard.
-
-5. tag the repository with the version f.e. "``cvs tag php_4_4_1RC1``"
+4. tag the repository with the version f.e. "``cvs tag php_4_4_1RC1``"
 (of course, you need to change that to the version you're rolling an RC for).
 
-6. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
+5. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
 and possibly ``NEWS`` again, to the **next** version. F.e. if the release
 candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless
 if we get a new RC or not. This is to make sure ``version_compare()`` can
 correctly work.
 
-7. Commit those changes
+6. Commit those changes
 
-8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
+7. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
 branch if you're rolling 4.4.x releases).
 
-9. You do not have to update the tree, but of course you can with "``cvs up -dP``".
+8. You do not have to update the tree, but of course you can with "``cvs up -dP``".
 
-10. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
+9. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-11. Copy those two tarballs to www.php.net, in your homedir there should be a
+10. Copy those two tarballs to www.php.net, in your homedir their should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick.
 
-12. Now the RC can be found on http://downloads.php.net/yourname,
+11. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-13. Once the release has been tagged, contact the PHP Windows development team
+12. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
-Getting the non stable release (alpha/beta/RC) announced
---------------------------------------------------------
+Getting the non stable release announced
+----------------------------------------
 
 1. Send an email (see example here: http://news.php.net/php.internals/19486)
 **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` lists
 pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release".
 
-2. Only for an RC release also send an email
-(see example here http://news.php.net/php.qa/26069) **To**
+2. Send an email (see example here http://news.php.net/php.qa/26069) **To**
 ``php-qa@lists.php.net`` and **CC** ``primary-qa-tests@lists.php.net``.
 This email is to notify the selected projects about a new RC so that they can
 make sure their projects keep working. Make sure that you have been setup
@@ -101,7 +97,7 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-3. Update the MD5 sums in ``qaweb/include/rc-md5sums.txt`` (no empty lines).
+3. Update the MD5 sums in ``qaweb/include/rc-md5sums.txt``.
 
 4. Update in ``qaweb/include/release-qa.php`` constants with the new RC and
 commit this.
@@ -129,9 +125,6 @@ function to include the new RC and commit.
 
  a. ``cvs commit include/version.inc include/releases.inc``
 
-5. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the 
-INSTALL and win32/install.txt files which are generated from the PHP manual sources.
-
 Rolling a stable release
 ------------------------
 
@@ -143,37 +136,34 @@ Rolling a stable release
 
 4. Commit those changes
 
-5. run the "scripts/dev/credits" script in php-src and commit the changes in the
-credits files in ext/standard.
-
-6. tag the repository with the version f.e. "``cvs tag php_4_4_1``"
+5. tag the repository with the version f.e. "``cvs tag php_4_4_1``"
 (of course, you need to change that to the version you're rolling an RC for).
 When making 5.X release, you need to tag the Zend directory separately!!
 
-7. Bump up the version numbers in ``main/php_version.h``, ``configure.in`` and
+6. Bump up the version numbers in ``main/php_version.h``, ``configure.in`` and
 possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate
 was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
 
-8. Commit those changes
+7. Commit those changes
 
-9. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
+8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
 branch if you're rolling 4.4.x releases).
 
-10. You do not have to update the tree, but of course you can with "``cvs up -dP``".
+9. You do not have to update the tree, but of course you can with "``cvs up -dP``".
 
-11. run: ``./makedist php 4.4.1``, this will export the tree, create configure
+10. run: ``./makedist php 4.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-12. Commit those two tarballs to CVS (phpweb/distributions)
+11. Commit those two tarballs to CVS (phpweb/distributions)
 
-13. Once the release has been tagged, contact the PHP Windows development team
+12. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be committed to CVS too.
 
-14. Check if the pear files are updated (phar for 5.1+ or run pear/make-pear-bundle.php with 4.4)
+13. Check if the pear files are updated (phar for 5.1+ or run pear/make-pear-bundle.php with 4.4)
 
-15. When making a final release, also remind the PHP Windows development team
+14. When making a final release, also remind the PHP Windows development team
 (internals-win@lists.php.net) to prepare the installer packages for Win32.
 
 Getting the stable release announced

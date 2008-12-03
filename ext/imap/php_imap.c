@@ -40,7 +40,6 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_smart_str.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -73,11 +72,10 @@ MAILSTREAM DEFAULTPROTO;
 # define PHP_IMAP_EXPORT
 #endif
 
-
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
-static char* _php_imap_parse_address(ADDRESS *addresslist, zval *paddress TSRMLS_DC);
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC);
+static void _php_imap_parse_address(ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC);
+static int _php_imap_address_size(ADDRESS *addresslist);
 
 /* the gets we use */
 static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md);
@@ -99,6 +97,7 @@ ZEND_DECLARE_MODULE_GLOBALS(imap)
 static PHP_GINIT_FUNCTION(imap);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_INFO(0, mailbox)
 	ZEND_ARG_INFO(0, user)
@@ -107,6 +106,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_INFO(0, n_retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_reopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
@@ -114,6 +114,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_reopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, n_retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_append, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, folder)
@@ -121,35 +122,42 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_append, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_msg, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_ping, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_recent, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quota, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, qroot)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quotaroot, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mbox)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_set_quota, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, qroot)
 	ZEND_ARG_INFO(0, mailbox_size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setacl, 0, 0, 4)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
@@ -157,31 +165,37 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setacl, 0, 0, 4)
 	ZEND_ARG_INFO(0, rights)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getacl, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_expunge, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_body, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_copy, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msglist)
@@ -189,6 +203,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_copy, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_move, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, sequence)
@@ -196,34 +211,40 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_move, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_createmailbox, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_renamemailbox, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, old_name)
 	ZEND_ARG_INFO(0, new_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_deletemailbox, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_list, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, ref)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getmailboxes, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, ref)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_listscan, 0, 0, 4)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, ref)
@@ -231,22 +252,26 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_listscan, 0, 0, 4)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_check, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_delete, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_undelete, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headerinfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
@@ -255,39 +280,46 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headerinfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, default_host)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, headers)
 	ZEND_ARG_INFO(0, default_host)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_lsub, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, ref)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getsubscribed, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, ref)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_subscribe, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_unsubscribe, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchstructure, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchbody, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
@@ -295,6 +327,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchbody, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_savebody, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, file)
@@ -303,49 +336,60 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_savebody, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_base64, 0, 0, 1)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_qprint, 0, 0, 1)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_8bit, 0, 0, 1)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_binary, 0, 0, 1)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mailboxmsginfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_write_address, 0, 0, 3)
 	ZEND_ARG_INFO(0, mailbox)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, personal)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_adrlist, 0, 0, 2)
 	ZEND_ARG_INFO(0, address_string)
 	ZEND_ARG_INFO(0, default_host)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf8, 0, 0, 1)
 	ZEND_ARG_INFO(0, mime_encoded_text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, buf)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, buf)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setflag_full, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, sequence)
@@ -353,6 +397,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setflag_full, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_clearflag_full, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, sequence)
@@ -360,6 +405,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_clearflag_full, 0, 0, 3)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_sort, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, criteria)
@@ -369,45 +415,53 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_sort, 0, 0, 3)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchheader, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_uid, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_msgno, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, unique_msg_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_status, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, mailbox)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_bodystruct, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, msg_no)
 	ZEND_ARG_INFO(0, section)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetch_overview, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, sequence)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_compose, 0, 0, 2)
 	ZEND_ARG_INFO(0, envelope)
 	ZEND_ARG_INFO(0, body)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail, 0, 0, 3)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, subject)
@@ -418,6 +472,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail, 0, 0, 3)
 	ZEND_ARG_INFO(0, rpath)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_search, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, criteria)
@@ -425,24 +480,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_search, 0, 0, 2)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imap_alerts, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imap_errors, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imap_last_error, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mime_header_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_thread, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_timeout, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout_type)
 	ZEND_ARG_INFO(0, timeout)
@@ -2427,7 +2488,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	char *mailbox, *host, *personal;
 	int mailbox_len, host_len, personal_len;
 	ADDRESS *addr;
-	char *string;
+	char string[MAILTMPLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &mailbox, &mailbox_len, &host, &host_len, &personal, &personal_len) == FAILURE) {
 		return;
@@ -2451,12 +2512,13 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	addr->error=NIL;
 	addr->adl=NIL;
 
-	string = _php_rfc822_write_address(addr TSRMLS_CC);
-	if (string) {
-		RETVAL_STRING(string, 0);
-	} else {
+	if (_php_imap_address_size(addr) >= MAILTMPLEN) {
 		RETURN_FALSE;
 	}
+
+	string[0]='\0';
+	rfc822_write_address(string, addr);
+	RETVAL_STRING(string, 1);
 }
 /* }}} */
 
@@ -2691,7 +2753,7 @@ PHP_FUNCTION(imap_utf7_decode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%ld] != outlen [%d]", outp - out, outlen);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -2808,7 +2870,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%ld] != outlen [%d]", outp - out, outlen);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "outp - out [%d] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -3166,7 +3228,7 @@ PHP_FUNCTION(imap_fetch_overview)
  	int sequence_len;
 	pils *imap_le_struct;
 	zval *myoverview;
-	char *address;
+	char address[MAILTMPLEN];
 	long status, flags = 0L;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3174,16 +3236,11 @@ PHP_FUNCTION(imap_fetch_overview)
 		return;
 	}
 
-	if (flags && ((flags & ~FT_UID) !=0)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-		RETURN_FALSE;
-	}
-
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	array_init(return_value);
-
-	status = (flags & FT_UID)
+	
+	status = (flags & FT_UID) 
 		? mail_uid_sequence(imap_le_struct->imap_stream, sequence)
 		: mail_sequence(imap_le_struct->imap_stream, sequence);
 	
@@ -3200,19 +3257,17 @@ PHP_FUNCTION(imap_fetch_overview)
 				if (env->subject) {
 					add_property_string(myoverview, "subject", env->subject, 1);
 				}
-				if (env->from) {
+				if (env->from && _php_imap_address_size(env->from) < MAILTMPLEN) {
 					env->from->next=NULL;
-					address =_php_rfc822_write_address(env->from TSRMLS_CC);
-					if (address) {
-						add_property_string(myoverview, "from", address, 0);
-					}
+					address[0] = '\0';
+					rfc822_write_address(address, env->from);
+					add_property_string(myoverview, "from", address, 1);
 				}
-				if (env->to) {
+				if (env->to && _php_imap_address_size(env->to) < MAILTMPLEN) {
 					env->to->next = NULL;
-					address = _php_rfc822_write_address(env->to TSRMLS_CC);
-					if (address) {
-						add_property_string(myoverview, "to", address, 0);
-					}
+					address[0] = '\0';
+					rfc822_write_address(address, env->to);
+					add_property_string(myoverview, "to", address, 1);
 				}
 				if (env->date) {
 					add_property_string(myoverview, "date", env->date, 1);
@@ -4104,43 +4159,6 @@ static int _php_rfc822_len(char *str)
 /* }}} */
 
 /* Support Functions */
-
-#ifdef HAVE_RFC822_OUTPUT_ADDRESS_LIST
-/* {{{ _php_rfc822_soutr
- */
-static long _php_rfc822_soutr (void *stream, char *string)
-{
-	smart_str *ret = (smart_str*)stream;
-	int len = strlen(string);
-
-	smart_str_appendl(ret, string, len);	
-	return LONGT;
-}
-
-/* }}} */
-
-/* {{{ _php_rfc822_write_address
- */
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
-{
-	char address[MAILTMPLEN];
-	smart_str ret = {0};
-	RFC822BUFFER buf;
-
-	buf.beg = address;
-	buf.cur = buf.beg;
-	buf.end = buf.beg + sizeof(address) - 1;
-	buf.s = &ret;
-	buf.f = _php_rfc822_soutr;
-	rfc822_output_address_list(&buf, addresslist, 0, NULL);
-	rfc822_output_flush(&buf);
-	smart_str_0(&ret);
-	return ret.c;
-}
-/* }}} */
-
-#else
-
 /* {{{ _php_imap_get_address_size
  */
 static int _php_imap_address_size (ADDRESS *addresslist)
@@ -4170,33 +4188,26 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 
 /* }}} */
 
-/* {{{ _php_rfc822_write_address
- */
-static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
-{
-	char address[SENDBUFLEN];
 
-	if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Address buffer overflow");
-		return NULL;
-	}
-	address[0] = 0;
-	rfc822_write_address(address, addresslist);
-	return estrdup(address);
-}
-/* }}} */
-#endif
 /* {{{ _php_imap_parse_address
  */
-static char* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress TSRMLS_DC)
+static void _php_imap_parse_address (ADDRESS *addresslist, char **fulladdress, zval *paddress TSRMLS_DC)
 {
-	char *fulladdress;
 	ADDRESS *addresstmp;
 	zval *tmpvals;
+	char *tmpstr;
+	int len=0;
 		
 	addresstmp = addresslist;
 
-	fulladdress = _php_rfc822_write_address(addresstmp TSRMLS_CC);
+	if ((len = _php_imap_address_size(addresstmp))) {
+		tmpstr = (char *) pemalloc(len + 1, 1);
+		tmpstr[0] = '\0';
+		rfc822_write_address(tmpstr, addresstmp);
+		*fulladdress = tmpstr;
+	} else {
+		*fulladdress = NULL;
+	}
 	
 	addresstmp = addresslist;
 	do {
@@ -4208,7 +4219,6 @@ static char* _php_imap_parse_address (ADDRESS *addresslist, zval *paddress TSRML
 		if (addresstmp->host) add_property_string(tmpvals, "host", addresstmp->host, 1);
 		add_next_index_object(paddress, tmpvals TSRMLS_CC);
 	} while ((addresstmp = addresstmp->next));
-	return fulladdress;
 }
 /* }}} */
 
@@ -4235,9 +4245,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->to, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->to, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "toaddress", fulladdress, 0);
+			add_property_string(myzvalue, "toaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "to", paddress TSRMLS_CC);
 	}
@@ -4245,9 +4256,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->from) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->from, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->from, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "fromaddress", fulladdress, 0);
+			add_property_string(myzvalue, "fromaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "from", paddress TSRMLS_CC);
 	}
@@ -4255,9 +4267,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->cc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->cc, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->cc, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "ccaddress", fulladdress, 0);
+			add_property_string(myzvalue, "ccaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "cc", paddress TSRMLS_CC);
 	}
@@ -4265,9 +4278,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->bcc) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->bcc, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->bcc, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "bccaddress", fulladdress, 0);
+			add_property_string(myzvalue, "bccaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "bcc", paddress TSRMLS_CC);
 	}
@@ -4275,9 +4289,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->reply_to) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->reply_to, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->reply_to, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "reply_toaddress", fulladdress, 0);
+			add_property_string(myzvalue, "reply_toaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "reply_to", paddress TSRMLS_CC);
 	}
@@ -4285,9 +4300,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->sender) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->sender, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->sender, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "senderaddress", fulladdress, 0);
+			add_property_string(myzvalue, "senderaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "sender", paddress TSRMLS_CC);
 	}
@@ -4295,9 +4311,10 @@ static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC)
 	if (en->return_path) {
 		MAKE_STD_ZVAL(paddress);
 		array_init(paddress);
-		fulladdress = _php_imap_parse_address(en->return_path, paddress TSRMLS_CC);
+		_php_imap_parse_address(en->return_path, &fulladdress, paddress TSRMLS_CC);
 		if (fulladdress) {
-			add_property_string(myzvalue, "return_pathaddress", fulladdress, 0);
+			add_property_string(myzvalue, "return_pathaddress", fulladdress, 1);
+			free(fulladdress);
 		}
 		add_assoc_object(myzvalue, "return_path", paddress TSRMLS_CC);
 	}

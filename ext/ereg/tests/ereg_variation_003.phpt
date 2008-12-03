@@ -83,7 +83,6 @@ Error: 8 - Undefined variable: undefined_var, %s(61)
 Error: 8 - Undefined variable: unset_var, %s(64)
 
 Arg value 0 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -93,7 +92,6 @@ array(2) {
 }
 
 Arg value 1 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -103,7 +101,6 @@ array(2) {
 }
 
 Arg value 12345 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -113,7 +110,6 @@ array(2) {
 }
 
 Arg value -2345 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -123,7 +119,6 @@ array(2) {
 }
 
 Arg value 10.5 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -133,7 +128,6 @@ array(2) {
 }
 
 Arg value -10.5 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -143,7 +137,6 @@ array(2) {
 }
 
 Arg value 101234567000 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -153,7 +146,6 @@ array(2) {
 }
 
 Arg value 1.07654321E-9 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -163,7 +155,6 @@ array(2) {
 }
 
 Arg value 0.5 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -173,7 +164,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -183,7 +173,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -193,7 +182,6 @@ array(2) {
 }
 
 Arg value 1 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -203,7 +191,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -213,7 +200,6 @@ array(2) {
 }
 
 Arg value 1 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -223,7 +209,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -233,7 +218,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -243,7 +227,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -253,7 +236,6 @@ array(2) {
 }
 
 Arg value string 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -263,7 +245,6 @@ array(2) {
 }
 
 Arg value string 
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -274,7 +255,6 @@ array(2) {
 Error: 4096 - Object of class stdClass could not be converted to string, %s(70)
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -284,7 +264,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>
@@ -294,7 +273,6 @@ array(2) {
 }
 
 Arg value  
-Error: 8192 - Function ereg() is deprecated, %s(71)
 int(6)
 array(2) {
   [0]=>

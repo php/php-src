@@ -20,7 +20,7 @@ $supported_hash_al = array(
 "MHASH_GOST"      => "101b0a2552cebdf5137cadf15147f21e55b6432935bb9c2c03c7e28d188b2d9e",
 "MHASH_TIGER"     => "fdb9019a79c33a95677e2097abae91eb0de00b3054bb5c39",
 "MHASH_CRC32"     => "83041db8",
-"MHASH_CRC32B"    => "df5ab7a4"
+"MHASH_CRC32B"    => "a4b75adf"
 );
 
 $data = "This is the test of the mhash extension...";
@@ -33,7 +33,7 @@ foreach ($supported_hash_al as $hash=>$wanted) {
 		echo "$hash: ";
 		var_dump($wanted);
 		echo "$hash: ";
-		var_dump(bin2hex($result));
+		var_dump($result);
 	}
 	echo "\n";
 }

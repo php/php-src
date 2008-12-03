@@ -29,17 +29,21 @@
 #include "dom_ce.h"
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_split_text, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_is_whitespace_in_element_content, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_replace_whole_text, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
@@ -74,7 +78,6 @@ PHP_METHOD(domtext, __construct)
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s", &id, dom_text_class_entry, &value, &value_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
@@ -88,7 +91,7 @@ PHP_METHOD(domtext, __construct)
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
+		oldnode = (xmlNodePtr)intern->ptr;
 		if (oldnode != NULL) {
 			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 		}
@@ -168,19 +171,19 @@ PHP_FUNCTION(dom_text_split_text)
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
-	length = xmlUTF8Strlen(cur);
+	length = xmlStrlen(cur);
 
 	if (offset > length || offset < 0) {
 		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
-	first = xmlUTF8Strndup(cur, offset);
-	second = xmlUTF8Strsub(cur, offset, length - offset);
+	first = xmlStrndup(cur, offset);
+	second = xmlStrdup(cur + offset);
 	
 	xmlFree(cur);
 
-	xmlNodeSetContent(node, first);
+	xmlNodeSetContentLen(node, first, offset);
 	nnode = xmlNewDocText(node->doc, second);
 	
 	xmlFree(first);

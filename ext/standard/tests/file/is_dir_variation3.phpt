@@ -1,5 +1,5 @@
 --TEST--
-Test is_dir() function: usage variations - invalid arguments 
+Test is_dir() function: usage variations - invalid arguments
 --FILE--
 <?php
 /* Prototype: bool is_dir ( string $dirname );
@@ -18,10 +18,9 @@ $dirnames = array(
   TRUE,
   FALSE,
   NULL,
-  " ",
   $dir_handle,
 
-  /* scalars */
+  /* Non-existing dirnames */
   0,
   1234
 );
@@ -40,7 +39,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 
 Warning: is_dir() expects parameter 1 to be string, resource given in %s on line %d
 NULL
@@ -48,4 +46,3 @@ bool(false)
 bool(false)
 
 *** Done ***
-

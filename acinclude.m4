@@ -2416,7 +2416,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   $php_shtool mkdir -p ext/iconv
 
   echo > ext/iconv/php_have_bsd_iconv.h
-  echo > ext/iconv/php_have_ibm_iconv.h
   echo > ext/iconv/php_have_glibc_iconv.h
   echo > ext/iconv/php_have_libiconv.h
   echo > ext/iconv/php_have_iconv.h
@@ -2762,22 +2761,6 @@ AC_DEFUN([PHP_DETECT_ICC],
     AC_MSG_RESULT([no]),
     ICC="yes"
     GCC="no"
-    AC_MSG_RESULT([yes])
-  )
-])
-
-dnl PHP_DETECT_SUNCC
-dnl Detect if the systems default compiler is suncc.
-dnl We also set some usefull CFLAGS if the user didn't set any
-AC_DEFUN([PHP_DETECT_SUNCC],[
-  SUNCC="no"
-  AC_MSG_CHECKING([for suncc])
-  AC_EGREP_CPP([^__SUNPRO_C], [__SUNPRO_C],
-    SUNCC="no"
-    AC_MSG_RESULT([no]),
-    SUNCC="yes"
-    test -n "$auto_cflags" && CFLAGS="-fsimple=2 -xnorunpath -xO4 -xalias_level=basic -xipo=1 -xlibmopt -xprefetch_level=1 -xprefetch=auto -xstrconst -xtarget=native -zlazyload"
-    GCC=""
     AC_MSG_RESULT([yes])
   )
 ])

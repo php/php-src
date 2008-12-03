@@ -770,42 +770,51 @@ PHP_MINFO_FUNCTION(milter)
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_setflags, 0, 0, 1)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_settimeout, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_getsymval, 0, 0, 1)
 	ZEND_ARG_INFO(0, macro)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_setreply, 0, 0, 3)
 	ZEND_ARG_INFO(0, rcode)
 	ZEND_ARG_INFO(0, xcode)
 	ZEND_ARG_INFO(0, message)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_addheader, 0, 0, 2)
 	ZEND_ARG_INFO(0, headerf)
 	ZEND_ARG_INFO(0, headerv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_chgheader, 0, 0, 2)
 	ZEND_ARG_INFO(0, headerf)
 	ZEND_ARG_INFO(0, headerv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_addrcpt, 0, 0, 1)
 	ZEND_ARG_INFO(0, rcpt)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_delrcpt, 0, 0, 1)
 	ZEND_ARG_INFO(0, rcpt)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_smfi_replacebody, 0, 0, 1)
 	ZEND_ARG_INFO(0, body)
 ZEND_END_ARG_INFO()

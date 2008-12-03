@@ -528,10 +528,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
-				HashPosition pos;
-				for (zend_hash_internal_pointer_reset_ex(url_stream_wrappers_hash, &pos);
-						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-						zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
+				for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
+						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, (uint *)&stream_protocol_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+						zend_hash_move_forward(url_stream_wrappers_hash)) {
 					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
 					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len - 1);
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len - 1] = ',';
@@ -560,10 +559,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((stream_xport_hash = php_stream_xport_get_hash())) {
-				HashPosition pos;
-				for(zend_hash_internal_pointer_reset_ex(stream_xport_hash, &pos);
-					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-					zend_hash_move_forward_ex(stream_xport_hash, &pos)) {
+				for(zend_hash_internal_pointer_reset(stream_xport_hash);
+					zend_hash_get_current_key_ex(stream_xport_hash, &xport_name, (uint *)&xport_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+					zend_hash_move_forward(stream_xport_hash)) {
 					if (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
 						while (xport_buf_len + xport_name_len + 2 > xport_buf_size) {
 							xport_buf_size += 256;
@@ -602,10 +600,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			ulong num_key;
 
 			if ((stream_filter_hash = php_get_stream_filters_hash())) {
-				HashPosition pos;
-				for(zend_hash_internal_pointer_reset_ex(stream_filter_hash, &pos);
-					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-					zend_hash_move_forward_ex(stream_filter_hash, &pos)) {
+				for(zend_hash_internal_pointer_reset(stream_filter_hash);
+					zend_hash_get_current_key_ex(stream_filter_hash, &filter_name, (uint *)&filter_name_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING;
+					zend_hash_move_forward(stream_filter_hash)) {
 					if (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
 						while (filter_buf_len + filter_name_len + 2 > filter_buf_size) {
 							filter_buf_size += 256;
@@ -1001,10 +998,15 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
-	long flag = PHP_INFO_ALL;
+	int argc = ZEND_NUM_ARGS();
+	long flag;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;
+	}
+
+	if(!argc) {
+		flag = PHP_INFO_ALL;
 	}
 
 	/* Andale!  Andale!  Yee-Hah! */
@@ -1047,11 +1049,16 @@ PHP_FUNCTION(phpversion)
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
-	long flag = PHP_CREDITS_ALL;
+	int argc = ZEND_NUM_ARGS();
+	long flag;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;
 	}
+
+	if(!argc) {
+		flag = PHP_CREDITS_ALL;
+	} 
 
 	php_print_credits(flag TSRMLS_CC);
 	RETURN_TRUE;
@@ -1154,7 +1161,7 @@ PHP_FUNCTION(php_sapi_name)
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
-	int modelen = sizeof("a")-1;
+	int modelen;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
 		return;
 	}

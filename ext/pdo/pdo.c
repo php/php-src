@@ -102,10 +102,6 @@ PHP_FUNCTION(pdo_drivers)
 {
 	HashPosition pos;
 	pdo_driver_t **pdriver;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
 	
 	array_init(return_value);
 
@@ -118,6 +114,7 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
 ZEND_END_ARG_INFO()
 /* }}} */

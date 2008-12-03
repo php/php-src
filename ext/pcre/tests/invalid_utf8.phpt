@@ -2,8 +2,8 @@
 preg_replace() and invalid UTF8
 --SKIPIF--
 <?php
-if (@preg_match('/./u', '') === false) {
-	die('skip no utf8 support in PCRE library');
+if (@preg_match_all('/./u', "", $matches) === false) {
+	die("skip no utf8 support in PCRE library");
 }
 ?>
 --FILE--

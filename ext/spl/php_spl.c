@@ -32,6 +32,7 @@
 #include "spl_array.h"
 #include "spl_directory.h"
 #include "spl_iterators.h"
+#include "spl_sxe.h"
 #include "spl_exceptions.h"
 #include "spl_observer.h"
 #include "spl_dllist.h"
@@ -85,7 +86,7 @@ static zend_class_entry * spl_find_ce_by_name(char *name, int len, zend_bool aut
 	return *ce;
 }
 
-/* {{{ proto array class_parents(object instance [, boolean autoload = true])
+/* {{{ proto array class_parents(object instance)
  Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
@@ -190,6 +191,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RegexIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplDoublyLinkedList, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileInfo, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SplFileObject, z_list, sub, allow, ce_flags); \
@@ -424,7 +426,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_bool prepend  = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
-	zval *obj_ptr;
+	zval **obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
@@ -446,7 +448,7 @@ PHP_FUNCTION(spl_autoload_register)
 		if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_STRICT, &func_name, &func_name_len, &fcc, &error TSRMLS_CC)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
-			obj_ptr = fcc.object_ptr;
+			obj_ptr = fcc.object_pp;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
@@ -488,7 +490,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
-		obj_ptr = fcc.object_ptr;
+		obj_ptr = fcc.object_pp;
 		if (error) {
 			efree(error);
 		}
@@ -503,10 +505,10 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
+			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
 			lc_name[func_name_len] = '\0';
-			alfi.obj = obj_ptr;
+			alfi.obj = *obj_ptr;
 			Z_ADDREF_P(alfi.obj);
 		} else {
 			alfi.obj = NULL;
@@ -558,7 +560,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zval *zcallable;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
-	zval *obj_ptr;
+	zval **obj_ptr;
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcallable) == FAILURE) {
@@ -575,7 +577,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 		RETURN_FALSE;
 	}
-	obj_ptr = fcc.object_ptr;
+	obj_ptr = fcc.object_pp;
 	if (error) {
 		efree(error);
 	}
@@ -595,7 +597,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
 			if (success != SUCCESS && obj_ptr) {
 				func_name = erealloc(func_name, func_name_len + 1 + sizeof(zend_object_handle));
-				memcpy(func_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
+				memcpy(func_name + func_name_len, &Z_OBJ_HANDLE_PP(obj_ptr), sizeof(zend_object_handle));
 				func_name_len += sizeof(zend_object_handle);
 				func_name[func_name_len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
@@ -743,58 +745,70 @@ PHP_MINFO_FUNCTION(spl)
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_to_array, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, use_keys)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_iterator, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iterator_apply, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, function)
 	ZEND_ARG_ARRAY_INFO(0, args, 1)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_parents, 0, 0, 1)
 	ZEND_ARG_INFO(0, instance)
-	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_implements, 0, 0, 1)
 	ZEND_ARG_INFO(0, what)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_spl_classes, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_spl_autoload_functions, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 	ZEND_ARG_INFO(0, file_extensions)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_extensions, 0, 0, 0)
 	ZEND_ARG_INFO(0, file_extensions)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_call, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_register, 0, 0, 0)
 	ZEND_ARG_INFO(0, autoload_function)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_unregister, 0, 0, 1)
 	ZEND_ARG_INFO(0, autoload_function)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_object_hash, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
@@ -830,6 +844,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_dllist)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
@@ -862,10 +877,23 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+#ifdef HAVE_SIMPLEXML
+static const zend_module_dep spl_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("simplexml")
+	{NULL, NULL, NULL}
+};
+#endif
+
 /* {{{ spl_module_entry
  */
 zend_module_entry spl_module_entry = {
+#ifdef HAVE_SIMPLEXML
+	STANDARD_MODULE_HEADER_EX, NULL,
+	spl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"SPL",
 	spl_functions,
 	PHP_MINIT(spl),

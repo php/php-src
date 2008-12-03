@@ -189,82 +189,100 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 	}
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_version, 0, 0, 0)
 	ZEND_ARG_INFO(0, version)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_init, 0, 0, 0)
 	ZEND_ARG_INFO(0, url)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_copy_handle, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt, 0)
 	ZEND_ARG_INFO(0, ch)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt_array, 0)
 	ZEND_ARG_INFO(0, ch)
 	ZEND_ARG_INFO(0, options)/* ARRAY_INFO(0, options, 0) */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_exec, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_getinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, ch)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_error, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_errno, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_close, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_init, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_add_handle, 0)
 	ZEND_ARG_INFO(0, mh)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_remove_handle, 0)
 	ZEND_ARG_INFO(0, mh)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_select, 0, 0, 1)
 	ZEND_ARG_INFO(0, mh)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_exec, 0, 0, 1)
 	ZEND_ARG_INFO(0, mh)
 	ZEND_ARG_INFO(1, still_running)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_getcontent, 0)
 	ZEND_ARG_INFO(0, ch)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_info_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, mh)
 	ZEND_ARG_INFO(0, msgs_in_queue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
@@ -320,129 +338,9 @@ ZEND_GET_MODULE (curl)
  */
 PHP_MINFO_FUNCTION(curl)
 {
-	curl_version_info_data *d;
-	char **p;
-	char str[1024];
-	size_t n = 0;
-
-	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
 	php_info_print_table_row(2, "cURL support",    "enabled");
-	php_info_print_table_row(2, "cURL Information", d->version);
-	sprintf(str, "%d", d->age);
-	php_info_print_table_row(2, "Age", str);
-
-#ifdef CURL_VERSION_IPV6
-	if (d->features & CURL_VERSION_IPV6) {
-		n = sprintf(str, "%s", "IPv6-enabled, ");
-	}
-#endif
-
-#ifdef CURL_VERSION_KERBEROS4
-	if (d->features & CURL_VERSION_KERBEROS4) {
-			n += sprintf(str + n, "%s", "kerberos auth is supported, ");
-	}
-#endif
-
-#ifdef CURL_VERSION_SSL
-	if (d->features & CURL_VERSION_SSL) {
-			n += sprintf(str + n, "%s", "SSL options are present, ");
-	}
-#endif
-
-#ifdef CURL_VERSION_LIBZ
-	if (d->features & CURL_VERSION_LIBZ) {
-			n += sprintf(str + n, "%s", "libz features are present, ");
-	}
-#endif
-
-#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
-	if (d->features & CURL_VERSION_NTLM) {
-			n += sprintf(str + n, "%s", "NTLM auth is supported, ");
-	}
-	if (d->features & CURL_VERSION_GSSNEGOTIATE) {
-			n += sprintf(str + n, "%s", "Negotiate auth support, ");
-	}
-	if (d->features & CURL_VERSION_DEBUG) {
-			n += sprintf(str + n, "%s", "built with debug capabilities, ");
-	}
-#endif
-
-#if LIBCURL_VERSION_NUM > 0x070a06 /* 7.10.7 */
-	if (d->features & CURL_VERSION_ASYNCHDNS) {
-			n += sprintf(str + n, "%s", "asynchronous dns resolves, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070a07 /* 7.10.8 */
-	if (d->features & CURL_VERSION_SPNEGO) {
-			n += sprintf(str + n, "%s", "SPNEGO auth, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070a09 /* 7.10.1 */
-	if (d->features & CURL_VERSION_LARGEFILE) {
-			n += sprintf(str + n, "%s", "supports files bigger than 2GB, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070b02 /* 7.12.0 */
-	if (d->features & CURL_VERSION_IDN) {
-			n += sprintf(str + n, "%s", "International Domain Names support, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070d01 /* 7.13.2 */
-	if (d->features & CURL_VERSION_SSPI) {
-			n += sprintf(str + n, "%s", "SSPI is supported, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
-	if (d->features & CURL_VERSION_CONV) {                   
-			n += sprintf(str + n, "%s", "character conversions are supported, ");
-	}
-#endif
-
-	if (n > 3) {
-		str[n - 2] = '\0';
-	}
-	php_info_print_table_row(2, "Features", str);
-	n = 0;
-	p = (char **) d->protocols;
-	while (*p != NULL) {
-			n += sprintf(str + n, "%s%s", *p, *(p + 1) != NULL ? ", " : "");
-			p++;
-	}
-	php_info_print_table_row(2, "Protocols", str);
-
-	php_info_print_table_row(2, "Host", d->host);
-
-	if (d->ssl_version) {
-		php_info_print_table_row(2, "SSL Version", d->ssl_version);
-	}
-
-	if (d->libz_version) {
-		php_info_print_table_row(2, "ZLib Version", d->libz_version);
-	}
-
-#if defined(CURLVERSION_SECOND) && CURLVERSION_NOW >= CURLVERSION_SECOND
-	if (d->ares) {
-		php_info_print_table_row(2, "ZLib Version", d->ares);
-	}
-#endif
-
-#if defined(CURLVERSION_THIRD) && CURLVERSION_NOW >= CURLVERSION_THIRD
-	if (d->libidn) {
-		php_info_print_table_row(2, "libIDN Version", d->libidn);
-	}
-#endif
-
-#if defined(CURLVERSION_FOURTH) &&  CURLVERSION_NOW >= CURLVERSION_FOURTH
-
-	if (d->iconv_ver_num) {
-		php_info_print_table_row(2, "IconV Version", d->iconv_ver_num);
-	}
-
-	if (d->libssh_version) {
-		php_info_print_table_row(2, "libSSH Version", d->libssh_version);
-	}
-#endif
+	php_info_print_table_row(2, "cURL Information", curl_version());
 	php_info_print_table_end();
 }
 /* }}} */
@@ -850,7 +748,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
-			fci.object_ptr = NULL;
+			fci.object_pp = NULL;
 			fci.function_name = t->func_name;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 2;
@@ -923,7 +821,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
 			fci.function_name = t->func_name;
-			fci.object_ptr = NULL;
+			fci.object_pp = NULL;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 3;
 			fci.params = argv;
@@ -1000,7 +898,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.function_table = EG(function_table);
 			fci.function_name = t->func_name;
 			fci.symbol_table = NULL;
-			fci.object_ptr = NULL;
+			fci.object_pp = NULL;
 			fci.retval_ptr_ptr = &retval_ptr;
 			fci.param_count = 2;
 			fci.params = argv;
@@ -1192,7 +1090,7 @@ PHP_FUNCTION(curl_init)
 	php_curl    *ch;
 	CURL        *cp;
 	char	    *url = NULL;
-	int	     url_len = 0;
+	int	     url_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
 		return;
@@ -1582,37 +1480,17 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
 					if (*postval == '@') {
-						char *type;
 						++postval;
-
-						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + strlen(postval)))) {
-							*type = '\0';
-						}
 						/* safe_mode / open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
-							if (type) {
-								*type = ';';
-							}
 							RETVAL_FALSE;
 							return 1;
 						}
-						if (type) {
-							type++;
-							error = curl_formadd(&first, &last, 
+						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
 											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-											 CURLFORM_FILE, postval,
-											 CURLFORM_CONTENTTYPE, type,
+											 CURLFORM_FILE, postval, 
 											 CURLFORM_END);
-							*(type - 1) = ';';
-						} else {
-							error = curl_formadd(&first, &last, 
-											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-											 CURLFORM_FILE, postval,
-											 CURLFORM_END);
-
-						}
 					} else {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
@@ -1733,17 +1611,17 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
-	zval        *zid, **zvalue;
+	zval        *zid, *zvalue;
 	long        zoption;
 	php_curl    *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &zoption, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &zid, &zoption, &zvalue) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (!_php_curl_setopt(ch, zoption, zvalue, return_value TSRMLS_CC)) {
+	if (!_php_curl_setopt(ch, zoption, &zvalue, return_value TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1849,7 +1727,7 @@ PHP_FUNCTION(curl_getinfo)
 	zval        *zid;
 	php_curl    *ch;
 	int          argc = ZEND_NUM_ARGS();
-	long         option = 0;
+	long         option;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
 		return;

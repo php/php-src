@@ -35,7 +35,7 @@ static void php_save_umask(void);
 static void php_restore_umask(void);
 static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC);
 static char *sapi_apache_read_cookies(TSRMLS_D);
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC);
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
 static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC);
 static int send_php(request_rec *r, int display_source_mode, char *filename);
 static int send_parsed_php(request_rec * r);
@@ -163,54 +163,41 @@ static char *sapi_apache_read_cookies(TSRMLS_D)
 
 /* {{{ sapi_apache_header_handler
  */
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
 	if(!r) {
+		efree(sapi_header->header);
 		return 0;
 	}
 
-	switch(op) {
-		case SAPI_HEADER_DELETE_ALL:
-			clear_table(r->headers_out);
-			return 0;
+	header_name = sapi_header->header;
 
-		case SAPI_HEADER_DELETE:
-			table_unset(r->headers_out, sapi_header->header);
-			return 0;
-
-		case SAPI_HEADER_ADD:
-		case SAPI_HEADER_REPLACE:
-			header_name = sapi_header->header;
-
-			header_content = p = strchr(header_name, ':');
-			if (!p) {
-				return 0;
-			}
-
-			*p = 0;
-			do {
-				header_content++;
-			} while (*header_content==' ');
-
-			if (!strcasecmp(header_name, "Content-Type")) {
-				r->content_type = pstrdup(r->pool, header_content);
-			} else if (!strcasecmp(header_name, "Set-Cookie")) {
-				table_add(r->headers_out, header_name, header_content);
-			} else if (op == SAPI_HEADER_REPLACE) {
-				table_set(r->headers_out, header_name, header_content);
-			} else {
-				table_add(r->headers_out, header_name, header_content);
-			}
-
-			*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
-
-			return SAPI_HEADER_ADD;
-
-		default:
-			return 0;
+	header_content = p = strchr(header_name, ':');
+	if (!p) {
+		efree(sapi_header->header);
+		return 0;
 	}
+
+	*p = 0;
+	do {
+		header_content++;
+	} while (*header_content==' ');
+
+	if (!strcasecmp(header_name, "Content-Type")) {
+		r->content_type = pstrdup(r->pool, header_content);
+	} else if (!strcasecmp(header_name, "Set-Cookie")) {
+		table_add(r->headers_out, header_name, header_content);
+	} else if (sapi_header->replace) {
+		table_set(r->headers_out, header_name, header_content);
+	} else {
+		table_add(r->headers_out, header_name, header_content);
+	}
+
+	*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
+
+	return SAPI_HEADER_ADD;
 }
 /* }}} */
 
@@ -613,8 +600,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		return OK;
 	}
 
-	SG(server_context) = r;
-
 	zend_first_try {
 
 		/* Make sure file exists */
@@ -672,6 +657,8 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		/* Init timeout */
 		hard_timeout("send", r);
 
+		SG(server_context) = r;
+		
 		php_save_umask();
 		add_common_vars(r);
 		add_cgi_vars(r);
@@ -745,11 +732,11 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_di
 		return 1; /* does not exist in dest, copy from source */
 	}
 
-	if (orig_per_dir_entry->type==PHP_INI_SYSTEM
-		&& new_per_dir_entry->type!=PHP_INI_SYSTEM) {
-		return 0;
-	} else {
+	if (new_per_dir_entry->type==PHP_INI_SYSTEM
+		&& orig_per_dir_entry->type!=PHP_INI_SYSTEM) {
 		return 1;
+	} else {
+		return 0;
 	}
 }
 /* }}} */
@@ -786,9 +773,9 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 
 	/* need a copy of addv to merge */
 	new = php_create_dir(p, "php_merge_dir");
-	zend_hash_copy(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
+	zend_hash_copy(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, NULL, sizeof(php_per_dir_entry));
 
-	zend_hash_merge_ex(new, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	zend_hash_merge_ex(new, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
 	return new;
 }
 /* }}} */

@@ -25,7 +25,6 @@ var_dump($authstmt->fetch(PDO::FETCH_NUM));
 $info = $logstmt->errorInfo();
 unset($info[2]);
 var_dump($info);
-?>
 --EXPECT--
 array(2) {
   [0]=>
@@ -34,9 +33,7 @@ array(2) {
   string(7) "testing"
 }
 bool(true)
-array(2) {
+array(1) {
   [0]=>
   string(5) "00000"
-  [1]=>
-  NULL
 }

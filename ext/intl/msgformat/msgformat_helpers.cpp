@@ -20,7 +20,6 @@
 
 #include <math.h>
 #include <unicode/msgfmt.h>
-#include <unicode/chariter.h>
 
 extern "C" {
 #include "php_intl.h"

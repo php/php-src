@@ -508,9 +508,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	
 	/* 5 */
 	if (ret == SUCCESS) {
-		if (!value || (key->name && strlen(key->name))) {
-			ret = inifile_truncate(dba, append ? pos_grp_next : pos_grp_start TSRMLS_CC); /* writes error on fail */
-		}
+		ret = inifile_truncate(dba, append ? pos_grp_next : pos_grp_start TSRMLS_CC); /* writes error on fail */
 	}
 
 	if (ret == SUCCESS) {

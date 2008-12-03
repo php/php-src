@@ -42,10 +42,12 @@ static const char digits[] = "0123456789abcdef";
 #define PHP_JSON_HEX_QUOT	(1<<3)
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, json)
 	ZEND_ARG_INFO(0, assoc)
@@ -209,9 +211,6 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 					if (i == HASH_KEY_IS_STRING) {
 						if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
 							/* Skip protected and private members. */
-							if (tmp_ht) {
-								tmp_ht->nApplyCount--;
-							}
 							continue;
 						}
 

@@ -198,6 +198,8 @@ Warning: current() expects parameter 1 to be array, string given in %s on line %
 NULL
 
 -- Iteration 21 --
+
+Warning: current() expects parameter 1 to be array, object given in %s on line %d
 NULL
 
 -- Iteration 22 --

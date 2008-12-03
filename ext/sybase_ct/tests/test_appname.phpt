@@ -35,6 +35,7 @@ Sybase-CT application name
   );
   
   var_dump(
+    $r,
     compare_string($program_name, $r[0]['program_name']),
     compare_string($hostname, $r[0]['hostname'])
   );
@@ -51,5 +52,14 @@ Sybase-CT application name
     where
       program_name = "phpt_test"
 <<< Return: resource
+array(1) {
+  [0]=>
+  array(2) {
+    ["hostname"]=>
+    string(10) "php.net%s"
+    ["program_name"]=>
+    string(16) "phpt_test%s"
+  }
+}
 bool(true)
 bool(true)

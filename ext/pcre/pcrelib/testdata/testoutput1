@@ -6605,8 +6605,4 @@ No match
     p    
  0: p
 
-/.*[op][xyz]/
-    fooabcfoo
-No match
-
 / End of testinput1 /

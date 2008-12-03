@@ -38,16 +38,10 @@
 
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
-#if _MSC_VER <= 1300
-#include "win32/php_strtoi64.h"
-#endif
 #define strtoull _strtoui64
 #else
 #include <unistd.h>
 #endif
-
-
-
 
 #include <string.h>
 #include <assert.h>
@@ -109,6 +103,8 @@ private const char *getstr(struct magic_set *, const char *, char *, int,
     int *, int);
 private int parse(struct magic_set *, struct magic_entry **, uint32_t *,
     const char *, size_t, int);
+private int parse_mime(struct magic_set *, struct magic_entry **, uint32_t *,
+    const char *);
 private void eatsize(const char **);
 private int apprentice_1(struct magic_set *, const char *, int, struct mlist *);
 private size_t apprentice_magic_strength(const struct magic *);
@@ -128,25 +124,13 @@ private int apprentice_compile(struct magic_set *, struct magic **, uint32_t *,
 private int check_format_type(const char *, int);
 private int check_format(struct magic_set *, struct magic *);
 private int get_op(char);
-private int parse_mime(struct magic_set *, struct magic_entry *, const char *);
-private int parse_strength(struct magic_set *, struct magic_entry *,
-    const char *);
 
 private size_t maxmagic = 0;
 private size_t magicsize = sizeof(struct magic);
 
 private const char usg_hdr[] = "cont\toffset\ttype\topcode\tmask\tvalue\tdesc";
-private struct {
-	const char *name;
-	size_t len;
-	int (*fun)(struct magic_set *, struct magic_entry *, const char *);
-} bang[] = {
-#define	DECLARE_FIELD(name) { # name, sizeof(# name) - 1, parse_ ## name }
-	DECLARE_FIELD(mime),
-	DECLARE_FIELD(strength),
-#undef	DECLARE_FIELD
-	{ NULL, 0, NULL }
-};
+private const char mime_marker[] = "!:mime";
+private const size_t mime_marker_len = sizeof(mime_marker) - 1;
 
 #include "../data_file.c"
 
@@ -267,12 +251,9 @@ apprentice_1(struct magic_set *ms, const char *fn, int action,
 	}
 
 	if ((rv = apprentice_map(ms, &magic, &nmagic, fn)) == -1) {
-		if (fn) {
-			if (ms->flags & MAGIC_CHECK)
-				file_magwarn(ms, "using regular magic file `%s'", fn);
-			rv = apprentice_load(ms, &magic, &nmagic, fn, action);
-		}
-
+		if (ms->flags & MAGIC_CHECK)
+			file_magwarn(ms, "using regular magic file `%s'", fn);
+		rv = apprentice_load(ms, &magic, &nmagic, fn, action);
 		if (rv != 0)
 			return -1;
 	}
@@ -378,8 +359,6 @@ apprentice_magic_strength(const struct magic *m)
 
 	switch (m->type) {
 	case FILE_DEFAULT:	/* make sure this sorts last */
-		if (m->factor_op != FILE_FACTOR_OP_NONE)
-			abort();
 		return 0;
 
 	case FILE_BYTE:
@@ -477,32 +456,6 @@ apprentice_magic_strength(const struct magic *m)
 	if (val == 0)	/* ensure we only return 0 for FILE_DEFAULT */
 		val = 1;
 
-	switch (m->factor_op) {
-	case FILE_FACTOR_OP_NONE:
-		break;
-	case FILE_FACTOR_OP_PLUS:
-		val += m->factor;
-		break;
-	case FILE_FACTOR_OP_MINUS:
-		val -= m->factor;
-		break;
-	case FILE_FACTOR_OP_TIMES:
-		val *= m->factor;
-		break;
-	case FILE_FACTOR_OP_DIV:
-		val /= m->factor;
-		break;
-	default:
-		abort();
-	}
-
-
-	/*
-	 * Magic entries with no description get a bonus because they depend
-	 * on subsequent magic entries to print something.
-	 */
-	if (m->desc[0] == '\0')
-		val++;
 	return val;
 }
 
@@ -569,7 +522,7 @@ set_test_type(struct magic *mstart, struct magic *m)
 	case FILE_REGEX:
 	case FILE_SEARCH:
 		/* binary test if pattern is not text */
-		if (file_looks_utf8(m->value.us, m->vallen, NULL, NULL) <= 0)
+		if (file_looks_utf8(m->value.s, m->vallen, NULL, NULL) == 0)
 			mstart->flag |= BINTEST;
 		break;
 	case FILE_DEFAULT:
@@ -614,46 +567,24 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
 		/* read and parse this file */
 		for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &line_len)) != NULL; ms->line++) {
-			if (line_len == 0) /* null line, garbage, etc */
+			if (line_len == 0 ||		/* null line, garbage, etc */
+					line[0] == '\0' ||	/* empty*/
+					line[0] == '#' || 	/* comment */
+					line[0] == '\n' || line[0] == '\r') {	/* New Line */
 				continue;
+			}
 
 			if (line[line_len - 1] == '\n') {
 				lineno++;
 				line[line_len - 1] = '\0'; /* delete newline */
 			}
-			if (line[0] == '\0')	/* empty, do not parse */
-				continue;
-			if (line[0] == '#')	/* comment, do not parse */
-				continue;
 
-			if (line[0] == '!' && line[1] == ':') {
-				size_t i;
-
-				for (i = 0; bang[i].name != NULL; i++) {
-					if (line_len - 2 > bang[i].len &&
-					    memcmp(bang[i].name, line + 2,
-					    bang[i].len) == 0)
-						break;
-				}
-				if (bang[i].name == NULL) {
-					file_error(ms, 0,
-					    "Unknown !: entry `%s'", line);
+			if (line_len > mime_marker_len &&
+			    memcmp(line, mime_marker, mime_marker_len) == 0) {
+				/* MIME type */
+				if (parse_mime(ms, marray, marraycount,
+					       line + mime_marker_len) != 0)
 					(*errs)++;
-					continue;
-				}
-				if (*marraycount == 0) {
-					file_error(ms, 0,
-					    "No current entry for :!%s type",
-						bang[i].name);
-					(*errs)++;
-					continue;
-				}
-				if ((*bang[i].fun)(ms, 
-				    &(*marray)[*marraycount - 1],
-				    line + bang[i].len + 2) != 0) {
-					(*errs)++;
-					continue;
-				}
 				continue;
 			}
 			if (parse(ms, marray, marraycount, line, lineno, action) != 0)
@@ -694,11 +625,10 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		dir = opendir(fn);
 		if (dir) {
-			while ((d = readdir(dir)) != NULL) {
+			while ((d = readdir(dir))) {
 				snprintf(subfn, sizeof(subfn), "%s/%s",
 				    fn, d->d_name);
-				if (stat(subfn, &st) == 0 &&
-					S_ISREG(st.st_mode)) {
+				if (stat(subfn, &st) == 0 && S_ISREG(st.st_mode)) {
 					load_1(ms, action, subfn, &errs,
 					    &marray, &marraycount);
 				}
@@ -720,27 +650,26 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 
 		starttest = i;
 		do {
-			static const char text[] = "text";
-			static const char binary[] = "binary";
-			static const size_t len = sizeof(text);
 			set_test_type(marray[starttest].mp, marray[i].mp);
-			if ((ms->flags & MAGIC_DEBUG) == 0)
-				continue;
-			(void)fprintf(stderr, "%s%s%s: %s\n",
-			    marray[i].mp->mimetype,
-			    marray[i].mp->mimetype[0] == '\0' ? "" : "; ",
-			    marray[i].mp->desc[0] ? marray[i].mp->desc :
-			    "(no description)",
-			    marray[i].mp->flag & BINTEST ? binary : text);
-			if (marray[i].mp->flag & BINTEST) {
-				char *p = strstr(marray[i].mp->desc, text);
-				if (p && (p == marray[i].mp->desc ||
-				    isspace((unsigned char)p[-1])) &&
-				    (p + len - marray[i].mp->desc == 
-				    MAXstring || (p[len] == '\0' ||
-				    isspace((unsigned char)p[len]))))
-					(void)fprintf(stderr, "*** Possible "
-					    "binary test for text type\n");
+			if (ms->flags & MAGIC_DEBUG) {
+				(void)fprintf(stderr, "%s%s%s: %s\n",
+					marray[i].mp->mimetype,
+					marray[i].mp->mimetype[0] == '\0' ? "" : "; ",
+					marray[i].mp->desc[0] ? marray[i].mp->desc : "(no description)",
+					marray[i].mp->flag & BINTEST ? "binary" : "text");
+				if (marray[i].mp->flag & BINTEST) {
+#define SYMBOL "text"
+#define SYMLEN sizeof(SYMBOL)
+					char *p = strstr(marray[i].mp->desc, "text");
+					if (p && (p == marray[i].mp->desc || isspace(p[-1])) &&
+					    (p + SYMLEN - marray[i].mp->desc == MAXstring ||
+					     (p[SYMLEN] == '\0' || isspace(p[SYMLEN])))) {
+						(void)fprintf(stderr,
+							      "*** Possible binary test for text type\n");
+					}
+#undef SYMBOL
+#undef SYMLEN
+				}
 			}
 		} while (++i < marraycount && marray[i].mp->cont_level != 0);
 	}
@@ -1077,7 +1006,6 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 		} else
 			m = me->mp;
 		(void)memset(m, 0, sizeof(*m));
-		m->factor_op = FILE_FACTOR_OP_NONE;
 		m->cont_level = 0;
 		me->cont_count = 1;
 	}
@@ -1300,17 +1228,6 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 	switch (*l) {
 	case '>':
 	case '<':
-  		m->reln = *l;
-  		++l;
-		if (*l == '=') {
-			if (ms->flags & MAGIC_CHECK) {
-				file_magwarn(ms, "%c= not supported",
-				    m->reln);
-				return -1;
-			}
-		   ++l;
-		}
-		break;
 	/* Old-style anding: "0 byte &0x80 dynamically linked" */
 	case '&':
 	case '^':
@@ -1375,6 +1292,9 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 		if (check_format(ms, m) == -1)
 			return -1;
 	}
+	if (action == FILE_CHECK) {
+		file_mdump(m);
+	}
 	m->mimetype[0] = '\0';		/* initialise MIME type to none */
 	if (m->cont_level == 0)
 		++(*nmentryp);		/* make room for next */
@@ -1382,73 +1302,29 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 }
 
 /*
- * parse a STRENGTH annotation line from magic file, put into magic[index - 1]
- * if valid
- */
-private int
-parse_strength(struct magic_set *ms, struct magic_entry *me, const char *line)
-{
-	const char *l = line;
-	char *el;
-	unsigned long factor;
-	struct magic *m = &me->mp[0];
-
-	if (m->factor_op != FILE_FACTOR_OP_NONE) {
-		file_magwarn(ms,
-		    "Current entry already has a strength type: %c %d",
-		    m->factor_op, m->factor);
-		return -1;
-	}
-	EATAB;
-	switch (*l) {
-	case FILE_FACTOR_OP_NONE:
-	case FILE_FACTOR_OP_PLUS:
-	case FILE_FACTOR_OP_MINUS:
-	case FILE_FACTOR_OP_TIMES:
-	case FILE_FACTOR_OP_DIV:
-		m->factor_op = *l++;
-		break;
-	default:
-		file_magwarn(ms, "Unknown factor op `%c'", *l);
-		return -1;
-	}
-	EATAB;
-	factor = strtoul(l, &el, 0);
-	if (factor > 255) {
-		file_magwarn(ms, "Too large factor `%lu'", factor);
-		goto out;
-	}
-	if (*el && !isspace((unsigned char)*el)) {
-		file_magwarn(ms, "Bad factor `%s'", l);
-		goto out;
-	}
-	m->factor = (uint8_t)factor;
-	if (m->factor == 0 && m->factor_op == FILE_FACTOR_OP_DIV) {
-		file_magwarn(ms, "Cannot have factor op `%c' and factor %u",
-		    m->factor_op, m->factor);
-		goto out;
-	}
-	return 0;
-out:
-	m->factor_op = FILE_FACTOR_OP_NONE;
-	m->factor = 0;
-	return -1;
-}
-
-/*
  * parse a MIME annotation line from magic file, put into magic[index - 1]
  * if valid
  */
 private int
-parse_mime(struct magic_set *ms, struct magic_entry *me, const char *line)
+parse_mime(struct magic_set *ms, struct magic_entry **mentryp,
+    uint32_t *nmentryp, const char *line)
 {
 	size_t i;
 	const char *l = line;
-	struct magic *m = &me->mp[me->cont_count == 0 ? 0 : me->cont_count - 1];
+	struct magic *m;
+	struct magic_entry *me;
+
+	if (*nmentryp == 0) {
+		file_error(ms, 0, "No current entry for MIME type");
+		return -1;
+	}
+
+	me = &(*mentryp)[*nmentryp - 1];
+	m = &me->mp[me->cont_count == 0 ? 0 : me->cont_count - 1];
 
 	if (m->mimetype[0] != '\0') {
-		file_magwarn(ms, "Current entry already has a MIME type `%s',"
-		    " new type `%s'", m->mimetype, l);
+		file_error(ms, 0, "Current entry already has a MIME type: %s\n"
+		    "Description: %s\nNew type: %s", m->mimetype, m->desc, l);
 		return -1;
 	}	
 
@@ -1633,9 +1509,8 @@ check_format(struct magic_set *ms, struct magic *m)
 		 * string is not one character long
 		 */
 		file_magwarn(ms, "Printf format `%c' is not valid for type "
-		    "`%s' in description `%s'",
-            ptr && *ptr ? *ptr : '?',
-            file_names[m->type], m->desc);
+		    "`%s' in description `%s'", *ptr,
+		    file_names[m->type], m->desc);
 		return -1;
 	}
 	
@@ -1964,9 +1839,6 @@ eatsize(const char **p)
 
 /*
  * handle a compiled file.
- * return -1 = error
- * return 1  = memory structure you can free
- * return 3  = bundled library from PHP
  */
 private int
 apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
@@ -1978,7 +1850,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	char *dbname = NULL;
 	void *mm = NULL;
 	int   ret = 0;
-	php_stream *stream = NULL;
+	php_stream *stream;
 	php_stream_statbuf st;
 
 
@@ -2022,41 +1894,27 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	ret = 1;
 
 	php_stream_close(stream);
-	stream = NULL;
 
 internal_loaded:
 	*magicp = mm;
 	ptr = (uint32_t *)(void *)*magicp;
 	if (*ptr != MAGICNO) {
 		if (swap4(*ptr) != MAGICNO) {
-			file_error(ms, 0, "bad magic in `%s'", dbname);
+			file_error(ms, 0, "bad magic in `%s'");
 			goto error1;
 		}
 		needsbyteswap = 1;
-	} else {
+	} else
 		needsbyteswap = 0;
-	}
-
 	if (needsbyteswap)
 		version = swap4(ptr[1]);
 	else
 		version = ptr[1];
-
 	if (version != VERSIONNO) {
 		file_error(ms, 0, "File %d.%d supports only %d version magic "
 		    "files. `%s' is version %d", FILE_VERSION_MAJOR, patchlevel,
 		    VERSIONNO, dbname, version);
 		goto error1;
-	}
-
-	/* php_magic_database is a const, performing writes will segfault. This is for big-endian
-	machines only, PPC and Sparc specifically. Consider static variable or MINIT in
-	future. */
-	if (needsbyteswap && fn == NULL) {
-		mm = emalloc(sizeof(php_magic_database));
-		mm = memcpy(mm, php_magic_database, sizeof(php_magic_database));
-		*magicp = mm;
-		ret = 1;
 	}
 
 	if (fn == NULL) {
@@ -2081,17 +1939,14 @@ error1:
 	if (stream) {
 		php_stream_close(stream);
 	}
-
-	if (mm && ret == 1) {
+	if (mm) {
 		efree(mm);
 	} else {
 		*magicp = NULL;
 		*nmagicp = 0;
 	}
 error2:
-	if (dbname) {
-		efree(dbname);
-	}
+	efree(dbname);
 	return -1;
 }
 
@@ -2159,17 +2014,14 @@ private const char ext[] = ".mgc";
 private void
 mkdbname(const char *fn, char **buf, int strip)
 {
-	const char *p;
 	if (strip) {
+		const char *p;
 		if ((p = strrchr(fn, '/')) != NULL)
 			fn = ++p;
 	}
-	if ((p = strstr(fn, ext)) != NULL && p[sizeof(ext) - 1] == '\0')
-		*buf = strdup(fn);
-	else
-		(void)spprintf(buf, 0, "%s%s", fn, ext);
 
-	if (buf && *buf && strlen(*buf) > MAXPATHLEN) {
+	(void)spprintf(buf, 0, "%s%s", fn, ext);
+	if (*buf && strlen(*buf) > MAXPATHLEN) {
 		efree(*buf);
 		*buf = NULL;
 	}
@@ -2222,7 +2074,7 @@ swap4(uint32_t sv)
 private uint64_t
 swap8(uint64_t sv)
 {
-	uint64_t rv;
+	uint32_t rv;
 	uint8_t *s = (uint8_t *)(void *)&sv; 
 	uint8_t *d = (uint8_t *)(void *)&rv; 
 #if 0

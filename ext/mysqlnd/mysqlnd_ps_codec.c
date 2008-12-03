@@ -28,6 +28,17 @@
 #define MYSQLND_SILENT
 
 
+
+typedef int8  my_int8;
+typedef uint8  my_uint8;
+
+typedef int16 my_int16;
+typedef uint16 my_uint16;
+
+typedef int32   my_int32;
+typedef uint32 my_uint32;
+
+
 enum mysqlnd_timestamp_type
 {
   MYSQLND_TIMESTAMP_NONE= -2,
@@ -47,6 +58,7 @@ struct st_mysqlnd_time
 };
 
 
+
 struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
 #define MYSQLND_PS_SKIP_RESULT_W_LEN	-1
@@ -54,7 +66,7 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
 /* {{{ ps_fetch_from_1_to_8_bytes */
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
-								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
+								uint pack_len, zend_uchar **row, zend_bool as_unicode,
 								unsigned int byte_count TSRMLS_DC)
 {
 	char tmp[22];
@@ -63,17 +75,17 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 	DBG_ENTER("ps_fetch_from_1_to_8_bytes");
 	DBG_INF_FMT("zv=%p byte_count=%d", zv, byte_count);
 	if (field->flags & UNSIGNED_FLAG) {
-		uint64_t uval = 0;
+		uint64 uval = 0;
 
 		switch (byte_count) {
-			case 8:uval = is_bit? (uint64_t) bit_uint8korr(*row):(uint64_t) uint8korr(*row);break;
+			case 8:uval = is_bit? (uint64) bit_uint8korr(*row):(uint64) uint8korr(*row);break;
 			case 7:uval = bit_uint7korr(*row);break;
 			case 6:uval = bit_uint6korr(*row);break;
 			case 5:uval = bit_uint5korr(*row);break;
-			case 4:uval = is_bit? (uint64_t) bit_uint4korr(*row):(uint64_t) uint4korr(*row);break;
-			case 3:uval = is_bit? (uint64_t) bit_uint3korr(*row):(uint64_t) uint3korr(*row);break;
-			case 2:uval = is_bit? (uint64_t) bit_uint2korr(*row):(uint64_t) uint2korr(*row);break;
-			case 1:uval = (uint64_t) uint1korr(*row);break;
+			case 4:uval = is_bit? (uint64) bit_uint4korr(*row):(uint64) uint4korr(*row);break;
+			case 3:uval = is_bit? (uint64) bit_uint3korr(*row):(uint64) uint3korr(*row);break;
+			case 2:uval = is_bit? (uint64) bit_uint2korr(*row):(uint64) uint2korr(*row);break;
+			case 1:uval = (uint64) uint1korr(*row);break;
 		}
 
 #if SIZEOF_LONG==4
@@ -92,21 +104,21 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 		}
 	} else {
 		/* SIGNED */
-		int64_t lval = 0;
+		int64 lval = 0;
 		switch (byte_count) {
-			case 8:lval = (int64_t) sint8korr(*row);break;
+			case 8:lval = (int64) sint8korr(*row);break;
 			/*
 			  7, 6 and 5 are not possible.
 			  BIT is only unsigned, thus only uint5|6|7 macroses exist
 			*/
-			case 4:lval = (int64_t) sint4korr(*row);break;
-			case 3:lval = (int64_t) sint3korr(*row);break;
-			case 2:lval = (int64_t) sint2korr(*row);break;
-			case 1:lval = (int64_t) *(int8_t*)*row;break;
+			case 4:lval = (int64) sint4korr(*row);break;
+			case 3:lval = (int64) sint3korr(*row);break;
+			case 2:lval = (int64) sint2korr(*row);break;
+			case 1:lval = (int64) *(my_int8*)*row;break;
 		}
 
 #if SIZEOF_LONG==4
-	    if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
+	    if ((L64(2147483647) < (int64) lval) || (L64(-2147483648) > (int64) lval)) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
 		} else 
@@ -137,7 +149,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_null */
 static
 void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
+				   uint pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	ZVAL_NULL(zv);
@@ -148,7 +160,7 @@ void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int8 */
 static
 void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
+				   uint pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1 TSRMLS_CC);
@@ -159,7 +171,7 @@ void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int16 */
 static
 void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
+					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2 TSRMLS_CC);
@@ -170,7 +182,7 @@ void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int32 */
 static
 void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
+					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4 TSRMLS_CC);
@@ -181,7 +193,7 @@ void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_int64 */
 static
 void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
+					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
@@ -192,7 +204,7 @@ void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_float */
 static
 void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
+					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	float value;
@@ -209,7 +221,7 @@ void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_double */
 static
 void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
+					uint pack_len, zend_uchar **row,
 					zend_bool as_unicode TSRMLS_DC)
 {
 	double value;
@@ -226,7 +238,7 @@ void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_time */
 static
 void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
+				   uint pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
@@ -284,7 +296,7 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_date */
 static
 void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
+				   uint pack_len, zend_uchar **row,
 				   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t = {0};
@@ -335,7 +347,7 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_datetime */
 static
 void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
-					   unsigned int pack_len, zend_uchar **row,
+					   uint pack_len, zend_uchar **row,
 					   zend_bool as_unicode TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
@@ -394,7 +406,7 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_string */
 static
 void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
-					 unsigned int pack_len, zend_uchar **row,
+					 uint pack_len, zend_uchar **row,
 					 zend_bool as_unicode TSRMLS_DC)
 {
 	/*
@@ -424,7 +436,7 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 /* {{{ ps_fetch_bit */
 static
 void ps_fetch_bit(zval *zv, const MYSQLND_FIELD * const field,
-				  unsigned int pack_len, zend_uchar **row,
+				  uint pack_len, zend_uchar **row,
 				  zend_bool as_unicode TSRMLS_DC)
 {
 	unsigned long length= php_mysqlnd_net_field_length(row);
@@ -578,7 +590,7 @@ void _mysqlnd_init_ps_subsystem()
 
 /* {{{ mysqlnd_stmt_copy_it */
 static void
-mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current)
+mysqlnd_stmt_copy_it(zval *** copies, zval *original, uint param_count, uint current)
 {
 	if (!*copies) {
 		*copies = ecalloc(param_count, sizeof(zval *));					
@@ -597,8 +609,8 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
 {
 	unsigned int i = 0;
-	size_t left = (*buf_len - (*p - *buf));
-	size_t data_size = 0;
+	unsigned left = (*buf_len - (*p - *buf));
+	unsigned int data_size = 0;
 	zval **copies = NULL;/* if there are different types */
 
 /* 1. Store type information */

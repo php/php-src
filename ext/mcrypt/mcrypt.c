@@ -50,6 +50,7 @@ typedef struct _php_mcrypt {
 } php_mcrypt;
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, cipher_directory)
@@ -57,132 +58,161 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, mode_directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_init, 0, 0, 3)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic, 0, 0, 2)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mdecrypt_generic, 0, 0, 2)
 	ZEND_ARG_INFO(0, td)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_supported_key_sizes, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_self_test, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_generic_deinit, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_algorithm, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_is_block_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_block_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_key_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_iv_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_algorithms_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_enc_get_modes_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, td)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_self_test, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_algorithm, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_is_block_mode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_block_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_algo_key_size, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_get_supported_key_sizes, 0, 0, 1)
 	ZEND_ARG_INFO(0, algorithm)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_algorithms, 0, 0, 0)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_list_modes, 0, 0, 0)
 	ZEND_ARG_INFO(0, lib_dir)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_key_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_block_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_iv_size, 0, 0, 2)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_get_cipher_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, cipher)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_encrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -191,6 +221,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_encrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -199,6 +230,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_decrypt, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -207,6 +239,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ecb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -215,6 +248,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cbc, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -223,6 +257,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_cfb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, cipher)
 	ZEND_ARG_INFO(0, key)
@@ -231,6 +266,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 2)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, source)
@@ -1160,7 +1196,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	int block_size, max_key_length, use_key_length, i, count, iv_size;
+	int block_size, max_key_length, use_key_length, i, count, iv_size, req_iv;
 	unsigned long int data_size;
 	int *key_length_sizes;
 	char *key_s = NULL, *iv_s;
@@ -1208,17 +1244,16 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 	/* Check IV */
 	iv_s = NULL;
 	iv_size = mcrypt_enc_get_iv_size (td);
-	
-	/* IV is required */
-	if (mcrypt_enc_mode_has_iv(td) == 1) {
-		if (argc == 5) {
-			if (iv_size != iv_len) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
-			} else {
-				iv_s = emalloc(iv_size + 1);
-				memcpy(iv_s, iv, iv_size);
-			}
-		} else if (argc == 4) {
+	req_iv = mcrypt_enc_mode_has_iv(td);
+	if (argc == 5) {
+		if (iv_size != iv_len) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
+		} else {
+			iv_s = emalloc(iv_size + 1);
+			memcpy(iv_s, iv, iv_size);
+		}
+	} else if (argc == 4) {
+		if (req_iv == 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommend");
 			iv_s = emalloc(iv_size + 1);
 			memset(iv_s, 0, iv_size + 1);

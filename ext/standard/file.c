@@ -193,10 +193,10 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LOCK_SH", PHP_LOCK_SH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LOCK_EX", PHP_LOCK_EX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LOCK_UN", PHP_LOCK_UN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LOCK_NB", PHP_LOCK_NB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_SH", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_EX", 2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_UN", 3, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_NB", 4, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_CONNECT", 		PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_REQUIRED",	PHP_STREAM_NOTIFY_AUTH_REQUIRED,	CONST_CS | CONST_PERSISTENT);
@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
-	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
+	act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && arg3 && PZVAL_IS_REF(arg3)) {
 			Z_LVAL_P(arg3) = 1;
@@ -1223,7 +1223,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	int arg2len;
 	int ret;
 	int num_bytes;
-	long arg3 = 0;
+	long arg3;
 	char *buffer = NULL;
 	php_stream *stream;
 
@@ -1441,7 +1441,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	long arg1 = 0;
+	long arg1;
 	int oldumask;
 	int arg_count = ZEND_NUM_ARGS();
 
@@ -1866,7 +1866,7 @@ quit_loop:
 }
 /* }}} */
 
-#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL(field), c, Z_STRLEN(field))
+#define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL_PP(field), c, Z_STRLEN_PP(field))
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
    Format line as CSV and write to file pointer */
@@ -1877,9 +1877,9 @@ PHP_FUNCTION(fputcsv)
 	const char escape_char = '\\';
 	php_stream *stream;
 	int ret;
-	zval *fp = NULL, *fields = NULL, **field_tmp = NULL, field;
+	zval *fp = NULL, *fields = NULL, **field = NULL;
 	char *delimiter_str = NULL, *enclosure_str = NULL;
-	int delimiter_str_len = 0, enclosure_str_len = 0;
+	int delimiter_str_len, enclosure_str_len;
 	HashPosition pos;
 	int count, i = 0;
 	smart_str csvline = {0};
@@ -1918,14 +1918,11 @@ PHP_FUNCTION(fputcsv)
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field_tmp, &pos) == SUCCESS) {
-		field = **field_tmp;
-
-		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
-			zval_copy_ctor(&field);
-			convert_to_string(&field);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field, &pos) == SUCCESS) {
+		if (Z_TYPE_PP(field) != IS_STRING) {
+			SEPARATE_ZVAL(field);
+			convert_to_string(*field);
 		}
-
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
 			FPUTCSV_FLD_CHK(enclosure) ||
@@ -1935,8 +1932,8 @@ PHP_FUNCTION(fputcsv)
 			FPUTCSV_FLD_CHK('\t') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
-			char *ch = Z_STRVAL(field);
-			char *end = ch + Z_STRLEN(field);
+			char *ch = Z_STRVAL_PP(field);
+			char *end = ch + Z_STRLEN_PP(field);
 			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
@@ -1953,17 +1950,13 @@ PHP_FUNCTION(fputcsv)
 			}
 			smart_str_appendc(&csvline, enclosure);
 		} else {
-			smart_str_appendl(&csvline, Z_STRVAL(field), Z_STRLEN(field));
+			smart_str_appendl(&csvline, Z_STRVAL_PP(field), Z_STRLEN_PP(field));
 		}
 
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
-		
-		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
-			zval_dtor(&field);
-		}
 	}
 
 	smart_str_appendc(&csvline, '\n');
@@ -2180,9 +2173,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								memcpy(tptr, line_end, line_end_len);
 								tptr += line_end_len;
 
-								if (stream == NULL) {
-									goto quit_loop_2;
-								} else if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+								if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
 									/* we've got an unterminated enclosure,
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
@@ -2343,9 +2334,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 out:
 	efree(temp);
-	if (stream) {
-		efree(buf);
-	}
+	efree(buf);
 }
 /* }}} */
 

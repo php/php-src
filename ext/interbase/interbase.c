@@ -43,18 +43,19 @@
 #define COMMIT			1
 #define RETAIN			2
 
-#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
-
 ZEND_DECLARE_MODULE_GLOBALS(ibase)
 static PHP_GINIT_FUNCTION(ibase);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ibase_errmsg, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ibase_errcode, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
@@ -65,6 +66,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, role)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 1)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
@@ -75,14 +77,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 1)
 	ZEND_ARG_INFO(0, role)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_close, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_drop_db, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_trans, 0, 0, 0)
 	ZEND_ARG_INFO(0, trans_args)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -90,70 +95,85 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_trans, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_commit, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_rollback, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_commit_ret, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_rollback_ret, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_gen_id, 0, 0, 1)
 	ZEND_ARG_INFO(0, generator)
 	ZEND_ARG_INFO(0, increment)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_open, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, blob_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, blob_handle)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_get, 0, 0, 2)
 	ZEND_ARG_INFO(0, blob_handle)
 	ZEND_ARG_INFO(0, len)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, blob_handle)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_cancel, 0, 0, 1)
 	ZEND_ARG_INFO(0, blob_handle)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, blob_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_echo, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, blob_id)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_blob_import, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_query, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -162,73 +182,88 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_query, 0, 0, 0)
 	ZEND_ARG_INFO(0, bind_arg)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_affected_rows, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 
 #if abies_0
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, result_identifier)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_fetch_row, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, fetch_flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_fetch_assoc, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, fetch_flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_fetch_object, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, fetch_flags)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_name_result, 0, 0, 2)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_free_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_prepare, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_execute, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, bind_arg)
 	ZEND_ARG_INFO(0, bind_arg)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_free_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_num_fields, 0, 0, 1)
 	ZEND_ARG_INFO(0, query_result)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_field_info, 0, 0, 2)
 	ZEND_ARG_INFO(0, query_result)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_num_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_param_info, 0, 0, 2)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_INFO(0, field_number)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_add_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, user_name)
@@ -238,6 +273,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_add_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, last_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_modify_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, user_name)
@@ -247,6 +283,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_modify_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, last_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_delete_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, user_name)
@@ -256,16 +293,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_delete_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, last_name)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_service_attach, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, dba_username)
 	ZEND_ARG_INFO(0, dba_password)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_service_detach, 0, 0, 1)
 	ZEND_ARG_INFO(0, service_handle)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_backup, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, source_db)
@@ -274,6 +314,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_backup, 0, 0, 3)
 	ZEND_ARG_INFO(0, verbose)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_restore, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, source_file)
@@ -282,6 +323,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_restore, 0, 0, 3)
 	ZEND_ARG_INFO(0, verbose)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_maintain_db, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, db)
@@ -289,6 +331,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_maintain_db, 0, 0, 3)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_db_info, 0, 0, 3)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, db)
@@ -296,17 +339,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_db_info, 0, 0, 3)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_server_info, 0, 0, 2)
 	ZEND_ARG_INFO(0, service_handle)
 	ZEND_ARG_INFO(0, action)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_wait_event, 0, 0, 1)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, event)
 	ZEND_ARG_INFO(0, event2)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_set_event_handler, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, handler)
@@ -314,6 +360,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_set_event_handler, 0, 0, 2)
 	ZEND_ARG_INFO(0, event2)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_free_event_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, event)
 ZEND_END_ARG_INFO()
@@ -1051,25 +1098,30 @@ PHP_FUNCTION(ibase_pconnect)
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	zval *link_arg = NULL;
+	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
 	int link_id;
 
 	RESET_ERRMSG;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
-		return;
-	}
-	
-	if (ZEND_NUM_ARGS() == 0) {
-		link_id = IBG(default_link);
-		CHECK_LINK(link_id);
-		IBG(default_link) = -1;
-	} else {
-		link_id = Z_RESVAL_P(link_arg);
+	switch (ZEND_NUM_ARGS()) {
+		case 0:
+			link_id = IBG(default_link);
+			IBG(default_link) = -1;
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &link_arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(link_arg);
+			link_id = Z_LVAL_PP(link_arg);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &link_arg, link_id, LE_LINK, le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
 	zend_list_delete(link_id);
 	RETURN_TRUE;
 }
@@ -1079,26 +1131,31 @@ PHP_FUNCTION(ibase_close)
    Drop an InterBase database */
 PHP_FUNCTION(ibase_drop_db)
 {
-	zval *link_arg = NULL;
+	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
 	ibase_tr_list *l;
 	int link_id;
 
 	RESET_ERRMSG;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
-		return;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 0:
+			link_id = IBG(default_link);
+			IBG(default_link) = -1;
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &link_arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(link_arg);
+			link_id = Z_LVAL_PP(link_arg);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	
-	if (ZEND_NUM_ARGS() == 0) {
-		link_id = IBG(default_link);
-		CHECK_LINK(link_id);
-		IBG(default_link) = -1;
-	} else {
-		link_id = Z_RESVAL_P(link_arg);
-	}
-	
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &link_arg, link_id, LE_LINK, le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
 
 	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
 		_php_ibase_error(TSRMLS_C);
@@ -1140,9 +1197,9 @@ PHP_FUNCTION(ibase_trans)
 		long trans_argl = 0;
 		char *tpb;
 		ISC_TEB *teb;
-		zval ***args = NULL;
+		zval ***args = (zval ***) safe_emalloc(sizeof(zval **),argn,0);
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argn) == FAILURE) {
+		if (zend_get_parameters_array_ex(argn, args) == FAILURE) {
 			efree(args);
 			efree(ib_link);
 			RETURN_FALSE;
@@ -1157,13 +1214,8 @@ PHP_FUNCTION(ibase_trans)
 			
 			if (Z_TYPE_PP(args[i]) == IS_RESOURCE) {
 				
-				if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link[link_cnt], ibase_db_link *, args[i], -1, LE_LINK, le_link, le_plink)) {
-					efree(teb);
-					efree(tpb);
-					efree(ib_link);
-					efree(args);
-					RETURN_FALSE;
-				}
+				ZEND_FETCH_RESOURCE2(ib_link[link_cnt], ibase_db_link *, args[i], -1, 
+					LE_LINK, le_link, le_plink);
 	
 				/* copy the most recent modifier string into tbp[] */
 				memcpy(&tpb[TPB_MAX_SIZE * link_cnt], last_tpb, TPB_MAX_SIZE);
@@ -1227,10 +1279,8 @@ PHP_FUNCTION(ibase_trans)
 
 	if (link_cnt == 0) {
 		link_cnt = 1;
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link[0], ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink)) {
-			efree(ib_link);
-			RETURN_FALSE;
-		}
+		ZEND_FETCH_RESOURCE2(ib_link[0], ibase_db_link *, NULL, IBG(default_link), LE_LINK, 
+			le_link, le_plink);
 		result = isc_start_transaction(IB_STATUS, &tr_handle, 1, &ib_link[0]->handle, tpb_len, last_tpb);
 	}
 	
@@ -1310,42 +1360,55 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	ibase_trans *trans = NULL;
 	int res_id = 0;
 	ISC_STATUS result;
-	ibase_db_link *ib_link;
-	zval *arg = NULL;
-	int type;
 
 	RESET_ERRMSG;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
-		return;
-	}
 
-	if (ZEND_NUM_ARGS() == 0) {
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
-		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
-			/* this link doesn't have a default transaction */
-			_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
-			RETURN_FALSE;
-		}
-		trans = ib_link->tr_list->trans;
-	} else {
-		/* one id was passed, could be db or trans id */
-		if (zend_list_find(Z_RESVAL_P(arg), &type) && type == le_trans) {
-			ZEND_FETCH_RESOURCE(trans, ibase_trans *, &arg, -1, LE_TRANS, le_trans);
-			res_id = Z_RESVAL_P(arg);
-		} else {
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &arg, -1, LE_LINK, le_link, le_plink);
+	switch (ZEND_NUM_ARGS()) {
 
+		ibase_db_link *ib_link;
+		zval **arg;
+		int type;
+
+		case 0:
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, 
+				le_link, le_plink);
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
-				_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
+				_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
 				RETURN_FALSE;
 			}
 			trans = ib_link->tr_list->trans;
-		}
+			break;
+
+		case 1: 
+			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			/* one id was passed, could be db or trans id */
+			if (zend_list_find(Z_LVAL_PP(arg), &type) && type == le_trans) {			
+				ZEND_FETCH_RESOURCE(trans, ibase_trans *, arg, -1, LE_TRANS, le_trans);
+
+				convert_to_long_ex(arg);
+				res_id = Z_LVAL_PP(arg);
+			} else {
+				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, arg, -1, LE_LINK, le_link, le_plink);
+
+				if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
+					/* this link doesn't have a default transaction */
+					_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
+					RETURN_FALSE;
+				}
+				trans = ib_link->tr_list->trans;
+			}
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 
 	switch (commit) {
+		
 		default: /* == case ROLLBACK: */
 			result = isc_rollback_transaction(IB_STATUS, &trans->handle);
 			break;
@@ -1366,7 +1429,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	}
 
 	/* Don't try to destroy implicitly opened transaction from list... */
-	if ((commit & RETAIN) == 0 && res_id != 0) {
+	if ( (commit & RETAIN) == 0 && res_id != 0) {
 		zend_list_delete(res_id);
 	}
 	RETURN_TRUE;

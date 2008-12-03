@@ -206,7 +206,9 @@ Warning: array_key_exists() expects parameter 2 to be array, string given in %s 
 NULL
 
 -- Iteration 22 --
-bool(false)
+
+Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 

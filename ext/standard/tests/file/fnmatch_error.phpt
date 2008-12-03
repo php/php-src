@@ -2,11 +2,8 @@
 Test fnmatch() function: Error conditions
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN')
-    die("skip do not run on Windows");
-
-if (!function_exists('fnmatch'))
-    die("skip fnmatch() function is not available");
+if( (stristr(PHP_OS, "Mac")) || (stristr(PHP_OS, "Win")) )
+  die("skip do not run on MacOS/Windows");
 ?>
 --FILE--
 <?php

@@ -1,7 +1,5 @@
 --TEST--
 Test fopen, fclose() & feof() functions: error conditions
---CREDITS--
-Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /*
@@ -46,6 +44,7 @@ var_dump( feof($fp, "handle"));
 fclose($fp);
 
 /* test invalid arguments : non-resources */
+chdir(dirname(__FILE__));
 echo "-- Testing fopen(), fclose() & feof() with invalid arguments --\n";
 $invalid_args = array (
   "string",
@@ -79,7 +78,7 @@ bool(false)
 Warning: fclose(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: fclose() expects parameter 1 to be resource, string given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, string given %s on line %d
 bool(false)
 
 Warning: fclose() expects exactly 1 parameter, 0 given in %s on line %d
@@ -88,7 +87,7 @@ bool(false)
 Warning: feof(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
-Warning: feof() expects parameter 1 to be resource, string given in %s on line %d
+Warning: feof() expects parameter 1 to be resource, string given %s on line %d
 bool(false)
 
 Warning: feof() expects exactly 1 parameter, 0 given in %s on line %d
@@ -179,4 +178,3 @@ bool(false)
 
 Warning: feof() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
-

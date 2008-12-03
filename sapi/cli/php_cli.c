@@ -260,10 +260,11 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 	{
 		ret = sapi_cli_single_write(ptr, remaining);
 		if (!ret) {
-#ifndef PHP_CLI_WIN32_NO_CONSOLE
+#ifdef PHP_CLI_WIN32_NO_CONSOLE
+			break;
+#else
 			php_handle_aborted_connection();
 #endif
-			break;
 		}
 		ptr += ret;
 		remaining -= ret;
@@ -346,8 +347,11 @@ static char* sapi_cli_read_cookies(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static int sapi_cli_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
+static int sapi_cli_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
 {
+	/* free allocated header line */
+	efree(h->header);
+	/* avoid pushing headers into SAPI headers list */
 	return 0;
 }
 /* }}} */

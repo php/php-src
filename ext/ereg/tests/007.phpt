@@ -6,6 +6,5 @@ Test empty result buffer in reg_replace
 	$b=ereg_replace("abcd","",$a);
 	echo "strlen(\$b)=".strlen($b);
 ?>
---EXPECTF--
-Deprecated: Function ereg_replace() is deprecated in %s on line %d
+--EXPECT--
 strlen($b)=0

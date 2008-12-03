@@ -112,9 +112,9 @@ array(2) {
     ["test_tinyint"]=>
     int(123)
     ["test_real"]=>
-    string(18) "123456789.12345679"
+    string(16) "123456789.123457"
     ["test_double"]=>
-    string(18) "123456789.12345679"
+    string(16) "123456789.123457"
   }
   [1]=>
   array(10) {
@@ -135,9 +135,9 @@ array(2) {
     ["test_tinyint"]=>
     int(255)
     ["test_real"]=>
-    string(19) "-123456789.12345679"
+    string(17) "-123456789.123457"
     ["test_double"]=>
-    string(19) "-123456789.12345679"
+    string(17) "-123456789.123457"
   }
 }
 bool(true)

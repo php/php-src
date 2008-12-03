@@ -113,6 +113,7 @@ static PHP_GINIT_FUNCTION(snmp);
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -121,6 +122,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpgetnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -129,6 +131,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpgetnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -137,6 +140,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmprealwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -145,24 +149,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmprealwalk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get_quick_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, d)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_quick_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, quick_print)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_NET_SNMP
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_enum_print, 0, 0, 1)
 	ZEND_ARG_INFO(0, enum_print)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, oid_format)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -173,6 +182,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -181,6 +191,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_getnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -189,6 +200,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_getnext, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -197,6 +209,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_real_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -205,6 +218,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_real_walk, 0, 0, 3)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_set, 0, 0, 5)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, community)
@@ -215,11 +229,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_set, 0, 0, 5)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_php_snmpv3, 0, 0, 2)
 	ZEND_ARG_INFO(0, s)
 	ZEND_ARG_INFO(0, st)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -233,6 +249,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_getnext, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -246,6 +263,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_getnext, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -259,6 +277,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_real_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -272,6 +291,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_real_walk, 0, 0, 8)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, sec_name)
@@ -287,13 +307,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
 	ZEND_ARG_INFO(0, retries)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_valueretrieval, 0, 0, 1)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_snmp_get_valueretrieval, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_read_mib, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -604,13 +627,13 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	while (keepwalking) {
 		keepwalking = 0;
 		if ((st == SNMP_CMD_GET) || (st == SNMP_CMD_GETNEXT)) {
+			pdu = snmp_pdu_create((st == SNMP_CMD_GET) ? SNMP_MSG_GET : SNMP_MSG_GETNEXT);
 			name_length = MAX_OID_LEN;
 			if (!snmp_parse_oid(objid, name, &name_length)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid);
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
-			pdu = snmp_pdu_create((st == SNMP_CMD_GET) ? SNMP_MSG_GET : SNMP_MSG_GETNEXT);
 			snmp_add_null_var(pdu, name, name_length);
 		} else if (st == SNMP_CMD_SET) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
@@ -621,7 +644,6 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				sprint_objid(buf, name, name_length);
 #endif
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s %c %s", buf, type, value);
-				snmp_free_pdu(pdu);
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
@@ -655,13 +677,11 @@ retry:
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
 						zval_ptr_dtor(&snmpval);
-						snmp_free_pdu(pdu);
 						snmp_close(ss);
 						return;
 					} else if (st == SNMP_CMD_GETNEXT) {
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
-						snmp_free_pdu(pdu);
 						snmp_close(ss);
 						return;
 					} else if (st == SNMP_CMD_WALK) {
@@ -700,28 +720,23 @@ retry:
 					}
 					if (st == SNMP_CMD_GET) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
-							snmp_free_pdu(pdu);
 							goto retry;
 						}
 					} else if (st == SNMP_CMD_SET) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
-							snmp_free_pdu(pdu);
 							goto retry;
 						}
 					} else if (st == SNMP_CMD_GETNEXT) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
-							snmp_free_pdu(pdu);
 							goto retry;
 						}
 					} else if (st >= SNMP_CMD_WALK) { /* Here we do walks. */
 						if ((pdu = snmp_fix_pdu(response, ((session->version == SNMP_VERSION_1)
 										? SNMP_MSG_GETNEXT
 										: SNMP_MSG_GETBULK))) != NULL) {
-							snmp_free_pdu(pdu);
 							goto retry;
 						}
 					}
-					snmp_free_pdu(pdu);
 					snmp_close(ss);
 					if (st == SNMP_CMD_WALK || st == SNMP_CMD_REALWALK) {
 						zval_dtor(return_value);

@@ -607,27 +607,6 @@ static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 
 #ifdef PHP_MHASH_BC
 
-PHP_MINFO_FUNCTION(mhash)
-{
-	php_info_print_table_start();
-	php_info_print_table_row(2, "MHASH support", "Enabled");
-	php_info_print_table_row(2, "MHASH API Version", "Emulated Support");
-	php_info_print_table_end();
-}
-
-zend_module_entry mhash_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"mhash",
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	PHP_MINFO(mhash),
-	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES,
-};
-
 static void mhash_init(INIT_FUNC_ARGS)
 {
 	char buf[128];
@@ -643,28 +622,24 @@ static void mhash_init(INIT_FUNC_ARGS)
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
 		zend_register_long_constant(buf, len + 1, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC);
 	}
-	
-	zend_register_module_ex(&mhash_module_entry TSRMLS_CC);
 }
 
 PHP_FUNCTION(mhash)
 {
-	zval **z_algorithm;
-	long algorithm;
+	zval *z_algorithm;
+	int algorithm;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "Z", &z_algorithm) == FAILURE) {
+	if (zend_parse_parameters(1 TSRMLS_CC, "z", &z_algorithm) == FAILURE) {
 		return;
 	}
 
-	SEPARATE_ZVAL(z_algorithm);
-	convert_to_long_ex(z_algorithm);
-	algorithm = Z_LVAL_PP(z_algorithm);
+	algorithm = Z_LVAL_P(z_algorithm);
 
 	/* need to conver the first parameter from int to string */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
-			ZVAL_STRING(*z_algorithm, algorithm_lookup.hash_name, 1);
+			ZVAL_STRING(z_algorithm, algorithm_lookup.hash_name, 1);
 		}
 	}
 
@@ -890,11 +865,13 @@ PHP_MINFO_FUNCTION(hash)
 
 /* {{{ arginfo */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
@@ -902,29 +879,34 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, data)
@@ -932,6 +914,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, filename)
@@ -939,51 +922,61 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_update, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_stream, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_copy, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
 ZEND_END_ARG_INFO()
 
 /* BC Land */
 #ifdef PHP_MHASH_BC
+static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
 	ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_hash_name, 0)
 	ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
 	ZEND_ARG_INFO(0, hash)
 	ZEND_ARG_INFO(0, input_password)
@@ -991,9 +984,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
 	ZEND_ARG_INFO(0, bytes)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_count, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mhash, 0, 0, 2)
 	ZEND_ARG_INFO(0, hash)
 	ZEND_ARG_INFO(0, data)

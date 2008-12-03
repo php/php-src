@@ -1576,6 +1576,10 @@ SOURCE=..\win32\wfile.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\snmp\winsnmp.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\winutil.c
 # End Source File
 # Begin Source File

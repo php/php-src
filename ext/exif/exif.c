@@ -102,10 +102,12 @@ typedef unsigned char uchar;
 #define MAX_IFD_NESTING_LEVEL 100
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_exif_tagname, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_read_data, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, sections_needed)
@@ -113,6 +115,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_read_data, 0, 0, 1)
 	ZEND_ARG_INFO(0, read_thumbnail)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_thumbnail, 0, 0, 1)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(1, width)
@@ -120,6 +123,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_thumbnail, 0, 0, 1)
 	ZEND_ARG_INFO(1, imagetype)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_exif_imagetype, 0)
 	ZEND_ARG_INFO(0, imagefile)
 ZEND_END_ARG_INFO()
@@ -3904,8 +3908,8 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
    Reads header data from the JPEG/TIFF image filename and optionally reads the internal thumbnails */
 PHP_FUNCTION(exif_read_data)
 {
-	char *p_name, *p_sections_needed = NULL;
-	int p_name_len, p_sections_needed_len = 0;
+	char *p_name, *p_sections_needed;
+	int p_name_len, p_sections_needed_len;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
 	int i, ac = ZEND_NUM_ARGS(), ret, sections_needed=0;

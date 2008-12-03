@@ -39,8 +39,7 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 enum_func_status mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 										const char * const arg, size_t arg_len,
 										enum php_mysql_packet_type ok_packet,
-										zend_bool silent, zend_bool ignore_upsert_status
-										TSRMLS_DC);
+										zend_bool silent TSRMLS_DC);
 
 /* Exported by mysqlnd_ps_codec.c */
 zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
@@ -58,7 +57,7 @@ enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param,
 											   zend_bool *fetched_anything TSRMLS_DC);
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
-static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
+static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC);
 
 static void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const stmt TSRMLS_DC);
 static enum_func_status mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const stmt TSRMLS_DC);
@@ -421,7 +420,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * co
 	}
 
 	if (FAIL == mysqlnd_simple_command(stmt_to_prepare->conn, COM_STMT_PREPARE, query,
-									   query_len, PROT_LAST, FALSE, TRUE TSRMLS_CC) ||
+									   query_len, PROT_LAST, FALSE TSRMLS_CC) ||
 		FAIL == mysqlnd_stmt_read_prepare_response(stmt_to_prepare TSRMLS_CC)) {
 		goto fail;
 	}
@@ -653,7 +652,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	}
 
 	if (stmt->param_count) {
-		unsigned int i, not_bound = 0;
+		uint i, not_bound = 0;
 		if (!stmt->param_bind) {
 			SET_STMT_ERROR(stmt, CR_PARAMS_NOT_BOUND, UNKNOWN_SQLSTATE,
 							 "No data supplied for parameters in prepared statement");
@@ -683,7 +682,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 	ret = mysqlnd_simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
 								 PROT_LAST /* we will handle the response packet*/,
-								 FALSE, FALSE TSRMLS_CC);
+								 FALSE TSRMLS_CC);
 
 	if (free_request) {
 		mnd_efree(request);
@@ -708,7 +707,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 {
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
-	unsigned int field_count = result->meta->field_count;
+	uint field_count = result->meta->field_count;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_buffered");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -724,7 +723,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 			zval **current_row = set->data_cursor;
 
 			if (NULL == current_row[0]) {
-				uint64_t row_num = (set->data_cursor - set->data) / field_count;
+				uint64 row_num = (set->data_cursor - set->data) / field_count;
 				set->initialized_rows++;
 				result->m.row_decoder(set->row_buffers[row_num],
 									  current_row,
@@ -866,7 +865,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)
-							 && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data)))
+							 && (result->meta->fields[i].max_length < Z_STRLEN_P(data)))
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
@@ -967,13 +966,12 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 	php_mysql_packet_row *row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
+	DBG_INF_FMT("stmt=%lu flags=%u", stmt->stmt_id, flags);
 
 	if (!stmt) {
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
-
-	DBG_INF_FMT("stmt=%lu flags=%u", stmt->stmt_id, flags);
 
 	if (stmt->state < MYSQLND_STMT_USER_FETCHING) {
 		/* Only initted - error */
@@ -991,7 +989,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	if (FAIL == mysqlnd_simple_command(stmt->conn, COM_STMT_FETCH, (char *)buf, sizeof(buf),
 									   PROT_LAST /* we will handle the response packet*/,
-									   FALSE, TRUE TSRMLS_CC)) {
+									   FALSE TSRMLS_CC)) {
 		stmt->error_info = stmt->conn->error_info;
 		DBG_RETURN(FAIL);
 	}
@@ -1034,7 +1032,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 							|| Z_TYPE_P(data) == IS_UNICODE
 #endif
 							)
-							 && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data)))
+							 && (result->meta->fields[i].max_length < Z_STRLEN_P(data)))
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
@@ -1183,7 +1181,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const stmt TSRMLS_DC)
 		if (CONN_GET_STATE(conn) == CONN_READY &&
 			FAIL == (ret = mysqlnd_simple_command(conn, COM_STMT_RESET, (char *)cmd_buf,
 												  sizeof(cmd_buf), PROT_OK_PACKET,
-												  FALSE, TRUE TSRMLS_CC))) {
+												  FALSE TSRMLS_CC))) {
 			stmt->error_info = conn->error_info;
 		}
 		stmt->upsert_status = conn->upsert_status;
@@ -1255,7 +1253,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 
 		/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
 		ret = mysqlnd_simple_command(conn, cmd, (char *)cmd_buf, packet_len,
-									 PROT_LAST , FALSE, TRUE TSRMLS_CC);
+									 PROT_LAST , FALSE TSRMLS_CC);
 		mnd_efree(cmd_buf);
 		if (FAIL == ret) {
 			stmt->error_info = conn->error_info;
@@ -1284,7 +1282,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
-							 "smaller chunks of data. Answer was "MYSQLND_SZ_T_SPEC" bytes long.", packet_len);
+							 "smaller chunks of data. Answer was %u bytes long.", packet_len);
 			SET_STMT_ERROR(stmt, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE,
 							"Server responded to COM_STMT_SEND_LONG_DATA.");
 			ret = FAIL;
@@ -1477,7 +1475,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 	SET_EMPTY_ERROR(stmt->conn->error_info);
 
 	if (stmt->field_count) {
-		unsigned int i = 0;
+		uint i = 0;
 
 		if (!result_bind) {
 			DBG_ERR("no result bind passed");
@@ -1508,7 +1506,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 
 /* {{{ mysqlnd_stmt::bind_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt::bind_result");
 	DBG_INF_FMT("stmt=%lu field_count=%u", stmt->stmt_id, stmt->field_count);
@@ -1564,7 +1562,7 @@ MYSQLND_METHOD(mysqlnd_stmt, set_result_bind_dtor)(MYSQLND_STMT * const stmt,
 
 
 /* {{{ mysqlnd_stmt::insert_id */
-static uint64_t
+static uint64
 MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->upsert_status.last_insert_id;
@@ -1573,7 +1571,7 @@ MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
 
 
 /* {{{ mysqlnd_stmt::affected_rows */
-static uint64_t
+static uint64
 MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->upsert_status.affected_rows;
@@ -1582,7 +1580,7 @@ MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
 
 
 /* {{{ mysqlnd_stmt::num_rows */
-static uint64_t
+static uint64
 MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const stmt)
 {
 	return stmt->result? mysqlnd_num_rows(stmt->result):0;
@@ -1646,7 +1644,7 @@ MYSQLND_METHOD(mysqlnd_stmt, sqlstate)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::data_seek */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const stmt, uint64_t row TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const stmt, uint64 row TSRMLS_DC)
 {
 	return stmt->result? stmt->result->m.seek_data(stmt->result, row TSRMLS_CC) : FAIL;
 }
@@ -1887,7 +1885,7 @@ void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 
 /* {{{ mysqlnd_stmt_separate_one_result_bind */
-void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC)
+void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, uint param_no TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
 	DBG_INF_FMT("stmt=%lu result_bind=%p field_count=%u param_no=%d",
@@ -2011,7 +2009,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 			DBG_INF("skipping result");
 			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
 		}
-	} while (mysqlnd_stmt_more_results(stmt) && mysqlnd_stmt_next_result(stmt) == PASS);
+	} while (mysqlnd_stmt_more_results(stmt) && mysqlnd_stmt_next_result(stmt));
 	/*
 	  After this point we are allowed to free the result set,
 	  as we have cleaned the line
@@ -2024,7 +2022,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 		if (CONN_GET_STATE(conn) == CONN_READY &&
 			FAIL == mysqlnd_simple_command(conn, COM_STMT_CLOSE, (char *)cmd_buf, sizeof(cmd_buf),
 										   PROT_LAST /* COM_STMT_CLOSE doesn't send an OK packet*/,
-										   FALSE, TRUE TSRMLS_CC)) {
+										   FALSE TSRMLS_CC)) {
 			stmt->error_info = conn->error_info;
 			DBG_RETURN(FAIL);
 		}

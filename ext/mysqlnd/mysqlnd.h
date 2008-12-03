@@ -23,14 +23,14 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.5-dev - 081106 - $Revision$"
-#define MYSQLND_VERSION_ID 50005
+#define MYSQLND_VERSION "mysqlnd 5.0.4-dev - 080501 - $Revision$"
+#define MYSQLND_VERSION_ID 50004
 
 /* This forces inlining of some accessor functions */
-#define MYSQLND_USE_OPTIMISATIONS 1
+#define MYSQLND_USE_OPTIMISATIONS 0
 
 
-#define MYSQLND_STRING_TO_INT_CONVERSION
+/* #define MYSQLND_STRING_TO_INT_CONVERSION */
 /*
   This force mysqlnd to do a single (or more depending on ammount of data)
   non-blocking read() calls before sending a command to the server. Useful
@@ -74,7 +74,7 @@ PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC);
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 #define mysqlnd_thread_safe()	TRUE
 
-PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetno);
+PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(uint charsetno);
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const charsetname);
 
 
@@ -106,12 +106,8 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced) TSRMLS_CC)
 #define mysqlnd_query(conn, query_str, query_len)		(conn)->m->query((conn), (query_str), (query_len) TSRMLS_CC)
-#define mysqlnd_async_query(conn, query_str, query_len)	(conn)->m->send_query((conn), (query_str), (query_len) TSRMLS_CC)
-#define mysqlnd_poll(r, err, d_pull,sec,usec,desc_num)	_mysqlnd_poll((r), (err), (d_pull), (sec), (usec), (desc_num) TSRMLS_CC)
-#define mysqlnd_reap_async_query(conn)					(conn)->m->reap_query((conn) TSRMLS_CC)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result) TSRMLS_CC)
 
-PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC);
 
 #define mysqlnd_use_result(conn)		(conn)->m->use_result((conn) TSRMLS_CC)
 #define mysqlnd_store_result(conn)		(conn)->m->store_result((conn) TSRMLS_CC)

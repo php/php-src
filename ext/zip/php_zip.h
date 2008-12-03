@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) 1997-2007 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,12 @@
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry
 
+#ifdef PHP_WIN32
+#define PHP_ZIP_API __declspec(dllexport)
+#else
+#define PHP_ZIP_API
+#endif
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -32,8 +38,10 @@ extern zend_module_entry zip_module_entry;
 
 #define PHP_ZIP_VERSION_STRING "1.8.11"
 
-#if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
-# define PHP_ZIP_USE_OO 1
+#ifndef ZEND_ENGINE_2_1
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 0) || PHP_MAJOR_VERSION == 6
+#  define ZEND_ENGINE_2_1
+# endif
 #endif
 
 #ifndef  Z_SET_REFCOUNT_P
@@ -66,7 +74,7 @@ typedef struct _ze_zip_read_rsrc {
 	struct zip_stat sb;
 } zip_read_rsrc;
 
-#ifdef PHP_ZIP_USE_OO 
+#ifdef ZEND_ENGINE_2_1
 #define ZIPARCHIVE_ME(name, arg_info, flags)	ZEND_FENTRY(name, c_ziparchive_ ##name, arg_info, flags)
 #define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_##name)
 

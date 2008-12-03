@@ -213,7 +213,7 @@ class PharCommand extends CLICommand
 			$apiver = trim(substr($apiver, strlen('API Version')));
 			if ($apiver) {
 				self::notice("Pear package PHP_Archive: API Version: $apiver.\n");
-				$files  = explode("\n", `pear list-files PHP_Archive`);
+				$files  = split("\n", `pear list-files PHP_Archive`);
 				$phpdir = `pear config-get php_dir 2>/dev/null`;
 				$phpdir = trim($phpdir);
 				self::notice("Pear package PHP_Archive: $phpdir.\n");
@@ -488,9 +488,7 @@ class PharCommand extends CLICommand
 
 			if (isset($loader)) {
 				$s = "<?php if (!class_exists('PHP_Archive')) {\n?>";
-				if (is_file($loader)) {
-					$s .= file_get_contents($loader);
-				}
+				$s .= file_get_contents($loader);
 				$s .= "<?php\n";
 				$s .= "}\n";
 				$s .= "if (!in_array('phar', stream_get_wrappers())) {\n";

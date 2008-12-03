@@ -14,14 +14,14 @@ Sybase-CT bug #30312 (sybase_unbuffered_query calls)
 
   $db= sybase_connect_ex();
 
-  $query= sybase_unbuffered_query('select datepart(yy, getdate())');
+  $query= sybase_unbuffered_query('select getdate()');
   $array= sybase_fetch_array($query);
   var_dump($array[0]);
 
-  $query= sybase_unbuffered_query('select datepart(yy, getdate())');
+  $query= sybase_unbuffered_query('select getdate()');
   $array= sybase_fetch_array($query);
   var_dump($array[0]);
 ?>
 --EXPECTF--
-int(%d)
-int(%d)
+string(%d) "%s %d %d %d:%d%s"
+string(%d) "%s %d %d %d:%d%s"

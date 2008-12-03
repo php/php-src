@@ -4,7 +4,6 @@ pcntl: pcntl_sigprocmask(), pcntl_sigwaitinfo(), pcntl_sigtimedwait()
 <?php
 	if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
 	elseif (!extension_loaded('posix')) die('skip posix extension not available');
-	elseif (!function_exists('pcntl_sigwaitinfo') or !function_exists('pcntl_sigtimedwait')) die('skip required functionality is not available');
 ?>
 --FILE--
 <?php
@@ -14,11 +13,6 @@ if ($pid == -1) {
 	die('failed');
 } else if ($pid) {
 	pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,(string)SIGTERM));
-	$oldset = array();
-	pcntl_sigprocmask(SIG_BLOCK, array(), $oldset);
-	var_dump(in_array(SIGCHLD, $oldset));
-	var_dump(in_array(SIGTERM, $oldset));
-
 	posix_kill(posix_getpid(), SIGTERM);
 	$signo = pcntl_sigwaitinfo(array(SIGTERM), $siginfo);
 	echo "signo == SIGTERM\n";
@@ -45,19 +39,8 @@ if ($pid == -1) {
 	var_dump($siginfo['pid'] === $pid);
 	pcntl_waitpid($pid, $status);
 
-	set_error_handler(function($errno, $errstr) { echo "Error triggered\n"; }, E_WARNING);
-
 	echo "sigprocmask with invalid arguments\n";
-
-	/* Valgrind expectedly complains about this:
-         * "sigprocmask: unknown 'how' field 2147483647"
-	 * Skip */
-	if (getenv("USE_ZEND_ALLOC") !== '0') {
-		var_dump(pcntl_sigprocmask(PHP_INT_MAX, array(SIGTERM)));
-	} else {
-		echo "Error triggered\n";
-		echo "bool(false)\n";
-	}
+	var_dump(pcntl_sigprocmask(PHP_INT_MAX, array(SIGTERM)));
 	var_dump(pcntl_sigprocmask(SIG_SETMASK, array(0)));
 
 	echo "sigwaitinfo with invalid arguments\n";
@@ -67,14 +50,12 @@ if ($pid == -1) {
 	var_dump(pcntl_sigtimedwait(array(SIGTERM), $signo, PHP_INT_MAX, PHP_INT_MAX));
 } else {
 	$siginfo = NULL;
-	pcntl_sigtimedwait(array(SIGINT), $siginfo, PHP_INT_MAX, 999999999);
+	pcntl_sigtimedwait(array(SIGTERM), $siginfo, PHP_INT_MAX, 999999999);
 	exit;
 }
 
 ?>
 --EXPECTF--
-bool(true)
-bool(true)
 signo == SIGTERM
 bool(true)
 code === SI_USER || SI_NOINFO
@@ -90,13 +71,17 @@ bool(true)
 signo === pid
 bool(true)
 sigprocmask with invalid arguments
-Error triggered
+
+Warning: pcntl_sigprocmask(): Invalid argument in %s on line %d
 bool(false)
-Error triggered
+
+Warning: pcntl_sigprocmask(): Invalid argument in %s on line %d
 bool(false)
 sigwaitinfo with invalid arguments
-Error triggered
+
+Warning: pcntl_sigwaitinfo(): Invalid argument in %s on line %d
 bool(false)
 sigtimedwait with invalid arguments
-Error triggered
+
+Warning: pcntl_sigtimedwait(): Invalid argument in %s on line %d
 int(-1)

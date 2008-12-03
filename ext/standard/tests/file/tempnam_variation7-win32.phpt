@@ -3,7 +3,7 @@ Test tempnam() function: usage variations - invalid/non-existing dir
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
-  die("skip Only run on Windows");
+  die("skip Run only on Windows");
 ?>
 --FILE--
 <?php
@@ -15,6 +15,8 @@ if(substr(PHP_OS, 0, 3) != "WIN")
      hence the unique files will be created in temporary dir */
 
 echo "*** Testing tempnam() with invalid/non-existing directory names ***\n";
+$file_path = dirname(__FILE__);
+
 /* An array of names, which will be passed as a dir name */ 
 $names_arr = array(
   /* Invalid args */ 
@@ -24,7 +26,7 @@ $names_arr = array(
   NULL,
   "",
   " ",
-  "\0",
+  "/0",
   array(),
 
   /* Non-existing dirs */
@@ -33,7 +35,7 @@ $names_arr = array(
 
 );
 
-for( $i=0; $i<count($names_arr); $i++ ) {
+for( $i=1; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
   $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
 
@@ -46,19 +48,9 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "File permissions are => ";
     printf("%o", fileperms($file_name) );
     echo "\n";
-    
-    echo "File created in => ";
-    $file_dir = dirname($file_name);
-    if (realpath($file_dir) == realpath(sys_get_temp_dir()) || realpath($file_dir."\\") == realpath(sys_get_temp_dir())) {
-       echo "temp dir\n";
-    }
-    else {
-       echo "unknown location\n";
-    }                
   }
-  else { 
+  else 
     echo "-- File is not created --\n";
-  }
  
   unlink($file_name);
 }
@@ -67,34 +59,24 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
--- Iteration 0 --
-File name is => %s%et%s
-File permissions are => 100666
-File created in => temp dir
 -- Iteration 1 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 2 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 3 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 4 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 5 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 6 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 1 to be string, array given in %s on line %d
@@ -102,13 +84,10 @@ Warning: tempnam() expects parameter 1 to be string, array given in %s on line %
 
 Warning: unlink(): No such file or directory in %s on line %d
 -- Iteration 8 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 -- Iteration 9 --
-File name is => %s%et%s
+File name is => %s
 File permissions are => 100666
-File created in => temp dir
 
 *** Done ***
-

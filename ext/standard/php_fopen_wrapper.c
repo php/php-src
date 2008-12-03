@@ -48,11 +48,17 @@ static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_D
 	return 0;
 }
 
+static int php_stream_output_flush(php_stream *stream TSRMLS_DC)
+{
+	sapi_flush(TSRMLS_C);
+	return 0;
+}
+
 php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
 	php_stream_output_read,
 	php_stream_output_close,
-	NULL, /* flush */
+	php_stream_output_flush,
 	"Output",
 	NULL, /* seek */
 	NULL, /* cast */
@@ -171,21 +177,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 				return NULL;
 			}
 		}
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
-		return php_stream_temp_create(mode_rw, max_memory);		
+		return php_stream_temp_create(TEMP_STREAM_DEFAULT, max_memory);		
 	}
 	
 	if (!strcasecmp(path, "memory")) {
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
-		return php_stream_memory_create(mode_rw);
+		return php_stream_memory_create(TEMP_STREAM_DEFAULT);
 	}
 	
 	if (!strcasecmp(path, "output")) {
@@ -295,23 +291,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		return NULL;
 	}
 
-#if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
-	do {
-		struct stat st;
-		memset(&st, 0, sizeof(st));
-		if (fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
-			stream = php_stream_sock_open_from_socket(fd, NULL);
-			if (stream) {
-				stream->ops = &php_stream_socket_ops;
-				return stream;
-			}
-		}
-	} while (0);
-#endif
-
 	if (file) {
 		stream = php_stream_fopen_from_file(file, mode);
-	} else {
+	} else {	
 		stream = php_stream_fopen_from_fd(fd, mode, NULL);
 		if (stream == NULL) {
 			close(fd);

@@ -103,9 +103,6 @@ void xsl_objects_free_storage(void *object TSRMLS_DC)
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
 		intern->ptr = NULL;
 	}
-	if (intern->profiling) {
-		efree(intern->profiling);
-	}
 	efree(object);
 }
 /* }}} */

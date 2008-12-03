@@ -454,7 +454,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &dbstmt_ce->function_table;
 		fci.function_name = NULL;
-		fci.object_ptr = object;
+		fci.object_pp = &object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
 		if (ctor_args) {
@@ -478,7 +478,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fcc.function_handler = dbstmt_ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(object);
-		fcc.object_ptr = object;
+		fcc.object_pp = &object;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			zval_dtor(object);
@@ -923,7 +923,7 @@ static PHP_METHOD(PDO, exec)
 	}
 
 	if (!statement_len) {
-		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query" TSRMLS_CC);
+		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute and empty query" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 	PDO_DBH_CLEAR_ERR();
@@ -983,14 +983,6 @@ static PHP_METHOD(PDO, errorCode)
 		RETURN_STRING(dbh->query_stmt->error_code, 1);
 	}
 	
-	if (dbh->error_code[0] == '\0') {
-		RETURN_NULL();
-	}
-
-	/**
-	 * Making sure that we fallback to the default implementation
-	 * if the dbh->error_code is not null.
-	 */
 	RETURN_STRING(dbh->error_code, 1);
 }
 /* }}} */
@@ -999,16 +991,11 @@ static PHP_METHOD(PDO, errorCode)
    Fetch extended error information associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorInfo)
 {
-	int error_count;
-	int error_count_diff 	 = 0;
-	int error_expected_count = 3;
-
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-
 	PDO_CONSTRUCT_CHECK;
 
 	array_init(return_value);
@@ -1018,25 +1005,8 @@ static PHP_METHOD(PDO, errorInfo)
 	} else {
 		add_next_index_string(return_value, dbh->error_code, 1);
 	}
-
 	if (dbh->methods->fetch_err) {
 		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value TSRMLS_CC);
-	}
-	
-	/**
-	 * In order to be consistent, we have to make sure we add the good amount
-	 * of nulls depending on the current number of elements. We make a simple
-	 * difference and add the needed elements
-	 */
-	error_count = zend_hash_num_elements(Z_ARRVAL_P(return_value));
-
-	if (error_expected_count > error_count) {
-		int current_index;
-
-		error_count_diff = error_expected_count - error_count;
-		for (current_index = 0; current_index < error_count_diff; current_index++) {
-			add_next_index_null(return_value);
-		}
 	}
 }
 /* }}} */
@@ -1242,7 +1212,8 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
 		return 0;
 	}
-	funcs =	dbh->methods->get_driver_methods(dbh, kind TSRMLS_CC);
+	funcs =	dbh->methods->get_driver_methods(dbh,
+			PDO_DBH_DRIVER_METHOD_KIND_DBH TSRMLS_CC);
 	if (!funcs) {
 		return 0;
 	}
@@ -1322,6 +1293,9 @@ static union _zend_function *dbh_method_get(
 
 		if (zend_hash_find(dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
 				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+			if (std_object_handlers.get_method) {
+				fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC);
+			}
 
 			if (!fbc) {
 				fbc = NULL;
@@ -1333,12 +1307,6 @@ static union _zend_function *dbh_method_get(
 	}
 
 out:
-	if (!fbc) {
-		if (std_object_handlers.get_method) {
-			fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC);
-		}
-	}
-
 	efree(lc_method_name);
 	return fbc;
 }

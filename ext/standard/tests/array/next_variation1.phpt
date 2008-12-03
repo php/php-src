@@ -200,7 +200,9 @@ Warning: next() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-bool(false)
+
+Warning: next() expects parameter 1 to be array, object given in %s on line %d
+NULL
 
 -- Iteration 23 --
 

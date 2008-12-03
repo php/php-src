@@ -111,9 +111,6 @@ SAFE_MODE_WARNING;
 }
 
 $environment = isset($_ENV) ? $_ENV : array();
-if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
-  $environment["SystemRoot"] = getenv("SystemRoot");
-}
 
 // Don't ever guess at the PHP executable location.
 // Require the explicit specification.
@@ -543,7 +540,7 @@ if (isset($argc) && $argc > 1) {
 					if (!$valgrind_header) {
 						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
 					} else {
-						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)([.-]\w+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
+						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)(-\w+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
 						if ($replace_count != 1 || !is_numeric($valgrind_version)) {
 							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
 						}
@@ -999,7 +996,7 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline, $env = null, $stdin = null)
 {
-	global $leak_check, $cwd;
+	global $leak_check;
 
 	$data = '';
 
@@ -1007,7 +1004,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, $cwd, $env, array('suppress_errors' => true, 'binary_pipes' => true));
+		), $pipes, null, $env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
@@ -1739,17 +1736,10 @@ COMMAND $cmd
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'unicode',
 				$wanted_re
 			);
-			$wanted_re = str_replace(
-				array('%u\|b%', '%b\|u%'),
-				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? '' : 'u',
-				$wanted_re
-			);
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-			$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
 			$wanted_re = str_replace('%a', '.+', $wanted_re);
-			$wanted_re = str_replace('%A', '.*', $wanted_re);
 			$wanted_re = str_replace('%w', '\s*', $wanted_re);
 			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
 			$wanted_re = str_replace('%d', '\d+', $wanted_re);

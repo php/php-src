@@ -417,7 +417,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 				n = SSL_connect(sslsock->ssl_handle);
 				gettimeofday(&tve, &tz);
 
-				timeout -= (tve.tv_sec + (float) tve.tv_usec / 1000000) - (tvs.tv_sec + (float) tvs.tv_usec / 1000000);
+				timeout -= (tve.tv_sec + tve.tv_usec / 1000000) - (tvs.tv_sec + tvs.tv_usec / 1000000);
 				if (timeout < 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: connection timeout");
 					return -1;
@@ -556,7 +556,6 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 			
 			xparam->outputs.client = php_stream_alloc_rel(stream->ops, clisockdata, NULL, "r+");
 			if (xparam->outputs.client) {
-				xparam->outputs.client->context = stream->context;
 				if (stream->context) {
 					zend_list_addref(stream->context->rsrc_id);
 				}

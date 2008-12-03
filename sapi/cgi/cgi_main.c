@@ -375,8 +375,6 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
-	zend_bool ignore_status = 0;
-	int response_status = SG(sapi_headers).http_response_code;
 
 	if (SG(request_info).no_headers == 1) {
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -388,11 +386,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		zend_bool has_status = 0;
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
-			char *s;
 			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
-			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
-				response_status = atoi((s + 1));
-			}
 
 			if (len > SAPI_CGI_MAX_HEADER_LENGTH) {
 				len = SAPI_CGI_MAX_HEADER_LENGTH;
@@ -407,7 +401,6 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 				strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0
 			) {
 				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
-				response_status = atoi((s + 1));
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 				while (h) {
@@ -437,7 +430,6 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		}
 		if (!has_status) {
 			PHPWRITE_H(buf, len);
-			ignore_status = 1;
 		}
 	}
 
@@ -445,21 +437,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:")-1 &&
-			    strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0) {
-			    if (!ignore_status) {
-				    ignore_status = 1;
-					PHPWRITE_H(h->header, h->header_len);
-					PHPWRITE_H("\r\n", 2);
-				}
-			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 && 
-					strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0) {
-				h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
-				continue;
-			} else {
-				PHPWRITE_H(h->header, h->header_len);
-				PHPWRITE_H("\r\n", 2);
-			}
+			PHPWRITE_H(h->header, h->header_len);
+			PHPWRITE_H("\r\n", 2);
 		}
 		h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
@@ -1078,9 +1057,6 @@ static void init_request_info(TSRMLS_D)
 			if (script_path_translated &&
 				(script_path_translated_len = strlen(script_path_translated)) > 0 &&
 				(script_path_translated[script_path_translated_len-1] == '/' ||
-#ifdef PHP_WIN32
-				 script_path_translated[script_path_translated_len-1] == '\\' ||
-#endif
 				(real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
@@ -1612,18 +1588,11 @@ consult the installation file that came with this distribution, or visit \n\
 #ifndef PHP_WIN32
 	/* Pre-fork, if required */
 	if (getenv("PHP_FCGI_CHILDREN")) {
-		char * children_str = getenv("PHP_FCGI_CHILDREN");
-		children = atoi(children_str);
+		children = atoi(getenv("PHP_FCGI_CHILDREN"));
 		if (children < 0) {
 			fprintf(stderr, "PHP_FCGI_CHILDREN is not valid\n");
 			return FAILURE;
 		}
-		fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, children_str, strlen(children_str));
-		/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
-		fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
-	} else {
-		fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
-		fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 	}
 
 	if (children) {

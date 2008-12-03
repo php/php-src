@@ -63,11 +63,13 @@
   ((c) == sizeof(unsigned long) ? *((unsigned long *)(a)) == *((unsigned long *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strlen, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_substr, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, offset)
@@ -75,6 +77,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_substr, 0, 0, 2)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
@@ -82,46 +85,54 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strrpos, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_encode, 0, 0, 2)
 	ZEND_ARG_INFO(0, field_name)
 	ZEND_ARG_INFO(0, field_value)
 	ZEND_ARG_INFO(0, preference) /* ZEND_ARG_ARRAY_INFO(0, preference, 1) */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_decode_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, headers)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_iconv, 0)
 	ZEND_ARG_INFO(0, in_charset)
 	ZEND_ARG_INFO(0, out_charset)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_ob_iconv_handler, 0)
 	ZEND_ARG_INFO(0, contents)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_iconv_set_encoding, 0)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, charset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_get_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
@@ -1284,6 +1295,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						char_cnt -= 3;
 					}
 				}
+				prev_in_left = in_left;
 
 				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
 				char_cnt -= 2;
@@ -1862,7 +1874,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
    Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	char *str;
 	int str_len; 
@@ -1870,6 +1882,8 @@ PHP_FUNCTION(iconv_strlen)
 	php_iconv_err_t err;
 
 	unsigned int retval;
+
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
 		&str, &str_len, &charset, &charset_len) == FAILURE) {
@@ -1895,15 +1909,17 @@ PHP_FUNCTION(iconv_strlen)
    Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	char *str;
 	int str_len; 
-	long offset, length = 0;
+	long offset, length;
 
 	php_iconv_err_t err;
 
 	smart_str retval = {0};
+
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls",
 		&str, &str_len, &offset, &length,
@@ -1935,17 +1951,20 @@ PHP_FUNCTION(iconv_substr)
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	char *haystk;
 	int haystk_len; 
 	char *ndl;
 	int ndl_len;
-	long offset = 0;
+	long offset;
 
 	php_iconv_err_t err;
 
 	unsigned int retval;
+
+	offset = 0;
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls",
 		&haystk, &haystk_len, &ndl, &ndl_len,
@@ -1983,7 +2002,7 @@ PHP_FUNCTION(iconv_strpos)
    Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	char *haystk;
 	int haystk_len; 
@@ -1993,6 +2012,8 @@ PHP_FUNCTION(iconv_strrpos)
 	php_iconv_err_t err;
 
 	unsigned int retval;
+
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s",
 		&haystk, &haystk_len, &ndl, &ndl_len,
@@ -2147,13 +2168,15 @@ PHP_FUNCTION(iconv_mime_decode)
 {
 	char *encoded_str;
 	int encoded_str_len;
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	long mode = 0;
 	
 	smart_str retval = {0};
 
 	php_iconv_err_t err;
+
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls",
 		&encoded_str, &encoded_str_len, &mode, &charset, &charset_len) == FAILURE) {
@@ -2188,11 +2211,13 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	const char *encoded_str;
 	int encoded_str_len;
-	char *charset = ICONVG(internal_encoding);
+	char *charset;
 	int charset_len = 0;
 	long mode = 0;
 	
 	php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
+
+	charset = ICONVG(internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls",
 		&encoded_str, &encoded_str_len, &mode, &charset, &charset_len) == FAILURE) {
@@ -2398,7 +2423,7 @@ PHP_FUNCTION(iconv_set_encoding)
 PHP_FUNCTION(iconv_get_encoding)
 {
 	char *type = "all";
-	int type_len = sizeof("all")-1;
+	int type_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &type, &type_len) == FAILURE)
 		return;

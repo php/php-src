@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.31 2008-11-21 14:17:33 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.29 2008-07-25 12:40:45 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -41,13 +41,6 @@ VC_VERSIONS[1300] = 'MSVC7 (Visual C++ 2002)';
 VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
 VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
 VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
-
-var VC_VERSIONS_SHORT = new Array();
-VC_VERSIONS_SHORT[1200] = 'VC6';
-VC_VERSIONS_SHORT[1300] = 'VC7';
-VC_VERSIONS_SHORT[1310] = 'VC7.1';
-VC_VERSIONS_SHORT[1400] = 'VC8';
-VC_VERSIONS_SHORT[1500] = 'VC9';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1481,10 +1474,8 @@ function write_summary()
 	output_as_table(["Sapi Name"], sapi_enabled);
 	STDOUT.WriteBlankLines(2);
 
-	ar[0] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
-	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
-	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
-	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	ar[0] = ['Compiler', VC_VERSIONS[VCVERS]];
+	ar[1] = ['Architecture', X64 ? 'x64' : 'x86'];
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);

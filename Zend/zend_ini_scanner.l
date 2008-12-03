@@ -188,7 +188,7 @@ int zend_ini_scanner_get_lineno(TSRMLS_D)
 */
 char *zend_ini_scanner_get_filename(TSRMLS_D)
 {
-	return ini_filename ? ini_filename : "Unknown";
+	return ini_filename;
 }
 /* }}} */
 
@@ -244,10 +244,21 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 		if (*s == '\\') {
 			s++;
 			if (s >= end) {
-				*t++ = '\\';
 				continue;
 			}
 			switch (*s) {
+				case 'n':
+					*t++ = '\n';
+					Z_STRLEN_P(lval)--;
+					break;
+				case 'r':
+					*t++ = '\r';
+					Z_STRLEN_P(lval)--;
+					break;
+				case 't':
+					*t++ = '\t';
+					Z_STRLEN_P(lval)--;
+					break;
 				case '"':
 					if (*s != quote_type) {
 						*t++ = '\\';
@@ -313,7 +324,7 @@ RAW_VALUE_CHARS [^=\n\r;]
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
-DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
+DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
@@ -446,11 +457,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 	return '"';
 }
 
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+("\\"["])? { /* Escape double quoted string contents */
-	if(yyleng > 1 && yytext[yyleng-1] == '"' && yytext[yyleng-2] == '\\') {
-		yyless(yyleng-1);
-		yyleng--;
-	}
+<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ { /* Escape double quoted string contents */
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"' TSRMLS_CC);
 	return TC_QUOTED_STRING;
 }
@@ -475,13 +482,6 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 }
 
 <INITIAL,ST_VALUE,ST_RAW>{TABS_AND_SPACES}*[;][^\r\n]*{NEWLINE} { /* Comment */
-	BEGIN(INITIAL);
-	SCNG(lineno)++;
-	return END_OF_LINE;
-}
-
-<INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
-	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(TSRMLS_C), SCNG(lineno));
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
 	return END_OF_LINE;

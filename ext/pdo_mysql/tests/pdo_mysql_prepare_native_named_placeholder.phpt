@@ -70,8 +70,6 @@ $db = MySQLPDOTest::factory();
 --EXPECTF--
 [003] Execute has failed, 'HY093' array (
   0 => 'HY093',
-  1 => NULL,
-  2 => NULL,
 )
 array(0) {
 }

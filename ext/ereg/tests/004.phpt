@@ -9,9 +9,6 @@ simple ereg test
     echo "ok\n";
   }
 ?>
---EXPECTF--
-Deprecated: Function ereg() is deprecated in %s on line %d
+--EXPECT--
 ok
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 ok

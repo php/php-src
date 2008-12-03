@@ -23,22 +23,11 @@ var_dump($regs);
 echo "Done";
 ?>
 --EXPECTF--
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)
 string(8) "original"
 Done

@@ -53,38 +53,36 @@ Currently we have the following branches in use::
 
   PHP_5_1  This branch is closed.
 
-  PHP_4_4  This branch is closed.
+  PHP_4_4  Is used to release the PHP 4.4.x series. Only bugfixes are permitted
+           on this branch (Consult the releasemaster prior to commit).
+
+  PHP_4_3  This branch is closed.
 
 The next few rules are more of a technical nature::
 
-   1. All changes should first go to HEAD and then get merged from HEAD
-      (aka MFH'ed) to all other relevant branches.
-
-   2. DO NOT TOUCH ChangeLog! It is automagically updated from the commit
+   1. DO NOT TOUCH ChangeLog! It is automagically updated from the commit
       messages every day. Woe be to those who attempt to mess with it.
 
-   3. All news updates intended for public viewing, such as new features,
-      bug fixes, improvements, etc., should go into the NEWS file of the
-      *first* to be released version with the given change. In other words
-      any NEWS file change only needs to done in one branch.
+   2. All news updates intended for public viewing, such as new features,
+      bug fixes, improvements, etc., should go into the NEWS file.
 
       NB! Lines, starting with @ will go automagically into NEWS file, but
       this is NOT recommended, though. Please, add news entries directly to
       NEWS file and don't forget to keep them adjusted and sorted.
 
-   4. Do not commit multiple file and dump all messages in one commit. If you
+   3. Do not commit multiple file and dump all messages in one commit. If you
       modified several unrelated files, commit each group separately and
       provide a nice commit message for each one. See example below.
 
-   5. Do write your commit message in such a way that it makes sense even
+   4. Do write your commit message in such a way that it makes sense even
       without the corresponding diff. One should be able to look at it, and
       immediately know what was modified. Definitely include the function name
       in the message as shown below.
 
-   6. In your commit messages, keep each line shorter than 80 characters. And
+   5. In your commit messages, keep each line shorter than 80 characters. And
       try to align your lines vertically, if they wrap. It looks bad otherwise.
 
-   7. If you modified a function that is callable from PHP, prepend PHP to
+   6. If you modified a function that is callable from PHP, prepend PHP to
       the function name as shown below.
 
 
@@ -131,9 +129,6 @@ Example::
 If you don't see your messages in ChangeLog right away, don't worry!
 These files are updated once a day, so your stuff will not show up until
 somewhat later.
-
-When you change the NEWS file for a bug fix, then please keep the bugs 
-sorted in decreasing order under the fixed version.
 
 You can use LXR (http://lxr.php.net/) and Bonsai (http://bonsai.php.net/)
 to look at PHP CVS repository in various ways.

@@ -218,7 +218,6 @@ do
       /* SKIPZERO skips the bracket. */
 
       case OP_SKIPZERO:
-      tcode++;
       do tcode += GET(tcode,1); while (*tcode == OP_ALT);
       tcode += 1 + LINK_SIZE;
       break;
@@ -502,7 +501,7 @@ Returns:    pointer to a pcre_extra block, with study_data filled in and the
             NULL on error or if no optimization possible
 */
 
-PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
+PCRE_EXP_DEFN pcre_extra *
 pcre_study(const pcre *external_re, int options, const char **errorptr)
 {
 uschar start_bits[32];

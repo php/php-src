@@ -54,6 +54,7 @@ static int le_bucket;
 PHP_FUNCTION(user_filter_nop)
 {
 }
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
 	ZEND_ARG_INFO(0, in)
 	ZEND_ARG_INFO(0, out)
@@ -61,9 +62,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
 	ZEND_ARG_INFO(0, closing)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onCreate, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onClose, 0)
 ZEND_END_ARG_INFO()
 
@@ -177,14 +180,12 @@ php_stream_filter_status_t userfilter_filter(
 	zval *retval = NULL;
 	zval **args[4];
 	zval *zclosing, *zconsumed, *zin, *zout, *zstream;
-	zval zpropname;
 	int call_result;
 
 	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", sizeof("stream"), (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */
 		ALLOC_INIT_ZVAL(zstream);
 		php_stream_to_zval(stream, zstream);
-		zval_copy_ctor(zstream);
 		add_property_zval(obj, "stream", zstream);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zstream);
@@ -245,13 +246,6 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_bucket_delref(bucket TSRMLS_CC);
 		}
 	}
-
-	/* filter resources are cleaned up by the stream destructor,
-	 * keeping a reference to the stream resource here would prevent it
-	 * from being destroyed properly */
-	INIT_ZVAL(zpropname);
-	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1, 0);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname TSRMLS_CC);
 
 	zval_ptr_dtor(&zclosing);
 	zval_ptr_dtor(&zconsumed);

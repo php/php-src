@@ -438,7 +438,7 @@ skip_phar:
 
 /* {{{ php_stat
  */
-static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_DC)
+void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value TSRMLS_DC)
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
@@ -607,7 +607,7 @@ static void phar_fancy_stat(struct stat *stat_sb, int type, zval *return_value T
 }
 /* }}} */
 
-static void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -646,7 +646,6 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			entry_len = (int) filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 				efree(arch);
-				efree(entry);
 				goto skip_phar;
 			}
 splitted:
@@ -686,7 +685,6 @@ splitted:
 				int save_len;
 
 notfound:
-				efree(entry);
 				save = PHAR_G(cwd);
 				save_len = PHAR_G(cwd_len);
 				/* this file is not in the current directory, use the original path */

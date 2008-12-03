@@ -35,32 +35,14 @@ mbstring.func_overload=0
 	}
 ?>
 
---EXPECTF--
+--EXPECT--
 bool(true)
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 ok
-
-Deprecated: Function split() is deprecated in %s on line %d
 2-2
-
-Deprecated: Function split() is deprecated in %s on line %d
 3-3
-
-Deprecated: Function split() is deprecated in %s on line %d
 4-4

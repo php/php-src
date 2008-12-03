@@ -61,13 +61,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --EXPECTF--
 Testing emulated PS...
-array(3) {
+array(1) {
   [0]=>
   string(0) ""
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 
 Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
@@ -90,25 +86,17 @@ array(3) {
   [2]=>
   string(%d) "Table '%s.test' doesn't exist"
 }
-array(3) {
+array(1) {
   [0]=>
   string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 Testing native PS...
 
 Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
 bool(false)
-array(3) {
+array(1) {
   [0]=>
   string(0) ""
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 
 Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.test' doesn't exist in %s on line %d

@@ -9,6 +9,7 @@ new mysqli()
 
 	$tmp    = NULL;
 	$link   = NULL;
+
 	ini_set('mysqli.default_socket', 'socket');
 	ini_set('mysqli.default_port', 9999);
 	ini_set('mysqli.default_pw', 'password');
@@ -34,6 +35,7 @@ new mysqli()
 		printf("%s\n", $e->getMessage());
 		printf("[002] Usage of mysqli.default_socket failed\n");
 	}
+
 
 	ini_set('mysqli.default_port', $port);
 	try {

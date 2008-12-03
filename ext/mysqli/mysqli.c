@@ -94,8 +94,8 @@ static int le_pmysqli;
 /* Destructor for mysqli entries in free_links/used_links */
 void php_mysqli_dtor_p_elements(void *data)
 {
-	MYSQL *mysql = (MYSQL *) data;
 	TSRMLS_FETCH();
+	MYSQL *mysql = (MYSQL *) data;
 	mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT);
 }
 
@@ -777,7 +777,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_YEAR_AS_INT", MYSQLND_OPT_INT_AND_YEAR_AS_INT, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* mysqli_real_connect flags */	
@@ -793,9 +793,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
 #if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
 	REGISTER_LONG_CONSTANT("MYSQLI_BG_STORE_RESULT", MYSQLI_BG_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
-#endif
-#if defined (MYSQLI_USE_MYSQLND)
-	REGISTER_LONG_CONSTANT("MYSQLI_ASYNC", MYSQLI_ASYNC, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* for mysqli_fetch_assoc */
@@ -1275,7 +1272,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fci.function_table = &ce->function_table;
 			fci.function_name = NULL;
 			fci.symbol_table = NULL;
-			fci.object_ptr = return_value;
+			fci.object_pp = &return_value;
 			fci.retval_ptr_ptr = &retval_ptr;
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
@@ -1309,7 +1306,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = EG(scope);
 			fcc.called_scope = Z_OBJCE_P(return_value);
-			fcc.object_ptr = return_value;
+			fcc.object_pp = &return_value;
 
 			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);

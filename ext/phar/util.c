@@ -21,9 +21,6 @@
 /* $Id$ */
 
 #include "phar_internal.h"
-#ifdef PHAR_HASH_OK
-#include "ext/hash/php_hash_sha.h"
-#endif
 
 #ifdef PHAR_HAVE_OPENSSL
 /* OpenSSL includes */
@@ -68,13 +65,12 @@ static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 phar_entry_info *phar_get_link_source(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *link_entry;
-	char *link;
+	char *link = phar_get_link_location(entry TSRMLS_CC);
 
 	if (!entry->link) {
 		return entry;
 	}
 
-	link = phar_get_link_location(entry TSRMLS_CC);
 	if (SUCCESS == zend_hash_find(&(entry->phar->manifest), entry->link, strlen(entry->link), (void **)&link_entry) ||
 		SUCCESS == zend_hash_find(&(entry->phar->manifest), link, strlen(link), (void **)&link_entry)) {
 		if (link != entry->link) {
@@ -684,13 +680,13 @@ really_get_entry:
 			phar_seek_efp(entry, 0, SEEK_END, 0, 0 TSRMLS_CC);
 		}
 	} else {
-		if (for_write) {
-			if (entry->link) {
-				efree(entry->link);
-				entry->link = NULL;
-				entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
-			}
+		if (entry->link) {
+			efree(entry->link);
+			entry->link = NULL;
+			entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
+		}
 
+		if (for_write) {
 			if (for_trunc) {
 				if (FAILURE == phar_create_writeable_entry(phar, entry, error TSRMLS_CC)) {
 					return FAILURE;
@@ -715,11 +711,7 @@ really_get_entry:
 	(*ret)->is_zip = entry->is_zip;
 	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1 TSRMLS_CC);
-	if (entry->link) {
-		(*ret)->zero = phar_get_fp_offset(phar_get_link_source(entry TSRMLS_CC) TSRMLS_CC);
-	} else {
-		(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
-	}
+	(*ret)->zero = phar_get_fp_offset(entry TSRMLS_CC);
 
 	if (!phar->is_persistent) {
 		++(entry->fp_refcount);
@@ -793,12 +785,12 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	if (allow_dir == 2) {
 		etemp.is_dir = 1;
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_DIR;
+		if (is_dir) {
+			etemp.filename_len--; /* strip trailing / */
+			path_len--;
+		}
 	} else {
 		etemp.flags = etemp.old_flags = PHAR_ENT_PERM_DEF_FILE;
-	}
-	if (is_dir) {
-		etemp.filename_len--; /* strip trailing / */
-		path_len--;
 	}
 
 	phar_add_virtual_dirs(phar, path, path_len TSRMLS_CC);
@@ -811,7 +803,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 
 	if (phar->is_tar) {
 		etemp.is_tar = phar->is_tar;
-		etemp.tar_type = etemp.is_dir ? TAR_DIR : TAR_FILE;
+		etemp.tar_type = TAR_FILE;
 	}
 
 	if (FAILURE == zend_hash_add(&phar->manifest, etemp.filename, path_len, (void*)&etemp, sizeof(phar_entry_info), (void **) &entry)) {
@@ -1158,7 +1150,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 /**
  * helper function to open an internal file's fp just-in-time
  */
-phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
+phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, php_stream *fp, char **error, int for_write TSRMLS_DC) /* {{{ */
 {
 	if (error) {
 		*error = NULL;
@@ -1458,7 +1450,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
-	int is_dir;
+	char is_dir;
 
 #ifdef PHP_WIN32
 	phar_unixify_path_separators(path, path_len);
@@ -1883,7 +1875,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature TSRMLS_CC);
 		}
 		break;
-#ifdef PHAR_HASH_OK
+#if HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -2047,7 +2039,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 	}
 
 	switch(phar->sig_flags) {
-#ifdef PHAR_HASH_OK
+#if HAVE_HASH_EXT
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -2201,7 +2193,7 @@ void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename
 }
 /* }}} */
 
-static int phar_update_cached_entry(void *data, void *argument) /* {{{ */
+static void phar_update_cached_entry(void *data, void *argument) /* {{{ */
 {
 	phar_entry_info *entry = (phar_entry_info *)data;
 	TSRMLS_FETCH();
@@ -2222,10 +2214,8 @@ static int phar_update_cached_entry(void *data, void *argument) /* {{{ */
 
 	if (entry->metadata) {
 		if (entry->metadata_len) {
-			char *buf = estrndup((char *) entry->metadata, entry->metadata_len);
 			/* assume success, we would have failed before */
-			phar_parse_metadata((char **) &buf, &entry->metadata, entry->metadata_len TSRMLS_CC);
-			efree(buf);
+			phar_parse_metadata((char **) &entry->metadata, &entry->metadata, entry->metadata_len TSRMLS_CC);
 		} else {
 			zval *t;
 
@@ -2242,7 +2232,6 @@ static int phar_update_cached_entry(void *data, void *argument) /* {{{ */
 			entry->metadata_str.len = 0;
 		}
 	}
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -2251,7 +2240,6 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 	phar_archive_data *phar;
 	HashTable newmanifest;
 	char *fname;
-	phar_archive_object **objphar;
 
 	phar = (phar_archive_data *) emalloc(sizeof(phar_archive_data));
 	*phar = **pphar;
@@ -2271,9 +2259,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 	if (phar->metadata) {
 		/* assume success, we would have failed before */
 		if (phar->metadata_len) {
-			char *buf = estrndup((char *) phar->metadata, phar->metadata_len);
-			phar_parse_metadata(&buf, &phar->metadata, phar->metadata_len TSRMLS_CC);
-			efree(buf);
+			phar_parse_metadata((char **) &phar->metadata, &phar->metadata, phar->metadata_len TSRMLS_CC);
 		} else {
 			zval *t;
 
@@ -2300,15 +2286,6 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 		zend_get_hash_value, NULL, 0);
 	zend_hash_copy(&phar->virtual_dirs, &(*pphar)->virtual_dirs, NULL, NULL, sizeof(void *));
 	*pphar = phar;
-
-	/* now, scan the list of persistent Phar objects referencing this phar and update the pointers */
-	for (zend_hash_internal_pointer_reset(&PHAR_GLOBALS->phar_persist_map);
-	SUCCESS == zend_hash_get_current_data(&PHAR_GLOBALS->phar_persist_map, (void **) &objphar);
-	zend_hash_move_forward(&PHAR_GLOBALS->phar_persist_map)) {
-		if (objphar[0]->arc.archive->fname_len == phar->fname_len && !memcmp(objphar[0]->arc.archive->fname, phar->fname, phar->fname_len)) {
-			objphar[0]->arc.archive = phar;
-		}
-	}
 }
 /* }}} */
 

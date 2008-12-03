@@ -30,17 +30,20 @@
 #include "php_mysqli_structs.h"
 
 
-ZEND_BEGIN_ARG_INFO(second_arg_force_by_ref_rest, 1)
-	ZEND_ARG_PASS_INFO(0)
-ZEND_END_ARG_INFO();
+static
+	ZEND_BEGIN_ARG_INFO(second_arg_force_by_ref_rest, 1)
+		ZEND_ARG_PASS_INFO(0)
+	ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(third_arg_force_by_ref_rest, 1)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
-ZEND_END_ARG_INFO();
+static
+	ZEND_BEGIN_ARG_INFO(third_arg_force_by_ref_rest, 1)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+	ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
-ZEND_END_ARG_INFO();
+static
+	ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
+	ZEND_END_ARG_INFO();
 
 
 /* {{{ mysqli_functions[]
@@ -113,18 +116,12 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_num_rows,								NULL)
 	PHP_FE(mysqli_options, 								NULL)
 	PHP_FE(mysqli_ping,									NULL)
-#if defined(MYSQLI_USE_MYSQLND)
-	PHP_FE(mysqli_poll,									NULL)
-#endif
 	PHP_FE(mysqli_prepare,								NULL)
 	PHP_FE(mysqli_report,								NULL)
 	PHP_FE(mysqli_query,								NULL)
 	PHP_FE(mysqli_real_connect,							NULL)
 	PHP_FE(mysqli_real_escape_string,					NULL)
 	PHP_FE(mysqli_real_query,							NULL)
-#if defined(MYSQLI_USE_MYSQLND)
-	PHP_FE(mysqli_reap_async_query,						NULL)
-#endif
 	PHP_FE(mysqli_rollback,								NULL)
 	PHP_FE(mysqli_select_db,							NULL)
 #ifdef HAVE_MYSQLI_SET_CHARSET
@@ -225,10 +222,6 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(query,mysqli_query,NULL)
 	PHP_FALIAS(real_connect,mysqli_real_connect,NULL)
 	PHP_FALIAS(real_escape_string,mysqli_real_escape_string,NULL)
-#if defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(poll,mysqli_poll,NULL)
-	PHP_FALIAS(reap_async_query,mysqli_reap_async_query,NULL)
-#endif
 	PHP_FALIAS(escape_string, mysqli_real_escape_string,NULL)
 	PHP_FALIAS(real_query,mysqli_real_query,NULL)
 	PHP_FALIAS(rollback,mysqli_rollback,NULL)
@@ -290,11 +283,11 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(fetch,mysqli_stmt_fetch,NULL)
 	PHP_FALIAS(get_warnings, mysqli_stmt_get_warnings,	NULL)
 	PHP_FALIAS(result_metadata, mysqli_stmt_result_metadata,NULL)
-#if defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(more_results, mysqli_stmt_more_results,NULL)
-	PHP_FALIAS(next_result, mysqli_stmt_next_result,NULL)
-#endif
 	PHP_FALIAS(num_rows, mysqli_stmt_num_rows,NULL)
+#if defined(MYSQLI_USE_MYSQLND)
+	PHP_FALIAS(more_results, mysqli_stmt_more_results, NULL)
+	PHP_FALIAS(next_result, mysqli_stmt_next_result, NULL)
+#endif
 	PHP_FALIAS(send_long_data,mysqli_stmt_send_long_data,NULL)
 	PHP_FALIAS(stmt,mysqli_prepare,NULL)
 	PHP_FALIAS(free_result,mysqli_stmt_free_result,NULL)

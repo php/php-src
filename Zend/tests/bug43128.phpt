@@ -1,7 +1,5 @@
 --TEST--
 Bug #43128 (Very long class name causes segfault)
---INI--
-memory_limit=128000000
 --FILE--
 <?php
 

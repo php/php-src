@@ -87,20 +87,25 @@ static PHP_MINFO_FUNCTION(libxml);
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_set_streams_context, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_use_internal_errors, 0)
 	ZEND_ARG_INFO(0, use_errors)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_get_last_error, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_get_errors, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_clear_errors, 0)
 ZEND_END_ARG_INFO()
 

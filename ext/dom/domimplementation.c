@@ -28,20 +28,24 @@
 #include "php_dom.h"
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_get_feature, 0, 0, 2)
 	ZEND_ARG_INFO(0, feature)
 	ZEND_ARG_INFO(0, version)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_has_feature, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_documenttype, 0, 0, 3)
 	ZEND_ARG_INFO(0, qualifiedName)
 	ZEND_ARG_INFO(0, publicId)
 	ZEND_ARG_INFO(0, systemId)
 ZEND_END_ARG_INFO();
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementation_create_document, 0, 0, 3)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, qualifiedName)
@@ -94,7 +98,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 	zval *rv = NULL;
 	xmlDtd *doctype;
 	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
-	char *name = NULL, *publicid = NULL, *systemid = NULL;
+	char *name, *publicid, *systemid;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
@@ -157,7 +161,7 @@ PHP_METHOD(domimplementation, createDocument)
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
 	int ret, uri_len = 0, name_len = 0, errorcode = 0;
-	char *uri = NULL, *name = NULL;
+	char *uri, *name;
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 

@@ -93,7 +93,6 @@
 
 #include <zend_operators.h>
 #include <zend_strtod.h>
-#include <zend_float.h>
 
 #ifdef ZTS
 #include <TSRM.h>
@@ -1721,7 +1720,14 @@ ZEND_API char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sig
 					if (value(d) > 0.5 + value(eps))
 						goto bump_up;
 					else if (value(d) < 0.5 - value(eps)) {
-						while(*--s == '0');
+						/* cut ALL traling zeros only if the number of chars is greater than precision 
+						 * otherwise cut only extra zeros
+						 */
+						if (k < ndigits) {
+							while(*--s == '0' && (s - s0) > k);
+						} else {
+							while(*--s == '0');
+						}
 						s++;
 						goto ret1;
 					}
@@ -2033,7 +2039,6 @@ ret1:
 
 ZEND_API double zend_strtod (CONST char *s00, char **se)
 {
-	ZEND_FLOAT_DECLARE
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign,
 		e, e1, esign, i, j, k, nd, nd0, nf, nz, nz0, sign;
 	CONST char *s, *s0, *s1;
@@ -2045,8 +2050,6 @@ ZEND_API double zend_strtod (CONST char *s00, char **se)
 	double result;
 
 	CONST char decimal_point = '.';
-
-	ZEND_FLOAT_ENSURE();
 
 	sign = nz0 = nz = 0;
 	value(rv) = 0.;
@@ -2578,7 +2581,7 @@ ret:
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(pow5mult_mutex);
 
-	ZEND_FLOAT_RETURN(result);
+	return result;
 }
 
 ZEND_API double zend_hex_strtod(const char *str, char **endptr)

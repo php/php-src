@@ -232,7 +232,8 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				mbfl_filt_conv_html_dec_flush(filter);
 				if (c=='&')
 				{
-					buffer[filter->status++] = '&';
+					filter->status = 1;
+					buffer[0] = '&';
 				}
 			}
 		}
@@ -243,19 +244,17 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 {
 	int status, pos = 0;
-	unsigned char *buffer;
-	int err = 0;
+	char *buffer;
 
-	buffer = (unsigned char*)filter->opaque;
+	buffer = (char*)filter->opaque;
 	status = filter->status;
-	filter->status = 0;
 	/* flush fragments */
 	while (status--) {
-		int e = (*filter->output_function)(buffer[pos++], filter->data);
-		if (e != 0)
-			err = e;
+		CK((*filter->output_function)(buffer[pos++], filter->data));
 	}
-	return err;
+	filter->status = 0;
+	/*filter->buffer = 0; of cause NOT*/
+	return 0;
 }
 
 

@@ -3,9 +3,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Defines for Win32 to make it compatible for MySQL */
 
-#ifndef _MYSQLND_CONFIG_WIN_H
-#define _MYSQLND_CONFIG_WIN_H
-
 #include <sys/locking.h>
 #include <windows.h>
 #include <math.h>			/* Because of rint() */
@@ -13,35 +10,18 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <io.h>
 #include <malloc.h>
 
-#include <win32/php_stdint.h>
-
-#ifndef HAVE_INT8_T
-#define HAVE_INT8_T
-#endif
-#ifndef HAVE_UINT8_T
-#define HAVE_UINT8_T
-#endif
-#ifndef HAVE_INT16_T
-#define HAVE_INT16_T
-#endif
-#ifndef HAVE_UINT16_T
-#define HAVE_UINT16_T
-#endif
-#ifndef HAVE_INT32_T
-#define HAVE_INT32_T
-#endif
-#ifndef HAVE_UINT32_T
-#define HAVE_UINT32_T
-#endif
-#ifndef HAVE_INT64_T
-#define HAVE_INT64_T
-#endif
-#ifndef HAVE_UINT64_T
-#define HAVE_UINT64_T
+#if defined(__NT__)
+#define	SYSTEM_TYPE	"NT"
+#elif defined(__WIN2000__)
+#define	SYSTEM_TYPE	"WIN2000"
+#else
+#define	SYSTEM_TYPE	"Win95/Win98"
 #endif
 
-
-#ifndef _WIN64
+#ifdef _WIN64
+#define MACHINE_TYPE	"ia64"		/* Define to machine type name */
+#else
+#define MACHINE_TYPE	"i32"		/* Define to machine type name */
 #ifndef _WIN32
 #define _WIN32				/* Compatible with old source */
 #endif
@@ -50,10 +30,21 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 #endif /* _WIN64 */
 #ifndef __WIN__
-#define __WIN__				/* To make it easier in VC++ */
+#define __WIN__                       /* To make it easier in VC++ */
 #endif
 
+#define LONGLONG_MIN	((__int64) 0x8000000000000000)
+#define LONGLONG_MAX	((__int64) 0x7FFFFFFFFFFFFFFF)
+#define LL(A)		((__int64) A)
+
 /* Type information */
+
+typedef unsigned short  ushort;
+typedef unsigned int    uint;
+typedef unsigned __int64 ulonglong;	/* Microsofts 64 bit types */
+typedef __int64	longlong;
+typedef int sigset_t;
+#define longlong_defined
 
 #define SIZEOF_CHAR		1
 #define SIZEOF_LONG		4
@@ -63,53 +54,45 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef _WIN64
 /* Optimized store functions for Intel x86 */
 
-#define sint2korr(A)	(*((int16_t *) (A)))
-#define sint3korr(A)	((int32_t) ((((zend_uchar) (A)[2]) & 128) ? \
-										(((uint32_t) 255L << 24) | \
-										(((uint32_t) (zend_uchar) (A)[2]) << 16) |\
-										(((uint32_t) (zend_uchar) (A)[1]) << 8) | \
-										((uint32_t) (zend_uchar) (A)[0])) : \
-										(((uint32_t) (zend_uchar) (A)[2]) << 16) |\
-										(((uint32_t) (zend_uchar) (A)[1]) << 8) | \
-										((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)	(*((int32_t *) (A)))
-#define uint2korr(A)	(*((uint16_t *) (A)))
-#define uint3korr(A)	(int32_t) (*((uint32_t *) (A)) & 0xFFFFFF)
-#define uint4korr(A)	(*((uint32_t *) (A)))
-#define uint5korr(A)	((uint64_t)(((uint32_t) ((zend_uchar) (A)[0])) +\
-									(((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
-									(((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
-									(((uint32_t) ((zend_uchar) (A)[3])) << 24)) +\
-									(((uint64_t) ((zend_uchar) (A)[4])) << 32))
-#define uint8korr(A)	(*((uint64_t *) (A)))
-#define sint8korr(A)	(*((int64_t *) (A)))
-#define int2store(T,A)	*((uint16_t*) (T))= (uint16_t) (A)
-#define int3store(T,A)		{	*(T)=  (zend_uchar) ((A));\
-								*(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
-								*(T+2)=(zend_uchar) (((A) >> 16)); }
-#define int4store(T,A)	*((int32_t *) (T))= (int32_t) (A)
-#define int5store(T,A)	{	*(T)= (zend_uchar)((A));\
-							*((T)+1)=(zend_uchar) (((A) >> 8));\
-							*((T)+2)=(zend_uchar) (((A) >> 16));\
-							*((T)+3)=(zend_uchar) (((A) >> 24)); \
-							*((T)+4)=(zend_uchar) (((A) >> 32)); }
-#define int8store(T,A)	*((uint64_t *) (T))= (uint64_t) (A)
+#define sint2korr(A)	(*((int16 *) (A)))
+#define sint3korr(A)	((int32) ((((uchar) (A)[2]) & 128) ? \
+				  (((uint32) 255L << 24) | \
+				   (((uint32) (uchar) (A)[2]) << 16) |\
+				   (((uint32) (uchar) (A)[1]) << 8) | \
+				   ((uint32) (uchar) (A)[0])) : \
+				  (((uint32) (uchar) (A)[2]) << 16) |\
+				  (((uint32) (uchar) (A)[1]) << 8) | \
+				  ((uint32) (uchar) (A)[0])))
+#define sint4korr(A)	(*((long *) (A)))
+#define uint2korr(A)	(*((uint16 *) (A)))
+#define uint3korr(A)	(long) (*((unsigned long *) (A)) & 0xFFFFFF)
+#define uint4korr(A)	(*((unsigned long *) (A)))
+#define uint5korr(A)	((ulonglong)(((uint32) ((uchar) (A)[0])) +\
+				    (((uint32) ((uchar) (A)[1])) << 8) +\
+				    (((uint32) ((uchar) (A)[2])) << 16) +\
+				    (((uint32) ((uchar) (A)[3])) << 24)) +\
+			 	    (((ulonglong) ((uchar) (A)[4])) << 32))
+#define uint8korr(A)	(*((ulonglong *) (A)))
+#define sint8korr(A)	(*((longlong *) (A)))
+#define int2store(T,A)	*((uint16*) (T))= (uint16) (A)
+#define int3store(T,A)		{ *(T)=  (uchar) ((A));\
+				  *(T+1)=(uchar) (((uint) (A) >> 8));\
+				  *(T+2)=(uchar) (((A) >> 16)); }
+#define int4store(T,A)	*((long *) (T))= (long) (A)
+#define int5store(T,A)	{ *(T)= (uchar)((A));\
+			  *((T)+1)=(uchar) (((A) >> 8));\
+			  *((T)+2)=(uchar) (((A) >> 16));\
+			  *((T)+3)=(uchar) (((A) >> 24)); \
+			  *((T)+4)=(uchar) (((A) >> 32)); }
+#define int8store(T,A)	*((ulonglong *) (T))= (ulonglong) (A)
 
-#define float8get(V,M)	{	*((int32_t *) &V) = *((int32_t*) M); \
-							*(((int32_t *) &V)+1) = *(((int32_t*) M)+1); }
-#define float8store(T,V) {	*((int32_t *) T) = *((int32_t*) &V); \
-							*(((int32_t *) T)+1) = *(((int32_t*) &V)+1); }
-#define float4get(V,M) { *((int32_t *) &(V)) = *((int32_t*) (M)); }
+#define doubleget(V,M)	{ *((long *) &V) = *((long*) M); \
+			  *(((long *) &V)+1) = *(((long*) M)+1); }
+#define doublestore(T,V) { *((long *) T) = *((long*) &V); \
+			   *(((long *) T)+1) = *(((long*) &V)+1); }
+#define float4get(V,M) { *((long *) &(V)) = *((long*) (M)); }
+#define float8get(V,M) doubleget((V),(M))
+#define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
+#define float8store(V,M) doublestore((V),(M))
 
 #endif /* _WIN64 */
-
-#endif /* _MYSQLND_CONFIG_WIN_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -60,6 +60,12 @@
  * NSAPI includes
  */
 #include "nsapi.h"
+#include "base/pblock.h"
+#include "base/session.h"
+#include "frame/req.h"
+#include "frame/protocol.h"  /* protocol_start_response */
+#include "base/util.h"       /* is_mozilla, getline */
+#include "frame/log.h"       /* log_error */
 
 #define NSLS_D		struct nsapi_request_context *request_context
 #define NSLS_DC		, NSLS_D
@@ -164,13 +170,16 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
 
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_nsapi_virtual, 0, 0, 1)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_nsapi_request_headers, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_nsapi_response_headers, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -440,6 +449,8 @@ PHP_FUNCTION(nsapi_response_headers)
 	
 	array_init(return_value);
 
+	php_header(TSRMLS_C);
+
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
 		entry=rc->rq->srvhdrs->ht[i];
 		while (entry) {
@@ -458,12 +469,9 @@ PHP_FUNCTION(nsapi_response_headers)
 static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
 {
 	int retval;
-	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
-	
-	if (!SG(headers_sent)) {
-		sapi_send_headers(TSRMLS_C);
-	}
+	nsapi_request_context *rc;
 
+	rc = (nsapi_request_context *)SG(server_context);
 	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /* -1 */ || retval == IO_EOF /* 0 */) {
 		php_handle_aborted_connection();
@@ -471,98 +479,38 @@ static int sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_D
 	return retval;
 }
 
-/* modified version of apache2 */
-static void sapi_nsapi_flush(void *server_context)
-{
-	nsapi_request_context *rc = (nsapi_request_context *)server_context;
-	TSRMLS_FETCH();
-
-	if (!SG(headers_sent)) {
-		sapi_send_headers(TSRMLS_C);
-	}
-
-	/* flushing is only supported in iPlanet servers from version 6.1 on, make it conditional */
-#if NSAPI_VERSION >= 302
-	if (net_flush(rc->sn->csd) < 0) {
-		php_handle_aborted_connection();
-	}
-#endif
-}
-
-/* callback for zend_llist_apply on SAPI_HEADER_DELETE_ALL operation */
-static int php_nsapi_remove_header(sapi_header_struct *sapi_header TSRMLS_DC)
-{
-	char *header_name, *p;
-	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
-	
-	/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
-	header_name = nsapi_strdup(sapi_header->header);
-
-	/* extract name, this works, if only the header without ':' is given, too */
-	if (p = strchr(header_name, ':')) {
-		*p = 0;
-	}
-	
-	/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
-	for (p=header_name; *p; p++) {
-		*p=tolower(*p);
-	}
-	
-	/* remove the header */
-	param_free(pblock_remove(header_name, rc->rq->srvhdrs));
-	nsapi_free(header_name);
-	
-	return ZEND_HASH_APPLY_KEEP;
-}
-
-static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	switch(op) {
-		case SAPI_HEADER_DELETE_ALL:
-			/* this only deletes headers set or overwritten by PHP, headers previously set by NSAPI are left intact */
-			zend_llist_apply(&sapi_headers->headers, (llist_apply_func_t) php_nsapi_remove_header TSRMLS_CC);
-			return 0;
-
-		case SAPI_HEADER_DELETE:
-			/* reuse the zend_llist_apply callback function for this, too */
-			php_nsapi_remove_header(sapi_header TSRMLS_CC);
-			return 0;
-
-		case SAPI_HEADER_ADD:
-		case SAPI_HEADER_REPLACE:
-			/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
-			header_name = nsapi_strdup(sapi_header->header);
-
-			/* split header and align pointer for content */
-			header_content = strchr(header_name, ':');
-			if (header_content) {
-				*header_content = 0;
-				do {
-					header_content++;
-				} while (*header_content==' ');
-				
-				/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
-				for (p=header_name; *p; p++) {
-					*p=tolower(*p);
-				}
-
-				/* if REPLACE, remove first.  "Content-type" is always removed, as SAPI has a bug according to this */
-				if (op==SAPI_HEADER_REPLACE || strcmp(header_name, "content-type")==0) {
-					param_free(pblock_remove(header_name, rc->rq->srvhdrs));
-				}
-				/* ADD header to nsapi table */
-				pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
-			}
-			
-			nsapi_free(header_name);
-			return SAPI_HEADER_ADD;
-			
-		default:
-			return 0;
+	header_name = sapi_header->header;
+	header_content = p = strchr(header_name, ':');
+	if (p == NULL) {
+		efree(sapi_header->header);
+		return 0;
 	}
+
+	*p = 0;
+	do {
+		header_content++;
+	} while (*header_content == ' ');
+
+	if (!strcasecmp(header_name, "Content-Type")) {
+		param_free(pblock_remove("content-type", rc->rq->srvhdrs));
+		pblock_nvinsert("content-type", header_content, rc->rq->srvhdrs);
+	} else {
+		/* to lower case because NSAPI reformats the headers and wants lowercase */
+		for (p=header_name; *p; p++) {
+			*p=tolower(*p);
+		}
+		if (sapi_header->replace) param_free(pblock_remove(header_name, rc->rq->srvhdrs));
+		pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
+	}
+
+	sapi_free_header(sapi_header);
+
+	return 0;	/* don't use the default SAPI mechanism, NSAPI duplicates this functionality */
 }
 
 static int sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
@@ -803,13 +751,6 @@ static int php_nsapi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-static struct stat* sapi_nsapi_get_stat(TSRMLS_D)
-{
-	return request_stat_path(
-		SG(request_info).path_translated,
-		((nsapi_request_context *)SG(server_context))->rq
-	);
-}
 
 static sapi_module_struct nsapi_sapi_module = {
 	"nsapi",                                /* name */
@@ -822,8 +763,8 @@ static sapi_module_struct nsapi_sapi_module = {
 	NULL,                                   /* deactivate */
 
 	sapi_nsapi_ub_write,                    /* unbuffered write */
-	sapi_nsapi_flush,                       /* flush */
-	sapi_nsapi_get_stat,                    /* get uid/stat */
+	NULL,                                   /* flush */
+	NULL,                                   /* get uid */
 	NULL,                                   /* getenv */
 
 	php_error,                              /* error handler */
@@ -913,10 +854,12 @@ int NSAPI_PUBLIC php5_init(pblock *pb, Session *sn, Request *rq)
 	int threads=128; /* default for server */
 
 	/* fetch max threads from NSAPI and initialize TSRM with it */
-	threads=conf_getglobals()->Vpool_maxthreads;
+#if defined(pool_maxthreads)
+	threads=pool_maxthreads;
 	if (threads<1) {
 		threads=128; /* default for server */
 	}
+#endif
 	tsrm_startup(threads, 1, 0, NULL);
 
 	core_globals = ts_resource(core_globals_id);
@@ -964,7 +907,7 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 	int retval;
 	nsapi_request_context *request_context;
 	zend_file_handle file_handle = {0};
-	struct stat *fst;
+	struct stat fst;
 
 	char *path_info;
 	char *query_string    = pblock_findval("query", rq->reqpb);
@@ -1036,8 +979,7 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	fst = request_stat_path(SG(request_info).path_translated, rq);
-	if (fst && S_ISREG(fst->st_mode)) {
+	if (stat(SG(request_info).path_translated, &fst)==0 && S_ISREG(fst.st_mode)) {
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			php_execute_script(&file_handle TSRMLS_CC);
 			php_request_shutdown(NULL);

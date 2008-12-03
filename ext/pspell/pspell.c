@@ -73,6 +73,7 @@ static PHP_FUNCTION(pspell_config_repl);
 static PHP_FUNCTION(pspell_config_save_repl);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
 	ZEND_ARG_INFO(0, language)
 	ZEND_ARG_INFO(0, spelling)
@@ -81,6 +82,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
 	ZEND_ARG_INFO(0, personal)
 	ZEND_ARG_INFO(0, language)
@@ -90,44 +92,53 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_config, 0, 0, 1)
 	ZEND_ARG_INFO(0, config)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_check, 0, 0, 2)
 	ZEND_ARG_INFO(0, pspell)
 	ZEND_ARG_INFO(0, word)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_suggest, 0, 0, 2)
 	ZEND_ARG_INFO(0, pspell)
 	ZEND_ARG_INFO(0, word)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_store_replacement, 0, 0, 3)
 	ZEND_ARG_INFO(0, pspell)
 	ZEND_ARG_INFO(0, misspell)
 	ZEND_ARG_INFO(0, correct)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_personal, 0, 0, 2)
 	ZEND_ARG_INFO(0, pspell)
 	ZEND_ARG_INFO(0, word)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_session, 0, 0, 2)
 	ZEND_ARG_INFO(0, pspell)
 	ZEND_ARG_INFO(0, word)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_clear_session, 0, 0, 1)
 	ZEND_ARG_INFO(0, pspell)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_save_wordlist, 0, 0, 1)
 	ZEND_ARG_INFO(0, pspell)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_create, 0, 0, 1)
 	ZEND_ARG_INFO(0, language)
 	ZEND_ARG_INFO(0, spelling)
@@ -135,41 +146,49 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_create, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_runtogether, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, runtogether)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_mode, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_ignore, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, ignore)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_personal, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, personal)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_dict_dir, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_data_dir, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, directory)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_repl, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, repl)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_save_repl, 0, 0, 2)
 	ZEND_ARG_INFO(0, conf)
 	ZEND_ARG_INFO(0, save)

@@ -6,8 +6,8 @@ namespace Exception;
 function foo() {
   echo "ok\n";
 }
-\Exception\foo();
-\Exception::bar();
+Exception::foo();
+Exception::bar();
 --EXPECTF--
 ok
 

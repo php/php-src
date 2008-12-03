@@ -95,7 +95,7 @@ protected int file_os2_apptype(struct magic_set *ms, const char *fn,
 private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
-private int unreadable_info(struct magic_set *, mode_t, const char *);
+private int info_from_stat(struct magic_set *, mode_t);
 private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO
@@ -148,13 +148,13 @@ free_mlist(struct mlist *mlist)
 }
 
 private int
-unreadable_info(struct magic_set *ms, mode_t md, const char *file)
+info_from_stat(struct magic_set *ms, mode_t md)
 {
 	/* We cannot open it, but we were able to stat it. */
-	if (access(file, W_OK) == 0)
+	if (md & 0222)
 		if (file_printf(ms, "writable, ") == -1)
 			return -1;
-	if (access(file, X_OK) == 0)
+	if (md & 0111)
 		if (file_printf(ms, "executable, ") == -1)
 			return -1;
 	if (S_ISREG(md))
@@ -202,6 +202,14 @@ public int
 magic_compile(struct magic_set *ms, const char *magicfile)
 {
 	struct mlist *ml = file_apprentice(ms, magicfile, FILE_COMPILE);
+	free_mlist(ml);
+	return ml ? 0 : -1;
+}
+
+public int
+magic_check(struct magic_set *ms, const char *magicfile)
+{
+	struct mlist *ml = file_apprentice(ms, magicfile, FILE_CHECK);
 	free_mlist(ml);
 	return ml ? 0 : -1;
 }
@@ -267,7 +275,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	unsigned char *buf;
 	struct stat	sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
-	int no_in_stream = 0;
+	int	ispipe = 0;
 	TSRMLS_FETCH();
 
 	if (!inname && !stream) {
@@ -295,33 +303,30 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 			goto done;
 	}
 
-	errno = 0;
+		errno = 0;
 
-	if (!stream && inname) {
-		no_in_stream = 1;
+		if (!stream && inname) {
 #if (PHP_MAJOR_VERSION < 6)
 		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 #else
 		stream = php_stream_open_wrapper(inname, "rb", REPORT_ERRORS, NULL);
 #endif
-	}
+		}
 
-	if (!stream) {
-				if (unreadable_info(ms, sb.st_mode,
-#ifdef __CYGWIN
-						    tmp
-#else
-						    inname
-#endif
-						    ) == -1)
-			goto done;
-		rv = 0;
-		goto done;
-	}
+		if (!stream) {
+				fprintf(stderr, "couldn't open file\n");
+				if (info_from_stat(ms, sb.st_mode) == -1)
+					goto done;
+				rv = 0;
+				goto done;
+		}
 
 #ifdef O_NONBLOCK
-		/* we should be already be in non blocking mode for network socket */
+/* we should be already be in non blocking mode for network socket 
+ * leaving the comment/#ifdef as documentation
+ */
 #endif
+
 
 	/*
 	 * try looking at the first HOWMANY bytes
@@ -338,13 +343,14 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 done:
 	efree(buf);
 
-	if (no_in_stream && stream) {
+	if (stream) {
 		php_stream_close(stream);
 	}
 
 	close_and_restore(ms, inname, 0, &sb);
 	return rv == 0 ? file_getbuffer(ms) : NULL;
 }
+
 
 public const char *
 magic_buffer(struct magic_set *ms, const void *buf, size_t nb)

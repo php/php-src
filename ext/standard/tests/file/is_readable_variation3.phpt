@@ -2,17 +2,8 @@
 Test is_readable() function: usage variations - invalid file names
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-
-  // Skip if being run by root (files are always readable, writeable and executable)
-  $filename = dirname(__FILE__)."/is_readable_root_check.tmp";
-  $fp = fopen($filename, 'w');
-  fclose($fp);
-  if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-  }
-  unlink($filename);
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip not for windows');
 }
 ?>
 --FILE--
@@ -36,7 +27,6 @@ $misc_files = array(
   TRUE,
   FALSE,
   NULL,
-  " ",
   @array(),
   @$file_handle
 );
@@ -59,10 +49,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 
 Warning: is_readable() expects parameter 1 to be string, array given in %s on line %d
 NULL
 bool(false)
 Done
-

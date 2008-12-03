@@ -48,37 +48,43 @@ ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_pcntl_void, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_waitpid, 0, 0, 2)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wait, 0, 0, 1)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
 	ZEND_ARG_INFO(0, signo)
 	ZEND_ARG_INFO(0, handler)
 	ZEND_ARG_INFO(0, restart_syscalls)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
 	ZEND_ARG_INFO(0, how)
 	ZEND_ARG_INFO(0, set)
-	ZEND_ARG_INFO(1, oldset)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigwaitinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, set)
 	ZEND_ARG_INFO(1, info)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
 	ZEND_ARG_INFO(0, set)
 	ZEND_ARG_INFO(1, info)
@@ -86,41 +92,50 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
 	ZEND_ARG_INFO(0, nanoseconds)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifstopped, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexitstatus, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wtermsig, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wstopsig, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_exec, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, args)
 	ZEND_ARG_INFO(0, envs)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_alarm, 0, 0, 1)
 	ZEND_ARG_INFO(0, seconds)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GETPRIORITY
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_getpriority, 0, 0, 0)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(0, process_identifier)
@@ -128,6 +143,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_SETPRIORITY
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
 	ZEND_ARG_INFO(0, priority)
 	ZEND_ARG_INFO(0, pid)
@@ -586,7 +602,7 @@ PHP_FUNCTION(pcntl_wstopsig)
    Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
-	zval *args = NULL, *envs = NULL;
+	zval *args, *envs;
 	zval **element;
 	HashTable *args_hash, *envs_hash;
 	int argc = 0, argi = 0;
@@ -744,20 +760,20 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 /* }}} */
 
 #ifdef HAVE_SIGPROCMASK
-/* {{{ proto bool pcntl_sigprocmask(int how, array set[, array &oldset])
+/* {{{ proto bool pcntl_sigprocmask(int how, array set)
    Examine and change blocked signals */
 PHP_FUNCTION(pcntl_sigprocmask)
 {
 	long          how, signo;
-	zval         *user_set, *user_oldset = NULL, **user_signo;
-	sigset_t      set, oldset;
+	zval         *user_set, **user_signo;
+	sigset_t      set;
 	HashPosition  pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z", &how, &user_set, &user_oldset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la", &how, &user_set) == FAILURE) {
 		return;
 	}
 
-	if (sigemptyset(&set) != 0 || sigemptyset(&oldset) != 0) {
+	if (sigemptyset(&set) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -777,24 +793,9 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		zend_hash_move_forward_ex(Z_ARRVAL_P(user_set), &pos);
 	}
 
-	if (sigprocmask(how, &set, &oldset) != 0) {
+	if (sigprocmask(how, &set, NULL) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
-	}
-
-	if (user_oldset != NULL) {
-		if (Z_TYPE_P(user_oldset) != IS_ARRAY) {
-			zval_dtor(user_oldset);
-			array_init(user_oldset);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(user_oldset));
-		}
-		for (signo = 1; signo < MAX(NSIG-1, SIGRTMAX); ++signo) {
-			if (sigismember(&oldset, signo) != 1) {
-				continue;
-			}
-			add_next_index_long(user_oldset, signo);
-		}
 	}
 
 	RETURN_TRUE;
@@ -858,8 +859,6 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
 			array_init(user_siginfo);
-		} else {
-			zend_hash_clean(Z_ARRVAL_P(user_siginfo));
 		}
 		add_assoc_long_ex(user_siginfo, "signo", sizeof("signo"), siginfo.si_signo);
 		add_assoc_long_ex(user_siginfo, "errno", sizeof("errno"), siginfo.si_errno);

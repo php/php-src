@@ -188,7 +188,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 		if (ce) {
 			return zend_hash_update(doc_props->classmap, basece->name, basece->name_length + 1, &ce, sizeof(ce), NULL);
 		} else {
-			zend_hash_del(doc_props->classmap, basece->name, basece->name_length + 1);
+			return zend_hash_del(doc_props->classmap, basece->name, basece->name_length + 1);
 		}
 	}
 	return SUCCESS;
@@ -510,6 +510,7 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_import_simplexml, 0, 0, 1)
 	ZEND_ARG_INFO(0, node)
 ZEND_END_ARG_INFO()
@@ -964,10 +965,8 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 		intern->ptr = NULL;
 	}
 
-	if (intern->registered_phpfunctions) {
-		zend_hash_destroy(intern->registered_phpfunctions);
-		FREE_HASHTABLE(intern->registered_phpfunctions);
-	}
+	zend_hash_destroy(intern->registered_phpfunctions);
+	FREE_HASHTABLE(intern->registered_phpfunctions);
 	
 	if (intern->node_list) {
 		zend_hash_destroy(intern->node_list);

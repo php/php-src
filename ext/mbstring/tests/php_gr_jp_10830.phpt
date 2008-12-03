@@ -13,8 +13,6 @@ var_dump( mb_ereg("^[^><]+$",$a) );
 var_dump( ereg("^[^><]+$",$a) );
 ?>
 
---EXPECTF--
+--EXPECT--
 bool(false)
-
-Deprecated: Function ereg() is deprecated in %s on line %d
 bool(false)

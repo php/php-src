@@ -19,7 +19,6 @@ if (!CL) {
 VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
 AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
-DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
 
 // do we use x64 or 80x86 version of compiler?
 X64 = probe_binary(CL, 64);
@@ -29,7 +28,6 @@ if (X64) {
 	STDOUT.WriteLine("  Detected 32-bit compiler");
 }
 AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
-DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
@@ -184,9 +182,6 @@ if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
 
-DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
-
-
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
@@ -236,7 +231,6 @@ if (PHP_PHP_BUILD == 'no') {
 		}
 	}
 }
-DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
@@ -310,11 +304,6 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c getopt.c fopen_wra
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c");
 ADD_SOURCES("win32", "inet.c");
-
-// Newer versions have it
-if (VCVERS <= 1300) {
-	ADD_SOURCES("win32", "strtoi64.c");
-}
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");

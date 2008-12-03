@@ -29,78 +29,48 @@ echo "Done";
 --EXPECTF--
 *** Testing eregi_replace() : bad REs ***
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EMPTY in %s on line %d
+Warning: eregi_replace(): REG_EMPTY in %s on line 9
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EPAREN in %s on line %d
+Warning: eregi_replace(): REG_EPAREN in %s on line 10
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EBRACK in %s on line %d
+Warning: eregi_replace(): REG_EBRACK in %s on line 11
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EPAREN in %s on line %d
+Warning: eregi_replace(): REG_EPAREN in %s on line 12
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADRPT in %s on line %d
+Warning: eregi_replace(): REG_BADRPT in %s on line 13
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADRPT in %s on line %d
+Warning: eregi_replace(): REG_BADRPT in %s on line 14
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADRPT in %s on line %d
+Warning: eregi_replace(): REG_BADRPT in %s on line 15
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADRPT in %s on line %d
+Warning: eregi_replace(): REG_BADRPT in %s on line 16
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADBR in %s on line %d
+Warning: eregi_replace(): REG_BADBR in %s on line 17
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EMPTY in %s on line %d
+Warning: eregi_replace(): REG_EMPTY in %s on line 18
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EMPTY in %s on line %d
+Warning: eregi_replace(): REG_EMPTY in %s on line 19
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_BADBR in %s on line %d
+Warning: eregi_replace(): REG_BADBR in %s on line 20
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_ERANGE in %s on line %d
+Warning: eregi_replace(): REG_ERANGE in %s on line 21
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_EESCAPE in %s on line %d
+Warning: eregi_replace(): REG_EESCAPE in %s on line 22
 bool(false)
 
-Deprecated: Function eregi_replace() is deprecated in %s on line %d
-
-Warning: eregi_replace(): REG_ERANGE in %s on line %d
+Warning: eregi_replace(): REG_ERANGE in %s on line 23
 bool(false)
 Done

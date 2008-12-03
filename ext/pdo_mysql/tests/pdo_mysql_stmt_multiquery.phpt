@@ -54,13 +54,9 @@ MySQLPDOTest::skip();
 ?>
 --EXPECTF--
 Emulated Prepared Statements...
-array(3) {
+array(1) {
   [0]=>
   string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 array(1) {
   [0]=>
@@ -69,13 +65,9 @@ array(1) {
     string(1) "a"
   }
 }
-array(3) {
+array(1) {
   [0]=>
   string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
 }
 array(1) {
   [0]=>

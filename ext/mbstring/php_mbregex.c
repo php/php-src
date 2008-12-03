@@ -114,7 +114,6 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
-	onig_init();
 	return SUCCESS;
 }
 /* }}} */
@@ -122,7 +121,6 @@ PHP_MINIT_FUNCTION(mb_regex)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(mb_regex) */
 PHP_MSHUTDOWN_FUNCTION(mb_regex)
 {
-	onig_end();
 	return SUCCESS;
 }
 /* }}} */

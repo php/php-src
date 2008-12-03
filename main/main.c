@@ -575,8 +575,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *docref_target = "", *docref_root = "";
 	char *p;
 	int buffer_len = 0;
-	char *space = "";
-	char *class_name = "";
+	char *space;
+	char *class_name = get_active_class_name(&space TSRMLS_CC);
 	char *function;
 	int origin_len;
 	char *origin;
@@ -632,7 +632,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			function = "Unknown";
 		} else {
 			is_function = 1;
-			class_name = get_active_class_name(&space TSRMLS_CC);
 		}
 	}
 
@@ -1122,7 +1121,7 @@ static char *php_resolve_path_for_zend(const char *filename, int filename_len TS
 
 /* {{{ php_get_configuration_directive_for_zend
  */
-static int php_get_configuration_directive_for_zend(const char *name, uint name_length, zval *contents)
+static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
 {
 	zval *retval = cfg_get_entry(name, name_length);
 
@@ -1478,12 +1477,7 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
-		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
-				OG(ob_nesting_level) && !OG(active_ob_buffer).chunk_size && PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)) {
-			send_buffer = 0;
-		}
-		php_end_ob_buffers(send_buffer TSRMLS_CC);
+		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
 	} zend_end_try();
 
 	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */

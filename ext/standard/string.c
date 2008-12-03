@@ -50,9 +50,6 @@
 #include "TSRM.h"
 #endif
 
-/* For str_getcsv() support */
-#include "ext/standard/file.h"
-
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
 #define STR_PAD_BOTH			2
@@ -207,8 +204,10 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 {
 	char *s11, *s22;
 	int len1, len2;
-	long start = 0, len = 0;
+	long start, len;
 	
+	start = 0;
+	len = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
 		return;
@@ -2061,7 +2060,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
    Returns split line */
 PHP_FUNCTION(chunk_split) 
 {
-	zval **p_chunklen = NULL, **p_ending = NULL;
+	zval **p_chunklen, **p_ending;
 	char *str;
 	char *result;
 	char *end    = "\r\n";
@@ -2120,7 +2119,7 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	char *str;
-	long l = 0, f;
+	long l, f;
 	int str_len;
 	int argc = ZEND_NUM_ARGS();
 	
@@ -2721,8 +2720,8 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 PHP_FUNCTION(strtr)
 {								
 	zval **from;
-	char *str, *to = NULL;
-	int str_len, to_len = 0;
+	char *str, *to;
+	int str_len, to_len;
 	int ac = ZEND_NUM_ARGS();
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|s", &str, &str_len, &from, &to, &to_len) == FAILURE) {
@@ -2834,7 +2833,7 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 PHP_FUNCTION(similar_text)
 {
 	char *t1, *t2;
-	zval **percent = NULL;
+	zval **percent;
 	int ac = ZEND_NUM_ARGS();
 	int sim;
 	int t1_len, t2_len;
@@ -3611,7 +3610,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval **subject, **search, **replace, **subject_entry, **zcount = NULL;
+	zval **subject, **search, **replace, **subject_entry, **zcount;
 	zval *result;
 	char *string_key;
 	uint string_key_len;
@@ -4353,10 +4352,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 
 			case '"':
 			case '\'':
-				if (state == 4) {
-					/* Inside <!-- comment --> */
-					break;
-				} else if (state == 2 && *(p-1) != '\\') {
+				if (state == 2 && *(p-1) != '\\') {
 					if (lc == c) {
 						lc = '\0';
 					} else if (lc != '\\') {
@@ -4459,27 +4455,6 @@ reg_char:
 		*stateptr = state;
 
 	return (size_t)(rp - rbuf);
-}
-/* }}} */
-
-/* {{{ proto array str_getcsv(string input[, string delimiter[, string enclosure[, string escape]]])
-Parse a CSV string into an array */
-PHP_FUNCTION(str_getcsv)
-{
-	char *str, delim = ',', enc = '"', esc = '\\';
-	char *delim_str = NULL, *enc_str = NULL, *esc_str = NULL;
-	int str_len = 0, delim_len = 0, enc_len = 0, esc_len = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss", &str, &str_len, &delim_str, &delim_len, 
-		&enc_str, &enc_len, &esc_str, &esc_len) == FAILURE) {
-		return;
-	}
-	
-	delim = delim_len ? delim_str[0] : delim;
-	enc = enc_len ? enc_str[0] : enc;
-	esc = esc_len ? esc_str[0] : esc;
-
-	php_fgetcsv(NULL, delim, enc, esc, str_len, str, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -4727,7 +4702,7 @@ PHP_FUNCTION(strnatcasecmp)
 PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
-	long offset = 0, length = 0;
+	long offset = 0, length;
 	int ac = ZEND_NUM_ARGS();
 	int count = 0;
 	int haystack_len, needle_len;
@@ -4969,7 +4944,7 @@ PHP_FUNCTION(str_shuffle)
 PHP_FUNCTION(str_word_count)
 {
 	char *buf, *str, *char_list = NULL, *p, *e, *s, ch[256];
-	int str_len, char_list_len = 0, word_count = 0;
+	int str_len, char_list_len, word_count = 0;
 	long type = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &type, &char_list, &char_list_len) == FAILURE) {

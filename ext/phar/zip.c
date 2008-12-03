@@ -465,38 +465,10 @@ foundit:
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
 			off_t saveloc;
-			/* verify local file header */
-			phar_zip_file_header local;
 
-			/* archive alias found */
+			/* archive alias found, seek to file contents, do not validate local header. Potentially risky, but not very. */
 			saveloc = php_stream_tell(fp);
-			php_stream_seek(fp, PHAR_GET_32(zipentry.offset), SEEK_SET);
-
-			if (sizeof(local) != php_stream_read(fp, (char *) &local, sizeof(local))) {
-				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (cannot read local file header for alias)");
-			}
-
-			/* verify local header */
-			if (entry.filename_len != PHAR_GET_16(local.filename_len) || entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
-				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local head of alias does not match central directory)");
-			}
-
-			/* construct actual offset to file start - local extra_len can be different from central extra_len */
-			entry.offset = entry.offset_abs =
-				sizeof(local) + entry.header_offset + PHAR_GET_16(local.filename_len) + PHAR_GET_16(local.extra_len);
-#if PHP_VERSION_ID < 50207
-			/* work around Bug #46147 */
-			fp->writepos = fp->readpos = 0;
-#endif
-			php_stream_seek(fp, entry.offset, SEEK_SET);
-			/* these next lines should be for php < 5.2.6 after 5.3 filters are fixed */
-			fp->writepos = 0;
-			fp->readpos = 0;
-			php_stream_seek(fp, entry.offset, SEEK_SET);
-			fp->writepos = 0;
-			fp->readpos = 0;
-			/* the above lines should be for php < 5.2.6 after 5.3 filters are fixed */
-
+			php_stream_seek(fp, PHAR_GET_32(zipentry.offset) + sizeof(phar_zip_file_header) + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
 			mydata->alias_len = entry.uncompressed_filesize;
 
 			if (entry.flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -511,9 +483,6 @@ foundit:
 
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					pefree(entry.filename, entry.is_persistent);
-#if PHP_VERSION_ID < 50207
-					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
-#endif
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 
@@ -529,12 +498,10 @@ foundit:
 				}
 
 				php_stream_filter_append(&fp->readfilters, filter);
+				php_stream_filter_append(&fp->readfilters, filter);
 
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					pefree(entry.filename, entry.is_persistent);
-#if PHP_VERSION_ID < 50207
-					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
-#endif
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 
@@ -704,7 +671,6 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		}
 	}
 
-	phar_add_virtual_dirs(entry->phar, entry->filename, entry->filename_len TSRMLS_CC);
 	memset(&local, 0, sizeof(local));
 	memset(&central, 0, sizeof(central));
 	memset(&perms, 0, sizeof(perms));
@@ -1171,7 +1137,6 @@ nostub:
 	pass.filefp = php_stream_fopen_tmpfile();
 
 	if (!pass.filefp) {
-fperror:
 		if (closeoldfile) {
 			php_stream_close(oldfile);
 		}
@@ -1184,7 +1149,13 @@ fperror:
 	pass.centralfp = php_stream_fopen_tmpfile();
 
 	if (!pass.centralfp) {
-		goto fperror;
+		if (closeoldfile) {
+			php_stream_close(oldfile);
+		}
+		if (error) {
+			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to open temporary file", phar->fname);
+		}
+		return EOF;
 	}
 
 	pass.free_fp = pass.free_ufp = 1;
@@ -1195,17 +1166,15 @@ fperror:
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass TSRMLS_CC);
 
 	if (temperr) {
+		php_stream_close(pass.filefp);
+		php_stream_close(pass.centralfp);
+		if (closeoldfile) {
+			php_stream_close(oldfile);
+		}
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
 		}
 		efree(temperr);
-temperror:
-		php_stream_close(pass.centralfp);
-nocentralerror:
-		php_stream_close(pass.filefp);
-		if (closeoldfile) {
-			php_stream_close(oldfile);
-		}
 		return EOF;
 	}
 
@@ -1215,10 +1184,15 @@ nocentralerror:
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
 	if (eocd.cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
+		php_stream_close(pass.filefp);
+		php_stream_close(pass.centralfp);
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 		}
-		goto temperror;
+		if (closeoldfile) {
+			php_stream_close(oldfile);
+		}
+		return EOF;
 	}
 
 	php_stream_close(pass.centralfp);
@@ -1231,27 +1205,41 @@ nocentralerror:
 		eocd.comment_len = PHAR_SET_16(main_metadata_str.len);
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
+			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
 			}
-			goto nocentralerror;
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			smart_str_free(&main_metadata_str);
+			return EOF;
 		}
 
 		if (main_metadata_str.len != php_stream_write(pass.filefp, main_metadata_str.c, main_metadata_str.len)) {
+			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write metadata to zip comment", phar->fname);
 			}
-			goto nocentralerror;
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			smart_str_free(&main_metadata_str);
+			return EOF;
 		}
 
 		smart_str_free(&main_metadata_str);
 
 	} else {
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
+			php_stream_close(pass.filefp);
 			if (error) {
 				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write end of central-directory", phar->fname);
 			}
-			goto nocentralerror;
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+			return EOF;
 		}
 	}
 

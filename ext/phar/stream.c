@@ -258,7 +258,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
 				entry->is_temp_dir = 1;
-				entry->filename = estrndup("", 0);
+				entry->filename = "";
 				entry->filename_len = 0;
 				entry->phar = phar;
 				entry->offset = entry->offset_abs = 0;
@@ -346,8 +346,15 @@ phar_stub:
  */
 static int phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
+	phar_entry_info *entry = ((phar_entry_data *)stream->abstract)->internal_file;
+	int is_temp_dir = entry->is_temp_dir;
+
 	phar_entry_delref((phar_entry_data *)stream->abstract TSRMLS_CC);
 
+	if (is_temp_dir) {
+		/* phar archive stub, free it */
+		efree(entry);
+	}
 	return 0;
 }
 /* }}} */
@@ -359,15 +366,8 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
-	phar_entry_info *entry;
 
-	if (data->internal_file->link) {
-		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
-	} else {
-		entry = data->internal_file;
-	}
-
-	if (entry->is_deleted) {
+	if (data->internal_file->is_deleted) {
 		stream->eof = 1;
 		return 0;
 	}
@@ -375,9 +375,9 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 	/* use our proxy position */
 	php_stream_seek(data->fp, data->position + data->zero, SEEK_SET);
 
-	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
+	got = php_stream_read(data->fp, buf, MIN(count, data->internal_file->uncompressed_filesize - data->position));
 	data->position = php_stream_tell(data->fp) - data->zero;
-	stream->eof = (data->position == (off_t) entry->uncompressed_filesize);
+	stream->eof = (data->position == (off_t) data->internal_file->uncompressed_filesize);
 
 	return got;
 }
@@ -389,19 +389,12 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	phar_entry_info *entry;
+
 	int res;
 	off_t temp;
-
-	if (data->internal_file->link) {
-		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
-	} else {
-		entry = data->internal_file;
-	}
-
 	switch (whence) {
 		case SEEK_END :
-			temp = data->zero + entry->uncompressed_filesize + offset;
+			temp = data->zero + data->internal_file->uncompressed_filesize + offset;
 			break;
 		case SEEK_CUR :
 			temp = data->zero + data->position + offset;
@@ -410,7 +403,7 @@ static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t 
 			temp = data->zero + offset;
 			break;
 	}
-	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
+	if (temp > data->zero + (off_t) data->internal_file->uncompressed_filesize) {
 		*newoffset = -1;
 		return -1;
 	}
@@ -472,7 +465,8 @@ static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_temp_dir TSRMLS_DC)
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, 
+			zend_bool is_temp_dir, char *alias, int alias_len TSRMLS_DC)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
@@ -549,7 +543,7 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 		return -1;
 	}
 
-	phar_dostat(data->phar, data->internal_file, ssb, 0 TSRMLS_CC);
+	phar_dostat(data->phar, data->internal_file, ssb, 0, data->phar->alias, data->phar->alias_len TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -587,7 +581,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 
 	internal_file = resource->path + 1; /* strip leading "/" */
 	/* find the phar in our trusty global hash indexed by alias (host of phar://blah.phar/file.whatever) */
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
+	if (FAILURE == phar_get_archive(&phar, resource->host, strlen(resource->host), NULL, 0, &error TSRMLS_CC)) {
 		php_url_free(resource);
 		if (error) {
 			efree(error);
@@ -599,7 +593,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	}
 	if (*internal_file == '\0') {
 		/* root directory requested */
-		phar_dostat(phar, NULL, ssb, 1 TSRMLS_CC);
+		phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
 	}
@@ -610,12 +604,12 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 	internal_file_len = strlen(internal_file);
 	/* search through the manifest of files, and if we have an exact match, it's a file */
 	if (SUCCESS == zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
-		phar_dostat(phar, entry, ssb, 0 TSRMLS_CC);
+		phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
 	}
 	if (zend_hash_exists(&(phar->virtual_dirs), internal_file, internal_file_len)) {
-		phar_dostat(phar, NULL, ssb, 1 TSRMLS_CC);
+		phar_dostat(phar, NULL, ssb, 1, phar->alias, phar->alias_len TSRMLS_CC);
 		php_url_free(resource);
 		return SUCCESS;
 	}
@@ -639,6 +633,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			} else {
 				char *test;
 				int test_len;
+				phar_entry_info *entry;
 				php_stream_statbuf ssbi;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
@@ -662,7 +657,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				if (SUCCESS != zend_hash_find(&phar->manifest, internal_file, internal_file_len, (void**)&entry)) {
 					goto free_resource;
 				}
-				phar_dostat(phar, entry, ssb, 0 TSRMLS_CC);
+				phar_dostat(phar, entry, ssb, 0, phar->alias, phar->alias_len TSRMLS_CC);
 				php_url_free(resource);
 				return SUCCESS;
 			}

@@ -50,15 +50,15 @@ static int scan(Scanner *s)
 	QUESTION	= [?];
 	SPECIALS	= [:?"'];
 	MULTICHAR	= [:?];
-	EOF			= [\000];
+	EOF		= [\000];
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
-		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
-		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
+		(["] ([^"])* ["])		{ RET(PDO_PARSER_TEXT); }
+		(['] ([^'])* ['])		{ RET(PDO_PARSER_TEXT); }
 		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
-		BINDCHR									{ RET(PDO_PARSER_BIND); }
+		BINDCHR						{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
 		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
@@ -299,9 +299,9 @@ rewrite:
 
 	} else if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 		/* rewrite ? to :pdoX */
-		char *name, *idxbuf;
+		char idxbuf[32];
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
-		int bind_no = 1;
+		char *name;
 		
 		newbuffer_len = inquery_len;
 
@@ -317,19 +317,21 @@ rewrite:
 
 			/* check if bound parameter is already available */
 			if (!strcmp(name, "?") || zend_hash_find(stmt->bound_param_map, name, plc->len + 1, (void**) &p) == FAILURE) {
-				spprintf(&idxbuf, 0, tmpl, bind_no++);
+				snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
 			} else {
-				idxbuf = estrdup(p);
+				memset(idxbuf, 0, sizeof(idxbuf));
+				memcpy(idxbuf, p, sizeof(idxbuf));
 				skip_map = 1;
 			}
 
-			plc->quoted = idxbuf;
+			plc->quoted = estrdup(idxbuf);
 			plc->qlen = strlen(plc->quoted);
 			plc->freeq = 1;
 			newbuffer_len += plc->qlen;
 
 			if (!skip_map && stmt->named_rewrite_template) {
 				/* create a mapping */
+				
 				zend_hash_update(stmt->bound_param_map, name, plc->len + 1, idxbuf, plc->qlen + 1, NULL);
 			}
 

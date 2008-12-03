@@ -155,7 +155,10 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
 		*dst++ = '-';
 	}
 
-	if ((decpt >= 0 && decpt > ndigit) || decpt < -3) { /* use E-style */
+	for (i = 0; i < ndigit && digits[i] != '\0'; i++);
+
+	if ((decpt >= 0 && decpt - i > 4)
+			|| (decpt < 0 && decpt < -3)) {     /* use E-style */
 		/* exponential format (e.g. 1.2345e+13) */
 		if (--decpt < 0) {
 			sign = 1;
@@ -1265,42 +1268,6 @@ PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list a
 
 	strx_printv(&cc, buf, len, format, ap);
 	return (cc);
-}
-/* }}} */
-
-PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap) /* {{{ */
-{
-	va_list ap2;
-	int cc;
-
-	va_copy(ap2, ap);
-	cc = ap_php_vsnprintf(NULL, 0, format, ap2);
-	va_end(ap2);
-
-	*buf = NULL;
-
-	if (cc >= 0) {
-		if ((*buf = malloc(++cc)) != NULL) {
-			if ((cc = ap_php_vsnprintf(*buf, cc, format, ap)) < 0) {
-				free(*buf);
-				*buf = NULL;
-			}
-		}
-	}
-
-	return cc;
-}
-/* }}} */
-
-PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) /* {{{ */
-{
-	int cc;
-	va_list ap;
-
-	va_start(ap, format);
-	cc = vasprintf(buf, format, ap);
-	va_end(ap);
-	return cc;
 }
 /* }}} */
 

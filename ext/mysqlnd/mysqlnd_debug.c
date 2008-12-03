@@ -89,7 +89,7 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	enum_func_status ret;
 	int i;
 	char * message_line;
-	unsigned int message_line_len;
+	uint message_line_len;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
@@ -194,7 +194,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	int i;
 	enum_func_status ret;
 	char * message_line, *buffer;
-	unsigned int message_line_len;
+	uint message_line_len;
 	va_list args;
 	unsigned int flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
@@ -301,7 +301,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 static zend_bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
-										  char * func_name, unsigned int func_name_len)
+										  char * func_name, uint func_name_len)
 {
 #ifdef MYSQLND_THREADED
 	MYSQLND_ZTS(self);
@@ -422,7 +422,7 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	unsigned int mode_len = strlen(mode), i;
+	uint mode_len = strlen(mode), i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
 
 	self->flags = 0;
@@ -487,7 +487,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 						if (mode[j] == ',' || mode[j] == ':') {
 							if (j > i + 2) {
 								char func_name[1024];
-								unsigned int func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
+								uint func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
 								memcpy(func_name, mode + i + 1, func_name_len);
 								func_name[func_name_len] = '\0'; 
 
@@ -683,7 +683,7 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret); 
 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EMALLOC_COUNT, 1, STAT_MEM_EMALLOC_AMMOUNT, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_EMALLOC_COUNT, 1, STAT_MEM_EMALLOC_AMMOUNT, size);
 	}
 	DBG_RETURN(ret);
 }
@@ -710,7 +710,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 	if (MYSQLND_G(collect_memory_statistics)) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_MALLOC_COUNT:STAT_MEM_EMALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_MALLOC_AMMOUNT:STAT_MEM_EMALLOC_AMMOUNT;
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(s1, 1, s2, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(s1, 1, s2, size);
 	}
 
 	DBG_RETURN(ret);
@@ -719,7 +719,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_ecalloc */
-void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+void * _mysqlnd_ecalloc(uint nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_ecalloc_name);
@@ -736,7 +736,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	DBG_INF_FMT("after : %lu", zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret); 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_ECALLOC_COUNT, 1, STAT_MEM_ECALLOC_AMMOUNT, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_ECALLOC_COUNT, 1, STAT_MEM_ECALLOC_AMMOUNT, size);
 	}
 	DBG_RETURN(ret);
 }
@@ -744,7 +744,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_pecalloc */
-void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
+void * _mysqlnd_pecalloc(uint nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_pecalloc_name);
@@ -763,7 +763,7 @@ void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent M
 	if (MYSQLND_G(collect_memory_statistics)) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_CALLOC_COUNT:STAT_MEM_ECALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_CALLOC_AMMOUNT:STAT_MEM_ECALLOC_AMMOUNT;
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(s1, 1, s2, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(s1, 1, s2, size);
 	}
 
 	DBG_RETURN(ret);
@@ -790,7 +790,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	DBG_INF_FMT("after : %lu", zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_INF_FMT("new_ptr=%p", ret); 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMMOUNT, new_size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_EREALLOC_COUNT, 1, STAT_MEM_EREALLOC_AMMOUNT, new_size);
 	}
 	DBG_RETURN(ret);
 }
@@ -819,7 +819,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 	if (MYSQLND_G(collect_memory_statistics)) {
 		enum mysqlnd_collected_stats s1 = persistent? STAT_MEM_REALLOC_COUNT:STAT_MEM_EREALLOC_COUNT;
 		enum mysqlnd_collected_stats s2 = persistent? STAT_MEM_REALLOC_AMMOUNT:STAT_MEM_EREALLOC_AMMOUNT;
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(s1, 1, s2, new_size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(s1, 1, s2, new_size);
 	}
 	DBG_RETURN(ret);
 }
@@ -881,7 +881,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret); 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_MALLOC_COUNT, 1, STAT_MEM_MALLOC_AMMOUNT, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_MALLOC_COUNT, 1, STAT_MEM_MALLOC_AMMOUNT, size);
 	}
 	DBG_RETURN(ret);
 }
@@ -889,7 +889,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_calloc */
-void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+void * _mysqlnd_calloc(uint nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_calloc_name);
@@ -899,7 +899,7 @@ void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 	DBG_INF_FMT("size=%lu ptr=%p", size, ret); 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_CALLOC_COUNT, 1, STAT_MEM_CALLOC_AMMOUNT, size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_CALLOC_COUNT, 1, STAT_MEM_CALLOC_AMMOUNT, size);
 	}
 	DBG_RETURN(ret);
 }
@@ -920,7 +920,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	DBG_INF_FMT("new_ptr=%p", ret);
 
 	if (MYSQLND_G(collect_memory_statistics)) {
-		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_MEM_REALLOC_COUNT, 1, STAT_MEM_REALLOC_AMMOUNT, new_size);
+		MYSQLND_INC_GLOBAL_STATISTIC2_W_VALUE(STAT_MEM_REALLOC_COUNT, 1, STAT_MEM_REALLOC_AMMOUNT, new_size);
 	}
 	DBG_RETURN(ret);
 }

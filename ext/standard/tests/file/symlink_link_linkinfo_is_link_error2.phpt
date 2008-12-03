@@ -5,7 +5,7 @@ Test symlink(), linkinfo(), link() and is_link() functions : error conditions - 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
-if (PHP_INT_SIZE != 4) {
+if (PHP_INT_SIZE != 4 ) {
   die("skip this test is for 32bit platform only");
 }
 ?>
@@ -42,7 +42,6 @@ var_dump( link($filename, $linkname, false) );
 //invalid arguments
 var_dump( link(NULL, $linkname) );  // NULL as filename
 var_dump( link('', $linkname) );  // empty string as filename
-var_dump( link(' ', $linkname) );  // space as filename
 var_dump( link(false, $linkname) );  // boolean false as filename
 var_dump( link($filename, NULL) );  // NULL as linkname
 var_dump( link($filename, '') );  // '' as linkname
@@ -58,7 +57,6 @@ var_dump( is_link($linkname, "/") );
 //invalid arguments
 var_dump( is_link(NULL) );  // NULL as linkname
 var_dump( is_link('') );  // empty string as linkname
-var_dump( is_link(' ') );  // space as linkname
 var_dump( is_link(false) );  // boolean false as linkname
 var_dump( is_link($filename) );  // file given to is_link
 
@@ -77,25 +75,22 @@ NULL
 Warning: link() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
-bool(false)
-
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(): %s in %s on line %d
 bool(false)
 
 *** Testing is_link() for error conditions ***
@@ -109,6 +104,4 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 Done
-

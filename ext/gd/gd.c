@@ -29,6 +29,11 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_GD_PNG
+/* needs to be first */
+#include <png.h>
+#endif
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/head.h"
@@ -164,27 +169,33 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
 /* {{{ arginfo */
+static
 ZEND_BEGIN_ARG_INFO(arginfo_gd_info, 0)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageloadfont, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetstyle, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, styles) /* ARRAY_INFO(0, styles, 0) */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatetruecolor, 0)
 	ZEND_ARG_INFO(0, x_size)
 	ZEND_ARG_INFO(0, y_size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageistruecolor, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagetruecolortopalette, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, ditherFlag)
@@ -192,17 +203,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagetruecolortopalette, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolormatch, 0)
 	ZEND_ARG_INFO(0, im1)
 	ZEND_ARG_INFO(0, im2)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetthickness, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, thickness)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledellipse, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, cx)
@@ -212,6 +226,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefilledellipse, 0)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledarc, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, cx)
@@ -224,23 +239,27 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefilledarc, 0)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagealphablending, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, blend)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesavealpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, save)
 ZEND_END_ARG_INFO()
 
 #if HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagelayereffect, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, effect)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocatealpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -249,6 +268,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocatealpha, 0)
 	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolvealpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -257,6 +277,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolvealpha, 0)
 	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosestalpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -265,6 +286,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosestalpha, 0)
 	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexactalpha, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -273,6 +295,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexactalpha, 0)
 	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
 	ZEND_ARG_INFO(0, dst_im)
 	ZEND_ARG_INFO(0, src_im)
@@ -287,16 +310,19 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef PHP_WIN32
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegrabwindow, 0, 0, 1)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_INFO(0, client_area)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagegrabscreen, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagerotate, 0, 0, 3)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, angle)
@@ -306,6 +332,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_GD_IMAGESETTILE
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesettile, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, tile)
@@ -313,71 +340,84 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_GD_IMAGESETBRUSH
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetbrush, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, brush)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreate, 0)
 	ZEND_ARG_INFO(0, x_size)
 	ZEND_ARG_INFO(0, y_size)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagetypes, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_LIBGD15
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromstring, 0)
 	ZEND_ARG_INFO(0, image)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_GIF_READ
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgif, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_JPG
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromjpeg, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_PNG
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrompng, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_XBM
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxbm, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxpm, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_WBMP
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromwbmp, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_GD2
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd2, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromgd2part, 0)
 	ZEND_ARG_INFO(0, filename)
 	ZEND_ARG_INFO(0, srcX)
@@ -388,6 +428,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagexbm, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -396,6 +437,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_GIF_CREATE
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegif, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -403,6 +445,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_PNG
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -410,6 +453,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_JPG
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagejpeg, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -418,6 +462,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_WBMP
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewbmp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -425,12 +470,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewbmp, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_GD2
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -439,10 +486,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegd2, 0, 0, 1)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagedestroy, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocate, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -451,18 +500,21 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorallocate, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_LIBGD15
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepalettecopy, 0)
 	ZEND_ARG_INFO(0, dst)
 	ZEND_ARG_INFO(0, src)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorat, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosest, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -471,6 +523,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosest, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_COLORCLOSESTHWB
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosesthwb, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -479,11 +532,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorclosesthwb, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolordeallocate, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolve, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -491,6 +546,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorresolve, 0)
 	ZEND_ARG_INFO(0, blue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexact, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, red)
@@ -498,6 +554,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexact, 0)
 	ZEND_ARG_INFO(0, blue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorset, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, color)
@@ -506,17 +563,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorset, 0)
 	ZEND_ARG_INFO(0, blue)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorsforindex, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagegammacorrect, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, inputgamma)
 	ZEND_ARG_INFO(0, outputgamma)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetpixel, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x)
@@ -524,6 +584,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagesetpixel, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageline, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x1)
@@ -533,6 +594,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageline, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagedashedline, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x1)
@@ -542,6 +604,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagedashedline, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagerectangle, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x1)
@@ -551,6 +614,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagerectangle, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledrectangle, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x1)
@@ -560,6 +624,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefilledrectangle, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagearc, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, cx)
@@ -571,6 +636,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagearc, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageellipse, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, cx)
@@ -580,6 +646,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageellipse, 0)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilltoborder, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x)
@@ -588,6 +655,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefilltoborder, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefill, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, x)
@@ -595,20 +663,24 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefill, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorstotal, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolortransparent, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageinterlace, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, interlace)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
@@ -616,6 +688,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagepolygon, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, points) /* ARRAY_INFO(0, points, 0) */
@@ -623,14 +696,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagefilledpolygon, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefontwidth, 0)
 	ZEND_ARG_INFO(0, font)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagefontheight, 0)
 	ZEND_ARG_INFO(0, font)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagechar, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, font)
@@ -640,6 +716,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagechar, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecharup, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, font)
@@ -649,6 +726,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecharup, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagestring, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, font)
@@ -658,6 +736,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagestring, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagestringup, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, font)
@@ -667,6 +746,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagestringup, 0)
 	ZEND_ARG_INFO(0, col)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopy, 0)
 	ZEND_ARG_INFO(0, dst_im)
 	ZEND_ARG_INFO(0, src_im)
@@ -679,6 +759,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopy, 0)
 ZEND_END_ARG_INFO()
 
 #if HAVE_LIBGD15
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopymerge, 0)
 	ZEND_ARG_INFO(0, src_im)
 	ZEND_ARG_INFO(0, dst_im)
@@ -691,6 +772,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopymerge, 0)
 	ZEND_ARG_INFO(0, pct)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergegray, 0)
 	ZEND_ARG_INFO(0, src_im)
 	ZEND_ARG_INFO(0, dst_im)
@@ -704,6 +786,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergegray, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresized, 0)
 	ZEND_ARG_INFO(0, dst_im)
 	ZEND_ARG_INFO(0, src_im)
@@ -717,16 +800,19 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresized, 0)
 	ZEND_ARG_INFO(0, src_h)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesx, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagesy, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
 #ifdef ENABLE_GD_TTF
 #if HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, angle)
@@ -735,6 +821,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, size)
@@ -748,6 +835,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
 ZEND_END_ARG_INFO()
 #endif
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagettfbbox, 0)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, angle)
@@ -755,6 +843,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagettfbbox, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagettftext, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, size)
@@ -768,35 +857,42 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_LIBT1
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepsloadfont, 0)
 	ZEND_ARG_INFO(0, pathname)
 ZEND_END_ARG_INFO()
 
 /*
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepscopyfont, 0)
 	ZEND_ARG_INFO(0, font_index)
 ZEND_END_ARG_INFO()
 */
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepsfreefont, 0)
 	ZEND_ARG_INFO(0, font_index)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepsencodefont, 0)
 	ZEND_ARG_INFO(0, font_index)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepsextendfont, 0)
 	ZEND_ARG_INFO(0, font_index)
 	ZEND_ARG_INFO(0, extend)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imagepsslantfont, 0)
 	ZEND_ARG_INFO(0, font_index)
 	ZEND_ARG_INFO(0, slant)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepstext, 0, 0, 8)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, text)
@@ -812,6 +908,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepstext, 0, 0, 8)
 	ZEND_ARG_INFO(0, antialias)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepsbbox, 0, 0, 3)
 	ZEND_ARG_INFO(0, text)
 	ZEND_ARG_INFO(0, font)
@@ -823,6 +920,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_WBMP
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_image2wbmp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -831,6 +929,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_JPG) && defined(HAVE_GD_WBMP)
+static
 ZEND_BEGIN_ARG_INFO(arginfo_jpeg2wbmp, 0)
 	ZEND_ARG_INFO(0, f_org)
 	ZEND_ARG_INFO(0, f_dest)
@@ -841,6 +940,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_PNG) && defined(HAVE_GD_WBMP)
+static
 ZEND_BEGIN_ARG_INFO(arginfo_png2wbmp, 0)
 	ZEND_ARG_INFO(0, f_org)
 	ZEND_ARG_INFO(0, f_dest)
@@ -851,6 +951,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefilter, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filtertype)
@@ -859,6 +960,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefilter, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg3)
 ZEND_END_ARG_INFO()
 
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, matrix3x3) /* ARRAY_INFO(0, matrix3x3, 0) */
@@ -868,6 +970,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_GD_BUNDLED
+static
 ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, on)
@@ -1287,17 +1390,10 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "GIF Create Support", "enabled");
 #endif
 #ifdef HAVE_GD_JPG
-	{
-		char tmp[12];
-		snprintf(tmp, sizeof(tmp), "%d", gdJpegGetVersionInt());
-		php_info_print_table_row(2, "JPG Support", "enabled");
-		php_info_print_table_row(2, "libJPEG Version", tmp);
-	}
+	php_info_print_table_row(2, "JPG Support", "enabled");
 #endif
-
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
 #endif
 #ifdef HAVE_GD_WBMP
 	php_info_print_table_row(2, "WBMP Support", "enabled");
@@ -2619,11 +2715,11 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	long quality = 0, type = 0;
+	long quality, type;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	int file_len = 0, argc = ZEND_NUM_ARGS();
+	int file_len, argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
@@ -3376,7 +3472,7 @@ PHP_FUNCTION(imagecolorstotal)
 PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
-	long COL = 0;
+	long COL;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3400,7 +3496,7 @@ PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
 	int argc = ZEND_NUM_ARGS();
-	long INT = 0;
+	long INT;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &INT) == FAILURE) {
@@ -4069,18 +4165,20 @@ PHP_FUNCTION(imagepsloadfont)
 /* The function in t1lib which this function uses seem to be buggy...
 PHP_FUNCTION(imagepscopyfont)
 {
+	zval **fnt;
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
-	long fnt;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &fnt) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	of_ind = zend_list_find(fnt, &type);
+	convert_to_long_ex(fnt);
+
+	of_ind = zend_list_find(Z_LVAL_PP(fnt), &type);
 
 	if (type != le_ps_font) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Type 1 font index", fnt);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a Type 1 font index", Z_LVAL_PP(fnt));
 		RETURN_FALSE;
 	}
 
@@ -4357,7 +4455,7 @@ PHP_FUNCTION(imagepstext)
 PHP_FUNCTION(imagepsbbox)
 {
 	zval *fnt;
-	long sz = 0, sp = 0, wd = 0;
+	long sz = 0, sp, wd;
 	char *str;
 	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
@@ -4365,7 +4463,7 @@ PHP_FUNCTION(imagepsbbox)
 	int *f_ind;
 	int str_len, per_char = 0;
 	int argc = ZEND_NUM_ARGS();
-	double angle = 0, sin_a = 0, cos_a = 0;
+	double angle, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
 	if (argc != 3 && argc != 6) {
