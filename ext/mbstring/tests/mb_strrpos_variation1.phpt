@@ -19,7 +19,7 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
 echo "*** Testing mb_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = 'world';
+$needle = b'world';
 $offset = 0;
 $encoding = 'utf-8';
 
@@ -31,12 +31,12 @@ unset ($unset_var);
 class classA
 {
   public function __toString() {
-    return "hello, world";
+    return b"hello, world";
   }
 }
 
 // heredoc string
-$heredoc = <<<EOT
+$heredoc = b<<<EOT
 hello, world
 EOT;
 
@@ -74,8 +74,8 @@ $inputs = array(
        '',
 
        // string data
-/*18*/ "hello, world",
-       'hello, world',
+/*18*/ b"hello, world",
+       b'hello, world',
        $heredoc,
        
        // object data

@@ -23,15 +23,15 @@ mbstring.func_overload=0
 		}	
 	}
 
-	var_dump( mb_split( " ", "a b c d e f g" )
-	          == mb_split( "[[:space:]]", "a\nb\tc\nd e f g" ) );
+	var_dump( mb_split( b" ", b"a b c d e f g" )
+	          == mb_split( b"[[:space:]]", b"a\nb\tc\nd e f g" ) );
 
 	for ( $i = 0; $i < 5; ++$i ) {
-		verify_split( " ", "a\tb\tc\td   e\tf g", $i );
+		verify_split( b" ", b"a\tb\tc\td   e\tf g", $i );
 	}
 
 	for ( $i = 1; $i < 5; ++$i ) {
-		verify_split( "\xa1\xa1+", "\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1", $i );
+		verify_split( b"\xa1\xa1+", b"\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1\xa1\xa1\xa1\xa2\xa2\xa1\xa1\xa1", $i );
 	}
 ?>
 

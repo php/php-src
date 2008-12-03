@@ -19,8 +19,8 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
 echo "*** Testing mb_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = 'a';
-$haystack = 'string_val';
+$needle = b'a';
+$haystack = b'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable
@@ -31,12 +31,12 @@ unset ($unset_var);
 class classA
 {
   public function __toString() {
-    return "7";
+    return b"7";
   }
 }
 
 // heredoc string
-$heredoc = <<<EOT
+$heredoc = b<<<EOT
 hello world
 EOT;
 

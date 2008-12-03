@@ -21,13 +21,22 @@ function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is n
  */
 
 echo "*** Testing mb_encode_mimeheader() : basic ***\n";
-mb_internal_encoding('utf-8');
 
-$inputs = array('English' => 'This is an English string. 0123456789',
-                'Japanese' => base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC'),
+$english = array('English' => 'This is an English string. 0123456789');
+$nonEnglish = array('Japanese' => base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC'),
                 'Greek' => base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=='));
 
-foreach ($inputs as $lang => $input) {
+foreach ($english as $lang => $input) {
+	echo "\nLanguage: $lang\n";
+	echo "-- Base 64: --\n";
+	var_dump(mb_encode_mimeheader($input, 'UTF-8', 'B'));
+	echo "-- Quoted-Printable --\n";
+	var_dump(mb_encode_mimeheader($input, 'UTF-8', 'Q'));
+}
+
+mb_internal_encoding('utf-8');
+
+foreach ($nonEnglish as $lang => $input) {
 	echo "\nLanguage: $lang\n";
 	echo "-- Base 64: --\n";
 	var_dump(mb_encode_mimeheader($input, 'UTF-8', 'B'));

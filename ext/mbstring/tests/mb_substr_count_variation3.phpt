@@ -20,8 +20,8 @@ function_exists('mb_substr_count') or die("skip mb_substr_count() is not availab
 echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$haystack = 'hello, world';
-$needle = 'world';
+$haystack = b'hello, world';
+$needle = b'world';
 
 //get an unset variable
 $unset_var = 10;

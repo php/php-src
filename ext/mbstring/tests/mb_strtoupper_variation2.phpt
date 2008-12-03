@@ -20,7 +20,7 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 echo "*** Testing mb_strtoupper() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$sourcestring = 'Hello, World';
+$sourcestring = b'Hello, World';
 
 //get an unset variable
 $unset_var = 10;
@@ -94,7 +94,13 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strtoupper($sourcestring, $input) );
+  $res = mb_strtoupper($sourcestring, $input);
+  if ($res === false || $res == NULL) {
+     var_dump($res);
+  }
+  else {
+     var_dump(bin2hex($res));
+  }
   $iterator++;
 };
 
@@ -192,16 +198,16 @@ Warning: mb_strtoupper(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 18 --
-string(12) "HELLO, WORLD"
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 19 --
-string(12) "HELLO, WORLD"
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 20 --
-string(12) "HELLO, WORLD"
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 21 --
-string(12) "HELLO, WORLD"
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 22 --
 

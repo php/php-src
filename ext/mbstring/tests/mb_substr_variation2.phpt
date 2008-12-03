@@ -20,7 +20,7 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 echo "*** Testing mb_substr() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$str = 'string_val';
+$str = b'string_val';
 $start = 1;
 $length = 5;
 
@@ -96,7 +96,13 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_substr($str, $start, $length, $input));
+  $res = mb_substr($str, $start, $length, $input);
+  if ($res === false) {
+     var_dump($res);
+  }
+  else {
+     var_dump(bin2hex($res));
+  }
   $iterator++;
 };
 
@@ -192,16 +198,16 @@ Warning: mb_substr(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 18 --
-string(5) "tring"
+string(10) "7472696e67"
 
 -- Iteration 19 --
-string(5) "tring"
+string(10) "7472696e67"
 
 -- Iteration 20 --
-string(5) "tring"
+string(10) "7472696e67"
 
 -- Iteration 21 --
-string(5) "tring"
+string(10) "7472696e67"
 
 -- Iteration 22 --
 

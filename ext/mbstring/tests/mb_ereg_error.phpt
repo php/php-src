@@ -21,15 +21,15 @@ echo "*** Testing mb_ereg() : error conditions ***\n";
 
 //Test mb_ereg with one more than the expected number of arguments
 echo "\n-- Testing mb_ereg() function with more than expected no. of arguments --\n";
-$pattern = 'string_val';
-$string = 'string_val';
+$pattern = b'string_val';
+$string = b'string_val';
 $registers = array(1, 2);
 $extra_arg = 10;
 var_dump( mb_ereg($pattern, $string, $registers, $extra_arg) );
 
 // Testing mb_ereg with one less than the expected number of arguments
 echo "\n-- Testing mb_ereg() function with less than expected no. of arguments --\n";
-$pattern = 'string_val';
+$pattern = b'string_val';
 var_dump( mb_ereg($pattern) );
 
 echo "Done";

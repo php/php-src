@@ -19,8 +19,6 @@ function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is n
 
 echo "*** Testing mb_encode_mimeheader() : usage variations ***\n";
 
-mb_internal_encoding('utf-8');
-
 // Initialise function arguments not being substituted
 $charset = 'utf-8';
 $transfer_encoding = 'B';

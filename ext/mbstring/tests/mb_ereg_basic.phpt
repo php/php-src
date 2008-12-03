@@ -23,9 +23,9 @@ if(mb_regex_encoding('utf-8') == true) {
 } else {
 	echo "Could not set regex encoding to utf-8\n";
 }
-$string_ascii = 'This is an English string. 0123456789.';
-$regex_ascii1 = '(.*is)+.*\.[[:blank:]][0-9]{9}';
-$regex_ascii2 = '.*is+';
+$string_ascii = b'This is an English string. 0123456789.';
+$regex_ascii1 = b'(.*is)+.*\.[[:blank:]][0-9]{9}';
+$regex_ascii2 = b'.*is+';
 
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 $regex_mb1 = base64_decode('KOaXpeacrOiqnikuKj8oWzEtOV0rKQ==');
@@ -37,9 +37,9 @@ var_dump(mb_ereg($regex_ascii1, $string_ascii));
 var_dump(mb_ereg($regex_ascii2, $string_ascii));
 echo "--With \$regs argument --\n";
 var_dump(mb_ereg($regex_ascii1, $string_ascii, $regs_ascii1));
-var_dump($regs_ascii1);
+base64_encode_var_dump($regs_ascii1);
 var_dump(mb_ereg($regex_ascii2, $string_ascii, $regs_ascii2));
-var_dump($regs_ascii2);
+base64_encode_var_dump($regs_ascii2);
 
 echo "\n**-- Multibyte String --**\n";
 echo "-- Without \$regs argument --\n";
@@ -76,7 +76,7 @@ function base64_encode_var_dump($regs) {
 }
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : basic functionality ***
 Regex encoding set to utf-8
 
@@ -88,14 +88,14 @@ int(1)
 int(36)
 array(2) {
   [0]=>
-  string(36) "This is an English string. 012345678"
+  string(48) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4"
   [1]=>
-  string(17) "This is an Englis"
+  string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
 }
 int(17)
 array(1) {
   [0]=>
-  string(17) "This is an Englis"
+  string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
 }
 
 **-- Multibyte String --**
