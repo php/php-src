@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed missing initialization of BG(page_uid) and BG(page_gid), 
   reported by Maksymilian Arciemowicz. (Stas)
 
+- Fixed memory leak inside sqlite_create_aggregate(). (Felipe)
+- Fixed memory leak inside PDO sqlite's sqliteCreateAggregate() method. (Felipe)
 - Fixed bug #46366 (bad cwd with / as pathinfo). (Dmitry)
 - Fixed bug #46732 (mktime.year description is wrong). (Derick)
 
