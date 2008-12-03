@@ -3,6 +3,7 @@ Test fopen() function : variation: use include path (path is bad) create a file 
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --XFAIL--
+Bug #46680
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])

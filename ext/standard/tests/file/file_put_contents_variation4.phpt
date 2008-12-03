@@ -3,6 +3,7 @@ Test file_put_contents() function : variation - include path testing
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --XFAIL--
+Bug #46680
 --FILE--
 <?php
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
