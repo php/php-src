@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2009, PHP 5.2.8
+
 04 Dec 2008, PHP 5.2.7
 - Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
 - Updated timezone database to version 2008.9. (Derick)
