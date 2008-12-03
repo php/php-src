@@ -3174,7 +3174,7 @@ PHP_FUNCTION(imap_fetch_overview)
 		return;
 	}
 
-	if (flags && !(flags & FT_UID)) {
+	if (flags && ((flags & ~FT_UID) !=0)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
 		RETURN_FALSE;
 	}
