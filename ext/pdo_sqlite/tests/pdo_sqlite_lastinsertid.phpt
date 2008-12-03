@@ -3,7 +3,7 @@ PDO_sqlite: Testing lastInsertId()
 --FILE--
 <?php
 
-$db = new pdo('sqlite:memory');
+$db = new pdo('sqlite::memory:');
 $db->query('CREATE TABLE IF NOT EXISTS foo (id INT AUTO INCREMENT, name TEXT)');
 $db->query('INSERT INTO foo VALUES (NULL, "PHP")');
 $db->query('INSERT INTO foo VALUES (NULL, "PHP6")');
