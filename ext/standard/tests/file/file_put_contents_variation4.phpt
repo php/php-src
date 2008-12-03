@@ -43,7 +43,8 @@ function runtest() {
    file_put_contents($filename, "File in include path", FILE_USE_INCLUDE_PATH);
    $line = file_get_contents($firstFile);
    echo "$line\n";
-   unlink($firstFile);  
+   unlink($firstFile);
+   unlink($filename);
 }
 
 ?>
