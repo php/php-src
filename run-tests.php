@@ -1726,8 +1726,18 @@ COMMAND $cmd
 		if (isset($section_text['EXPECTF'])) {
 			$wanted_re = preg_quote($wanted_re, '/');
 			$wanted_re = str_replace(
+				array('%unicode_string_optional%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'Unicode string',
+				$wanted_re
+			);
+			$wanted_re = str_replace(
 				array('%unicode\|string%', '%string\|unicode%'),
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'unicode',
+				$wanted_re
+			);
+			$wanted_re = str_replace(
+				array('%u\|b%', '%b\|u%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? '' : 'u',
 				$wanted_re
 			);
 			// Stick to basics
