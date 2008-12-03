@@ -1,3 +1,38 @@
+2008-12-02  Christian Seiler  <chris_se@gmx.net>
+
+    * (PHP_5_3)
+      acinclude.m4:
+      - MFH: Fixed autoconf 2.13 issues with FP checks.
+
+    * acinclude.m4:
+      - Fixed autoconf 2.13 issues with FP checks.
+
+    * (PHP_5_3)
+      Zend.m4
+      acinclude.m4
+      zend_float.h
+      zend_operators.c
+      zend_strtod.c
+      tests/float_prec_001.phpt:
+      - MFH: Changed floating point behaviour to consistently use double
+      precision
+        on all platforms and with all compilers.
+
+    * acinclude.m4
+      zend_float.h
+      zend_float.h:
+      - Fixed comment style.
+
+    * Zend.m4
+      acinclude.m4
+      zend_float.h
+      zend_operators.c
+      zend_strtod.c
+      tests/float_prec_001.phpt
+      tests/float_prec_001.phpt:
+      - Changed floating point behaviour to consistently use double precision on
+        all platforms and with all compilers.
+
 2008-11-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
