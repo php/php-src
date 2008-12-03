@@ -3,7 +3,7 @@ PDO_sqlite: Testing transaction
 --FILE--
 <?php
 
-$db = new pdo('sqlite:memory');
+$db = new pdo('sqlite::memory:');
 
 $db->beginTransaction();
 
