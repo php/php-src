@@ -3,7 +3,7 @@ PDO_sqlite: Testing sqliteCreateFunction()
 --FILE--
 <?php
 
-$db = new pdo('sqlite:memory');
+$db = new pdo('sqlite::memory:');
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
 
