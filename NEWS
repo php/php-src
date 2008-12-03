@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 
 - Moved ext/msql to PECL. (Derick, Lukas)
 
+- Removed ext/mhash, the BC layer is now entirely within ext/hash. (Scott)
+
 - Changed error level E_ERROR into E_WARNING in Soap extension methods
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
@@ -13,6 +15,7 @@ PHP                                                                        NEWS
   platforms and with all compilers. (Christian Seiler)
 - Changed round() to act more intuitively when rounding to a certain precision
   and to correctly round very large and very small exponents. (Christian Seiler)
+- Changed fileinfo to no longer send errors to stderr. (Scott)
 
 - Added support for namespaces with brackets. (Greg)
 - Added stream_cast() and stream_set_options() to user-space stream wrappers,
@@ -20,9 +23,10 @@ PHP                                                                        NEWS
   stream_set_write_buffer() to work with user-space stream wrappers. (Arnaud)
 - Added header_remove() function. (chsc at peytz dot dk, Arnaud)
 - Added stream_context_get_params() function. (Arnaud)
-- Added optional parameter "new" to sybase_connect() (Timm)
+- Added optional parameter "new" to sybase_connect(). (Timm)
 - Added parse_ini_string() function. (grange at lemonde dot fr, Arnaud) 
 - Added str_getcsv() function. (Sara)
+- Added openssl_random_pseudo_bytes() function. (Scott)
 - Added ability to send user defined HTTP headers with SOAP request.
   (Brian J.France, Dmitry)
 - Added concatenation option to bz2.decompress stream filter.
@@ -88,6 +92,8 @@ PHP                                                                        NEWS
 - Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
   (Ilia)
 - Fixed bug #46039 (ArrayObject iteration is slow). (Arnaud)
+- Fixed bug #46033 (Direct instantiation of SQLite3stmt and SQLite3result 
+  cause a segfault.) (Scott)
 - Fixed bug #45976 (Moved SXE from SPL to SimpleXML). (Etienne)
 - Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
   (Christian Schneider, Arnaud)
