@@ -1770,6 +1770,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CONTENT_TYPE, &s_code) == CURLE_OK) {
 			if (s_code != NULL) {
 				CAAS("content_type", s_code);
+			} else {
+				zval *retnull;
+				MAKE_STD_ZVAL(retnull);
+				ZVAL_NULL(retnull);
+				CAAZ("content_type", retnull);
 			}
 		}
 		if (curl_easy_getinfo(ch->cp, CURLINFO_HTTP_CODE, &l_code) == CURLE_OK) {
