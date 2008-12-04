@@ -4,15 +4,16 @@
 <?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
-namespace test::ns1;
+namespace test\ns1;
+use \SplObserver;
 
 class Foo implements SplObserver {
-	function update(SplSubject $x) {
+	function update(\SplSubject $x) {
 		echo "ok\n";
 	}
 }
 
-class Bar implements SplSubject {
+class Bar implements \SplSubject {
 	function attach(SplObserver $x) {
 		echo "ok\n";
 	}

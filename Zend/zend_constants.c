@@ -322,30 +322,26 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 	zend_constant *c;
 	int retval = 1;
 	zstr colon;
+	zend_class_entry *ce = NULL;
+	zval **ret_constant;
 
-	/* Skip leading :: */
+	/* Skip leading \ */
 	if (type == IS_UNICODE &&
-	    name.u[0] == ':' &&
-	    name.u[1] == ':') {
-		name.u += 2;
-		name_len -= 2;
-		flags &= ZEND_FETCH_CLASS_SILENT;
+	    name.u[0] == '\\') {
+		name.u += 1;
+		name_len -= 1;
 	} else if (type == IS_STRING &&
-	           name.s[0] == ':' &&
-	           name.s[1] == ':') {
-		name.s += 2;
-		name_len -= 2;
-		flags &= ZEND_FETCH_CLASS_SILENT;
+	           name.s[0] == '\\') {
+		name.s += 1;
+		name_len -= 1;
 	}
 
 	if ((type == IS_UNICODE && (colon.u = u_memrchr(name.u, ':', name_len)) && colon.u > name.u && *(colon.u-1) == ':') ||
 	    (!type == IS_STRING && (colon.s = zend_memrchr(name.s, ':', name_len))&& colon.s > name.s && *(colon.s-1) == ':')) {
 		/* compound constant name */
-		zend_class_entry *ce = NULL;
 		int class_name_len = (type == IS_UNICODE) ? colon.u-name.u-1 : colon.s-name.s-1;
 		int const_name_len = name_len - class_name_len - 2;
 		zstr constant_name, class_name;
-		zval **ret_constant;
 		zstr lcname;
 		unsigned int lcname_len;
 
@@ -382,6 +378,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			efree(lcname.v);
 		} else if (lcname_len == sizeof("parent")-1 &&
 		           ZEND_U_EQUAL(type, lcname, lcname_len, "parent", sizeof("parent")-1)) {
+			efree(lcname.v);
 			if (!scope) {
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			} else if (!scope->parent) {
@@ -389,85 +386,82 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			} else {
 				ce = scope->parent;
 			}
-			efree(lcname.v);
 		} else if (lcname_len == sizeof("static")-1 &&
 		           ZEND_U_EQUAL(type, lcname, lcname_len, "static", sizeof("static")-1)) {
+			efree(lcname.v);
 			if (EG(called_scope)) {
 				ce = EG(called_scope);
 			} else {
 				zend_error(E_ERROR, "Cannot access static:: when no class scope is active");
 			}
-			efree(lcname.v);
 		} else {
-			/* Check for namespace constant */
-			zstr nsname;
-			unsigned int nsname_len;
-
-			/* Concatenate lowercase namespace name and constant name */
-			if (type == IS_UNICODE) {
-				lcname.u = erealloc(lcname.u, UBYTES(lcname_len + 2 + const_name_len + 1));
-				lcname.u[lcname_len] = ':';
-				lcname.u[lcname_len+1] = ':';
-				memcpy(lcname.u+lcname_len+2, constant_name.u, UBYTES(const_name_len + 1));
-			} else {
-				lcname.s = erealloc(lcname.s, lcname_len + 2 + const_name_len + 1);
-				lcname.s[lcname_len] = ':';
-				lcname.s[lcname_len+1] = ':';
-				memcpy(lcname.s+lcname_len+2, constant_name.s, const_name_len + 1);
-			}
-			lcname_len += 2 + const_name_len;
-
-			nsname = lcname;
-			nsname_len = lcname_len;
-			if (flags & ZEND_FETCH_CLASS_RT_NS_NAME) {
-				/* Remove namespace name */
-				if (type == IS_UNICODE) {
-					nsname.u = u_memchr(nsname.u, ':', nsname_len) + 2;
-					nsname_len -= (nsname.u - lcname.u);
-				} else {
-					nsname.s = (char *)memchr(nsname.s, ':', nsname_len) + 2;
-					nsname_len -= (nsname.s - lcname.s);
-			    }
-			}
-
-			if (zend_u_hash_find(EG(zend_constants), type, nsname, nsname_len+1, (void **) &c) == SUCCESS) {
-				efree(lcname.v);
-				efree(class_name.v);
-				*result = c->value;
-				zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
-				zval_copy_ctor(result);
-				Z_SET_REFCOUNT_P(result, 1);
-				Z_UNSET_ISREF_P(result);
-				return 1;
-			}
 			efree(lcname.v);
-
-			if ((flags & IS_CONSTANT_RT_NS_CHECK) == 0) {
-				/* Check for class */
-				ce = zend_u_fetch_class(type, class_name, class_name_len, flags TSRMLS_CC);
-			}
+			ce = zend_u_fetch_class(type, class_name, class_name_len, flags TSRMLS_CC);
 		}
 
 		if (retval && ce) {
 			if (zend_u_hash_find(&ce->constants_table, type, constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
 				retval = 0;
-			}
-		} else {
-			if ((flags & ZEND_FETCH_CLASS_RT_NS_NAME) == 0) {
-				if ((flags & IS_CONSTANT_RT_NS_CHECK) != 0) {
-					name = constant_name;
-					name_len = const_name_len;
-					efree(class_name.v);
-					return zend_u_get_constant(type, name, name_len, result TSRMLS_CC);
-				}
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_ERROR, "Class '%R' not found", type, class_name);
+					zend_error(E_ERROR, "Undefined class constant '%R::%R'", type, class_name, type, constant_name);
 				}
 			}
+		} else if (!ce) {
 			retval = 0;
 		}
 		efree(class_name.v);
+		goto finish;
+	}
+	/* non-class constant */
+	if(type == IS_UNICODE) {
+		colon.u = u_memrchr(name.u, '\\', name_len);
+	} else {
+		colon.s = zend_memrchr(name.s, '\\', name_len);
+	}
+	if(colon.v != NULL) {
+		/* compound constant name */
+		zstr lcname, constant_name;
+		unsigned int lcname_len, prefix_len, const_name_len;
 
+		if(type == IS_UNICODE) {
+			prefix_len = colon.u - name.u;
+			constant_name.u = colon.u+1;
+		} else {
+			prefix_len = colon.s - name.s;
+			constant_name.s = colon.s+1;
+		}
+		const_name_len = name_len - prefix_len - 1;
+
+		lcname = zend_u_str_case_fold(type, name, prefix_len, 0, &lcname_len);
+
+		if(type == IS_UNICODE) {
+			lcname.u = erealloc(lcname.u, UBYTES(const_name_len + 1 + lcname_len + 1));
+			lcname.u[lcname_len] = '\\';
+			memcpy(lcname.u+lcname_len+1, constant_name.u, UBYTES(const_name_len + 1));
+		} else {
+			lcname.s = erealloc(lcname.s, const_name_len + 1 + lcname_len + 1);
+			lcname.s[lcname_len] = '\\';
+			memcpy(lcname.s+lcname_len+1, constant_name.s, const_name_len + 1);
+		}
+
+		if (zend_u_hash_find(EG(zend_constants), type, lcname, const_name_len + 1 + lcname_len + 1, (void **) &c) == SUCCESS) {
+			efree(lcname.v);
+			*result = c->value;
+			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
+			zval_copy_ctor(result);
+			Z_SET_REFCOUNT_P(result, 1);
+			Z_UNSET_ISREF_P(result);
+			return 1;
+		}
+		efree(lcname.v);
+		/* name requires runtime resolution, need to check non-namespaced name */
+		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
+			name = constant_name;
+			name_len = const_name_len;
+			return zend_u_get_constant(type, name, name_len, result TSRMLS_CC);
+		}
+		retval = 0;
+finish:
 		if (retval) {
 			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
 			*result = **ret_constant;

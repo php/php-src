@@ -2,7 +2,7 @@
 007: Run-time name conflict (php name)
 --FILE--
 <?php
-namespace test::ns1;
+namespace test\ns1;
 
 class Exception {
 }

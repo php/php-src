@@ -15,35 +15,27 @@ class X {
 	}
 }
 new X();
-new X::X();
-new Y::X();
-new ::X::X();
+new Y\X();
+new \X\X();
 X::bar();
-X::X::bar();
-Y::X::bar();
-::X::X::bar();
+Y\X::bar();
+\X\X::bar();
 echo X::C;
-echo X::X::C;
-echo Y::X::C;
-echo ::X::X::C;
+echo Y\X::C;
+echo \X\X::C;
 echo X::$var;
-echo X::X::$var;
-echo Y::X::$var;
-echo ::X::X::$var;
+echo Y\X::$var;
+echo \X\X::$var;
 --EXPECT--
 class ok
 class ok
 class ok
-class ok
-method ok
 method ok
 method ok
 method ok
 const ok
 const ok
 const ok
-const ok
-var ok
 var ok
 var ok
 var ok

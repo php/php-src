@@ -23,10 +23,10 @@ var_dump(__namespace__);
 
 ?>
 --EXPECTF--
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+%string|unicode%(%d) "%s"
 int(%d)
-unicode(22) "test::foo::__construct"
-unicode(9) "test::foo"
-unicode(11) "__construct"
-unicode(4) "test"
+%string|unicode%(21) "test\foo::__construct"
+%string|unicode%(8) "test\foo"
+%string|unicode%(11) "__construct"
+%string|unicode%(4) "test"
