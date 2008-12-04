@@ -1,3 +1,740 @@
+2008-12-03  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      ext/posix/tests/posix_getcwd.phpt:
+      fix test
+
+2008-12-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to -dev
+
+    * (PHP_5_3)
+      NEWS:
+      fix vi user error
+
+2008-12-03  Felipe Pena  <felipensp@gmail.com>
+
+    * ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_mknod.phpt
+      ext/posix/tests/posix_mknod.phpt
+      ext/posix/tests/posix_mknod.phpt:
+      - Fixed strange typos
+
+2008-12-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      5.3.0. Alpha 3
+
+    * (PHP_5_3)
+      ext/standard/tests/array/array_count_values_variation.phpt:
+      MFH One more cleanup after running tests
+
+    * ext/standard/tests/array/array_count_values_variation.phpt:
+      One more cleanup after running tests
+
+2008-12-03  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      acinclude.m4
+      configure.in:
+      Fix test for auto_cflags and explictly set GCC="no" if we detect suncc
+
+    * (PHP_5_3)
+      scripts/phpize.m4:
+      Fix cc detection in phpize according to changes in configure.in
+
+2008-12-03  Ant Phillips  <antphill@uk.ibm.com>
+
+    * (PHP_5_2)
+      ext/xml/tests/utf8_decode_error.phpt
+      ext/xml/tests/utf8_decode_variation1.phpt
+      ext/xml/tests/utf8_encode_error.phpt
+      ext/xml/tests/utf8_encode_variation1.phpt
+      ext/xml/tests/xml_error_string_error.phpt
+      ext/xml/tests/xml_error_string_variation1.phpt
+      ext/xml/tests/xml_get_current_byte_index_error.phpt
+      ext/xml/tests/xml_get_current_byte_index_variation1.phpt
+      ext/xml/tests/xml_get_current_column_number_error.phpt
+      ext/xml/tests/xml_get_current_column_number_variation1.phpt
+      ext/xml/tests/xml_get_current_line_number_error.phpt
+      ext/xml/tests/xml_get_current_line_number_variation1.phpt
+      ext/xml/tests/xml_get_error_code_error.phpt
+      ext/xml/tests/xml_get_error_code_variation1.phpt
+      ext/xml/tests/xml_parse_error.phpt
+      ext/xml/tests/xml_parse_into_struct_error.phpt
+      ext/xml/tests/xml_parse_into_struct_variation.phpt
+      ext/xml/tests/xml_parse_into_struct_variation1.phpt
+      ext/xml/tests/xml_parse_variation1.phpt
+      ext/xml/tests/xml_parser_create_error.phpt
+      ext/xml/tests/xml_parser_create_ns_error.phpt
+      ext/xml/tests/xml_parser_create_ns_variation1.phpt
+      ext/xml/tests/xml_parser_create_variation1.phpt
+      ext/xml/tests/xml_parser_free_error.phpt
+      ext/xml/tests/xml_parser_free_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_error.phpt
+      ext/xml/tests/xml_parser_get_option_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_basic.phpt
+      ext/xml/tests/xml_parser_set_option_error.phpt
+      ext/xml/tests/xml_parser_set_option_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_variation3.phpt
+      ext/xml/tests/xml_set_character_data_handler_error.phpt
+      ext/xml/tests/xml_set_character_data_handler_variation1.phpt
+      ext/xml/tests/xml_set_default_handler_error.phpt
+      ext/xml/tests/xml_set_default_handler_variation1.phpt
+      ext/xml/tests/xml_set_element_handler_error.phpt
+      ext/xml/tests/xml_set_element_handler_variation1.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_error.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_variation1.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_object_error.phpt
+      ext/xml/tests/xml_set_object_variation1.phpt
+      ext/xml/tests/xml_set_object_variation2.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_basic.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_error.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_variation1.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_error.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_variation1.phpt:
+      XML tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and Linux 64
+      bit).
+
+    * ext/xml/tests/utf8_decode_error.phpt
+      ext/xml/tests/utf8_decode_error.phpt
+      ext/xml/tests/utf8_decode_variation1.phpt
+      ext/xml/tests/utf8_decode_variation1.phpt
+      ext/xml/tests/utf8_encode_error.phpt
+      ext/xml/tests/utf8_encode_error.phpt
+      ext/xml/tests/utf8_encode_variation1.phpt
+      ext/xml/tests/utf8_encode_variation1.phpt
+      ext/xml/tests/xml_error_string_error.phpt
+      ext/xml/tests/xml_error_string_error.phpt
+      ext/xml/tests/xml_error_string_variation1.phpt
+      ext/xml/tests/xml_error_string_variation1.phpt
+      ext/xml/tests/xml_get_current_byte_index_error.phpt
+      ext/xml/tests/xml_get_current_byte_index_error.phpt
+      ext/xml/tests/xml_get_current_byte_index_variation1.phpt
+      ext/xml/tests/xml_get_current_byte_index_variation1.phpt
+      ext/xml/tests/xml_get_current_column_number_error.phpt
+      ext/xml/tests/xml_get_current_column_number_error.phpt
+      ext/xml/tests/xml_get_current_column_number_variation1.phpt
+      ext/xml/tests/xml_get_current_column_number_variation1.phpt
+      ext/xml/tests/xml_get_current_line_number_error.phpt
+      ext/xml/tests/xml_get_current_line_number_error.phpt
+      ext/xml/tests/xml_get_current_line_number_variation1.phpt
+      ext/xml/tests/xml_get_current_line_number_variation1.phpt
+      ext/xml/tests/xml_get_error_code_error.phpt
+      ext/xml/tests/xml_get_error_code_error.phpt
+      ext/xml/tests/xml_get_error_code_variation1.phpt
+      ext/xml/tests/xml_get_error_code_variation1.phpt
+      ext/xml/tests/xml_parse_error.phpt
+      ext/xml/tests/xml_parse_error.phpt
+      ext/xml/tests/xml_parse_into_struct_error.phpt
+      ext/xml/tests/xml_parse_into_struct_error.phpt
+      ext/xml/tests/xml_parse_into_struct_variation.phpt
+      ext/xml/tests/xml_parse_into_struct_variation.phpt
+      ext/xml/tests/xml_parse_into_struct_variation1.phpt
+      ext/xml/tests/xml_parse_into_struct_variation1.phpt
+      ext/xml/tests/xml_parse_variation1.phpt
+      ext/xml/tests/xml_parse_variation1.phpt
+      ext/xml/tests/xml_parser_create_error.phpt
+      ext/xml/tests/xml_parser_create_error.phpt
+      ext/xml/tests/xml_parser_create_ns_error.phpt
+      ext/xml/tests/xml_parser_create_ns_error.phpt
+      ext/xml/tests/xml_parser_create_ns_variation1.phpt
+      ext/xml/tests/xml_parser_create_ns_variation1.phpt
+      ext/xml/tests/xml_parser_create_variation1.phpt
+      ext/xml/tests/xml_parser_create_variation1.phpt
+      ext/xml/tests/xml_parser_free_error.phpt
+      ext/xml/tests/xml_parser_free_error.phpt
+      ext/xml/tests/xml_parser_free_variation1.phpt
+      ext/xml/tests/xml_parser_free_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_error.phpt
+      ext/xml/tests/xml_parser_get_option_error.phpt
+      ext/xml/tests/xml_parser_get_option_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_variation2.phpt
+      ext/xml/tests/xml_parser_get_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_basic.phpt
+      ext/xml/tests/xml_parser_set_option_basic.phpt
+      ext/xml/tests/xml_parser_set_option_error.phpt
+      ext/xml/tests/xml_parser_set_option_error.phpt
+      ext/xml/tests/xml_parser_set_option_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_variation3.phpt
+      ext/xml/tests/xml_parser_set_option_variation3.phpt
+      ext/xml/tests/xml_set_character_data_handler_error.phpt
+      ext/xml/tests/xml_set_character_data_handler_error.phpt
+      ext/xml/tests/xml_set_character_data_handler_variation1.phpt
+      ext/xml/tests/xml_set_character_data_handler_variation1.phpt
+      ext/xml/tests/xml_set_default_handler_error.phpt
+      ext/xml/tests/xml_set_default_handler_error.phpt
+      ext/xml/tests/xml_set_default_handler_variation1.phpt
+      ext/xml/tests/xml_set_default_handler_variation1.phpt
+      ext/xml/tests/xml_set_element_handler_error.phpt
+      ext/xml/tests/xml_set_element_handler_error.phpt
+      ext/xml/tests/xml_set_element_handler_variation1.phpt
+      ext/xml/tests/xml_set_element_handler_variation1.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_error.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_error.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_variation1.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_object_error.phpt
+      ext/xml/tests/xml_set_object_error.phpt
+      ext/xml/tests/xml_set_object_variation1.phpt
+      ext/xml/tests/xml_set_object_variation1.phpt
+      ext/xml/tests/xml_set_object_variation2.phpt
+      ext/xml/tests/xml_set_object_variation2.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_basic.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_basic.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_error.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_error.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_variation1.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_variation1.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_error.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_error.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_variation1.phpt:
+      
+      XML tests: checked on PHP 5.2.6, 5.3 and 6.0 (Windows, Linux and Linux 64
+      bit).
+
+    * ext/xml/tests/utf8_decode_error.phpt
+      ext/xml/tests/utf8_decode_error.phpt
+      ext/xml/tests/xml_error_string_error.phpt
+      ext/xml/tests/xml_error_string_error.phpt
+      ext/xml/tests/xml_get_current_column_number_variation1.phpt
+      ext/xml/tests/xml_get_current_column_number_variation1.phpt
+      ext/xml/tests/xml_get_current_line_number_variation1.phpt
+      ext/xml/tests/xml_get_current_line_number_variation1.phpt
+      ext/xml/tests/xml_parse_variation1.phpt
+      ext/xml/tests/xml_parse_variation1.phpt
+      ext/xml/tests/xml_parser_free_variation1.phpt
+      ext/xml/tests/xml_parser_free_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_variation2.phpt
+      ext/xml/tests/xml_set_character_data_handler_error.phpt
+      ext/xml/tests/xml_set_character_data_handler_error.phpt
+      ext/xml/tests/xml_set_element_handler_variation1.phpt
+      ext/xml/tests/xml_set_element_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_variation1.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_object_error.phpt
+      ext/xml/tests/xml_set_object_error.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_error.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_variation1.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_variation1.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_basic.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_error.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_error.phpt:
+      
+      file utf8_decode_error.phpt was initially added on branch PHP_5_3.
+
+    * ext/xml/tests/utf8_decode_variation1.phpt
+      ext/xml/tests/utf8_decode_variation1.phpt
+      ext/xml/tests/utf8_encode_error.phpt
+      ext/xml/tests/utf8_encode_error.phpt
+      ext/xml/tests/utf8_encode_variation1.phpt
+      ext/xml/tests/utf8_encode_variation1.phpt
+      ext/xml/tests/xml_error_string_variation1.phpt
+      ext/xml/tests/xml_error_string_variation1.phpt
+      ext/xml/tests/xml_get_current_byte_index_error.phpt
+      ext/xml/tests/xml_get_current_byte_index_error.phpt
+      ext/xml/tests/xml_get_current_byte_index_variation1.phpt
+      ext/xml/tests/xml_get_current_byte_index_variation1.phpt
+      ext/xml/tests/xml_get_current_column_number_error.phpt
+      ext/xml/tests/xml_get_current_column_number_error.phpt
+      ext/xml/tests/xml_get_current_line_number_error.phpt
+      ext/xml/tests/xml_get_current_line_number_error.phpt
+      ext/xml/tests/xml_get_error_code_error.phpt
+      ext/xml/tests/xml_get_error_code_error.phpt
+      ext/xml/tests/xml_get_error_code_variation1.phpt
+      ext/xml/tests/xml_get_error_code_variation1.phpt
+      ext/xml/tests/xml_parse_error.phpt
+      ext/xml/tests/xml_parse_error.phpt
+      ext/xml/tests/xml_parse_into_struct_error.phpt
+      ext/xml/tests/xml_parse_into_struct_error.phpt
+      ext/xml/tests/xml_parse_into_struct_variation.phpt
+      ext/xml/tests/xml_parse_into_struct_variation.phpt
+      ext/xml/tests/xml_parse_into_struct_variation1.phpt
+      ext/xml/tests/xml_parse_into_struct_variation1.phpt
+      ext/xml/tests/xml_parser_create_error.phpt
+      ext/xml/tests/xml_parser_create_error.phpt
+      ext/xml/tests/xml_parser_create_ns_error.phpt
+      ext/xml/tests/xml_parser_create_ns_error.phpt
+      ext/xml/tests/xml_parser_create_ns_variation1.phpt
+      ext/xml/tests/xml_parser_create_ns_variation1.phpt
+      ext/xml/tests/xml_parser_create_variation1.phpt
+      ext/xml/tests/xml_parser_create_variation1.phpt
+      ext/xml/tests/xml_parser_free_error.phpt
+      ext/xml/tests/xml_parser_free_error.phpt
+      ext/xml/tests/xml_parser_get_option_error.phpt
+      ext/xml/tests/xml_parser_get_option_error.phpt
+      ext/xml/tests/xml_parser_get_option_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_variation1.phpt
+      ext/xml/tests/xml_parser_get_option_variation2.phpt
+      ext/xml/tests/xml_parser_get_option_variation2.phpt
+      ext/xml/tests/xml_parser_set_option_basic.phpt
+      ext/xml/tests/xml_parser_set_option_basic.phpt
+      ext/xml/tests/xml_parser_set_option_error.phpt
+      ext/xml/tests/xml_parser_set_option_error.phpt
+      ext/xml/tests/xml_parser_set_option_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation1.phpt
+      ext/xml/tests/xml_parser_set_option_variation3.phpt
+      ext/xml/tests/xml_parser_set_option_variation3.phpt
+      ext/xml/tests/xml_set_character_data_handler_variation1.phpt
+      ext/xml/tests/xml_set_character_data_handler_variation1.phpt
+      ext/xml/tests/xml_set_default_handler_error.phpt
+      ext/xml/tests/xml_set_default_handler_error.phpt
+      ext/xml/tests/xml_set_default_handler_variation1.phpt
+      ext/xml/tests/xml_set_default_handler_variation1.phpt
+      ext/xml/tests/xml_set_element_handler_error.phpt
+      ext/xml/tests/xml_set_element_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_error.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_end_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_error.phpt
+      ext/xml/tests/xml_set_external_entity_ref_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_error.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_notation_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_object_variation1.phpt
+      ext/xml/tests/xml_set_object_variation1.phpt
+      ext/xml/tests/xml_set_object_variation2.phpt
+      ext/xml/tests/xml_set_object_variation2.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_basic.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_basic.phpt
+      ext/xml/tests/xml_set_processing_instruction_handler_error.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_start_namespace_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_variation1.phpt
+      ext/xml/tests/xml_set_unparsed_entity_decl_handler_variation1.phpt:
+      
+      file utf8_decode_variation1.phpt was initially added on branch PHP_5_3.
+
+2008-12-03  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      ext/imap/php_imap.c:
+      bug #46731 modification to previous fix
+
+2008-12-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_mknod.phpt
+      ext/posix/tests/posix_mknod.phpt:
+      - Coverage++
+
+    * ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getcwd.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getgrnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getpwnam.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_getrlimit.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_initgroups.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_isatty.phpt
+      ext/posix/tests/posix_mknod.phpt
+      ext/posix/tests/posix_mknod.phpt
+      ext/posix/tests/posix_mknod.phpt:
+        1.1.4;
+      - Coverage++
+
+2008-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_5_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      PHP 5.2.7
+
+2008-12-03  Robin Fernandes  <robin@soal.org>
+
+    * (PHP_5_2)
+      run-tests.php:
+      Add support for %u|b% and %unicode_string_optional% to facilitate writing
+      tests compatible with both 5_2 and HEAD.
+
+2008-12-03  Ant Phillips  <antphill@uk.ibm.com>
+
+    * ext/mbstring/tests/bug43998.phpt
+      ext/mbstring/tests/bug43998.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation2.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_variation3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic3.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_variation1.phpt
+      ext/mbstring/tests/mb_ereg_basic.phpt
+      ext/mbstring/tests/mb_ereg_error.phpt
+      ext/mbstring/tests/mb_ereg_match_basic.phpt
+      ext/mbstring/tests/mb_ereg_match_basic.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation1.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation1.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation2.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation2.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation4.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation5.phpt
+      ext/mbstring/tests/mb_ereg_variation6.phpt
+      ext/mbstring/tests/mb_internal_encoding_ini_basic2.phpt
+      ext/mbstring/tests/mb_internal_encoding_ini_basic2.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/mb_split_variation3.phpt
+      ext/mbstring/tests/mb_split_variation3.phpt
+      ext/mbstring/tests/mb_stripos.phpt
+      ext/mbstring/tests/mb_stripos_basic2.phpt
+      ext/mbstring/tests/mb_stripos_basic2.phpt
+      ext/mbstring/tests/mb_stristr_basic.phpt
+      ext/mbstring/tests/mb_stristr_basic.phpt
+      ext/mbstring/tests/mb_stristr_error1.phpt
+      ext/mbstring/tests/mb_stristr_error1.phpt
+      ext/mbstring/tests/mb_stristr_variation1.phpt
+      ext/mbstring/tests/mb_stristr_variation1.phpt
+      ext/mbstring/tests/mb_stristr_variation2.phpt
+      ext/mbstring/tests/mb_stristr_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation4.phpt
+      ext/mbstring/tests/mb_strpos_variation5.phpt
+      ext/mbstring/tests/mb_strrchr_basic.phpt
+      ext/mbstring/tests/mb_strrchr_basic.phpt
+      ext/mbstring/tests/mb_strrchr_error2.phpt
+      ext/mbstring/tests/mb_strrchr_error2.phpt
+      ext/mbstring/tests/mb_strrchr_variation1.phpt
+      ext/mbstring/tests/mb_strrchr_variation1.phpt
+      ext/mbstring/tests/mb_strrchr_variation6.phpt
+      ext/mbstring/tests/mb_strrchr_variation6.phpt
+      ext/mbstring/tests/mb_strrichr_error2.phpt
+      ext/mbstring/tests/mb_strrichr_error2.phpt
+      ext/mbstring/tests/mb_strrichr_variation1.phpt
+      ext/mbstring/tests/mb_strrichr_variation1.phpt
+      ext/mbstring/tests/mb_strripos_basic.phpt
+      ext/mbstring/tests/mb_strripos_basic.phpt
+      ext/mbstring/tests/mb_strripos_basic2.phpt
+      ext/mbstring/tests/mb_strripos_basic2.phpt
+      ext/mbstring/tests/mb_strripos_error2.phpt
+      ext/mbstring/tests/mb_strripos_error2.phpt
+      ext/mbstring/tests/mb_strripos_variation2.phpt
+      ext/mbstring/tests/mb_strripos_variation2.phpt
+      ext/mbstring/tests/mb_strrpos_variation1.phpt
+      ext/mbstring/tests/mb_strrpos_variation3.phpt
+      ext/mbstring/tests/mb_strrpos_variation4.phpt
+      ext/mbstring/tests/mb_strstr_error1.phpt
+      ext/mbstring/tests/mb_strstr_error1.phpt
+      ext/mbstring/tests/mb_strstr_variation3.phpt
+      ext/mbstring/tests/mb_strstr_variation3.phpt
+      ext/mbstring/tests/mb_strtolower_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_basic.phpt
+      ext/mbstring/tests/mb_strtoupper_variation1.phpt
+      ext/mbstring/tests/mb_strtoupper_variation2.phpt
+      ext/mbstring/tests/mb_strtoupper_variation4.phpt
+      ext/mbstring/tests/mb_substitute_character_variation1.phpt
+      ext/mbstring/tests/mb_substitute_character_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation1.phpt
+      ext/mbstring/tests/mb_substr_count_variation2.phpt
+      ext/mbstring/tests/mb_substr_count_variation3.phpt
+      ext/mbstring/tests/mb_substr_variation1.phpt
+      ext/mbstring/tests/mb_substr_variation5.phpt:
+      
+      file bug43998.phpt was initially added on branch PHP_5_2.
+
+    * ext/mbstring/tests/bug43840.phpt
+      ext/mbstring/tests/bug43840.phpt
+      ext/mbstring/tests/bug43994.phpt
+      ext/mbstring/tests/bug43994.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_basic2.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_indent.phpt
+      ext/mbstring/tests/mb_encode_mimeheader_indent.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_match_error1.phpt
+      ext/mbstring/tests/mb_ereg_match_error1.phpt
+      ext/mbstring/tests/mb_ereg_replace_basic.phpt
+      ext/mbstring/tests/mb_ereg_replace_basic.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation3.phpt
+      ext/mbstring/tests/mb_ereg_replace_variation3.phpt
+      ext/mbstring/tests/mb_ereg_variation4.phpt
+      ext/mbstring/tests/mb_ereg_variation7.phpt
+      ext/mbstring/tests/mb_regex_encoding_variation2.phpt
+      ext/mbstring/tests/mb_split_error.phpt
+      ext/mbstring/tests/mb_split_error.phpt
+      ext/mbstring/tests/mb_split_variation1.phpt
+      ext/mbstring/tests/mb_split_variation1.phpt
+      ext/mbstring/tests/mb_stripos_error1.phpt
+      ext/mbstring/tests/mb_stripos_error2.phpt
+      ext/mbstring/tests/mb_stripos_variation1.phpt
+      ext/mbstring/tests/mb_stripos_variation2.phpt
+      ext/mbstring/tests/mb_stripos_variation3.phpt
+      ext/mbstring/tests/mb_stristr_error2.phpt
+      ext/mbstring/tests/mb_stristr_error2.phpt
+      ext/mbstring/tests/mb_stristr_variation3.phpt
+      ext/mbstring/tests/mb_stristr_variation3.phpt
+      ext/mbstring/tests/mb_stristr_variation4.phpt
+      ext/mbstring/tests/mb_stristr_variation4.phpt
+      ext/mbstring/tests/mb_stristr_variation5.phpt
+      ext/mbstring/tests/mb_stristr_variation5.phpt
+      ext/mbstring/tests/mb_strlen_basic.phpt
+      ext/mbstring/tests/mb_strlen_variation1.phpt
+      ext/mbstring/tests/mb_strpos.phpt
+      ext/mbstring/tests/mb_strpos_basic.phpt
+      ext/mbstring/tests/mb_strpos_variation2.phpt
+      ext/mbstring/tests/mb_strpos_variation3.phpt
+      ext/mbstring/tests/mb_strrchr_error1.phpt
+      ext/mbstring/tests/mb_strrchr_error1.phpt
+      ext/mbstring/tests/mb_strrchr_variation2.phpt
+      ext/mbstring/tests/mb_strrchr_variation2.phpt
+      ext/mbstring/tests/mb_strrchr_variation3.phpt
+      ext/mbstring/tests/mb_strrchr_variation3.phpt
+      ext/mbstring/tests/mb_strrchr_variation5.phpt
+      ext/mbstring/tests/mb_strrchr_variation5.phpt
+      ext/mbstring/tests/mb_strrichr_basic.phpt
+      ext/mbstring/tests/mb_strrichr_basic.phpt
+      ext/mbstring/tests/mb_strrichr_error1.phpt
+      ext/mbstring/tests/mb_strrichr_error1.phpt
+      ext/mbstring/tests/mb_strrichr_variation2.phpt
+      ext/mbstring/tests/mb_strrichr_variation2.phpt
+      ext/mbstring/tests/mb_strrichr_variation3.phpt
+      ext/mbstring/tests/mb_strrichr_variation3.phpt
+      ext/mbstring/tests/mb_strrichr_variation4.phpt
+      ext/mbstring/tests/mb_strrichr_variation4.phpt
+      ext/mbstring/tests/mb_strrichr_variation5.phpt
+      ext/mbstring/tests/mb_strrichr_variation5.phpt
+      ext/mbstring/tests/mb_strripos_error1.phpt
+      ext/mbstring/tests/mb_strripos_error1.phpt
+      ext/mbstring/tests/mb_strripos_variation1.phpt
+      ext/mbstring/tests/mb_strripos_variation1.phpt
+      ext/mbstring/tests/mb_strripos_variation4.phpt
+      ext/mbstring/tests/mb_strripos_variation4.phpt
+      ext/mbstring/tests/mb_strrpos_basic.phpt
+      ext/mbstring/tests/mb_strstr_basic.phpt
+      ext/mbstring/tests/mb_strstr_basic.phpt
+      ext/mbstring/tests/mb_strstr_error2.phpt
+      ext/mbstring/tests/mb_strstr_error2.phpt
+      ext/mbstring/tests/mb_strstr_variation2.phpt
+      ext/mbstring/tests/mb_strstr_variation2.phpt
+      ext/mbstring/tests/mb_strstr_variation4.phpt
+      ext/mbstring/tests/mb_strstr_variation4.phpt
+      ext/mbstring/tests/mb_strstr_variation5.phpt
+      ext/mbstring/tests/mb_strstr_variation5.phpt
+      ext/mbstring/tests/mb_strstr_variation6.phpt
+      ext/mbstring/tests/mb_strstr_variation6.phpt
+      ext/mbstring/tests/mb_strtolower_variation1.phpt
+      ext/mbstring/tests/mb_strtolower_variation4.phpt
+      ext/mbstring/tests/mb_substitute_character_basic.phpt
+      ext/mbstring/tests/mb_substitute_character_basic.phpt
+      ext/mbstring/tests/mb_substitute_character_error.phpt
+      ext/mbstring/tests/mb_substitute_character_error.phpt
+      ext/mbstring/tests/mb_substitute_character_variation2.phpt
+      ext/mbstring/tests/mb_substitute_character_variation2.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/mb_substr_count_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation2.phpt
+      ext/mbstring/tests/mb_substr_variation4.phpt
+      ext/mbstring/tests/mb_substr_variation6.phpt
+      ext/mbstring/tests/mb_substr_variation6.phpt
+      ext/mbstring/tests/mb_substr_variation7.phpt
+      ext/mbstring/tests/mb_substr_variation7.phpt:
+      
+      file bug43840.phpt was initially added on branch PHP_5_2.
+
+    * ext/mbstring/tests/mb_convert_encoding_variation1.phpt
+      ext/mbstring/tests/mb_convert_encoding_variation1.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_error.phpt
+      ext/mbstring/tests/mb_decode_mimeheader_error.phpt
+      ext/mbstring/tests/mb_ereg_replace_error.phpt
+      ext/mbstring/tests/mb_ereg_replace_error.phpt
+      ext/mbstring/tests/mb_split_variation2.phpt
+      ext/mbstring/tests/mb_split_variation2.phpt
+      ext/mbstring/tests/mb_stripos_basic.phpt
+      ext/mbstring/tests/mb_stripos_variation4.phpt
+      ext/mbstring/tests/mb_strrchr_variation4.phpt
+      ext/mbstring/tests/mb_strrchr_variation4.phpt
+      ext/mbstring/tests/mb_strstr_variation1.phpt
+      ext/mbstring/tests/mb_strstr_variation1.phpt:
+      
+      file mb_convert_encoding_variation1.phpt was initially added on branch
+      PHP_5_2.
+
+    * (PHP_5_3)
+      ext/standard/tests/file/file_put_contents_variation4.phpt
+      ext/standard/tests/file/file_put_contents_variation5.phpt
+      ext/standard/tests/file/file_put_contents_variation6.phpt
+      ext/standard/tests/file/fopen_variation12.phpt
+      ext/standard/tests/file/fopen_variation16.phpt
+      ext/standard/tests/file/fopen_variation16.phpt
+      ext/standard/tests/file/fopen_variation17.phpt
+      ext/standard/tests/file/fopen_variation17.phpt
+      ext/standard/tests/file/fopen_variation5.phpt
+      ext/standard/tests/file/fopen_variation7.phpt
+      ext/standard/tests/file/fopen_variation8.phpt
+      ext/standard/tests/file/fopen_variation9.phpt:
+      Put bug number in the XFAIL section for cross referencing
+
+2008-12-03  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      NEWS:
+      BFN, just some missing NEWS entries
+
+2008-12-03  Johannes Schlüter  <johannes@schlueters.de>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      Update credits
+
+    * (PHP_5_3)
+      ext/standard/tests/file/file_put_contents_variation4.phpt
+      ext/standard/tests/file/file_put_contents_variation6.phpt:
+      Cleanup after running the tests ...
+      
+
+    * ext/standard/tests/file/file_put_contents_variation4.phpt
+      ext/standard/tests/file/file_put_contents_variation6.phpt:
+      Cleanup after running the tests ...
+
+    * (PHP_5_3)
+      ext/pdo_sqlite/tests/bug44327_2.phpt
+      ext/pdo_sqlite/tests/bug44327_3.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_createaggregate.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_createfunction.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_lastinsertid.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_transaction.phpt:
+      MFH: Fix tests (use a in-memory database not a file called memory)
+
+    * ext/pdo_sqlite/tests/bug44327_2.phpt
+      ext/pdo_sqlite/tests/bug44327_3.phpt
+      ext/pdo_sqlite/tests/debugdumpparams_001.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_createaggregate.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_createfunction.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_lastinsertid.phpt
+      ext/pdo_sqlite/tests/pdo_sqlite_transaction.phpt:
+      Fix tests (use a in-memory database not a file called memory)
+
+2008-12-03  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      NEWS:
+      - BFN
+
+2008-12-03  Antony Dovgal  <tony@daylessday.org>
+
+    * ext/pdo/pdo_stmt.c:
+      fix possible invalid read
+
+2008-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      
+      MFB: Fixed bug #46731 (Missing validation for the options parameter of the
+        imap_fetch_overview() function).
+
+    * (PHP_5_3)
+      NEWS
+      ext/imap/php_imap.c:
+      
+      Fixed bug #46731 (Missing validation for the options parameter of the
+      imap_fetch_overview() function).
+
+2008-12-03  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      ext/pdo/pdo_dbh.c:
+      Fixed error message typo
+
+    * ext/pdo/pdo_dbh.c:
+      MFB (1.82.2.31.2.17.2.10): "Added a warning message on pdo::exec() failure
+      in the event of an empty query"
+
 2008-12-02  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
