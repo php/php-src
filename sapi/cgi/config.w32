@@ -1,9 +1,0 @@
-// vim:ft=javascript
-// $Id$
-
-ARG_ENABLE('cgi', 'Build CGI version of PHP', 'yes');
-
-if (PHP_CGI == "yes") {
-	SAPI('cgi', 'cgi_main.c fastcgi.c', 'php-cgi.exe');
-	ADD_FLAG('LIBS_CGI', 'ws2_32.lib kernel32.lib advapi32.lib');
-}
