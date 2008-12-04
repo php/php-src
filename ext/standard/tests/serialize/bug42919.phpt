@@ -10,5 +10,5 @@ $x = unserialize(serialize(new Bar));
 echo get_class($x) . "\n";
 ?>
 --EXPECT--
-O:8:"Foo::Bar":0:{}
-Foo::Bar
+O:7:"Foo\005cBar":0:{}
+Foo\Bar
