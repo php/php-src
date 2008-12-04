@@ -23,7 +23,7 @@ CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann");
 CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger");
 CREDIT_LINE("ereg", "Rasmus Lerdorf, Jim Winstead, Jaakko Hyvätti");
 CREDIT_LINE("EXIF", "Rasmus Lerdorf, Marcus Boerger");
-CREDIT_LINE("fileinfo", "Ilia Alshanetsky, Derick Rethans");
+CREDIT_LINE("fileinfo", "Ilia Alshanetsky, Scott MacVicar, Derick Rethans");
 CREDIT_LINE("Firebird/InterBase driver for PDO", "Ard Biesheuvel");
 CREDIT_LINE("FTP", "Stefan Esser, Andrew Skalski");
 CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead, Jouni Ahto, Ilia Alshanetsky, Pierre-Alain Joye, Marcus Boerger");
