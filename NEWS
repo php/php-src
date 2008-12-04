@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.8
+- Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
+  (Mikko)
 
 04 Dec 2008, PHP 5.2.7
 - Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
