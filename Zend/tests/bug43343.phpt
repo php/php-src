@@ -8,4 +8,4 @@ $foo = 'bar';
 var_dump(new namespace::$foo);
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'namespace' as a class name in %sbug43343.php on line 5
+Parse error: syntax error, unexpected T_PAAMAYIM_NEKUDOTAYIM, expecting T_NS_SEPARATOR in %sbug43343.php on line 5

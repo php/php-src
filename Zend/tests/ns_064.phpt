@@ -21,7 +21,7 @@ class foo {
 	}
 }
 
-use test::foo as stdClass;
+use test\foo as stdClass;
 
 $x = new stdClass;
 $x->a = 1;

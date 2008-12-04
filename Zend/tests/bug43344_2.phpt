@@ -6,4 +6,4 @@ namespace Foo;
 echo Foo::bar."\n";
 ?>
 --EXPECTF--
-Fatal error: Class 'Foo::Foo' not found in %sbug43344_2.php on line %d
+Fatal error: Class 'Foo\Foo' not found in %sbug43344_2.php on line %d

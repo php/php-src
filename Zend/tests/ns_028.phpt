@@ -14,13 +14,13 @@ class Foo {
 }
 
 $x = new Foo;
-Foo::Bar();
-$x = new Foo::Foo;
-Foo::Foo::Bar();
-::Foo::Bar();
+Foo\Bar();
+$x = new Foo\Foo;
+Foo\Foo::Bar();
+\Foo\Bar();
 --EXPECT--
 Method - Foo::__construct
-Func   - Foo::Bar
-Method - Foo::Foo::__construct
-Method - Foo::Foo::Bar
-Func   - Foo::Bar
+Func   - Foo\Bar
+Method - Foo\Foo::__construct
+Method - Foo\Foo::Bar
+Func   - Foo\Bar

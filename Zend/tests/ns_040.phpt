@@ -9,13 +9,13 @@ const B = A;
 function f1($x=A) {
 	echo $x;
 }
-function f2($x=X::A) {
+function f2($x=\X\A) {
 	echo $x;
 }
-function f3($x=Y::A) {
+function f3($x=Y\A) {
 	echo $x;
 }
-function f4($x=::X::A) {
+function f4($x=\X\A) {
 	echo $x;
 }
 function f5($x=B) {
@@ -31,9 +31,9 @@ function f8($x=array(A=>"aaa\n")) {
 	echo $x["ok\n"];
 }
 echo A;
-echo X::A;
-echo Y::A;
-echo ::X::A;
+echo \X\A;
+echo Y\A;
+echo \X\A;
 f1();
 f2();
 f3();

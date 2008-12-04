@@ -1610,6 +1610,10 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	return T_PAAMAYIM_NEKUDOTAYIM;
 }
 
+<ST_IN_SCRIPTING>"\\" {
+	return T_NS_SEPARATOR;
+}
+
 <ST_IN_SCRIPTING>"new" {
 	return T_NEW;
 }

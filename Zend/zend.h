@@ -560,7 +560,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK	0x0f
-#define IS_CONSTANT_RT_NS_CHECK	0x10
+#define IS_CONSTANT_UNQUALIFIED	0x10
 #define IS_CONSTANT_INDEX		0x80
 #define IS_LEXICAL_VAR			0x20
 #define IS_LEXICAL_REF			0x40

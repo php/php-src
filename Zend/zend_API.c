@@ -2792,20 +2792,16 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	fcc->function_handler = NULL;
 
 	if (!ce_org) {
-		/* Skip leading :: */
+		/* Skip leading \ */
 		if (Z_TYPE_P(callable) == IS_UNICODE &&
-			Z_USTRVAL_P(callable)[0] == ':' &&
-			Z_USTRVAL_P(callable)[1] == ':'
-		) {
- 			mlen = Z_USTRLEN_P(callable) - 2;
-			mname.u = Z_USTRVAL_P(callable) + 2;
+			Z_USTRVAL_P(callable)[0] == '\\') {
+ 			mlen = Z_USTRLEN_P(callable) - 1;
+			mname.u = Z_USTRVAL_P(callable) + 1;
 			lmname = zend_u_str_case_fold(IS_UNICODE, mname, mlen, 1, &lmlen);
 		} else if (Z_TYPE_P(callable) == IS_STRING &&
-			Z_STRVAL_P(callable)[0] == ':' &&
-			Z_STRVAL_P(callable)[1] == ':'
-		) {
- 			mlen = Z_USTRLEN_P(callable) - 2;
-			mname.u = Z_USTRVAL_P(callable) + 2;
+			Z_STRVAL_P(callable)[0] == '\\') {
+ 			mlen = Z_USTRLEN_P(callable) - 1;
+			mname.u = Z_USTRVAL_P(callable) + 1;
 			lmname = zend_u_str_case_fold(IS_STRING, mname, mlen, 1, &lmlen);
 		} else {
 			mlen = Z_UNILEN_P(callable);

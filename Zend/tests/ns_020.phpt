@@ -8,11 +8,11 @@ function foo() {
 	echo __FUNCTION__,"\n";
 }
 foo();
-X::foo();
-Y::foo();
-::X::foo();
+\X\foo();
+Y\foo();
+\X\foo();
 --EXPECT--
-X::foo
-X::foo
-X::foo
-X::foo
+X\foo
+X\foo
+X\foo
+X\foo

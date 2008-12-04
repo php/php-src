@@ -5,11 +5,11 @@ Bug #43332.2 (self and parent as type hint in namespace)
 namespace foobar;
 
 class foo {
-  public function bar(::self $a) { }
+  public function bar(\self $a) { }
 }
 
 $foo = new foo;
 $foo->bar($foo); // Ok!
 $foo->bar(new stdclass); // Error, ok!
 --EXPECTF--
-Fatal error: '::self' is a wrong class name in %sbug43332_2.php on line 5
+Fatal error: '\self' is an invalid class name in %sbug43332_2.php on line 5

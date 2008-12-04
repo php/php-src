@@ -2,7 +2,7 @@
 029: Name ambiguity (class name & import name)
 --FILE--
 <?php
-use A::B as Foo;
+use A\B as Foo;
 
 class Foo {
 }

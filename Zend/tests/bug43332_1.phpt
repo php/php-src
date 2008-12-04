@@ -10,6 +10,6 @@ class foo {
 
 $foo = new foo;
 $foo->bar($foo); // Ok!
-$foo->bar(new stdclass); // Error, ok!
+$foo->bar(new \stdclass); // Error, ok!
 --EXPECTF--
-Catchable fatal error: Argument 1 passed to foobar::foo::bar() must be an instance of foobar::foo, instance of stdClass given, called in %sbug43332_1.php on line 10 and defined in %sbug43332_1.php on line 5
+Catchable fatal error: Argument 1 passed to foobar\foo::bar() must be an instance of foobar\foo, instance of stdClass given, called in %sbug43332_1.php on line 10 and defined in %sbug43332_1.php on line 5
