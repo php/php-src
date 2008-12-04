@@ -796,7 +796,7 @@ if test "$PHP_DEBUG" = "yes"; then
     CXXFLAGS="$CXXFLAGS -O0"
   fi
   if test "$SUNCC" = "yes"; then
-    if -n "$auto_cflags"; then
+    if test -n "$auto_cflags"; then
       CFLAGS="-g"
       CXXFLAGS="-g"
     else
