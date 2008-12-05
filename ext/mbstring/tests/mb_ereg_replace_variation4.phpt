@@ -13,10 +13,6 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing mb_ereg_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)

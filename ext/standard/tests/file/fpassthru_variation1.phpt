@@ -10,10 +10,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  * Alias to functions: gzpassthru
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing fpassthru() : usage variations ***\n";
 error_reporting(E_ALL & ~E_NOTICE);
 

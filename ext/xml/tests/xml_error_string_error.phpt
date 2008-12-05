@@ -14,10 +14,6 @@ if (!extension_loaded("xml")) {
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing xml_error_string() : error conditions ***\n";
 
 // Zero arguments
