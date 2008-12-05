@@ -47,19 +47,19 @@ foreach($tests as $data)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 ==========
-string(6) "String"
+%unicode|string%(6) "String"
 Test::__construct(String)
 Test::serialize(String)
 Test::unserialize(String)
-object(Test)#1 (1) {
-  ["data"]=>
-  string(6) "String"
+object(Test)#%d (1) {
+  [%u|b%"data"]=>
+  %unicode|string%(6) "String"
 }
-object(Test)#1 (1) {
-  ["data"]=>
-  string(6) "String"
+object(Test)#%d (1) {
+  [%u|b%"data"]=>
+  %unicode|string%(6) "String"
 }
 ==========
 NULL
