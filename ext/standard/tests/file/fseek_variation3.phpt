@@ -10,10 +10,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  * Alias to functions: gzseek
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing fseek() : variation - beyond file boundaries ***\n";
 
 $outputfile = __FILE__.".tmp";

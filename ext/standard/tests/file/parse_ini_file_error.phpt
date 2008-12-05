@@ -8,10 +8,6 @@ Test parse_ini_file() function : error conditions
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing parse_ini_file() : error conditions ***\n";
 
 // Zero arguments
