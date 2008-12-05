@@ -23,19 +23,19 @@ mb_regex_encoding('utf-8');
 //contains japanese characters, ASCII digits and different, UTF-8 encoded digits
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-$character_classes = array ('[[:alnum:]]+', /*1*/
-                            '[[:alpha:]]+',
-                            '[[:ascii:]]+',
-                            '[[:blank:]]+',
-                            '[[:cntrl:]]+',/*5*/
-                            '[[:digit:]]+',
-                            '[[:graph:]]+',
-                            '[[:lower:]]+',
-                            '[[:print:]]+',
-                            '[[:punct:]]+', /*10*/
-                            '[[:space:]]+',
-                            '[[:upper:]]+',
-                            '[[:xdigit:]]+'); /*13*/
+$character_classes = array (b'[[:alnum:]]+', /*1*/
+                            b'[[:alpha:]]+',
+                            b'[[:ascii:]]+',
+                            b'[[:blank:]]+',
+                            b'[[:cntrl:]]+',/*5*/
+                            b'[[:digit:]]+',
+                            b'[[:graph:]]+',
+                            b'[[:lower:]]+',
+                            b'[[:print:]]+',
+                            b'[[:punct:]]+', /*10*/
+                            b'[[:space:]]+',
+                            b'[[:upper:]]+',
+                            b'[[:xdigit:]]+'); /*13*/
 
 $iterator = 1;
 foreach ($character_classes as $pattern) {
@@ -59,7 +59,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
+			if (is_unicode($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -73,28 +73,28 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --
 int(47)
 array(1) {
   [0]=>
-  string(64) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJk="
+  string(47) "日本語テキストです01234５６７８９"
 }
 
 -- Iteration 2 --
 int(27)
 array(1) {
   [0]=>
-  string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
+  string(27) "日本語テキストです"
 }
 
 -- Iteration 3 --
 int(5)
 array(1) {
   [0]=>
-  string(8) "MDEyMzQ="
+  string(5) "01234"
 }
 
 -- Iteration 4 --
@@ -107,14 +107,14 @@ bool(false)
 int(20)
 array(1) {
   [0]=>
-  string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
+  string(20) "01234５６７８９"
 }
 
 -- Iteration 7 --
 int(50)
 array(1) {
   [0]=>
-  string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+  string(50) "日本語テキストです01234５６７８９。"
 }
 
 -- Iteration 8 --
@@ -124,14 +124,14 @@ bool(false)
 int(50)
 array(1) {
   [0]=>
-  string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+  string(50) "日本語テキストです01234５６７８９。"
 }
 
 -- Iteration 10 --
 int(3)
 array(1) {
   [0]=>
-  string(4) "44CC"
+  string(3) "。"
 }
 
 -- Iteration 11 --
@@ -144,6 +144,7 @@ bool(false)
 int(5)
 array(1) {
   [0]=>
-  string(8) "MDEyMzQ="
+  string(5) "01234"
 }
 Done
+

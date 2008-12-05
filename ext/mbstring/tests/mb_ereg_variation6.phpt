@@ -24,20 +24,27 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$regex_char = array ('\w+', '\W+', '\s+', '\S+', '\d+', '\D+', '\b', '\B');
+$regex_char = array ('\w+' => b'\w+', 
+                     '\W+' => b'\W+', 
+                     '\s+' => b'\s+', 
+                     '\S+' => b'\S+', 
+                     '\d+' => b'\d+', 
+                     '\D+' => b'\D+', 
+                     '\b' =>  b'\b', 
+                     '\B' =>  b'\B');
 
-$string_ascii = 'This is an English string. 0123456789.';
+$string_ascii = b'This is an English string. 0123456789.';
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-foreach ($regex_char as $char) {
-	echo "\n--** Pattern is: $char **--\n";
+foreach ($regex_char as $displayChar => $char) {
+	echo "\n--** Pattern is: $displayChar **--\n";
 	if (@$regs_ascii || @$regs_mb) {
 		$regs_ascii = null;
 		$regs_mb = null;
 	}
 	echo "-- ASCII String: --\n";
 	var_dump(mb_ereg($char, $string_ascii, $regs_ascii));
-	var_dump($regs_ascii);
+	base64_encode_var_dump($regs_ascii);
 
 	echo "-- Multibyte String: --\n";
 	var_dump(mb_ereg($char, $string_mb, $regs_mb));
@@ -55,7 +62,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
+			if (is_unicode($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -85,7 +92,7 @@ array(1) {
 int(27)
 array(1) {
   [0]=>
-  string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
+  string(27) "日本語テキストです"
 }
 
 --** Pattern is: \W+ **--
@@ -99,7 +106,7 @@ array(1) {
 int(3)
 array(1) {
   [0]=>
-  string(4) "44CC"
+  string(3) "。"
 }
 
 --** Pattern is: \s+ **--
@@ -124,7 +131,7 @@ array(1) {
 int(53)
 array(1) {
   [0]=>
-  string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
+  string(53) "日本語テキストです。01234５６７８９。"
 }
 
 --** Pattern is: \d+ **--
@@ -138,7 +145,7 @@ array(1) {
 int(20)
 array(1) {
   [0]=>
-  string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
+  string(20) "01234５６７８９"
 }
 
 --** Pattern is: \D+ **--
@@ -152,7 +159,7 @@ array(1) {
 int(30)
 array(1) {
   [0]=>
-  string(40) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC"
+  string(30) "日本語テキストです。"
 }
 
 --** Pattern is: \b **--
@@ -183,3 +190,4 @@ array(1) {
   bool(false)
 }
 Done
+

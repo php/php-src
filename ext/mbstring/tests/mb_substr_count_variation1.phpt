@@ -21,7 +21,6 @@ echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
 $needle = 'world';
-$encoding = 'utf-8';
 
 //get an unset variable
 $unset_var = 10;
@@ -95,7 +94,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_substr_count($input, $needle, $encoding) );
+  var_dump( mb_substr_count($input, $needle) );
   $iterator++;
 };
 

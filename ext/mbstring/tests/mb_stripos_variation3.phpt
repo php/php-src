@@ -7,9 +7,10 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_stripos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another 
+/* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+ * Description: Finds position of first occurrence of a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c
+ * Alias to functions: 
  */
 
 /*
@@ -19,8 +20,8 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = 'a';
-$haystack = 'string_val';
+$needle = b'A';
+$haystack = b'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable
@@ -161,27 +162,27 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -200,3 +201,4 @@ int(8)
 Warning: mb_stripos() expects parameter 3 to be long, resource given in %s on line %d
 bool(false)
 Done
+

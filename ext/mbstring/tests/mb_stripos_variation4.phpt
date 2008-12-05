@@ -7,9 +7,10 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_stripos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another 
+/* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+ * Description: Finds position of first occurrence of a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c
+ * Alias to functions: 
  */
 
 /*
@@ -20,8 +21,8 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$haystack = 'string_val';
-$needle = 'val';
+$haystack = b'string_val';
+$needle = b'VaL';
 $offset = 0;
 
 //get an unset variable
@@ -110,85 +111,131 @@ echo "Done";
 
 -- Iteration 1 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "0" in %s on line %d
 bool(false)
 
 -- Iteration 2 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "12345" in %s on line %d
 bool(false)
 
 -- Iteration 4 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "-2345" in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "10.5" in %s on line %d
 bool(false)
 
 -- Iteration 6 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "-10.5" in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "123456789000" in %s on line %d
 bool(false)
 
 -- Iteration 8 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "1.23456789E-9" in %s on line %d
 bool(false)
 
 -- Iteration 9 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "0.5" in %s on line %d
 bool(false)
 
 -- Iteration 10 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 11 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 12 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 13 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 14 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 15 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 16 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 17 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
@@ -207,16 +254,25 @@ int(7)
 
 -- Iteration 22 --
 
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 23 --
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
+
+Warning: mb_stripos(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_stripos(): Unknown encoding "" in %s on line %d
 bool(false)
 
 -- Iteration 24 --
 
-Warning: mb_stripos() expects parameter 4 to be string, resource given in %s on line %d
+Warning: mb_stripos() expects parameter 4 to be binary string, resource given in %s on line %d
 bool(false)
 Done
+
