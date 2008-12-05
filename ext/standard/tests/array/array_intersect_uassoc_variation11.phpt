@@ -1,12 +1,5 @@
 --TEST--
 Test array_intersect_uassoc() function : usage variation - Passing class without string to callback (Handling fatal error)
---SKIPIF--
-<?php
-$php_version = phpversion();
-if(stristr($php_version, "5.2" ) == FALSE){
-  die('skip Test is applicable only for PHP5.2');
-}
-?>
 --FILE--
 <?php
 /* Prototype  : array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func)
@@ -42,10 +35,8 @@ var_dump( array_intersect_uassoc($array1, $array2, $array3, $value) );
 ===DONE===
 --EXPECTF--
 *** Testing array_intersect_uassoc() : usage variation ***
-Error: 4096 - Object of class classWithoutToString could not be converted to string, %s(%d)
-Error: 2 - array_intersect_uassoc(): Not a valid callback , %s(%d)
+Error: 2 - array_intersect_uassoc() expects parameter 3 to be a valid callback, no array or string given, %s(%d)
 NULL
-Error: 4096 - Object of class classWithoutToString could not be converted to string, %s(%d)
-Error: 2 - array_intersect_uassoc(): Not a valid callback , %s(%d)
+Error: 2 - array_intersect_uassoc() expects parameter 4 to be a valid callback, no array or string given, %s(%d)
 NULL
 ===DONE===
