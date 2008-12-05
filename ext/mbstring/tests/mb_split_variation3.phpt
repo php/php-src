@@ -13,10 +13,6 @@ function_exists('mb_split') or die("skip mb_split() is not available in this bui
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing mb_split() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
