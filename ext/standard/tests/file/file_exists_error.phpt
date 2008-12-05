@@ -10,10 +10,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing file_exists() : error conditions ***\n";
 
 // Zero arguments

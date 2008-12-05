@@ -8,12 +8,7 @@ Test stream_set_timeout() function : error conditions
  * Alias to functions: socket_set_timeout
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing stream_set_timeout() : error conditions ***\n";
-
 
 //Test stream_set_timeout with one more than the expected number of arguments
 echo "\n-- Testing stream_set_timeout() function with more than expected no. of arguments --\n";

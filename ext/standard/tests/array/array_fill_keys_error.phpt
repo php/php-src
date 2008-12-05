@@ -8,10 +8,6 @@ Test array_fill_keys() function : error conditions
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing array_fill_keys() : error conditions ***\n";
 
 $keys = array(1, 2);

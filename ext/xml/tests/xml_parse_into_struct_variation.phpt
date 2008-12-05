@@ -14,12 +14,7 @@ if (!extension_loaded("xml")) {
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing xml_parse_into_struct() : variation ***\n";
-
 
 $simple = "<main><para><note>simple note</note></para><para><note>simple note</note></para></main>";
 $p = xml_parser_create();
