@@ -12,10 +12,6 @@ Test posix_strerror() function : usage variations
  * Alias to functions: 
  */
 
-/*
- * add a comment here to say what the test is supposed to do
- */
-
 echo "*** Testing posix_strerror() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
