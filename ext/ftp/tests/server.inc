@@ -244,7 +244,26 @@ while($buf = fread($s, 4098)) {
 	} elseif (preg_match('/^USER /', $buf)) {
 		user_auth($buf);
 
-	} else {
+	} elseif (preg_match('/^MDTM ([\w\h]+)/', $buf, $matches)) {
+		switch ($matches [1]){
+			case "A":
+				fputs($s, "213 19980615100045.014\r\n");
+				break;
+			case "B":
+				fputs($s, "213 19980615100045.014\r\n");
+				break;
+			case "C":
+				fputs($s, "213 19980705132316\r\n");
+				break;
+			case "19990929043300 File6":
+				fputs($s, "213 19991005213102\r\n");
+				break;
+			default :
+				fputs($s, "550 No file named \"{$matches [1]}\"\r\n");
+				break;
+		}
+	}	
+	else {
 		fputs($s, "500 Syntax error, command unrecognized.\r\n");
 		dump_and_exit($buf);
 	}
