@@ -2895,6 +2895,10 @@ PHP_FUNCTION(imap_fetch_overview)
 	if(myargc == 3) {
 		convert_to_long_ex(pflags);
 		flags = Z_LVAL_PP(pflags);
+                if (flags && ((flags & ~FT_UID) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		 	RETURN_FALSE;
+		} 
 	}
 
 	array_init(return_value);
