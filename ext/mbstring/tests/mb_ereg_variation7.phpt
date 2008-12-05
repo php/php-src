@@ -27,10 +27,10 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$string_ascii = 'This is an English string. 0123456789.';
-$regex_ascii = '([A-Z]\w{1,4}is( [aeiou]|h)) ?.*\.\s[0-9]+(5([6-9][79]){2})[[:punct:]]$';
+$string_ascii = b'This is an English string. 0123456789.';
+$regex_ascii = b'([A-Z]\w{1,4}is( [aeiou]|h)) ?.*\.\s[0-9]+(5([6-9][79]){2})[[:punct:]]$';
 var_dump(mb_ereg($regex_ascii, $string_ascii, $regs_ascii));
-var_dump($regs_ascii);
+base64_encode_var_dump($regs_ascii);
 
 $string_mb = base64_decode('zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg==');
 $regex_mb = base64_decode("W86RLc6pXShcdysgKSvOtVvOsS3PiVxzXSvOui4qKM+MfM6/KS4qXC5cc1swLTldKyg1KFs2LTldWzc5XSl7Mn0pW1s6cHVuY3Q6XV0k");
@@ -47,7 +47,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
+			if (is_unicode($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -81,14 +81,15 @@ array(5) {
 int(64)
 array(5) {
   [0]=>
-  string(88) "zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=="
+  string(64) "Αυτό είναι ελληνικό κείμενο. 0123456789."
   [1]=>
-  string(16) "zrXOr869zrHOuSA="
+  string(11) "είναι "
   [2]=>
-  string(4) "zr8="
+  string(2) "ο"
   [3]=>
-  string(8) "NTY3ODk="
+  string(5) "56789"
   [4]=>
-  string(4) "ODk="
+  string(2) "89"
 }
 Done
+

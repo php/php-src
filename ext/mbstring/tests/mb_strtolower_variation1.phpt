@@ -18,8 +18,6 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 
 echo "*** Testing mb_strtolower() : usage variations ***\n";
 
-// Initialise function arguments not being substituted
-$encoding = 'UTF-8';
 
 //get an unset variable
 $unset_var = 10;
@@ -93,7 +91,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strtolower($input, $encoding) );
+  var_dump( mb_strtolower($input) );
   $iterator++;
 };
 
@@ -178,3 +176,4 @@ string(0) ""
 Warning: mb_strtolower() expects parameter 1 to be binary string, resource given in %s on line %d
 NULL
 Done
+

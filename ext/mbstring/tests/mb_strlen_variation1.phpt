@@ -34,7 +34,7 @@ class classA
 }
 
 // heredoc string
-$heredoc = <<<EOT
+$heredoc = b<<<EOT
 hello world
 EOT;
 
@@ -72,8 +72,8 @@ $inputs = array(
        '',
 
        // string data
-/*18*/ "string",
-       'string',
+/*18*/ b"string",
+       b'string',
        $heredoc,
        
        // object data

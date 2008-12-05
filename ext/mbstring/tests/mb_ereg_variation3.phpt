@@ -21,18 +21,18 @@ echo "*** Testing mb_ereg() : variation ***\n";
 
 mb_regex_encoding('utf-8'); // have to set otherwise won't match $mb properly
 $mb = base64_decode('5pel5pys6Kqe');
-$character_classes = array ('aB1'    => '[[:alnum:]]+', /*1*/
-                            'aBcD'   => '[[:alpha:]]+',
-                            'ab/='   => '[[:ascii:]]+',
-                            " \t"    => '[[:blank:]]+',
-                            '234'    => '[[:digit:]]+', /*5*/
-                            "$mb"    => '[[:graph:]]+',
-                            'fjds'   => '[[:lower:]]+',
-                            "$mb\t"  => '[[:print:]]+',
-                            '.!"*@'  => '[[:punct:]]+',
-                            "\t"     => '[[:space:]]+', /*10*/
-                            'IDSJV'  => '[[:upper:]]+',
-                            '3b5D'   => '[[:xdigit:]]+'); /*12*/
+$character_classes = array (b'aB1'    => b'[[:alnum:]]+', /*1*/
+                            b'aBcD'   => b'[[:alpha:]]+',
+                            b'ab/='   => b'[[:ascii:]]+',
+                            b" \t"    => b'[[:blank:]]+',
+                            b'234'    => b'[[:digit:]]+', /*5*/
+                            "$mb"    => b'[[:graph:]]+',
+                            b'fjds'   => b'[[:lower:]]+',
+                            b"$mb\t"  => b'[[:print:]]+',
+                            b'.!"*@'  => b'[[:punct:]]+',
+                            b"\t"     => b'[[:space:]]+', /*10*/
+                            b'IDSJV'  => b'[[:upper:]]+',
+                            b'3b5D'   => b'[[:xdigit:]]+'); /*12*/
 
 $iterator = 1;
 foreach($character_classes as $string => $pattern) {
@@ -42,11 +42,7 @@ foreach($character_classes as $string => $pattern) {
 	// make sure any multibyte output is in base 64
 	echo "\n-- Iteration $iterator --\n";
 	var_dump(mb_ereg($pattern, $string, $regs));
-	if (strpos($string, $mb) === FALSE) {
-		var_dump($regs);
-	} else {
-		base64_encode_var_dump($regs);
-	}
+	base64_encode_var_dump($regs);
 	$iterator++;
 }
 /**
@@ -59,7 +55,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
+			if (is_unicode($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -116,7 +112,7 @@ array(1) {
 int(9)
 array(1) {
   [0]=>
-  string(12) "5pel5pys6Kqe"
+  string(9) "日本語"
 }
 
 -- Iteration 7 --
@@ -130,7 +126,7 @@ array(1) {
 int(10)
 array(1) {
   [0]=>
-  string(16) "5pel5pys6KqeCQ=="
+  string(10) "日本語	"
 }
 
 -- Iteration 9 --
@@ -161,3 +157,4 @@ array(1) {
   string(4) "3b5D"
 }
 Done
+

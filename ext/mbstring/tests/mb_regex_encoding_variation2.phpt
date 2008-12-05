@@ -91,77 +91,89 @@ echo "Done";
 *** Testing mb_regex_encoding() : usage variations ***
 
 -- Iteration 1 --
-string(%d) "%s"
+string(10) "ISO-8859-1"
 bool(true)
 string(5) "UCS-4"
 
 -- Iteration 2 --
 string(5) "UCS-4"
-bool(true)
-string(7) "UCS-4BE"
+
+Warning: mb_regex_encoding(): Unknown encoding "UCS-4BE" in %s on line %d
+bool(false)
+string(5) "UCS-4"
 
 -- Iteration 3 --
-string(7) "UCS-4BE"
+string(5) "UCS-4"
 bool(true)
 string(7) "UCS-4LE"
 
 -- Iteration 4 --
 string(7) "UCS-4LE"
-bool(true)
-string(5) "UCS-2"
+
+Warning: mb_regex_encoding(): Unknown encoding "UCS-2" in %s on line %d
+bool(false)
+string(7) "UCS-4LE"
 
 -- Iteration 5 --
-string(5) "UCS-2"
-bool(true)
-string(7) "UCS-2BE"
+string(7) "UCS-4LE"
+
+Warning: mb_regex_encoding(): Unknown encoding "UCS-2BE" in %s on line %d
+bool(false)
+string(7) "UCS-4LE"
 
 -- Iteration 6 --
-string(7) "UCS-2BE"
-bool(true)
-string(7) "UCS-2LE"
+string(7) "UCS-4LE"
+
+Warning: mb_regex_encoding(): Unknown encoding "UCS-2LE" in %s on line %d
+bool(false)
+string(7) "UCS-4LE"
 
 -- Iteration 7 --
-string(7) "UCS-2LE"
+string(7) "UCS-4LE"
 bool(true)
-string(6) "UTF-32"
+string(5) "UCS-4"
 
 -- Iteration 8 --
-string(6) "UTF-32"
+string(5) "UCS-4"
 bool(true)
-string(8) "UTF-32BE"
+string(5) "UCS-4"
 
 -- Iteration 9 --
-string(8) "UTF-32BE"
+string(5) "UCS-4"
 bool(true)
-string(8) "UTF-32LE"
+string(7) "UCS-4LE"
 
 -- Iteration 10 --
-string(8) "UTF-32LE"
+string(7) "UCS-4LE"
 bool(true)
 string(6) "UTF-16"
 
 -- Iteration 11 --
 string(6) "UTF-16"
 bool(true)
-string(8) "UTF-16BE"
+string(6) "UTF-16"
 
 -- Iteration 12 --
-string(8) "UTF-16BE"
+string(6) "UTF-16"
 bool(true)
 string(8) "UTF-16LE"
 
 -- Iteration 13 --
 string(8) "UTF-16LE"
-bool(true)
-string(5) "UTF-7"
+
+Warning: mb_regex_encoding(): Unknown encoding "UTF-7" in %s on line %d
+bool(false)
+string(8) "UTF-16LE"
 
 -- Iteration 14 --
-string(5) "UTF-7"
-bool(true)
-string(9) "UTF7-IMAP"
+string(8) "UTF-16LE"
+
+Warning: mb_regex_encoding(): Unknown encoding "UTF7-IMAP" in %s on line %d
+bool(false)
+string(8) "UTF-16LE"
 
 -- Iteration 15 --
-string(9) "UTF7-IMAP"
+string(8) "UTF-16LE"
 bool(true)
 string(5) "UTF-8"
 
@@ -198,12 +210,14 @@ bool(false)
 string(4) "SJIS"
 
 -- Iteration 22 --
-string(11) "SJIS"
-bool(true)
-string(3) "JIS"
+string(4) "SJIS"
+
+Warning: mb_regex_encoding(): Unknown encoding "JIS" in %s on line %d
+bool(false)
+string(4) "SJIS"
 
 -- Iteration 23 --
-string(3) "JIS"
+string(4) "SJIS"
 bool(true)
 string(10) "ISO-8859-1"
 
@@ -269,106 +283,139 @@ string(11) "ISO-8859-15"
 
 -- Iteration 36 --
 string(11) "ISO-8859-15"
-bool(true)
-string(7) "byte2be"
+
+Warning: mb_regex_encoding(): Unknown encoding "byte2be" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 37 --
-string(7) "byte2be"
-bool(true)
-string(7) "byte2le"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "byte2le" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 38 --
-string(7) "byte2le"
-bool(true)
-string(7) "byte4be"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "byte4be" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 39 --
-string(7) "byte4be"
-bool(true)
-string(7) "byte4le"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "byte4le" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 40 --
-string(7) "byte4le"
-bool(true)
-string(6) "BASE64"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "BASE64" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 41 --
-string(6) "BASE64"
-bool(true)
-string(13) "HTML-ENTITIES"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "HTML-ENTITIES" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 42 --
-string(13) "HTML-ENTITIES"
-bool(true)
-string(4) "7bit"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "7bit" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 43 --
-string(4) "7bit"
-bool(true)
-string(4) "8bit"
+string(11) "ISO-8859-15"
+
+Warning: mb_regex_encoding(): Unknown encoding "8bit" in %s on line %d
+bool(false)
+string(11) "ISO-8859-15"
 
 -- Iteration 44 --
-string(4) "8bit"
+string(11) "ISO-8859-15"
 bool(true)
 string(6) "EUC-CN"
 
 -- Iteration 45 --
 string(6) "EUC-CN"
-bool(true)
-string(5) "CP936"
+
+Warning: mb_regex_encoding(): Unknown encoding "CP936" in %s on line %d
+bool(false)
+string(6) "EUC-CN"
 
 -- Iteration 46 --
-string(5) "CP936"
-bool(true)
-string(2) "HZ"
+string(6) "EUC-CN"
+
+Warning: mb_regex_encoding(): Unknown encoding "HZ" in %s on line %d
+bool(false)
+string(6) "EUC-CN"
 
 -- Iteration 47 --
-string(2) "HZ"
+string(6) "EUC-CN"
 bool(true)
 string(6) "EUC-TW"
 
 -- Iteration 48 --
 string(6) "EUC-TW"
-bool(true)
-string(5) "CP950"
+
+Warning: mb_regex_encoding(): Unknown encoding "CP950" in %s on line %d
+bool(false)
+string(6) "EUC-TW"
 
 -- Iteration 49 --
-string(5) "CP950"
+string(6) "EUC-TW"
 bool(true)
-string(5) "BIG5"
+string(4) "BIG5"
 
 -- Iteration 50 --
-string(5) "BIG5"
+string(4) "BIG5"
 bool(true)
 string(6) "EUC-KR"
 
 -- Iteration 51 --
 string(6) "EUC-KR"
-bool(true)
-string(3) "UHC"
+
+Warning: mb_regex_encoding(): Unknown encoding "UHC" in %s on line %d
+bool(false)
+string(6) "EUC-KR"
 
 -- Iteration 52 --
-string(3) "UHC"
-bool(true)
-string(11) "ISO-2022-KR"
+string(6) "EUC-KR"
+
+Warning: mb_regex_encoding(): Unknown encoding "ISO-2022-KR" in %s on line %d
+bool(false)
+string(6) "EUC-KR"
 
 -- Iteration 53 --
-string(11) "ISO-2022-KR"
-bool(true)
-string(12) "Windows-1251"
+string(6) "EUC-KR"
+
+Warning: mb_regex_encoding(): Unknown encoding "Windows-1251" in %s on line %d
+bool(false)
+string(6) "EUC-KR"
 
 -- Iteration 54 --
-string(12) "Windows-1251"
-bool(true)
-string(12) "Windows-1252"
+string(6) "EUC-KR"
+
+Warning: mb_regex_encoding(): Unknown encoding "Windows-1252" in %s on line %d
+bool(false)
+string(6) "EUC-KR"
 
 -- Iteration 55 --
-string(12) "Windows-1252"
-bool(true)
-string(5) "CP866"
+string(6) "EUC-KR"
+
+Warning: mb_regex_encoding(): Unknown encoding "CP866" in %s on line %d
+bool(false)
+string(6) "EUC-KR"
 
 -- Iteration 56 --
-string(5) "CP866"
+string(6) "EUC-KR"
 bool(true)
-string(6) "KOI8-R"
+string(5) "KOI8R"
 Done
+

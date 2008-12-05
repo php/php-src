@@ -19,7 +19,8 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				256 => "User Error",		// E_USER_ERROR
 				512 => "User Warning",		// E_USER_WARMING
 				1024=> "User Notice",		// E_USER_NOTICE
-				4096=> "Catchable fatal error"		// E_RECOVERABLE_ERROR
+				2048=> "Strict Notice",      // E_STRICT
+				4096=> "Catchable fatal error",      // E_RECOVERABLE_ERROR
 				);
 	
 	if (!empty($debug)) {
@@ -35,13 +36,13 @@ set_error_handler('test_error_handler');
 
 // Var def for testing
 $t_ary = array(
-		's1' => 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó',
+		's1' => 'Ã†Ã¼Ã‹ÃœÂ¸Ã¬EUC-JPÂ¤ÃÃŠÂ¸Â»ÃºÃÃ³',
 		's2' => 'English Text'
 		);
 
 class tc
 {
-	public $s1 = 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó';
+	public $s1 = 'Ã†Ã¼Ã‹ÃœÂ¸Ã¬EUC-JPÂ¤ÃÃŠÂ¸Â»ÃºÃÃ³';
 	public $s2 = 'English Text';
 
 	function tc() 
