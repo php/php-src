@@ -24,20 +24,27 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$regex_char = array ('\w+', '\W+', '\s+', '\S+', '\d+', '\D+', '\b', '\B');
+$regex_char = array ('\w+' => b'\w+', 
+                     '\W+' => b'\W+', 
+                     '\s+' => b'\s+', 
+                     '\S+' => b'\S+', 
+                     '\d+' => b'\d+', 
+                     '\D+' => b'\D+', 
+                     '\b' =>  b'\b', 
+                     '\B' =>  b'\B');
 
-$string_ascii = 'This is an English string. 0123456789.';
+$string_ascii = b'This is an English string. 0123456789.';
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-foreach ($regex_char as $char) {
-	echo "\n--** Pattern is: $char **--\n";
+foreach ($regex_char as $displayChar => $char) {
+	echo "\n--** Pattern is: $displayChar **--\n";
 	if (@$regs_ascii || @$regs_mb) {
 		$regs_ascii = null;
 		$regs_mb = null;
 	}
 	echo "-- ASCII String: --\n";
 	var_dump(mb_ereg($char, $string_ascii, $regs_ascii));
-	var_dump($regs_ascii);
+	base64_encode_var_dump($regs_ascii);
 
 	echo "-- Multibyte String: --\n";
 	var_dump(mb_ereg($char, $string_mb, $regs_mb));
@@ -70,7 +77,7 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 Regex encoding set to utf-8
 
@@ -79,7 +86,7 @@ Regex encoding set to utf-8
 int(4)
 array(1) {
   [0]=>
-  string(4) "This"
+  string(8) "VGhpcw=="
 }
 -- Multibyte String: --
 int(27)
@@ -93,7 +100,7 @@ array(1) {
 int(1)
 array(1) {
   [0]=>
-  string(1) " "
+  string(4) "IA=="
 }
 -- Multibyte String: --
 int(3)
@@ -107,7 +114,7 @@ array(1) {
 int(1)
 array(1) {
   [0]=>
-  string(1) " "
+  string(4) "IA=="
 }
 -- Multibyte String: --
 bool(false)
@@ -118,7 +125,7 @@ NULL
 int(4)
 array(1) {
   [0]=>
-  string(4) "This"
+  string(8) "VGhpcw=="
 }
 -- Multibyte String: --
 int(53)
@@ -132,7 +139,7 @@ array(1) {
 int(10)
 array(1) {
   [0]=>
-  string(10) "0123456789"
+  string(16) "MDEyMzQ1Njc4OQ=="
 }
 -- Multibyte String: --
 int(20)
@@ -146,7 +153,7 @@ array(1) {
 int(27)
 array(1) {
   [0]=>
-  string(27) "This is an English string. "
+  string(36) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4g"
 }
 -- Multibyte String: --
 int(30)

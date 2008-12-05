@@ -20,15 +20,15 @@ echo "*** Testing mb_strrpos() : basic ***\n";
 
 mb_internal_encoding('UTF-8');
 
-$string_ascii = 'This is an English string. 0123456789.';
+$string_ascii = b'This is an English string. 0123456789.';
 //Japanese string in UTF-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
 echo "\n-- ASCII string 1 --\n";
-var_dump(mb_strrpos($string_ascii, 'is', 4, 'ISO-8859-1'));
+var_dump(mb_strrpos($string_ascii, b'is', 4, 'ISO-8859-1'));
 
 echo "\n-- ASCII string 2 --\n";
-var_dump(mb_strrpos($string_ascii, 'hello, world'));
+var_dump(mb_strrpos($string_ascii, b'hello, world'));
 
 echo "\n-- Multibyte string 1 --\n";
 $needle1 = base64_decode('44CC');

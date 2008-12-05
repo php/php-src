@@ -19,14 +19,14 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 echo "*** Testing mb_strtoupper() : basic functionality ***\n";
 
 mb_internal_encoding('utf-8');
-$ascii_lower = 'abcdefghijklmnopqrstuvwxyz';
-$ascii_upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+$ascii_lower = b'abcdefghijklmnopqrstuvwxyz';
+$ascii_upper = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 $greek_lower = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');
 $greek_upper = base64_decode('zpHOks6TzpTOlc6WzpfOmM6ZzprOm86czp3Ons6fzqDOoc6jzqTOpc6mzqfOqM6p');
 
 echo "\n-- ASCII String --\n";
 $ascii = mb_strtoupper($ascii_lower);
-var_dump($ascii);
+var_dump(base64_encode($ascii));
 
 if($ascii == $ascii_upper) {
 	echo "Correctly converted\n";
@@ -47,11 +47,11 @@ if ($mb == $greek_upper) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_strtoupper() : basic functionality ***
 
 -- ASCII String --
-string(26) "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+string(36) "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo="
 Correctly converted
 
 -- Multibyte String --
