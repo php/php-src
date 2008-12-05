@@ -7,9 +7,10 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 ?>
 --FILE--
 <?php
-/* Prototype  : int mb_stripos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another 
+/* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
+ * Description: Finds position of first occurrence of a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c
+ * Alias to functions: 
  */
 
 /*
@@ -20,134 +21,138 @@ echo "*** Testing mb_stripos() : basic functionality***\n";
 
 mb_internal_encoding('UTF-8');
 
-$string_ascii = 'abc def ABC DEF';
-//Japanese string in UTF-8
-$string_mb = '日本語テキストです。01234５６７８９。';
+//ascii strings
+$ascii_haystacks = array(
+   b'abc defabc   def',
+   b'ABC DEFABC   DEF',
+   b'Abc dEFaBC   Def',
+);
 
-echo "\n-- ISO-8859-1 string 1 --\n";
-var_dump(mb_stripos($string_ascii, 'd', 0, 'ISO-8859-1'));
+$ascii_needles = array(
+   // 4 good ones
+   b'DE',
+   b'de',
+   b'De',
+   b'dE',
+   
+   //flag a swap between good and bad
+   '!', 
+   
+   // 4 bad ones
+   b'df',
+   b'Df',
+   b'dF', 
+   b'DF'
+);
 
-echo "\n-- ISO-8859-1 string 2 --\n";
-var_dump(mb_stripos($string_ascii, 'D', 0, 'ISO-8859-1'));
+//greek strings in UTF-8
+$greek_lower = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');
+$greek_upper = base64_decode('zpHOks6TzpTOlc6WzpfOmM6ZzprOm86czp3Ons6fzqDOoc6jzqTOpc6mzqfOqM6p');
+$greek_mixed = base64_decode('zrHOss6TzpTOlc6WzpfOmM65zrrOu868zr3Ovs6fzqDOoc6jzqTOpc+Gz4fPiM+J');
+$greek_haystacks = array($greek_lower, $greek_upper, $greek_mixed);
 
-echo "\n-- ISO-8859-1 string 3 --\n";
-var_dump(mb_stripos($string_ascii, 'd', 1, 'ISO-8859-1'));
+$greek_nlower = base64_decode('zrzOvc6+zr8=');
+$greek_nupper = base64_decode('zpzOnc6ezp8=');
+$greek_nmixed1 = base64_decode('zpzOnc6+zr8=');
+$greek_nmixed2 = base64_decode('zrzOvc6+zp8=');
 
-echo "\n-- ISO-8859-1 string 4 --\n";
-var_dump(mb_stripos($string_ascii, 'D', 1, 'ISO-8859-1'));
+$greek_blower = base64_decode('zpzOns6f');
+$greek_bupper = base64_decode('zrzOvs6/');
+$greek_bmixed1 = base64_decode('zpzOvs6/');
+$greek_bmixed2 = base64_decode('zrzOvs6f');
+$greek_needles = array(
+   // 4 good ones
+   $greek_nlower, $greek_nupper, $greek_nmixed1, $greek_nmixed2,
+   
+   '!', // used to flag a swap between good and bad
+   
+   // 4 bad ones
+   $greek_blower, $greek_bupper, $greek_bmixed1, $greek_bmixed2,   
+);
 
-echo "\n-- ISO-8859-1 string 5 --\n";
-var_dump(mb_stripos($string_ascii, 'c', 4, 'ISO-8859-1'));
+// try the basic options
+echo "\n -- ASCII Strings, needle should be found --\n";
+foreach ($ascii_needles as $needle) {
+   if ($needle == '!') {
+      echo "\n -- ASCII Strings, needle should not be found --\n";
+   }
+   else {
+      foreach ($ascii_haystacks as $haystack) {
+         var_dump(mb_stripos($haystack, $needle));
+      }
+   }   
+}
 
-echo "\n-- ISO-8859-1 string 6 --\n";
-var_dump(mb_stripos($string_ascii, 'c D', 0, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 7 --\n";
-var_dump(mb_stripos($string_ascii, 'C d', 0, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 8 --\n";
-var_dump(mb_stripos($string_ascii, 'deF', 0, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 9 --\n";
-var_dump(mb_stripos($string_ascii, '123', 0, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 10 --\n";
-var_dump(mb_stripos($string_ascii, 'c D', 1, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 11 --\n";
-var_dump(mb_stripos($string_ascii, 'C d', 1, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 12 --\n";
-var_dump(mb_stripos($string_ascii, 'deF', 1, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 13 --\n";
-var_dump(mb_stripos($string_ascii, '123', 1, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 14 --\n";
-var_dump(mb_stripos($string_ascii, 'c D', 4, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 15 --\n";
-var_dump(mb_stripos($string_ascii, 'C d', 4, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 16 --\n";
-var_dump(mb_stripos($string_ascii, 'deF', 4, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 17 --\n";
-var_dump(mb_stripos($string_ascii, 'deF', 5, 'ISO-8859-1'));
-
-echo "\n-- ISO-8859-1 string 18 --\n";
-var_dump(mb_stripos($string_ascii, '123', 4, 'ISO-8859-1'));
-
-echo "\n-- Multibyte string 1 --\n";
-$needle1 = '日本語';
-var_dump(mb_stripos($string_mb, $needle1));
-
-echo "\n-- Multibyte string 2 --\n";
-$needle2 = 'こんにちは、世界';
-var_dump(mb_stripos($string_mb, $needle2));
+echo "\n -- Greek Strings, needle should be found --\n";
+foreach ($greek_needles as $needle) {
+   if ($needle == '!') {
+      echo "\n -- ASCII Strings, needle should not be found --\n";
+   }
+   else {
+      foreach ($greek_haystacks as $haystack) {
+         var_dump(mb_stripos($haystack, $needle));
+      }
+   }   
+}
 
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing mb_stripos() : basic functionality***
 
--- ISO-8859-1 string 1 --
+ -- ASCII Strings, needle should be found --
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
+int(4)
 int(4)
 
--- ISO-8859-1 string 2 --
-int(4)
-
--- ISO-8859-1 string 3 --
-int(4)
-
--- ISO-8859-1 string 4 --
-int(4)
-
--- ISO-8859-1 string 5 --
-int(10)
-
--- ISO-8859-1 string 6 --
-int(2)
-
--- ISO-8859-1 string 7 --
-int(2)
-
--- ISO-8859-1 string 8 --
-int(4)
-
--- ISO-8859-1 string 9 --
+ -- ASCII Strings, needle should not be found --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 
--- ISO-8859-1 string 10 --
-int(2)
+ -- Greek Strings, needle should be found --
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
+int(11)
 
--- ISO-8859-1 string 11 --
-int(2)
-
--- ISO-8859-1 string 12 --
-int(4)
-
--- ISO-8859-1 string 13 --
+ -- ASCII Strings, needle should not be found --
 bool(false)
-
--- ISO-8859-1 string 14 --
-int(10)
-
--- ISO-8859-1 string 15 --
-int(10)
-
--- ISO-8859-1 string 16 --
-int(4)
-
--- ISO-8859-1 string 17 --
-int(12)
-
--- ISO-8859-1 string 18 --
 bool(false)
-
--- Multibyte string 1 --
-int(0)
-
--- Multibyte string 2 --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 Done

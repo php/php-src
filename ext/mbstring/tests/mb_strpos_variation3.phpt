@@ -19,8 +19,8 @@ function_exists('mb_strpos') or die("skip mb_strpos() is not available in this b
 echo "*** Testing mb_strpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$needle = 'a';
-$haystack = 'string_val';
+$needle = b'a';
+$haystack = b'string_val';
 $encoding = 'utf-8';
 
 //get an unset variable

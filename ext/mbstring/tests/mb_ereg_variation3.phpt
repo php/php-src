@@ -21,18 +21,18 @@ echo "*** Testing mb_ereg() : variation ***\n";
 
 mb_regex_encoding('utf-8'); // have to set otherwise won't match $mb properly
 $mb = base64_decode('5pel5pys6Kqe');
-$character_classes = array ('aB1'    => '[[:alnum:]]+', /*1*/
-                            'aBcD'   => '[[:alpha:]]+',
-                            'ab/='   => '[[:ascii:]]+',
-                            " \t"    => '[[:blank:]]+',
-                            '234'    => '[[:digit:]]+', /*5*/
-                            "$mb"    => '[[:graph:]]+',
-                            'fjds'   => '[[:lower:]]+',
-                            "$mb\t"  => '[[:print:]]+',
-                            '.!"*@'  => '[[:punct:]]+',
-                            "\t"     => '[[:space:]]+', /*10*/
-                            'IDSJV'  => '[[:upper:]]+',
-                            '3b5D'   => '[[:xdigit:]]+'); /*12*/
+$character_classes = array (b'aB1'    => b'[[:alnum:]]+', /*1*/
+                            b'aBcD'   => b'[[:alpha:]]+',
+                            b'ab/='   => b'[[:ascii:]]+',
+                            b" \t"    => b'[[:blank:]]+',
+                            b'234'    => b'[[:digit:]]+', /*5*/
+                            "$mb"    => b'[[:graph:]]+',
+                            b'fjds'   => b'[[:lower:]]+',
+                            b"$mb\t"  => b'[[:print:]]+',
+                            b'.!"*@'  => b'[[:punct:]]+',
+                            b"\t"     => b'[[:space:]]+', /*10*/
+                            b'IDSJV'  => b'[[:upper:]]+',
+                            b'3b5D'   => b'[[:xdigit:]]+'); /*12*/
 
 $iterator = 1;
 foreach($character_classes as $string => $pattern) {
@@ -42,11 +42,7 @@ foreach($character_classes as $string => $pattern) {
 	// make sure any multibyte output is in base 64
 	echo "\n-- Iteration $iterator --\n";
 	var_dump(mb_ereg($pattern, $string, $regs));
-	if (strpos($string, $mb) === FALSE) {
-		var_dump($regs);
-	} else {
-		base64_encode_var_dump($regs);
-	}
+	base64_encode_var_dump($regs);
 	$iterator++;
 }
 /**
@@ -74,42 +70,42 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : variation ***
 
 -- Iteration 1 --
 int(3)
 array(1) {
   [0]=>
-  string(3) "aB1"
+  string(4) "YUIx"
 }
 
 -- Iteration 2 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "aBcD"
+  string(8) "YUJjRA=="
 }
 
 -- Iteration 3 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "ab/="
+  string(8) "YWIvPQ=="
 }
 
 -- Iteration 4 --
 int(2)
 array(1) {
   [0]=>
-  string(2) " 	"
+  string(4) "IAk="
 }
 
 -- Iteration 5 --
 int(3)
 array(1) {
   [0]=>
-  string(3) "234"
+  string(4) "MjM0"
 }
 
 -- Iteration 6 --
@@ -123,7 +119,7 @@ array(1) {
 int(4)
 array(1) {
   [0]=>
-  string(4) "fjds"
+  string(8) "Zmpkcw=="
 }
 
 -- Iteration 8 --
@@ -137,27 +133,27 @@ array(1) {
 int(5)
 array(1) {
   [0]=>
-  string(5) ".!"*@"
+  string(8) "LiEiKkA="
 }
 
 -- Iteration 10 --
 int(1)
 array(1) {
   [0]=>
-  string(1) "	"
+  string(4) "CQ=="
 }
 
 -- Iteration 11 --
 int(5)
 array(1) {
   [0]=>
-  string(5) "IDSJV"
+  string(8) "SURTSlY="
 }
 
 -- Iteration 12 --
 int(4)
 array(1) {
   [0]=>
-  string(4) "3b5D"
+  string(8) "M2I1RA=="
 }
 Done

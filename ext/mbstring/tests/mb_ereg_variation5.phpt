@@ -20,16 +20,16 @@ echo "*** Testing mb_ereg() : usage variations ***\n";
 
 mb_regex_encoding('utf-8');
 
-$string_ascii = 'This is an English string. 0123456789.';
+$string_ascii = b'This is an English string. 0123456789.';
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
-$regex = '^.*?[[:blank:]]?[[:punct:][:digit:]]+\.?$';
+$regex = b'^.*?[[:blank:]]?[[:punct:][:digit:]]+\.?$';
 
 echo "\nASCII String without \$regs arg:\t\t";
 var_dump(mb_ereg($regex, $string_ascii));
 echo "ASCII String with \$regs arg:\n";
 var_dump(mb_ereg($regex, $string_ascii, $regs_ascii));
-var_dump($regs_ascii);
+base64_encode_var_dump($regs_ascii);
 
 echo "\nMultibyte String without \$regs arg:\t";
 var_dump(mb_ereg($regex, $string_mb));
@@ -69,7 +69,7 @@ ASCII String with $regs arg:
 int(38)
 array(1) {
   [0]=>
-  string(38) "This is an English string. 0123456789."
+  string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
 }
 
 Multibyte String without $regs arg:	int(1)

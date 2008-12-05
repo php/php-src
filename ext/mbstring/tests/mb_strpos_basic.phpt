@@ -20,12 +20,12 @@ echo "*** Testing mb_strpos() : basic functionality***\n";
 
 mb_internal_encoding('UTF-8');
 
-$string_ascii = 'abc def';
+$string_ascii = b'abc def';
 //Japanese string in UTF-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
 echo "\n-- ASCII string 1 --\n";
-var_dump(mb_strpos($string_ascii, 'd', 2, 'ISO-8859-1'));
+var_dump(mb_strpos($string_ascii, b'd', 2, 'ISO-8859-1'));
 
 echo "\n-- ASCII string 2 --\n";
 var_dump(mb_strpos($string_ascii, '123'));
@@ -40,7 +40,7 @@ var_dump(mb_strpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strpos() : basic functionality***
 
 -- ASCII string 1 --

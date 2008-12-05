@@ -20,7 +20,6 @@ echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $haystack = 'hello, world';
-$encoding = 'utf-8';
 
 //get an unset variable
 $unset_var = 10;
@@ -94,7 +93,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_substr_count($haystack, $input, $encoding) );
+  var_dump( mb_substr_count($haystack, $input) );
   $iterator++;
 };
 

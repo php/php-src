@@ -20,7 +20,6 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 echo "*** Testing mb_strtoupper() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$encoding = 'UTF-8';
 
 //get an unset variable
 $unset_var = 10;
@@ -94,7 +93,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strtoupper($input, $encoding) );
+  var_dump( mb_strtoupper($input) );
   $iterator++;
 };
 
