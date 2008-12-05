@@ -1,6 +1,6 @@
 <?php
 // Change these to make tests run successfully
-$server   = '{localhost}';
+$server   = '{localhost/norsh}';
 $default_mailbox = $server . "INBOX";
 $domain = "something.com";
 $admin_user = "webmaster"; // a user with admin access 
