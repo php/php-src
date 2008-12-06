@@ -25,17 +25,6 @@
 #include "php_spl.h"
 #include "zend_interfaces.h"
 
-/* {{{ zend_class_entry */
-static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
-{
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_class_entry) {
-		return Z_OBJ_HT_P(obj)->get_class_entry(obj TSRMLS_CC);
-	} else {
-		return NULL;
-	}
-}
-/* }}} */
-
 PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
 
 PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
