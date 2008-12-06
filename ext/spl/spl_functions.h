@@ -37,17 +37,11 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 #define REGISTER_SPL_INTERFACE(class_name) \
 	spl_register_interface(&spl_ce_ ## class_name, # class_name, spl_funcs_ ## class_name TSRMLS_CC);
 
-#define REGISTER_SPL_PARENT_CE(class_name, parent_class) \
-	spl_register_parent_ce(spl_ce_ ## class_name, spl_ce_ ## parent_class TSRMLS_CC);
-
 #define REGISTER_SPL_IMPLEMENTS(class_name, interface_name) \
 	zend_class_implements(spl_ce_ ## class_name TSRMLS_CC, 1, spl_ce_ ## interface_name);
 
 #define REGISTER_SPL_ITERATOR(class_name) \
 	zend_class_implements(spl_ce_ ## class_name TSRMLS_CC, 1, zend_ce_iterator);
-
-#define REGISTER_SPL_FUNCTIONS(class_name, function_list) \
-	spl_register_functions(spl_ce_ ## class_name, function_list TSRMLS_CC);
 
 #define REGISTER_SPL_PROPERTY(class_name, prop_name, prop_flags) \
 	spl_register_property(spl_ce_ ## class_name, prop_name, sizeof(prop_name)-1, prop_flags TSRMLS_CC);
@@ -55,15 +49,10 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 #define REGISTER_SPL_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
-void spl_destroy_class(zend_class_entry ** ppce);
-
 void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);
 void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);
-
 void spl_register_interface(zend_class_entry ** ppce, char * class_name, const zend_function_entry *functions TSRMLS_DC);
 
-void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * parent_class TSRMLS_DC);
-void spl_register_functions(zend_class_entry * class_entry, const zend_function_entry * function_list TSRMLS_DC);
 void spl_register_property( zend_class_entry * class_entry, char *prop_name, int prop_name_len, int prop_flags TSRMLS_DC);
 
 /* sub: whether to allow subclasses/interfaces
