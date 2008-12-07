@@ -183,8 +183,14 @@ int fcgi_in_shutdown(void)
 int fcgi_init(void)
 {
 	if (!is_initialized) {
+#ifndef _WIN32
+		sa_t sa;
+		socklen_t len = sizeof(sa);
+#endif
 		zend_hash_init(&fcgi_mgmt_vars, 0, NULL, fcgi_free_mgmt_var_cb, 1);
 		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
+
+		is_initialized = 1;
 #ifdef _WIN32
 # if 0
 		/* TODO: Support for TCP sockets */
@@ -195,8 +201,6 @@ int fcgi_init(void)
 			return 0;
 		}
 # endif
-		is_initialized = 1;
-
 		if ((GetStdHandle(STD_OUTPUT_HANDLE) == INVALID_HANDLE_VALUE) &&
 		    (GetStdHandle(STD_ERROR_HANDLE)  == INVALID_HANDLE_VALUE) &&
 		    (GetStdHandle(STD_INPUT_HANDLE)  != INVALID_HANDLE_VALUE)) {
@@ -223,10 +227,6 @@ int fcgi_init(void)
 			return is_fastcgi = 0;
 		}
 #else
-		sa_t sa;
-		socklen_t len = sizeof(sa);
-
-		is_initialized = 1;
 		errno = 0;
 		if (getpeername(0, (struct sockaddr *)&sa, &len) != 0 && errno == ENOTCONN) {
 			fcgi_setup_signals();

@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.8
+- Fixed bug #46782 (fastcgi.c parse error). (Matt)
 - Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
   (Mikko)
 
