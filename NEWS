@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
   (Mikko)
 
-09 Dec 2008, PHP 5.2.8
+08 Dec 2008, PHP 5.2.8
 - Reverted bug fix #42718 that broke magic_quotes_gpc (Scott)
 
 04 Dec 2008, PHP 5.2.7
