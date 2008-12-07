@@ -1,5 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2009, PHP 5.2.9
+- Fixed bug #46782 (fastcgi.c parse error). (Matt)
+- Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
+  (Mikko)
+
 08 Dec 2008, PHP 5.2.8
 - Reverted bug fix #42718 that broke magic_quotes_gpc (Scott)
 
