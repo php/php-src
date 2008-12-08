@@ -139,7 +139,7 @@ class PharCommand extends CLICommand
 			'y' => array(
 				'typ' => 'privkey',
 				'val' => NULL,
-				'inf' => 'Private key for OpenSSL signing.',
+				'inf' => '<key>    Private key for OpenSSL signing.',
 			),
 		);
 
@@ -157,6 +157,9 @@ class PharCommand extends CLICommand
 		$hash_optional = array('SHA-256' => 'SHA256',
 							   'SHA-512' => 'SHA512',
 							   'OpenSSL' => 'OpenSSL');
+		if (!in_array('OpenSSL', $hash_avail)) {
+			unset($phar_args['y']);
+		}
 
 		foreach($hash_optional as $key => $name) {
 			if (in_array($key, $hash_avail)) {
@@ -378,7 +381,7 @@ class PharCommand extends CLICommand
 	 * @param  string $arg  The phar selection
 	 * @param  string $cfg  The config option.
 	 * @param  string $key  The key information.
-	 * @return string $arg  The selected algorithm
+	 * @return string $arg  The private key.
 	 */
 	static function cli_arg_typ_privkey($arg, $cfg, $key)
 	{
