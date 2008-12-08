@@ -59,6 +59,11 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
+// If __DIR__ is not defined, define it
+if (!defined('__DIR__')) {
+	define('__DIR__', realpath(dirname(__FILE__)));
+}
+
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -111,6 +116,9 @@ SAFE_MODE_WARNING;
 }
 
 $environment = isset($_ENV) ? $_ENV : array();
+if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
+  $environment["SystemRoot"] = getenv("SystemRoot");
+}
 
 // Don't ever guess at the PHP executable location.
 // Require the explicit specification.
@@ -217,7 +225,7 @@ function write_information($show_html)
 	global $cwd, $php, $php_cgi, $php_info, $user_tests, $ini_overwrites, $pass_options, $exts_to_test, $leak_check, $valgrind_header;
 
 	// Get info from php
-	$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
+	$info_file = __DIR__ . '/run-test-info.php';
 	@unlink($info_file);
 	$php_info = '<?php echo "
 PHP_SAPI    : " , PHP_SAPI , "
@@ -355,7 +363,7 @@ function save_or_mail_results()
 				$libtool = shell_exec($CUR_DIR . '/libtool --version');
 
 				/* Use shtool to find out if there is glibtool present (MacOSX) */
-				$sys_libtool_path = shell_exec(realpath(dirname(__FILE__)) . '/build/shtool path glibtool libtool');
+				$sys_libtool_path = shell_exec(__DIR__ . '/build/shtool path glibtool libtool');
 
 				if ($sys_libtool_path) {
 					$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
@@ -559,6 +567,7 @@ if (isset($argc) && $argc > 1) {
 				case 'p':
 					$php = $argv[++$i];
 					putenv("TEST_PHP_EXECUTABLE=$php");
+					$environment['TEST_PHP_EXECUTABLE'] = $php;
 					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
@@ -995,15 +1004,20 @@ function error_report($testname, $logname, $tested)
 
 function system_with_timeout($commandline, $env = null, $stdin = null)
 {
-	global $leak_check;
+	global $leak_check, $cwd;
 
 	$data = '';
+
+	$bin_env = array();
+	foreach($env as $key => $value) {
+		$bin_env[(binary)$key] = (binary)$value;
+	}
 
 	$proc = proc_open($commandline, array(
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, null, $env, array('suppress_errors' => true, 'binary_pipes' => true));
+		), $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
@@ -1293,7 +1307,7 @@ TEST $file
 	$temp_clean        = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$test_clean        = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
 	$tmp_post          = $temp_dir . DIRECTORY_SEPARATOR . uniqid('/phpt.');
-	$tmp_relative_file = str_replace(realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR, '', $test_file) . 't';
+	$tmp_relative_file = str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $test_file) . 't';
 
 	if ($temp_source && $temp_target) {
 		$temp_skipif  .= 's';
@@ -1725,12 +1739,11 @@ COMMAND $cmd
 
 		if (isset($section_text['EXPECTF'])) {
 			$wanted_re = preg_quote($wanted_re, '/');
-				$wanted_re = str_replace(
-                                array('%binary_string_optional%'),
-                                version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'binary string',
-                                $wanted_re
-                        );
-
+			$wanted_re = str_replace(
+				array('%binary_string_optional%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'binary string',
+				$wanted_re
+			);
 			$wanted_re = str_replace(
 				array('%unicode_string_optional%'),
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'Unicode string',
@@ -1749,7 +1762,9 @@ COMMAND $cmd
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+			$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
 			$wanted_re = str_replace('%a', '.+', $wanted_re);
+			$wanted_re = str_replace('%A', '.*', $wanted_re);
 			$wanted_re = str_replace('%w', '\s*', $wanted_re);
 			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
 			$wanted_re = str_replace('%d', '\d+', $wanted_re);
