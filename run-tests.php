@@ -59,6 +59,11 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
+// If __DIR__ is not defined, define it
+if (!defined('__DIR__')) {
+	define('__DIR__', realpath(dirname(__FILE__)));
+}
+
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
