@@ -152,9 +152,10 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 							ERR_error_string_n(ecode, esbuf, sizeof(esbuf) - 1);
 						}
 						code = strlen(esbuf);
-						esbuf[code] = '\0';
 
 						ebuf = erealloc(ebuf, ebuf_size + code + 1);
+						ebuf_size += code;
+
 						if (wptr == NULL) {
 							wptr = ebuf;
 						}	
