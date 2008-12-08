@@ -339,6 +339,220 @@ PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+/* {{{  */
+typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
+typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+
+#include "winver.h"
+
+#if _MSC_VER < 1300
+#define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
+#endif
+
+char* php_get_windows_name()
+{
+	OSVERSIONINFOEX osvi;
+	SYSTEM_INFO si;
+	PGNSI pGNSI;
+	PGPI pGPI;
+	BOOL bOsVersionInfoEx;
+	DWORD dwType;
+	char *major = NULL, *sub = NULL, *retval;
+
+	ZeroMemory(&si, sizeof(SYSTEM_INFO));
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
+	if (!(bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi))) {
+		return NULL;
+	}
+
+	pGNSI = (PGNSI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
+	if(NULL != pGNSI) {
+		pGNSI(&si);
+	} else {
+		GetSystemInfo(&si);
+	}
+
+	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
+		if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 )	{
+			if (osvi.wProductType == VER_NT_WORKSTATION) {
+				major = "Windows Vista";
+			} else {
+				major = "Windows Server 2008";
+			}
+
+			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
+			pGPI(6, 0, 0, 0, &dwType);
+
+			switch (dwType) {
+				case PRODUCT_ULTIMATE:
+					sub = "Ultimate Edition";
+					break;
+				case PRODUCT_HOME_PREMIUM:
+					sub = "Home Premium Edition";
+					break;
+				case PRODUCT_HOME_BASIC:
+					sub = "Home Basic Edition";
+					break;
+				case PRODUCT_ENTERPRISE:
+					sub = "Enterprise Edition";
+					break;
+				case PRODUCT_BUSINESS:
+					sub = "Business Edition";
+					break;
+				case PRODUCT_STARTER:
+					sub = "Starter Edition";
+					break;
+				case PRODUCT_CLUSTER_SERVER:
+					sub = "Cluster Server Edition";
+					break;
+				case PRODUCT_DATACENTER_SERVER:
+					sub = "Datacenter Edition";
+					break;
+				case PRODUCT_DATACENTER_SERVER_CORE:
+					sub = "Datacenter Edition (core installation)";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER:
+					sub = "Enterprise Edition";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER_CORE:
+					sub = "Enterprise Edition (core installation)";
+					break;
+				case PRODUCT_ENTERPRISE_SERVER_IA64:
+					sub = "Enterprise Edition for Itanium-based Systems";
+					break;
+				case PRODUCT_SMALLBUSINESS_SERVER:
+					sub = "Small Business Server";
+					break;
+				case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
+					sub = "Small Business Server Premium Edition";
+					break;
+				case PRODUCT_STANDARD_SERVER:
+					sub = "Standard Edition";
+					break;
+				case PRODUCT_STANDARD_SERVER_CORE:
+					sub = "Standard Edition (core installation)";
+					break;
+				case PRODUCT_WEB_SERVER:
+					sub = "Web Server Edition";
+					break;
+			}
+		}
+
+		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 )	{
+			if (GetSystemMetrics(SM_SERVERR2))
+				major = "Windows Server 2003 R2";
+			else if (osvi.wSuiteMask==VER_SUITE_STORAGE_SERVER)
+				major = "Windows Storage Server 2003";
+			else if (osvi.wSuiteMask==VER_SUITE_WH_SERVER)
+				major = "Windows Home Server";
+			else if (osvi.wProductType == VER_NT_WORKSTATION &&
+				si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64) {
+				major = "Windows XP Professional x64 Edition";
+			} else {
+				major = "Windows Server 2003";
+			}
+
+			/* Test for the server type. */
+			if ( osvi.wProductType != VER_NT_WORKSTATION ) {
+				if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_IA64 ) {
+					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						sub = "Datacenter Edition for Itanium-based Systems";
+					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						sub = "Enterprise Edition for Itanium-based Systems";
+				}
+
+				else if ( si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64 ) {
+					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						sub = "Datacenter x64 Edition";
+					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						sub = "Enterprise x64 Edition";
+					else sub = "Standard x64 Edition";
+				} else {
+					if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
+						sub = "Compute Cluster Edition";
+					else if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						sub = "Datacenter Edition";
+					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						sub = "Enterprise Edition";
+					else if ( osvi.wSuiteMask & VER_SUITE_BLADE )
+						sub = "Web Edition";
+					else sub = "Standard Edition";
+				}
+			} 
+		}
+
+		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 )	{
+			major = "Windows XP";
+			if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
+				sub = "Home Edition";
+			else sub = "Professional";
+		}
+
+		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0 ) {
+			major = "Windows 2000";
+
+			if (osvi.wProductType == VER_NT_WORKSTATION ) {
+				sub = "Professional";
+			} else {
+				if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+					sub = "Datacenter Server";
+				else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+					sub = "Advanced Server";
+				else sub = "Server";
+			}
+		}
+	} else {
+		return NULL;
+	}
+
+	spprintf(&retval, 0, "%s%s%s%s%s", major, sub?" ":"", sub?sub:"", osvi.szCSDVersion[0] != '\0'?" ":"", osvi.szCSDVersion);
+	return retval;
+}
+/* }}}  */
+
+/* {{{  */
+void php_get_windows_cpu(char *buf, int bufsize)
+{
+	SYSTEM_INFO SysInfo;
+	GetSystemInfo(&SysInfo);
+	switch (SysInfo.wProcessorArchitecture) {
+		case PROCESSOR_ARCHITECTURE_INTEL :
+			snprintf(buf, bufsize, "i%d", SysInfo.dwProcessorType);
+			break;
+		case PROCESSOR_ARCHITECTURE_MIPS :
+			snprintf(buf, bufsize, "MIPS R%d000", SysInfo.wProcessorLevel);
+			break;
+		case PROCESSOR_ARCHITECTURE_ALPHA :
+			snprintf(buf, bufsize, "Alpha %d", SysInfo.wProcessorLevel);
+			break;
+		case PROCESSOR_ARCHITECTURE_PPC :
+			snprintf(buf, bufsize, "PPC 6%02d", SysInfo.wProcessorLevel);
+			break;
+		case PROCESSOR_ARCHITECTURE_IA64 :
+			snprintf(buf, bufsize,  "IA64");
+			break;
+#if defined(PROCESSOR_ARCHITECTURE_IA32_ON_WIN64)
+		case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64 :
+			snprintf(buf, bufsize, "IA32");
+			break;
+#endif
+#if defined(PROCESSOR_ARCHITECTURE_AMD64)
+		case PROCESSOR_ARCHITECTURE_AMD64 :
+			snprintf(buf, bufsize, "AMD64");
+			break;
+#endif
+		case PROCESSOR_ARCHITECTURE_UNKNOWN :
+		default:
+			snprintf(buf, bufsize, "Unknown");
+			break;
+	}
+}
+/* }}}  */
+#endif
+
 /* {{{ php_get_uname
  */
 PHPAPI char *php_get_uname(char mode)
@@ -352,10 +566,8 @@ PHPAPI char *php_get_uname(char mode)
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 	DWORD dwSize = MAX_COMPUTERNAME_LENGTH + 1;
 	char ComputerName[MAX_COMPUTERNAME_LENGTH + 1];
-	SYSTEM_INFO SysInfo;
-
+	
 	GetComputerName(ComputerName, &dwSize);
-	GetSystemInfo(&SysInfo);
 
 	if (mode == 's') {
 		if (dwVersion < 0x80000000) {
@@ -369,52 +581,34 @@ PHPAPI char *php_get_uname(char mode)
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
+		char *winver = php_get_windows_name();
 		dwBuild = (DWORD)(HIWORD(dwVersion));
-		snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
-		php_uname = tmp_uname;
-	} else if (mode == 'm') {
-		switch (SysInfo.wProcessorArchitecture) {
-			case PROCESSOR_ARCHITECTURE_INTEL :
-				snprintf(tmp_uname, sizeof(tmp_uname), "i%d", SysInfo.dwProcessorType);
-				php_uname = tmp_uname;
-				break;
-			case PROCESSOR_ARCHITECTURE_MIPS :
-				snprintf(tmp_uname, sizeof(tmp_uname), "MIPS R%d000", SysInfo.wProcessorLevel);
-				php_uname = tmp_uname;
-				break;
-			case PROCESSOR_ARCHITECTURE_ALPHA :
-				snprintf(tmp_uname, sizeof(tmp_uname), "Alpha %d", SysInfo.wProcessorLevel);
-				php_uname = tmp_uname;
-				break;
-			case PROCESSOR_ARCHITECTURE_PPC :
-				snprintf(tmp_uname, sizeof(tmp_uname), "PPC 6%02d", SysInfo.wProcessorLevel);
-				php_uname = tmp_uname;
-				break;
-			case PROCESSOR_ARCHITECTURE_IA64 :
-				php_uname = "IA64";
-				break;
-#if defined(PROCESSOR_ARCHITECTURE_IA32_ON_WIN64)
-			case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64 :
-				php_uname = "IA32";
-				break;
-#endif
-#if defined(PROCESSOR_ARCHITECTURE_AMD64)
-			case PROCESSOR_ARCHITECTURE_AMD64 :
-				php_uname = "AMD64";
-				break;
-#endif
-			case PROCESSOR_ARCHITECTURE_UNKNOWN :
-			default :
-				php_uname = "Unknown";
-				break;
+		if(winver == NULL) {
+			snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
+		} else {
+			snprintf(tmp_uname, sizeof(tmp_uname), "build %d (%s)", dwBuild, winver);
 		}
+		php_uname = tmp_uname;
+		if(winver) {
+			efree(winver);
+		}
+	} else if (mode == 'm') {
+		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
+		php_uname = tmp_uname;
 	} else { /* assume mode == 'a' */
 		/* Get build numbers for Windows NT or Win95 */
 		if (dwVersion < 0x80000000){
+			char *winver = php_get_windows_name();
+			char wincpu[20];
+
+			php_get_windows_cpu(wincpu, sizeof(wincpu));
 			dwBuild = (DWORD)(HIWORD(dwVersion));
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d",
+			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
 					 "Windows NT", ComputerName,
-					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
+					 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
+			if(winver) {
+				efree(winver);
+			}
 		} else {
 			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
 					 "Windows 9x", ComputerName,
