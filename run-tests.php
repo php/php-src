@@ -59,6 +59,11 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
+// If __DIR__ is not defined, define it
+if (!defined('__DIR__')) {
+	define('__DIR__', realpath(dirname(__FILE__)));
+}
+
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -1003,11 +1008,16 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 
 	$data = '';
 
+	$bin_env = array();
+	foreach($env as $key => $value) {
+		$bin_env[(binary)$key] = (binary)$value;
+	}
+
 	$proc = proc_open($commandline, array(
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes, $cwd, $env, array('suppress_errors' => true, 'binary_pipes' => true));
+		), $pipes, $cwd, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
 
 	if (!$proc) {
 		return false;
