@@ -213,9 +213,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		RETURN_NULL();
 	}
 
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 	
 	dirp = php_stream_opendir(dirname, ENFORCE_SAFE_MODE|REPORT_ERRORS, context);
 
@@ -558,9 +556,7 @@ PHP_FUNCTION(scandir)
 		RETURN_FALSE;
 	}
 
-	if (zcontext) {
-		context = php_stream_context_from_zval(zcontext, 0);
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
 	if (!flags) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
