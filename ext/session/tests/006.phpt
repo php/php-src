@@ -57,6 +57,14 @@ object(b)#%d (1) {
     string(5) "hallo"
   }
 }
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 values after session:
 object(a)#%d (1) {
   ["test"]=>

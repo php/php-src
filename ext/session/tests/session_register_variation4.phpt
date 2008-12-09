@@ -32,6 +32,8 @@ ob_end_flush();
 bool(true)
 array(0) {
 }
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["foo"]=>
@@ -43,4 +45,3 @@ array(1) {
   NULL
 }
 Done
-

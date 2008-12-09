@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Changed opendir(), dir() and scandir() to use default context when no context
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
+- Deprecated session_register(), session_unregister() and
+  session_is_registered(). (Hannes)
 
 - Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
 

@@ -47,6 +47,7 @@ var_dump($_SESSION);
 session_destroy();
 ?>
 --EXPECTF--
+Deprecated: Function session_register() is deprecated in %s on line %d
 array(2) {
   ["o1"]=>
   &object(TFoo)#%d (1) {

@@ -36,6 +36,8 @@ array(1) {
   ["foo"]=>
   string(12) "Hello World!"
 }
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 array(0) {
 }
@@ -43,4 +45,3 @@ bool(true)
 array(0) {
 }
 Done
-
