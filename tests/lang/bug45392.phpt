@@ -19,4 +19,3 @@ ob_end_clean();
 --EXPECTF--
 2
 Fatal error: Allowed memory size of %d bytes exhausted%s
-5
