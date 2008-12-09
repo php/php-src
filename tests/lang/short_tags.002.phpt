@@ -1,5 +1,5 @@
 --TEST--
-short tags
+short_open_tag: Off
 --INI--
 short_open_tag=off
 --FILE--
