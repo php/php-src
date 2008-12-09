@@ -1,12 +1,14 @@
 --TEST--
 short tags
 --INI--
-short_tags=off
+short_open_tag=off
 --FILE--
 <?
 echo "Used a short tag\n";
 ?>
 Finished
 --EXPECT--
-Used a short tag
+<?
+echo "Used a short tag\n";
+?>
 Finished
