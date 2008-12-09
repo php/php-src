@@ -1,7 +1,7 @@
 --TEST--
 tags
 --INI--
-short_open_tags=on
+short_open_tag=on
 asp_tags=on
 --FILE--
 <?='this should get echoed'?>
