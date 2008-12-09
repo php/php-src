@@ -1283,6 +1283,7 @@ PHP_FUNCTION(curl_copy_handle)
 	TSRMLS_SET_CTX(dupch->thread_ctx);
 
 	dupch->cp = cp;
+	dupch->uses = 0;
 	dupch->handlers->write->method = ch->handlers->write->method;
 	dupch->handlers->write->type   = ch->handlers->write->type;
 	dupch->handlers->read->method  = ch->handlers->read->method;
