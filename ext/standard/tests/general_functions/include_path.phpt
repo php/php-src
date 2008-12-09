@@ -62,7 +62,7 @@ string(1) "."
 string(14) ".:/path/to/dir"
 NULL
 string(1) "."
-string(1) "."
+bool(false)
 string(1) "."
 NULL
 string(1) "."
