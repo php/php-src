@@ -59,8 +59,8 @@ NO_PROC_OPEN_ERROR;
 exit;
 }
 
-// If __DIR__ is not defined, define it
-if (!defined('__DIR__')) {
+// __DIR__ is available from 5.3.0
+if (PHP_VERSION_ID < 50300) {
 	define('__DIR__', realpath(dirname(__FILE__)));
 }
 
