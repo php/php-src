@@ -66,10 +66,6 @@
 #ifndef VER_SUITE_COMPUTE_SERVER
 # define VER_SUITE_COMPUTE_SERVER            0x00004000
 #endif
-/*
-ext\standard\info.c(346) : error C2065: 'VER_SUITE_STORAGE_SERVER' : undeclared identifier
-ext\standard\info.c(373) : error C2065: 'VER_SUITE_COMPUTE_SERVER' : undeclared identifier
-*/
 
 #ifndef PROCESSOR_ARCHITECTURE_AMD64
 #define PROCESSOR_ARCHITECTURE_AMD64            9
