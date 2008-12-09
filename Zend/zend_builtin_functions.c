@@ -1160,8 +1160,24 @@ ZEND_FUNCTION(class_exists)
 	}
 
 	if (!autoload) {
+		zstr name;
+		int len;
+
 		lc_name = zend_u_str_case_fold(type, class_name, class_name_len, 1, &lc_name_len);
-		found = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) &ce);
+
+		/* Ignore leading "\" */
+		name = lc_name;
+		len = class_name_len;
+		if (lc_name.s[0] == '\\') {
+			if (type == IS_UNICODE) {
+				name.u = &lc_name.u[1];
+			} else {
+				name.s = &lc_name.s[1];
+			}
+			len--;
+		}
+
+		found = zend_u_hash_find(EG(class_table), type, name, len+1, (void **) &ce);
 		efree(lc_name.v);
 		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & ZEND_ACC_INTERFACE));
 	}
