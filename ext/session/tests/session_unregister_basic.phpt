@@ -101,78 +101,125 @@ ob_end_flush();
 bool(true)
 
 -- Iteration 1 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 2 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 3 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 4 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 5 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 6 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 7 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 8 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 9 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 10 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 11 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 12 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 13 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 14 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 15 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 16 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 17 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 18 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 19 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 20 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 21 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 22 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 23 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
 
 -- Iteration 24 --
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 
 Warning: session_unregister() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 bool(true)
 Done
-

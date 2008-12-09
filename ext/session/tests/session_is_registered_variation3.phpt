@@ -36,24 +36,37 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_is_registered() : variation ***
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(1) {
   ["foo"]=>
   &string(12) "Hello World!"
 }
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Function session_unregister() is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
 Done
-

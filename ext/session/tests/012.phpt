@@ -31,5 +31,6 @@ session_destroy();
 
 print "I live\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function session_register() is deprecated in %s on line %d
 I live

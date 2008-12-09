@@ -100,6 +100,8 @@ ob_end_flush();
 
 -- Iteration 1 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["0"]=>
@@ -109,6 +111,8 @@ bool(true)
 
 -- Iteration 2 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["1"]=>
@@ -118,6 +122,8 @@ bool(true)
 
 -- Iteration 3 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["12345"]=>
@@ -127,6 +133,8 @@ bool(true)
 
 -- Iteration 4 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["-2345"]=>
@@ -136,6 +144,8 @@ bool(true)
 
 -- Iteration 5 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["10.5"]=>
@@ -145,6 +155,8 @@ bool(true)
 
 -- Iteration 6 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["-10.5"]=>
@@ -154,6 +166,8 @@ bool(true)
 
 -- Iteration 7 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["123456789000"]=>
@@ -163,6 +177,8 @@ bool(true)
 
 -- Iteration 8 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["1.23456789E-9"]=>
@@ -172,6 +188,8 @@ bool(true)
 
 -- Iteration 9 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["0.5"]=>
@@ -181,6 +199,8 @@ bool(true)
 
 -- Iteration 10 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -190,6 +210,8 @@ bool(true)
 
 -- Iteration 11 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -199,6 +221,8 @@ bool(true)
 
 -- Iteration 12 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["1"]=>
@@ -208,6 +232,8 @@ bool(true)
 
 -- Iteration 13 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -217,6 +243,8 @@ bool(true)
 
 -- Iteration 14 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["1"]=>
@@ -226,6 +254,8 @@ bool(true)
 
 -- Iteration 15 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -235,6 +265,8 @@ bool(true)
 
 -- Iteration 16 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -244,6 +276,8 @@ bool(true)
 
 -- Iteration 17 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -253,6 +287,8 @@ bool(true)
 
 -- Iteration 18 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["Nothing"]=>
@@ -262,6 +298,8 @@ bool(true)
 
 -- Iteration 19 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["Nothing"]=>
@@ -271,6 +309,8 @@ bool(true)
 
 -- Iteration 20 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["Hello World!"]=>
@@ -280,6 +320,8 @@ bool(true)
 
 -- Iteration 21 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["Hello World!"]=>
@@ -289,6 +331,8 @@ bool(true)
 
 -- Iteration 22 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -298,6 +342,8 @@ bool(true)
 
 -- Iteration 23 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -307,6 +353,8 @@ bool(true)
 
 -- Iteration 24 --
 bool(true)
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 bool(true)
 array(1) {
   ["Resource id #%d"]=>
@@ -314,4 +362,3 @@ array(1) {
 }
 bool(true)
 Done
-

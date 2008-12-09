@@ -100,6 +100,8 @@ ob_end_flush();
 
 -- Iteration 1 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -107,6 +109,8 @@ bool(true)
 
 -- Iteration 2 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -114,6 +118,8 @@ bool(true)
 
 -- Iteration 3 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -121,6 +127,8 @@ bool(true)
 
 -- Iteration 4 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -128,6 +136,8 @@ bool(true)
 
 -- Iteration 5 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -135,6 +145,8 @@ bool(true)
 
 -- Iteration 6 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -142,6 +154,8 @@ bool(true)
 
 -- Iteration 7 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -149,6 +163,8 @@ bool(true)
 
 -- Iteration 8 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -156,6 +172,8 @@ bool(true)
 
 -- Iteration 9 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -163,6 +181,8 @@ bool(true)
 
 -- Iteration 10 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -170,6 +190,8 @@ bool(true)
 
 -- Iteration 11 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -177,6 +199,8 @@ bool(true)
 
 -- Iteration 12 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -184,6 +208,8 @@ bool(true)
 
 -- Iteration 13 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -191,6 +217,8 @@ bool(true)
 
 -- Iteration 14 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -198,6 +226,8 @@ bool(true)
 
 -- Iteration 15 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -205,6 +235,8 @@ bool(true)
 
 -- Iteration 16 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -212,6 +244,8 @@ bool(true)
 
 -- Iteration 17 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -219,6 +253,8 @@ bool(true)
 
 -- Iteration 18 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -226,6 +262,8 @@ bool(true)
 
 -- Iteration 19 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -233,6 +271,8 @@ bool(true)
 
 -- Iteration 20 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -240,6 +280,8 @@ bool(true)
 
 -- Iteration 21 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -247,6 +289,8 @@ bool(true)
 
 -- Iteration 22 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -254,6 +298,8 @@ bool(true)
 
 -- Iteration 23 --
 bool(true)
+
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
 bool(false)
 array(0) {
 }
@@ -262,10 +308,11 @@ bool(true)
 -- Iteration 24 --
 bool(true)
 
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
+
 Warning: session_is_registered() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 array(0) {
 }
 bool(true)
 Done
-

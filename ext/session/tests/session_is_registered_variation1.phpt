@@ -97,6 +97,8 @@ bool(true)
 array(0) {
 }
 
+Deprecated: Function session_is_registered() is deprecated in %s on line %d
+
 Warning: session_is_registered() expects parameter 1 to be string, array given in %s on line %d
 NULL
 array(0) {
@@ -105,4 +107,3 @@ bool(true)
 array(0) {
 }
 Done
-
