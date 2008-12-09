@@ -30,9 +30,6 @@ PHP                                                                        NEWS
   operands. (Dmitry)
 - Removed Freetype 1.x and GD 1.x support from GD extension. (Pierre)
 
-- Moved extensions to PECL:
-  . ext/ncurses (Hartmut)
-
 - Improved ext/zlib; re-implemented non-file related functionality. (Mike)
 - Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
 - Improved ext/mhash: (Mike)
@@ -43,11 +40,11 @@ PHP                                                                        NEWS
 
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
-- Added streams features:
-  . Second optional parameter to stream_context_create() to
-    set params during context creation. (Sara)
-  . "context" and "binary_pipes" params in "other_options" arg. (Sara)
-  . stream_resolve_include_path(). (Sara)
+- Added "context" and "binary_pipes" params in "other_options" for proc_open().
+  (Sara)
+- Added stream_resolve_include_path() function which checks which file fopen()
+  with a relative path will open. (Sara)
 - Added shm_has_var() function. (Mike)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
+
