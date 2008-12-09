@@ -1157,10 +1157,21 @@ ZEND_FUNCTION(class_exists)
 	}
 
 	if (!autoload) {
+		char *name;
+		int len;
+
 		lc_name = do_alloca(class_name_len + 1, use_heap);
 		zend_str_tolower_copy(lc_name, class_name, class_name_len);
+
+		/* Ignore leading "\" */
+		name = lc_name;
+		len = class_name_len;
+		if (lc_name[0] == '\\') {
+			name = &lc_name[1];
+			len--;
+		}
 	
-		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
+		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
 		free_alloca(lc_name, use_heap);
 		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & ZEND_ACC_INTERFACE));
 	}
