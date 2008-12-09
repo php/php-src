@@ -5,6 +5,8 @@ EXTENSION("date", "php_date.c", false, "-Iext/date/lib");
 ADD_SOURCES("ext/date/lib", "astro.c timelib.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c parse_iso_intervals.c interval.c", "date");
 AC_DEFINE('HAVE_DATE', 1, 'Have date/time support');
 
+ADD_FLAG('CFLAGS_DATE', "/wd4244");
+
 var tl_config = FSO.CreateTextFile("ext/date/lib/timelib_config.h", true);
 tl_config.WriteLine("#include \"config.w32.h\"");
 tl_config.Close();
