@@ -1,5 +1,5 @@
 --TEST--
-tags
+short_open_tag: On, asp_tags: On
 --INI--
 short_open_tag=on
 asp_tags=on

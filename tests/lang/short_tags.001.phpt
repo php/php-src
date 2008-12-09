@@ -1,5 +1,5 @@
 --TEST--
-short tags
+short_open_tag: On
 --INI--
 short_open_tag=on
 --FILE--
