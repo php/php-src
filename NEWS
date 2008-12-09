@@ -5,7 +5,6 @@ PHP                                                                        NEWS
 
 - Changed dl() to be disabled by default. Enabled only when explicitly
   registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
-- Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Changed allow_url_fopen/allow_url_include to allow
   per-wrapper enable/disable and runtime tightening. (Sara)
 
