@@ -238,6 +238,6 @@ Syntax error in sequence
 -- Testing with second argument value: NULL
 Syntax error in sequence
 
--- Testing with second argument value: resource(7) of type (stream)
+-- Testing with second argument value: resource(%d) of type (stream)
 Syntax error in sequence
 ===DONE===
