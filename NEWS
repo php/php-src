@@ -1,11 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 4
-- Changed opendir/dir/scandir to use default context
-  when no context argument is passed. (Sara)
+- Changed opendir(), dir() and scandir() to use default context when no context
+  argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 
-- Fixed bug #46811 ini_set() doesn't return false on failure. (Hannes)
+- Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
 
 04 Dec 2008, PHP 5.3.0 Alpha 3
 - Upgraded bundled PCRE to version 7.8. (Nuno)
@@ -21,7 +21,7 @@ PHP                                                                        NEWS
 - Changed floating point behaviour to consistently use double precision on all
   platforms and with all compilers. (Christian Seiler)
 - Changed round() to act more intuitively when rounding to a certain precision
-  and to correctly round very large and very small exponents. (Christian Seiler)
+  and round very large and very small exponents correctly. (Christian Seiler)
 - Changed fileinfo to no longer send errors to stderr. (Scott)
 
 - Added support for namespaces with brackets. (Greg)
@@ -39,9 +39,9 @@ PHP                                                                        NEWS
 - Added concatenation option to bz2.decompress stream filter.
   (Keisial at gmail dot com, Greg)
 - Added support for using compressed connections with PDO_mysql. (Johannes)
+
 - Implemented FR #46595 (Use cc as the default compiler). (David Soria Parra)
-- Implemented FR #46513 (Missing compiler flags for suncc). 
-  (David Soria Parra)
+- Implemented FR #46513 (Missing compiler flags for suncc).  (David Soria Parra)
 
 - Deprecated define_syslog_variables(). (Kalle)
 - Deprecated ereg extension. (Felipe)
