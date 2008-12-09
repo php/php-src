@@ -238,7 +238,7 @@ Syntax error in sequence
 -- Testing with second argument value: NULL
 Syntax error in sequence
 
--- Testing with second argument value: resource(7) of type (stream)
+-- Testing with second argument value: resource(%d) of type (stream)
 
 Warning: imap_fetch_overview() expects parameter 2 to be %binary_string_optional%, resource given in %s on line %d
 Syntax error in sequence
