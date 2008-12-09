@@ -292,6 +292,7 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, uint name_length, char *new_val
 		ini_entry->value_length = new_value_length;
 	} else {
 		efree(duplicate);
+		return FAILURE;
 	}
 
 	return SUCCESS;
