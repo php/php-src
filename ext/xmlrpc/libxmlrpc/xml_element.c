@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.11  2007/01/01 09:29:33  sebastian
+ *   Bump year.
+ *
  *   Revision 1.10  2007/07/30 11:33:49  tony2001
  *   fix compile warnings (#38257)
  *
@@ -378,7 +381,7 @@ static void xml_element_serialize(xml_element *el, int (*fptr)(void *data, const
    depth++;
 
    if(!el) {
-      fprintf(stderr, "Nothing to write\n");
+      /* fprintf(stderr, "Nothing to write\n"); */
       return;
    }
    if(!options) {
@@ -725,7 +728,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
                       byte_idx > 10  ? 10 : byte_idx,
                       in_buf + (byte_idx > 10 ? byte_idx - 10 : byte_idx));
          }
-
+/*
          fprintf(stderr, "expat reports error code %i\n"
                 "\tdescription: %s\n"
                 "\tline: %i\n"
@@ -734,7 +737,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
                 "\ttotal bytes: %i\n%s ",
                 err_code, error_str, line_num, 
                 col_num, byte_idx, byte_total, buf);
-
+*/
 
           /* error condition */
           if(error) {
