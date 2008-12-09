@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 200?, PHP 5.3.0 Alpha 4
 - Changed opendir/dir/scandir to use default context
   when no context argument is passed. (Sara)
+- Changed open_basedir to allow tightening in runtime contexts. (Sara)
 
 - Fixed bug #46811 ini_set() doesn't return false on failure. (Hannes)
 
