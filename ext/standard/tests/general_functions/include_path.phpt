@@ -62,7 +62,7 @@ unicode(1) "."
 unicode(14) ".:/path/to/dir"
 NULL
 unicode(1) "."
-unicode(1) "."
+bool(false)
 unicode(1) "."
 NULL
 unicode(1) "."
