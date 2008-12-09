@@ -1,5 +1,5 @@
 --TEST--
-tags
+short_open_tag: Off, asp_tags: Off
 --INI--
 short_open_tag=off
 asp_tags=off
