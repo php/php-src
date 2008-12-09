@@ -57,9 +57,19 @@
 #define VER_SUITE_BLADE                     0x00000400
 #define VER_SUITE_EMBEDDED_RESTRICTED       0x00000800
 #define VER_SUITE_SECURITY_APPLIANCE        0x00001000
-#define VER_SUITE_STORAGE_SERVER            0x00002000
-#define VER_SUITE_COMPUTE_SERVER            0x00004000
 #endif
+
+#ifndef VER_SUITE_STORAGE_SERVER
+# define VER_SUITE_STORAGE_SERVER            0x00002000
+#endif
+
+#ifndef VER_SUITE_COMPUTE_SERVER
+# define VER_SUITE_COMPUTE_SERVER            0x00004000
+#endif
+/*
+ext\standard\info.c(346) : error C2065: 'VER_SUITE_STORAGE_SERVER' : undeclared identifier
+ext\standard\info.c(373) : error C2065: 'VER_SUITE_COMPUTE_SERVER' : undeclared identifier
+*/
 
 #ifndef PROCESSOR_ARCHITECTURE_AMD64
 #define PROCESSOR_ARCHITECTURE_AMD64            9

@@ -38,6 +38,18 @@
 #include <sys/utsname.h>
 #endif
 
+#ifdef PHP_WIN32
+typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
+typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+
+# include "winver.h"
+
+#if _MSC_VER < 1300
+# define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
+#endif
+
+#endif
+
 #if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
@@ -343,9 +355,9 @@ char* php_get_windows_name()
 		if ( osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 )	{
 			if (GetSystemMetrics(SM_SERVERR2))
 				major = "Windows Server 2003 R2";
-			else if (osvi.wSuiteMask==VER_SUITE_STORAGE_SERVER)
+			else if (osvi.wSuiteMask == VER_SUITE_STORAGE_SERVER)
 				major = "Windows Storage Server 2003";
-			else if (osvi.wSuiteMask==VER_SUITE_WH_SERVER)
+			else if (osvi.wSuiteMask == VER_SUITE_WH_SERVER)
 				major = "Windows Home Server";
 			else if (osvi.wProductType == VER_NT_WORKSTATION &&
 				si.wProcessorArchitecture==PROCESSOR_ARCHITECTURE_AMD64) {
