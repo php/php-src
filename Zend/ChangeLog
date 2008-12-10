@@ -1,3 +1,32 @@
+2008-12-09  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      tests/bug46813.phpt:
+      MFH: Fix #46813 (class_exists doesn`t work with fully qualified namespace)
+
+    * zend_builtin_functions.c
+      tests/bug46813.phpt
+      tests/bug46813.phpt:
+      Fix #46813 (class_exists doesn`t work with fully qualified namespace)
+
+2008-12-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * zend_language_parser.y:
+      - fix EOL (which makes on bison 1.7 cry), nb: pls use unix EOL on mac
+
+2008-12-09  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * tests/bug46811.phpt
+      tests/bug46811.phpt:
+      
+      Fixed bug#46811 ini_set() doesn't return false on failure
+
+    * zend_ini.c
+      zend_ini.c
+      tests/bug46811.phpt:
+      Fixed bug#46811 ini_set() doesn't return false on failure
+
 2008-12-04  Stanislav Malyshev  <stas@zend.com>
 
     * zend.h
