@@ -3136,7 +3136,7 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignore
 		return NULL;
 	}
 
-	if (!gdImageTrueColor(src) && clrBack>=gdImageColorsTotal(src)) {
+	if (!gdImageTrueColor(src) && (clrBack < 0 || clrBack>=gdImageColorsTotal(src))) {
 		return NULL;
 	}
 
