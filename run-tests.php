@@ -1009,7 +1009,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	$data = '';
 
 	$bin_env = array();
-	foreach($env as $key => $value) {
+	foreach((array)$env as $key => $value) {
 		$bin_env[(binary)$key] = (binary)$value;
 	}
 
