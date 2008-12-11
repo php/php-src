@@ -3227,7 +3227,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	if (ret == NULL) {
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
 
 	RETVAL_STRING((char *)ret, 1);
