@@ -2209,7 +2209,9 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 			if (res == HASH_KEY_IS_LONG) {
 				php_stream_printf(out TSRMLS_CC, "Key: Position #%ld:\n", num);
 			} else if (res == HASH_KEY_IS_STRING) {
-				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, str);
+				char *s = estrndup(str, len);
+				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, s);
+				efree(s);
 			}
 
 			php_stream_printf(out TSRMLS_CC, "paramno=%d\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
