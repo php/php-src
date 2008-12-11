@@ -21,7 +21,7 @@
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
 
-#include <timelib_config.h>
+#include "timelib_config.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
