@@ -986,6 +986,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				res_buf[res_length] = '\0';
 				ZVAL_STRINGL(result, res_buf, res_length, 0);
 			}
+			}
 			break;
 		case SQLNUMERIC:
 		default: {
