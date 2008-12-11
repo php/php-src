@@ -885,6 +885,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				res_buf[res_length] = '\0';
 				ZVAL_STRINGL(result, res_buf, res_length, 0);
 			}
+			}
 			break;
 		case SQLNUMERIC:
 		default: {
@@ -937,7 +938,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 	}
 }
 
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type TSRMLS_DC)
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr, int offset,zval *result, int column_type TSRMLS_DC)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		ZVAL_NULL(result);
