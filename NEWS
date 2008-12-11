@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
 - Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error when
   given bad data). (Ilia)
+- Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
 
 04 Dec 2008, PHP 5.3.0 Alpha 3
 - Upgraded bundled PCRE to version 7.8. (Nuno)
