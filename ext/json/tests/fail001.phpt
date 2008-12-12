@@ -50,116 +50,116 @@ AS ARRAY
 unicode(58) "A JSON payload should be an object or array, not a string."
 Testing: ["Unclosed array"
 AS OBJECT
-unicode(17) "["Unclosed array""
+NULL
 AS ARRAY
-unicode(17) "["Unclosed array""
+NULL
 Testing: {unquoted_key: "keys must be quoted}
 AS OBJECT
-unicode(36) "{unquoted_key: "keys must be quoted}"
+NULL
 AS ARRAY
-unicode(36) "{unquoted_key: "keys must be quoted}"
+NULL
 Testing: ["extra comma",]
 AS OBJECT
-unicode(16) "["extra comma",]"
+NULL
 AS ARRAY
-unicode(16) "["extra comma",]"
+NULL
 Testing: ["double extra comma",,]
 AS OBJECT
-unicode(24) "["double extra comma",,]"
+NULL
 AS ARRAY
-unicode(24) "["double extra comma",,]"
+NULL
 Testing: [   , "<-- missing value"]
 AS OBJECT
-unicode(26) "[   , "<-- missing value"]"
+NULL
 AS ARRAY
-unicode(26) "[   , "<-- missing value"]"
+NULL
 Testing: ["Comma after the close"],
 AS OBJECT
-unicode(26) "["Comma after the close"],"
+NULL
 AS ARRAY
-unicode(26) "["Comma after the close"],"
+NULL
 Testing: ["Extra close"]]
 AS OBJECT
-unicode(16) "["Extra close"]]"
+NULL
 AS ARRAY
-unicode(16) "["Extra close"]]"
+NULL
 Testing: {"Extra comma": true,}
 AS OBJECT
-unicode(22) "{"Extra comma": true,}"
+NULL
 AS ARRAY
-unicode(22) "{"Extra comma": true,}"
+NULL
 Testing: {"Extra value after close": true} "misplaced quoted value"
 AS OBJECT
-unicode(58) "{"Extra value after close": true} "misplaced quoted value""
+NULL
 AS ARRAY
-unicode(58) "{"Extra value after close": true} "misplaced quoted value""
+NULL
 Testing: {"Illegal expression": 1 + 2}
 AS OBJECT
-unicode(29) "{"Illegal expression": 1 + 2}"
+NULL
 AS ARRAY
-unicode(29) "{"Illegal expression": 1 + 2}"
+NULL
 Testing: {"Illegal invocation": alert()}
 AS OBJECT
-unicode(31) "{"Illegal invocation": alert()}"
+NULL
 AS ARRAY
-unicode(31) "{"Illegal invocation": alert()}"
+NULL
 Testing: {"Numbers cannot have leading zeroes": 013}
 AS OBJECT
-unicode(43) "{"Numbers cannot have leading zeroes": 013}"
+NULL
 AS ARRAY
-unicode(43) "{"Numbers cannot have leading zeroes": 013}"
+NULL
 Testing: {"Numbers cannot be hex": 0x14}
 AS OBJECT
-unicode(31) "{"Numbers cannot be hex": 0x14}"
+NULL
 AS ARRAY
-unicode(31) "{"Numbers cannot be hex": 0x14}"
+NULL
 Testing: ["Illegal backslash escape: \x15"]
 AS OBJECT
-unicode(34) "["Illegal backslash escape: \x15"]"
+NULL
 AS ARRAY
-unicode(34) "["Illegal backslash escape: \x15"]"
+NULL
 Testing: ["Illegal backslash escape: \'"]
 AS OBJECT
-unicode(32) "["Illegal backslash escape: \'"]"
+NULL
 AS ARRAY
-unicode(32) "["Illegal backslash escape: \'"]"
+NULL
 Testing: ["Illegal backslash escape: \017"]
 AS OBJECT
-unicode(34) "["Illegal backslash escape: \017"]"
+NULL
 AS ARRAY
-unicode(34) "["Illegal backslash escape: \017"]"
+NULL
 Testing: [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
 AS OBJECT
-unicode(266) "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+NULL
 AS ARRAY
-unicode(266) "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+NULL
 Testing: {"Missing colon" null}
 AS OBJECT
-unicode(22) "{"Missing colon" null}"
+NULL
 AS ARRAY
-unicode(22) "{"Missing colon" null}"
+NULL
 Testing: {"Double colon":: null}
 AS OBJECT
-unicode(23) "{"Double colon":: null}"
+NULL
 AS ARRAY
-unicode(23) "{"Double colon":: null}"
+NULL
 Testing: {"Comma instead of colon", null}
 AS OBJECT
-unicode(32) "{"Comma instead of colon", null}"
+NULL
 AS ARRAY
-unicode(32) "{"Comma instead of colon", null}"
+NULL
 Testing: ["Colon instead of comma": false]
 AS OBJECT
-unicode(33) "["Colon instead of comma": false]"
+NULL
 AS ARRAY
-unicode(33) "["Colon instead of comma": false]"
+NULL
 Testing: ["Bad value", truth]
 AS OBJECT
-unicode(20) "["Bad value", truth]"
+NULL
 AS ARRAY
-unicode(20) "["Bad value", truth]"
+NULL
 Testing: ['single quote']
 AS OBJECT
-unicode(16) "['single quote']"
+NULL
 AS ARRAY
-unicode(16) "['single quote']"
+NULL
