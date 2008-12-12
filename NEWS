@@ -10,7 +10,7 @@ PHP                                                                        NEWS
 - Fixed bug #46748 (Segfault when an SSL error has more than one error). (Scott)
 - Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
   (Mikko)
-- Fixed bug #46699: (xml_parse crash when parser is namespace aware). (Rob)
+- Fixed bug #46699 (xml_parse crash when parser is namespace aware). (Rob)
 - Fixed bug #35975 (Session cookie expires date format isn't the most compatible.
   Now matches that of setcookie()). (Scott)
 
