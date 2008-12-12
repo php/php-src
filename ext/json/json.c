@@ -544,13 +544,7 @@ static PHP_FUNCTION(json_decode)
 				RETURN_DOUBLE(d);
 			}
 		}
-		if (str_len > 1 && *str.s == '"' && str.s[str_len-1] == '"') {
-			RETURN_STRINGL(str.s+1, str_len-2, 1);
-		} else if (*str.s == '{' || *str.s == '[') { /* invalid JSON string */
-			RETURN_NULL();
-		} else {
-			RETURN_STRINGL(str.s, str_len, 1);
-		}
+		RETURN_NULL();
 	}
 	else
 	{
@@ -577,13 +571,7 @@ static PHP_FUNCTION(json_decode)
 				RETURN_DOUBLE(d);
 			}
 		}
-		if (str_len > 1 && *str.u == 0x22 /*'"'*/ && str.u[str_len-1] == 0x22 /*'"'*/) {
-			RETURN_UNICODEL(str.u+1, str_len-2, 1);
-		} else if (*str.u == 0x7b /*'{'*/ || *str.u == 0x5b /*'['*/ ) { /* invalid JSON string */
-			RETURN_NULL();
-		} else {
-			RETURN_UNICODEL(str.u, str_len, 1);
-		}
+		RETURN_NULL();
 	}
 }
 /* }}} */

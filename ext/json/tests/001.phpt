@@ -31,12 +31,12 @@ NULL
 NULL
 NULL
 NULL
-unicode(1) "."
-unicode(1) "."
-unicode(3) "<?>"
-unicode(1) ";"
-unicode(6) "руссиш"
-unicode(4) "blah"
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
 NULL
 object(stdClass)#%d (1) {
   [u"test"]=>
@@ -66,6 +66,6 @@ object(stdClass)#%d (1) {
     unicode(0) ""
   }
 }
-unicode(16) "{ "": { "": "" }"
-unicode(16) "{ "": "": "" } }"
+NULL
+NULL
 Done
