@@ -22,7 +22,7 @@ $input = array(
   array(1, 2, 3, 1)
 );
 
-var_dump( array_unique($input) );
+var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>

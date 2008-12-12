@@ -29,7 +29,7 @@ $input = array(
   5 => $value4
 );
 
-var_dump( array_unique($input) );
+var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
