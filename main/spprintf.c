@@ -77,6 +77,7 @@
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
 
+#define _GNU_SOURCE
 #include "php.h"
 
 #include <stddef.h>
@@ -208,6 +209,14 @@ do { 												\
 } while (0)
 
 /* }}} */
+
+
+#if !HAVE_STRNLEN
+static size_t strnlen(const char *s, size_t maxlen) {
+	char *r = memchr(s, '\0', maxlen);
+	return r ? r-s : maxlen;
+}
+#endif
 
 /*
  * Do format conversion placing the output in buffer
@@ -656,9 +665,11 @@ fmt_unicode:
 fmt_string:
 					s = va_arg(ap, char *);
 					if (s != NULL) {
-						s_len = strlen(s);
-						if (adjust_precision && precision < s_len)
-							s_len = precision;
+						if (!adjust_precision) {
+							s_len = strlen(s);
+						} else {
+							s_len = strnlen(s, precision);
+						}
 					} else {
 						s = S_NULL;
 						s_len = S_NULL_LEN;
