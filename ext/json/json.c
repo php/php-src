@@ -523,13 +523,7 @@ static PHP_FUNCTION(json_decode)
 				RETURN_DOUBLE(d);
 			}
 		}
-		if (str_len > 1 && *str == '"' && str[str_len-1] == '"') {
-			RETURN_STRINGL(str+1, str_len-2, 1);
-		} else if (*str == '{' || *str == '[') { /* invalid JSON string */
-			RETURN_NULL();
-		} else {
-			RETURN_STRINGL(str, str_len, 1);
-		}
+		RETURN_NULL();
 	}
 }
 /* }}} */

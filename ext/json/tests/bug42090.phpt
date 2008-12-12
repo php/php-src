@@ -16,10 +16,9 @@ var_dump(
 ?>
 --EXPECT--
 string(0) ""
-string(5) "".."."
-string(1) """
-string(2) """"
+NULL
+NULL
+NULL
 string(4) ""\"""
 string(1) """
 string(2) """"
-
