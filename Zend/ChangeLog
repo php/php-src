@@ -1,3 +1,12 @@
+2008-12-11  Antony Dovgal  <tony@daylessday.org>
+
+    * tests/bug46665.phpt
+      tests/bug46665_autoload.inc
+      tests/bug46665_autoload.inc
+      tests/bug46665_autoload.php:
+      rename .php to .inc
+      all .php files are deleted on `make clean`
+
 2008-12-09  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
