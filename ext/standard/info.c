@@ -38,6 +38,17 @@
 #include <sys/utsname.h>
 #endif
 
+
+#ifdef PHP_WIN32
+typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
+typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+# include "winver.h"
+
+# if _MSC_VER < 1300
+#  define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
+# endif
+#endif
+
 #if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
@@ -341,14 +352,6 @@ PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 
 #ifdef PHP_WIN32
 /* {{{  */
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
-
-#include "winver.h"
-
-#if _MSC_VER < 1300
-#define OSVERSIONINFOEX php_win_OSVERSIONINFOEX
-#endif
 
 char* php_get_windows_name()
 {
