@@ -20,6 +20,8 @@ echo "ok\n";
 ?>
 --EXPECTF--
 1
+
+Deprecated: Function session_register() is deprecated in %s on line %d
 2
 
 Notice: Undefined variable: x in %sunset_cv06.php on line %d
