@@ -625,6 +625,7 @@ strcoll \
 strdup \
 strerror \
 strftime \
+strnlen \
 strptime \
 strstr \
 strtok_r \
