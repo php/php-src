@@ -524,6 +524,7 @@ PHP_MINFO_FUNCTION(dba)
 		php_info_print_table_row(2, "Supported handlers", "none");
 	}
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 

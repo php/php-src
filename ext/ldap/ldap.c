@@ -271,6 +271,7 @@ PHP_MINFO_FUNCTION(ldap)
 #endif
 
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
