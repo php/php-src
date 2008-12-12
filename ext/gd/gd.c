@@ -1054,6 +1054,7 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 #if HAVE_GD_FONTMUTEX && HAVE_LIBFREETYPE
 	gdFontCacheMutexShutdown();
 #endif
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 #endif
@@ -1246,6 +1247,7 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "JIS-mapped Japanese Font Support", "enabled");
 #endif
 	php_info_print_table_end();
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
