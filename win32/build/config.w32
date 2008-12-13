@@ -349,6 +349,9 @@ ADD_SOURCES("win32", "inet.c");
 if (VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
+if (VCVERS >= 1400) {
+	AC_DEFINE('HAVE_STRNLEN', 1);
+}
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c unicode_filter.c glob_wrapper.c");
