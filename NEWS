@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.9
+- Added optional sorting type flag parameter to array_unique(), default is
+  SORT_REGULAR. (Andrei)
 - Fixed security issue in imagerotate(), background colour isn't validated
   correctly with a non truecolour image. (Scott)
 

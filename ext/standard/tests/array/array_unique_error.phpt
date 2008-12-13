@@ -17,7 +17,7 @@ var_dump( array_unique() );
 echo "\n-- Testing array_unique() function with more than expected no. of arguments --\n";
 $input = array(1, 2);
 $extra_arg = 10;
-var_dump( array_unique($input, $extra_arg) );
+var_dump( array_unique($input, SORT_NUMERIC, $extra_arg) );
 
 echo "Done";
 ?>
@@ -26,11 +26,11 @@ echo "Done";
 
 -- Testing array_unique() function with zero arguments --
 
-Warning: Wrong parameter count for array_unique() in %s on line %d
+Warning: array_unique() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing array_unique() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for array_unique() in %s on line %d
+Warning: array_unique() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 Done

@@ -2813,12 +2813,11 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
-/* {{{ proto array array_unique(array input)
+/* {{{ proto array array_unique(array input [, int sort_flags])
    Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
-	zval **array, *tmp;
-	HashTable *target_hash;
+	zval *array, *tmp;
 	Bucket *p;
 	struct bucketindex {
 		Bucket *b;
@@ -2826,34 +2825,31 @@ PHP_FUNCTION(array_unique)
 	};
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
+	long sort_type = SORT_REGULAR;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+		return;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		RETURN_FALSE;
-	}
+
+	set_compare_func(sort_type TSRMLS_CC);
 
 	array_init(return_value);
-	zend_hash_copy(Z_ARRVAL_P(return_value), target_hash, (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
+	zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array), (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
 
-	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
+	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
 		return;
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = (struct bucketindex *) pemalloc((target_hash->nNumOfElements + 1) * sizeof(struct bucketindex), target_hash->persistent);
+	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->persistent);
 	if (!arTmp) {
 		RETURN_FALSE;
 	}
-	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext) {
+	for (i = 0, p = Z_ARRVAL_P(array)->pListHead; p; i++, p = p->pListNext) {
 		arTmp[i].b = p;
 		arTmp[i].i = i;
 	}
 	arTmp[i].b = NULL;
-	set_compare_func(SORT_STRING TSRMLS_CC);
 	zend_qsort((void *) arTmp, i, sizeof(struct bucketindex), array_data_compare TSRMLS_CC);
 
 	/* go through the sorted array and delete duplicates from the copy */
@@ -2879,7 +2875,7 @@ PHP_FUNCTION(array_unique)
 			}
 		}
 	}
-	pefree(arTmp, target_hash->persistent);
+	pefree(arTmp, Z_ARRVAL_P(array)->persistent);
 }
 /* }}} */
 

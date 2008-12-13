@@ -74,7 +74,7 @@ $inputs = array (
 $iterator = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $iterator --\n";
-  var_dump( array_unique($input) );
+  var_dump( array_unique($input, SORT_STRING) );
   $iterator++;
 }
   
