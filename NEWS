@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Added optional sorting type flag parameter to array_unique(), default is
   SORT_REGULAR. (Andrei)
 - Fixed security issue in imagerotate(), background colour isn't validated
-  correctly with a non truecolour image. (Scott)
+  correctly with a non truecolour image. (Fixes CVE-2008-5498) (Scott)
 
 - Fixed bug #46798 (Crash in mssql extension when retrieving a NULL value
   inside a binary or image column type). (Ilia)
