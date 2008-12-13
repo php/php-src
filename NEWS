@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 Alpha 4
-- Added optional sorting type flag parameter to array_unique(), default is
-  SORT_REGULAR. (Andrei)
 - Changed opendir(), dir() and scandir() to use default context when no context
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
