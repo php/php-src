@@ -521,7 +521,7 @@ PHP_FUNCTION(file_get_contents)
 	char *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	int len, newlen;
+	int len;
 	long offset = -1;
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
@@ -556,8 +556,7 @@ PHP_FUNCTION(file_get_contents)
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
 
 		if (PG(magic_quotes_runtime)) {
-			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
-			len = newlen;
+			contents = php_addslashes(contents, len, &len, 1 TSRMLS_CC); /* 1 = free source string */
 		}
 
 		RETVAL_STRINGL(contents, len, 0);
