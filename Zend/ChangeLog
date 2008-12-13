@@ -1,3 +1,9 @@
+2008-12-12  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      tests/unset_cv06.phpt:
+      fix test
+
 2008-12-11  Antony Dovgal  <tony@daylessday.org>
 
     * tests/bug46665.phpt
