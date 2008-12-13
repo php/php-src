@@ -333,7 +333,7 @@ function copy_dir($source, $dest)
 
 	$d = opendir($source);
 	while (($f = readdir($d)) !== false) {
-		if ($f == '.' || $f == '..' || $f == 'CVS') {
+		if ($f == '.' || $f == '..' || $f == 'CVS' || $f == '.cvsignore') {
 			continue;
 		}
 		$fs = $source . '/' . $f;
