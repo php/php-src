@@ -40,11 +40,11 @@ END_EXTERN_C()
 #if ZEND_DEBUG
 /* these have more of a dependency on the definitions of the zend macros than
  * I would prefer, but doing it this way saves loads of idefs :-/ */
-# define STREAMS_D			int __php_stream_call_depth ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC 
-# define STREAMS_C			0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC 
+# define STREAMS_D			int __php_stream_call_depth ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
+# define STREAMS_C			0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC
 # define STREAMS_REL_C		__php_stream_call_depth + 1 ZEND_FILE_LINE_CC, \
 	__php_stream_call_depth ? __zend_orig_filename : __zend_filename, \
-	__php_stream_call_depth ? __zend_orig_lineno : __zend_lineno 
+	__php_stream_call_depth ? __zend_orig_lineno : __zend_lineno
 
 # define STREAMS_DC		, STREAMS_D
 # define STREAMS_CC		, STREAMS_C
@@ -64,33 +64,33 @@ END_EXTERN_C()
 #define php_stream_alloc_rel(ops, thisptr, persistent, mode) _php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_copy_to_mem_rel(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
-	
+
 #define php_stream_fopen_rel(filename, mode, opened, options) _php_stream_fopen((filename), (mode), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_with_path_rel(filename, mode, path, opened, options) _php_stream_fopen_with_path((filename), (mode), (path), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_from_fd_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_REL_CC TSRMLS_CC)
 #define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC TSRMLS_CC)
-	
+
 #define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC TSRMLS_CC)
-	
+
 #define php_stream_fopen_tmpfile_rel()	_php_stream_fopen_tmpfile(0 STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_temporary_file_rel(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_REL_CC TSRMLS_CC)
-	
+
 #define php_stream_open_wrapper_rel(path, mode, options, opened) _php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_REL_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex_rel(path, mode, options, opened, context) _php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_make_seekable_rel(origstream, newstream, flags) _php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_REL_CC TSRMLS_CC)
 
 /* }}} */
-	
+
 /* The contents of the php_stream_ops and php_stream should only be accessed
  * using the functions/macros in this header.
  * If you need to get at something that doesn't have an API,
  * drop me a line <wez@thebrainroom.com> and we can sort out a way to do
  * it properly.
- * 
+ *
  * The only exceptions to this rule are that stream implementations can use
  * the php_stream->abstract pointer to hold their context, and streams
  * opened via stream_open_wrappers can use the zval ptr in
@@ -121,9 +121,9 @@ typedef struct _php_stream_ops  {
 	size_t (*read)(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 	int    (*close)(php_stream *stream, int close_handle TSRMLS_DC);
 	int    (*flush)(php_stream *stream TSRMLS_DC);
-	
+
 	const char *label; /* label for this ops structure */
-	
+
 	/* these are optional */
 	int (*seek)(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
@@ -144,7 +144,7 @@ typedef struct _php_stream_wrapper_ops {
 	/* open a "directory" stream */
 	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-	
+
 	const char *label;
 
 	/* delete a file */
@@ -188,14 +188,14 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_AVOID_BLOCKING				16
 
 #define PHP_STREAM_FLAG_NO_CLOSE					32
-	
+
 #define PHP_STREAM_FLAG_IS_DIR						64
 
 #define PHP_STREAM_FLAG_NO_FCLOSE					128
 
 struct _php_stream  {
 	php_stream_ops *ops;
-	void *abstract;  		/* convenience pointer for abstraction */
+	void *abstract;			/* convenience pointer for abstraction */
 
 	php_stream_filter_chain readfilters, writefilters;
 
@@ -227,7 +227,7 @@ struct _php_stream  {
 	size_t readbuflen; /* Length in units (char or UChar) */
 	off_t readpos; /* Position in units (char or UChar) */
 	off_t writepos;
-	
+
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
 
@@ -489,7 +489,7 @@ static inline int _php_stream_path_param_encode(zval **ppzval, char **ppath, int
 #define PHP_STREAM_OPTION_LOCKING		6
 
 /* whether or not locking is supported */
-#define PHP_STREAM_LOCK_SUPPORTED		1	
+#define PHP_STREAM_LOCK_SUPPORTED		1
 
 #define php_stream_supports_lock(stream)	_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED TSRMLS_CC) == 0 ? 1 : 0
 #define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL TSRMLS_CC)
@@ -597,7 +597,7 @@ END_EXTERN_C()
  * a socket, pass this flag and the streams/wrappers will not use
  * buffering mechanisms while reading the headers, so that HTTP
  * wrapped streams will work consistently.
- * If you omit this flag, streams will use buffering and should end 
+ * If you omit this flag, streams will use buffering and should end
  * up working more optimally.
  * */
 #define STREAM_WILL_CAST                0x00000020
