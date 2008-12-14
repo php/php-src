@@ -13,7 +13,7 @@ echo "Done\n";
 --EXPECTF--
 bool(true)
 
-Notice: fopen(): Unable to find the wrapper "file" - did you forget to enable it when you configured PHP? in %s on line %d
+Warning: fopen(): Unable to find the wrapper "file" - did you forget to enable it when you configured PHP? in %s on line %d
 
 Warning: fopen(): Plainfiles wrapper disabled in %s on line %d
 
