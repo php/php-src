@@ -1,3 +1,8 @@
+2008-12-13  Johannes Schlüter  <johannes@schlueters.de>
+
+    * tests/bug46811.phpt:
+      Fix test
+
 2008-12-12  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
