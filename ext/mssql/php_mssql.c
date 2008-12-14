@@ -980,7 +980,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			if (!res_length) {
 				ZVAL_NULL(result);
 			} else {
-				ZVAL_STRINGL(result, (char *)dbdata(mssql_ptr->link, offset)), res_length, 1);
+				ZVAL_STRINGL(result, (char *)dbdata(mssql_ptr->link, offset), res_length, 1);
 			}
 			}
 			break;
