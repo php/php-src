@@ -1794,6 +1794,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		Z_LVAL(opline2->op1.u.constant) = prefix_len;
 		/* this is the hash of the non-prefixed part, lowercased */
 		opline2->extended_value = zend_u_hash_func(type, slash, name_len+1);
+		SET_UNUSED(opline2->op2);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *function_name;
