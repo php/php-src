@@ -1208,22 +1208,29 @@ PHP_FUNCTION(imap_headers)
    Read the message body */
 PHP_FUNCTION(imap_body)
 {
-	zval **streamind, **msgno, **flags;
+	zval **streamind, **msgno, **pflags;
 	pils *imap_le_struct; 
 	int msgindex, myargc=ZEND_NUM_ARGS();
+	long flags=0L;
 
-	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
+	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 	
 	convert_to_long_ex(msgno);
 	if (myargc == 3) {
-		convert_to_long_ex(flags);
+		convert_to_long_ex(pflags);
+		flags = Z_LVAL_PP(pflags);
+	        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+       	       		RETURN_FALSE;
+       		}
 	}
 
-	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
+	if ((myargc == 3) && (flags & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
 		   IMAP server, then that's the price we pay for making
 		   sure we don't crash. */
@@ -1236,7 +1243,7 @@ PHP_FUNCTION(imap_body)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, myargc==3 ? Z_LVAL_PP(flags) : NIL), 1);
+	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, myargc==3 ? Z_LVAL_PP(pflags) : NIL), 1);
 }
 /* }}} */
 
@@ -1830,14 +1837,16 @@ PHP_FUNCTION(imap_unsubscribe)
    Read the full structure of a message */
 PHP_FUNCTION(imap_fetchstructure)
 {
-	zval **streamind, **msgno, **flags;
+	zval **streamind, **msgno, **pflags;
 	pils *imap_le_struct;
 	BODY *body;
 	int msgindex, myargc=ZEND_NUM_ARGS();
+	long flags=0L;
 
-	if (myargc < 2  || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
+	if (myargc < 2  || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
@@ -1846,12 +1855,18 @@ PHP_FUNCTION(imap_fetchstructure)
 		RETURN_FALSE;
 	}
 	if (myargc == 3) {
-		convert_to_long_ex(flags);
+		convert_to_long_ex(pflags);
+		flags = Z_LVAL_PP(pflags);
+
+	        if (flags && ((flags & ~FT_UID) != 0)) {
+       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+       	        	RETURN_FALSE;
+       		}
 	}
 
 	object_init(return_value);
 
-	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
+	if ((myargc == 3) && (flags & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
 		   IMAP server, then that's the price we pay for making
 		   sure we don't crash. */
@@ -1861,7 +1876,7 @@ PHP_FUNCTION(imap_fetchstructure)
 	}
 	PHP_IMAP_CHECK_MSGNO(msgindex);
 
-	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(flags) : NIL);
+	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(pflags) : NIL);
 	
 	if (!body) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body information available");
@@ -1876,30 +1891,37 @@ PHP_FUNCTION(imap_fetchstructure)
    Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
 {
-	zval **streamind, **msgno, **sec, **flags;
+	zval **streamind, **msgno, **sec, **pflags;
 	pils *imap_le_struct;
 	char *body;
+        long flags=0L;
 	unsigned long len;
 	int myargc=ZEND_NUM_ARGS();
 
-	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &msgno, &sec, &flags) == FAILURE) {
+	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &msgno, &sec, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	convert_to_long_ex(msgno);
 	convert_to_string_ex(sec);
 	if (myargc == 4) {
-		convert_to_long_ex(flags);
+		convert_to_long_ex(pflags);
+		flags = Z_LVAL_PP(pflags);
+ 		if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+                	RETURN_FALSE;
+       		 }
 	}
 
-	if (myargc < 4 || !(Z_LVAL_PP(flags) & FT_UID)) {
+	if (myargc < 4 || !(flags & FT_UID)) {
 		/* only perform the check if the msgno is a message number and not a UID */
 		PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
 	}
 
-	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(flags) : NIL);
+	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(pflags) : NIL);
 
 	if (!body) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No body information available");
@@ -2640,22 +2662,29 @@ PHP_FUNCTION(imap_sort)
    Get the full unfiltered header for a message */
 PHP_FUNCTION(imap_fetchheader)
 {
-	zval **streamind, **msgno, **flags;
+	zval **streamind, **msgno, **pflags;
 	pils *imap_le_struct;
 	int msgindex, myargc = ZEND_NUM_ARGS();
+        long flags=0L;
 	
-	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
+	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	
+
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	convert_to_long_ex(msgno);
 	if (myargc == 3) {
-		convert_to_long_ex(flags);
-	}
+		convert_to_long_ex(pflags);
+                flags =  Z_LVAL_PP(pflags);
+	        if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
+       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+       	        	RETURN_FALSE;
+		}
+        }
+
 	
-	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
+	if ((myargc == 3) && (flags & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
 		   IMAP server, then that's the price we pay for making sure
 		   we don't crash. */
@@ -2666,7 +2695,7 @@ PHP_FUNCTION(imap_fetchheader)
 
 	PHP_IMAP_CHECK_MSGNO(msgindex);
 
-	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(flags) : NIL)), 1);
+	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, (myargc == 3 ? Z_LVAL_PP(pflags) : NIL)), 1);
 }
 /* }}} */
 
@@ -2888,6 +2917,7 @@ PHP_FUNCTION(imap_fetch_overview)
 	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &sequence, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
