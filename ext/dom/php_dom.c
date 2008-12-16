@@ -147,6 +147,31 @@ dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 	}
 }
 
+static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_obj *dest_doc)
+{
+	dom_doc_propsptr source, dest;
+	
+	if (source_doc && dest_doc) {
+		
+		source = dom_get_doc_props(source_doc);
+		dest = dom_get_doc_props(dest_doc);
+
+		dest->formatoutput = source->formatoutput;
+		dest->validateonparse = source->validateonparse;
+		dest->resolveexternals = source->resolveexternals;
+		dest->preservewhitespace = source->preservewhitespace;
+		dest->substituteentities = source->substituteentities;
+		dest->stricterror = source->stricterror;
+		dest->recover = source->recover;
+		if (source->classmap) {
+			ALLOC_HASHTABLE(dest->classmap);
+			zend_u_hash_init(dest->classmap, 0, NULL, NULL, 0, UG(unicode));
+			zend_hash_copy(dest->classmap, source->classmap, NULL, NULL, sizeof(zend_class_entry *));
+		}
+
+	}
+}
+
 int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce TSRMLS_DC)
 {
 	dom_doc_propsptr doc_props;
@@ -1068,6 +1093,9 @@ void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 				}
 				php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc TSRMLS_CC);
 				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone TSRMLS_CC);
+				if (intern->document != clone->document) {
+					dom_copy_doc_props(intern->document, clone->document);
+				}
 			}
 
 		}
@@ -1363,8 +1391,8 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 
 	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (xmlStrEqual(nodep->name, local) || xmlStrEqual("*", local)) {
-				if (ns == NULL || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, ns) || xmlStrEqual("*", ns)))) {
+			if (xmlStrEqual(nodep->name, (xmlChar *)local) || xmlStrEqual((xmlChar *)"*", (xmlChar *)local)) {
+				if (ns == NULL || (nodep->ns != NULL && (xmlStrEqual(nodep->ns->href, (xmlChar *)ns) || xmlStrEqual((xmlChar *)"*", (xmlChar *)ns)))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;
@@ -1469,9 +1497,9 @@ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, i
 		return NAMESPACE_ERR;
 	}
 	
-	*localname = xmlSplitQName2(qname, (xmlChar **) prefix);
+	*localname = (char *)xmlSplitQName2((xmlChar *)qname, (xmlChar **) prefix);
 	if (*localname == NULL) {
-		*localname = xmlStrdup(qname);
+		*localname = (char *)xmlStrdup(qname);
 		if (*prefix == NULL && uri_len == 0) {
 			return 0;
 		}
@@ -1507,10 +1535,10 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 
 	*errorcode = 0;
 
-	if (! ((prefix && !strcmp (prefix, "xml"  ) && strcmp(uri, XML_XML_NAMESPACE)) ||
-		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, DOM_XMLNS_NAMESPACE)) ||
-		   (prefix && !strcmp(uri, DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
-		nsptr = xmlNewNs(nodep, uri, prefix);
+	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
+		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
+		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
+		nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
 	}
 
 	if (nsptr == NULL) {
@@ -1529,7 +1557,7 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	if (node == NULL)
 		return NULL;
 
-	if (localName == NULL || xmlStrEqual(localName, "")) {
+	if (localName == NULL || xmlStrEqual(localName, (xmlChar *)"")) {
 		cur = node->nsDef;
 		while (cur != NULL) {
 			if (cur->prefix == NULL  && cur->href != NULL) {
