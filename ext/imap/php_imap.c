@@ -1560,6 +1560,12 @@ PHP_FUNCTION(imap_body)
 		return;
 	}
 
+        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+                RETURN_FALSE;
+        }
+
+
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	if ((argc == 3) && (flags & FT_UID)) {
@@ -2151,6 +2157,12 @@ PHP_FUNCTION(imap_fetchstructure)
 	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		return;
 	}
+
+        if (flags && ((flags & ~FT_UID) != 0)) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+                RETURN_FALSE;
+        }
+
 	
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2196,6 +2208,12 @@ PHP_FUNCTION(imap_fetchbody)
 	if (zend_parse_parameters(argc TSRMLS_CC, "rls|l", &streamind, &msgno, &sec, &sec_len, &flags) == FAILURE) {
 		return;
 	}
+
+        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+                RETURN_FALSE;
+        }
+
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2915,13 +2933,20 @@ PHP_FUNCTION(imap_sort)
 PHP_FUNCTION(imap_fetchheader)
 {
 	zval *streamind;
-	long msgno, flags;
+	long msgno, flags=0L;
 	pils *imap_le_struct;
 	int msgindex, argc = ZEND_NUM_ARGS();
 	
 	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		return;
 	}
+
+
+        if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+                RETURN_FALSE;
+        }
+
 	
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 	
@@ -3159,7 +3184,7 @@ PHP_FUNCTION(imap_fetch_overview)
 		return;
 	}
 
-	if (flags && ((flags & ~FT_UID) !=0)) {	
+	if (flags && ((flags & ~FT_UID) != 0)) {	
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
 		RETURN_FALSE;
 	}
