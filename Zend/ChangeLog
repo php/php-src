@@ -1,3 +1,12 @@
+2008-12-15  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      initialize op2
+
+    * (PHP_5_3)
+      zend_compile.c:
+      initialize op1
+
 2008-12-13  Johannes Schlüter  <johannes@schlueters.de>
 
     * tests/bug46811.phpt:
