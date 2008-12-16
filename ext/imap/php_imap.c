@@ -1140,6 +1140,13 @@ PHP_FUNCTION(imap_close)
 	if (myargcount == 2) {
 		convert_to_long_ex(options);
 		flags = Z_LVAL_PP(options);
+
+                /* Check that flags is exactly equal to PHP_EXPUNGE or Zero*/
+                if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
+                        php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
+                         RETURN_FALSE;
+                }
+
 		/* Do the translation from PHP's internal PHP_EXPUNGE define to c-client's CL_EXPUNGE */
 		if (flags & PHP_EXPUNGE) {
 			flags ^= PHP_EXPUNGE;
