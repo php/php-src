@@ -44,6 +44,7 @@ static const char digits[] = "0123456789abcdef";
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
@@ -443,7 +444,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 }
 /* }}} */
 
-/* {{{ proto string json_encode(mixed data)
+/* {{{ proto string json_encode(mixed data [, int options])
    Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
@@ -463,17 +464,19 @@ static PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc])
+/* {{{ proto mixed json_decode(string json [, bool assoc [, long depth]])
    Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
 	char *str;
 	int str_len, utf16_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
+	long depth = JSON_PARSER_MAX_DEPTH;
 	zval *z;
 	unsigned short *utf16;
+	JSON_parser jp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &assoc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &str, &str_len, &assoc, &depth) == FAILURE) {
 		return;
 	}
 
@@ -491,11 +494,15 @@ static PHP_FUNCTION(json_decode)
 		RETURN_NULL();
 	}
 
+	/* can be removed once we remove the max depth limit */
+	if (depth <= 0 || depth > JSON_PARSER_MAX_DEPTH) {
+		depth = JSON_PARSER_MAX_DEPTH;
+	}
+
 	ALLOC_INIT_ZVAL(z);
-	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC)) {
+	jp = new_JSON_parser(depth);
+	if (parse_JSON(jp, z, utf16, utf16_len, assoc TSRMLS_CC)) {
 		*return_value = *z;
-		FREE_ZVAL(z);
-		efree(utf16);
 	}
 	else
 	{
@@ -503,28 +510,30 @@ static PHP_FUNCTION(json_decode)
 		int type;
 		long p;
 
-		zval_dtor(z);
-		FREE_ZVAL(z);
-		efree(utf16);
-
+		RETVAL_NULL();
 		if (str_len == 4) {
 			if (!strcasecmp(str, "null")) {
-				RETURN_NULL();
+				RETVAL_NULL();
 			} else if (!strcasecmp(str, "true")) {
-				RETURN_BOOL(1);
+				RETVAL_BOOL(1);
 			}
 		} else if (str_len == 5 && !strcasecmp(str, "false")) {
-			RETURN_BOOL(0);
+			RETVAL_BOOL(0);
 		}
+
 		if ((type = is_numeric_string(str, str_len, &p, &d, 0)) != 0) {
 			if (type == IS_LONG) {
-				RETURN_LONG(p);
+				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETURN_DOUBLE(d);
+				RETVAL_DOUBLE(d);
 			}
 		}
-		RETURN_NULL();
+
+		zval_dtor(z);
 	}
+	FREE_ZVAL(z);
+	efree(utf16);
+	free_JSON_parser(jp);
 }
 /* }}} */
 
