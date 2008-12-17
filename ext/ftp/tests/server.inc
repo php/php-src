@@ -136,7 +136,6 @@ $cwd = '/';
 $num_bogus_cmds = 0;
 
 while($buf = fread($s, 4098)) {
-
 	if (!empty($bogus)) {
 		fputs($s, "502 Command not implemented (".$num_bogus_cmds++.").\r\n");
 
@@ -262,7 +261,29 @@ while($buf = fread($s, 4098)) {
 				fputs($s, "550 No file named \"{$matches [1]}\"\r\n");
 				break;
 		}
-	}	
+         }elseif (preg_match('/^RETR ([\w\h]+)/', $buf, $matches)) {
+                if (!$fs = stream_socket_client("tcp://$host:$port")) {
+                             fputs($s, "425 Can't open data connection\r\n");
+                             continue;
+                        }
+			switch($matches[1]){
+                        case "a story":
+                            fputs($s, "150 File status okay; about to open data connection.\r\n");
+			    fputs($fs, "For sale: baby shoes, never worn.\r\n");
+                            fputs($s, "226 Closing data Connection.\r\n");
+                        break;
+			case "binary data":
+                            fputs($s, "150 File status okay; about to open data connection.\r\n");
+                            $transfer_type = $ascii? 'ASCII' : 'BINARY' ;
+                            fputs($fs, $transfer_type."Foo\0Bar\r\n");
+                            fputs($s, "226 Closing data Connection.\r\n");
+			break;
+			default:
+                            fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
+                        break;
+			}	
+			fclose($fs);
+          }
 	else {
 		fputs($s, "500 Syntax error, command unrecognized.\r\n");
 		dump_and_exit($buf);
