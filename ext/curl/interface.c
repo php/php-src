@@ -323,14 +323,12 @@ PHP_MINFO_FUNCTION(curl)
 	char str[1024];
 	size_t n = 0;
 
-
 	d = curl_version_info(CURLVERSION_NOW);
 	php_info_print_table_start();
 	php_info_print_table_row(2, "cURL support",    "enabled");
 	php_info_print_table_row(2, "cURL Information", d->version);
 	sprintf(str, "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
-
 
 #ifdef CURL_VERSION_IPV6
 	if (d->features & CURL_VERSION_IPV6) {
@@ -1102,6 +1100,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 /* }}} */
 #endif
 
+#if LIBCURL_VERSION_NUM < 0x071101
 /* {{{ curl_free_string
  */
 static void curl_free_string(void **string)
@@ -1109,6 +1108,7 @@ static void curl_free_string(void **string)
 	efree(*string);
 }	
 /* }}} */
+#endif
 
 /* {{{ curl_free_post
  */
@@ -1184,7 +1184,9 @@ static void alloc_curl_handle(php_curl **ch)
 		
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
 	
+#if LIBCURL_VERSION_NUM < 0x071101
 	zend_llist_init(&(*ch)->to_free.str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
+#endif
 	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
 	zend_llist_init(&(*ch)->to_free.post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
 }
@@ -1196,17 +1198,17 @@ PHP_FUNCTION(curl_init)
 {
 	php_curl	*ch;
 	CURL		*cp;
-	zstr		src = NULL_ZSTR;
-	int		src_len = 0;
-	zend_uchar	src_type = 0;
+	zstr		url = NULL_ZSTR;
+	int		url_len = 0;
+	zend_uchar	url_type = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &src, &src_len, &src_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &url, &url_len, &url_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (src.v && src_type == IS_UNICODE) {
-		src.s = zend_unicode_to_ascii((UChar*)src.u, src_len TSRMLS_CC);
-		if (!src.s) {
+	if (url.v && url_type == IS_UNICODE) {
+		url.s = zend_unicode_to_ascii((UChar*)url.u, url_len TSRMLS_CC);
+		if (!url.s) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received"); 
 			RETURN_FALSE;
 		}
@@ -1246,12 +1248,16 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
 
-	if (src.v) {
+	if (url.v) {
+#if LIBCURL_VERSION_NUM >= 0x071100
+		curl_easy_setopt(ch->cp, CURLOPT_URL, url.s);
+#else
 		char *urlcopy;
 
-		urlcopy = estrndup(src.s, src_len);
+		urlcopy = estrndup(url.s, url_len);
 		curl_easy_setopt(ch->cp, CURLOPT_URL, urlcopy);
 		zend_llist_add_element(&ch->to_free.str, &urlcopy);
+#endif
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
@@ -1318,9 +1324,11 @@ PHP_FUNCTION(curl_copy_handle)
 	curl_easy_setopt(dupch->cp, CURLOPT_INFILE,            (void *) dupch);
 	curl_easy_setopt(dupch->cp, CURLOPT_WRITEHEADER,       (void *) dupch);
 
+#if LIBCURL_VERSION_NUM < 0x071101
 	zend_llist_copy(&dupch->to_free.str, &ch->to_free.str);
 	/* Don't try to free copied strings, they're free'd when the original handle is destroyed */
 	dupch->to_free.str.dtor = NULL;
+#endif
 	zend_llist_copy(&dupch->to_free.slist, &ch->to_free.slist);
 	zend_llist_copy(&dupch->to_free.post, &ch->to_free.post);
 
@@ -1443,7 +1451,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_SSLENGINE_DEFAULT:
 		case CURLOPT_SSLCERTTYPE:
 		case CURLOPT_ENCODING: {
+#if LIBCURL_VERSION_NUM < 0x071100
 			char *copystr = NULL;
+#endif
 	
 			convert_to_string_ex(zvalue);
 
@@ -1451,9 +1461,14 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue), 1);
 			}
 
+#if LIBCURL_VERSION_NUM >= 0x071100
+			/* Strings passed to libcurl as ’char *’ arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
+			error = curl_easy_setopt(ch->cp, option, Z_STRVAL_PP(zvalue));
+#else
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
 			error = curl_easy_setopt(ch->cp, option, copystr);
 			zend_llist_add_element(&ch->to_free.str, &copystr);
+#endif
 
 			break;
 		}
@@ -1694,6 +1709,11 @@ type_conflict:
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
 
 			} else {
+#if LIBCURL_VERSION_NUM >= 0x071101
+				/* with curl 7.17.0 and later, we can use COPYPOSTFIELDS, but we have to provide size before */
+				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_PP(zvalue));
+				error = curl_easy_setopt(ch->cp, CURLOPT_COPYPOSTFIELDS, Z_STRVAL_PP(zvalue));
+#else
 				char *post = NULL;
 
 				convert_to_string_ex(zvalue);
@@ -1702,6 +1722,7 @@ type_conflict:
 
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
 				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_PP(zvalue));
+#endif
 			}
 			break;
 		case CURLOPT_HTTPHEADER: 
@@ -1723,20 +1744,15 @@ type_conflict:
 				 zend_hash_get_current_data(ph, (void **) &current) == SUCCESS;
 				 zend_hash_move_forward(ph)
 			) {
-				char *indiv = NULL;
-
 				SEPARATE_ZVAL(current);
 				convert_to_string_ex(current);
 
-				indiv = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current) + 1);
-				slist = curl_slist_append(slist, indiv);
+				slist = curl_slist_append(slist, Z_STRVAL_PP(current));
 				if (!slist) {
-					efree(indiv);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not build curl_slist"); 
 					RETVAL_FALSE;
 					return 1;
 				}
-				zend_llist_add_element(&ch->to_free.str, &indiv);
 			}
 			zend_llist_add_element(&ch->to_free.slist, &slist);
 
@@ -1751,7 +1767,9 @@ type_conflict:
 		case CURLOPT_SSLCERT:
 		case CURLOPT_RANDOM_FILE:
 		case CURLOPT_COOKIEFILE: {
+#if LIBCURL_VERSION_NUM < 0x071100
 			char *copystr = NULL;
+#endif
 
 			convert_to_string_ex(zvalue);
 
@@ -1760,11 +1778,14 @@ type_conflict:
 				return 1;
 			}
 
+#if LIBCURL_VERSION_NUM >= 0x071100
+			error = curl_easy_setopt(ch->cp, option, Z_STRVAL_PP(zvalue));
+#else
 			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
 
 			error = curl_easy_setopt(ch->cp, option, copystr);
 			zend_llist_add_element(&ch->to_free.str, &copystr);
-
+#endif
 			break;
 		}
 		case CURLINFO_HEADER_OUT:
@@ -2127,7 +2148,9 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #endif
 	
 	curl_easy_cleanup(ch->cp);
+#if LIBCURL_VERSION_NUM < 0x071101
 	zend_llist_clean(&ch->to_free.str);
+#endif
 	zend_llist_clean(&ch->to_free.slist);
 	zend_llist_clean(&ch->to_free.post);
 
