@@ -29,6 +29,9 @@ SOFTWARE.
 #include <stdio.h>
 #include "JSON_parser.h"
 
+/* Windows defines IN for documentation */
+#undef IN
+
 #define true  1
 #define false 0
 #define __   -1     /* the universal error code */
