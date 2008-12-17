@@ -475,7 +475,7 @@ static PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc]) U
+/* {{{ proto mixed json_decode(string json [, bool assoc [, long depth]]) U
    Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
@@ -483,10 +483,12 @@ static PHP_FUNCTION(json_decode)
 	int str_len, utf16_len;
 	zend_uchar str_type;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
+	long depth = JSON_PARSER_MAX_DEPTH;
 	zval *z;
 	unsigned short *utf16;
+	JSON_parser jp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &str, &str_len, &str_type, &assoc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|bl", &str, &str_len, &str_type, &assoc, &depth) == FAILURE) {
 		return;
 	}
 
@@ -509,14 +511,15 @@ static PHP_FUNCTION(json_decode)
 		}
 	}
 
-	ALLOC_INIT_ZVAL(z);
-	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC)) {
-		*return_value = *z;
-		FREE_ZVAL(z);
+	/* can be removed once we remove the max depth limit */
+	if (depth <= 0 || depth > JSON_PARSER_MAX_DEPTH) {
+		depth = JSON_PARSER_MAX_DEPTH;
+	}
 
-		if (str_type == IS_STRING) {
-			efree(utf16);
-		}
+	ALLOC_INIT_ZVAL(z);
+	jp = new_JSON_parser(depth);
+	if (parse_JSON(jp, z, utf16, utf16_len, assoc TSRMLS_CC)) {
+		*return_value = *z;
 	}
 	else if (str_type == IS_STRING)
 	{
@@ -525,26 +528,25 @@ static PHP_FUNCTION(json_decode)
 		long p;
 
 		zval_dtor(z);
-		FREE_ZVAL(z);
-		efree(utf16);
+		RETVAL_NULL();
 
 		if (str_len == 4) {
 			if (!strcasecmp(str.s, "null")) {
-				RETURN_NULL();
+				RETVAL_NULL();
 			} else if (!strcasecmp(str.s, "true")) {
-				RETURN_BOOL(1);
+				RETVAL_BOOL(1);
 			}
 		} else if (str_len == 5 && !strcasecmp(str.s, "false")) {
-			RETURN_BOOL(0);
+			RETVAL_BOOL(0);
 		}
+
 		if ((type = is_numeric_string(str.s, str_len, &p, &d, 0)) != 0) {
 			if (type == IS_LONG) {
-				RETURN_LONG(p);
+				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETURN_DOUBLE(d);
+				RETVAL_DOUBLE(d);
 			}
 		}
-		RETURN_NULL();
 	}
 	else
 	{
@@ -553,26 +555,32 @@ static PHP_FUNCTION(json_decode)
 		long p;
 
 		zval_dtor(z);
-		FREE_ZVAL(z);
+		RETVAL_NULL();
 
 		if (str_len == 4) {
 			if (ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "null", sizeof("null")-1)) {
-				RETURN_NULL();
+				RETVAL_NULL();
 			} else if (ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "true", sizeof("true")-1)) {
-				RETURN_BOOL(1);
+				RETVAL_BOOL(1);
 			}
 		} else if (str_len == 5 && ZEND_U_CASE_EQUAL(IS_UNICODE, str, str_len, "false", sizeof("false")-1)) {
-			RETURN_BOOL(0);
+			RETVAL_BOOL(0);
 		}
+
 		if ((type = is_numeric_unicode(str.u, str_len, &p, &d, 0)) != 0) {
 			if (type == IS_LONG) {
-				RETURN_LONG(p);
+				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETURN_DOUBLE(d);
+				RETVAL_DOUBLE(d);
 			}
 		}
-		RETURN_NULL();
 	}
+
+	FREE_ZVAL(z);
+	if (str_type == IS_STRING) {
+		efree(utf16);
+	}
+	free_JSON_parser(jp);
 }
 /* }}} */
 
