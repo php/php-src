@@ -471,6 +471,9 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(r->headers_out, "ETag");
 	auth = apr_table_get(r->headers_in, "Authorization");
 	php_handle_auth_data(auth TSRMLS_CC);
+	if (SG(request_info).auth_user == NULL && r->user) {
+		SG(request_info).auth_user = estrdup(r->user);
+	}
 	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 	return php_request_startup(TSRMLS_C);
 }
