@@ -26,331 +26,363 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
-#include "JSON_parser.h"
 #include <stdio.h>
+#include "JSON_parser.h"
 
 #define true  1
 #define false 0
+#define __   -1     /* the universal error code */
 
 /*
-    Characters are mapped into these 32 symbol classes. This allows for
-    significant reductions in the size of the state transition table.
+    Characters are mapped into these 31 character classes. This allows for
+    a significant reduction in the size of the state transition table.
 */
 
-/* {{{ constants */
-
-/* error */
-#define S_ERR -1
-
-/* space */
-#define S_SPA 0
-
-/* other whitespace */
-#define S_WSP 1
-
-/* {  */
-#define S_LBE 2
-
-/* } */
-#define S_RBE 3
-
-/* [ */
-#define S_LBT 4
-
-/* ] */
-#define S_RBT 5
-
-/* : */
-#define S_COL 6
-
-/* , */
-#define S_COM 7
-
-/* " */
-#define S_QUO 8
-
-/* \ */
-#define S_BAC 9
-
-/* / */
-#define S_SLA 10
-
-/* + */
-#define S_PLU 11
-
-/* - */
-#define S_MIN 12
-
-/* . */
-#define S_DOT 13
-
-/* 0 */
-#define S_ZER 14
-
-/* 123456789 */
-#define S_DIG 15
-
-/* a */
-#define S__A_ 16
-
-/* b */
-#define S__B_ 17
-
-/* c */
-#define S__C_ 18
-
-/* d */
-#define S__D_ 19
-
-/* e */
-#define S__E_ 20
-
-/* f */
-#define S__F_ 21
-
-/* l */
-#define S__L_ 22
-
-/* n */
-#define S__N_ 23
-
-/* r */
-#define S__R_ 24
-
-/* s */
-#define S__S_ 25
-
-/* t */
-#define S__T_ 26
-
-/* u */
-#define S__U_ 27
-
-/* ABCDF */
-#define S_A_F 28
-
-/* E */
-#define S_E   29
-
-/* everything else */
-#define S_ETC 30
-
-/* }}} */
-
-/* {{{ tables */
-/*
-    This table maps the 128 ASCII characters into the 32 character classes.
-    The remaining Unicode characters should be mapped to S_ETC.
-*/
-static const int ascii_class[128] = {
-    S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
-    S_ERR, S_WSP, S_WSP, S_ERR, S_ERR, S_WSP, S_ERR, S_ERR,
-    S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
-    S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR, S_ERR,
-
-    S_SPA, S_ETC, S_QUO, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_PLU, S_COM, S_MIN, S_DOT, S_SLA,
-    S_ZER, S_DIG, S_DIG, S_DIG, S_DIG, S_DIG, S_DIG, S_DIG,
-    S_DIG, S_DIG, S_COL, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC,
-
-    S_ETC, S_A_F, S_A_F, S_A_F, S_A_F, S_E  , S_A_F, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_LBT, S_BAC, S_RBT, S_ETC, S_ETC,
-
-    S_ETC, S__A_, S__B_, S__C_, S__D_, S__E_, S__F_, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_ETC, S__L_, S_ETC, S__N_, S_ETC,
-    S_ETC, S_ETC, S__R_, S__S_, S__T_, S__U_, S_ETC, S_ETC,
-    S_ETC, S_ETC, S_ETC, S_LBE, S_ETC, S_RBE, S_ETC, S_ETC
+enum classes {
+    C_SPACE,  /* space */
+    C_WHITE,  /* other whitespace */
+    C_LCURB,  /* {  */
+    C_RCURB,  /* } */
+    C_LSQRB,  /* [ */
+    C_RSQRB,  /* ] */
+    C_COLON,  /* : */
+    C_COMMA,  /* , */
+    C_QUOTE,  /* " */
+    C_BACKS,  /* \ */
+    C_SLASH,  /* / */
+    C_PLUS,   /* + */
+    C_MINUS,  /* - */
+    C_POINT,  /* . */
+    C_ZERO ,  /* 0 */
+    C_DIGIT,  /* 123456789 */
+    C_LOW_A,  /* a */
+    C_LOW_B,  /* b */
+    C_LOW_C,  /* c */
+    C_LOW_D,  /* d */
+    C_LOW_E,  /* e */
+    C_LOW_F,  /* f */
+    C_LOW_L,  /* l */
+    C_LOW_N,  /* n */
+    C_LOW_R,  /* r */
+    C_LOW_S,  /* s */
+    C_LOW_T,  /* t */
+    C_LOW_U,  /* u */
+    C_ABCDF,  /* ABCDF */
+    C_E,      /* E */
+    C_ETC,    /* everything else */
+    NR_CLASSES
 };
 
+static const int ascii_class[128] = {
+/*
+    This array maps the 128 ASCII characters into character classes.
+    The remaining Unicode characters should be mapped to C_ETC.
+    Non-whitespace control characters are errors.
+*/
+    __,      __,      __,      __,      __,      __,      __,      __,
+    __,      C_WHITE, C_WHITE, __,      __,      C_WHITE, __,      __,
+    __,      __,      __,      __,      __,      __,      __,      __,
+    __,      __,      __,      __,      __,      __,      __,      __,
+
+    C_SPACE, C_ETC,   C_QUOTE, C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_PLUS,  C_COMMA, C_MINUS, C_POINT, C_SLASH,
+    C_ZERO,  C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT,
+    C_DIGIT, C_DIGIT, C_COLON, C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
+
+    C_ETC,   C_ABCDF, C_ABCDF, C_ABCDF, C_ABCDF, C_E,     C_ABCDF, C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_LSQRB, C_BACKS, C_RSQRB, C_ETC,   C_ETC,
+
+    C_ETC,   C_LOW_A, C_LOW_B, C_LOW_C, C_LOW_D, C_LOW_E, C_LOW_F, C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_LOW_L, C_ETC,   C_LOW_N, C_ETC,
+    C_ETC,   C_ETC,   C_LOW_R, C_LOW_S, C_LOW_T, C_LOW_U, C_ETC,   C_ETC,
+    C_ETC,   C_ETC,   C_ETC,   C_LCURB, C_ETC,   C_RCURB, C_ETC,   C_ETC
+};
+
+
+/*
+    The state codes.
+*/
+enum states {
+    GO,  /* start    */
+    OK,  /* ok       */
+    OB,  /* object   */
+    KE,  /* key      */
+    CO,  /* colon    */
+    VA,  /* value    */
+    AR,  /* array    */
+    ST,  /* string   */
+    ES,  /* escape   */
+    U1,  /* u1       */
+    U2,  /* u2       */
+    U3,  /* u3       */
+    U4,  /* u4       */
+    MI,  /* minus    */
+    ZE,  /* zero     */
+    IN,  /* integer  */
+    FR,  /* fraction */
+    E1,  /* e        */
+    E2,  /* ex       */
+    E3,  /* exp      */
+    T1,  /* tr       */
+    T2,  /* tru      */
+    T3,  /* true     */
+    F1,  /* fa       */
+    F2,  /* fal      */
+    F3,  /* fals     */
+    F4,  /* false    */
+    N1,  /* nu       */
+    N2,  /* nul      */
+    N3,  /* null     */
+    NR_STATES
+};
+
+
+static const int state_transition_table[NR_STATES][NR_CLASSES] = {
 /*
     The state transition table takes the current state and the current symbol,
-    and returns either a new state or an action. A new state is a number between
-    0 and 29. An action is a negative number between -1 and -9. A JSON text is
-    accepted if the end of the text is in state 9 and mode is MODE_DONE.
-*/
-static const int state_transition_table[30][31] = {
-/* 0*/ { 0, 0,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/* 1*/ { 1, 1,-1,-9,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/* 2*/ { 2, 2,-8,-1,-6,-5,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
-/* 3*/ { 3,-1, 3, 3, 3, 3, 3, 3,-4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-/* 4*/ {-1,-1,-1,-1,-1,-1,-1,-1, 3, 3, 3,-1,-1,-1,-1,-1,-1, 3,-1,-1,-1, 3,-1, 3, 3,-1, 3, 5,-1,-1,-1},
-/* 5*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 6, 6, 6, 6, 6, 6, 6, 6,-1,-1,-1,-1,-1,-1, 6, 6,-1},
-/* 6*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 7, 7, 7, 7, 7, 7, 7, 7,-1,-1,-1,-1,-1,-1, 7, 7,-1},
-/* 7*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 8, 8, 8, 8, 8, 8, 8, 8,-1,-1,-1,-1,-1,-1, 8, 8,-1},
-/* 8*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 3, 3, 3, 3, 3, 3, 3, 3,-1,-1,-1,-1,-1,-1, 3, 3,-1},
-/* 9*/ { 9, 9,-1,-7,-1,-5,-1,-3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*10*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,11,-1,-1,-1,-1,-1,-1},
-/*11*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12,-1,-1,-1},
-/*12*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*13*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*14*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,15,-1,-1,-1,-1,-1,-1,-1,-1},
-/*15*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,-1,-1,-1,-1,-1},
-/*16*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*17*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,-1},
-/*18*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,19,-1,-1,-1,-1,-1,-1,-1,-1},
-/*19*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 9,-1,-1,-1,-1,-1,-1,-1,-1},
-/*20*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,21,22,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*21*/ { 9, 9,-1,-7,-1,-5,-1,-3,-1,-1,-1,-1,-1,23,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*22*/ { 9, 9,-1,-7,-1,-5,-1,-3,-1,-1,-1,-1,-1,23,22,22,-1,-1,-1,-1,24,-1,-1,-1,-1,-1,-1,-1,-1,24,-1},
-/*23*/ { 9, 9,-1,-7,-1,-5,-1,-3,-1,-1,-1,-1,-1,-1,23,23,-1,-1,-1,-1,24,-1,-1,-1,-1,-1,-1,-1,-1,24,-1},
-/*24*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,25,25,-1,26,26,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*25*/ {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,26,26,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*26*/ { 9, 9,-1,-7,-1,-5,-1,-3,-1,-1,-1,-1,-1,-1,26,26,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*27*/ {27,27,-1,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-/*28*/ {28,28,-8,-1,-6,-1,-1,-1, 3,-1,-1,-1,20,-1,21,22,-1,-1,-1,-1,-1,13,-1,17,-1,-1,10,-1,-1,-1,-1},
-/*29*/ {29,29,-1,-1,-1,-1,-1,-1, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
+    and returns either a new state or an action. An action is represented as a
+    negative number. A JSON text is accepted if at the end of the text the
+    state is OK and if the mode is MODE_DONE.
+
+                 white                                      1-9                                   ABCDF  etc
+             space |  {  }  [  ]  :  ,  "  \  /  +  -  .  0  |  a  b  c  d  e  f  l  n  r  s  t  u  |  E  |*/
+/*start  GO*/ {GO,GO,-6,__,-5,__,__,__,ST,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*ok     OK*/ {OK,OK,__,-8,__,-7,__,-3,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*object OB*/ {OB,OB,__,-9,__,__,__,__,ST,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*key    KE*/ {KE,KE,__,__,__,__,__,__,ST,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*colon  CO*/ {CO,CO,__,__,__,__,-2,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*value  VA*/ {VA,VA,-6,__,-5,__,__,__,ST,__,__,__,MI,__,ZE,IN,__,__,__,__,__,F1,__,N1,__,__,T1,__,__,__,__},
+/*array  AR*/ {AR,AR,-6,__,-5,-7,__,__,ST,__,__,__,MI,__,ZE,IN,__,__,__,__,__,F1,__,N1,__,__,T1,__,__,__,__},
+/*string ST*/ {ST,__,ST,ST,ST,ST,ST,ST,-4,ES,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST,ST},
+/*escape ES*/ {__,__,__,__,__,__,__,__,ST,ST,ST,__,__,__,__,__,__,ST,__,__,__,ST,__,ST,ST,__,ST,U1,__,__,__},
+/*u1     U1*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,U2,U2,U2,U2,U2,U2,U2,U2,__,__,__,__,__,__,U2,U2,__},
+/*u2     U2*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,U3,U3,U3,U3,U3,U3,U3,U3,__,__,__,__,__,__,U3,U3,__},
+/*u3     U3*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,U4,U4,U4,U4,U4,U4,U4,U4,__,__,__,__,__,__,U4,U4,__},
+/*u4     U4*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,ST,ST,ST,ST,ST,ST,ST,ST,__,__,__,__,__,__,ST,ST,__},
+/*minus  MI*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,ZE,IN,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*zero   ZE*/ {OK,OK,__,-8,__,-7,__,-3,__,__,__,__,__,FR,__,__,__,__,__,__,E1,__,__,__,__,__,__,__,__,E1,__},
+/*int    IN*/ {OK,OK,__,-8,__,-7,__,-3,__,__,__,__,__,FR,IN,IN,__,__,__,__,E1,__,__,__,__,__,__,__,__,E1,__},
+/*frac   FR*/ {OK,OK,__,-8,__,-7,__,-3,__,__,__,__,__,__,FR,FR,__,__,__,__,E1,__,__,__,__,__,__,__,__,E1,__},
+/*e      E1*/ {__,__,__,__,__,__,__,__,__,__,__,E2,E2,__,E3,E3,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*ex     E2*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,E3,E3,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*exp    E3*/ {OK,OK,__,-8,__,-7,__,-3,__,__,__,__,__,__,E3,E3,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*tr     T1*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,T2,__,__,__,__,__,__},
+/*tru    T2*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,T3,__,__,__},
+/*true   T3*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,OK,__,__,__,__,__,__,__,__,__,__},
+/*fa     F1*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,F2,__,__,__,__,__,__,__,__,__,__,__,__,__,__},
+/*fal    F2*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,F3,__,__,__,__,__,__,__,__},
+/*fals   F3*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,F4,__,__,__,__,__},
+/*false  F4*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,OK,__,__,__,__,__,__,__,__,__,__},
+/*nu     N1*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,N2,__,__,__},
+/*nul    N2*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,N3,__,__,__,__,__,__,__,__},
+/*null   N3*/ {__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,__,OK,__,__,__,__,__,__,__,__},
 };
 
-/* }}} */
-
-#define JSON_PARSER_MAX_DEPTH 512
 
 /*
-   A stack maintains the states of nested structures.
+    These modes can be pushed on the stack.
 */
+enum modes {
+    MODE_ARRAY, 
+    MODE_DONE,  
+    MODE_KEY,   
+    MODE_OBJECT,
+};
 
-typedef struct json_parser
-{
-    int the_stack[JSON_PARSER_MAX_DEPTH];
-    zval *the_zstack[JSON_PARSER_MAX_DEPTH];
-    int the_top;
-} json_parser;
+enum error_codes {
+    ERROR_DEPTH, 
+    ERROR_MISMATCH,  
+    ERROR_CTRL_CHAR,   
+    ERROR_SYNTAX,
+};
 
-/*
-    These modes can be pushed on the PDA stack.
-*/
-#define MODE_DONE   1
-#define MODE_KEY    2
-#define MODE_OBJECT 3
-#define MODE_ARRAY  4
 
 /*
     Push a mode onto the stack. Return false if there is overflow.
 */
-static int push(json_parser *json, zval *z, int mode) /* {{{ */
+static int
+push(JSON_parser jp, int mode)
 {
-	json->the_top += 1;
-	if (json->the_top >= JSON_PARSER_MAX_DEPTH) {
-		return false;
-	}
-
-	json->the_stack[json->the_top] = mode;
-	return true;
+    jp->top += 1;
+    if (jp->top >= jp->depth) {
+		jp->error = ERROR_DEPTH;
+        return false;
+    }
+    jp->stack[jp->top] = mode;
+    return true;
 }
-/* }}} */
+
 
 /*
     Pop the stack, assuring that the current mode matches the expectation.
     Return false if there is underflow or if the modes mismatch.
 */
-static int pop(json_parser *json, zval *z, int mode) /* {{{ */
+static int
+pop(JSON_parser jp, int mode)
 {
-	if (json->the_top < 0 || json->the_stack[json->the_top] != mode) {
-		return false;
-	}
-	json->the_stack[json->the_top] = 0;
-	json->the_top -= 1;
-
-	return true;
+    if (jp->top < 0 || jp->stack[jp->top] != mode) {
+		jp->error = ERROR_MISMATCH;
+        return false;
+    }
+    jp->top -= 1;
+    return true;
 }
-/* }}} */
 
-static int dehexchar(char c) /* {{{ */
+/*
+    new_JSON_checker starts the checking process by constructing a JSON_checker
+    object. It takes a depth parameter that restricts the level of maximum
+    nesting.
+
+    To continue the process, call JSON_checker_char for each character in the
+    JSON text, and then call JSON_checker_done to obtain the final result.
+    These functions are fully reentrant.
+
+    The JSON_checker object will be deleted by JSON_checker_done.
+    JSON_checker_char will delete the JSON_checker object if it sees an error.
+*/
+JSON_parser
+new_JSON_parser(int depth)
 {
-    if (c >= '0' && c <= '9') {
+    JSON_parser jp = (JSON_parser)emalloc(sizeof(struct JSON_parser_struct));
+    jp->state = GO;
+    jp->depth = depth;
+    jp->top = -1;
+    jp->stack = (int*)ecalloc(depth, sizeof(int));
+    push(jp, MODE_DONE);
+    return jp;
+}
+
+/*
+    Delete the JSON_parser object.
+*/
+int
+free_JSON_parser(JSON_parser jp)
+{
+    efree((void*)jp->stack);
+    efree((void*)jp);
+    return false;
+}
+
+static int dehexchar(char c)
+{
+    if (c >= '0' && c <= '9')
+    {
         return c - '0';
-    } else if (c >= 'A' && c <= 'F') {
+    }
+    else if (c >= 'A' && c <= 'F')
+    {
         return c - ('A' - 10);
-    } else if (c >= 'a' && c <= 'f') {
+    }
+    else if (c >= 'a' && c <= 'f')
+    {
         return c - ('a' - 10);
-    } else {
+    }
+    else
+    {
         return -1;
     }
 }
-/* }}} */
 
-static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC) /* {{{ */
+
+static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
 {
-	ALLOC_INIT_ZVAL(*z);
+    ALLOC_INIT_ZVAL(*z);
 
-	if (type == IS_LONG) {
+    if (type == IS_LONG)
+    {
 		double d = zend_strtod(buf->c, NULL);
 		if (d > LONG_MAX || d < LONG_MIN) {
 			ZVAL_DOUBLE(*z, d);
 		} else {
 			ZVAL_LONG(*z, (long)d);
 		}
-	} else if (type == IS_DOUBLE) {
-		ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
-	} else if (type == IS_STRING) {
-		ZVAL_UTF8_STRINGL(*z, buf->c, buf->len, ZSTR_DUPLICATE);
-	} else if (type == IS_BOOL) {
-		ZVAL_BOOL(*z, (*(buf->c) == 't'));
-	} else { /* type == IS_NULL) || type unknown */ 
-		ZVAL_NULL(*z);
-	}
+    }
+    else if (type == IS_DOUBLE)
+    {
+        ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
+    }
+    else if (type == IS_STRING)
+    {
+        ZVAL_UTF8_STRINGL(*z, buf->c, buf->len, ZSTR_DUPLICATE);
+    }
+    else if (type == IS_BOOL)
+    {
+        ZVAL_BOOL(*z, (*(buf->c) == 't'));
+    }
+    else /* type == IS_NULL) || type unknown */
+    {
+        ZVAL_NULL(*z);
+    }
 }
-/* }}} */
 
-static void utf16_to_utf8(smart_str *buf, unsigned short utf16) /* {{{ */
+
+static void utf16_to_utf8(smart_str *buf, unsigned short utf16)
 {
-	if (utf16 < 0x80) {
-		smart_str_appendc(buf, (unsigned char) utf16);
-	} else if (utf16 < 0x800) {
-		smart_str_appendc(buf, 0xc0 | (utf16 >> 6));
-		smart_str_appendc(buf, 0x80 | (utf16 & 0x3f));
-	} else if ((utf16 & 0xfc00) == 0xdc00
-			&& buf->len >= 3
-			&& ((unsigned char) buf->c[buf->len - 3]) == 0xed
-			&& ((unsigned char) buf->c[buf->len - 2] & 0xf0) == 0xa0
-			&& ((unsigned char) buf->c[buf->len - 1] & 0xc0) == 0x80)
-	{
-		/* found surrogate pair */
-		unsigned long utf32;
+    if (utf16 < 0x80)
+    {
+        smart_str_appendc(buf, (unsigned char) utf16);
+    }
+    else if (utf16 < 0x800)
+    {
+        smart_str_appendc(buf, 0xc0 | (utf16 >> 6));
+        smart_str_appendc(buf, 0x80 | (utf16 & 0x3f));
+    }
+    else if ((utf16 & 0xfc00) == 0xdc00
+                && buf->len >= 3
+                && ((unsigned char) buf->c[buf->len - 3]) == 0xed
+                && ((unsigned char) buf->c[buf->len - 2] & 0xf0) == 0xa0
+                && ((unsigned char) buf->c[buf->len - 1] & 0xc0) == 0x80)
+    {
+        /* found surrogate pair */
+        unsigned long utf32;
 
-		utf32 = (((buf->c[buf->len - 2] & 0xf) << 16)
-				| ((buf->c[buf->len - 1] & 0x3f) << 10)
-				| (utf16 & 0x3ff)) + 0x10000;
-		buf->len -= 3;
+        utf32 = (((buf->c[buf->len - 2] & 0xf) << 16)
+                    | ((buf->c[buf->len - 1] & 0x3f) << 10)
+                    | (utf16 & 0x3ff)) + 0x10000;
+        buf->len -= 3;
 
-		smart_str_appendc(buf, 0xf0 | (utf32 >> 18));
-		smart_str_appendc(buf, 0x80 | ((utf32 >> 12) & 0x3f));
-		smart_str_appendc(buf, 0x80 | ((utf32 >> 6) & 0x3f));
-		smart_str_appendc(buf, 0x80 | (utf32 & 0x3f));
-	} else {
-		smart_str_appendc(buf, 0xe0 | (utf16 >> 12));
-		smart_str_appendc(buf, 0x80 | ((utf16 >> 6) & 0x3f));
-		smart_str_appendc(buf, 0x80 | (utf16 & 0x3f));
-	}
+        smart_str_appendc(buf, 0xf0 | (utf32 >> 18));
+        smart_str_appendc(buf, 0x80 | ((utf32 >> 12) & 0x3f));
+        smart_str_appendc(buf, 0x80 | ((utf32 >> 6) & 0x3f));
+        smart_str_appendc(buf, 0x80 | (utf32 & 0x3f));
+    }
+    else
+    {
+        smart_str_appendc(buf, 0xe0 | (utf16 >> 12));
+        smart_str_appendc(buf, 0x80 | ((utf16 >> 6) & 0x3f));
+        smart_str_appendc(buf, 0x80 | (utf16 & 0x3f));
+    }
 }
-/* }}} */
 
-static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int assoc TSRMLS_DC) /* {{{ */
+static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int assoc TSRMLS_DC)
 {
-	zval *root = json->the_zstack[up];
-	zval *child =  json->the_zstack[cur];
-	int up_mode = json->the_stack[up];
+    zval *root = jp->the_zstack[up];
+    zval *child =  jp->the_zstack[cur];
+    int up_mode = jp->stack[up];
 
-	if (up_mode == MODE_ARRAY) {
-		add_next_index_zval(root, child);
-	} else if (up_mode == MODE_OBJECT) {
-		if (!assoc) {
-			add_utf8_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
-#if PHP_MAJOR_VERSION >= 5
-			Z_DELREF_P(child);
-#endif
-		} else {
-			add_utf8_assoc_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child);
-		}
-		key->len = 0;
-	}
+    if (up_mode == MODE_ARRAY)
+    {
+        add_next_index_zval(root, child);
+    }
+    else if (up_mode == MODE_OBJECT)
+    {
+        if (!assoc)
+        {
+            add_utf8_property_zval_ex(root, (key->len ? key->c : "_empty_"), (key->len ? (key->len + 1) : sizeof("_empty_")), child TSRMLS_CC);
+            Z_DELREF_P(child);
+        }
+        else
+        {
+            add_utf8_assoc_zval_ex(root, (key->len ? key->c : ""), (key->len ? (key->len + 1) : sizeof("")), child);
+        }
+        key->len = 0;
+    }
 }
-/* }}} */
 
-#define FREE_BUFFERS() do { smart_str_free(&buf); smart_str_free(&key); } while (0);
+
+#define FREE_BUFFERS() smart_str_free(&buf); smart_str_free(&key);
 #define SWAP_BUFFERS(from, to) do { \
         char *t1 = from.c; \
         int t2 = from.a; \
@@ -361,8 +393,7 @@ static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int 
         to.len = from.len; \
         from.len = 0; \
         } while(0);
-#define JSON_RESET_TYPE() do { type = -1; } while(0);
-#define JSON(x) the_json.x
+#define JSON_RESET_TYPE() type = -1;
 
 /*
     The JSON_parser takes a UTF-16 encoded string and determines if it is a
@@ -371,336 +402,316 @@ static void attach_zval(json_parser *json, int up, int cur, smart_str *key, int 
     It is implemented as a Pushdown Automaton; that means it is a finite state
     machine with a stack.
 */
-int JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC) /* {{{ */
+int
+parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc TSRMLS_DC)
 {
-	int b;  /* the next character */
-	int c;  /* the next character class */
-	int s;  /* the next state */
-	json_parser the_json; /* the parser state */
-	int the_state = 0;
-	int the_index;
+    int next_char;  /* the next character */
+    int next_class;  /* the next character class */
+    int next_state;  /* the next state */
+    int the_index;
 
-	smart_str buf = {0};
-	smart_str key = {0};
+    smart_str buf = {0};
+    smart_str key = {0};
 
-	int type = -1;
-	unsigned short utf16 = 0;
+    unsigned short utf16 = 0;
+    int type;
 
-	JSON(the_top) = -1;
-	push(&the_json, z, MODE_DONE);
+	JSON_RESET_TYPE();
 
-	for (the_index = 0; the_index < length; the_index += 1) {
-		b = p[the_index];
-		if ((b & 127) == b) {
-			c = ascii_class[b];
-			if (c <= S_ERR) {
+    for (the_index = 0; the_index < length; the_index += 1) {
+        next_char = utf16_json[the_index];
+		if (next_char >= 128) {
+			next_class = C_ETC;
+		} else {
+			next_class = ascii_class[next_char];
+			if (next_class <= __) {
+				jp->error = ERROR_CTRL_CHAR;
 				FREE_BUFFERS();
 				return false;
 			}
-		} else {
-			c = S_ETC;
 		}
-		/*
-		   Get the next state from the transition table.
-		   */
-		s = state_transition_table[the_state][c];
-		if (s < 0) {
-			/*
-			   Perform one of the predefined actions.
-			   */
-			switch (s) {
-				/* empty "}" {{{ */
-				case -9:
-					if (!pop(&the_json, z, MODE_KEY)) {
-						FREE_BUFFERS();
-						return false;
-					}
-					the_state = 9;
-					break;
-				/* }}} */
+/*
+    Get the next state from the transition table.
+*/
+        next_state = state_transition_table[jp->state][next_class];
+        if (next_state >= 0) {
+/*
+    Change the state and iterate
+*/
+			if (type == IS_STRING) {
+	            if (next_state == ST && jp->state != U4) {
+	                if (jp->state != ES) {
+	                    utf16_to_utf8(&buf, next_char);
+	                } else {
+	                    switch (next_char) {
+	                        case 'b':
+	                            smart_str_appendc(&buf, '\b');
+	                            break;
+	                        case 't':
+	                            smart_str_appendc(&buf, '\t');
+	                            break;
+	                        case 'n':
+	                            smart_str_appendc(&buf, '\n');
+	                            break;
+	                        case 'f':
+	                            smart_str_appendc(&buf, '\f');
+	                            break;
+	                        case 'r':
+	                            smart_str_appendc(&buf, '\r');
+	                            break;
+	                        default:
+	                            utf16_to_utf8(&buf, next_char);
+	                            break;
+	                    }
+	                }
+	            } else if (next_state == U2) {
+	                utf16 = dehexchar(next_char) << 12;
+	            } else if (next_state == U3) {
+	                utf16 += dehexchar(next_char) << 8;
+	            } else if (next_state == U4) {
+	                utf16 += dehexchar(next_char) << 4;
+	            } else if (next_state == ST && jp->state == U4) {
+	                utf16 += dehexchar(next_char);
+	                utf16_to_utf8(&buf, utf16);
+	            }
+	        } else if (type < IS_LONG && (next_class == C_DIGIT || next_class == C_ZERO)) {
+	            type = IS_LONG;
+	            smart_str_appendc(&buf, next_char);
+	        } else if (type == IS_LONG && next_state == E1) {
+	            type = IS_DOUBLE;
+	            smart_str_appendc(&buf, next_char);
+	        } else if (type < IS_DOUBLE && next_class == C_POINT) {
+	            type = IS_DOUBLE;
+	            smart_str_appendc(&buf, next_char);
+	        } else if (type < IS_STRING && next_class == C_QUOTE) {
+	            type = IS_STRING;
+	        } else if (type < IS_BOOL && ((jp->state == T3 && next_state == OK) || (jp->state == F4 && next_state == OK))) {
+	            type = IS_BOOL;
+	        } else if (type < IS_NULL && jp->state == N3 && next_state == OK) {
+	            type = IS_NULL;
+	        } else if (type != IS_STRING && next_class > C_WHITE) {
+	            utf16_to_utf8(&buf, next_char);
+	        }
+        	jp->state = next_state;
+		} else {
+/*
+    Perform one of the predefined actions.
+*/
+            switch (next_state) {
+/* empty } */
+            case -9:
+                if (!pop(jp, MODE_KEY)) {
+                    FREE_BUFFERS();
+                    return false;
+                }
+                jp->state = OK;
+                break;
+/* } */
+            case -8:
+                if (type != -1 &&
+                    (jp->stack[jp->top] == MODE_OBJECT ||
+                     jp->stack[jp->top] == MODE_ARRAY))
+                {
+                    zval *mval;
+                    smart_str_0(&buf);
 
-				/* "{" {{{ */
-				case -8:
-					if (!push(&the_json, z, MODE_KEY)) {
-						FREE_BUFFERS();
-						return false;
-					}
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
 
-					the_state = 1;
-					if (JSON(the_top) > 0) {
-						zval *obj;
+                    if (!assoc) {
+                        add_utf8_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                        Z_DELREF_P(mval);
+                    } else {
+                        add_utf8_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
+                    }
+                    key.len = 0;
+                    buf.len = 0;
+                    JSON_RESET_TYPE();
+                }
 
-						if (JSON(the_top) == 1)	{
-							obj = z;
-						} else {
-							ALLOC_INIT_ZVAL(obj);
-						}
 
-						if (!assoc) {
-							object_init(obj);
-						} else {
-							array_init(obj);
-						}
+                if (!pop(jp, MODE_OBJECT)) {
+                    FREE_BUFFERS();
+                    return false;
+                }
+                jp->state = OK;
+                break;
+/* ] */
+            case -7:
+            {
+                if (type != -1 &&
+                    (jp->stack[jp->top] == MODE_OBJECT ||
+                     jp->stack[jp->top] == MODE_ARRAY))
+                {
+                    zval *mval;
+                    smart_str_0(&buf);
 
-						JSON(the_zstack)[JSON(the_top)] = obj;
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                    add_next_index_zval(jp->the_zstack[jp->top], mval);
+                    buf.len = 0;
+                    JSON_RESET_TYPE();
+                }
 
-						if (JSON(the_top) > 1) {
-							attach_zval(&the_json, JSON(the_top-1), JSON(the_top), &key, assoc TSRMLS_CC);
-						}
+                if (!pop(jp, MODE_ARRAY)) {
+                    FREE_BUFFERS();
+                    return false;
+                }
+                jp->state = OK;
+            }
+			break;
+/* { */
+            case -6:
+                if (!push(jp, MODE_KEY)) {
+                    FREE_BUFFERS();
+                    return false;
+                }
 
-						JSON_RESET_TYPE();
-					}
-					break;
-				/* }}} */
+                jp->state = OB;
+                if (jp->top > 0) {
+                    zval *obj;
 
-				/* "}" {{{ */
-				case -7:
-					if (type != -1 &&
-							(JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-							 JSON(the_stack)[JSON(the_top)] == MODE_ARRAY))
-					{
-						zval *mval;
+                    if (jp->top == 1) {
+                        obj = z;
+                  	} else {
+                        ALLOC_INIT_ZVAL(obj);
+                    }
+
+                    if (!assoc) {
+                        object_init(obj);
+                    } else {
+                        array_init(obj);
+                    }
+
+                    jp->the_zstack[jp->top] = obj;
+
+                    if (jp->top > 1) {
+                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc TSRMLS_CC);
+                    }
+
+                    JSON_RESET_TYPE();
+                }
+
+                break;
+/* [ */
+            case -5:
+                if (!push(jp, MODE_ARRAY)) {
+                    FREE_BUFFERS();
+                    return false;
+                }
+                jp->state = AR;
+
+                if (jp->top > 0) {
+                    zval *arr;
+
+                    if (jp->top == 1) {
+                        arr = z;
+                    } else {
+                        ALLOC_INIT_ZVAL(arr);
+                    }
+
+                    array_init(arr);
+                    jp->the_zstack[jp->top] = arr;
+
+                    if (jp->top > 1) {
+                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc TSRMLS_CC);
+                    }
+
+                    JSON_RESET_TYPE();
+                }
+
+                break;
+
+/* " */
+            case -4:
+                switch (jp->stack[jp->top]) {
+                case MODE_KEY:
+                    jp->state = CO;
+                    smart_str_0(&buf);
+                    SWAP_BUFFERS(buf, key);
+                    JSON_RESET_TYPE();
+                    break;
+                case MODE_ARRAY:
+                case MODE_OBJECT:
+                    jp->state = OK;
+                    break;
+				case MODE_DONE:
+					if (type == IS_STRING) {
 						smart_str_0(&buf);
-
-						json_create_zval(&mval, &buf, type TSRMLS_CC);
-
-						if (!assoc) {
-							add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
-#if PHP_MAJOR_VERSION >= 5
-							Z_DELREF_P(mval);
-#endif
-						} else {
-							add_utf8_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
-						}
-						key.len = 0;
-						buf.len = 0;
-						JSON_RESET_TYPE();
-					}
-
-
-					if (!pop(&the_json, z, MODE_OBJECT)) {
-						FREE_BUFFERS();
-						return false;
-					}
-					the_state = 9;
-					break;
-				/* }}} */
-
-				/* "[" {{{ */
-				case -6:
-					if (!push(&the_json, z, MODE_ARRAY)) {
-						FREE_BUFFERS();
-						return false;
-					}
-					the_state = 2;
-
-					if (JSON(the_top) > 0) {
-						zval *arr;
-
-						if (JSON(the_top) == 1) {
-							arr = z;
-						} else {
-							ALLOC_INIT_ZVAL(arr);
-						}
-
-						array_init(arr);
-						JSON(the_zstack)[JSON(the_top)] = arr;
-
-						if (JSON(the_top) > 1) {
-							attach_zval(&the_json, JSON(the_top-1), JSON(the_top), &key, assoc TSRMLS_CC);
-						}
-
-						JSON_RESET_TYPE();
-					}
-
-					break;
-				/* }}} */
-
-				/* "]" {{{ */
-				case -5:
-					{
-						if (type != -1 &&
-								(JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-								 JSON(the_stack)[JSON(the_top)] == MODE_ARRAY))
-						{
-							zval *mval;
-							smart_str_0(&buf);
-
-							json_create_zval(&mval, &buf, type TSRMLS_CC);
-							add_next_index_zval(JSON(the_zstack)[JSON(the_top)], mval);
-							buf.len = 0;
-							JSON_RESET_TYPE();
-						}
-
-						if (!pop(&the_json, z, MODE_ARRAY)) {
-							FREE_BUFFERS();
-							return false;
-						}
-						the_state = 9;
-					}
-					break;
-				/* }}} */
-				
-				/* "\"" {{{ */
-				case -4:
-					switch (JSON(the_stack)[JSON(the_top)]) {
-						case MODE_KEY:
-							the_state = 27;
-							smart_str_0(&buf);
-							SWAP_BUFFERS(buf, key);
-							JSON_RESET_TYPE();
-							break;
-						case MODE_ARRAY:
-						case MODE_OBJECT:
-							the_state = 9;
-							break;
-						case MODE_DONE:
-							if (type == IS_STRING) {
-								smart_str_0(&buf);
-								ZVAL_UTF8_STRINGL(z, buf.c, buf.len, ZSTR_DUPLICATE);
-								the_state = 9;
-								break;
-							}
-							/* fall through if not IS_STRING */
-						default:
-							FREE_BUFFERS();
-							return false;
-					}
-					break;
-				/* }}} */
-
-				/* "'" {{{ */
-				case -3:
-					{
-						zval *mval;
-
-						if (type != -1 &&
-								(JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-								 JSON(the_stack[JSON(the_top)]) == MODE_ARRAY))
-						{
-							smart_str_0(&buf);
-							json_create_zval(&mval, &buf, type TSRMLS_CC);
-						}
-
-						switch (JSON(the_stack)[JSON(the_top)]) {
-							case MODE_OBJECT:
-								if (pop(&the_json, z, MODE_OBJECT) && push(&the_json, z, MODE_KEY)) {
-									if (type != -1) {
-										if (!assoc) {
-											add_utf8_property_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
-#if PHP_MAJOR_VERSION >= 5
-											Z_DELREF_P(mval);
-#endif
-										} else {
-											add_utf8_assoc_zval_ex(JSON(the_zstack)[JSON(the_top)], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
-										}
-										key.len = 0;
-									}
-									the_state = 29;
-								}
-								break;
-							case MODE_ARRAY:
-								if (type != -1) {
-									add_next_index_zval(JSON(the_zstack)[JSON(the_top)], mval);
-								}
-								the_state = 28;
-								break;
-							default:
-								FREE_BUFFERS();
-								return false;
-						}
-						buf.len = 0;
-						JSON_RESET_TYPE();
-					}
-					break;
-				/* }}} */
-
-			 /* ":" {{{ */
-					/*
-					   :
-					   */
-				case -2:
-					if (pop(&the_json, z, MODE_KEY) && push(&the_json, z, MODE_OBJECT)) {
-						the_state = 28;
+						ZVAL_UTF8_STRINGL(z, buf.c, buf.len, ZSTR_DUPLICATE);
+						jp->state = OK;
 						break;
 					}
-			/* }}} */
+					/* fall through if not IS_STRING */
+                default:
+                    FREE_BUFFERS();
+                    return false;
+                }
+                break;
+/* , */
+            case -3:
+            {
+                zval *mval;
 
-			/* syntax error {{{ */
-				case -1:
-					{
-						FREE_BUFFERS();
-						return false;
-					}
-			/* }}} */
-			}
-		} else {
-			/*
-			   Change the state and iterate.
-			   */
-			if (type == IS_STRING) {
-				if (s == 3 && the_state != 8) {
-					if (the_state != 4) {
-						utf16_to_utf8(&buf, b);
-					} else {
-						switch (b) {
-							case 'b':
-								smart_str_appendc(&buf, '\b');
-								break;
-							case 't':
-								smart_str_appendc(&buf, '\t');
-								break;
-							case 'n':
-								smart_str_appendc(&buf, '\n');
-								break;
-							case 'f':
-								smart_str_appendc(&buf, '\f');
-								break;
-							case 'r':
-								smart_str_appendc(&buf, '\r');
-								break;
-							default:
-								utf16_to_utf8(&buf, b);
-								break;
-						}
-					}
-				} else if (s == 6) {
-					utf16 = dehexchar(b) << 12;
-				} else if (s == 7) {
-					utf16 += dehexchar(b) << 8;
-				} else if (s == 8) {
-					utf16 += dehexchar(b) << 4;
-				} else if (s == 3 && the_state == 8) {
-					utf16 += dehexchar(b);
-					utf16_to_utf8(&buf, utf16);
-				}
-			} else if (type < IS_LONG && (c == S_DIG || c == S_ZER)) {
-				type = IS_LONG;
-				smart_str_appendc(&buf, b);
-			} else if (type == IS_LONG && s == 24) {
-				type = IS_DOUBLE;
-				smart_str_appendc(&buf, b);
-			} else if (type < IS_DOUBLE && c == S_DOT) {
-				type = IS_DOUBLE;
-				smart_str_appendc(&buf, b);
-			} else if (type < IS_STRING && c == S_QUO) {
-				type = IS_STRING;
-			} else if (type < IS_BOOL && ((the_state == 12 && s == 9) || (the_state == 16 && s == 9))) {
-				type = IS_BOOL;
-			} else if (type < IS_NULL && the_state == 19 && s == 9) {
-				type = IS_NULL;
-			} else if (type != IS_STRING && c > S_WSP) {
-				utf16_to_utf8(&buf, b);
-			}
+                if (type != -1 &&
+                    (jp->stack[jp->top] == MODE_OBJECT ||
+                     jp->stack[jp->top] == MODE_ARRAY))
+                {
+                    smart_str_0(&buf);
+                    json_create_zval(&mval, &buf, type TSRMLS_CC);
+                }
 
-			the_state = s;
-		}
-	}
+                switch (jp->stack[jp->top]) {
+                    case MODE_OBJECT:
+                        if (pop(jp, MODE_OBJECT) && push(jp, MODE_KEY)) {
+                            if (type != -1) {
+                                if (!assoc) {
+                                    add_utf8_property_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : "_empty_"), (key.len ? (key.len + 1) : sizeof("_empty_")), mval TSRMLS_CC);
+                                    Z_DELREF_P(mval);
+                                } else {
+                                    add_utf8_assoc_zval_ex(jp->the_zstack[jp->top], (key.len ? key.c : ""), (key.len ? (key.len + 1) : sizeof("")), mval);
+                                }
+                                key.len = 0;
+                            }
+                            jp->state = KE;
+                        }
+                        break;
+                    case MODE_ARRAY:
+                        if (type != -1) {
+                            add_next_index_zval(jp->the_zstack[jp->top], mval);
+                        }
+                        jp->state = VA;
+                        break;
+                    default:
+                        FREE_BUFFERS();
+                        return false;
+                }
+                buf.len = 0;
+                JSON_RESET_TYPE();
+            }
+            break;
+/* : */
+            case -2:
+                if (pop(jp, MODE_KEY) && push(jp, MODE_OBJECT)) {
+                    jp->state = VA;
+                    break;
+                }
+/*
+    syntax error
+*/
+            default:
+                {
+					jp->error = ERROR_SYNTAX;
+                    FREE_BUFFERS();
+                    return false;
+                }
+            }
+        }
+    }
 
-	FREE_BUFFERS();
-	return the_state == 9 && pop(&the_json, z, MODE_DONE);
+    FREE_BUFFERS();
+
+    return jp->state == OK && pop(jp, MODE_DONE);
 }
-/* }}} */
+
 
 /*
  * Local variables:
