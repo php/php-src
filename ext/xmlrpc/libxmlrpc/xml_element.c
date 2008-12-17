@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.12  2008/12/09 17:20:57  iliaa
+ *   Comment out fprintf() use inside the library
+ *
  *   Revision 1.11  2007/01/01 09:29:33  sebastian
  *   Bump year.
  *
@@ -719,7 +722,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
          int line_num = XML_GetCurrentLineNumber(parser);
          int col_num = XML_GetCurrentColumnNumber(parser);
          long byte_idx = XML_GetCurrentByteIndex(parser);
-         int byte_total = XML_GetCurrentByteCount(parser);
+/*         int byte_total = XML_GetCurrentByteCount(parser); */
          const char * error_str = XML_ErrorString(err_code);
          if(byte_idx >= 0) {
              snprintf(buf, 
