@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.9.4.1  2006/07/30 11:34:02  tony2001
+ *   MFH: fix compile warnings (#38257)
+ *
  *   Revision 1.9  2005/04/22 11:06:53  jorton
  *   Fixed bug #32797 (invalid C code in xmlrpc extension).
  *
@@ -713,7 +716,7 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
          int line_num = XML_GetCurrentLineNumber(parser);
          int col_num = XML_GetCurrentColumnNumber(parser);
          long byte_idx = XML_GetCurrentByteIndex(parser);
-         int byte_total = XML_GetCurrentByteCount(parser);
+/*         int byte_total = XML_GetCurrentByteCount(parser); */
          const char * error_str = XML_ErrorString(err_code);
          if(byte_idx >= 0) {
              snprintf(buf, 
