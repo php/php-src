@@ -114,7 +114,9 @@ struct _php_curl_send_headers {
 };
 
 struct _php_curl_free {
+#if LIBCURL_VERSION_NUM < 0x071100
 	zend_llist str;
+#endif
 	zend_llist post;
 	zend_llist slist;
 };
