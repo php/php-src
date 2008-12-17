@@ -1262,6 +1262,10 @@ PHP_FUNCTION(curl_init)
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
 	ch->id = Z_LVAL_P(return_value);
+
+	if (url_type == IS_UNICODE) {
+		efree(url.s);
+	}
 }
 /* }}} */
 
@@ -1933,8 +1937,8 @@ PHP_FUNCTION(curl_getinfo)
 	long		option = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zid, &option) == FAILURE) {
-                RETURN_FALSE;
-        }
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
