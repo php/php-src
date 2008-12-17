@@ -1,5 +1,5 @@
 --TEST--
-Test bug #46739
+Bug #46739 (array returned by curl_getinfo should contain content_type key)
 --FILE--
 <?php
 $ch = curl_init('http://127.0.0.1:9/');

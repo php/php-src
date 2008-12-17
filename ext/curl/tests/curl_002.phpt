@@ -1,5 +1,5 @@
 --TEST--
-Test curl_opt() function with CURLOPT_RETURNTRANSFER paremter set to 1
+Test curl_opt() function with CURLOPT_RETURNTRANSFER parameter set to 1
 --CREDITS--
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 --SKIPIF--

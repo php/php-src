@@ -1,5 +1,5 @@
 --TEST--
-Test curl_opt() function with CURLOPT_WRITEFUNCTION paremter set to a closure
+Test curl_opt() function with CURLOPT_WRITEFUNCTION parameter set to a closure
 --SKIPIF--
 <?php if (!extension_loaded("curl") || false === getenv(b'PHP_CURL_HTTP_REMOTE_SERVER')) print "skip"; ?>
 --FILE--
