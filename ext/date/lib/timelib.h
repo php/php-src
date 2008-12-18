@@ -28,6 +28,7 @@
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
+#define TIMELIB_NO_CLONE         0x02
 
 #define TIMELIB_SPECIAL_WEEKDAY  0x01
 

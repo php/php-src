@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed security issue in imagerotate(), background colour isn't validated
   correctly with a non truecolour image. (Fixes CVE-2008-5498) (Scott)
 
+- Fixed bug #46889: Memory leak in strtotime(). (Derick)
 - Fixed bug #46798 (Crash in mssql extension when retrieving a NULL value
   inside a binary or image column type). (Ilia)
 - Fixed bug #46782 (fastcgi.c parse error). (Matt)
