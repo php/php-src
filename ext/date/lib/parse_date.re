@@ -2089,7 +2089,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 {
-	if (!(options && TIMELIB_OVERRIDE_TIME) && parsed->have_date && !parsed->have_time) {
+	if (!(options & TIMELIB_OVERRIDE_TIME) && parsed->have_date && !parsed->have_time) {
 		parsed->h = 0;
 		parsed->i = 0;
 		parsed->s = 0;
@@ -2109,7 +2109,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 		parsed->tz_abbr = now->tz_abbr ? strdup(now->tz_abbr) : NULL;
 	}
 	if (!parsed->tz_info) {
-		parsed->tz_info = now->tz_info ? timelib_tzinfo_clone(now->tz_info) : NULL;
+		parsed->tz_info = now->tz_info ? (!(options & TIMELIB_NO_CLONE) ? timelib_tzinfo_clone(now->tz_info) : now->tz_info) : NULL;
 	}
 	if (parsed->zone_type == 0 && now->zone_type != 0) {
 		parsed->zone_type = now->zone_type;
