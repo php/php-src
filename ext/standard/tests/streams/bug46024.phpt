@@ -20,7 +20,7 @@ $w = array($pipes[0]);
 $e = null;
 $ret = stream_select($r, $w, $e, 1);
 var_dump($ret === (count($r) + count($w)));
-fread($pipes[0], 1);
+fread($pipes[1], 1);
 
 $r = array($pipes[1]);
 $w = array($pipes[0]);
