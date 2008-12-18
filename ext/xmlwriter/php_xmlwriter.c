@@ -168,7 +168,7 @@ static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRML
 
 #define XMLW_NAME_CHK(__err) \
 	if (xmlValidateName((xmlChar *) name, 0) != 0) {	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, __err);	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", __err);	\
 		RETURN_FALSE;	\
 	}	\
 
