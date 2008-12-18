@@ -1,5 +1,7 @@
 --TEST--
 Test idate() function : usage variation - Checking for Strict Standards.
+--INI--
+date.timezone=
 --FILE--
 <?php
 /* Prototype  : int idate(string format [, int timestamp])
