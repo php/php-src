@@ -4,7 +4,8 @@ PHP                                                                        NEWS
 - Added optional sorting type flag parameter to array_unique(), default is
   SORT_REGULAR. (Andrei)
 - Fixed security issue in imagerotate(), background colour isn't validated
-  correctly with a non truecolour image. (Fixes CVE-2008-5498) (Scott)
+  correctly with a non truecolour image, reported by Hamid Ebadi, APA Laboratory.
+  (Fixes CVE-2008-5498) (Scott)
 
 - Fixed bug #46889 (Memory leak in strtotime()). (Derick)
 - Fixed bug #46887 (Invalid calls to php_error_docref()).
