@@ -2871,6 +2871,7 @@ PHP_FUNCTION(date_modify)
 
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
+	dateobj->time->have_relative = 0;
 
 	RETURN_ZVAL(object, 1, 0);
 }
@@ -2915,6 +2916,7 @@ PHP_FUNCTION(date_add)
 
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
+	dateobj->time->have_relative = 0;
 
 	RETURN_ZVAL(object, 1, 0);
 }
