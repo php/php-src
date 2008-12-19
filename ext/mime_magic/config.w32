@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_WITH("mime-magic", "Mime Magic support", "no");
-
-if (PHP_MIME_MAGIC != "no") {
-	EXTENSION('mime_magic', 'mime_magic.c');
-}
-
