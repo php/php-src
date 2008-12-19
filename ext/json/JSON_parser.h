@@ -12,11 +12,19 @@ typedef struct JSON_parser_struct {
     int state;
     int depth;
     int top;
-    int error;
+    int error_code;
     int* stack;
     zval *the_zstack[JSON_PARSER_MAX_DEPTH];
 
 } * JSON_parser;
+
+enum error_codes {
+	PHP_JSON_ERROR_NONE = 0,
+    PHP_JSON_ERROR_DEPTH, 
+    PHP_JSON_ERROR_STATE_MISMATCH,  
+    PHP_JSON_ERROR_CTRL_CHAR,   
+    PHP_JSON_ERROR_SYNTAX,
+};
 
 extern JSON_parser new_JSON_parser(int depth);
 extern int parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc TSRMLS_DC);
