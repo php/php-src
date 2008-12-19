@@ -494,9 +494,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
     }
 */
             case -7:
-                if (type != -1 &&
-                    (JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-                     JSON(the_stack)[JSON(the_top)] == MODE_ARRAY))
+                if (type != -1 && JSON(the_stack)[JSON(the_top)] == MODE_OBJECT)
                 {
                     zval *mval;
                     smart_str_0(&buf);
@@ -566,9 +564,7 @@ JSON_parser(zval *z, unsigned short p[], int length, int assoc TSRMLS_DC)
 */
             case -5:
             {
-                if (type != -1 &&
-                    (JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-                     JSON(the_stack)[JSON(the_top)] == MODE_ARRAY))
+                if (type != -1 && JSON(the_stack)[JSON(the_top)] == MODE_ARRAY)
                 {
                     zval *mval;
                     smart_str_0(&buf);

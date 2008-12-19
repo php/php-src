@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   correctly with a non truecolour image, reported by Hamid Ebadi, APA Laboratory.
   (Fixes CVE-2008-5498) (Scott)
 
+- Fixed segfault when malformed string passed to json_decode(). (Scott)
+
 - Fixed bug #46889 (Memory leak in strtotime()). (Derick)
 - Fixed bug #46887 (Invalid calls to php_error_docref()).
   (oeriksson at mandriva dot com, Ilia)
