@@ -33,6 +33,7 @@
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
+static PHP_FUNCTION(json_last_error);
 
 static const char digits[] = "0123456789abcdef";
 
@@ -41,24 +42,28 @@ static const char digits[] = "0123456789abcdef";
 #define PHP_JSON_HEX_APOS	(1<<2)
 #define PHP_JSON_HEX_QUOT	(1<<3)
 
+ZEND_DECLARE_MODULE_GLOBALS(json)
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, json)
 	ZEND_ARG_INFO(0, assoc)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_json_last_error, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ json_functions[]
- *
- * Every user visible function must have an entry in json_functions[].
- */
+/* {{{ json_functions[] */
 static const function_entry json_functions[] = {
 	PHP_FE(json_encode, arginfo_json_encode)
 	PHP_FE(json_decode, arginfo_json_decode)
+	PHP_FE(json_last_error, arginfo_json_last_error)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -71,7 +76,21 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_GINIT_FUNCTION
+*/
+static PHP_GINIT_FUNCTION(json)
+{
+	json_globals->error_code = 0;
 }
 /* }}} */
 
@@ -79,9 +98,7 @@ static PHP_MINIT_FUNCTION(json)
 /* {{{ json_module_entry
  */
 zend_module_entry json_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"json",
 	json_functions,
 	PHP_MINIT(json),
@@ -89,10 +106,12 @@ zend_module_entry json_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(json),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_JSON_VERSION,
-#endif
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(json),
+	PHP_GINIT(json),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -580,7 +599,20 @@ static PHP_FUNCTION(json_decode)
 	if (str_type == IS_STRING) {
 		efree(utf16);
 	}
+	JSON_G(error_code) = jp->error_code;
 	free_JSON_parser(jp);
+}
+/* }}} */
+
+/* {{{ proto int json_last_error() U
+   Returns the error code of the last json_decode(). */
+static PHP_FUNCTION(json_last_error)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(JSON_G(error_code));
 }
 /* }}} */
 

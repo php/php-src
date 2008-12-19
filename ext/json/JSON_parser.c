@@ -194,13 +194,6 @@ enum modes {
     MODE_OBJECT,
 };
 
-enum error_codes {
-    ERROR_DEPTH, 
-    ERROR_MISMATCH,  
-    ERROR_CTRL_CHAR,   
-    ERROR_SYNTAX,
-};
-
 
 /*
     Push a mode onto the stack. Return false if there is overflow.
@@ -210,7 +203,7 @@ push(JSON_parser jp, int mode)
 {
     jp->top += 1;
     if (jp->top >= jp->depth) {
-		jp->error = ERROR_DEPTH;
+		jp->error_code = PHP_JSON_ERROR_DEPTH;
         return false;
     }
     jp->stack[jp->top] = mode;
@@ -226,7 +219,7 @@ static int
 pop(JSON_parser jp, int mode)
 {
     if (jp->top < 0 || jp->stack[jp->top] != mode) {
-		jp->error = ERROR_MISMATCH;
+		jp->error_code = PHP_JSON_ERROR_STATE_MISMATCH;
         return false;
     }
     jp->top -= 1;
@@ -252,6 +245,7 @@ new_JSON_parser(int depth)
     jp->state = GO;
     jp->depth = depth;
     jp->top = -1;
+	jp->error_code = PHP_JSON_ERROR_NONE;
     jp->stack = (int*)ecalloc(depth, sizeof(int));
     push(jp, MODE_DONE);
     return jp;
@@ -428,7 +422,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 		} else {
 			next_class = ascii_class[next_char];
 			if (next_class <= __) {
-				jp->error = ERROR_CTRL_CHAR;
+				jp->error_code = PHP_JSON_ERROR_CTRL_CHAR;
 				FREE_BUFFERS();
 				return false;
 			}
@@ -511,9 +505,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
                 break;
 /* } */
             case -8:
-                if (type != -1 &&
-                    (jp->stack[jp->top] == MODE_OBJECT ||
-                     jp->stack[jp->top] == MODE_ARRAY))
+                if (type != -1 && jp->stack[jp->top] == MODE_OBJECT)
                 {
                     zval *mval;
                     smart_str_0(&buf);
@@ -541,9 +533,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 /* ] */
             case -7:
             {
-                if (type != -1 &&
-                    (jp->stack[jp->top] == MODE_OBJECT ||
-                     jp->stack[jp->top] == MODE_ARRAY))
+                if (type != -1 && jp->stack[jp->top] == MODE_ARRAY)
                 {
                     zval *mval;
                     smart_str_0(&buf);
@@ -702,7 +692,7 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
 */
             default:
                 {
-					jp->error = ERROR_SYNTAX;
+					jp->error_code = PHP_JSON_ERROR_SYNTAX;
                     FREE_BUFFERS();
                     return false;
                 }
@@ -711,10 +701,13 @@ parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int
     }
 
     FREE_BUFFERS();
+	if (jp->state == OK && pop(jp, MODE_DONE)) {
+		return true;
+	}
 
-    return jp->state == OK && pop(jp, MODE_DONE);
+	jp->error_code = PHP_JSON_ERROR_SYNTAX;
+	return false;
 }
-
 
 /*
  * Local variables:
