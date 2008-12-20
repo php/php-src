@@ -2265,7 +2265,7 @@ cleanup:
 
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
 {
-	char *delim = &delimiter, *enc = &enclosure, *buffer = buf, *esc;
+	char *delim = &delimiter, *enc = &enclosure, *buffer = buf, *esc = &escape;
 	int delim_len = 1, enc_len = 1, esc_len = 1, buffer_len = buf_len;
 	zend_uchar type = IS_STRING;
 
