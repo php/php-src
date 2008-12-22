@@ -69,6 +69,9 @@ ZEND_API void zend_register_interfaces(TSRMLS_D);
 ZEND_API int zend_user_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
 ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
+ZEND_API int zend_class_serialize_deny(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+
 END_EXTERN_C()
 
 #endif /* ZEND_INTERFACES_H */
