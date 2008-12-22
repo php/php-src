@@ -48,8 +48,6 @@ struct php_fileinfo {
 	struct magic_set *magic;
 };
 
-#ifdef ZEND_ENGINE_2
-/* {{{ */
 static zend_object_handlers finfo_object_handlers;
 zend_class_entry *finfo_class_entry;
 
@@ -103,6 +101,7 @@ PHP_FILEINFO_API zend_object_value finfo_objects_new(zend_class_entry *class_typ
 	zval *tmp;
 
 	intern = emalloc(sizeof(struct finfo_object));
+	memset(intern, 0, sizeof(struct finfo_object));
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
@@ -169,32 +168,13 @@ ZEND_END_ARG_INFO()
 /* {{{ finfo_class_functions
  */
 function_entry finfo_class_functions[] = {
-#if PHP_VERSION_ID >= 50200
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
-#else
-	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags)
-	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer)
-#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
-
-/* }}} */
-#else 
-/* {{{ */
-#define FILEINFO_REGISTER_OBJECT(_object, _ptr) {}
-#define FILEINFO_FROM_OBJECT(socket_id, object) {}
-
-#define FILEINFO_DECLARE_INIT_OBJECT(object)
-#define object 0
-
-/* }}} */
-#endif /* ZEND_ENGINE_2 */
 
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
@@ -236,7 +216,6 @@ function_entry fileinfo_functions[] = {
  */
 PHP_MINIT_FUNCTION(finfo)
 {
-#ifdef ZEND_ENGINE_2
 	zend_class_entry _finfo_class_entry;
 	INIT_CLASS_ENTRY(_finfo_class_entry, "finfo", finfo_class_functions);
 	_finfo_class_entry.create_object = finfo_objects_new;
@@ -244,7 +223,6 @@ PHP_MINIT_FUNCTION(finfo)
 
 	/* copy the standard object handlers to you handler table */
 	memcpy(&finfo_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-#endif /* ZEND_ENGINE_2 */
 
 	le_fileinfo = zend_register_list_destructors_ex(finfo_resource_destructor, NULL, "file_info", module_number);
 
@@ -268,9 +246,7 @@ PHP_MINIT_FUNCTION(finfo)
 /* {{{ fileinfo_module_entry
  */
 zend_module_entry fileinfo_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"fileinfo",
 	fileinfo_functions,
 	PHP_MINIT(finfo),
@@ -278,9 +254,7 @@ zend_module_entry fileinfo_module_entry = {
 	NULL,	
 	NULL,
 	PHP_MINFO(fileinfo),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_FILEINFO_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
