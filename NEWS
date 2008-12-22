@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   given bad data). (Ilia)
 - Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
 - Fixed bug #46681 (mkdir() fails silently on PHP 5.3). (Hannes)
+- Fixed bug #46646 (Restrict serialization on some internal classes like
+  Closure and SplFileInfo using exceptions). (Etienne)
 - Fixed bug #46268 (DateTime::modify() does not reset relative time values).
   (Derick)
 - Fixed bug #45989 (json_decode() doesn't return NULL on certain
