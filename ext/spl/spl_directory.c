@@ -2753,6 +2753,8 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.clone_obj      = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object    = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.get_debug_info = spl_filesystem_object_get_debug_info;
+	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;
+	spl_ce_SplFileInfo->unserialize = zend_class_unserialize_deny;
 
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
