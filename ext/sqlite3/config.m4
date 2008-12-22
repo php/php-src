@@ -69,9 +69,11 @@ if test $PHP_SQLITE3 != "no"; then
 
     other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1"
 
-dnl    if test "$PHP_MAJOR_VERSION" -ge "6"; then
-dnl      other_flags="$other_flags -DSQLITE_ENABLE_ICU=1"
-dnl    fi
+	dnl As long as intl is not shared we can have ICU support
+    if test "$PHP_INTL" = "yes"; then
+      other_flags="$other_flags -DSQLITE_ENABLE_ICU=1"
+    fi
+
     PHP_SQLITE3_CFLAGS="-I@ext_srcdir@/libsqlite $other_flags $threadsafe_flags $debug_flags"
   fi
 
