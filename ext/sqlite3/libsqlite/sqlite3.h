@@ -107,8 +107,8 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.6.2"
-#define SQLITE_VERSION_NUMBER  3006006
+#define SQLITE_VERSION         "3.6.7"
+#define SQLITE_VERSION_NUMBER  3006007
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers {H10020} <S60100>
@@ -507,6 +507,8 @@ int sqlite3_exec(
 #define SQLITE_IOERR_ACCESS            (SQLITE_IOERR | (13<<8))
 #define SQLITE_IOERR_CHECKRESERVEDLOCK (SQLITE_IOERR | (14<<8))
 #define SQLITE_IOERR_LOCK              (SQLITE_IOERR | (15<<8))
+#define SQLITE_IOERR_CLOSE             (SQLITE_IOERR | (16<<8))
+#define SQLITE_IOERR_DIR_CLOSE         (SQLITE_IOERR | (17<<8))
 
 /*
 ** CAPI3REF: Flags For File Open Operations {H10230} <H11120> <H12700>
@@ -723,6 +725,9 @@ struct sqlite3_io_methods {
 ** is defined.
 */
 #define SQLITE_FCNTL_LOCKSTATE        1
+#define SQLITE_GET_LOCKPROXYFILE      2
+#define SQLITE_SET_LOCKPROXYFILE      3
+#define SQLITE_LAST_ERRNO             4
 
 /*
 ** CAPI3REF: Mutex Handle {H17110} <S20130>
@@ -770,11 +775,11 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** The zName field holds the name of the VFS module.  The name must
 ** be unique across all VFS modules.
 **
-** {H11141} SQLite will guarantee that the zFilename parameter to xOpen
+** SQLite will guarantee that the zFilename parameter to xOpen
 ** is either a NULL pointer or string obtained
 ** from xFullPathname().  SQLite further guarantees that
 ** the string will be valid and unchanged until xClose() is
-** called. {END}  Because of the previous sentense,
+** called. Because of the previous sentense,
 ** the [sqlite3_file] can safely store a pointer to the
 ** filename if it needs to remember the filename for some reason.
 ** If the zFilename parameter is xOpen is a NULL pointer then xOpen
@@ -782,14 +787,14 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** xFilename parameter is NULL it will also be the case that the
 ** flags parameter will include [SQLITE_OPEN_DELETEONCLOSE].
 **
-** {H11142} The flags argument to xOpen() includes all bits set in
+** The flags argument to xOpen() includes all bits set in
 ** the flags argument to [sqlite3_open_v2()].  Or if [sqlite3_open()]
 ** or [sqlite3_open16()] is used, then flags includes at least
-** [SQLITE_OPEN_READWRITE] | [SQLITE_OPEN_CREATE]. {END}
+** [SQLITE_OPEN_READWRITE] | [SQLITE_OPEN_CREATE]. 
 ** If xOpen() opens a file read-only then it sets *pOutFlags to
 ** include [SQLITE_OPEN_READONLY].  Other bits in *pOutFlags may be set.
 **
-** {H11143} SQLite will also add one of the following flags to the xOpen()
+** SQLite will also add one of the following flags to the xOpen()
 ** call, depending on the object being opened:
 **
 ** <ul>
@@ -800,7 +805,7 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** <li>  [SQLITE_OPEN_TRANSIENT_DB]
 ** <li>  [SQLITE_OPEN_SUBJOURNAL]
 ** <li>  [SQLITE_OPEN_MASTER_JOURNAL]
-** </ul> {END}
+** </ul>
 **
 ** The file I/O implementation can use the object type flags to
 ** change the way it deals with files.  For example, an application
@@ -818,28 +823,28 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** <li> [SQLITE_OPEN_EXCLUSIVE]
 ** </ul>
 **
-** {H11145} The [SQLITE_OPEN_DELETEONCLOSE] flag means the file should be
-** deleted when it is closed.  {H11146} The [SQLITE_OPEN_DELETEONCLOSE]
+** The [SQLITE_OPEN_DELETEONCLOSE] flag means the file should be
+** deleted when it is closed.  The [SQLITE_OPEN_DELETEONCLOSE]
 ** will be set for TEMP  databases, journals and for subjournals.
 **
-** {H11147} The [SQLITE_OPEN_EXCLUSIVE] flag means the file should be opened
+** The [SQLITE_OPEN_EXCLUSIVE] flag means the file should be opened
 ** for exclusive access.  This flag is set for all files except
 ** for the main database file.
 **
-** {H11148} At least szOsFile bytes of memory are allocated by SQLite
+** At least szOsFile bytes of memory are allocated by SQLite
 ** to hold the  [sqlite3_file] structure passed as the third
-** argument to xOpen. {END}  The xOpen method does not have to
+** argument to xOpen.  The xOpen method does not have to
 ** allocate the structure; it should just fill it in.
 **
-** {H11149} The flags argument to xAccess() may be [SQLITE_ACCESS_EXISTS]
+** The flags argument to xAccess() may be [SQLITE_ACCESS_EXISTS]
 ** to test for the existence of a file, or [SQLITE_ACCESS_READWRITE] to
 ** test whether a file is readable and writable, or [SQLITE_ACCESS_READ]
-** to test whether a file is at least readable. {END}  The file can be a
+** to test whether a file is at least readable.   The file can be a
 ** directory.
 **
-** {H11150} SQLite will always allocate at least mxPathname+1 bytes for the
-** output buffer xFullPathname. {H11151} The exact size of the output buffer
-** is also passed as a parameter to both  methods. {END}  If the output buffer
+** SQLite will always allocate at least mxPathname+1 bytes for the
+** output buffer xFullPathname.  The exact size of the output buffer
+** is also passed as a parameter to both  methods. If the output buffer
 ** is not large enough, [SQLITE_CANTOPEN] should be returned. Since this is
 ** handled as a fatal error by SQLite, vfs implementations should endeavor
 ** to prevent this by setting mxPathname to a sufficiently large value.
@@ -853,6 +858,7 @@ typedef struct sqlite3_mutex sqlite3_mutex;
 ** The xSleep() method causes the calling thread to sleep for at
 ** least the number of microseconds given.  The xCurrentTime()
 ** method returns a Julian Day Number for the current date and time.
+**
 */
 typedef struct sqlite3_vfs sqlite3_vfs;
 struct sqlite3_vfs {
@@ -869,7 +875,7 @@ struct sqlite3_vfs {
   int (*xFullPathname)(sqlite3_vfs*, const char *zName, int nOut, char *zOut);
   void *(*xDlOpen)(sqlite3_vfs*, const char *zFilename);
   void (*xDlError)(sqlite3_vfs*, int nByte, char *zErrMsg);
-  void *(*xDlSym)(sqlite3_vfs*,void*, const char *zSymbol);
+  void (*(*xDlSym)(sqlite3_vfs*,void*, const char *zSymbol))(void);
   void (*xDlClose)(sqlite3_vfs*, void*);
   int (*xRandomness)(sqlite3_vfs*, int nByte, char *zOut);
   int (*xSleep)(sqlite3_vfs*, int microseconds);
@@ -882,14 +888,14 @@ struct sqlite3_vfs {
 /*
 ** CAPI3REF: Flags for the xAccess VFS method {H11190} <H11140>
 **
-** {H11191} These integer constants can be used as the third parameter to
+** These integer constants can be used as the third parameter to
 ** the xAccess method of an [sqlite3_vfs] object. {END}  They determine
 ** what kind of permissions the xAccess method is looking for.
-** {H11192} With SQLITE_ACCESS_EXISTS, the xAccess method
+** With SQLITE_ACCESS_EXISTS, the xAccess method
 ** simply checks whether the file exists.
-** {H11193} With SQLITE_ACCESS_READWRITE, the xAccess method
+** With SQLITE_ACCESS_READWRITE, the xAccess method
 ** checks whether the file is both readable and writable.
-** {H11194} With SQLITE_ACCESS_READ, the xAccess method
+** With SQLITE_ACCESS_READ, the xAccess method
 ** checks whether the file is readable.
 */
 #define SQLITE_ACCESS_EXISTS    0
@@ -1044,7 +1050,7 @@ int sqlite3_os_end(void);
 **          S is a pointer to an aligned memory buffer not less than
 **          Z*N bytes in size shall cause S to be used by the
 **          [scratch memory allocator] for as many as N simulataneous
-**          allocations each of size Z.
+**          allocations each of size (Z & ~7).
 **
 ** {H14153} A successful call to [sqlite3_config]([SQLITE_CONFIG_SCRATCH],S,Z,N)
 **          where S is a NULL pointer shall disable the
@@ -1056,7 +1062,7 @@ int sqlite3_os_end(void);
 **          S is a pointer to an aligned memory buffer not less than
 **          Z*N bytes in size shall cause S to be used by the
 **          [pagecache memory allocator] for as many as N simulataneous
-**          allocations each of size Z.
+**          allocations each of size (Z & ~7).
 **
 ** {H14159} A successful call to
 **          [sqlite3_config]([SQLITE_CONFIG_PAGECACHE],S,Z,N)
@@ -1404,18 +1410,18 @@ int sqlite3_extended_result_codes(sqlite3*, int onoff);
 ** CAPI3REF: Last Insert Rowid {H12220} <S10700>
 **
 ** Each entry in an SQLite table has a unique 64-bit signed
-** integer key called the "rowid". The rowid is always available
+** integer key called the [ROWID | "rowid"]. The rowid is always available
 ** as an undeclared column named ROWID, OID, or _ROWID_ as long as those
 ** names are not also used by explicitly declared columns. If
-** the table has a column of type INTEGER PRIMARY KEY then that column
+** the table has a column of type [INTEGER PRIMARY KEY] then that column
 ** is another alias for the rowid.
 **
-** This routine returns the rowid of the most recent
+** This routine returns the [rowid] of the most recent
 ** successful [INSERT] into the database from the [database connection]
 ** in the first argument.  If no successful [INSERT]s
 ** have ever occurred on that database connection, zero is returned.
 **
-** If an [INSERT] occurs within a trigger, then the rowid of the inserted
+** If an [INSERT] occurs within a trigger, then the [rowid] of the inserted
 ** row is returned by this routine as long as the trigger is running.
 ** But once the trigger terminates, the value returned by this routine
 ** reverts to the last value inserted before the trigger fired.
@@ -1435,7 +1441,8 @@ int sqlite3_extended_result_codes(sqlite3*, int onoff);
 **
 ** INVARIANTS:
 **
-** {H12221} The [sqlite3_last_insert_rowid()] function shall return the rowid
+** {H12221} The [sqlite3_last_insert_rowid()] function shall return
+**          the [rowid]
 **          of the most recent successful [INSERT] performed on the same
 **          [database connection] and within the same or higher level
 **          trigger context, or zero if there have been no qualifying
@@ -1449,10 +1456,10 @@ int sqlite3_extended_result_codes(sqlite3*, int onoff);
 **
 ** {A12232} If a separate thread performs a new [INSERT] on the same
 **          database connection while the [sqlite3_last_insert_rowid()]
-**          function is running and thus changes the last insert rowid,
+**          function is running and thus changes the last insert [rowid],
 **          then the value returned by [sqlite3_last_insert_rowid()] is
 **          unpredictable and might not equal either the old or the new
-**          last insert rowid.
+**          last insert [rowid].
 */
 sqlite3_int64 sqlite3_last_insert_rowid(sqlite3*);
 
@@ -2163,8 +2170,8 @@ sqlite3_int64 sqlite3_memory_highwater(int resetFlag);
 ** CAPI3REF: Pseudo-Random Number Generator {H17390} <S20000>
 **
 ** SQLite contains a high-quality pseudo-random number generator (PRNG) used to
-** select random ROWIDs when inserting new records into a table that
-** already uses the largest possible ROWID.  The PRNG is also used for
+** select random [ROWID | ROWIDs] when inserting new records into a table that
+** already uses the largest possible [ROWID].  The PRNG is also used for
 ** the build-in random() and randomblob() SQL functions.  This interface allows
 ** applications to access the same PRNG for other purposes.
 **
@@ -5113,8 +5120,8 @@ void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
 ** to be invoked.
 ** The third and fourth arguments to the callback contain pointers to the
 ** database and table name containing the affected row.
-** The final callback parameter is the rowid of the row. In the case of
-** an update, this is the rowid after the update takes place.
+** The final callback parameter is the [rowid] of the row.
+** In the case of an update, this is the [rowid] after the update takes place.
 **
 ** The update hook is not invoked when internal system tables are
 ** modified (i.e. sqlite_master and sqlite_sequence).
@@ -5157,7 +5164,7 @@ void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
 **          to zero-terminated UTF-8 strings which are the names of the
 **          database and table that is being updated.
 
-** {H12985} The final callback parameter is the rowid of the row after
+** {H12985} The final callback parameter is the [rowid] of the row after
 **          the change occurs.
 */
 void *sqlite3_update_hook(
@@ -5323,7 +5330,7 @@ void sqlite3_soft_heap_limit(int);
 ** <tr><td> 6th <td> const char* <td> Name of default collation sequence
 ** <tr><td> 7th <td> int         <td> True if column has a NOT NULL constraint
 ** <tr><td> 8th <td> int         <td> True if column is part of the PRIMARY KEY
-** <tr><td> 9th <td> int         <td> True if column is AUTOINCREMENT
+** <tr><td> 9th <td> int         <td> True if column is [AUTOINCREMENT]
 ** </table>
 ** </blockquote>
 **
@@ -5334,9 +5341,9 @@ void sqlite3_soft_heap_limit(int);
 ** If the specified table is actually a view, an [error code] is returned.
 **
 ** If the specified column is "rowid", "oid" or "_rowid_" and an
-** INTEGER PRIMARY KEY column has been explicitly declared, then the output
+** [INTEGER PRIMARY KEY] column has been explicitly declared, then the output
 ** parameters are set for the explicitly declared column. If there is no
-** explicitly declared INTEGER PRIMARY KEY column, then the output
+** explicitly declared [INTEGER PRIMARY KEY] column, then the output
 ** parameters are set as follows:
 **
 ** <pre>
@@ -5443,7 +5450,7 @@ int sqlite3_enable_load_extension(sqlite3 *db, int onoff);
 **
 ** {H12644} Automatic extensions apply across all threads.
 */
-int sqlite3_auto_extension(void *xEntryPoint);
+int sqlite3_auto_extension(void (*xEntryPoint)(void));
 
 /*
 ** CAPI3REF: Reset Automatic Extension Loading {H12660} <S20500>
@@ -5760,7 +5767,7 @@ typedef struct sqlite3_blob sqlite3_blob;
 ** in other words, the same BLOB that would be selected by:
 **
 ** <pre>
-**     SELECT zColumn FROM zDb.zTable WHERE rowid = iRow;
+**     SELECT zColumn FROM zDb.zTable WHERE [rowid] = iRow;
 ** </pre> {END}
 **
 ** If the flags parameter is non-zero, the the BLOB is opened for read
