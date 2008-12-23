@@ -1,3 +1,18 @@
+2008-12-22  Etienne Kneuss  <php@colder.ch>
+
+    * (PHP_5_3)
+      zend_closures.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      MFH: Fix #46646 (Implement zend functions to restrict serialization or
+      internal classes)
+
+    * zend_closures.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      Fix #46646 (Implement zend functions to restrict serialization or internal
+      classes)
+
 2008-12-15  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c:
