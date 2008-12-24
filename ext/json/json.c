@@ -531,6 +531,8 @@ static PHP_FUNCTION(json_decode)
 		RETVAL_NULL();
 		if (str_len == 4) {
 			if (!strcasecmp(str, "null")) {
+				/* We need to explicitly clear the error because its an actual NULL and not an error */
+				jp->error_code = PHP_JSON_ERROR_NONE;
 				RETVAL_NULL();
 			} else if (!strcasecmp(str, "true")) {
 				RETVAL_BOOL(1);
@@ -545,6 +547,10 @@ static PHP_FUNCTION(json_decode)
 			} else if (type == IS_DOUBLE) {
 				RETVAL_DOUBLE(d);
 			}
+		}
+
+		if (Z_TYPE_P(return_value) != IS_NULL) {
+			jp->error_code = PHP_JSON_ERROR_NONE;
 		}
 
 		zval_dtor(z);
