@@ -619,7 +619,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 	int i;
 	int ret;
 	int fake_argc;
-	zval **agg_context = NULL;
+	php_sqlite3_agg_context *agg_context = NULL;
 
 	if (is_agg) {
 		is_agg = 2;
@@ -643,16 +643,17 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 
 	if (is_agg) {
 		/* summon the aggregation context */
-		agg_context = (zval**)sqlite3_aggregate_context(context, sizeof(zval*));
-		if (!*agg_context) {
-			MAKE_STD_ZVAL(*agg_context);
-			ZVAL_NULL(*agg_context);
+		agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
+
+		if (!agg_context->zval_context) {
+			MAKE_STD_ZVAL(agg_context->zval_context);
+			ZVAL_NULL(agg_context->zval_context);
 		}
-		zargs[0] = agg_context;
+		zargs[0] = &agg_context->zval_context;
 
 		zargs[1] = emalloc(sizeof(zval*));
 		MAKE_STD_ZVAL(*zargs[1]);
-		ZVAL_LONG(*zargs[1], sqlite3_aggregate_count(context));
+		ZVAL_LONG(*zargs[1], agg_context->row_count);
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -727,20 +728,20 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 			sqlite3_result_error(context, "failed to invoke callback", 0);
 		}
 
-		if (agg_context) {
-			zval_ptr_dtor(agg_context);
+		if (agg_context && agg_context->zval_context) {
+			zval_ptr_dtor(&agg_context->zval_context);
 		}
 	} else {
 		/* we're stepping in an aggregate; the return value goes into
 		 * the context */
-		if (agg_context) {
-			zval_ptr_dtor(agg_context);
+		if (agg_context && agg_context->zval_context) {
+			zval_ptr_dtor(&agg_context->zval_context);
 		}
 		if (retval) {
-			*agg_context = retval;
+			agg_context->zval_context = retval;
 			retval = NULL;
 		} else {
-			*agg_context = NULL;
+			agg_context->zval_context = NULL;
 		}
 	}
 
@@ -763,7 +764,10 @@ static void php_sqlite3_callback_func(sqlite3_context *context, int argc, sqlite
 static void php_sqlite3_callback_step(sqlite3_context *context, int argc, sqlite3_value **argv) /* {{{ */
 {
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
+	php_sqlite3_agg_context *agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
+
 	TSRMLS_FETCH();
+	agg_context->row_count++;
 
 	sqlite3_do_callback(&func->astep, func->step, argc, argv, context, 1 TSRMLS_CC);
 }
@@ -772,7 +776,10 @@ static void php_sqlite3_callback_step(sqlite3_context *context, int argc, sqlite
 static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 {
 	php_sqlite3_func *func = (php_sqlite3_func *)sqlite3_user_data(context);
+	php_sqlite3_agg_context *agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context(context, sizeof(php_sqlite3_agg_context));
+
 	TSRMLS_FETCH();
+	agg_context->row_count = 0;
 
 	sqlite3_do_callback(&func->afini, func->fini, 0, NULL, context, 1 TSRMLS_CC);
 }
