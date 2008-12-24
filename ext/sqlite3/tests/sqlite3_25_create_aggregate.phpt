@@ -7,7 +7,7 @@ SQLite3::createAggregate() test
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 
-function sum_list_step($context, $num_args, $string) {
+function sum_list_step($context, $rows, $string) {
 	if (empty($context))
 	{
 		$context = array('total' => 0, 'values' => array());
