@@ -291,6 +291,14 @@ restart:
 		return 0;
 	}
 
+	/* Eat any UTF-8 BOM we find in the first 3 bytes */
+	if (YYCURSOR == SCNG(yy_start) && YYCURSOR + 3 < YYLIMIT) {
+		if (memcmp(YYCURSOR, "\xef\xbb\xbf", 3) == 0) {
+			YYCURSOR += 3;
+			goto restart;
+		}
+	}
+
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM [0-9]+
