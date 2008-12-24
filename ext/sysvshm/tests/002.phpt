@@ -34,10 +34,10 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Warning: shm_attach() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
+NULL
 
 Warning: shm_attach() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
+NULL
 
 Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
 bool(false)
