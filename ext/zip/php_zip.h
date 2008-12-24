@@ -30,7 +30,7 @@ extern zend_module_entry zip_module_entry;
 
 #include "lib/zip.h"
 
-#define PHP_ZIP_VERSION_STRING "1.8.11"
+#define PHP_ZIP_VERSION_STRING "1.9.1"
 
 #if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
 # define PHP_ZIP_USE_OO 1
@@ -45,7 +45,7 @@ extern zend_module_entry zip_module_entry;
 
 /* {{{ OPENBASEDIR_CHECKPATH(filename) */
 #if (PHP_MAJOR_VERSION < 6)
-#define OPENBASEDIR_CHECKPATH(filename) \
+# define OPENBASEDIR_CHECKPATH(filename) \
 	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
 #else
 #define OPENBASEDIR_CHECKPATH(filename) \
