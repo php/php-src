@@ -2512,6 +2512,8 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 		}
 		add_next_index_object(return_value, tovals TSRMLS_CC);
 	} while ((addresstmp = addresstmp->next));
+	
+	mail_free_envelope(&env);
 }
 /* }}} */
 
