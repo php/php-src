@@ -41,7 +41,6 @@ PHP                                                                        NEWS
   (Sara)
 - Added stream_resolve_include_path() function which checks which file fopen()
   with a relative path will open. (Sara)
-- Added shm_has_var() function. (Mike)
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
 - Fixed bug #46647 (SplFileObject::fgetcsv segfaults). (Etienne)
