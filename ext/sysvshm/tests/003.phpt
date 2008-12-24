@@ -31,24 +31,24 @@ shm_remove($s);
 
 ?>
 --EXPECTF--	
-Warning: shm_detach() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line %d
 NULL
 
-Warning: shm_detach() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: shm_detach() expects exactly 1 parameter, 2 given in %s003.php on line %d
 NULL
 bool(true)
 
-Warning: shm_detach(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_detach(): %d is not a valid sysvshm resource in %s003.php on line %d
 bool(false)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): %d is not a valid sysvshm resource in %s003.php on line %d
 
-Warning: shm_detach(): The parameter is not a valid shm_identifier in %s on line %d
-bool(false)
+Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
+NULL
 
-Warning: shm_detach(): The parameter is not a valid shm_identifier in %s on line %d
-bool(false)
+Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
+NULL
 
-Warning: shm_detach(): The parameter is not a valid shm_identifier in %s on line %d
-bool(false)
+Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
+NULL
 Done

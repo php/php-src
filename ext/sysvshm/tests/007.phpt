@@ -22,20 +22,22 @@ var_dump(shm_remove($s));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: shm_remove() expects exactly 1 parameter, 0 given in %s on line %d
+
+Warning: shm_remove() expects exactly 1 parameter, 0 given in %s007.php on line %d
 NULL
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
-bool(false)
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
+NULL
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
-bool(false)
+Warning: shm_remove() expects parameter 1 to be resource, integer given in %s007.php on line %d
+NULL
 
-Warning: shm_remove() expects parameter 1 to be long, string given in %s on line %d
+Warning: shm_remove() expects parameter 1 to be resource, string given in %s007.php on line %d
 NULL
 bool(true)
 bool(true)
 
-Warning: shm_remove(): The parameter is not a valid shm_identifier in %s on line %d
+Warning: shm_remove(): %d is not a valid sysvshm resource in %s007.php on line %d
 bool(false)
 Done
+
