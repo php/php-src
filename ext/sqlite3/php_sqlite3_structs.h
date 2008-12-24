@@ -72,6 +72,12 @@ typedef struct _php_sqlite3_db_object  {
 	zend_llist free_list;
 } php_sqlite3_db_object;
 
+/* Structure for SQLite Database object. */
+typedef struct _php_sqlite3_agg_context  {
+	zval *zval_context;
+	long row_count;
+} php_sqlite3_agg_context;
+
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;
 typedef struct _php_sqlite3_result_object php_sqlite3_result;
 
