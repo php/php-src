@@ -28,10 +28,10 @@ echo "Done\n";
 --EXPECTF--
 
 Warning: shm_remove_var() expects exactly 2 parameters, 0 given in %s006.php on line %d
-bool(false)
+NULL
 
 Warning: shm_remove_var() expects parameter 1 to be resource, integer given in %s006.php on line %d
-bool(false)
+NULL
 
 Warning: shm_remove_var(): variable key -10 doesn't exist in %s006.php on line %d
 bool(false)

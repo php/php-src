@@ -25,13 +25,13 @@ echo "Done\n";
 --EXPECTF--
 
 Warning: shm_put_var() expects exactly 3 parameters, 0 given in %s004.php on line %d
-bool(false)
+NULL
 
 Warning: shm_put_var() expects parameter 1 to be resource, integer given in %s004.php on line %d
-bool(false)
+NULL
 
 Warning: shm_put_var() expects parameter 1 to be resource, integer given in %s004.php on line %d
-bool(false)
+NULL
 bool(true)
 bool(true)
 bool(true)

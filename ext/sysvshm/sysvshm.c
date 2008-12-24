@@ -153,7 +153,7 @@ PHP_FUNCTION(shm_attach)
 	long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &shm_key, &shm_size, &shm_flag)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (shm_size < 1) {
@@ -209,7 +209,7 @@ PHP_FUNCTION(shm_detach)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &shm_id)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(SUCCESS == zend_list_delete(Z_LVAL_P(shm_id)));
@@ -224,7 +224,7 @@ PHP_FUNCTION(shm_remove)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &shm_id)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
@@ -249,7 +249,7 @@ PHP_FUNCTION(shm_put_var)
 	php_serialize_data_t var_hash;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &shm_id, &shm_key, &arg_var)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
@@ -285,7 +285,7 @@ PHP_FUNCTION(shm_get_var)
 	php_unserialize_data_t var_hash;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
@@ -318,7 +318,7 @@ PHP_FUNCTION(shm_has_var)
 	sysvshm_shm *shm_list_ptr;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
@@ -334,7 +334,7 @@ PHP_FUNCTION(shm_remove_var)
 	sysvshm_shm *shm_list_ptr;
 	
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
-		RETURN_FALSE;
+		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
