@@ -2,5 +2,10 @@
 // $Id$
 // tail end of configure
 
+if (sapi_enabled.length < 1) {
+	MESSAGE("");
+	ERROR("No SAPI selected, please enable at least one SAPI.");
+}
+
 generate_files();
 
