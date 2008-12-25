@@ -1998,7 +1998,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zval **stack,			/* Input stack */
 	     **val;			/* Value to be popped */
 	char *key = NULL;
-	int key_len = 0;
+	uint key_len = 0;
 	ulong index;
 	
 	/* Get the arguments and do error-checking */
@@ -2016,10 +2016,11 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	}
 		
 	/* Get the first or last value and copy it into the return value */
-	if (off_the_end)
+	if (off_the_end) {
 		zend_hash_internal_pointer_end(Z_ARRVAL_PP(stack));
-	else
+	} else {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
+	}
 	zend_hash_get_current_data(Z_ARRVAL_PP(stack), (void **)&val);
 	RETVAL_ZVAL(*val, 1, 0);
 	
@@ -2817,7 +2818,8 @@ PHP_FUNCTION(array_change_key_case)
    Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
 {
-	zval *array, *tmp;
+	zval **array, *tmp;
+	HashTable *target_hash;
 	Bucket *p;
 	struct bucketindex {
 		Bucket *b;
@@ -2827,25 +2829,30 @@ PHP_FUNCTION(array_unique)
 	unsigned int i;
 	long sort_type = SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &array, &sort_type) == FAILURE) {
 		return;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
+		RETURN_FALSE;
 	}
 
 	set_compare_func(sort_type TSRMLS_CC);
 
 	array_init(return_value);
-	zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(array), (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
+	zend_hash_copy(Z_ARRVAL_P(return_value), target_hash, (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
 
-	if (Z_ARRVAL_P(array)->nNumOfElements <= 1) {	/* nothing to do */
+	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
 		return;
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->persistent);
+	arTmp = (struct bucketindex *) pemalloc((target_hash->nNumOfElements + 1) * sizeof(struct bucketindex), target_hash->persistent);
 	if (!arTmp) {
 		RETURN_FALSE;
 	}
-	for (i = 0, p = Z_ARRVAL_P(array)->pListHead; p; i++, p = p->pListNext) {
+	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext) {
 		arTmp[i].b = p;
 		arTmp[i].i = i;
 	}
@@ -2875,7 +2882,7 @@ PHP_FUNCTION(array_unique)
 			}
 		}
 	}
-	pefree(arTmp, Z_ARRVAL_P(array)->persistent);
+	pefree(arTmp, target_hash->persistent);
 }
 /* }}} */
 
