@@ -31,74 +31,74 @@ foreach ($queries as $query) {
 ?>
 --EXPECT--
 array(3) {
-  ["foo"]=>
-  string(3) "abc"
-  ["bar"]=>
-  string(3) "def"
-  ["fubar"]=>
-  string(3) "ghi"
+  [u"foo"]=>
+  unicode(3) "abc"
+  [u"bar"]=>
+  unicode(3) "def"
+  [u"fubar"]=>
+  unicode(3) "ghi"
 }
-string(0) ""
-string(0) ""
-string(0) ""
-string(3) "abc"
-string(3) "def"
-string(3) "ghi"
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(3) "abc"
+unicode(3) "def"
+unicode(3) "ghi"
 array(3) {
-  ["+foo"]=>
-  string(3) "def"
-  ["-bar"]=>
-  string(3) "jkl"
-  ["fubar"]=>
-  string(0) ""
+  [u"+foo"]=>
+  unicode(3) "def"
+  [u"-bar"]=>
+  unicode(3) "jkl"
+  [u"fubar"]=>
+  unicode(0) ""
 }
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
 array(3) {
-  ["foo"]=>
+  [u"foo"]=>
   array(4) {
     [0]=>
-    string(3) "abc"
+    unicode(3) "abc"
     [1]=>
-    string(3) "def"
+    unicode(3) "def"
     [2]=>
-    string(3) "ghi"
+    unicode(3) "ghi"
     [3]=>
-    string(0) ""
+    unicode(0) ""
   }
-  ["bar"]=>
+  [u"bar"]=>
   array(1) {
     [0]=>
-    string(0) ""
+    unicode(0) ""
   }
-  ["fubar"]=>
+  [u"fubar"]=>
   array(1) {
     [0]=>
-    string(1) "="
+    unicode(1) "="
   }
 }
-string(0) ""
-string(0) ""
-string(0) ""
+unicode(0) ""
+unicode(0) ""
+unicode(0) ""
 array(4) {
   [0]=>
-  string(3) "abc"
+  unicode(3) "abc"
   [1]=>
-  string(3) "def"
+  unicode(3) "def"
   [2]=>
-  string(3) "ghi"
+  unicode(3) "ghi"
   [3]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(1) {
   [0]=>
-  string(0) ""
+  unicode(0) ""
 }
 array(1) {
   [0]=>
-  string(1) "="
+  unicode(1) "="
 }

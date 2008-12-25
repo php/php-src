@@ -14,7 +14,7 @@ var_dump($test);
 ?>
 --EXPECT--
 bool(true)
-string(0) ""
+unicode(0) ""
 bool(true)
-string(3) "moo"
+unicode(3) "moo"
 

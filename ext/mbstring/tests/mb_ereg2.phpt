@@ -31,7 +31,7 @@ array(1) {
   string(2) "-1"
 }
 
-Notice: Array to string conversion in %s on line %d
+Warning: mbereg_search_init() expects parameter 3 to be binary string, array given in %s on line %d
 int(-1)
 int(-1)
 array(1) {
