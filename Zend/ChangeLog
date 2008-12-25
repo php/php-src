@@ -1,3 +1,16 @@
+2008-12-24  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      MFH Fix bug #45991 - UTF-8 BOM breaks ini parser
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      Fix bug #45991 - UTF-8 BOM breaks ini parser
+
 2008-12-22  Etienne Kneuss  <php@colder.ch>
 
     * (PHP_5_3)
