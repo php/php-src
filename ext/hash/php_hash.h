@@ -82,6 +82,8 @@ extern const php_hash_ops php_hash_gost_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
+extern const php_hash_ops php_hash_salsa10_ops;
+extern const php_hash_ops php_hash_salsa20_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
 

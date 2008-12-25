@@ -1010,6 +1010,8 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("adler32",		&php_hash_adler32_ops);
 	php_hash_register_algo("crc32",			&php_hash_crc32_ops);
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);
+	php_hash_register_algo("salsa10",		&php_hash_salsa10_ops);
+	php_hash_register_algo("salsa20",		&php_hash_salsa20_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
