@@ -9,6 +9,8 @@ if (PHP_SIMPLEXML == "yes" && PHP_LIBXML == "yes"
 	AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
 	if (!PHP_SIMPLEXML_SHARED) {
 		ADD_FLAG("CFLAGS_SIMPLEXML", "/D LIBXML_STATIC");
+// be tricky for now, we actually need a macro like the one in m4 (PHP_SETUP_LIBXML)
+		ADD_FLAG("CFLAGS_SIMPLEXML", "$(CFLAGS_LIBXML)");
 	}
 	if (!ADD_EXTENSION_DEP('simplexml', 'spl', true)) {
 		MESSAGE("\tSPL support in simplexml disabled");
@@ -17,5 +19,3 @@ if (PHP_SIMPLEXML == "yes" && PHP_LIBXML == "yes"
 	PHP_SIMPLEXML == "no";
 	WARNING("simplexml not enabled; libraries and headers not found");
 }
-
-
