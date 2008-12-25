@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.31 2008-11-21 14:17:33 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.32 2008-12-25 00:08:51 pajoye Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1467,9 +1467,6 @@ function output_as_table(header, ar_out)
 function write_summary()
 {
 	var ar = new Array();
-	if (PHP_SUMMARY == "no") {
-		return;
-	}
 
 	STDOUT.WriteBlankLines(2);
 
