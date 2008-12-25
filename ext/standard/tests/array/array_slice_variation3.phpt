@@ -1,5 +1,7 @@
 --TEST--
 Test array_slice() function : usage variations - Pass different data types as $length arg
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
