@@ -174,8 +174,8 @@ if (PHP_DEBUG == "yes") {
 		ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 	}
 	// Equivalent to Release_TSInline build -> best optimization
-	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG \
-/D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+
 	// if you have VS.Net /GS hardens the binary against buffer overruns
 	// ADD_FLAG("CFLAGS", "/GS");
 }
@@ -369,8 +369,6 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 }
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
-
-ARG_ENABLE('summary', 'Enable configuration summary', 'yes');
 
 if (PHP_DSP != "no") {
 	if (FSO.FolderExists("tmp")) {
