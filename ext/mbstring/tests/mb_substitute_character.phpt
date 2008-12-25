@@ -31,15 +31,15 @@ var_dump(mb_substitute_character('BAD_NAME'));
 --EXPECT--
 bool(true)
 int(12356)
-string(8) "82a282a0"
+unicode(8) "82a282a0"
 bool(true)
-string(4) "long"
-string(16) "552b3236363082a0"
+unicode(4) "long"
+unicode(16) "552b3236363082a0"
 bool(true)
-string(4) "none"
-string(4) "82a0"
+unicode(4) "none"
+unicode(4) "82a0"
 bool(true)
-string(6) "entity"
-string(20) "262378323636303b82a0"
+unicode(6) "entity"
+unicode(20) "262378323636303b82a0"
 ERR: Warning
 bool(false)

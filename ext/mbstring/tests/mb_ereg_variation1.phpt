@@ -187,14 +187,14 @@ NULL
 int(6)
 array(1) {
   [0]=>
-  string(6) "string"
+  unicode(6) "string"
 }
 
 -- Iteration 19 --
 int(6)
 array(1) {
   [0]=>
-  string(6) "string"
+  unicode(6) "string"
 }
 
 -- Iteration 20 --

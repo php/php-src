@@ -46,7 +46,7 @@ if ($mb == $greek_lower) {
 echo "Done";
 ?>
 --EXPECT--
-**** Testing mb_strtolower() : basic functionality***
+**** Testing mb_strtolower() : basic functionality****
 
 -- ASCII String --
 string(26) "abcdefghijklmnopqrstuvwxyz"
