@@ -98,98 +98,97 @@ echo "Done";
 *** Testing array_unique() : Passing non array values to $input argument ***
 -- Iteration 1 --
 
-Warning: array_unique() expects parameter 1 to be array, integer given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 2 --
 
-Warning: array_unique() expects parameter 1 to be array, integer given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 3 --
 
-Warning: array_unique() expects parameter 1 to be array, integer given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 4 --
 
-Warning: array_unique() expects parameter 1 to be array, integer given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 5 --
 
-Warning: array_unique() expects parameter 1 to be array, double given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 6 --
 
-Warning: array_unique() expects parameter 1 to be array, double given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 7 --
 
-Warning: array_unique() expects parameter 1 to be array, double given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 8 --
 
-Warning: array_unique() expects parameter 1 to be array, double given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 9 --
 
-Warning: array_unique() expects parameter 1 to be array, double given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 10 --
 
-Warning: array_unique() expects parameter 1 to be array, null given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 11 --
 
-Warning: array_unique() expects parameter 1 to be array, null given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 12 --
 
-Warning: array_unique() expects parameter 1 to be array, boolean given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 13 --
 
-Warning: array_unique() expects parameter 1 to be array, boolean given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 14 --
 
-Warning: array_unique() expects parameter 1 to be array, boolean given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 15 --
 
-Warning: array_unique() expects parameter 1 to be array, boolean given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 16 --
 
-Warning: array_unique() expects parameter 1 to be array, string given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 17 --
 
-Warning: array_unique() expects parameter 1 to be array, string given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 18 --
 
-Warning: array_unique() expects parameter 1 to be array, string given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 19 --
 
-Warning: array_unique() expects parameter 1 to be array, string given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 20 --
 
-Warning: array_unique() expects parameter 1 to be array, string given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 21 --
-
-Warning: array_unique() expects parameter 1 to be array, object given in %s on line %d
-NULL
+array(0) {
+}
 -- Iteration 22 --
 
-Warning: array_unique() expects parameter 1 to be array, null given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 23 --
 
-Warning: array_unique() expects parameter 1 to be array, null given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 -- Iteration 24 --
 
-Warning: array_unique() expects parameter 1 to be array, resource given in %s on line %d
-NULL
+Warning: array_unique(): The argument should be an array in %s on line %d
+bool(false)
 Done
