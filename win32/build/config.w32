@@ -398,8 +398,6 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
-ARG_ENABLE('summary', 'Enable configuration summary', 'yes');
-
 if (PHP_DSP != "no") {
 	if (FSO.FolderExists("tmp")) {
 		FSO.DeleteFolder("tmp");
