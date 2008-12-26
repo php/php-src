@@ -77,7 +77,19 @@ typedef struct {
 #define SIMPLEXML_G(v) (simplexml_globals.v)
 #endif
 
-ZEND_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D);
+#ifdef PHP_WIN32
+#ifdef SIMPLEXML_EXPORTS
+#define PHP_SXE_API __declspec(dllexport)
+#else
+#define PHP_SXE_API __declspec(dllimport)
+#endif /* SIMPLEXML_EXPORTS */
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define PHP_SXE_API __attribute__ ((visibility("default")))
+#else
+#define PHP_SXE_API
+#endif /* PHP_WIN32 */
+
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D);
 
 #endif
 
