@@ -40,7 +40,7 @@
 
 zend_class_entry *sxe_class_entry = NULL;
 
-ZEND_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
+PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 {
 	return sxe_class_entry;
 }
@@ -2082,7 +2082,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 
 /* {{{ sxe_object_new()
  */
-ZEND_API zend_object_value
+PHP_SXE_API zend_object_value
 sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_sxe_object    *intern;
@@ -2344,7 +2344,7 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_k
 }
 /* }}} */
 
-ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC) /* {{{ */
+PHP_SXE_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC) /* {{{ */
 {
 	xmlNodePtr      node = NULL;
 	php_sxe_object  *intern;
