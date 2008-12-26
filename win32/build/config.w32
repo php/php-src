@@ -209,7 +209,7 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 
 // Find the php_build dir - it contains headers and libraries
 // that we need
-ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
+ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
 
 if (PHP_PHP_BUILD == 'no') {
 	if (FSO.FolderExists("..\\deps")) {
@@ -241,6 +241,9 @@ ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
 
 var php_usual_include_suspects = PHP_PHP_BUILD+"\\include;..\\deps\\include";
 var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib;..\\deps\\lib";
+
+ADD_FLAG("CFLAGS", '/I "' + php_usual_include_suspects + '" ');
+ADD_FLAG("LDFLAGS", '/libpath:"\\"' + php_usual_lib_suspects + '\\"" ');
 
 // Poke around for some headers
 function probe_basic_headers()
