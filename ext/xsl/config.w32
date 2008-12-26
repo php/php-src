@@ -4,7 +4,9 @@
 ARG_WITH("xsl", "xsl support", "no");
 
 if (PHP_XSL != "no") {
-	if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
+	if (PHP_DOM == "yes" && PHP_LIBXML == "yes"
+	&& ADD_EXTENSION_DEP('xsl', 'libxml')
+	&& ADD_EXTENSION_DEP('xsl', 'dom')) {
 		var ext_xsl_lib_found = false;
 		var ext_exslt_lib_found = false;
 
@@ -37,7 +39,7 @@ if (PHP_XSL != "no") {
 					ADD_FLAG("LDFLAGS_XSL", "/nodefaultlib:msvcrt");
 				}
 			}
-			ADD_EXTENSION_DEP('xsl', 'libxml');
+			
 		} else {
 			WARNING("xsl not enabled; libraries and headers not found");
 		}
