@@ -39,7 +39,7 @@
 	} \
 }
 
-ZEND_API zend_object_value sxe_object_new(zend_class_entry *ce TSRMLS_DC);
+PHP_SXE_API zend_object_value sxe_object_new(zend_class_entry *ce TSRMLS_DC);
 /* {{{ php_sxe_fetch_object()
  */
 static inline php_sxe_object *
