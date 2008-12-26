@@ -3,19 +3,20 @@
 
 ARG_WITH("simplexml", "Simple XML support", "yes");
 
-if (PHP_SIMPLEXML == "yes" && PHP_LIBXML == "yes"
-	&& ADD_EXTENSION_DEP('simplexml', 'libxml')) {
-	EXTENSION("simplexml", "simplexml.c sxe.c");
-	AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
-	if (!PHP_SIMPLEXML_SHARED) {
-		ADD_FLAG("CFLAGS_SIMPLEXML", "/D LIBXML_STATIC");
+if (PHP_SIMPLEXML == "yes") {
+	if (PHP_LIBXML == "yes" && ADD_EXTENSION_DEP('simplexml', 'libxml')) {
+		EXTENSION("simplexml", "simplexml.c sxe.c");
+		AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
+		if (!PHP_SIMPLEXML_SHARED) {
+			ADD_FLAG("CFLAGS_SIMPLEXML", "/D LIBXML_STATIC");
+		}
+		if (!ADD_EXTENSION_DEP('simplexml', 'spl', true)) {
+			MESSAGE("\tSPL support in simplexml disabled");
+		}
+	} else {
+		PHP_SIMPLEXML == "no";
+		WARNING("simplexml not enabled; libraries and headers not found");
 	}
-	if (!ADD_EXTENSION_DEP('simplexml', 'spl', true)) {
-		MESSAGE("\tSPL support in simplexml disabled");
-	}
-} else {
-	PHP_SIMPLEXML == "no";
-	WARNING("simplexml not enabled; libraries and headers not found");
 }
 
 
