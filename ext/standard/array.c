@@ -1372,6 +1372,13 @@ PHP_FUNCTION(extract)
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
+	/* var_array is passed by ref for the needs of EXTR_REFS (needs to
+	 * work on the original array to create refs to its members)
+	 * simulate pass_by_value if EXTR_REFS is not used */
+	if (!extract_refs) {
+		SEPARATE_ARG_IF_REF(var_array);
+	}
+
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&entry, &pos) == SUCCESS) {
 		zval final_name;
@@ -1482,6 +1489,10 @@ PHP_FUNCTION(extract)
 		zval_dtor(&final_name);
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
+	}
+
+	if (!extract_refs) {
+		zval_ptr_dtor(&var_array);
 	}
 
 	RETURN_LONG(count);
