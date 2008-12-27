@@ -1334,7 +1334,7 @@ static int php_valid_var_name(char *var_name, int len) /* {{{ */
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval **var_array, **z_extract_type, **prefix;
+	zval **var_array, *orig_var_array, **z_extract_type, **prefix;
 	zval **entry, *data;
 	char *var_name;
 	smart_str final_name = {0};
@@ -1391,7 +1391,15 @@ PHP_FUNCTION(extract)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument should be an array");
 		return;
 	}
-		
+
+	/* var_array is passed by ref for the needs of EXTR_REFS (needs to
+	 * work on the original array to create refs to its members)
+	 * simulate pass_by_value if EXTR_REFS is not used */
+	if (!extract_refs) {
+		orig_var_array = *var_array;
+		SEPARATE_ARG_IF_REF((*var_array));
+	}
+
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(var_array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(var_array), (void **)&entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
@@ -1491,6 +1499,10 @@ PHP_FUNCTION(extract)
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(var_array), &pos);
 	}
 
+	if (!extract_refs) {
+		zval_ptr_dtor(var_array);
+		*var_array = orig_var_array;
+	}
 	smart_str_free(&final_name);
 
 	RETURN_LONG(count);
