@@ -1294,10 +1294,12 @@ PHP_FUNCTION(explode)
 	array_init(return_value);
 
 	if ( str_len == 0 ) {
-		if ( str_type == IS_UNICODE ) {
-			add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 0);
-		} else {
-			add_next_index_stringl(return_value, "", sizeof("")-1, 1);
+	  	if (limit >= 0 || argc == 2) {
+			if ( str_type == IS_UNICODE ) {
+				add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 0);
+			} else {
+				add_next_index_stringl(return_value, "", sizeof("")-1, 1);
+			}
 		}
 		return;
 	}
