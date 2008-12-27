@@ -644,6 +644,10 @@ default_socket_timeout = 60
 ;stack size limit imposed by the Operating System).
 ;pcre.recursion_limit=100000
 
+[Pdo]
+; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
+;pdo_odbc.connection_pooling=strict
+
 [Phar]
 ;phar.readonly = On
 ;phar.require_hash = On
@@ -693,6 +697,8 @@ odbc.defaultlrl = 4096
 ; See the documentation on odbc_binmode and odbc_longreadlen for an explanation
 ; of uodbc.defaultlrl and uodbc.defaultbinmode
 odbc.defaultbinmode = 1
+
+;birdstep.max_links = -1
 
 [MySQL]
 ; Allow or prevent persistent links.
@@ -843,31 +849,6 @@ pgsql.ignore_notice = 0
 ; Unless pgsql.ignore_notice=0, module cannot log notice message.
 pgsql.log_notice = 0
 
-[Sybase]
-; Allow or prevent persistent links.
-sybase.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-sybase.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-sybase.max_links = -1
-
-;sybase.interface_file = "/usr/sybase/interfaces"
-
-; Minimum error severity to display.
-sybase.min_error_severity = 10
-
-; Minimum message severity to display.
-sybase.min_message_severity = 10
-
-; Compatibility mode with old versions of PHP 3.0.
-; If on, this will cause PHP to automatically assign types to results according
-; to their Sybase type, instead of treating them all as strings.  This
-; compatibility mode will probably not stay around forever, so try applying
-; whatever necessary changes to your code, and turn it off.
-sybase.compatability_mode = Off
-
 [Sybase-CT]
 ; Allow or prevent persistent links.
 sybct.allow_persistent = On
@@ -884,49 +865,17 @@ sybct.min_server_severity = 10
 ; Minimum client message severity to display.
 sybct.min_client_severity = 10
 
+; Set per-context timeout
+;sybct.timeout=
+
+;sybct.packet_size
+
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
 bcmath.scale = 0
 
 [browscap]
 ;browscap = extra/browscap.ini
-
-[Informix]
-; Default host for ifx_connect() (doesn't apply in safe mode).
-ifx.default_host =
-
-; Default user for ifx_connect() (doesn't apply in safe mode).
-ifx.default_user =
-
-; Default password for ifx_connect() (doesn't apply in safe mode).
-ifx.default_password =
-
-; Allow or prevent persistent links.
-ifx.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-ifx.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-ifx.max_links = -1
-
-; If on, select statements return the contents of a text blob instead of its id.
-ifx.textasvarchar = 0
-
-; If on, select statements return the contents of a byte blob instead of its id.
-ifx.byteasvarchar = 0
-
-; Trailing blanks are stripped from fixed-length char columns.  May help the
-; life of Informix SE users.
-ifx.charasvarchar = 0
-
-; If on, the contents of text and byte blobs are dumped to a file instead of
-; keeping them in memory.
-ifx.blobinfile = 0
-
-; NULL's are returned as empty strings, unless this is set to 1.  In that case,
-; NULL's are returned as string 'NULL'.
-ifx.nullformat = 0
 
 [Session]
 ; Handler used to store/retrieve data.
