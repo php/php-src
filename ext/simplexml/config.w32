@@ -13,6 +13,7 @@ if (PHP_SIMPLEXML == "yes") {
 		if (!ADD_EXTENSION_DEP('simplexml', 'spl', true)) {
 			MESSAGE("\tSPL support in simplexml disabled");
 		}
+		ADD_FLAG("CFLAGS_SIMPLEXML", "/D PHP_SIMPLEXML_EXPORTS ");
 	} else {
 		PHP_SIMPLEXML == "no";
 		WARNING("simplexml not enabled; libraries and headers not found");
