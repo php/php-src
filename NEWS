@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   maximum if required. (Scott)
 - Add ICU support to SQLite3 if using the bundled version. (Scott)
 
+- Fixed Bug #46957 (The tokenizer returns deprecated values). (Felipe)
 - Fixed bug #46849 (Cloning DOMDocument doesn't clone the properties). (Rob)
 - Fixed bug #46847 (phpinfo() is missing some settings). (Hannes)
 - Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
