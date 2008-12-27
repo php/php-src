@@ -721,7 +721,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 		}
 	}
 
-	if (out.xmlrpc_out.xml_elem_opts.encoding != ENCODING_DEFAULT) {
+	if (strcmp(out.xmlrpc_out.xml_elem_opts.encoding, ENCODING_DEFAULT) != 0) {
 		efree((char *)out.xmlrpc_out.xml_elem_opts.encoding);
 	}
 }
