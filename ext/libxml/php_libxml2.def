@@ -1052,9 +1052,11 @@ xmlTextReaderReadState
 xmlTextReaderReadString
 xmlTextReaderRelaxNGSetSchema
 xmlTextReaderRelaxNGValidate
+xmlTextReaderSchemaValidate
 xmlTextReaderSetErrorHandler
 xmlTextReaderSetParserProp
 xmlTextReaderSetStructuredErrorHandler
+xmlTextReaderSetup
 xmlTextReaderStandalone
 xmlTextReaderValue
 xmlTextReaderXmlLang
