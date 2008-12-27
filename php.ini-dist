@@ -771,16 +771,6 @@ mysqli.default_pw =
 ; Allow or prevent reconnect
 mysqli.reconnect = Off
 
-[mSQL]
-; Allow or prevent persistent links.
-msql.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-msql.max_persistent = -1
-
-; Maximum number of links (persistent+non persistent).  -1 means no limit.
-msql.max_links = -1
-
 [OCI8]
 
 ; Connection: Enables privileged connections using external
@@ -1134,21 +1124,6 @@ mssql.secure_connection = Off
 ; 2: Overload str*() functions
 ; 4: Overload ereg*() functions
 ;mbstring.func_overload = 0
-
-[FrontBase]
-;fbsql.allow_persistent = On
-;fbsql.autocommit = On
-;fbsql.show_timestamp_decimals = Off
-;fbsql.default_database =
-;fbsql.default_database_password =
-;fbsql.default_host =
-;fbsql.default_password =
-;fbsql.default_user = "_SYSTEM"
-;fbsql.generate_warnings = Off
-;fbsql.max_connections = 128
-;fbsql.max_links = 128
-;fbsql.max_persistent = -1
-;fbsql.max_results = 128
 
 [gd]
 ; Tell the jpeg decode to libjpeg warnings and try to create
