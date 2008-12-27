@@ -1238,6 +1238,11 @@ soap.wsdl_cache_dir="/tmp"
 ; instead of original one.
 soap.wsdl_cache_ttl=86400
 
+[sysvshm]
+; A default size of the shared memory segment
+;sysvshm.init_mem = 10000
+
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
