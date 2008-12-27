@@ -1033,7 +1033,9 @@ PHP_FUNCTION(explode)
 	array_init(return_value);
 
 	if (! Z_STRLEN_PP(str)) {
-		add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
+	  	if (limit >= 0 || argc == 2) {
+			add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
+		} 
 		return;
 	}
 

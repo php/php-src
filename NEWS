@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.9
+- Fixed explode() behavior to respect negative limit when string is empty. (shire)
 - Added optional sorting type flag parameter to array_unique(), default is
   SORT_REGULAR. (Andrei)
 - Fixed security issue in imagerotate(), background colour isn't validated
