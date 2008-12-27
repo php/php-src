@@ -1922,8 +1922,10 @@ PHP_FUNCTION(mb_detect_order)
 				if (list) {
 					efree(list);
 				}
+				zval_ptr_dtor(&arg1);
 				RETURN_FALSE;
 			}
+			zval_ptr_dtor(&arg1);
 			break;
 		}
 
@@ -1978,7 +1980,9 @@ PHP_FUNCTION(mb_substitute_character)
 				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
+					zval_ptr_dtor(&arg1);
 				} else {
+					zval_ptr_dtor(&arg1);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETURN_FALSE;
 				}
