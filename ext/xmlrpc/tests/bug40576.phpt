@@ -29,11 +29,11 @@ string(125) "<?xml version="1.0" encoding="utf-8"?>
 </param>
 </params>
 "
-string(128) "<?xml version="1.0" encoding="utf-8"?>
+string(130) "<?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>
  <value>
-  <double>11234567891000</double>
+  <double>1.1234567891E+13</double>
  </value>
 </param>
 </params>
