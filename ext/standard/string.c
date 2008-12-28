@@ -2129,7 +2129,7 @@ PHP_FUNCTION(pathinfo)
 		if (zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element) == SUCCESS) {
 			RETVAL_ZVAL(*element, 1, 0);
 		} else {
-			ZVAL_EMPTY_STRING(return_value);
+			ZVAL_EMPTY_UNICODE(return_value);
 		}
 	}
 
