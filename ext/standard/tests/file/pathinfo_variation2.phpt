@@ -122,7 +122,7 @@ unicode(%d) %s
 unicode(%d) %s
 
 --float .5--
-string(0) ""
+unicode(0) ""
 
 --empty array--
 Error: 2 - pathinfo() expects parameter 2 to be long, array given, %s(%d)
@@ -141,22 +141,22 @@ Error: 2 - pathinfo() expects parameter 2 to be long, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-string(0) ""
+unicode(0) ""
 
 --lowercase null--
-string(0) ""
+unicode(0) ""
 
 --lowercase true--
 unicode(17) "/usr/include/arpa"
 
 --lowercase false--
-string(0) ""
+unicode(0) ""
 
 --uppercase TRUE--
 unicode(17) "/usr/include/arpa"
 
 --uppercase FALSE--
-string(0) ""
+unicode(0) ""
 
 --empty string DQ--
 Error: 2 - pathinfo() expects parameter 2 to be long, Unicode string given, %s(%d)
@@ -191,9 +191,9 @@ Error: 2 - pathinfo() expects parameter 2 to be long, object given, %s(%d)
 NULL
 
 --undefined var--
-string(0) ""
+unicode(0) ""
 
 --unset var--
-string(0) ""
+unicode(0) ""
 ===DONE===
 
