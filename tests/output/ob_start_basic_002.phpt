@@ -1,7 +1,5 @@
 --TEST--
 ob_start(): Check behaviour with various callback return values.
---XFAIL--
-PHP6 behaves differently from PHP5 when callback returns null. See bug 46900.
 --FILE--
 <?php
 function return_empty_string($string) {

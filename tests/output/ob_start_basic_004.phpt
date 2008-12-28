@@ -1,7 +1,5 @@
 --TEST--
 ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size.
---XFAIL--
-Special behaviour when chunk_size set to 1 is not honoured on PHP6. See bug 46903.
 --FILE--
 <?php
 /* 

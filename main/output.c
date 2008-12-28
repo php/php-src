@@ -983,7 +983,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			ZVAL_LONG(ob_mode, (long) context->op);
 			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 2, &ob_data, &ob_mode);
 			
-#define PHP_OUTPUT_USER_SUCCESS(retval) (retval && (Z_TYPE_P(retval) != IS_NULL) && (Z_TYPE_P(retval) != IS_BOOL || Z_BVAL_P(retval)))
+#define PHP_OUTPUT_USER_SUCCESS(retval) (retval && !(Z_TYPE_P(retval) == IS_BOOL && Z_BVAL_P(retval)==0))
 			if (SUCCESS == zend_fcall_info_call(&handler->func.user->fci, &handler->func.user->fcc, &retval, NULL TSRMLS_CC) && PHP_OUTPUT_USER_SUCCESS(retval)) {
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
@@ -1342,6 +1342,8 @@ PHP_FUNCTION(ob_start)
 	}
 	if (chunk_size < 0) {
 		chunk_size = 0;
+	} else if (chunk_size == 1) {
+		chunk_size = 4096;
 	}
 	
 	if (SUCCESS != php_output_start_user(output_handler, chunk_size, flags TSRMLS_CC)) {
