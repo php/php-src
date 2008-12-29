@@ -1,14 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.9
-- Fixed explode() behavior to respect negative limit when string is empty. (shire)
-- Added optional sorting type flag parameter to array_unique(), default is
+- Added optional sorting type flag parameter to array_unique(). Default is
   SORT_REGULAR. (Andrei)
+
+- Fixed explode() behavior with empty string to respect negative limit. (Shire)
 - Fixed security issue in imagerotate(), background colour isn't validated
   correctly with a non truecolour image, reported by Hamid Ebadi, APA Laboratory.
   (Fixes CVE-2008-5498) (Scott)
-
-- Fixed segfault when malformed string passed to json_decode(). (Scott)
+- Fixed a segfault when malformed string is passed to json_decode(). (Scott)
 
 - Fixed bug #46918 (imap_rfc822_parse_adrlist host part not filled in correctly).
   (Felipe)
