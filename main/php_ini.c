@@ -132,11 +132,24 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 }
 /* }}} */
 
+/* {{{ php_ini_available
+ */
+static int php_ini_available(zend_ini_entry *ini_entry, int *module_number_available TSRMLS_DC)
+{
+	if (ini_entry->module_number == *module_number_available) {
+		*module_number_available = -1;
+		return ZEND_HASH_APPLY_STOP;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+}
+/* }}} */
+
 /* {{{ display_ini_entries
  */
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
-	int module_number;
+	int module_number, module_number_available;
 	TSRMLS_FETCH();
 
 	if (module) {
@@ -144,10 +157,14 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	} else {
 		module_number = 0;
 	}
-	php_info_print_table_start();
-	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (zend_intptr_t) module_number TSRMLS_CC);
-	php_info_print_table_end();
+	module_number_available = module_number;
+	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_available, &module_number_available TSRMLS_CC);
+	if (module_number_available == -1) {
+		php_info_print_table_start();
+		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
+		zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (zend_intptr_t) module_number TSRMLS_CC);
+		php_info_print_table_end();
+	}
 }
 /* }}} */
 
