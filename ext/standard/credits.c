@@ -57,14 +57,14 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		} else {
 			php_info_print_table_header(1, "Language Design & Concept");
 		}
-		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski");
+		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski, Marcus Boerger");
 		php_info_print_table_end();
 
 		/* PHP Language */
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "PHP Authors");
 		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
+		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Marcus Boerger, Dmitry Stogov");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski, Andrei Zmievski");
 		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann, Jani Taskinen");
 		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski, Wez Furlong");
