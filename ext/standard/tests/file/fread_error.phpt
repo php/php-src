@@ -103,7 +103,7 @@ bool(false)
 
 Notice: Undefined variable: file_content_type in %s on line %d
 
-Warning: fread(): %d is not a valid stream resource in %s on line %d
+Warning: fread(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fread() expects parameter 1 to be resource, null given in %s on line %d
@@ -112,4 +112,3 @@ bool(false)
 Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 Done
-

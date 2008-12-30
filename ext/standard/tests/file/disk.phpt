@@ -37,8 +37,8 @@ bool(false)
 
 Warning: disk_total_space(): No such file or directory in %s on line %d
 bool(false)
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 Warning: disk_free_space(): No such file or directory in %s on line %d
 bool(false)
