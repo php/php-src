@@ -89,26 +89,29 @@ static int php_info_write_wrapper(const char *str, uint str_length)
 }
 
 
-PHPAPI void php_info_print_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
+PHPAPI void php_info_print_module(zend_module_entry *zend_module TSRMLS_DC) /* {{{ */
 {
-	if (module->info_func) {
+	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
-			php_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
+			php_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", zend_module->name, zend_module->name);
 		} else {
 			php_info_print_table_start();
-			php_info_print_table_header(1, module->name);
+			php_info_print_table_header(1, zend_module->name);
 			php_info_print_table_end();
 		}
-		module->info_func(module TSRMLS_CC);
+		if (zend_module->info_func) {
+			zend_module->info_func(zend_module TSRMLS_CC);
+		} else {
+			php_info_print_table_start();
+			php_info_print_table_row(2, "Version", zend_module->version);
+			php_info_print_table_end();
+			DISPLAY_INI_ENTRIES();
+		}
 	} else {
 		if (!sapi_module.phpinfo_as_text) {
-			php_printf("<tr>");
-			php_printf("<td>");
-			php_printf("%s", module->name);
-			php_printf("</td></tr>\n");
+			php_printf("<tr><td colspan='2>%s</td></tr>\n", zend_module->name);
 		} else {
-			php_printf("%s", module->name);
-			php_printf("\n");
+			php_printf("%s\n", zend_module->name);
 		}	
 	}
 }
@@ -116,7 +119,7 @@ PHPAPI void php_info_print_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
 
 static int _display_module_info_func(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	if (module->info_func) {
+	if (module->info_func || module->version) {
 		php_info_print_module(module TSRMLS_CC);
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -125,7 +128,7 @@ static int _display_module_info_func(zend_module_entry *module TSRMLS_DC) /* {{{
 
 static int _display_module_info_def(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	if (!module->info_func) {
+	if (!module->info_func && !module->version) {
 		php_info_print_module(module TSRMLS_CC);
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -896,7 +899,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
-		php_info_print_table_header(1, "Module Name");
+		php_info_print_table_header(2, "Module Name");
 		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_def TSRMLS_CC);
 		php_info_print_table_end();
 
