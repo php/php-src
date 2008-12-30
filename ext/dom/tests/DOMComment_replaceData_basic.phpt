@@ -4,7 +4,7 @@ Test replacing data into a DOMComment basic test
 Andrew Larssen <al@larssen.org>
 London TestFest 2008
 --SKIPIF--
-<?php // require_once('skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
