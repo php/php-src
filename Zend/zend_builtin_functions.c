@@ -291,15 +291,23 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 };
 /* }}} */
 
-int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
-{
-	return zend_register_functions(NULL, builtin_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
-}
+zend_module_entry zend_builtin_module = { /* {{{ */
+    STANDARD_MODULE_HEADER,
+	"Zend",
+	builtin_functions,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	ZEND_VERSION,
+	STANDARD_MODULE_PROPERTIES
+};
 /* }}} */
 
-void zend_shutdown_builtin_functions(TSRMLS_D) /* {{{ */
+int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
 {
-	zend_unregister_functions(builtin_functions, -1, NULL TSRMLS_CC);
+	return zend_register_internal_module(&zend_builtin_module TSRMLS_CC) == NULL ? FAILURE : SUCCESS;
 }
 /* }}} */
 
