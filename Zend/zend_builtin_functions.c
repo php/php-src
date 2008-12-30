@@ -293,7 +293,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 
 zend_module_entry zend_builtin_module = { /* {{{ */
     STANDARD_MODULE_HEADER,
-	"Zend",
+	"Core",
 	builtin_functions,
 	NULL,
 	NULL,
@@ -307,7 +307,9 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 
 int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
 {
-	return zend_register_internal_module(&zend_builtin_module TSRMLS_CC) == NULL ? FAILURE : SUCCESS;
+	zend_builtin_module.module_number = 0;
+	zend_builtin_module.type = MODULE_PERSISTENT;
+	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module TSRMLS_CC)) == NULL ? FAILURE : SUCCESS;
 }
 /* }}} */
 

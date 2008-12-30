@@ -684,6 +684,7 @@ static void register_standard_class(TSRMLS_D) /* {{{ */
 	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
 	zend_hash_add(CG(class_table), "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
+	zend_standard_class_def->module = EG(current_module);
 }
 /* }}} */
 
@@ -1159,6 +1160,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
 #endif
+
 	register_standard_class(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
