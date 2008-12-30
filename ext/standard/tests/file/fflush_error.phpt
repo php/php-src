@@ -24,10 +24,9 @@ if($file_handle == false)
    
 var_dump( fflush($file_handle, $file_handle) );
 fclose($file_handle);
-fflush($file_handle);
 
 // test invalid arguments : non-resources
-echo "\n-- Testing fflush(): with invalid arguments --\n";
+echo "-- Testing fflush(): with invalid arguments --\n";
 $invalid_args = array (
   "string",
   10,
@@ -42,7 +41,7 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   echo "-- Iteration $loop_counter --\n";
   var_dump( fflush($invalid_args[$loop_counter - 1]) );
 }
-echo "Done\n";
+echo "\n*** Done ***";
 ?>
 
 --CLEAN--
@@ -61,9 +60,6 @@ NULL
 
 Warning: fflush() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-
-Warning: fflush(): 5 is not a valid stream resource in %s on line %d
-
 -- Testing fflush(): with invalid arguments --
 -- Iteration 1 --
 
@@ -89,5 +85,5 @@ NULL
 
 Warning: fflush() expects parameter 1 to be resource, object given in %s on line %d
 NULL
-Done
 
+*** Done ***

@@ -1,7 +1,5 @@
 --TEST--
 Test fseek(), ftell() & rewind() functions : error conditions - fseek() 
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 
@@ -59,44 +57,43 @@ echo "Done\n";
 -- Testing fseek() with zero argument --
 
 Warning: fseek() expects at least 2 parameters, 0 given in %s on line %d
-bool(false)
+NULL
 -- Testing fseek() with unexpected number of arguments --
 
 Warning: fseek() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
+NULL
 
 Warning: fseek() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
+NULL
 -- Testing fseek() with invalid arguments --
 -- Iteration 1 --
 
 Warning: fseek() expects parameter 1 to be resource, Unicode string given in %s on line %d
-bool(false)
+NULL
 -- Iteration 2 --
 
 Warning: fseek() expects parameter 1 to be resource, integer given in %s on line %d
-bool(false)
+NULL
 -- Iteration 3 --
 
 Warning: fseek() expects parameter 1 to be resource, double given in %s on line %d
-bool(false)
+NULL
 -- Iteration 4 --
 
 Warning: fseek() expects parameter 1 to be resource, boolean given in %s on line %d
-bool(false)
+NULL
 -- Iteration 5 --
 
 Warning: fseek() expects parameter 1 to be resource, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 6 --
 
 Warning: fseek() expects parameter 1 to be resource, object given in %s on line %d
-bool(false)
+NULL
 -- Testing fseek() with closed/unset file handle --
 Warning: fseek(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fseek() expects parameter 1 to be resource, null given in %s on line %d
-bool(false)
+NULL
 Done
-
