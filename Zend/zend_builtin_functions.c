@@ -119,7 +119,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_each, 0, 0, 1)
 	ZEND_ARG_INFO(1, arr)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_reporting, 0, 0, 0)
 	ZEND_ARG_INFO(0, new_error_level)
 ZEND_END_ARG_INFO()
 
@@ -575,7 +575,7 @@ ZEND_FUNCTION(each)
 }
 /* }}} */
 
-/* {{{ proto int error_reporting(int new_error_level=null) U
+/* {{{ proto int error_reporting([int new_error_level]) U
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
