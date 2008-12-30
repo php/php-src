@@ -2386,7 +2386,8 @@ PHP_FUNCTION(mb_strrchr)
 PHP_FUNCTION(mb_stristr)
 {
 	zend_bool part = 0;
-	unsigned int n, from_encoding_len, len, mblen;
+	unsigned int from_encoding_len, len, mblen;
+	int n;
 	mbfl_string haystack, needle, result, *ret = NULL;
 	const char *from_encoding = mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
 	mbfl_string_init(&haystack);
