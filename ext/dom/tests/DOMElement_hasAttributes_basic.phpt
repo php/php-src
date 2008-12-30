@@ -1,5 +1,7 @@
 --TEST--
 DOMNode: hasAttributes() 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --CREDITS--
 James Lewis <james@s-1.com>
 #TestFest 2008
