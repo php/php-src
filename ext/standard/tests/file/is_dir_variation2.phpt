@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Testing is_dir() with dir, soft & hard link to dir,
      and with file, soft & hard link to file */
-      
+
 $file_path = dirname(__FILE__);
 
 echo "*** Testing is_dir() with dir and links to dir ***\n";
@@ -70,7 +70,7 @@ bool(true)
 -- With symlink --
 bool(true)
 -- With hardlink --
-Warning: link(): %s
+Warning: link(): %s in %s on line %d
 bool(false)
 
 *** Testing is_dir() with file and links to a file ***

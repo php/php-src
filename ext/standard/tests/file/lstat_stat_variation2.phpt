@@ -21,12 +21,13 @@ $file_path = dirname(__FILE__);
 require("file.inc");
 
 /* create temp directory */
-mkdir("$file_path/lstat_stat_variation1/");  // temp dir
+@rmdir("$file_path/lstat_stat_variation2/");  //ensure that dir doesn't exists 
+mkdir("$file_path/lstat_stat_variation2/");  // temp dir
 
 // renaming a directory and check stat
 echo "*** Testing stat() for directory after being renamed ***\n";
-$old_dirname = "$file_path/lstat_stat_variation1";
-$new_dirname = "$file_path/lstat_stat_variation1a";
+$old_dirname = "$file_path/lstat_stat_variation2";
+$new_dirname = "$file_path/lstat_stat_variation2a";
 $old_stat = stat($old_dirname);
 clearstatcache();
 var_dump( rename($old_dirname, $new_dirname) );
@@ -36,11 +37,8 @@ $new_stat = stat($new_dirname);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 
-// compare the two stats - all except ctime
-$keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 
-                       "dev", "ino", "mode", "nlink", "uid", "gid",
-                       "rdev", "size", "atime", "mtime", "blksize", "blocks");
-var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
+// compare the two stats
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
 // clear the cache
 clearstatcache();
 
@@ -50,9 +48,9 @@ echo "\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-rmdir("$file_path/lstat_stat_variation1a");
+rmdir("$file_path/lstat_stat_variation2a");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() for directory after being renamed ***
 bool(true)
 bool(true)

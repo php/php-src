@@ -11,7 +11,7 @@ $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
         unlink ($filename);
-        die('skip...cannot be run as root\n');
+        die('skip cannot be run as root');
 }
 
 unlink($filename);
@@ -88,100 +88,99 @@ chmod(dirname(__FILE__)."/006_variation2", 0777);
 unlink(dirname(__FILE__)."/006_variation2.tmp");
 rmdir(dirname(__FILE__)."/006_variation2");
 ?>
---EXPECTF--	
+--EXPECTF--
 *** Testing fileperms() & chmod() : usage variations ***
 
 *** Testing fileperms(), chmod() with miscellaneous permissions ***
 -- Iteration 1 --
 bool(true)
-%d
+107777
 bool(true)
-%d
+47777
 -- Iteration 2 --
 bool(true)
-%d
+100000
 bool(true)
-%d
+40000
 -- Iteration 3 --
 bool(true)
-%d
+101000
 bool(true)
-%d
+41000
 -- Iteration 4 --
 bool(true)
-%d
+101111
 bool(true)
-%d
+41111
 -- Iteration 5 --
 bool(true)
-%d
+107001
 bool(true)
-%d
+47001
 -- Iteration 6 --
 bool(true)
-%d
+100001
 bool(true)
-%d
+40001
 -- Iteration 7 --
 bool(true)
-%d
+101411
 bool(true)
-%d
+41411
 -- Iteration 8 --
 bool(true)
-%d
+107141
 bool(true)
-%d
+47141
 -- Iteration 9 --
 bool(true)
-%d
+100637
 bool(true)
-%d
+40637
 -- Iteration 10 --
 bool(true)
-%d
+103567
 bool(true)
-%d
+43567
 -- Iteration 11 --
 bool(true)
-%d
+103567
 bool(true)
-%d
+43567
 -- Iteration 12 --
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+103567
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+43567
 -- Iteration 13 --
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+103567
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+43567
 -- Iteration 14 --
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+103567
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+43567
 -- Iteration 15 --
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+103567
 
 Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
 NULL
-%d
+43567
 *** Done ***
-
