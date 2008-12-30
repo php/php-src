@@ -218,7 +218,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-static const zend_function_entry builtin_functions[] = {
+static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(zend_version,		arginfo_zend__void)
 	ZEND_FE(func_num_args,		arginfo_zend__void)
 	ZEND_FE(func_get_arg,		arginfo_func_get_arg)
@@ -284,13 +284,27 @@ static const zend_function_entry builtin_functions[] = {
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
 	{ NULL, NULL, NULL }
 };
+/* }}} */
 
+zend_module_entry zend_builtin_module = { /* {{{ */
+    STANDARD_MODULE_HEADER,
+	"Zend",
+	builtin_functions,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	ZEND_VERSION,
+	STANDARD_MODULE_PROPERTIES
+};
+/* }}} */
 
-int zend_startup_builtin_functions(TSRMLS_D)
+int zend_startup_builtin_functions(TSRMLS_D) /* {{{ */
 {
-	return zend_register_functions(NULL, builtin_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+	return zend_register_internal_module(&zend_builtin_module TSRMLS_CC) == NULL ? FAILURE : SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto string zend_version(void)
    Get the version of the Zend Engine */
