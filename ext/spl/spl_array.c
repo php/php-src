@@ -436,11 +436,6 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 	case IS_UNICODE:
-		/* FIXME: Unicode support??? */
-		if (Z_STRVAL_P(offset)[0] == '\0') {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
-			return;
-		}
 		Z_ADDREF_P(value);
 		zend_u_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
@@ -1712,7 +1707,7 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	if (buf_len == 0) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Empty serialized string cannot be empty");
+		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Serialized string cannot be empty");
 		return;
 	}
 
