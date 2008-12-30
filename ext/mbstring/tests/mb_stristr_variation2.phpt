@@ -122,31 +122,31 @@ fclose($fp);
 *** Testing mb_stristr() : usage variation ***
 
 --int 0--
-string(0) ""
+bool(false)
 
 --int 1--
-string(0) ""
+bool(false)
 
 --int 12345--
-string(0) ""
+bool(false)
 
 --int -12345--
-string(0) ""
+bool(false)
 
 --float 10.5--
-string(0) ""
+bool(false)
 
 --float -10.5--
-string(0) ""
+bool(false)
 
 --float 12.3456789000e10--
-string(0) ""
+bool(false)
 
 --float -12.3456789000e10--
-string(0) ""
+bool(false)
 
 --float .5--
-string(0) ""
+bool(false)
 
 --empty array--
 Error: 2 - mb_stristr() expects parameter 2 to be binary string, array given, %s(%d)
@@ -173,14 +173,14 @@ Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
 bool(false)
 
 --lowercase true--
-string(0) ""
+bool(false)
 
 --lowercase false--
 Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
 bool(false)
 
 --uppercase TRUE--
-string(0) ""
+bool(false)
 
 --uppercase FALSE--
 Error: 2 - mb_stristr(): Empty delimiter., %s(%d)

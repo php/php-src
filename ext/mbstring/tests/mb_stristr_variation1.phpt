@@ -122,31 +122,31 @@ fclose($fp);
 *** Testing mb_stristr() : usage variation ***
 
 --int 0--
-string(0) ""
+bool(false)
 
 --int 1--
-string(0) ""
+bool(false)
 
 --int 12345--
-string(0) ""
+bool(false)
 
 --int -12345--
-string(0) ""
+bool(false)
 
 --float 10.5--
-string(0) ""
+bool(false)
 
 --float -10.5--
-string(0) ""
+bool(false)
 
 --float 12.3456789000e10--
-string(0) ""
+bool(false)
 
 --float -12.3456789000e10--
-string(0) ""
+bool(false)
 
 --float .5--
-string(0) ""
+bool(false)
 
 --empty array--
 Error: 2 - mb_stristr() expects parameter 1 to be binary string, array given, %s(%d)
@@ -165,41 +165,41 @@ Error: 2 - mb_stristr() expects parameter 1 to be binary string, array given, %s
 bool(false)
 
 --uppercase NULL--
-string(0) ""
+bool(false)
 
 --lowercase null--
-string(0) ""
+bool(false)
 
 --lowercase true--
-string(0) ""
+bool(false)
 
 --lowercase false--
-string(0) ""
+bool(false)
 
 --uppercase TRUE--
-string(0) ""
+bool(false)
 
 --uppercase FALSE--
-string(0) ""
+bool(false)
 
 --empty string DQ--
-string(0) ""
+bool(false)
 
 --empty string SQ--
-string(0) ""
+bool(false)
 
 --instance of classWithToString--
-string(0) ""
+bool(false)
 
 --instance of classWithoutToString--
 Error: 2 - mb_stristr() expects parameter 1 to be binary string, object given, %s(%d)
 bool(false)
 
 --undefined var--
-string(0) ""
+bool(false)
 
 --unset var--
-string(0) ""
+bool(false)
 
 --resource--
 Error: 2 - mb_stristr() expects parameter 1 to be binary string, resource given, %s(%d)
