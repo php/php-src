@@ -50,15 +50,15 @@ rmdir($file_path.$dir);
 
 --EXPECTF--
 *** Testing with existing directory ***
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 *** Testing with newly created directory ***
  
  Free Space before writing to a file
-float(%f)
+float(%d)
 
  Free Space after writing to a file
-float(%f)
+float(%d)
 
  Free Space Value Is Correct
 

@@ -38,11 +38,11 @@ rmdir($file_path."/disk_total_space");
 
 --EXPECTF--
 *** Testing with existing directory ***
-float(%f)
+float(%d)
 *** Testing with newly created directory ***
-float(%f)
+float(%d)
  
  Total Space after writing to a file
-float(%f)
+float(%d)
 
 --- Done ---

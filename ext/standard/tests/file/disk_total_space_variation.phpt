@@ -63,46 +63,46 @@ rmdir($file_path.$dir);
 ?>
 --EXPECTF--
 *** Testing with a directory ***
-float(%f)
+float(%d)
 
 Testing for the return type ***
 bool(true)
 
 *** Testing disk_total_space() function with different directory combinations ***
 -- Iteration 1 --
-float(%f)
+float(%d)
 
 -- Iteration 2 --
-float(%f)
+float(%d)
 
 -- Iteration 3 --
-float(%f)
+float(%d)
 
 -- Iteration 4 --
-float(%f)
+float(%d)
 
 -- Iteration 5 --
-float(%f)
+float(%d)
 
 -- Iteration 6 --
-float(%f)
+float(%d)
 
 -- Iteration 7 --
-float(%f)
+float(%d)
 
 -- Iteration 8 --
-float(%f)
+float(%d)
 
 -- Iteration 9 --
-float(%f)
+float(%d)
 
 -- Iteration 10 --
-float(%f)
+float(%d)
 
 -- Iteration 11 --
-float(%f)
+float(%d)
 
 -- Iteration 12 --
-float(%f)
+float(%d)
 
 --- Done ---

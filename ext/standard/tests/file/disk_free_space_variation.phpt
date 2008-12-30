@@ -65,59 +65,59 @@ rmdir($file_path);
 
 --EXPECTF--
 *** Testing disk_free_space() function with a directory ***
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 *** Testing for the return type ***
 bool(true)
 
 *** Testing disk_free_space() function with different styles of file and directory ***
 -- Iteration 1 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 2 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 3 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 4 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 5 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 6 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 7 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 8 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 9 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 10 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 11 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Iteration 12 --
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 --- Done ---

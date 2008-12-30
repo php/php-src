@@ -55,12 +55,12 @@ NULL
 Warning: diskfreespace() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: disk_free_space(): %s in %s on line %d
+Warning: disk_free_space(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): %s in %s on line %d
+Warning: diskfreespace(): No such file or directory in %s on line %d
 bool(false)
-float(%f)
-float(%f)
+float(%d)
+float(%d)
 
 -- Done --
