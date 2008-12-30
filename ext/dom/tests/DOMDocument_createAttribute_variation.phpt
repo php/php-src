@@ -1,5 +1,7 @@
 --TEST--
 Test DOMDocument::createAttribute() for expected return value
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 $dom = new DOMDocument();
