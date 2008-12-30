@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   (Fixes CVE-2008-5498) (Scott)
 - Fixed a segfault when malformed string is passed to json_decode(). (Scott)
 
+- Fixed bug #46964 (Fixed pdo_mysql build with older version of MySQL). (Ilia)
 - Fixed bug #46959 (Unable to disable PCRE). (Scott)
 - Fixed bug #46918 (imap_rfc822_parse_adrlist host part not filled in correctly).
   (Felipe)
