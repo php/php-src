@@ -3,8 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
 
-- Changed dl() to be disabled by default. Enabled only when explicitly
-  registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
 - Changed allow_url_fopen/allow_url_include to allow
   per-wrapper enable/disable and runtime tightening. (Sara)
 
