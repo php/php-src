@@ -575,6 +575,7 @@ getprotobyname \
 getprotobynumber \
 getservbyname \
 getservbyport \
+gethostname \
 getrusage \
 gettimeofday \
 gmtime_r \

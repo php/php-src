@@ -980,6 +980,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostbynamel, 0)
 	ZEND_ARG_INFO(0, hostname)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_GETHOSTNAME
+ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
@@ -3005,6 +3010,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostbyaddr,													arginfo_gethostbyaddr)
 	PHP_FE(gethostbyname,													arginfo_gethostbyname)
 	PHP_FE(gethostbynamel,													arginfo_gethostbynamel)
+
+#ifdef HAVE_GETHOSTNAME
+	PHP_FE(gethostname,													arginfo_gethostname)
+#endif
 
 #if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)

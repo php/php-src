@@ -31,6 +31,10 @@ PHP_FUNCTION(gethostbyaddr);
 PHP_FUNCTION(gethostbyname);
 PHP_FUNCTION(gethostbynamel);
 
+#ifdef HAVE_GETHOSTNAME
+PHP_FUNCTION(gethostname);
+#endif
+
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32))
 
 PHP_FUNCTION(dns_check_record);
