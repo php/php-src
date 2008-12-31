@@ -674,20 +674,6 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_
 }
 /* }}} */
 
-static void register_standard_class(TSRMLS_D) /* {{{ */
-{
-	zend_standard_class_def = calloc(1, sizeof(zend_class_entry));
-
-	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
-	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
-	zend_standard_class_def->name.s = zend_strndup("stdClass", zend_standard_class_def->name_length);
-	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
-
-	zend_hash_add(CG(class_table), "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
-	zend_standard_class_def->module = EG(current_module);
-}
-/* }}} */
-
 #ifdef ZTS
 static zend_bool asp_tags_default			= 0;
 static zend_bool short_tags_default			= 1;
@@ -1161,7 +1147,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	EG(user_exception_handler) = NULL;
 #endif
 
-	register_standard_class(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
 
