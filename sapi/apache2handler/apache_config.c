@@ -138,11 +138,13 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_dir_en
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
 	php_conf_rec *d = base_conf, *e = new_conf, *n = NULL;
+#if STAS_0
 	php_dir_entry *pe;
 	php_dir_entry *data;
 	zstr str;
 	uint str_len;
 	ulong num_index;
+#endif
 
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
