@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - Added json_last_error() to return any error information from json_decode().
   (Scott)
+- Added gethostname() to return the current system host name. (Ilia)
 - Added shm_has_var() function. (Mike)
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
