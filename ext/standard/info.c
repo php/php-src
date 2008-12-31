@@ -867,7 +867,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
-		php_info_print_table_header(2, "Module Name");
+		php_info_print_table_header(1, "Module Name");
 		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_def TSRMLS_CC);
 		php_info_print_table_end();
 
