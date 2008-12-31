@@ -1910,6 +1910,15 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start Zend extensions */
 	zend_startup_extensions();
 
+	/* register additional functions */
+	if (sapi_module.additional_functions) {
+		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
+			EG(current_module) = module;
+			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+			EG(current_module) = NULL;
+		}
+	}
+	
 	/* make core report what it should */
 	if (zend_hash_find(&module_registry, "core", sizeof("core"), (void**)&module)==SUCCESS) {
 		module->version = PHP_VERSION;

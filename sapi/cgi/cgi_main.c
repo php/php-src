@@ -850,6 +850,17 @@ static sapi_module_struct cgi_sapi_module = {
 };
 /* }}} */
 
+/* {{{ arginfo ext/standard/dl.c */
+ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
+	ZEND_ARG_INFO(0, extension_filename)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+static const zend_function_entry additional_functions[] = {
+	ZEND_FE(dl, arginfo_dl)
+	{NULL, NULL, NULL}
+};
+
 /* {{{ php_cgi_usage
  */
 static void php_cgi_usage(char *argv0)
@@ -1534,6 +1545,7 @@ int main(int argc, char *argv[])
 #endif
 
 	cgi_sapi_module.executable_location = argv[0];
+	cgi_sapi_module.additional_functions = additional_functions;
 
 	/* startup after we get the above ini override se we get things right */
 	if (cgi_sapi_module.startup(&cgi_sapi_module) == FAILURE) {
