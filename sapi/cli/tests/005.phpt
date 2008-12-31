@@ -21,7 +21,7 @@ echo "Done\n";
 --EXPECTF--	
 string(40) "Exception: Class unknown does not exist
 "
-string(178) "Class [ <internal> class stdClass ] {
+string(183) "Class [ <internal:Core> class stdClass ] {
 
   - Constants [0] {
   }
@@ -40,7 +40,7 @@ string(178) "Class [ <internal> class stdClass ] {
 }
 
 "
-string(1141) "Class [ <internal> class Exception ] {
+string(1355) "Class [ <internal:Core> class Exception ] {
 
   - Constants [0] {
   }
@@ -51,46 +51,51 @@ string(1141) "Class [ <internal> class Exception ] {
   - Static methods [0] {
   }
 
-  - Properties [6] {
+  - Properties [7] {
     Property [ <default> protected $message ]
     Property [ <default> private $string ]
     Property [ <default> protected $code ]
     Property [ <default> protected $file ]
     Property [ <default> protected $line ]
     Property [ <default> private $trace ]
+    Property [ <default> private $previous ]
   }
 
-  - Methods [9] {
-    Method [ <internal> final private method __clone ] {
+  - Methods [10] {
+    Method [ <internal:Core> final private method __clone ] {
     }
 
-    Method [ <internal, ctor> public method __construct ] {
+    Method [ <internal:Core, ctor> public method __construct ] {
 
-      - Parameters [2] {
+      - Parameters [3] {
         Parameter #0 [ <optional> $message ]
         Parameter #1 [ <optional> $code ]
+        Parameter #2 [ <optional> $previous ]
       }
     }
 
-    Method [ <internal> final public method getMessage ] {
+    Method [ <internal:Core> final public method getMessage ] {
     }
 
-    Method [ <internal> final public method getCode ] {
+    Method [ <internal:Core> final public method getCode ] {
     }
 
-    Method [ <internal> final public method getFile ] {
+    Method [ <internal:Core> final public method getFile ] {
     }
 
-    Method [ <internal> final public method getLine ] {
+    Method [ <internal:Core> final public method getLine ] {
     }
 
-    Method [ <internal> final public method getTrace ] {
+    Method [ <internal:Core> final public method getTrace ] {
     }
 
-    Method [ <internal> final public method getTraceAsString ] {
+    Method [ <internal:Core> final public method getPrevious ] {
     }
 
-    Method [ <internal> public method __toString ] {
+    Method [ <internal:Core> final public method getTraceAsString ] {
+    }
+
+    Method [ <internal:Core> public method __toString ] {
     }
   }
 }
