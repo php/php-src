@@ -1,6 +1,5 @@
 --TEST--
 Test chmod() function : second parameter variation 
---XFAIL--
 --FILE--
 <?php
 /* Prototype  : bool chmod(string filename, int mode)

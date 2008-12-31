@@ -1,6 +1,5 @@
 --TEST--
 Test pathinfo() function : usage variation 
---XFAIL--
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

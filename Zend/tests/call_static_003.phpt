@@ -1,7 +1,5 @@
 --TEST--
 Testing method name case
---XFAIL--
-http://bugs.php.net/bug.php?id=45089
 --FILE--
 <?php
 

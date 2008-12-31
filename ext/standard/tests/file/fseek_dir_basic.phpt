@@ -1,7 +1,5 @@
 --TEST--
 Testing fseek() on a directory stream
---XFAIL--
-Pending completion of Unicode streams
 --FILE--
 <?php
 

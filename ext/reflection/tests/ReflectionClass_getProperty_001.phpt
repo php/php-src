@@ -3,7 +3,6 @@ ReflectionClass::getProperty()
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
---XFAIL--
 --FILE--
 <?php
 class pubf {

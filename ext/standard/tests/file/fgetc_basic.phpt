@@ -1,7 +1,5 @@
 --TEST--
 Test fgetc() function : basic functionality
---XFAIL--
-Pending completion of Unicode streams
 --FILE--
 <?php
 /*
