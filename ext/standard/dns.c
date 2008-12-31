@@ -107,6 +107,28 @@
 static char *php_gethostbyaddr(char *ip);
 static char *php_gethostbyname(char *name);
 
+#ifdef HAVE_GETHOSTNAME
+/* {{{ proto string gethostname()
+   Get the host name of the current machine */
+PHP_FUNCTION(gethostname)
+{
+	char buf[4096];
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (gethostname(buf, sizeof(buf) - 1)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(buf, 1);
+}
+/* }}} */
+#endif
+
+
 /* {{{ proto string gethostbyaddr(string ip_address) U
    Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
@@ -133,6 +155,7 @@ PHP_FUNCTION(gethostbyaddr)
 	}
 }
 /* }}} */
+
 
 /* {{{ php_gethostbyaddr */
 static char *php_gethostbyaddr(char *ip)
