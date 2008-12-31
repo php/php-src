@@ -1738,7 +1738,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.vspprintf_function = vspprintf;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zend_startup(&zuf, NULL, 1 TSRMLS_CC);
+	zend_startup(&zuf, NULL TSRMLS_CC);
 
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);
