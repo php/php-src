@@ -297,6 +297,8 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
 	zend_standard_class_def = zend_register_internal_class(&class_entry TSRMLS_CC);
 
+	zend_register_default_classes(TSRMLS_C);
+
 	return SUCCESS;
 }
 /* }}} */
