@@ -400,7 +400,7 @@ contributors all around the world.
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2008 The PHP Group
+Copyright \(co 1997\-2009 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
