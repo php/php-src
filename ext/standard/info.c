@@ -849,8 +849,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		} else {
 			SECTION("Configuration");
 		}	
-		SECTION("PHP Core");
-		display_ini_entries(NULL);
+		if (!(flag & PHP_INFO_MODULES)) {
+			SECTION("PHP Core");
+			display_ini_entries(NULL);
+		}
 	}
 
 	if (flag & PHP_INFO_MODULES) {
