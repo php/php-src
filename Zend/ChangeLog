@@ -1,3 +1,36 @@
+2008-12-30  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend.c
+      zend_builtin_functions.c:
+      - MFH Provide a core module that contains all Zend and php/main (in 5.3
+      incl. stdClass)
+
+    * zend.c
+      zend_builtin_functions.c:
+      - Provide a core module that contains all Zend and php/main stuff but
+      stdClass
+
+2008-12-30  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * zend_builtin_functions.c:
+      MFB5.3: Fix error_reporting arginfo and proto
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      Fix arginfo and proto
+
+2008-12-30  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      MFH Use a module struct for the built-in functions
+
+    * zend.c
+      zend_builtin_functions.c
+      zend_builtin_functions.h:
+      Use a module struct for the built-in functions
+
 2008-12-24  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
