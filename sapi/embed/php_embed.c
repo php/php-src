@@ -140,6 +140,7 @@ sapi_module_struct php_embed_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
+
 /* {{{ arginfo ext/standard/dl.c */
 ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
 	ZEND_ARG_INFO(0, extension_filename)
