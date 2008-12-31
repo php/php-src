@@ -1786,9 +1786,15 @@ COMMAND $cmd
 			if (isset($old_php)) {
 				$php = $old_php;
 			}
-			if (!$leaked && !$failed_headers) {
-				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-				return 'PASSED';
+
+                        if (!$leaked && !$failed_headers) {
+                            if (isset($section_text['XFAIL'] )) {
+                                $warn = true;
+                                $info = " (warn: XFAIL section but test passes)";
+                            }else {
+                                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+                                return 'PASSED';
+                            }
 			}
 		}
 
@@ -1810,9 +1816,14 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 
-			if (!$leaked && !$failed_headers) {
-				show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-				return 'PASSED';
+                        if (!$leaked && !$failed_headers) {
+                            if (isset($section_text['XFAIL'] )) {
+                                $warn = true;
+                                $info = " (warn: XFAIL section but test passes)";
+                            }else {
+                                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+                                return 'PASSED';
+                            }
 			}
 		}
 
