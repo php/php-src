@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : error conditions
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
