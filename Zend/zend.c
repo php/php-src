@@ -588,7 +588,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions TSRMLS_DC) /* {{{ */
+int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC) /* {{{ */
 {
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -685,10 +685,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
 #endif
-	if (start_builtin_functions) {
-		zend_startup_builtin_functions(TSRMLS_C);
-	}
 
+	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS") - 1, NULL TSRMLS_CC);
 
