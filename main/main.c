@@ -1606,6 +1606,14 @@ static void core_globals_dtor(php_core_globals *core_globals TSRMLS_DC)
 }
 /* }}} */
 
+PHP_MINFO_FUNCTION(php_core) { /* {{{ */
+	php_info_print_table_start();
+	php_info_print_table_row(2, "PHP Version", PHP_VERSION);
+	php_info_print_table_end(); 
+	DISPLAY_INI_ENTRIES();
+}
+/* }}} */
+
 /* {{{ php_register_extensions
  */
 int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
@@ -1663,6 +1671,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
 	char *php_os;
+	zend_module_entry *module;
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
@@ -1875,9 +1884,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
-	/* Register internal Zend classes */
-	zend_register_default_classes(TSRMLS_C);
-
 	/* startup extensions staticly compiled in */
 	if (php_register_internal_extensions_func(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
@@ -1903,6 +1909,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* start Zend extensions */
 	zend_startup_extensions();
+
+	/* make core report what it should */
+	if (zend_hash_find(&module_registry, "core", sizeof("core"), (void**)&module)==SUCCESS) {
+		module->version = PHP_VERSION;
+		module->info_func = PHP_MINFO(php_core);
+	}
 
 #ifdef ZTS
 	zend_post_startup(TSRMLS_C);
