@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Fixed bug #46849 (Cloning DOMDocument doesn't clone the properties). (Rob)
 - Fixed bug #46847 (phpinfo() is missing some settings). (Hannes)
 - Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
+- Fixed bug #46763 (mb_stristr() wrong output when needle does not exist).
+  (Henrique M. Decaria)
 - Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error when
   given bad data). (Ilia)
 - Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
