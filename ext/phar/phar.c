@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2008 The PHP Group                                |
+  | Copyright (c) 2005-2009 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -3656,7 +3656,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
 	PUTS("Phar fully realized by Gregory Beaver and Marcus Boerger.");
 	PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
-	PUTS("Portions of tar implementation Copyright (c) 2003-2008 Tim Kientzle.");
+	PUTS("Portions of tar implementation Copyright (c) 2003-2009 Tim Kientzle.");
 	php_info_print_box_end();
 
 	DISPLAY_INI_ENTRIES();

@@ -5,7 +5,7 @@
 /* This is the public header file for the PCRE library, to be #included by
 applications that call the PCRE functions.
 
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
