@@ -109,7 +109,7 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module TSRMLS_DC) /* {
 		}
 	} else {
 		if (!sapi_module.phpinfo_as_text) {
-			php_printf("<tr><td colspan='2>%s</td></tr>\n", zend_module->name);
+			php_printf("<tr><td>%s</td></tr>\n", zend_module->name);
 		} else {
 			php_printf("%s\n", zend_module->name);
 		}	
@@ -901,7 +901,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
-		php_info_print_table_header(2, "Module Name");
+		php_info_print_table_header(1, "Module Name");
 		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_def TSRMLS_CC);
 		php_info_print_table_end();
 
