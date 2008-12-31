@@ -115,7 +115,7 @@ PHP_FUNCTION(gethostname)
 	char buf[4096];
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if (gethostname(buf, sizeof(buf) - 1)) {
