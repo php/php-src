@@ -264,6 +264,7 @@ struct _sapi_module_struct {
 	int phpinfo_as_text;
 
 	char *ini_entries;
+	const zend_function_entry *additional_functions;
 };
 
 
