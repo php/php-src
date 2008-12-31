@@ -1,7 +1,5 @@
 --TEST--
 strtotime() function - a test to show the difference in behaviour between 'first' and '1', "second" and "2"...
---XFAIL--
-Expected to fail - fix to bug 43452 needs to be back ported to PHP52
 --INI--
 date.timezone="UTC"
 --SKIPIF--
