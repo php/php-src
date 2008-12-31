@@ -291,11 +291,21 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 };
 /* }}} */
 
+ZEND_MINIT_FUNCTION(core) { /* {{{ */
+	zend_class_entry class_entry;
+
+	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
+	zend_standard_class_def = zend_register_internal_class(&class_entry TSRMLS_CC);
+
+	return SUCCESS;
+}
+/* }}} */
+
 zend_module_entry zend_builtin_module = { /* {{{ */
     STANDARD_MODULE_HEADER,
 	"Core",
 	builtin_functions,
-	NULL,
+	ZEND_MINIT(core),
 	NULL,
 	NULL,
 	NULL,
