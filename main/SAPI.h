@@ -22,6 +22,7 @@
 #define SAPI_H
 
 #include "zend.h"
+#include "zend_API.h"
 #include "zend_llist.h"
 #include "zend_operators.h"
 #ifdef PHP_WIN32
