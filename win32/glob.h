@@ -96,7 +96,7 @@ typedef struct {
 #define GLOB_ABEND	GLOB_ABORTED
 
 BEGIN_EXTERN_C()
-int	glob(const char *, int, int (*)(const char *, int), glob_t *);
-void	globfree(glob_t *);
+PHPAPI int	glob(const char *, int, int (*)(const char *, int), glob_t *);
+PHPAPI void	globfree(glob_t *);
 END_EXTERN_C()
 #endif /* !_GLOB_H_ */
