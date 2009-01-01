@@ -1981,11 +1981,11 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {

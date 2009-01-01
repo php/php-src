@@ -6187,11 +6187,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -6658,11 +6658,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -7131,11 +7131,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -7697,11 +7697,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -10703,11 +10703,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -12614,11 +12614,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -14509,11 +14509,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -17022,11 +17022,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -18454,11 +18454,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -19654,11 +19654,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -20786,11 +20786,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -22187,11 +22187,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -25222,11 +25222,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -26942,11 +26942,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -28714,11 +28714,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
@@ -30992,11 +30992,11 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	EX(called_scope) = Z_OBJCE_P(EX(object));
-
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(called_scope) = NULL;
 		EX(object) = NULL;
 	} else {
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
