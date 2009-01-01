@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Changed opendir(), dir() and scandir() to use default context when no context
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
+- Re-enabled socket_create_pair() on Windows (Kalle)
 
 - Added json_last_error() to return any error information from json_decode().
   (Scott)
