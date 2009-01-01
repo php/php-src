@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -22,6 +23,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_closures.h"
+#include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
@@ -226,6 +228,59 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 }
 /* }}} */
 
+ZEND_API HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(object TSRMLS_CC);
+	HashTable *rv;
+	zval *val;
+	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
+
+	*is_temp = 1;
+	ALLOC_HASHTABLE(rv);
+	zend_hash_init(rv, 1, NULL, ZVAL_PTR_DTOR, 0);
+	val = closure->this_ptr;
+	if (!val) {
+		ALLOC_INIT_ZVAL(val);
+	} else {
+		Z_ADDREF_P(val);
+	}
+	zend_symtable_update(rv, "this", sizeof("this"), (void *) &val, sizeof(zval *), NULL);
+	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
+		HashTable *static_variables = closure->func.op_array.static_variables;
+		MAKE_STD_ZVAL(val);
+		array_init(val);
+		zend_hash_copy(Z_ARRVAL_P(val), static_variables, (copy_ctor_func_t)zval_add_ref, NULL, sizeof(zval*));
+		zend_symtable_update(rv, "static", sizeof("static"), (void *) &val, sizeof(zval *), NULL);
+	}
+
+	if (arg_info) {
+		MAKE_STD_ZVAL(val);
+		array_init(val);
+		zend_uint i, required = closure->func.common.required_num_args;
+		for (i = 0; i < closure->func.common.num_args; i++) {
+			char *name, *info;
+			int name_len, info_len;
+			if (arg_info->name.v) {
+				name_len = zend_spprintf(&name, 0, "%s$%v",
+								arg_info->pass_by_reference ? "&" : "",
+								arg_info->name.v);
+			} else {
+				name_len = zend_spprintf(&name, 0, "%s$param%d",
+								arg_info->pass_by_reference ? "&" : "",
+								i + 1);
+			}
+			info_len = zend_spprintf(&info, 0, "%s",
+							i >= required ? "<optional>" : "<required>");
+			add_assoc_stringl_ex(val, name, name_len + 1, info, info_len, 0);
+			efree(name);
+			arg_info++;
+		}
+		zend_symtable_update(rv, "parameter", sizeof("parameter"), (void *) &val, sizeof(zval *), NULL);
+	}
+	return rv;
+}
+/* }}} */
+
 void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
@@ -247,6 +302,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 	closure_handlers.unset_property = zend_closure_unset_property;
 	closure_handlers.compare_objects = zend_closure_compare_objects;
 	closure_handlers.clone_obj = NULL;
+	closure_handlers.get_debug_info = zend_closure_get_debug_info;
 	closure_handlers.get_closure = zend_closure_get_closure;
 }
 /* }}} */
