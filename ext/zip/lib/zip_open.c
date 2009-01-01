@@ -68,7 +68,10 @@ zip_open(const char *fn, int flags, int *zep)
     
     switch (_zip_file_exists(fn, flags, zep)) {
     case -1:
+			if (!(flags & ZIP_OVERWRITE)) {
 	return NULL;
+			}
+			
     case 0:
 	return _zip_allocate_new(fn, zep);
     default:
@@ -440,7 +443,7 @@ _zip_file_exists(const char *fn, int flags, int *zep)
     }
     
     if (stat(fn, &st) != 0) {
-	if (flags & ZIP_CREATE)
+	if (flags & ZIP_CREATE || flags & ZIP_OVERWRITE)
 	    return 0;
 	else {
 	    set_error(zep, NULL, ZIP_ER_OPEN);
