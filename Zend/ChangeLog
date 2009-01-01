@@ -1,3 +1,138 @@
+2008-12-31  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * tests/bug45147.phpt
+      tests/bug45147.phpt
+      tests/call_static_002.phpt
+      tests/call_static_002.phpt
+      tests/call_static_003.phpt
+      tests/call_static_003.phpt
+      tests/call_static_004.phpt
+      tests/call_static_004.phpt
+      tests/call_static_007.phpt
+      tests/call_static_007.phpt:
+      removing xfail sections as test passes
+
+2008-12-31  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend.c
+      zend.h:
+      - Sync with HEAD, no ability to not start builtin functions
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      MFH
+      - Register engine classes when and where they should be
+      - Show core module version as PHP version
+
+    * zend_builtin_functions.c:
+      - Register engine classes when and where they should be
+      - Show core module version as PHP version
+
+    * (PHP_5_3)
+      zend.c
+      zend_builtin_functions.c:
+      - MFH Move stdClass registering where it should be
+
+    * zend.c
+      zend_builtin_functions.c:
+      - Move stdClass registering where it should be
+
+2008-12-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * acconfig.h
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_closures.c
+      zend_closures.h
+      zend_compile.c
+      zend_compile.h
+      zend_config.nw.h
+      zend_config.w32.h
+      zend_constants.c
+      zend_constants.h
+      zend_default_classes.c
+      zend_dynamic_array.c
+      zend_dynamic_array.h
+      zend_errors.h
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_extensions.c
+      zend_extensions.h
+      zend_fast_cache.h
+      zend_globals.h
+      zend_globals_macros.h
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_highlight.h
+      zend_indent.c
+      zend_indent.h
+      zend_ini.c
+      zend_ini.h
+      zend_ini_scanner.h
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_istdiostream.h
+      zend_iterators.c
+      zend_iterators.h
+      zend_language_scanner.c
+      zend_language_scanner.h
+      zend_list.c
+      zend_list.h
+      zend_llist.c
+      zend_llist.h
+      zend_modules.h
+      zend_multiply.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_ptr_stack.c
+      zend_ptr_stack.h
+      zend_qsort.c
+      zend_qsort.h
+      zend_sprintf.c
+      zend_stack.c
+      zend_stack.h
+      zend_static_allocator.c
+      zend_static_allocator.h
+      zend_stream.c
+      zend_stream.h
+      zend_strtod.h
+      zend_ts_hash.c
+      zend_ts_hash.h
+      zend_types.h
+      zend_unicode.c
+      zend_unicode.h
+      zend_variables.c
+      zend_variables.h
+      zend_vm.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Bump copyright year, 3 of 3.
+
+    * zend_ini_parser.y
+      zend_language_parser.y
+      zend_language_scanner.l:
+      Bump copyright year, 1 of 3.
+
 2008-12-30  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
