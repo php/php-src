@@ -1338,8 +1338,8 @@ yymore_restart:
 		return 0;
 	}
 
-	/* ignore first line when it's started with a # */
-	if (YYCURSOR == SCNG(yy_start) && *YYCURSOR == '#') {
+	/* ignore first line when it's started with a #! */
+	if (YYCURSOR == SCNG(yy_start) && *YYCURSOR == '#' && *(YYCURSOR + 1) == '!') {
 		while (++YYCURSOR < YYLIMIT) {
 			if (*YYCURSOR == '\n') {
 				++YYCURSOR;
