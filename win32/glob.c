@@ -159,7 +159,7 @@ static int	 match(Char *, Char *, Char *);
 static void	 qprintf(const char *, Char *);
 #endif
 
-int
+PHPAPI int
 glob(pattern, flags, errfunc, pglob)
 	const char *pattern;
 	int flags, (*errfunc)(const char *, int);
@@ -811,7 +811,7 @@ match(name, pat, patend)
 }
 
 /* Free allocated data belonging to a glob_t structure. */
-void
+PHPAPI void
 globfree(pglob)
 	glob_t *pglob;
 {
