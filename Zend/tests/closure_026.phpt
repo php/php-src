@@ -32,7 +32,18 @@ object(foo)#%d (1) {
   [u"a"]=>
   array(1) {
     [0]=>
-    object(Closure)#%d (0) {
+    object(Closure)#%d (1) {
+      ["this"]=>
+      object(foo)#%d (1) {
+        [u"a"]=>
+        array(1) {
+          [0]=>
+          object(Closure)#%d (1) {
+            ["this"]=>
+            *RECURSION*
+          }
+        }
+      }
     }
   }
 }
@@ -41,7 +52,21 @@ int(1)
 unicode(1) "a"
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["this"]=>
+    object(foo)#%d (1) {
+      [u"a"]=>
+      array(1) {
+        [0]=>
+        object(Closure)#%d (1) {
+          ["this"]=>
+          object(foo)#%d (1) {
+            [u"a"]=>
+            *RECURSION*
+          }
+        }
+      }
+    }
   }
 }
 int(1)
