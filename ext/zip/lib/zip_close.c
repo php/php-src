@@ -636,13 +636,14 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
     char *temp;
     int tfd;
     FILE *tfp;
+	int len = strlen(za->zn) + 8;
 
     if ((temp=(char *)malloc(strlen(za->zn)+8)) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 
-    sprintf(temp, "%s.XXXXXX", za->zn);
+		snprintf(temp, len, "%s.XXXXXX", za->zn);
 
     if ((tfd=mkstemp(temp)) == -1) {
 	_zip_error_set(&za->error, ZIP_ER_TMPOPEN, errno);
@@ -657,6 +658,9 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
+#ifdef PHP_WIN32
+	_setmode(_fileno(tfp), _O_BINARY );
+#endif
 
     *outp = tfp;
     return temp;
