@@ -739,8 +739,8 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 }
 /* }}} */
 
-/* This function doesn't return as it calls E_ERROR */
-ZEND_API void zend_exception_error(zval *exception TSRMLS_DC) /* {{{ */
+/* This function doesn't return if it uses E_ERROR */
+ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce_exception = Z_OBJCE_P(exception);
 	if (instanceof_function(ce_exception, default_exception_ce TSRMLS_CC)) {
@@ -774,9 +774,9 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC) /* {{{ */
 		file = zend_read_property(default_exception_ce, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(default_exception_ce, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(severity, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
-		zend_error(E_ERROR, "Uncaught exception '%s'", ce_exception->name);
+		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}
 }
 /* }}} */

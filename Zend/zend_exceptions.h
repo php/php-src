@@ -49,8 +49,8 @@ ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, char 
 
 extern ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
-/* show an exception using zend_error(E_ERROR,...) */
-ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
+/* show an exception using zend_error(severity,...), severity should be E_ERROR */
+ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC);
 
 /* do not export, in php it's available thru spprintf directly */
 int zend_spprintf(char **message, int max_len, char *format, ...);
