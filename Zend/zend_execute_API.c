@@ -1184,7 +1184,7 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 
 	result = zend_eval_string(str, retval_ptr, string_name TSRMLS_CC);
 	if (handle_exceptions && EG(exception)) {
-		zend_exception_error(EG(exception) TSRMLS_CC);
+		zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 		result = FAILURE;
 	}
 	return result;
@@ -1253,7 +1253,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 	zend_execute(CG(active_op_array) TSRMLS_CC);
 
 	if (EG(exception)) {
-		zend_exception_error(EG(exception) TSRMLS_CC);
+		zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 	}
 
 	CG(active_op_array)->last -= 1;	/* get rid of that ZEND_RETURN */
