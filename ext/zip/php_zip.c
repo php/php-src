@@ -442,6 +442,7 @@ static int php_zip_get_num_files(struct zip *za TSRMLS_DC) /* {{{ */
 
 static char * php_zipobj_get_filename(ze_zip_object *obj TSRMLS_DC) /* {{{ */
 {
+
 	if (!obj) {
 		return NULL;
 	}
@@ -791,7 +792,7 @@ static int php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, zv
 	switch (hnd->type) {
 		case IS_STRING:
 			if (retchar) {
-				ZVAL_STRINGL(*retval, (char *) retchar, len, 1);
+				ZVAL_STRING(*retval, (char *) retchar, 1);
 			} else {
 				ZVAL_EMPTY_STRING(*retval);
 			}
