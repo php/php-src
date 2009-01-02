@@ -12,8 +12,6 @@ var_dump(json_decode($a));
 
 echo "Done\n";
 ?>
---INI--
-precision=14
 --EXPECT--	
 float(123456789.12345)
 Done
