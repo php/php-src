@@ -254,9 +254,11 @@ ZEND_API HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRML
 	}
 
 	if (arg_info) {
+		zend_uint i, required = closure->func.common.required_num_args;
+
 		MAKE_STD_ZVAL(val);
 		array_init(val);
-		zend_uint i, required = closure->func.common.required_num_args;
+
 		for (i = 0; i < closure->func.common.num_args; i++) {
 			char *name, *info;
 			int name_len, info_len;
