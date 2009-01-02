@@ -1,3 +1,35 @@
+2009-01-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.c
+      zend_language_scanner.l:
+      
+      MFB: Fixed bug #46844 (php scripts or included files with first line
+      starting with # have the 1st line missed from the output).
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l:
+      
+      Fixed bug #46844 (php scripts or included files with first line starting
+        with # have the 1st line missed from the output).
+
+2009-01-01  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend_closures.c
+      tests/closure_020.phpt
+      tests/closure_026.phpt
+      tests/closure_032.phpt:
+      - Add var_dump support for closures
+
+    * (PHP_5_3)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH Fix SEGV if get_method() returns a non bound function
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Fix SEGV if get_method() returns a non bound function
+
 2008-12-31  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * tests/bug45147.phpt
