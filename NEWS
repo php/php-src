@@ -4,12 +4,15 @@ PHP                                                                        NEWS
 - Added optional sorting type flag parameter to array_unique(). Default is
   SORT_REGULAR. (Andrei)
 
+- Fixed zip filename property read. (Pierre)
 - Fixed explode() behavior with empty string to respect negative limit. (Shire)
 - Fixed security issue in imagerotate(), background colour isn't validated
   correctly with a non truecolour image, reported by Hamid Ebadi, APA Laboratory.
   (Fixes CVE-2008-5498) (Scott)
 - Fixed a segfault when malformed string is passed to json_decode(). (Scott)
 
+- Fixed bug #46985 (OVERWRITE and binary mode does not work, regression introduced in
+  5.2.8). (Pierre)
 - Fixed bug #46973 (IPv6 address filter rejects valid address). (Felipe)
 - Fixed bug #46964 (Fixed pdo_mysql build with older version of MySQL). (Ilia)
 - Fixed bug #46959 (Unable to disable PCRE). (Scott)
