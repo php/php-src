@@ -1141,6 +1141,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 	}
+	errno = 0;
 	n = select(max_fd + 1, &rset, &wset, &eset, timeout >= 0 ? &tv : NULL);
 
 	if (n >= 0) {
