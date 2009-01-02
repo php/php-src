@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 200?, PHP 5.3.0 Alpha 4
+?? ??? 2009, PHP 5.3.0 Alpha 4
 - Upgraded bundled sqlite to version 3.6.7. (Scott)
 
 - Deprecated session_register(), session_unregister() and
@@ -20,8 +20,11 @@ PHP                                                                        NEWS
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
+- Enabled the salsa hashing functions. (Scott)
 
 - Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
+- Fixed bug #46944 (UTF-8 characters outside the BMP aren't encoded correctly).
+  (Scott)
 - Fixed bug #46849 (Cloning DOMDocument doesn't clone the properties). (Rob)
 - Fixed bug #46847 (phpinfo() is missing some settings). (Hannes)
 - Fixed bug #46844 (php scripts or included files with first line starting
