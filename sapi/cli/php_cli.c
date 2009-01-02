@@ -1127,7 +1127,7 @@ int main(int argc, char *argv[])
 					}
 
 					if (EG(exception)) {
-						zend_exception_error(EG(exception) TSRMLS_CC);
+						zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
 					}
 
 					php_last_char = '\0';

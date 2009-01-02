@@ -1728,10 +1728,10 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
  						}
 					} else {
 						zend_exception_restore(TSRMLS_C);
-						zend_exception_error(EG(exception) TSRMLS_CC);
+						zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 					}
 				} else {
-					zend_exception_error(EG(exception) TSRMLS_CC);
+					zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 				}
 			}
 			destroy_op_array(EG(active_op_array) TSRMLS_CC);
