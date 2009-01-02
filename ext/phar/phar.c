@@ -3122,7 +3122,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				return EOF;
 #endif
 			default: {
-				char *digest;
+				char *digest = NULL;
 				int digest_len;
 
 				if (FAILURE == phar_create_signature(phar, newfile, &digest, &digest_len, error TSRMLS_CC)) {
@@ -3131,7 +3131,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 						spprintf(error, 0, "phar error: unable to write signature: %s", save);
 						efree(save);
 					}
-					efree(digest);
+					if (digest) {
+						efree(digest);
+					}
 					if (closeoldfile) {
 						php_stream_close(oldfile);
 					}
