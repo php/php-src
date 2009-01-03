@@ -107,6 +107,20 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 }
 /* }}} */
 
+ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC)
+{
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	return &closure->func;
+}
+/* }}} */
+
+ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	return closure->this_ptr;
+}
+/* }}} */
+
 static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_name, int method_len TSRMLS_DC) /* {{{ */
 {
 	unsigned int lc_name_len;
