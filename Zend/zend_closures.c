@@ -40,6 +40,7 @@ typedef struct _zend_closure {
 	zval          *this_ptr;
 } zend_closure;
 
+/* non-static since it needs to be referenced */
 ZEND_API zend_class_entry *zend_ce_closure;
 static zend_object_handlers closure_handlers;
 
@@ -107,7 +108,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 }
 /* }}} */
 
-ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC)
+ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
 	return &closure->func;
