@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.13.2.2.2.1 2007-01-01 19:32:09 iliaa Exp $ */
+/* $Id: buildconf.js,v 1.13.2.2.2.2 2009-01-03 03:27:47 kalle Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -258,6 +258,4 @@ C.Write(modules);
 
 C.WriteBlankLines(1);
 C.Write(file_get_contents("win32/build/configure.tail"));
-
-WScript.StdOut.WriteLine("Now run 'cscript /nologo configure.js --help'");
 
