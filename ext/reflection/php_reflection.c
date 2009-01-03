@@ -857,8 +857,6 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 						fptr->op_array.line_start,
 						fptr->op_array.line_end);
 	}
-	string_init(&param_indent);
-	string_printf(&param_indent, "%s  ", indent);
 	if (closure) {
 		const zend_function *closure_fptr = zend_get_closure_method_def(closure TSRMLS_CC);
 		if (closure_fptr->type == ZEND_USER_FUNCTION && closure_fptr->op_array.static_variables) {
@@ -881,6 +879,8 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 			}
 		}
 	}
+	string_init(&param_indent);
+	string_printf(&param_indent, "%s  ", indent);
 	_function_parameter_string(str, fptr, param_indent.string TSRMLS_CC);
 	string_free(&param_indent);
 	string_printf(str, "%s}\n", indent);
