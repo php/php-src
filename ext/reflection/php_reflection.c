@@ -1591,10 +1591,14 @@ ZEND_METHOD(reflection_function, getClosureThis)
 {
 	reflection_object *intern;
 	zend_function *fptr;
+	zval* closure_this;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	RETURN_ZVAL(intern->obj, 1, 0);
+	if (intern->obj) {
+		closure_this = zend_get_closure_this_ptr(intern->obj TSRMLS_CC);
+		RETURN_ZVAL(closure_this, 1, 0);
+	}
 }
 /* }}} */
 
