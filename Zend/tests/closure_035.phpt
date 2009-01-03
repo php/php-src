@@ -33,7 +33,7 @@ object(Test)#%d (2) {
       ["instance"]=>
       int(1)
       ["func"]=>
-      object(Closure)#2 (1) {
+      object(Closure)#%d (1) {
         ["this"]=>
         *RECURSION*
       }
