@@ -2899,13 +2899,13 @@ ZEND_METHOD(reflection_function, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon.s > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& colon.u > Z_USTRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -2913,53 +2913,53 @@ ZEND_METHOD(reflection_function, inNamespace)
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::getNamespaceName()
+/* {{{ proto public string ReflectionFunction::getNamespaceName() U
    Returns the name of namespace where this function is defined */
 ZEND_METHOD(reflection_function, getNamespaceName)
 {
 	zval **name;
-	zstr colon;
+	zstr backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (backslash.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash.s > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(Z_STRVAL_PP(name), colon.s - Z_STRVAL_PP(name) - 1, 1);
+		RETURN_STRINGL(Z_STRVAL_PP(name), backslash.s - Z_STRVAL_PP(name), 1);
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (backslash.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& backslash.u > Z_USTRVAL_PP(name))
 	{
-		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name) - 1, 1);
+		RETURN_UNICODEL(Z_USTRVAL_PP(name), backslash.u - Z_USTRVAL_PP(name), 1);
 	}
 	RETURN_EMPTY_TEXT();
 }
 /* }}} */
 
-/* {{{ proto public string ReflectionFunction::getShortName()
+/* {{{ proto public string ReflectionFunction::getShortName() U
    Returns the short name of the function (without namespace part) */
 ZEND_METHOD(reflection_function, getShortName)
 {
 	zval **name;
-	zstr colon;
+	zstr backslash;
 
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (backslash.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& backslash.s > Z_STRVAL_PP(name))
 	{
-		RETURN_STRINGL(colon.s + 1, Z_STRLEN_PP(name) - (colon.s - Z_STRVAL_PP(name) + 1), 1);
+		RETURN_STRINGL(backslash.s + 1, Z_STRLEN_PP(name) - (backslash.s - Z_STRVAL_PP(name) + 1), 1);
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (backslash.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& backslash.u > Z_USTRVAL_PP(name))
 	{
-		RETURN_UNICODEL(colon.u + 1, Z_USTRLEN_PP(name) - (colon.u - Z_USTRVAL_PP(name) + 1), 1);
+		RETURN_UNICODEL(backslash.u + 1, Z_USTRLEN_PP(name) - (backslash.u - Z_USTRVAL_PP(name) + 1), 1);
 	}
 	RETURN_ZVAL(*name, 1, 0);
 }
@@ -4275,13 +4275,13 @@ ZEND_METHOD(reflection_class, inNamespace)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon.s > Z_STRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& colon.u > Z_USTRVAL_PP(name))
 	{
 		RETURN_TRUE;
 	}
@@ -4301,15 +4301,15 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon.s > Z_STRVAL_PP(name))
 	{
 		RETURN_STRINGL(Z_STRVAL_PP(name), colon.s - Z_STRVAL_PP(name) - 1, 1);
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& colon.u > Z_USTRVAL_PP(name))
 	{
-		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name) - 1, 1);
+		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name), 1);
 	}
 	RETURN_EMPTY_TEXT();
 }
@@ -4327,13 +4327,13 @@ ZEND_METHOD(reflection_class, getShortName)
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(name) == IS_STRING
-		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), ':', Z_STRLEN_PP(name)))
-		&& colon.s > Z_STRVAL_PP(name) && *(colon.s-1) == ':')
+		&& (colon.s = zend_memrchr(Z_STRVAL_PP(name), '\\', Z_STRLEN_PP(name)))
+		&& colon.s > Z_STRVAL_PP(name))
 	{
 		RETURN_STRINGL(colon.s + 1, Z_STRLEN_PP(name) - (colon.s - Z_STRVAL_PP(name) + 1), 1);
 	} else if (Z_TYPE_PP(name) == IS_UNICODE
-		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), ':', Z_USTRLEN_PP(name)))
-		&& colon.u > Z_USTRVAL_PP(name) && *(colon.u-1) == ':')
+		&& (colon.u = u_memrchr(Z_USTRVAL_PP(name), '\\', Z_USTRLEN_PP(name)))
+		&& colon.u > Z_USTRVAL_PP(name))
 	{
 		RETURN_UNICODEL(colon.u + 1, Z_USTRLEN_PP(name) - (colon.u - Z_USTRVAL_PP(name) + 1), 1);
 	}
