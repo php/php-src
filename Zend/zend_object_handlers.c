@@ -405,6 +405,10 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = tmp_member;
 	}
 
+	if (value && Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ce_closure && zend_get_closure_this_ptr(value TSRMLS_CC) != object) {
+		value = zend_closure_copy(value, object TSRMLS_CC);
+	}
+
 	property_info = zend_get_property_info(zobj->ce, member, (zobj->ce->__set != NULL) TSRMLS_CC);
 
 	if (property_info && zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {

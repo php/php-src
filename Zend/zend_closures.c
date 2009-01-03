@@ -118,6 +118,17 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zval* zend_closure_copy(zval *closure_obj, zval *this_ptr TSRMLS_DC) /* {{{ */
+{
+	zend_closure *closure;
+
+	zval_copy_ctor(closure_obj);
+	closure = (zend_closure *)zend_object_store_get_object(closure_obj TSRMLS_CC);
+	closure->this_ptr = this_ptr;
+	return closure_obj;
+}
+/* }}} */
+
 static zend_function *zend_closure_get_method(zval **object_ptr, char *method_name, int method_len TSRMLS_DC) /* {{{ */
 {
 	char *lc_name;
@@ -238,7 +249,7 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 }
 /* }}} */
 
-ZEND_API HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
+static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *rv;
