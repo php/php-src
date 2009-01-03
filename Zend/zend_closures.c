@@ -128,7 +128,13 @@ ZEND_API zval* zend_closure_copy(zval *closure_obj, zval *this_ptr TSRMLS_DC) /*
 
 	zval_copy_ctor(closure_obj);
 	closure = (zend_closure *)zend_object_store_get_object(closure_obj TSRMLS_CC);
+	if (closure->this_ptr) {
+		zval_ptr_dtor(&closure->this_ptr);
+	}
 	closure->this_ptr = this_ptr;
+	if (this_ptr) {
+		Z_ADDREF_P(this_ptr);
+	}
 	return closure_obj;
 }
 /* }}} */
