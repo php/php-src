@@ -1585,6 +1585,19 @@ ZEND_METHOD(reflection_function, isClosure)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::getClosureThis() U
+   Returns this pointer bound to closure */
+ZEND_METHOD(reflection_function, getClosureThis)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_ZVAL(intern->obj, 1, 0);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionFunction::isInternal() U
    Returns whether this is an internal function */
 ZEND_METHOD(reflection_function, isInternal)
@@ -5106,25 +5119,26 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	PHP_ABSTRACT_ME(reflection_function, __toString, NULL)
+	ZEND_ME(reflection_function, inNamespace, NULL, 0)
 	ZEND_ME(reflection_function, isClosure, NULL, 0)
+	ZEND_ME(reflection_function, isDeprecated, NULL, 0)
 	ZEND_ME(reflection_function, isInternal, NULL, 0)
 	ZEND_ME(reflection_function, isUserDefined, NULL, 0)
-	ZEND_ME(reflection_function, getName, NULL, 0)
-	ZEND_ME(reflection_function, getFileName, NULL, 0)
-	ZEND_ME(reflection_function, getStartLine, NULL, 0)
-	ZEND_ME(reflection_function, getEndLine, NULL, 0)
+	ZEND_ME(reflection_function, getClosureThis, NULL, 0)
 	ZEND_ME(reflection_function, getDocComment, NULL, 0)
-	ZEND_ME(reflection_function, getStaticVariables, NULL, 0)
-	ZEND_ME(reflection_function, returnsReference, NULL, 0)
-	ZEND_ME(reflection_function, getParameters, NULL, 0)
-	ZEND_ME(reflection_function, getNumberOfParameters, NULL, 0)
-	ZEND_ME(reflection_function, getNumberOfRequiredParameters, NULL, 0)
+	ZEND_ME(reflection_function, getEndLine, NULL, 0)
 	ZEND_ME(reflection_function, getExtension, NULL, 0)
 	ZEND_ME(reflection_function, getExtensionName, NULL, 0)
-	ZEND_ME(reflection_function, isDeprecated, NULL, 0)
-	ZEND_ME(reflection_function, inNamespace, NULL, 0)
+	ZEND_ME(reflection_function, getFileName, NULL, 0)
+	ZEND_ME(reflection_function, getName, NULL, 0)
 	ZEND_ME(reflection_function, getNamespaceName, NULL, 0)
+	ZEND_ME(reflection_function, getNumberOfParameters, NULL, 0)
+	ZEND_ME(reflection_function, getNumberOfRequiredParameters, NULL, 0)
+	ZEND_ME(reflection_function, getParameters, NULL, 0)
 	ZEND_ME(reflection_function, getShortName, NULL, 0)
+	ZEND_ME(reflection_function, getStartLine, NULL, 0)
+	ZEND_ME(reflection_function, getStaticVariables, NULL, 0)
+	ZEND_ME(reflection_function, returnsReference, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
