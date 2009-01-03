@@ -1,3 +1,30 @@
+2009-01-02  Felipe Pena  <felipensp@gmail.com>
+
+    * header
+      zend_float.h
+      zend_gc.c
+      zend_gc.h
+      zend_ini_scanner.c
+      zend_ini_scanner.l:
+      - Year++
+
+2009-01-02  Marcus Boerger  <php@marcus-boerger.de>
+
+    * zend.c
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute_API.c:
+      - Catch exceptions in cli -a
+
+2009-01-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * zend_closures.c:
+      - MFB: fix build (declaration first please)
+
+    * (PHP_5_3)
+      zend_closures.c:
+      - fix build (declaration first please)
+
 2009-01-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_language_scanner.c
