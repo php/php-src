@@ -319,7 +319,7 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 }
 
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
-static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char *indent TSRMLS_DC);
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, zval* closure, char *indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
@@ -485,7 +485,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					string_printf(str, "\n");
-					_function_string(str, mptr, ce, sub_indent.string TSRMLS_CC);
+					_function_string(str, mptr, ce, NULL, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -587,7 +587,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 							closure = NULL;
 						}
 						string_printf(&dyn, "\n");
-						_function_string(&dyn, mptr, ce, sub_indent.string TSRMLS_CC);
+						_function_string(&dyn, mptr, ce, NULL, sub_indent.string TSRMLS_CC);
 						count++;
 						_free_function(closure TSRMLS_CC);
 					}
@@ -744,7 +744,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 /* }}} */
 
 /* {{{ _function_string */
-static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC)
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, zval* closure, char* indent TSRMLS_DC)
 {
 	string param_indent;
 	zend_function *overwrites;
@@ -759,7 +759,8 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 		string_printf(str, "%s%s\n", indent, fptr->op_array.doc_comment);
 	}
 
-	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
+	string_write(str, indent, strlen(indent));
+	string_printf(str, closure ? "Closure [ " : (fptr->common.scope ? "Method [ " : "Function [ "));
 	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
 	if (fptr->common.fn_flags & ZEND_ACC_DEPRECATED) {
 		string_printf(str, ", deprecated");
@@ -834,6 +835,28 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 						fptr->op_array.filename,
 						fptr->op_array.line_start,
 						fptr->op_array.line_end);
+	}
+	if (closure) {
+		const zend_function *closure_fptr = zend_get_closure_method_def(closure TSRMLS_CC);
+		if (closure_fptr->type == ZEND_USER_FUNCTION && closure_fptr->op_array.static_variables) {
+			HashTable *static_variables = closure_fptr->op_array.static_variables;
+			HashPosition pos;
+			uint key_len;
+			char* key;
+			ulong num_index, index = 0;
+			int count = zend_hash_num_elements(static_variables);
+			if (count) {
+				string_printf(str, "\n");
+				string_printf(str, "%s  - Static Parameters [%d] {\n", indent, count);
+				zend_hash_internal_pointer_reset_ex(static_variables, &pos);
+				while (index++ < count) {
+					zend_hash_get_current_key_ex(static_variables, &key, &key_len, &num_index, 0, &pos);
+					string_printf(str, "%s    Parameter #%d [ $%s ]\n", indent, index++, key);
+					zend_hash_move_forward_ex(static_variables, &pos);
+				}	
+				string_printf(str, "%s  }\n", indent);
+			}
+		}
 	}
 	string_init(&param_indent);
 	string_printf(&param_indent, "%s  ", indent);
@@ -1037,7 +1060,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				continue;
 			}
 			
-			_function_string(str, fptr, NULL, "    " TSRMLS_CC);
+			_function_string(str, fptr, NULL, NULL, "    " TSRMLS_CC);
 			func++;
 		}
 		string_printf(str, "%s  }\n", indent);
@@ -1436,34 +1459,41 @@ ZEND_METHOD(reflection_function, __construct)
 {
 	zval *name;
 	zval *object;
+	zval *closure = NULL;
 	char *lcname;
 	reflection_object *intern;
 	zend_function *fptr;
 	char *name_str;
 	int name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
-		return;
-	}
-
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	if (intern == NULL) {
 		return;
 	}
-	lcname = zend_str_tolower_dup(name_str, name_len);
-	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "O", &closure, zend_ce_closure) == SUCCESS) {
+		fptr = zend_get_closure_invoke_method(closure TSRMLS_CC);
+		Z_ADDREF_P(closure);
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == SUCCESS) {
+		lcname = zend_str_tolower_dup(name_str, name_len);
+		if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
+			efree(lcname);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Function %s() does not exist", name_str);
+			return;
+		}
 		efree(lcname);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Function %s() does not exist", name_str);
+	} else {
 		return;
 	}
-	efree(lcname);
+
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRING(name, fptr->common.function_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
+	intern->obj = closure;
 	intern->ce = NULL;
 }
 /* }}} */
@@ -1479,23 +1509,36 @@ ZEND_METHOD(reflection_function, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
-	_function_string(&str, fptr, intern->ce, "" TSRMLS_CC);
+	_function_string(&str, fptr, intern->ce, intern->obj, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
 
 /* {{{ proto public string ReflectionFunction::getName()
    Returns this function's name */
-ZEND_METHOD(reflection, function_getName)
+ZEND_METHOD(reflection_function, getName)
 {
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::isClosure()
+   Returns whether this is a closure */
+ZEND_METHOD(reflection_function, isClosure)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(intern->obj);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionFunction::isInternal()
    Returns whether this is an internal function */
-ZEND_METHOD(reflection, function_isInternal)
+ZEND_METHOD(reflection_function, isInternal)
 {
 	reflection_object *intern;
 	zend_function *fptr;
@@ -2402,7 +2445,7 @@ ZEND_METHOD(reflection_method, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
-	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
+	_function_string(&str, mptr, intern->ce, intern->obj, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -4838,6 +4881,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	PHP_ABSTRACT_ME(reflection_function, __toString, NULL)
+	ZEND_ME(reflection_function, isClosure, NULL, 0)
 	ZEND_ME(reflection_function, isInternal, NULL, 0)
 	ZEND_ME(reflection_function, isUserDefined, NULL, 0)
 	ZEND_ME(reflection_function, getName, NULL, 0)
