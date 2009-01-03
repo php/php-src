@@ -316,7 +316,7 @@ define ____print_ht
 				end
 			else
 				printf "\""
-				printt $unicode $p->key.arKey.v $p->nKeyLength
+				printt $unicode $p->key.arKey.u $p->nKeyLength
 				printf "\" => "
 			end
 		else
