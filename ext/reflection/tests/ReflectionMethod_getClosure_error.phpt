@@ -56,9 +56,13 @@ try {
 *** Testing ReflectionMethod::getClosure() : error conditions ***
 
 -- Testing ReflectionMethod::getClosure() function with more than expected no. of arguments --
-object(Closure)#%d (0) {
+object(Closure)#%d (1) {
+  ["this"]=>
+  NULL
 }
-object(Closure)#%d (0) {
+object(Closure)#%d (1) {
+  ["this"]=>
+  NULL
 }
 
 Warning: ReflectionMethod::getClosure() expects exactly 1 parameter, 2 given in %s on line %d
