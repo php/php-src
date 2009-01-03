@@ -310,11 +310,24 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 }
 /* }}} */
 
+/* {{{ proto Closure::__construct()
+   Private constructor preventing instantiation */
+ZEND_METHOD(Closure, __construct)
+{
+	zend_error(E_RECOVERABLE_ERROR, "Instantiation of 'Closure' is not allowed");
+}
+/* }}} */
+
+static const zend_function_entry closure_functions[] = {
+	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
+	{NULL, NULL, NULL}
+};
+
 void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "Closure", NULL);
+	INIT_CLASS_ENTRY(ce, "Closure", closure_functions);
 	zend_ce_closure = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_closure->create_object = zend_closure_new;
