@@ -875,24 +875,32 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	if (closure) {
 		const zend_function *closure_fptr = zend_get_closure_method_def(closure TSRMLS_CC);
+		zval *closure_this = zend_get_closure_this_ptr(closure TSRMLS_CC);
+		HashTable *static_variables = NULL;
+		int index = 0, count = closure_this ? 1 : 0;
 		if (closure_fptr->type == ZEND_USER_FUNCTION && closure_fptr->op_array.static_variables) {
-			HashTable *static_variables = closure_fptr->op_array.static_variables;
-			HashPosition pos;
-			uint key_len;
-			zstr key;
-			ulong num_index, index = 0;
-			int count = zend_hash_num_elements(static_variables);
-			if (count) {
-				string_printf(str, "\n");
-				string_printf(str, "%s  - Static Parameters [%d] {\n", indent, count);
+			static_variables = closure_fptr->op_array.static_variables;
+			count += zend_hash_num_elements(static_variables);
+		}
+		if (count) {
+			string_printf(str, "\n");
+			string_printf(str, "%s  - Static Parameters [%d] {\n", indent, count);
+			if (closure_this) {
+				string_printf(str, "%s    Parameter #%d [ %v $this ]\n", indent, ++index, Z_OBJCE_P(closure_this)->name);
+			}
+			if (static_variables) {
+				HashPosition pos;
+				uint key_len;
+				zstr key;
+				ulong num_index;
 				zend_hash_internal_pointer_reset_ex(static_variables, &pos);
 				while (index++ < count) {
 					zend_hash_get_current_key_ex(static_variables, &key, &key_len, &num_index, 0, &pos);
 					string_printf(str, "%s    Parameter #%d [ $%v ]\n", indent, index++, key);
 					zend_hash_move_forward_ex(static_variables, &pos);
-				}	
-				string_printf(str, "%s  }\n", indent);
+				}
 			}
+			string_printf(str, "%s  }\n", indent);
 		}
 	}
 	string_init(&param_indent);
