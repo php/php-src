@@ -130,6 +130,9 @@ ZEND_API zval* zend_closure_copy(zval *closure_obj, zval *this_ptr TSRMLS_DC) /*
 	closure->this_ptr = this_ptr;
 	if (this_ptr) {
 		Z_ADDREF_P(this_ptr);
+		closure->func.common.scope = Z_OBJCE_P(this_ptr);
+	} else {
+		closure->func.common.scope = NULL;
 	}
 	return closure_obj;
 }
