@@ -1338,7 +1338,6 @@ TEST $file
 	if (is_array($IN_REDIRECT)) {
 		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']);
 		$tested_file = $tmp_relative_file;
-		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
 	}
 
 	// unlink old test results
@@ -1871,6 +1870,7 @@ COMMAND $cmd
 
 		// write .diff
 		$diff = generate_diff($wanted, $wanted_re, $output);
+		$diff = "# original source file: $shortname\n" . $diff;
 		show_file_block('diff', $diff);
 		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, (binary) $diff, FILE_BINARY) === false) {
 			error("Cannot create test diff - $diff_filename");
