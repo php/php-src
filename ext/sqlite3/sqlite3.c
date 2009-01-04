@@ -72,7 +72,7 @@ PHP_METHOD(sqlite3, open)
 	zval *object = getThis();
 	char *filename, *encryption_key, *fullpath;
 	zend_uchar filename_type;
-	int filename_len, encryption_key_len;
+	int filename_len, encryption_key_len = 0;
 	long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
