@@ -1,3 +1,47 @@
+2009-01-03  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_closures.c:
+      - MFH Prevent instantiation from Reflection
+
+    * zend_closures.c:
+      - Prevent instantiation from Reflection
+
+    * tests/closure_035.phpt:
+      - Overlooked one instance number
+
+    * zend_closures.c
+      tests/closure_035.phpt
+      tests/closure_035.phpt:
+      - Fix refcounting
+
+    * (PHP_5_3)
+      zend_closures.c
+      zend_closures.h
+      zend_object_handlers.c
+      tests/closure_033.phpt
+      tests/closure_034.phpt:
+      - MFH Rebind closure when binding to property
+
+    * tests/closure_033.phpt
+      tests/closure_033.phpt
+      tests/closure_034.phpt
+      tests/closure_034.phpt:
+      
+      - Rebind closure when binding to property
+
+    * zend_closures.c
+      zend_closures.h
+      zend_object_handlers.c:
+      - Rebind closure when binding to property
+
+    * zend_closures.c:
+      - Fix vim blocks and add missing comment
+
+    * zend_closures.c
+      zend_closures.h:
+      - Add reflection helpers
+
 2009-01-02  Felipe Pena  <felipensp@gmail.com>
 
     * header
