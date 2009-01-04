@@ -36,6 +36,11 @@
 #endif
 
 #include <sys/resource.h>
+
+#if defined(_GNU_SOURCE) && !defined(__USE_GNU)
+# define __USE_GNU
+#endif
+
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/stat.h>
