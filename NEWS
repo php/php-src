@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 - Fixed bug #46798 (Crash in mssql extension when retrieving a NULL value
   inside a binary or image column type). (Ilia)
 - Fixed bug #46782 (fastcgi.c parse error). (Matt)
+- Fixed bug #46760 (SoapClient doRequest fails when proxy is used). (Felipe)
 - Fixed bug #46748 (Segfault when an SSL error has more than one error). (Scott)
 - Fixed bug #46739 (array returned by curl_getinfo should contain content_type key). 
   (Mikko)
