@@ -1469,6 +1469,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
 	ZEND_ARG_INFO(0, argument_count)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_execute, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(1, param)
