@@ -45,17 +45,6 @@ print "done!";
 Warning: mysql_field_name() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_name(): Field -1 is invalid for MySQL result index %d in %s on line %d
-string(2) "id"
-
-Warning: mysql_field_name(): Field 2 is invalid for MySQL result index %d in %s on line %d
-
-Warning: mysql_field_name(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
---UEXPECTF--
-Warning: Wrong parameter count for mysql_field_name() in %s on line %d
-
-Warning: mysql_field_name(): Field -1 is invalid for MySQL result index %d in %s on line %d
 unicode(2) "id"
 
 Warning: mysql_field_name(): Field 2 is invalid for MySQL result index %d in %s on line %d
