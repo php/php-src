@@ -7,7 +7,8 @@ if (!extension_loaded('pdo_sqlite')) die('skip no pdo_sqlite');
 --FILE--
 <?php
 
-$pdo = new PDO("sqlite:/tmp/foo.db");
+$dir = dirname(__FILE__);
+$pdo = new PDO("sqlite:$dir/foo.db");
 
 $attrs = array(PDO::ATTR_STATEMENT_CLASS, PDO::ATTR_STRINGIFY_FETCHES, PDO::NULL_TO_STRING);
 
@@ -16,6 +17,8 @@ foreach ($attrs as $attr) {
 	var_dump($pdo->setAttribute($attr, 1));
 	var_dump($pdo->setAttribute($attr, 'nonsense'));
 }
+
+@unlink($dir."/foo.db");
 
 ?>
 --EXPECTF--
