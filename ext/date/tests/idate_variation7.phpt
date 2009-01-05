@@ -24,7 +24,7 @@ var_dump( idate($format, $timestamp) );
 *** Testing idate() : usage variation ***
 
 Strict Standards: idate(): It is not safe to rely on the system's timezone settings.%s
-int(2008)
+int(2009)
 
 Strict Standards: idate(): It is not safe to rely on the system's timezone settings.%s
 int(2008)

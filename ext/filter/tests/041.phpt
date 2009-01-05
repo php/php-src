@@ -19,12 +19,12 @@ var_dump(filter_input(INPUT_COOKIE, "xyz", FILTER_SANITIZE_SPECIAL_CHARS));
 ?>
 --EXPECT--
 array(3) {
-  ["abc"]=>
-  string(3) "dir"
-  ["def"]=>
-  string(4) "true"
-  ["xyz"]=>
-  string(17) "&#34;foo bar&#34;"
+  [u"abc"]=>
+  unicode(3) "dir"
+  [u"def"]=>
+  unicode(4) "true"
+  [u"xyz"]=>
+  unicode(17) "&#34;foo bar&#34;"
 }
 bool(true)
 string(3) "dir"

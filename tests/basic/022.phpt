@@ -6,7 +6,7 @@ cookie1=val1  ; cookie2=val2%20; cookie3=val 3.; cookie 4= value 4 %3B; cookie1=
 <?php
 var_dump($_COOKIE);
 ?>
---EXPECT--
+--EXPECTF--
 array(10) {
   [u"cookie1"]=>
   unicode(0) ""
