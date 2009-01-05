@@ -180,18 +180,17 @@ PHP_FUNCTION(apache_child_terminate)
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	char *note_name, *note_val;
+	char *note_name, *note_val = NULL;
 	int note_name_len, note_val_len;
 	char *old_val;
-	int arg_count = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(arg_count TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		return;
 	}
 
 	old_val = (char *) table_get(((request_rec *)SG(server_context))->notes, note_name);
 
-	if (arg_count == 2) {
+	if (note_val) {
 		table_set(((request_rec *)SG(server_context))->notes, note_name, note_val);
 	}
 
