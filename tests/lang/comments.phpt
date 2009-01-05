@@ -17,6 +17,7 @@ echo "\n";
 
 ?>
 --EXPECT--
+#teste
 #teste2
 #ola
 uhm # ah
