@@ -45,17 +45,6 @@ print "done!";
 Warning: mysql_field_type() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_type(): Field -1 is invalid for MySQL result index %d in %s on line %d
-string(3) "int"
-
-Warning: mysql_field_type(): Field 2 is invalid for MySQL result index %d in %s on line %d
-
-Warning: mysql_field_type(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
---UEXPECTF--
-Warning: Wrong parameter count for mysql_field_type() in %s on line %d
-
-Warning: mysql_field_type(): Field -1 is invalid for MySQL result index %d in %s on line %d
 unicode(3) "int"
 
 Warning: mysql_field_type(): Field 2 is invalid for MySQL result index %d in %s on line %d

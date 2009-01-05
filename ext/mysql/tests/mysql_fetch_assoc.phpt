@@ -61,45 +61,6 @@ print "done!";
 --EXPECTF--
 [005]
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-[006]
-bool(false)
-[008]
-array(5) {
-  ["a"]=>
-  string(1) "2"
-  ["c"]=>
-  string(1) "3"
-  ["C"]=>
-  string(1) "4"
-  ["d"]=>
-  NULL
-  ["e"]=>
-  string(1) "1"
-}
-
-Warning: mysql_fetch_assoc(): %d is not a valid MySQL result resource in %s on line %d
-[010]
-array(5) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-  ["_id"]=>
-  string(1) "1"
-  ["_label"]=>
-  string(2) "aa"
-  ["_foo"]=>
-  NULL
-}
-done!
---UEXPECTF--
-[005]
-array(2) {
   [u"id"]=>
   unicode(1) "1"
   [u"label"]=>

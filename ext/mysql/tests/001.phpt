@@ -25,9 +25,6 @@ mysql_close($db);
 var_dump($test);
 print "done!";
 ?>
---EXPECT--
-string(2) "11"
-done!
---UEXPECTF--
+--EXPECTF--
 unicode(2) "11"
 done!

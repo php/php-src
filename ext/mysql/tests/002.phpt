@@ -39,29 +39,6 @@ bool(true)
 bool(true)
 resource(%d) of type (mysql result)
 array(3) {
-  ["col1"]=>
-  string(1) "1"
-  ["col2"]=>
-  string(3) "foo"
-  ["col3"]=>
-  string(3) "bar"
-}
-array(3) {
-  ["col1"]=>
-  string(1) "2"
-  ["col2"]=>
-  string(3) "foo"
-  ["col3"]=>
-  string(3) "bar"
-}
-done!
---UEXPECTF--
-resource(%d) of type (mysql link)
-bool(true)
-bool(true)
-bool(true)
-resource(%d) of type (mysql result)
-array(3) {
   [u"col1"]=>
   unicode(1) "1"
   [u"col2"]=>

@@ -53,7 +53,5 @@ mysql_close($link);
 print "done!";
 ?>
 --EXPECTF--
-done!
---UEXPECTF--
 Warning: mysql_set_charset(): Character set %s is not supported when running PHP with unicode.semantics=On. in %s on line %d
 done!

@@ -73,54 +73,6 @@ bool(false)
 Warning: mysql_result(): Bad column offset specified in %s on line %d
 bool(false)
 valid fields
-string(1) "1"
-string(1) "a"
-string(1) "1"
-string(1) "1"
-string(1) "a"
-string(1) "a"
-some invalid fields
-
-Warning: mysql_result(): unknown not found in MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): _test. not found in MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result():  not found in MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): _test. not found in MySQL result index %d in %s on line %d
-bool(false)
-_id
-string(1) "1"
-_label
-string(2) "aa"
-_foo
-NULL
-
-Warning: mysql_result(): test.id not found in MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): test.label not found in MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
---UEXPECTF--
-Warning: mysql_result(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): Unable to jump to row 2 on MySQL result index %d in %s on line %d
-bool(false)
-
-Warning: mysql_result(): Bad column offset specified in %s on line %d
-bool(false)
-
-Warning: mysql_result(): Bad column offset specified in %s on line %d
-bool(false)
-valid fields
 unicode(1) "1"
 unicode(1) "a"
 unicode(1) "1"
