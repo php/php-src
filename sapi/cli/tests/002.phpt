@@ -17,6 +17,6 @@ var_dump(`"$php" -n -r 'var_dump("hello");'`);
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(18) "string(5) "hello"
+string(19) "unicode(5) "hello"
 "
 Done

@@ -24,11 +24,11 @@ var_dump(`cat "$filename_txt" | "$php" -n -B 'var_dump("start");' -E 'var_dump("
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(18) "string(5) "start"
+string(19) "unicode(5) "start"
 "
-string(16) "string(3) "end"
+string(17) "unicode(3) "end"
 "
-string(34) "string(5) "start"
-string(3) "end"
+string(36) "unicode(5) "start"
+unicode(3) "end"
 "
 Done
