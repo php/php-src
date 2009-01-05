@@ -75,6 +75,40 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+#define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
+#ifdef _WIN64
+# define DVAL_TO_LVAL(d, l) \
+	if ((d) > LONG_MAX) { \
+		(l) = (long)(unsigned long)(__int64) (d); \
+	} else { \
+		(l) = (long) (d); \
+	}
+#elif !defined(_WIN64) && __WORDSIZE == 64
+# define DVAL_TO_LVAL(d, l) \
+	if ((d) >= LONG_MAX) { \
+		(l) = LONG_MAX; \
+	} else if ((d) <=  LONG_MIN) { \
+		(l) = LONG_MIN; \
+	} else {\
+		(l) = (long) (d); \
+	} 
+#else
+# define DVAL_TO_LVAL(d, l) \
+	if ((d) > LONG_MAX) { \
+		if ((d) > MAX_UNSIGNED_INT) { \
+			(l) = LONG_MAX; \
+		} else { \
+			(l) = (unsigned long) (d); \
+		} \
+	} else { \
+		if((d) < LONG_MIN) { \
+			(l) = LONG_MIN; \
+		} else { \
+			(l) = (long) (d); \
+		} \
+	} 
+#endif
+
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a'  && (c) <= 'f'))
 

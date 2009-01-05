@@ -211,40 +211,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 		}																	\
 	}
 
-#define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
-#ifdef _WIN64
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) > LONG_MAX) { \
-		(l) = (long)(unsigned long)(__int64) (d); \
-	} else { \
-		(l) = (long) (d); \
-	}
-#elif !defined(_WIN64) && __WORDSIZE == 64
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) >= LONG_MAX) { \
-		(l) = LONG_MAX; \
-	} else if ((d) <=  LONG_MIN) { \
-		(l) = LONG_MIN; \
-	} else {\
-		(l) = (long) (d); \
-	} 
-#else
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) > LONG_MAX) { \
-		if ((d) > MAX_UNSIGNED_INT) { \
-			(l) = LONG_MAX; \
-		} else { \
-			(l) = (unsigned long) (d); \
-		} \
-	} else { \
-		if((d) < LONG_MIN) { \
-			(l) = LONG_MIN; \
-		} else { \
-			(l) = (long) (d); \
-		} \
-	} 
-#endif
-
 
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op == result) {												\
