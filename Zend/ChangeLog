@@ -1,3 +1,15 @@
+2009-01-04  Marcus Boerger  <php@marcus-boerger.de>
+
+    * (PHP_5_3)
+      zend_closures.c
+      tests/closure_036.phpt:
+      - MFH - Set scope when copying a closure with a new this pointer.
+
+    * zend_closures.c
+      tests/closure_036.phpt
+      tests/closure_036.phpt:
+      - Set scope when copying a closure with a new this pointer.
+
 2009-01-03  Marcus Boerger  <php@marcus-boerger.de>
 
     * (PHP_5_3)
