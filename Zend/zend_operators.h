@@ -78,6 +78,42 @@ ZEND_API unsigned long zend_u_strtoul(const UChar *nptr, UChar **endptr, int bas
 ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr);
 END_EXTERN_C()
 
+/* {{{ DVAL_TO_LVAL */
+#define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
+#ifdef _WIN64
+# define DVAL_TO_LVAL(d, l) \
+       if ((d) > LONG_MAX) { \
+               (l) = (long)(unsigned long)(__int64) (d); \
+       } else { \
+               (l) = (long) (d); \
+       }
+#elif !defined(_WIN64) && __WORDSIZE == 64
+# define DVAL_TO_LVAL(d, l) \
+       if ((d) >= LONG_MAX) { \
+               (l) = LONG_MAX; \
+       } else if ((d) <=  LONG_MIN) { \
+               (l) = LONG_MIN; \
+       } else {\
+               (l) = (long) (d); \
+       }
+#else
+# define DVAL_TO_LVAL(d, l) \
+       if ((d) > LONG_MAX) { \
+               if ((d) > MAX_UNSIGNED_INT) { \
+                       (l) = LONG_MAX; \
+               } else { \
+                       (l) = (unsigned long) (d); \
+               } \
+       } else { \
+               if((d) < LONG_MIN) { \
+                       (l) = LONG_MIN; \
+               } else { \
+                       (l) = (long) (d); \
+               } \
+       }
+#endif
+/* }}} */
+
 static inline zend_uchar is_numeric_string(char *str, int length, long *lval, double *dval, int allow_errors)
 {
 	long local_lval;

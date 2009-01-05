@@ -2920,9 +2920,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -3453,9 +3455,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -3933,9 +3937,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -4137,9 +4143,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -4616,9 +4624,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -6285,9 +6295,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -6758,9 +6770,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -7231,9 +7245,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -7325,9 +7341,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -7795,9 +7813,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -10981,9 +11001,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -12825,9 +12847,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -14720,9 +14744,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -15671,9 +15697,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -17231,9 +17259,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -25320,9 +25350,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -27042,9 +27074,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -28814,9 +28848,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -29649,9 +29685,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -31090,9 +31128,11 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 		}
 	}
 	if (offset) {
+	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
+			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
