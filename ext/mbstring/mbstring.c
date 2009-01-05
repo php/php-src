@@ -1722,12 +1722,12 @@ PHP_FUNCTION(mb_http_output)
 PHP_FUNCTION(mb_detect_order)
 {
 	size_t argc = ZEND_NUM_ARGS();
-	zval *arg1;
+	zval **arg1;
 	int n, size;
 	enum mbfl_no_encoding *list, *entry;
 	char *name;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|z", &arg1) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|Z", &arg1) == FAILURE) {
 		return;
 	}
 
@@ -1746,9 +1746,9 @@ PHP_FUNCTION(mb_detect_order)
 	} else {
 		list = NULL;
 		size = 0;
-		switch (Z_TYPE_P(arg1)) {
+		switch (Z_TYPE_PP(arg1)) {
 		case IS_ARRAY:
-			if (!php_mb_parse_encoding_array(arg1, &list, &size, 0 TSRMLS_CC)) {
+			if (!php_mb_parse_encoding_array(*arg1, &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
 				}
@@ -1756,15 +1756,13 @@ PHP_FUNCTION(mb_detect_order)
 			}
 			break;
 		default:
-			convert_to_string_ex(&arg1);
-			if (!php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0 TSRMLS_CC)) {
+			convert_to_string_ex(arg1);
+			if (!php_mb_parse_encoding_list(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
 				}
-				zval_ptr_dtor(&arg1);
 				RETURN_FALSE;
 			}
-			zval_ptr_dtor(&arg1);
 			break;
 		}
 
@@ -1786,9 +1784,9 @@ PHP_FUNCTION(mb_detect_order)
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
 {
-	zval *arg1;
+	zval **arg1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Z", &arg1) == FAILURE) {
 		return;
 	}
 
@@ -1805,36 +1803,32 @@ PHP_FUNCTION(mb_substitute_character)
 	} else {
 		RETVAL_TRUE;
 
-		switch (Z_TYPE_P(arg1)) {
+		switch (Z_TYPE_PP(arg1)) {
 		case IS_STRING:
-			if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+			if (strncasecmp("none", Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-			} else if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+			} else if (strncasecmp("long", Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-			} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+			} else if (strncasecmp("entity", Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 			} else {
-				convert_to_long_ex(&arg1);
+				convert_to_long_ex(arg1);
 
-				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+				if (Z_LVAL_PP(arg1) < 0xffff && Z_LVAL_PP(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-					zval_ptr_dtor(&arg1);
+					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 				} else {
-					zval_ptr_dtor(&arg1);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETURN_FALSE;
 				}
 			}
 			break;
 		default:
-			convert_to_long_ex(&arg1);
-			if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+			convert_to_long_ex(arg1);
+			if (Z_LVAL_PP(arg1) < 0xffff && Z_LVAL_PP(arg1) > 0x0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-				zval_ptr_dtor(&arg1);
+				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
 			} else {
-				zval_ptr_dtor(&arg1);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 				RETURN_FALSE;
 			}
