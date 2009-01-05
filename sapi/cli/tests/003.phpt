@@ -20,13 +20,13 @@ var_dump(`"$php" -n -d upload_tmp_dir=/test/path -d max_execution_time=555 -r 'v
 echo "Done\n";
 ?>
 --EXPECTF--	
-string(16) "string(3) "111"
+string(17) "unicode(3) "111"
 "
-string(16) "string(3) "500"
+string(17) "unicode(3) "500"
 "
-string(16) "string(3) "555"
+string(17) "unicode(3) "555"
 "
-string(40) "string(3) "555"
-string(10) "/test/path"
+string(42) "unicode(3) "555"
+unicode(10) "/test/path"
 "
 Done
