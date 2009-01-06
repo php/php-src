@@ -145,6 +145,10 @@ if (VCVERS >= 1400) {
 	}
 }
 
+if (VCVERS >= 1500) {
+	ADD_FLAG('CFLAGS', ' /MP ');
+}
+
 // General link flags
 DEFINE("LDFLAGS", "/nologo /version:" +
 	PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
