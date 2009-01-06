@@ -75,6 +75,22 @@ ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_cl
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+#ifdef _WIN64
+# define DVAL_TO_LVAL(d, l) \
+      if ((d) > LONG_MAX) { \
+              (l) = (long)(unsigned long)(__int64) (d); \
+      } else { \
+              (l) = (long) (d); \
+      }
+#else
+# define DVAL_TO_LVAL(d, l) \
+      if ((d) > LONG_MAX) { \
+              (l) = (unsigned long) (d); \
+      } else { \
+              (l) = (long) (d); \
+      }
+#endif
+
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a'  && (c) <= 'f'))
 
