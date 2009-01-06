@@ -225,13 +225,6 @@ char *nsapi_dll = NULL;
  */
 static void php_nsapi_init_dynamic_symbols(void)
 {
-#if defined(servact_uri2path) && defined(servact_pathchecks) && defined(servact_fileinfo) && defined(servact_service)
-	/* use functions from nsapi.h if available */
-	nsapi_servact_uri2path = &servact_uri2path;
-	nsapi_servact_pathchecks = &servact_pathchecks;
-	nsapi_servact_fileinfo = &servact_fileinfo;
-	nsapi_servact_service = &servact_service;
-#else
 	/* find address of internal NSAPI functions */
 #ifdef PHP_WIN32
 	register int i;
@@ -265,7 +258,6 @@ static void php_nsapi_init_dynamic_symbols(void)
 		nsapi_servact_fileinfo = NULL;
 		nsapi_servact_service = NULL;
 	}
-#endif
 }
 /* }}} */
 
