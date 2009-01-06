@@ -93,7 +93,7 @@ PHP_FUNCTION(dns_check_record)
 	int type = DNS_TYPE_MX;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
-	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
+	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
 		return;
@@ -260,7 +260,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 
 		case DNS_TYPE_NAPTR:
 			{
+#ifdef DNS_NAPTR_DATA
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
+
 				add_assoc_string(*subarray, "type", "NAPTR", 1);
 				add_assoc_long(*subarray, "order", data_naptr->wOrder);
 				add_assoc_long(*subarray, "pref", data_naptr->wPreference);
@@ -268,6 +270,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				add_assoc_string(*subarray, "services", data_naptr->pService, 1);
 				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression, 1);
 				add_assoc_string(*subarray, "replacement", data_naptr->pReplacement, 1);
+#endif
 			}
 			break;
 
