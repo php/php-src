@@ -35,8 +35,6 @@ PHP                                                                        NEWS
 - Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error when
   given bad data). (Ilia)
 - Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
-- Fixed bug #46701 (Creating associative array with long values in the key fails
-  on 32bit linux). (Shire)
 - Fixed bug #46681 (mkdir() fails silently on PHP 5.3). (Hannes)
 - Fixed bug #46646 (Restrict serialization on some internal classes like
   Closure and SplFileInfo using exceptions). (Etienne)
