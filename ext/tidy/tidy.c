@@ -562,7 +562,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	zend_bool use_include_path = 0;
 	TidyDoc doc;
 	TidyBuffer *errbuf;
-	zval **config;
+	zval **config = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|Zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
@@ -593,7 +593,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	
 	TIDY_SET_DEFAULT_CONFIG(doc);
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (config) {
 		TIDY_APPLY_CONFIG_ZVAL(doc, config);
 	}
 
