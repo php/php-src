@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2009 The PHP Group                                |
+   | Copyright (c) 1997-2008 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -996,13 +996,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
+#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-# if HAVE_DNS_FUNCS
+# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 1, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, type)
@@ -1011,15 +1011,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 1, 0, 1)
 ZEND_END_ARG_INFO()
 # endif
 
-# if HAVE_DN_SKIPNAME && HAVE_DN_EXPAND
+# if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(1, mxhosts) /* ARRAY_INFO(1, mxhosts, 1) */
 	ZEND_ARG_INFO(1, weight) /* ARRAY_INFO(1, weight, 1) */
 ZEND_END_ARG_INFO()
 # endif
-#endif /* HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE)) */
+
+#endif /* defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE))) */
 /* }}} */
+
 /* {{{ exec.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exec, 0, 0, 1)
 	ZEND_ARG_INFO(0, command)
@@ -2999,14 +3001,17 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
+#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
+
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
-# if HAVE_DN_SKIPNAME && HAVE_DN_EXPAND
+
+# if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
 	PHP_FE(dns_get_mx,														arginfo_dns_get_mx)
-	PHP_FALIAS(getmxrr,				dns_get_mx,								arginfo_dns_get_mx)
+	PHP_FALIAS(getmxrr,				dns_get_mx,					arginfo_dns_get_mx)
 # endif
-# if HAVE_DNS_FUNCS
+
+# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
 	PHP_FE(dns_get_record,													arginfo_dns_get_record)
 # endif
 #endif
@@ -3033,6 +3038,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
+
+	/* functions from dl.c */
+//	PHP_FE(dl,																arginfo_dl)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -3636,8 +3644,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC);
 #endif
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
-# if HAVE_DNS_FUNCS
+#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
+# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
 	PHP_MINIT(dns)(INIT_FUNC_ARGS_PASSTHRU);
 # endif
 #endif
