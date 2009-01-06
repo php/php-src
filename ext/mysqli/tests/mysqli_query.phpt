@@ -114,19 +114,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  ["valid"]=>
-  string(30) "this is sql but with semicolon"
-}
-array(1) {
-  [""]=>
-  string(1) "a"
-}
-string(1) "a"
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
-done!
---UEXPECTF--
-array(1) {
   [u"valid"]=>
   unicode(30) "this is sql but with semicolon"
 }

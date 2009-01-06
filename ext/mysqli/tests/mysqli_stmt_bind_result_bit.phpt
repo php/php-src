@@ -153,5 +153,3 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 done!
---UEXPECTF--
-done!

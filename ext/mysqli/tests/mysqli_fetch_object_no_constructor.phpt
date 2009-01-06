@@ -47,21 +47,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 No exception with PHP:
 object(mysqli_fetch_object_test)#%d (%d) {
-  ["a"]=>
-  NULL
-  ["b"]=>
-  NULL
-}
-
-Exception with mysqli. Note that at all other places we throws errors but no exceptions unless the error mode has been changed:
-Exception: Class mysqli_fetch_object_test does not have a constructor hence you cannot use ctor_params
-
-Fatal error with PHP (but no exception!):
-
-Fatal error: Call to undefined method mysqli_fetch_object_test::mysqli_fetch_object_test() in %s on line %d
---UEXPECTF--
-No exception with PHP:
-object(mysqli_fetch_object_test)#%d (%d) {
   [%s"a"]=>
   NULL
   [%s"b"]=>

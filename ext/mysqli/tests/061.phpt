@@ -49,13 +49,7 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 	unlink($filename);
 	print "done!";
 ?>
---EXPECT--
-foo-bar
-string-string
-rab-oof
-string-string
-done!
---UEXPECTF--
+--EXPECTF--
 foo-bar
 unicode-unicode
 rab-oof

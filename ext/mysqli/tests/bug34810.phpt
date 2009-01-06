@@ -35,83 +35,83 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 object(mysqli)#%d (%d) {
-  ["affected_rows"]=>
+  [u"affected_rows"]=>
   int(0)
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
+  [u"client_info"]=>
+  unicode(%d) "%s"
+  [u"client_version"]=>
   int(%d)
-  ["connect_errno"]=>
+  [u"connect_errno"]=>
   int(0)
-  ["connect_error"]=>
-  string(0) ""
-  ["errno"]=>
+  [u"connect_error"]=>
+  unicode(0) ""
+  [u"errno"]=>
   int(0)
-  ["error"]=>
-  string(0) ""
-  ["field_count"]=>
+  [u"error"]=>
+  unicode(0) ""
+  [u"field_count"]=>
   int(0)
-  ["host_info"]=>
-  string(%d) "MySQL host info: %s via %s%s"
-  ["info"]=>
+  [u"host_info"]=>
+  unicode(%d) "MySQL host info: %s via %s%s"
+  [u"info"]=>
   NULL
-  ["insert_id"]=>
+  [u"insert_id"]=>
   int(0)
-  ["server_info"]=>
-  string(%d) "%s"
-  ["server_version"]=>
+  [u"server_info"]=>
+  unicode(%d) "%s"
+  [u"server_version"]=>
   int(%d)
-  ["sqlstate"]=>
-  string(5) "00000"
-  ["protocol_version"]=>
+  [u"sqlstate"]=>
+  unicode(5) "00000"
+  [u"protocol_version"]=>
   int(10)
-  ["thread_id"]=>
+  [u"thread_id"]=>
   int(%d)
-  ["warning_count"]=>
+  [u"warning_count"]=>
   int(0)
 }
 object(mysqli)#%d (%d) {
-  ["affected_rows"]=>
+  [u"affected_rows"]=>
   NULL
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
+  [u"client_info"]=>
+  unicode(%d) "%s"
+  [u"client_version"]=>
   int(%d)
-  ["connect_errno"]=>
+  [u"connect_errno"]=>
   int(0)
-  ["connect_error"]=>
-  string(0) ""
-  ["errno"]=>
+  [u"connect_error"]=>
+  unicode(0) ""
+  [u"errno"]=>
   int(0)
-  ["error"]=>
-  string(0) ""
-  ["field_count"]=>
+  [u"error"]=>
+  unicode(0) ""
+  [u"field_count"]=>
   NULL
-  ["host_info"]=>
+  [u"host_info"]=>
   NULL
-  ["info"]=>
+  [u"info"]=>
   NULL
-  ["insert_id"]=>
+  [u"insert_id"]=>
   NULL
-  ["server_info"]=>
+  [u"server_info"]=>
   NULL
-  ["server_version"]=>
+  [u"server_version"]=>
   NULL
-  ["sqlstate"]=>
+  [u"sqlstate"]=>
   NULL
-  ["protocol_version"]=>
+  [u"protocol_version"]=>
   NULL
-  ["thread_id"]=>
+  [u"thread_id"]=>
   NULL
-  ["warning_count"]=>
+  [u"warning_count"]=>
   NULL
 }
 object(mysqli_warning)#%d (%d) {
-  ["message"]=>
-  string(25) "Column 'a' cannot be null"
-  ["sqlstate"]=>
-  string(5) "HY000"
-  ["errno"]=>
+  [u"message"]=>
+  unicode(25) "Column 'a' cannot be null"
+  [u"sqlstate"]=>
+  unicode(5) "HY000"
+  [u"errno"]=>
   int(1048)
 }
 Done

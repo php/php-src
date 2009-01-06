@@ -91,5 +91,3 @@ mysqli.max_persistent=2
 ?>
 --EXPECTF--
 done!
---UEXPECTF--
-done!

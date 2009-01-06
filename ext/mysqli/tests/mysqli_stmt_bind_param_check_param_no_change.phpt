@@ -65,48 +65,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Test 1: 
 object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
-}
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
-}
-фубар
-
-Test 2: 
-object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
-}
----
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
-}
----
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
-}
----
-фубар - 0
-
-Test 3: 
-object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
-}
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
-}
-0 - фубар
-
-done!
---UEXPECTF--
-Test 1: 
-object(foo)#3 (1) {
   [u"bar"]=>
   unicode(5) "фубар"
 }

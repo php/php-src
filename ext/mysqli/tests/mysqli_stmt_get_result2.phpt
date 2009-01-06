@@ -153,25 +153,6 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  int(1)
-  ["label"]=>
-  string(1) "a"
-}
-NULL
-array(2) {
-  ["id"]=>
-  int(1)
-  ["label"]=>
-  string(1) "a"
-}
-NULL
-[017] [2014] Commands out of sync; you can't run this command now
-
-Warning: mysqli_stmt_get_result(): Couldn't fetch mysqli_stmt in %s on line %d
-done!
---UEXPECTF--
-array(2) {
   [u"id"]=>
   int(1)
   [u"label"]=>

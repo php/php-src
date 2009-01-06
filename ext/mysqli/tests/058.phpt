@@ -53,18 +53,6 @@ array(4) {
   [0]=>
   int(1)
   [1]=>
-  string(3) "foo"
-  [2]=>
-  int(2)
-  [3]=>
-  string(3) "bar"
-}
-done!
---UEXPECTF--
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
   unicode(3) "foo"
   [2]=>
   int(2)

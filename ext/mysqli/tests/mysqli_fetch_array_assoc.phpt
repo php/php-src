@@ -31,22 +31,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [002]
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-[004]
-array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-done!
---UEXPECTF--
-[002]
-array(2) {
   [u"id"]=>
   unicode(1) "1"
   [u"label"]=>

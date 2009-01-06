@@ -91,14 +91,6 @@ ver_param;')) {
 ?>
 --EXPECTF--
 array(1) {
-  ["valid"]=>
-  string(30) "this is sql but with semicolon"
-}
-
-Warning: mysqli_real_query(): Couldn't fetch mysqli in %s on line %d
-done!
---UEXPECTF--
-array(1) {
   [u"valid"]=>
   unicode(30) "this is sql but with semicolon"
 }

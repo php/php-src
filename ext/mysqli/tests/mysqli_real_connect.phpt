@@ -173,39 +173,39 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_real_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
-  ["affected_rows"]=>
+  [u"affected_rows"]=>
   NULL
-  ["client_info"]=>
-  string(%d) "%s"
-  ["client_version"]=>
+  [u"client_info"]=>
+  unicode(%d) "%s"
+  [u"client_version"]=>
   int(%d)
-  ["connect_errno"]=>
+  [u"connect_errno"]=>
   int(%d)
-  ["connect_error"]=>
-  string(%d) "%s"
-  ["errno"]=>
+  [u"connect_error"]=>
+  unicode(%d) "%s"
+  [u"errno"]=>
   int(%d)
-  ["error"]=>
-  string(%d) "%s"
-  ["field_count"]=>
+  [u"error"]=>
+  unicode(%d) "%s"
+  [u"field_count"]=>
   NULL
-  ["host_info"]=>
+  [u"host_info"]=>
   NULL
-  ["info"]=>
+  [u"info"]=>
   NULL
-  ["insert_id"]=>
+  [u"insert_id"]=>
   NULL
-  ["server_info"]=>
+  [u"server_info"]=>
   NULL
-  ["server_version"]=>
+  [u"server_version"]=>
   NULL
-  ["sqlstate"]=>
+  [u"sqlstate"]=>
   NULL
-  ["protocol_version"]=>
+  [u"protocol_version"]=>
   NULL
-  ["thread_id"]=>
+  [u"thread_id"]=>
   NULL
-  ["warning_count"]=>
+  [u"warning_count"]=>
   NULL
 }
 done!

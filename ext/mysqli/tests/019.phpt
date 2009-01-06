@@ -76,32 +76,6 @@ array(11) {
   [8]=>
   NULL
   [9]=>
-  string(3) "foo"
-  [10]=>
-  string(6) "foobar"
-}
-done!
---UEXPECTF--
-array(11) {
-  [0]=>
-  int(1)
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
-  [5]=>
-  float(3.14)
-  [6]=>
-  NULL
-  [7]=>
-  NULL
-  [8]=>
-  NULL
-  [9]=>
   unicode(3) "foo"
   [10]=>
   unicode(6) "foobar"

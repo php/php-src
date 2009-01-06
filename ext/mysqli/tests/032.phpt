@@ -27,8 +27,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-string(38) "Records: 3  Duplicates: 0  Warnings: 0"
-done!
---UEXPECTF--
 unicode(38) "Records: 3  Duplicates: 0  Warnings: 0"
 done!

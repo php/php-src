@@ -316,15 +316,5 @@ Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match numbe
 
 Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
 int(1)
-%s(1) "a"
-done!
---UEXPECTF--
-Warning: mysqli_stmt_bind_result(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
-
-Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
-int(1)
 unicode(1) "a"
 done!

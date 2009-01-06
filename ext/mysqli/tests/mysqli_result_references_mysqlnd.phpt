@@ -55,49 +55,6 @@ if (!$IS_MYSQLND)
 array(2) refcount(2){
   [0]=>
   array(4) refcount(1){
-    ["row_ref"]=>
-    &NULL refcount(2)
-    ["row_copy"]=>
-    array(2) refcount(1){
-      ["id"]=>
-      string(1) "1" refcount(2)
-      ["label"]=>
-      string(1) "a" refcount(2)
-    }
-    ["id_ref"]=>
-    string(1) "1" refcount(1)
-    ["id_copy"]=>
-    string(1) "1" refcount(1)
-  }
-  [1]=>
-  array(5) refcount(1){
-    ["row_ref"]=>
-    &array(2) refcount(2){
-      ["id"]=>
-      &string(1) "2" refcount(2)
-      ["label"]=>
-      string(1) "b" refcount(3)
-    }
-    ["row_copy"]=>
-    array(2) refcount(1){
-      ["id"]=>
-      string(1) "2" refcount(2)
-      ["label"]=>
-      string(1) "b" refcount(3)
-    }
-    ["id_ref"]=>
-    &string(1) "2" refcount(2)
-    ["id_copy"]=>
-    string(1) "2" refcount(1)
-    ["id_copy_mod"]=>
-    long(2) refcount(1)
-  }
-}
-done!
---UEXPECTF--
-array(2) refcount(2){
-  [0]=>
-  array(4) refcount(1){
     [u"row_ref" { 0072 006f 0077 005f 0072 0065 0066 }]=>
     &NULL refcount(2)
     [u"row_copy" { 0072 006f 0077 005f 0063 006f 0070 0079 }]=>

@@ -62,26 +62,6 @@ array(8) {
   [6]=>
   string(6) "foobar"
   [7]=>
-  string(11) "mysql rulez"
-}
-done!
---UEXPECTF--
-array(8) {
-  [0]=>
-  int(19)
-  [1]=>
-  int(2999)
-  [2]=>
-  int(3999)
-  [3]=>
-  int(4999999)
-  [4]=>
-  float(2345.60009766)
-  [5]=>
-  float(5678.89563)
-  [6]=>
-  string(6) "foobar"
-  [7]=>
   unicode(11) "mysql rulez"
 }
 done!

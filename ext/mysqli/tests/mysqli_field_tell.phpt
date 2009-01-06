@@ -61,52 +61,6 @@ Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line
 NULL
 int(0)
 object(stdClass)#%d (11) {
-  ["name"]=>
-  string(2) "id"
-  ["orgname"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "test"
-  ["orgtable"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
-  int(0)
-  ["length"]=>
-  int(11)
-  ["charsetnr"]=>
-  int(63)
-  ["flags"]=>
-  int(49155)
-  ["type"]=>
-  int(3)
-  ["decimals"]=>
-  int(0)
-}
-bool(false)
-int(1)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
-int(1)
-
-Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
-bool(false)
-int(1)
-bool(true)
-int(0)
-
-Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-NULL
-done!
---UEXPECTF--
-int(0)
-
-Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-int(0)
-object(stdClass)#%d (11) {
   [u"name"]=>
   unicode(2) "id"
   [u"orgname"]=>

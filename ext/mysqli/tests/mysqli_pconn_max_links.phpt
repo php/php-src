@@ -140,22 +140,6 @@ mysqli.max_persistent=2
 ?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-
-Warning: mysqli_connect(): Too many open persistent links (%d) in %s on line %d
-done!
---UEXPECTF--
-array(2) {
   [u"id"]=>
   unicode(1) "1"
   [u"label"]=>

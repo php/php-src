@@ -80,68 +80,6 @@ require_once('skipifconnectfailure.inc');
 array(7) refcount(2){
   [0]=>
   array(2) refcount(1){
-    ["id"]=>
-    long(1) refcount(1)
-    ["label"]=>
-    string(1) "a" refcount(1)
-  }
-  [1]=>
-  array(2) refcount(1){
-    ["id"]=>
-    long(2) refcount(1)
-    ["label"]=>
-    string(1) "b" refcount(1)
-  }
-  [2]=>
-  array(2) refcount(1){
-    ["id"]=>
-    long(1) refcount(1)
-    ["label"]=>
-    string(1) "a" refcount(1)
-  }
-  [3]=>
-  array(2) refcount(1){
-    ["id"]=>
-    long(2) refcount(1)
-    ["label"]=>
-    string(1) "b" refcount(1)
-  }
-  [4]=>
-  array(3) refcount(1){
-    ["id"]=>
-    &long(3) refcount(2)
-    ["label"]=>
-    string(1) "a" refcount(1)
-    ["id2"]=>
-    &long(3) refcount(2)
-  }
-  [5]=>
-  array(3) refcount(1){
-    ["id"]=>
-    &long(4) refcount(2)
-    ["label"]=>
-    string(1) "b" refcount(1)
-    ["id2"]=>
-    &long(4) refcount(2)
-  }
-  [6]=>
-  &object(mysqli_result)#2 (0) refcount(2){
-  }
-}
-array(1) refcount(2){
-  [0]=>
-  array(2) refcount(1){
-    ["id"]=>
-    string(1) "1" refcount(1)
-    ["label"]=>
-    string(1) "a" refcount(1)
-  }
-}
-done!
---UEXPECTF--
-array(7) refcount(2){
-  [0]=>
-  array(2) refcount(1){
     [u"id" { 0069 0064 }]=>
     long(1) refcount(1)
     [u"label" { 006c 0061 0062 0065 006c }]=>

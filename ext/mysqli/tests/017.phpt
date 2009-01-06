@@ -36,16 +36,6 @@ array(3) {
   [0]=>
   string(32) "37b51d194a7513e45b56f6524f2d51f2"
   [1]=>
-  string(%d) "%s"
-  [2]=>
-  string(3) "foo"
-}
-done!
---UEXPECTF--
-array(3) {
-  [0]=>
-  string(32) "37b51d194a7513e45b56f6524f2d51f2"
-  [1]=>
   unicode(%d) "%s"
   [2]=>
   unicode(3) "foo"

@@ -29,16 +29,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 array(1) {
   [1]=>
-  string(1) "1"
-}
-array(1) {
-  [2]=>
-  string(1) "2"
-}
-done!
---UEXPECTF--
-array(1) {
-  [1]=>
   unicode(1) "1"
 }
 array(1) {
