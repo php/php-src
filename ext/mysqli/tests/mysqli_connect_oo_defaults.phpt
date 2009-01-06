@@ -144,32 +144,6 @@ new mysqli()
 ?>
 --EXPECTF--
 array(1) {
-  ["testing"]=>
-  string(21) "mysqli.default_socket"
-}
-array(1) {
-  ["testing"]=>
-  string(19) "mysqli.default_port"
-}
-array(1) {
-  ["testing"]=>
-  string(17) "mysqli.default_pw"
-}
-array(1) {
-  ["testing"]=>
-  string(19) "mysqli.default_user"
-}
-array(1) {
-  ["all_defaults"]=>
-  string(13) "have been set"
-}
-array(1) {
-  ["all_defaults"]=>
-  string(13) "have been set"
-}
-done!
---UEXPECTF--
-array(1) {
   [u"testing"]=>
   unicode(21) "mysqli.default_socket"
 }

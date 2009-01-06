@@ -125,14 +125,6 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 array(1) {
-  ["правилен"]=>
-  string(59) "това ескюел, но с точка и запетая"
-}
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
-done!
---UEXPECTF--
-array(1) {
   [u"правилен"]=>
   unicode(33) "това ескюел, но с точка и запетая"
 }

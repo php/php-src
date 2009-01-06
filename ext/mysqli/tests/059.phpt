@@ -42,8 +42,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECT--
-string(6) "foobar"
-done!
---UEXPECT--
 unicode(6) "foobar"
 done!

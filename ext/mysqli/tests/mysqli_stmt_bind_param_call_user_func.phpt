@@ -331,38 +331,6 @@ if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
 --EXPECTF--
 Regular, procedural, using variables
 int(1)
-string(1) "a"
-Call user func, procedural, using references for everything
-int(1)
-string(1) "a"
-Call user func, object oriented, using references for everything
-int(1)
-string(1) "a"
-Call user func, object oriented, using variable for types. using references for bound parameter
-int(1)
-string(1) "a"
-Call user func, object oriented, using constant for types. using references for bound parameter
-int(1)
-string(1) "a"
-Call user func, procedural, using references for everything but using variable for types
-int(1)
-string(1) "a"
-Call user func, procedural, using references for bound parameter, using variables for resource and types
-int(1)
-string(1) "a"
-Call user func, procedural, using references for bound parameter, using variables for resource and types
-int(1)
-string(1) "a"
-Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types
-int(1)
-string(1) "a"
-Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types, array
-int(1)
-string(1) "a"
-done!
---UEXPECTF--
-Regular, procedural, using variables
-int(1)
 unicode(1) "a"
 Call user func, procedural, using references for everything
 int(1)

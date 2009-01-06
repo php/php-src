@@ -71,32 +71,6 @@ NULL
 ALTER
 bool(true)
 bool(false)
-string(34) "Unknown column 'a' in 'field list'"
----- Row 1
-bool(false)
-int(2)
----- Row 2
-bool(false)
-int(2)
----- Row 3
-bool(false)
-----
-done!
---UEXPECTF--
-bool(true)
-bool(true)
----- Row 1
-bool(true)
-int(1)
----- Row 2
-bool(true)
-int(2)
----- Row 3
-NULL
-----
-ALTER
-bool(true)
-bool(false)
 unicode(34) "Unknown column 'a' in 'field list'"
 ---- Row 1
 bool(false)

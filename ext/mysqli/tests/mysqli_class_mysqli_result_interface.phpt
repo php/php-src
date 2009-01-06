@@ -187,43 +187,6 @@ mysqli_result->unknown = ''
 
 Constructor:
 
-Warning: mysqli_result::mysqli_result() expects parameter 2 to be long, string given in %s on line %d
-
-Warning: mysqli_result::mysqli_result() expects parameter 1 to be mysqli, string given in %s on line %d
-done!
---UEXPECTF--
-Parent class:
-bool(false)
-
-Methods:
-ok
-
-Class variables:
-current_field
-field_count
-lengths
-num_rows
-type
-
-Object variables:
-current_field
-field_count
-lengths
-num_rows
-type
-
-Magic, magic properties:
-mysqli_result->current_field = '0'/integer ('0'/integer)
-mysqli_result->field_count = '2'/integer ('2'/integer)
-mysqli_result->lengths -> '1 1'/array ('1 1'/array)
-mysqli_result->num_rows = '6'/integer ('6'/integer)
-mysqli_result->type = 'store'/integer
-
-Access to undefined properties:
-mysqli_result->unknown = ''
-
-Constructor:
-
 Warning: mysqli_result::mysqli_result() expects parameter 2 to be long, Unicode string given in %s on line %d
 
 Warning: mysqli_result::mysqli_result() expects parameter 1 to be mysqli, Unicode string given in %s on line %d

@@ -78,30 +78,7 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 	mysqli_close($link);
 	print "done!";
 ?>
-
 --EXPECTF--
-array(8) {
-  [0]=>
-  int(5)
-  [1]=>
-  int(-23)
-  [2]=>
-  int(4)
-  [3]=>
-  string(14) "33333333333333"
-  [4]=>
-  int(0)
-  [5]=>
-  int(0)
-  [6]=>
-  int(100)
-  [7]=>
-  int(4567)
-}
-20123456
-3123456789
-done!
---UEXPECTF--
 array(8) {
   [0]=>
   int(5)

@@ -236,20 +236,6 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 ?>
 --EXPECTF--
 array(1) {
-  ["message"]=>
-  string(20) "dumped by the parent"
-}
-     child start
-     child array
-    parent conti
-     child array
-    parent conti
-     child array
-    parent conti
-     child stop
-done!
---UEXPECTF--
-array(1) {
   [u"message"]=>
   unicode(20) "dumped by the parent"
 }

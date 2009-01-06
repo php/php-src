@@ -57,32 +57,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [005]
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-[006]
-NULL
-[008]
-array(5) {
-  ["a"]=>
-  string(1) "2"
-  ["c"]=>
-  string(1) "3"
-  ["C"]=>
-  string(1) "4"
-  ["d"]=>
-  NULL
-  ["e"]=>
-  string(1) "1"
-}
-
-Warning: mysqli_result::fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d
-done!
---UEXPECTF--
-[005]
-array(2) {
   [u"id"]=>
   unicode(1) "1"
   [u"label"]=>

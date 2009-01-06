@@ -59,12 +59,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  ["label"]=>
-  string(1) "\"
-}
-done!
---UEXPECTF--
-array(1) {
   [u"label"]=>
   unicode(1) "\"
 }

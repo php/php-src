@@ -87,64 +87,6 @@ require_once('skipifconnectfailure.inc');
 [002]
 array(2) {
   [1]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[004]
-array(2) {
-  ["a"]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[006]
-array(2) {
-  ["a"]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[008]
-array(2) {
-  ["a"]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[011]
-array(2) {
-  [1]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[014]
-array(2) {
-  ["a"]=>
-  %s(1) "1"
-  [2]=>
-  %s(1) "2"
-}
-[017]
-array(2) {
-  ["a"]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-[017]
-array(2) {
-  ["a"]=>
-  string(1) "1"
-  [2]=>
-  string(1) "2"
-}
-done!
---UEXPECTF--
-[002]
-array(2) {
-  [1]=>
   unicode(1) "1"
   [2]=>
   unicode(1) "2"

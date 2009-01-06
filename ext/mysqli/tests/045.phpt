@@ -46,14 +46,6 @@ mysqli_bind_result (SHOW)
 --EXPECTF--
 array(2) {
   [0]=>
-  string(4) "port"
-  [1]=>
-  string(%d) "%s"
-}
-done!
---UEXPECTF--
-array(2) {
-  [0]=>
   unicode(4) "port"
   [1]=>
   unicode(%d) "%s"

@@ -92,24 +92,6 @@ if (ini_get("unicode.semantics")) {
 ?>
 --EXPECTF--
 array(7) {
-  ["put_hits"]=>
-  int(0)
-  ["put_misses"]=>
-  int(0)
-  ["get_hits"]=>
-  int(0)
-  ["get_misses"]=>
-  int(0)
-  ["size"]=>
-  int(%d)
-  ["free_items"]=>
-  int(%d)
-  ["references"]=>
-  int(%d)
-}
-done!
---UEXPECTF--
-array(7) {
   [u"put_hits"]=>
   int(0)
   [u"put_misses"]=>

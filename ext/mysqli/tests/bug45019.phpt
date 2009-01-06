@@ -136,23 +136,23 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Using CAST('somestring' AS CHAR)...
-string(3) "one"
-string(5) "three"
-string(3) "two"
+unicode(3) "one"
+unicode(5) "three"
+unicode(3) "two"
 Mixing CAST('somestring'AS CHAR), integer and CAST(integer AS CHAR)...
-string(1) "1"
-string(5) "three"
-string(1) "2"
+unicode(1) "1"
+unicode(5) "three"
+unicode(1) "2"
 Using integer only...
 int(1)
 int(303)
 int(2)
 Testing bind_param(), strings only...
-string(3) "one"
-string(5) "three"
-string(3) "two"
+unicode(3) "one"
+unicode(5) "three"
+unicode(3) "two"
 Testing bind_param(), strings only, with CAST AS CHAR...
-string(3) "one"
-string(32) "three beers are more than enough"
-string(3) "two"
+unicode(3) "one"
+unicode(32) "three beers are more than enough"
+unicode(3) "two"
 done!

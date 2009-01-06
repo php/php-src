@@ -50,24 +50,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 object(stdClass)#%d (7) {
-  ["c1"]=>
-  string(1) "0"
-  ["c2"]=>
-  string(5) "35999"
-  ["c3"]=>
-  NULL
-  ["c4"]=>
-  string(4) "-500"
-  ["c5"]=>
-  string(6) "-32768"
-  ["c6"]=>
-  string(1) "0"
-  ["c7"]=>
-  string(1) "0"
-}
-done!
---UEXPECTF--
-object(stdClass)#%d (7) {
   [u"c1"]=>
   unicode(1) "0"
   [u"c2"]=>

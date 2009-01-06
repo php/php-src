@@ -39,58 +39,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 object(stdClass)#%d (11) {
-  ["name"]=>
-  string(2) "ID"
-  ["orgname"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "TEST"
-  ["orgtable"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
-  int(1)
-  ["length"]=>
-  int(11)
-  ["charsetnr"]=>
-  int(63)
-  ["flags"]=>
-  int(49155)
-  ["type"]=>
-  int(3)
-  ["decimals"]=>
-  int(0)
-}
-object(stdClass)#%d (11) {
-  ["name"]=>
-  string(5) "label"
-  ["orgname"]=>
-  string(5) "label"
-  ["table"]=>
-  string(4) "TEST"
-  ["orgtable"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
-  int(1)
-  ["length"]=>
-  int(1)
-  ["charsetnr"]=>
-  int(8)
-  ["flags"]=>
-  int(0)
-  ["type"]=>
-  int(254)
-  ["decimals"]=>
-  int(0)
-}
-
-Warning: mysqli_fetch_fields(): Couldn't fetch mysqli_result in %s on line %d
-done!
---UEXPECTF--
-object(stdClass)#%d (11) {
   [u"name"]=>
   unicode(2) "ID"
   [u"orgname"]=>

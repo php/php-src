@@ -167,32 +167,6 @@ Warning: mysqli_stmt_get_result(): invalid object or resource mysqli_stmt
 [038] [2014] [Commands out of sync; you can't run this command now]
 [039] [0] []
 array(2) {
-  ["id"]=>
-  int(1)
-  ["label"]=>
-  %s(1) "a"
-}
-array(2) {
-  ["id"]=>
-  int(2)
-  ["label"]=>
-  %s(1) "b"
-}
-
-Warning: mysqli_stmt_fetch(): Couldn't fetch mysqli_stmt in %s on line %d
-done!
---UEXPECTF--
-Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_get_result(): invalid object or resource mysqli_stmt
- in %s on line %d
-[038] [2014] [Commands out of sync; you can't run this command now]
-[039] [0] []
-array(2) {
   [%s"id"]=>
   int(1)
   [%s"label"]=>

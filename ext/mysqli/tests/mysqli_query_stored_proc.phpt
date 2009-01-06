@@ -152,36 +152,6 @@ END;')) {
 ?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-array(1) {
-  ["id"]=>
-  string(1) "1"
-}
-done!
---UEXPECTF--
-array(2) {
   [u"id"]=>
   unicode(1) "1"
   [u"label"]=>

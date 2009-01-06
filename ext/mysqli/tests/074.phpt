@@ -25,17 +25,6 @@ require_once('skipifconnectfailure.inc');
 bool(true)
 array(1) {
   [0]=>
-  string(1) "0"
-}
-bool(true)
-array(1) {
-  [0]=>
-  string(1) "1"
-}
---UEXPECTF--
-bool(true)
-array(1) {
-  [0]=>
   unicode(1) "0"
 }
 bool(true)

@@ -48,8 +48,5 @@ mysqlnd.debug="t:O,/tmp/mysqli_debug_phpt.trace"
 	print "done!";
 ?>
 --EXPECTF--
-string(32) "t:O,/tmp/mysqli_debug_phpt.trace"
-done!
---UEXPECTF--
 unicode(32) "t:O,/tmp/mysqli_debug_phpt.trace"
 done!
