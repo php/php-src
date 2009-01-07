@@ -28,10 +28,7 @@ array(4) {
     [0]=>
     array(1) {
       [0]=>
-      array(1) {
-        [u"["]=>
-        unicode(1) "3"
-      }
+      unicode(1) "3"
     }
   }
 }
