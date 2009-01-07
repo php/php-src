@@ -15,10 +15,10 @@ $rc->getConstants('A', 'B');
 
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 8
+Warning: ReflectionClass::getConstants() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 9
+Warning: ReflectionClass::getConstants() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 10
+Warning: ReflectionClass::getConstants() expects exactly 0 parameters, 1 given in %s on line %d
 
-Warning: Wrong parameter count for ReflectionClass::getConstants() in %s on line 11
+Warning: ReflectionClass::getConstants() expects exactly 0 parameters, 2 given in %s on line %d

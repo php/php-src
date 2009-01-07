@@ -23,5 +23,5 @@ $closure = $func->getClosure('bar');
 --EXPECTF--
 *** Testing ReflectionFunction::getClosure() : error conditions ***
 
-Warning: Wrong parameter count for ReflectionFunction::getClosure() in %s on line %d
+Warning: ReflectionFunction::getClosure() expects exactly 0 parameters, 1 given in %s on line %d
 ===DONE===

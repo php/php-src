@@ -10,15 +10,14 @@ var_dump($rc->getConstructor(true));
 var_dump($rc->getConstructor(array(1,2,3)));
 ?>
 --EXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 4
+Warning: ReflectionClass::getConstructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 5
+Warning: ReflectionClass::getConstructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 6
+Warning: ReflectionClass::getConstructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getConstructor() in %s on line 7
+Warning: ReflectionClass::getConstructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

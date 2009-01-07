@@ -21,7 +21,6 @@ var_dump($rp->isDefault(1));
 
 ?>
 --EXPECTF--
-
 Warning: ReflectionProperty::__construct() expects exactly 2 parameters, 0 given in %s on line %d
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -46,23 +45,23 @@ object(ReflectionProperty)#%d (2) {
   string(0) ""
 }
 
-Warning: Wrong parameter count for ReflectionProperty::getName() in %s on line %d
+Warning: ReflectionProperty::getName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::isPrivate() in %s on line %d
+Warning: ReflectionProperty::isPrivate() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::isProtected() in %s on line %d
+Warning: ReflectionProperty::isProtected() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::isPublic() in %s on line %d
+Warning: ReflectionProperty::isPublic() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::isStatic() in %s on line %d
+Warning: ReflectionProperty::isStatic() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::getModifiers() in %s on line %d
+Warning: ReflectionProperty::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionProperty::isDefault() in %s on line %d
+Warning: ReflectionProperty::isDefault() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

@@ -14,15 +14,14 @@ var_dump($rc->getInterfaces(true));
 var_dump($rc->getInterfaces(array(1,2,3)));
 ?>
 --EXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::getInterfaces() in %s on line 5
+Warning: ReflectionClass::getInterfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getInterfaces() in %s on line 6
+Warning: ReflectionClass::getInterfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getInterfaces() in %s on line 7
+Warning: ReflectionClass::getInterfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getInterfaces() in %s on line 8
+Warning: ReflectionClass::getInterfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
