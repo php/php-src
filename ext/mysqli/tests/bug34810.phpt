@@ -24,7 +24,7 @@ class DbConnection {
 		$mysql->query("CREATE TABLE test_warnings (a int not null)");
 		$mysql->query("SET sql_mode=''");
 		$mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
-		var_dump(new mysqli_warning($mysql));
+		var_dump($mysql->get_warnings());
 	} 
 } 
 

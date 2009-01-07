@@ -424,41 +424,6 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 }
 /* }}} */
 
-static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
-{
-	zend_class_entry * ce = Z_OBJCE_P(object);
-
-	if (ce != mysqli_link_class_entry && ce != mysqli_stmt_class_entry &&
-		ce != mysqli_result_class_entry && ce != mysqli_driver_class_entry && 
-		ce != mysqli_warning_class_entry) {
-		return zend_std_get_constructor(object TSRMLS_CC);
-	} else {
-		static zend_internal_function f;
-		mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
-
-		f.function_name = obj->zo.ce->name;
-		f.scope = obj->zo.ce;
-		f.arg_info = NULL;
-		f.num_args = 0;
-		f.fn_flags = 0;
-
-		f.type = ZEND_INTERNAL_FUNCTION;
-		if (obj->zo.ce == mysqli_link_class_entry) {
-			f.handler = ZEND_FN(mysqli_link_construct);
-		} else if (obj->zo.ce == mysqli_stmt_class_entry) {
-			f.handler = ZEND_FN(mysqli_stmt_construct);
-		} else if (obj->zo.ce == mysqli_result_class_entry) {
-			f.handler = ZEND_FN(mysqli_result_construct);
-		} else if (obj->zo.ce == mysqli_driver_class_entry) {
-			f.handler = ZEND_FN(mysqli_driver_construct);
-		} else if (obj->zo.ce == mysqli_warning_class_entry) {
-			f.handler = ZEND_MN(mysqli_warning___construct);
-		}
-
-		return (union _zend_function*)&f;
-	}
-}
-
 static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
 {
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
@@ -713,7 +678,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
-	mysqli_object_handlers.get_constructor = php_mysqli_constructor_get;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
 	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
 
