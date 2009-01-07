@@ -3039,9 +3039,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
 
-	/* functions from dl.c */
-//	PHP_FE(dl,																arginfo_dl)
-
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
 	PHP_FE(popen,															arginfo_popen)
