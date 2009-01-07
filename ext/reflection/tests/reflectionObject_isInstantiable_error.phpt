@@ -15,8 +15,8 @@ var_dump($reflectionObject->IsInstantiable(0, null));
 
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 10
+Warning: ReflectionClass::isInstantiable() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::isInstantiable() in %s on line 11
+Warning: ReflectionClass::isInstantiable() expects exactly 0 parameters, 2 given in %s on line %d
 NULL

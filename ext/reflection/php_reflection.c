@@ -78,11 +78,6 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 		return;                                                                                             \
 	}                                                                                                       \
 
-#define METHOD_NOTSTATIC_NUMPARAMS(ce, c) METHOD_NOTSTATIC(ce)                                              \
-	if (ZEND_NUM_ARGS() > c) {                                                                              \
-		ZEND_WRONG_PARAM_COUNT();                                                                           \
-	}                                                                                                       \
-
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
 	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                       \
@@ -1143,7 +1138,9 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & mask);
 }
@@ -1562,7 +1559,9 @@ ZEND_METHOD(reflection_function, __toString)
 	string str;
 	zval* name;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	_default_lookup_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 	string_init(&str);
@@ -1575,7 +1574,9 @@ ZEND_METHOD(reflection_function, __toString)
    Returns this function's name */
 ZEND_METHOD(reflection_function, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -1587,7 +1588,9 @@ ZEND_METHOD(reflection_function, isClosure)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(intern->obj);
 }
@@ -1601,7 +1604,9 @@ ZEND_METHOD(reflection_function, getClosureThis)
 	zend_function *fptr;
 	zval* closure_this;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (intern->obj) {
 		closure_this = zend_get_closure_this_ptr(intern->obj TSRMLS_CC);
@@ -1619,7 +1624,9 @@ ZEND_METHOD(reflection_function, isInternal)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION);
 }
@@ -1632,7 +1639,9 @@ ZEND_METHOD(reflection_function, isUserDefined)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(fptr->type == ZEND_USER_FUNCTION);
 }
@@ -1658,7 +1667,9 @@ ZEND_METHOD(reflection_function, getFileName)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_RT_STRING(fptr->op_array.filename, 1);
@@ -1674,7 +1685,9 @@ ZEND_METHOD(reflection_function, getStartLine)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_start);
@@ -1690,7 +1703,9 @@ ZEND_METHOD(reflection_function, getEndLine)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_end);
@@ -1706,7 +1721,9 @@ ZEND_METHOD(reflection_function, getDocComment)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment.v) {
 		RETURN_ZSTRL(ZEND_STR_TYPE, fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
@@ -1723,7 +1740,9 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	reflection_object *intern;
 	zend_function *fptr;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	/* Return an empty array in case no static variables exist */
@@ -1742,7 +1761,9 @@ ZEND_METHOD(reflection_function, getClosure)
 	reflection_object *intern;
 	zend_function *fptr;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	zend_create_closure(return_value, fptr, NULL, NULL TSRMLS_CC);
@@ -2162,7 +2183,9 @@ ZEND_METHOD(reflection_parameter, __toString)
 	parameter_reference *param;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
 	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
@@ -2174,7 +2197,9 @@ ZEND_METHOD(reflection_parameter, __toString)
    Returns this parameters's name */
 ZEND_METHOD(reflection_parameter, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -2186,7 +2211,9 @@ ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->fptr->common.scope) {
@@ -2204,7 +2231,9 @@ ZEND_METHOD(reflection_parameter, getDeclaringClass)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->common.scope) {
@@ -2221,7 +2250,9 @@ ZEND_METHOD(reflection_parameter, getClass)
 	parameter_reference *param;
 	zend_class_entry **pce, *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->arg_info->class_name.v) {
@@ -2276,7 +2307,9 @@ ZEND_METHOD(reflection_parameter, isArray)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->array_type_hint);
@@ -2290,7 +2323,9 @@ ZEND_METHOD(reflection_parameter, allowsNull)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->allow_null);
@@ -2304,7 +2339,9 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->pass_by_reference);
@@ -2318,7 +2355,9 @@ ZEND_METHOD(reflection_parameter, getPosition)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_LONG(param->offset);
@@ -2332,7 +2371,9 @@ ZEND_METHOD(reflection_parameter, isOptional)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->offset >= param->required);
@@ -2347,7 +2388,9 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	parameter_reference *param;
 	zend_op *precv;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type != ZEND_USER_FUNCTION)
@@ -2373,7 +2416,9 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	parameter_reference *param;
 	zend_op *precv;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type != ZEND_USER_FUNCTION)
@@ -2584,7 +2629,9 @@ ZEND_METHOD(reflection_method, __toString)
 	string str;
 	zval* name;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	_default_lookup_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 	string_init(&str);
@@ -2894,7 +2941,9 @@ ZEND_METHOD(reflection_function, inNamespace)
 	zval **name;
 	zstr colon;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2920,7 +2969,9 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	zval **name;
 	zstr backslash;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2946,7 +2997,9 @@ ZEND_METHOD(reflection_function, getShortName)
 	zval **name;
 	zstr backslash;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_abstract_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2972,7 +3025,9 @@ ZEND_METHOD(reflection_method, isConstructor)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	/* we need to check if the ctor is the ctor of the class level we we 
 	 * looking at since we might be looking at an inherited old style ctor
@@ -2988,7 +3043,9 @@ ZEND_METHOD(reflection_method, isDestructor)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
 }
@@ -3001,7 +3058,9 @@ ZEND_METHOD(reflection_method, getModifiers)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	RETURN_LONG(mptr->common.fn_flags);
@@ -3125,7 +3184,9 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	HashPosition pos;
 	zval **value;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
@@ -3233,7 +3294,9 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	int count, i;
 	HashTable *ht_list[3];
 	
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 
@@ -3287,7 +3350,9 @@ ZEND_METHOD(reflection_class, __toString)
 	zend_class_entry *ce;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
 	_class_string(&str, ce, intern->obj, "" TSRMLS_CC);
@@ -3299,7 +3364,9 @@ ZEND_METHOD(reflection_class, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_class, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -3311,7 +3378,9 @@ ZEND_METHOD(reflection_class, isInternal)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETURN_BOOL(ce->type == ZEND_INTERNAL_CLASS);
 }
@@ -3324,7 +3393,9 @@ ZEND_METHOD(reflection_class, isUserDefined)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETURN_BOOL(ce->type == ZEND_USER_CLASS);
 }
@@ -3337,7 +3408,9 @@ ZEND_METHOD(reflection_class, getFileName)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_RT_STRING(ce->filename, 1);
@@ -3353,7 +3426,9 @@ ZEND_METHOD(reflection_class, getStartLine)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(ce->line_start);
@@ -3369,7 +3444,9 @@ ZEND_METHOD(reflection_class, getEndLine)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_LONG(ce->line_end);
@@ -3385,7 +3462,9 @@ ZEND_METHOD(reflection_class, getDocComment)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment.v) {
 		RETURN_ZSTRL(ZEND_STR_TYPE, ce->doc_comment, ce->doc_comment_len, 1);
@@ -3401,7 +3480,9 @@ ZEND_METHOD(reflection_class, getConstructor)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->constructor) {
@@ -3778,7 +3859,9 @@ ZEND_METHOD(reflection_class, getConstants)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}	
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
@@ -3819,7 +3902,9 @@ static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETVAL_BOOL(ce->ce_flags & mask);
 }
@@ -3832,7 +3917,9 @@ ZEND_METHOD(reflection_class, isInstantiable)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
 		RETURN_FALSE;
@@ -3879,7 +3966,9 @@ ZEND_METHOD(reflection_class, getModifiers)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	RETURN_LONG(ce->ce_flags);
@@ -4061,7 +4150,9 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	/* Return an empty array if this class implements no interfaces */
@@ -4088,7 +4179,9 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 	zend_class_entry *ce;
 	zend_uint i;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	/* Return an empty array if this class implements no interfaces */
@@ -4107,7 +4200,9 @@ ZEND_METHOD(reflection_class, getParentClass)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	
 	if (ce->parent) {
@@ -4270,7 +4365,9 @@ ZEND_METHOD(reflection_class, inNamespace)
 	zval **name;
 	zstr colon;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -4296,7 +4393,9 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 	zval **name;
 	zstr colon;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -4322,7 +4421,9 @@ ZEND_METHOD(reflection_class, getShortName)
 	zval **name;
 	zstr colon;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	if (zend_hash_find(Z_OBJPROP_P(getThis()), "name", sizeof("name"), (void **) &name) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -4477,7 +4578,9 @@ ZEND_METHOD(reflection_property, __toString)
 	property_reference *ref;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
 	_property_string(&str, &ref->prop, NULL_ZSTR, "" TSRMLS_CC);
@@ -4489,7 +4592,9 @@ ZEND_METHOD(reflection_property, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_property, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -4499,7 +4604,9 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ 
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	RETURN_BOOL(ref->prop.flags & mask);
 }
@@ -4555,7 +4662,9 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 	zval **zdef, *zv;
 	zend_uchar utype = UG(unicode) ? IS_UNICODE : IS_STRING;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
@@ -4582,7 +4691,9 @@ ZEND_METHOD(reflection_property, getModifiers)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	RETURN_LONG(ref->prop.flags);
@@ -4725,7 +4836,9 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	zstr prop_name, class_name;
 	int prop_name_len;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, ref->prop.name, ref->prop.name_length, &class_name, &prop_name) != SUCCESS) {
@@ -4754,7 +4867,9 @@ ZEND_METHOD(reflection_property, getDocComment)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop.doc_comment.v) {
 		RETURN_ZSTRL(ZEND_STR_TYPE, ref->prop.doc_comment, ref->prop.doc_comment_len, 1);
@@ -4771,12 +4886,10 @@ ZEND_METHOD(reflection_property, setAccessible)
 	property_reference *ref;
 	zend_bool visible;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 1);
-	GET_REFLECTION_OBJECT_PTR(ref);
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
 		return;
 	}
+	GET_REFLECTION_OBJECT_PTR(ref);
 	ref->ignore_visibility = visible;
 }
 /* }}} */
@@ -4837,7 +4950,9 @@ ZEND_METHOD(reflection_extension, __toString)
 	zend_module_entry *module;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 	string_init(&str);
 	_extension_string(&str, module, "" TSRMLS_CC);
@@ -4849,7 +4964,9 @@ ZEND_METHOD(reflection_extension, __toString)
    Returns this extension's name */
 ZEND_METHOD(reflection_extension, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -4861,7 +4978,9 @@ ZEND_METHOD(reflection_extension, getVersion)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	/* An extension does not necessarily have a version number */
@@ -4880,7 +4999,9 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -4930,7 +5051,9 @@ ZEND_METHOD(reflection_extension, getConstants)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -4962,7 +5085,9 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -4997,7 +5122,9 @@ ZEND_METHOD(reflection_extension, getClasses)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -5012,7 +5139,9 @@ ZEND_METHOD(reflection_extension, getClassNames)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -5028,7 +5157,9 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	zend_module_entry *module;
 	const zend_module_dep *dep;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 	
 	array_init(return_value);
@@ -5079,7 +5210,9 @@ ZEND_METHOD(reflection_extension, info)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	php_info_print_module(module TSRMLS_CC);

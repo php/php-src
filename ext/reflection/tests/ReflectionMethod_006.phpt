@@ -35,7 +35,7 @@ var_dump($rm->getName(1));
 
 ?>
 --EXPECTF--
-Warning: ReflectionMethod::__construct() expects %s on line 3
+Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 0 given in %s on line %d
 object(ReflectionMethod)#%d (2) {
   [u"name"]=>
   unicode(0) ""
@@ -43,7 +43,7 @@ object(ReflectionMethod)#%d (2) {
   unicode(0) ""
 }
 
-Warning: ReflectionMethod::__construct() expects %s on line 4
+Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 3 given in %s on line %d
 object(ReflectionMethod)#%d (2) {
   [u"name"]=>
   unicode(0) ""
@@ -51,50 +51,50 @@ object(ReflectionMethod)#%d (2) {
   unicode(0) ""
 }
 
-Warning: Wrong parameter count for ReflectionMethod::isFinal() in %s on line 12
+Warning: ReflectionMethod::isFinal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isAbstract() in %s on line 13
+Warning: ReflectionMethod::isAbstract() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isPrivate() in %s on line 14
+Warning: ReflectionMethod::isPrivate() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isProtected() in %s on line 15
+Warning: ReflectionMethod::isProtected() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isPublic() in %s on line 16
+Warning: ReflectionMethod::isPublic() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isStatic() in %s on line 17
+Warning: ReflectionMethod::isStatic() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isConstructor() in %s on line 18
+Warning: ReflectionMethod::isConstructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::isDestructor() in %s on line 19
+Warning: ReflectionMethod::isDestructor() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionMethod::getModifiers() in %s on line 20
+Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::isInternal() in %s on line 21
+Warning: ReflectionFunctionAbstract::isInternal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::isUserDefined() in %s on line 22
+Warning: ReflectionFunctionAbstract::isUserDefined() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::getFileName() in %s on line 23
+Warning: ReflectionFunctionAbstract::getFileName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::getStartLine() in %s on line 24
+Warning: ReflectionFunctionAbstract::getStartLine() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::getEndLine() in %s on line 25
+Warning: ReflectionFunctionAbstract::getEndLine() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::getStaticVariables() in %s on line 26
+Warning: ReflectionFunctionAbstract::getStaticVariables() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionFunctionAbstract::getName() in %s on line 27
+Warning: ReflectionFunctionAbstract::getName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

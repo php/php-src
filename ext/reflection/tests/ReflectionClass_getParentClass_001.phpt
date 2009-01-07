@@ -28,11 +28,11 @@ bool(false)
 
 Test bad params:
 
-Warning: Wrong parameter count for ReflectionClass::getParentClass() in %s on line 11
+Warning: ReflectionClass::getParentClass() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getParentClass() in %s on line 12
+Warning: ReflectionClass::getParentClass() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getParentClass() in %s on line 13
+Warning: ReflectionClass::getParentClass() expects exactly 0 parameters, 2 given in %s on line %d
 NULL
