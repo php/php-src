@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Alpha 4
+- Changed __call() to be invoked on private/protected method access, similar to
+  properties and __get(). (Andrei)
 - Upgraded bundled sqlite to version 3.6.7. (Scott)
 
 - Deprecated session_register(), session_unregister() and
