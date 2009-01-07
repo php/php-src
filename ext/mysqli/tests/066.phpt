@@ -19,7 +19,7 @@ require_once('skipifconnectfailure.inc');
 
 	$mysql->query("INSERT INTO test_warnings VALUES (1),(2),(NULL)");
 
-	if (($warning = new mysqli_warning($mysql))) {
+	if (($warning = $mysql->get_warnings())) {
 		do {
 			printf("Warning\n");
 		} while ($warning->next());

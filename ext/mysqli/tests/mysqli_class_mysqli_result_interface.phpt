@@ -187,9 +187,9 @@ mysqli_result->unknown = ''
 
 Constructor:
 
-Warning: mysqli_result::mysqli_result() expects parameter 2 to be long, string given in %s on line %d
+Warning: mysqli_result::__construct() expects parameter 2 to be long, string given in %s on line %d
 
-Warning: mysqli_result::mysqli_result() expects parameter 1 to be mysqli, string given in %s on line %d
+Warning: mysqli_result::__construct() expects parameter 1 to be mysqli, string given in %s on line %d
 done!
 --UEXPECTF--
 Parent class:
@@ -224,7 +224,7 @@ mysqli_result->unknown = ''
 
 Constructor:
 
-Warning: mysqli_result::mysqli_result() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mysqli_result::__construct() expects parameter 2 to be long, Unicode string given in %s on line %d
 
-Warning: mysqli_result::mysqli_result() expects parameter 1 to be mysqli, Unicode string given in %s on line %d
+Warning: mysqli_result::__construct() expects parameter 1 to be mysqli, Unicode string given in %s on line %d
 done!
