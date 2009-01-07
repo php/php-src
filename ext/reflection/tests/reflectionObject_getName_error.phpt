@@ -13,11 +13,11 @@ var_dump($r3->getName('x','y'));
 var_dump($r3->getName(0));
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 8
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 9
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getName() in %s on line 10
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
