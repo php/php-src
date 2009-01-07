@@ -299,7 +299,7 @@ PHP_FUNCTION(dns_get_record)
 	int addtl_recs = 0;
 	IN_ADDR ipaddr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
 		return;
 	}
 
