@@ -281,7 +281,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (sock->socket == -1) {
 					alive = 0;
 				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					if (0 == recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+					if (0 == recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EWOULDBLOCK) {
 						alive = 0;
 					}
 				}
