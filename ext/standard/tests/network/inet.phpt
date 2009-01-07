@@ -64,12 +64,12 @@ bool(false)
 
 Warning: inet_pton(): Unrecognized address abra in %s on line %d
 bool(false)
-string(4) "%s"
+string(%d) "%s"
 unicode(9) "127.0.0.1"
-string(4) "%s"
+string(%d) "%s"
 unicode(14) "66.163.161.116"
-string(4) "%s"
+string(%d) "%s"
 unicode(15) "255.255.255.255"
-string(4) "%s"
+string(%d) "%s"
 unicode(7) "0.0.0.0"
 Done
