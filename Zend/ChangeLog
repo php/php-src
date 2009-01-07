@@ -1,3 +1,17 @@
+2009-01-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_execute.c
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug46701.phpt:
+      MFH:
+      - Fixed bug #46701 (Creating associative array with long values in the key
+      fails on 32bit linux)
+      Patch by Shire
+
 2009-01-05  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
