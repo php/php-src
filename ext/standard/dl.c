@@ -51,7 +51,7 @@
 
 /* {{{ proto int dl(string extension_filename)
    Load a PHP extension at runtime */
-PHP_FUNCTION(dl)
+PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
 	int filename_len;
