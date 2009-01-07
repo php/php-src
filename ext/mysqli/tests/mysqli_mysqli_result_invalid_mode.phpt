@@ -22,5 +22,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_result::mysqli_result(): Invalid value for resultmode in %s on line %d
+Warning: mysqli_result::__construct(): Invalid value for resultmode in %s on line %d
 done!
