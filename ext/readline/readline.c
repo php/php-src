@@ -339,10 +339,9 @@ PHP_FUNCTION(readline_clear_history)
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
-	int ac = ZEND_NUM_ARGS();
 
-	if (ac) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	history = history_list();
