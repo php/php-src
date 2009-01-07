@@ -14,15 +14,14 @@ var_dump($rc->getModifiers(array(1,2,3)));
 
 ?>
 --EXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::isFinal() in %s on line 4
+Warning: ReflectionClass::isFinal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::isInterface() in %s on line 5
+Warning: ReflectionClass::isInterface() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::isAbstract() in %s on line 6
+Warning: ReflectionClass::isAbstract() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getModifiers() in %s on line 7
+Warning: ReflectionClass::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

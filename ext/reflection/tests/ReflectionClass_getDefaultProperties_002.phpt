@@ -19,27 +19,26 @@ var_dump($rc->getStaticProperties(array(1,2,3)));
 
 ?>
 --EXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::getDefaultProperties() in %s on line 5
+Warning: ReflectionClass::getDefaultProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDefaultProperties() in %s on line 6
+Warning: ReflectionClass::getDefaultProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDefaultProperties() in %s on line 7
+Warning: ReflectionClass::getDefaultProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDefaultProperties() in %s on line 8
+Warning: ReflectionClass::getDefaultProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getStaticProperties() in %s on line 9
+Warning: ReflectionClass::getStaticProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getStaticProperties() in %s on line 10
+Warning: ReflectionClass::getStaticProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getStaticProperties() in %s on line 11
+Warning: ReflectionClass::getStaticProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getStaticProperties() in %s on line 12
+Warning: ReflectionClass::getStaticProperties() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

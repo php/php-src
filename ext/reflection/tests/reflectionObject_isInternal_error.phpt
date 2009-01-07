@@ -8,8 +8,8 @@ var_dump($r1->isInternal('X'));
 var_dump($r1->isInternal('X', true));
 ?>
 --EXPECTF--
-Warning: Wrong parameter count for ReflectionClass::isInternal() in %s on line 4
+Warning: ReflectionClass::isInternal() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::isInternal() in %s on line 5
+Warning: ReflectionClass::isInternal() expects exactly 0 parameters, 2 given in %s on line %d
 NULL

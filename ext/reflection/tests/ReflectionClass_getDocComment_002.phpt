@@ -13,15 +13,14 @@ var_dump($rc->getDocComment(true));
 var_dump($rc->getDocComment(array(1,2,3)));
 ?>
 --EXPECTF--
-
-Warning: Wrong parameter count for ReflectionClass::getDocComment() in %s on line 4
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDocComment() in %s on line 5
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDocComment() in %s on line 6
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getDocComment() in %s on line 7
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

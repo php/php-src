@@ -16,22 +16,22 @@ foreach ($methods as $method) {
 --EXPECTF--
 string(%d) "%s"
 
-Warning: Wrong parameter count for ReflectionClass::getFileName() in %s on line 9
+Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getFileName() in %s on line 10
-NULL
-int(2)
-
-Warning: Wrong parameter count for ReflectionClass::getStartLine() in %s on line 9
-NULL
-
-Warning: Wrong parameter count for ReflectionClass::getStartLine() in %s on line 10
+Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 2 given in %s on line %d
 NULL
 int(2)
 
-Warning: Wrong parameter count for ReflectionClass::getEndLine() in %s on line 9
+Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for ReflectionClass::getEndLine() in %s on line 10
+Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 2 given in %s on line %d
+NULL
+int(2)
+
+Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
+
+Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 2 given in %s on line %d
 NULL

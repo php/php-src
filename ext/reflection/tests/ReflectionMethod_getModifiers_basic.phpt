@@ -236,7 +236,7 @@ int(65794)
 
 Wrong number of params:
 
-Warning: Wrong parameter count for ReflectionMethod::getModifiers() in %s on line %d
+Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
 
 ReflectionMethod::getModifiers() modifiers:
 int(256)
