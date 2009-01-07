@@ -71,6 +71,10 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	for (pRec = pResult; pRec; pRec = pRec->pNext) {
 		DNS_SRV_DATA *srv = &pRec->Data.Srv;
 
+		if (pRec->wType != DNS_TYPE_MX) {
+			continue;
+		}
+
 		add_next_index_string(mx_list, pRec->Data.MX.pNameExchange, 1);
 		if (weight_list) {
 			add_next_index_long(weight_list, srv->wPriority);
