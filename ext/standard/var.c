@@ -363,13 +363,15 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 
 	level = va_arg(args, int);
 
+	php_printf("%*c", level + 1, ' ');
 	if (hash_key->nKeyLength != 0) {
-		php_printf("%*c", level + 1, ' ');
 		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf(" '%s' => ", prop_name);
-		php_var_export(zv, level + 2 TSRMLS_CC);
-		PUTS (",\n");
+	} else {
+		php_printf(" %ld => ", hash_key->h);
 	}
+	php_var_export(zv, level + 2 TSRMLS_CC);
+	PUTS (",\n");
 	return 0;
 }
 /* }}} */
