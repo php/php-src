@@ -53,6 +53,10 @@
 #	define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
 
+#ifndef EWOULDBLOCK
+# define EWOULDBLOCK EAGAIN
+#endif
+
 #ifdef PHP_WIN32
 #define php_socket_errno() WSAGetLastError()
 #else
