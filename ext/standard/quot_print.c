@@ -156,7 +156,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	int i = 0, j = 0, k;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 	convert_to_string_ex(arg1);
     
