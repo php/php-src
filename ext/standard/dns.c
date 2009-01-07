@@ -670,7 +670,7 @@ PHP_FUNCTION(dns_get_record)
 	int n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
 		return;
 	}
 
