@@ -4641,7 +4641,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 		zend_encoding *new_encoding, *old_encoding;
 		zend_encoding_filter old_input_filter;
 
-		if (Z_TYPE(val->u.constant) == IS_CONSTANT) {
+		if ((Z_TYPE(val->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
 		}
 
