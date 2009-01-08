@@ -758,6 +758,24 @@ static inline zend_class_entry * zend_get_function_root_class(zend_function *fbc
 }
 
 
+static inline union _zend_function *zend_get_user_call_function(zend_object *zobj, char *method_name, int method_len) /* {{{ */
+{
+	zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
+	call_user_call->type = ZEND_INTERNAL_FUNCTION;
+	call_user_call->module = zobj->ce->module;
+	call_user_call->handler = zend_std_call_user_call;
+	call_user_call->arg_info = NULL;
+	call_user_call->num_args = 0;
+	call_user_call->scope = zobj->ce;
+	call_user_call->fn_flags = 0;
+	call_user_call->function_name = estrndup(method_name, method_len);
+	call_user_call->pass_rest_by_reference = 0;
+	call_user_call->return_reference = ZEND_RETURN_VALUE;
+
+	return (union _zend_function *)call_user_call;
+}
+/* }}} */
+
 static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len TSRMLS_DC)
 {
 	zend_object *zobj;
@@ -774,19 +792,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&fbc) == FAILURE) {
 		free_alloca_with_limit(lc_method_name, use_heap);
 		if (zobj->ce->__call) {
-			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
-			call_user_call->type = ZEND_INTERNAL_FUNCTION;
-			call_user_call->module = zobj->ce->module;
-			call_user_call->handler = zend_std_call_user_call;
-			call_user_call->arg_info = NULL;
-			call_user_call->num_args = 0;
-			call_user_call->scope = zobj->ce;
-			call_user_call->fn_flags = 0;
-			call_user_call->function_name = estrndup(method_name, method_len);
-			call_user_call->pass_rest_by_reference = 0;
-			call_user_call->return_reference = ZEND_RETURN_VALUE;
-
-			return (union _zend_function *)call_user_call;
+			return zend_get_user_call_function(zobj, method_name, method_len);
 		} else {
 			return NULL;
 		}
@@ -797,12 +803,18 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		zend_function *updated_fbc;
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
 		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
-		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+		if (updated_fbc) {
+			fbc = updated_fbc;
+		} else {
+			if (zobj->ce->__call) {
+				fbc = zend_get_user_call_function(zobj, method_name, method_len);
+			} else {
+				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+			}
 		}
-		fbc = updated_fbc;
 	} else {
 		/* Ensure that we haven't overridden a private function and end up calling
 		 * the overriding public function...
@@ -820,9 +832,14 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		}
 		if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 * If we're not and __call() handler exists, invoke it, otherwise error out.
 			 */
 			if (!zend_check_protected(zend_get_function_root_class(fbc), EG(scope))) {
-				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+				if (zobj->ce->__call) {
+					fbc = zend_get_user_call_function(zobj, method_name, method_len);
+				} else {
+					zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+				}
 			}
 		}
 	}
