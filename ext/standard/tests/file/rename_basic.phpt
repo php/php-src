@@ -8,38 +8,40 @@ Test rename() function: basic functionality
 
 echo "*** Testing rename() on non-existing file ***\n";
 $file_path = dirname(__FILE__);
+require "$file_path/file.inc";
+
 $src_name = "$file_path/rename_basic.tmp";
 $dest_name = "$file_path/rename_basic_new.tmp";
 
 // create the file
 $fp = fopen($src_name, "w");
-$s1 = stat($src_name);
+$old_stat = stat($src_name);
 fclose($fp);
 
 var_dump( rename($src_name, $dest_name) ); // expecting true
 var_dump( file_exists($src_name) ); // expecting false
 var_dump( file_exists($dest_name) ); // expecting true
 
-$s2 = stat("$file_path/rename_basic_new.tmp");
+$new_stat = stat("$file_path/rename_basic_new.tmp");
 
-// checking statistics of old and renamed file - both should be same
-for ($i = 0; $i <= 12; $i++) {
-  if ($s1[$i] != $s2[$i]) {
-    echo "rename_basic.tmp and rename_basic_new.tmp stat differ at element $i\n";
-  }
-}
+// checking statistics of old and renamed file - both should be same except ctime
+$keys_to_compare = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 
+                       "dev", "ino", "mode", "nlink", "uid", "gid",
+                       "rdev", "size", "atime", "mtime", "blksize", "blocks");
+var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
 
-echo "Done\n";
 ?>
+===Done===
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/rename_basic.tmp");
 unlink(dirname(__FILE__)."/rename_basic_new.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on non-existing file ***
 bool(true)
 bool(false)
 bool(true)
-Done
+bool(true)
+===Done===
 
