@@ -248,6 +248,14 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_bucket_delref(bucket TSRMLS_CC);
 		}
 	}
+	if (ret != PSFS_PASS_ON) {
+		php_stream_bucket *bucket = buckets_out->head;
+		while (bucket != NULL) {
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+			bucket = buckets_out->head;
+		}
+	}
 
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
