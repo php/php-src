@@ -53,20 +53,15 @@ Warning: readfile(-1): failed to open stream: No such file or directory in %s on
 
 Warning: readfile(1): failed to open stream: No such file or directory in %s on line %d
 -- testing '' --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 -- testing '' --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 -- testing '' --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 -- testing ' ' --
 
 Warning: readfile( ): failed to open stream: No such file or directory in %s on line %d
--- testing '%s' --
--- testing 'Array' --
-
-Warning: readfile() expects parameter 1 to be string, array given in %s on line %d
--- testing '/no/such/file/dir' --
-
-Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
--- testing 'php/php' --
-
-Warning: readfile(php/php): failed to open stream: %s directory in %s on line %d
-
-*** Done ***
+-- testing '

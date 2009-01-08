@@ -161,9 +161,11 @@ Error: 2 - file() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --lowercase null--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --lowercase true--
@@ -171,6 +173,7 @@ Error: 2 - file(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --lowercase false--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --uppercase TRUE--
@@ -178,16 +181,19 @@ Error: 2 - file(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --uppercase FALSE--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --empty string DQ--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --empty string SQ--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --instance of classWithToString--
-Error: 2 - file(Class A object): failed to open stream: No such file or directory, %s(%d)
+Error: 2 - file(Class A object): failed to open stream: %s, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
@@ -195,8 +201,10 @@ Error: 2 - file() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --unset var--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 ===DONE===

@@ -164,6 +164,8 @@ bool(false)
 Warning: feof() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 -- Iteration 7 --
+
+Warning: fopen(): Filename cannot be empty in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
@@ -172,6 +174,8 @@ bool(false)
 Warning: feof() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Warning: fopen(): Filename cannot be empty in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, string given in %s on line %d
@@ -179,4 +183,3 @@ bool(false)
 
 Warning: feof() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
-
