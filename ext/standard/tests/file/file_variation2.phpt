@@ -165,9 +165,11 @@ Error: 2 - file(Array): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --uppercase NULL--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --lowercase null--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --lowercase true--
@@ -175,6 +177,7 @@ Error: 2 - file(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --lowercase false--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --uppercase TRUE--
@@ -182,12 +185,15 @@ Error: 2 - file(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 --uppercase FALSE--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --empty string DQ--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --empty string SQ--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --instance of classWithToString--
@@ -201,8 +207,10 @@ Error: 2 - file(Object): failed to open stream: No such file or directory, %s(%d
 bool(false)
 
 --undefined var--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 
 --unset var--
+Error: 2 - file(): Filename cannot be empty, %s(%d)
 bool(false)
 ===DONE===
