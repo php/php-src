@@ -25,8 +25,8 @@ $space1 =  disk_free_space($file_path.$dir);
 var_dump( $space1 ); 
 
 $fh = fopen($file_path.$dir."/disk_free_space.tmp", "a");
-for( $i=1; $i<=1000; $i++)
-fwrite($fh, (binary)"x");
+$data = str_repeat("x", 4096);
+fwrite($fh, (binary)$data);
 fclose($fh);
 
 echo "\n Free Space after writing to a file\n";
