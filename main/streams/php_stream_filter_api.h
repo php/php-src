@@ -152,7 +152,9 @@ struct _php_stream_filter {
 /* stack filter onto a stream */
 BEGIN_EXTERN_C()
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
+PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
+PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI int _php_stream_filter_check_chain(php_stream_filter_chain *chain TSRMLS_DC);
 PHPAPI int _php_stream_filter_output_prefer_unicode(php_stream_filter *filter TSRMLS_DC);
 PHPAPI int _php_stream_filter_product(php_stream_filter_chain *chain, int type TSRMLS_DC);
