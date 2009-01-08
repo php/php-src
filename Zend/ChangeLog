@@ -1,3 +1,23 @@
+2009-01-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * tests/access_modifiers_011.phpt
+      tests/access_modifiers_011.phpt:
+      
+      MFB
+
+    * tests/access_modifiers_011.phpt
+      tests/access_modifiers_011.phpt:
+      
+      file access_modifiers_011.phpt was initially added on branch PHP_5_3.
+
+    * zend_object_handlers.c:
+      MFB
+
+    * (PHP_5_3)
+      zend_object_handlers.c:
+      Changed __call() to be invoked on private/protected method access,
+      similar to properties and __get().
+
 2009-01-06  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
