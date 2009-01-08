@@ -14,3 +14,5 @@ Warning: stream_filter_append(): stream filter (convert.base64-decode): invalid 
 
 Warning: stream_filter_append(): Filter failed to process pre-buffered data in %s
 test filtering of non buffered data
+
+Warning: stream_get_contents(): stream filter (convert.base64-decode): invalid byte sequence in %s
