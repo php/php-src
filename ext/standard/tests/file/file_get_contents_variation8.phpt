@@ -52,16 +52,24 @@ bool(false)
 Warning: file_get_contents(1): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 3 --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 4 --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 5 --
 
 Warning: file_get_contents( ): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 7 --
 
@@ -73,7 +81,7 @@ Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such fi
 bool(false)
 -- Iteration 9 --
 
-Warning: file_get_contents(php/php): failed to open stream: %s directory in %s on line %d
+Warning: file_get_contents(php/php): failed to open stream: %s in %s on line %d
 bool(false)
 
 *** Done ***

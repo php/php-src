@@ -38,8 +38,14 @@ Warning: readfile() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 
 -- Testing readfile() with invalid arguments --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
 
 Warning: readfile() expects parameter 3 to be resource, string given in %s on line %d
@@ -50,6 +56,6 @@ bool(false)
 
 -- Testing readfile() with non-existent file --
 
-Warning: readfile(%s/non_existent_file.tmp): failed to open stream: %s in %s on line %d
+Warning: readfile(%s/non_existent_file.tmp): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 Done
