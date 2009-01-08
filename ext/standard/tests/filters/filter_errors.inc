@@ -27,7 +27,7 @@ function filter_errors_test($filter, $data) {
 	fwrite($stream, b"$data");
 	fseek($stream, 0, SEEK_SET);
 
-	stream_get_line($stream, 8192, "\r\n");
+	stream_filter_append($stream, $filter);
 	stream_get_contents($stream);
 
 }
