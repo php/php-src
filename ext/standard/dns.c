@@ -470,7 +470,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				tp[dlen] = '\0';
 				cp += dlen;
 
-				add_ascii_assoc_rt_stringl(*subarray, "txt", tp, dlen, ZSTR_AUTOFREE);
+				add_ascii_assoc_rt_stringl(*subarray, "txt", tp, dlen - 1, ZSTR_AUTOFREE);
 			}
 			break;
 		case DNS_T_SOA:
