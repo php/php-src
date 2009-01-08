@@ -38,8 +38,14 @@ Warning: readfile() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 
 -- Testing readfile() with invalid arguments --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
 
 Warning: readfile() expects parameter 3 to be resource, Unicode string given in %s on line %d
