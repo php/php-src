@@ -90,38 +90,38 @@ foreach($inputs as $key =>$value) {
 *** Testing rmdir() : usage variation ***
 
 --uppercase NULL--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --lowercase false--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --empty string SQ--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - rmdir(): No such file or directory, %s(%d)
+Error: 2 - rmdir(): %s, %s(%d)
 bool(false)
 
 --single space--
-Error: 2 - rmdir( ): No such file or directory, %s(%d)
+Error: 2 - rmdir( ): %s, %s(%d)
 bool(false)
 ===DONE===
