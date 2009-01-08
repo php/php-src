@@ -51,8 +51,8 @@ zip->status (0):
 zip->numFiles (5):
 	empty(): 0
 	isset(): 1
-zip->filename (0):
-	empty(): 1
+zip->filename (%d):
+	empty(): 0
 	isset(): 1
 zip->comment (19):
 	empty(): 0
