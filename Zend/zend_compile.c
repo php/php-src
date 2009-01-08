@@ -4868,7 +4868,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 	} else if (UG(unicode) && ZEND_U_EQUAL(Z_TYPE(var->u.constant), Z_UNIVAL(var->u.constant), Z_UNILEN(var->u.constant), "encoding", sizeof("encoding")-1)) {
 		UErrorCode status = U_ZERO_ERROR;
 
-		if (Z_TYPE(val->u.constant) == IS_CONSTANT) {
+		if ((Z_TYPE(val->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
 		}
 		/*
