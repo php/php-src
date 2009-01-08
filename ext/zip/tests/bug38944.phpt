@@ -23,7 +23,7 @@ echo "Done\n";
 int(0)
 int(0)
 int(0)
-string(0) ""
+string(%d) "%s"
 string(0) ""
 object(ZipArchive)#1 (5) {
   ["status"]=>
@@ -33,7 +33,7 @@ object(ZipArchive)#1 (5) {
   ["numFiles"]=>
   int(0)
   ["filename"]=>
-  string(0) ""
+  string(%d) "%s"
   ["comment"]=>
   string(0) ""
 }
