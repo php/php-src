@@ -1783,6 +1783,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	if (!path || !*path) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot be empty");
 		return NULL;
 	}
 
