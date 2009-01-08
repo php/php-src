@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   (Fixes CVE-2008-5498) (Scott)
 - Fixed a segfault when malformed string is passed to json_decode(). (Scott)
 
+- Fixed bug #47035 (dns_get_record returns a garbage byte at the end of a TXT 
+  record). (Felipe)
 - Fixed bug #47027 (var_export doesn't show numeric indices on ArrayObject).
   (Derick)
 - Fixed bug #46985 (OVERWRITE and binary mode does not work, regression introduced in
