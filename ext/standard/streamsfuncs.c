@@ -1261,6 +1261,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	long read_write = 0;
 	zval *filterparams = NULL;
 	php_stream_filter *filter = NULL;
+	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz", &zstream,
 				&filtername, &filternamelen, &read_write, &filterparams) == FAILURE) {
@@ -1290,9 +1291,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		}
 
 		if (append) {
-			php_stream_filter_append(&stream->readfilters, filter);
+			ret = php_stream_filter_append_ex(&stream->readfilters, filter TSRMLS_CC);
 		} else {
-			php_stream_filter_prepend(&stream->readfilters, filter);
+			ret = php_stream_filter_prepend_ex(&stream->readfilters, filter TSRMLS_CC);
+		}
+		if (ret != SUCCESS) {
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			RETURN_FALSE;
 		}
 		if (FAILURE == php_stream_filter_check_chain(&stream->readfilters)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Readfilter chain unstable -- unresolvable unicode/string conversion conflict");
@@ -1306,9 +1311,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		}
 
 		if (append) { 
-			php_stream_filter_append(&stream->writefilters, filter);
+			ret = php_stream_filter_append_ex(&stream->writefilters, filter TSRMLS_CC);
 		} else {
-			php_stream_filter_prepend(&stream->writefilters, filter);
+			ret = php_stream_filter_prepend_ex(&stream->writefilters, filter TSRMLS_CC);
+		}
+		if (ret != SUCCESS) {
+			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			RETURN_FALSE;
 		}
 		if (FAILURE == php_stream_filter_check_chain(&stream->writefilters)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writefilter chain unstable -- unresolvable unicode/string conversion conflict");
