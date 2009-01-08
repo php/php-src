@@ -593,33 +593,25 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	zval **spliton, **str, **arg_count = NULL;
+	long count = -1;
 	regex_t re;
 	regmatch_t subs[1];
-	char *strp, *endp;
-	int err, size, count = -1, copts = 0;
-	int argc = ZEND_NUM_ARGS();
+	char *spliton, *str, *strp, *endp;
+	int spliton_len, str_len;
+	int err, size, copts = 0;
 
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &spliton, &str, &arg_count) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
+		return;
 	}
 
-	if (argc > 2) {
-		convert_to_long_ex(arg_count);
-		count = Z_LVAL_PP(arg_count);
-	}
-
-	if (icase)
+	if (icase) {
 		copts = REG_ICASE;
+	}
 
-	convert_to_string_ex(spliton);
-	convert_to_string_ex(str);
+	strp = str;
+	endp = strp + str_len;
 
-	strp = Z_STRVAL_PP(str);
-	endp = strp + Z_STRLEN_PP(str);
-
-	err = regcomp(&re, Z_STRVAL_PP(spliton), REG_EXTENDED | copts);
+	err = regcomp(&re, spliton, REG_EXTENDED | copts);
 	if (err) {
 		php_ereg_eprint(err, &re);
 		RETURN_FALSE;
