@@ -1191,20 +1191,19 @@ PHP_FUNCTION(imap_reopen)
 	zval *streamind;
 	char *mailbox;
 	int mailbox_len;
-	long options, retries;
+	long options = NULL, retries = NULL;
 	pils *imap_le_struct; 
 	MAILSTREAM *imap_stream;
 	long flags=NIL;
 	long cl_flags=NIL;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rs|ll", &streamind, &mailbox, &mailbox_len, &options, &retries) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ll", &streamind, &mailbox, &mailbox_len, &options, &retries) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
-	if (argc >= 3) {
+	if (options) {
 		flags = options;
 		if (flags & PHP_EXPUNGE) {
 			cl_flags = CL_EXPUNGE;
@@ -1213,7 +1212,7 @@ PHP_FUNCTION(imap_reopen)
 		imap_le_struct->flags = cl_flags;	
 	}
 #ifdef SET_MAXLOGINTRIALS
-	if (argc == 4) {
+	if (retries) {
 		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
 	}
 #endif
@@ -1241,9 +1240,8 @@ PHP_FUNCTION(imap_append)
 	int folder_len, message_len, flags_len = 0;
 	pils *imap_le_struct;
 	STRING st;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rss|s", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|s", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len) == FAILURE) {
 		return;
 	}
   
@@ -1251,7 +1249,7 @@ PHP_FUNCTION(imap_append)
 
 	INIT (&st, mail_string, (void *) message, message_len);
 
-	if (mail_append_full(imap_le_struct->imap_stream, folder, (argc == 4 ? flags : NIL), NIL, &st)) {
+	if (mail_append_full(imap_le_struct->imap_stream, folder, (flags ? flags : NIL), NIL, &st)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -2840,17 +2838,16 @@ PHP_FUNCTION(imap_setflag_full)
 	zval *streamind;
 	char *sequence, *flag;
 	int sequence_len, flag_len;
-	long flags;
+	long flags = NULL;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rss|l", &streamind, &sequence, &sequence_len, &flag, &flag_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|l", &streamind, &sequence, &sequence_len, &flag, &flag_len, &flags) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
-	mail_setflag_full(imap_le_struct->imap_stream, sequence, flag, (argc == 4 ? flags : NIL));
+	mail_setflag_full(imap_le_struct->imap_stream, sequence, flag, (flags ? flags : NIL));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -4093,34 +4090,6 @@ PHP_FUNCTION(imap_mime_header_decode)
 }
 /* }}} */
 
-/* {{{ _php_rfc822_len
- * Calculate string length based on imap's rfc822_cat function.
- */	
-static int _php_rfc822_len(char *str)
-{
-	int len;
-	char *p;
-
-	if (!str || !*str) {
-		return 0;
-	}
-
-	/* strings with special characters will need to be quoted, as a safety measure we
-	 * add 2 bytes for the quotes just in case.
-	 */
-	len = strlen(str) + 2;
-	p = str;
-	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
-	 * our buffer length to account for these characters.
-	 */
-	while ((p = strpbrk(p, "\\\""))) {
-		p++;
-		len++;
-	}
-
-	return len;
-}
-/* }}} */
 
 /* Support Functions */
 
@@ -4159,6 +4128,35 @@ static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 /* }}} */
 
 #else
+
+/* {{{ _php_rfc822_len
+ * Calculate string length based on imap's rfc822_cat function.
+ */	
+static int _php_rfc822_len(char *str)
+{
+	int len;
+	char *p;
+
+	if (!str || !*str) {
+		return 0;
+	}
+
+	/* strings with special characters will need to be quoted, as a safety measure we
+	 * add 2 bytes for the quotes just in case.
+	 */
+	len = strlen(str) + 2;
+	p = str;
+	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
+	 * our buffer length to account for these characters.
+	 */
+	while ((p = strpbrk(p, "\\\""))) {
+		p++;
+		len++;
+	}
+
+	return len;
+}
+/* }}} */
 
 /* {{{ _php_imap_get_address_size
  */
