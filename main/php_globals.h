@@ -151,6 +151,9 @@ struct _php_core_globals {
 	long user_ini_cache_ttl;
 
 	char *request_order;
+
+	zend_bool mail_x_header;
+	char *mail_log;
 };
 
 
