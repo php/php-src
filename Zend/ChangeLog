@@ -1,3 +1,33 @@
+2009-01-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      MFH: use correct check for constants and stop segfaulting
+      (5_2 doesn't need this)
+
+    * zend_compile.c:
+      use correct check for constants and stop segfaulting
+
+2009-01-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      zend_API.c
+      tests/access_modifiers_012.phpt
+      tests/access_modifiers_012.phpt:
+      Handle __call() on protected/private method access for callbacks too.
+
+2009-01-08  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_object_handlers.c:
+      fix ZTS build
+
+2009-01-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_2)
+      zend_object_handlers.c
+      tests/access_modifiers_011.phpt:
+      MFB
+
 2009-01-07  Andrei Zmievski  <andrei@gravitonic.com>
 
     * tests/access_modifiers_011.phpt
