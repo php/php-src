@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
+
 - Added optional sorting type flag parameter to array_unique(). Default is
   SORT_REGULAR. (Andrei)
 
@@ -10,12 +11,12 @@ PHP                                                                        NEWS
 - Fixed zip filename property read. (Pierre)
 - Fixed explode() behavior with empty string to respect negative limit. (Shire)
 - Fixed security issue in imagerotate(), background colour isn't validated
-  correctly with a non truecolour image, reported by Hamid Ebadi, APA Laboratory.
-  (Fixes CVE-2008-5498) (Scott)
+  correctly with a non truecolour image. Reported by Hamid Ebadi,
+  APA Laboratory (Fixes CVE-2008-5498). (Scott)
 - Fixed a segfault when malformed string is passed to json_decode(). (Scott)
 
-- Fixed bug #47037 (No error when using fopen with emty string). 
-  (Cristian Rodriguez R.)
+- Fixed bug #47037 (No error when using fopen with empty string). 
+  (Cristian Rodriguez R., Felipe)
 - Fixed bug #47035 (dns_get_record returns a garbage byte at the end of a TXT 
   record). (Felipe)
 - Fixed bug #47027 (var_export doesn't show numeric indices on ArrayObject).
@@ -52,7 +53,7 @@ PHP                                                                        NEWS
 - Reverted bug fix #42718 that broke magic_quotes_gpc (Scott)
 
 04 Dec 2008, PHP 5.2.7
-- Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371) (Ilia)
+- Upgraded PCRE to version 7.8 (Fixes CVE-2008-2371). (Ilia)
 - Updated timezone database to version 2008.9. (Derick)
 - Upgraded bundled libzip to 0.9.0. (Pierre)
 
