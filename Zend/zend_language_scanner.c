@@ -6474,7 +6474,7 @@ yy553:
 		++YYCURSOR;
 		YYDEBUG(556, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1641 "Zend/zend_language_scanner.l"
+#line 1620 "Zend/zend_language_scanner.l"
 		{
 	return T_UNICODE_CAST;
 }
@@ -8614,7 +8614,7 @@ yy887:
 yy888:
 		YYDEBUG(888, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 1580 "Zend/zend_language_scanner.l"
+#line 1559 "Zend/zend_language_scanner.l"
 		{
 	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
 	Z_STRLEN_P(zendlval) = yyleng;

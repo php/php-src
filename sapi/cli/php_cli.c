@@ -574,6 +574,8 @@ static const char *param_mode_conflict = "Either execute direct code, process st
  */
 static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno TSRMLS_DC)
 {
+	char c;
+
 	*lineno = 1;
 
 	file_handle->type = ZEND_HANDLE_FP;
@@ -584,6 +586,25 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 		return FAILURE;
 	}
 	file_handle->filename = script_file;
+
+	/* #!php support */
+	c = fgetc(file_handle->handle.fp);
+	if (c == '#' && (c = fgetc(file_handle->handle.fp)) == '!') {
+		while (c != '\n' && c != '\r' && c != EOF) {
+			c = fgetc(file_handle->handle.fp);	/* skip to end of line */
+		}
+		/* handle situations where line is terminated by \r\n */
+		if (c == '\r') {
+			if (fgetc(file_handle->handle.fp) != '\n') {
+				long pos = ftell(file_handle->handle.fp);
+				fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
+			}
+		}
+		*lineno = 2;
+	} else {
+		rewind(file_handle->handle.fp);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
