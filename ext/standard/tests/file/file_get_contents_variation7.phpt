@@ -52,8 +52,8 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file_get_contents($dir."/".$filename));
 }
 
-unlink($absFile);
 chdir($old_dir_path);
+unlink($absFile);
 rmdir($absSubDir);
 rmdir($absMainDir);
 
