@@ -24,7 +24,6 @@ PHP                                                                        NEWS
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
-- Added zend_ts_hash_copy_to_hash(). (Tony)
 - Enabled the salsa hashing functions. (Scott)
 
 - Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
