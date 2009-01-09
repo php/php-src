@@ -1336,27 +1336,6 @@ yymore_restart:
 		return 0;
 	}
 
-	/* ignore first line when it's started with a #! */
-	if (YYCURSOR == SCNG(yy_start) && *YYCURSOR == '#' && *(YYCURSOR + 1) == '!') {
-		while (++YYCURSOR < YYLIMIT) {
-			if (*YYCURSOR == '\n') {
-				++YYCURSOR;
-				CG(zend_lineno)++;
-				goto restart;
-			}
-
-			if (*YYCURSOR == '\r') {
-				if (++YYCURSOR < YYLIMIT && *YYCURSOR == '\n') { /* match \r\n as single newline */
-					++YYCURSOR;
-				}
-				CG(zend_lineno)++;
-				goto restart;
-			}
-		}
-
-		return 0; /* EOF */
-	}
-
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM	[0-9]+
