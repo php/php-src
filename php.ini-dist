@@ -669,6 +669,12 @@ smtp_port = 25
 ; the 5th parameter to mail(), even in safe mode.
 ;mail.force_extra_parameters =
 
+; Add X-PHP-Originaiting-Script: that will include uid of the script followed by the filename
+mail.add_x_header = Off
+
+; Log all mail() calls including the full path of the script, line #, to address and headers
+mail.log =
+
 [SQL]
 sql.safe_mode = Off
 
