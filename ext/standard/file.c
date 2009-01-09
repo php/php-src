@@ -911,17 +911,18 @@ PHP_FUNCTION(tempnam)
 {
 	zval **ppdir, **ppprefix;
 	char *dir, *prefix;
-	int dir_len, prefix_len, p_len;
+	int dir_len;
 	char *opened_path;
 	char *p;
 	int fd;
+	size_t p_len, prefix_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &ppdir, &ppprefix) == FAILURE) {
 		return;
 	}
 
 	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
-		php_stream_path_param_encode(ppprefix, &prefix, &prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		php_stream_path_param_encode(ppprefix, &prefix, (int *)&prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
