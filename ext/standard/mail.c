@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
+#include "ext/standard/basic_functions.h"
 
 #if HAVE_SYSEXITS_H
 #include <sysexits.h>
@@ -66,6 +68,8 @@
 	while ((p = memchr(p, '\0', (e - p)))) {	\
 		*p = ' ';								\
 	}											\
+
+extern long php_getuid(void);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -199,25 +203,61 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
+	char *mail_log = INI_STR("mail.log");
+	char *hdr = headers;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
 
+#define MAIL_RET(val) \
+	if (hdr != headers) {	\
+		efree(hdr);	\
+	}	\
+	return val;	\
+
+	if (mail_log) {
+		char *tmp;
+		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
+		if (hdr) { /* find all \r\n instances and replace them with spaces, so a log line is always one line long */ 
+			char *p = tmp;
+			while ((p = strpbrk(p, "\r\n"))) {
+				*p = ' ';
+			}
+			tmp[l - 1] = '\n';
+		}
+		_php_error_log(3, tmp, mail_log, NULL TSRMLS_CC);
+		efree(tmp);
+	}
+	if (PG(mail_x_header)) {
+		char *tmp = zend_get_executed_filename(TSRMLS_C);
+		char *f;
+		size_t f_len;
+
+		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len);
+
+		if (headers != NULL) {
+			spprintf(&hdr, 0, "%s\r\nX-PHP-Originating-Script: %ld:%s\n", headers, php_getuid(), f);
+		} else {
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(), f);
+		}
+		efree(f);
+	}
+
 	if (!sendmail_path) {
 #if (defined PHP_WIN32 || defined NETWARE)
 		/* handle old style win smtp sending */
-		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message, NULL, NULL, NULL TSRMLS_CC) == FAILURE) {
+		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL TSRMLS_CC) == FAILURE) {
 			if (tsm_errmsg) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tsm_errmsg);
 				efree(tsm_errmsg);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
-			return 0;
+			MAIL_RET(0);
 		}
-		return 1;
+		MAIL_RET(1);
 #else
-		return 0;
+		MAIL_RET(0);
 #endif
 	}
 	if (extra_cmd != NULL) {
@@ -261,13 +301,13 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 				signal(SIGCHLD, sig_handler);
 			}
 #endif
-			return 0;
+			MAIL_RET(0);
 		}
 #endif
 		fprintf(sendmail, "To: %s\n", to);
 		fprintf(sendmail, "Subject: %s\n", subject);
-		if (headers != NULL) {
-			fprintf(sendmail, "%s\n", headers);
+		if (hdr != NULL) {
+			fprintf(sendmail, "%s\n", hdr);
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
@@ -290,9 +330,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #endif
 #endif
 		{
-			return 0;
+			MAIL_RET(0);
 		} else {
-			return 1;
+			MAIL_RET(1);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
@@ -301,10 +341,10 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			signal(SIGCHLD, sig_handler);						
 		}
 #endif
-		return 0;
+		MAIL_RET(0);
 	}
 
-	return 1; /* never reached */
+	MAIL_RET(1); /* never reached */
 }
 /* }}} */
 
