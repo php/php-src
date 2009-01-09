@@ -1366,7 +1366,7 @@ PHP_FUNCTION(mysqli_init)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-	if (getThis() && instanceof_function(Z_OBJCE_P(getThis()), mysqli_link_class_entry TSRMLS_CC)) {
+	if (getThis() && ((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr) {
 		return;
 	}
 
