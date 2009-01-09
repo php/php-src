@@ -1847,7 +1847,7 @@ PHP_FUNCTION(strtotitle)
 
 /* {{{ php_u_basename
  */
-PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar **p_ret, int *p_len TSRMLS_DC)
+PHPAPI void php_u_basename(UChar *s, size_t len, UChar *suffix, size_t sufflen, UChar **p_ret, size_t *p_len TSRMLS_DC)
 {
 	UChar *end, *c, *comp, *cend;
 	int state;
@@ -1895,7 +1895,7 @@ PHPAPI void php_u_basename(UChar *s, int len, UChar *suffix, int sufflen, UChar 
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(char *s, int len, char *suffix, int sufflen, char **p_ret, int *p_len TSRMLS_DC)
+PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
 {
 	char *ret = NULL, *c, *comp, *cend;
 	size_t inc_len, cnt;
@@ -1972,7 +1972,7 @@ PHP_FUNCTION(basename)
 	zstr string, suffix = NULL_ZSTR, ret;
 	int string_len, suffix_len = 0;
 	zend_uchar string_type, suffix_type;
-	int ret_len;
+	size_t ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &string, &string_len, &string_type, &suffix, &suffix_len, &suffix_type) == FAILURE) {
 		return;
@@ -1980,17 +1980,17 @@ PHP_FUNCTION(basename)
 
 	if (string_type == IS_UNICODE) {
 		php_u_basename(string.u, string_len, suffix.u, suffix_len, &ret.u, &ret_len TSRMLS_CC);
-		RETURN_UNICODEL(ret.u, ret_len, 0);
+		RETURN_UNICODEL(ret.u, (int)ret_len, 0);
 	} else {
 		php_basename(string.s, string_len, suffix.s, suffix_len, &ret.s, &ret_len TSRMLS_CC);
-		RETURN_STRINGL(ret.s, ret_len, 0);
+		RETURN_STRINGL(ret.s, (int)ret_len, 0);
 	}
 }
 /* }}} */
 
 /* {{{ php_u_dirname
    Returns directory name component of path */
-PHPAPI int php_u_dirname(UChar *path, int len)
+PHPAPI size_t php_u_dirname(UChar *path, size_t len)
 {
 	return zend_u_dirname(path, len);
 }
@@ -1998,7 +1998,7 @@ PHPAPI int php_u_dirname(UChar *path, int len)
 
 /* {{{ php_dirname
    Returns directory name component of path */
-PHPAPI int php_dirname(char *path, int len)
+PHPAPI size_t php_dirname(char *path, size_t len)
 {
 	return zend_dirname(path, len);
 }
@@ -2012,7 +2012,7 @@ PHP_FUNCTION(dirname)
 	int str_len;
 	zend_uchar str_type;
 	zstr ret;
-	int ret_len;
+	size_t ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len,
 							  &str_type) == FAILURE) {
@@ -2027,7 +2027,7 @@ PHP_FUNCTION(dirname)
 		ret_len = php_dirname(ret.s, str_len);
 	}
 
-	RETURN_ZSTRL(str_type, ret, ret_len, 0);
+	RETURN_ZSTRL(str_type, ret, (int)ret_len, 0);
 }
 /* }}} */
 
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(pathinfo)
 	zstr path, ret = NULL_ZSTR;
 	int path_len, have_basename, have_ext, have_filename;
 	zend_uchar path_type;
-	int ret_len;
+	size_t ret_len;
 	zval *tmp;
 	long opt = PHP_PATHINFO_ALL;
 
