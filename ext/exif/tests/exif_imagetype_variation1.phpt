@@ -165,20 +165,32 @@ NULL
 Warning: exif_imagetype(1): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 16 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 17 --
 
 Warning: exif_imagetype(1): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 18 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 19 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 20 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 21 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 22 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 23 --
 
@@ -189,11 +201,14 @@ bool(false)
 Warning: exif_imagetype() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 26 --
+
+Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 Done
 
 ?>
 ===Done===
-
