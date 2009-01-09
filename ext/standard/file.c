@@ -911,7 +911,7 @@ PHP_FUNCTION(tempnam)
 {
 	zval **ppdir, **ppprefix;
 	char *dir, *prefix;
-	int dir_len;
+	int dir_len, tmp_prefix_len;
 	char *opened_path;
 	char *p;
 	int fd;
@@ -922,7 +922,7 @@ PHP_FUNCTION(tempnam)
 	}
 
 	if (php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
-		php_stream_path_param_encode(ppprefix, &prefix, (int *)&prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		php_stream_path_param_encode(ppprefix, &prefix, &tmp_prefix_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -930,6 +930,7 @@ PHP_FUNCTION(tempnam)
 		RETURN_FALSE;
 	}
 
+	prefix_len = tmp_prefix_len;
 	php_basename(prefix, prefix_len, NULL, 0, &p, &p_len TSRMLS_CC);
 	if (p_len > 64) {
 		p[63] = '\0';
