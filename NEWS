@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Re-enabled socket_create_pair() on Windows (Kalle)
 
+- Added mail logging functionality that allows logging of mail sent via
+  mail() function. (Ilia)
 - Added json_last_error() to return any error information from json_decode().
   (Scott)
 - Added gethostname() to return the current system host name. (Ilia)
