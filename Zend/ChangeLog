@@ -1,3 +1,28 @@
+2009-01-09  Antony Dovgal  <tony@daylessday.org>
+
+    * zend_ts_hash.c
+      zend_ts_hash.h:
+      add zend_ts_hash_copy_to_hash()
+
+2009-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.c:
+      
+      MFH: Corrected fix for bug #46844 to only trigger on the 1st line of CLI
+      opened files.
+
+    * zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.c:
+      
+      Corrected fix for bug #46844 to only trigger on the 1st line of CLI opened
+      files.
+
 2009-01-08  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_3)
