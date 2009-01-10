@@ -1,9 +1,8 @@
 --TEST--
 checkdate() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 var_dump(checkdate());
 var_dump(checkdate(1,1,1));

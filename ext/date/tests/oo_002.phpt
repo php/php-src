@@ -1,9 +1,8 @@
 --TEST--
 date OO cloning
---INI--
-date.timezone=Europe/Berlin
 --FILE--
 <?php
+date_default_timezone_set('Europe/Berlin');
 class _d extends DateTime {}
 class _t extends DateTimeZone {}
 $d = new _d("1pm Aug 1 GMT 2007");

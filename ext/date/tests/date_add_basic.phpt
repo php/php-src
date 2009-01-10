@@ -4,10 +4,9 @@ Test date_add() function : basic functionality
 Felix De Vliegher <felix.devliegher@gmail.com>
 --SKIPIF--
 <?php if (!function_exists('date_add')) echo "skip: date_add() function not found!"; ?>
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 /* Prototype  : void date_add(DateTime object, DateInterval interval)
  * Description: Adds an interval to the current date in object.
  * Source code: ext/date/php_date.c

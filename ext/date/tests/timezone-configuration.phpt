@@ -1,7 +1,5 @@
 --TEST--
 timezone configuration [1]
---INI--
-date.timezone=GMT
 --FILE--
 <?php
 	putenv('TZ=Europe/Oslo');
