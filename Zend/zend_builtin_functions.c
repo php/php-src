@@ -743,10 +743,10 @@ ZEND_FUNCTION(get_called_class)
 
 	if (EG(called_scope)) {
 		RETURN_TEXTL(EG(called_scope)->name, EG(called_scope)->name_length, 1);
-	} else {
+	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
-		RETURN_FALSE;
 	}
+	RETURN_FALSE;
 }
 /* }}} */
 
