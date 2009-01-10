@@ -40,49 +40,49 @@ echo "Done";
 --EXPECTF--
 *** Testing spliti() : error conditions ***
 
-Warning: spliti(): REG_EMPTY in %s on line 16
+Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EPAREN in %s on line 17
+Warning: spliti(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EBRACK in %s on line 18
+Warning: spliti(): REG_EBRACK in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EPAREN in %s on line 19
+Warning: spliti(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADRPT in %s on line 20
+Warning: spliti(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADRPT in %s on line 21
+Warning: spliti(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADRPT in %s on line 22
+Warning: spliti(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADRPT in %s on line 23
+Warning: spliti() expects parameter 3 to be long, binary string given in %s on line %d
+NULL
+
+Warning: spliti(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADBR in %s on line 24
+Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EMPTY in %s on line 25
+Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EMPTY in %s on line 26
+Warning: spliti(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADBR in %s on line 27
+Warning: spliti(): REG_ERANGE in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_ERANGE in %s on line 28
+Warning: spliti(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_EESCAPE in %s on line 29
-bool(false)
-
-Warning: spliti(): REG_ERANGE in %s on line 30
-bool(false)
+Warning: spliti() expects parameter 3 to be long, binary string given in %s on line %d
+NULL
 string(8) "original"
 Done

@@ -81,8 +81,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing spliti() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(64)
-Error: 8 - Undefined variable: unset_var, %s(67)
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
 
 Arg value 0 
 array(1) {
@@ -139,66 +139,31 @@ array(1) {
   [0]=>
   string(3) "0.5"
 }
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
-Error: 8 - Array to string conversion, %s(73)
+Error: 2 - spliti() expects parameter 2 to be binary string, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
-Error: 8 - Array to string conversion, %s(73)
+Error: 2 - spliti() expects parameter 2 to be binary string, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
-Error: 8 - Array to string conversion, %s(73)
+Error: 2 - spliti() expects parameter 2 to be binary string, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
-Error: 8 - Array to string conversion, %s(73)
+Error: 2 - spliti() expects parameter 2 to be binary string, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(1) "A"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ay"
-}
+Error: 2 - spliti() expects parameter 2 to be binary string, array given, %s(%d)
+NULL
 
 Arg value  
 array(1) {
@@ -247,19 +212,11 @@ array(1) {
   [0]=>
   string(0) ""
 }
-Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to binary string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-array(3) {
-  [0]=>
-  string(2) "Ob"
-  [1]=>
-  string(0) ""
-  [2]=>
-  string(2) "ct"
-}
+Error: 2 - spliti() expects parameter 2 to be binary string, object given, %s(%d)
+NULL
 
 Arg value  
 array(1) {

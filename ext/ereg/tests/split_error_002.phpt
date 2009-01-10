@@ -40,49 +40,49 @@ echo "Done";
 --EXPECTF--
 *** Testing split() : error conditions ***
 
-Warning: split(): REG_EMPTY in %s on line 16
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_EPAREN in %s on line 17
+Warning: split(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: split(): REG_EBRACK in %s on line 18
+Warning: split(): REG_EBRACK in %s on line %d
 bool(false)
 
-Warning: split(): REG_EPAREN in %s on line 19
+Warning: split(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 20
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 21
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 22
+Warning: split(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADRPT in %s on line 23
+Warning: split() expects parameter 3 to be long, binary string given in %s on line %d
+NULL
+
+Warning: split(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADBR in %s on line 24
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_EMPTY in %s on line 25
+Warning: split(): REG_EMPTY in %s on line %d
 bool(false)
 
-Warning: split(): REG_EMPTY in %s on line 26
+Warning: split(): REG_BADBR in %s on line %d
 bool(false)
 
-Warning: split(): REG_BADBR in %s on line 27
+Warning: split(): REG_ERANGE in %s on line %d
 bool(false)
 
-Warning: split(): REG_ERANGE in %s on line 28
+Warning: split(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: split(): REG_EESCAPE in %s on line 29
-bool(false)
-
-Warning: split(): REG_ERANGE in %s on line 30
-bool(false)
+Warning: split() expects parameter 3 to be long, binary string given in %s on line %d
+NULL
 string(8) "original"
 Done
