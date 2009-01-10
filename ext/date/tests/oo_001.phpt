@@ -1,9 +1,8 @@
 --TEST--
 date OO interface
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 class _d extends DateTime {
 	function __construct() {
 	}

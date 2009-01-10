@@ -1,7 +1,5 @@
 --TEST--
 strftime() and gmstrftime() tests
---INI--
-date.timezone=Asia/Jerusalem
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip posix only test.');
@@ -9,6 +7,7 @@ if (!function_exists('strftime')) die("skip, strftime not available");
 ?>
 --FILE--
 <?php
+date_default_timezone_set('Asia/Jerusalem');
 
 $t = mktime(0,0,0, 6, 27, 2006);
 

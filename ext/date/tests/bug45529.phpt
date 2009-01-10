@@ -1,9 +1,8 @@
 --TEST--
 Bug #45529 (UTC not properly recognised as timezone identifier while parsing)
---INI--
-date.timezone=Europe/Oslo
 --FILE--
 <?php
+date_default_timezone_set('Europe/Oslo');
 $tz1 = new DateTimeZone('UTC');
 $tz2 = date_create('UTC')->getTimeZone();
 echo $tz1->getName(), PHP_EOL;

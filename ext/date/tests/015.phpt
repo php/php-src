@@ -1,9 +1,8 @@
 --TEST--
 timezone object reference handling
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 $dto = new DateTime();
 $tzold = $dto->getTimezone();
 var_dump($tzold->getName());

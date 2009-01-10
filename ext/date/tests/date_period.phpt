@@ -1,9 +1,8 @@
 --TEST--
 DatePeriod
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 $db = new DateTime( '2008-01-01' );
 $de = new DateTime( '2008-12-31' );
 $di = DateInterval::createFromDateString( 'first day of next month' );

@@ -1,9 +1,8 @@
 --TEST--
 date_date_set() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 $dto = date_create("2006-12-12");
 var_dump($dto);

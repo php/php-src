@@ -4,10 +4,9 @@ Test date_sub() function : basic functionality
 Felix De Vliegher <felix.devliegher@gmail.com>
 --SKIPIF--
 <?php if (!function_exists('date_sub')) echo "skip: date_sub() function not found!"; ?>
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 /* Prototype  : void date_sub(DateTime object, DateInterval interval)
  * Description: Subtracts an interval from the current date in object.
  * Source code: ext/date/php_date.c
