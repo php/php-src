@@ -8,7 +8,7 @@ imageloadfont() function crashes
 --FILE--
 <?php
 $filename = dirname(__FILE__) .  '/font.gdf';
-$bin = "\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00";
+$bin = b"\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00";
 $fp = fopen($filename, 'wb');
 fwrite($fp, $bin);
 fclose($fp);
