@@ -1752,7 +1752,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
+	if (!EX(object) || (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
