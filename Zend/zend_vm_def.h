@@ -1922,15 +1922,18 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		if (!EX(fbc)) {
 			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
 		}
+		
+		EX(called_scope) = Z_OBJCE_P(EX(object));
 	} else {
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
-
-	if (!EX(object) || (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	
+	if (!EX(object)) {
 		EX(called_scope) = NULL;
 		EX(object) = NULL;
-	} else {
-		EX(called_scope) = Z_OBJCE_P(EX(object));
+	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+		EX(object) = NULL;
+	} else {		
 		if (!PZVAL_IS_REF(EX(object))) {
 			Z_ADDREF_P(EX(object)); /* For $this pointer */
 		} else {
