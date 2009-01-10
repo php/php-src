@@ -112,41 +112,31 @@ array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-Error: 8 - Array to string conversion, %s(72)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 8 - Array to string conversion, %s(72)
+Error: 2 - split() expects parameter 3 to be long, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 8 - Array to string conversion, %s(72)
+Error: 2 - split() expects parameter 3 to be long, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 8 - Array to string conversion, %s(72)
+Error: 2 - split() expects parameter 3 to be long, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 8 - Array to string conversion, %s(72)
+Error: 2 - split() expects parameter 3 to be long, array given, %s(%d)
+NULL
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - split() expects parameter 3 to be long, array given, %s(%d)
+NULL
 
 Arg value  
 array(1) {
@@ -185,36 +175,25 @@ array(1) {
 }
 
 Arg value  
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - split() expects parameter 3 to be long, Unicode string given, %s(%d)
+NULL
 
 Arg value  
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - split() expects parameter 3 to be long, Unicode string given, %s(%d)
+NULL
 
 Arg value string 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - split() expects parameter 3 to be long, Unicode string given, %s(%d)
+NULL
 
 Arg value string 
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
+Error: 2 - split() expects parameter 3 to be long, Unicode string given, %s(%d)
+NULL
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 8 - Object of class stdClass could not be converted to int, %s(73)
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
+Error: 2 - split() expects parameter 3 to be long, object given, %s(%d)
+NULL
 
 Arg value  
 array(1) {
