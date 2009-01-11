@@ -57,13 +57,6 @@
 #endif
  
 /*
- * For windows do some sanity checks, because time_t must be 32bit for NSAPI on win32
- */
-#if defined(PHP_WIN32) && !defined(_WIN64) && sizeof(time_t)!=4
-#error "NSAPI module needs time_t to have a size of 32 bits on win32"
-#endif
- 
-/*
  * NSAPI includes
  */
 #include "nsapi.h"
