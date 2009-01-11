@@ -398,15 +398,9 @@ if test "$ac_cv_func_dlopen" = "yes"; then
 fi
 AC_CHECK_LIB(m, sin)
 
-dnl Check for resolver routines.
-dnl Need to check for both res_search and __res_search
-dnl in -lc, -lbind, -lresolv and -lsocket
-PHP_CHECK_FUNC(res_search, resolv, bind, socket)
-
 dnl Check for inet_aton and dn_skipname
 dnl in -lc, -lbind and -lresolv
 PHP_CHECK_FUNC(inet_aton, resolv, bind)
-PHP_CHECK_FUNC(dn_skipname, resolv, bind)
 
 
 dnl Then headers.

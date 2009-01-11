@@ -358,7 +358,7 @@ typedef union {
  *   __libc_res_nsend()   in resolv/res_send.c
  * */
 
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && !defined(HAVE_DEPRECATED_DNS_FUNCS)
 #define php_dns_free_res(__res__) _php_dns_free_res(__res__)
 static void _php_dns_free_res(struct __res_state res) { /* {{{ */
 	int ns;
@@ -672,7 +672,9 @@ PHP_FUNCTION(dns_get_record)
 	zval *authns = NULL, *addtl = NULL;
 	int addtl_recs = 0;
 	int type_to_fetch;
+#if !defined(HAVE_DEPRECATED_DNS_FUNCS)
 	struct __res_state res;
+#endif
 	HEADER *hp;
 	querybuf buf, answer;
 	u_char *cp = NULL, *end = NULL;
@@ -757,11 +759,14 @@ PHP_FUNCTION(dns_get_record)
 				break;
 		}
 		if (type_to_fetch) {
+#if defined(HAVE_DEPRECATED_DNS_FUNCS)
+			res_init();
+#else
 			memset(&res, 0, sizeof(res));
 			res_ninit(&res);
 			res.retrans = 5;
 			res.options &= ~RES_DEFNAMES;
-
+#endif
 			n = res_nmkquery(&res, QUERY, hostname, C_IN, type_to_fetch, NULL, 0, NULL, buf.qb2, sizeof buf);
 			if (n<0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nmkquery() failed");
