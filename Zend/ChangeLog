@@ -1,3 +1,32 @@
+2009-01-10  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - MFH Fix SEGV if get_method() returns a non bound function
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug47054.phpt:
+      - MFH: Fixed bug #47054 (BC break in static functions called as dynamic)
+
+    * zend_builtin_functions.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug47054.phpt
+      tests/bug47054.phpt:
+      - Fixed bug #47054 (BC break in static functions called as dynamic)
+
+    * (PHP_5_2)
+      tests/bug40236.phpt
+      tests/bug40236.phpt:
+      - MFH: Fixed test (patch by Timm Friebe [thekid@php])
+
+    * tests/bug40236.phpt:
+      - Fixed test (patch by Timm Friebe [thekid@php])
+
 2009-01-09  Antony Dovgal  <tony@daylessday.org>
 
     * zend_ts_hash.c
