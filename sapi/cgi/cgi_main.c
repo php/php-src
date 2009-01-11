@@ -1545,7 +1545,9 @@ int main(int argc, char *argv[])
 #endif
 
 	cgi_sapi_module.executable_location = argv[0];
-	cgi_sapi_module.additional_functions = additional_functions;
+	if (!cgi && !fastcgi && !bindpath) {
+		cgi_sapi_module.additional_functions = additional_functions;
+	}
 
 	/* startup after we get the above ini override se we get things right */
 	if (cgi_sapi_module.startup(&cgi_sapi_module) == FAILURE) {
