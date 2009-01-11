@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 - Fixed bug #46699 (xml_parse crash when parser is namespace aware). (Rob)
 - Fixed bug #46005 (User not consistently logged under Apache2). 
   (admorten at umich dot edu, Stas)
+- Fixed bug #45996 (libxml2 2.7 causes breakage with character data 
+  in xml_parse()). (Rob)
 - Fixed bug #45161 (Reusing a curl handle leaks memory). (Mark Karpeles, Jani)
 - Fixed bug #35975 (Session cookie expires date format isn't the most compatible.
   Now matches that of setcookie()). (Scott)
