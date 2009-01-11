@@ -9,3 +9,4 @@ php_pcre_maketables
 php_pcre_study
 php_pcre_version
 php_pcre_fullinfo
+php_pcre_free
