@@ -409,16 +409,16 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	ALLOC_INIT_ZVAL(*subarray);
 	array_init(*subarray);
 
-	add_ascii_assoc_string(*subarray, "host", name, 1);
+	add_ascii_assoc_rt_string(*subarray, "host", name, ZSTR_DUPLICATE);
 	switch (type) {
 		case DNS_T_A:
-			add_ascii_assoc_string(*subarray, "type", "A", 1);
+			add_ascii_assoc_rt_string(*subarray, "type", "A", ZSTR_DUPLICATE);
 			snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
 			add_ascii_assoc_rt_string(*subarray, "ip", name, ZSTR_DUPLICATE);
 			cp += dlen;
 			break;
 		case DNS_T_MX:
-			add_ascii_assoc_string(*subarray, "type", "MX", ZSTR_DUPLICATE);
+			add_ascii_assoc_rt_string(*subarray, "type", "MX", ZSTR_DUPLICATE);
 			GETSHORT(n, cp);
 			add_ascii_assoc_long(*subarray, "pri", n);
 			/* no break; */
@@ -457,20 +457,28 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			break;
 		case DNS_T_TXT:
 			{
+				zval *txtarray = NULL;
 				int ll = 0;
+				char *txt = NULL;
 
 				add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
 				tp = emalloc(dlen + 1);
 				
+				MAKE_STD_ZVAL(txtarray);
+				array_init(txtarray);
+				
 				while (ll < dlen) {
+					txt = tp + ll;
 					n = cp[ll];
-					memcpy(tp + ll , cp + ll + 1, n);
+					memcpy(txt, cp + ll + 1, n);
 					ll = ll + n + 1;
+					tp[ll] = '\0';
+					add_next_index_rt_stringl(txtarray, txt, n, ZSTR_DUPLICATE);
 				}
-				tp[dlen] = '\0';
 				cp += dlen;
 
-				add_ascii_assoc_rt_stringl(*subarray, "txt", tp, dlen - 1, ZSTR_AUTOFREE);
+				add_rt_assoc_zval(*subarray, "txt", txtarray);
+				efree(tp);
 			}
 			break;
 		case DNS_T_SOA:
