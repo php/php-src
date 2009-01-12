@@ -706,7 +706,7 @@ smtp_port = 25
 ; the 5th parameter to mail(), even in safe mode.
 ;mail.force_extra_parameters =
 
-; Add X-PHP-Originaiting-Script: that will include uid of the script followed by the filename
+; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = On
 
 ; Log all mail() calls including the full path of the script, line #, to address and headers
