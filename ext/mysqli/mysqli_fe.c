@@ -44,6 +44,13 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)
+	ZEND_ARG_ARRAY_INFO(1, read, 1)
+	ZEND_ARG_ARRAY_INFO(1, write, 1)
+	ZEND_ARG_ARRAY_INFO(1, error, 1)
+	ZEND_ARG_INFO(0, sec)
+	ZEND_ARG_INFO(0, usec)
+ZEND_END_ARG_INFO();
 
 /* {{{ mysqli_functions[]
  *
@@ -116,7 +123,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_options, 								NULL)
 	PHP_FE(mysqli_ping,									NULL)
 #if defined(MYSQLI_USE_MYSQLND)
-	PHP_FE(mysqli_poll,									NULL)
+	PHP_FE(mysqli_poll,									arginfo_mysqli_poll)
 #endif
 	PHP_FE(mysqli_prepare,								NULL)
 	PHP_FE(mysqli_report,								NULL)
