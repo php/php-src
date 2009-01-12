@@ -194,24 +194,30 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				int i = 0;
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
-				char *txt;
-				long txt_len;
-				zval *txtarray;
-
-				MAKE_STD_ZVAL(txtarray);
-				array_init(txtarray);
+				char *txt, *txt_dst;
+				long txt_len = 0;
+				zval *entries;
 
 				add_assoc_string(*subarray, "type", "TXT", 1);
-
+				
+				ALLOC_INIT_ZVAL(entries);
+				array_init(entries);
+				
 				for (i = 0; i < count; i++) {
-					txt_len = strlen(data_txt->pStringArray[i]);
-					txt = emalloc(txt_len + 1);
-					memcpy(txt, data_txt->pStringArray[i], txt_len);
-					txt[txt_len] = '\0';
-					add_next_index_stringl(txtarray, txt, txt_len, 0);
+					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
 
-				add_assoc_zval(*subarray, "txt", txtarray);
+				txt = ecalloc(txt_len * 2, 1);
+				txt_dst = txt;
+				for (i = 0; i < count; i++) {
+					int len = strlen(data_txt->pStringArray[i]);
+					memcpy(txt_dst, data_txt->pStringArray[i], len);
+					add_next_index_stringl(entries, data_txt->pStringArray[i], len, 1);
+					txt_dst += len;
+				}
+
+				add_assoc_string(*subarray, "txt", txt, 0);
+				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
 
