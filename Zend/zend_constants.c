@@ -357,6 +357,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		int const_name_len = name_len - prefix_len - 1;
 		char *constant_name = colon + 1;
 		char *lcname;
+		int found_const = 0;
 
 		lcname = zend_str_tolower_dup(name, prefix_len);
 		/* Check for namespace constant */
@@ -367,7 +368,18 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		memcpy(lcname + prefix_len + 1, constant_name, const_name_len + 1);
 
 		if (zend_hash_find(EG(zend_constants), lcname, prefix_len + 1 + const_name_len + 1, (void **) &c) == SUCCESS) {
-			efree(lcname);
+			found_const = 1;
+		} else {
+			/* try lowercase */
+			zend_str_tolower(lcname + prefix_len + 1, const_name_len);
+			if (zend_hash_find(EG(zend_constants), lcname, prefix_len + 1 + const_name_len + 1, (void **) &c) == SUCCESS) {
+				if ((c->flags & CONST_CS) == 0) {
+					found_const = 1;
+				}
+			}
+		}
+		efree(lcname);
+		if(found_const) {
 			*result = c->value;
 			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
 			zval_copy_ctor(result);
@@ -375,8 +387,6 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 			Z_UNSET_ISREF_P(result);
 			return 1;
 		}
-
-		efree(lcname);
 		/* name requires runtime resolution, need to check non-namespaced name */
 		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
 			name = constant_name;
@@ -414,7 +424,14 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		zend_str_tolower(lowercase_name, c->name_len-1);
 		name = lowercase_name;
 	} else {
-		name = c->name;
+		char *slash = strrchr(c->name, '\\');
+		if(slash) {
+			lowercase_name = estrndup(c->name, c->name_len-1);
+			zend_str_tolower(lowercase_name, slash-c->name);
+			name = lowercase_name;
+		} else {
+			name = c->name;
+		}
 	}
 
 	if ((strncmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) ||
