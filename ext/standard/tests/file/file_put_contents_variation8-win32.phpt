@@ -19,64 +19,80 @@ echo "*** Testing file_put_contents() : usage variation ***\n";
 
 /* An array of filenames */ 
 $names_arr = array(
-  -1,
-  TRUE,
-  FALSE,
-  NULL,
-  "",
-  " ",
-  "\0",
-  array(),
+  "-1" => -1,
+  "TRUE" => TRUE,
+  "FALSE" => FALSE,
+  "NULL" => NULL,
+  "\"\"" => "",
+  "\" \"" => " ",
+  "\\0" => "\0",
+  "array()" => array(),
 
-  //the next 2 generate java messages so we don't replicate the php messages
-  "/no/such/file/dir", 
-  "php/php"
+  /* prefix with path separator of a non existing directory*/ 
+  "/no/such/file/dir" => "/no/such/file/dir", 
+  "php/php"=> "php/php"
 
 );
 
-for( $i=0; $i<count($names_arr); $i++ ) {
-  echo "-- Iteration $i --\n";
-  $res = file_put_contents($names_arr[$i], "Some data");
-  if ($res !== false && $res != null) {
-     echo "$res bytes written to: $names_arr[$i]\n";
-     unlink($names_arr[$i]);
-  }
-  else {
-     echo "Failed to write data to: $names_arr[$i]\n";
-  }
-}
+foreach($names_arr as $key =>$value) {
+      echo "\n-- Filename: $key --\n";
+      $res = file_put_contents($value, "Some data");
+  	  if ($res !== false && $res != null) {
+     	 echo "$res bytes written to: $value\n";
+     	 unlink($value);
+  	  } else {
+         echo "Failed to write data to: $key\n";
+      }	
+};
 
-echo "\n*** Done ***\n";
 ?>
+===Done===
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
--- Iteration 0 --
+
+-- Filename: -1 --
 9 bytes written to: -1
--- Iteration 1 --
+
+-- Filename: TRUE --
 9 bytes written to: 1
--- Iteration 2 --
-Failed to write data to: 
--- Iteration 3 --
-Failed to write data to: 
--- Iteration 4 --
-Failed to write data to: 
--- Iteration 5 --
+
+-- Filename: FALSE --
+
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
+Failed to write data to: FALSE
+
+-- Filename: NULL --
+
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
+Failed to write data to: NULL
+
+-- Filename: "" --
+
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
+Failed to write data to: ""
+
+-- Filename: " " --
 
 Warning: file_put_contents( ): failed to open stream: Permission denied in %s on line %d
-Failed to write data to:  
--- Iteration 6 --
-Failed to write data to:%s
--- Iteration 7 --
+Failed to write data to: " "
+
+-- Filename: \0 --
+
+Warning: file_put_contents(): Filename cannot be empty in %s on line %d
+Failed to write data to: \0
+
+-- Filename: array() --
 
 Warning: file_put_contents() expects parameter 1 to be string, array given in %s on line %d
-Failed to write data to: Array
--- Iteration 8 --
+Failed to write data to: array()
+
+-- Filename: /no/such/file/dir --
 
 Warning: file_put_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d
 Failed to write data to: /no/such/file/dir
--- Iteration 9 --
+
+-- Filename: php/php --
 
 Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
 Failed to write data to: php/php
-
-*** Done ***
+===Done===
