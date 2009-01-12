@@ -125,7 +125,17 @@ array(7) refcount(2){
     &long(4) refcount(2)
   }
   [6]=>
-  &object(mysqli_result)#2 (0) refcount(2){
+  &object(mysqli_result)#2 (5) refcount(2){
+    ["current_field"]=>
+    NULL refcount(1)
+    ["field_count"]=>
+    NULL refcount(1)
+    ["lengths"]=>
+    NULL refcount(1)
+    ["num_rows"]=>
+    NULL refcount(1)
+    ["type"]=>
+    NULL refcount(1)
   }
 }
 array(1) refcount(2){
