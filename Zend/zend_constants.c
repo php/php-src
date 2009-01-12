@@ -422,6 +422,7 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 		/* compound constant name */
 		zstr lcname, constant_name;
 		unsigned int lcname_len, prefix_len, const_name_len;
+		int found_const = 0;
 
 		if(type == IS_UNICODE) {
 			prefix_len = colon.u - name.u;
@@ -445,7 +446,19 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 		}
 
 		if (zend_u_hash_find(EG(zend_constants), type, lcname, const_name_len + 1 + lcname_len + 1, (void **) &c) == SUCCESS) {
+			found_const = 1;
+		} else {
+			/* try lowercase */
 			efree(lcname.v);
+			lcname = zend_u_str_case_fold(type, name, name_len, 0, &lcname_len);
+			if (zend_u_hash_find(EG(zend_constants), type, lcname, lcname_len + 1, (void **) &c) == SUCCESS) {
+				if ((c->flags & CONST_CS) == 0) {
+					found_const = 1;
+				}
+			}
+		}
+		efree(lcname.v);
+		if(found_const) {
 			*result = c->value;
 			zval_update_constant_ex(&result, (void*)1, NULL TSRMLS_CC);
 			zval_copy_ctor(result);
@@ -453,7 +466,6 @@ ZEND_API int zend_u_get_constant_ex(zend_uchar type, zstr name, uint name_len, z
 			Z_UNSET_ISREF_P(result);
 			return 1;
 		}
-		efree(lcname.v);
 		/* name requires runtime resolution, need to check non-namespaced name */
 		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
 			name = constant_name;
@@ -498,9 +510,43 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 		name = lookup_name = zend_u_str_case_fold(type, c->name, c->name_len-1, 1, &lookup_name_len);
 		lookup_name_len++;
 	} else {
-		lookup_name_len = c->name_len;
-		name = c->name;
-		lookup_name = NULL_ZSTR;
+		zstr slash, const_name;
+		unsigned int lcname_len, prefix_len, const_name_len;
+
+		if(type == IS_UNICODE) {
+			slash.u = u_memrchr(c->name.u, '\\', c->name_len-1);
+		} else {
+			slash.s = zend_memrchr(c->name.s, '\\', c->name_len-1);
+		}
+		if(slash.v != NULL) {
+			name = c->name;
+			if(type == IS_UNICODE) {
+				prefix_len = slash.u - name.u;
+				const_name.u = slash.u+1;
+			} else {
+				prefix_len = slash.s - name.s;
+				const_name.s = slash.s+1;
+			}
+			const_name_len = c->name_len - 1 - prefix_len - 1;
+
+			lookup_name = zend_u_str_case_fold(type, name, prefix_len, 0, &lcname_len);
+			lookup_name_len = const_name_len + 1 + lcname_len + 1;
+
+			if(type == IS_UNICODE) {
+				lookup_name.u = erealloc(lookup_name.u, UBYTES(lookup_name_len));
+				lookup_name.u[lcname_len] = '\\';
+				memcpy(lookup_name.u+lcname_len+1, const_name.u, UBYTES(const_name_len + 1));
+			} else {
+				lookup_name.s = erealloc(lookup_name.s, lookup_name_len);
+				lookup_name.s[lcname_len] = '\\';
+				memcpy(lookup_name.s+lcname_len+1, const_name.s, const_name_len + 1);
+			}
+			name = lookup_name;
+		} else {
+			lookup_name_len = c->name_len;
+			name = c->name;
+			lookup_name = NULL_ZSTR;
+		}
 	}
 
 	if (EG(in_execution) && lookup_name_len == sizeof(ZEND_HALT_CONSTANT_NAME) && ZEND_U_EQUAL(type, name, lookup_name_len-1, ZEND_HALT_CONSTANT_NAME, sizeof(ZEND_HALT_CONSTANT_NAME)-1)) {
