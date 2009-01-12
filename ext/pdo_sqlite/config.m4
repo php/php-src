@@ -81,6 +81,10 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       other_flags="-DSQLITE_ENABLE_FTS3=1 -DSQLITE_CORE=1"
 
+      if test "$PHP_SQLITE3" != "yes"; then
+        PHP_ADD_SOURCES(PHP_EXT_DIR(sqlite3), libsqlite/sqlite3.c)
+      fi
+
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core,
         $ext_shared,,-DPDO_SQLITE_BUNDLED=1 $other_flags $threadsafe_flags -I$pdo_inc_path)
