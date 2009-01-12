@@ -623,6 +623,7 @@ static const XML_Char *const error_mapping[] = {
 	"No memory",
 	"Invalid document start",
 	"Empty document",
+	"Not well-formed (invalid token)",
 	"Invalid document end",
 	"Invalid hexadecimal character reference",
 	"Invalid decimal character reference",
