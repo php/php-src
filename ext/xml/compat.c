@@ -620,7 +620,6 @@ XML_GetErrorCode(XML_Parser parser)
 
 static const XML_Char *const error_mapping[] = {
 	"No error",
-	"Internal error",
 	"No memory",
 	"Invalid document start",
 	"Empty document",
