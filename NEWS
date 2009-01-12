@@ -51,6 +51,8 @@ PHP                                                                        NEWS
   (Scott)
 - Fixed bug #45989 (json_decode() doesn't return NULL on certain invalid
   strings). (magicaltux, Scott)
+- Fixed bug #45940 (MySQLI OO does not populate connect_error property on
+  failed connect). (Johannes)
 - Fixed bug #45820 (Allow empty keys in ArrayObject). (Etienne)
 - Fixed bug #45791 (json_decode() doesn't convert 0e0 to a double). (Scott)
 
