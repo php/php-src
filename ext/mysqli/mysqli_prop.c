@@ -32,7 +32,7 @@
 #include "php_mysqli_structs.h"
 
 #define CHECK_STATUS(value) \
-	if (((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
+	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Property access is not allowed yet"); \
 		ZVAL_NULL(*retval); \
 		return SUCCESS; \
@@ -136,7 +136,6 @@ static int link_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 	ZVAL_LONG(*retval, (long)MyG(error_no));
 	return SUCCESS;
 }
@@ -146,8 +145,11 @@ static int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
-	ZVAL_UTF8_STRING(*retval, MyG(error_msg), ZSTR_DUPLICATE)
+	if (MyG(error_msg)) {
+		ZVAL_UTF8_STRING(*retval, MyG(error_msg), ZSTR_DUPLICATE);
+	} else {
+		ZVAL_NULL(*retval);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -159,6 +161,8 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	my_ulonglong rc;
 
 	MAKE_STD_ZVAL(*retval); 
+
+	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	

@@ -38,6 +38,6 @@ array(2) {
 }
 NULL
 
-Warning: main(): Couldn't fetch mysqli_result in %s on line %d
+Warning: main(): Property access is not allowed yet in %s on line %d
 NULL
 done!
