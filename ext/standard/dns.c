@@ -456,29 +456,26 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			break;
 		case DNS_T_TXT:
 			{
-				zval *txtarray = NULL;
 				int ll = 0;
-				char *txt = NULL;
+				zval *entries = NULL;
 
 				add_assoc_string(*subarray, "type", "TXT", 1);
 				tp = emalloc(dlen + 1);
 				
-				MAKE_STD_ZVAL(txtarray);
-				array_init(txtarray);
+				MAKE_STD_ZVAL(entries);
+				array_init(entries);
 				
 				while (ll < dlen) {
-					txt = tp + ll;
 					n = cp[ll];
-					memcpy(txt, cp + ll + 1, n);
+					memcpy(tp + ll , cp + ll + 1, n);
+					add_next_index_stringl(entries, cp + ll + 1, n, 1);
 					ll = ll + n + 1;
-					tp[ll] = '\0';
-					add_next_index_stringl(txtarray, txt, n, 1);	
 				}
-
+				tp[dlen] = '\0';
 				cp += dlen;
 
-				add_assoc_zval(*subarray, "txt", txtarray);
-				efree(tp);
+				add_assoc_stringl(*subarray, "txt", tp, dlen - 1, 0);
+				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
 		case DNS_T_SOA:
