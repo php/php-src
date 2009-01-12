@@ -4,7 +4,7 @@ Test pow() - basic function test pow()
 precision=14
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
@@ -20,7 +20,7 @@ $bases = array(23,
 				"23.45",
 				"2.345e1",	
 				PHP_INT_MAX,
-				-PHP_INT_MAX - 1);			
+				-PHP_INT_MAX - 1);				
 
 $exponents = array(0,
                1,
@@ -48,8 +48,6 @@ foreach($bases as $base) {
 ?>
 ===Done===
 --EXPECTF--
-
-
 Base = 23
 ..... Exponent = 0 Result = 1
 ..... Exponent = 1 Result = 23
@@ -254,16 +252,16 @@ Base = 2.345e1
 
 
 
-Base = 2147483647
+Base = 9223372036854775807
 ..... Exponent = 0 Result = 1
-..... Exponent = 1 Result = 2147483647
-..... Exponent = -1 Result = 4.6566128752458E-10
-..... Exponent = 2 Result = 4.6116860141324E+18
-..... Exponent = -2 Result = 2.1684043469905E-19
-..... Exponent = 3 Result = 9.903520300448E+27
-..... Exponent = -3 Result = 1.0097419600935E-28
-..... Exponent = 2.5 Result = 2.1370991100146E+23
-..... Exponent = -2.5 Result = 4.6792401686657E-24
+..... Exponent = 1 Result = 9223372036854775807
+..... Exponent = -1 Result = 1.0842021724855E-19
+..... Exponent = 2 Result = 8.5070591730235E+37
+..... Exponent = -2 Result = 1.1754943508223E-38
+..... Exponent = 3 Result = 7.8463771692334E+56
+..... Exponent = -3 Result = 1.274473528906E-57
+..... Exponent = 2.5 Result = 2.5835942961798E+47
+..... Exponent = -2.5 Result = 3.8705767444936E-48
 ..... Exponent = 500 Result = INF
 ..... Exponent = -500 Result = 0
 ..... Exponent = 2147483647 Result = INF
@@ -271,14 +269,14 @@ Base = 2147483647
 
 
 
-Base = -2147483648
+Base = -9223372036854775808
 ..... Exponent = 0 Result = 1
-..... Exponent = 1 Result = -2147483648
-..... Exponent = -1 Result = -4.6566128730774E-10
-..... Exponent = 2 Result = 4.6116860184274E+18
-..... Exponent = -2 Result = 2.168404344971E-19
-..... Exponent = 3 Result = -9.903520314283E+27
-..... Exponent = -3 Result = -1.0097419586829E-28
+..... Exponent = 1 Result = -9223372036854775808
+..... Exponent = -1 Result = -1.0842021724855E-19
+..... Exponent = 2 Result = 8.5070591730235E+37
+..... Exponent = -2 Result = 1.1754943508223E-38
+..... Exponent = 3 Result = -7.8463771692334E+56
+..... Exponent = -3 Result = -1.274473528906E-57
 ..... Exponent = 2.5 Result = NAN
 ..... Exponent = -2.5 Result = NAN
 ..... Exponent = 500 Result = INF
