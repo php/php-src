@@ -16,64 +16,82 @@ if(substr(PHP_OS, 0, 3) != "WIN")
  */
 
 echo "*** Testing file_get_contents() : variation ***\n";
+
 /* An array of filenames */ 
 $names_arr = array(
-  /* Invalid args */ 
-  -1,
-  TRUE,
-  FALSE,
-  NULL,
-  "",
-  " ",
-  "\0",
-  array(),
+  /* Invalid args */  
+  "-1" => -1,
+  "TRUE" => TRUE,
+  "FALSE" => FALSE,
+  "NULL" => NULL,
+  "\"\"" => "",
+  "\" \"" => " ",
+  "\\0" => "\0",
+  "array()" => array(),
 
-  /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
-  "php/php"
+  /* prefix with path separator of a non existing directory*/ 
+  "/no/such/file/dir" => "/no/such/file/dir", 
+  "php/php"=> "php/php"
 
 );
 
-for( $i=0; $i<count($names_arr); $i++ ) {
-  echo "-- Iteration $i --\n";
-  var_dump(file_get_contents($names_arr[$i]));
+foreach($names_arr as $key =>$value) {
+  echo "\n-- Filename: $key --\n";
+  var_dump(file_get_contents($value));
 }
 
-echo "\n*** Done ***\n";
 ?>
+===Done===
 --EXPECTF--
 *** Testing file_get_contents() : variation ***
--- Iteration 0 --
+
+-- Filename: -1 --
 
 Warning: file_get_contents(-1): failed to open stream: No such file or directory in %s on line %d
 bool(false)
--- Iteration 1 --
+
+-- Filename: TRUE --
 
 Warning: file_get_contents(1): failed to open stream: No such file or directory in %s on line %d
 bool(false)
--- Iteration 2 --
+
+-- Filename: FALSE --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
--- Iteration 3 --
+
+-- Filename: NULL --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
--- Iteration 4 --
+
+-- Filename: "" --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
--- Iteration 5 --
+
+-- Filename: " " --
 
 Warning: file_get_contents( ): failed to open stream: Permission denied in %s on line %d
 bool(false)
--- Iteration 6 --
+
+-- Filename: \0 --
+
+Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
--- Iteration 7 --
+
+-- Filename: array() --
 
 Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
 NULL
--- Iteration 8 --
+
+-- Filename: /no/such/file/dir --
 
 Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
 bool(false)
--- Iteration 9 --
+
+-- Filename: php/php --
 
 Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-
-*** Done ***
+===Done===

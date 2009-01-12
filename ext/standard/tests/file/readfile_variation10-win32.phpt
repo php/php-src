@@ -17,56 +17,71 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 echo "*** Testing readfile() : variation ***\n";
 
-
 /* An array of files */ 
 $names_arr = array(
-  /* Invalid args */ 
-  -1,
-  TRUE,
-  FALSE,
-  NULL,
-  "",
-  " ",
-  "\0",
-  array(),
+  /* Invalid args */
+  "-1" => -1,
+  "TRUE" => TRUE,
+  "FALSE" => FALSE,
+  "NULL" => NULL,
+  "\"\"" => "",
+  "\" \"" => " ",
+  "\\0" => "\0",
+  "array()" => array(),
 
   /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
-  "php/php"
+  "/no/such/file/dir" => "/no/such/file/dir", 
+  "php/php"=> "php/php"
 
 );
 
-for( $i=0; $i<count($names_arr); $i++ ) {
-  $name = $names_arr[$i];
-  echo "-- testing '$name' --\n";  
-  readfile($name);
-}
+foreach($names_arr as $key => $value) {
+      echo "\n-- Filename: $key --\n";
+      readfile($value);
+};
 
-echo "\n*** Done ***\n";
 ?>
+===Done===
 --EXPECTF--
 *** Testing readfile() : variation ***
--- testing '-1' --
+
+-- Filename: -1 --
 
 Warning: readfile(-1): failed to open stream: No such file or directory in %s on line %d
--- testing '1' --
+
+-- Filename: TRUE --
 
 Warning: readfile(1): failed to open stream: No such file or directory in %s on line %d
--- testing '' --
--- testing '' --
--- testing '' --
--- testing ' ' --
+
+-- Filename: FALSE --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
+
+-- Filename: NULL --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
+
+-- Filename: "" --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
+
+-- Filename: " " --
 
 Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
--- testing '%s' --
--- testing 'Array' --
+
+-- Filename: \0 --
+
+Warning: readfile(): Filename cannot be empty in %s on line %d
+
+-- Filename: array() --
 
 Warning: readfile() expects parameter 1 to be string, array given in %s on line %d
--- testing '/no/such/file/dir' --
+
+-- Filename: /no/such/file/dir --
 
 Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
--- testing 'php/php' --
+
+-- Filename: php/php --
 
 Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
-
-*** Done ***
+===Done===
