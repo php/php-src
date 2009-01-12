@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
 - Enabled the salsa hashing functions. (Scott)
 
+- Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
 - Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
 - Fixed bug #46944 (UTF-8 characters outside the BMP aren't encoded correctly).
   (Scott)
