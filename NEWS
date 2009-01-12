@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.3.0 Alpha 4
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
-- Upgraded bundled sqlite to version 3.6.8. (Ilia)
+- Upgraded bundled sqlite to version 3.6.8. (Scott, Ilia)
 
 - Deprecated session_register(), session_unregister() and
   session_is_registered(). (Hannes)
@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Re-enabled socket_create_pair() on Windows. (Kalle)
+- Fixed building of pdo_sqlite without sqlite3. (Scott)
 
 - Added support for old style DNS functions. (Scott)
 - Added mail logging functionality that allows logging of mail sent via
