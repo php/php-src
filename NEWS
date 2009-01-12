@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   correctly with a non truecolour image. Reported by Hamid Ebadi,
   APA Laboratory (Fixes CVE-2008-5498). (Scott)
 - Fixed a segfault when malformed string is passed to json_decode(). (Scott)
+- Fixed bug in xml_error_string() which resulted in messages being
+  off by one. (Scott)
 
 - Fixed bug #47042 (PHP cgi sapi is removing SCRIPT_FILENAME for non apache).
   (Sriram Natarajan)
