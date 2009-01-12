@@ -1,7 +1,14 @@
 --TEST--
-Maths test for xapic versions of srand()
+Test srand() - basic function test for srand()
 --FILE--
 <?php
+/* Prototype  : void srand  ([ int $seed  ] )
+ * Description: Seed the random number generator.
+ * Source code: ext/standard/rand.c
+ */
+
+echo "*** Testing srand() : basic functionality ***\n";
+
 // Should return NULL if given anything that it can convert to long
 // This doesn't actually test what it does with the input :-\
 var_dump(srand());
@@ -13,7 +20,9 @@ var_dump(srand(true));
 var_dump(srand(false));
 var_dump(srand(NULL));
 ?>
+===Done===
 --EXPECTF--
+*** Testing srand() : basic functionality ***
 NULL
 NULL
 NULL
@@ -22,3 +31,4 @@ NULL
 NULL
 NULL
 NULL
+===Done===
