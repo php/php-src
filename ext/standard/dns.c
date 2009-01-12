@@ -457,28 +457,26 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			break;
 		case DNS_T_TXT:
 			{
-				zval *txtarray = NULL;
 				int ll = 0;
-				char *txt = NULL;
+				zval *entries = NULL;
 
 				add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
 				tp = emalloc(dlen + 1);
-				
-				MAKE_STD_ZVAL(txtarray);
-				array_init(txtarray);
+
+				MAKE_STD_ZVAL(entries);
+				array_init(entries);
 				
 				while (ll < dlen) {
-					txt = tp + ll;
 					n = cp[ll];
-					memcpy(txt, cp + ll + 1, n);
+					memcpy(tp + ll, cp + ll + 1, n);
+					add_next_index_rt_stringl(entries, cp + ll + 1, n, ZSTR_DUPLICATE);
 					ll = ll + n + 1;
-					tp[ll] = '\0';
-					add_next_index_rt_stringl(txtarray, txt, n, ZSTR_DUPLICATE);
 				}
+				tp[dlen] = '\0';
 				cp += dlen;
-
-				add_rt_assoc_zval(*subarray, "txt", txtarray);
-				efree(tp);
+				
+				add_ascii_assoc_rt_stringl(*subarray, "txt", tp, dlen - 1, ZSTR_AUTOFREE);
+				add_ascii_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
 		case DNS_T_SOA:
