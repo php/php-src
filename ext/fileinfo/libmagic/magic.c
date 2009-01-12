@@ -230,7 +230,7 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 #elif defined(HAVE_UTIME_H) || defined(HAVE_SYS_UTIME_H)
 		struct utimbuf  utbuf;
 
-		(void)memset(utbuf, 0, sizeof(utbuf));
+		(void)memset(&utbuf, 0, sizeof(utbuf));
 		utbuf.actime = sb->st_atime;
 		utbuf.modtime = sb->st_mtime;
 		(void) utime(name, &utbuf); /* don't care if loses */
