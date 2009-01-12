@@ -153,38 +153,38 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 	ALLOC_INIT_ZVAL(*subarray);
 	array_init(*subarray);
 
-	add_assoc_rt_string(*subarray, "host", pRec->pName, ZSTR_DUPLICATE);
+	add_ascii_assoc_rt_string(*subarray, "host", pRec->pName, ZSTR_DUPLICATE);
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_assoc_rt_string(*subarray, "type", "A", ZSTR_DUPLICATE);
-			add_assoc_rt_string(*subarray, "ip", inet_ntoa(ipaddr), ZSTR_DUPLICATE);
+			add_ascii_assoc_rt_string(*subarray, "type", "A", ZSTR_DUPLICATE);
+			add_ascii_assoc_rt_string(*subarray, "ip", inet_ntoa(ipaddr), ZSTR_DUPLICATE);
 			break;
 		}
 
 		case DNS_TYPE_MX:
-			add_assoc_rt_string(*subarray, "type", "MX", ZSTR_DUPLICATE);
-			add_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
+			add_ascii_assoc_rt_string(*subarray, "type", "MX", ZSTR_DUPLICATE);
+			add_ascii_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
 			/* no break; */
 
 		case DNS_TYPE_CNAME:
 			if (type == DNS_TYPE_CNAME) {
-				add_assoc_rt_string(*subarray, "type", "CNAME", ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "CNAME", ZSTR_DUPLICATE);
 			}
 			/* no break; */
 
 		case DNS_TYPE_NS:
 			if (type == DNS_TYPE_NS) {
-				add_assoc_rt_string(*subarray, "type", "NS", ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "NS", ZSTR_DUPLICATE);
 			}
 			/* no break; */
 
 		case DNS_TYPE_PTR:
 			if (type == DNS_TYPE_PTR) {
-				add_assoc_rt_string(*subarray, "type", "PTR", ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "PTR", ZSTR_DUPLICATE);
 			}
-			add_assoc_rt_string(*subarray, "target", pRec->Data.MX.pNameExchange, ZSTR_DUPLICATE);
+			add_ascii_assoc_rt_string(*subarray, "target", pRec->Data.MX.pNameExchange, ZSTR_DUPLICATE);
 			break;
 
 		/* Not available on windows, the query is possible but there is no DNS_HINFO_DATA structure */
@@ -194,24 +194,30 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				int i = 0;
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
-				char *txt;
-				long txt_len;
-				zval *txtarray;
-
-				MAKE_STD_ZVAL(txtarray);
-				array_init(txtarray);
+				char *txt, *txt_dst;
+				long txt_len = 0;
+				zval *entries;
 
 				add_ascii_assoc_rt_string(*subarray, "type", "TXT", ZSTR_DUPLICATE);
+				
+				ALLOC_INIT_ZVAL(entries);
+				array_init(entries);
 
 				for (i = 0; i < count; i++) {
-					txt_len = strlen(data_txt->pStringArray[i]);
-					txt = emalloc(txt_len + 1);
-					memcpy(txt, data_txt->pStringArray[i], txt_len);
-					txt[txt_len] = '\0';
-					add_next_index_rt_stringl(txtarray, txt, txt_len, ZSTR_AUTOFREE);
+					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
 
-				add_assoc_zval(*subarray, "txt", txtarray);
+				txt = ecalloc(txt_len * 2, 1);
+				txt_dst = txt;
+				for (i = 0; i < count; i++) {
+					int len = strlen(data_txt->pStringArray[i]);
+					memcpy(txt_dst, data_txt->pStringArray[i], len);
+					add_next_index_rt_stringl(entries, data_txt->pStringArray[i], len, ZSTR_DUPLICATE);
+					txt_dst += len;
+				}
+
+				add_ascii_assoc_rt_string(*subarray, "txt", txt, ZSTR_AUTOFREE);
+				add_ascii_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
 
@@ -219,15 +225,15 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 				DNS_SOA_DATA *data_soa = &pRec->Data.Soa;
 
-				add_assoc_rt_string(*subarray, "type", "SOA", ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "SOA", ZSTR_DUPLICATE);
 
-				add_assoc_rt_string(*subarray, "mname", data_soa->pNamePrimaryServer, ZSTR_DUPLICATE);
-				add_assoc_rt_string(*subarray, "rname", data_soa->pNameAdministrator, ZSTR_DUPLICATE);
-				add_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
-				add_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
-				add_assoc_long(*subarray, "retry", data_soa->dwRetry);
-				add_assoc_long(*subarray, "expire", data_soa->dwExpire);
-				add_assoc_long(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
+				add_ascii_assoc_rt_string(*subarray, "mname", data_soa->pNamePrimaryServer, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "rname", data_soa->pNameAdministrator, ZSTR_DUPLICATE);
+				add_ascii_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
+				add_ascii_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
+				add_ascii_assoc_long(*subarray, "retry", data_soa->dwRetry);
+				add_ascii_assoc_long(*subarray, "expire", data_soa->dwExpire);
+				add_ascii_assoc_long(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
 			}
 			break;
 
@@ -237,8 +243,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 				LPSTR str[MAXHOSTNAMELEN];
 				DNS_AAAA_DATA *data_aaaa = &pRec->Data.AAAA;
-				add_assoc_rt_string(*subarray, "type", "AAAA", ZSTR_DUPLICATE);
-				add_assoc_rt_string(*subarray, "ipv6", RtlIpv6AddressToString(data_aaaa->Ip6Address, str), ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "AAAA", ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "ipv6", RtlIpv6AddressToString(data_aaaa->Ip6Address, str), ZSTR_DUPLICATE);
 			}
 #endif
 			break;
@@ -253,11 +259,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 				DNS_SRV_DATA *data_srv = &pRec->Data.Srv;
 
-				add_assoc_rt_string(*subarray, "type", "SRV", ZSTR_DUPLICATE);
-				add_assoc_long(*subarray, "pri", data_srv->wPriority);
-				add_assoc_long(*subarray, "weight", data_srv->wWeight);
-				add_assoc_long(*subarray, "port", data_srv->wPort);
-				add_assoc_rt_string(*subarray, "target", data_srv->pNameTarget, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "SRV", ZSTR_DUPLICATE);
+				add_ascii_assoc_long(*subarray, "pri", data_srv->wPriority);
+				add_ascii_assoc_long(*subarray, "weight", data_srv->wWeight);
+				add_ascii_assoc_long(*subarray, "port", data_srv->wPort);
+				add_ascii_assoc_rt_string(*subarray, "target", data_srv->pNameTarget, ZSTR_DUPLICATE);
 			}
 			break;
 
@@ -265,13 +271,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			{
 #ifdef DNS_NAPTR_DATA
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
-				add_assoc_rt_string(*subarray, "type", "NAPTR", ZSTR_DUPLICATE);
-				add_assoc_long(*subarray, "order", data_naptr->wOrder);
-				add_assoc_long(*subarray, "pref", data_naptr->wPreference);
-				add_assoc_rt_string(*subarray, "flags", data_naptr->pFlags, ZSTR_DUPLICATE);
-				add_assoc_rt_string(*subarray, "services", data_naptr->pService, ZSTR_DUPLICATE);
-				add_assoc_rt_string(*subarray, "regex", data_naptr->pRegularExpression, ZSTR_DUPLICATE);
-				add_assoc_rt_string(*subarray, "replacement", data_naptr->pReplacement, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "type", "NAPTR", ZSTR_DUPLICATE);
+				add_ascii_assoc_long(*subarray, "order", data_naptr->wOrder);
+				add_ascii_assoc_long(*subarray, "pref", data_naptr->wPreference);
+				add_ascii_assoc_rt_string(*subarray, "flags", data_naptr->pFlags, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "services", data_naptr->pService, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "regex", data_naptr->pRegularExpression, ZSTR_DUPLICATE);
+				add_ascii_assoc_rt_string(*subarray, "replacement", data_naptr->pReplacement, ZSTR_DUPLICATE);
 #endif
 			}
 			break;
@@ -280,8 +286,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			break;
 	}
 
-	add_assoc_rt_string(*subarray, "class", "IN", ZSTR_DUPLICATE);
-	add_assoc_long(*subarray, "ttl", ttl);
+	add_ascii_assoc_rt_string(*subarray, "class", "IN", ZSTR_DUPLICATE);
+	add_ascii_assoc_long(*subarray, "ttl", ttl);
 }
 /* }}} */
 #endif
