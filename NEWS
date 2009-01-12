@@ -46,8 +46,6 @@ PHP                                                                        NEWS
 - Fixed bug #46653 (can't extend mysqli). (Johannes)
 - Fixed bug #46646 (Restrict serialization on some internal classes like
   Closure and SplFileInfo using exceptions). (Etienne)
-- Fixed bug #46304 (Defining namespaced constant using define() defines 
-  CASE SENSITIVE namespace). (Stas)
 - Fixed bug #46268 (DateTime::modify() does not reset relative time values).
   (Derick)
 - Fixed bug #46044 (Mysqli - wrong error message). (Johannes)
