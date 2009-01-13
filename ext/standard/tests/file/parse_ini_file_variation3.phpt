@@ -12,7 +12,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 echo "*** Testing parse_ini_file() : variation ***\n";
 $pwd = getcwd();
-$f = basename(__FILE__);
+$f = "parse_ini_file_variation3";
 $dir1 = $pwd."/".$f.".dir1";
 $dir2 = $pwd."/".$f.".dir2";
 $dir3 = $pwd."/".$f.".dir3";
@@ -29,12 +29,10 @@ foreach($newdirs as $newdir) {
    $newIncludePath .= $newdir.$pathSep;
 }
 
-
-var_dump(parse_ini_file($iniFile));
 set_include_path($newIncludePath);
-var_dump(parse_ini_file($iniFile));
-
-
+$path = get_include_path();
+echo "New include path is : " . $path . "\n";
+ 
 $output_file = $dir2."/".$iniFile;
 $iniContent = <<<FILE
 error_reporting  =  E_ALL
@@ -54,24 +52,31 @@ FILE;
 file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
+?>
+===Done===
+--CLEAN--
+<?php
+
+$pwd = getcwd();
+$f = "parse_ini_file_variation3";
+$iniFile = "php.ini";
+
+$dir1 = $pwd."/".$f.".dir1";
+$dir2 = $pwd."/".$f.".dir2";
+$dir3 = $pwd."/".$f.".dir3";
+$newdirs = array($dir1, $dir2, $dir3);
+$output_file = $dir2."/".$iniFile;
+
+// Tidy up after test
 unlink($output_file);
 foreach($newdirs as $newdir) {
    rmdir($newdir);
 }
 
-
-
-
 ?>
-===DONE===
 --EXPECTF--
 *** Testing parse_ini_file() : variation ***
-
-Warning: parse_ini_file(php.ini): failed to open stream: No such file or directory in %s on line %d
-bool(false)
-
-Warning: parse_ini_file(php.ini): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
 array(11) {
   ["error_reporting"]=>
   string(4) "6143"
@@ -96,4 +101,4 @@ array(11) {
   ["docref_ext"]=>
   string(5) ".html"
 }
-===DONE===
+===Done===
