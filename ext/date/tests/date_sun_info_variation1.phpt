@@ -1,13 +1,12 @@
 --TEST--
 Test date_sun_info() function : error variations - Pass unexpected values for time argument
---INI--
-date.timezone=UTC
 --FILE--
 <?php
 /* Prototype  : array date_sun_info ( int $time , float $latitude , float $longitude )
  * Description:  Returns an array with information about sunset/sunrise and twilight begin/end.
  * Source code: ext/standard/data/php_date.c
  */
+date_default_timezone_set("UTC");
 
 echo "*** Testing date_sun_info() : usage variations ***\n";
 
