@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Re-enabled socket_create_pair() on Windows. (Kalle)
 - Fixed building of pdo_sqlite without sqlite3. (Scott)
 
+- Added table info to PDO::getColumnMeta() with SQLite. (Martin Jansen, Scott)
 - Added support for old style DNS functions. (Scott)
 - Added mail logging functionality that allows logging of mail sent via
   mail() function. (Ilia)
