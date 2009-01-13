@@ -1,7 +1,5 @@
 --TEST--
 Test date_sun_info() function : error variations
---INI--
-date.timezone=UTC
 --FILE--
 <?php
 /* Prototype  : array date_sun_info ( int $time , float $latitude , float $longitude   )
