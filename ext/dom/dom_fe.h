@@ -168,6 +168,7 @@ PHP_FUNCTION(dom_node_get_user_data);
 PHP_METHOD(domnode, C14N);
 PHP_METHOD(domnode, C14NFile);
 PHP_METHOD(domnode, getNodePath);
+PHP_METHOD(domnode, getLineNo);
 
 /* domnodelist methods */
 PHP_FUNCTION(dom_nodelist_item);
