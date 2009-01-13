@@ -62,4 +62,4 @@ value6
 value6
 value6
 
-Fatal error: Undefined constant 'NS1\ns2\coNSt1' in %s\bug46304.php on line %d
+Fatal error: Undefined constant 'NS1\ns2\coNSt1' in %sbug46304.php on line %d
