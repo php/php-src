@@ -5385,6 +5385,7 @@ PHP_FUNCTION(ini_set)
 		if (_CHECK_PATH(varname, varname_len, "error_log") ||
 			_CHECK_PATH(varname, varname_len, "java.class.path") ||
 			_CHECK_PATH(varname, varname_len, "java.home") ||
+			_CHECK_PATH(varname, varname_len, "mail.log") ||
 			_CHECK_PATH(varname, varname_len, "java.library.path") ||
 			_CHECK_PATH(varname, varname_len, "vpopmail.directory")) {
 
