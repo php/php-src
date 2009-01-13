@@ -1,7 +1,5 @@
 --TEST--
 Test date_default_timezone_set() function : error variations
---INI--
-date.timezone=UTC
 --FILE--
 <?php
 /* Prototype  : bool date_default_timezone_set ( string $timezone_identifier )
