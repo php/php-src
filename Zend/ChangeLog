@@ -1,3 +1,19 @@
+2009-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_constants.c:
+      fix #46304 Defining namespaced constant using define() defines CASE
+      SENSITIVE namespace
+
+    * tests/bug46304.phpt:
+      MFB test
+
+    * (PHP_5_3)
+      zend_constants.c
+      tests/bug46304.phpt
+      tests/bug46304.phpt:
+      fix #46304: Defining namespaced constant using define() uses case sensitive
+      match for namespace
+
 2009-01-10  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
