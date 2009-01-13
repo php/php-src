@@ -105,16 +105,16 @@ Arg value Array
 string(8) "No error"
 
 Arg value Array 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value Array 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value Array 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value Array 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value  
 string(8) "No error"
@@ -123,13 +123,13 @@ Arg value
 string(8) "No error"
 
 Arg value 1 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value  
 string(8) "No error"
 
 Arg value 1 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value  
 string(8) "No error"
@@ -147,7 +147,7 @@ Arg value string
 string(8) "No error"
 
 Arg value Some Ascii Data 
-string(14) "Internal error"
+string(9) "No memory"
 
 Arg value  
 string(8) "No error"
