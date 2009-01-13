@@ -22,6 +22,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <glib/glist.h>
+#include <glib/ghash.h>
 #include <enchant.h>
 #include "php.h"
 #include "php_ini.h"
@@ -83,7 +85,7 @@ function_entry enchant_functions[] = {
 	PHP_FE(enchant_dict_store_replacement, NULL)
 	PHP_FE(enchant_dict_get_error, NULL)
 	PHP_FE(enchant_dict_describe, NULL)
-	PHP_FE(enchant_dict_quick_check, third_arg_force_ref)
+	PHP_FE(enchant_dict_quick_check, NULL)
 
 	{NULL, NULL, NULL}	/* Must be the last line in enchant_functions[] */
 };
@@ -569,12 +571,12 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	PHP_ENCHANT_GET_DICT;
 
 	if (enchant_dict_check(pdict->pdict, word, wordlen) > 0) {
+		int n_sugg;
+		char **suggs;
+
 		if (!sugg && ZEND_NUM_ARGS() == 2) {
 			RETURN_FALSE;
 		}
-
-		int n_sugg;
-		char **suggs;
 
 		array_init(sugg);
 
