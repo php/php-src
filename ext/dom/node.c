@@ -106,6 +106,9 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getNodePath, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getLineNo, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclusive)
 	ZEND_ARG_INFO(0, with_comments)
@@ -149,6 +152,7 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 	PHP_FALIAS(setUserData, dom_node_set_user_data, arginfo_dom_node_set_user_data)
 	PHP_FALIAS(getUserData, dom_node_get_user_data, arginfo_dom_node_get_user_data)
 	PHP_ME(domnode, getNodePath, arginfo_dom_node_getNodePath, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, getLineNo, arginfo_dom_node_getLineNo, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -2026,6 +2030,24 @@ PHP_METHOD(domnode, getNodePath)
 		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
 		xmlFree(value);
 	}
+}
+/* }}} */
+
+/* {{{ proto int DOMNode::getLineNo()
+   Gets line number for a node */
+PHP_METHOD(domnode, getLineNo)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	RETURN_LONG(xmlGetLineNo(nodep));
 }
 /* }}} */
 
