@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.9
+- Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
+  (frode at coretrek dot com, Nuno)
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
 
