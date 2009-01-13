@@ -218,6 +218,8 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log) {
 		char *tmp;
 		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
+		php_stream *stream = php_stream_open_wrapper(mail_log, "a", IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR, NULL);
+
 		if (hdr) { /* find all \r\n instances and replace them with spaces, so a log line is always one line long */ 
 			char *p = tmp;
 			while ((p = strpbrk(p, "\r\n"))) {
@@ -225,7 +227,10 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			}
 			tmp[l - 1] = '\n';
 		}
-		_php_error_log(3, tmp, mail_log, NULL TSRMLS_CC);
+		if (stream) {
+			php_stream_write(stream, tmp, l);
+			php_stream_close(stream);
+		}
 		efree(tmp);
 	}
 	if (PG(mail_x_header)) {
