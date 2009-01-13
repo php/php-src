@@ -45,7 +45,7 @@ Registered Stream Filters => %s
 
 Configuration
 
-PHP Core
+Core
 
 %a
 
