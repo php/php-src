@@ -5188,7 +5188,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		} else {
 			*name = *ns;
 			zval_copy_ctor(name);
-			warn = !is_global;
+			warn = !is_global && !CG(current_namespace);
 		}
 	}
 
