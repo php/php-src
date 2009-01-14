@@ -18,160 +18,158 @@ echo "*** Testing base64_decode() : usage variations ***\n";
 // Initialise function arguments not being substituted (if any)
 $str = 'aGVsbG8gd29ybGQh!';
 
+//getting the resource
+$file_handle = fopen(__FILE__, "r");
+
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
-
-      // int data
-      0,
-      1,
-      12345,
-      -2345,
-
-      // float data
-      10.5,
-      -10.5,
-      10.1234567e10,
-      10.7654321E-10,
-      .5,
-
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
-
-      // null data
-      NULL,
-      null,
-
-      // boolean data
-      true,
-      false,
-      TRUE,
-      FALSE,
-
-      // empty data
-      "",
-      '',
-
-      // string data
-      "string",
-      'string',
-
-      // object data
-      new stdclass(),
-
-      // undefined data
-      $undefined_var,
-
-      // unset data
-      $unset_var,
+$values =  array (
+   	// int data
+	"0" =>  0,
+	"1" =>  1,
+	"12345" =>  12345,
+	"-2345"	=>  -2345,
+		
+	// float data
+    "10.5" =>  10.5,
+	"-10.5" => -10.5,
+	"10.1234567e10" =>	10.1234567e10,
+	"10.7654321E-10" => 10.7654321E-10,
+	".5" => .5,
+		
+    // array data
+    "array()" =>   array(),
+	"array(0)" =>  array(0),
+	"array(1)" =>  array(1),
+	"array(1, 2)" => array(1, 2),
+	"array('color' => 'red', 'item' => 'pen'" => array('color' => 'red', 'item' => 'pen'),
+		
+	// null data
+	"NULL" => NULL,
+	"null" => null,
+		
+	// boolean data
+	"true" => true,
+	"false" => false,
+	"TRUE" => TRUE,
+	"FALSE" => FALSE,
+		
+	// empty data
+	"\"\"" => "",
+	"''" => '',
+		
+	// object data
+	"stdClass object" => new stdclass(),
+		
+	// undefined data
+    "undefined variable" => $undefined_var,
+		
+	// unset data
+	"unset variable" => $unset_var,
+	
+	// resource data
+	"resource" => $file_handle
 );
 
-// loop through each element of the array for strict
+// loop through each element of the array for strict argument
 
-foreach($values as $value) {
-      echo "\nArg value $value \n";
-      var_dump( base64_decode($str, $value) );
+foreach($values as $key=>$value) {
+    echo "\n-- Arg value $key --\n";
+    var_dump(base64_decode($str, $value));
 };
 
-echo "Done";
 ?>
+===Done===
 --EXPECTF--
 *** Testing base64_decode() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(67)
-Error: 8 - Undefined variable: unset_var, %s(70)
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
 
-Arg value 0 
+-- Arg value 0 --
 string(12) "hello world!"
 
-Arg value 1 
+-- Arg value 1 --
 bool(false)
 
-Arg value 12345 
+-- Arg value 12345 --
 bool(false)
 
-Arg value -2345 
+-- Arg value -2345 --
 bool(false)
 
-Arg value 10.5 
+-- Arg value 10.5 --
 bool(false)
 
-Arg value -10.5 
+-- Arg value -10.5 --
 bool(false)
 
-Arg value 101234567000 
+-- Arg value 10.1234567e10 --
 bool(false)
 
-Arg value 1.07654321E-9 
+-- Arg value 10.7654321E-10 --
 bool(false)
 
-Arg value 0.5 
+-- Arg value .5 --
 bool(false)
 
-Arg value Array 
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(77)
+-- Arg value array() --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
 NULL
 
-Arg value Array 
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(77)
+-- Arg value array(0) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
 NULL
 
-Arg value Array 
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(77)
+-- Arg value array(1) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
 NULL
 
-Arg value Array 
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(77)
+-- Arg value array(1, 2) --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
 NULL
 
-Arg value Array 
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(77)
+-- Arg value array('color' => 'red', 'item' => 'pen' --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
 NULL
 
-Arg value  
+-- Arg value NULL --
 string(12) "hello world!"
 
-Arg value  
+-- Arg value null --
 string(12) "hello world!"
 
-Arg value 1 
+-- Arg value true --
 bool(false)
 
-Arg value  
+-- Arg value false --
 string(12) "hello world!"
 
-Arg value 1 
+-- Arg value TRUE --
 bool(false)
 
-Arg value  
+-- Arg value FALSE --
 string(12) "hello world!"
 
-Arg value  
+-- Arg value "" --
 string(12) "hello world!"
 
-Arg value  
+-- Arg value '' --
 string(12) "hello world!"
 
-Arg value string 
-bool(false)
-
-Arg value string 
-bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
-
-Arg value  
-Error: 2 - base64_decode() expects parameter 2 to be boolean, object given, %s(77)
+-- Arg value stdClass object --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, object given, %s(%d)
 NULL
 
-Arg value  
+-- Arg value undefined variable --
 string(12) "hello world!"
 
-Arg value  
+-- Arg value unset variable --
 string(12) "hello world!"
-Done
+
+-- Arg value resource --
+Error: 2 - base64_decode() expects parameter 2 to be boolean, resource given, %s(%d)
+NULL
+===Done===
