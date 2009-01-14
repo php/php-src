@@ -2480,20 +2480,45 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 				fcc->function_handler = priv_fbc;
 			}
 		}
-	} else if (fcc->object_ptr) {
-		if (Z_OBJ_HT_P(fcc->object_ptr)->get_method) {
-			fcc->function_handler = Z_OBJ_HT_P(fcc->object_ptr)->get_method(&fcc->object_ptr, mname, mlen TSRMLS_CC);
-			retval = fcc->function_handler ? 1 : 0;
-			call_via_handler = 1;
+		if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0 &&
+		    (fcc->calling_scope &&
+		     (fcc->calling_scope->__call ||
+		      fcc->calling_scope->__callstatic))) {
+			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+				if (!zend_check_private(fcc->function_handler, fcc->object_ptr ? Z_OBJCE_P(fcc->object_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
+					retval = 0;
+					fcc->function_handler = NULL;
+					goto get_function_via_handler;
+				}
+			} else if (fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED) {
+				if (!zend_check_protected(fcc->function_handler->common.scope, EG(scope))) {
+					retval = 0;
+					fcc->function_handler = NULL;
+					goto get_function_via_handler;
+				}
+			}
 		}
-	} else if (fcc->calling_scope) {
-		if (fcc->calling_scope->get_static_method) {
-			fcc->function_handler = fcc->calling_scope->get_static_method(fcc->calling_scope, mname, mlen TSRMLS_CC);
-		} else {
-			fcc->function_handler = zend_std_get_static_method(fcc->calling_scope, mname, mlen TSRMLS_CC);
+	} else {
+get_function_via_handler:
+		if (fcc->object_ptr) {
+			if (Z_OBJ_HT_P(fcc->object_ptr)->get_method) {
+				fcc->function_handler = Z_OBJ_HT_P(fcc->object_ptr)->get_method(&fcc->object_ptr, mname, mlen TSRMLS_CC);
+				if (fcc->function_handler) {
+					retval = 1;
+					call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
+				}
+			}
+		} else if (fcc->calling_scope) {
+			if (fcc->calling_scope->get_static_method) {
+				fcc->function_handler = fcc->calling_scope->get_static_method(fcc->calling_scope, mname, mlen TSRMLS_CC);
+			} else {
+				fcc->function_handler = zend_std_get_static_method(fcc->calling_scope, mname, mlen TSRMLS_CC);
+			}
+			if (fcc->function_handler) {
+				retval = 1;
+				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
+			}
 		}
-		retval = fcc->function_handler ? 1 : 0;
-		call_via_handler = 1;
 	}
 
 	if (retval) {
