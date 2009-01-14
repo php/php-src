@@ -122,26 +122,6 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zval* zend_closure_copy(zval *closure_obj, zval *this_ptr TSRMLS_DC) /* {{{ */
-{
-	zend_closure *closure;
-
-	zval_copy_ctor(closure_obj);
-	closure = (zend_closure *)zend_object_store_get_object(closure_obj TSRMLS_CC);
-	if (closure->this_ptr) {
-		zval_ptr_dtor(&closure->this_ptr);
-	}
-	closure->this_ptr = this_ptr;
-	if (this_ptr) {
-		Z_ADDREF_P(this_ptr);
-		closure->func.common.scope = Z_OBJCE_P(this_ptr);
-	} else {
-		closure->func.common.scope = NULL;
-	}
-	return closure_obj;
-}
-/* }}} */
-
 static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_name, int method_len TSRMLS_DC) /* {{{ */
 {
 	unsigned int lc_name_len;
