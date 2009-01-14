@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.9
-- Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
-  (frode at coretrek dot com, Nuno)
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
 
@@ -53,6 +51,8 @@ PHP                                                                        NEWS
 - Fixed bug #45996 (libxml2 2.7 causes breakage with character data 
   in xml_parse()). (Rob)
 - Fixed bug #45161 (Reusing a curl handle leaks memory). (Mark Karpeles, Jani)
+- Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
+  (frode at coretrek dot com, Nuno)
 - Fixed bug #35975 (Session cookie expires date format isn't the most compatible.
   Now matches that of setcookie()). (Scott)
 
