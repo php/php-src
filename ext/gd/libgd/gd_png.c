@@ -189,7 +189,8 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	png_read_info(png_ptr, info_ptr);	/* read all PNG info up to image data */
 
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL);
-	if ((color_type == PNG_COLOR_TYPE_RGB) || (color_type == PNG_COLOR_TYPE_RGB_ALPHA)) {
+	if ((color_type == PNG_COLOR_TYPE_RGB) || (color_type == PNG_COLOR_TYPE_RGB_ALPHA)
+		|| color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
 		im = gdImageCreateTrueColor((int) width, (int) height);
 	} else {
 		im = gdImageCreate((int) width, (int) height);
@@ -251,7 +252,6 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			}
 			break;
 		case PNG_COLOR_TYPE_GRAY:
-		case PNG_COLOR_TYPE_GRAY_ALPHA:
 			/* create a fake palette and check for single-shade transparency */
 			if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL) {
 				php_gd_error("gd-png error: cannot allocate gray palette");
@@ -292,6 +292,9 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 				 */
 			}
 			break;
+
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+			png_set_gray_to_rgb(png_ptr);
 
 			case PNG_COLOR_TYPE_RGB:
 			case PNG_COLOR_TYPE_RGB_ALPHA:
@@ -365,6 +368,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			}
 			break;
 
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			for (h = 0; h < height; h++) {
 				int boffset = 0;
