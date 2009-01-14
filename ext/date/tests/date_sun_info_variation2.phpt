@@ -1,5 +1,5 @@
 --TEST--
-Test date_sun_info() function : error variations - Pass unexepcted values for latitude argument
+Test date_sun_info() function : error variations - Pass unexpected values for latitude argument
 --FILE--
 <?php
 /* Prototype  : array date_sun_info ( int $time , float $latitude , float $longitude )
