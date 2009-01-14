@@ -72,6 +72,16 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_BRIGHTNESS failed\n";
 	}
+
+	$im = imagecreatefrompng($SOURCE_IMG);
+	
+	if (imagefilter($im, IMG_FILTER_PIXELATE, 5, 1)) {
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
+		echo "IMG_FILTER_PIXELATE success\n";
+		unlink($SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
+	} else {
+		echo "IMG_FILTER_PIXELATE failed\n";
+	}
 ?>
 --EXPECT--
 IMG_FILTER_NEGATE success
@@ -85,3 +95,4 @@ IMG_FILTER_SMOOTH success
 IMG_FILTER_COLORIZE success
 IMG_FILTER_CONTRAST success
 IMG_FILTER_BRIGHTNESS success
+IMG_FILTER_PIXELATE success
