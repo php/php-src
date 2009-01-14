@@ -1,5 +1,5 @@
 --TEST--
-Test date_sun_info() function : error variations - PAss unexepcted valuesfor latitude argument
+Test date_sun_info() function : error variations - Pass unexepcted values for latitude argument
 --FILE--
 <?php
 /* Prototype  : array date_sun_info ( int $time , float $latitude , float $longitude )
@@ -7,8 +7,7 @@ Test date_sun_info() function : error variations - PAss unexepcted valuesfor lat
  * Source code: ext/standard/data/php_date.c
  */
  
-// supress date() function strict msgs 
-error_reporting(E_ALL & ~E_STRICT);
+date_default_timezone_set("UTC");
 
 echo "*** Testing date_sun_info() : usage variations ***\n";
 
