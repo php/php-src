@@ -35,7 +35,6 @@ ZEND_API int zend_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_functio
 ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC);
 ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC);
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC);
-ZEND_API zval* zend_closure_copy(zval *closure, zval *this_ptr TSRMLS_DC);
 
 END_EXTERN_C()
 
