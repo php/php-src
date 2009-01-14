@@ -141,7 +141,8 @@ int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #define IMAGE_FILTER_SELECTIVE_BLUR 8
 #define IMAGE_FILTER_MEAN_REMOVAL   9
 #define IMAGE_FILTER_SMOOTH         10
-#define IMAGE_FILTER_MAX            10
+#define IMAGE_FILTER_PIXELATE       11
+#define IMAGE_FILTER_MAX            11
 #define IMAGE_FILTER_MAX_ARGS       5
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS);
@@ -154,6 +155,7 @@ static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 #endif
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string (zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC);
@@ -1187,6 +1189,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_FILTER_EMBOSS", IMAGE_FILTER_EMBOSS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
 	/* End Section Filters */
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
@@ -4915,6 +4918,29 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_FALSE;
 }
 
+static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *IM;
+	gdImagePtr im;
+	long tmp, blocksize, mode = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll|l", &IM, &tmp, &blocksize, &mode) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	if (im == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (gdImagePixelate(im, (int) blocksize, (const unsigned int) mode)) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+
 /* {{{ proto bool imagefilter(resource src_im, int filtertype, [args] )
    Applies Filter an image using a custom angle */
 PHP_FUNCTION(imagefilter)
@@ -4935,7 +4961,8 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_gaussian_blur,
 		php_image_filter_selective_blur,
 		php_image_filter_mean_removal,
-		php_image_filter_smooth
+		php_image_filter_smooth,
+		php_image_filter_pixelate
 	};
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 6) {
