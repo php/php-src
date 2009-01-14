@@ -721,9 +721,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-#if PDO_USE_MYSQLND
-	struct pdo_column_data *cols = stmt->columns;
-#endif
+
 	PDO_DBG_ENTER("pdo_mysql_stmt_get_col");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (!S->result) {
