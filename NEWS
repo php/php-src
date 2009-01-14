@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 - Fixed building of pdo_sqlite without sqlite3. (Scott)
 
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
+- Fixed bug #47045 (SplObjectStorage instances compared with ==). (Etienne)
 - Fixed bug #46979 (use with non-compound name *has* effect). (Dmitry)
 - Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
 - Fixed bug #46944 (UTF-8 characters outside the BMP aren't encoded correctly).
