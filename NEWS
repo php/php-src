@@ -1,29 +1,29 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Alpha 4
-- Improved DNS API
- . Windows support for dns_check_record, dns_get_mx (checkdnsrr and getmxrr).
-   (Pierre)
- . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
- . Added a new "entries" array in dns_check_record containing the TXT elements
-   (Felipe, Pierre)
-
-- Changed __call() to be invoked on private/protected method access, similar to
-  properties and __get(). (Andrei)
 - Upgraded bundled sqlite to version 3.6.8. (Scott, Ilia)
 
 - Deprecated session_register(), session_unregister() and
   session_is_registered(). (Hannes)
 
-- Added support for gray levels PNG image with alpha. (Pierre)
+- Improved DNS API
+ . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
+   getmxrr(). (Pierre)
+ . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
+ . Added a new "entries" array in dns_check_record() containing the TXT
+   elements. (Felipe, Pierre)
+
+- Changed __call() to be invoked on private/protected method access, similar to
+  properties and __get(). (Andrei)
 - Changed dl() to be disabled by default. Enabled only when explicitly
-  registered by the SAPI layer. Enabled only with CLI, CGI and EMBED. (Dmitry)
+  registered by the SAPI. Currently enabled with cli, cgi and embed SAPIs.
+  (Dmitry)
 - Changed opendir(), dir() and scandir() to use default context when no context
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
-- Re-enabled socket_create_pair() on Windows. (Kalle)
-- Fixed building of pdo_sqlite without sqlite3. (Scott)
 
+- Added support for gray levels PNG image with alpha in GD extension. (Pierre)
+- Added support for salsa hashing functions in HASH extension. (Scott)
 - Added DOMNode::getLineNo to get line number of parsed node. (Rob)
 - Added table info to PDO::getColumnMeta() with SQLite. (Martin Jansen, Scott)
 - Added mail logging functionality that allows logging of mail sent via
@@ -35,7 +35,10 @@ PHP                                                                        NEWS
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
-- Enabled the salsa hashing functions. (Scott)
+
+- Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
+
+- Fixed building of pdo_sqlite without sqlite3. (Scott)
 
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
 - Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
