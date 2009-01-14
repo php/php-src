@@ -21,7 +21,7 @@ $no_arg_filters = array(
 
 $SAVE_DIR = dirname(__FILE__);
 $SOURCE_IMG = $SAVE_DIR . "/test.png";
-
+	
 	foreach ($no_arg_filters as $filt) {
 		$im = imagecreatefrompng($SOURCE_IMG);
 		if (imagefilter($im, constant($filt))) {
@@ -34,7 +34,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	}
 
 	$im = imagecreatefrompng($SOURCE_IMG);
-
+	
 	if (imagefilter($im, IMG_FILTER_SMOOTH, -1924.124)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_SMOOTH.png");
 		echo "IMG_FILTER_SMOOTH success\n";
@@ -42,9 +42,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_SMOOTH failed\n";
 	}
-
+	
 	$im = imagecreatefrompng($SOURCE_IMG);
-
+	
 	if (imagefilter($im, IMG_FILTER_COLORIZE, -127.12, -127.98, 127)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_COLORIZE.png");
 		echo "IMG_FILTER_COLORIZE success\n";
@@ -52,9 +52,9 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_COLORIZE failed\n";
 	}
-
+	
 	$im = imagecreatefrompng($SOURCE_IMG);
-
+	
 	if (imagefilter($im, IMG_FILTER_CONTRAST, -90)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_CONTRAST.png");
 		echo "IMG_FILTER_CONTRAST success\n";
@@ -64,13 +64,23 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	}
 
 	$im = imagecreatefrompng($SOURCE_IMG);
-
+	
 	if (imagefilter($im, IMG_FILTER_BRIGHTNESS, 98)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_BRIGHTNESS.png");
 		echo "IMG_FILTER_BRIGHTNESS success\n";
 		unlink($SAVE_DIR . "/IMG_FILTER_BRIGHTNESS.png");
 	} else {
 		echo "IMG_FILTER_BRIGHTNESS failed\n";
+	}
+
+	$im = imagecreatefrompng($SOURCE_IMG);
+	
+	if (imagefilter($im, IMG_FILTER_PIXELATE, 5, 1)) {
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
+		echo "IMG_FILTER_PIXELATE success\n";
+		unlink($SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
+	} else {
+		echo "IMG_FILTER_PIXELATE failed\n";
 	}
 ?>
 --EXPECT--
@@ -85,3 +95,4 @@ IMG_FILTER_SMOOTH success
 IMG_FILTER_COLORIZE success
 IMG_FILTER_CONTRAST success
 IMG_FILTER_BRIGHTNESS success
+IMG_FILTER_PIXELATE success
