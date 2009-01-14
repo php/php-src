@@ -7,8 +7,7 @@ Test date_sun_info() function : usage variations - Pass unexpected values for lo
  * Source code: ext/standard/data/php_date.c
  */
  
-// supress date() function strict msgs 
-error_reporting(E_ALL & ~E_STRICT);
+date_default_timezone_set("UTC");
 
 echo "*** Testing date_sun_info() : usage variations ***\n";
 
