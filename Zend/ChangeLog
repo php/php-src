@@ -1,3 +1,15 @@
+2009-01-13  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/bug46304.phpt
+      tests/bug46304.phpt:
+      - Fixed test
+
+2009-01-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_3)
+      tests/access_modifiers_012.phpt:
+      Add test
+
 2009-01-12  Stanislav Malyshev  <stas@zend.com>
 
     * zend_constants.c:
