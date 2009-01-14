@@ -577,6 +577,13 @@ void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
 void gdImageAntialias(gdImagePtr im, int antialias);
 void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
 
+enum gdPixelateMode {
+	GD_PIXELATE_UPPERLEFT,
+	GD_PIXELATE_AVERAGE
+};
+
+int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
+
 /* Macros to access information about images. */
 
 /* Returns nonzero if the image is a truecolor image,
