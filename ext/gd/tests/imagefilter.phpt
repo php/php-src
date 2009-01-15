@@ -75,7 +75,7 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 
 	$im = imagecreatefrompng($SOURCE_IMG);
 	
-	if (imagefilter($im, IMG_FILTER_PIXELATE, 5, 1)) {
+	if (imagefilter($im, IMG_FILTER_PIXELATE, 5, true)) {
 		imagepng($im, $SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
 		echo "IMG_FILTER_PIXELATE success\n";
 		unlink($SAVE_DIR . "/IMG_FILTER_PIXELATE.png");
