@@ -1,3 +1,35 @@
+2009-01-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed bug #46755 (warning: use statement with non-compound name)
+      Fixed bug #46979 (use with non-compound name *has* effect)
+
+    * zend_API.c
+      tests/access_modifiers_012.phpt:
+      Fixed __call() to be invoked on private/protected method access through
+      callback
+      s
+
+    * (PHP_5_3)
+      zend_API.c:
+      Fixed __call() to be invoked on private/protected method access through
+      callbacks
+
+    * zend_closures.c
+      zend_closures.c
+      zend_closures.h
+      zend_closures.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/closure_034.phpt
+      tests/closure_034.phpt
+      tests/closure_035.phpt
+      tests/closure_035.phpt
+      tests/closure_036.phpt
+      tests/closure_036.phpt:
+      Reverted "Rebind closure when binding to property"
+
 2009-01-13  Felipe Pena  <felipensp@gmail.com>
 
     * tests/bug46304.phpt
