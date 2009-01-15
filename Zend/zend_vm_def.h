@@ -1182,6 +1182,8 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 	zval *container;
 	zval **retval;
 	zend_free_op free_op1;
+	zend_free_op free_op2;
+	zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -1194,6 +1196,7 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		FREE_OP2();
 		FREE_OP1();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -1206,10 +1209,8 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		FREE_OP2();
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
 		if (IS_OP2_TMP_FREE()) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}

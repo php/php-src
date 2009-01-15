@@ -9142,6 +9142,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CONST(int type, ZEND
 	zval **retval;
 	zend_free_op free_op1;
 
+	zval *offset  = &opline->op2.u.constant;
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -9153,6 +9155,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CONST(int type, ZEND
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -9165,10 +9168,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CONST(int type, ZEND
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = &opline->op2.u.constant;
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -10660,6 +10661,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_TMP(int type, ZEND_O
 	zval *container;
 	zval **retval;
 	zend_free_op free_op1;
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -10672,6 +10675,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_TMP(int type, ZEND_O
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		zval_dtor(free_op2.var);
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -10684,10 +10688,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_TMP(int type, ZEND_O
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		zval_dtor(free_op2.var);
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -12182,6 +12184,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_VAR(int type, ZEND_O
 	zval *container;
 	zval **retval;
 	zend_free_op free_op1;
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -12194,6 +12198,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_VAR(int type, ZEND_O
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -12206,10 +12211,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_VAR(int type, ZEND_O
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -14201,6 +14204,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CV(int type, ZEND_OP
 	zval **retval;
 	zend_free_op free_op1;
 
+	zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -14212,6 +14217,7 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CV(int type, ZEND_OP
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -14224,10 +14230,8 @@ static int zend_fetch_property_address_read_helper_SPEC_VAR_CV(int type, ZEND_OP
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -15470,6 +15474,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(int type, Z
 	zval **retval;
 
 
+	zval *offset  = &opline->op2.u.constant;
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -15482,6 +15488,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(int type, Z
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
 
+
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -15493,10 +15500,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(int type, Z
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = &opline->op2.u.constant;
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -16493,6 +16498,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(int type, ZEN
 	zval *container;
 	zval **retval;
 
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -16505,6 +16512,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(int type, ZEN
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		zval_dtor(free_op2.var);
 
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -16517,10 +16525,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(int type, ZEN
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		zval_dtor(free_op2.var);
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -17473,6 +17479,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(int type, ZEN
 	zval *container;
 	zval **retval;
 
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -17485,6 +17493,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(int type, ZEN
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -17497,10 +17506,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(int type, ZEN
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -18719,6 +18726,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(int type, ZEND
 	zval **retval;
 
 
+	zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -18731,6 +18740,7 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(int type, ZEND
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
 
+
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -18742,10 +18752,8 @@ static int zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(int type, ZEND
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -21299,6 +21307,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CONST(int type, ZEND_
 	zval **retval;
 
 
+	zval *offset  = &opline->op2.u.constant;
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -21311,6 +21321,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CONST(int type, ZEND_
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
 
+
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -21322,10 +21333,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CONST(int type, ZEND_
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = &opline->op2.u.constant;
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -22809,6 +22818,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_TMP(int type, ZEND_OP
 	zval *container;
 	zval **retval;
 
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -22821,6 +22832,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_TMP(int type, ZEND_OP
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		zval_dtor(free_op2.var);
 
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -22833,10 +22845,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_TMP(int type, ZEND_OP
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		zval_dtor(free_op2.var);
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -24323,6 +24333,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_VAR(int type, ZEND_OP
 	zval *container;
 	zval **retval;
 
+	zend_free_op free_op2;
+	zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
@@ -24335,6 +24347,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_VAR(int type, ZEND_OP
 			PZVAL_LOCK(*retval);
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -24347,10 +24360,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_VAR(int type, ZEND_OP
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
@@ -26332,6 +26343,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CV(int type, ZEND_OPC
 	zval **retval;
 
 
+	zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+
 	retval = &EX_T(opline->result.u.var).var.ptr;
 	EX_T(opline->result.u.var).var.ptr_ptr = retval;
 
@@ -26344,6 +26357,7 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CV(int type, ZEND_OPC
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
 
+
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -26355,10 +26369,8 @@ static int zend_fetch_property_address_read_helper_SPEC_CV_CV(int type, ZEND_OPC
 		*retval = EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);
+
 	} else {
-
-		zval *offset  = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
