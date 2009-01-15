@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
+- Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
 
 - Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
 
