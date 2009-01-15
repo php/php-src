@@ -901,6 +901,26 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 	}
 
+	/* Prevent crash because of stack reallocation */
+	if (!call_via_handler &&
+	    fci->param_count &&
+	    EG(argument_stack).top + fci->param_count > EG(argument_stack).max &&
+	    *(void***)fci->params >= EG(argument_stack).elements &&
+	    *(void***)fci->params < EG(argument_stack).top_element) {
+
+		/* Manual stack reallocation */
+		void **prev_elements = EG(argument_stack).elements;
+		void **prev_top_element = EG(argument_stack).top_element;
+
+		ZEND_PTR_STACK_RESIZE_IF_NEEDED((&EG(argument_stack)), fci->param_count);
+		for (i=0; i<fci->param_count; i++) {
+			if ((void**)fci->params[i] >= prev_elements &&
+			    (void**)fci->params[i] < prev_top_element) {
+				fci->params[i] = (zval**)((void**)fci->params[i] - prev_elements + EG(argument_stack).elements);
+			}
+		}
+	}
+
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
