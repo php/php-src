@@ -1273,12 +1273,15 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *container = GET_OP1_OBJ_ZVAL_PTR(type);
+	zend_free_op free_op2;
+	zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (container == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(error_zval_ptr));
 			PZVAL_LOCK(EG(error_zval_ptr));
 		}
+		FREE_OP2();
 		FREE_OP1();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -1292,9 +1295,8 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
 			PZVAL_LOCK(EG(uninitialized_zval_ptr));
 		}
+		FREE_OP2();
 	} else {
-		zend_free_op free_op2;
-		zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		zval *retval;
 
 		if (IS_OP2_TMP_FREE()) {
