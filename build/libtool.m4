@@ -4892,12 +4892,18 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
 	    _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='--backend -Wl,'
 	    _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
 	    ;;
-	  icpc* | ecpc*)
-	    # Intel C++
-	    _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
-	    _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-KPIC'
-	    _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
-	    ;;
+      ecpc*)
+        # old Intel C++ for x86_64 which still supported -KPIC.
+        _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
+        _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-KPIC'
+        _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
+        ;;
+      icpc*)
+        # Intel C++, used to be incompatible with GCC.
+        _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
+        _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
+        _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
+        ;;
 	  pgCC*)
 	    # Portland Group C++ compiler.
 	    _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
@@ -5138,10 +5144,18 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
 
     linux*)
       case $cc_basename in
-      icc* | ecc*)
-	_LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
-	_LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-KPIC'
-	_LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
+      # old Intel for x86_64 which still supported -KPIC.
+      ecc*)
+        _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
+        _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-KPIC'
+        _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
+        ;;
+      # icc used to be incompatible with GCC.
+      # ICC 10 doesn't accept -KPIC any more.
+      icc*)
+        _LT_AC_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
+        _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
+        _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='-static'
         ;;
       pgcc* | pgf77* | pgf90* | pgf95*)
         # Portland Group compilers (*not* the Pentium gcc compiler,
