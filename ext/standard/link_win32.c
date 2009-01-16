@@ -82,11 +82,7 @@ PHP_FUNCTION(readlink)
 		return;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(link, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(link TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(link)) {
 		RETURN_FALSE;
 	}
 
@@ -194,19 +190,11 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (OPENBASEDIR_CHECKPATH(dest_p)) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(source_p)) {
 		RETURN_FALSE;
 	}
 
@@ -255,19 +243,11 @@ PHP_FUNCTION(link)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (OPENBASEDIR_CHECKPATH(source_p)) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (OPENBASEDIR_CHECKPATH(dest_p)) {
 		RETURN_FALSE;
 	}
 
