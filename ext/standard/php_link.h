@@ -21,7 +21,7 @@
 #ifndef PHP_LINK_H
 #define PHP_LINK_H
 
-#ifdef HAVE_SYMLINK
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 
 PHP_FUNCTION(link);
 PHP_FUNCTION(readlink);
