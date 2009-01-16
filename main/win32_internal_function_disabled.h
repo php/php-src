@@ -19,6 +19,15 @@
 /* $Id$ */
 
 /* 5 means the min version is 5 (XP/2000), 6 (2k8/vista), etc. */
+
+/*
+Windows Server 2008     6.0
+Windows Vista           6.0
+Windows Server 2003 R2  5.2
+Windows Server 2003     5.2
+Windows XP              5.1
+Windows 2000            5.0
+*/
 static const char *function_name_5[] = {"link", NULL};
 const int function_name_cnt_5 = 1;
 static const char *function_name_6[] = {"readlink", "symlink", NULL};
