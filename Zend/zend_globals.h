@@ -203,6 +203,7 @@ struct _zend_executor_globals {
 
 #ifdef ZEND_WIN32
 	zend_bool timed_out;
+	OSVERSIONINFOEX windows_version_info;
 #endif
 
 	HashTable regular_list;
