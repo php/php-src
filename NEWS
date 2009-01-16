@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 
+- Added support for symlink, readlink, linkinfo and link on Windows. They are
+  available only when the running plaform supports them. (Pierre)
 - Added support for gray levels PNG image with alpha in GD extension. (Pierre)
 - Added support for salsa hashing functions in HASH extension. (Scott)
 - Added DOMNode::getLineNo to get line number of parsed node. (Rob)
