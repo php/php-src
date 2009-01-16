@@ -1576,7 +1576,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_levenshtein, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ link.c */
-#ifdef HAVE_SYMLINK
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_INFO(arginfo_readlink, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -2809,7 +2809,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(rawurldecode,													arginfo_rawurldecode)
 	PHP_FE(http_build_query,												arginfo_http_build_query)
 
-#ifdef HAVE_SYMLINK
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 	PHP_FE(readlink,														arginfo_readlink)
 	PHP_FE(linkinfo,														arginfo_linkinfo)
 	PHP_FE(symlink,															arginfo_symlink)
