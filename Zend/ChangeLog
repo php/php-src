@@ -1,3 +1,25 @@
+2009-01-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_execute_API.c:
+      Fixed possible crash because of argument stack reallocation
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug47109.phpt
+      tests/bug47109.phpt:
+      Fixed bug #47109 (Memory leak on $a->{"a"."b"} when $a is not an object)
+
+    * tests/bug47109.phpt
+      tests/bug47109.phpt
+      tests/bug47109.phpt:
+        1.1.4;
+      file bug47109.phpt was initially added on branch PHP_5_2.
+
 2009-01-14  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
