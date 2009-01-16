@@ -123,6 +123,7 @@ static php_win32_disable_functions() {
 			}
 		}
 	}
+	return SUCCESS;
 }
 #endif
 
@@ -2090,7 +2091,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #ifdef PHP_WIN32
 	/* Disable incompatible functions for the running platform */
-	php_win32_disable_functions();
+	if (php_win32_disable_functions() == FAILURE) {
+		php_printf("Unable to disable unsupported functions\n");
+		return FAILURE;
+	}
 #endif
 	zend_post_startup(TSRMLS_C);
 
