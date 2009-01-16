@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Marcus Boerger <helly@php.net>                              |
+   |          Etienne Kneuss <colder@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -237,7 +238,6 @@ spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern
 	}
 } /* }}} */
 
-
 void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj, zval *inf TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorageElement *pelement, element;
@@ -330,6 +330,62 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	} else {
 		RETURN_ZVAL(element->inf,1, 0);
 	}
+} /* }}} */
+
+/* {{{ proto bool SplObjectStorage::addAll(SplObjectStorage $os)
+ Add all elements contained in $os */
+SPL_METHOD(SplObjectStorage, addAll)
+{
+	zval *obj;
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	spl_SplObjectStorage *other;
+	spl_SplObjectStorageElement *element;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
+		return;
+	}
+
+	other = (spl_SplObjectStorage *)zend_object_store_get_object(obj TSRMLS_CC);
+
+	zend_hash_internal_pointer_reset_ex(&other->storage, &pos);
+	while (zend_hash_get_current_data_ex(&other->storage, (void **)&element, &pos) == SUCCESS) {
+		spl_object_storage_attach(intern, element->obj, element->inf TSRMLS_CC);
+		zend_hash_move_forward_ex(&other->storage, &pos);
+	}
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	intern->index = 0;
+
+	RETURN_LONG(zend_hash_num_elements(&intern->storage));
+} /* }}} */
+
+/* {{{ proto bool SplObjectStorage::removeAll(SplObjectStorage $os)
+ Remove all elements contained in $os */
+SPL_METHOD(SplObjectStorage, removeAll)
+{
+	zval *obj;
+	spl_SplObjectStorage *intern = (spl_SplObjectStorage *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	spl_SplObjectStorage *other;
+	spl_SplObjectStorageElement *element;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
+		return;
+	}
+
+	other = (spl_SplObjectStorage *)zend_object_store_get_object(obj TSRMLS_CC);
+
+	zend_hash_internal_pointer_reset_ex(&other->storage, &pos);
+	while (zend_hash_get_current_data_ex(&other->storage, (void **)&element, &pos) == SUCCESS) {
+		spl_object_storage_detach(intern, element->obj TSRMLS_CC);
+		zend_hash_move_forward_ex(&other->storage, &pos);
+	}
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	intern->index = 0;
+
+	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 
 /* {{{ proto bool SplObjectStorage::contains($obj)
@@ -618,6 +674,8 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  attach,      arginfo_attach,        0)
 	SPL_ME(SplObjectStorage,  detach,      arginfo_Object,        0)
 	SPL_ME(SplObjectStorage,  contains,    arginfo_Object,        0)
+	SPL_ME(SplObjectStorage,  addAll,      arginfo_Object,        0)
+	SPL_ME(SplObjectStorage,  removeAll,   arginfo_Object,        0)
 	SPL_ME(SplObjectStorage,  getInfo,     NULL,                  0)
 	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
 	/* Countable */
