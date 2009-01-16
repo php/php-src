@@ -99,6 +99,33 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
+#ifdef PHP_WIN32
+#include "win32_internal_function_disabled.h"
+
+static php_win32_disable_functions() {
+	int i;
+	TSRMLS_FETCH();
+
+	if (EG(windows_version_info).dwMajorVersion < 5) {
+		for (i = 0; i < function_name_cnt_5; i++) {
+			if (zend_hash_del(CG(function_table), function_name_5[i], strlen(function_name_5[i]) + 1)==FAILURE) {
+				php_printf("Unable to disable function '%s'\n", function_name_5[i]);
+				return FAILURE;
+			}
+		}
+	}
+
+	if (EG(windows_version_info).dwMajorVersion < 6) {
+		for (i = 0; i < function_name_cnt_6; i++) {
+			if (zend_hash_del(CG(function_table), function_name_6[i], strlen(function_name_6[i]) + 1)==FAILURE) {
+				php_printf("Unable to disable function '%s'\n", function_name_6[i]);
+				return FAILURE;
+			}
+		}
+	}
+}
+#endif
+
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 /* {{{ PHP_INI_MH
@@ -1788,6 +1815,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
+#ifdef PHP_WIN32
+	DWORD dwVersion = GetVersion();
+#endif
 
 	php_core_globals *core_globals;
 #endif
@@ -1796,16 +1826,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	WSADATA wsaData;
 #endif
 #ifdef PHP_WIN32
-	{
-		DWORD dwVersion = GetVersion();
-
 		/* Get build numbers for Windows NT or Win95 */
 		if (dwVersion < 0x80000000){
 			php_os="WINNT";
 		} else {
 			php_os="WIN32";
 		}
-	}
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 	old_invalid_parameter_handler =
 		_set_invalid_parameter_handler(dummy_invalid_parameter_handler);
@@ -1862,6 +1888,18 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	gc_globals_ctor(TSRMLS_C);
 
+#ifdef PHP_WIN32
+	{
+		OSVERSIONINFOEX *osvi = &EG(windows_version_info);
+
+		ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
+		osvi->dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+		if( !GetVersionEx((OSVERSIONINFO *) osvi)) {
+			php_printf("\nGetVersionEx unusable. %d\n", GetLastError());
+			return FAILURE;
+		}
+	}
+#endif
 	EG(bailout) = NULL;
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -2050,6 +2088,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->info_func = PHP_MINFO(php_core);
 	}
 
+#ifdef PHP_WIN32
+	/* Disable incompatible functions for the running platform */
+	php_win32_disable_functions();
+#endif
 	zend_post_startup(TSRMLS_C);
 
 	module_initialized = 1;
