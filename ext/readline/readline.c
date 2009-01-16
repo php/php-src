@@ -216,17 +216,16 @@ PHP_FUNCTION(readline)
    Gets/sets various internal readline variables. */
 PHP_FUNCTION(readline_info)
 {
-	char *what;
-	zval **value;
+	char *what = NULL;
+	zval **value = NULL;
 	int what_len, oldval;
 	char *oldstr;
-	int ac = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sZ", &what, &what_len, &value) == FAILURE) {
 		return;
 	}
 
-	if (ac == 0) {
+	if (what) {
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer),1);
 		add_assoc_long(return_value,"point",rl_point);
@@ -246,7 +245,7 @@ PHP_FUNCTION(readline_info)
 	} else {
 		if (!strcasecmp(what,"line_buffer")) {
 			oldstr = rl_line_buffer;
-			if (ac == 2) {
+			if (value) {
 				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				convert_to_string_ex(value);
 				rl_line_buffer = strdup(Z_STRVAL_PP(value));
@@ -261,14 +260,14 @@ PHP_FUNCTION(readline_info)
 			RETVAL_LONG(rl_mark);
 		} else if (!strcasecmp(what, "done")) {
 			oldval = rl_done;
-			if (ac == 2) {
+			if (value) {
 				convert_to_long_ex(value);
 				rl_done = Z_LVAL_PP(value);
 			}
 			RETVAL_LONG(oldval);
 		} else if (!strcasecmp(what, "pending_input")) {
 			oldval = rl_pending_input;
-			if (ac == 2) {
+			if (value) {
 				convert_to_string_ex(value);
 				rl_pending_input = Z_STRVAL_PP(value)[0];
 			}
@@ -281,7 +280,7 @@ PHP_FUNCTION(readline_info)
 #if HAVE_ERASE_EMPTY_LINE
 		} else if (!strcasecmp(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
-			if (ac == 2) {
+			if (value) {
 				convert_to_long_ex(value);
 				rl_erase_empty_line = Z_LVAL_PP(value);
 			}
@@ -291,7 +290,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version),1);
 		} else if (!strcasecmp(what, "readline_name")) {
 			oldstr = (char*)rl_readline_name;
-			if (ac == 2) {
+			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				convert_to_string_ex(value);
 				rl_readline_name = strdup(Z_STRVAL_PP(value));;
