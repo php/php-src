@@ -38,6 +38,7 @@ PHP                                                                        NEWS
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
 - Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
+- Added SplObjectStorage::addAll/removeAll. (Etienne)
 
 - Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
 
