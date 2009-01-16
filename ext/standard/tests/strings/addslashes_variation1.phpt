@@ -41,8 +41,8 @@ $values =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -95,8 +95,8 @@ for($index = 0; $index < count($values); $index ++) {
 // closing the file
 fclose($file_handle);
 
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing addslashes() : with non-string type argument ***
 
@@ -118,9 +118,9 @@ unicode(4) "10.5"
 -- Iteration 6 --
 unicode(5) "-10.5"
 -- Iteration 7 --
-unicode(12) "105000000000"
+unicode(12) "101234567000"
 -- Iteration 8 --
-unicode(7) "1.06E-9"
+unicode(13) "1.07654321E-9"
 -- Iteration 9 --
 unicode(3) "0.5"
 -- Iteration 10 --
@@ -169,4 +169,4 @@ NULL
 unicode(0) ""
 -- Iteration 26 --
 unicode(0) ""
-Done
+===DONE===
