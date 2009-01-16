@@ -51,6 +51,10 @@ TODO:
 - this file is then useless and we have a portable link API
 */
 
+#ifndef VOLUME_NAME_NT
+#define VOLUME_NAME_NT 0x2
+#endif
+
 /* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
@@ -150,7 +154,7 @@ PHP_FUNCTION(symlink)
 	size_t len;
 	DWORD attr;
 	HINSTANCE kernel32;
-	typedef BOOLEAN (WINAPI *csla_func)( __in LPCSTR, __in LPCSTR, __in DWORD);
+	typedef BOOLEAN (WINAPI *csla_func)(LPCSTR, LPCSTR, DWORD);
 	csla_func pCreateSymbolicLinkA;
 
 	kernel32 = LoadLibrary("kernel32.dll");
