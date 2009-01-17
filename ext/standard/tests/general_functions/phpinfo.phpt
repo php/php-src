@@ -30,6 +30,8 @@ Additional .ini files parsed => %a
 PHP API => %d
 PHP Extension => %d
 Zend Extension => %d
+Zend Extension Build => API%s
+PHP Extension Build => API%s
 Debug Build => %s
 Thread Safety => %s
 Zend Memory Manager => %s
@@ -46,7 +48,7 @@ Registered Stream Filters => %s
 
 Configuration
 
-PHP Core
+Core
 
 %a
 
