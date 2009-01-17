@@ -79,18 +79,9 @@ int zend_load_extension(const char *path)
 			DL_UNLOAD(handle);
 			return FAILURE;
 		}
-	} else if (ZTS_V!=extension_version_info->thread_safe) {
-		fprintf(stderr, "Cannot load %s - it %s thread safe, whereas Zend %s\n",
-					new_extension->name,
-					(extension_version_info->thread_safe?"is":"isn't"),
-					(ZTS_V?"is":"isn't"));
-		DL_UNLOAD(handle);
-		return FAILURE;
-	} else if (ZEND_DEBUG!=extension_version_info->debug) {
-		fprintf(stderr, "Cannot load %s - it %s debug information, whereas Zend %s\n",
-					new_extension->name,
-					(extension_version_info->debug?"contains":"does not contain"),
-					(ZEND_DEBUG?"does":"does not"));
+	} else if (strcmp(ZEND_EXTENSION_BUILD_ID, extension_version_info->build_id)) {
+		fprintf(stderr, "Cannot load %s - it was build with configuration %s, whereas running engine is %s\n",
+					new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}

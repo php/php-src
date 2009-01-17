@@ -23,19 +23,19 @@
 #define ZEND_EXTENSIONS_H
 
 #include "zend_compile.h"
+#include "zend_build.h"
 
 /* The first number is the engine version and the rest is the date.
  * This way engine 2/3 API no. is always greater than engine 1 API no..
  */
-#define ZEND_EXTENSION_API_NO	220070929
+#define ZEND_EXTENSION_API_NO	220090115
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
-	char *required_zend_version;
-	unsigned char thread_safe;
-	unsigned char debug;
+	char *build_id;
 } zend_extension_version_info;
 
+#define ZEND_EXTENSION_BUILD_ID "API" ZEND_TOSTR(ZEND_EXTENSION_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
 typedef struct _zend_extension zend_extension;
 
