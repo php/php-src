@@ -1,3 +1,11 @@
+2009-01-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * zend_globals.h
+      zend_globals.h:
+      - add EG(windows_version_info), set at init time once per instance
+        contains a OSVERSIONINFOEX struct. It lets us determine easily on which
+      windows version is used (for example)
+
 2009-01-15  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
