@@ -2913,7 +2913,7 @@ PHP_FUNCTION(strripos)
 	if (haystack_type == IS_UNICODE) {
 		if (offset >= 0) {
 			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
-			if (cu_offset > haystack_len - needle_len) {
+			if (cu_offset > haystack_len) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
