@@ -24,6 +24,7 @@
 
 #include "zend.h"
 #include "zend_compile.h"
+#include "zend_build.h"
 
 #define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
@@ -32,7 +33,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-#define ZEND_MODULE_API_NO 20071006
+#define ZEND_MODULE_API_NO 20090115
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -45,7 +46,9 @@
 #define ZE2_STANDARD_MODULE_HEADER \
 	STANDARD_MODULE_HEADER_EX, ini_entries, NULL
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
+#define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
+
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -95,6 +98,7 @@ struct _zend_module_entry {
 	unsigned char type;
 	void *handle;
 	int module_number;
+	char *build_id;
 };
 
 #define MODULE_DEP_REQUIRED		1
