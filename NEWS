@@ -49,6 +49,7 @@ PHP                                                                        NEWS
 - Fixed bug #46701 (Creating associative array with long values in the key fails
   on 32bit linux). (Shire)
 - Fixed bug #46699 (xml_parse crash when parser is namespace aware). (Rob)
+- Fixed bug #46282 (Corrupt DBF When Using DATE). (arne at bukkie dot nl)
 - Fixed bug #46005 (User not consistently logged under Apache2). 
   (admorten at umich dot edu, Stas)
 - Fixed bug #45996 (libxml2 2.7 causes breakage with character data 
