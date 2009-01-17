@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Changed opendir(), dir() and scandir() to use default context when no context
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
+- Changed PHP/Zend extensions to use flexible build IDs. (Stas)
 
 - Added support for symlink, readlink, linkinfo and link on Windows. They are
   available only when the running platform supports them. (Pierre)
