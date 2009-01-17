@@ -1,7 +1,5 @@
 --TEST--
 Test strripos() function : usage variations - double quoted strings for 'haystack' & 'needle' arguments
---XFAIL--
-This test will fail until bug #47102 fixed
 --FILE--
 <?php
 /* Prototype  : int strripos ( string $haystack, string $needle [, int $offset] );
