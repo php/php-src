@@ -1,3 +1,38 @@
+2009-01-17  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_extensions.h:
+      - Fix build
+
+    * (PHP_5_3)
+      zend_build.h:
+      MFH:
+      - Added header
+      - Fixed compiler warning ("no newline at end of file")
+
+    * zend_build.h:
+      - Added header
+      - Fixed compiler warning ("no newline at end of file")
+
+2009-01-17  Johannes Schlüter  <johannes@schlueters.de>
+
+    * zend_extensions.h:
+      Fix Zend extensions
+
+2009-01-17  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_build.h
+      zend_extensions.c
+      zend_modules.h:
+      build IDs
+
+    * zend_build.h
+      zend_build.h
+      zend_extensions.c
+      zend_extensions.h
+      zend_modules.h:
+      
+      file zend_build.h was initially added on branch PHP_5_3.
+
 2009-01-16  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * zend_globals.h
