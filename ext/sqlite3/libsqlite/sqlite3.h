@@ -107,8 +107,8 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.8"
-#define SQLITE_VERSION_NUMBER  3006008
+#define SQLITE_VERSION         "3.6.10"
+#define SQLITE_VERSION_NUMBER  3006010
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers {H10020} <S60100>
