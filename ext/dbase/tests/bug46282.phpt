@@ -20,7 +20,7 @@ if (!dbase_create($file, $def)) {
 }
 
 // open in read-write mode
-$db = dbase_open('test.dbf', 2);
+$db = dbase_open($file, 2);
 
 if ($db) {
 	for ($i = 0; $i < 5; $i++) {
@@ -40,7 +40,7 @@ dbase_close($db);
 --EXPECTF--
 array(5) {
   [0]=>
-  string(8) "20090117"
+  string(8) "%d"
   [1]=>
   string(50) "Name #0                                           "
   [2]=>
@@ -52,7 +52,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  string(8) "20090117"
+  string(8) "%d"
   [1]=>
   string(50) "Name #1                                           "
   [2]=>
@@ -64,7 +64,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  string(8) "20090117"
+  string(8) "%d"
   [1]=>
   string(50) "Name #2                                           "
   [2]=>
@@ -76,7 +76,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  string(8) "20090117"
+  string(8) "%d"
   [1]=>
   string(50) "Name #3                                           "
   [2]=>
@@ -88,7 +88,7 @@ array(5) {
 }
 array(5) {
   [0]=>
-  string(8) "20090117"
+  string(8) "%d"
   [1]=>
   string(50) "Name #4                                           "
   [2]=>
