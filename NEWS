@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - Fixed bug #47104 (Linking shared extensions fails with icc). (Jani)
 - Fixed bug #47109 (Memory leak on $a->{"a"."b"} when $a is not an object).
   (Etienne, Dmitry)
+- Fixed bug #47048 (Segfault with new pg_meta_data). (Felipe)
 - Fixed bug #47042 (PHP cgi sapi is removing SCRIPT_FILENAME for non apache).
   (Sriram Natarajan)
 - Fixed bug #47037 (No error when using fopen with empty string). 
