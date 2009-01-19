@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Changed PHP/Zend extensions to use flexible build IDs. (Stas)
 
+- Added support for time_ nanosleep and time_ sleep_ until on Windows. (Pierre)
 - Added support for symlink, readlink, linkinfo and link on Windows. They are
   available only when the running platform supports them. (Pierre)
 - Added support for gray levels PNG image with alpha in GD extension. (Pierre)
