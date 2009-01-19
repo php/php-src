@@ -31,42 +31,42 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values
 $strings =  array (
 
-  // integer values
-  0,
-  1,
-  -2,
-
-  // float values
-  10.5,
-  -20.5,
-  10.5e10,
-
-  // array values
-  array(),
-  array(0),
-  array(1, 2),
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // null vlaues
-  NULL,
-  null,
-
-  // objects
-  new sample(),
-
-  // resource
-  $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
+		  // integer values
+/*1*/	  0,
+		  1,
+		  -2,
+		
+		  // float values
+/*4*/	  10.5,
+		  -20.5,
+		  10.1234567e10,
+		
+		  // array values
+/*7*/	  array(),
+		  array(0),
+		  array(1, 2),
+		
+		  // boolean values
+/*10*/	  true,
+		  false,
+		  TRUE,
+		  FALSE,
+		
+		  // null vlaues
+/*14*/	  NULL,
+		  null,
+		
+		  // objects
+/*16*/	  new sample(),
+		
+		  // resource
+/*17*/	  $file_handle,
+		
+		  // undefined variable
+/*18*/	  @$undefined_var,
+		
+		  // unset variable
+/*19*/	  @$unset_var
 );
 
 //defining 'from' argument
@@ -86,8 +86,8 @@ for($index = 0; $index < count($strings); $index++) {
 
 fclose($file_handle);  //closing the file handle
 
-echo "*** Done ***";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'str' ***
 -- Iteration 1 --
@@ -101,7 +101,7 @@ unicode(4) "ta.5"
 -- Iteration 5 --
 unicode(5) "-ma.5"
 -- Iteration 6 --
-unicode(12) "ta5aaaaaaaaa"
+unicode(12) "tatm34567aaa"
 -- Iteration 7 --
 
 Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
@@ -136,4 +136,4 @@ NULL
 unicode(0) ""
 -- Iteration 19 --
 unicode(0) ""
-*** Done ***
+===DONE===
