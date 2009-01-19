@@ -2,28 +2,14 @@
 Test file_put_contents() function : variation - include path testing
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
---XFAIL--
-Bug #46680
 --FILE--
 <?php
-/* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written 
- * Source code: ext/standard/file.c
- * Alias to functions: 
- */
 
-echo "*** Testing file_put_contents() : variation ***\n";
-
-require_once('fopen_include_path.inc');
-
-// this doesn't create the include dirs in this directory
-// we change to this to ensure we are not part of the
-// include paths.
-$thisTestDir = "fileGetContentsVar7.dir";
+$thisTestDir = basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "readFileVar7.tmp";
+$filename = basename(__FILE__, ".php") . ".tmp"; 
 $scriptLocFile = dirname(__FILE__)."/".$filename;
 
 $newpath = "rubbish";
@@ -36,25 +22,29 @@ set_include_path(null);
 runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
-chdir("..");
+
+chdir(dirname(__FILE__));
 rmdir($thisTestDir);
 
 
 function runtest() {
    global $scriptLocFile, $filename;
-   file_put_contents($filename, "File in script location", FILE_USE_INCLUDE_PATH);
-   $line = file_get_contents($scriptLocFile);
-   echo "$line\n";
-   unlink($scriptLocFile);     
+   file_put_contents($filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
+   if(file_exists($scriptLocFile)) {
+      echo "Fail - this is PHP52 behaviour\n";
+      unlink($scriptLocFile);
+   }else {
+      $line = file_get_contents($filename); 
+      echo "$line\n";
+      unlink($filename);     
+   }
 }
-
 ?>
 ===DONE===
 --EXPECT--
-*** Testing file_put_contents() : variation ***
-File in script location
-File in script location
-File in script location
-File in script location
+File written in working directory
+File written in working directory
+File written in working directory
+File written in working directory
 ===DONE===
 
