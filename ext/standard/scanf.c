@@ -1390,7 +1390,7 @@ literal:
 						__buf[0] = sch;
 						__buf[1] = '\0';;
 						current = args[objIndex++];
-						convert_to_string_ex( current );
+						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1, 1);
 					} else {
 						add_index_stringl(*return_value, objIndex++, &sch, 1, 1);
@@ -1522,9 +1522,9 @@ addToInt:
 							break;
 						} else if (numVars) {
 						  /* change passed value type to string */
-						   current = args[objIndex++];
-						   convert_to_string( *current );
-						   ZVAL_STRING( *current, buf, 1 );
+							current = args[objIndex++];
+							zval_dtor(*current);
+							ZVAL_STRING( *current, buf, 1 );
 						} else {
 							add_index_string(*return_value, objIndex++, buf, 1);
 						}
@@ -1533,7 +1533,7 @@ addToInt:
 							break;
 						} else if (numVars) {
 							current = args[objIndex++];
-							convert_to_long( *current );
+							zval_dtor(*current);
 							Z_LVAL(**current) = value;
 						} else {
 							add_index_long(*return_value, objIndex++, value);
@@ -1638,7 +1638,7 @@ addToFloat:
 						break;
 					} else if (numVars) {
 						current = args[objIndex++];
-						convert_to_double( *current );
+						zval_dtor(*current);
 						Z_DVAL_PP( current ) = dvalue;
 					} else {
 						add_index_double( *return_value, objIndex++, dvalue );
@@ -2036,7 +2036,7 @@ literal:
 						__buf[0] = sch;
 						__buf[1] = '\0';;
 						current = args[objIndex++];
-						convert_to_string_ex( current );
+						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1, 1);
 					} else {
 						add_index_stringl(*return_value, objIndex++, &sch, 1, 1);
@@ -2168,9 +2168,9 @@ addToInt:
 							break;
 						} else if (numVars) {
 						  /* change passed value type to string */
-						   current = args[objIndex++];
-						   convert_to_unicode( *current );
-						   ZVAL_UNICODE( *current, buf, 1 );
+							current = args[objIndex++];
+							zval_dtor(*current);
+							ZVAL_UNICODE( *current, buf, 1 );
 						} else {
 							add_index_unicode(*return_value, objIndex++, buf, 1);
 						}
@@ -2179,7 +2179,7 @@ addToInt:
 							break;
 						} else if (numVars) {
 							current = args[objIndex++];
-							convert_to_long( *current );
+							zval_dtor(*current);
 							Z_LVAL(**current) = value;
 						} else {
 							add_index_long(*return_value, objIndex++, value);
@@ -2284,7 +2284,7 @@ addToFloat:
 						break;
 					} else if (numVars) {
 						current = args[objIndex++];
-						convert_to_double( *current );
+						zval_dtor(*current);
 						Z_DVAL_PP( current ) = dvalue;
 					} else {
 						add_index_double( *return_value, objIndex++, dvalue );
