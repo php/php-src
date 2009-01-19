@@ -438,7 +438,11 @@ try_again:
 				smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
-		} else{
+		} else if (FG(user_agent)) {
+			smart_str_append_const(&soap_headers, "User-Agent: ");
+			smart_str_appends(&soap_headers, FG(user_agent));
+			smart_str_append_const(&soap_headers, "\r\n");
+		} else {
 			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
 		}
 
