@@ -1802,7 +1802,9 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 	a=w>>1;
 	b=h>>1;
 
-	gdImageLine(im, mx-a, my, mx+a, my, c);
+	for (x = mx-a; x <= mx+a; x++) {
+		gdImageSetPixel(im, x, my, c);
+	}
 
 	mx1 = mx-a;my1 = my;
 	mx2 = mx+a;my2 = my;
