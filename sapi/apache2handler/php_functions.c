@@ -372,7 +372,11 @@ PHP_MINFO_FUNCTION(apache)
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
 #if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
+#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
+	AP_DECLARE_DATA extern unixd_config_rec ap_unixd_config;
+#else
 	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
+#endif
 #endif
 	
 	for (n = 0; ap_loaded_modules[n]; ++n) {
@@ -403,7 +407,11 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 	
 #if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
+#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
+	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
+#else
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
+#endif
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 
