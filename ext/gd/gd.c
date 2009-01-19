@@ -114,7 +114,7 @@ int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #define IMAGE_FILTER_SMOOTH         10
 #define IMAGE_FILTER_PIXELATE       11
 #define IMAGE_FILTER_MAX            11
-#define IMAGE_FILTER_MAX_ARGS       5
+#define IMAGE_FILTER_MAX_ARGS       6
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS);
@@ -4658,7 +4658,7 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_pixelate
 	};
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 6) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {
 		WRONG_PARAM_COUNT;
 	} else if (zend_parse_parameters(2 TSRMLS_CC, "rl", &tmp, &filtertype) == FAILURE) {
 		return;
