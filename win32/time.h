@@ -28,6 +28,14 @@ struct itimerval {
 	struct timeval it_value;	/* current value */
 };
 
+#ifndef timespec
+struct timespec
+{
+	time_t   tv_sec;   /* seconds */
+	long     tv_nsec;  /* nanoseconds */
+};
+#endif
+
 #define ITIMER_REAL    0		/*generates sigalrm */
 #define ITIMER_VIRTUAL 1		/*generates sigvtalrm */
 #define ITIMER_VIRT    1		/*generates sigvtalrm */
@@ -39,5 +47,7 @@ PHPAPI extern int gettimeofday(struct timeval *time_Info, struct timezone *timez
 /* setitimer operates at 100 millisecond resolution */
 PHPAPI extern int setitimer(int which, const struct itimerval *value,
 					 struct itimerval *ovalue);
+
+PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
 
 #endif
