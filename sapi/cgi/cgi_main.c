@@ -961,8 +961,7 @@ static void init_request_info(TSRMLS_D)
  			}
 
  			if (env_path_translated != NULL && env_redirect_url != NULL &&
- 			    orig_script_filename != NULL && script_path_translated != NULL &&
- 			    strcmp(orig_script_filename, script_path_translated) != 0) {
+ 			    orig_script_filename != NULL && script_path_translated != NULL) {
 				/* 
 				   pretty much apache specific.  If we have a redirect_url
 				   then our script_filename and script_name point to the
