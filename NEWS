@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 
 - Fixed building of pdo_sqlite without sqlite3. (Scott)
 
+- Fixed bug #47141 (Unable to fetch error messages from SQLite
+  when the database can't be opened). (Scott)
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
 - Fixed bug #47045 (SplObjectStorage instances compared with ==). (Etienne)
 - Fixed bug #46979 (use with non-compound name *has* effect). (Dmitry)
