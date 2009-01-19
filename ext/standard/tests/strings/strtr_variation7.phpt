@@ -37,42 +37,42 @@ $from = "atm012";
 // array of values for 'to' argument
 $to_arr =  array (
 
-  // integer values
-  0,
-  1,
-  -2,
-
-  // float values
-  10.5,
-  -20.5,
-  10.5e10,
-
-  // array values
-  array(),
-  array(0),
-  array(1, 2),
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // null vlaues
-  NULL,
-  null,
-
-  // objects
-  new sample(),
-
-  // resource
-  $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
+		  // integer values
+/*1*/	  0,
+		  1,
+		  -2,
+		
+		  // float values
+/*4*/	  10.5,
+		  -20.5,
+		  10.12345675e10,
+		
+		  // array values
+/*7*/	  array(),
+		  array(0),
+		  array(1, 2),
+		
+		  // boolean values
+/*10*/	  true,
+		  false,
+		  TRUE,
+		  FALSE,
+		
+		  // null vlaues
+/*14*/	  NULL,
+		  null,
+		
+		  // objects
+/*16*/	  new sample(),
+		
+		  // resource
+/*17*/	  $file_handle,
+		
+		  // undefined variable
+/*18*/	  @$undefined_var,
+		
+		  // unset variable
+/*19*/	  @$unset_var
 );
 
 // loop through with each element of the $to array to test strtr() function
@@ -86,8 +86,8 @@ for($index = 0; $index < count($to_arr); $index++) {
 
 fclose($file_handle);  //closing the file handle
 
-echo "*** Done ***";
 ?>
+===Done===
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'to' ***
 
@@ -107,7 +107,7 @@ string(6) "51210."
 string(6) ".52-20"
 
 -- Iteration 6 --
-string(6) "000105"
+string(6) "234101"
 
 -- Iteration 7 --
 
@@ -153,4 +153,4 @@ string(6) "012atm"
 
 -- Iteration 19 --
 string(6) "012atm"
-*** Done ***
+===Done===

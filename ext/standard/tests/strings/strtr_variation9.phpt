@@ -29,44 +29,44 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values
 $values =  array (
 
-  // integer values
-  0,
-  1,
-  -2,
-
-  // float values
-  10.5,
-  -20.5,
-  10.5e10,
-
-  // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
-
-  // boolean values
-  true,
-  false,
-  TRUE,
-  FALSE,
-
-  // null vlaues
-  NULL,
-  null,
-
-  // objects
-  new sample(),
-
-  // resource
-  $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
+		  // integer values
+/*1*/	  0,
+		  1,
+		  -2,
+		
+		  // float values
+/*4*/	  10.5,
+		  -20.5,
+		  10.1234567e10,
+		
+		  // array values
+/*7*/	  array(),
+		  array(0),
+		  array(1),
+		  array(1, 2),
+		  array('color' => 'red', 'item' => 'pen'),
+		
+		  // boolean values
+/*12*/	  true,
+		  false,
+		  TRUE,
+		  FALSE,
+		
+		  // null vlaues
+/*16*/	  NULL,
+		  null,
+		
+		  // objects
+/*18*/	  new sample(),
+		
+		  // resource
+/*19*/	  $file_handle,
+		
+		  // undefined variable
+/*20*/	  @$undefined_var,
+		
+		  // unset variable
+/*21*/	  @$unset_var
 );
 
 // loop through with each element of the $values array to test strtr() function
@@ -80,8 +80,8 @@ for($index = 0; $index < count($values); $index++) {
 
 fclose($file_handle);  //closing the file handle
 
-echo "*** Done ***";
 ?>
+===Done===
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for all arguments ***
 
@@ -116,7 +116,7 @@ Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 6 --
-string(12) "105000000000"
+string(12) "101234567000"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
@@ -240,4 +240,4 @@ string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
-*** Done ***
+===Done===
