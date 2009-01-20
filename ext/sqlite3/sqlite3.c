@@ -1094,6 +1094,8 @@ PHP_METHOD(sqlite3stmt, execute)
 	zval *object = getThis();
 	int return_code = 0;
 	struct php_sqlite3_bound_param *param;
+	php_sqlite3_free_list *free_item;
+
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1168,13 +1170,16 @@ PHP_METHOD(sqlite3stmt, execute)
 	}
 
 	return_code = sqlite3_step(stmt_obj->stmt);
+	free_item = emalloc(sizeof(php_sqlite3_free_list));
+	free_item->stmt_obj = stmt_obj;
+	free_item->stmt_obj_zval = getThis();
+
+	zend_llist_add_element(&(stmt_obj->db_obj->free_list), &free_item);
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
 		{
-			php_sqlite3_free_list *free_item;
-
 			sqlite3_reset(stmt_obj->stmt);
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = (php_sqlite3_result *)zend_object_store_get_object(return_value TSRMLS_CC);
@@ -1185,12 +1190,6 @@ PHP_METHOD(sqlite3stmt, execute)
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
 			result->stmt_obj_zval = getThis();
-
-			free_item = emalloc(sizeof(php_sqlite3_free_list));
-			free_item->stmt_obj = stmt_obj;
-			free_item->stmt_obj_zval = getThis();
-
-			zend_llist_add_element(&(stmt_obj->db_obj->free_list), &free_item);
 
 			break;
 		}
