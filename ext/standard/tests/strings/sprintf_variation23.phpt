@@ -39,42 +39,40 @@ foreach($resource_values as $resource_value) {
 
 // closing the resources
 fclose($fp);
-fclose($dfp);
+closedir($dfp);
 
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing sprintf() : char formats with resource values ***
 
 -- Iteration 1 --
-unicode(1) ""
+unicode(1) "%a"
 unicode(1) "c"
-unicode(1) ""
+unicode(1) "%a"
 unicode(1) "c"
-unicode(2) " "
-unicode(2) " "
-unicode(2) "	"
+unicode(2) " %a"
+unicode(2) "%a "
+unicode(2) "	%a"
 unicode(2) "
-"
-unicode(1) ""
-unicode(1) ""
+%a"
+unicode(1) "%a"
+unicode(1) "%a"
 unicode(11) "a-bA-B@#$&]"
 unicode(1) "c"
 
 -- Iteration 2 --
-unicode(1) ""
+unicode(1) "%a"
+unicode(1) "%a"
+unicode(1) "%a"
 unicode(1) "c"
-unicode(1) ""
-unicode(1) "c"
-unicode(2) " "
-unicode(2) " "
-unicode(2) "	"
+unicode(2) " %a"
+unicode(2) "%a "
+unicode(2) "	%a"
 unicode(2) "
-"
-unicode(1) ""
-unicode(1) ""
+%a"
+unicode(1) "%a"
+unicode(1) "%a"
 unicode(11) "a-bA-B@#$&]"
 unicode(1) "c"
-
-Warning: fclose(): %d is not a valid stream resource in %s on line %d
-Done
+===DONE===
