@@ -48,7 +48,7 @@ PHP                                                                        NEWS
 
 - Fixed building of pdo_sqlite without sqlite3. (Scott)
 
-- Fixed bug #47145 (Always free failed SQLite statements). (Scott)
+- Fixed bug #47145 + #47159 (Always free failed SQLite statements). (Scott)
 - Fixed bug #47141 (Unable to fetch error messages from SQLite
   when the database can't be opened). (Scott)
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
