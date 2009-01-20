@@ -1,17 +1,19 @@
 --TEST--
-Test stripslashes() function : usage variations  - non-string type argument 
+Test stripcslashes() function : usage variations  - non-string type argument 
+--INI--
 --FILE--
 <?php
-/* Prototype  : string stripslashes ( string $str )
- * Description: Returns an un-quoted string
+/* Prototype  : string stripcslashes  ( string $str  )
+ * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
+ *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
 
 /*
- * Test stripslashes() with non-string type argument such as int, float, etc 
+ * Test stripcslashes() with non-string type argument such as int, float, etc 
 */
 
-echo "*** Testing stripslashes() : with non-string type argument ***\n";
+echo "*** Testing stripcslashes() : with non-string type argument ***\n";
 // initialize all required variables
 
 // get an unset variable
@@ -21,7 +23,7 @@ unset($unset_var);
 // declaring a class
 class sample  {
   public function __toString() {
-  return "obj\'ct";
+  return "obj'ct";
   } 
 }
 
@@ -73,21 +75,21 @@ $values =  array (
 		  // resource
 /*24*/	  $file_handle,
 		 
-		 // null values
+		  // null values
 /*25*/	  NULL,
 		  null
 );
 
 
-// loop through each element of the array and check the working of stripslashes()
+// loop through each element of the array and check the working of stripcslashes()
 // when $str arugment is supplied with different values
-echo "\n--- Testing stripslashes() by supplying different values for 'str' argument ---\n";
+echo "\n--- Testing stripcslashes() by supplying different values for 'str' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( stripslashes($str) );
+  var_dump( stripcslashes($str) );
 
   $counter ++;
 }
@@ -98,13 +100,13 @@ fclose($file_handle);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing stripslashes() : with non-string type argument ***
+*** Testing stripcslashes() : with non-string type argument ***
 
 Notice: Undefined variable: undefined_var in %s on line %d
 
 Notice: Undefined variable: unset_var in %s on line %d
 
---- Testing stripslashes() by supplying different values for 'str' argument ---
+--- Testing stripcslashes() by supplying different values for 'str' argument ---
 -- Iteration 1 --
 string(1) "0"
 -- Iteration 2 --
