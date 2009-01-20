@@ -2,9 +2,6 @@
 Test fnmatch() function: Basic functionality
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN')
-    die("skip do not run on Windows");
-
 if (!function_exists('fnmatch'))
     die("skip fnmatch() function is not available");
 ?>
@@ -34,7 +31,7 @@ var_dump( fnmatch(NULL, NULL) );
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fnmatch() with file ***
 bool(true)
 bool(true)
