@@ -48,6 +48,7 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
+#include "win32/fnmatch.h"
 #elif defined(NETWARE)
 #include <sys/param.h>
 #include <sys/select.h>
@@ -115,7 +116,7 @@ int file_globals_id;
 php_file_globals file_globals;
 #endif
 
-#ifdef HAVE_FNMATCH
+#if defined(HAVE_FNMATCH) && !defined(PHP_WIN32)
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
