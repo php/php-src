@@ -351,7 +351,7 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c fopen_wrappers.c \
 	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c \
 	getopt.c");
 
-ADD_SOURCES("win32", "inet.c");
+ADD_SOURCES("win32", "inet.c fnmatch.c");
 
 // Newer versions have it
 if (VCVERS <= 1300) {
