@@ -41,9 +41,8 @@ foreach($resource_values as $resource_value) {
 fclose($fp);
 closedir($dfp);
 
-
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing sprintf() : scientific formats with resource values ***
 
@@ -58,7 +57,7 @@ string(%d) "	%f"
 string(%d) "
 %f"
 string(%d) "%f"
-string(%d) "%s%f"
+string(30) "%s%f"
 string(%d) "0-1]"
 string(1) "e"
 
@@ -73,7 +72,7 @@ string(%d) "	%f"
 string(%d) "
 %f"
 string(%d) "%f"
-string(%d) "%s%f"
+string(30) "%s%f"
 string(%d) "0-1]"
 string(1) "e"
-Done
+===DONE===
