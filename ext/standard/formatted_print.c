@@ -225,6 +225,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	if ((adjust & ADJ_PRECISION) == 0) {
 		precision = FLOAT_PRECISION;
 	} else if (precision > MAX_FLOAT_PRECISION) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Requested precision of %d digits was truncated to PHP maximum of %d digits", precision, MAX_FLOAT_PRECISION);
 		precision = MAX_FLOAT_PRECISION;
 	}
 	
