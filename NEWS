@@ -53,6 +53,7 @@ PHP                                                                        NEWS
 - Fixed bug #47145 + #47159 (Always free failed SQLite statements). (Scott)
 - Fixed bug #47141 (Unable to fetch error messages from SQLite
   when the database can't be opened). (Scott)
+- Fixed bug #47087 (Second parameter of mssql_fetch_array()). (Felipe)
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
 - Fixed bug #47045 (SplObjectStorage instances compared with ==). (Etienne)
 - Fixed bug #46979 (use with non-compound name *has* effect). (Dmitry)
