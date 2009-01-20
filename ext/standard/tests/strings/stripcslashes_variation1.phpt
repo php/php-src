@@ -1,17 +1,19 @@
 --TEST--
-Test stripslashes() function : usage variations  - non-string type argument 
+Test stripcslashes() function : usage variations  - non-string type argument 
+--INI--
 --FILE--
 <?php
-/* Prototype  : string stripslashes ( string $str )
- * Description: Returns an un-quoted string
+/* Prototype  : string stripcslashes  ( string $str  )
+ * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
+ *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
 
 /*
- * Test stripslashes() with non-string type argument such as int, float, etc 
+ * Test stripcslashes() with non-string type argument such as int, float, etc 
 */
 
-echo "*** Testing stripslashes() : with non-string type argument ***\n";
+echo "*** Testing stripcslashes() : with non-string type argument ***\n";
 // initialize all required variables
 
 // get an unset variable
@@ -79,15 +81,15 @@ $values =  array (
 );
 
 
-// loop through each element of the array and check the working of stripslashes()
+// loop through each element of the array and check the working of stripcslashes()
 // when $str arugment is supplied with different values
-echo "\n--- Testing stripslashes() by supplying different values for 'str' argument ---\n";
+echo "\n--- Testing stripcslashes() by supplying different values for 'str' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( stripslashes($str) );
+  var_dump( stripcslashes($str) );
 
   $counter ++;
 }
@@ -98,75 +100,79 @@ fclose($file_handle);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing stripslashes() : with non-string type argument ***
+*** Testing stripcslashes() : with non-string type argument ***
 
 Notice: Undefined variable: undefined_var in %s on line %d
 
 Notice: Undefined variable: unset_var in %s on line %d
 
---- Testing stripslashes() by supplying different values for 'str' argument ---
+--- Testing stripcslashes() by supplying different values for 'str' argument ---
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(5) "12345"
+string(5) "12345"
 -- Iteration 4 --
-unicode(5) "-2345"
+string(5) "-2345"
 -- Iteration 5 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 6 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 -- Iteration 7 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 -- Iteration 8 --
-unicode(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
 -- Iteration 9 --
-unicode(3) "0.5"
+string(3) "0.5"
 -- Iteration 10 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
 NULL
 -- Iteration 15 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 -- Iteration 17 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 -- Iteration 19 --
-unicode(0) ""
+
+Warning: stripcslashes() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
+NULL
 -- Iteration 20 --
-unicode(0) ""
+
+Warning: stripcslashes() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
+NULL
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 -- Iteration 22 --
-unicode(0) ""
+string(0) ""
 -- Iteration 23 --
-unicode(6) "object"
+string(6) "object"
 -- Iteration 24 --
 
-Warning: stripslashes() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be binary string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
-unicode(0) ""
+string(0) ""
 -- Iteration 26 --
-unicode(0) ""
+string(0) ""
 ===DONE===

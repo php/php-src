@@ -1,7 +1,7 @@
 --TEST--
 Test strip_tags() function : usage variations - unexpected values for both 'str' and 'allowable_tags'
 --INI--
-short_open_tag = on
+set short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -32,52 +32,51 @@ class classA{
 //array of values to iterate over
 $values = array(
 
-      // int data
-      0,
-      1,
-      12345,
-      -2345,
-
-      // float data
-      10.5,
-      -10.5,
-      10.5e10,
-      10.6E-10,
-      .5,
-
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
-
-      // null data
-      NULL,
-      null,
-
-      // boolean data
-      true,
-      false,
-      TRUE,
-      FALSE,
-
-      // empty data
-      "",
-      '',
-
-      // object data
-      new classA(),
-
-      // undefined data
-      @$undefined_var,
-
-      // unset data
-      @$unset_var,
-
-      // resource variable
-      $fp
-
+		      // int data
+/*1*/	      0,
+		      1,
+		      12345,
+		      -2345,
+		
+		      // float data
+/*5*/	      10.5,
+		      -10.5,
+		      10.1234567e10,
+		      10.7654321E-10,
+		      .5,
+		
+		      // array data
+/*10*/	      array(),
+		      array(0),
+		      array(1),
+		      array(1, 2),
+		      array('color' => 'red', 'item' => 'pen'),
+		
+		      // null data
+/*15*/	      NULL,
+		      null,
+		
+		      // boolean data
+/*17*/	      true,
+		      false,
+		      TRUE,
+		      FALSE,
+		
+		      // empty data
+/*21*/	      "",
+		      '',
+		
+		      // object data
+/*23*/	      new classA(),
+		
+		      // undefined data
+/*24*/	      @$undefined_var,
+		
+		      // unset data
+/*25*/	      @$unset_var,
+		
+		      // resource variable
+/*26*/	      $fp
 );
 
 // loop through each element of the array for allowable_tags
@@ -88,8 +87,8 @@ foreach($values as $value) {
       $iterator++;
 };
 
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
@@ -105,9 +104,9 @@ unicode(4) "10.5"
 -- Iteration 6 --
 unicode(5) "-10.5"
 -- Iteration 7 --
-unicode(12) "105000000000"
+unicode(12) "101234567000"
 -- Iteration 8 --
-unicode(7) "1.06E-9"
+unicode(13) "1.07654321E-9"
 -- Iteration 9 --
 unicode(3) "0.5"
 -- Iteration 10 --
@@ -156,4 +155,4 @@ unicode(0) ""
 
 Warning: strip_tags() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
 NULL
-Done
+===DONE===
