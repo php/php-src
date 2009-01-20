@@ -2133,7 +2133,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 				if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
 					/* Method call */
 					op = ZEND_SEND_VAR_NO_REF;
-					send_function = ZEND_ARG_SEND_FUNCTION;
+					send_function = ZEND_ARG_SEND_FUNCTION | ZEND_ARG_SEND_SILENT;
 				}
 			} else {
 				op = ZEND_SEND_VAL;

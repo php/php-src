@@ -14,7 +14,5 @@ class Foo {
 extract(Foo::bar());
 echo "ok\n";
 ?>
---EXPECTF--
-
-Strict Standards: Only variables should be passed by reference in %sbug47165.php on line 11
+--EXPECT--
 ok
