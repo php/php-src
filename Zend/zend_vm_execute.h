@@ -8531,7 +8531,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		zval *valptr;
 
-		zend_error(E_STRICT, "Only variables should be passed by reference");
+		if (!(opline->extended_value & ZEND_ARG_SEND_SILENT)) {
+			zend_error(E_STRICT, "Only variables should be passed by reference");
+		}
 		ALLOC_ZVAL(valptr);
 		INIT_PZVAL_COPY(valptr, varptr);
 		if (!0) {
@@ -23274,7 +23276,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	} else {
 		zval *valptr;
 
-		zend_error(E_STRICT, "Only variables should be passed by reference");
+		if (!(opline->extended_value & ZEND_ARG_SEND_SILENT)) {
+			zend_error(E_STRICT, "Only variables should be passed by reference");
+		}
 		ALLOC_ZVAL(valptr);
 		INIT_PZVAL_COPY(valptr, varptr);
 		if (!0) {
