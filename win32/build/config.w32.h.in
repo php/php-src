@@ -138,6 +138,7 @@
 # define SIZEOF_SIZE_T 4
 # define SIZEOF_PTRDIFF_T 4
 #endif
+#define HAVE_FNMATCH
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define HAVE_SQLDATASOURCES
