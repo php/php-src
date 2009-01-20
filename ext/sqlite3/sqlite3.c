@@ -384,6 +384,8 @@ PHP_METHOD(sqlite3, prepare)
 	zval *object = getThis();
 	char *sql;
 	int sql_len, errcode;
+	php_sqlite3_free_list *free_item;
+
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj->initialised, SQLite3)
@@ -402,7 +404,7 @@ PHP_METHOD(sqlite3, prepare)
 	stmt_obj->db_obj_zval = getThis();
 
 	Z_ADDREF_P(object);
-	
+
 	/* Todo: utf-8 or utf-16 = sqlite3_prepare16_v2 */
 	errcode = sqlite3_prepare_v2(db_obj->db, sql, sql_len, &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
@@ -410,7 +412,14 @@ PHP_METHOD(sqlite3, prepare)
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
+
 	stmt_obj->initialised = 1;
+
+	free_item = emalloc(sizeof(php_sqlite3_free_list));
+	free_item->stmt_obj = stmt_obj;
+	free_item->stmt_obj_zval = return_value;
+
+	zend_llist_add_element(&(db_obj->free_list), &free_item);
 }
 /* }}} */
 
@@ -1094,7 +1103,6 @@ PHP_METHOD(sqlite3stmt, execute)
 	zval *object = getThis();
 	int return_code = 0;
 	struct php_sqlite3_bound_param *param;
-	php_sqlite3_free_list *free_item;
 
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1170,11 +1178,6 @@ PHP_METHOD(sqlite3stmt, execute)
 	}
 
 	return_code = sqlite3_step(stmt_obj->stmt);
-	free_item = emalloc(sizeof(php_sqlite3_free_list));
-	free_item->stmt_obj = stmt_obj;
-	free_item->stmt_obj_zval = getThis();
-
-	zend_llist_add_element(&(stmt_obj->db_obj->free_list), &free_item);
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -1217,6 +1220,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 	char *sql;
 	int sql_len, errcode;
 	zend_error_handling error_handling;
+	php_sqlite3_free_list *free_item;
 
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1248,6 +1252,12 @@ PHP_METHOD(sqlite3stmt, __construct)
 		RETURN_FALSE;
 	}
 	stmt_obj->initialised = 1;
+
+	free_item = emalloc(sizeof(php_sqlite3_free_list));
+	free_item->stmt_obj = stmt_obj;
+	free_item->stmt_obj_zval = getThis();
+
+	zend_llist_add_element(&(db_obj->free_list), &free_item);
 }
 /* }}} */
 
