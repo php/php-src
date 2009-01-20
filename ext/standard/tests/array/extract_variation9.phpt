@@ -14,7 +14,9 @@ var_dump ( extract(get_object_vars($A),EXTR_REFS));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing for object ***
+
+Strict Standards: Only variables should be passed by reference in %sextract_variation9.php on line 10
 int(1)
 Done
