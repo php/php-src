@@ -1,7 +1,7 @@
 --TEST--
 Test strip_tags() function : usage variations - unexpected values for both 'str' and 'allowable_tags'
 --INI--
-short_open_tag = on
+set short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -41,8 +41,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -88,8 +88,8 @@ foreach($values as $value) {
       $iterator++;
 };
 
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
@@ -105,9 +105,9 @@ string(4) "10.5"
 -- Iteration 6 --
 string(5) "-10.5"
 -- Iteration 7 --
-string(12) "105000000000"
+string(12) "101234567000"
 -- Iteration 8 --
-string(7) "1.06E-9"
+string(13) "1.07654321E-9"
 -- Iteration 9 --
 string(3) "0.5"
 -- Iteration 10 --
@@ -156,4 +156,4 @@ string(0) ""
 
 Warning: strip_tags() expects parameter 1 to be string, resource given in %s on line %d
 NULL
-Done
+===DONE===
