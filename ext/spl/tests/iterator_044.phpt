@@ -72,8 +72,6 @@ $it->test($checks);
 <?php exit(0); ?>
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
-
-Notice: Undefined index:  0 in %siterator_044.php on line %d
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 
 Warning: CachingIterator::offsetExists() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
