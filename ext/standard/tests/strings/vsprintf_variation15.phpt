@@ -32,7 +32,7 @@ $formats = array(
 $args_array = array(
   array(1234567, 01234567, 0 ),
   array(12345678900, 12345678900, 1234, 12345),
-  array("1234000", 10e20, 1.2e2),
+  array("1234000", 10.1234567e5, 1.2e2),
   array(1, 0, 00, "10_"),
   array(3, 4, 1, 2)
 );
@@ -46,8 +46,8 @@ foreach($formats as $format) {
   $counter++;
 }
 
-echo "Done";
 ?>
+===Done===
 --EXPECT--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
@@ -58,11 +58,11 @@ unicode(16) "1234567 342391 0"
 unicode(23) "2147483647 u 1234 12345"
 
 -- Iteration 3 --
-unicode(25) "   1234000 2147483647 120"
+unicode(25) "   1234000 1012345    120"
 
 -- Iteration 4 --
 unicode(10) "#1 0 $0 10"
 
 -- Iteration 5 --
 unicode(7) "1 2 3 4"
-Done
+===Done===

@@ -37,38 +37,42 @@ foreach($resource_values as $resource_value) {
   $count++;
 };
 
-echo "Done";
+// closing the resources
+fclose($fp);
+closedir($dfp);
+
 ?>
+===DONE===
 --EXPECTF--
 *** Testing sprintf() : hexa formats with resource values ***
 
 -- Iteration 1 --
-unicode(%d) "%d"
-unicode(%d) "%dx"
-unicode(%d) "%d"
+unicode(%d) "%a"
+unicode(%d) "%ax"
+unicode(%d) "%a"
 unicode(1) "x"
-unicode(%d) " %d"
-unicode(%d) "%d "
-unicode(%d) "	%d"
+unicode(%d) " %a"
+unicode(%d) "%a "
+unicode(%d) "	%a"
 unicode(%d) "
-%d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
+%a"
+unicode(4) "%a"
+unicode(30) "%a"
 unicode(10) "0-9A-Fa-f]"
 unicode(1) "x"
 
 -- Iteration 2 --
-unicode(%d) "%d"
-unicode(%d) "%dx"
-unicode(%d) "%d"
+unicode(%d) "%a"
+unicode(%d) "%ax"
+unicode(%d) "%a"
 unicode(1) "x"
-unicode(%d) " %d"
-unicode(%d) "%d "
-unicode(%d) "	%d"
+unicode(%d) " %a"
+unicode(%d) "%a "
+unicode(%d) "	%a"
 unicode(%d) "
-%d"
-unicode(%d) "   %d"
-unicode(%d) "                             %d"
+%a"
+unicode(4) "%a"
+unicode(30) "%a"
 unicode(10) "0-9A-Fa-f]"
 unicode(1) "x"
-Done
+===DONE===
