@@ -2,9 +2,6 @@
 Test fnmatch() function: Variations
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN')
-    die("skip do not run on Windows");
-
 if (!function_exists('fnmatch'))
     die("skip fnmatch() function is not available");
 ?>
@@ -17,6 +14,11 @@ if (!function_exists('fnmatch'))
 
 echo "*** Testing fnmatch() with file and various patterns ***\n";
 $file_name = dirname(__FILE__)."/match.tmp";
+
+/* avoid using \, it breaks the pattern */
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    $file_name = str_replace('\\','/', $file_name);
+}
 
 fopen($file_name, "w");
 
