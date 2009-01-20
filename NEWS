@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug in xml_error_string() which resulted in messages being
   off by one. (Scott)
 
+- Fixed bug #47152 (gzseek/fseek using SEEK_END produces strange results).
+  (Felipe)
 - Fixed bug #47131 (SOAP Extension ignores "user_agent" ini setting). (Ilia)
 - Fixed bug #47104 (Linking shared extensions fails with icc). (Jani)
 - Fixed bug #47109 (Memory leak on $a->{"a"."b"} when $a is not an object).
