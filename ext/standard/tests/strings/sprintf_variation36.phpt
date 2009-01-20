@@ -37,38 +37,42 @@ foreach($resource_values as $resource_value) {
   $count++;
 };
 
-echo "Done";
+// closing the resources
+fclose($fp);
+closedir($dfp);
+
 ?>
+===DONE===
 --EXPECTF--
 *** Testing sprintf() : hexa formats with resource values ***
 
 -- Iteration 1 --
-string(%d) "%d"
-string(%d) "%dx"
-string(%d) "%d"
+string(%d) "%a"
+string(%d) "%ax"
+string(%d) "%a"
 string(1) "x"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
+string(%d) " %a"
+string(%d) "%a "
+string(%d) "	%a"
 string(%d) "
-%d"
-string(%d) "   %d"
-string(%d) "                             %d"
+%a"
+string(4) "%a"
+string(30) "%a"
 string(10) "0-9A-Fa-f]"
 string(1) "x"
 
 -- Iteration 2 --
-string(%d) "%d"
-string(%d) "%dx"
-string(%d) "%d"
+string(%d) "%a"
+string(%d) "%ax"
+string(%d) "%a"
 string(1) "x"
-string(%d) " %d"
-string(%d) "%d "
-string(%d) "	%d"
+string(%d) " %a"
+string(%d) "%a "
+string(%d) "	%a"
 string(%d) "
-%d"
-string(%d) "   %d"
-string(%d) "                             %d"
+%a"
+string(4) "%a"
+string(30) "%a"
 string(10) "0-9A-Fa-f]"
 string(1) "x"
-Done
+===DONE===
