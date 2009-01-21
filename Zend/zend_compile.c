@@ -1607,8 +1607,17 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 
 	if (function_ptr) {
 		if (ARG_MAY_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
-			op = (param->op_type & (IS_VAR|IS_CV))?ZEND_SEND_REF:ZEND_SEND_VAL;
-			send_by_reference = 0;
+			if (param->op_type & (IS_VAR|IS_CV)) {
+				send_by_reference = 1;
+				if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
+					/* Method call */
+					op = ZEND_SEND_VAR_NO_REF;
+					send_function = ZEND_ARG_SEND_FUNCTION | ZEND_ARG_SEND_SILENT;
+				}
+			} else {
+				op = ZEND_SEND_VAL;
+				send_by_reference = 0;
+			}
 		} else {
 			send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;
 		}

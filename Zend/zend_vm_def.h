@@ -2331,7 +2331,9 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	} else {
 		zval *valptr;
 
-		zend_error(E_STRICT, "Only variables should be passed by reference");
+		if (!(opline->extended_value & ZEND_ARG_SEND_SILENT)) {
+			zend_error(E_STRICT, "Only variables should be passed by reference");
+		}
 		ALLOC_ZVAL(valptr);
 		INIT_PZVAL_COPY(valptr, varptr);
 		if (!IS_OP1_TMP_FREE()) {
