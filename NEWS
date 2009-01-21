@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug in xml_error_string() which resulted in messages being
   off by one. (Scott)
 
+- Fixed bug #47174 (base64_decode() interprets pad char in mid string as
+  terminator). (Ilia)
 - Fixed bug #47165 (Possible memory corruption when passing return value by
   reference). (Dmitry)
 - Fixed bug #47152 (gzseek/fseek using SEEK_END produces strange results).
