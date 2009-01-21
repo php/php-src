@@ -109,11 +109,7 @@ file not opened for read
 Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
 
 --c:fopen11.tmpdirTwo--
-
-Warning: fopen(c:fopen11.tmpdirTwo\fopen_variation11.tmp): failed to open stream: No such file or directory in %s on line %d
-file not opened for read
-
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+file in fopen11.tmpdirTwo
 
 --c:adir--
 
