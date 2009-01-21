@@ -1,0 +1,590 @@
+# This file is created from the magic.mime file from php.net 5.2.4 windows releaase
+# fixing a few entries, plus taking entries from apache "magic" file.
+# The first section is from php.net - magic.mime
+0	leshort	0x602	application/x-alan-adventure-game
+0	string	TADS	application/x-tads-game
+0	short		0420		application/x-executable-file
+0	short		0421		application/x-executable-file
+0	leshort		0603		application/x-executable-file
+0	string		Core\001	application/x-executable-file
+0	string          AMANDA:\ TAPESTART\ DATE     application/x-amanda-header
+0	belong		0x000003f3	application/x-executable-file
+0	belong		0x000003e7	application/x-library-file
+0	belong		0x000001b3		video/mpeg
+0	belong		0x000001ba		video/mpeg
+0	beshort&0xfff0	0xfff0			audio/mpeg
+4	leshort		0xAF11			video/fli
+4	leshort		0xAF12			video/flc
+0	string		MOVI		video/x-sgi-movie
+4	string		moov		video/quicktime
+4	string		mdat		video/quicktime
+0	long		0100554		application/x-apl-workspace
+0	string		FiLeStArTfIlEsTaRt	text/x-apple-binscii
+0	string		\x0aGL			application/data
+0	string		\x76\xff		application/data
+0	string		NuFile			application/data
+0	string		N\xf5F\xe9l\xe5		application/data
+0	belong		0x00051600		application/data
+0	belong		0x00051607		application/data
+257	string		ustar\0		application/x-tar
+257	string		ustar\040\040\0	application/x-gtar
+0	short		070707		application/x-cpio
+0	short		0143561		application/x-bcpio
+0	string		070707		application/x-cpio
+0	string		070701		application/x-cpio
+0	string		070702		application/x-cpio
+0	string		!<arch>\ndebian application/x-dpkg
+0	long		0177555		application/x-ar
+0	short		0177555		application/data
+0	long		0177545		application/data
+0	short		0177545		application/data
+0	long		0100554		application/x-apl-workspace
+0	string		=<ar>		application/x-ar
+0	string	!<arch>\n__________E	application/x-ar
+0	string		-h-		application/data
+0	string		!<arch>		application/x-ar
+0	string		\<ar>		application/x-ar
+0	string		=<ar>		application/x-ar
+0	belong		0x65ff0000	application/x-ar
+0	belong		0x3c61723e	application/x-ar
+0	long		0x213c6172	application/x-ar
+0	lelong		0177555		application/data
+0	leshort		0177555		application/data
+0	lelong		0177545		application/data
+0	leshort		0177545		application/data
+0	lelong		0x39bed		application/data
+0	lelong		0x39bee		application/data
+0	lelong&0x8080ffff	0x0000081a	application/x-arc
+0	lelong&0x8080ffff	0x0000091a	application/x-arc
+0	lelong&0x8080ffff	0x0000021a	application/x-arc
+0	lelong&0x8080ffff	0x0000031a	application/x-arc
+0	lelong&0x8080ffff	0x0000041a	application/x-arc
+0	lelong&0x8080ffff	0x0000061a	application/x-arc
+0	string		\032archive	application/data
+0	leshort		0xea60		application/x-arj
+0	string		HPAK		application/data
+0	string		\351,\001JAM\		application/data
+2	string		-lh0-		application/x-lha
+2	string		-lh1-		application/x-lha
+2	string		-lz4-		application/x-lha
+2	string		-lz5-		application/x-lha
+2	string		-lzs-		application/x-lha
+2	string		-lh\40-		application/x-lha
+2	string		-lhd-		application/x-lha
+2	string		-lh2-		application/x-lha
+2	string		-lh3-		application/x-lha
+2	string		-lh4-		application/x-lha
+2	string		-lh5-		application/x-lha
+0	string		Rar!		application/x-rar
+0	string		SQSH		application/data
+0	string		UC2\x1a		application/data
+0	string		PK\003\004	application/zip
+20	lelong		0xfdc4a7dc	application/x-zoo
+10	string		#\ This\ is\ a\ shell\ archive	application/x-shar
+0	string		*STA		application/data
+0	string		2278		application/data
+0	beshort		0560		application/x-executable-file
+0	beshort		0561		application/x-executable-file
+0	string		\000\004\036\212\200	application/core
+0	string		.snd		audio/basic
+0	lelong		0x0064732E	audio/basic
+0	string	MThd			audio/midi
+0	string	CTMF			audio/x-cmf
+0	string	SBI			audio/x-sbi
+0	string	Creative\ Voice\ File	audio/x-voc
+0	belong		0x4e54524b	audio/x-multitrack
+0	string		RIFF		audio/x-wav
+0	string		EMOD		audio/x-emod
+0	belong		0x2e7261fd	audio/x-pn-realaudio
+0	string		MTM		audio/x-multitrack
+0	string		if		audio/x-669-mod
+0	string		FAR		audio/mod
+0	string		MAS_U		audio/x-multimate-mod
+0x2c	string		SCRM		audio/x-st3-mod
+0	string		GF1PATCH110\0ID#000002\0	audio/x-gus-patch
+0	string		GF1PATCH100\0ID#000002\0	audio/x-gus-patch
+0	string	JN		audio/x-669-mod
+0	string	UN05		audio/x-mikmod-uni
+0	string	Extended\ Module: audio/x-ft2-mod
+21	string	!SCREAM!	audio/x-st2-mod
+1080	string	M.K.		audio/x-protracker-mod
+1080	string	M!K!		audio/x-protracker-mod
+1080	string	FLT4		audio/x-startracker-mod
+1080	string	4CHN		audio/x-fasttracker-mod
+1080	string	6CHN		audio/x-fasttracker-mod
+1080	string	8CHN		audio/x-fasttracker-mod
+1080	string	CD81		audio/x-oktalyzer-mod
+1080	string	OKTA		audio/x-oktalyzer-mod
+1080	string	16CN		audio/x-taketracker-mod
+1080	string	32CN		audio/x-taketracker-mod
+0       string          TOC             audio/x-toc
+0	short		03401		application/x-executable-file
+0	long		0406		application/x-executable-file
+0	short		0406		application/x-executable-file
+0	short		03001		application/x-executable-file
+0	lelong			000000314	application/x-executable-file
+0	string		//		text/cpp
+0       string          \\1cw\          application/data
+0       string          \\1cw           application/data
+0	belong&0xffffff00	0x85011400  application/data
+0	belong&0xffffff00	0x8501cb00  application/data
+0	short		0575		application/x-executable-file
+0	short		0577		application/x-executable-file
+4	string		pipe		application/data
+4	string		prof		application/data
+0	string		:\ shell application/data
+0	string		#!/bin/sh		application/x-sh
+0	string		#!\ /bin/sh		application/x-sh
+0	string		#!\	/bin/sh		application/x-sh
+0	string		#!/bin/csh		application/x-csh
+0	string		#!\ /bin/csh		application/x-csh
+0	string		#!\	/bin/csh	application/x-csh
+0	string		#!/bin/ksh		application/x-ksh
+0	string		#!\ /bin/ksh		application/x-ksh
+0	string		#!\	/bin/ksh	application/x-ksh
+0	string	 	#!/bin/tcsh		application/x-csh
+0	string	 	#!\ /bin/tcsh		application/x-csh
+0	string	 	#!\	/bin/tcsh	application/x-csh
+0	string		#!/usr/local/tcsh	application/x-csh
+0	string	 	#!\ /usr/local/tcsh	application/x-csh
+0	string		#!/usr/local/bin/tcsh	application/x-csh
+0	string		#!\ /usr/local/bin/tcsh	application/x-csh
+0	string		#!\	/usr/local/bin/tcsh	application/x-csh
+0	string		#!/usr/local/bin/zsh	application/x-zsh
+0	string		#!\ /usr/local/bin/zsh	application/x-zsh
+0	string		#!\	/usr/local/bin/zsh	application/x-zsh
+0	string		#!/usr/local/bin/ash	application/x-sh
+0	string		#!\ /usr/local/bin/ash	application/x-zsh
+0	string		#!\	/usr/local/bin/ash	application/x-zsh
+0	string		#!/usr/local/bin/ae	text/script
+0	string		#!\ /usr/local/bin/ae	text/script
+0	string		#!\	/usr/local/bin/ae	text/script
+0	string		#!/bin/nawk		application/x-awk
+0	string		#!\ /bin/nawk		application/x-awk
+0	string		#!\	/bin/nawk		application/x-awk
+0	string		#!/usr/bin/nawk		application/x-awk
+0	string		#!\ /usr/bin/nawk	application/x-awk
+0	string		#!\	/usr/bin/nawk	application/x-awk
+0	string		#!/usr/local/bin/nawk	application/x-awk
+0	string		#!\ /usr/local/bin/nawk	application/x-awk
+0	string		#!\	/usr/local/bin/nawk	application/x-awk
+0	string		#!/bin/gawk		application/x-awk
+0	string		#!\ /bin/gawk		application/x-awk
+0	string		#!\	/bin/gawk		application/x-awk
+0	string		#!/usr/bin/gawk		application/x-awk
+0	string		#!\ /usr/bin/gawk	application/x-awk
+0	string		#!\	/usr/bin/gawk	application/x-awk
+0	string		#!/usr/local/bin/gawk	application/x-awk
+0	string		#!\ /usr/local/bin/gawk	application/x-awk
+0	string		#!\	/usr/local/bin/gawk	application/x-awk
+0	string		#!/bin/awk		application/x-awk
+0	string		#!\ /bin/awk		application/x-awk
+0	string		#!\	/bin/awk		application/x-awk
+0	string		#!/usr/bin/awk		application/x-awk
+0	string		#!\ /usr/bin/awk	application/x-awk
+0	string		#!\	/usr/bin/awk	application/x-awk
+0	string		BEGIN			application/x-awk
+0	string		#!/bin/perl			application/x-perl
+0	string		#!\ /bin/perl			application/x-perl
+0	string		#!\	/bin/perl		application/x-perl
+0	string		eval\ "exec\ /bin/perl		application/x-perl
+0	string		#!/usr/bin/perl			application/x-perl
+0	string		#!\ /usr/bin/perl		application/x-perl
+0	string		#!\	/usr/bin/perl		application/x-perl
+0	string		eval\ "exec\ /usr/bin/perl	application/x-perl
+0	string		#!/usr/local/bin/perl		application/x-perl
+0	string		#!\ /usr/local/bin/perl		application/x-perl
+0	string		#!\	/usr/local/bin/perl	application/x-perl
+0	string		eval\ "exec\ /usr/local/bin/perl	application/x-perl
+0	string		#!/bin/rc	text/script
+0	string		#!\ /bin/rc	text/script
+0	string		#!\	/bin/rc	text/script
+0	string		#!/bin/bash	application/x-sh
+0	string		#!\ /bin/bash	application/x-sh
+0	string		#!\	/bin/bash	application/x-sh
+0	string		#!/usr/local/bin/bash	application/x-sh
+0	string		#!\ /usr/local/bin/bash	application/x-sh
+0	string		#!\	/usr/local/bin/bash	application/x-sh
+0	string		#!\ /			text/script
+0	string		#!\	/		text/script
+0	string		#!/			text/script
+0	string		#!\ 			text/script
+0	string		\037\235	application/compress
+0	string		\037\213	application/x-gzip
+0	string		\037\036	application/data
+0	short		017437		application/data
+0	short		0x1fff		application/data
+0	string		\377\037	application/data
+0	short		0145405		application/data
+0	string		BZh		application/x-bzip2
+0	leshort		0xFF76		application/data
+0	leshort		0xFE76		application/data
+0	leshort		0xFD76		application/x-lzh
+0	string		\037\237	application/data
+0	string		\037\236	application/data
+0	string		\037\240	application/data
+0	string		BZ		application/x-bzip
+0	string		\x89\x4c\x5a\x4f\x00\x0d\x0a\x1a\x0a	application/data
+0	belong	0507	application/x-object-file
+0	belong	0513	application/x-executable-file
+0	belong	0515	application/x-executable-file
+0	belong	0517	application/x-executable-file
+0	belong	0x011257	application/core
+24	belong	60011	application/data
+24	belong	60012	application/data
+24	belong	60013	application/data
+24	belong	60014	application/data
+0	belong	0601		application/x-object-file
+0	belong			application/core
+0	belong			0607		application/data
+0	belong	0x13579ace	application/x-gdbm
+0	lelong	0x13579ace	application/x-gdbm
+0	string	GDBM		application/x-gdbm
+0	belong	0x061561	application/x-db
+0	belong	0x053162	application/x-db
+0	string	=<list>\n<protocol\ bbn-m	application/data
+0	string		diff\ 	text/x-patch
+0	string		***\ 		text/x-patch
+0	string		Only\ in\ 	text/x-patch
+0	string		Common\ subdirectories:\ 	text/x-patch
+0	string	!<arch>\n________64E	application/data
+0	leshort		0x183		application/x-executable-file
+0	leshort		0x188	application/x-executable-file
+0	leshort		0x18f	application/x-object-file
+0	string	\377\377\177		application/data
+0	string	\377\377\174		application/data
+0	string	\377\377\176		application/data
+0	string	\033c\033		application/data
+0	long	04553207		image/x11
+0	string	!<PDF>!\n		application/x-prof
+0	short		0x0501		application/x-locale
+24	belong	60012		application/x-dump
+24	belong	60011		application/x-dump
+24	lelong	60012		application/x-dump
+24	lelong	60011		application/x-dump
+0	string		\177ELF		application/x-executable-file
+0	short		0x154		application/data
+0	short		0x155		application/x-executable-file
+0x438	leshort	0xEF53			application/x-linux-ext2fs
+0	string	\366\366\366\366	application/x-pc-floppy
+0774	beshort		0xdabe		application/data
+0x1FE	leshort	0xAA55			application/data
+0x410	leshort		0x137f		application/x-filesystem
+0x410	leshort		0x138f		application/x-filesystem
+0x410	leshort		0x2468		application/x-filesystem
+0x410	leshort		0x2478		application/x-filesystem
+0	string		-rom1fs-\0	application/x-filesystem
+0	lelong		0x1b031336	application/x-bootable
+0x18b	string	OS/2	application/x-bootable
+0	string		FONT		font/x-vfont
+0	short		0436		font/x-vfont
+0	short		017001		font/x-vfont
+0	string		%!PS-AdobeFont-1.0	font/type1
+6	string		%!PS-AdobeFont-1.0	font/type1
+0	belong		00000004		font/x-snf
+0	lelong		00000004		font/x-snf
+0	string		STARTFONT\040		font/x-bdf
+0	string		\001fcp			font/x-pcf
+0	string		D1.0\015		font/x-speedo
+0	string		flf		font/x-figlet
+0	string		flc		application/x-font
+0	belong		0x14025919	font/x-libgrx
+0	belong		0xff464f4e	font/x-dos
+7	belong		0x00454741	font/x-dos
+7	belong		0x00564944	font/x-dos
+4098	string		DOSFONT		font/x-dos
+0	string		\<MakerFile	application/x-framemaker
+0	string		\<MIFFile	application/x-framemaker
+0	string		\<MakerDictionary	application/x-framemaker
+0	string		\<MakerScreenFont	font/x-framemaker
+0	string		\<MML		application/x-framemaker
+0	string		\<BookFile	application/x-framemaker
+0	string		\<Maker	application/x-framemaker
+0	lelong&0377777777	041400407	application/x-executable-file
+0	lelong&0377777777	041400410	application/x-executable-file
+0	lelong&0377777777	041400413	application/x-executable-file
+0	lelong&0377777777	041400314	application/x-executable-file
+7	string	\357\020\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0	application/core
+0	lelong			011421044151	application/data
+0       string          GIMP\ Gradient  application/x-gimp-gradient
+0	string		gimp\ xcf	application/x-gimp-image
+20      string          GPAT            application/x-gimp-pattern
+20      string          GIMP            application/x-gimp-brush
+0	string		\336\22\4\225	application/x-locale
+0	string		\225\4\22\336	application/x-locale
+0	beshort		0627		application/x-executable-file
+0	beshort		0624		application/x-executable-file
+0	string		\000\001\000\000\000	font/ttf
+0       long            01203604016     application/data
+0       long            01702407010     application/data
+0       long            01003405017     application/data
+0       long            01602007412     application/data
+0	belong 		0x02100106	application/x-object-file
+0	belong 		0x02100107	application/x-executable-file
+0	belong 		0x02100108	application/x-executable-file
+0	belong 		0x0210010b	application/x-executable-file
+0	belong 		0x0210010e	application/x-library-file
+0	belong 		0x0210010d	application/x-library-file
+0	belong		0x02140106	application/x-object-file
+0       belong		0x02140107	application/x-executable-file
+0       belong		0x02140108	application/x-executable-file
+0       belong		0x0214010b	application/x-executable-file
+0       belong		0x0214010e	application/x-library-file
+0       belong		0x0214010d	application/x-object-file
+0	belong 		0x020b0106	application/x-object-file
+0	belong 		0x020b0107	application/x-executable-file
+0	belong 		0x020b0108	application/x-executable-file
+0	belong 		0x020b010b	application/x-executable-file
+0	belong 		0x020b010e	application/x-library-file
+0	belong 		0x020b010d	application/x-library-file
+0	belong		0x213c6172	application/x-ar
+0	long		0x02080106	application/x-executable-file
+0	long		0x02080107	application/x-executable-file
+0	long		0x02080108	application/x-executable-file
+0	belong 		0x020c0108	application/x-executable-file
+0	belong		0x020c0107	application/x-executable-file
+0	belong		0x020c010b	application/x-executable-file
+0	belong		0x020c0106	application/x-executable-file
+0	belong 		0x020a0108	application/x-executable-file
+0	belong		0x020a0107	application/x-executable-file
+0	belong		0x020c010e	application/x-library-file
+0	belong		0x020c010d	application/x-library-file
+0	long		0x0000ff65	application/x-library-file
+0	long		0x020aff65	application/x-library-file
+0	long		0x020cff65	application/x-library-file
+0	long		0x0208ff65	application/x-library-file
+0	long		0x015821a6	application/core
+0	long		0x4da7eee8	font/x-hp-windows
+0	string		Bitmapfile	image/unknown
+#0	string		IMGfile	CIS 	image/unknown
+0	long		0x020c010c	application/x-lisp
+0	string		msgcat01	application/x-locale
+0	string		P1		image/x-portable-bitmap
+0	string		P2		image/x-portable-graymap
+0	string		P3		image/x-portable-pixmap
+0	string		P4		image/x-portable-bitmap
+0	string		P5		image/x-portable-graymap
+0	string		P6		image/x-portable-pixmap
+0	string		IIN1		image/x-niff
+0	string		MM\x00\x2a	image/tiff
+0	string		II\x2a\x00	image/tiff
+0	string		\x89PNG		image/x-png
+1	string		PNG		image/x-png
+0	string		GIF8		image/gif
+0	string		\361\0\100\273	image/x-cmu-raster
+0	beshort		0xffd8		image/jpeg
+0	string		hsi1		image/x-jpeg-proprietary
+0	string		BM		image/x-bmp
+0	string		IC		image/x-ico
+0	belong		0x59a66a95	x/x-image-sun-raster
+0	beshort		474		x/x-image-sgi
+2048	string		PCD_IPI		x/x-photo-cd-pack-file
+0	string		PCD_OPA		x/x-photo-cd-overfiew-file
+0	leshort		0510		application/x-executable-file
+0	leshort		0511		application/x-executable-file
+0	leshort		=0512		application/x-executable-file
+0	leshort		=0522		application/x-executable-file
+0	leshort		=0514		application/x-executable-file
+0	ubelong	0xcafebabe	application/java
+0	leshort		0x0436		font/linux-psf
+0	string		FFIL			font/ttf
+65	string		FFIL			font/ttf
+0	string		LWFN			font/type1
+65	string		LWFN			font/type1
+0	string		Return-Path:	message/rfc822
+0	string		Path:		message/news
+0	string		Xref:		message/news
+0	string		From:		message/rfc822
+0	string		Article 	message/news
+0	string		BABYL		message/x-gnu-rmail
+0	string		Received:	message/rfc822
+0	string		MZ	application/x-ms-dos-executable
+2080	string	Microsoft\ Word\ 6.0\ Document	text/vnd.ms-word
+2080	string	Documento\ Microsoft\ Word\ 6	text/vnd.ms-word
+2112	string	MSWordDoc	text/vnd.ms-word
+0	belong	0x31be0000	text/vnd.ms-word
+0       string  PO^Q`           text/vnd.ms-word
+2080	string	Microsoft\ Excel\ 5.0\ Worksheet	application/vnd.ms-excel
+2114	string	Biff5		application/vnd.ms-excel
+1       string          WPC             text/vnd.wordperfect
+0	string		StartFontMetrics	font/x-sunos-news
+0	string		StartFont	font/x-sunos-news
+0	belong		0x137A2944	font/x-sunos-news
+0	belong		0x137A2947	font/x-sunos-news
+0	belong		0x137A2950	font/x-sunos-news
+0	belong		0x137A2951	font/x-sunos-news
+8	belong		0x137A2B45	font/x-sunos-news
+8	belong		0x137A2B48	font/x-sunos-news
+0	string		%!		application/postscript
+0	string		\004%!		application/postscript
+0	string		\033E\033	image/x-pcl-hp
+0	string		\<!DOCTYPE\ HTML	text/html
+0	string		\<!doctype\ html	text/html
+0	string		\<!doctype\ HTML	text/html
+0	string		\<!DOCTYPE\ html	text/html
+0	string		\<HEAD		text/html
+0	string		\<head		text/html
+0	string		\<TITLE		text/html
+0	string		\<title		text/html
+0	string		\<html		text/html
+0	string		\<HTML		text/html
+0	string		\367\203	font/x-tex
+0	string		\367\131	font/x-tex
+0	string		\367\312	font/x-tex
+2	string		\000\021	font/x-tex-tfm
+2	string		\000\022	font/x-tex-tfm
+
+#******************************
+# Taken from apache - magic
+#******************************
+# only non continuations ones added (ie entries that don't use >) as these
+# don't appear to work.
+# did not include commented out entries, or ones that already exist
+#------------------------------------------------------------------------------
+# Bytes 0-3 of AIFF, AIFF-C, & 8SVX audio files are "FORM"
+#					AIFF audio data
+8	string		AIFF		audio/x-aiff	
+#					AIFF-C audio data
+8	string		AIFC		audio/x-aiff	
+#					IFF/8SVX audio data
+8	string		8SVX		audio/x-aiff	
+# C64 SID Music files, from Linus Walleij <triad@df.lth.se>
+0   string      PSID        audio/prs.sid
+
+#------------------------------------------------------------------------------
+# XPM icons (Greg Roelofs, newt@uchicago.edu)
+0	string		/*\ XPM		image/x-xbm	7bit
+#					C or REXX program text
+0	string		/*		text/plain
+#					C++ program text
+
+
+#------------------------------------------------------------------------------
+# html:  file(1) magic for HTML (HyperText Markup Language) docs
+#
+# from Daniel Quinlan <quinlan@yggdrasil.com>
+# and Anna Shergold <anna@inext.co.uk>
+#
+0   string      \<!--       text/html
+0   string      \<h1        text/html
+0   string      \<H1        text/html
+
+# XML eXtensible Markup Language, from Linus Walleij <triad@df.lth.se>
+0   string      \<?xml      text/xml
+
+#------------------------------------------------------------------------------
+# images:  file(1) magic for image formats (see also "c-lang" for XPM bitmaps)
+#
+# originally from jef@helios.ee.lbl.gov (Jef Poskanzer),
+# additions by janl@ifi.uio.no as well as others. Jan also suggested
+# merging several one- and two-line files into here.
+#
+# XXX - byte order for GIF and TIFF fields?
+# [GRR:  TIFF allows both byte orders; GIF is probably little-endian]
+#
+
+# PBMPLUS
+#					PBM file
+0	string		P1		image/x-portable-bitmap	7bit
+#					PGM file
+0	string		P2		image/x-portable-greymap	7bit
+#					PPM file
+0	string		P3		image/x-portable-pixmap	7bit
+#					PBM "rawbits" file
+0	string		P4		image/x-portable-bitmap
+#					PGM "rawbits" file
+0	string		P5		image/x-portable-greymap
+#					PPM "rawbits" file
+0	string		P6		image/x-portable-pixmap
+
+# possible GIF replacements; none yet released!
+# (Greg Roelofs, newt@uchicago.edu)
+#
+# GRR 950115:  this was mine ("Zip GIF"):
+#					ZIF image (GIF+deflate alpha)
+0	string		GIF94z		image/unknown
+#
+# GRR 950115:  this is Jeremy Wohl's Free Graphics Format (better):
+#					FGF image (GIF+deflate beta)
+0	string		FGF95a		image/unknown
+#
+# GRR 950115:  this is Thomas Boutell's Portable Bitmap Format proposal
+# (best; not yet implemented):
+#					PBF image (deflate compression)
+0	string		PBF		image/unknown
+
+#------------------------------------------------------------------------------
+# lisp:  file(1) magic for lisp programs
+#
+# various lisp types, from Daniel Quinlan (quinlan@yggdrasil.com)
+0	string	;;			text/plain	8bit
+# Emacs 18 - this is always correct, but not very magical.
+0	string	\012(			application/x-elc
+# Emacs 19
+0	string	;ELC\023\000\000\000	application/x-elc
+
+#------------------------------------------------------------------------------
+# mail.news:  file(1) magic for mail and news
+#
+# There are tests to ascmagic.c to cope with mail and news.
+0	string		Relay-Version: 	message/rfc822	7bit
+0	string		#!\ rnews	message/rfc822	7bit
+0	string		N#!\ rnews	message/rfc822	7bit
+0	string		Forward\ to 	message/rfc822	7bit
+0	string		Pipe\ to 	message/rfc822	7bit
+#------------------------------------------------------------------------------
+# msword: file(1) magic for MS Word files
+#
+# Contributor claims:
+# Reversed-engineered MS Word magic numbers
+#
+0	string		\376\067\0\043			application/msword
+0	string		\333\245-\0\0\0			application/msword
+
+#------------------------------------------------------------------------------
+# printer:  file(1) magic for printer-formatted files
+#
+# Acrobat
+# (due to clamen@cs.cmu.edu)
+0	string		%PDF-		application/pdf
+
+#------------------------------------------------------------------------------
+# sc:  file(1) magic for "sc" spreadsheet
+#
+38	string		Spreadsheet	application/x-sc
+
+#------------------------------------------------------------------------------
+# tex:  file(1) magic for TeX files
+#
+# XXX - needs byte-endian stuff (big-endian and little-endian DVI?)
+#
+# From <conklin@talisman.kaleida.com>
+
+# correct TeX magic for Linux (and maybe more)
+# from Peter Tobias (tobias@server.et-inf.fho-emden.de)
+#
+0	leshort		0x02f7		application/x-dvi
+
+# RTF - Rich Text Format
+0	string		{\\rtf		application/rtf
+
+#------------------------------------------------------------------------------
+# animation:  file(1) magic for animation/movie formats
+#
+# animation formats, originally from vax@ccwf.cc.utexas.edu (VaX#n8)
+#						MPEG file
+0	string		\000\000\001\263	video/mpeg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
