@@ -10,8 +10,8 @@ if (!extension_loaded("zlib")) {
 <?php
 $f = "temp3.txt.gz";
 $h = gzopen($f, 'w'); 
-$str1 = "This is the first line.";
-$str2 = "This is the second line.";
+$str1 = b"This is the first line.";
+$str2 = b"This is the second line.";
 gzwrite($h, $str1);
 echo "tell=";
 var_dump(gztell($h));
