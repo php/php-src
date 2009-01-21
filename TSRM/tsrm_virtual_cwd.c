@@ -755,7 +755,27 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 #ifdef TSRM_WIN32
 			if (IS_SLASH(path[0])) {
-				state_cwd_length = 2;
+				if (state->cwd[1] == ':') {
+					/* Copy only the drive name */
+					state_cwd_length = 2;
+				} else if (IS_UNC_PATH(state->cwd, state->cwd_length)) {
+					/* Copy only the share name */
+					state_cwd_length = 2;
+					while (IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (state->cwd[state_cwd_length] &&
+					       !IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (state->cwd[state_cwd_length] &&
+					       !IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+				}
 			}
 #endif
 			if (path_length + state_cwd_length + 1 >= MAXPATHLEN-1) {
@@ -767,7 +787,16 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			path_length += state_cwd_length + 1;
 		}
 	} else {		
-		memcpy(resolved_path , path, path_length + 1);
+#ifdef TSRM_WIN32
+		if (path_length > 2 && path[1] == ':' && !IS_SLASH(path[2])) {
+			resolved_path[0] = path[0];
+			resolved_path[1] = ':';
+			resolved_path[2] = DEFAULT_SLASH;
+			memcpy(resolved_path + 3, path + 2, path_length - 1);
+			path_length++;
+		} else
+#endif
+		memcpy(resolved_path, path, path_length + 1);
 	} 
 
 #ifdef TSRM_WIN32
@@ -824,6 +853,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
 	
 	if (path_length < 0) {
+		errno = ENOENT;
 		return 1;
 	}
 	
