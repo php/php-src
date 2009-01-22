@@ -6,14 +6,15 @@ error_log=
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("error_log");
-$directory = dirname(__FILE__);
 
-var_dump(ini_set("error_log", $directory."/test/bad/bad.txt"));
-var_dump(ini_set("error_log", $directory."/test/bad.txt"));
-var_dump(ini_set("error_log", $directory."/bad.txt"));
-var_dump(ini_set("error_log", $directory."/test/ok/ok.txt"));
-var_dump(ini_set("error_log", $directory."/test/ok/ok.txt"));
+
+var_dump(ini_set("error_log", $initdir."/test/bad/bad.txt"));
+var_dump(ini_set("error_log", $initdir."/test/bad.txt"));
+var_dump(ini_set("error_log", $initdir."/bad.txt"));
+var_dump(ini_set("error_log", $initdir."/test/ok/ok.txt"));
+var_dump(ini_set("error_log", $initdir."/test/ok/ok.txt"));
 
 test_open_basedir_after("error_log");
 ?>

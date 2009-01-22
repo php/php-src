@@ -5,13 +5,14 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
+
 test_open_basedir_before("dir");
 test_open_basedir_error("dir");     
 
-$directory = dirname(__FILE__);
-var_dump(dir($directory."/test/ok/"));
-var_dump(dir($directory."/test/ok"));
-var_dump(dir($directory."/test/ok/../ok"));
+var_dump(dir($initdir."/test/ok/"));
+var_dump(dir($initdir."/test/ok"));
+var_dump(dir($initdir."/test/ok/../ok"));
 
 test_open_basedir_after("dir");?>
 --CLEAN--

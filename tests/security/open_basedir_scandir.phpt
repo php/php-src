@@ -5,13 +5,13 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("scandir");
 test_open_basedir_error("scandir");     
 
-$directory = dirname(__FILE__);
-var_dump(scandir($directory."/test/ok/"));
-var_dump(scandir($directory."/test/ok"));
-var_dump(scandir($directory."/test/ok/../ok"));
+var_dump(scandir($initdir."/test/ok/"));
+var_dump(scandir($initdir."/test/ok"));
+var_dump(scandir($initdir."/test/ok/../ok"));
 
 test_open_basedir_after("scandir");?>
 --CLEAN--
@@ -48,7 +48,7 @@ Warning: scandir(..): failed to open dir: %s in %s on line %d
 Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 
-Warning: scandir(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line 80
+Warning: scandir(): open_basedir restriction in effect. File(../) is not within the allowed path(s): (.) in %s on line %d
 
 Warning: scandir(../): failed to open dir: %s in %s on line %d
 
