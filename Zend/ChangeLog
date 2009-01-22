@@ -1,3 +1,14 @@
+2009-01-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug47165.phpt:
+      Fixed bug #47165 (Possible memory corruption when passing return value by
+      reference)
+
 2009-01-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
