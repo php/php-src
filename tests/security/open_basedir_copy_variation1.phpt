@@ -6,7 +6,6 @@ open_basedir=.
 <?php
 require_once "open_basedir.inc";
 test_open_basedir_before("copy");
-$directory = dirname(__FILE__);
 
 var_dump(copy("../bad/bad.txt", "copy.txt"));
 var_dump(unlink("copy.txt"));
@@ -32,3 +31,4 @@ bool(false)
 Warning: unlink(copy.txt): No such file or directory in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [copy] ***
+

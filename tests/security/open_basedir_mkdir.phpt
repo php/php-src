@@ -11,16 +11,16 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("mkdir");
-$directory = dirname(__FILE__);
 
 var_dump(mkdir("../bad/blah"));
 var_dump(mkdir("../blah"));
 var_dump(mkdir("../bad/./blah"));
 var_dump(mkdir("./.././blah"));
 
-var_dump(mkdir($directory."/test/ok/blah"));
-var_dump(rmdir($directory."/test/ok/blah"));
+var_dump(mkdir($initdir."/test/ok/blah"));
+var_dump(rmdir($initdir."/test/ok/blah"));
 test_open_basedir_after("mkdir");
 ?>
 --CLEAN--

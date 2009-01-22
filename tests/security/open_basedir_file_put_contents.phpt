@@ -5,14 +5,14 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("file_put_contents");
-$directory = dirname(__FILE__);
 
 var_dump(file_put_contents("../bad/bad.txt", "Hello World!"));
 var_dump(file_put_contents(".././bad/bad.txt", "Hello World!"));
 var_dump(file_put_contents("../bad/../bad/bad.txt", "Hello World!"));
 var_dump(file_put_contents("./.././bad/bad.txt", "Hello World!"));
-var_dump(file_put_contents($directory."/test/bad/bad.txt", "Hello World!"));
+var_dump(file_put_contents($initdir."/test/bad/bad.txt", "Hello World!"));
 
 test_open_basedir_after("file_put_contents");
 ?>
@@ -54,3 +54,4 @@ Warning: file_put_contents(): open_basedir restriction in effect. File%s/test/ba
 Warning: file_put_contents%s/test/bad/bad.txt): failed to open stream: %s in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [file_put_contents] ***
+
