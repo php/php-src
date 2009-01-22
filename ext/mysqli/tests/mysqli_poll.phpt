@@ -28,28 +28,28 @@ if (!$IS_MYSQLND)
 	if (NULL !== ($tmp = @mysqli_poll()))
 		printf("[002] Expecting NULL got %s\n", var_export($tmp, true));
 
-	if (NULL !== ($tmp = @mysqli_poll(array($link))))
+	$l = array($link);
+	if (NULL !== ($tmp = @mysqli_poll($l)))
 		printf("[003] Expecting NULL got %s\n", var_export($tmp, true));
 
-	if (NULL !== ($tmp = @mysqli_poll(array($link), NULL)))
+	$l = array($link); $n = NULL;
+	if (NULL !== ($tmp = @mysqli_poll($l, $n)))
 		printf("[004] Expecting NULL got %s\n", var_export($tmp, true));
 
-	if (NULL !== ($tmp = @mysqli_poll(array($link), NULL, NULL)))
+	$l = array($link); $n = NULL;
+	if (NULL !== ($tmp = @mysqli_poll($l, $n, $n)))
 		printf("[005] Expecting NULL got %s\n", var_export($tmp, true));
 
-	$int_val = 43;
-	$myerrors = &$int_val;
-
-	if (NULL !== ($tmp = @mysqli_poll(array($link), $myerrors, NULL, 1)))
-		printf("[006] Expecting NULL got %s\n", var_export($tmp, true));
-
-	if (NULL !== ($tmp = @mysqli_poll(array($link), NULL, NULL, -1)))
+	$l = array($link); $e = NULL; $r = NULL;
+	if (NULL !== ($tmp = @mysqli_poll($l, $e, $r, -1)))
 		printf("[007] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
-	if (NULL !== ($tmp = @mysqli_poll(array($link), NULL, NULL, 0, -1)))
+	$l = array($link); $e = NULL; $r = NULL;
+	if (NULL !== ($tmp = @mysqli_poll($l, $e, $r, 0, -1)))
 		printf("[008] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
-	if (0 !== ($tmp = (mysqli_poll(array($link), array($link), array($link), 0, 1))))
+	$read = $error = $reject = array($link);
+	if (0 !== ($tmp = (mysqli_poll($read, $error, $reject, 0, 1))))
 		printf("[009] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 
