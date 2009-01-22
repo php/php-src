@@ -2,8 +2,6 @@
 Test fopen() function : variation: use include path create and read a file (relative)
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
---XFAIL--
-Bug #46680
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
@@ -14,7 +12,6 @@ Bug #46680
 
 require_once('fopen_include_path.inc');
 
-echo "*** Testing fopen() : variation ***\n";
 $thisTestDir = "fopenVariation16.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
@@ -22,6 +19,7 @@ chdir($thisTestDir);
 $newpath = create_include_path();
 set_include_path($newpath);
 runtest();
+
 $newpath = generate_next_path();
 set_include_path($newpath);
 runtest();
@@ -37,13 +35,15 @@ function runtest() {
     $extraDir = "extraDir";
 
     mkdir($dir1.'/'.$extraDir);
+    mkdir($extraDir);
     
 	$tmpfile = $extraDir.'/fopen_variation16.tmp';
+
 	$h = fopen($tmpfile, "w+", true);
-	fwrite($h, "This is the test file");
+	fwrite($h, (binary) "This is the test file");
 	fclose($h);
 	
-	$h = fopen($dir1.'/'.$tmpfile, "r");
+	$h = @fopen($dir1.'/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
 	}
@@ -57,19 +57,19 @@ function runtest() {
 	   echo "could not find file for reading\n";
 	}
 	else {
-	   echo "found file again in dir1\n";
+	   echo "found file - not in dir1\n";
 	   fclose($h);
 	}
 	
-	unlink($dir1.'/'.$tmpfile);   
+	unlink($tmpfile);   
     rmdir($dir1.'/'.$extraDir);	
+    rmdir($extraDir);	
 }
 ?>
 ===DONE===
 --EXPECT--
-*** Testing fopen() : variation ***
-created in dir1
-found file again in dir1
-created in dir1
-found file again in dir1
+Not created in dir1
+found file - not in dir1
+Not created in dir1
+found file - not in dir1
 ===DONE===
