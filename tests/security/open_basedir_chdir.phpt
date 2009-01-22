@@ -6,7 +6,6 @@ open_basedir=.
 <?php
 require_once "open_basedir.inc";
 test_open_basedir_before("chdir");
-$directory = dirname(__FILE__);
 
 var_dump(chdir("../bad"));
 var_dump(chdir(".."));

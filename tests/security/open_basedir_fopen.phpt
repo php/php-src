@@ -5,8 +5,8 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("fopen");
-$directory = dirname(__FILE__);
 
 var_dump(fopen("../bad", "r"));
 var_dump(fopen("../bad/bad.txt", "r"));
@@ -17,7 +17,7 @@ var_dump(fopen("../bad/.", "r"));
 var_dump(fopen("../bad/./bad.txt", "r"));
 var_dump(fopen("./../.", "r"));
 
-var_dump(fopen($directory."/test/ok/ok.txt", "r"));
+var_dump(fopen($initdir."/test/ok/ok.txt", "r"));
 var_dump(fopen("./ok.txt", "r"));
 var_dump(fopen("ok.txt", "r"));
 var_dump(fopen("../ok/ok.txt", "r"));

@@ -5,8 +5,8 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("tempnam");
-$directory = dirname(__FILE__);
 
 var_dump(tempnam("../bad", "test"));
 var_dump(tempnam("..", "test"));
@@ -14,8 +14,19 @@ var_dump(tempnam("../", "test"));
 var_dump(tempnam("/", "test"));
 var_dump(tempnam("../bad/.", "test"));
 var_dump(tempnam("./../.", "test"));
+var_dump(tempnam("", "test"));
 
-$file = tempnam($directory."/test/ok", "test");
+//absolute test
+$file = tempnam($initdir."/test/ok", "test");
+var_dump($file);
+var_dump(unlink($file));
+
+//relative test
+$file = tempnam(".", "test");
+var_dump($file);
+var_dump(unlink($file));
+
+$file = tempnam("../ok", "test");
 var_dump($file);
 var_dump(unlink($file));
 
@@ -51,6 +62,13 @@ bool(false)
 
 Warning: tempnam(): open_basedir restriction in effect. File(./../.) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
+
+Warning: tempnam(): open_basedir restriction in effect. File() is not within the allowed path(s): (.) in %s on line %d
+bool(false)
+string(%d) "%s"
+bool(true)
+string(%d) "%s"
+bool(true)
 string(%d) "%s"
 bool(true)
 *** Finished testing open_basedir configuration [tempnam] ***

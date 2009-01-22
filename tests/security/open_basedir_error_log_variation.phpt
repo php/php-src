@@ -5,14 +5,15 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("error_log");
-$directory = dirname(__FILE__);
+
 define("DESTINATION_IS_FILE", 3);
 
-var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $directory."/test/bad/bad.txt"));
-var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $directory."/test/bad.txt"));
-var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $directory."/bad.txt"));
-var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $directory."/test/ok/ok.txt"));
+var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $initdir."/test/bad/bad.txt"));
+var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $initdir."/test/bad.txt"));
+var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $initdir."/bad.txt"));
+var_dump(error_log("Hello World!", DESTINATION_IS_FILE, $initdir."/test/ok/ok.txt"));
 
 test_open_basedir_after("error_log");
 ?>
