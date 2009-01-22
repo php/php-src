@@ -1,7 +1,5 @@
 --TEST--
 Test file_put_contents() function : variation - include path testing
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -12,26 +10,23 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
  * Alias to functions: 
  */
 
-echo "*** Testing file_put_contents() : variation ***\n";
 
 require_once('fopen_include_path.inc');
 
-// this doesn't create the include dirs in this directory
-// we change to this to ensure we are not part of the
-// include paths.
-$thisTestDir = "filePutContentsVar4.dir";
+$thisTestDir = basename(__FILE__, ".php") . ".dir"; 
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "afile.txt";
-$firstFile = $dir1."/".$filename;
+$filename = basename(__FILE__, ".php") . ".tmp";
 
 $newpath = create_include_path();
 set_include_path($newpath);
 runtest();
+
 $newpath = generate_next_path();
 set_include_path($newpath);
 runtest();
+
 teardown_include_path();
 restore_include_path();
 chdir("..");
@@ -39,18 +34,18 @@ rmdir($thisTestDir);
 
 
 function runtest() {
-   global $firstFile, $filename;
-   file_put_contents($filename, "File in include path", FILE_USE_INCLUDE_PATH);
-   $line = file_get_contents($firstFile);
+   global $filename;
+   //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists 
+   // in the include path. In this case it doesn't so the file should be written in the current dir.
+   file_put_contents($filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
+   $line = file_get_contents($filename);
    echo "$line\n";
-   unlink($firstFile);
    unlink($filename);
 }
 
 ?>
 ===DONE===
 --EXPECT--
-*** Testing file_put_contents() : variation ***
 File in include path
 File in include path
 ===DONE===
