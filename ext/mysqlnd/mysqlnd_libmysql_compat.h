@@ -73,6 +73,7 @@
 #define mysql_ping(r)					mysqlnd_ping((r))
 #define mysql_real_escape_string(r,a,b,c) mysqlnd_real_escape_string((r), (a), (b), (c))
 #define mysql_real_query(r,a,b)			mysqlnd_query((r), (a), (b))
+#define mysql_refresh(conn, options)	mysqlnd_refresh((conn), (options))
 #define mysql_rollback(r)				mysqlnd_rollback((r))
 #define mysql_select_db(r,a)			mysqlnd_select_db((r), (a) ,strlen((a)))
 #define mysql_set_server_option(r,o)	mysqlnd_set_server_option((r), (o))
@@ -117,5 +118,15 @@
 #define mysql_get_server_version(r)		mysqlnd_get_server_version((r))
 #define mysql_warning_count(r)			mysqlnd_warning_count((r))
 #define mysql_eof(r)					(((r)->unbuf && (r)->unbuf->eof_reached) || (r)->stored_data)
+
+#define REFRESH_GRANT      MYSQLND_REFRESH_GRANT
+#define REFRESH_LOG        MYSQLND_REFRESH_LOG
+#define REFRESH_TABLES     MYSQLND_REFRESH_TABLES
+#define REFRESH_HOSTS      MYSQLND_REFRESH_HOSTS
+#define REFRESH_STATUS     MYSQLND_REFRESH_STATUS
+#define REFRESH_THREADS    MYSQLND_REFRESH_THREADS
+#define REFRESH_SLAVE      MYSQLND_REFRESH_SLAVE
+#define REFRESH_MASTER     MYSQLND_REFRESH_MASTER
+#define REFRESH_BACKUP_LOG MYSQLND_REFRESH_BACKUP_LOG
 
 #endif /* MYSQLND_LIBMYSQL_COMPAT_H */

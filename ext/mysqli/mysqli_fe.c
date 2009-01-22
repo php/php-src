@@ -178,6 +178,8 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_use_result,							NULL)
 	PHP_FE(mysqli_warning_count,						NULL)
 
+	PHP_FE(mysqli_refresh,							NULL)
+
 	/* Aliases */
 	PHP_FALIAS(mysqli_bind_param,		mysqli_stmt_bind_param,		third_arg_force_by_ref_rest)
 	PHP_FALIAS(mysqli_bind_result,		mysqli_stmt_bind_result,	second_arg_force_by_ref_rest)
@@ -252,6 +254,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(store_result,mysqli_store_result,NULL)
 	PHP_FALIAS(thread_safe,mysqli_thread_safe,NULL)
 	PHP_FALIAS(use_result,mysqli_use_result,NULL)
+	PHP_FALIAS(refresh,mysqli_refresh,NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
