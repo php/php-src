@@ -431,6 +431,15 @@ typedef enum mysqlnd_collected_stats
 
 #define MYSQLND_DEFAULT_PREFETCH_ROWS (ulong) 1
 
+#define MYSQLND_REFRESH_GRANT      1	/* Refresh grant tables */
+#define MYSQLND_REFRESH_LOG        2	/* Start on new log file */
+#define MYSQLND_REFRESH_TABLES     4	/* close all tables */
+#define MYSQLND_REFRESH_HOSTS	   8	/* Flush host cache */
+#define MYSQLND_REFRESH_STATUS     16	/* Flush status variables */
+#define MYSQLND_REFRESH_THREADS    32	/* Flush thread cache */
+#define MYSQLND_REFRESH_SLAVE      64	/* Reset master info and restart slave */
+#define MYSQLND_REFRESH_MASTER     128	/* Remove all bin logs in the index */
+#define MYSQLND_REFRESH_BACKUP_LOG 0x200000L
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */
 

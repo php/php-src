@@ -483,6 +483,7 @@ PHP_FUNCTION(mysqli_embedded_server_start);
 PHP_FUNCTION(mysqli_sqlstate);
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
+PHP_FUNCTION(mysqli_refresh);
 PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_data_seek);
