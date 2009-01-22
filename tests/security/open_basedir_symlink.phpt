@@ -11,30 +11,30 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("symlink");
-$directory = dirname(__FILE__);
 
-$target = ($directory."/test/ok/ok.txt");
+$target = ($initdir."/test/ok/ok.txt");
 var_dump(symlink($target, "../bad/symlink.txt"));
 var_dump(symlink($target, "../symlink.txt"));
 var_dump(symlink($target, "../bad/./symlink.txt"));
 var_dump(symlink($target, "./.././symlink.txt"));
 
-$symlink = ($directory."/test/ok/symlink.txt");
+$symlink = ($initdir."/test/ok/symlink.txt");
 var_dump(symlink("../bad/bad.txt", $symlink));
 var_dump(symlink("../bad", $symlink));
 var_dump(symlink("../bad/./bad.txt", $symlink));
 var_dump(symlink("../bad/bad.txt", $symlink));
 var_dump(symlink("./.././bad", $symlink));
 
-$target = ($directory."/test/ok/ok.txt");
+$target = ($initdir."/test/ok/ok.txt");
 
 var_dump(symlink($target, $symlink));
 var_dump(unlink($symlink));
 
 var_dump(mkdir("ok2"));
-$symlink = ($directory."/test/ok/ok2/ok.txt");
-var_dump(symlink("../ok.txt", $symlink)); // $target == (dirname($symlink)."/".$target) == ($directory."/test/ok/ok.txt");
+$symlink = ($initdir."/test/ok/ok2/ok.txt");
+var_dump(symlink("../ok.txt", $symlink)); // $target == (dirname($symlink)."/".$target) == ($initdir."/test/ok/ok.txt");
 var_dump(unlink($symlink));
 
 test_open_basedir_after("symlink");

@@ -5,11 +5,11 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
-
+$initdir = getcwd();
 test_open_basedir_before("disk_free_space");
 test_open_basedir_error("disk_free_space");     
-$directory = dirname(__FILE__);
-var_dump(disk_free_space($directory."/test/ok"));
+
+var_dump(disk_free_space($initdir."/test/ok"));
 test_open_basedir_after("disk_free_space");
 ?>
 --CLEAN--

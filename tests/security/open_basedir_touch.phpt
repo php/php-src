@@ -5,8 +5,8 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("touch");
-$directory = dirname(__FILE__);
 
 var_dump(touch("../bad"));
 var_dump(touch("../bad/bad.txt"));
@@ -17,7 +17,7 @@ var_dump(touch("../bad/."));
 var_dump(touch("../bad/./bad.txt"));
 var_dump(touch("./../."));
 
-var_dump(touch($directory."/test/ok/ok.txt"));
+var_dump(touch($initdir."/test/ok/ok.txt"));
 var_dump(touch("./ok.txt"));
 var_dump(touch("ok.txt"));
 var_dump(touch("../ok/ok.txt"));
