@@ -84,11 +84,23 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_REPORT_ERROR"				=> true,
 		"MYSQLI_REPORT_OFF"					=> true,
 		"MYSQLI_SET_CHARSET_NAME"			=> true,
+		"MYSQLI_REFRESH_GRANT"				=> true,
+		"MYSQLI_REFRESH_LOG"				=> true,
+		"MYSQLI_REFRESH_TABLES"				=> true,
+		"MYSQLI_REFRESH_HOSTS"				=> true,
+		"MYSQLI_REFRESH_STATUS"				=> true,
+		"MYSQLI_REFRESH_THREADS"			=> true,
+		"MYSQLI_REFRESH_SLAVE"				=> true,
+		"MYSQLI_REFRESH_MASTER"				=> true,
 	);
 
 	/* depends on the build - experimental */
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
 		$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
+	}
+
+	if ($IS_MYSQLND || defined('MYSQLI_REFRESH_BACKUP_LOG')) {
+		$expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 	}
 
 	if ($IS_MYSQLND) {

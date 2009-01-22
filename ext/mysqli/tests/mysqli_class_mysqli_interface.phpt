@@ -45,6 +45,7 @@ require_once('skipifconnectfailure.inc');
 		'real_connect'			=> true,
 		'real_escape_string'		=> true,
 		'real_query'			=> true,
+		'refresh'			=> true,
 		'rollback'			=> true,
 		'select_db'			=> true,
 		'set_charset'			=> true,
