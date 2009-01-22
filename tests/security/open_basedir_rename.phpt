@@ -5,14 +5,14 @@ open_basedir=.
 --FILE--
 <?php
 require_once "open_basedir.inc";
+$initdir = getcwd();
 test_open_basedir_before("rename");
-$directory = dirname(__FILE__);
 
 var_dump(rename("../bad/bad.txt", "rename.txt"));
 var_dump(rename(".././bad/bad.txt", "rename.txt"));
 var_dump(rename("../bad/../bad/bad.txt", "rename.txt"));
 var_dump(rename("./.././bad/bad.txt", "rename.txt"));
-var_dump(rename($directory."/test/bad/bad.txt", "rename.txt"));
+var_dump(rename($initdir."/test/bad/bad.txt", "rename.txt"));
 
 test_open_basedir_after("rename");
 ?>
@@ -44,3 +44,4 @@ bool(false)
 Warning: rename(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [rename] ***
+

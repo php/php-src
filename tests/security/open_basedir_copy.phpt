@@ -6,7 +6,6 @@ open_basedir=.
 <?php
 require_once "open_basedir.inc";
 test_open_basedir_before("copy");
-$directory = dirname(__FILE__);
 
 var_dump(copy("ok.txt", "../bad"));
 var_dump(copy("ok.txt", "../bad/bad.txt"));
@@ -76,3 +75,4 @@ bool(false)
 bool(true)
 bool(true)
 *** Finished testing open_basedir configuration [copy] ***
+
