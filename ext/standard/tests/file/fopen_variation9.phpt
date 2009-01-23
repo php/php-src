@@ -2,8 +2,6 @@
 Test fopen() function : variation: use include path and stream context create a file, relative path
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
---XFAIL--
-Bug #46680
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
@@ -14,14 +12,14 @@ Bug #46680
 
 require_once('fopen_include_path.inc');
 
-echo "*** Testing fopen() : variation ***\n";
-$thisTestDir = "fopenVariation9.dir";
+$thisTestDir =  basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
 $newpath = relative_include_path();
 set_include_path($newpath);
 runtest();
+
 $newpath = generate_next_rel_path();
 set_include_path($newpath);
 runtest();
@@ -32,9 +30,9 @@ chdir("..");
 rmdir($thisTestDir);
 
 function runtest() {
-	$tmpfile = 'fopen_variation7.tmp';
+	$tmpfile =  basename(__FILE__, ".php") . ".tmp";
 	$h = fopen($tmpfile, "w", true);
-	fwrite($h, "This is the test file");
+	fwrite($h, (binary) "This is the test file");
 	fclose($h);
 	
 	
@@ -48,7 +46,7 @@ function runtest() {
 	   unlink($tmpfile);
 	}
 	
-	$h = fopen('dir1/'.$tmpfile, "r");
+	$h = @fopen('dir1/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
 	}
@@ -61,9 +59,8 @@ function runtest() {
 ?>
 ===DONE===
 --EXPECT--
-*** Testing fopen() : variation ***
-Not created in working dir
-created in dir1
-Not created in working dir
-created in dir1
+created in working dir
+Not created in dir1
+created in working dir
+Not created in dir1
 ===DONE===
