@@ -1,5 +1,5 @@
 --TEST--
-Test filetype() function: Check character type
+Test filetype() function: Check block device
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -7,8 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no /dev on Windows');
 }
-if (!file_exists("/dev/console")) {
-    die('skip /dev/console not available);
+if (!file_exists("/dev/ram0")) {
+    die('skip /dev/ram0 not available);
 ?>
 --FILE--
 <?php
@@ -18,11 +18,11 @@ Description: Returns the type of the file. Possible values are fifo, char,
              dir, block, link, file, and unknown. 
 */
 
-echo "-- Checking for char --\n";
-print( filetype("/dev/console") )."\n";
+echo "-- Checking for block --\n";
+print( filetype("/dev/ram0") )."\n";
 ?>
 ===DONE===
 --EXPECTF--
--- Checking for char --
-char
+-- Checking for block --
+block
 ===DONE===
