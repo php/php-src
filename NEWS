@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
 - Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
 - Added SplObjectStorage::addAll/removeAll. (Etienne)
+- Added Windows support for stream_socket_pair(). (Kalle)
 
 - Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
 

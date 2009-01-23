@@ -21,27 +21,51 @@
 
 /* $Id$ */
 
+/* Code originally from ext/sockets */
 
-#ifdef PHP_WIN32
+#include <stdio.h>
+#include <fcntl.h>
 
-#define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
-#define ECONNRESET		WSAECONNRESET
+#include "php.h"
 
-#ifdef errno
-#undef errno
-#endif
+PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2])
+{
+	struct sockaddr_in address;
+	SOCKET redirect;
+	int size = sizeof(address);
 
-#define errno WSAGetLastError()
-#define h_errno WSAGetLastError()
-#define set_errno(a) WSASetLastError(a)
-#define close(a) closesocket(a)
+	if(domain != AF_INET) {
+		WSASetLastError(WSAENOPROTOOPT);
+		return -1;
+	}
 
-struct	sockaddr_un {
-	short	sun_family;
-	char	sun_path[108];
-};
 
-int socketpair(int domain, int type, int protocol, SOCKET sock[2]);
-int inet_aton(const char *cp, struct in_addr *inp);
+	sock[0]				= socket(domain, type, protocol);
+	address.sin_addr.s_addr		= INADDR_ANY;
+	address.sin_family		= AF_INET;
+	address.sin_port		= 0;
 
-#endif
+	bind(sock[0], (struct sockaddr*)&address, sizeof(address));
+
+	if(getsockname(sock[0], (struct sockaddr *)&address, &size) != 0) {
+	}
+
+	listen(sock[0], 2);
+	sock[1] = socket(domain, type, protocol);	
+	address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+	connect(sock[1], (struct sockaddr*)&address, sizeof(address));
+	redirect = accept(sock[0],(struct sockaddr*)&address, &size);
+
+	closesocket(sock[0]);
+	sock[0] = redirect;
+
+	if(sock[0] == INVALID_SOCKET ) {
+		closesocket(sock[0]);
+		closesocket(sock[1]);
+		WSASetLastError(WSAECONNABORTED);
+		return -1;
+	}
+	
+	return 0;
+}
