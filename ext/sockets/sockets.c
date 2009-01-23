@@ -39,8 +39,17 @@
 # include <windows.h>
 # include <Ws2tcpip.h>
 # include "php_sockets.h"
-# include "php_sockets_win.h"
+# include "win32/sockets.h"
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
+# define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
+# define ECONNRESET		WSAECONNRESET
+# ifdef errno
+#  undef errno
+# endif
+# define errno			WSAGetLastError()
+# define h_errno		WSAGetLastError()
+# define set_errno(a)		WSASetLastError(a)
+# define close(a)		closesocket(a)
 #else
 # include "php_sockets.h"
 # include <sys/types.h>
@@ -223,7 +232,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_option, 0, 0, 4)
 	ZEND_ARG_INFO(0, optval)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_SOCKETPAIR) || defined(PHP_WIN32)
+#ifdef HAVE_SOCKETPAIR
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create_pair, 0, 0, 4)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, type)
@@ -254,7 +263,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			arginfo_socket_select)
 	PHP_FE(socket_create,			arginfo_socket_create)
 	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)
-#if defined(HAVE_SOCKETPAIR) || defined(PHP_WIN32)
+#ifdef HAVE_SOCKETPAIR
 	PHP_FE(socket_create_pair,		arginfo_socket_create_pair)
 #endif
 	PHP_FE(socket_accept,			arginfo_socket_accept)
@@ -1857,7 +1866,7 @@ PHP_FUNCTION(socket_set_option)
 }
 /* }}} */
 
-#if defined(HAVE_SOCKETPAIR) || defined(PHP_WIN32)
+#ifdef HAVE_SOCKETPAIR
 /* {{{ proto bool socket_create_pair(int domain, int type, int protocol, array &fd) U
    Creates a pair of indistinguishable sockets and stores them in fds. */
 PHP_FUNCTION(socket_create_pair)
