@@ -9,13 +9,13 @@ Test getimagesize() function : basic functionality
 
 $imagetype_filenames = array(
       // GIF file
-      "GIF image file" => "200x100.GIF",
+      "GIF image file" => "200x100.gif",
 
       //JPEG file
-      "JPEG image file" => "200x100.JPG",
+      "JPEG image file" => "200x100.jpg",
 
       //PNG file
-      "PNG image file" => "200x100.PNG",
+      "PNG image file" => "200x100.png",
     
       //SWF file
       "SWF image file" => "200x100.swf",
@@ -24,7 +24,7 @@ $imagetype_filenames = array(
       "BMP image file" => "200x100.bmp",
       
       //TIFF intel byte order
-      "TIFF intel byte order image file" => "200x100.TIF",
+      "TIFF intel byte order image file" => "200x100.tif",
 
       //JPC file
       "JPC image file" => "test1pix.jpc",
@@ -35,7 +35,6 @@ $imagetype_filenames = array(
       //IFF file
       "IFF image file" => "test4pix.iff"
 );
-
 
 echo "*** Testing getimagesize() : basic functionality ***\n";
 
@@ -50,7 +49,7 @@ foreach($imagetype_filenames as $key => $filename) {
 --EXPECTF--
 *** Testing getimagesize() : basic functionality ***
 
--- GIF image file (200x100.GIF) --
+-- GIF image file (200x100.gif) --
 array(7) {
   [0]=>
   int(200)
@@ -70,7 +69,7 @@ array(7) {
 array(0) {
 }
 
--- JPEG image file (200x100.JPG) --
+-- JPEG image file (200x100.jpg) --
 array(7) {
   [0]=>
   int(200)
@@ -89,10 +88,10 @@ array(7) {
 }
 array(1) {
   [u"APP0"]=>
-  unicode(14)%sJFIF%s
+  unicode(14) "JFIF%s"
 }
 
--- PNG image file (200x100.PNG) --
+-- PNG image file (200x100.png) --
 array(6) {
   [0]=>
   int(200)
@@ -144,7 +143,7 @@ array(6) {
 array(0) {
 }
 
--- TIFF intel byte order image file (200x100.TIF) --
+-- TIFF intel byte order image file (200x100.tif) --
 array(5) {
   [0]=>
   int(200)
