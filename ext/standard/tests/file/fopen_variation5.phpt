@@ -1,7 +1,5 @@
 --TEST--
 Test fopen() function : variation: use include path and stream context (absolute directories in path)
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -14,14 +12,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 
 
-echo "*** Testing fopen() : variation ***\n";
 //create the include directory structure
-$thisTestDir = "fopenVariation5.dir";
+$thisTestDir =  basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
 $workingDir = "workdir";
-$filename = "afile.txt";
+$filename = basename(__FILE__, ".php") . ".tmp";
 $scriptDir = dirname(__FILE__);
 $baseDir = getcwd();
 $secondFile = $baseDir."/dir2/".$filename;
@@ -66,7 +63,7 @@ function test_fopen($mode) {
    
    // create a file in the middle directory
    $h = fopen($secondFile, "w");
-   fwrite($h, "in dir2");
+   fwrite($h, (binary) "in dir2");
    fclose($h);
 
    echo "\n** testing with mode=$mode **\n";
@@ -78,7 +75,7 @@ function test_fopen($mode) {
 
    //create a file in dir1
    $h = fopen($firstFile, "w");
-   fwrite($h, "in dir1");
+   fwrite($h, (binary) "in dir1");
    fclose($h);
    
    //should now read dir1 file
@@ -89,7 +86,7 @@ function test_fopen($mode) {
    
    // create a file in working directory
    $h = fopen($filename, "w");
-   fwrite($h, "in working dir");
+   fwrite($h, (binary) "in working dir");
    fclose($h);
    
    //should still read dir1 file
@@ -101,7 +98,7 @@ function test_fopen($mode) {
    unlink($firstFile);
    unlink($secondFile);
    
-   //should fail to read the file
+   //should read the file in working dir
    $h = fopen($filename, $mode, true);
    fpassthru($h);
    fclose($h);
@@ -109,7 +106,7 @@ function test_fopen($mode) {
    
    // create a file in the script directory
    $h = fopen($scriptFile, "w");
-   fwrite($h, "in script dir");
+   fwrite($h, (binary) "in script dir");
    fclose($h);
    
    //should read the file in script dir
@@ -127,7 +124,6 @@ function test_fopen($mode) {
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing fopen() : variation ***
 
 --- testing include path ---
 
@@ -135,39 +131,21 @@ function test_fopen($mode) {
 in dir2
 in dir1
 in dir1
-
-Warning: fopen(afile.txt): failed to open stream: No such file or directory in %s on line %d
-
-Warning: fpassthru(): supplied argument is not a valid stream resource in %s on line %d
-
-Warning: fclose(): supplied argument is not a valid stream resource in %s on line %d
-
+in working dir
 in script dir
 
 ** testing with mode=r+ **
 in dir2
 in dir1
 in dir1
-
-Warning: fopen(afile.txt): failed to open stream: No such file or directory in %s on line %d
-
-Warning: fpassthru(): supplied argument is not a valid stream resource in %s on line %d
-
-Warning: fclose(): supplied argument is not a valid stream resource in %s on line %d
-
+in working dir
 in script dir
 
 ** testing with mode=rt **
 in dir2
 in dir1
 in dir1
-
-Warning: fopen(afile.txt): failed to open stream: No such file or directory in %s on line %d
-
-Warning: fpassthru(): supplied argument is not a valid stream resource in %s on line %d
-
-Warning: fclose(): supplied argument is not a valid stream resource in %s on line %d
-
+in working dir
 in script dir
 ===DONE===
 
