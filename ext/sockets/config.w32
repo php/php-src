@@ -6,7 +6,7 @@ ARG_ENABLE("sockets", "SOCKETS support", "no");
 if (PHP_SOCKETS != "no") {
 
 	if (CHECK_LIB("ws2_32.lib", "sockets", PHP_SOCKETS)) {
-		EXTENSION('sockets', 'sockets.c php_sockets_win.c');
+		EXTENSION('sockets', 'sockets.c');
 		AC_DEFINE('HAVE_SOCKETS', 1);
 	} else {
 		WARNING("sockets not enabled; libraries and headers not found");

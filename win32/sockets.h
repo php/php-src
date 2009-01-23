@@ -21,55 +21,6 @@
 
 /* $Id$ */
 
+/* Code originally from ext/sockets */
 
-#ifdef PHP_WIN32
-
-#include <stdio.h>
-#include <fcntl.h>
-
-#include "php.h"
-#include "php_sockets.h"
-#include "php_sockets_win.h"
-
-int socketpair(int domain, int type, int protocol, SOCKET sock[2]) {
-	struct sockaddr_in address;
-	SOCKET redirect;
-	int size = sizeof(address);
-
-	if(domain != AF_INET) {
-		set_errno(WSAENOPROTOOPT);
-		return -1;
-	}
-
-
-	sock[0] = socket(domain, type, protocol);
-	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_family		= AF_INET;
-	address.sin_port		= 0;
-
-	bind(sock[0], (struct sockaddr*)&address, sizeof(address));
-	if(getsockname(sock[0], (struct sockaddr *)&address, &size) != 0) {
-
-    }
-
-	listen(sock[0], 2);
-	sock[1] = socket(domain, type, protocol);	
-	address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-	connect(sock[1], (struct sockaddr*)&address, sizeof(address));
-	redirect = accept(sock[0],(struct sockaddr*)&address, &size);
-
-	close(sock[0]);
-	sock[0] = redirect;
-
-	if(sock[0] == INVALID_SOCKET ) {
-		close(sock[0]);
-		close(sock[1]);
-		set_errno(WSAECONNABORTED);
-		return -1;
-	}
-	
-	return 0;
-}
-
-#endif
+PHPAPI int socketpair(int domain, int type, int protocol, SOCKET sock[2]);
