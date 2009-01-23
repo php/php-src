@@ -36,6 +36,7 @@
 typedef unsigned long long php_timeout_ull;
 #else
 #include "win32/select.h"
+#include "win32/sockets.h"
 typedef unsigned __int64 php_timeout_ull;
 #endif
 
