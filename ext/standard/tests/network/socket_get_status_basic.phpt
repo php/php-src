@@ -8,10 +8,10 @@ var_dump(socket_get_status($tcp_socket));
 fclose($tcp_socket);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(7) {
   ["stream_type"]=>
-  string(10) "tcp_socket"
+  string(%d) "tcp_socket%s"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
