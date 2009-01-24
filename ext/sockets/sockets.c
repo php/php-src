@@ -51,7 +51,6 @@
 # define set_errno(a)		WSASetLastError(a)
 # define close(a)		closesocket(a)
 #else
-# include "php_sockets.h"
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <netdb.h>
@@ -67,6 +66,7 @@
 # include <sys/uio.h>
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
+# include "php_sockets.h"
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(sockets)
