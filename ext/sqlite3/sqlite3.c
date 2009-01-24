@@ -794,7 +794,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3::createFunction(string name, mixed callback [, int argcount]))
+/* {{{ proto bool SQLite3::createFunction(string name, mixed callback [, int argcount])
    Allows registration of a PHP function as a SQLite UDF that can be called within SQL statements. */
 PHP_METHOD(sqlite3, createFunction)
 {
@@ -847,7 +847,7 @@ PHP_METHOD(sqlite3, createFunction)
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3::createAggregate(string name, mixed step, mixed final [, int argcount]))
+/* {{{ proto bool SQLite3::createAggregate(string name, mixed step, mixed final [, int argcount])
    Allows registration of a PHP function for use as an aggregate. */
 PHP_METHOD(sqlite3, createAggregate)
 {
@@ -909,6 +909,184 @@ PHP_METHOD(sqlite3, createAggregate)
 	efree(func);
 
 	RETURN_FALSE;
+}
+/* }}} */
+
+typedef struct {
+	sqlite3_blob *blob;
+	size_t		 position;
+	size_t       size;
+} php_stream_sqlite3_data;
+
+static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+	
+	return 0;
+}
+
+static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	if (sqlite3_stream->position + count >= sqlite3_stream->size) {
+		count = sqlite3_stream->size - sqlite3_stream->position;
+		stream->eof = 1;
+	}
+	if (count) {
+		if (sqlite3_blob_read(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
+			return 0;
+		}
+		sqlite3_stream->position += count;
+	}
+	return count;
+}
+
+static int php_sqlite3_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+	
+	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
+		/* Error occured, but it still closed */
+	}
+
+	efree(sqlite3_stream);
+	
+	return 0;
+}
+
+static int php_sqlite3_stream_flush(php_stream *stream TSRMLS_DC)
+{
+	/* do nothing */
+	return 0;
+}
+
+/* {{{ */
+static int php_sqlite3_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+{
+	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+
+	switch(whence) {
+		case SEEK_CUR:
+			if (offset < 0) {
+				if (sqlite3_stream->position < (size_t)(-offset)) {
+					sqlite3_stream->position = 0;
+					*newoffs = -1;
+					return -1;
+				} else {
+					sqlite3_stream->position = sqlite3_stream->position + offset;
+					*newoffs = sqlite3_stream->position;
+					stream->eof = 0;
+					return 0;
+				}
+			} else {
+				if (sqlite3_stream->position + (size_t)(offset) > sqlite3_stream->size) {
+					sqlite3_stream->position = sqlite3_stream->size;
+					*newoffs = -1;
+					return -1;
+				} else {
+					sqlite3_stream->position = sqlite3_stream->position + offset;
+					*newoffs = sqlite3_stream->position;
+					stream->eof = 0;
+					return 0;
+				}
+			}
+		case SEEK_SET:
+			if (sqlite3_stream->size < (size_t)(offset)) {
+				sqlite3_stream->position = sqlite3_stream->size;
+				*newoffs = -1;
+				return -1;
+			} else {
+				sqlite3_stream->position = offset;
+				*newoffs = sqlite3_stream->position;
+				stream->eof = 0;
+				return 0;
+			}
+		case SEEK_END:
+			if (offset > 0) {
+				sqlite3_stream->position = sqlite3_stream->size;
+				*newoffs = -1;
+				return -1;
+			} else if (sqlite3_stream->size < (size_t)(-offset)) {
+				sqlite3_stream->position = 0;
+				*newoffs = -1;
+				return -1;
+			} else {
+				sqlite3_stream->position = sqlite3_stream->size + offset;
+				*newoffs = sqlite3_stream->position;
+				stream->eof = 0;
+				return 0;
+			}
+		default:
+			*newoffs = sqlite3_stream->position;
+			return -1;
+	}
+}
+/* }}} */
+
+
+static int php_sqlite3_stream_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
+{
+	return FAILURE;
+}
+
+static int php_sqlite3_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	/* TODO: fill in details based on Data: and Content-Length: headers, and/or data
+	 * from curl_easy_getinfo().
+	 * For now, return -1 to indicate that it doesn't make sense to stat this stream */
+	return -1;
+}
+
+PHPAPI php_stream_ops	php_stream_sqlite3_ops = {
+	php_sqlite3_stream_write,
+	php_sqlite3_stream_read,
+	php_sqlite3_stream_close,
+	php_sqlite3_stream_flush,
+	"SQLite3",
+	php_sqlite3_stream_seek,
+	php_sqlite3_stream_cast,
+	php_sqlite3_stream_stat
+};
+
+/* {{{ proto resource SQLite3::openBlob(string table, string column, int rowid [, string dbname])
+   Open a blob as a stream which we can read / write to. */
+PHP_METHOD(sqlite3, openBlob)
+{
+	php_sqlite3_db_object *db_obj;
+	zval *object = getThis();
+	char *table, *column, *dbname = "main";
+	int table_len, column_len, dbname_len;
+	long rowid, flags = 0;
+	sqlite3_blob *blob = NULL;
+	php_stream_sqlite3_data *sqlite3_stream;
+	php_stream *stream;
+
+	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
+
+	SQLITE3_CHECK_INITIALIZED(db_obj->initialised, SQLite3)
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|s", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len) == FAILURE) {
+		return;
+	}
+
+	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, flags, &blob) != SQLITE_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open blob: %s", sqlite3_errmsg(db_obj->db));
+		RETURN_FALSE;
+	}
+
+	sqlite3_stream = emalloc(sizeof(php_stream_sqlite3_data));
+	sqlite3_stream->blob = blob;
+	sqlite3_stream->position = 0;
+	sqlite3_stream->size = sqlite3_blob_bytes(blob);
+	
+	stream = php_stream_alloc_rel(&php_stream_sqlite3_ops, sqlite3_stream, 0, "rb");
+
+	if (stream) {
+		php_stream_to_zval(stream, return_value);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1481,6 +1659,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3stmt_execute, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(argingo_sqlite3_openblob, 0, 0, 3)
+	ZEND_ARG_INFO(0, table)
+	ZEND_ARG_INFO(0, column)
+	ZEND_ARG_INFO(0, rowid)
+	ZEND_ARG_INFO(0, dbname)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindparam, 0, 0, 2)
 	ZEND_ARG_INFO(0, param_number)
 	ZEND_ARG_INFO(1, param)
@@ -1530,6 +1715,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		querySingle,		arginfo_sqlite3_querysingle, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		createFunction,		arginfo_sqlite3_createfunction, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		createAggregate,	arginfo_sqlite3_createaggregate, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		openBlob,			argingo_sqlite3_openblob, ZEND_ACC_PUBLIC)
 	/* Aliases */
 	PHP_MALIAS(sqlite3,	__construct, open, arginfo_sqlite3_open, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
