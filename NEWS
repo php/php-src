@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 - Added depth parameter to json_decode() to lower the nesting depth from the
   maximum if required. (Scott)
 - Added ICU support to SQLite3 when using the bundled version. (Scott)
+- Added SQLite3::openBlob() to read a blob value as a stream. (Scott)
 - Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
 - Added SplObjectStorage::addAll/removeAll. (Etienne)
 - Added Windows support for stream_socket_pair(). (Kalle)
@@ -51,8 +52,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #47165 (Possible memory corruption when passing return value by
   reference). (Dmitry)
-- Fixed bug #47145 + #47159 (Always free failed SQLite statements). (Scott)
-- Fixed bug #47141 (Unable to fetch error messages from SQLite
+- Fixed bug #47145 + #47159 (Always free failed SQLite3 statements). (Scott)
+- Fixed bug #47141 (Unable to fetch error messages from SQLite3
   when the database can't be opened). (Scott)
 - Fixed bug #47087 (Second parameter of mssql_fetch_array()). (Felipe)
 - Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
