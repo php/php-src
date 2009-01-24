@@ -43,7 +43,7 @@ PHP_RSHUTDOWN_FUNCTION(sockets);
 
 PHP_FUNCTION(socket_select);
 PHP_FUNCTION(socket_create_listen);
-#ifdef PHP_WIN32
+#ifdef HAVE_SOCKETPAIR
 PHP_FUNCTION(socket_create_pair);
 #endif
 PHP_FUNCTION(socket_accept);
