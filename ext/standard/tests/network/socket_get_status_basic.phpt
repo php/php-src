@@ -8,7 +8,7 @@ var_dump(socket_get_status($tcp_socket));
 fclose($tcp_socket);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(8) {
   [u"stream_type"]=>
   unicode(%d) "tcp_socket%s"
