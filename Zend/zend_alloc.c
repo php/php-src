@@ -399,9 +399,9 @@ struct _zend_mm_heap {
 	size_t              compact_size;
 	zend_mm_segment    *segments_list;
 	zend_mm_storage    *storage;
-	size_t				real_size;
+	size_t              real_size;
 	size_t              real_peak;
-	size_t				limit;
+	size_t              limit;
 	size_t              size;
 	size_t              peak;
 	size_t              reserve_size;
@@ -432,8 +432,8 @@ struct _zend_mm_heap {
 
 #define ZEND_MM_REST_BUCKET(heap) \
 	(zend_mm_free_block*)((char*)&heap->rest_buckets[0] + \
-		        sizeof(zend_mm_free_block*) * 2 - \
-		        sizeof(zend_mm_small_free_block))
+		sizeof(zend_mm_free_block*) * 2 - \
+		sizeof(zend_mm_small_free_block))
 
 #if ZEND_MM_COOKIES
 
