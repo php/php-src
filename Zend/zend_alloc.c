@@ -1804,7 +1804,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	heap->cache_stat[ZEND_MM_NUM_BUCKETS].miss++;
 #endif
 
-    best_fit = zend_mm_search_large_block(heap, true_size);
+	best_fit = zend_mm_search_large_block(heap, true_size);
 
 	if (!best_fit && heap->real_size >= heap->limit - heap->block_size) {
 		zend_mm_free_block *p = heap->rest_buckets[0];
