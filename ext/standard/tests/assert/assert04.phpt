@@ -1,5 +1,11 @@
 --TEST--
 misc assert() tests tests
+---INI---
+assert.active = 1
+assert.warning = 1
+assert.callback = 
+assert.bail = 0
+assert.quiet_eval = 0
 --FILE--
 <?php
 /* Assert not active */
