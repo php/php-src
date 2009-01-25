@@ -158,7 +158,6 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 				efree(result);
 				return NULL;
 			}
-			i++;
 			continue;
 		}
 
