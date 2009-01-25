@@ -164,7 +164,7 @@ static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_
 
 static void zend_mm_mem_mmap_free(zend_mm_storage *storage, zend_mm_segment* segment)
 {
-	munmap(segment, segment->size);
+	munmap((void*)segment, segment->size);
 }
 
 #endif
