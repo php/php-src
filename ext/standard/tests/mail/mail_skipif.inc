@@ -3,7 +3,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
  
 // Change these to make tests run successfully
 $mailbox  = '{localhost}';
-$username = 'webmaster@something.com';
+$username = 'webmaster@example.com';
 $password = 'p4ssw0rd';
 $options = OP_HALFOPEN; // this should be enough to verify server present
 $retries = 0; // dont retry connect on failure
