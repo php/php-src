@@ -14,7 +14,7 @@ var_dump( ezmlm_hash() );
 
 echo "\n-- Testing ezmlm_hash() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( ezmlm_hash("webmaster@something.com", $extra_arg) );
+var_dump( ezmlm_hash("webmaster@example.com", $extra_arg) );
 
 echo "\n-- Testing ezmlm_hash() function with invalid input - ARRAY --\n";
 $array_arg = array(1,2,3,4);
