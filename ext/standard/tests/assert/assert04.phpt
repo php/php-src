@@ -1,5 +1,11 @@
 --TEST--
 misc assert() tests tests
+---INI---
+assert.active = 1
+assert.warning = 1
+assert.callback = 
+assert.bail = 0
+assert.quiet_eval = 0
 --FILE--
 <?php
 /* Assert not active */
@@ -34,7 +40,7 @@ Warning: assert() expects exactly 1 parameter, 2 given in %s on line %d
 
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 
-Warning: assert_options() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: assert_options() expects parameter 1 to be long, %unicode_string_optional% given in %s on line %d
 
 Warning: assert(): Assertion failed in %s on line %d
 
