@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Changed PHP/Zend extensions to use flexible build IDs. (Stas)
 
+- Added support for SSH via libssh2 in cURL. (Pierre)
 - Added support for fnmatch() on Windows. (Pierre)
 - Added support for time_nanosleep() and time_sleep_until() on Windows.
   (Pierre)
