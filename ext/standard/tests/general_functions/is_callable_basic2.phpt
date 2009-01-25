@@ -1,5 +1,5 @@
 --TEST--
-Test is_callable() function
+Test is_callable() function : usage variations - on objects 
 --INI--
 precision=14
 error_reporting = E_ALL & ~E_NOTICE | E_STRICT
@@ -9,24 +9,6 @@ error_reporting = E_ALL & ~E_NOTICE | E_STRICT
    Description: Verify that the contents of a variable can be called as a function
                 In case of objects, $var = array($SomeObject, 'MethodName')
 */
-
-/* Prototype: void check_iscallable( $functions );
-   Description: use iscallable() on given string to check for valid function name
-                returns true if valid function name, false otherwise
-*/
-function check_iscallable( $functions ) {
-  $counter = 1;
-  foreach($functions as $func) {
-    echo "-- Iteration  $counter --\n";
-    var_dump( is_callable($func) );  //given only $var argument
-    var_dump( is_callable($func, TRUE) );  //given $var and $syntax argument
-    var_dump( is_callable($func, TRUE, $callable_name) );
-    var_dump( is_callable($func, FALSE) );  //given $var and $syntax argument
-    var_dump( is_callable($func, FALSE, $callable_name) );
-    echo $callable_name, "\n";
-    $counter++;
-  }
-}
 
 /* Prototype: void check_iscallable_objects( $methods );
    Description: use is_callable() on given $method to check if the array 
@@ -42,71 +24,12 @@ function check_iscallable_objects( $methods ) {
     var_dump( is_callable($method, true) );
     var_dump( is_callable($method, false) );
     var_dump( is_callable($method, true, $callable_name) );
+    echo $callable_name, "\n";
     var_dump( is_callable($method, false, $callable_name) );
     echo $callable_name, "\n";
     $counter++;
   }
 }
-
-echo "\n*** Testing is_callable() on defined functions ***\n";
-/* function name with simple string */
-function someFunction() {
-}
-
-/* function name with mixed string and integer */
-function x123() {
-}
-
-/* function name as NULL */
-function NULL() {
-}
-
-/* function name with boolean name */
-function false() {
-}
-
-/* function name with string and special character */
-function Hello_World() {
-}
-
-$defined_functions = array (
-  $functionVar1 = 'someFunction',
-  $functionVar2 = 'x123',
-  $functionVar3 = 'NULL',
-  $functionVar4 = 'false',
-  $functionVar5 = "Hello_World"
-);
-/* use check_iscallable() to check whether given string is valid function name
- *  expected: true as it is valid callback
- */
-check_iscallable($defined_functions);
-
-echo "\n*** Testing is_callable() on undefined functions ***\n";
-$undef_functions = array (
-  "",  //empty string
-  '',
-  " ",  //string with a space
-  ' ',
-  "12356",
-  "\0",
-  '\0',
-  "hello world",
-  'hello world',
-  "welcome\0",
-  'welcome\0',
-  "==%%%***$$$@@@!!",
-  "false",
-  "\070",
-  '\t',  //escape character
-  '\007',
-  '123',
-  'echo()'
-);
-/* use check_iscallable() to check whether given string is valid function name
- * expected: true with $syntax = TRUE
- *           false with $syntax = FALSE
- */
-check_iscallable($undef_functions);
 
 echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
@@ -203,209 +126,9 @@ foreach($objects as $object) {
   $loop_counter++;
 }
 
-echo "\n*** Testing is_callable() on invalid function names ***\n";
-/* check on unset variables */
-$unset_var = 10;
-unset ($unset_var);
-
-/* opening file resource type */
-$file_handle = fopen (__FILE__, "r");
-
-$variants = array (
-  NULL,  // NULL as argument
-  0,  // zero as argument
-  1234567890,  // positive value
-  -100123456782,  // negative value
-  -2.000000,  // negative float value
-  .567,  // positive float value
-  FALSE,  // boolean value
-  array(1, 2, 3),  // array
-  @$unset_var,
-  @$undef_var,  //undefined variable
-  $file_handle
-);
-/* use check_iscallable() to check whether given variable is valid function name
- *  expected: false
- */
-check_iscallable($variants);
-
-echo "\n*** Testing error conditions ***\n";
-/* passing zero argument */
-var_dump( is_callable() );
-/* passing more than required arguments */
-var_dump( is_callable("string", TRUE, $callable_name, "EXTRA") );
-
-/* closing resources used */
-fclose($file_handle);
-
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--
-*** Testing is_callable() on defined functions ***
--- Iteration  1 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-someFunction
--- Iteration  2 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-x123
--- Iteration  3 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-NULL
--- Iteration  4 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-false
--- Iteration  5 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-Hello_World
-
-*** Testing is_callable() on undefined functions ***
--- Iteration  1 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-
--- Iteration  2 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-
--- Iteration  3 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
- 
--- Iteration  4 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
- 
--- Iteration  5 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-12356
--- Iteration  6 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-
--- Iteration  7 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-\0
--- Iteration  8 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-hello world
--- Iteration  9 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-hello world
--- Iteration  10 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-welcome
--- Iteration  11 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-welcome\0
--- Iteration  12 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-==%%%***$$$@@@!!
--- Iteration  13 --
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-false
--- Iteration  14 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-8
--- Iteration  15 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-\t
--- Iteration  16 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-\007
--- Iteration  17 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-123
--- Iteration  18 --
-bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
-echo()
-
 *** Testing is_callable() on objects ***
 
 ** Testing behavior of is_callable() on static methods **
@@ -419,6 +142,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::foo1
 bool(true)
 object_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 1 --
@@ -426,6 +150,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo2
 bool(false)
 object_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 1 --
@@ -433,6 +158,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo3
 bool(false)
 object_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 1 --
@@ -440,6 +166,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::x123
 bool(true)
 object_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 1 --
@@ -447,6 +174,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::null
 bool(true)
 object_class::null
 -- Innerloop iteration 6 of Outerloop iteration 1 --
@@ -454,6 +182,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::TRUE
 bool(true)
 object_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 1 --
@@ -461,6 +190,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::123
 bool(false)
 object_class::123
 -- Innerloop iteration 8 of Outerloop iteration 1 --
@@ -468,6 +198,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 1 --
@@ -475,6 +206,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 1 --
@@ -486,6 +218,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -496,6 +229,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo1
 bool(false)
 no_member_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 2 --
@@ -503,6 +237,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo2
 bool(false)
 no_member_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 2 --
@@ -510,6 +245,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo3
 bool(false)
 no_member_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 2 --
@@ -517,6 +253,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::x123
 bool(false)
 no_member_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 2 --
@@ -524,6 +261,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::null
 bool(false)
 no_member_class::null
 -- Innerloop iteration 6 of Outerloop iteration 2 --
@@ -531,6 +269,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::TRUE
 bool(false)
 no_member_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 2 --
@@ -538,6 +277,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::123
 bool(false)
 no_member_class::123
 -- Innerloop iteration 8 of Outerloop iteration 2 --
@@ -545,6 +285,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 2 --
@@ -552,6 +293,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 2 --
@@ -563,6 +305,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -573,6 +316,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo1
 bool(false)
 contains_object_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 3 --
@@ -580,6 +324,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo2
 bool(false)
 contains_object_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 3 --
@@ -587,6 +332,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo3
 bool(false)
 contains_object_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 3 --
@@ -594,6 +340,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::x123
 bool(false)
 contains_object_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 3 --
@@ -601,6 +348,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::null
 bool(false)
 contains_object_class::null
 -- Innerloop iteration 6 of Outerloop iteration 3 --
@@ -608,6 +356,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::TRUE
 bool(false)
 contains_object_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 3 --
@@ -615,6 +364,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::123
 bool(false)
 contains_object_class::123
 -- Innerloop iteration 8 of Outerloop iteration 3 --
@@ -622,6 +372,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 3 --
@@ -629,6 +380,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 3 --
@@ -640,6 +392,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -650,6 +403,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo1
 bool(false)
 contains_object_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 4 --
@@ -657,6 +411,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo2
 bool(false)
 contains_object_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 4 --
@@ -664,6 +419,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::foo3
 bool(false)
 contains_object_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 4 --
@@ -671,6 +427,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::x123
 bool(false)
 contains_object_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 4 --
@@ -678,6 +435,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::null
 bool(false)
 contains_object_class::null
 -- Innerloop iteration 6 of Outerloop iteration 4 --
@@ -685,6 +443,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::TRUE
 bool(false)
 contains_object_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 4 --
@@ -692,6 +451,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+contains_object_class::123
 bool(false)
 contains_object_class::123
 -- Innerloop iteration 8 of Outerloop iteration 4 --
@@ -699,6 +459,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 4 --
@@ -706,6 +467,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 4 --
@@ -717,6 +479,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -727,6 +490,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::foo1
 bool(true)
 object_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 5 --
@@ -734,6 +498,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo2
 bool(false)
 object_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 5 --
@@ -741,6 +506,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo3
 bool(false)
 object_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 5 --
@@ -748,6 +514,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::x123
 bool(true)
 object_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 5 --
@@ -755,6 +522,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::null
 bool(true)
 object_class::null
 -- Innerloop iteration 6 of Outerloop iteration 5 --
@@ -762,6 +530,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::TRUE
 bool(true)
 object_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 5 --
@@ -769,6 +538,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::123
 bool(false)
 object_class::123
 -- Innerloop iteration 8 of Outerloop iteration 5 --
@@ -776,6 +546,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 5 --
@@ -783,6 +554,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 5 --
@@ -794,6 +566,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -804,6 +577,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo1
 bool(false)
 no_member_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 6 --
@@ -811,6 +585,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo2
 bool(false)
 no_member_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 6 --
@@ -818,6 +593,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::foo3
 bool(false)
 no_member_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 6 --
@@ -825,6 +601,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::x123
 bool(false)
 no_member_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 6 --
@@ -832,6 +609,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::null
 bool(false)
 no_member_class::null
 -- Innerloop iteration 6 of Outerloop iteration 6 --
@@ -839,6 +617,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::TRUE
 bool(false)
 no_member_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 6 --
@@ -846,6 +625,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::123
 bool(false)
 no_member_class::123
 -- Innerloop iteration 8 of Outerloop iteration 6 --
@@ -853,6 +633,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 6 --
@@ -860,6 +641,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 6 --
@@ -871,6 +653,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -881,6 +664,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::foo1
 bool(true)
 object_class::foo1
 -- Innerloop iteration 2 of Outerloop iteration 7 --
@@ -888,6 +672,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo2
 bool(false)
 object_class::foo2
 -- Innerloop iteration 3 of Outerloop iteration 7 --
@@ -895,6 +680,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::foo3
 bool(false)
 object_class::foo3
 -- Innerloop iteration 4 of Outerloop iteration 7 --
@@ -902,6 +688,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::x123
 bool(true)
 object_class::x123
 -- Innerloop iteration 5 of Outerloop iteration 7 --
@@ -909,6 +696,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::null
 bool(true)
 object_class::null
 -- Innerloop iteration 6 of Outerloop iteration 7 --
@@ -916,6 +704,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+object_class::TRUE
 bool(true)
 object_class::TRUE
 -- Innerloop iteration 7 of Outerloop iteration 7 --
@@ -923,6 +712,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::123
 bool(false)
 object_class::123
 -- Innerloop iteration 8 of Outerloop iteration 7 --
@@ -930,6 +720,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 7 --
@@ -937,6 +728,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 7 --
@@ -948,6 +740,7 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
@@ -958,6 +751,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 2 of Outerloop iteration 8 --
@@ -965,6 +759,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 3 of Outerloop iteration 8 --
@@ -972,6 +767,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 4 of Outerloop iteration 8 --
@@ -979,6 +775,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 5 of Outerloop iteration 8 --
@@ -986,6 +783,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 6 of Outerloop iteration 8 --
@@ -993,6 +791,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 7 of Outerloop iteration 8 --
@@ -1000,6 +799,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 8 of Outerloop iteration 8 --
@@ -1007,6 +807,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 9 of Outerloop iteration 8 --
@@ -1014,6 +815,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+Array
 bool(false)
 Array
 -- Innerloop iteration 10 of Outerloop iteration 8 --
@@ -1025,95 +827,9 @@ bool(true)
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 bool(true)
+object_class::foo1
 
 Strict Standards: Non-static method object_class::foo1() cannot be called statically in %s on line %d
 bool(true)
 object_class::foo1
-
-*** Testing is_callable() on invalid function names ***
--- Iteration  1 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
--- Iteration  2 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-0
--- Iteration  3 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-1234567890
--- Iteration  4 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--100123456782
--- Iteration  5 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
--2
--- Iteration  6 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-0.567
--- Iteration  7 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
--- Iteration  8 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-Array
--- Iteration  9 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
--- Iteration  10 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
--- Iteration  11 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-Resource id #5
-
-*** Testing error conditions ***
-
-Warning: Wrong parameter count for is_callable() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for is_callable() in %s on line %d
-NULL
-Done
+===DONE===
