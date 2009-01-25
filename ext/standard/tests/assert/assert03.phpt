@@ -1,5 +1,11 @@
 --TEST--
 assert() - set callback using ini_set()
+---INI---
+assert.active = 1
+assert.warning = 0
+assert.callback = 
+assert.bail = 0
+assert.quiet_eval = 1
 --FILE--
 <?php
 function a($file,$line,$myev)
