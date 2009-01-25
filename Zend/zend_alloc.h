@@ -78,29 +78,29 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 
 inline static void * __zend_malloc(size_t len)
 {
-  void *tmp = malloc(len);
-  if (tmp) {
-    return tmp;
-  }  
-  fprintf(stderr, "Out of memory\n");
-  exit(1);
+	void *tmp = malloc(len);
+	if (tmp) {
+		return tmp;
+	}
+	fprintf(stderr, "Out of memory\n");
+	exit(1);
 }
 
 inline static void * __zend_calloc(size_t nmemb, size_t len)
 {
-  void *tmp = _safe_malloc(nmemb, len, 0);
-  memset(tmp, 0, len);
-  return tmp;
+	void *tmp = _safe_malloc(nmemb, len, 0);
+	memset(tmp, 0, len);
+	return tmp;
 }
 
 inline static void * __zend_realloc(void *p, size_t len)
 {
-  p = realloc(p, len);
-  if (p) {
-    return p;
-  }  
-  fprintf(stderr, "Out of memory\n");
-  exit(1);
+	p = realloc(p, len);
+	if (p) {
+		return p;
+	}
+	fprintf(stderr, "Out of memory\n");
+	exit(1);
 }
 
 
