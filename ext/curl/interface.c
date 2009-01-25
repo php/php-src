@@ -332,77 +332,64 @@ PHP_MINFO_FUNCTION(curl)
 	sprintf(str, "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
 
-#ifdef CURL_VERSION_IPV6
-	if (d->features & CURL_VERSION_IPV6) {
-		n = sprintf(str, "%s", "IPv6-enabled, ");
-	}
-#endif
+	/* To update on each new cURL release using src/main.c in cURL sources */
+	if(d->features) {
+		struct feat {
+			const char *name;
+			int bitmask;
+		};
 
-#ifdef CURL_VERSION_KERBEROS4
-	if (d->features & CURL_VERSION_KERBEROS4) {
-			n += sprintf(str + n, "%s", "kerberos auth is supported, ");
-	}
-#endif
+		unsigned int i;
 
-#ifdef CURL_VERSION_SSL
-	if (d->features & CURL_VERSION_SSL) {
-			n += sprintf(str + n, "%s", "SSL options are present, ");
-	}
-#endif
-
-#ifdef CURL_VERSION_LIBZ
-	if (d->features & CURL_VERSION_LIBZ) {
-			n += sprintf(str + n, "%s", "libz features are present, ");
-	}
-#endif
-
-#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
-	if (d->features & CURL_VERSION_NTLM) {
-			n += sprintf(str + n, "%s", "NTLM auth is supported, ");
-	}
-	if (d->features & CURL_VERSION_GSSNEGOTIATE) {
-			n += sprintf(str + n, "%s", "Negotiate auth support, ");
-	}
-	if (d->features & CURL_VERSION_DEBUG) {
-			n += sprintf(str + n, "%s", "built with debug capabilities, ");
-	}
-#endif
-
+		static const struct feat feats[] = {
 #if LIBCURL_VERSION_NUM > 0x070a06 /* 7.10.7 */
-	if (d->features & CURL_VERSION_ASYNCHDNS) {
-			n += sprintf(str + n, "%s", "asynchronous dns resolves, ");
-	}
+			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 #endif
-#if LIBCURL_VERSION_NUM > 0x070a07 /* 7.10.8 */
-	if (d->features & CURL_VERSION_SPNEGO) {
-			n += sprintf(str + n, "%s", "SPNEGO auth, ");
-	}
-#endif
-#if LIBCURL_VERSION_NUM > 0x070a09 /* 7.10.1 */
-	if (d->features & CURL_VERSION_LARGEFILE) {
-			n += sprintf(str + n, "%s", "supports files bigger than 2GB, ");
-	}
+#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
+			{"Debug", CURL_VERSION_DEBUG},
+			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
 #endif
 #if LIBCURL_VERSION_NUM > 0x070b02 /* 7.12.0 */
-	if (d->features & CURL_VERSION_IDN) {
-			n += sprintf(str + n, "%s", "International Domain Names support, ");
-	}
+			{"IDN", CURL_VERSION_IDN},
+#endif
+#ifdef CURL_VERSION_IPV6
+			{"IPv6", CURL_VERSION_IPV6},
+#endif
+#if LIBCURL_VERSION_NUM > 0x070a09 /* 7.10.1 */
+			{"Largefile", CURL_VERSION_LARGEFILE},
+#endif
+#if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
+			{"NTLM", CURL_VERSION_NTLM},
+#endif
+#if LIBCURL_VERSION_NUM > 0x070a07 /* 7.10.8 */
+			{"SPNEGO", CURL_VERSION_SPNEGO},
+#endif
+#ifdef CURL_VERSION_SSL
+			{"SSL",  CURL_VERSION_SSL},
 #endif
 #if LIBCURL_VERSION_NUM > 0x070d01 /* 7.13.2 */
-	if (d->features & CURL_VERSION_SSPI) {
-			n += sprintf(str + n, "%s", "SSPI is supported, ");
-	}
+			{"SSPI",  CURL_VERSION_SSPI},
+#endif
+#ifdef CURL_VERSION_KERBEROS4
+			{"krb4", CURL_VERSION_KERBEROS4},
+#endif
+#ifdef CURL_VERSION_LIBZ
+			{"libz", CURL_VERSION_LIBZ},
 #endif
 #if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
-	if (d->features & CURL_VERSION_CONV) {                   
-			n += sprintf(str + n, "%s", "character conversions are supported, ");
-	}
+			{"CharConv", CURL_VERSION_CONV},
 #endif
+			NULL, 0
+		};
 
-	if (n > 3) {
-		str[n - 2] = '\0';
+		php_info_print_table_row(1, "Features");
+		for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
+			if (feats[i].name) {
+				php_info_print_table_row(2, feats[i].name, d->features & feats[i].bitmask ? "Yes" : "No");
+			}
+		}
 	}
-	php_info_print_table_row(2, "Features", str);
+
 	n = 0;
 	p = (char **) d->protocols;
 	while (*p != NULL) {
