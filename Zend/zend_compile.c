@@ -2539,7 +2539,7 @@ void zend_do_early_binding(TSRMLS_D)
 					/* clear unnecessary ZEND_FETCH_CLASS opcode */
 					if (opline > CG(active_op_array)->opcodes &&
 					    (opline-1)->opcode == ZEND_FETCH_CLASS) {
-					  zend_op *fetch_class_opline = opline-1;
+						zend_op *fetch_class_opline = opline-1;
 
 						zval_dtor(&fetch_class_opline->op2.u.constant);
 						fetch_class_opline->opcode = ZEND_NOP;
