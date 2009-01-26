@@ -378,7 +378,7 @@ PHP_MINFO_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
 			{"CharConv", CURL_VERSION_CONV},
 #endif
-			NULL, 0
+			{NULL, 0}
 		};
 
 		php_info_print_table_row(1, "Features");
@@ -1686,14 +1686,13 @@ type_conflict:
 							return 1;
 						}
 						if (type) {
-							type++;
 							error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, key,
 											 CURLFORM_NAMELENGTH, l,
 											 CURLFORM_FILE, postval,
-											 CURLFORM_CONTENTTYPE, type,
+											 CURLFORM_CONTENTTYPE, type + sizeof(";type=") - 1,
 											 CURLFORM_END);
-							*(type - 1) = ';';
+							*type = ';';
 						} else {
 							error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, key,
