@@ -1,3 +1,31 @@
+2009-01-25  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      zend_alloc.c
+      zend_alloc.c:
+      MFH: Fix compiler warning. munmap expects a void pointer.
+
+    * zend_alloc.c:
+      Fix compiler warning. munmap expects a void pointer.
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      MFB: Fix WS
+
+    * zend_alloc.c
+      zend_alloc.h:
+      Fix WS
+
+2009-01-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_2)
+      zend_alloc.c
+      zend_alloc.c:
+      MFH: Patch by David Soria Parra <dsp@php.net>.
+
+    * zend_alloc.c:
+      Patch by David Soria Parra <dsp@php.net>.
+
 2009-01-21  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_2)
