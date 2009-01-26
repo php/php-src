@@ -39,7 +39,9 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/md5.h"
+#include "ext/standard/php_rand.h"
+#include "ext/standard/php_lcg.h"
+#include "main/snprintf.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -669,34 +671,41 @@ PHP_FUNCTION(spl_autoload_functions)
 PHP_FUNCTION(spl_object_hash)
 {
 	zval *obj;
-	char* md5str;
+	char* hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
 		return;
 	}
 	
-	md5str = emalloc(33);
-	php_spl_object_hash(obj, md5str TSRMLS_CC);
+	hash = emalloc(33);
+	php_spl_object_hash(obj, hash TSRMLS_CC);
 	
-	RETVAL_STRING(md5str, 0);
+	RETVAL_STRING(hash, 0);
 }
 /* }}} */
 
-PHPAPI void php_spl_object_hash(zval *obj, char *md5str TSRMLS_DC) /* {{{*/
+PHPAPI void php_spl_object_hash(zval *obj, char *result TSRMLS_DC) /* {{{*/
 {
-	int len;
-	char *hash;
-	PHP_MD5_CTX context;
-	unsigned char digest[16];
+	intptr_t hash_handle, hash_handlers;
+	char *hex;
 
-	len = spprintf(&hash, 0, "%p:%d", Z_OBJ_HT_P(obj), Z_OBJ_HANDLE_P(obj));
+	if (!SPL_G(hash_mask_init)) {
+		if (!BG(mt_rand_is_seeded)) {
+			php_mt_srand(GENERATE_SEED() TSRMLS_CC);
+		}
 
-	md5str[0] = '\0';
-	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, (unsigned char*)hash, len);
-	PHP_MD5Final(digest, &context);
-	make_digest(md5str, digest);
-	efree(hash);
+		SPL_G(hash_mask_handle)   = (intptr_t)(php_mt_rand(TSRMLS_C) >> 1);
+		SPL_G(hash_mask_handlers) = (intptr_t)(php_mt_rand(TSRMLS_C) >> 1);
+		SPL_G(hash_mask_init) = 1;
+	}
+
+	hash_handle   = SPL_G(hash_mask_handle)^(intptr_t)Z_OBJ_HANDLE_P(obj);
+	hash_handlers = SPL_G(hash_mask_handlers)^(intptr_t)Z_OBJ_HT_P(obj);
+
+	spprintf(&hex, 32, "%016x%016x", hash_handle, hash_handlers);
+
+	strlcpy(result, hex, 33);
+	efree(hex);
 }
 /* }}} */
 
@@ -844,6 +853,7 @@ PHP_RINIT_FUNCTION(spl) /* {{{ */
 	SPL_G(autoload_extensions) = NULL;
 	SPL_G(autoload_extensions_len) = 0;
 	SPL_G(autoload_functions) = NULL;
+	SPL_G(hash_mask_init) = 0;
 	return SUCCESS;
 } /* }}} */
 
@@ -858,6 +868,9 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 		zend_hash_destroy(SPL_G(autoload_functions));
 		FREE_HASHTABLE(SPL_G(autoload_functions));
 		SPL_G(autoload_functions) = NULL;
+	}
+	if (SPL_G(hash_mask_init)) {
+		SPL_G(hash_mask_init) = 0;
 	}
 	return SUCCESS;
 } /* }}} */
