@@ -705,7 +705,9 @@ static zval *to_zval_string(encodeTypePtr type, xmlNodePtr data)
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 		}
 	} else {
-		ZVAL_EMPTY_STRING(ret);
+		TSRMLS_FETCH();
+
+		soap_decode_string(ret, "" TSRMLS_CC);
 	}
 	return ret;
 }
@@ -2715,39 +2717,38 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 			ulong int_val;
 
 			zend_hash_get_current_data(data->value.ht, (void **)&temp_data);
-			if (Z_TYPE_PP(temp_data) != IS_NULL) {
-				item = xmlNewNode(NULL, BAD_CAST("item"));
-				xmlAddChild(xmlParam, item);
-				key = xmlNewNode(NULL, BAD_CAST("key"));
-				xmlAddChild(item,key);
-				key_type = zend_hash_get_current_key_ex(data->value.ht, &key_val, &key_len, &int_val, FALSE, NULL);
-				if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_UNICODE) {
-					char *str;
-					TSRMLS_FETCH();
+			item = xmlNewNode(NULL, BAD_CAST("item"));
+			xmlAddChild(xmlParam, item);
+			key = xmlNewNode(NULL, BAD_CAST("key"));
+			xmlAddChild(item,key);
+			key_type = zend_hash_get_current_key_ex(data->value.ht, &key_val, &key_len, &int_val, FALSE, NULL);
+			if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_UNICODE) {
+				char *str;
+				TSRMLS_FETCH();
 
-					if (style == SOAP_ENCODED) {
-						set_xsi_type(key, "xsd:string");
-					}
-					str = soap_encode_string_ex(key_type, key_val, key_len TSRMLS_CC);
-					xmlNodeSetContent(key, BAD_CAST(str));
-					efree(str);
-				} else {
-					smart_str tmp = {0};
-					smart_str_append_long(&tmp, int_val);
-					smart_str_0(&tmp);
-
-					if (style == SOAP_ENCODED) {
-						set_xsi_type(key, "xsd:int");
-					}
-					xmlNodeSetContentLen(key, BAD_CAST(tmp.c), tmp.len);
-
-					smart_str_free(&tmp);
+				if (style == SOAP_ENCODED) {
+					set_xsi_type(key, "xsd:string");
 				}
+				str = soap_encode_string_ex(key_type, key_val, key_len TSRMLS_CC);
+				xmlNodeSetContent(key, BAD_CAST(str));
+				efree(str);
+			} else {
+				smart_str tmp = {0};
+				smart_str_append_long(&tmp, int_val);
+				smart_str_0(&tmp);
 
-				xparam = master_to_xml(get_conversion((*temp_data)->type), (*temp_data), style, item);
+				if (style == SOAP_ENCODED) {
+					set_xsi_type(key, "xsd:int");
+				}
+				xmlNodeSetContentLen(key, BAD_CAST(tmp.c), tmp.len);
 
-				xmlNodeSetName(xparam, BAD_CAST("value"));
+				smart_str_free(&tmp);
 			}
+
+			xparam = master_to_xml(get_conversion((*temp_data)->type), (*temp_data), style, item);
+
+			xmlNodeSetName(xparam, BAD_CAST("value"));
+
 			zend_hash_move_forward(data->value.ht);
 		}
 	}
