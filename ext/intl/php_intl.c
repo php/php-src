@@ -62,6 +62,8 @@
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
 
+#include "idn/idn.h"
+
 #include "msgformat/msgformat.h"
 #include "common/common_error.h"
 
@@ -316,6 +318,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, calendar)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_utf8, 0, 0, 1)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ intl_functions
@@ -422,6 +436,10 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( grapheme_stristr, grapheme_strstr_args )
 	PHP_FE( grapheme_extract, grapheme_extract_args )
 
+	/* IDN functions */
+	PHP_FE(idn_to_ascii, arginfo_idn_to_ascii)
+	PHP_FE(idn_to_utf8, arginfo_idn_to_ascii)
+
 	/* common functions */
 	PHP_FE( intl_get_error_code, intl_0_args )
 	PHP_FE( intl_get_error_message, intl_0_args )
@@ -521,12 +539,15 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose ICU error codes to PHP scripts. */
 	intl_expose_icu_error_codes( INIT_FUNC_ARGS_PASSTHRU );
 
+	/* Expose IDN constants to PHP scripts. */
+	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
 
 	/* Set the default_locale value */
-    	if( INTL_G(default_locale) == NULL ) {
-        	INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
+	if( INTL_G(default_locale) == NULL ) {
+		INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
 	}
 
 	return SUCCESS;
