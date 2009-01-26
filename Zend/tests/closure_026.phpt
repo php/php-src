@@ -32,18 +32,7 @@ object(foo)#%d (1) {
   ["a"]=>
   array(1) {
     [0]=>
-    object(Closure)#%d (1) {
-      ["this"]=>
-      object(foo)#%d (1) {
-        ["a"]=>
-        array(1) {
-          [0]=>
-          object(Closure)#%d (1) {
-            ["this"]=>
-            *RECURSION*
-          }
-        }
-      }
+    object(Closure)#%d (0) {
     }
   }
 }
@@ -52,21 +41,7 @@ int(1)
 string(1) "a"
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
-    ["this"]=>
-    object(foo)#%d (1) {
-      ["a"]=>
-      array(1) {
-        [0]=>
-        object(Closure)#%d (1) {
-          ["this"]=>
-          object(foo)#%d (1) {
-            ["a"]=>
-            *RECURSION*
-          }
-        }
-      }
-    }
+  object(Closure)#%d (0) {
   }
 }
 int(1)

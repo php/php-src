@@ -53,7 +53,6 @@ Array
                 (
                     [0] => Closure Object
                         (
-                            [this] => 
                             [parameter] => Array
                                 (
                                     [$param] => <required>
