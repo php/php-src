@@ -61,6 +61,9 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	zval         autoload_extensions;
 	HashTable *  autoload_functions;
 	int          autoload_running;
+	intptr_t     hash_mask_handle;
+	intptr_t     hash_mask_handlers;
+	int          hash_mask_init;
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
