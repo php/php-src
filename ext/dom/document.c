@@ -1687,7 +1687,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int optio
 			EG(error_reporting) = old_error_reporting;
 		}
 		/* If loading from memory, set the base reference uri for the document */
-		if (ret->URL == NULL && ctxt->directory != NULL) {
+		if (ret && ret->URL == NULL && ctxt->directory != NULL) {
 			ret->URL = xmlStrdup(ctxt->directory);
 		}
 	} else {
