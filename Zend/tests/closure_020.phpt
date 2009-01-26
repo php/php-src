@@ -27,22 +27,7 @@ object(foo)#%d (%d) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure)#%d (2) {
-    ["this"]=>
-    object(foo)#%d (2) {
-      ["test":"foo":private]=>
-      int(3)
-      ["a"]=>
-      object(Closure)#%d (2) {
-        ["this"]=>
-        *RECURSION*
-        ["static"]=>
-        array(1) {
-          ["a"]=>
-          *RECURSION*
-        }
-      }
-    }
+  object(Closure)#%d (1) {
     ["static"]=>
     array(1) {
       ["a"]=>
@@ -50,9 +35,7 @@ object(foo)#%d (%d) {
         ["test":"foo":private]=>
         int(3)
         ["a"]=>
-        object(Closure)#%d (2) {
-          ["this"]=>
-          *RECURSION*
+        object(Closure)#%d (1) {
           ["static"]=>
           array(1) {
             ["a"]=>

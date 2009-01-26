@@ -1389,7 +1389,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	CG(labels) = NULL;
 }
 
-void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC)
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference TSRMLS_DC)
 {
 	znode          function_name;
 	zend_op_array *current_op_array = CG(active_op_array);
@@ -1409,9 +1409,6 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	zval_dtor(&current_op->op2.u.constant);
 	ZVAL_LONG(&current_op->op2.u.constant, zend_hash_func(Z_STRVAL(current_op->op1.u.constant), Z_STRLEN(current_op->op1.u.constant)));
 	current_op->result = *result;
-	if (is_static) {
-	    CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
-	}
 	CG(active_op_array)->fn_flags |= ZEND_ACC_CLOSURE;
 }
 
