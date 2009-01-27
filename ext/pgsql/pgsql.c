@@ -3454,7 +3454,7 @@ PHP_FUNCTION(pg_copy_from)
 	ExecStatusType status;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rs/a|ss",
+	if (zend_parse_parameters(argc TSRMLS_CC, "rsa|ss",
 							  &pgsql_link, &table_name, &table_name_len, &pg_rows,
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
 		return;
