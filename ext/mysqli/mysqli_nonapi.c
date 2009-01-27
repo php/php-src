@@ -177,9 +177,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							mysqlnd_end_psession(mysql->mysql);
 #endif	
 							/* reset variables */
-							/* todo: option for ping or change_user */
 
-#if G0
+#ifndef MYSQLI_NO_CHANGE_USER_ON_PCONNECT
 							if (!mysql_change_user(mysql->mysql, username, passwd, dbname)) {
 #else
 							if (!mysql_ping(mysql->mysql)) {
