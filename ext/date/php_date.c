@@ -707,8 +707,8 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 #define DATE_TZ_ERRMSG \
-	"It is not safe to rely on the system's timezone settings. Please use " \
-	"the date.timezone setting, the TZ environment variable or the " \
+	"It is not safe to rely on the system's timezone settings. You are " \
+	"*required* to use the date.timezone setting or the " \
 	"date_default_timezone_set() function. In case you used any of those " \
 	"methods and you are still getting this warning, you most likely " \
 	"misspelled the timezone identifier. "
@@ -845,7 +845,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 			tzid = "UTC";
 		}
 		
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead", tzid, ta ? ta->tm_zone : "Unknown", ta ? (float) (ta->tm_gmtoff / 3600) : 0, ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%s/%.1f/%s' instead", tzid, ta ? ta->tm_zone : "Unknown", ta ? (float) (ta->tm_gmtoff / 3600) : 0, ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
 		return tzid;
 	}
 #endif
@@ -864,7 +864,7 @@ php_win_std_time:
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/no DST' instead", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/no DST' instead", tzid, ((tzi.Bias + tzi.StandardBias) / -60.0));
 				break;
 
 			/* DST in effect */
@@ -878,7 +878,7 @@ php_win_std_time:
 				if (! tzid) {
 					tzid = "UTC";
 				}
-				php_error_docref(NULL TSRMLS_CC, E_STRICT, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/DST' instead", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected '%s' for '%.1f/DST' instead", tzid, ((tzi.Bias + tzi.DaylightBias) / -60.0));
 				break;
 		}
 		return tzid;
