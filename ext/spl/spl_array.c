@@ -1725,7 +1725,7 @@ int spl_array_unserialize(zval **object, zend_class_entry *ce, const unsigned ch
 		zval *zdata;
 		php_unserialize_data_t *before;
 		MAKE_STD_ZVAL(zdata);
-		ZVAL_STRINGL(zdata, buf, buf_len, 1);
+		ZVAL_STRINGL(zdata, (char *)buf, buf_len, 1);
 
 		before = intern->unserialize_data;
 		intern->unserialize_data = (php_unserialize_data_t *)data;
