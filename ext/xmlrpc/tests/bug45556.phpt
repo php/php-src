@@ -25,16 +25,7 @@ xmlrpc_server_call_method ($server, $request, NULL, $options);
 
 ?>
 --EXPECTF--
-
 Warning: xmlrpc_server_call_method(): Invalid callback 'foobar' passed in %s on line %d
-expat reports error code 5
-	description: Invalid document end
-	line: 1
-	column: 1
-	byte index: 0
-	total bytes: 0
-
-	data beginning 0 before byte index: foo
  
 Warning: xmlrpc_server_call_method(): xml parse error: [line 1, column 1, message: Invalid document end] Unable to add introspection data returned from bar::test() in %s on line %d
 
