@@ -11,7 +11,7 @@ fclose($tcp_socket);
 --EXPECTF--
 array(7) {
   ["stream_type"]=>
-  string(%d) "tcp_socket%s"
+  string(%d) "tcp_socket%S"
   ["mode"]=>
   string(2) "r+"
   ["unread_bytes"]=>
