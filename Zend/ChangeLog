@@ -1,3 +1,28 @@
+2009-01-26  Christian Seiler  <chris_se@gmx.net>
+
+    * (PHP_5_3)
+      zend_closures.c
+      zend_closures.h
+      zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/closure_005.phpt
+      tests/closure_007.phpt
+      tests/closure_020.phpt
+      tests/closure_026.phpt
+      tests/closure_032.phpt:
+      [DOC] Remove $this support in closures for PHP 5.3 beta 1
+      - Implementation notes here:
+        http://wiki.php.net/rfc/closures/removal-of-this
+
+2009-01-26  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_2)
+      zend_compile.c:
+      Fix indention
+
 2009-01-25  David Soria Parra  <dsoria@gmx.net>
 
     * (PHP_5_2)
