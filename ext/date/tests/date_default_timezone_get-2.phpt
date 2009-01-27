@@ -1,5 +1,7 @@
 --TEST--
 date_default_timezone_get() function [2]
+--INI--
+date.timezone=
 --FILE--
 <?php
 	putenv('TZ=');
