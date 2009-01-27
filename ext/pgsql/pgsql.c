@@ -1735,7 +1735,7 @@ PHP_FUNCTION(pg_field_table)
 	char *table_name;
 	zend_rsrc_list_entry *field_table;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|b!", &result, &fnum, &return_oid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|b", &result, &fnum, &return_oid) == FAILURE) {
 		return;
 	}
 
