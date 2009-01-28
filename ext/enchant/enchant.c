@@ -22,8 +22,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#if PHP_WIN32
 #include <glib/glist.h>
 #include <glib/ghash.h>
+#endif
 #include <enchant.h>
 #include "php.h"
 #include "php_ini.h"
@@ -435,7 +437,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
-	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl TSRMLS_CC)) {
+	if (php_check_open_basedir(pwl TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
