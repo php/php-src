@@ -8,6 +8,7 @@ if test "$PHP_PHAR" != "no"; then
   PHP_C_BIGENDIAN
   if test $ac_cv_c_bigendian_php = yes; then
     AC_MSG_WARN([Disabling Phar due to crash bugs on big endian systems])
+    PHP_PHAR=no
   else
   PHP_NEW_EXTENSION(phar, util.c tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared)
   AC_MSG_CHECKING([for phar openssl support])
