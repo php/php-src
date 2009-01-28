@@ -17,7 +17,7 @@ var_dump($matches1);
 --EXPECT--
 
 $string_before looks like: /this *-has \ metacharacters^ in $
-$string_after looks like: \/this \*-has \\ metacharacters\^ in \$, with metacharacters and / (set as delimiter) escaped
+$string_after looks like: \/this \*\-has \\ metacharacters\^ in \$, with metacharacters and / (set as delimiter) escaped
 int(1)
 array(1) {
   [0]=>

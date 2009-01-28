@@ -1661,6 +1661,7 @@ static PHP_FUNCTION(preg_quote)
 			case '<':
 			case '|':
 			case ':':
+			case '-':
 				*q++ = '\\';
 				*q++ = c;
 				break;
