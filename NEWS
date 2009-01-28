@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Deprecated session_register(), session_unregister() and
   session_is_registered(). (Hannes)
 
+- Disabled Phar for big endian systems due to various crash bugs. (Scott)
+
 - Improved DNS API
  . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
    getmxrr(). (Pierre)
