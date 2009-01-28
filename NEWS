@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.3.0 Alpha 4
+29 Jan 2009, PHP 5.3.0 Beta 1
 - Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
 
 - Deprecated session_register(), session_unregister() and
