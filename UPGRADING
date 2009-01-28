@@ -1,548 +1,403 @@
 $Id$
 
-UPGRADE NOTES - PHP 5.1
-
-1. Changes in reference handling
-     a. Overview
-     b. Code that worked under PHP 4.3, but now fails
-     c. Code that was valid under PHP 4.3, but now throws an error
-     d. Code that failed under PHP 4.3, but now works
-     e. Code that 'should have worked' under PHP 5.0
-     f. Warnings that came and went
-2. Reading []
-3. instanceof, is_a(), is_subclass_of(), catch
-4. Integer values in function parameters
-5. Abstract private methods
-6. Access modifiers in interfaces
-7. Changes in inheritance rules
-8. Class constants
-9. Extensions
-     a. Extensions that are gone from the PHP core
-     b. Class constants in new PHP 5.1 extensions
-10. Date/time support
-11. Changes in database support
-     a. PDO overview
-     b. Changes in MySQL support
-     c. Changes in SQLite support
-12. Further migration information
-13. Checking for E_STRICT errors
-
-===============================================================================
-
-1. Changes in reference handling
-================================
-
-1a. Overview
-============
-
-From the PHP script writer's point of view, the change most likely to impact
-legacy code is in the way that references are handled in all PHP versions
-post-dating the PHP 4.4.0 release.
-
-Until and including PHP 4.3, it was possible to send, assign or return variables
-by reference that should really be returned by value, such as a constant, a
-temporary value (e.g. the result of an expression), or the result of a function
-that had itself been returned by value, as here:
-
-<?php
-
-$foo = "123";
-
-function return_value() {
-    global $foo;
-    return $foo;
-}
-
-$bar = &return_value();
-
-?>
-
-Although this code would usually work as expected under PHP 4.3, in the general
-case the result is undefined. The Zend Engine could not act correctly on these
-values as references. This bug could and did lead to various hard-to-reproduce
-memory corruption problems, particularly where the code base was large.
-
-In PHP 4.4.0, PHP 5.0.4 and all subsequent PHP releases, the Engine was fixed
-to 'know' when the reference operation is being used on a value that should
-not be referenced. The actual value is now used in such cases, and a warning
-is emitted. The warning takes the form of an E_NOTICE in PHP 4.4.0 and up,
-and E_STRICT in PHP 5.0.4 and up.
-
-Code that could potentially produce memory corruption can no longer do so.
-However, some legacy code might work differently as a result.
-
-1b. Code that worked under PHP 4.3, but now fails
-=================================================
-
-<?php
-
-function func(&$arraykey) {
-    return $arraykey; // function returns by value!
-}
-
-$array = array('a', 'b', 'c');
-foreach (array_keys($array) as $key) {
-    $y = &func($array[$key]);
-    $z[] =& $y;
-}
-
-var_dump($z);
-
-?>
-Running the above script under any version of PHP that pre-dates the reference
-fix would produce this output:
-
-array(3) {
-  [0]=>
-  &string(1) "a"
-  [1]=>
-  &string(1) "b"
-  [2]=>
-  &string(1) "c"
-}
-
-Following the reference fix, the same code would result in:
-
-array(3) {
-  [0]=>
-  &string(1) "c"
-  [1]=>
-  &string(1) "c"
-  [2]=>
-  &string(1) "c"
-}
-
-This is because, following the changes, func() assigns by value. The value
-of $y is re-assigned, and reference-binding is preserved from $z. Prior
-to the fix, the value was assigned by reference, leading $y to be
-re-bound on each assignment. The attempt to bind to a temporary value
-by reference was the cause of the memory corruption.
-
-Such code can be made to work identically in both the pre-fix and the
-post-fix PHP versions. The signature of func() can be altered to return
-by reference, or the reference assignment can be removed from the result
-of func().
-
-<?php
-
-function func() {
-    return 'function return';
-}
-
-$x = 'original value';
-$y =& $x;
-$y = &func();
-echo $x;
-
-?>
-
-In PHP 4.3 $x would be 'original value', whereas after the changes it would
-be 'function return' - remember that where the function does not return by
-reference, the reference assignment is converted to a regular assignment.
-Again, this can be brought to a common base, either by forcing func() to
-return by reference or by eliminating the by-reference assignment.
-
-1c. Code that was valid under PHP 4.3, but now throws an error
-==============================================================
-
-<?php
-
-class Foo {
-
-    function getThis() {
-        return $this;
-    }
-
-    function destroyThis() {
-        $baz =& $this->getThis();
-    }
-}
-
-$bar = new Foo();
-$bar->destroyThis();
-var_dump($bar);
-
-?>
-
-In PHP 5.0.3, $bar evaluated to NULL instead of returning an object.
-That happened because getThis() returns by value, but the value here
-is assigned by reference. Although it now works in the expected way,
-this is actually invalid code which will throw an E_NOTICE under
-PHP 4.4 or an E_STRICT under PHP 5.0.4 and up.
-
-1d. Code that failed under PHP 4.3, but now works
-=================================================
-
-<?php
-
-function &f() {
-    $x = "foo";
-    var_dump($x);
-    print "$x\n";
-    return($a);
-}
-
-for ($i = 0; $i < 3; $i++) {
-    $h = &f();
-}
-
-?>
-
-In PHP 4.3 the third call to var_dump produces NULL, due to the memory
-corruption caused by returning an uninitialized value by reference.
-This is valid code in PHP 5.0.4 and up, but threw errors in earlier
-releases of PHP.
-
-<?php
-
-$arr = array('a1' => array('alfa' => 'ok'));
-$arr =& $arr['a1'];
-echo '-'.$arr['alfa']."-\n";
-
-?>
-
-Until PHP 5.0.5, it wasn't possible to assign an array element by
-reference in this way. It now is.
-
-1e. Code that 'should have worked' under PHP 5.0
-================================================
-
-There are a couple of instances of bugs reported under PHP 5.0 prior
-to the reference fixes which now 'work'. However, in both cases errors
-are thrown by PHP 5.1, because the code was invalid in the first place.
-Returning values by reference using self:: now works in the general
-case but throws an E_STRICT warning, and although your mileage may
-vary when assigning by reference to an overloaded object, you will
-still see an E_ERROR when you try it, even where the assignment
-itself appears to work.
-
-1f. Warnings that came and went
-===============================
-
-<?php
-
-function & foo() {
-    $var = 'ok';
-    return $var;
-}
-
-function & bar() {
-    return foo();
-}
-
-$a =& bar();
-echo "$a\n";
-
-?>
-
-Nested calls to functions returning by reference are valid code under both
-PHP 4.3 and PHP 5.1, but threw an unwarranted E_NOTICE or E_STRICT under
-the intervening PHP releases.
-
-2. Reading []
-=============
-
-<?php
-
-class XmlTest {
-
-    function test_ref(&$test) {
-        $test = "ok";
-    }
-
-    function test($test) { }
-
-    function run() {
-        $ar = array();
-        $this->test_ref($ar[]);
-        var_dump($ar);
-        $this->test($ar[]);
-    }
-}
-
-$o = new XmlTest();
-$o->run();
-
-?>
-
-This should always have thrown a fatal E_ERROR, because [] cannot be used
-for reading in PHP. It is invalid code in PHP 4.4.2 and PHP 5.0.5 upward.
-
-3. instanceof, is_a(), is_subclass_of(), catch
-==============================================
-
-In PHP 5.0, is_a() was deprecated and replaced by the "instanceof" operator.
-There were some issues with the initial implementation of "instanceof", which
-relied on __autoload() to search for missing classes. If the class was not
-present, "instanceof" would throw a fatal E_ERROR due to the failure of
-__autoload() to discover that class. The same behaviour occurred in the
-"catch" operator and the is_subclass_of() function, for the same reason.
-
-None of these functions or operators call __autoload() in PHP 5.1, and
-the class_exists() workarounds used in code written for PHP 5.0, while
-not problematic in any way, are no longer necessary.
-
-4. Integer values in function parameters
-========================================
-
-With the advent of PHP 5.0, a new parameter parsing API was introduced
-which is used by a large number of PHP functions. In all versions of
-PHP between 5.0 and 5.1, the handling of integer values was very strict
-and would reject non-well formed numeric values when a PHP function
-expected an integer. These checks have now been relaxed to support
-non-well formed numeric strings such as " 123" and "123 ", and will
-no longer fail as they did under PHP 5.0. However, to promote code
-safety and input validation, PHP functions will now emit an E_NOTICE
-when such strings are passed as integers.
-
-5. Abstract private methods
-===========================
-
-Abstract private methods were supported between PHP 5.0.0 and PHP 5.0.4,
-but were then disallowed on the grounds that the behaviours of 'private'
-and 'abstract' are mutually exclusive.
-
-6. Access modifiers in interfaces
-=================================
-
-Under PHP 5.0, function declarations in interfaces were treated in exactly
-the same way as function declarations in classes. This has not been the case
-since October 2004, at which point only the 'public' access modifier was
-allowed in interface function declarations. Since April 2005 - which pre-dates
-the PHP 5.0b1 release - the 'static' modifier has also been allowed. However,
-the 'protected' and 'private' modifiers will now throw an E_ERROR, as will
-'abstract'. Note that this change should not affect your existing code, as
-none of these modifiers makes sense in the context of interfaces anyway.
-
-7. Changes in inheritance rules
-===============================
-
-Under PHP 5.0, it was possible to have a function declaration in a derived class
-that did not match the declaration of the same function in the base class, e.g.
-
-class Base {
-    function &return_by_ref() {
-        $r = 1;
-        return $r;
-    }
-}
-
-class Derived extends Base {
-    function return_by_ref() {
-        return 1;
-    }
-}
-
-This code will cause an E_STRICT error to be emitted under PHP 5.1.
-
-8. Class constants
-==================
-
-Under PHP 5.0, the following code was valid:
-
-<?php
-
-class test {
-    const foobar = 'foo';
-    const foobar = 'bar';
-}
-
-?>
-
-Under PHP 5.1, redefinition of a class constant will throw a fatal E_ERROR.
-
-9. Extensions
-=============
-
-9a. Extensions that are gone from the PHP core
-==============================================
-
-One of the first things you're likely to notice when you download PHP 5.1 is that
-several of the older extensions have disappeared. Those extensions that are still
-actively maintained are available in the PHP Extension Community Library (PECL),
-at http://pecl.php.net. Windows binaries are built regularly, and you can obtain
-the binaries for PECL extensions built against PHP 5.1 from
-http://pecl4win.php.net/list.php/5_1.
-
-Extension           Alternative/status
-=========           ========================
-ext/cpdf            pecl/pdflib
-ext/dbx             pecl/dbx
-ext/dio             pecl/dio
-ext/fam             not actively maintained
-ext/ingres_ii       pecl/ingres
-ext/ircg            not actively maintained
-ext/mcve            pecl/mcve
-ext/mnogosearch     not actively maintained
-ext/oracle          ext/oci8 or ext/pdo_oci
-ext/ovrimos         not actively maintained
-ext/pfpro           not actively maintained
-                    - alternatives at http://pecl.php.net/packages.php?catpid=18&catname=Payment
-ext/w32api          pecl/ffi
-ext/yp              not actively maintained
-sapi/activescript   http://pecl4win.php.net/ext.php/php5activescript.dll (PECL package)
-                    or pecl/activescript (CVS)
-
-Modules in PECL that are not actively maintained (i.e. have not been supported
-for some time, have no active maintainer working on them currently, and do not
-have any PECL package releases), are still available in CVS at
-http://cvs.php.net/pecl/. However, unreleased PHP modules are by their nature
-unsupported, and your mileage may vary when attempting to install or use them.
-
-9b. Class constants in new PHP 5.1 extensions
-=============================================
-
-The Zend Engine 2.1 API allows extension developers to declare class constants
-in object oriented extensions. New extensions written for PHP 5.1, including SPL,
-PDO, ext/XMLReader and ext/date, have their constants in the format
-
-PDO::CLASS_CONSTANT
-
-rather than in the C format
-
-PDO_CLASS_CONSTANT
-
-in order to minimise pollution of the global namespace in PHP.
-
-10. Date/time support
-====================
-
-Date/time support has been fully rewritten in PHP 5.1, and no longer
-uses the system settings to 'know' the timezone in operation. It will
-instead utilize, in the following order:
-
-* The timezone set using the date_default_timezone_set() function (if any)
-* The TZ environment variable (if non empty)
-* The date.timezone ini option (if set)
-* "magical" guess (if the operating system supports it)
-* If none of the above options succeeds, UTC
-
-To ensure accuracy (and avoid an E_STRICT warning), you will need to define
-your timezone in your php.ini using the following format:
-
-date.timezone = Europe/London
-
-The supported timezones are listed, in this format, in the PHP manual at
-http://www.php.net/manual/en/timezones.php.
-
-11. Changes in database support
-==============================
-
-11a. PDO overview
-================
-
-PHP Data Objects (PDO) were introduced as a PECL extension under PHP 5.0,
-and became part of the core PHP distribution in PHP 5.1. The PDO extension
-provides a consistent interface for database access, and is used alongside
-database-specific PDO drivers. Each driver may also have database-specific
-functions of its own, but basic data access functionality such as issuing
-queries and fetching data is covered by PDO functions, using the driver
-named in PDO::__construct().
-
-Note that the PDO extension, and its drivers, are intended to be built as
-shared extensions. This will enable straightforward driver upgrades from
-PECL, without forcing you to rebuild all of PHP.
-
-At the point of the PHP 5.1 release, PDO is more than ready for widespread
-testing and could be adopted in most situations. However, it is important
-to understand that PDO and its drivers are comparatively young and may be
-missing certain database-specific features; evaluate PDO carefully before
-you use it in new projects.
-
-Legacy code will generally rely on the pre-existing database extensions,
-which are still maintained.
-
-There is more in-depth information about the PDO extension in the manual
-at http://www.php.net/manual/ref.pdo.php.
-
-11b. Changes in MySQL support
-============================
-
-In PHP 4, MySQL 3 support was built-in. With the release of PHP 5.0 there
-were two MySQL extensions, named 'mysql' and 'mysqli', which were designed
-to support MySQL < 4.1 and MySQL 4.1 and up, respectively. With the
-introduction of PDO, which provides a very fast interface to all the
-database APIs supported by PHP, the PDO_MYSQL driver can support any
-of the current versions (MySQL 3, 4 or 5) in PHP code written for PDO,
-depending on the MySQL library version used during compilation. The
-older MySQL extensions remain in place for reasons of back compatibility,
-but are not enabled by default.
-
-11c. Changes in SQLite support
+UPGRADE NOTES - PHP 5.3
+
+1. Reserved words and classes
+2. Changes made to existing functions
+3. Changes made to existing methods
+4. Changes made to existing classes
+5. Deprecated
+6. Undeprecated
+7. Extensions:
+     a. moved out to PECL and actively maintained there
+     b. no longer maintained
+     c. with changed behaviour
+     d. no longer possible to disable
+8. Changes in SAPI support
+9. Changes in INI directives
+10. Syntax additions
+11. Windows support
+12. New in PHP 5.3:
+     a. New libraries
+     b. New extensions
+     c. New stream wrappers
+     d. New functions
+     e. New global constants
+     f. New classes
+     g. New methods
+     h. New class constants
+
+=============================
+1. Reserved words and classes
 =============================
 
-In PHP 5.0, SQLite 2 support was provided by the built-in sqlite
-extension, which was also available as a PECL extension in PHP 4.3
-and PHP 4.4. With the introduction of PDO, the sqlite extension doubles
-up to act as a 'sqlite2' driver for PDO; it is due to this that the
-sqlite extension in PHP 5.1 has a dependency upon the PDO extension.
+- **namespace** and **goto** are now reserved keywords.
 
-PHP 5.1 ships with a number of alternative interfaces to sqlite:
+- **Closure** is now a reserved class. (Used by lambda and closure.)
 
-The sqlite extension provides the "classic" sqlite procedural/OO API
-that you may have used in prior versions of PHP. It also provides the
-PDO 'sqlite2' driver, which allows you to access legacy SQLite 2
-databases using the PDO API.
+=====================================
+2. Changes made to existing functions
+=====================================
 
-PDO_SQLITE provides the 'sqlite' version 3 driver. SQLite version 3
-is vastly superior to SQLite version 2, but the file formats of the
-two versions are not compatible.
+- The array functions natsort(), natcasesort(), usort(), uasort(), uksort(),
+  array_flip() and array_unique(), no longer accept objects passed as arguments.
+  If you need to access their properties using an object, you will need to cast
+  the objects to arrays first.
 
-If your SQLite-based project is already written and working against
-earlier PHP versions, then you can continue to use ext/sqlite without
-problems, but will need to explicitly enable both PDO and sqlite. New
-projects should use PDO and the 'sqlite' (version 3) driver, as this is
-faster than SQLite 2, has improved locking concurrency, and supports
-both prepared statements and binary columns natively.
+- var_dump() output now includes private object members.
 
-12. Further migration information
-================================
+- session_start() now returns FALSE when the session startup fails.
 
-For general information about migrating from PHP 4 to PHP 5, please refer to
-the relevant section in the PHP manual at http://www.php.net/manual/migration5.php.
+- clearstatcache() no longer clears the realpath cache by default.
 
-13. Checking for E_STRICT errors
-================================
+- The filesystem functions opendir(), scandir() and dir() now use the default
+  context if no context is passed as an argument to them.
 
-If you only have a single script to check, you can pick up E_STRICT
-errors using PHP's commandline lint facility:
+- The behaviour of functions with by-reference parameters called by value has
+  changed. Where previously the function would accept the by-value argument, a
+  warning is now emitted and all by-ref parameters are set to NULL.
 
-php -d error_reporting=4095 -l script_to_check.php
+- There is now native support for the following math functions: asinh(), acosh(),
+  atanh(), log1p() and expm1().
 
-For larger projects, the shell script below will achieve the same task:
+- In the GD extension, there is now pixelation support available through
+  the imagefilter() function.
 
-#!/bin/sh
+- crypt() now has Blowfish and extended DES support, and crypt() features are now
+  100% portable. PHP has its own internal crypt implementation which drops into
+  place when support for crypt or crypt_r() is not found.
 
-directory=$1
+- get_cfg_var() is now able to return "array" INI options.
 
-shift
+- Stream wrappers can now be used by include_path().
 
-# These extensions are checked
-extensions="php inc"
+- There are new parameters in:
+     clearstatcache(): clear_realpath_cache and filename.
+     copy(): context.
+     fgetcsv(): escape.
+     ini_get_all(): details.
+     nl2br(): is_xhtml.
+     parse_ini_file(): scanner_mode.
+     round(): mode.
+     stream_context_create(): params.
+     strstr(), stristr(): before_needle.
 
-check_file ()
-{
-  echo -ne "Doing PHP syntax check on $1 ..."
+===================================
+3. Changes made to existing methods
+===================================
 
-  # Options:
-  ERRORS=`/www/php/bin/php -d display_errors=1 -d html_errors=0 -d error_prepend_string=" " -d error_append_string=" " -d error_reporting=4095 -l $1 | grep -v "No syntax errors detected"`
+- The magic methods __get(), __set(), __isset(), __unset() and __call() should
+  always be public and can no longer be static. Method signatures are enforced.
 
-  if test -z "$ERRORS"; then
-    echo -ne "OK."
-  else
-    echo -e "Errors found!\n$ERRORS"
-  fi
+- The __toString() magic method can no longer accept arguments.
 
-  echo
-}
+- There is a new magic method, __callStatic().
 
-# loop over remaining file args
-for FILE in "$@" ; do
-  for ext in $extensions; do
-     if echo $FILE | grep "\.$ext$" > /dev/null; then
-       if test -f $FILE; then
-         check_file "$FILE"
-       fi
-     fi
-  done
-done
+- count() vs count_elements() handler resolution rules have changed. (This could
+  potentially break custom PHP extensions.)
+
+- The trailing / has been removed from SplFileInfo and other related directory
+  classes.
+
+- SplFileInfo::getpathinfo() now returns information about the path name.
+
+- There are new parameters in:
+     Exception::__construct(): previous.
+
+===================================
+4. Changes made to existing classes
+===================================
+
+- SplObjectStorage now has ArrayAccess support. It is also now possible to
+  store associative information with objects in SplObjectStorage.
+
+=============
+5. Deprecated
+=============
+
+- Ticks: declare(ticks=N) and register_tick_function() both now trigger an
+  E_DEPRECATED notice.
+
+- define_syslog_variables() is deprecated.
+
+- All ereg functions are deprecated. Use PCRE (preg_*()) instead.
+
+===============
+6. Undeprecated
+===============
+
+- By popular request, is_a() is no longer marked deprecated.
+
+==============
+7. Extensions:
+==============
+
+     a. moved out to PECL and actively maintained there
+
+        - fpdf
+        - ming
+        - ncurses
+
+     b. no longer maintained
+
+        - dbase
+        - fbsql
+        - msql
+        - sybase (use sybase_ct, which is still in PHP core)
+
+     c. with changed behaviour
+
+        - hash: The SHA-224 hash algorithm is now supported.
+
+        - oci8a: Calling oci_close() on a persistent connection, or on a variable
+          that references a persistent connection going out of scope, will now
+          roll back any uncommitted transaction. You should explicitly commit or
+          rollback as needed.
+          Setting oci8.old_oci_close semantics=On in php.ini gives the old
+          behaviour.
+
+        - openssl: There is now support for OpenSSL digest and cipher functions.
+          It is also now possible to access the internal values of DSA, RSA and
+          DH keys.
+
+        - session: Sessions will no longer store session-files in "/tmp" where
+          open_basedir restrictions apply, unless "/tmp" is explicitly added to
+          the list of allowed paths.
+
+     d. no longer possible to disable
+
+        - PCRE
+        - Reflection
+        - SPL
+
+==========================
+8. Changes in SAPI support
+==========================
+
+- FastCGI is now always enabled and can not be disabled. See sapi/cgi/CHANGES
+  for more details.
+
+- A new CGI SAPI option, -T, can be used to measure execution time of a script
+  repeated several times.
+ 
+- CGI/FastCGI now has support for .htaccess style user-defined php.ini files.
+
+============================
+9. Changes in INI directives
+============================
+
+- zend.ze1_compatibility_mode has been removed.
+
+- A new user initialization mechanism and config variables have been added:
+  user_ini.filename and user_ini.cache_ttl
+
+- There is now support for special sections: [PATH=/opt/httpd/www.example.com/]
+  and [HOST=www.example.com]. Directives set in these sections cannot be
+  overridden by user-defined INI files or at runtime.
+
+- Added mbstring.http_output_conv_mimetype. This directive specifies the
+  regex pattern of content types for which mb_output_handler() is activated.
+
+- It is now possible to use the full path to load modules using the "extension"
+  directive.
+
+- "ini-variables" can now be used almost anywhere in a php.ini file.
+
+- It is now possible to use alphanumeric or variable indices in ini option
+  arrays.
+
+- Runtime tightening of open_basedir restrictions is now possible.
+
+====================
+10. Syntax additions
+====================
+
+- NOWDOC is like HEREDOC but with single quotes:
+
+      <<<'LABEL' ...
+
+  Static HEREDOCs can be used to initialize static variables and class members
+  or constants:
+
+      static $foo = <<<LABEL
+      No variables here...
+      LABEL;
+
+- The ?: operator has been introduced:
+
+      var_dump(0 ?: 'Hello!');
+
+===================
+11. Windows support
+===================
+
+- The minimum Windows version is now Windows 2000. (Windows 98 and NT4 are no
+  longer supported).
+
+- PHP Windows binaries target i586 or later. i386 and i486 are not supported.
+
+- Windows support has been added for the following functions: getopt(),
+  imagecolorclosesthwb(), mcrypt_create_iv(), inet_ntop() and inet_pton().
+
+===================
+12. New in PHP 5.3:
+===================
+
+     a. New libraries
+
+       - mysqlnd is a new core library shipped with PHP. It is a PHP-specific
+         replacement for libmysql.
+
+     b. New extensions
+
+       - fileinfo
+       - intl
+       - Phar
+       - SQLite3
+
+     c. New stream wrappers
+
+       - glob:// stream wrapper
+       - phar:// stream wrapper for accessing phar archives
+
+     d. New functions
+
+       - Core:    gc_collect_cycles()
+                  gc_enabled()
+                  gc_enable()
+                  gc_disable()
+                  class_alias()
+                  get_called_class()
+                  get_extension_funcs()
+                  forward_static_call()
+                  forward_static_call_array()
+                  str_getcsv()
+                  quoted_printable_encode()
+                  lcfirst()
+       - Array:   array_replace()
+                  array_replace_recursive()
+       - Date:    date_add()
+                  date_sub()
+                  date_diff()
+                  date_parse_from_format()
+                  date_create_from_format()
+                  date_get_last_errors()
+       - INI:     parse_ini_string()
+       - GMP:     gmp_testbit()
+       - Hash:    hash_copy()
+       - JSON:    json_last_error()
+       - MySQLi:  mysqli_fetch_all()
+                  mysqli_get_connection_stats()
+                  mysqli_poll()
+                  mysqli_reap_async_query()
+       - OpenSSL: openssl_random_pseudo_bytes()
+       - PCNTL:   pcntl_signal_dispatch()
+                  pcntl_sigprocmask()
+                  pcntl_sigwaitinfo()
+                  pcntl_sigtimedwait()
+       - PCRE:    preg_filter()
+       - SHM:     msg_queue_exists()
+       - Streams: stream_supports_lock()
+                  stream_context_set_default()
+
+     e. New global constants
+
+       - Core:    E_DEPRECATED
+                  E_USER_DEPRECATED
+                  __DIR__
+                  __NAMESPACE__
+       - INI:     INI_SCANNER_NORMAL
+                  INI_SCANNER_RAW
+       - GD:      IMG_FILTER_PIXELATE
+       - JSON:    JSON_ERROR_NONE
+                  JSON_ERROR_DEPTH
+                  JSON_ERROR_STATE_MISMATCH
+                  JSON_ERROR_CTRL_CHAR
+                  JSON_ERROR_SYNTAX
+       - LDAP:    LDAP_OPT_NETWORK_TIMEOUT
+       - PCRE:    PREG_BAD_UTF8_OFFSET_ERROR
+       - PCNTL:   SIG_BLOCK
+                  SIG_UNBLOCK
+                  SIG_SETMASK
+                  SI_USER
+                  SI_NOINFO
+                  SI_KERNEL
+                  SI_QUEUE
+                  SI_TIMER
+                  SI_MESGQ
+                  SI_ASYNCIO
+                  SI_SIGIO
+                  SI_TKILL
+                  CLD_EXITED
+                  CLD_KILLED
+                  CLD_DUMPED
+                  CLD_TRAPPED
+                  CLD_STOPPED
+                  CLD_CONTINUED
+                  TRAP_BRKPT
+                  TRAP_TRACE
+                  POLL_IN
+                  POLL_OUT
+                  POLL_MSG
+                  POLL_ERR
+                  POLL_PRI
+                  POLL_HUP
+                  ILL_ILLOPC
+                  ILL_ILLOPN
+                  ILL_ILLADR
+                  ILL_ILLTRP
+                  ILL_PRVOPC
+                  ILL_PRVREG
+                  ILL_COPROC
+                  ILL_BADSTK
+                  FPE_INTDIV
+                  FPE_INTOVF
+                  FPE_FLTDIV
+                  FPE_FLTOVF
+                  FPE_FLTUND
+                  FPE_FLTRES
+                  FPE_FLTINV
+                  FPE_FLTSUB
+                  SEGV_MAPERR
+                  SEGV_ACCERR
+                  BUS_ADRALN
+                  BUS_ADRERR
+                  BUS_OBJERR
+
+     f. New classes
+
+       - Date:    DateInterval
+                  DatePeriod
+       - Phar:    Phar
+                  PharData
+                  PharFileInfo
+                  PharException
+       - SPL      SplDoublyLinkedList
+                  SplStack
+                  SplQueue
+                  SplHeap
+                  SplMinHeap
+                  SplMaxHeap
+                  SplPriorityQueue
+                  SplFixedArray
+                  FilesystemIterator
+                  GlobIterator
+                  RecursiveTreeIterator
+                  MultipleIterator
+
+     g. New methods
+
+       - Date:         DateTime::diff()
+                       DateTime::add()
+                       DateTime::sub()
+                       DateTime::createFromFormat()
+                       DateTime::getLastErrors()
+       - PDO_Firebird: PDO::setAttribute()
+       - Reflection:   ReflectionProperty::setAccessible()
+       - XSL:          XSLTProcessor::setProfiling()
+
+     h. New class constants
+
+       - PDO_Firebird: PDO::FB_ATTR_DATE_FORMAT
+                       PDO::FB_ATTR_TIME_FORMAT
+                       PDO::FB_ATTR_TIMESTAMP_FORMAT
