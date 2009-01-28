@@ -6,8 +6,6 @@ PHP                                                                        NEWS
 - Deprecated session_register(), session_unregister() and
   session_is_registered(). (Hannes)
 
-- Disabled Phar for big endian systems due to various crash bugs. (Scott)
-
 - Improved DNS API
  . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
    getmxrr(). (Pierre)
@@ -24,6 +22,8 @@ PHP                                                                        NEWS
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Changed PHP/Zend extensions to use flexible build IDs. (Stas)
+
+- Added new Enchant extension. (Pierre)
 
 - Added support for IDN via ICU in intl, idn_to_ascii and idn_to_utf8. (Pierre)
 - Added support for SSH via libssh2 in cURL. (Pierre)
@@ -51,6 +51,8 @@ PHP                                                                        NEWS
 - Added Windows support for stream_socket_pair(). (Kalle)
 
 - Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
+
+- Disabled Phar for big endian systems due to various crash bugs. (Scott)
 
 - Fixed building of pdo_sqlite without sqlite3. (Scott)
 
