@@ -3,6 +3,7 @@ Basic test for date_sunrise and date_sunset based on example in PHP manual
 --FILE--
 <?php
 
+date_default_timezone_set('UTC');
 /* calculate the sunrise time for Lisbon, Portugal
 Latitude: 38.4 North
 Longitude: 9 West
