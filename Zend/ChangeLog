@@ -1,3 +1,14 @@
+2009-01-28  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_stream.c:
+      MFB: turn the offset parameter of mmap() back to 0
+
+    * (PHP_5_3)
+      zend_stream.c:
+      the offset parameter of mmap() must be aligned to a page boundary (although
+      linux doesnt strictly require it).
+      use 0 as offset as it will be small and increment the ptrs afterwards
+
 2009-01-26  Christian Seiler  <chris_se@gmx.net>
 
     * (PHP_5_3)
