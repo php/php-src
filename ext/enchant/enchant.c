@@ -64,30 +64,76 @@ static int le_enchant_dict;
 /* If you declare any globals in php_enchant.h uncomment this:*/
 /*ZEND_DECLARE_MODULE_GLOBALS(enchant)*/
 
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO(arginfo_enchant_broker_init, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_free, 0, 0, 1)
+	ZEND_ARG_INFO(0, broker)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_request_dict, 0, 0, 2)
+	ZEND_ARG_INFO(0, broker)
+	ZEND_ARG_INFO(0, tag)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_request_pwl_dict, 0, 0, 2)
+	ZEND_ARG_INFO(0, broker)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_free_dict, 0, 0, 1)
+	ZEND_ARG_INFO(0, dict)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_set_ordering, 0, 0, 3)
+	ZEND_ARG_INFO(0, broker)
+	ZEND_ARG_INFO(0, tag)
+	ZEND_ARG_INFO(0, ordering)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_quick_check, 0, 0, 2)
+	ZEND_ARG_INFO(0, dict)
+	ZEND_ARG_INFO(0, word)
+	ZEND_ARG_INFO(1, suggestions)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_check, 0, 0, 2)
+	ZEND_ARG_INFO(0, dict)
+	ZEND_ARG_INFO(0, word)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_store_replacement, 0, 0, 3)
+	ZEND_ARG_INFO(0, dict)
+	ZEND_ARG_INFO(0, mis)
+	ZEND_ARG_INFO(0, cor)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ enchant_functions[]
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
 function_entry enchant_functions[] = {
-	PHP_FE(enchant_broker_init, NULL)
-	PHP_FE(enchant_broker_free, NULL)
-	PHP_FE(enchant_broker_get_error, NULL)
-	PHP_FE(enchant_broker_list_dicts, NULL)
-	PHP_FE(enchant_broker_request_dict,	NULL)
-	PHP_FE(enchant_broker_request_pwl_dict, NULL)
-	PHP_FE(enchant_broker_free_dict, NULL)
-	PHP_FE(enchant_broker_dict_exists, NULL)
-	PHP_FE(enchant_broker_set_ordering, NULL)
-	PHP_FE(enchant_broker_describe, NULL)
-	PHP_FE(enchant_dict_check, NULL)
-	PHP_FE(enchant_dict_suggest, NULL)
-	PHP_FE(enchant_dict_add_to_personal, NULL)
-	PHP_FE(enchant_dict_add_to_session, NULL)
-	PHP_FE(enchant_dict_is_in_session, NULL)
-	PHP_FE(enchant_dict_store_replacement, NULL)
-	PHP_FE(enchant_dict_get_error, NULL)
-	PHP_FE(enchant_dict_describe, NULL)
-	PHP_FE(enchant_dict_quick_check, NULL)
+	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
+	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_list_dicts, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_request_dict,		arginfo_enchant_broker_request_dict)
+	PHP_FE(enchant_broker_request_pwl_dict, arginfo_enchant_broker_request_pwl_dict)
+	PHP_FE(enchant_broker_free_dict, 		arginfo_enchant_broker_free_dict)
+	PHP_FE(enchant_broker_dict_exists, 		arginfo_enchant_broker_request_dict)
+	PHP_FE(enchant_broker_set_ordering, 	arginfo_enchant_broker_set_ordering)
+	PHP_FE(enchant_broker_describe, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_dict_check, 				arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_suggest, 			arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_add_to_personal, 	arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_add_to_session, 	arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_is_in_session, 		arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_store_replacement, 	arginfo_enchant_dict_store_replacement)
+	PHP_FE(enchant_dict_get_error, 			arginfo_enchant_broker_free_dict)
+	PHP_FE(enchant_dict_describe, 			arginfo_enchant_broker_free_dict)
+	PHP_FE(enchant_dict_quick_check, 		arginfo_enchant_dict_quick_check)
 
 	{NULL, NULL, NULL}	/* Must be the last line in enchant_functions[] */
 };
