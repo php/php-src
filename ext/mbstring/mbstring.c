@@ -2666,6 +2666,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			if (!php_mb_parse_encoding_array(*arg_list, &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
+					list = NULL;
 					size = 0;
 				}
 			}
@@ -2675,6 +2676,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			if (!php_mb_parse_encoding_list(Z_STRVAL_PP(arg_list), Z_STRLEN_PP(arg_list), &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
+					list = NULL;
 					size = 0;
 				}
 			}
