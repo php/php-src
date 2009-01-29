@@ -45,7 +45,7 @@ typedef struct _intl_data {
 	obj = (oclass##_object *) zend_object_store_get_object( object TSRMLS_CC );	\
     intl_error_reset( INTL_DATA_ERROR_P(obj) TSRMLS_CC );						\
 
-// Check status by error code, if error - exit
+/* Check status by error code, if error - exit */
 #define INTL_CHECK_STATUS(err, msg)											\
     intl_error_set_code( NULL, (err) TSRMLS_CC );							\
     if( U_FAILURE((err)) )													\
@@ -54,7 +54,7 @@ typedef struct _intl_data {
         RETURN_FALSE;														\
     }
 
-// Check status in object, if error - exit
+/* Check status in object, if error - exit */
 #define INTL_METHOD_CHECK_STATUS(obj, msg)											\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) TSRMLS_CC );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
@@ -63,7 +63,7 @@ typedef struct _intl_data {
         RETURN_FALSE;										\
     }
 
-// Check status, if error - destroy value and exit
+/* Check status, if error - destroy value and exit */
 #define INTL_CTOR_CHECK_STATUS(obj, msg)											\
     intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) TSRMLS_CC );				\
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
