@@ -19,12 +19,15 @@
 #endif
 
 #include <unicode/ustring.h>
+#include <locale.h>
 
 #include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
 #include "formatter_parse.h"
 #include "intl_convert.h"
+
+#define ICU_LOCALE_BUG 1
 
 /* {{{ proto mixed NumberFormatter::parse( string $str[, int $type, int &$position ])
  * Parse a number. }}} */
@@ -43,6 +46,7 @@ PHP_FUNCTION( numfmt_parse )
 	double val_double;
 	int32_t* position_p = NULL;
 	zval *zposition = NULL;
+	char *oldlocale;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -68,6 +72,10 @@ PHP_FUNCTION( numfmt_parse )
 		position_p = &position;
 	}
 
+#if ICU_LOCALE_BUG && defined(LC_NUMERIC)
+	oldlocale = setlocale(LC_NUMERIC, "C");
+#endif
+
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			val32 = unum_parse(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
@@ -91,6 +99,9 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_FALSE;
 			break;
 	}
+#if ICU_LOCALE_BUG && defined(LC_NUMERIC)
+	setlocale(LC_NUMERIC, oldlocale);
+#endif
 	if(zposition) {
 		zval_dtor(zposition);
 		ZVAL_LONG(zposition, position);
