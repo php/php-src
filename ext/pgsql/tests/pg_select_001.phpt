@@ -12,10 +12,12 @@ $conn = pg_connect($conn_str);
 pg_query('CREATE SCHEMA phptests');
 
 pg_query('CREATE TABLE phptests.foo (id INT, id2 INT)');
-pg_query('INSERT INTO phptests.foo VALUES (1,2), (2,3)');
+pg_query('INSERT INTO phptests.foo VALUES (1,2)');
+pg_query('INSERT INTO phptests.foo VALUES (2,3)');
 
 pg_query('CREATE TABLE phptests.bar (id4 INT, id3 INT)');
-pg_query('INSERT INTO phptests.bar VALUES (4,5), (6,7)');
+pg_query('INSERT INTO phptests.bar VALUES (4,5)');
+pg_query('INSERT INTO phptests.bar VALUES (6,7)');
 
 /* Inexistent table */
 var_dump(pg_select($conn, 'foo', array('id' => 1)));
