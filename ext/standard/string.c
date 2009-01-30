@@ -4816,7 +4816,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length < 0 || num_pad_chars < 0) {
+	if (pad_length <= 0 || num_pad_chars <= 0) {
 		RETURN_STRINGL(input, input_len, 1);
 	}
 
