@@ -4922,7 +4922,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (Z_LVAL_PP(pad_length) < 0 || num_pad_chars < 0) {
+	if (Z_LVAL_PP(pad_length) <= 0 || num_pad_chars <= 0) {
 		RETURN_ZVAL(*input, 1, 0);
 	}
 
