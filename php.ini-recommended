@@ -921,7 +921,7 @@ pgsql.max_links = -1
 ; Notice message logging require a little overheads.
 pgsql.ignore_notice = 0
 
-; Log PostgreSQL backends Noitce message or not.
+; Log PostgreSQL backends Notice message or not.
 ; Unless pgsql.ignore_notice=0, module cannot log notice message.
 pgsql.log_notice = 0
 
