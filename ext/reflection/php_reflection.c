@@ -2077,6 +2077,9 @@ ZEND_METHOD(reflection_parameter, __construct)
 				}
 				efree(fptr);
 			}
+			if (is_closure) {
+				zval_ptr_dtor(&reference);
+			}
 			_DO_THROW("The parameter specified by its offset could not be found");
 			/* returns out of this function */
 		}
@@ -2097,6 +2100,9 @@ ZEND_METHOD(reflection_parameter, __construct)
 					efree(fptr->common.function_name);
 				}
 				efree(fptr);
+			}
+			if (is_closure) {
+				zval_ptr_dtor(&reference);
 			}
 			_DO_THROW("The parameter specified by its name could not be found");
 			/* returns out of this function */
