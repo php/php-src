@@ -1283,11 +1283,11 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DTHREAD=1"
 fi
 
-if test "$PHP_DEBUG" = "yes" && test "$PHP_THREAD_SAFETY" = "yes; then
+if test "$PHP_DEBUG" = "yes" && test "$PHP_THREAD_SAFETY" = "yes"; then
   ZEND_EXT_TYPE="zend_extension_debug_ts"
 elif test "$PHP_DEBUG" = "yes"; then
   ZEND_EXT_TYPE="zend_extension_debug"
-elif test "$PHP_THREAD_SAFETY" = "yes; then
+elif test "$PHP_THREAD_SAFETY" = "yes"; then
   ZEND_EXT_TYPE="zend_extension_ts"
 else
   ZEND_EXT_TYPE="zend_extension"
