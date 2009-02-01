@@ -547,9 +547,11 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
-						s_len = strlen(s);
-						if (adjust_precision && precision < s_len)
+						if (adjust_precision && precision) {
 							s_len = precision;
+						} else {
+							s_len = strlen(s);
+						}
 					} else {
 						s = S_NULL;
 						s_len = S_NULL_LEN;
