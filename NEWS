@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Beta 2
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
+- Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
 
 
 29 Jan 2009, PHP 5.3.0 Beta 1
