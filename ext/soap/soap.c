@@ -2567,11 +2567,11 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	ZVAL_LONG(params[4], one_way);
 
 	if (call_user_function(NULL, &this_ptr, &func, response, 5, params TSRMLS_CC) != SUCCESS) {
-		add_soap_fault(this_ptr, "Client", "SoapSlient::__doRequest() failed", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL TSRMLS_CC);
 		ret = FALSE;
 	} else if (Z_TYPE_P(response) != IS_STRING) {
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == FAILURE) {
-			add_soap_fault(this_ptr, "Client", "SoapSlient::__doRequest() returned non string value", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL TSRMLS_CC);
 		}
 		ret = FALSE;
 	} else if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
