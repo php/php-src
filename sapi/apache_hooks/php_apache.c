@@ -91,7 +91,7 @@ const zend_function_entry apache_functions[] = {
 	PHP_FE(apache_response_headers,					arginfo_apachehooks__void)
 	PHP_FE(apache_get_version,						arginfo_apachehooks__void)
 	PHP_FE(apache_get_modules,						arginfo_apachehooks__void)
-	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_apachehooks_request_headers)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_apachehooks__void)
 	{NULL, NULL, NULL}
 };
 
