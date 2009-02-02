@@ -192,7 +192,7 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter)
 		}
 	}
 	if (s >= 0) {
-		if (s < 0x80) {	/* latin */
+		if (s <= 0x80) {	/* latin */
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data));
