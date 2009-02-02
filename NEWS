@@ -50,6 +50,7 @@ PHP                                                                        NEWS
 - Fixed bug #46887 (Invalid calls to php_error_docref()).
   (oeriksson at mandriva dot com, Ilia)
 - Fixed bug #46873 (extract($foo) crashes if $foo['foo'] exists). (Arnaud)
+- Fixed bug #46843 (CP936 euro symbol is not converted properly). (Moriyoshi)
 - Fixed bug #46798 (Crash in mssql extension when retrieving a NULL value
   inside a binary or image column type). (Ilia)
 - Fixed bug #46782 (fastcgi.c parse error). (Matt)
