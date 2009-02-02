@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug in xml_error_string() which resulted in messages being
   off by one. (Scott)
 
+- Fixed bug #47282 (FILTER_VALIDATE_EMAIL is marking valid email addresses
+  as invalid). (Ilia)
 - Fixed bug #47220 (segfault in dom_document_parser in recovery mode). (Rob)
 - Fixed bug #47217 (content-type is not set properly for file uploads).
   (Ilia)
