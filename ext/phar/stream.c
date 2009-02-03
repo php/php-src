@@ -888,6 +888,14 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 		is_dir = entry->is_dir;
 	} else {
 		is_dir = zend_hash_exists(&(phar->virtual_dirs), resource_from->path+1, strlen(resource_from->path)-1);
+		if (!is_dir) {
+			/* file does not exist */
+			php_url_free(resource_from);
+			php_url_free(resource_to);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "phar error: cannot rename \"%s\" to \"%s\" from extracted phar archive, source does not exist", url_from, url_to);
+			return 0;
+
+		}
 	}
 
 	/* Rename directory. Update all nested paths */
