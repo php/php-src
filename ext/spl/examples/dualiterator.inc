@@ -23,10 +23,9 @@ class DualIterator implements Iterator
 
 	const KEY_LHS   = 0x10;
 	const KEY_RHS   = 0x20;
-	const KEY_ARRAY = 0x30;
 	const KEY_0     = 0x00;
 	
-	const DEFAULT_FLAGS = 0x33;
+	const DEFAULT_FLAGS = 0x13;
 	
 	private $lhs;
 	private $rhs;
@@ -39,7 +38,7 @@ class DualIterator implements Iterator
 	 * @param flags iteration flags
 	 */
 	function __construct(Iterator $lhs, Iterator $rhs, 
-					$flags = 0x33 /*DualIterator::DEFAULT_FLAGS*/)
+					$flags = 0x13 /*DualIterator::DEFAULT_FLAGS*/)
 	{
 		$this->lhs   = $lhs;
 		$this->rhs   = $rhs;
@@ -107,20 +106,18 @@ class DualIterator implements Iterator
 		}
 	}
 
-	/** @return current value depending on KEY_* flags
+	/** @return key value depending on KEY_* flags
 	 */	
 	function key()
 	{
 		switch($this->flags & 0xF0)
 		{
 		default:
-		case self::CURRENT_ARRAY:
-			return array($this->lhs->key(), $this->rhs->key());
-		case self::CURRENT_LHS:
+		case self::KEY_LHS:
 			return $this->lhs->key();
-		case self::CURRENT_RHS:
+		case self::KEY_RHS:
 			return $this->rhs->key();
-		case self::CURRENT_0:
+		case self::KEY_0:
 			return NULL;
 		}
 	}
