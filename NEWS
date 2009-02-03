@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
 - Re-Fixed bug #46026 (bz2.decompress/zlib.inflate filter tries to decompress after
   end of stream). (Greg)
+- Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator). (David C.)
 
 29 Jan 2009, PHP 5.3.0 Beta 1
 - Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
