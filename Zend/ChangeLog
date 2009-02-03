@@ -1,3 +1,18 @@
+2009-02-02  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_ini_scanner_defs.h:
+      regenerate
+
+    * zend_ini_scanner.l:
+      MFB: fix #46347
+
+    * (PHP_5_3)
+      zend_ini_scanner.l:
+      fix bug #46347: allow * in ini keys
+
 2009-01-28  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_stream.c:
