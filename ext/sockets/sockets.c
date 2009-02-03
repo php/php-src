@@ -1036,6 +1036,9 @@ PHP_FUNCTION(socket_read)
 
 		efree(tmpbuf);
 		RETURN_FALSE;
+	} else if (!retval) {
+		efree(tmpbuf);
+		RETURN_EMPTY_STRING();
 	}
 
 	tmpbuf = erealloc(tmpbuf, retval + 1);
