@@ -333,7 +333,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
 	if (!data) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", sizeof(php_bz2_filter_data));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes.", sizeof(php_bz2_filter_data));
 		return NULL;
 	}
 
@@ -346,14 +346,14 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
 	data->strm.next_in = data->inbuf = (char *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", data->inbuf_len);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes.", data->inbuf_len);
 		pefree(data, persistent);
 		return NULL;
 	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (char *) pemalloc(data->outbuf_len, persistent);
 	if (!data->outbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", data->outbuf_len);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes.", data->outbuf_len);
 		pefree(data->inbuf, persistent);
 		pefree(data, persistent);
 		return NULL;
@@ -369,11 +369,14 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
 
 				if (SUCCESS == zend_hash_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated"), (void **) &tmpzval) ) {
-						SEPARATE_ZVAL(tmpzval);
-						convert_to_boolean_ex(tmpzval);
-						data->expect_concatenated = Z_LVAL_PP(tmpzval);
-						zval_ptr_dtor(tmpzval);
-						tmpzval = NULL;
+					zval tmp, *tmp2;
+
+					tmp = **tmpzval;
+					zval_copy_ctor(&tmp);
+					tmp2 = &tmp;
+					convert_to_boolean_ex(&tmp2);
+					data->expect_concatenated = Z_LVAL(tmp);
+					tmpzval = NULL;
 				}
 
 				zend_hash_find(HASH_OF(filterparams), "small", sizeof("small"), (void **) &tmpzval);
@@ -382,10 +385,13 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			}
 
 			if (tmpzval) {
-				SEPARATE_ZVAL(tmpzval);
-				convert_to_boolean_ex(tmpzval);
-				data->small_footprint = Z_LVAL_PP(tmpzval);
-				zval_ptr_dtor(tmpzval);
+				zval tmp, *tmp2;
+
+				tmp = **tmpzval;
+				zval_copy_ctor(&tmp);
+				tmp2 = &tmp;
+				convert_to_boolean_ex(&tmp2);
+				data->small_footprint = Z_LVAL(tmp);
 			}
 		}
 
@@ -401,26 +407,31 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
 				if (zend_hash_find(HASH_OF(filterparams), "blocks", sizeof("blocks"), (void**) &tmpzval) == SUCCESS) {
 					/* How much memory to allocate (1 - 9) x 100kb */
-					SEPARATE_ZVAL(tmpzval);
-					convert_to_long_ex(tmpzval);
-					if (Z_LVAL_PP(tmpzval) < 1 || Z_LVAL_PP(tmpzval) > 9) {
+					zval tmp;
+	
+					tmp = **tmpzval;
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%ld)", Z_LVAL_PP(tmpzval));
 					} else {
-						blockSize100k = Z_LVAL_PP(tmpzval);
+						blockSize100k = Z_LVAL(tmp);
 					}
-					zval_ptr_dtor(tmpzval);
 				}
 
 				if (zend_hash_find(HASH_OF(filterparams), "work", sizeof("work"), (void**) &tmpzval) == SUCCESS) {
 					/* Work Factor (0 - 250) */
-					SEPARATE_ZVAL(tmpzval);
-					convert_to_long_ex(tmpzval);
-					if (Z_LVAL_PP(tmpzval) < 0 || Z_LVAL_PP(tmpzval) > 250) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%ld)", Z_LVAL_PP(tmpzval));
+					zval tmp;
+	
+					tmp = **tmpzval;
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+
+					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%ld)", Z_LVAL(tmp));
 					} else {
-						workFactor = Z_LVAL_PP(tmpzval);
+						workFactor = Z_LVAL(tmp);
 					}
-					zval_ptr_dtor(tmpzval);
 				}
 			}
 		}
