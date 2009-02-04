@@ -180,6 +180,13 @@
 
 /* }}} */
 
+#if !HAVE_STRNLEN
+static size_t strnlen(const char *s, size_t maxlen) {
+	char *r = memchr(s, '\0', maxlen);
+	return r ? r-s : maxlen;
+}
+#endif
+
 /*
  * Do format conversion placing the output in buffer
  */
@@ -547,10 +554,10 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
-						if (adjust_precision && precision) {
-							s_len = precision;
-						} else {
+						if (!adjust_precision) {
 							s_len = strlen(s);
+						} else {
+							s_len = strnlen(s, precision);
 						}
 					} else {
 						s = S_NULL;
