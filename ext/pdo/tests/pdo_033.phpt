@@ -18,7 +18,9 @@ $unquoted = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`a
 
 $quoted = $db->quote($unquoted);
 
-$db->query("CREATE TABLE test (t char(100))");
+$len = strlen($unquoted);
+
+$db->query("CREATE TABLE test (t char($len))");
 $db->query("INSERT INTO test (t) VALUES($quoted)");
 
 $stmt = $db->prepare('SELECT * from test');
