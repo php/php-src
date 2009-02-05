@@ -24,9 +24,7 @@
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry
 
-#ifdef ZTS
 #include "TSRM.h"
-#endif
 
 #include "lib/zip.h"
 

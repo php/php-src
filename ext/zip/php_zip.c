@@ -31,6 +31,10 @@
 #include "lib/zip.h"
 #include "lib/zipint.h"
 
+#ifdef PHP_WIN32
+#include "tsrm_virtual_cwd.h"
+#endif
+
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
 static PHP_NAMED_FUNCTION(zif_zip_open);
 static PHP_NAMED_FUNCTION(zif_zip_read);
@@ -85,6 +89,284 @@ static int le_zip_entry;
 # define add_ascii_assoc_string add_assoc_string
 # define add_ascii_assoc_long add_assoc_long
 #endif
+
+static int php_zip_realpath_r(char *path, int start, int len, int *ll, time_t *t, int use_realpath, int is_dir, int *link_is_dir TSRMLS_DC) /* {{{ */
+{
+	int i, j;
+	char *tmp;
+
+	while (1) {
+		if (len <= start) {
+			return start;
+		}
+
+		i = len;
+		while (i > start && !IS_SLASH(path[i-1])) {
+			i--;
+		}
+
+		if (i == len ||
+			(i == len - 1 && path[i] == '.')) {
+			/* remove double slashes and '.' */
+			len = i - 1;
+			is_dir = 1;
+			continue;
+		} else if (i == len - 2 && path[i] == '.' && path[i+1] == '.') {
+			/* remove '..' and previous directory */
+			if (i - 1 <= start) {
+				return start ? start : len;
+			}
+			j = php_zip_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL TSRMLS_CC);
+			if (j > start) {
+				j--;
+				while (j > start && !IS_SLASH(path[j])) {
+					j--;
+				}
+				if (!start) {
+					/* leading '..' must not be removed in case of relative path */
+					if (j == 0 && path[0] == '.' && path[1] == '.' &&
+					    IS_SLASH(path[2])) {
+						path[3] = '.';
+						path[4] = '.';
+						path[5] = DEFAULT_SLASH;
+						j = 5;
+					} else if (j > 0 && 
+				               path[j+1] == '.' && path[j+2] == '.' &&
+				               IS_SLASH(path[j+3])) {
+						j += 4;
+						path[j++] = '.';
+						path[j++] = '.';
+						path[j] = DEFAULT_SLASH;
+					}
+				}
+			} else if (!start && !j) {
+				/* leading '..' must not be removed in case of relative path */
+				path[0] = '.';
+				path[1] = '.';
+				path[2] = DEFAULT_SLASH;
+				j = 2;
+			}
+			return j;
+		}
+	
+		path[len] = 0;
+
+#ifdef PHP_WIN32
+		tmp = tsrm_do_alloca(len+1);
+		memcpy(tmp, path, len+1);
+#elif defined(NETWARE)
+
+		tmp = tsrm_do_alloca(len+1);
+		memcpy(tmp, path, len+1);
+#else
+		tmp = tsrm_do_alloca(len+1);
+		memcpy(tmp, path, len+1);
+
+		{
+#endif
+			if (i - 1 <= start) {
+				j = start;
+			} else {
+				/* some leading directories may be unaccessable */
+				j = php_zip_realpath_r(path, start, i-1, ll, t, use_realpath, 1, NULL TSRMLS_CC);
+				if (j > start) {
+					path[j++] = DEFAULT_SLASH;
+				}
+			}
+#ifdef PHP_WIN32
+			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
+				tsrm_free_alloca(tmp);
+
+				return -1;
+			}
+			{
+				/* use the original file or directory name as it wasn't found */
+				memcpy(path+j, tmp+i, len-i+1);
+				j += (len-i);
+			}
+#else
+			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
+				tsrm_free_alloca(tmp);
+				return -1;
+			}
+			memcpy(path+j, tmp+i, len-i+1);
+			j += (len-i);
+		}
+#endif
+
+		tsrm_free_alloca(tmp);
+		return j;
+	}
+}
+/* }}} */
+
+#define CWD_STATE_FREE(s)			\
+	free((s)->cwd);
+
+
+#define CWD_STATE_COPY(d, s)				\
+	(d)->cwd_length = (s)->cwd_length;		\
+	(d)->cwd = (char *) malloc((s)->cwd_length+1);	\
+	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
+
+#ifdef PHP_WIN32
+extern virtual_cwd_globals cwd_globals;
+#endif
+
+/* Resolve path relatively to state and put the real path into state */
+/* returns 0 for ok, 1 for error */
+int php_zip_virtual_file_ex(cwd_state *state, const char *path, int use_realpath) /* {{{ */
+{
+	int path_length = strlen(path);
+	char resolved_path[MAXPATHLEN];
+	int start = 1;
+	int ll = 0;
+	time_t t;
+	int ret;
+	int add_slash;
+	TSRMLS_FETCH();
+
+	if (path_length == 0 || path_length >= MAXPATHLEN-1) {
+		return 1;
+	}
+
+	/* cwd_length can be 0 when getcwd() fails.
+	 * This can happen under solaris when a dir does not have read permissions
+	 * but *does* have execute permissions */
+	if (!IS_ABSOLUTE_PATH(path, path_length)) {
+		if (state->cwd_length == 0) {
+			/* resolve relative path */
+			start = 0;
+			memcpy(resolved_path , path, path_length + 1);
+		} else {
+			int state_cwd_length = state->cwd_length;
+
+#ifdef PHP_WIN32
+			if (IS_SLASH(path[0])) {
+				if (state->cwd[1] == ':') {
+					/* Copy only the drive name */
+					state_cwd_length = 2;
+				} else if (IS_UNC_PATH(state->cwd, state->cwd_length)) {
+					/* Copy only the share name */
+					state_cwd_length = 2;
+					while (IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (state->cwd[state_cwd_length] &&
+					       !IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+					while (state->cwd[state_cwd_length] &&
+					       !IS_SLASH(state->cwd[state_cwd_length])) {
+						state_cwd_length++;
+					}						 
+				}
+			}
+#endif
+			if (path_length + state_cwd_length + 1 >= MAXPATHLEN-1) {
+				return 1;
+			}
+			memcpy(resolved_path, state->cwd, state_cwd_length);
+			resolved_path[state_cwd_length] = DEFAULT_SLASH;
+			memcpy(resolved_path + state_cwd_length + 1, path, path_length + 1);
+			path_length += state_cwd_length + 1;
+		}
+	} else {		
+#ifdef PHP_WIN32
+		if (path_length > 2 && path[1] == ':' && !IS_SLASH(path[2])) {
+			resolved_path[0] = path[0];
+			resolved_path[1] = ':';
+			resolved_path[2] = DEFAULT_SLASH;
+			memcpy(resolved_path + 3, path + 2, path_length - 1);
+			path_length++;
+		} else
+#endif
+		memcpy(resolved_path, path, path_length + 1);
+	} 
+
+#ifdef PHP_WIN32
+	if (memchr(resolved_path, '*', path_length) ||
+	    memchr(resolved_path, '?', path_length)) {
+		return 1;
+	}
+#endif
+
+#ifdef PHP_WIN32
+	if (IS_UNC_PATH(resolved_path, path_length)) {
+		/* skip UNC name */
+		resolved_path[0] = DEFAULT_SLASH;
+		resolved_path[1] = DEFAULT_SLASH;
+		start = 2;
+		while (!IS_SLASH(resolved_path[start])) {
+			if (resolved_path[start] == 0) {
+				goto verify;
+			}
+			resolved_path[start] = toupper(resolved_path[start]);
+			start++;
+		}
+		resolved_path[start++] = DEFAULT_SLASH;
+		while (!IS_SLASH(resolved_path[start])) {
+			if (resolved_path[start] == 0) {
+				goto verify;
+			}
+			resolved_path[start] = toupper(resolved_path[start]);
+			start++;
+		}
+		resolved_path[start++] = DEFAULT_SLASH;
+	} else if (IS_ABSOLUTE_PATH(resolved_path, path_length)) {
+		/* skip DRIVE name */
+		resolved_path[0] = toupper(resolved_path[0]);
+		resolved_path[2] = DEFAULT_SLASH;
+		start = 3;
+	}
+#elif defined(NETWARE)
+	if (IS_ABSOLUTE_PATH(resolved_path, path_length)) {
+		/* skip VOLUME name */
+		start = 0;
+		while (start != ':') {
+			if (resolved_path[start] == 0) return -1;
+			start++;
+		}
+		start++;
+		if (!IS_SLASH(resolved_path[start])) return -1;
+		resolved_path[start++] = DEFAULT_SLASH;
+	}
+#endif
+
+	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
+	/* No cache used */
+	t =  0;
+	path_length = php_zip_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
+
+	if (path_length < 0) {
+		errno = ENOENT;
+		return 1;
+	}
+	
+	if (!start && !path_length) {
+		resolved_path[path_length++] = '.';
+	}
+	if (add_slash && path_length && !IS_SLASH(resolved_path[path_length-1])) {
+		if (path_length >= MAXPATHLEN-1) {
+			return -1;
+		}
+		resolved_path[path_length++] = DEFAULT_SLASH;
+	}
+	resolved_path[path_length] = 0;
+
+#ifdef PHP_WIN32
+verify:
+#endif
+	state->cwd_length = path_length;
+	state->cwd = (char *) realloc(state->cwd, state->cwd_length+1);
+	memcpy(state->cwd, resolved_path, state->cwd_length+1);
+	ret = 0;
+	return (ret);
+}
+/* }}} */
 
 /* Flatten a path by creating a relative path (to .) */
 static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
@@ -150,7 +432,9 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	/* Clean/normlize the path and then transform any path (absolute or relative)
 		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
 	 */
-	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
+	if (php_zip_virtual_file_ex(&new_state, file, CWD_EXPAND) == 1) {
+		return 0;
+	}
 	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
 	path_cleaned_len = strlen(path_cleaned);
 
