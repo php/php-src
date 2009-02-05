@@ -1399,7 +1399,13 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL_P(row), &element, sizeof(zval*), NULL);
 				} else { /* default to ASSOC */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
+					/* zend_symtable_update is only available in 5.2+ */
 					zend_symtable_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
+#else
+					/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
+					zend_hash_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
+#endif
 				}
 			}
 
@@ -1431,7 +1437,13 @@ PHP_FUNCTION(oci_fetch_all)
 				
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
+				/* zend_symtable_update is only available in 5.2+ */
 				zend_symtable_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
+#else
+				/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
+				zend_hash_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
+#endif
 			}
 		}
 
