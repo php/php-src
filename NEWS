@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Added optional sorting type flag parameter to array_unique(). Default is
   SORT_REGULAR. (Andrei)
 
+- Fixed a crash on extract in zip when files or directories entry names contain 
+  a relative path. (Pierre)
 - Fixed error conditions handling in stream_filter_append(). (Arnaud)
 - Fixed zip filename property read. (Pierre)
 - Fixed explode() behavior with empty string to respect negative limit. (Shire)
