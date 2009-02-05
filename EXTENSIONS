@@ -129,22 +129,9 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
-EXTENSION:           dbase
-MAINTENANCE:         Orphaned
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           fbsql
-PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
 EXTENSION:           interbase
 PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>, Jouni Ahto <jouni.ahto@exdec.fi>
 MAINTENANCE:         Odd fixes
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           msql
-MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mssql
