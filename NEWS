@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #47085 (rename() returns true even if the file in PHAR does not exist). (Greg)
 - Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
 - Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
-- Re-Fixed bug #46026 (bz2.decompress/zlib.inflate filter tries to decompress after
+- Fixed bug #46026 (bz2.decompress/zlib.inflate filter tries to decompress after
   end of stream). (Greg)
 - Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator). (David C.)
 
