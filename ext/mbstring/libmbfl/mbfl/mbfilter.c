@@ -462,10 +462,9 @@ enum mbfl_no_encoding mbfl_encoding_detector_judge(mbfl_encoding_detector *ident
 		while (n >= 0) {
 			filter = identd->filter_list[n];
 			if (!filter->flag) {
-				if (identd->strict && filter->status) {
-					continue;
+				if (!identd->strict || !filter->status) {
+					encoding = filter->encoding->no_encoding;
 				}
-				encoding = filter->encoding->no_encoding;
 			}
 			n--;
 		}
