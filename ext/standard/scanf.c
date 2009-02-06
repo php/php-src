@@ -1078,7 +1078,7 @@ addToInt:
 						} else if (numVars) {
 							current = args[objIndex++];
 							zval_dtor(*current);
-							Z_LVAL(**current) = value;
+							ZVAL_LONG(*current, value);
 						} else {
 							add_index_long(*return_value, objIndex++, value);
 						}
@@ -1183,7 +1183,7 @@ addToFloat:
 					} else if (numVars) {
 						current = args[objIndex++];
 						zval_dtor(*current);
-						Z_DVAL_PP( current ) = dvalue;
+						ZVAL_DOUBLE(*current, dvalue);
 					} else {
 						add_index_double( *return_value, objIndex++, dvalue );
 					}

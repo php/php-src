@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2009, PHP 5.2.9
+- Fixed bug #47322 (sscanf %d does't work). (Felipe)
 
 02 Feb 2009, PHP 5.2.9RC1
 - Changed __call() to be invoked on private/protected method access, similar to
