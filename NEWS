@@ -56,7 +56,8 @@ PHP                                                                        NEWS
 - Fixed bug #46887 (Invalid calls to php_error_docref()).
   (oeriksson at mandriva dot com, Ilia)
 - Fixed bug #46873 (extract($foo) crashes if $foo['foo'] exists). (Arnaud)
-- Fixed bug #46843 (CP936 euro symbol is not converted properly). (Moriyoshi)
+- Fixed bug #46843 (CP936 euro symbol is not converted properly).
+  (ty_c at cybozuy dot co dot jp, Moriyoshi)
 - Fixed bug #46798 (Crash in mssql extension when retrieving a NULL value
   inside a binary or image column type). (Ilia)
 - Fixed bug #46782 (fastcgi.c parse error). (Matt)
@@ -74,6 +75,8 @@ PHP                                                                        NEWS
   (admorten at umich dot edu, Stas)
 - Fixed bug #45996 (libxml2 2.7 causes breakage with character data 
   in xml_parse()). (Rob)
+- Fixed bug #45239 (Encoding detector hangs with mbstring.strict_detection
+  enabled). (Moriyoshi)
 - Fixed bug #45161 (Reusing a curl handle leaks memory). (Mark Karpeles, Jani)
 - Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
   (frode at coretrek dot com, Nuno)
