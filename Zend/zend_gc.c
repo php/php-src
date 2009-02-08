@@ -527,7 +527,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
 	int count = 0;
 
-	if (GC_G(roots).next != &GC_G(roots)) {
+	if (GC_G(roots).next != &GC_G(roots) && GC_G(roots).next) {
 		zval_gc_info *p, *q, *orig_free_list, *orig_next_to_free;
 
 		if (GC_G(gc_active)) {
