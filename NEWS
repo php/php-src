@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Beta 2
+- Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
 - Fixed bug #47265 (generating phar.phar failes because of safe_mode). (Greg)
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
 - Fixed bug #47085 (rename() returns true even if the file in PHAR does not exist). (Greg)
