@@ -51,8 +51,8 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 
 	gc_globals->buf = NULL;
 
-	gc_globals->roots.next = NULL;
-	gc_globals->roots.prev = NULL;
+	gc_globals->roots.next = &gc_globals->roots;
+	gc_globals->roots.prev = &gc_globals->roots;
 	gc_globals->unused = NULL;
 	gc_globals->zval_to_free = NULL;
 	gc_globals->free_list = NULL;
@@ -109,10 +109,10 @@ ZEND_API void gc_reset(TSRMLS_D)
 	GC_G(zobj_marked_grey) = 0;
 #endif
 
-	if (GC_G(buf)) {
-		GC_G(roots).next = &GC_G(roots);
-		GC_G(roots).prev = &GC_G(roots);
+	GC_G(roots).next = &GC_G(roots);
+	GC_G(roots).prev = &GC_G(roots);
 
+	if (GC_G(buf)) {
 		GC_G(unused) = NULL;
 		GC_G(first_unused) = GC_G(buf);
 
@@ -527,7 +527,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
 	int count = 0;
 
-	if (GC_G(roots).next != &GC_G(roots) && GC_G(roots).next) {
+	if (GC_G(roots).next != &GC_G(roots)) {
 		zval_gc_info *p, *q, *orig_free_list, *orig_next_to_free;
 
 		if (GC_G(gc_active)) {
