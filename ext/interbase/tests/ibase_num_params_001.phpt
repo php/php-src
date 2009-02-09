@@ -26,7 +26,7 @@ int(2)
 Warning: ibase_num_params() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: ibase_prepare(): Dynamic SQL Error SQL error code = -206 Column unknown X At line 1, column 52  in %s on line %d
+Warning: ibase_prepare(): Dynamic SQL Error SQL error code = -206 %s in %s on line %d
 
 Warning: ibase_num_params() expects parameter 1 to be resource, boolean given in %s on line %d
 NULL
