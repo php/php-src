@@ -28,5 +28,5 @@ var_dump(ibase_affected_rows($x));
 int(3)
 int(0)
 
-Warning: ibase_query(): Dynamic SQL Error SQL error code = -104 Unexpected end of command %s on line %d
+Warning: ibase_query(): Dynamic SQL Error SQL error code = -104 %s on line %d
 int(0)
