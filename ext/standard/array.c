@@ -2149,6 +2149,7 @@ PHP_FUNCTION(array_unshift)
 	zval ***args,			/* Function arguments array */
 		   *stack;			/* Input stack */
 	HashTable *new_hash;	/* New hashtable for the stack */
+	HashTable  old_hash;
 	int argc;				/* Number of function arguments */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a+", &stack, &args, &argc) == FAILURE) {
@@ -2158,12 +2159,13 @@ PHP_FUNCTION(array_unshift)
 	/* Use splice to insert the elements at the beginning. Destroy old
 	 * hashtable and replace it with new one */
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[0], argc, NULL);
-	zend_hash_destroy(Z_ARRVAL_P(stack));
+	old_hash = *Z_ARRVAL_P(stack);
 	if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
 		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(stack) = *new_hash;
 	FREE_HASHTABLE(new_hash);
+	zend_hash_destroy(&old_hash);
 
 	/* Clean up and return the number of elements in the stack */
 	efree(args);
@@ -2180,6 +2182,7 @@ PHP_FUNCTION(array_splice)
 		 ***repl = NULL;		/* Replacement elements */
 	HashTable *new_hash = NULL,	/* Output array's hash */
 	         **rem_hash = NULL;	/* Removed elements' hash */
+	HashTable  old_hash;
 	Bucket *p;					/* Bucket used for traversing hash */
 	long	i,
 			offset,
@@ -2237,12 +2240,13 @@ PHP_FUNCTION(array_splice)
 	new_hash = php_splice(Z_ARRVAL_P(array), offset, length, repl, repl_num, rem_hash);
 
 	/* Replace input array's hashtable with the new one */
-	zend_hash_destroy(Z_ARRVAL_P(array));
+	old_hash = *Z_ARRVAL_P(array);
 	if (Z_ARRVAL_P(array) == &EG(symbol_table)) {
 		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(array) = *new_hash;
 	FREE_HASHTABLE(new_hash);
+	zend_hash_destroy(&old_hash);
 
 	/* Clean up */
 	if (ZEND_NUM_ARGS() == 4) {
@@ -2746,6 +2750,7 @@ PHP_FUNCTION(array_pad)
 	zval  *pad_value;	/* Padding value obviously */
 	zval ***pads;		/* Array to pass to splice */
 	HashTable *new_hash;/* Return value from splice */
+	HashTable  old_hash;
 	long pad_size;		/* Size to pad to */
 	long pad_size_abs;	/* Absolute value of pad_size */
 	int	input_size;		/* Size of the input array */
@@ -2795,12 +2800,13 @@ PHP_FUNCTION(array_pad)
 	}
 
 	/* Copy the result hash into return value */
-	zend_hash_destroy(Z_ARRVAL_P(return_value));
+	old_hash = *Z_ARRVAL_P(return_value);
 	if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
 		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(return_value) = *new_hash;
 	FREE_HASHTABLE(new_hash);
+	zend_hash_destroy(&old_hash);
 
 	/* Clean up */
 	efree(pads);
