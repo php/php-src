@@ -11,9 +11,9 @@ ibase.timestampformat=%Y-%m-%d %H:%M:%S
     
 	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 
-	var_dump($db->getAttribute(PDO_ATTR_CONNECTION_STATUS));
+	var_dump($db->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
-	$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 	$db->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
 		datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
@@ -21,11 +21,13 @@ ibase.timestampformat=%Y-%m-%d %H:%M:%S
 	
 	$s = $db->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
 
-	$s->bindParam(1,$id = 0);
-	$s->bindColumn("TEXT",$var = null);
+	$id = 0;
+	$s->bindParam(1,$id);
+	$var = null;
+	$s->bindColumn("TEXT",$var);
 	$id = 1;
 	$s->execute();
-	$s->setAttribute(PDO_ATTR_CURSOR_NAME, "c");
+	$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
 	
 	var_dump($id);
 
