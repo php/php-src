@@ -1,7 +1,7 @@
 --TEST--
 GC 031: gc_collect_roots() with GC turned off.
 --INI--
-zend.gc_enable=1
+zend.enable_gc=0
 --FILE--
 <?php
 gc_collect_cycles();
