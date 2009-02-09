@@ -1,3 +1,18 @@
+2009-02-08  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_3)
+      zend_gc.c
+      tests/gc_031.phpt:
+      - MFH: Fixed bug #47341: Calling gc_collect_cycles() with zend.enable_gc=0
+        causes segfault.
+
+    * zend_gc.c
+      tests/gc_031.phpt
+      tests/gc_031.phpt:
+      - Fixed bug #47341: Calling gc_collect_cycles() with zend.enable_gc=0
+      causes
+        segfault.
+
 2009-02-02  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend_ini_scanner.c
