@@ -1452,7 +1452,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(mb_parse_str)
 {
-	zval *track_vars_array;
+	zval *track_vars_array = NULL;
 	char *encstr = NULL;
 	int encstr_len;
 	php_mb_encoding_handler_info_t info;
