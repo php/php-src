@@ -1631,15 +1631,15 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			return;
 		}
 
-		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
-			/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
-			EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
-		} else {
-			ALLOC_HASHTABLE(EG(active_symbol_table));
-			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
-			/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
-		}
 		if (ex && ex->op_array) {
+			if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+				/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
+				EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
+			} else {
+				ALLOC_HASHTABLE(EG(active_symbol_table));
+				zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
+			}
 			ex->symbol_table = EG(active_symbol_table);
 
 			if (ex->op_array->this_var != -1 &&

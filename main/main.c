@@ -750,12 +750,17 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		efree(docref_buf);
 	}
 
-	if (PG(track_errors) && module_initialized && EG(active_symbol_table) && 
+	if (PG(track_errors) && module_initialized && 
 			(!EG(user_error_handler) || !(EG(user_error_handler_error_reporting) & type))) {
-		zval *tmp;
-		ALLOC_INIT_ZVAL(tmp);
-		ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		if (EG(active_symbol_table)) {
+			zval *tmp;
+			ALLOC_INIT_ZVAL(tmp);
+			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
+			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
+		}
 	}
 	efree(buffer);
 
@@ -1033,11 +1038,16 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		return;
 	}
 
-	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
-		zval *tmp;
-		ALLOC_INIT_ZVAL(tmp);
-		ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+	if (PG(track_errors) && module_initialized) {
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		if (EG(active_symbol_table)) {
+			zval *tmp;
+			ALLOC_INIT_ZVAL(tmp);
+			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
+			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+		}
 	}
 
 	efree(buffer);
