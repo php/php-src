@@ -527,6 +527,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 		case PDO_PARAM_EVT_ALLOC:
 			if (param->is_param) {
 				/* allocate the parameter */
+				if (var->sqlind) {
+					efree(var->sqlind);
+				}
 				var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
