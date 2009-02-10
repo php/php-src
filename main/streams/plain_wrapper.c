@@ -1324,7 +1324,7 @@ not_relative_path:
 		/* getcwd() will return always return [DRIVE_LETTER]:/) on windows. */
 		*(cwd+3) = '\0';
 	
-		if (snprintf(trypath, MAXPATHLEN, "%s%s", cwd, filename) > MAXPATHLEN) {
+		if (snprintf(trypath, MAXPATHLEN, "%s%s", cwd, filename) >= MAXPATHLEN) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 		
@@ -1387,7 +1387,7 @@ not_relative_path:
 		if (*ptr == '\0') {
 			goto stream_skip;
 		}
-		if (snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename) > MAXPATHLEN) {
+		if (snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename) >= MAXPATHLEN) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", ptr, filename, MAXPATHLEN);
 		}
 
