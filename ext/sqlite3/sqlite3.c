@@ -72,29 +72,38 @@ PHP_METHOD(sqlite3, open)
 	char *filename, *encryption_key, *fullpath;
 	int filename_len, encryption_key_len = 0;
 	long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+	zend_error_handling error_handling;
+
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
 
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
+
 	if (db_obj->initialised) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Already initialised DB Object");
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Already initialised DB Object", 0 TSRMLS_CC);
 	}
 
 	if (strncmp(filename, ":memory:", 8) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
-			RETURN_FALSE;
+			zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unable to expand filepath", 0 TSRMLS_CC);
+			return;
 		}
 
 		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "safe_mode prohibits opening %s", fullpath);
 			efree(fullpath);
-			RETURN_FALSE;
+			return;
 		}
 
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "open_basedir prohibits opening %s", fullpath);
 			efree(fullpath);
-			RETURN_FALSE;
+			return;
 		}
 	} else {
 		fullpath = estrdup(filename);
@@ -105,7 +114,7 @@ PHP_METHOD(sqlite3, open)
 #else
 	if (sqlite3_open(fullpath, &(db_obj->db)) != SQLITE_OK) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
+		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
 		if (fullpath) {
 			efree(fullpath);
 		}
@@ -117,6 +126,7 @@ PHP_METHOD(sqlite3, open)
 #if SQLITE_HAS_CODEC
 	if (encryption_key_len > 0) {
 		if (sqlite3_key(db_obj->db, encryption_key, encryption_key_len) != SQLITE_OK) {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
 			return;
 		}
 	}
@@ -129,7 +139,6 @@ PHP_METHOD(sqlite3, open)
 	if (fullpath) {
 		efree(fullpath);
 	}
-	RETURN_TRUE;
 }
 /* }}} */
 
