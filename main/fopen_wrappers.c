@@ -636,7 +636,9 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 			*end = '\0';
 			end++;
 		}
-		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
+		if (snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename) > MAXPATHLEN) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", ptr, filename, MAXPATHLEN);
+		}
 
 		fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
 		if (fp) {
