@@ -1,3 +1,20 @@
+2009-02-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug47320.phpt:
+      Fixed bug #47320 ($php_errormsg out of scope in functions)
+
+    * tests/bug47320.phpt
+      tests/bug47320.phpt:
+      
+      file bug47320.phpt was initially added on branch PHP_5_3.
+
+    * zend_gc.c
+      zend_gc.c
+      tests/gc_031.phpt:
+      Better fix for #47341
+
 2009-02-08  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_3)
