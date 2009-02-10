@@ -7,14 +7,14 @@ SQLite3::open error test
 $unreadable = dirname(__FILE__) . '/unreadable.db';
 touch($unreadable);
 chmod($unreadable,  0200);
-$db = new SQLite3($unreadable);
-
-var_dump($db);
+try {
+	$db = new SQLite3($unreadable);
+} catch (Exception $e) {
+	echo $e->getMessage() . "\n";
+}
 echo "Done\n";
 unlink($unreadable);
 ?>
 --EXPECTF--
-Notice: SQLite3::__construct(): Unable to open database: unable to open database file in %s/sqlite3_15_open_error.php on line %d
-object(SQLite3)#%d (0) {
-}
+Unable to open database: unable to open database file
 Done
