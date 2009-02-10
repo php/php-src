@@ -89,8 +89,8 @@ Getting the non stable release (alpha/beta/RC) announced
 pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release".
 
-2. Send an email (see example here http://news.php.net/php.qa/26069) **To**
-``php-qa@lists.php.net`` and **CC** ``primary-qa-tests@lists.php.net``.
+2. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
+``php-qa@lists.php.net`` and ``primary-qa-tests@lists.php.net``.
 This email is to notify the selected projects about a new release so that they
 can make sure their projects keep working. Make sure that you have been setup
 as a moderator for ``primary-qa-tests@lists.php.net`` by having someone (Wez,
