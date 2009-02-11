@@ -22,7 +22,6 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 	int i, j, k, number;
 	char buf[5];
 	gdImagePtr im = 0;
-	char *apixel;
 	int *pointer;
 	int red = 0, green = 0, blue = 0;
 	int *colors;
@@ -34,7 +33,7 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 	}
 
 	if (!(im = gdImageCreate(image.width, image.height))) {
-		return 0;
+		goto done;
 	}
 
 	number = image.ncolors;
@@ -116,13 +115,7 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 
 
 		colors[i] = gdImageColorResolve(im, red, green, blue);
-		if (colors[i] == -1) {
-			php_gd_error("ARRRGH");
-		}
 	}
-
-	apixel = (char *) gdMalloc(image.cpp + 1);
-	apixel[image.cpp] = '\0';
 
 	pointer = (int *) image.data;
 	for (i = 0; i < image.height; i++) {
@@ -132,8 +125,10 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 		}
 	}
 
-	gdFree(apixel);
 	gdFree(colors);
+ done:
+	XpmFreeXpmImage(&image);
+	XpmFreeXpmInfo(&info);
 	return im;
 }
 #endif
