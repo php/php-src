@@ -613,8 +613,8 @@ void gdImagePaletteCopy (gdImagePtr to, gdImagePtr from)
 		xlate[i] = -1;
 	}
 
-	for (x = 0; x < to->sx; x++) {
-		for (y = 0; y < to->sy; y++) {
+	for (y = 0; y < to->sy; y++) {
+		for (x = 0; x < to->sx; x++) {
 			p = gdImageGetPixel(to, x, y);
 			if (xlate[p] == -1) {
 				/* This ought to use HWB, but we don't have an alpha-aware version of that yet. */
