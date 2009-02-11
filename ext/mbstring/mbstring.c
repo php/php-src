@@ -1882,17 +1882,16 @@ PHP_FUNCTION(mb_http_output)
    Sets the current detect_order or Return the current detect_order as a array */
 PHP_FUNCTION(mb_detect_order)
 {
-	size_t argc = ZEND_NUM_ARGS();
-	zval **arg1;
+	zval **arg1 = NULL;
 	int n, size;
 	enum mbfl_no_encoding *list, *entry;
 	char *name;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|Z", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Z", &arg1) == FAILURE) {
 		return;
 	}
 
-	if (argc == 0) {
+	if (!arg1) {
 		array_init(return_value);
 		entry = MBSTRG(current_detect_order_list);
 		n = MBSTRG(current_detect_order_list_size);
@@ -1945,13 +1944,13 @@ PHP_FUNCTION(mb_detect_order)
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
 {
-	zval **arg1;
+	zval **arg1 = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Z", &arg1) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (!arg1) {
 		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			RETURN_STRING("none", 1);
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
