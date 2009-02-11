@@ -55,6 +55,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 				if (obj->dtor && obj->object) {
 					obj->refcount++;
 					obj->dtor(obj->object, i TSRMLS_CC);
+					obj = &objects->object_buckets[i].bucket.obj;
 					obj->refcount--;
 				}
 			}
@@ -200,6 +201,10 @@ ZEND_API void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSR
 					} zend_end_try();
 				}
 			}
+
+			/* re-read the object from the object store as the store might have been reallocated in the dtor */
+			obj = &EG(objects_store).object_buckets[handle].bucket.obj;
+
 			if (obj->refcount == 1) {
 				if (obj->free_storage) {
 					zend_try {
@@ -241,6 +246,7 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	}
 
 	obj->clone(obj->object, &new_object TSRMLS_CC);
+	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 
 	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
 	retval.handlers = Z_OBJ_HT_P(zobject);
