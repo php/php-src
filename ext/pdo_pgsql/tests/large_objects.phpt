@@ -19,7 +19,7 @@ $db->exec('CREATE TABLE test (blobid integer not null primary key, bloboid OID)'
 $db->beginTransaction();
 $oid = $db->pgsqlLOBCreate();
 try {
-$stm = $db->pgsqlLOBOpen($oid);
+$stm = $db->pgsqlLOBOpen($oid, 'w+b');
 fwrite($stm, "Hello dude\n");
 
 $stmt = $db->prepare("INSERT INTO test (blobid, bloboid) values (?, ?)");
@@ -34,14 +34,37 @@ $stm = null;
 
 /* Pull it out */
 $stmt = $db->prepare("SELECT * from test");
-$stmt->execute();
 $stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
+$stmt->execute();
 echo "Fetching:\n";
 while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
 	var_dump($row['blobid']);
 	var_dump(stream_get_contents($lob));
 }
 echo "Fetched!\n";
+
+/* Try again, with late bind */
+$stmt = $db->prepare("SELECT * from test");
+$stmt->execute();
+$stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
+echo "Fetching late bind:\n";
+while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
+	var_dump($row['blobid']);
+	var_dump(is_int($row['bloboid']));
+}
+echo "Fetched!\n";
+
+/* Try again, with NO  bind */
+$stmt = $db->prepare("SELECT * from test");
+$stmt->execute();
+$stmt->bindColumn('bloboid', $lob, PDO::PARAM_LOB);
+echo "Fetching NO bind:\n";
+while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
+	var_dump($row['blobid']);
+	var_dump(is_int($row['bloboid']));
+}
+echo "Fetched!\n";
+
 } catch (Exception $e) {
 	/* catch exceptions so that we can guarantee to clean
 	 * up the LOB */
@@ -53,9 +76,18 @@ echo "Fetched!\n";
  * linger and clutter up the storage */
 $db->pgsqlLOBUnlink($oid);
 
+?>
 --EXPECT--
 Fetching:
 int(1)
 string(11) "Hello dude
 "
+Fetched!
+Fetching late bind:
+int(1)
+bool(true)
+Fetched!
+Fetching NO bind:
+int(1)
+bool(true)
 Fetched!
