@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2009, PHP 5.2.9
+12 Feb 2009, PHP 5.2.9RC2
 - Fixed bug #47353 (crash when creating a lot of objects in object destructor).
   (Tony)
 - Fixed bug #47322 (sscanf %d doesn't work). (Felipe)
