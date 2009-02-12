@@ -1,5 +1,5 @@
 --TEST--
-Bug#42090 (json_decode causes segmentation fault)
+Bug #42090 (json_decode causes segmentation fault)
 --SKIPIF--
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
@@ -16,10 +16,9 @@ var_dump(
 ?>
 --EXPECT--
 string(0) ""
-string(5) "".."."
-string(1) """
-string(2) """"
+NULL
+NULL
+NULL
 string(4) ""\"""
 string(1) """
 string(2) """"
-
