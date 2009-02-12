@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   properties and __get(). (Andrei)
 
 - Added optional sorting type flag parameter to array_unique(). Default is
-  SORT_REGULAR. (Andrei)
+  SORT_STRING. (Andrei)
 
 - Fixed a crash on extract in zip when files or directories entry names contain 
   a relative path. (Pierre)
