@@ -259,7 +259,7 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128M)
 
 ; error_reporting is a bit-field.  Or each number up to get desired error
 ; reporting level
-; E_ALL             - All errors and warnings (doesn't include E_STRICT)
+; E_ALL             - All errors and warnings (includes E_STRICT)
 ; E_ERROR           - fatal run-time errors
 ; E_RECOVERABLE_ERROR     - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
@@ -288,11 +288,11 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128M)
 ;
 ;   - Show all errors, except for notices and coding standards warnings
 ;
-;error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT
+;error_reporting = E_ALL | ~E_NOTICE | ~E_STRICT
 ;
 ;   - Show all errors, except for notices
 ;
-;error_reporting = E_ALL & ~E_NOTICE
+;error_reporting = E_ALL | ~E_NOTICE
 ;
 ;   - Show only errors
 ;
@@ -300,7 +300,7 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128M)
 ;
 ;   - Show all errors, except coding standards warnings
 ;
-error_reporting  =  E_ALL & ~E_STRICT
+error_reporting  =  E_ALL | ~E_STRICT
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
