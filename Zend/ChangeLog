@@ -1,3 +1,25 @@
+2009-02-11  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      tests/bug47353.phpt
+      tests/bug47353.phpt:
+      add test
+
+    * tests/bug47353.phpt
+      tests/bug47353.phpt
+      tests/bug47353.phpt:
+        1.1.4;
+      add test
+
+    * (PHP_5_2)
+      zend_objects_API.c
+      zend_objects_API.c:
+      MFH: fix bug #47353 (crash when creating a lot of objects in object
+      destructor)
+
+    * zend_objects_API.c:
+      fix bug #47353 (crash when creating a lot of objects in object destructor)
+
 2009-02-09  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute_API.c
