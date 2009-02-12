@@ -31,6 +31,8 @@ extern "C" {
 
 #include <php_ini.h>
 #include <SAPI.h>
+#include <unicode/uchar.h>
+#include <unicode/utrans.h>
 #include <ext/standard/info.h>
 
 extern zend_module_entry unicode_module_entry;
