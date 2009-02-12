@@ -24,7 +24,6 @@
 #include <unicode/uclean.h>
 #include <unicode/ustring.h>
 #include <unicode/ucnv.h>
-#include <unicode/ustdio.h>
 #include <unicode/uchar.h>
 #include <unicode/uloc.h>
 #include <unicode/ucol.h>

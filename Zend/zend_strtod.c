@@ -93,7 +93,6 @@
 
 #include <zend.h>
 #include <unicode/utypes.h>
-#include <unicode/ustdio.h>
 #include <zend_strtod.h>
 #include <zend_float.h>
 
