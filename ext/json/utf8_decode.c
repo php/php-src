@@ -165,7 +165,7 @@ utf8_decode_next(json_utf8_decode *utf8)
 /*
     Three continuation (65536 to 1114111)
 */
-    if ((c & 0xF1) == 0xF0) {
+    if ((c & 0xF8) == 0xF0) {
         int c1 = cont(utf8);
         int c2 = cont(utf8);
         int c3 = cont(utf8);
