@@ -7,12 +7,12 @@ PHP                                                                        NEWS
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
 - Fixed bug #47085 (rename() returns true even if the file in PHAR does not exist). (Greg)
 - Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
+- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers). (David C.)
 - Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
 - Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator). (David C.)
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
-- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers). (David C.)
 
 29 Jan 2009, PHP 5.3.0 Beta 1
 - Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
