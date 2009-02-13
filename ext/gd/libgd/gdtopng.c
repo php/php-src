@@ -26,7 +26,7 @@ main (int argc, char **argv)
   fclose (in);
   if (!im)
     {
-      fprintf (stderr, "Input is not in PNG format!\n");
+      fprintf (stderr, "Input is not in GD format!\n");
       exit (1);
     }
   out = fopen (argv[2], "wb");
