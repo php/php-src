@@ -774,6 +774,11 @@ PHP_FUNCTION(ob_flush)
 		RETURN_FALSE;
 	}
 	
+	if (!OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer %s.", OG(active_ob_buffer).handler_name);
+		RETURN_FALSE;
+	}
+	
 	php_end_ob_buffer(1, 1 TSRMLS_CC);
 	RETURN_TRUE;
 }
