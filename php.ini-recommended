@@ -339,11 +339,11 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128MB)
 ;
 ;   - Show all errors, except for notices and coding standards warnings
 ;
-;error_reporting = E_ALL | ~E_NOTICE
+;error_reporting = E_ALL & ~E_NOTICE
 ;
 ;   - Show all errors, except for notices
 ;
-;error_reporting = E_ALL | ~E_NOTICE | E_STRICT
+;error_reporting = E_ALL & ~E_NOTICE | E_STRICT
 ;
 ;   - Show only errors
 ;
@@ -351,7 +351,7 @@ memory_limit = 128M      ; Maximum amount of memory a script may consume (128MB)
 ;
 ;   - Show all errors, except coding standards warnings
 ;
-error_reporting  =  E_ALL
+error_reporting = E_ALL
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
