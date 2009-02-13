@@ -2839,7 +2839,7 @@ PHP_FUNCTION(array_unique)
 	};
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
-	long sort_type = SORT_STRING;
+	long sort_type = SORT_REGULAR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &array, &sort_type) == FAILURE) {
 		return;
