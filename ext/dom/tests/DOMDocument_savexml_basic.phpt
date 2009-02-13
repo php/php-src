@@ -1,6 +1,6 @@
 --TEST--
 DOM Document : save and saveXML
---CREDIT--
+--CREDITS--
 Sami Greenbury (sami@patabugen.co.uk)
 # TestFest 2008
 --SKIPIF--
