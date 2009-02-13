@@ -328,23 +328,27 @@ static PHP_METHOD(PDO, dbh_constructor)
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 				pdbh->persistent_id_len = plen+1;
 				pdbh->refcount = 1;
+				pdbh->properties = NULL;
 			}
 		}
 
 		if (pdbh) {
 			/* let's copy the emalloc bits over from the other handle */
-			pdbh->ce = dbh->ce;
-			pdbh->def_stmt_ce = dbh->def_stmt_ce;
-			pdbh->def_stmt_ctor_args = dbh->def_stmt_ctor_args;
-			pdbh->properties = dbh->properties;
+			if (pdbh->properties) {
+				zend_hash_destroy(dbh->properties);	
+				efree(dbh->properties);
+			} else {
+				pdbh->ce = dbh->ce;
+				pdbh->def_stmt_ce = dbh->def_stmt_ce;
+				pdbh->def_stmt_ctor_args = dbh->def_stmt_ctor_args;
+				pdbh->properties = dbh->properties;
+			}
 			/* kill the non-persistent thingamy */
 			efree(dbh);
 			/* switch over to the persistent one */
 			dbh = pdbh;
 			zend_object_store_set_object(object, dbh TSRMLS_CC);
-			if (!call_factory) {
-				dbh->refcount++;
-			}
+			dbh->refcount++;
 		}
 
 		if (hashkey) {
@@ -352,11 +356,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 		}
 	}
 	
-	dbh->data_source_len = strlen(colon + 1);
-	dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
-	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
-	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
-	dbh->default_fetch_type = PDO_FETCH_BOTH;
+	if (call_factory) {
+		dbh->data_source_len = strlen(colon + 1);
+		dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
+		dbh->username = username ? pestrdup(username, is_persistent) : NULL;
+		dbh->password = password ? pestrdup(password, is_persistent) : NULL;
+		dbh->default_fetch_type = PDO_FETCH_BOTH;
+	}	
 
 	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
@@ -1520,11 +1526,10 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 		dbh->properties = NULL;
 	}
 
-	if (!dbh->is_persistent) {
-		dbh_free(dbh TSRMLS_CC);
-	} else if (dbh->methods && dbh->methods->persistent_shutdown) {
+	if (dbh->is_persistent && dbh->methods && dbh->methods->persistent_shutdown) {
 		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
+	dbh_free(dbh TSRMLS_CC);
 }
 
 zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
