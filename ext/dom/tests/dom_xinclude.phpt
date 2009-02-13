@@ -23,10 +23,10 @@ foreach ($dom->documentElement->childNodes as $node) {
 --EXPECTF--
 <?xml version="1.0"?>
 <foo xmlns:xi="http://www.w3.org/2001/XInclude">
-    <book xml:base="compress.zlib://%sext/dom/tests/book.xml">
+    <book xml:base="compress.zlib://%sbook.xml">
   <title>The Grapes of Wrath</title>
   <author>John Steinbeck</author>
- </book><book xml:base="compress.zlib://%sext/dom/tests/book.xml">
+ </book><book xml:base="compress.zlib://%sbook.xml">
   <title>The Pearl</title>
   <author>John Steinbeck</author>
  </book>
