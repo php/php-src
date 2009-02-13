@@ -1,3 +1,10 @@
+2009-02-12  Moriyoshi Koizumi  <mozo@mozo.jp>
+
+    * zend_strtod.c
+      zend_unicode.h:
+      - Remove dependencies on ustdio.h. Doing so allows HEAD to be built with
+        ICU that comes with the out-of-the-box Mac OS X.
+
 2009-02-11  Antony Dovgal  <tony@daylessday.org>
 
     * (PHP_5_2)
