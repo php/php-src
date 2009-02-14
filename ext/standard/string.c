@@ -2784,7 +2784,7 @@ PHP_FUNCTION(strrpos)
 		if (offset >= 0) {
 			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
 			if (cu_offset > haystack_len - needle_len) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			u_p = haystack.u + cu_offset;
@@ -2792,13 +2792,13 @@ PHP_FUNCTION(strrpos)
 		} else {
 			u_p = haystack.u;
 			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
 				cu_offset = haystack_len;
 				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
 				if (cu_offset == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				if (needle_len > haystack_len - cu_offset) {
@@ -2822,14 +2822,14 @@ PHP_FUNCTION(strrpos)
 	} else {
 		if (offset >= 0) {
 			if (offset > haystack_len) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			p = haystack.s + offset;
 			e = haystack.s + haystack_len - needle_len;
 		} else {
 			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 
@@ -2914,7 +2914,7 @@ PHP_FUNCTION(strripos)
 		if (offset >= 0) {
 			U16_FWD_N(haystack.u, cu_offset, haystack_len, offset);
 			if (cu_offset > haystack_len) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			u_p = haystack.u + cu_offset;
@@ -2922,13 +2922,13 @@ PHP_FUNCTION(strripos)
 		} else {
 			u_p = haystack.u;
 			if (-offset > haystack_len || offset < -INT_MAX) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} else {
 				cu_offset = haystack_len;
 				U16_BACK_N(haystack.u, 0, cu_offset, -offset);
 				if (cu_offset == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				if (needle_len > haystack_len - cu_offset) {
@@ -2955,7 +2955,7 @@ PHP_FUNCTION(strripos)
 			   Can also avoid tolower emallocs */
 			if (offset >= 0) {
 				if (offset > haystack_len) {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				}
 				p = haystack.s + offset;
@@ -2963,7 +2963,7 @@ PHP_FUNCTION(strripos)
 			} else {
 				p = haystack.s;
 				if (-offset > haystack_len || offset < INT_MAX) {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 					RETURN_FALSE;
 				} else {
 					e = haystack.s + haystack_len + offset;
@@ -2989,7 +2989,7 @@ PHP_FUNCTION(strripos)
 			if (offset > haystack_len) {
 				efree(haystack_dup);
 				efree(needle_dup);
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
 			p = haystack_dup + offset;
@@ -2998,7 +2998,7 @@ PHP_FUNCTION(strripos)
 			if (-offset > haystack_len || offset < -INT_MAX) {
 				efree(haystack_dup);
 				efree(needle_dup);
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			} 
 			p = haystack_dup;
