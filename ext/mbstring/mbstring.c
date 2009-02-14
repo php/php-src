@@ -2237,12 +2237,12 @@ PHP_FUNCTION(mb_strpos)
 		}
 	}
 
-	if (offset < 0 || (unsigned long)offset > (unsigned long)mbfl_strlen(&haystack)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+	if (offset < 0 || offset > mbfl_strlen(&haystack)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 	if (needle.len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2254,17 +2254,17 @@ PHP_FUNCTION(mb_strpos)
 		case 1:
 			break;
 		case 2:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has not positive length.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Needle has not positive length");
 			break;
 		case 4:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding or conversion error");
 			break;
 		case 8:
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty.");
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is empty");
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos.");
-			break;			
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in mb_strpos");
+			break;
 		}
 		RETVAL_FALSE;
 	}
@@ -2351,10 +2351,13 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_FALSE;
 	}
 
-	if ((offset > 0 && offset > mbfl_strlen(&haystack)) ||
-		(offset < 0 && -offset > mbfl_strlen(&haystack))) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Offset is greater than the length of haystack string");
-		RETURN_FALSE;
+	{
+		int haystack_char_len = mbfl_strlen(&haystack);
+		if ((offset > 0 && offset > haystack_char_len) ||
+			(offset < 0 && -offset > haystack_char_len)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
+			RETURN_FALSE;
+		}
 	}
 
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
@@ -2408,10 +2411,6 @@ PHP_FUNCTION(mb_strripos)
 	offset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if ((unsigned int)offset > haystack.len) {
 		RETURN_FALSE;
 	}
 
@@ -4804,7 +4803,7 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 
 /* {{{ MBSTRING_API int php_mb_stripos()
  */
-MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, unsigned int offset, const char *from_encoding TSRMLS_DC)
+MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding TSRMLS_DC)
 {
 	int n;
 	mbfl_string haystack, needle;
@@ -4847,9 +4846,21 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 			break;
 		}
 
-		if (offset < 0 || offset > haystack.len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
-			break;
+ 		{
+ 			int haystack_char_len = mbfl_strlen(&haystack);
+ 
+ 			if (mode) {
+ 				if ((offset > 0 && offset > haystack_char_len) ||
+ 					(offset < 0 && -offset > haystack_char_len)) {
+ 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
+ 					break;
+ 				}
+ 			} else {
+ 				if (offset < 0 || offset > haystack_char_len) {
+ 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
+ 					break;
+ 				}
+ 			}
 		}
 
 		n = mbfl_strpos(&haystack, &needle, offset, mode);
