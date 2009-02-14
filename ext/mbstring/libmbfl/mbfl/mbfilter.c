@@ -906,6 +906,9 @@ mbfl_strpos(
 
 	if (offset < 0) {
 		negative_offset = -offset - pc.needle_len;
+		if (negative_offset < 0) {
+			negative_offset = 0;
+		}
 		offset = 0;
 	}
 
