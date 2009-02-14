@@ -1,0 +1,93 @@
+--TEST--
+array_chunk() - variation 11
+--FILE--
+<?php
+$array = array (0 => 0, 3 => 2);
+
+var_dump ($array);
+for ($i = 0; $i < (sizeof($array) + 1); $i++) {
+	echo "[$i]\n";
+	var_dump (@array_chunk ($array, $i));
+	var_dump (@array_chunk ($array, $i, TRUE));
+	var_dump (@array_chunk ($array, $i, FALSE));
+	echo "\n";
+}
+?>
+--EXPECT--
+array(2) {
+  [0]=>
+  int(0)
+  [3]=>
+  int(2)
+}
+[0]
+NULL
+NULL
+NULL
+
+[1]
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [3]=>
+    int(2)
+  }
+}
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(0)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}
+
+[2]
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [3]=>
+    int(2)
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+  }
+}
