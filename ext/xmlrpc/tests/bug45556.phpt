@@ -26,7 +26,7 @@ xmlrpc_server_call_method ($server, $request, NULL, $options);
 ?>
 --EXPECTF--
 Warning: xmlrpc_server_call_method(): Invalid callback 'foobar' passed in %s on line %d
- 
+
 Warning: xmlrpc_server_call_method(): xml parse error: [line 1, column 1, message: Invalid document end] Unable to add introspection data returned from bar::test() in %s on line %d
 
 Warning: xmlrpc_server_call_method(): Invalid callback 'foo::bar' passed in %s on line %d
