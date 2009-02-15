@@ -274,38 +274,38 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unqu
 	char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
 	int qcount = 0;
-	char const *c;
+	char const *co, *l, *r;
+	char *c;
 	
-	/* Firebird only requires single quotes to be doubled if string lengths are used */
-	
-	/* count the number of ' characters */
-	for (c = unquoted; (c = strchr(c,'\'')); qcount++, c++);
-	
-	if (!qcount) {
-		return 0;
-	} else {
-		char const *l, *r;
-		char *c;
-		
-		*quotedlen = unquotedlen + qcount;
-		*quoted = c = emalloc(*quotedlen+1);
-		
-		/* foreach (chunk that ends in a quote) */
-		for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
-			
-			/* copy the chunk */
-			strncpy(c, l, r-l);
-			c += (r-l);
-			
-			/* add the second quote */
-			*c++ = '\'';
-		}
-		
-		/* copy the remainder */
-		strncpy(c, l, *quotedlen-(c-*quoted));
-		
+	if (!unquotedlen) {
+		*quotedlen = 2;
+		*quoted = emalloc(*quotedlen+1);
+		strcpy(*quoted, "''");
 		return 1;
-	}			
+	}
+			
+	/* Firebird only requires single quotes to be doubled if string lengths are used */
+	/* count the number of ' characters */
+	for (co = unquoted; (co = strchr(co,'\'')); qcount++, co++);
+	
+	*quotedlen = unquotedlen + qcount + 2;
+	*quoted = c = emalloc(*quotedlen+1);		
+	*c++ = '\'';
+	
+	/* foreach (chunk that ends in a quote) */
+	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {			
+		strncpy(c, l, r-l+1);
+		c += (r-l+1);			
+		/* add the second quote */
+		*c++ = '\'';
+	}
+		
+	/* copy the remainder */
+	strncpy(c, l, *quotedlen-(c-*quoted)-1);
+	(*quoted)[*quotedlen-1] = '\''; 
+	(*quoted)[*quotedlen]   = '\0';
+	
+	return 1;
 }
 /* }}} */
 
