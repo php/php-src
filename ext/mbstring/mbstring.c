@@ -1867,7 +1867,7 @@ PHP_FUNCTION(mb_strstr)
 	}
 
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 	n = mbfl_strpos(&haystack, &needle, 0, 0);
@@ -1976,7 +1976,7 @@ PHP_FUNCTION(mb_stristr)
 	}
 
 	if(!needle.len){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty delimiter.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2095,7 +2095,7 @@ PHP_FUNCTION(mb_substr_count)
 	}
 
 	if (needle.len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Empty substring.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty substring");
 		RETURN_FALSE;
 	}
 
