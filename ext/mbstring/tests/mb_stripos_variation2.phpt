@@ -136,12 +136,12 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 11 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 12 --
@@ -149,7 +149,7 @@ bool(false)
 
 -- Iteration 13 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 14 --
@@ -157,17 +157,17 @@ bool(false)
 
 -- Iteration 15 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 16 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 18 --
@@ -184,12 +184,12 @@ bool(false)
 
 -- Iteration 22 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 23 --
 
-Warning: mb_stripos(): Empty delimiter. in %s on line %d
+Warning: mb_stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 24 --
