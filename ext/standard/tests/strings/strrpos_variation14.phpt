@@ -90,11 +90,11 @@ echo "*** Done ***";
 int(6)
 -- Iteration 2 --
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 4 --
 int(6)
