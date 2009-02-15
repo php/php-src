@@ -19,12 +19,19 @@
 #include "phar_internal.h"
 
 #ifdef WORDS_BIGENDIAN
-# define PHAR_GET_32(buffer) (((((unsigned char*)(buffer))[3]) << 24) \
-		| ((((unsigned char*)(buffer))[2]) << 16) \
-		| ((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0]))
-# define PHAR_GET_16(buffer) (((((unsigned char*)(buffer))[1]) <<  8) \
-		| (((unsigned char*)(buffer))[0]))
+static inline php_uint32 phar_fix_32(php_uint32 buffer)
+{
+	return ((((unsigned char *)&buffer)[3]) << 24) |
+		((((unsigned char *)&buffer)[2]) << 16) |
+		((((unsigned char *)&buffer)[1]) << 8) |
+		(((unsigned char *)&buffer)[0]);
+}
+static inline php_uint16 phar_fix_16(php_uint16 buffer)
+{
+	return ((((unsigned char *)&buffer)[1]) << 8) | ((unsigned char *)&buffer)[0];
+}
+# define PHAR_GET_32(buffer) phar_fix_32((php_uint32)(buffer))
+# define PHAR_GET_16(buffer) phar_fix_16((php_uint16)(buffer))
 # define PHAR_SET_32(buffer) PHAR_GET_32(buffer)
 # define PHAR_SET_16(buffer) PHAR_GET_16(buffer)
 #else
