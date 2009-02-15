@@ -383,7 +383,7 @@ foundit:
 			php_stream_seek(fp, loc + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
 		}
 
-		switch (zipentry.compressed) {
+		switch (PHAR_GET_16(zipentry.compressed)) {
 			case PHAR_ZIP_COMP_NONE :
 				/* compression flag already set */
 				break;
@@ -450,7 +450,7 @@ foundit:
 			}
 
 			p = buf;
-			entry.metadata_len = zipentry.comment_len;
+			entry.metadata_len = PHAR_GET_16(zipentry.comment_len);
 
 			if (phar_parse_metadata(&p, &(entry.metadata), PHAR_GET_16(zipentry.comment_len) TSRMLS_CC) == FAILURE) {
 				entry.metadata_len = 0;
@@ -997,6 +997,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	char *temperr = NULL;
 	struct _phar_zip_pass pass;
 	phar_zip_dir_end eocd;
+	php_uint32 cdir_size, cdir_offset;
 
 	pass.error = &temperr;
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
@@ -1198,7 +1199,7 @@ fperror:
 	memset(&eocd, 0, sizeof(eocd));
 
 	strncpy(eocd.signature, "PK\5\6", 4);
-	eocd.counthere = eocd.count = zend_hash_num_elements(&phar->manifest);
+	eocd.counthere = eocd.count = PHAR_GET_16(zend_hash_num_elements(&phar->manifest));
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass TSRMLS_CC);
 
 	if (temperr) {
@@ -1217,11 +1218,13 @@ nocentralerror:
 	}
 
 	/* save zip */
-	eocd.cdir_size = php_stream_tell(pass.centralfp);
-	eocd.cdir_offset = php_stream_tell(pass.filefp);
+	cdir_size = php_stream_tell(pass.centralfp);
+	cdir_offset = php_stream_tell(pass.filefp);
+	eocd.cdir_size = PHAR_SET_32(cdir_size);
+	eocd.cdir_offset = PHAR_SET_32(cdir_offset);
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
-	if (eocd.cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
+	if (cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
 		}
