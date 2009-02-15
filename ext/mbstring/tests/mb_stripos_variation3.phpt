@@ -115,12 +115,12 @@ int(8)
 
 -- Iteration 3 --
 
-Warning: mb_stripos(): Offset not contained in string. in %s on line %d
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: mb_stripos(): Offset not contained in string. in %s on line %d
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -128,12 +128,12 @@ bool(false)
 
 -- Iteration 6 --
 
-Warning: mb_stripos(): Offset not contained in string. in %s on line %d
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: mb_stripos(): Offset not contained in string. in %s on line %d
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Iteration 8 --

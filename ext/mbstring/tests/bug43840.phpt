@@ -47,29 +47,29 @@ bool(false)
 -- Offset is 22 --
 --Multibyte String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 --ASCII String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Offset is 53 --
 --Multibyte String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 --ASCII String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Offset is 54 --
 --Multibyte String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
 --ASCII String:--
 
-Warning: mb_strpos(): Offset not contained in string. in %s on line %d
+Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)

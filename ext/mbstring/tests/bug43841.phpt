@@ -1,6 +1,5 @@
 --TEST--
 Test mb_strrpos() function : mb_strrpos offset is byte count for negative values
---XFAIL--
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -40,31 +39,31 @@ foreach ($offsets as $i) {
 -- Offset is -25 --
 Multibyte String:
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 ASCII String:
 mb_strrpos:
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 strrpos:
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Offset is -24 --
 Multibyte String:
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 ASCII String:
 mb_strrpos:
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 strrpos:
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Offset is -13 --
