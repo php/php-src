@@ -6,10 +6,10 @@ PHP_ARG_ENABLE(phar, for phar archive support,
 
 if test "$PHP_PHAR" != "no"; then
   PHP_C_BIGENDIAN
-dnl  if test $ac_cv_c_bigendian_php = yes; then
-dnl    AC_MSG_WARN([Disabling Phar due to crash bugs on big endian systems])
-dnl    PHP_PHAR=no
-dnl  else
+  if test $ac_cv_c_bigendian_php = yes; then
+    AC_MSG_WARN([Disabling Phar due to crash bugs on big endian systems])
+    PHP_PHAR=no
+  else
   PHP_NEW_EXTENSION(phar, util.c tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared)
   AC_MSG_CHECKING([for phar openssl support])
   if test "$PHP_HASH_SHARED" != "yes"; then
@@ -32,5 +32,5 @@ dnl  else
   PHP_ADD_EXTENSION_DEP(phar, hash, true)
   PHP_ADD_EXTENSION_DEP(phar, spl, true)
   PHP_ADD_MAKEFILE_FRAGMENT
-dnl  fi
+  fi
 fi
