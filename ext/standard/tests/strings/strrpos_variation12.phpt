@@ -38,7 +38,7 @@ int(11)
 int(11)
 int(2)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 int(5)
 int(5)
@@ -46,6 +46,6 @@ int(0)
 bool(false)
 int(5)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 *** Done ***

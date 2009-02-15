@@ -179,6 +179,6 @@ bool(false)
 -- Iteration 35 --
 int(0)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 *** Done ***

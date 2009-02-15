@@ -93,12 +93,12 @@ echo "*** Done ***";
 -- Iteration 1 --
 bool(false)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 2 --
 bool(false)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 3 --
 bool(false)
@@ -171,7 +171,7 @@ bool(false)
 -- Iteration 15 --
 bool(false)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 16 --
 bool(false)
@@ -179,7 +179,7 @@ bool(false)
 -- Iteration 17 --
 bool(false)
 
-Notice: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 18 --
 bool(false)
