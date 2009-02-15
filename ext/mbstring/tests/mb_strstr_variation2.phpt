@@ -165,33 +165,33 @@ Error: 2 - mb_strstr() expects parameter 2 to be string, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --lowercase true--
 bool(false)
 
 --lowercase false--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --uppercase TRUE--
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --empty string SQ--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --instance of classWithToString--
@@ -202,11 +202,11 @@ Error: 2 - mb_strstr() expects parameter 2 to be string, object given, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - mb_strstr(): Empty delimiter., %s(%d)
+Error: 2 - mb_strstr(): Empty delimiter, %s(%d)
 bool(false)
 
 --resource--
