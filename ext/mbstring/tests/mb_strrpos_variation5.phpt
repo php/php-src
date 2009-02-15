@@ -38,31 +38,47 @@ for ($i = -60; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 
 **-- Offset is: -60 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: -50 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: -40 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: -30 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: -20 --**
@@ -97,25 +113,41 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: 40 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: 50 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 **-- Offset is: 60 --**
 -- ASCII String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 --Multibyte String --
+
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 Done

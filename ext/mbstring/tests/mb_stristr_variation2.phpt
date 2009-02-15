@@ -165,38 +165,38 @@ Error: 2 - mb_stristr() expects parameter 2 to be binary string, array given, %s
 bool(false)
 
 --uppercase NULL--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --lowercase true--
 bool(false)
 
 --lowercase false--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --uppercase TRUE--
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --empty string SQ--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --instance of classWithToString--
 Error: 4096 - Method classWithToString::__toString() must return a string value, %s(%d)
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
@@ -204,11 +204,11 @@ Error: 2 - mb_stristr() expects parameter 2 to be binary string, object given, %
 bool(false)
 
 --undefined var--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - mb_stristr(): Empty delimiter., %s(%d)
+Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
 bool(false)
 
 --resource--

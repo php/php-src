@@ -133,12 +133,12 @@ int(0)
 
 -- Iteration 10 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 11 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 12 --
@@ -146,7 +146,7 @@ int(0)
 
 -- Iteration 13 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 14 --
@@ -154,17 +154,17 @@ int(0)
 
 -- Iteration 15 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 16 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 18 --
@@ -181,12 +181,12 @@ int(1)
 
 -- Iteration 22 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 23 --
 
-Warning: mb_substr_count(): Empty substring. in %s on line %d
+Warning: mb_substr_count(): Empty substring in %s on line %d
 bool(false)
 
 -- Iteration 24 --
