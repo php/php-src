@@ -10,7 +10,7 @@ $d = dirname(__FILE__) . "/copyonwrite6";
 mkdir($d);
 file_put_contents($d . "/file1", "file1\n");
 file_put_contents($d . "/file2", "file2\n");
-var_dump($phar->buildFromIterator(new RecursiveDirectoryIterator($d),$d));
+var_dump($phar->buildFromIterator(new RecursiveDirectoryIterator($d, RecursiveDirectoryIterator::SKIP_DOTS),$d));
 $phar2 = new Phar(__FILE__);
 $arr = array();
 foreach ($phar2 as $name => $file) {
