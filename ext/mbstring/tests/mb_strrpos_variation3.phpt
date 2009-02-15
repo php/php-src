@@ -97,12 +97,12 @@ int(8)
 
 -- Iteration 3 --
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -113,7 +113,7 @@ bool(false)
 
 -- Iteration 7 --
 
-Notice: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 
 -- Iteration 8 --
