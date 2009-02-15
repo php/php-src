@@ -2726,11 +2726,9 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 		}
 	}
 	if (offset) {
-	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), (long) Z_DVAL_P(offset), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:

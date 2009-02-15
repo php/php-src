@@ -979,7 +979,7 @@ fetch_string_dim:
 				long index;
 
 				if (Z_TYPE_P(dim) == IS_DOUBLE) {
-					DVAL_TO_LVAL(Z_DVAL_P(dim), index);
+					index = (long)Z_DVAL_P(dim);
 				} else {
 					index = Z_LVAL_P(dim);
 				}
