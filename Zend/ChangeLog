@@ -1,3 +1,25 @@
+2009-02-14  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * acinclude.m4
+      acinclude.m4
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      2.4.1 is safe
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_language_scanner.c
+      zend_language_scanner_defs.h:
+      Unmangle
+
+    * (PHP_5_2)
+      acinclude.m4:
+      2.4.1 is safe to use.  Perhaps we should just drop the 3rd part from
+      the check there?  Might be unsafe if they break 2.4.2 though
+
 2009-02-12  Moriyoshi Koizumi  <mozo@mozo.jp>
 
     * zend_strtod.c
