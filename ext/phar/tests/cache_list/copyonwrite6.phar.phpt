@@ -4,6 +4,7 @@ Phar: copy-on-write test 6 [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/copyonwrite6.phar.php
 phar.readonly=0
+open_basedir=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE_EXTERNAL--
