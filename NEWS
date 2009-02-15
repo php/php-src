@@ -1,7 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2009, PHP 5.2.9
-- Fixed Bug #45923 (mb_st[r]ripos() offset not handled correctly). (Moriyoshi)
+- Fixed bug #45923 (mb_st[r]ripos() offset not handled correctly). (Moriyoshi)
+- Fixed bug #43841 (mb_strrpos() offset is byte count for negative values).
+  (Moriyoshi)
 
 12 Feb 2009, PHP 5.2.9RC2
 - Fixed bug #47353 (crash when creating a lot of objects in object destructor).
