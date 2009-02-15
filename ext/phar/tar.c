@@ -1084,10 +1084,10 @@ nostub:
 
 #ifdef WORDS_BIGENDIAN
 # define PHAR_SET_32(var, buffer) \
-	*(php_uint32 *)(var) = (((((unsigned char*)(buffer))[3]) << 24) \
-		| ((((unsigned char*)(buffer))[2]) << 16) \
-		| ((((unsigned char*)(buffer))[1]) << 8) \
-		| (((unsigned char*)(buffer))[0]))
+	*(php_uint32 *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
+		| ((((unsigned char*)&(buffer))[2]) << 16) \
+		| ((((unsigned char*)&(buffer))[1]) << 8) \
+		| (((unsigned char*)&(buffer))[0]))
 #else
 # define PHAR_SET_32(var, buffer) *(php_uint32 *)(var) = (php_uint32) (buffer)
 #endif
