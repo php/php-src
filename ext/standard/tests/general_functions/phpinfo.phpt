@@ -48,6 +48,8 @@ Registered Stream Filters => %s
 
 Configuration
 
+%a
+
 Core
 
 %a
