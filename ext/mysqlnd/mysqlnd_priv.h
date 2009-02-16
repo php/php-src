@@ -49,12 +49,10 @@
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
 
-
+#define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
 #define MYSQLND_CLASS_METHODS_START(class) static \
-									 struct st_##class##_methods mysqlnd_##class##_methods = {
+									 struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
 #define MYSQLND_CLASS_METHODS_END  				}							 
-#define MYSQLND_METHOD(class, method) 			php_##class##_##method##_pub
-#define MYSQLND_METHOD_PRIVATE(class, method)	php_##class##_##method##_priv
 
 #if PHP_MAJOR_VERSION < 6
 #define mysqlnd_array_init(arg, field_count) \
@@ -170,7 +168,9 @@ extern const char * const mysqlnd_server_gone;
 enum_func_status mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
 
 
+
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
+void _mysqlnd_init_ps_fetch_subsystem();
 
 void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,

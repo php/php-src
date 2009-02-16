@@ -67,6 +67,13 @@
 void mysqlnd_library_init(TSRMLS_D);
 void mysqlnd_library_end(TSRMLS_D);
 
+PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
+PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods);
+
+PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods();
+PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods);
+
+
 #define mysqlnd_restart_psession(conn, cache) _mysqlnd_restart_psession((conn), (cache) TSRMLS_CC)
 PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC);
 #define mysqlnd_end_psession(conn) _mysqlnd_end_psession((conn) TSRMLS_CC)
@@ -354,7 +361,9 @@ MYSQLND_RES * 		mysqlnd_qcache_get(MYSQLND_QCACHE * const cache, const char * qu
 void				mysqlnd_qcache_put(MYSQLND_QCACHE * const cache, char * query, size_t query_len,
 									   MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta);
 
-
+/* double check the class name to avoid naming conflicts when using these: */
+#define MYSQLND_METHOD(class, method) php_##class##_##method##_pub
+#define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_bool		collect_statistics;
