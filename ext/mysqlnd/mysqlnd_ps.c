@@ -35,6 +35,8 @@
 const char * const mysqlnd_not_bound_as_blob = "Can't send long data for non-string/non-binary data types";
 const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 
+static struct st_mysqlnd_stmt_methods *mysqlnd_stmt_methods;
+
 /* Exported by mysqlnd.c */
 enum_func_status mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 										const char * const arg, size_t arg_len,
@@ -2080,8 +2082,7 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const stmt, zend_bool implicit
 /* }}} */
 
 
-static
-struct st_mysqlnd_stmt_methods mysqlnd_stmt_methods = {
+MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, prepare),
 	MYSQLND_METHOD(mysqlnd_stmt, execute),
 	MYSQLND_METHOD(mysqlnd_stmt, use_result),
@@ -2123,7 +2124,7 @@ struct st_mysqlnd_stmt_methods mysqlnd_stmt_methods = {
 
 	MYSQLND_METHOD(mysqlnd_stmt, attr_get),
 	MYSQLND_METHOD(mysqlnd_stmt, attr_set),	
-};
+MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ _mysqlnd_stmt_init */
@@ -2134,7 +2135,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 	DBG_ENTER("_mysqlnd_stmt_init");
 	DBG_INF_FMT("stmt=%p", stmt); 
 
-	stmt->m = &mysqlnd_stmt_methods;
+	stmt->m = mysqlnd_stmt_methods;
 	stmt->state = MYSQLND_STMT_INITTED;
 	stmt->execute_cmd_buffer.length = 4096;
 	stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
@@ -2169,6 +2170,28 @@ PHPAPI void
 mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind)
 {
 	efree(result_bind);
+}
+/* }}} */
+
+/* {{{ _mysqlnd_init_ps_subsystem */
+void _mysqlnd_init_ps_subsystem()
+{
+	mysqlnd_stmt_methods = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt);
+	_mysqlnd_init_ps_fetch_subsystem();
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_get_methods */
+PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods()
+{
+	return mysqlnd_stmt_methods;
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_set_methods */
+PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods)
+{
+	mysqlnd_stmt_methods = methods;
 }
 /* }}} */
 
