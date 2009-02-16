@@ -68,19 +68,7 @@ static zend_bool mysqlnd_library_initted = FALSE;
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
-
-/* {{{ mysqlnd_library_init */
-void mysqlnd_library_init(TSRMLS_D)
-{
-	if (mysqlnd_library_initted == FALSE) {
-		mysqlnd_library_initted = TRUE;
-		_mysqlnd_init_ps_subsystem();
-		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
-		mysqlnd_stats_init(&mysqlnd_global_stats);
-	}
-}
-/* }}} */
-
+static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
 /* {{{ mysqlnd_library_end */
 void mysqlnd_library_end(TSRMLS_D)
@@ -2125,7 +2113,6 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
 
-
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, escape_string),
 	MYSQLND_METHOD(mysqlnd_conn, set_charset),
@@ -2196,7 +2183,7 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	SET_ERROR_AFF_ROWS(ret);
 	ret->persistent = persistent;
 
-	ret->m = & mysqlnd_mysqlnd_conn_methods;
+	ret->m = mysqlnd_conn_methods;
 	ret->m->get_reference(ret TSRMLS_CC);
 
 #ifdef MYSQLND_THREADED
@@ -2212,6 +2199,32 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ mysqlnd_library_init */
+void mysqlnd_library_init(TSRMLS_D)
+{
+	if (mysqlnd_library_initted == FALSE) {
+		mysqlnd_library_initted = TRUE;
+		mysqlnd_conn_methods = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn);
+		_mysqlnd_init_ps_subsystem();
+		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
+		mysqlnd_stats_init(&mysqlnd_global_stats);
+	}
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_get_methods */
+PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods()
+{
+	return mysqlnd_conn_methods;
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn_set_methods */
+PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
+{
+	mysqlnd_conn_methods = methods;
+}
+/* }}} */
 
 /*
  * Local variables:

@@ -433,8 +433,8 @@ void ps_fetch_bit(zval *zv, const MYSQLND_FIELD * const field,
 /* }}} */
 
 
-/* {{{ _mysqlnd_init_ps_subsystem */
-void _mysqlnd_init_ps_subsystem()
+/* {{{ _mysqlnd_init_ps_fetch_subsystem */
+void _mysqlnd_init_ps_fetch_subsystem()
 {
 	memset(mysqlnd_ps_fetch_functions, 0, sizeof(mysqlnd_ps_fetch_functions));
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_NULL].func		= ps_fetch_null;
