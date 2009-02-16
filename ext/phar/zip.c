@@ -480,11 +480,13 @@ foundit:
 			php_stream_seek(fp, PHAR_GET_32(zipentry.offset), SEEK_SET);
 
 			if (sizeof(local) != php_stream_read(fp, (char *) &local, sizeof(local))) {
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (cannot read local file header for alias)");
 			}
 
 			/* verify local header */
 			if (entry.filename_len != PHAR_GET_16(local.filename_len) || entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
+				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local head of alias does not match central directory)");
 			}
 
