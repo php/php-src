@@ -1,7 +1,7 @@
 --TEST--
 Test mail() function : basic functionality 
 --INI--
-sendmail_path="exit -2"
+sendmail_path="exit 1"
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
