@@ -167,7 +167,7 @@ mbfl_filt_conv_sjiswin_wchar(int c, mbfl_convert_filter *filter)
 	case 1:		/* kanji second char */
 		filter->status = 0;
 		c1 = filter->cache;
-		if (c > 0x39 && c < 0xfd && c != 0x7f) {
+		if (c >= 0x40 && c <= 0xfc && c != 0x7f) {
 			w = 0;
 			SJIS_DECODE(c1, c, s1, s2);
 			s = (s1 - 0x21)*94 + s2 - 0x21;
