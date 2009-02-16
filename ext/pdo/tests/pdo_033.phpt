@@ -20,6 +20,8 @@ $quoted = $db->quote($unquoted);
 
 $len = strlen($unquoted);
 
+@$db->exec("DROP TABLE test");
+
 $db->query("CREATE TABLE test (t char($len))");
 $db->query("INSERT INTO test (t) VALUES($quoted)");
 
@@ -28,6 +30,7 @@ $stmt->execute();
 
 print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
 
+$db->exec("DROP TABLE test");
 
 ?>
 --EXPECT--
