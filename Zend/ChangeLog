@@ -1,3 +1,14 @@
+2009-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_execute.c
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      
+      Revert patch for bug #46701 as it introduces a BC break
+
 2009-02-14  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * acinclude.m4
