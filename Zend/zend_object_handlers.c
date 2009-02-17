@@ -472,6 +472,10 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 			}
 			return 0;
 		}
+		if (EG(exception)) {
+			zval_ptr_dtor(&retval);
+			return 0;
+		}
 
 		/* Undo PZVAL_LOCK() */
 		retval->refcount--;
