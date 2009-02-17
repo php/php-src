@@ -1,7 +1,5 @@
 --TEST--
 Test mb_stristr() function : basic functionality 
---XFAIL--
-Bug #46763 stristr() wrong output when needle does not exist
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
