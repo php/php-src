@@ -121,7 +121,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_into, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_id)
-	ZEND_ARG_INFO(0, result_array)
+	ZEND_ARG_INFO(1, result_array)
 	ZEND_ARG_INFO(0, rownumber)
 ZEND_END_ARG_INFO()
 
