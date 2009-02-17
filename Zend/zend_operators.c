@@ -936,7 +936,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		return FAILURE;			/* modulus by zero */
 	}
 
-	if (abs(op2->value.lval) == 1) {
+	if (op2->value.lval == -1) {
 		ZVAL_LONG(result, 0);
 		return SUCCESS;
 	}
