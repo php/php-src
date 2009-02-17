@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? Feb 2009, PHP 5.2.9
 - Fixed bug #47399 (mb_check_encoding() returns true for some illegal SJIS
   characters). (for-bugs at hnw dot jp, Moriyoshi)
+- Fixed bug #45940 (MySQLI OO does not populate connect_error property on
+  failed connect). (Johannes)
 - Fixed bug #45923 (mb_st[r]ripos() offset not handled correctly). (Moriyoshi)
 - Fixed bug #43841 (mb_strrpos() offset is byte count for negative values).
   (Moriyoshi)
