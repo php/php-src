@@ -937,6 +937,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	}
 
 	if (op2->value.lval == -1) {
+		/* Prevent overflow error/crash if op1==LONG_MIN */
 		ZVAL_LONG(result, 0);
 		return SUCCESS;
 	}
