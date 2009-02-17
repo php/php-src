@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Beta 2  
 - Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
+- Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)
 - Fixed bug #47329 (Crash in garbage collector). (Dmitry)
 - Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
 - Fixed bug #47265 (generating phar.phar failes because of safe_mode). (Greg)
