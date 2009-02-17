@@ -7,13 +7,16 @@ PHP                                                                        NEWS
 - Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
 - Fixed bug #47265 (generating phar.phar failes because of safe_mode). (Greg)
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
-- Fixed bug #47085 (rename() returns true even if the file in PHAR does not exist). (Greg)
+- Fixed bug #47085 (rename() returns true even if the file in PHAR does not
+  exist). (Greg)
 - Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
-- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers). (David C.)
+- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers).
+  (David C.)
 - Fixed bug #46542 (Extending PDO class with a __call() function doesn't work
   as expected). (Johannes)
 - Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
-- Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator). (David C.)
+- Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator).
+  (David C.)
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
