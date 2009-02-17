@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2009, PHP 5.2.9
+- Fixed bug #47422 (modulus operator returns incorrect results on 64 bit linux).
+  (Matt)
 - Fixed bug #47399 (mb_check_encoding() returns true for some illegal SJIS
   characters). (for-bugs at hnw dot jp, Moriyoshi)
 - Fixed bug #45940 (MySQLI OO does not populate connect_error property on
