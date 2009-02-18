@@ -1342,8 +1342,6 @@ PHP_FUNCTION(ob_start)
 	}
 	if (chunk_size < 0) {
 		chunk_size = 0;
-	} else if (chunk_size == 1) {
-		chunk_size = 4096;
 	}
 	
 	if (SUCCESS != php_output_start_user(output_handler, chunk_size, flags TSRMLS_CC)) {
