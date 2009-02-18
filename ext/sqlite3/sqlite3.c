@@ -930,7 +930,7 @@ typedef struct {
 
 static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
+/*	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract; */
 	
 	return 0;
 }
