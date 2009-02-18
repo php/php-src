@@ -107,8 +107,8 @@ extern "C" {
 **          with the value (X*1000000 + Y*1000 + Z) where X, Y, and Z
 **          are the major version, minor version, and release number.
 */
-#define SQLITE_VERSION         "3.6.10"
-#define SQLITE_VERSION_NUMBER  3006010
+#define SQLITE_VERSION         "3.6.11"
+#define SQLITE_VERSION_NUMBER  3006011
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers {H10020} <S60100>
@@ -2789,8 +2789,10 @@ typedef struct sqlite3_stmt sqlite3_stmt;
 ** new limit for that construct.  The function returns the old limit.
 **
 ** If the new limit is a negative number, the limit is unchanged.
-** For the limit category of SQLITE_LIMIT_XYZ there is a hard upper
-** bound set by a compile-time C preprocessor macro named SQLITE_MAX_XYZ.
+** For the limit category of SQLITE_LIMIT_XYZ there is a 
+** [limits | hard upper bound]
+** set by a compile-time C preprocessor macro named 
+** [limits | SQLITE_MAX_XYZ].
 ** (The "_LIMIT_" in the name is changed to "_MAX_".)
 ** Attempts to increase a limit above its hard upper bound are
 ** silently truncated to the hard upper limit.
@@ -2798,7 +2800,7 @@ typedef struct sqlite3_stmt sqlite3_stmt;
 ** Run time limits are intended for use in applications that manage
 ** both their own internal database and also databases that are controlled
 ** by untrusted external sources.  An example application might be a
-** webbrowser that has its own databases for storing history and
+** web browser that has its own databases for storing history and
 ** separate databases controlled by JavaScript applications downloaded
 ** off the Internet.  The internal databases can be given the
 ** large, default limits.  Databases managed by external sources can
@@ -2830,9 +2832,10 @@ int sqlite3_limit(sqlite3*, int id, int newVal);
 ** CAPI3REF: Run-Time Limit Categories {H12790} <H12760>
 ** KEYWORDS: {limit category} {limit categories}
 **
-** These constants define various aspects of a [database connection]
-** that can be limited in size by calls to [sqlite3_limit()].
-** The meanings of the various limits are as follows:
+** These constants define various performance limits
+** that can be lowered at run-time using [sqlite3_limit()].
+** The synopsis of the meanings of the various limits is shown below.
+** Additional information is available at [limits | Limits in SQLite].
 **
 ** <dl>
 ** <dt>SQLITE_LIMIT_LENGTH</dt>
@@ -2843,7 +2846,7 @@ int sqlite3_limit(sqlite3*, int id, int newVal);
 **
 ** <dt>SQLITE_LIMIT_COLUMN</dt>
 ** <dd>The maximum number of columns in a table definition or in the
-** result set of a SELECT or the maximum number of columns in an index
+** result set of a [SELECT] or the maximum number of columns in an index
 ** or in an ORDER BY or GROUP BY clause.</dd>
 **
 ** <dt>SQLITE_LIMIT_EXPR_DEPTH</dt>
@@ -2860,11 +2863,11 @@ int sqlite3_limit(sqlite3*, int id, int newVal);
 ** <dd>The maximum number of arguments on a function.</dd>
 **
 ** <dt>SQLITE_LIMIT_ATTACHED</dt>
-** <dd>The maximum number of attached databases.</dd>
+** <dd>The maximum number of [ATTACH | attached databases].</dd>
 **
 ** <dt>SQLITE_LIMIT_LIKE_PATTERN_LENGTH</dt>
-** <dd>The maximum length of the pattern argument to the LIKE or
-** GLOB operators.</dd>
+** <dd>The maximum length of the pattern argument to the [LIKE] or
+** [GLOB] operators.</dd>
 **
 ** <dt>SQLITE_LIMIT_VARIABLE_NUMBER</dt>
 ** <dd>The maximum number of variables in an SQL statement that can
@@ -3099,7 +3102,7 @@ typedef struct sqlite3_context sqlite3_context;
 ** KEYWORDS: {SQL parameter} {SQL parameters} {parameter binding}
 **
 ** In the SQL strings input to [sqlite3_prepare_v2()] and its variants,
-** literals may be replaced by a parameter in one of these forms:
+** literals may be replaced by a [parameter] in one of these forms:
 **
 ** <ul>
 ** <li>  ?
@@ -4977,8 +4980,8 @@ int sqlite3_get_autocommit(sqlite3*);
 ** CAPI3REF: Find The Database Handle Of A Prepared Statement {H13120} <S60600>
 **
 ** The sqlite3_db_handle interface returns the [database connection] handle
-** to which a [prepared statement] belongs.  The database handle returned by
-** sqlite3_db_handle is the same database handle that was the first argument
+** to which a [prepared statement] belongs.  The [database connection]
+** returned by sqlite3_db_handle is the same [database connection] that was the first argument
 ** to the [sqlite3_prepare_v2()] call (or its variants) that was used to
 ** create the statement in the first place.
 **
@@ -5183,7 +5186,7 @@ void *sqlite3_update_hook(
 ** to the same database. Sharing is enabled if the argument is true
 ** and disabled if the argument is false.
 **
-** Cache sharing is enabled and disabled for an entire process. {END}
+** Cache sharing is enabled and disabled for an entire process.
 ** This is a change as of SQLite version 3.5.0. In prior versions of SQLite,
 ** sharing was enabled or disabled for each thread separately.
 **
@@ -5202,6 +5205,8 @@ void *sqlite3_update_hook(
 ** Shared cache is disabled by default. But this might change in
 ** future releases of SQLite.  Applications that care about shared
 ** cache setting should set it explicitly.
+**
+** See Also:  [SQLite Shared-Cache Mode]
 **
 ** INVARIANTS:
 **
@@ -6372,6 +6377,7 @@ int sqlite3_test_control(int op, ...);
 #define SQLITE_TESTCTRL_BITVEC_TEST              8
 #define SQLITE_TESTCTRL_FAULT_INSTALL            9
 #define SQLITE_TESTCTRL_BENIGN_MALLOC_HOOKS     10
+#define SQLITE_TESTCTRL_PENDING_BYTE            11
 
 /*
 ** CAPI3REF: SQLite Runtime Status {H17200} <S60200>
@@ -6661,17 +6667,17 @@ typedef struct sqlite3_pcache sqlite3_pcache;
 **                in which case SQLite will attempt to unpin one or more 
 **                pages before re-requesting the same page, or it can
 **                allocate a new page and return a pointer to it. If a new
-**                page is allocated, then it must be completely zeroed before 
-**                it is returned.
+**                page is allocated, then the first sizeof(void*) bytes of
+**                it (at least) must be zeroed before it is returned.
 **   <tr><td>2<td>If createFlag is set to 2, then SQLite is not holding any
 **                pinned pages associated with the specific cache passed
 **                as the first argument to xFetch() that can be unpinned. The
 **                cache implementation should attempt to allocate a new
-**                cache entry and return a pointer to it. Again, the new
-**                page should be zeroed before it is returned. If the xFetch()
-**                method returns NULL when createFlag==2, SQLite assumes that
-**                a memory allocation failed and returns SQLITE_NOMEM to the
-**                user.
+**                cache entry and return a pointer to it. Again, the first
+**                sizeof(void*) bytes of the page should be zeroed before 
+**                it is returned. If the xFetch() method returns NULL when 
+**                createFlag==2, SQLite assumes that a memory allocation 
+**                failed and returns SQLITE_NOMEM to the user.
 ** </table>
 **
 ** xUnpin() is called by SQLite with a pointer to a currently pinned page
@@ -6721,6 +6727,202 @@ struct sqlite3_pcache_methods {
   void (*xTruncate)(sqlite3_pcache*, unsigned iLimit);
   void (*xDestroy)(sqlite3_pcache*);
 };
+
+/*
+** CAPI3REF: Online Backup Object
+** EXPERIMENTAL
+**
+** The sqlite3_backup object records state information about an ongoing
+** online backup operation.  The sqlite3_backup object is created by
+** a call to [sqlite3_backup_init()] and is destroyed by a call to
+** [sqlite3_backup_finish()].
+**
+** See Also: [Using the SQLite Online Backup API]
+*/
+typedef struct sqlite3_backup sqlite3_backup;
+
+/*
+** CAPI3REF: Online Backup API.
+** EXPERIMENTAL
+**
+** This API is used to overwrite the contents of one database with that
+** of another. It is useful either for creating backups of databases or
+** for copying in-memory databases to or from persistent files. 
+**
+** See Also: [Using the SQLite Online Backup API]
+**
+** Exclusive access is required to the destination database for the 
+** duration of the operation. However the source database is only
+** read-locked while it is actually being read, it is not locked
+** continuously for the entire operation. Thus, the backup may be
+** performed on a live database without preventing other users from
+** writing to the database for an extended period of time.
+** 
+** To perform a backup operation: 
+**   <ol>
+**     <li><b>sqlite3_backup_init()</b> is called once to initialize the
+**         backup, 
+**     <li><b>sqlite3_backup_step()</b> is called one or more times to transfer 
+**         the data between the two databases, and finally
+**     <li><b>sqlite3_backup_finish()</b> is called to release all resources 
+**         associated with the backup operation. 
+**   </ol>
+** There should be exactly one call to sqlite3_backup_finish() for each
+** successful call to sqlite3_backup_init().
+**
+** <b>sqlite3_backup_init()</b>
+**
+** The first two arguments passed to [sqlite3_backup_init()] are the database
+** handle associated with the destination database and the database name 
+** used to attach the destination database to the handle. The database name
+** is "main" for the main database, "temp" for the temporary database, or
+** the name specified as part of the [ATTACH] statement if the destination is
+** an attached database. The third and fourth arguments passed to 
+** sqlite3_backup_init() identify the [database connection]
+** and database name used
+** to access the source database. The values passed for the source and 
+** destination [database connection] parameters must not be the same.
+**
+** If an error occurs within sqlite3_backup_init(), then NULL is returned
+** and an error code and error message written into the [database connection] 
+** passed as the first argument. They may be retrieved using the
+** [sqlite3_errcode()], [sqlite3_errmsg()], and [sqlite3_errmsg16()] functions.
+** Otherwise, if successful, a pointer to an [sqlite3_backup] object is
+** returned. This pointer may be used with the sqlite3_backup_step() and
+** sqlite3_backup_finish() functions to perform the specified backup 
+** operation.
+**
+** <b>sqlite3_backup_step()</b>
+**
+** Function [sqlite3_backup_step()] is used to copy up to nPage pages between 
+** the source and destination databases, where nPage is the value of the 
+** second parameter passed to sqlite3_backup_step(). If nPage is a negative
+** value, all remaining source pages are copied. If the required pages are 
+** succesfully copied, but there are still more pages to copy before the 
+** backup is complete, it returns [SQLITE_OK]. If no error occured and there 
+** are no more pages to copy, then [SQLITE_DONE] is returned. If an error 
+** occurs, then an SQLite error code is returned. As well as [SQLITE_OK] and
+** [SQLITE_DONE], a call to sqlite3_backup_step() may return [SQLITE_READONLY],
+** [SQLITE_NOMEM], [SQLITE_BUSY], [SQLITE_LOCKED], or an
+** [SQLITE_IOERR_ACCESS | SQLITE_IOERR_XXX] extended error code.
+**
+** As well as the case where the destination database file was opened for
+** read-only access, sqlite3_backup_step() may return [SQLITE_READONLY] if
+** the destination is an in-memory database with a different page size
+** from the source database.
+**
+** If sqlite3_backup_step() cannot obtain a required file-system lock, then
+** the [sqlite3_busy_handler | busy-handler function]
+** is invoked (if one is specified). If the 
+** busy-handler returns non-zero before the lock is available, then 
+** [SQLITE_BUSY] is returned to the caller. In this case the call to
+** sqlite3_backup_step() can be retried later. If the source
+** [database connection]
+** is being used to write to the source database when sqlite3_backup_step()
+** is called, then [SQLITE_LOCKED] is returned immediately. Again, in this
+** case the call to sqlite3_backup_step() can be retried later on. If
+** [SQLITE_IOERR_ACCESS | SQLITE_IOERR_XXX], [SQLITE_NOMEM], or
+** [SQLITE_READONLY] is returned, then 
+** there is no point in retrying the call to sqlite3_backup_step(). These 
+** errors are considered fatal. At this point the application must accept 
+** that the backup operation has failed and pass the backup operation handle 
+** to the sqlite3_backup_finish() to release associated resources.
+**
+** Following the first call to sqlite3_backup_step(), an exclusive lock is
+** obtained on the destination file. It is not released until either 
+** sqlite3_backup_finish() is called or the backup operation is complete 
+** and sqlite3_backup_step() returns [SQLITE_DONE]. Additionally, each time 
+** a call to sqlite3_backup_step() is made a [shared lock] is obtained on
+** the source database file. This lock is released before the
+** sqlite3_backup_step() call returns. Because the source database is not
+** locked between calls to sqlite3_backup_step(), it may be modified mid-way
+** through the backup procedure. If the source database is modified by an
+** external process or via a database connection other than the one being
+** used by the backup operation, then the backup will be transparently
+** restarted by the next call to sqlite3_backup_step(). If the source 
+** database is modified by the using the same database connection as is used
+** by the backup operation, then the backup database is transparently 
+** updated at the same time.
+**
+** <b>sqlite3_backup_finish()</b>
+**
+** Once sqlite3_backup_step() has returned [SQLITE_DONE], or when the 
+** application wishes to abandon the backup operation, the [sqlite3_backup]
+** object should be passed to sqlite3_backup_finish(). This releases all
+** resources associated with the backup operation. If sqlite3_backup_step()
+** has not yet returned [SQLITE_DONE], then any active write-transaction on the
+** destination database is rolled back. The [sqlite3_backup] object is invalid
+** and may not be used following a call to sqlite3_backup_finish().
+**
+** The value returned by sqlite3_backup_finish is [SQLITE_OK] if no error
+** occurred, regardless or whether or not sqlite3_backup_step() was called
+** a sufficient number of times to complete the backup operation. Or, if
+** an out-of-memory condition or IO error occured during a call to
+** sqlite3_backup_step() then [SQLITE_NOMEM] or an
+** [SQLITE_IOERR_ACCESS | SQLITE_IOERR_XXX] error code
+** is returned. In this case the error code and an error message are
+** written to the destination [database connection].
+**
+** A return of [SQLITE_BUSY] or [SQLITE_LOCKED] from sqlite3_backup_step() is
+** not a permanent error and does not affect the return value of
+** sqlite3_backup_finish().
+**
+** <b>sqlite3_backup_remaining(), sqlite3_backup_pagecount()</b>
+**
+** Each call to sqlite3_backup_step() sets two values stored internally
+** by an [sqlite3_backup] object. The number of pages still to be backed
+** up, which may be queried by sqlite3_backup_remaining(), and the total
+** number of pages in the source database file, which may be queried by
+** sqlite3_backup_pagecount().
+**
+** The values returned by these functions are only updated by
+** sqlite3_backup_step(). If the source database is modified during a backup
+** operation, then the values are not updated to account for any extra
+** pages that need to be updated or the size of the source database file
+** changing.
+**
+** <b>Concurrent Usage of Database Handles</b>
+**
+** The source [database connection] may be used by the application for other
+** purposes while a backup operation is underway or being initialized.
+** If SQLite is compiled and configured to support threadsafe database
+** connections, then the source database connection may be used concurrently
+** from within other threads.
+**
+** However, the application must guarantee that the destination database
+** connection handle is not passed to any other API (by any thread) after 
+** sqlite3_backup_init() is called and before the corresponding call to
+** sqlite3_backup_finish(). Unfortunately SQLite does not currently check
+** for this, if the application does use the destination [database connection]
+** for some other purpose during a backup operation, things may appear to
+** work correctly but in fact be subtly malfunctioning.  Use of the
+** destination database connection while a backup is in progress might
+** also cause a mutex deadlock.
+**
+** Furthermore, if running in [shared cache mode], the application must
+** guarantee that the shared cache used by the destination database
+** is not accessed while the backup is running. In practice this means
+** that the application must guarantee that the file-system file being 
+** backed up to is not accessed by any connection within the process,
+** not just the specific connection that was passed to sqlite3_backup_init().
+**
+** The [sqlite3_backup] object itself is partially threadsafe. Multiple 
+** threads may safely make multiple concurrent calls to sqlite3_backup_step().
+** However, the sqlite3_backup_remaining() and sqlite3_backup_pagecount()
+** APIs are not strictly speaking threadsafe. If they are invoked at the
+** same time as another thread is invoking sqlite3_backup_step() it is
+** possible that they return invalid values.
+*/
+sqlite3_backup *sqlite3_backup_init(
+  sqlite3 *pDest,                        /* Destination database handle */
+  const char *zDestName,                 /* Destination database name */
+  sqlite3 *pSource,                      /* Source database handle */
+  const char *zSourceName                /* Source database name */
+);
+int sqlite3_backup_step(sqlite3_backup *p, int nPage);
+int sqlite3_backup_finish(sqlite3_backup *p);
+int sqlite3_backup_remaining(sqlite3_backup *p);
+int sqlite3_backup_pagecount(sqlite3_backup *p);
 
 /*
 ** Undo the hack that converts floating point types to integer for
