@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   (Matt)
 - Fixed bug #47399 (mb_check_encoding() returns true for some illegal SJIS
   characters). (for-bugs at hnw dot jp, Moriyoshi)
+- Fixed bug #47049 (SoapClient::__soapCall causes a segmentation fault).
+  (Dmitry)
 - Fixed bug #45940 (MySQLI OO does not populate connect_error property on
   failed connect). (Johannes)
 - Fixed bug #45923 (mb_st[r]ripos() offset not handled correctly). (Moriyoshi)

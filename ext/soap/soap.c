@@ -4187,7 +4187,17 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		/*style = SOAP_RPC;*/
 		if (style == SOAP_RPC) {
 			ns = encode_add_ns(body, uri);
-			method = xmlNewChild(body, ns, BAD_CAST(function_name), NULL);
+			if (function_name) {
+				method = xmlNewChild(body, ns, BAD_CAST(function_name), NULL);
+			} else if (function && function->requestName) {
+				method = xmlNewChild(body, ns, BAD_CAST(function->requestName), NULL);
+			} else if (function && function->functionName) {
+				method = xmlNewChild(body, ns, BAD_CAST(function->functionName), NULL);
+			} else {
+				method = body;
+			}
+		} else {
+			method = body;
 		}
 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use"), (void **)&zuse) == SUCCESS &&
