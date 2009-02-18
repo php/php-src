@@ -117,7 +117,7 @@ static uint zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2009 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
-static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC) /* {{{ */
+static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object TSRMLS_DC) /* {{{ */
 {
 	zval **tmp;
 	char *string_key;
@@ -127,49 +127,54 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 	int i;
 
 	for (i = 0; i < indent; i++) {
-		ZEND_PUTS(" ");
+		ZEND_PUTS_EX(" ");
 	}
-	ZEND_PUTS("(\n");
+	ZEND_PUTS_EX("(\n");
 	indent += PRINT_ZVAL_INDENT;
 	zend_hash_internal_pointer_reset_ex(ht, &iterator);
 	while (zend_hash_get_current_data_ex(ht, (void **) &tmp, &iterator) == SUCCESS) {
 		for (i = 0; i < indent; i++) {
-			ZEND_PUTS(" ");
+			ZEND_PUTS_EX(" ");
 		}
-		ZEND_PUTS("[");
+		ZEND_PUTS_EX("[");
 		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
 					char *prop_name, *class_name;
 					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
 
+					ZEND_PUTS_EX(prop_name);
 					if (class_name && mangled == SUCCESS) {
 						if (class_name[0]=='*') {
-							zend_printf("%s:protected", prop_name);
+							ZEND_PUTS_EX(":protected");
 						} else {
-							zend_printf("%s:%s:private", prop_name, class_name);
+							ZEND_PUTS_EX(":");
+							ZEND_PUTS_EX(class_name);
+							ZEND_PUTS_EX(":private");
 						}
-					} else {
-						zend_printf("%s", prop_name);
 					}
 				} else {
-					zend_printf("%s", string_key);
+					ZEND_WRITE_EX(string_key, str_len-1);
 				}
 				break;
 			case HASH_KEY_IS_LONG:
-				zend_printf("%ld", num_key);
+				{
+					char key[25];
+					snprintf(key, sizeof(key), "%ld", num_key);
+					ZEND_PUTS_EX(key);
+				}
 				break;
 		}
-		ZEND_PUTS("] => ");
-		zend_print_zval_r(*tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
-		ZEND_PUTS("\n");
+		ZEND_PUTS_EX("] => ");
+		zend_print_zval_r_ex(write_func, *tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
+		ZEND_PUTS_EX("\n");
 		zend_hash_move_forward_ex(ht, &iterator);
 	}
 	indent -= PRINT_ZVAL_INDENT;
 	for (i = 0; i < indent; i++) {
-		ZEND_PUTS(" ");
+		ZEND_PUTS_EX(" ");
 	}
-	ZEND_PUTS(")\n");
+	ZEND_PUTS_EX(")\n");
 }
 /* }}} */
 
@@ -373,13 +378,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 {
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
-			ZEND_PUTS("Array\n");
+			ZEND_PUTS_EX("Array\n");
 			if (++Z_ARRVAL_P(expr)->nApplyCount>1) {
-				ZEND_PUTS(" *RECURSION*");
+				ZEND_PUTS_EX(" *RECURSION*");
 				Z_ARRVAL_P(expr)->nApplyCount--;
 				return;
 			}
-			print_hash(Z_ARRVAL_P(expr), indent, 0 TSRMLS_CC);
+			print_hash(write_func, Z_ARRVAL_P(expr), indent, 0 TSRMLS_CC);
 			Z_ARRVAL_P(expr)->nApplyCount--;
 			break;
 		case IS_OBJECT:
@@ -393,10 +398,11 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
 				if (class_name) {
-					zend_printf("%s Object\n", class_name);
+					ZEND_PUTS_EX(class_name);
 				} else {
-					zend_printf("%s Object\n", "Unknown class");
+					ZEND_PUTS_EX("Unknown Class");
 				}
+				ZEND_PUTS_EX(" Object\n");
 				if (class_name) {
 					efree(class_name);
 				}
@@ -404,11 +410,11 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 					break;
 				}
 				if (++properties->nApplyCount>1) {
-					ZEND_PUTS(" *RECURSION*");
+					ZEND_PUTS_EX(" *RECURSION*");
 					properties->nApplyCount--;
 					return;
 				}
-				print_hash(properties, indent, 1 TSRMLS_CC);
+				print_hash(write_func, properties, indent, 1 TSRMLS_CC);
 				properties->nApplyCount--;
 				if (is_temp) {
 					zend_hash_destroy(properties);
@@ -417,7 +423,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				break;
 			}
 		default:
-			zend_print_variable(expr);
+			zend_print_zval_ex(write_func, expr, indent);
 			break;
 	}
 }
