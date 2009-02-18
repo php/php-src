@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.3.0 Beta 2  
+?? ??? 2009, PHP 5.3.0 Beta 2
+- Upgraded bundled sqlite to version 3.6.11. (Scott)
+
 - Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
 - Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)
 - Fixed bug #47343 (gc_collect_cycles causes a segfault when called within a
