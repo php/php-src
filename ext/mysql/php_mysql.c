@@ -2318,7 +2318,7 @@ PHP_FUNCTION(mysql_fetch_field)
 	
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
-	if (field) {
+	if (ZEND_NUM_ARGS() > 1) {
 		if (field<0 || field>=(int)mysql_num_fields(mysql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad field offset");
 			RETURN_FALSE;
