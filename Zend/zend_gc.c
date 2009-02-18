@@ -521,7 +521,7 @@ static void gc_collect_roots(TSRMLS_D)
 	}
 }
 
-#define FREE_LIST_END ((zval_gc_info*)((-1)|~GC_COLOR))
+#define FREE_LIST_END ((zval_gc_info*)(~(zend_uintptr_t)GC_COLOR))
 
 ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
