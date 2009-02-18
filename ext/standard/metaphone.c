@@ -420,7 +420,7 @@ static int metaphone(unsigned char *word, int word_len, long max_phonemes, char 
 			} else if (Next_Letter == 'H') {
 				Phonize(TH);
 				skip_letter++;
-			} else {
+			} else if (!(Next_Letter == 'C' && After_Next_Letter == 'H')) {
 				Phonize('T');
 			}
 			break;
