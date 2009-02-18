@@ -1,3 +1,33 @@
+2009-02-17  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * tests/bug46701.phpt
+      tests/bug46701.phpt
+      tests/bug46701.phpt:
+      fix test
+
+2009-02-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      Fixed bug #45327 (memory leak if offsetGet throws exception)
+
+2009-02-17  Matt Wilmas  <php_lists@realplain.com>
+
+    * zend_operators.c:
+      Added overflow comment from div_function
+
+    * (PHP_5_2)
+      zend_operators.c
+      zend_operators.c:
+      MFH: Fixed bug #47422 (modulus operator returns incorrect results on 64 bit
+      linux)
+
+    * zend_operators.c:
+      Fixed bug #47422 (modulus operator returns incorrect results on 64 bit
+      linux)
+      Removed abs(), just -1 needs to be checked (only LONG_MIN % -1 is a
+      problem)
+
 2009-02-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_2)
