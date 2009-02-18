@@ -1,12 +1,12 @@
 --TEST--
-ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size.
+ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size. 
 --FILE--
 <?php
 /* 
  * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
 */ 
-
+// In HEAD, $chunk_size value of 1 should not have any special behaviour (http://marc.info/?l=php-internals&m=123476465621346&w=2).
 function callback($string) {
 	global $callback_invocations;
 	$callback_invocations++;
@@ -40,7 +40,15 @@ f[call:1; len:8]12345678
 f[call:1; len:8]12345678
 
 ----( chunk_size: 1, output append size: 1 )----
-f[call:1; len:8]12345678
+f[call:1; len:1]1
+f[call:2; len:1]2
+f[call:3; len:1]3
+f[call:4; len:1]4
+f[call:5; len:1]5
+f[call:6; len:1]6
+f[call:7; len:1]7
+f[call:8; len:1]8
+f[call:9; len:0]
 
 ----( chunk_size: 2, output append size: 1 )----
 f[call:1; len:2]12
@@ -85,7 +93,9 @@ f[call:1; len:8]12345678
 f[call:1; len:8]12345678
 
 ----( chunk_size: 1, output append size: 4 )----
-f[call:1; len:8]12345678
+f[call:1; len:4]1234
+f[call:2; len:4]5678
+f[call:3; len:0]
 
 ----( chunk_size: 2, output append size: 4 )----
 f[call:1; len:4]1234
