@@ -1,3 +1,22 @@
+2009-02-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c
+      tests/bug47343.phpt:
+      Fixed bug #47343 (gc_collect_cycles causes a segfault when called within a
+      destructor in one case)
+
+    * tests/bug47343.phpt
+      tests/bug47343.phpt:
+      
+      file bug47343.phpt was initially added on branch PHP_5_3.
+
+    * zend.c
+      zend.c
+      zend.h
+      zend.h:
+      Fixed zend_print_zval_r_ex() to use the write callback function
+
 2009-02-17  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * tests/bug46701.phpt
