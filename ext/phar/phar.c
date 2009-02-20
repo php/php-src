@@ -510,19 +510,6 @@ void phar_entry_remove(phar_entry_data *idata, char **error TSRMLS_DC) /* {{{ */
 	var = ((((unsigned char*)(buffer))[1]) <<  8) \
 		| (((unsigned char*)(buffer))[0]); \
 	(buffer) += 2
-static inline php_uint32 phar_fix_32(php_uint32 buffer)
-{
-	return ((((unsigned char *)&buffer)[3]) << 24) |
-		((((unsigned char *)&buffer)[2]) << 16) |
-		((((unsigned char *)&buffer)[1]) << 8) |
-		(((unsigned char *)&buffer)[0]);
-}
-static inline php_uint16 phar_fix_16(php_uint16 buffer)
-{
-	return ((((unsigned char *)&buffer)[1]) << 8) | ((unsigned char *)&buffer)[0];
-}
-# define PHAR_ZIP_32(buffer) phar_fix_32((php_uint32)(buffer))
-# define PHAR_ZIP_16(buffer) phar_fix_16((php_uint16)(buffer))
 #else
 # define PHAR_GET_32(buffer, var) \
 	var = *(php_uint32*)(buffer); \
@@ -530,9 +517,13 @@ static inline php_uint16 phar_fix_16(php_uint16 buffer)
 # define PHAR_GET_16(buffer, var) \
 	var = *(php_uint16*)(buffer); \
 	buffer += 2
-# define PHAR_ZIP_32(buffer) buffer
-# define PHAR_ZIP_16(buffer) buffer
 #endif
+#define PHAR_ZIP_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
+	(((php_uint16)var[1]) & 0xff) << 8))
+#define PHAR_ZIP_32(var) ((php_uint32)((((php_uint32)var[0]) & 0xff) | \
+	(((php_uint32)var[1]) & 0xff) << 8 | \
+	(((php_uint32)var[2]) & 0xff) << 16 | \
+	(((php_uint32)var[3]) & 0xff) << 24))
 
 /**
  * Open an already loaded phar
@@ -2420,7 +2411,7 @@ int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error
 
 		/* verify local header */
 		if (entry->filename_len != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
-			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local head of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
+			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local header of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
 			return FAILURE;
 		}
 
