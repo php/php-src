@@ -17,4 +17,4 @@ $a->TRUC();
 ?>
 --EXPECT--
 A::truc
-A::truc
+A::TRUC
