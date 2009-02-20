@@ -18,28 +18,26 @@
 
 #include "phar_internal.h"
 
-#ifdef WORDS_BIGENDIAN
-static inline php_uint32 phar_fix_32(php_uint32 buffer)
+#define PHAR_GET_16(var) ((php_uint16)((((php_uint16)var[0]) & 0xff) | \
+	(((php_uint16)var[1]) & 0xff) << 8))
+#define PHAR_GET_32(var) ((php_uint32)((((php_uint32)var[0]) & 0xff) | \
+	(((php_uint32)var[1]) & 0xff) << 8 | \
+	(((php_uint32)var[2]) & 0xff) << 16 | \
+	(((php_uint32)var[3]) & 0xff) << 24))
+static inline void phar_write_32(char buffer[4], php_uint32 value)
 {
-	return ((((unsigned char *)&buffer)[3]) << 24) |
-		((((unsigned char *)&buffer)[2]) << 16) |
-		((((unsigned char *)&buffer)[1]) << 8) |
-		(((unsigned char *)&buffer)[0]);
+	buffer[3] = (unsigned char) ((value & 0xff000000) >> 24);
+	buffer[2] = (unsigned char) ((value & 0xff0000) >> 16);
+	buffer[1] = (unsigned char) ((value & 0xff00) >> 8);
+	buffer[0] = (unsigned char) (value & 0xff);
 }
-static inline php_uint16 phar_fix_16(php_uint16 buffer)
+static inline void phar_write_16(char buffer[2], php_uint32 value)
 {
-	return ((((unsigned char *)&buffer)[1]) << 8) | ((unsigned char *)&buffer)[0];
+	buffer[1] = (unsigned char) ((value & 0xff00) >> 8);
+	buffer[0] = (unsigned char) (value & 0xff);
 }
-# define PHAR_GET_32(buffer) phar_fix_32((php_uint32)(buffer))
-# define PHAR_GET_16(buffer) phar_fix_16((php_uint16)(buffer))
-# define PHAR_SET_32(buffer) PHAR_GET_32(buffer)
-# define PHAR_SET_16(buffer) PHAR_GET_16(buffer)
-#else
-# define PHAR_GET_32(buffer) (buffer)
-# define PHAR_GET_16(buffer) (buffer)
-# define PHAR_SET_32(buffer) (buffer)
-# define PHAR_SET_16(buffer) (buffer)
-#endif
+# define PHAR_SET_32(var, value) phar_write_32(var, (php_uint32) (value));
+# define PHAR_SET_16(var, value) phar_write_16(var, (php_uint16) (value));
 
 static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_uint16 len TSRMLS_DC) /* {{{ */
 {
@@ -71,7 +69,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
 
 		if (PHAR_GET_16(h.unix3.size) > sizeof(h.unix3) - 4) {
 			/* skip symlink filename - we may add this support in later */
-			php_stream_seek(fp, h.unix3.size - sizeof(h.unix3.size), SEEK_CUR);
+			php_stream_seek(fp, PHAR_GET_16(h.unix3.size) - sizeof(h.unix3.size), SEEK_CUR);
 		}
 
 		/* set permissions */
@@ -122,8 +120,9 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(int dtime, int ddate) /* {{{ */
+static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
 {
+	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
 	time_t now;
 
@@ -142,13 +141,16 @@ static time_t phar_zip_d2u_time(int dtime, int ddate) /* {{{ */
 }
 /* }}} */
 
-static void phar_zip_u2d_time(time_t time, php_uint16 *dtime, php_uint16 *ddate) /* {{{ */
+static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 {
+	php_uint16 ctime, cdate;
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
-	*ddate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
-	*dtime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	ctime = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
+	cdate = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	PHAR_SET_16(dtime, ctime);
+	PHAR_SET_16(ddate, cdate);
 }
 /* }}} */
 
@@ -198,7 +200,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	while ((p=(char *) memchr(p + 1, 'P', (size_t) (size - (p + 1 - buf)))) != NULL) {
 		if (!memcmp(p + 1, "K\5\6", 3)) {
 			memcpy((void *)&locator, (void *) p, sizeof(locator));
-			if (locator.centraldisk != 0 || locator.disknumber != 0) {
+			if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
 				/* split archives not handled */
 				php_stream_close(fp);
 				if (error) {
@@ -207,7 +209,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 				return FAILURE;
 			}
 
-			if (locator.counthere != locator.count) {
+			if (PHAR_GET_16(locator.counthere) != PHAR_GET_16(locator.count)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar \"%s\"", fname);
 				}
@@ -219,7 +221,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 			mydata->is_persistent = PHAR_G(persist);
 
 			/* read in archive comment, if any */
-			if (locator.comment_len) {
+			if (PHAR_GET_16(locator.comment_len)) {
 				char *metadata;
 
 				metadata = p + sizeof(locator);
@@ -443,7 +445,7 @@ foundit:
 		}
 
 		/* get file metadata */
-		if (zipentry.comment_len) {
+		if (PHAR_GET_16(zipentry.comment_len)) {
 			if (PHAR_GET_16(zipentry.comment_len) != php_stream_read(fp, buf, PHAR_GET_16(zipentry.comment_len))) {
 				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("unable to read in file comment, truncated");
@@ -487,7 +489,7 @@ foundit:
 			/* verify local header */
 			if (entry.filename_len != PHAR_GET_16(local.filename_len) || entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
 				pefree(entry.filename, entry.is_persistent);
-				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local head of alias does not match central directory)");
+				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local header of alias does not match central directory)");
 			}
 
 			/* construct actual offset to file start - local extra_len can be different from central extra_len */
@@ -719,30 +721,36 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	memset(&perms, 0, sizeof(perms));
 	strncpy(local.signature, "PK\3\4", 4);
 	strncpy(central.signature, "PK\1\2", 4);
-	central.extra_len = local.extra_len = PHAR_SET_16(sizeof(perms));
+	PHAR_SET_16(central.extra_len, sizeof(perms));
+	PHAR_SET_16(local.extra_len, sizeof(perms));
 	perms.tag[0] = 'n';
 	perms.tag[1] = 'u';
-	perms.size = PHAR_SET_16(sizeof(perms) - 4);
-	perms.perms = PHAR_SET_16(entry->flags & PHAR_ENT_PERM_MASK);
-	perms.crc32 = ~0;
-	CRC32(perms.crc32, (char)perms.perms & 0xFF);
-	CRC32(perms.crc32, (char)perms.perms & 0xFF00 >> 8);
-	perms.crc32 = PHAR_SET_32(~(perms.crc32));
+	PHAR_SET_16(perms.size, sizeof(perms) - 4);
+	PHAR_SET_16(perms.perms, entry->flags & PHAR_ENT_PERM_MASK);
+	{
+		php_uint32 crc = ~0;
+		CRC32(crc, perms.perms[0]);
+		CRC32(crc, perms.perms[1]);
+		PHAR_SET_32(perms.crc32, ~crc);
+	}
 
 	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
-		local.compressed = central.compressed = PHAR_SET_16(PHAR_ZIP_COMP_DEFLATE);
+		PHAR_SET_16(central.compressed, PHAR_ZIP_COMP_DEFLATE);
+		PHAR_SET_16(local.compressed, PHAR_ZIP_COMP_DEFLATE);
 	}
 
 	if (entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
-		local.compressed = central.compressed = PHAR_SET_16(PHAR_ZIP_COMP_BZIP2);
+		PHAR_SET_16(central.compressed, PHAR_ZIP_COMP_BZIP2);
+		PHAR_SET_16(local.compressed, PHAR_ZIP_COMP_BZIP2);
 	}
 
-	/* do not use PHAR_SET_16 on either field of the next line */
-	phar_zip_u2d_time(entry->timestamp, &local.timestamp, &local.datestamp);
-	central.timestamp = local.timestamp;
-	central.datestamp = local.datestamp;
-	central.filename_len = local.filename_len = PHAR_SET_16(entry->filename_len + (entry->is_dir ? 1 : 0));
-	central.offset = PHAR_SET_32(php_stream_tell(p->filefp));
+	/* do not use PHAR_GET_16 on either field of the next line */
+	phar_zip_u2d_time(entry->timestamp, local.timestamp, local.datestamp);
+	memcpy(central.timestamp, local.timestamp, sizeof(local.timestamp));
+	memcpy(central.datestamp, local.datestamp, sizeof(local.datestamp));
+	PHAR_SET_16(central.filename_len, entry->filename_len + (entry->is_dir ? 1 : 0));
+	PHAR_SET_16(local.filename_len, entry->filename_len + (entry->is_dir ? 1 : 0));
+	PHAR_SET_32(central.offset, php_stream_tell(p->filefp));
 
 	/* do extra field for perms later */
 	if (entry->is_modified) {
@@ -784,12 +792,14 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		}
 
 		entry->crc32 = ~newcrc32;
-		central.uncompsize = local.uncompsize = PHAR_SET_32(entry->uncompressed_filesize);
+		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);
+		PHAR_SET_32(local.uncompsize, entry->uncompressed_filesize);
 
 		if (!(entry->flags & PHAR_ENT_COMPRESSION_MASK)) {
 			/* not compressed */
 			entry->compressed_filesize = entry->uncompressed_filesize;
-			central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
+			PHAR_SET_32(central.compsize, entry->uncompressed_filesize);
+			PHAR_SET_32(local.compsize, entry->uncompressed_filesize);
 			goto not_compressed;
 		}
 
@@ -833,15 +843,18 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		php_stream_seek(entry->cfp, 0, SEEK_END);
 		entry->compressed_filesize = (php_uint32) php_stream_tell(entry->cfp);
-		central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
+		PHAR_SET_32(central.compsize, entry->compressed_filesize);
+		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 		/* generate crc on compressed file */
 		php_stream_rewind(entry->cfp);
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 	} else {
 is_compressed:
-		central.uncompsize = local.uncompsize = PHAR_SET_32(entry->uncompressed_filesize);
-		central.compsize = local.compsize = PHAR_SET_32(entry->compressed_filesize);
+		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);
+		PHAR_SET_32(local.uncompsize, entry->uncompressed_filesize);
+		PHAR_SET_32(central.compsize, entry->compressed_filesize);
+		PHAR_SET_32(local.compsize, entry->compressed_filesize);
 
 		if (-1 == php_stream_seek(p->old, entry->offset_abs, SEEK_SET)) {
 			spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
@@ -849,7 +862,8 @@ is_compressed:
 		}
 	}
 not_compressed:
-	central.crc32 = local.crc32 = PHAR_SET_32(entry->crc32);
+	PHAR_SET_32(central.crc32, entry->crc32);
+	PHAR_SET_32(local.crc32, entry->crc32);
 continue_dir:
 	/* set file metadata */
 	if (entry->metadata) {
@@ -863,7 +877,7 @@ continue_dir:
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
 		php_var_serialize(&entry->metadata_str, &entry->metadata, &metadata_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-		central.comment_len = PHAR_SET_16(entry->metadata_str.len);
+		PHAR_SET_16(central.comment_len, entry->metadata_str.len);
 	}
 
 	entry->header_offset = php_stream_tell(p->filefp);
@@ -1201,7 +1215,8 @@ fperror:
 	memset(&eocd, 0, sizeof(eocd));
 
 	strncpy(eocd.signature, "PK\5\6", 4);
-	eocd.counthere = eocd.count = PHAR_GET_16(zend_hash_num_elements(&phar->manifest));
+	PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest));
+	PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest));
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass TSRMLS_CC);
 
 	if (temperr) {
@@ -1222,8 +1237,8 @@ nocentralerror:
 	/* save zip */
 	cdir_size = php_stream_tell(pass.centralfp);
 	cdir_offset = php_stream_tell(pass.filefp);
-	eocd.cdir_size = PHAR_SET_32(cdir_size);
-	eocd.cdir_offset = PHAR_SET_32(cdir_offset);
+	PHAR_SET_32(eocd.cdir_size, cdir_size);
+	PHAR_SET_32(eocd.cdir_offset, cdir_offset);
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
 	if (cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
@@ -1240,7 +1255,7 @@ nocentralerror:
 		PHP_VAR_SERIALIZE_INIT(metadata_hash);
 		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
-		eocd.comment_len = PHAR_SET_16(main_metadata_str.len);
+		PHAR_SET_16(eocd.comment_len, main_metadata_str.len);
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {
 			if (error) {
