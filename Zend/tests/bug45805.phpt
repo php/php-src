@@ -1,7 +1,7 @@
 --TEST--
 Bug #45805 (Crash on throwing exception from error handler)
 --SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
+<?php if (!extension_loaded('reflection') || !extension_loaded('spl')) print "skip"; ?>
 --FILE--
 <?php
 class PHPUnit_Util_ErrorHandler
