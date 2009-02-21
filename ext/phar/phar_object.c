@@ -3946,7 +3946,6 @@ PHP_METHOD(Phar, getMetadata)
 			phar_parse_metadata(&buf, &ret, phar_obj->arc.archive->metadata_len TSRMLS_CC);
 			efree(buf);
 			RETURN_ZVAL(ret, 0, 1);
-			return;
 		}
 		RETURN_ZVAL(phar_obj->arc.archive->metadata, 1, 0);
 	}
@@ -4590,7 +4589,6 @@ PHP_METHOD(PharFileInfo, getMetadata)
 			phar_parse_metadata(&buf, &ret, entry_obj->ent.entry->metadata_len TSRMLS_CC);
 			efree(buf);
 			RETURN_ZVAL(ret, 0, 1);
-			return;
 		}
 		RETURN_ZVAL(entry_obj->ent.entry->metadata, 1, 0);
 	}
