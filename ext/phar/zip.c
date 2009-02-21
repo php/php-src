@@ -727,7 +727,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	PHAR_SET_16(perms.size, sizeof(perms) - 4);
 	PHAR_SET_16(perms.perms, entry->flags & PHAR_ENT_PERM_MASK);
 	{
-		php_uint32 crc = ~0;
+		php_uint32 crc = (php_uint32) ~0;
 		CRC32(crc, perms.perms[0]);
 		CRC32(crc, perms.perms[1]);
 		PHAR_SET_32(perms.crc32, ~crc);
