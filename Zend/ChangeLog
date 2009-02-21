@@ -1,3 +1,15 @@
+2009-02-20  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      tests/bug46701.phpt:
+      - Fix test
+
+2009-02-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      tests/bug45805.phpt:
+      - spl is not forced on everyone in 5.2 branch.
+
 2009-02-18  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_gc.c
