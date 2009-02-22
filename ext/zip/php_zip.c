@@ -791,7 +791,7 @@ static int php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, zv
 	switch (hnd->type) {
 		case IS_STRING:
 			if (retchar) {
-				ZVAL_STRING(*retval, (char *) retchar, 1);
+				ZVAL_STRINGL(*retval, (char *) retchar, len, 1);
 			} else {
 				ZVAL_EMPTY_STRING(*retval);
 			}
@@ -914,10 +914,11 @@ static int php_zip_has_property(zval *object, zval *member, int type TSRMLS_DC) 
 
 	if (ret == SUCCESS) {
 		zval *tmp;
+		ALLOC_INIT_ZVAL(tmp);
 
 		if (type == 2) {
 			retval = 1;
-		} else if (php_zip_property_reader(obj, hnd, &tmp, 1 TSRMLS_CC) == SUCCESS) {
+		} else if (php_zip_property_reader(obj, hnd, &tmp, 0 TSRMLS_CC) == SUCCESS) {
 			Z_SET_REFCOUNT_P(tmp, 1);
 			Z_UNSET_ISREF_P(tmp);
 			if (type == 1) {
@@ -925,8 +926,9 @@ static int php_zip_has_property(zval *object, zval *member, int type TSRMLS_DC) 
 			} else if (type == 0) {
 				retval = (Z_TYPE_P(tmp) != IS_NULL);
 			}
-			zval_ptr_dtor(&tmp);
 		}
+
+		zval_ptr_dtor(&tmp);
 	} else {
 		std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->has_property(object, member, type TSRMLS_CC);
