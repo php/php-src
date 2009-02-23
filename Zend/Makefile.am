@@ -8,7 +8,7 @@ noinst_LTLIBRARIES=libZend.la
 libZend_la_SOURCES=\
 	zend_language_parser.y zend_language_scanner.l \
 	zend_ini_parser.y zend_ini_scanner.l \
-	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
+	zend_alloc.c zend_compile.c zend_constants.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
