@@ -655,6 +655,12 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
+				/* Check flags */
+				if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
+					if (Z_STRLEN_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
+						RETURN_VALIDATION_FAILED
+					}
+				}
 			}
 			break;
 	}
