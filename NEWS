@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2009, PHP 5.2.9RC4
+- Fixed bug #37209 (mssql_execute with non fatal errors). (Kalle)
 
 19 Feb 2009, PHP 5.2.9RC3
 - Fixed bug #47422 (modulus operator returns incorrect results on 64 bit linux).

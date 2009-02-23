@@ -2158,11 +2158,12 @@ PHP_FUNCTION(mssql_execute)
 	int num_fields;
 	int batchsize;
 	int ac = ZEND_NUM_ARGS();
+	int exec_retval;
 
 	batchsize = MS_SQL_G(batchsize);
 	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &stmt, &skip)==FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+		WRONG_PARAM_COUNT;
+	}
 	if (ac == 2) {
 		skip_results = Z_BVAL_PP(skip);
 	}
@@ -2170,10 +2171,15 @@ PHP_FUNCTION(mssql_execute)
 	ZEND_FETCH_RESOURCE(statement, mssql_statement *, stmt, -1, "MS SQL-Statement", le_statement);
 
 	mssql_ptr=statement->link;
+	exec_retval = dbrpcexec(mssql_ptr->link);
 
-	if (dbrpcexec(mssql_ptr->link)==FAIL || dbsqlok(mssql_ptr->link)==FAIL) {
+	if (exec_retval == FAIL || dbsqlok(mssql_ptr->link) == FAIL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "stored procedure execution failed");
-		dbcancel(mssql_ptr->link);
+
+		if (exec_retval == FAIL) {
+			dbcancel(mssql_ptr->link);
+		}
+
 		RETURN_FALSE;
 	}
 
