@@ -106,7 +106,8 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 		}
 		filter->status = 0;
 	} else if (c < 0xc0) {
-		switch (filter->status & 0xff) {
+		int status = filter->status & 0xff;
+		switch (status) {
 		case 0x10: /* 2byte code 2nd char */
 		case 0x21: /* 3byte code 3rd char */
 		case 0x32: /* 4byte code 4th char */
@@ -114,7 +115,11 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 		case 0x54: /* 6byte code 6th char */
 			filter->status = 0;
 			s = filter->cache | (c & 0x3f);
-			if (s >= 0x80) {
+			if ((status == 0x10 && s >= 0x80) ||
+			    (status == 0x21 && s >= 0x800 && (s < 0xd800 || s > 0xdfff)) ||
+			    (status == 0x32 && s >= 0x10000) ||
+			    (status == 0x43 && s >= 0x200000) ||
+			    (status == 0x54 && s >= 0x4000000 && s < MBFL_WCSGROUP_UCS4MAX)) {
 				CK((*filter->output_function)(s, filter->data));
 			}
 			break;
