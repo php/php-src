@@ -1,3 +1,12 @@
+2009-02-23  David Soria Parra  <dsoria@gmx.net>
+
+    * Makefile.am
+      Zend.dsp
+      ZendTS.dsp
+      zend_dynamic_array.c
+      zend_dynamic_array.h:
+      Remove zend_dynamic_array and it's build targets as it is not longer needed
+
 2009-02-20  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
