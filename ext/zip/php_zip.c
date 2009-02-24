@@ -780,6 +780,7 @@ static int php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, zv
 			} else {
 				if (hnd->read_const_char_from_obj_func) {
 					retchar = hnd->read_const_char_from_obj_func(obj TSRMLS_CC);
+					len = strlen(retchar);
 				}
 			}
 		}
