@@ -473,7 +473,7 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 	char *header_name, *header_content, *p;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	header_name = sapi_header->header;
+	header_name = nsapi_strdup(sapi_header->header);
 	header_content = p = strchr(header_name, ':');
 	if (p == NULL) {
 		efree(sapi_header->header);
@@ -497,9 +497,9 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 		pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
 	}
 
-	sapi_free_header(sapi_header);
+	nsapi_free(header_name);
 
-	return 0;	/* don't use the default SAPI mechanism, NSAPI duplicates this functionality */
+	return SAPI_HEADER_ADD;
 }
 
 static int sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
