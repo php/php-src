@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2009, PHP 5.2.10
+
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
