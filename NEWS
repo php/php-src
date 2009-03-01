@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.3.0 Beta 2
 - Upgraded bundled sqlite to version 3.6.11. (Scott)
 
+- Re-enabled phar for big-endian systems after fixing problems. (Greg)
+
 - Fixed Bug #47443 (metaphone('scratch') returns wrong result). (Felipe)
 - Fixed bug #47438 (mysql_fetch_field ignores zero offset). (Johannes)
 - Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
