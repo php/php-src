@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.10
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
+- Fixed bug #47435 (FILTER_FLAG_NO_PRIV_RANGE does not work with ipv6
+ addresses in the filter extension). (Ilia)
+
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
