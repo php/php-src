@@ -12,8 +12,8 @@ PATH_INFO=/index.php
 Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/blog.phar
---EXPECT--
-string(167) "<xml version="1.0" encoding="UTF-8">
+--EXPECTF--
+string(%d) "<xml version="1.0" encoding="UTF-8">
 <config>
  <database>
   <host>localhost</name>
