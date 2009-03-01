@@ -1,17 +1,16 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("phar", "enable phar support", "no");
+ARG_ENABLE("phar", "disable phar support", "yes");
 ARG_ENABLE("phar-native-ssl", "enable phar with native OpenSSL support", "no");
 
 if (PHP_PHAR_NATIVE_SSL != "no") {
 	PHP_PHAR = PHP_PHAR_NATIVE_SSL;
-	PHP_PHAR_SHARED = PHP_PHAR_NATIVE_SSL_SHARED;
 }
 
 if (PHP_PHAR != "no") {
 	EXTENSION("phar", "dirstream.c func_interceptors.c phar.c phar_object.c phar_path_check.c stream.c tar.c util.c zip.c");
-	if (PHP_PHAR_SHARED) {
+	if (PHP_PHAR_SHARED || (PHP_PHAR_NATIVE_SSL_SHARED && PHP_SNAPSHOT_BUILD == "no")) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
 	if (PHP_PHAR_NATIVE_SSL != "no") {
@@ -34,6 +33,13 @@ if (PHP_PHAR != "no") {
 			STDOUT.WriteLine('        Native OpenSSL support in Phar enabled');
 		} else {
 			STDOUT.WriteLine('        Native OpenSSL support in Phar disabled');
+		}
+	}
+	if (PHP_HASH != "no") {
+		if (PHP_HASH_SHARED == "no") {
+			AC_DEFINE("PHAR_HASH_OK", 1);
+		} else {
+			WARNING('Phar: sha256/sha512 signature support disabled if ext/hash is built shared');
 		}
 	}
 	ADD_EXTENSION_DEP('phar', 'spl', true);
