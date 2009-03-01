@@ -32,6 +32,6 @@ var_dump( gmstrftime($format, $timestamp) );
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with Day of the month as decimal single digit format --
-string(%d) "%d"
+string(%d) "%s"
 string(2) " 8"
 ===DONE===
