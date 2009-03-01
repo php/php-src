@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("phar", "disable phar support", "yes");
+ARG_ENABLE("phar", "enable phar support", "no");
 ARG_ENABLE("phar-native-ssl", "enable phar with native OpenSSL support", "no");
 
 if (PHP_PHAR_NATIVE_SSL != "no") {
