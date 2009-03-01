@@ -19,6 +19,12 @@ $p['b'] = 'b';
 $p['c'] = 'c';
 copy($fname2, $fname);
 
+$a = stat($pname . '/a');
+$b = stat($pname2 . '/a');
+if ($a['mtime'] != $b['mtime']) {
+	echo "timestamp changed, was $a[mtime], now $b[mtime]!\n";
+}
+
 $phar = new Phar($fname);
 echo $phar->getStub();
 
