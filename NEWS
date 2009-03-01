@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.10
+- Fixed memory corruptions while reading properties of zip files. (Ilia)
 
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
