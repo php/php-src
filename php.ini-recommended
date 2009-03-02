@@ -1169,7 +1169,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
-;mbstring.strict_encoding = Off
+;mbstring.strict_detection = Off
 
 [gd]
 ; Tell the jpeg decode to libjpeg warnings and try to create
