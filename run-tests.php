@@ -1738,7 +1738,32 @@ COMMAND $cmd
 		$wanted_re = preg_replace('/\r\n/', "\n", $wanted);
 
 		if (isset($section_text['EXPECTF'])) {
-			$wanted_re = preg_quote($wanted_re, '/');
+			
+                // do preg_quote, but miss out any %r delimited sections
+                $temp = "";
+                $r = "%r";
+                $startOffset = 0;
+                $length = strlen($wanted_re);
+                while($startOffset < $length) {
+                  $start = strpos($wanted_re, $r, $startOffset);
+                  if ($start !== false) {
+                    // we have found a start tag
+                    $end = strpos($wanted_re, $r, $start+2);
+                    if ($end === false) {
+                      // unbalanced tag, ignore it.
+                      $end = $start = $length;
+                    }
+                  } else {
+                    // no more %r sections
+                    $start = $end = $length;
+                  }
+                  // quote a non re portion of the string
+                  $temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+                  // add the re unquoted.
+                  $temp = $temp . substr($wanted_re, $start+2, ($end - $start-2));
+                  $startOffset = $end + 2;
+                }
+                $wanted_re = $temp;
 			$wanted_re = str_replace(
 				array('%binary_string_optional%'),
 				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'binary string',
