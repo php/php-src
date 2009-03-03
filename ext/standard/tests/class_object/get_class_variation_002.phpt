@@ -16,6 +16,3 @@ echo "Done";
 --EXPECTF--
 string(19) "caseSensitivityTest"
 Done
---UEXPECTF--
-unicode(19) "caseSensitivityTest"
-Done
