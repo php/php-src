@@ -1311,7 +1311,7 @@ PHP_FUNCTION(explode)
 		} else {
 			add_index_stringl(return_value, 0, (char *)str, str_len, 1);
 		}
-	} else if (limit < 0 && argc == 3) {
+	} else if (limit < -1 && argc == 3) {
 		if ( str_type == IS_UNICODE ) {
 			php_u_explode_negative_limit((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
 		} else {
