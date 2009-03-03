@@ -25,10 +25,3 @@ array(1) {
   string(8) "MyMeThOd"
 }
 Done
---UEXPECTF--
-*** Testing get_class_methods() : usage variations ***
-array(1) {
-  [0]=>
-  unicode(8) "MyMeThOd"
-}
-Done
