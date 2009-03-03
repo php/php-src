@@ -25,6 +25,7 @@
 #include "zend_constants.h"
 #include "zend_ini.h"
 #include "zend_extensions.h"
+#include <ctype.h>
 
 #undef ZEND_TEST_EXCEPTIONS
 
@@ -624,6 +625,40 @@ ZEND_FUNCTION(define)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz|b", &name, &name_len, &name_type, &val, &non_cs) == FAILURE) {
 		return;
+	}
+
+	/* check if class constant */
+	if ((p = memchr(name, ':', name_len))) {
+		char *s = name;
+		zend_class_entry **ce;
+
+		if (*(p + 1) != ':') { /* invalid constant specifier */
+			RETURN_FALSE;
+		} else if ((p + 2) >= (name + name_len)) { /* constant name length < 1 */
+			zend_error(E_WARNING, "Constants name cannot be empty");
+			RETURN_FALSE;
+		} else if (zend_lookup_class(s, (p - s), &ce TSRMLS_CC) != SUCCESS) { /* invalid class name */
+			zend_error(E_WARNING, "Class does not exists");
+			RETURN_FALSE;
+		} else { /* check of constant name contains invalid chars */
+			int ok = 1;
+			p += 2; /* move beyond :: to 1st char of constant's name */
+
+			if (!isalpha(*p) && *p != '_') {
+				ok = 0;
+			}
+
+			while (ok && *++p) {
+				if (!isalnum(*p) && *p != '_') {
+					ok = 0;
+					break;
+				}
+			}
+
+			if (!ok) {
+				RETURN_FALSE;
+			}
+		}
 	}
 
 	if(non_cs) {
@@ -1885,7 +1920,8 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names[0] = "internal";
 		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
 		while (zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) != FAILURE) {
-			module_names[i++] = (char*)module->name;
+			module_names[module->module_number] = (char *)module->name;
+			i++;
 			zend_hash_move_forward_ex(&module_registry, &pos);
 		}
 		module_names[i] = "user";
