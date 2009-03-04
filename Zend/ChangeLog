@@ -1,3 +1,16 @@
+2009-03-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      
+      MFB: Fixed bug #47549 (get_defined_constants() return array with broken
+      array categories)
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      
+      Fixed bug #47549 (get_defined_constants() return array with broken
+      array categories)
+
 2009-02-23  David Soria Parra  <dsoria@gmx.net>
 
     * Makefile.am
