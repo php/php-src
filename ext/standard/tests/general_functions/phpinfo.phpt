@@ -46,27 +46,17 @@ Registered Stream Filters => %s
 
 
 Configuration
-
-%a
-
+%A
 Core
-
-%a
-
+%A
 Additional Modules
-
-%a
-
+%A
 Environment
-
-%a
-
+%A
 PHP Variables
-
-%a
-
+%A
 PHP License
-%a
+%A
 bool(true)
 --
 
