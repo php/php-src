@@ -575,7 +575,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
-		uint str_index_len = 0;
+		uint str_index_len;
 		ulong num_index;
 		int ret;
 
@@ -615,8 +615,8 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
 						if ((actual = (char *)zend_memrchr(str_index, '\\', str_index_len - 3))) {
 							actual++;
-						str_index_len -= (actual - str_index);
-							str_index = save;
+							str_index_len -= (actual - str_index);
+							str_index = actual;
 						}
 					}
 					if (str_index[0] == '\\') {
