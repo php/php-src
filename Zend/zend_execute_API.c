@@ -655,9 +655,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 						str_index.u = colon.u + 1;
 					} else {
 						if (str_index.u[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
-							actual = (UChar *)u_memrchr(str_index.u, '\\', str_index_len - 3) + 1;
+							if ((actual = (UChar *)u_memrchr(str_index.u, '\\', str_index_len - 3))) {
+								actual++;
 							str_index_len -= (actual - str_index.u);
 							str_index.u = actual;
+						}
 						}
 						if (str_index.u[0] == '\\') {
 							++str_index.u;
@@ -678,9 +680,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 						str_index.s = colon.s + 1;
 					} else {
 						if (str_index.s[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
-							actual = (char *)zend_memrchr(str_index.s, '\\', str_index_len - 3) + 1;
+							if ((actual = (char *)zend_memrchr(str_index.s, '\\', str_index_len - 3))) {
+								actual++;
 							str_index_len -= (actual - str_index.s);
 							str_index.s = actual;
+						}
 						}
 						if (str_index.s[0] == '\\') {
 							++str_index.s;
