@@ -2117,7 +2117,7 @@ PHP_FUNCTION(mb_strrpos)
 	mbfl_string haystack, needle;
 	char *enc_name = NULL;
 	int enc_name_len;
-	zval **zoffset;
+	zval **zoffset = NULL;
 	long offset = 0, str_flg;
 	char *enc_name2 = NULL;
 	int enc_name_len2;
@@ -2133,7 +2133,7 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_FALSE;
 	}
 
-	if(ZEND_NUM_ARGS() >= 3) {
+	if (zoffset) {
 		if (Z_TYPE_PP(zoffset) == IS_STRING) {
 			enc_name2     = Z_STRVAL_PP(zoffset);
 			enc_name_len2 = Z_STRLEN_PP(zoffset);
@@ -2161,9 +2161,9 @@ PHP_FUNCTION(mb_strrpos)
 				}
 			}
 
-			if(str_flg) {
-					convert_to_long_ex(zoffset);
-					offset   = Z_LVAL_PP(zoffset);
+			if (str_flg) {
+				convert_to_long_ex(zoffset);
+				offset   = Z_LVAL_PP(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
