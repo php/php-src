@@ -1,3 +1,25 @@
+2009-03-05  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      - Fixed typo
+
+    * (PHP_5_3)
+      zend_execute_API.c
+      tests/bug47572.phpt:
+      - MFH: Fixed bug #47572 (zval_update_constant_ex: Segmentation fault)
+
+    * zend_execute_API.c
+      tests/bug47572.phpt
+      tests/bug47572.phpt:
+      - Fixed bug #47572 (zval_update_constant_ex: Segmentation fault)
+
+2009-03-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      
+      Removed bogus code
+
 2009-03-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:
