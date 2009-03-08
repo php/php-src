@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 
 - Re-enabled phar for big-endian systems after fixing problems. (Greg)
 
+- Fixed bug #47593 (interface_exists() returns false when using absolute 
+  namespace path). (Kalle, Felipe)
+- Fixed bug #47572 (Undefined constant causes segmentation fault). (Felipe)
 - Fixed bug #47549 (get_defined_constants() return array with broken
   array categories). (Ilia)
 - Fixed Bug #47443 (metaphone('scratch') returns wrong result). (Felipe)

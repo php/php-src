@@ -1228,10 +1228,21 @@ ZEND_FUNCTION(interface_exists)
 	}
 
 	if (!autoload) {
+		char *name;
+		int len;
+		
 		lc_name = do_alloca(iface_name_len + 1, use_heap);
 		zend_str_tolower_copy(lc_name, iface_name, iface_name_len);
 	
-		found = zend_hash_find(EG(class_table), lc_name, iface_name_len+1, (void **) &ce);
+		/* Ignore leading "\" */
+		name = lc_name;
+		len = iface_name_len;
+		if (lc_name[0] == '\\') {
+			name = &lc_name[1];
+			len--;
+		}
+
+		found = zend_hash_find(EG(class_table), name, len+1, (void **) &ce);
 		free_alloca(lc_name, use_heap);
 		RETURN_BOOL(found == SUCCESS && (*ce)->ce_flags & ZEND_ACC_INTERFACE);
 	}
@@ -1260,8 +1271,15 @@ ZEND_FUNCTION(function_exists)
 	}
 
 	lcname = zend_str_tolower_dup(name, name_len);
+	
+	/* Ignore leading "\" */
+	name = lcname;
+	if (lcname[0] == '\\') {
+		name = &lcname[1];
+		name_len--;
+	}
 
-	retval = (zend_hash_find(EG(function_table), lcname, name_len+1, (void **)&func) == SUCCESS);
+	retval = (zend_hash_find(EG(function_table), name, name_len+1, (void **)&func) == SUCCESS);
 	
 	efree(lcname);
 
