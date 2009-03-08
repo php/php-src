@@ -1230,8 +1230,24 @@ ZEND_FUNCTION(interface_exists)
 	}
 
 	if (!autoload) {
+		zstr name;
+		int len;
+		
 		lc_name = zend_u_str_case_fold(type, iface_name, iface_name_len, 1, &lc_name_len);
-		found = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) &ce);
+		
+		/* Ignore leading "\" */
+		name = lc_name;
+		len = iface_name_len;
+		if (lc_name.s[0] == '\\') {
+			if (type == IS_UNICODE) {
+				name.u = &lc_name.u[1];
+			} else {
+				name.s = &lc_name.s[1];
+			}
+			len--;
+		}
+		
+		found = zend_u_hash_find(EG(class_table), type, name, len+1, (void **) &ce);
 		efree(lc_name.v);
 		RETURN_BOOL(found == SUCCESS && (*ce)->ce_flags & ZEND_ACC_INTERFACE);
 	}
@@ -1260,8 +1276,19 @@ ZEND_FUNCTION(function_exists)
 	}
 
 	lcname = zend_u_str_case_fold(function_name_type, function_name, function_name_len, 1, &lcname_len);
+	
+	function_name = lcname;
+	if (function_name.s[0] == '\\') {
+		if (function_name_type == IS_UNICODE) {
+			function_name.u = &lcname.u[1];
+		} else {
+			function_name.s = &lcname.s[1];
+		}
+		function_name_len--;
+	}
 
-	retval = (zend_u_hash_find(EG(function_table), function_name_type, lcname, lcname_len+1, (void **)&func) == SUCCESS);
+
+	retval = (zend_u_hash_find(EG(function_table), function_name_type, function_name, function_name_len+1, (void **)&func) == SUCCESS);
 
 	efree(lcname.v);
 
