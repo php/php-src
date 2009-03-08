@@ -673,7 +673,7 @@ smtp_port = 25
 mail.add_x_header = Off
 
 ; Log all mail() calls including the full path of the script, line #, to address and headers
-mail.log =
+;mail.log =
 
 [SQL]
 sql.safe_mode = Off
