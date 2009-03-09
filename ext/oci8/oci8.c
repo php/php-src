@@ -39,6 +39,14 @@
 
 #if HAVE_OCI8
 
+#if PHP_MAJOR_VERSION > 5
+#error This version of the PHP OCI8 extension is not compatible with PHP 6 or later
+#elif PHP_MAJOR_VERSION < 5
+#ifdef ZTS
+#error The PHP OCI8 extension does not support ZTS mode in PHP 4
+#endif
+#endif
+
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 #include "zend_hash.h"
@@ -47,6 +55,7 @@ ZEND_DECLARE_MODULE_GLOBALS(oci)
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 /* This "if" allows PECL builds from this file to be portable to older PHP releases */
 static PHP_GINIT_FUNCTION(oci);
+static PHP_GSHUTDOWN_FUNCTION(oci);
 #endif
 
 /* Allow PHP 5.3 branch to be used in PECL for 5.x compatible builds */
@@ -96,9 +105,6 @@ static void php_oci_spool_list_dtor(zend_rsrc_list_entry *entry TSRMLS_DC);
 static void php_oci_collection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 
 static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC);
-#ifdef ZTS
-static int php_oci_list_helper(zend_rsrc_list_entry *le, void *le_type TSRMLS_DC);
-#endif
 static int php_oci_connection_ping(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_status(php_oci_connection * TSRMLS_DC);
 static int php_oci_connection_close(php_oci_connection * TSRMLS_DC);
@@ -941,7 +947,7 @@ zend_module_entry oci8_module_entry = {
 	/* This check allows PECL builds from this file to be portable to older PHP releases */
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),			  /* globals ctor */
-	NULL,					  /* globals dtor */
+	PHP_GSHUTDOWN(oci),		  /* globals dtor */
 	NULL,					  /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 #else
@@ -1068,6 +1074,21 @@ static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ PHP_GSHUTDOWN_FUNCTION
+ *
+ * Called for thread shutdown in ZTS, after module shutdown for non-ZTS
+ */
+/* This check allows PECL builds from this file to be portable to older PHP releases */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
+static PHP_GSHUTDOWN_FUNCTION(oci)
+#else
+static void php_oci_shutdown_globals(zend_oci_globals *oci_globals TSRMLS_DC)
+#endif
+{
+	php_oci_cleanup_global_handles(TSRMLS_C);
+}
+/* }}} */
+
 PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
@@ -1077,7 +1098,7 @@ PHP_MINIT_FUNCTION(oci)
 	/* This check allows PECL builds from this file to be portable to older PHP releases */
 	/* this is handled by new globals management code */
 #else
-	ZEND_INIT_MODULE_GLOBALS(oci, php_oci_init_globals, NULL);
+	ZEND_INIT_MODULE_GLOBALS(oci, php_oci_init_globals, php_oci_shutdown_globals);
 #endif
 	REGISTER_INI_ENTRIES();
 
@@ -1189,39 +1210,27 @@ PHP_RINIT_FUNCTION(oci)
 
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
-	OCI_G(shutdown) = 1;
-
-	UNREGISTER_INI_ENTRIES();
-
+/* Work around PHP_GSHUTDOWN_FUNCTION not being called in older versions of PHP */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 2) || (PHP_MAJOR_VERSION < 5)
 #ifndef ZTS
 	php_oci_cleanup_global_handles(TSRMLS_C);
 #endif
+#endif
+
+	OCI_G(shutdown) = 1;
+
+	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(oci)
 {
-#ifdef ZTS
-	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_descriptor TSRMLS_CC);
-	zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_collection TSRMLS_CC);
-	while (OCI_G(num_statements) > 0) {
-		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_statement TSRMLS_CC);
-	}
-#endif
-
 	/* Check persistent connections and do the necessary actions if needed. If persistent_helper is
 	 * unable to process a pconnection because of a refcount, the processing would happen from
 	 * np-destructor which is called when refcount goes to zero - php_oci_pconnection_list_np_dtor
 	 */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_oci_persistent_helper TSRMLS_CC);
-
-#ifdef ZTS
-	while (OCI_G(num_links) > OCI_G(num_persistent)) {
-		zend_hash_apply_with_argument(&EG(regular_list), (apply_func_arg_t) php_oci_list_helper, (void *)le_connection TSRMLS_CC);
-	}
-	php_oci_cleanup_global_handles(TSRMLS_C);
-#endif
 
 	return SUCCESS;
 }
@@ -3104,24 +3113,6 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 
 	return OCI_SUCCESS;
 } /* }}} */
-
-#ifdef ZTS
-/* {{{ php_oci_list_helper()
- *
- *	Helper function to destroy data on thread shutdown in ZTS mode
- */
-static int php_oci_list_helper(zend_rsrc_list_entry *le, void *le_type TSRMLS_DC)
-{
-	int type = (int) le_type;
-
-	if (le->type == type) {
-		if (le->ptr != NULL && --le->refcount<=0) {
-			return ZEND_HASH_APPLY_REMOVE;
-		}
-	}
-	return ZEND_HASH_APPLY_KEEP;
-} /* }}} */
-#endif
 
 #endif /* HAVE_OCI8 */
 
