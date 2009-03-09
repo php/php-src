@@ -32,11 +32,17 @@ if (false !== getenv('PHP_OCI8_TEST_DB')) {
 	}
 } else {
 	$user						= "system";
-	$password					= "system";
+	$password					= "oracle";
 	$dbase						= "localhost/XE";
 	$oracle_on_localhost		= TRUE;
 	$test_drcp					= FALSE;
 }
+
+$user						= "system";
+$password					= "oracle";
+$dbase						= "ca-tools1.us.oracle.com/orcl";
+$oracle_on_localhost		= TRUE;
+$test_drcp					= FALSE;
 
 /*
  * Common object names for scripts to use

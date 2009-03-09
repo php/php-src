@@ -72,6 +72,12 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define ONUPDATELONGFUNC OnUpdateInt
 #endif
 
+#ifdef ZTS
+#define PHP_OCI_INIT_MODE (OCI_DEFAULT | OCI_OBJECT | OCI_THREADED | OCI_NO_MUTEX)
+#else
+#define PHP_OCI_INIT_MODE (OCI_DEFAULT | OCI_OBJECT)
+#endif
+
 /* static protos {{{ */
 static void php_oci_connection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
 static void php_oci_pconnection_list_dtor (zend_rsrc_list_entry * TSRMLS_DC);
@@ -836,60 +842,65 @@ PHP_INI_END()
  */
 static void php_oci_init_global_handles(TSRMLS_D)
 {
-	sword errcode;
-	sb4 error_code = 0;
-	text tmp_buf[PHP_OCI_ERRBUF_LEN];
+	sword errstatus;
+	sb4   ora_error_code = 0;
+	text  tmp_buf[PHP_OCI_ERRBUF_LEN];
 
-	errcode =  OCIEnvNlsCreate(&OCI_G(env), OCI_DEFAULT, 0, NULL, NULL, NULL, 0, NULL, 0, 0);
+	errstatus = OCIEnvNlsCreate(&OCI_G(env), PHP_OCI_INIT_MODE, 0, NULL, NULL, NULL, 0, NULL, 0, 0);
 
-	if (errcode == OCI_ERROR) {
-		goto oci_error;
-	}
-
-	errcode = OCIHandleAlloc (OCI_G(env), (dvoid **)&OCI_G(err), OCI_HTYPE_ERROR, 0, NULL);
-
-	if (errcode == OCI_ERROR || errcode == OCI_SUCCESS_WITH_INFO) {
-		goto oci_error;
-	}
-
-#if !defined(OCI_MAJOR_VERSION) || (OCI_MAJOR_VERSION < 11)
-	/* This works around PECL bug #15988 (sqlnet.ora not being read).
-	 * The root cause was fixed in Oracle 10.2.0.4 but there is no
-	 * compile time method to check for that precise patch level, nor
-	 * can it be guaranteed that runtime will use the same patch level
-	 * the code was compiled with.  So, we do this code for all non
-	 * 11g versions.
-	 */
-	OCICPool *cpoolh;
-	ub4 cpoolmode = 0x80000000;	/* Pass invalid mode to OCIConnectionPoolCreate */
-	PHP_OCI_CALL(OCIHandleAlloc, (OCI_G(env), (dvoid **) &cpoolh, OCI_HTYPE_CPOOL, (size_t) 0, (dvoid **) 0));
-	PHP_OCI_CALL(OCIConnectionPoolCreate, (OCI_G(env), OCI_G(err), cpoolh, NULL, 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, 0, cpoolmode));
-	PHP_OCI_CALL(OCIConnectionPoolDestroy, (cpoolh, OCI_G(err), OCI_DEFAULT));
-	PHP_OCI_CALL(OCIHandleFree, (cpoolh, OCI_HTYPE_CPOOL));
+	if (errstatus == OCI_ERROR) {
+#ifdef HAVE_OCI_INSTANT_CLIENT
+# ifdef PHP_WIN32
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
+# else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
+# endif
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
 #endif
+		OCI_G(env) = NULL;
+		OCI_G(err) = NULL;
+		return;
+	}
 
-	return;
+	errstatus = OCIHandleAlloc (OCI_G(env), (dvoid **)&OCI_G(err), OCI_HTYPE_ERROR, 0, NULL);
 
-oci_error:
+	if (errstatus == OCI_SUCCESS) {
+#if !defined(OCI_MAJOR_VERSION) || (OCI_MAJOR_VERSION < 11)
+		/* This fixes PECL bug 15988 (sqlnet.ora not being read).  The
+		 * root cause was fixed in Oracle 10.2.0.4 but there is no
+		 * compile time method to check for that precise patch level,
+		 * nor can it be guaranteed that runtime will use the same
+		 * patch level the code was compiled with.  So, we do this
+		 * code for all non 11g versions.
+		 */
+		OCICPool *cpoolh;
+		ub4 cpoolmode = 0x80000000;	/* Pass invalid mode to OCIConnectionPoolCreate */
+		PHP_OCI_CALL(OCIHandleAlloc, (OCI_G(env), (dvoid **) &cpoolh, OCI_HTYPE_CPOOL, (size_t) 0, (dvoid **) 0));
+		PHP_OCI_CALL(OCIConnectionPoolCreate, (OCI_G(env), OCI_G(err), cpoolh, NULL, 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, 0, cpoolmode));
+		PHP_OCI_CALL(OCIConnectionPoolDestroy, (cpoolh, OCI_G(err), OCI_DEFAULT));
+		PHP_OCI_CALL(OCIHandleFree, (cpoolh, OCI_HTYPE_CPOOL));
+#endif
+	} else {
+		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 
-	OCIErrorGet(OCI_G(env), (ub4)1, NULL, &error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
-
-	if (error_code) {
-		int tmp_buf_len = strlen((char *)tmp_buf);
-
-		if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
-			tmp_buf[tmp_buf_len - 1] = '\0';
-		}
-
-		if (errcode != OCI_SUCCESS_WITH_INFO) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_ERROR: %s", tmp_buf);
-
-			OCIHandleFree((dvoid *) OCI_G(env), OCI_HTYPE_ENV);
-
-			OCI_G(env) = NULL;
-			OCI_G(err) = NULL;
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %s", tmp_buf);
+		if (ora_error_code) {
+			int tmp_buf_len = strlen((char *)tmp_buf);
+			
+			if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
+				tmp_buf[tmp_buf_len - 1] = '\0';
+			}
+			
+			if (errstatus == OCI_SUCCESS_WITH_INFO) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Initialization error: OCI_SUCCESS_WITH_INFO: %s", tmp_buf);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Initialization error: OCI_ERROR: %s", tmp_buf);
+				
+				OCIHandleFree((dvoid *) OCI_G(env), OCI_HTYPE_ENV);
+				
+				OCI_G(env) = NULL;
+				OCI_G(err) = NULL;
+			}
 		}
 	}
 } /* }}} */
@@ -925,14 +936,6 @@ PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
 	zend_class_entry oci_coll_class_entry;
-
-#define PHP_OCI_INIT_MODE_TMP OCI_DEFAULT | OCI_OBJECT
-
-#ifdef ZTS
-#define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP | OCI_THREADED
-#else
-#define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP
-#endif
 
 	REGISTER_INI_ENTRIES();
 
@@ -1565,6 +1568,14 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 		}
 	}
 
+	/* Initialize global handles if they weren't initialized before */
+	if (OCI_G(env) == NULL) {
+		php_oci_init_global_handles(TSRMLS_C);
+		if (OCI_G(env) == NULL) {
+			return NULL;
+		}
+	}
+
 	/* We cannot use the new session create logic (OCISessionGet from
 	 * client-side session pool) when privileged connect or password
 	 * change is attempted or OCI_CRED_EXT mode is specified.  TODO:
@@ -1600,11 +1611,6 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 		smart_str_appendl_ex(&hashed_details, dbname.s, USTR_BYTES(type, dbname_len), 0);
 	}
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
-
-	/* Initialize global handles if they weren't initialized before */
-	if (OCI_G(env) == NULL) {
-		php_oci_init_global_handles(TSRMLS_C);
-	}
 
 	if (!UG(unicode)) {
 		if (charset.s && *charset.s) {
