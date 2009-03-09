@@ -126,7 +126,7 @@ reflection::export(new reflectionfunction('ocicolltrim'));
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Function [ <internal:oci8> function oci_define_by_name ] {
+Function [ <internal%s> function oci_define_by_name ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $statement_resource ]
@@ -136,7 +136,7 @@ Function [ <internal:oci8> function oci_define_by_name ] {
   }
 }
 
-Function [ <internal:oci8> function oci_bind_by_name ] {
+Function [ <internal%s> function oci_bind_by_name ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $statement_resource ]
@@ -147,7 +147,7 @@ Function [ <internal:oci8> function oci_bind_by_name ] {
   }
 }
 
-Function [ <internal:oci8> function oci_bind_array_by_name ] {
+Function [ <internal%s> function oci_bind_array_by_name ] {
 
   - Parameters [6] {
     Parameter #0 [ <required> $statement_resource ]
@@ -159,7 +159,7 @@ Function [ <internal:oci8> function oci_bind_array_by_name ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_is_null ] {
+Function [ <internal%s> function oci_field_is_null ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -167,7 +167,7 @@ Function [ <internal:oci8> function oci_field_is_null ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_name ] {
+Function [ <internal%s> function oci_field_name ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -175,7 +175,7 @@ Function [ <internal:oci8> function oci_field_name ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_size ] {
+Function [ <internal%s> function oci_field_size ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -183,7 +183,7 @@ Function [ <internal:oci8> function oci_field_size ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_scale ] {
+Function [ <internal%s> function oci_field_scale ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -191,7 +191,7 @@ Function [ <internal:oci8> function oci_field_scale ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_precision ] {
+Function [ <internal%s> function oci_field_precision ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -199,7 +199,7 @@ Function [ <internal:oci8> function oci_field_precision ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_type ] {
+Function [ <internal%s> function oci_field_type ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -207,7 +207,7 @@ Function [ <internal:oci8> function oci_field_type ] {
   }
 }
 
-Function [ <internal:oci8> function oci_field_type_raw ] {
+Function [ <internal%s> function oci_field_type_raw ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -215,7 +215,7 @@ Function [ <internal:oci8> function oci_field_type_raw ] {
   }
 }
 
-Function [ <internal:oci8> function oci_execute ] {
+Function [ <internal%s> function oci_execute ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -223,42 +223,42 @@ Function [ <internal:oci8> function oci_execute ] {
   }
 }
 
-Function [ <internal:oci8> function oci_cancel ] {
+Function [ <internal%s> function oci_cancel ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_fetch ] {
+Function [ <internal%s> function oci_fetch ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_fetch_object ] {
+Function [ <internal%s> function oci_fetch_object ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_fetch_row ] {
+Function [ <internal%s> function oci_fetch_row ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_fetch_assoc ] {
+Function [ <internal%s> function oci_fetch_assoc ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_fetch_array ] {
+Function [ <internal%s> function oci_fetch_array ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -266,7 +266,7 @@ Function [ <internal:oci8> function oci_fetch_array ] {
   }
 }
 
-Function [ <internal:oci8> function ocifetchinto ] {
+Function [ <internal%s> function ocifetchinto ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $statement_resource ]
@@ -275,7 +275,7 @@ Function [ <internal:oci8> function ocifetchinto ] {
   }
 }
 
-Function [ <internal:oci8> function oci_fetch_all ] {
+Function [ <internal%s> function oci_fetch_all ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $statement_resource ]
@@ -286,28 +286,28 @@ Function [ <internal:oci8> function oci_fetch_all ] {
   }
 }
 
-Function [ <internal:oci8> function oci_free_statement ] {
+Function [ <internal%s> function oci_free_statement ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_internal_debug ] {
+Function [ <internal%s> function oci_internal_debug ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $mode ]
   }
 }
 
-Function [ <internal:oci8> function oci_num_fields ] {
+Function [ <internal%s> function oci_num_fields ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_parse ] {
+Function [ <internal%s> function oci_parse ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $connection_resource ]
@@ -315,14 +315,14 @@ Function [ <internal:oci8> function oci_parse ] {
   }
 }
 
-Function [ <internal:oci8> function oci_new_cursor ] {
+Function [ <internal%s> function oci_new_cursor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_result ] {
+Function [ <internal%s> function oci_result ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -330,35 +330,35 @@ Function [ <internal:oci8> function oci_result ] {
   }
 }
 
-Function [ <internal:oci8> function oci_server_version ] {
+Function [ <internal%s> function oci_server_version ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_statement_type ] {
+Function [ <internal%s> function oci_statement_type ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_num_rows ] {
+Function [ <internal%s> function oci_num_rows ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_close ] {
+Function [ <internal%s> function oci_close ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_connect ] {
+Function [ <internal%s> function oci_connect ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -369,7 +369,7 @@ Function [ <internal:oci8> function oci_connect ] {
   }
 }
 
-Function [ <internal:oci8> function oci_new_connect ] {
+Function [ <internal%s> function oci_new_connect ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -380,7 +380,7 @@ Function [ <internal:oci8> function oci_new_connect ] {
   }
 }
 
-Function [ <internal:oci8> function oci_pconnect ] {
+Function [ <internal%s> function oci_pconnect ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -391,21 +391,21 @@ Function [ <internal:oci8> function oci_pconnect ] {
   }
 }
 
-Function [ <internal:oci8> function oci_error ] {
+Function [ <internal%s> function oci_error ] {
 
   - Parameters [1] {
     Parameter #0 [ <optional> $connection_or_statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_free_descriptor ] {
+Function [ <internal%s> function oci_free_descriptor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_save ] {
+Function [ <internal%s> function oci_lob_save ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -414,7 +414,7 @@ Function [ <internal:oci8> function oci_lob_save ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_import ] {
+Function [ <internal%s> function oci_lob_import ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -422,21 +422,21 @@ Function [ <internal:oci8> function oci_lob_import ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_size ] {
+Function [ <internal%s> function oci_lob_size ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_load ] {
+Function [ <internal%s> function oci_lob_load ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_read ] {
+Function [ <internal%s> function oci_lob_read ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -444,21 +444,21 @@ Function [ <internal:oci8> function oci_lob_read ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_eof ] {
+Function [ <internal%s> function oci_lob_eof ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_tell ] {
+Function [ <internal%s> function oci_lob_tell ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_truncate ] {
+Function [ <internal%s> function oci_lob_truncate ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -466,7 +466,7 @@ Function [ <internal:oci8> function oci_lob_truncate ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_erase ] {
+Function [ <internal%s> function oci_lob_erase ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -475,7 +475,7 @@ Function [ <internal:oci8> function oci_lob_erase ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_flush ] {
+Function [ <internal%s> function oci_lob_flush ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -483,7 +483,7 @@ Function [ <internal:oci8> function oci_lob_flush ] {
   }
 }
 
-Function [ <internal:oci8> function ocisetbufferinglob ] {
+Function [ <internal%s> function ocisetbufferinglob ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -491,14 +491,14 @@ Function [ <internal:oci8> function ocisetbufferinglob ] {
   }
 }
 
-Function [ <internal:oci8> function ocigetbufferinglob ] {
+Function [ <internal%s> function ocigetbufferinglob ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_is_equal ] {
+Function [ <internal%s> function oci_lob_is_equal ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -506,14 +506,14 @@ Function [ <internal:oci8> function oci_lob_is_equal ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_rewind ] {
+Function [ <internal%s> function oci_lob_rewind ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function oci_lob_write ] {
+Function [ <internal%s> function oci_lob_write ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -522,7 +522,7 @@ Function [ <internal:oci8> function oci_lob_write ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_append ] {
+Function [ <internal%s> function oci_lob_append ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor_to ]
@@ -530,7 +530,7 @@ Function [ <internal:oci8> function oci_lob_append ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_copy ] {
+Function [ <internal%s> function oci_lob_copy ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor_to ]
@@ -539,7 +539,7 @@ Function [ <internal:oci8> function oci_lob_copy ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_export ] {
+Function [ <internal%s> function oci_lob_export ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -549,7 +549,7 @@ Function [ <internal:oci8> function oci_lob_export ] {
   }
 }
 
-Function [ <internal:oci8> function oci_lob_seek ] {
+Function [ <internal%s> function oci_lob_seek ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -558,21 +558,21 @@ Function [ <internal:oci8> function oci_lob_seek ] {
   }
 }
 
-Function [ <internal:oci8> function oci_commit ] {
+Function [ <internal%s> function oci_commit ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_rollback ] {
+Function [ <internal%s> function oci_rollback ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function oci_new_descriptor ] {
+Function [ <internal%s> function oci_new_descriptor ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $connection_resource ]
@@ -580,7 +580,7 @@ Function [ <internal:oci8> function oci_new_descriptor ] {
   }
 }
 
-Function [ <internal:oci8> function oci_set_prefetch ] {
+Function [ <internal%s> function oci_set_prefetch ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -588,7 +588,7 @@ Function [ <internal:oci8> function oci_set_prefetch ] {
   }
 }
 
-Function [ <internal:oci8> function oci_password_change ] {
+Function [ <internal%s> function oci_password_change ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $connection_resource_or_connection_string ]
@@ -598,14 +598,14 @@ Function [ <internal:oci8> function oci_password_change ] {
   }
 }
 
-Function [ <internal:oci8> function oci_free_collection ] {
+Function [ <internal%s> function oci_free_collection ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function oci_collection_append ] {
+Function [ <internal%s> function oci_collection_append ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
@@ -613,7 +613,7 @@ Function [ <internal:oci8> function oci_collection_append ] {
   }
 }
 
-Function [ <internal:oci8> function oci_collection_element_get ] {
+Function [ <internal%s> function oci_collection_element_get ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
@@ -621,7 +621,7 @@ Function [ <internal:oci8> function oci_collection_element_get ] {
   }
 }
 
-Function [ <internal:oci8> function oci_collection_element_assign ] {
+Function [ <internal%s> function oci_collection_element_assign ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $collection ]
@@ -630,7 +630,7 @@ Function [ <internal:oci8> function oci_collection_element_assign ] {
   }
 }
 
-Function [ <internal:oci8> function oci_collection_assign ] {
+Function [ <internal%s> function oci_collection_assign ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection_to ]
@@ -638,21 +638,21 @@ Function [ <internal:oci8> function oci_collection_assign ] {
   }
 }
 
-Function [ <internal:oci8> function oci_collection_size ] {
+Function [ <internal%s> function oci_collection_size ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function oci_collection_max ] {
+Function [ <internal%s> function oci_collection_max ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function oci_collection_trim ] {
+Function [ <internal%s> function oci_collection_trim ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
@@ -660,7 +660,7 @@ Function [ <internal:oci8> function oci_collection_trim ] {
   }
 }
 
-Function [ <internal:oci8> function oci_new_collection ] {
+Function [ <internal%s> function oci_new_collection ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $connection_resource ]
@@ -669,21 +669,21 @@ Function [ <internal:oci8> function oci_new_collection ] {
   }
 }
 
-Function [ <internal:oci8> function oci_free_cursor ] {
+Function [ <internal%s> function oci_free_cursor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocifreecursor ] {
+Function [ <internal%s> function ocifreecursor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocibindbyname ] {
+Function [ <internal%s> function ocibindbyname ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $statement_resource ]
@@ -694,7 +694,7 @@ Function [ <internal:oci8> function ocibindbyname ] {
   }
 }
 
-Function [ <internal:oci8> function ocidefinebyname ] {
+Function [ <internal%s> function ocidefinebyname ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $statement_resource ]
@@ -704,7 +704,7 @@ Function [ <internal:oci8> function ocidefinebyname ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumnisnull ] {
+Function [ <internal%s> function ocicolumnisnull ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -712,7 +712,7 @@ Function [ <internal:oci8> function ocicolumnisnull ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumnname ] {
+Function [ <internal%s> function ocicolumnname ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -720,7 +720,7 @@ Function [ <internal:oci8> function ocicolumnname ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumnsize ] {
+Function [ <internal%s> function ocicolumnsize ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -728,7 +728,7 @@ Function [ <internal:oci8> function ocicolumnsize ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumnscale ] {
+Function [ <internal%s> function ocicolumnscale ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -736,7 +736,7 @@ Function [ <internal:oci8> function ocicolumnscale ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumnprecision ] {
+Function [ <internal%s> function ocicolumnprecision ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -744,7 +744,7 @@ Function [ <internal:oci8> function ocicolumnprecision ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumntype ] {
+Function [ <internal%s> function ocicolumntype ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -752,7 +752,7 @@ Function [ <internal:oci8> function ocicolumntype ] {
   }
 }
 
-Function [ <internal:oci8> function ocicolumntyperaw ] {
+Function [ <internal%s> function ocicolumntyperaw ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -760,7 +760,7 @@ Function [ <internal:oci8> function ocicolumntyperaw ] {
   }
 }
 
-Function [ <internal:oci8> function ociexecute ] {
+Function [ <internal%s> function ociexecute ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -768,21 +768,21 @@ Function [ <internal:oci8> function ociexecute ] {
   }
 }
 
-Function [ <internal:oci8> function ocicancel ] {
+Function [ <internal%s> function ocicancel ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocifetch ] {
+Function [ <internal%s> function ocifetch ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocifetchstatement ] {
+Function [ <internal%s> function ocifetchstatement ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $statement_resource ]
@@ -793,28 +793,28 @@ Function [ <internal:oci8> function ocifetchstatement ] {
   }
 }
 
-Function [ <internal:oci8> function ocifreestatement ] {
+Function [ <internal%s> function ocifreestatement ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ociinternaldebug ] {
+Function [ <internal%s> function ociinternaldebug ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $mode ]
   }
 }
 
-Function [ <internal:oci8> function ocinumcols ] {
+Function [ <internal%s> function ocinumcols ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ociparse ] {
+Function [ <internal%s> function ociparse ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $connection_resource ]
@@ -822,14 +822,14 @@ Function [ <internal:oci8> function ociparse ] {
   }
 }
 
-Function [ <internal:oci8> function ocinewcursor ] {
+Function [ <internal%s> function ocinewcursor ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function ociresult ] {
+Function [ <internal%s> function ociresult ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -837,35 +837,35 @@ Function [ <internal:oci8> function ociresult ] {
   }
 }
 
-Function [ <internal:oci8> function ociserverversion ] {
+Function [ <internal%s> function ociserverversion ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocistatementtype ] {
+Function [ <internal%s> function ocistatementtype ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocirowcount ] {
+Function [ <internal%s> function ocirowcount ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocilogoff ] {
+Function [ <internal%s> function ocilogoff ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocilogon ] {
+Function [ <internal%s> function ocilogon ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -876,7 +876,7 @@ Function [ <internal:oci8> function ocilogon ] {
   }
 }
 
-Function [ <internal:oci8> function ocinlogon ] {
+Function [ <internal%s> function ocinlogon ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -887,7 +887,7 @@ Function [ <internal:oci8> function ocinlogon ] {
   }
 }
 
-Function [ <internal:oci8> function ociplogon ] {
+Function [ <internal%s> function ociplogon ] {
 
   - Parameters [5] {
     Parameter #0 [ <required> $username ]
@@ -898,21 +898,21 @@ Function [ <internal:oci8> function ociplogon ] {
   }
 }
 
-Function [ <internal:oci8> function ocierror ] {
+Function [ <internal%s> function ocierror ] {
 
   - Parameters [1] {
     Parameter #0 [ <optional> $connection_or_statement_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocifreedesc ] {
+Function [ <internal%s> function ocifreedesc ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function ocisavelob ] {
+Function [ <internal%s> function ocisavelob ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -921,7 +921,7 @@ Function [ <internal:oci8> function ocisavelob ] {
   }
 }
 
-Function [ <internal:oci8> function ocisavelobfile ] {
+Function [ <internal%s> function ocisavelobfile ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -929,7 +929,7 @@ Function [ <internal:oci8> function ocisavelobfile ] {
   }
 }
 
-Function [ <internal:oci8> function ociwritelobtofile ] {
+Function [ <internal%s> function ociwritelobtofile ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $lob_descriptor ]
@@ -939,28 +939,28 @@ Function [ <internal:oci8> function ociwritelobtofile ] {
   }
 }
 
-Function [ <internal:oci8> function ociloadlob ] {
+Function [ <internal%s> function ociloadlob ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $lob_descriptor ]
   }
 }
 
-Function [ <internal:oci8> function ocicommit ] {
+Function [ <internal%s> function ocicommit ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocirollback ] {
+Function [ <internal%s> function ocirollback ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $connection_resource ]
   }
 }
 
-Function [ <internal:oci8> function ocinewdescriptor ] {
+Function [ <internal%s> function ocinewdescriptor ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $connection_resource ]
@@ -968,7 +968,7 @@ Function [ <internal:oci8> function ocinewdescriptor ] {
   }
 }
 
-Function [ <internal:oci8> function ocisetprefetch ] {
+Function [ <internal%s> function ocisetprefetch ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
@@ -976,7 +976,7 @@ Function [ <internal:oci8> function ocisetprefetch ] {
   }
 }
 
-Function [ <internal:oci8> function ocipasswordchange ] {
+Function [ <internal%s> function ocipasswordchange ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $connection_resource_or_connection_string ]
@@ -986,14 +986,14 @@ Function [ <internal:oci8> function ocipasswordchange ] {
   }
 }
 
-Function [ <internal:oci8> function ocifreecollection ] {
+Function [ <internal%s> function ocifreecollection ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function ocinewcollection ] {
+Function [ <internal%s> function ocinewcollection ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $connection_resource ]
@@ -1002,7 +1002,7 @@ Function [ <internal:oci8> function ocinewcollection ] {
   }
 }
 
-Function [ <internal:oci8> function ocicollappend ] {
+Function [ <internal%s> function ocicollappend ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
@@ -1010,7 +1010,7 @@ Function [ <internal:oci8> function ocicollappend ] {
   }
 }
 
-Function [ <internal:oci8> function ocicollgetelem ] {
+Function [ <internal%s> function ocicollgetelem ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
@@ -1018,7 +1018,7 @@ Function [ <internal:oci8> function ocicollgetelem ] {
   }
 }
 
-Function [ <internal:oci8> function ocicollassignelem ] {
+Function [ <internal%s> function ocicollassignelem ] {
 
   - Parameters [3] {
     Parameter #0 [ <required> $collection ]
@@ -1027,21 +1027,21 @@ Function [ <internal:oci8> function ocicollassignelem ] {
   }
 }
 
-Function [ <internal:oci8> function ocicollsize ] {
+Function [ <internal%s> function ocicollsize ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function ocicollmax ] {
+Function [ <internal%s> function ocicollmax ] {
 
   - Parameters [1] {
     Parameter #0 [ <required> $collection ]
   }
 }
 
-Function [ <internal:oci8> function ocicolltrim ] {
+Function [ <internal%s> function ocicolltrim ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
