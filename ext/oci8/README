@@ -18,7 +18,7 @@ built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows
 Oracle's standard cross-version connectivity.  This release can be
 used with PHP versions 4.3.9 to 5.x.
 
-The OCI8 extension is not related to, or used by, PDO_OCI - the PHP
+The OCI8 extension is not related to, or used by, PDO_OCI, the PHP
 Data Objects (PDO) extension for Oracle.
 
 1. Common requirements
@@ -135,12 +135,15 @@ Install using either (a) or (b) below.
     When prompted, enter either the value of $ORACLE_HOME, or
     "instantclient,/path/to/instant/client/lib" (without quotes).
 
-  b) Alternatively, manually download the PECL package, e.g. oci8-1.3.3.tgz
+  b) Alternatively, manually download the PECL package, e.g. oci8-1.3.5.tgz
 
-     Extract and prepare the package:
+     Extract the package:
 
-       tar -zxf oci8-1.3.3.tgz
-       cd oci8-1.3.3
+       tar -zxf oci8-1.3.5.tgz
+       cd oci8-1.3.5
+
+     Prepare the package:
+
        phpize
 
      Configure the package, either using $ORACLE_HOME or Instant Client
@@ -159,6 +162,9 @@ After either install, edit your php.ini file, e.g. /etc/php.ini, and
 add the line:
 
   extension=oci8.so
+
+Make sure php.ini's "extension_dir" includes the directory that
+oci8.so was installed in.
 
 
 5. Testing OCI8
@@ -239,8 +245,6 @@ directory will contain logs of any failures.
 5.2.4. Restart the database:
 
     SQL> startup force
-
-5.2.5. Rerun the tests
 
 
 6. Oracle DRCP and FAN Support
