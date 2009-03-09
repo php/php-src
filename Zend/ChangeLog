@@ -1,3 +1,25 @@
+2009-03-08  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      tests/bug47593.phpt:
+      - MFH: Fixed bug #47593	(interface_exists() returns false when using
+      absolute namespace path)
+        patch by Kalle
+      - BFN #47572
+
+    * tests/bug47593.phpt
+      tests/bug47593.phpt:
+      
+      - Fixed bug #47593 (interface_exists() returns false when using absolute
+      namespace path)
+        Patch by Kalle.
+
+    * zend_builtin_functions.c:
+      - Fixed bug #47593 (interface_exists() returns false when using absolute
+      namespace path)
+        Patch by Kalle.
+
 2009-03-05  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
