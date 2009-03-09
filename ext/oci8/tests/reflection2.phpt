@@ -12,7 +12,7 @@ reflection::export(new reflectionclass('OCI-Collection'));
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Class [ <internal:oci8> class OCI-Lob ] {
+Class [ <internal%s> class OCI-Lob ] {
 
   - Constants [0] {
   }
@@ -27,26 +27,26 @@ Class [ <internal:oci8> class OCI-Lob ] {
   }
 
   - Methods [22] {
-    Method [ <internal:oci8> public method load ] {
+    Method [ <internal%s> public method load ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method tell ] {
+    Method [ <internal%s> public method tell ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method truncate ] {
+    Method [ <internal%s> public method truncate ] {
 
       - Parameters [1] {
         Parameter #0 [ <optional> $length ]
       }
     }
 
-    Method [ <internal:oci8> public method erase ] {
+    Method [ <internal%s> public method erase ] {
 
       - Parameters [2] {
         Parameter #0 [ <optional> $offset ]
@@ -54,46 +54,46 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method flush ] {
+    Method [ <internal%s> public method flush ] {
 
       - Parameters [1] {
         Parameter #0 [ <optional> $flag ]
       }
     }
 
-    Method [ <internal:oci8> public method setbuffering ] {
+    Method [ <internal%s> public method setbuffering ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $mode ]
       }
     }
 
-    Method [ <internal:oci8> public method getbuffering ] {
+    Method [ <internal%s> public method getbuffering ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method rewind ] {
+    Method [ <internal%s> public method rewind ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method read ] {
+    Method [ <internal%s> public method read ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $length ]
       }
     }
 
-    Method [ <internal:oci8> public method eof ] {
+    Method [ <internal%s> public method eof ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method seek ] {
+    Method [ <internal%s> public method seek ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $offset ]
@@ -101,7 +101,7 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method write ] {
+    Method [ <internal%s> public method write ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $string ]
@@ -109,20 +109,20 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method append ] {
+    Method [ <internal%s> public method append ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $lob_descriptor_from ]
       }
     }
 
-    Method [ <internal:oci8> public method size ] {
+    Method [ <internal%s> public method size ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method writetofile ] {
+    Method [ <internal%s> public method writetofile ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $filename ]
@@ -131,7 +131,7 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method export ] {
+    Method [ <internal%s> public method export ] {
 
       - Parameters [3] {
         Parameter #0 [ <required> $filename ]
@@ -140,14 +140,14 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method import ] {
+    Method [ <internal%s> public method import ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $filename ]
       }
     }
 
-    Method [ <internal:oci8> public method writetemporary ] {
+    Method [ <internal%s> public method writetemporary ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $data ]
@@ -155,13 +155,13 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method close ] {
+    Method [ <internal%s> public method close ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method save ] {
+    Method [ <internal%s> public method save ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $data ]
@@ -169,14 +169,14 @@ Class [ <internal:oci8> class OCI-Lob ] {
       }
     }
 
-    Method [ <internal:oci8> public method savefile ] {
+    Method [ <internal%s> public method savefile ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $filename ]
       }
     }
 
-    Method [ <internal:oci8> public method free ] {
+    Method [ <internal%s> public method free ] {
 
       - Parameters [0] {
       }
@@ -184,7 +184,7 @@ Class [ <internal:oci8> class OCI-Lob ] {
   }
 }
 
-Class [ <internal:oci8> class OCI-Collection ] {
+Class [ <internal%s> class OCI-Collection ] {
 
   - Constants [0] {
   }
@@ -199,21 +199,21 @@ Class [ <internal:oci8> class OCI-Collection ] {
   }
 
   - Methods [8] {
-    Method [ <internal:oci8> public method append ] {
+    Method [ <internal%s> public method append ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
       }
     }
 
-    Method [ <internal:oci8> public method getelem ] {
+    Method [ <internal%s> public method getelem ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $index ]
       }
     }
 
-    Method [ <internal:oci8> public method assignelem ] {
+    Method [ <internal%s> public method assignelem ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $index ]
@@ -221,33 +221,33 @@ Class [ <internal:oci8> class OCI-Collection ] {
       }
     }
 
-    Method [ <internal:oci8> public method assign ] {
+    Method [ <internal%s> public method assign ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $collection_from ]
       }
     }
 
-    Method [ <internal:oci8> public method size ] {
+    Method [ <internal%s> public method size ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method max ] {
+    Method [ <internal%s> public method max ] {
 
       - Parameters [0] {
       }
     }
 
-    Method [ <internal:oci8> public method trim ] {
+    Method [ <internal%s> public method trim ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $number ]
       }
     }
 
-    Method [ <internal:oci8> public method free ] {
+    Method [ <internal%s> public method free ] {
 
       - Parameters [0] {
       }
