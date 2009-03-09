@@ -1663,7 +1663,7 @@ go_out:
 	}
 
 	if (!errh) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIError: unable to find error handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Oci_error: unable to find error handle");
 		RETURN_FALSE;
 	}
 
