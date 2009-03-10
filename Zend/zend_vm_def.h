@@ -1961,10 +1961,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
-	if (OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
-
-		ZEND_VM_INC_OPCODE();
-
+	if (OP1_TYPE == IS_CONST) {
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
