@@ -44,6 +44,8 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_filestat.h"
 
+#define SPL_HAS_FLAG(flags, test_flag) ((flags & test_flag) ? 1 : 0)
+
 /* declare the class handlers */
 static zend_object_handlers spl_filesystem_object_handlers;
 
@@ -185,7 +187,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 {
 	zstr path;
 	zend_uchar path_type;
-	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
+	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
 	if (!intern->file_name.v) {
 		switch (intern->type) {
@@ -228,7 +230,7 @@ static inline int spl_filesystem_is_dot(const char * d_name) /* {{{ */
 static void spl_filesystem_dir_open(spl_filesystem_object* intern, zend_uchar type, zstr path, int path_len TSRMLS_DC)
 {
 	int options = REPORT_ERRORS;
-	int skip_dots = intern->flags & SPL_FILE_DIR_SKIPDOTS;
+	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 #if HELLY_0	
 	if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
@@ -322,7 +324,7 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	source = (spl_filesystem_object*)old_object;
 
-	skip_dots = source->flags & SPL_FILE_DIR_SKIPDOTS;
+	skip_dots = SPL_HAS_FLAG(source->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	new_obj_val = spl_filesystem_object_new_ex(old_object->ce, &intern TSRMLS_CC);
 	new_object = &intern->std;
@@ -666,7 +668,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 
 UChar u_glob[sizeof("glob://")];
 
-void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flags) /* {{{ */
+void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zstr path;
@@ -677,7 +679,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
-	if (ctor_flags & DIT_CTOR_FLAGS) {
+	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_FLAGS)) {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &path, &len, &path_type, &flags);
 	} else {
@@ -685,11 +687,11 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &len, &path_type);
 	}
 
-	if (ctor_flags & SPL_FILE_DIR_SKIPDOTS) {
+	if (SPL_HAS_FLAG(ctor_flags, SPL_FILE_DIR_SKIPDOTS)) {
 		flags |= SPL_FILE_DIR_SKIPDOTS;
 	}
 
-	if (ctor_flags & SPL_FILE_DIR_UNIXPATHS) {
+	if (SPL_HAS_FLAG(ctor_flags, SPL_FILE_DIR_UNIXPATHS)) {
 		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 
@@ -706,7 +708,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, int ctor_flag
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->flags = flags;
 
-	if ((ctor_flags & DIT_CTOR_GLOB) && (
+	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && (
 		(path_type == IS_STRING && strstr(path.s, "glob://") != path.s) ||
 		(path_type == IS_UNICODE && u_strstr(path.u, u_glob) != path.u)
 	)) {
@@ -771,7 +773,7 @@ SPL_METHOD(DirectoryIterator, current)
 SPL_METHOD(DirectoryIterator, next)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	int skip_dots = intern->flags & SPL_FILE_DIR_SKIPDOTS;
+	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	intern->u.dir.index++;
 	do {
@@ -1388,7 +1390,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	zval zpath, zflags;
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filesystem_object *subdir;
-	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
+	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
@@ -1439,7 +1441,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zstr sub_name;
 	int sub_len;
-	char slash = intern->flags & SPL_FILE_DIR_UNIXPATHS ? '/' : DEFAULT_SLASH;
+	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 
 	if (intern->u.dir.sub_path.v) {
 		sub_len = zspprintf(intern->u.dir.sub_path_type, &sub_name, 0, "%R%c%s", intern->u.dir.sub_path_type, intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
@@ -1912,7 +1914,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 		intern->u.file.current_line = estrdup("");
 		intern->u.file.current_line_len = 0;
 	} else {
-		if (intern->flags & SPL_FILE_OBJECT_DROP_NEW_LINE) {
+		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
 			line_len = strcspn(buf, "\r\n");
 			buf[line_len] = '\0';
 		}
@@ -1988,7 +1990,7 @@ static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char deli
 	
 	do {
 		ret = spl_filesystem_file_read(intern, 1 TSRMLS_CC);
-	} while (ret == SUCCESS && !intern->u.file.current_line_len && (intern->flags & SPL_FILE_OBJECT_SKIP_EMPTY));
+	} while (ret == SUCCESS && !intern->u.file.current_line_len && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
 	
 	if (ret == SUCCESS) {
 		size_t buf_len = intern->u.file.current_line_len;
@@ -2017,14 +2019,14 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 	zval *retval = NULL;
 
 	/* 1) use fgetcsv? 2) overloaded call the function, 3) do it directly */
-	if (intern->flags & SPL_FILE_OBJECT_READ_CSV || intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
+	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
 		if (php_stream_eof(intern->u.file.stream)) {
 			if (!silent) {
 				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 			}
 			return FAILURE;
 		}
-		if (intern->flags & SPL_FILE_OBJECT_READ_CSV) {
+		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
 			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL TSRMLS_CC);
 		} else {
 			zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
@@ -2061,7 +2063,7 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRML
 		case IS_UNICODE:
 			return Z_STRLEN_P(intern->u.file.current_zval) == 0;
 		case IS_ARRAY:
-			if ((intern->flags & SPL_FILE_OBJECT_READ_CSV)
+			if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
 			&& zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 1) {
 				zval ** first = Z_ARRVAL_P(intern->u.file.current_zval)->pListHead->pData;
 					
@@ -2084,7 +2086,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 {
 	int ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent TSRMLS_CC);
 
-	while ((intern->flags & SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && spl_filesystem_file_is_empty_line(intern TSRMLS_CC)) {
+	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && spl_filesystem_file_is_empty_line(intern TSRMLS_CC)) {
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent TSRMLS_CC);
 	}
@@ -2101,7 +2103,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		intern->u.file.current_line_num = 0;
 	}
-	if (intern->flags & SPL_FILE_OBJECT_READ_AHEAD) {
+	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(this_ptr, intern, 1 TSRMLS_CC);
 	}
 } /* }}} */
@@ -2226,7 +2228,7 @@ SPL_METHOD(SplFileObject, valid)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (intern->flags & SPL_FILE_OBJECT_READ_AHEAD) {
+	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		RETURN_BOOL(intern->u.file.current_line || intern->u.file.current_zval);
 	} else {
 		RETVAL_BOOL(!php_stream_eof(intern->u.file.stream));
@@ -2254,7 +2256,7 @@ SPL_METHOD(SplFileObject, current)
 	if (!intern->u.file.current_line && !intern->u.file.current_zval) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
-	if (intern->u.file.current_line && (!(intern->flags & SPL_FILE_OBJECT_READ_CSV) || !intern->u.file.current_zval)) {
+	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || !intern->u.file.current_zval)) {
 		RETURN_RT_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len, ZSTR_DUPLICATE);
 	} else if (intern->u.file.current_zval) {
 		RETURN_ZVAL(intern->u.file.current_zval, 1, 0);
@@ -2282,7 +2284,7 @@ SPL_METHOD(SplFileObject, next)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
-	if (intern->flags & SPL_FILE_OBJECT_READ_AHEAD) {
+	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	}
 	intern->u.file.current_line_num++;
