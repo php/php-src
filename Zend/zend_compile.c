@@ -2095,7 +2095,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	}
 
 	if (class_name->op_type == IS_CONST &&
-		method_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_TYPE(class_name->u.constant), Z_UNIVAL(class_name->u.constant), Z_UNILEN(class_name->u.constant))) {
 		fetch_type = ZEND_FETCH_CLASS_GLOBAL;
 		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
@@ -2107,45 +2106,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 	opline->op1 = class_node;
 	opline->op2 = *method_name;
-
-	if (class_node.op_type == IS_CONST &&
-		method_name->op_type == IS_CONST) {
-		/* Prebuild ns\func name to speedup run-time check.
-		   The additional names are stored in additional OP_DATA opcode. */
-		zstr nsname, fname, lcname;
-		unsigned int nsname_len, len, lcname_len;
-
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_OP_DATA;
-		opline->op1.op_type = IS_CONST;
-		SET_UNUSED(opline->op2);
-
-		nsname = Z_UNIVAL(class_node.u.constant);
-		nsname_len = Z_UNILEN(class_node.u.constant);
-		len = nsname_len + 1 + Z_UNILEN(method_name->u.constant);
-		if (UG(unicode)) {
-			fname.u = eumalloc(len + 1);
-			memcpy(fname.u, nsname.u, UBYTES(nsname_len));
-            fname.u[nsname_len] = '\\';
-			memcpy(fname.u + nsname_len + 1,
-				Z_USTRVAL(method_name->u.constant),
-				UBYTES(Z_USTRLEN(method_name->u.constant)+1));
-			lcname = zend_u_str_case_fold(IS_UNICODE, fname, len, 1, &lcname_len);
-			opline->extended_value = zend_u_hash_func(IS_UNICODE, lcname, lcname_len + 1);
-			ZVAL_UNICODEL(&opline->op1.u.constant, lcname.u, lcname_len, 0);
-		} else {
-			fname.s = emalloc(len + 1);
-			memcpy(fname.s, nsname.s, nsname_len);
-            fname.s[nsname_len] = '\\';
-			memcpy(fname.s + nsname_len + 1,
-				Z_STRVAL(method_name->u.constant),
-				Z_STRLEN(method_name->u.constant)+1);
-			lcname = zend_u_str_case_fold(IS_STRING, fname, len, 1, &lcname_len);
-			opline->extended_value = zend_u_hash_func(IS_STRING, lcname, lcname_len + 1);
-			ZVAL_STRINGL(&opline->op1.u.constant, lcname.s, lcname_len, 0);
-		}
-		efree(fname.v);
-	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
