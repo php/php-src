@@ -1990,25 +1990,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	zend_op *opline;
 	ulong fetch_type = 0;
 
-#if 0
-	if (class_name->op_type == IS_CONST &&
-	    Z_TYPE(class_name->u.constant) == IS_STRING &&
-	    Z_STRLEN(class_name->u.constant) == 0) {
-		/* namespace\func() not in namespace */
-		zval_dtor(&class_name->u.constant);
-		if (CG(current_namespace)) {
-			znode tmp;
-
-			tmp.op_type = IS_CONST;
-			tmp.u.constant = *CG(current_namespace);
-			zval_copy_ctor(&tmp.u.constant);
-			zend_do_build_namespace_name(&tmp, &tmp, method_name TSRMLS_CC);
-			*method_name = tmp;
-		}
-		return zend_do_begin_function_call(method_name, 0 TSRMLS_CC);
-	}
-#endif
-
 	if (method_name->op_type == IS_CONST) {
 		char *lcname = zend_str_tolower_dup(Z_STRVAL(method_name->u.constant), Z_STRLEN(method_name->u.constant));
 		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(method_name->u.constant) &&
@@ -2020,7 +2001,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	}
 
 	if (class_name->op_type == IS_CONST &&
-		method_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
 		fetch_type = ZEND_FETCH_CLASS_GLOBAL;
 		zend_resolve_class_name(class_name, &fetch_type, 1 TSRMLS_CC);
@@ -2032,32 +2012,6 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 	opline->op1 = class_node;
 	opline->op2 = *method_name;
-
-	if (class_node.op_type == IS_CONST &&
-		method_name->op_type == IS_CONST) {
-		/* Prebuild ns\func name to speedup run-time check.
-		   The additional names are stored in additional OP_DATA opcode. */
-		char *nsname, *fname;
-		unsigned int nsname_len, len;
-
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		opline->opcode = ZEND_OP_DATA;
-		opline->op1.op_type = IS_CONST;
-		SET_UNUSED(opline->op2);
-
-		nsname = Z_STRVAL(class_node.u.constant);
-		nsname_len = Z_STRLEN(class_node.u.constant);
-		len = nsname_len + 1 + Z_STRLEN(method_name->u.constant);
-		fname = emalloc(len + 1);
-		memcpy(fname, nsname, nsname_len);
-		fname[nsname_len] = '\\';
-		memcpy(fname + nsname_len + 1,
-			Z_STRVAL(method_name->u.constant),
-			Z_STRLEN(method_name->u.constant)+1);
-		zend_str_tolower(fname, len);
-		opline->extended_value = zend_hash_func(fname, len + 1);
-		ZVAL_STRINGL(&opline->op1.u.constant, fname, len, 0);
- 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C);
