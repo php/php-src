@@ -2016,17 +2016,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
-	if (OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
-		/* try a function in namespace */
-		zend_op *op_data = opline+1;
-
-		ZEND_VM_INC_OPCODE();
-
-		if (zend_u_hash_quick_find(EG(function_table), Z_TYPE(op_data->op1.u.constant), Z_UNIVAL(op_data->op1.u.constant), Z_UNILEN(op_data->op1.u.constant)+1, op_data->extended_value, (void **) &EX(fbc))==SUCCESS) {
-			EX(object) = NULL;
-			ZEND_VM_NEXT_OPCODE();
-		}
-
+	if (OP1_TYPE == IS_CONST) {
 		/* no function found. try a static method in class */
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
