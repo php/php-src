@@ -19,12 +19,15 @@ PHP                                                                        NEWS
 - Fixed bug #47329 (Crash in garbage collector). (Dmitry)
 - Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
 - Fixed bug #47265 (generating phar.phar fails because of safe_mode). (Greg)
+- Fixed bug #47243 (OCI8: Crash at shutdown on Windows) (Chris Jones/Oracle Corp.)
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
 - Fixed bug #47085 (rename() returns true even if the file in PHAR does not
   exist). (Greg)
 - Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
+- Fixed bug #46994 (OCI8: CLOB size does not update when using CLOB IN OUT param in stored procedure) (Chris Jones/Oracle Corp.)
 - Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers).
   (David C.)
+- Fixed bug #46623 (OCI8: phpinfo doesn't show compile time ORACLE_HOME with phpize) (Chris Jones/Oracle Corp.)
 - Fixed bug #46542 (Extending PDO class with a __call() function doesn't work
   as expected). (Johannes)
 - Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
@@ -33,6 +36,8 @@ PHP                                                                        NEWS
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
+- Fixed PECL Bug #15988 (OCI8: sqlnet.ora isn't read with older Oracle libraries) (Chris Jones/Oracle Corp.)
+- Fixed PECL Bug #16035 (OCI8: oci_connect without ORACLE_HOME defined causes segfault) (Chris Jones/Oracle Corp.)
 
 29 Jan 2009, PHP 5.3.0 Beta 1
 - Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
