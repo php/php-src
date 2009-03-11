@@ -1,3 +1,13 @@
+2009-03-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Clenaup deprecated namespace code
+
 2009-03-08  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_3)
