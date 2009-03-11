@@ -172,73 +172,86 @@ ZEND_API zval** zend_get_compiled_variable_value(const zend_execute_data *execut
 	return execute_data_ptr->CVs[var];
 }
 
-static inline zval *_get_zval_ptr_tmp(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static zend_always_inline zval *_get_zval_ptr_tmp(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
 	return should_free->var = &T(node->u.var).tmp_var;
 }
 
-static inline zval *_get_zval_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval *_get_zval_ptr_var_string_offset(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+{
+	temp_variable *T = &T(node->u.var);
+	zval *str = T->str_offset.str;
+	zval *ptr;
+
+	/* string offset */
+	ALLOC_ZVAL(ptr);
+	T->str_offset.ptr = ptr;
+	should_free->var = ptr;
+
+	if (T->str_offset.str->type != IS_STRING
+		|| ((int)T->str_offset.offset < 0)
+		|| (T->str_offset.str->value.str.len <= (int)T->str_offset.offset)) {
+		ptr->value.str.val = STR_EMPTY_ALLOC();
+		ptr->value.str.len = 0;
+	} else {
+		ptr->value.str.val = estrndup(str->value.str.val + T->str_offset.offset, 1);
+		ptr->value.str.len = 1;
+	}
+	PZVAL_UNLOCK_FREE(str);
+	Z_SET_REFCOUNT_P(ptr, 1);
+	Z_SET_ISREF_P(ptr);
+	ptr->type = IS_STRING;
+	return ptr;
+}
+
+static zend_always_inline zval *_get_zval_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
 	zval *ptr = T(node->u.var).var.ptr;
-	if (ptr) {
+	if (EXPECTED(ptr != NULL)) {
 		PZVAL_UNLOCK(ptr, should_free);
 		return ptr;
 	} else {
-		temp_variable *T = &T(node->u.var);
-		zval *str = T->str_offset.str;
-
-		/* string offset */
-		ALLOC_ZVAL(ptr);
-		T->str_offset.ptr = ptr;
-		should_free->var = ptr;
-
-		if (T->str_offset.str->type != IS_STRING
-			|| ((int)T->str_offset.offset < 0)
-			|| (T->str_offset.str->value.str.len <= (int)T->str_offset.offset)) {
-			ptr->value.str.val = STR_EMPTY_ALLOC();
-			ptr->value.str.len = 0;
-		} else {
-			ptr->value.str.val = estrndup(str->value.str.val + T->str_offset.offset, 1);
-			ptr->value.str.len = 1;
-		}
-		PZVAL_UNLOCK_FREE(str);
-		Z_SET_REFCOUNT_P(ptr, 1);
-		Z_SET_ISREF_P(ptr);
-		ptr->type = IS_STRING;
-		return ptr;
+		return _get_zval_ptr_var_string_offset(node, Ts, should_free TSRMLS_CC);
 	}
 }
 
-static inline zval *_get_zval_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC)
+static inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC)
+{
+	zend_compiled_variable *cv = &CV_DEF_OF(var);
+
+	if (!EG(active_symbol_table) ||
+	    zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_UNSET:
+				zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+				/* break missing intentionally */
+			case BP_VAR_IS:
+				return &EG(uninitialized_zval_ptr);
+				break;
+			case BP_VAR_RW:
+				zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+				/* break missing intentionally */
+			case BP_VAR_W:
+				Z_ADDREF(EG(uninitialized_zval));
+				if (!EG(active_symbol_table)) {
+					*ptr = (zval**)EG(current_execute_data)->CVs + (EG(active_op_array)->last_var + var);
+					**ptr = &EG(uninitialized_zval);
+				} else {
+					zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
+				}
+				break;
+		}
+	}
+	return *ptr;
+}
+
+static zend_always_inline zval *_get_zval_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
 
-	if (!*ptr) {
-		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
-		if (!EG(active_symbol_table) ||
-		    zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
-			switch (type) {
-				case BP_VAR_R:
-				case BP_VAR_UNSET:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-					/* break missing intentionally */
-				case BP_VAR_IS:
-					return &EG(uninitialized_zval);
-					break;
-				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-					/* break missing intentionally */
-				case BP_VAR_W:
-					Z_ADDREF(EG(uninitialized_zval));
-					if (!EG(active_symbol_table)) {
-						*ptr = (zval**)EG(current_execute_data)->CVs + (EG(active_op_array)->last_var + node->u.var);
-						**ptr = &EG(uninitialized_zval);
-					} else {
-						zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
-					}
-					break;
-			}
-		}
+	if (UNEXPECTED(*ptr == NULL)) {
+		return *_get_zval_cv_lookup(ptr, node->u.var, type TSRMLS_CC);
 	}
 	return **ptr;
 }
@@ -275,7 +288,7 @@ static inline zval **_get_zval_ptr_ptr_var(const znode *node, const temp_variabl
 {
 	zval** ptr_ptr = T(node->u.var).var.ptr_ptr;
 
-	if (ptr_ptr) {
+	if (EXPECTED(ptr_ptr != NULL)) {
 		PZVAL_UNLOCK(*ptr_ptr, should_free);
 	} else {
 		/* string offset */
@@ -284,37 +297,12 @@ static inline zval **_get_zval_ptr_ptr_var(const znode *node, const temp_variabl
 	return ptr_ptr;
 }
 
-static inline zval **_get_zval_ptr_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC)
+static zend_always_inline zval **_get_zval_ptr_ptr_cv(const znode *node, const temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
 
-	if (!*ptr) {
-		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
-
-		if (!EG(active_symbol_table) ||
-		    zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
-			switch (type) {
-				case BP_VAR_R:
-				case BP_VAR_UNSET:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-					/* break missing intentionally */
-				case BP_VAR_IS:
-					return &EG(uninitialized_zval_ptr);
-					break;
-				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-					/* break missing intentionally */
-				case BP_VAR_W:
-					Z_ADDREF(EG(uninitialized_zval));
-					if (!EG(active_symbol_table)) {
-						*ptr = (zval**)EG(current_execute_data)->CVs + (EG(active_op_array)->last_var + node->u.var);
-						**ptr = &EG(uninitialized_zval);
-					} else {
-						zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &EG(uninitialized_zval_ptr), sizeof(zval *), (void **)ptr);
-					}
-					break;
-			}
-		}
+	if (UNEXPECTED(*ptr == NULL)) {
+		return _get_zval_cv_lookup(ptr, node->u.var, type TSRMLS_CC);
 	}
 	return *ptr;
 }
