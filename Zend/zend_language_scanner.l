@@ -48,7 +48,7 @@
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
-#define YYFILL(n) { if (YYCURSOR >= YYLIMIT) return 0; }
+#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT + ZEND_MMAP_AHEAD)) { zend_error(E_COMPILE_ERROR, "Exceeded YYLIMIT bounds during scanning.  Please report this."); return 0; } }
 #define YYCURSOR  SCNG(yy_cursor)
 #define YYLIMIT   SCNG(yy_limit)
 #define YYMARKER  SCNG(yy_marker)
@@ -833,16 +833,6 @@ restart:
 
 yymore_restart:
 
-	/* detect EOF */
-	if (YYCURSOR >= YYLIMIT) {
-		/* special case */
-		if (YYSTATE == STATE(ST_COMMENT) || YYSTATE == STATE(ST_DOC_COMMENT)) {
-			zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
-		}
-
-		return 0;
-	}
-
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM	[0-9]+
@@ -853,17 +843,18 @@ LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
-ANY_CHAR [^]
+ANY_CHAR [^\x00]
 NEWLINE ("\r"|"\n"|"\r\n")
+NULL [\x00]{1}
 
 /*
  * LITERAL_DOLLAR matches unescaped $ that aren't followed by a label character
  * or a { and therefore will be taken literally. The case of literal $ before
  * a variable or "${" is handled in a rule for each string type
  */
-DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
-BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
-HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
+DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{\x00]|("\\"{ANY_CHAR})))
+BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{\x00]|("\\"{ANY_CHAR})))
+HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{\x00]|("\\"[^\n\r\x00])))
 
 /*
  * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
@@ -880,7 +871,7 @@ HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEW
  * This pattern is just used in the next 2 for matching { or literal $, and/or
  * \ escape sequence immediately at the beginning of a line or after a label
  */
-HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
+HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{\x00])|("{"*"\\"[^\n\r\x00])|{HEREDOC_LITERAL_DOLLAR})
 
 /*
  * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
@@ -889,12 +880,12 @@ HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_
  * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
  * or "{$", is handled in the heredoc rules
  *
- * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
- * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
+ * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{\x00]) handles cases where ;
+ * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{\x00] is needed to prevent a label
  * character or ; from matching on a possible (real) ending label
  */
-HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
-HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
+HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{\x00]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
+HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{\x00]|(";"[^$\n\r\\{\x00])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
 
 /*
  * CHARS matches everything up to a variable or "{$"
@@ -904,11 +895,11 @@ HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{
  * For heredocs, matching continues across/after newlines if/when it's known
  * that the next line doesn't contain a possible ending label
  */
-DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
-BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
-HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
+DOUBLE_QUOTES_CHARS ("{"*([^$"\\{\x00]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
+BACKQUOTE_CHARS     ("{"*([^$`\\{\x00]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
+HEREDOC_CHARS       ("{"*([^$\n\r\\{\x00]|("\\"[^\n\r\x00]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
-NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-Z0-9_\x7f-\xff;\n\r]|(";"[^\n\r])))))
+NOWDOC_CHARS        ([^\n\r\x00]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r\x00]|({LABEL}([^a-zA-Z0-9_\x7f-\xff;\n\r\x00]|(";"[^\n\r\x00])))))
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -1725,7 +1716,7 @@ inline_char_handler:
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]*{ANY_CHAR} {
+<ST_ONE_LINE_COMMENT>[^\n\r?%>\x00]*{ANY_CHAR} {
 	switch (yytext[yyleng-1]) {
 		case '?': case '%': case '>':
 			yyless(yyleng-1);
@@ -1771,13 +1762,18 @@ inline_char_handler:
 	yymore();
 }
 
+<ST_COMMENT,ST_DOC_COMMENT>{NULL} {
+	zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+	return 0;
+}
+
 <ST_IN_SCRIPTING>"/*" {
 	BEGIN(ST_COMMENT);
 	yymore();
 }
 
 
-<ST_COMMENT,ST_DOC_COMMENT>[^*]+ {
+<ST_COMMENT,ST_DOC_COMMENT>[^*\x00]+ {
 	yymore();
 }
 
@@ -1832,7 +1828,7 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']) {
+<ST_IN_SCRIPTING>(b?[']([^'\\\x00]|("\\"{ANY_CHAR}))*[']) {
 	register char *s, *t;
 	char *end;
 	int bprefix = (yytext[0] != '\'') ? 1 : 0;
@@ -2105,6 +2101,7 @@ inline_char_handler:
 	return '`';
 }
 
+<*>{NULL} { return 0; } /* EOF */
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);

@@ -50,7 +50,7 @@ bool(false)
 </span>
 </code>bool(true)
 <code><span style="color: #000000">
-<span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #FF9900">"test&nbsp;?&gt;</span>
+<span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #DD0000">"test&nbsp;?&gt;</span>
 </span>
 </code>bool(true)
 <code><span style="color: #000000">
