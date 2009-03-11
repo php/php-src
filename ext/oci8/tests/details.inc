@@ -34,8 +34,7 @@ if (false !== getenv('PHP_OCI8_TEST_DB')) {
 	$user						= "system";
 	$password					= "oracle";
 	$dbase						= "localhost/XE";
-	$dbase						= "ca-tools1.us.oracle.com/XE";
-	$oracle_on_localhost		= FALSE;
+	$oracle_on_localhost		= TRUE;
 	$test_drcp					= FALSE;
 }
 
