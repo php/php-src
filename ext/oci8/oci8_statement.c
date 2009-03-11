@@ -1159,9 +1159,24 @@ sb4 php_oci_bind_out_callback(
 		}
 		retval = OCI_CONTINUE;
 	} else if (Z_TYPE_P(val) == IS_OBJECT) {
+		zval **tmp;
+		php_oci_descriptor *desc;
+
 		if (!phpbind->descriptor) {
 			return OCI_ERROR;
 		}
+
+		/* Do not use the cached lob size if the descriptor is an
+		 * out-bind as the contents would have been changed for in/out
+		 * binds (Bug #46994).
+		 */
+		if (zend_hash_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find object outbind descriptor property");
+			return OCI_ERROR;
+		}
+		PHP_OCI_ZVAL_TO_DESCRIPTOR_EX(*tmp, desc);
+		desc->lob_size = -1;	/* force OCI8 to update cached size */
+
 		*alenpp = &phpbind->dummy_len;
 		*bufpp = phpbind->descriptor;
 		*piecep = OCI_ONE_PIECE;
