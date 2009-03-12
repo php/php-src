@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.10
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
+- Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
+  literal). (Ilia)
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
 - Fixed bug #47546 (Default value for limit parameter in explode is 0, not -1).
   (Kalle)
