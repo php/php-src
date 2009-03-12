@@ -1,3 +1,25 @@
+2009-03-11  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.h:
+      MFH: Add proper EOF handling for language scanner.  Fixes bug #46817.
+
+    * zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_stream.h:
+      Add proper EOF handling for language scanner.  Fixes bug #46817.  Removes
+      dos newlines from a previous commit.
+
+2009-03-11  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c:
+      Fixed speed degradation on gcc-4.3 because of less agressive inlining
+
 2009-03-10  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
