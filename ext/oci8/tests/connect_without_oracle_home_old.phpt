@@ -3,8 +3,6 @@ ocilogon() without ORACLE_HOME set (OCIServerAttach() segfaults)
 --SKIPIF--
 <?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-/* Disabled: Fix for PECL Bug #16035 stops a crash if ORACLE_HOME is not set when PHP starts. Using putenv('ORACLE_HOME=""') at runtime will still segfault */
-die("skip can't be tested with run-tests.php");
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
@@ -13,6 +11,8 @@ if ($ov !== 1) {
 	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
 ?>
+--ENV--
+ORACLE_HOME=""
 --FILE--
 <?php
 
