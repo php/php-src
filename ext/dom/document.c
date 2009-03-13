@@ -283,12 +283,14 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
+	ALLOC_ZVAL(*retval);
+
 	dtdptr = xmlGetIntSubset(docp);
 	if (!dtdptr) {
-		return FAILURE;
+		ZVAL_NULL(*retval);
+		return SUCCESS;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) dtdptr, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
@@ -298,8 +300,6 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ implementation	DOMImplementation	
 readonly=yes 
@@ -314,8 +314,6 @@ int dom_document_implementation_read(dom_object *obj, zval **retval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ documentElement	DOMElement	
 readonly=yes 
@@ -335,12 +333,14 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
+	ALLOC_ZVAL(*retval);
+
 	root = xmlDocGetRootElement(docp);
 	if (!root) {
-		return FAILURE;
+		ZVAL_NULL(*retval);
+		return SUCCESS;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object(root, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
@@ -421,8 +421,6 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ standalone	boolean	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-standalone
@@ -486,8 +484,6 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 }
 
 /* }}} */
-
-
 
 /* {{{ version	string	
 readonly=no
