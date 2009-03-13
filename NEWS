@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.10
+- Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
+  and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
+
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
 - Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
