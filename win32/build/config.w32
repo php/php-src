@@ -312,6 +312,10 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c fopen_wrappers.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c");
 
+if (VCVERS >= 14) {
+	AC_DEFINE('HAVE_STRNLEN', 1);
+}
+
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c");
 
