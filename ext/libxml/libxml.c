@@ -592,6 +592,7 @@ static PHP_MINIT_FUNCTION(libxml)
 
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION",	LIBXML_DOTTED_VERSION,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("LIBXML_LOADED_VERSION",	(char *)xmlParserVersion,		CONST_CS | CONST_PERSISTENT);
 
 	/* For use with loading xml */
 	REGISTER_LONG_CONSTANT("LIBXML_NOENT",		XML_PARSE_NOENT,		CONST_CS | CONST_PERSISTENT);
@@ -671,7 +672,8 @@ static PHP_MINFO_FUNCTION(libxml)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "libXML support", "active");
-	php_info_print_table_row(2, "libXML Version", LIBXML_DOTTED_VERSION);
+	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
+	php_info_print_table_row(2, "libXML Loaded Version", (char *)xmlParserVersion);
 	php_info_print_table_row(2, "libXML streams", "enabled");
 	php_info_print_table_end();
 }
