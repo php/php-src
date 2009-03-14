@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   addresses in the filter extension). (Ilia)
 - Fixed bug #47430 (Errors after writing to nodeValue parameter of an absent 
   previousSibling). (Rob)
+- Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
+  Takeshi Abe)
 
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
