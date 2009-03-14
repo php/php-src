@@ -34,6 +34,7 @@ PHP                                                                        NEWS
 - Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator).
   (David C.)
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
+- Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle, Takeshi Abe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
 - Fixed PECL Bug #16035 (OCI8: oci_connect without ORACLE_HOME defined causes segfault) (Chris Jones/Oracle Corp.)
