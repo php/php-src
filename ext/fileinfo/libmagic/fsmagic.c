@@ -30,13 +30,17 @@
  */
 
 #include "file.h"
+
+#ifndef	lint
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.59 2009/02/03 20:27:51 christos Exp $")
+#endif	/* lint */
+
 #include "magic.h"
 #include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdlib.h>
-#include <sys/stat.h>
 /* Since major is a function on SVR4, we cannot use `ifndef major'.  */
 #ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>
@@ -56,10 +60,6 @@
 #endif
 #undef HAVE_MAJOR
 
-#ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.50 2008/02/12 17:22:54 rrt Exp $")
-#endif	/* lint */
-
 #ifdef PHP_WIN32
 
 # undef S_IFIFO
@@ -74,14 +74,32 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.50 2008/02/12 17:22:54 rrt Exp $")
 #define S_ISREG(mode) ((mode) & _S_IFREG)
 #endif
 
+private int
+handle_mime(struct magic_set *ms, int mime, const char *str)
+{
+	if ((mime & MAGIC_MIME_TYPE)) {
+		if (file_printf(ms, "application/%s", str) == -1)
+			return -1;
+		if ((mime & MAGIC_MIME_ENCODING) && file_printf(ms,
+		    "; charset=") == -1)
+			return -1;
+	}
+	if ((mime & MAGIC_MIME_ENCODING) && file_printf(ms, "binary") == -1)
+		return -1;
+	return 0;
+}
+
 protected int
 file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream)
 {
 	int mime = ms->flags & MAGIC_MIME;
 	TSRMLS_FETCH();
 
+	if (ms->flags & MAGIC_APPLE)
+		return 0;
+
 	if (!fn && !stream) {
-		return -1;
+		return 0;
 	}
 
 	if (stream) {
@@ -89,6 +107,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 		if (php_stream_stat(stream, &ssb) < 0) {
 			if (ms->flags & MAGIC_ERROR) {
 				file_error(ms, errno, "cannot stat `%s'", fn);
+				return -1;
 			}
 			return 1;
 		}
@@ -97,27 +116,13 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 		if (php_sys_stat(fn, sb) != 0) {
 			if (ms->flags & MAGIC_ERROR) {
 				file_error(ms, errno, "cannot stat `%s'", fn);
+				return -1;
 			}
 			return 1;
 		}
 	}
 
-	if (mime) {
-			if (!S_ISREG(sb->st_mode)) {
-				if ((mime & MAGIC_MIME_TYPE) &&
-						file_printf(ms, "application/x-not-regular-file") == -1) {
-					return -1;
-				}
-				return 1;
-			}
-
-			if (S_ISDIR(sb->st_mode)) {
-				if (file_printf(ms, "directory") == -1) {
-					return -1;
-				}
-				return 1;
-			}
-	} else {
+	if (!mime) {
 #ifdef S_ISUID
 		if (sb->st_mode & S_ISUID) 
 			if (file_printf(ms, "setuid ") == -1)
@@ -147,41 +152,50 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 			if ((ms->flags & MAGIC_DEVICES) != 0) {
 				break;
 			}
+			if (mime) {
+				if (handle_mime(ms, mime, "x-character-device") == -1)
+					return -1;
+			} else {
 #  ifdef HAVE_STAT_ST_RDEV
 #   ifdef dv_unit
-			if (file_printf(ms, "character special (%d/%d/%d)",
-					major(sb->st_rdev), dv_unit(sb->st_rdev),
-					dv_subunit(sb->st_rdev)) == -1) {
-				return -1;
-			}
+				if (file_printf(ms, "character special (%d/%d/%d)",
+				    major(sb->st_rdev), dv_unit(sb->st_rdev),
+						dv_subunit(sb->st_rdev)) == -1)
+					return -1;
 #   else
-			if (file_printf(ms, "character special (%ld/%ld)",
-					(long) major(sb->st_rdev), (long) minor(sb->st_rdev)) == -1) {
-				return -1;
-			}
+				if (file_printf(ms, "character special (%ld/%ld)",
+				    (long)major(sb->st_rdev), (long)minor(sb->st_rdev))
+				    == -1)
+					return -1;
 #   endif
 #  else
-			if (file_printf(ms, "character special") == -1) {
-				return -1;
-			}
+				if (file_printf(ms, "character special") == -1)
+					return -1;
 #  endif
+			}
 			return 1;
 # endif
 #endif
 
 #ifdef	S_IFIFO
-	case S_IFIFO:
-		if((ms->flags & MAGIC_DEVICES) != 0)
-			break;
-		if (file_printf(ms, "fifo (named pipe)") == -1)
-			return -1;
-		return 1;
+			case S_IFIFO:
+				if((ms->flags & MAGIC_DEVICES) != 0)
+					break;
+				if (mime) {
+					if (handle_mime(ms, mime, "x-fifo") == -1)
+						return -1;
+				} else if (file_printf(ms, "fifo (named pipe)") == -1)
+					return -1;
+				return 1;
 #endif
 #ifdef	S_IFDOOR
-	case S_IFDOOR:
-		if (file_printf(ms, "door") == -1)
-			return -1;
-		return 1;
+				case S_IFDOOR:
+					if (mime) {
+						if (handle_mime(ms, mime, "x-door") == -1)
+							return -1;
+					} else if (file_printf(ms, "door") == -1)
+						return -1;
+					return 1;
 #endif
 
 #ifdef	S_IFLNK
@@ -197,7 +211,10 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 #ifdef	S_IFSOCK
 #ifndef __COHERENT__
 	case S_IFSOCK:
-		if (file_printf(ms, "socket") == -1)
+		if (mime) {
+			if (handle_mime(ms, mime, "x-socket") == -1)
+				return -1;
+		} else if (file_printf(ms, "socket") == -1)
 			return -1;
 		return 1;
 #endif
@@ -225,9 +242,10 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 	 * when we read the file.)
 	 */
 	if ((ms->flags & MAGIC_DEVICES) == 0 && sb->st_size == 0) {
-		if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
-		    file_printf(ms, mime ? "application/x-empty" :
-		    "empty") == -1)
+		if (mime) {
+			if (handle_mime(ms, mime, "x-empty") == -1)
+				return -1;
+		} else if (file_printf(ms, "empty") == -1)
 			return -1;
 		return 1;
 	}
