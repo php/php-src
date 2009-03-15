@@ -53,6 +53,11 @@
 #include "ext/pcre/php_pcre.h"
 
 #include <sys/types.h>
+#ifdef PHP_WIN32
+#include "win32/param.h"
+#else
+#include <sys/param.h>
+#endif
 /* Do this here and now, because struct stat gets re-defined on solaris */
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -102,8 +107,8 @@
 #define MAXstring 32		/* max leng of "string" types */
 
 #define MAGICNO		0xF11E041C
-#define VERSIONNO	6
-#define FILE_MAGICSIZE	(32 * 6)
+#define VERSIONNO	7
+#define FILE_MAGICSIZE	200
 
 #define	FILE_LOAD	0
 #define FILE_CHECK	1
@@ -182,7 +187,10 @@ struct magic {
 #define				FILE_DOUBLE	36
 #define				FILE_BEDOUBLE	37
 #define				FILE_LEDOUBLE	38
-#define				FILE_NAMES_SIZE	39/* size of array to contain all names */
+#define				FILE_BEID3	39
+#define				FILE_LEID3	40
+#define				FILE_INDIRECT	41
+#define				FILE_NAMES_SIZE	42/* size of array to contain all names */
 
 #define IS_LIBMAGIC_STRING(t) \
 	((t) == FILE_STRING || \
@@ -257,10 +265,12 @@ struct magic {
 #define str_flags _u._s._flags
 	/* Words 9-16 */
 	union VALUETYPE value; /* either number of string */
-	/* Words 17..31 */
+	/* Words 17-24 */
 	char desc[MAXDESC];	/* description */
-	/* Words 32..47 */
+	/* Words 25-32 */
 	char mimetype[MAXDESC]; /* MIME type */
+	/* Words 33-34 */
+	char apple[8];
 };
 
 #define BIT(A)   (1 << (A))
@@ -288,6 +298,12 @@ struct mlist {
 	struct mlist *next, *prev;
 };
 
+#ifdef __cplusplus
+#define CAST(T, b)	static_cast<T>(b)
+#else
+#define CAST(T, b)	(b)
+#endif
+
 struct level_info {
 	int32_t off;
 	int got_match;
@@ -295,7 +311,7 @@ struct level_info {
 	int last_match;
 	int last_cond;	/* used for error checking by parse() */
 #endif
-} *li;
+};
 
 struct magic_set {
 	struct mlist *mlist;
@@ -309,8 +325,9 @@ struct magic_set {
 	} o;
 	uint32_t offset;
 	int error;
-	int flags;
-	int haderr;
+	int flags;			/* Control magic tests. */
+	int event_flags;		/* Note things that happened. */
+#define 		EVENT_HAD_ERR		0x01
 	const char *file;
 	size_t line;			/* current magic line number */
 
@@ -340,13 +357,21 @@ protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
 protected int file_tryelf(struct magic_set *, int, const unsigned char *,
     size_t);
+protected int file_trycdf(struct magic_set *, int, const unsigned char *,
+    size_t);
 #ifdef PHP_FILEINFO_UNCOMPRESS 
 protected int file_zmagic(struct magic_set *, int, const char *,
     const unsigned char *, size_t);
 #endif
 protected int file_ascmagic(struct magic_set *, const unsigned char *, size_t);
+protected int file_ascmagic_with_encoding(struct magic_set *,
+    const unsigned char *, size_t, unichar *, size_t, const char *,
+    const char *);
+protected int file_encoding(struct magic_set *, const unsigned char *, size_t,
+    unichar **, size_t *, const char **, const char **, const char **);
 protected int file_is_tar(struct magic_set *, const unsigned char *, size_t);
-protected int file_softmagic(struct magic_set *, const unsigned char *, size_t, int);
+protected int file_softmagic(struct magic_set *, const unsigned char *, size_t,
+    int);
 protected struct mlist *file_apprentice(struct magic_set *, const char *, int);
 protected uint64_t file_signextend(struct magic_set *, struct magic *,
     uint64_t);
@@ -378,6 +403,14 @@ extern char *sys_errlist[];
 #define strtoul(a, b, c)	strtol(a, b, c)
 #endif
 
+#ifndef HAVE_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t siz);
+#endif
+#ifndef HAVE_STRLCAT
+size_t strlcat(char *dst, const char *src, size_t siz);
+#endif
+
+
 #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)
 #define QUICK
 #endif
@@ -388,12 +421,14 @@ extern char *sys_errlist[];
 
 #ifndef __cplusplus
 #ifdef __GNUC__
-static const char *rcsid(const char *) __attribute__((__used__));
-#endif
+#define FILE_RCSID(id) \
+static const char rcsid[] __attribute__((__used__)) = id;
+#else
 #define FILE_RCSID(id) \
 static const char *rcsid(const char *p) { \
 	return rcsid(p = id); \
 }
+#endif
 #else
 #define FILE_RCSID(id)
 #endif

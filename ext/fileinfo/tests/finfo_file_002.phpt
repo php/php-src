@@ -3,7 +3,7 @@ finfo_file(): Testing mime types
 --FILE--
 <?php
 
-$fp = finfo_open(FILEINFO_MIME);
+$fp = finfo_open(FILEINFO_MIME_TYPE);
 $results = array();
 
 foreach (glob(__DIR__ . "/resources/*") as $filename) {

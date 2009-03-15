@@ -25,6 +25,11 @@
  * SUCH DAMAGE.
  */
 #include "file.h"
+
+#ifndef	lint
+FILE_RCSID("@(#)$File: funcs.c,v 1.39 2008/03/01 22:21:49 rrt Exp $")
+#endif	/* lint */
+
 #include "magic.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -40,10 +45,6 @@
 #ifndef SIZE_MAX 
 # define SIZE_MAX ((size_t) -1) 
 #endif
-
-#ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.39 2008/03/01 22:21:49 rrt Exp $")
-#endif	/* lint */
 
 /*
  * Like printf, only we append to a buffer.
@@ -83,7 +84,7 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
 	char *buf = NULL;
 	
 	/* Only the first error is ok */
-	if (ms->haderr) {
+	if (ms->event_flags & EVENT_HAD_ERR) {
 		return;
 	}
 	
@@ -106,7 +107,7 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
 		efree(buf);
 	}
 
-	ms->haderr++;
+	ms->event_flags |= EVENT_HAD_ERR;
 	ms->error = error;
 }
 
@@ -134,6 +135,12 @@ file_magerror(struct magic_set *ms, const char *f, ...)
 }
 
 protected void
+file_oomem(struct magic_set *ms, size_t len)
+{
+	file_error(ms, errno, "cannot allocate %zu bytes", len);
+}
+
+protected void
 file_badseek(struct magic_set *ms)
 {
 	file_error(ms, errno, "error seeking");
@@ -149,9 +156,16 @@ protected int
 file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const void *buf,
     size_t nb)
 {
-	int m;
+	int m = 0, rv = 0, looks_text = 0;
 	int mime = ms->flags & MAGIC_MIME;
 	const unsigned char *ubuf = buf;
+	unichar *u8buf = NULL;
+	size_t ulen;
+	const char *code = NULL;
+	const char *code_mime = "binary";
+	const char *type = NULL;
+
+
 
 	if (nb == 0) {
 		if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
@@ -165,6 +179,11 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		    "very short file (no magic)") == -1)
 			return -1;
 		return 1;
+	}
+
+	if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
+		looks_text = file_encoding(ms, ubuf, nb, &u8buf, &ulen,
+		    &code, &code_mime, &type);
 	}
 
 #if defined(__EMX__)
@@ -181,40 +200,102 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 #endif
 
 #if PHP_FILEINFO_UNCOMPRESS
-	/* try compression stuff */
-	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) != 0 ||
-	    (m = file_zmagic(ms, stream, inname, ubuf, nb)) == 0) 
+	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0)
+		if ((m = file_zmagic(ms, stream, inname, ubuf, nb)) != 0) {
+			if ((ms->flags & MAGIC_DEBUG) != 0)
+				(void)fprintf(stderr, "zmagic %d\n", m);
+			goto done;
+ 	}
 #endif
-	{
-		/* Check if we have a tar file */
-		if ((ms->flags & MAGIC_NO_CHECK_TAR) != 0 || (m = file_is_tar(ms, ubuf, nb)) == 0) {
-			/* try tests in /etc/magic (or surrogate magic file) */
-			if ((ms->flags & MAGIC_NO_CHECK_SOFT) != 0 || (m = file_softmagic(ms, ubuf, nb, BINTEST)) == 0) {
-				/* try known keywords, check whether it is ASCII */
-				if ((ms->flags & MAGIC_NO_CHECK_ASCII) != 0 || (m = file_ascmagic(ms, ubuf, nb)) == 0) {
-					/* abandon hope, all ye who remain here */
-					if ((!mime || (mime & MAGIC_MIME_TYPE)) && file_printf(ms, mime ? "application/octet-stream" : "data") == -1) {
-						return -1;
-					}
-					m = 1;
-				}
+
+	/* Check if we have a tar file */
+	if ((ms->flags & MAGIC_NO_CHECK_TAR) == 0)
+		if ((m = file_is_tar(ms, ubuf, nb)) != 0) {
+			if ((ms->flags & MAGIC_DEBUG) != 0)
+				(void)fprintf(stderr, "tar %d\n", m);
+			goto done;
+		}
+
+	/* Check if we have a CDF file */
+	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
+		int fd;
+		TSRMLS_FETCH();
+		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
+			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {
+				if ((ms->flags & MAGIC_DEBUG) != 0)
+					(void)fprintf(stderr, "cdf %d\n", m);
+				goto done;
 			}
 		}
 	}
 
+	/* try soft magic tests */
+	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0)
+		if ((m = file_softmagic(ms, ubuf, nb, BINTEST)) != 0) {
+			if ((ms->flags & MAGIC_DEBUG) != 0)
+				(void)fprintf(stderr, "softmagic %d\n", m);
 #ifdef BUILTIN_ELF
-	if ((ms->flags & MAGIC_NO_CHECK_ELF) == 0 && m == 1 && nb > 5 && fd != -1) {
-		/*
-		 * We matched something in the file, so this *might*
-		 * be an ELF file, and the file is at least 5 bytes
-		 * long, so if it's an ELF file it has at least one
-		 * byte past the ELF magic number - try extracting
-		 * information from the ELF headers that cannot easily
-		 * be extracted with rules in the magic file.
-		 */
-		(void)file_tryelf(ms, stream, ubuf, nb);
-	}
+			if ((ms->flags & MAGIC_NO_CHECK_ELF) == 0 && m == 1 &&
+			    nb > 5 && fd != -1) {
+				/*
+				 * We matched something in the file, so this
+				 * *might* be an ELF file, and the file is at
+				 * least 5 bytes long, so if it's an ELF file
+				 * it has at least one byte past the ELF magic
+				 * number - try extracting information from the
+				 * ELF headers that cannot easily * be
+				 * extracted with rules in the magic file.
+				 */
+				if ((m = file_tryelf(ms, fd, ubuf, nb)) != 0)
+					if ((ms->flags & MAGIC_DEBUG) != 0)
+						(void)fprintf(stderr,
+						    "elf %d\n", m);
+			}
 #endif
+			goto done;
+		}
+
+	/* try text properties (and possibly text tokens) */
+	if ((ms->flags & MAGIC_NO_CHECK_TEXT) == 0) {
+
+		if ((m = file_ascmagic(ms, ubuf, nb)) != 0) {
+			if ((ms->flags & MAGIC_DEBUG) != 0)
+				(void)fprintf(stderr, "ascmagic %d\n", m);
+			goto done;
+		}
+
+		/* try to discover text encoding */
+		if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
+			if (looks_text == 0)
+				if ((m = file_ascmagic_with_encoding( ms, ubuf,
+				    nb, u8buf, ulen, code, type)) != 0) {
+					if ((ms->flags & MAGIC_DEBUG) != 0)
+						(void)fprintf(stderr,
+						    "ascmagic/enc %d\n", m);
+					goto done;
+				}
+		}
+	}
+
+	/* give up */
+	m = 1;
+	if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
+	    file_printf(ms, mime ? "application/octet-stream" : "data") == -1) {
+	    rv = -1;
+	}
+ done:
+	if ((ms->flags & MAGIC_MIME_ENCODING) != 0) {
+		if (ms->flags & MAGIC_MIME_TYPE)
+			if (file_printf(ms, "; charset=") == -1)
+				rv = -1;
+		if (file_printf(ms, "%s", code_mime) == -1)
+			rv = -1;
+	}
+	if (u8buf)
+		free(u8buf);
+	if (rv)
+		return rv;
+
 	return m;
 }
 
@@ -229,7 +310,7 @@ file_reset(struct magic_set *ms)
 		efree(ms->o.buf);
 	}
 	ms->o.buf = NULL;
-	ms->haderr = 0;
+	ms->event_flags &= ~EVENT_HAD_ERR;
 	ms->error = -1;
 	return 0;
 }
@@ -248,11 +329,14 @@ file_getbuffer(struct magic_set *ms)
 	char *pbuf, *op, *np;
 	size_t psize, len;
 
-	if (ms->haderr)
+	if (ms->event_flags & EVENT_HAD_ERR)
 		return NULL;
 
 	if (ms->flags & MAGIC_RAW)
 		return ms->o.buf;
+
+	if (ms->o.buf == NULL)
+		return NULL;
 
 	/* * 4 is for octal representation, + 1 is for NUL */
 	len = strlen(ms->o.buf);
