@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.11. (Scott)
 
 - Re-enabled phar for big-endian systems after fixing problems. (Greg)
-- Synced changes from libmagic 5.00 to bundled libmagic. (Scott)
+- Update bundled libmagic to 5.00 in the fileinfo extension. (Scott)
 
 - Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
 
