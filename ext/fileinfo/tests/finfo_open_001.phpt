@@ -1,5 +1,7 @@
 --TEST--
 finfo_open(): Testing magic_file names
+--SKIPIF--
+<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
 
