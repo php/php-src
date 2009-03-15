@@ -59,6 +59,11 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	enum mbfl_no_encoding detected;
 	php_mb_encoding_handler_info_t info;
 
+	{
+		char *value = zend_ini_string("mbstring.internal_encoding", sizeof("mbstring.internal_encoding"), 0);
+		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0 TSRMLS_CC);
+	}
+
 	if (!MBSTRG(encoding_translation)) {
 		php_default_treat_data(arg, str, destArray TSRMLS_CC);
 		return;
