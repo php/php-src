@@ -1,5 +1,7 @@
 --TEST--
 Test finfo_file() function : basic functionality 
+--SKIPIF--
+<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
