@@ -1,11 +1,14 @@
-#define	FILE_VERSION_MAJOR	4
-#define	patchlevel		25
+#define	FILE_VERSION_MAJOR	5
+#define	patchlevel		0
 
 /*
  * Patchlevel file for Ian Darwin's MAGIC command.
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
  *
  * $Log$
+ * Revision 1.2  2008/11/02 16:09:27  scottmac
+ * Update libmagic to 4.26 and add support for v6 of the magic file format.
+ *
  * Revision 1.1  2008/07/11 14:13:50  derick
  * - Move lib to libmagic
  *

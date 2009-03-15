@@ -32,8 +32,11 @@
 #include "php.h"
 
 #include "file.h"
-#include <stdio.h>
-#include <errno.h>
+
+#ifndef lint
+FILE_RCSID("@(#)$File: print.c,v 1.63 2008/02/17 19:28:54 rrt Exp $")
+#endif  /* lint */
+
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -41,10 +44,6 @@
 #include <unistd.h>
 #endif
 #include <time.h>
-
-#ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.63 2008/02/17 19:28:54 rrt Exp $")
-#endif  /* lint */
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
 

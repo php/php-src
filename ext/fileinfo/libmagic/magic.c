@@ -26,9 +26,13 @@
  */
 
 #include "file.h"
+
+#ifndef	lint
+FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
+#endif	/* lint */
+
 #include "magic.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
@@ -36,14 +40,12 @@
 #include <unistd.h>
 #endif
 #include <string.h>
-#include <sys/types.h>
 #ifdef PHP_WIN32
 # include "config.w32.h"
 #else
 # include "php_config.h"
 #endif
 
-#include <sys/stat.h>
 #include <limits.h>	/* for PIPE_BUF */
 
 #if defined(HAVE_UTIMES)
@@ -69,10 +71,6 @@
 #endif
 
 #include "patchlevel.h"
-
-#ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
-#endif	/* lint */
 
 #ifndef PIPE_BUF 
 /* Get the PIPE_BUF from pathconf */
@@ -120,7 +118,7 @@ magic_open(int flags)
 
 	ms->c.li = emalloc((ms->c.len = 10) * sizeof(*ms->c.li));
 	
-	ms->haderr = 0;
+	ms->event_flags = 0;
 	ms->error = -1;
 	ms->mlist = NULL;
 	ms->file = "unknown";
@@ -367,13 +365,13 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 public const char *
 magic_error(struct magic_set *ms)
 {
-	return ms->haderr ? ms->o.buf : NULL;
+	return (ms->event_flags & EVENT_HAD_ERR) ? ms->o.buf : NULL;
 }
 
 public int
 magic_errno(struct magic_set *ms)
 {
-	return ms->haderr ? ms->error : 0;
+	return (ms->event_flags & EVENT_HAD_ERR) ? ms->error : 0;
 }
 
 public int
