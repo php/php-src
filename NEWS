@@ -2,9 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 Beta 2
 - Upgraded bundled sqlite to version 3.6.11. (Scott)
+- Upgraded bundled libmagic to 5.00 in the fileinfo extension. (Scott)
 
 - Re-enabled phar for big-endian systems after fixing problems. (Greg)
-- Update bundled libmagic to 5.00 in the fileinfo extension. (Scott)
 
 - Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
 
