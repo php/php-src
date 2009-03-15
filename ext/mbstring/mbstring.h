@@ -159,6 +159,9 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 
 MBSTRING_API int php_mb_stripos(int mode, char *old_haystack, int old_haystack_len, char *old_needle, int old_needle_len, long offset, char *from_encoding TSRMLS_DC);
 
+/* internal use only */
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC);
+
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	enum mbfl_no_language language;
 	enum mbfl_no_encoding internal_encoding;

@@ -656,7 +656,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC)
+int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_value_length TSRMLS_DC)
 {
 	enum mbfl_no_encoding no_encoding;
 	const char *enc_name = NULL;
@@ -826,7 +826,6 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 	if (MBSTRG(encoding_translation)) {
 		sapi_unregister_post_entry(php_post_entries TSRMLS_CC);
 		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
-		sapi_register_treat_data(mbstr_treat_data);
 	} else {
 		sapi_unregister_post_entry(mbstr_post_entries TSRMLS_CC);
 		sapi_register_post_entries(php_post_entries TSRMLS_CC);
@@ -927,9 +926,12 @@ PHP_MINIT_FUNCTION(mbstring)
 
 	REGISTER_INI_ENTRIES();
 
+	/* This is a global handler. Should not be set in a per-request handler. */
+	sapi_register_treat_data(mbstr_treat_data);
+
+	/* Post handlers are stored in the thread-local context. */
 	if (MBSTRG(encoding_translation)) {
 		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
-		sapi_register_treat_data(mbstr_treat_data);
 	}
 
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
@@ -967,11 +969,6 @@ PHP_RINIT_FUNCTION(mbstring)
 	enum mbfl_no_encoding *list=NULL, *entry;
 	zend_function *func, *orig;
 	const struct mb_overload_def *p;
-
-	{
-		char *value = zend_ini_string("mbstring.internal_encoding", sizeof("mbstring.internal_encoding"), 0);
-		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0 TSRMLS_CC);
-	}
 
 	MBSTRG(current_internal_encoding) = MBSTRG(internal_encoding);
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
