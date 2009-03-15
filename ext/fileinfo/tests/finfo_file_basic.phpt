@@ -22,7 +22,7 @@ var_dump( finfo_file( $finfo, $magicFile ) );
 ===DONE===
 --EXPECTF--
 *** Testing finfo_file() : basic functionality ***
-string(10) "text/x-php"
+string(28) "text/x-php; charset=us-ascii"
 string(15) "PHP script text"
-string(27) "text/plain; charset=unknown"
+string(32) "text/plain; charset=unknown-8bit"
 ===DONE===
