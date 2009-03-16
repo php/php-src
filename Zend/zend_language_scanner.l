@@ -48,7 +48,7 @@
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
-#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT + ZEND_MMAP_AHEAD)) { zend_error(E_COMPILE_ERROR, "Exceeded YYLIMIT bounds during scanning.  Please report this."); return 0; } }
+#define YYFILL(n) { if ((YYCURSOR + n) >= (YYLIMIT + ZEND_MMAP_AHEAD)) { return 0; } }
 #define YYCURSOR  SCNG(yy_cursor)
 #define YYLIMIT   SCNG(yy_limit)
 #define YYMARKER  SCNG(yy_marker)
@@ -1346,9 +1346,9 @@ NULL [\x00]{1}
  * or a { and therefore will be taken literally. The case of literal $ before
  * a variable or "${" is handled in a rule for each string type
  */
-DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{\x00]|("\\"{ANY_CHAR})))
-BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{\x00]|("\\"{ANY_CHAR})))
-HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{\x00]|("\\"[^\n\r\x00])))
+DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
+BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
+HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
 
 /*
  * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
@@ -1365,7 +1365,7 @@ HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEW
  * This pattern is just used in the next 2 for matching { or literal $, and/or
  * \ escape sequence immediately at the beginning of a line or after a label
  */
-HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{\x00])|("{"*"\\"[^\n\r\x00])|{HEREDOC_LITERAL_DOLLAR})
+HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
 
 /*
  * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
@@ -1374,12 +1374,12 @@ HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{\x00])|("{"*"\\"[^\n\r\x00])|{
  * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
  * or "{$", is handled in the heredoc rules
  *
- * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{\x00]) handles cases where ;
- * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{\x00] is needed to prevent a label
+ * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
+ * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
  * character or ; from matching on a possible (real) ending label
  */
-HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{\x00]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
-HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{\x00]|(";"[^$\n\r\\{\x00])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
+HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
+HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
 
 /*
  * CHARS matches everything up to a variable or "{$"
@@ -1389,11 +1389,11 @@ HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{\x00]|(";"[^$\n\
  * For heredocs, matching continues across/after newlines if/when it's known
  * that the next line doesn't contain a possible ending label
  */
-DOUBLE_QUOTES_CHARS ("{"*([^$"\\{\x00]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
-BACKQUOTE_CHARS     ("{"*([^$`\\{\x00]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
-HEREDOC_CHARS       ("{"*([^$\n\r\\{\x00]|("\\"[^\n\r\x00]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
+DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
+BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
+HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
-NOWDOC_CHARS        ([^\n\r\x00]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r\x00]|({LABEL}([^a-zA-Z0-9_\x7f-\xff;\n\r\x00]|(";"[^\n\r\x00])))))
+NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-Z0-9_\x7f-\xff;\n\r]|(";"[^\n\r])))))
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -2254,7 +2254,7 @@ inline_char_handler:
 	yymore();
 }
 
-<ST_ONE_LINE_COMMENT>[^\n\r?%>\x00]*{ANY_CHAR} {
+<ST_ONE_LINE_COMMENT>[^\n\r?%>]*{ANY_CHAR} {
 	switch (yytext[yyleng-1]) {
 		case '?': case '%': case '>':
 			yyless(yyleng-1);
@@ -2311,7 +2311,7 @@ inline_char_handler:
 }
 
 
-<ST_COMMENT,ST_DOC_COMMENT>[^*\x00]+ {
+<ST_COMMENT,ST_DOC_COMMENT>[^*]+ {
 	yymore();
 }
 
