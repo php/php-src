@@ -104,8 +104,8 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 #endif
 	int rdays;
 
-	/* Unit is 100,000's of microseconds */
-	ts->tv_usec = (t % CDF_TIME_PREC) * 100000;
+	/* Time interval, in microseconds */
+	ts->tv_usec = (t % CDF_TIME_PREC) * CDF_TIME_PREC;
 
 	t /= CDF_TIME_PREC;
 	tm.tm_sec = t % 60;
@@ -153,7 +153,7 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timeval *ts)
 		errno = EINVAL;
 		return -1;
 	}
-	*t = (ts->ts_usec / 100000) * CDF_TIME_PREC;
+	*t = (ts->ts_usec / CDF_TIME_PREC) * CDF_TIME_PREC;
 	*t = tm.tm_sec;
 	*t += tm.tm_min * 60;
 	*t += tm.tm_hour * 60 * 60;
