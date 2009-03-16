@@ -51,7 +51,7 @@ Closure [ <user> function {closure} ] {
   }
 }
 
-NULL
+bool(false)
 unicode(9) "{closure}"
 bool(true)
 Closure [ <user> public method func ] {

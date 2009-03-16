@@ -716,7 +716,7 @@ ZEND_FUNCTION(get_class)
 	int dup;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o", &obj) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (!obj) {
