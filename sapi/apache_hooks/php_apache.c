@@ -713,21 +713,23 @@ PHP_FUNCTION(apache_request_server_port)
 PHP_FUNCTION(apache_request_remote_host)
 {
 	zval *id;
-	long type = 0;
+	long ztype;
 	request_rec *r;
 	char *res;
+	int type = REMOTE_NAME;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ztype) == FAILURE) {
 		return;
 	}
 
-	if (!type) {
-		type = REMOTE_NAME
+	if (ZEND_NUM_ARGS() == 1) {
+		type = ztype;
 	}
+
 
 	APREQ_GET_REQUEST(id, r);
 
-	res = (char *)ap_get_remote_host(r->connection, r->per_dir_config, (int)type);
+	res = (char *)ap_get_remote_host(r->connection, r->per_dir_config, type);
 
 	if (res) {
 		RETURN_STRING(res, 1);
