@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
 
+- Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
 - Fixed bug #47593 (interface_exists() returns false when using absolute 
   namespace path). (Kalle, Felipe)
 - Fixed bug #47572 (Undefined constant causes segmentation fault). (Felipe)
