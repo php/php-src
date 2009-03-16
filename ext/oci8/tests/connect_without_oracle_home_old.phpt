@@ -31,6 +31,6 @@ else {
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Warning: ocilogon(): OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory in %s on line %d
+Warning: ocilogon(): OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and %s are set and point to the right directories in %s on line %d
 bool(false)
 ===DONE===
