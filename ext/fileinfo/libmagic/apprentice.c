@@ -51,16 +51,11 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.132 2008/03/28 18:19:30 christos Exp $")
 #include <unistd.h>
 #endif
 
-
-
-
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-#ifndef PHP_WIN32
-#include <dirent.h>
-#endif
+
 
 #define	EATAB {while (isascii((unsigned char) *l) && \
 		      isspace((unsigned char) *l))  ++l;}

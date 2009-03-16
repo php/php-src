@@ -403,10 +403,10 @@ extern char *sys_errlist[];
 #define strtoul(a, b, c)	strtol(a, b, c)
 #endif
 
-#ifndef HAVE_STRLCPY
+#ifndef strlcpy
 size_t strlcpy(char *dst, const char *src, size_t siz);
 #endif
-#ifndef HAVE_STRLCAT
+#ifndef strlcat
 size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
