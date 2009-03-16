@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
+- Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect). (Mikko,Pierre)
 - Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
   literal). (Ilia)
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
