@@ -63,6 +63,16 @@ static PHP_GSHUTDOWN_FUNCTION(oci);
 #define Z_ADDREF_P(x) ZVAL_ADDREF(x)
 #endif
 
+/* For a user friendly message about environment setup */
+/* TODO: add cases for SHLIB_PATH, LIBPATH, LD_LIBRARY_PATH_64 etc */
+#if defined(PHP_WIN32)
+#define PHP_OCI8_LIB_PATH_MSG "PATH"
+#elif defined(__APPLE__)
+#define PHP_OCI8_LIB_PATH_MSG "DYLD_LIBRARY_PATH"
+#else
+#define PHP_OCI8_LIB_PATH_MSG "LD_LIBRARY_PATH"
+#endif
+
 /* True globals, no need for thread safety */
 int le_connection;
 int le_pconnection;
@@ -987,13 +997,9 @@ static void php_oci_init_global_handles(TSRMLS_D)
 
 	if (errstatus == OCI_ERROR) {
 #ifdef HAVE_OCI_INSTANT_CLIENT
-# ifdef PHP_WIN32
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
-# else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
-# endif
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that " PHP_OCI8_LIB_PATH_MSG " includes the directory with Oracle Instant Client libraries");
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
 		OCI_G(env) = NULL;
 		OCI_G(err) = NULL;
@@ -2703,13 +2709,9 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 #ifdef HAVE_OCI_INSTANT_CLIENT
-# ifdef PHP_WIN32
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that PATH includes the directory with Oracle Instant Client libraries");
-# else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that LD_LIBRARY_PATH includes the directory with Oracle Instant Client libraries");
-# endif
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that " PHP_OCI8_LIB_PATH_MSG " includes the directory with Oracle Instant Client libraries");
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME is set and points to the right directory");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and " PHP_OCI8_LIB_PATH_MSG " are set and point to the right directories");
 #endif
 		return NULL;
 	}
