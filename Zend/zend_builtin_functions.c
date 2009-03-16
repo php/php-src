@@ -1617,7 +1617,8 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names[0] = "internal";
 		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
 		while (zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) != FAILURE) {
-			module_names[i++] = module->name;
+			module_names[module->module_number] = module->name;
+			i++;
 			zend_hash_move_forward_ex(&module_registry, &pos);
 		}
 		module_names[i] = "user";
