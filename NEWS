@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect). (Mikko,Pierre)
 - Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
   literal). (Ilia)
+- Fixed bug #47616 (curl keeps crashing). (Felipe)
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
 - Fixed bug #47546 (Default value for limit parameter in explode is 0, not -1).
   (Kalle)
