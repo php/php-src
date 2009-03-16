@@ -722,7 +722,7 @@ PHP_FUNCTION(apache_request_remote_host)
 	}
 
 	if (!type) {
-		type = REMOTE_NAME
+		type = REMOTE_NAME;
 	}
 
 	APREQ_GET_REQUEST(id, r);
