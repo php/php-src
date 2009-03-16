@@ -42,7 +42,11 @@ typedef int32_t cdf_secid_t;
 
 typedef struct {
 	uint64_t	h_magic;
-#define CDF_MAGIC	0xE11AB1A1E011CFD0LL
+#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
+# define CDF_MAGIC	0xE11AB1A1E011CFD0i64
+#else
+# define CDF_MAGIC	0xE11AB1A1E011CFD0LL
+#endif
 	uint64_t	h_uuid[2];
 	uint16_t	h_revision;
 	uint16_t	h_version;
