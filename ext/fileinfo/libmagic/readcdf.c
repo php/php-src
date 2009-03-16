@@ -96,7 +96,11 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 		case CDF_FILETIME:
 			tp = info[i].pi_tp;
 			if (tp != 0) {
+#if defined(PHP_WIN32 ) && _MSC_VER <= 1500
+				if (tp < 1000000000000000i64) {
+#else
 				if (tp < 1000000000000000LL) {
+#endif
 					char tbuf[64];
 					cdf_print_elapsed_time(tbuf,
 					    sizeof(tbuf), tp);
