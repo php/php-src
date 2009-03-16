@@ -395,7 +395,7 @@ cdf_read_long_sector_chain(int fd, const cdf_header_t *h, const cdf_sat_t *sat,
 	return 0;
 out:
 	free(scn->sst_tab);
-	return (size_t)-1;
+	return -1;
 }
 
 int
@@ -430,7 +430,7 @@ cdf_read_short_sector_chain(const cdf_header_t *h,
 	return 0;
 out:
 	free(scn->sst_tab);
-	return (size_t)-1;
+	return -1;
 }
 
 int
