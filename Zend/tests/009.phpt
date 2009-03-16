@@ -42,7 +42,7 @@ Warning: get_class() called without object from outside a class in %s on line %d
 bool(false)
 
 Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-NULL
+bool(false)
 string(3) "foo"
 string(4) "foo2"
 Done

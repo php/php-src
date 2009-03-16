@@ -76,137 +76,137 @@ echo "Done";
 --EXPECTF--
 *** Testing get_class() : usage variations ***
 
-Notice: Undefined variable: undefined_var in %s on line 58
+Notice: Undefined variable: undefined_var in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 58
 
-Notice: Undefined variable: unset_var in %s on line 61
+Notice: Undefined variable: unset_var in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 61
 
 Arg value: 0 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, integer given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 1 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, integer given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 12345 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, integer given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: -2345 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, integer given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 10.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, double given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: -10.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, double given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 101234567000 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, double given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 1.07654321E-9 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, double given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 0.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, double given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: Array (type: array)
 
-Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, array given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: Array (type: array)
 
-Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, array given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: Array (type: array)
 
-Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, array given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: Array (type: array)
 
-Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, array given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: Array (type: array)
 
-Warning: get_class() expects parameter 1 to be object, array given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, array given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, null given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, null given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 1 (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, boolean given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, boolean given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: 1 (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, boolean given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, boolean given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: string)
 
-Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, string given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: string)
 
-Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, string given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: string (type: string)
 
-Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, string given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value: string (type: string)
 
-Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, string given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, null given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 
 Arg value:  (type: NULL)
 
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-NULL
+Warning: get_class() expects parameter 1 to be object, null given in /home/dmitry/php/php5.3/ext/standard/tests/class_object/get_class_variation_001.php on line 68
+bool(false)
 Done
