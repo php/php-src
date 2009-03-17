@@ -462,6 +462,26 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "i:" iv ";"	{
+#if SIZEOF_LONG == 4
+	int digits = YYCURSOR - start - 3;
+
+	if (start[2] == '-' || start[2] == '+') {
+		digits--;
+	}
+
+	/* Use double for large long values that were serialized on a 64-bit system */
+	if (digits >= MAX_LENGTH_OF_LONG - 1) {
+		if (digits == MAX_LENGTH_OF_LONG - 1) {
+			int cmp = strncmp(YYCURSOR - MAX_LENGTH_OF_LONG, long_min_digits, MAX_LENGTH_OF_LONG - 1);
+
+			if (!(cmp < 0 || (cmp == 0 && start[2] == '-'))) {
+				goto use_double;
+			}
+		} else {
+			goto use_double;
+		}
+	}
+#endif
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 	ZVAL_LONG(*rval, parse_iv(start + 2));
@@ -484,6 +504,9 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "d:" (iv | nv | nvexp) ";"	{
+#if SIZEOF_LONG == 4
+use_double:
+#endif
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 	ZVAL_DOUBLE(*rval, zend_strtod((const char *)start + 2, NULL));
