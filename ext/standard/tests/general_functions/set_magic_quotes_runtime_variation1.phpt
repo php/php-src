@@ -1,6 +1,6 @@
 --TEST--
 Test set_magic_quotes_runtime() function -  usage variation
---INI-
+--INI--
 magic_quotes_runtime = 0
 --FILE--
 <?php
