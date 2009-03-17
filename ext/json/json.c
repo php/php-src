@@ -43,6 +43,9 @@ static const char digits[] = "0123456789abcdef";
 #define PHP_JSON_HEX_QUOT	(1<<3)
 #define PHP_JSON_FORCE_OBJECT	(1<<4)
 
+#define PHP_JSON_OUTPUT_ARRAY 0
+#define PHP_JSON_OUTPUT_OBJECT 1
+
 ZEND_DECLARE_MODULE_GLOBALS(json)
 
 /* {{{ arginfo */
@@ -165,7 +168,7 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 		}
 	}
 
-	return 0;
+	return PHP_JSON_OUTPUT_ARRAY;
 }
 /* }}} */
 
@@ -176,10 +179,10 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 	if (Z_TYPE_PP(val) == IS_ARRAY) {
 		myht = HASH_OF(*val);
-		r = (options & PHP_JSON_FORCE_OBJECT) ? 1 : json_determine_array_type(val TSRMLS_CC);
+		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : json_determine_array_type(val TSRMLS_CC);
 	} else {
 		myht = Z_OBJPROP_PP(val);
-		r = 1;
+		r = PHP_JSON_OUTPUT_OBJECT;
 	}
 
 	if (myht && myht->nApplyCount > 1) {
@@ -188,7 +191,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		return;
 	}
 
-	if (r == 0) {
+	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, '[');
 	} else {
 		smart_str_appendc(buf, '{');
@@ -218,7 +221,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 					tmp_ht->nApplyCount++;
 				}
 
-				if (r == 0) {
+				if (r == PHP_JSON_OUTPUT_ARRAY) {
 					if (need_comma) {
 						smart_str_appendc(buf, ',');
 					} else {
@@ -226,7 +229,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 					}
  
 					json_encode_r(buf, *data, options TSRMLS_CC);
-				} else if (r == 1) {
+				} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 					if (i == HASH_KEY_IS_STRING || i == HASH_KEY_IS_UNICODE) {
 						if (key.s[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
 							/* Skip protected and private members. */
@@ -269,7 +272,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		}
 	}
 
-	if (r == 0) {
+	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, ']');
 	} else {
 		smart_str_appendc(buf, '}');
