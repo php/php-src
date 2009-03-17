@@ -51,6 +51,10 @@ if test $PHP_SQLITE3 != "no"; then
       AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
     ])
 
+    PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,[
+      AC_DEFINE(SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])
+    ])
+
   else
     AC_MSG_CHECKING([bundled sqlite3 library])
     AC_MSG_RESULT([yes])
