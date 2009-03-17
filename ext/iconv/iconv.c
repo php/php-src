@@ -2850,7 +2850,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 		return NULL;
 	}
 	++from_charset;
-	if ((to_charset = strchr(from_charset, '/')) == NULL) {
+	if ((to_charset = strpbrk(from_charset, "/.")) == NULL) {
 		return NULL;
 	}
 	from_charset_len = to_charset - from_charset;
