@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Re-enabled phar for big-endian systems after fixing problems. (Greg)
 
 - Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
+- Added JSON_FORCE_OBJECT flag to json_encode(). (Scott, Richard Quadling)
 
 - Fixed bug #47678 (Allow loadExtension to be disabled in SQLite3). (Scott)
 - Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
