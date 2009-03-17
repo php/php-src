@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed bug #47438 (mysql_fetch_field ignores zero offset). (Johannes)
 - Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
 - Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)
+- Fixed bug #47359 (Use the expected unofficial mimetype for bmp files). (Scott)
 - Fixed bug #47343 (gc_collect_cycles causes a segfault when called within a
   destructor in one case). (Dmitry)
 - Fixed bug #47329 (Crash in garbage collector). (Dmitry)
