@@ -23,7 +23,7 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   dnl Windows uses config.w32 thus this code is safe for now
   if test "$PHP_MYSQLND_THREADING" = "yes"; then
     PHP_BUILD_THREAD_SAFE
-    AC_DEFINE([MYSQLND_THREADED], 1, [Whether mysqlnd threading is enabled])
+    AC_DEFINE([MYSQLND_THREADED], 1, [EXPERIMENTAL: Use mysqlnd internal threading])
   fi
 
   dnl This creates a file so it has to be after above macros
