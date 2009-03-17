@@ -284,12 +284,12 @@ static void json_create_zval(zval **z, smart_str *buf, int type)
 
     if (type == IS_LONG)
     {
-	double d = zend_strtod(buf->c, NULL);
-	if (d > LONG_MAX || d < LONG_MIN) {
-		ZVAL_DOUBLE(*z, d);
-	} else {
-		ZVAL_LONG(*z, (long)d);
-	}
+		long l = strtol(buf->c, NULL, 10);
+		if (l > LONG_MAX || l < LONG_MIN) {
+			ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
+		} else {
+			ZVAL_LONG(*z, l);
+		}
     }
     else if (type == IS_DOUBLE)
     {
