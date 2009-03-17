@@ -1,6 +1,6 @@
 --TEST--
 Test set_magic_quotes_runtime() function -  basic test 
---INI-
+--INI--
 magic_quotes_runtime = 0
 --FILE--
 <?php
