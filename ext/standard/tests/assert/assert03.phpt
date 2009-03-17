@@ -1,6 +1,6 @@
 --TEST--
 assert() - set callback using ini_set()
----INI---
+--INI--
 assert.active = 1
 assert.warning = 0
 assert.callback = 
