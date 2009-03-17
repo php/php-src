@@ -27,7 +27,7 @@ image_type_to_mime_type()
 --EXPECT--
 array(11) {
   [u"test1pix.bmp"]=>
-  unicode(9) "image/bmp"
+  unicode(14) "image/x-ms-bmp"
   [u"test1pix.jp2"]=>
   unicode(9) "image/jp2"
   [u"test1pix.jpc"]=>

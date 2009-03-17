@@ -39,7 +39,7 @@ unicode\(29\) "application\/x-shockwave-flash"
 unicode\(9\) "image\/psd"
 
 -- Iteration 6 --
-unicode\(9\) "image\/bmp"
+unicode\(14\) "image\/x-ms-bmp"
 
 -- Iteration 7 --
 unicode\(10\) "image\/tiff"

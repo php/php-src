@@ -37,7 +37,7 @@ array(11) {
     [u"bits"]=>
     int(24)
     [u"mime"]=>
-    unicode(9) "image/bmp"
+    unicode(14) "image/x-ms-bmp"
   }
   [u"test1pix.jp2"]=>
   array(7) {
