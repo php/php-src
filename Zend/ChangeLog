@@ -1,3 +1,33 @@
+2009-03-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/009.phpt
+      tests/009.phpt:
+      Fixed bug #47664 (get_class returns NULL instead of FALSE)
+
+2009-03-16  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_3)
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      MFH: Fix scanner handling of NULL values in heredoc, nowdoc, strings,
+      comments, and non-parsed content.
+
+    * zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h:
+      Fix scanner handling of NULL values in heredoc, nowdoc, strings, comments,
+      and non-parsed content.
+
+2009-03-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      
+      MFB53: Fix for get_defined_constants()
+
 2009-03-11  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_3)
