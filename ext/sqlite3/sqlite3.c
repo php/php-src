@@ -266,6 +266,7 @@ PHP_METHOD(sqlite3, lastErrorMsg)
 }
 /* }}} */
 
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
 /* {{{ proto bool SQLite3::loadExtension(String Shared Library)
    Attempts to load an SQLite extension library. */
 PHP_METHOD(sqlite3, loadExtension)
@@ -328,6 +329,7 @@ PHP_METHOD(sqlite3, loadExtension)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto int SQLite3::changes()
   Returns the number of database rows that were changed (or inserted or deleted) by the most recent SQL statement. */
@@ -1607,9 +1609,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_open, 0)
 	ZEND_ARG_INFO(0, encryption_key)
 ZEND_END_ARG_INFO()
 
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
 ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_loadextension, 0)
 	ZEND_ARG_INFO(0, shared_library)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_escapestring, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
@@ -1685,7 +1689,9 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		lastInsertRowID,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorCode,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorMsg,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
+#ifndef SQLITE_OMIT_LOAD_EXTENSION
 	PHP_ME(sqlite3,		loadExtension,		arginfo_sqlite3_loadextension, ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME(sqlite3,		changes,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		escapeString,		arginfo_sqlite3_escapestring, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(sqlite3,		prepare,			arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
