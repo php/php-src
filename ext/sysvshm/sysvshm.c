@@ -166,19 +166,19 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: memorysize too small", shm_key);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", shm_key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", shm_key, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", shm_key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
