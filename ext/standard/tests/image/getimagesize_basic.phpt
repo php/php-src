@@ -138,7 +138,7 @@ array(6) {
   ["bits"]=>
   int(24)
   ["mime"]=>
-  string(9) "image/bmp"
+  string(14) "image/x-ms-bmp"
 }
 array(0) {
 }
