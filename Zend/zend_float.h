@@ -69,8 +69,11 @@
 /* MSVC detection (MSVC people usually don't use autoconf) */
 #ifdef _MSC_VER
 # if _MSC_VER >= 1500
+   /* Disable it, it slowdowns the floating operation more than
+      anything else, by a factor 3 (using Bench.php (mandel and 
+      mandel2 for example)*/
    /* Visual C++ 2008 or higher, supports _controlfp_s */
-#  define HAVE__CONTROLFP_S
+   /*#  define HAVE__CONTROLFP_S */
 # else
    /* Visual C++ (up to 2005), supports _controlfp */
 #  define HAVE__CONTROLFP
