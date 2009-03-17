@@ -1363,6 +1363,8 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 	if (set->data_cursor && (set->data_cursor - set->data) < (set->row_count)) {
 		uint64_t row_num = set->data_cursor - set->data;
 		zval **current_row = *set->data_cursor++;
+		unsigned int i;
+
 		set->initialized_rows++;
 		/* We don't forget to release the lock */
 		tsrm_mutex_unlock(set->LOCK);
@@ -1370,7 +1372,6 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 		/* If there was no decoding in background, we have to decode here */
 		if (set->decode_in_foreground == TRUE) {
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row_num];
-			unsigned int i;
 			result->m.row_decoder(current_buffer,
 								  current_row,
 								  result->meta->field_count,
@@ -1462,7 +1463,7 @@ mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC)
 {
 	enum_func_status ret;
 	php_mysql_packet_row *row_packet;
-	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET, free_rows;
+	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows;
 	MYSQLND_RES_BG_BUFFERED *set = result->bg_stored_data;
 	MYSQLND *conn = result->conn;
 
@@ -1606,9 +1607,9 @@ MYSQLND_METHOD(mysqlnd_res, background_store_result)(MYSQLND_RES * result, MYSQL
 	result->m.fetch_lengths	= mysqlnd_fetch_lengths_async_buffered;
 
 	result->bg_stored_data = mnd_pecalloc(1, sizeof(MYSQLND_RES_BG_BUFFERED), to_cache);
-	result->bg_stored_data->data_size	= STORE_RESULT_PREALLOCATED_SET;
+	result->bg_stored_data->data_size	= STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY;
 	result->bg_stored_data->data		= mnd_pecalloc(result->bg_stored_data->data_size, sizeof(zval **), to_cache);
-	result->bg_stored_data->row_buffers	= mnd_pemalloc(STORE_RESULT_PREALLOCATED_SET * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
+	result->bg_stored_data->row_buffers	= mnd_pemalloc(STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
 	result->bg_stored_data->persistent	= to_cache;
 	result->bg_stored_data->qcache		= to_cache? mysqlnd_qcache_get_cache_reference(conn->qcache):NULL;
 	result->bg_stored_data->references	= 1;
