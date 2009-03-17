@@ -1,6 +1,6 @@
 --TEST--
 misc assert() tests tests
----INI---
+--INI--
 assert.active = 1
 assert.warning = 1
 assert.callback = 

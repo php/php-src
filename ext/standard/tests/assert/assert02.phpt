@@ -1,6 +1,6 @@
 --TEST--
 catch assert() errors
----INI---
+--INI--
 assert.active = 1
 assert.warning = 1
 assert.callback = 
