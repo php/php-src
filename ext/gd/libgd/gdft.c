@@ -1108,15 +1108,23 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		double d1 = sin (angle + 0.78539816339744830962);
 		double d2 = sin (angle - 0.78539816339744830962);
 
+		/* make the center of rotation at (0, 0) */
+		FT_BBox normbox;
+
+		normbox.xMin = 0;
+		normbox.yMin = 0;
+		normbox.xMax = bbox.xMax - bbox.xMin;
+		normbox.yMax = bbox.yMax - bbox.yMin;
+
 		/* rotate bounding rectangle */
-		brect[0] = (int) (bbox.xMin * cos_a - bbox.yMin * sin_a);
-		brect[1] = (int) (bbox.xMin * sin_a + bbox.yMin * cos_a);
-		brect[2] = (int) (bbox.xMax * cos_a - bbox.yMin * sin_a);
-		brect[3] = (int) (bbox.xMax * sin_a + bbox.yMin * cos_a);
-		brect[4] = (int) (bbox.xMax * cos_a - bbox.yMax * sin_a);
-		brect[5] = (int) (bbox.xMax * sin_a + bbox.yMax * cos_a);
-		brect[6] = (int) (bbox.xMin * cos_a - bbox.yMax * sin_a);
-		brect[7] = (int) (bbox.xMin * sin_a + bbox.yMax * cos_a);
+		brect[0] = (int) (normbox.xMin * cos_a - normbox.yMin * sin_a);
+		brect[1] = (int) (normbox.xMin * sin_a + normbox.yMin * cos_a);
+		brect[2] = (int) (normbox.xMax * cos_a - normbox.yMin * sin_a);
+		brect[3] = (int) (normbox.xMax * sin_a + normbox.yMin * cos_a);
+		brect[4] = (int) (normbox.xMax * cos_a - normbox.yMax * sin_a);
+		brect[5] = (int) (normbox.xMax * sin_a + normbox.yMax * cos_a);
+		brect[6] = (int) (normbox.xMin * cos_a - normbox.yMax * sin_a);
+		brect[7] = (int) (normbox.xMin * sin_a + normbox.yMax * cos_a);
 
 		/* scale, round and offset brect */
 		brect[0] = x + gdroundupdown(brect[0], d2 > 0);
