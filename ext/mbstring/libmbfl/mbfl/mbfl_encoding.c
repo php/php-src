@@ -100,6 +100,7 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 #include "filters/mbfilter_armscii8.h"
+#include "filters/mbfilter_cp850.h"
 
 #ifndef HAVE_STRCASECMP
 #ifdef HAVE_STRICMP
@@ -186,6 +187,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_koi8r,
 	&mbfl_encoding_koi8u,
 	&mbfl_encoding_armscii8,
+	&mbfl_encoding_cp850,
 	NULL
 };
 

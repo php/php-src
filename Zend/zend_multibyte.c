@@ -453,6 +453,15 @@ static zend_encoding encoding_armscii8 = {
 	1
 };
 
+static const char *cp850_aliases[] = {"IBM850", NULL};
+static zend_encoding encoding_cp850 = {
+	NULL,
+	NULL,
+	"CP850",
+	(const char *(*)[])&cp850_aliases,
+	1
+};
+
 static zend_encoding *zend_encoding_table[] = {
 	&encoding_ucs4,
 	&encoding_ucs4be,
@@ -501,6 +510,7 @@ static zend_encoding *zend_encoding_table[] = {
 	&encoding_koi8u,
 	&encoding_armscii8,
 	&encoding_cp1254,
+	&encoding_cp850,
 	NULL
 };
 
