@@ -907,7 +907,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 		zval z_conv;
 		UConverter *script_enc_conv = NULL;
 		if (zend_set_converter_encoding(&script_enc_conv, EX(op_array)->script_encoding) == FAILURE) {
-			zend_error(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
+			zend_error_noreturn(E_ERROR, "Unsupported encoding [%d]", EX(op_array)->script_encoding);
 		}
 		zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &Z_STRVAL(z_conv), &Z_STRLEN(z_conv), Z_STRVAL_P(z), Z_STRLEN_P(z), &status);
 		Z_TYPE(z_conv) = IS_STRING;
@@ -1655,7 +1655,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
-		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
@@ -2011,10 +2011,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {		
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -2046,7 +2043,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		/* no function found. try a static method in class */
 		ce = zend_u_fetch_class(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%R' not found", Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -2087,7 +2084,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 				EX(fbc) = zend_std_get_static_method(ce, function_name_type, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %v::%R()", ce->name, function_name_type, function_name_strval);
 			}
 		}
 
@@ -3313,7 +3310,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 
 		if (FAILURE == zend_path_encode(&encpath, &encpath_len, Z_USTRVAL_P(inc_filename), Z_USTRLEN_P(inc_filename) TSRMLS_CC)) {
 			failure_retval = 0;
-			zend_error(E_ERROR, "Failure converting '%R' to filesystem encoding", IS_UNICODE, Z_USTRVAL_P(inc_filename));
+			zend_error_noreturn(E_ERROR, "Failure converting '%R' to filesystem encoding", IS_UNICODE, Z_USTRVAL_P(inc_filename));
 			goto skip_compile;
 		}
 
