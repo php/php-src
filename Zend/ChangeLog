@@ -1,3 +1,23 @@
+2009-03-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * tests/bug43343.phpt:
+      - MFB: make it less(er) sensible to bison version
+
+    * (PHP_5_3)
+      tests/bug43343.phpt:
+      - make it less(er) sensible to bison version
+
+    * (PHP_5_3)
+      tests/bug43343.phpt:
+      - make it less sensible to bison version
+
+    * (PHP_5_3)
+      zend_float.h:
+      - MFH: disable HAVE__CONTROLFP_S with VC9, 3x times slowdown
+
+    * zend_float.h:
+      - disable HAVE__CONTROLFP_S with VC9, 3x times slowdown
+
 2009-03-16  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c
