@@ -406,9 +406,10 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 	}																					\
 	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
 		const char *end=key+length-1;													\
-		long idx;																		\
+		long idx = end - tmp; /* temp var for remaining length (number of digits) */	\
 																						\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
+		if (idx > MAX_LENGTH_OF_LONG - 1 || (*tmp++ == '0' && length > 2)) {			\
+			/* don't accept numbers too long or with leading zeros */					\
 			break;																		\
 		}																				\
 		while (tmp<end) {																\
@@ -418,17 +419,16 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 			tmp++;																		\
 		}																				\
 		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			if (*key=='-') {															\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
+			if (idx == MAX_LENGTH_OF_LONG - 1) {										\
+				int cmp = strcmp(end - (MAX_LENGTH_OF_LONG - 1), long_min_digits);		\
+																						\
+				if (!(cmp < 0 || (cmp == 0 && *key == '-'))) {							\
+					break;																\
 				}																		\
 			}																			\
+																						\
+			idx = strtol(key, NULL, 10);												\
+			return func;																\
 		}																				\
 	} while (0);																		\
 }
@@ -441,9 +441,10 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 	}																					\
 	if ((*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) do { /* possibly a numeric index */	\
 		UChar *end=key+length-1;														\
-		long idx;																		\
+		long idx = end - tmp; /* temp var for remaining length (number of digits) */	\
 																						\
-		if (*tmp++==0x30 && length>2) { /* don't accept numbers with leading zeros */	\
+		if (idx > MAX_LENGTH_OF_LONG - 1 || (*tmp++ == 0x30 && length > 2)) {			\
+			/* don't accept numbers too long or with leading zeros */								\
 			break;																		\
 		}																				\
 		while (tmp<end) {																\
@@ -453,17 +454,16 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 			tmp++;																		\
 		}																				\
 		if (tmp==end && *tmp==0) { /* a numeric index */								\
-			if (*key==0x2D /*'-'*/) {													\
-				idx = zend_u_strtol(key, NULL, 10);										\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = zend_u_strtol(key, NULL, 10);										\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
+			if (idx == MAX_LENGTH_OF_LONG - 1) {										\
+				int cmp = zend_cmp_unicode_and_literal(end - (MAX_LENGTH_OF_LONG - 1), idx, long_min_digits, idx);	\
+																						\
+				if (!(cmp < 0 || (cmp == 0 && *key == 0x2D /*'-'*/))) {					\
+					break;																\
 				}																		\
 			}																			\
+																						\
+			idx = zend_u_strtol(key, NULL, 10);											\
+			return func;																\
 		}																				\
 	} while (0);																		\
 }

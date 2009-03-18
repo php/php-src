@@ -271,6 +271,18 @@ typedef union _zstr {
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
+#if SIZEOF_LONG == 4
+#define MAX_LENGTH_OF_LONG 11
+static const char long_min_digits[] = "2147483648";
+#elif SIZEOF_LONG == 8
+#define MAX_LENGTH_OF_LONG 20
+static const char long_min_digits[] = "9223372036854775808";
+#else
+#error "Unknown SIZEOF_LONG"
+#endif
+
+#define MAX_LENGTH_OF_DOUBLE 32
+
 #ifdef __GNUC__
 #	define ZSTR(x)    ((zstr)((void*)(x)))
 #	define NULL_ZSTR  ZSTR((void*)NULL)
