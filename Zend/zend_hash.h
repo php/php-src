@@ -313,9 +313,10 @@ END_EXTERN_C()
 	}																					\
 	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
 		const char *end=key+length-1;															\
-		long idx;																		\
+		long idx = end - tmp; /* temp var for remaining length (number of digits) */	\
 																						\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
+		if (idx > MAX_LENGTH_OF_LONG - 1 || (*tmp++ == '0' && length > 2)) {			\
+			/* don't accept numbers too long or with leading zeros */					\
 			break;																		\
 		}																				\
 		while (tmp<end) {																\
@@ -325,17 +326,16 @@ END_EXTERN_C()
 			tmp++;																		\
 		}																				\
 		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			if (*key=='-') {															\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
+			if (idx == MAX_LENGTH_OF_LONG - 1) {										\
+				int cmp = strcmp(end - (MAX_LENGTH_OF_LONG - 1), long_min_digits);		\
+																						\
+				if (!(cmp < 0 || (cmp == 0 && *key == '-'))) {							\
+					break;																\
 				}																		\
 			}																			\
+																						\
+			idx = strtol(key, NULL, 10);												\
+			return func;																\
 		}																				\
 	} while (0);																		\
 }
