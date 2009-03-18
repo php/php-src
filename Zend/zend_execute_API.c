@@ -32,6 +32,7 @@
 #include "zend_closures.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_float.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -136,6 +137,8 @@ static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {
 
 void init_executor(TSRMLS_D) /* {{{ */
 {
+	zend_init_fpu(TSRMLS_C);
+
 	INIT_ZVAL(EG(uninitialized_zval));
 	/* trick to make uninitialized_zval never be modified, passed by ref, etc. */
 	Z_ADDREF(EG(uninitialized_zval));
@@ -353,6 +356,9 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 			FREE_HASHTABLE(EG(in_autoload));
 		}
 	} zend_end_try();
+
+	zend_shutdown_fpu(TSRMLS_C);
+
 	EG(active) = 0;
 }
 /* }}} */
