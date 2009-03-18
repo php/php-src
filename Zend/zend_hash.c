@@ -2071,7 +2071,7 @@ ZEND_API int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLen
 
 ZEND_API int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
 	return zend_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
@@ -2106,7 +2106,7 @@ ZEND_API int zend_ascii_symtable_update(HashTable *ht, const char *arKey, uint n
 
 ZEND_API int zend_ascii_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
 	return zend_ascii_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
@@ -2134,7 +2134,7 @@ ZEND_API int zend_rt_symtable_update(HashTable *ht, const char *arKey, uint nKey
 
 ZEND_API int zend_rt_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
 	return zend_rt_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
@@ -2162,7 +2162,7 @@ ZEND_API int zend_utf8_symtable_update(HashTable *ht, const char *arKey, uint nK
 
 ZEND_API int zend_utf8_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
 	return zend_utf8_hash_del(ht, arKey, nKeyLength);
 }
 /* }}} */
