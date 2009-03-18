@@ -291,64 +291,6 @@ Manual Installation Steps
    The directory structure extracted from the zip is different for PHP
    versions 4 and 5 and look like as follows:
 
-   Example 2-1. PHP 4 package structure
-c:\php
-   |
-   +--cli
-   |  |
-   |  |-php.exe           -- CLI executable - ONLY for command line scripting
-   |
-   +--dlls                -- support DLLs required by some extensions
-   |  |
-   |  |-expat.dll
-   |  |
-   |  |-fdftk.dll
-   |  |
-   |  |-...
-   |
-   +--extensions          -- extension DLLs for PHP
-   |  |
-   |  |-php_bz2.dll
-   |  |
-   |  |-php_cpdf.dll
-   |  |
-   |  |-..
-   |
-   +--mibs                -- support files for SNMP
-   |
-   +--openssl             -- support files for Openssl
-   |
-   +--pdf-related         -- support files for PDF
-   |
-   +--sapi                -- SAPI (server module support) DLLs
-   |  |
-   |  |-php4apache.dll
-   |  |
-   |  |-php4apache2.dll
-   |  |
-   |  |-..
-   |
-   +--PEAR                -- initial copy of PEAR
-   |
-   |
-   |-go-pear.bat          -- PEAR setup script
-   |
-   |-..
-   |
-   |-php.exe              -- CGI executable
-   |
-   |-..
-   |
-   |-php.ini-development  -- development php.ini settings
-   |
-   |-php.ini-production   -- recommended php.ini settings for production
-   |
-   |-php4ts.dll           -- core PHP DLL
-   |
-   |-...
-
-   Or:
-
    Example 2-2. PHP 5 package structure
 c:\php
    |
@@ -418,24 +360,23 @@ c:\php
      Note: In PHP 4, you should move all files located in the dll and
      sapi folders to the main folder (e.g. C:\php).
 
-   Here is a list of server modules shipped with PHP 4 and PHP 5:
+   Here is a list of server modules shipped with PHP 5:
 
-     * sapi/php4activescript.dll (php5activescript.dll) - ActiveScript
-       engine, allowing you to embed PHP in your Windows applications.
-     * sapi/php4apache.dll (php5apache.dll) - Apache 1.3.x module.
-     * sapi/php4apache2.dll (php5apache2.dll) - Apache 2.0.x module.
      * sapi/php5apache2_2.dll - Apache 2.2.x module.
-     * sapi/php4isapi.dll (php5isapi.dll) - ISAPI Module for ISAPI
-       compliant web servers like IIS 4.0/PWS 4.0 or newer.
-     * sapi/php4nsapi.dll (php5nsapi.dll) - Sun/iPlanet/Netscape server
-       module.
-     * sapi/php4pi3web.dll (no equivalent in PHP 5) - Pi3Web server
+     * sapi/php5apache.dll (php5apache.dll) - Apache 1.x module
+     * sapi/php5apache2.dll (php5apache2.dll) -  - Apache 2.0.x module.
+     * sapi/php5isapi.dll - ISAPI Module for ISAPI compliant web servers 
+       like IIS 5.0 or newer. However the FCGI SAPI is recommended with 
+       IIS
+     * sapi/php5nsapi.dll (php5nsapi.dll) - Sun/iPlanet/Netscape server
        module.
 
    Server modules provide significantly better performance and additional
-   functionality compared to the CGI binary. The CLI version is designed
-   to let you use PHP for command line scripting. More information about
-   CLI is available in the chapter about using PHP from the command line.
+   functionality compared to the CGI binary. The FastCGI is significantly
+   more stable and can be faster than the ISAPI module with IIS.
+   The CLI version is designed to let you use PHP for command line 
+   scripting. More information about CLI is available in the chapter 
+   about using PHP from the command line.
 
    Warning
 
@@ -444,7 +385,7 @@ c:\php
    other server modules failing, such as ASP.
 
    The CGI and CLI binaries, and the web server modules all require the
-   php4ts.dll (php5ts.dll) file to be available to them. You have to make
+   php5ts.dll file to be available to them. You have to make
    sure that this file can be found by your PHP installation. The search
    order for this DLL is as follows:
 
@@ -453,7 +394,7 @@ c:\php
        Files\Apache Group\Apache2\bin).
      * Any directory in your Windows PATH environment variable.
 
-   To make php4ts.dll / php5ts.dll available you have three options: copy
+   To make php5ts.dll available you have three options: copy
    the file to the Windows system directory, copy the file to the web
    server's directory, or add your PHP directory, C:\php to the PATH. For
    better maintenance, we advise you to follow the last option, add C:\php
@@ -638,7 +579,7 @@ Windows NT/200x/XP and IIS 4 or newer
      * If you don't want to perform HTTP Authentication using PHP, you can
        (and should) skip this step. Under ISAPI Filters, add a new ISAPI
        filter. Use PHP as the filter name, and supply a path to the
-       php4isapi.dll / php5isapi.dll.
+       php5isapi.dll.
      * Under 'Home Directory', 'Virtual Directory', or 'Directory', do the
        following:
      * Change the Execute Permissions to 'Scripts only'
@@ -654,7 +595,7 @@ Windows NT/200x/XP and IIS 4 or newer
    With IIS 6 (2003 Server), open up the IIS Manager, go to Web Service
    Extensions, choose "Add a new Web service extension", enter in a name
    such as PHP, choose the Add button and for the value browse to either
-   the ISAPI file (php4isapi.dll or php5isapi.dll) or CGI (php.exe or
+   the ISAPI file (php5isapi.dll) or CGI (php.exe or
    php-cgi.exe) then check "Set extension status to Allowed" and click OK.
 
    In order to use index.php as a default content page, do the following:
@@ -670,82 +611,9 @@ Windows NT/200x/XP and IIS 4 or newer
    setting Cache ISAPI Application.
      __________________________________________________________________
 
-Windows and PWS 4
+Windows and IIS
 
-   PWS 4 does not support ISAPI, only PHP CGI should be used.
-
-     * Edit the enclosed pws-php4cgi.reg / pws-php5cgi.reg file (look into
-       the SAPI folder for PHP 4, or in the main folder for PHP 5) to
-       reflect the location of your php.exe / php-cgi.exe. Backslashes
-       should be escaped, for example:
-       [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\paramet
-       ers\Script Map] ".php"="C:\\php\\php.exe" (change to
-       C:\\php\\php-cgi.exe if you are using PHP 5) Now merge this
-       registery file into your system; you may do this by double-clicking
-       it.
-     * In the PWS Manager, right click on a given directory you want to
-       add PHP support to, and select Properties. Check the 'Execute'
-       checkbox, and confirm.
-     __________________________________________________________________
-
-Windows and PWS/IIS 3
-
-   The recommended method for configuring these servers is to use the REG
-   file included with the distribution (pws-php4cgi.reg in the SAPI folder
-   for PHP 4, or pws-php5cgi.reg in the main folder for PHP 5). You may
-   want to edit this file and make sure the extensions and PHP install
-   directories match your configuration. Or you can follow the steps below
-   to do it manually.
-
-   Warning
-
-   These steps involve working directly with the Windows registry. One
-   error here can leave your system in an unstable state. We highly
-   recommend that you back up your registry first. The PHP Development
-   team will not be held responsible if you damage your registry.
-
-     * Run Regedit.
-     * Navigate to: HKEY_LOCAL_MACHINE /System /CurrentControlSet
-       /Services /W3Svc /Parameters /ScriptMap.
-     * On the edit menu select: New->String Value.
-     * Type in the extension you wish to use for your php scripts. For
-       example .php
-     * Double click on the new string value and enter the path to php.exe
-       in the value data field. ex: C:\php\php.exe "%s" %s for PHP 4, or
-       C:\php\php-cgi.exe "%s" %s for PHP 5.
-     * Repeat these steps for each extension you wish to associate with
-       PHP scripts.
-
-   The following steps do not affect the web server installation and only
-   apply if you want your PHP scripts to be executed when they are run
-   from the command line (ex. run C:\myscripts\test.php) or by double
-   clicking on them in a directory viewer window. You may wish to skip
-   these steps as you might prefer the PHP files to load into a text
-   editor when you double click on them.
-
-     * Navigate to: HKEY_CLASSES_ROOT
-     * On the edit menu select: New->Key.
-     * Name the key to the extension you setup in the previous section.
-       ex: .php
-     * Highlight the new key and in the right side pane, double click the
-       "default value" and enter phpfile.
-     * Repeat the last step for each extension you set up in the previous
-       section.
-     * Now create another New->Key under HKEY_CLASSES_ROOT and name it
-       phpfile.
-     * Highlight the new key phpfile and in the right side pane, double
-       click the "default value" and enter PHP Script.
-     * Right click on the phpfile key and select New->Key, name it Shell.
-     * Right click on the Shell key and select New->Key, name it open.
-     * Right click on the open key and select New->Key, name it command.
-     * Highlight the new key command and in the right side pane, double
-       click the "default value" and enter the path to php.exe. ex:
-       c:\php\php.exe -q %1. (don't forget the %1).
-     * Exit Regedit.
-     * If using PWS on Windows, reboot to reload the registry.
-
-   PWS and IIS 3 users now have a fully operational system. IIS 3 users
-   can use a nifty tool from Steven Genusa to configure their script maps.
+See http://www.php.net/install.windows
      __________________________________________________________________
 
 Apache 1.3.x on Microsoft Windows
@@ -789,14 +657,6 @@ Installing as an Apache module
 
    This assumes PHP is installed to c:\php. Adjust the path if this is not
    the case.
-
-   For PHP 4:
-# Add to the end of the LoadModule section
-# Don't forget to copy this file from the sapi directory!
-LoadModule php4_module "C:/php/php4apache.dll"
-
-# Add to the end of the AddModule section
-AddModule mod_php4.c
 
    For PHP 5:
 # Add to the end of the LoadModule section
@@ -943,10 +803,6 @@ Installing as an Apache module
    configuration file to set up the PHP module for Apache 2.0:
 
    Example 2-6. PHP and Apache 2.0 as Module
-# For PHP 4 do something like this:
-LoadModule php4_module "c:/php/php4apache2.dll"
-# Don't forget to copy the php4apache2.dll file from the sapi directory!
-AddType application/x-httpd-php .php
 
 # For PHP 5 do something like this:
 LoadModule php5_module "c:/php/php5apache2.dll"
@@ -956,10 +812,9 @@ AddType application/x-httpd-php .php
 PHPIniDir "C:/php"
 
      Note: Remember to substitute your actual path to PHP for the c:/php/
-     in the above examples. Take care to use either php4apache2.dll or
-     php5apache2.dll in your LoadModule directive and not php4apache.dll
-     or php5apache.dll as the latter ones are designed to run with Apache
-     1.3.x.
+     in the above examples. Take care to use either 
+     php5apache2.dll in your LoadModule directive and not php5apache.dll 
+     as the latter ones are designed to run with Apache 1.3.x.
 
      Note: If you want to use content negotiation, read related FAQ.
 
@@ -986,7 +841,7 @@ CGI setup on Sun, iPlanet and Netscape servers
 
    To install PHP as a CGI handler, do the following:
 
-     * Copy php4ts.dll to your systemroot (the directory where you
+     * Copy php5ts.dll to your systemroot (the directory where you
        installed Windows)
      * Make a file association from the command line. Type the following
        two lines:
@@ -1011,7 +866,7 @@ NSAPI setup on Sun, iPlanet and Netscape servers
 
    To install PHP with NSAPI, do the following:
 
-     * Copy php4ts.dll to your systemroot (the directory where you
+     * Copy php5ts.dll to your systemroot (the directory where you
        installed Windows)
      * Make a file association from the command line. Type the following
        two lines:
@@ -1026,24 +881,24 @@ ftype PHPScript=c:\php\php.exe %1 %*
        and add the following: You should place the lines after mime types
        init.
 
-Init fn="load-modules" funcs="php4_init,php4_execute,php4_auth_trans" shlib="c:/
-php/sapi/php4nsapi.dll"
-Init fn="php4_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
+Init fn="load-modules" funcs="php5_init,php5_execute,php5_auth_trans" shlib="c:/
+php/sapi/php5nsapi.dll"
+Init fn="php5_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
 ini="c:/path/to/php.ini"]
 
-       (PHP >= 4.3.3) The php_ini parameter is optional but with it you
+       The php_ini parameter is optional but with it you
        can place your php.ini in your web server configuration directory.
      * Configure the default object in obj.conf (for virtual server
        classes [Sun Web Server 6.0+] in their vserver.obj.conf): In the
        <Object name="default"> section, place this line necessarily after
        all 'ObjectType' and before all 'AddLog' lines:
 
-Service fn="php4_execute" type="magnus-internal/x-httpd-php" [inikey=value inike
+Service fn="php5_execute" type="magnus-internal/x-httpd-php" [inikey=value inike
 y=value ...]
 
-       (PHP >= 4.3.3) As additional parameters you can add some special
+       As additional parameters you can add some special
        php.ini-values, for example you can set a
-       docroot="/path/to/docroot" specific to the context php4_execute is
+       docroot="/path/to/docroot" specific to the context php5_execute is
        called. For boolean ini-keys please use 0/1 as value, not
        "On","Off",... (this will not work correctly), e.g.
        zlib.output_compression=1 instead of zlib.output_compression="On"
@@ -1052,7 +907,7 @@ y=value ...]
 
 <Object name="x-httpd-php">
 ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
-Service fn=php4_execute [inikey=value inikey=value ...]
+Service fn=php5_execute [inikey=value inikey=value ...]
 </Object>
 
        After that you can configure a directory in the Administration
@@ -1094,7 +949,7 @@ CGI environment and recommended modifications in php.ini
      CGI-like environment variables.
 
    Simply change your scripts to get CGI variables in the correct way for
-   PHP 4.x by using the superglobal $_SERVER. If you have older scripts
+   PHP 5.x by using the superglobal $_SERVER. If you have older scripts
    which use $HTTP_HOST, etc., you should turn on register_globals in
    php.ini and change the variable order too (important: remove "E" from
    it, because you do not need the environment here):
@@ -1107,7 +962,7 @@ Special use for error pages or self-made directory listings (PHP >= 4.3.3)
    You can use PHP to generate the error pages for "404 Not Found" or
    similar. Add the following line to the object in obj.conf for every
    error page you want to overwrite:
-Error fn="php4_execute" code=XXX script="/path/to/script.php" [inikey=value inik
+Error fn="php5_execute" code=XXX script="/path/to/script.php" [inikey=value inik
 ey=value...]
 
    where XXX is the HTTP error code. Please delete any other Error
@@ -1119,7 +974,7 @@ ey=value...]
    create a PHP script which displays a directory listing and replace the
    corresponding default Service line for type="magnus-internal/directory"
    in obj.conf with the following:
-Service fn="php4_execute" type="magnus-internal/directory" script="/path/to/scri
+Service fn="php5_execute" type="magnus-internal/directory" script="/path/to/scri
 pt.php" [inikey=value inikey=value...]
 
    For both error and directory listing pages the original URI and
@@ -1144,8 +999,8 @@ Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
    server is used, the detection fails and nsapi_virtual() is disabled.
 
    If this is the case, try the following: Add the following parameter to
-   php4_init in magnus.conf/obj.conf:
-   Init fn=php4_init ... server_lib="ns-httpdXX.dll"
+   php5_init in magnus.conf/obj.conf:
+   Init fn=php5_init ... server_lib="ns-httpdXX.dll"
 
    where XX is the correct DLL version number. To get it, look in the
    server-root for the correct DLL name. The DLL with the biggest filesize
@@ -1189,46 +1044,6 @@ OmniHTTPd Server
 
    Repeat steps 2 - 6 for each extension you want to associate with PHP.
 
-     Note: Some OmniHTTPd packages come with built in PHP support. You
-     can choose at setup time to do a custom setup, and uncheck the PHP
-     component. We recommend you to use the latest PHP binaries. Some
-     OmniHTTPd servers come with PHP 4 beta distributions, so you should
-     choose not to set up the built in support, but install your own. If
-     the server is already on your machine, use the Replace button in
-     Step 4 and 5 to set the new, correct information.
-     __________________________________________________________________
-
-Sambar Server on Microsoft Windows
-
-   This section contains notes and hints specific to the Sambar Server for
-   Windows.
-
-     Note: You should read the manual installation steps first!
-
-   This list describes how to set up the ISAPI module to work with the
-   Sambar server on Windows.
-
-     * Find the file called mappings.ini (in the config directory) in the
-       Sambar install directory.
-     * Open mappings.ini and add the following line under [ISAPI]:
-
-   Example 2-7. ISAPI configuration of Sambar
-#for PHP 4
-*.php = c:\php\php4isapi.dll
-
-#for PHP 5
-*.php = c:\php\php5isapi.dll
-
-       (This line assumes that PHP was installed in c:\php.)
-     * Now restart the Sambar server for the changes to take effect.
-
-     Note: If you intend to use PHP to communicate with resources which
-     are held on a different computer on your network, then you will need
-     to alter the account used by the Sambar Server Service. The default
-     account used for the Sambar Server Service is LocalSystem which will
-     not have access to remote resources. The account can be amended by
-     using the Services option from within the Windows Control Panel
-     Administation Tools.
      __________________________________________________________________
 
 Xitami on Microsoft Windows
@@ -1257,8 +1072,7 @@ Xitami on Microsoft Windows
      * Navigate to the Filters, and put the extension which PHP should
        parse (i.e. .php) into the field File extensions (.xxx).
      * In Filter command or script put the path and name of your PHP CGI
-       executable i.e. C:\php\php.exe for PHP 4, or C:\php\php-cgi.exe for
-       PHP 5.
+       executable i.e. C:\php\php-cgi.exe.
      * Press the 'Save' icon.
      * Restart the server to reflect changes.
      __________________________________________________________________
@@ -1279,16 +1093,13 @@ Installation of extensions on Windows
    that require, or used to require, additional PHP DLL files. Here's a
    list of built in extensions:
 
-   In PHP 4 (updated PHP 4.3.11): BCMath, Caledar, COM, Ctype, FTP, MySQL,
-   ODBC, Overload, PCRE, Session, Tokenizer, WDDX, XML and Zlib
-
    In PHP 5 (updated PHP 5.0.4), the following changes exist. Built in:
    DOM, LibXML, Iconv, SimpleXML, SPL and SQLite. And the following are no
    longer built in: MySQL and Overload.
 
-   The default location PHP searches for extensions is C:\php4\extensions
-   in PHP 4 and C:\php5 in PHP 5. To change this setting to reflect your
-   setup of PHP edit your php.ini file:
+   The default location PHP searches for extensions is C:\php5 in PHP 5. 
+   To change this setting to reflect your setup of PHP edit your php.ini
+   file:
 
      * You will need to change the extension_dir setting to point to the
        directory where your extensions lives, or where you have placed
@@ -1308,13 +1119,9 @@ extension_dir = C:\php\extensions
 extension=php_bz2.dll
 
      * Some of the extensions need extra DLLs to work. Couple of them can
-       be found in the distribution package, in the C:\php\dlls\ folder in
-       PHP 4 or in the main folder in PHP 5, but some, for example Oracle
-       (php_oci8.dll) require DLLs which are not bundled with the
-       distribution package. If you are installing PHP 4, copy the bundled
-       DLLs from C:\php\dlls folder to the main C:\php folder. Don't
-       forget to include C:\php in the system PATH (this process is
-       explained in a separate FAQ entry).
+       be found in the distribution package, in in the main folder in PHP 5, 
+       but some, for example Oracle (php_oci8.dll) require DLLs which are 
+       not bundled with the distribution package.
      * Some of these DLLs are not bundled with the PHP distribution. See
        each extensions documentation page for details. Also, read the
        manual section titled Installation of PECL extensions for details
@@ -1330,48 +1137,31 @@ extension=php_bz2.dll
    Table 2-1. PHP Extensions
    Extension Description Notes
    php_bz2.dll bzip2 compression functions None
-   php_calendar.dll Calendar conversion functions Built in since PHP 4.0.3
+   php_calendar.dll Calendar conversion functions
    php_cpdf.dll ClibPDF functions None
    php_crack.dll Crack functions None
-   php_ctype.dll ctype family functions Built in since PHP 4.3.0
+   php_ctype.dll ctype family functions
    php_curl.dll CURL, Client URL library functions Requires: libeay32.dll,
    ssleay32.dll (bundled)
-   php_cybercash.dll Cybercash payment functions PHP <= 4.2.0
    php_db.dll DBM functions Deprecated. Use DBA instead (php_dba.dll)
    php_dba.dll DBA: DataBase (dbm-style) Abstraction layer functions None
    php_dbase.dll dBase functions None
    php_dbx.dll dbx functions
-   php_domxml.dll DOM XML functions PHP <= 4.2.0 requires: libxml2.dll
-   (bundled) PHP >= 4.3.0 requires: iconv.dll (bundled)
-   php_dotnet.dll .NET functions PHP <= 4.1.1
    php_exif.dll EXIF functions php_mbstring.dll. And, php_exif.dll must be
    loaded after php_mbstring.dll in php.ini.
-   php_fbsql.dll FrontBase functions PHP <= 4.2.0
    php_fdf.dll FDF: Forms Data Format functions. Requires: fdftk.dll
    (bundled)
    php_filepro.dll filePro functions Read-only access
-   php_ftp.dll FTP functions Built-in since PHP 4.0.3
-   php_gd.dll GD library image functions Removed in PHP 4.3.2. Also note
-   that truecolor functions are not available in GD1, instead, use
-   php_gd2.dll.
+   php_ftp.dll FTP functions
    php_gd2.dll GD library image functions GD2
-   php_gettext.dll Gettext functions PHP <= 4.2.0 requires gnu_gettext.dll
-   (bundled), PHP >= 4.2.3 requires libintl-1.dll, iconv.dll (bundled).
-   php_hyperwave.dll HyperWave functions None
-   php_iconv.dll ICONV characterset conversion Requires: iconv-1.3.dll
-   (bundled), PHP >=4.2.1 iconv.dll
-   php_ifx.dll Informix functions Requires: Informix libraries
-   php_iisfunc.dll IIS management functions None
+   php_gettext.dll Gettext functions, requires libintl-1.dll, 
+   iconv.dll (bundled).
+   php_iconv.dll ICONV characterset conversion Requires: iconv.dll
    php_imap.dll IMAP POP3 and NNTP functions None
-   php_ingres.dll Ingres II functions Requires: Ingres II libraries
    php_interbase.dll InterBase functions Requires: gds32.dll (bundled)
-   php_java.dll Java functions PHP <= 4.0.6 requires: jvm.dll (bundled)
-   php_ldap.dll LDAP functions PHP <= 4.2.0 requires libsasl.dll
-   (bundled), PHP >= 4.3.0 requires libeay32.dll, ssleay32.dll (bundled)
+   php_ldap.dll LDAP functions requires libeay32.dll, ssleay32.dll (bundled)
    php_mbstring.dll Multi-Byte String functions None
    php_mcrypt.dll Mcrypt Encryption functions Requires: libmcrypt.dll
-   php_mhash.dll Mhash functions PHP >= 4.3.0 requires: libmhash.dll
-   (bundled)
    php_mime_magic.dll Mimetype functions Requires: magic.mime (bundled)
    php_ming.dll Ming functions for Flash None
    php_msql.dll mSQL functions Requires: msql.dll (bundled)
@@ -1383,8 +1173,6 @@ extension=php_bz2.dll
    php_oci8.dll Oracle 8 functions Requires: Oracle 8.1+ client libraries
    php_openssl.dll OpenSSL functions Requires: libeay32.dll (bundled)
    php_oracle.dll Oracle functions Requires: Oracle 7 client libraries
-   php_overload.dll Object overloading functions Built in since PHP 4.3.0
-   php_pdf.dll PDF functions None
    php_pgsql.dll PostgreSQL functions None
    php_printer.dll Printer functions None
    php_shmop.dll Shared Memory functions None
@@ -1394,15 +1182,11 @@ extension=php_bz2.dll
    php_sybase_ct.dll Sybase functions Requires: Sybase client libraries
    php_tidy.dll Tidy functions PHP >= 5.0.0
    php_tokenizer.dll Tokenizer functions Built in since PHP 4.3.0
-   php_w32api.dll W32api functions None
    php_xmlrpc.dll XML-RPC functions PHP >= 4.2.1 requires: iconv.dll
    (bundled)
-   php_xslt.dll XSLT functions PHP <= 4.2.0 requires sablot.dll, expat.dll
-   (bundled). PHP >= 4.2.1 requires sablot.dll, expat.dll, iconv.dll
-   (bundled).
-   php_yaz.dll YAZ functions Requires: yaz.dll (bundled)
-   php_zip.dll Zip File functions Read only access
-   php_zlib.dll ZLib compression functions Built in since PHP 4.3.0
+   php_xslt.dll XSLT requires libxslt.dll, iconv.dll (bundled).
+   php_zip.dll Zip File functions
+   php_zlib.dll ZLib compression functions
      __________________________________________________________________
 
 Chapter 3. Installation of PECL extensions
@@ -1716,14 +1500,6 @@ Running PHP as an Apache module
   php_value include_path ".:/usr/local/lib/php"
   php_admin_flag safe_mode on
 </IfModule>
-<IfModule mod_php4.c>
-  php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
-</IfModule>
-<IfModule mod_php3.c>
-  php3_include_path ".:/usr/local/lib/php"
-  php3_safe_mode on
-</IfModule>
 
    Caution
 
@@ -1797,7 +1573,7 @@ Chapter 6. Installation FAQ
    9. Some operating systems: I have installed PHP without errors, but
           when I try to start apache I get undefined symbol errors:
 
-[mybox:user /src/php4] root# apachectl configtest
+[mybox:user /src/php5] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
   _uncompress
@@ -1908,8 +1684,6 @@ AddModule mod_perl.c
 
 # Extra Modules
 LoadModule php_module         modules/mod_php.so
-LoadModule php3_module        modules/libphp3.so     # for PHP 3
-LoadModule php4_module        modules/libphp4.so     # for PHP 4
 LoadModule perl_module        modules/libperl.so
 
    And add:
@@ -2010,7 +1784,7 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
 
    9. Some operating systems: I have installed PHP without errors, but
    when I try to start apache I get undefined symbol errors:
-[mybox:user /src/php4] root# apachectl configtest
+[mybox:user /src/php5] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
   _uncompress
@@ -2038,7 +1812,7 @@ cgi error:
    the browser again. If it still fails then it could be one of the
    following:
 
-     * File permissions on your PHP script, php.exe, php4ts.dll, php.ini
+     * File permissions on your PHP script, php.exe, php5ts.dll, php.ini
        or any PHP extensions you are trying to load are such that the
        anonymous internet user ISUR_<machinename> cannot access them.
      * The script file does not exist (or possibly isn't where you think
