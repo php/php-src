@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
 - Added JSON_FORCE_OBJECT flag to json_encode(). (Scott, Richard Quadling)
 
+- Added support for CP850 encoding in mbstring extension.
+  (Denis Giffeler, Moriyoshi)
+
 - Fixed bug #47678 (Allow loadExtension to be disabled in SQLite3). (Scott)
 - Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
 - Fixed bug #47593 (interface_exists() returns false when using absolute 

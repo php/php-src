@@ -49,7 +49,8 @@ OBJS=mbfilter_cp936.obj \
 	mbfilter_koi8r.obj \
 	mbfilter_koi8u.obj \
 	html_entities.obj \
-	mbfilter_armscii8.obj
+	mbfilter_armscii8.obj \
+	mbfilter_cp850.obj
 
 all: $(OBJS)
 

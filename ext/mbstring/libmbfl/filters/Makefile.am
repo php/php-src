@@ -52,6 +52,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_koi8r.c \
 	mbfilter_koi8u.c \
 	mbfilter_armscii8.c \
+	mbfilter_cp850.c \
 	html_entities.c \
 	cp932_table.h \
 	html_entities.h \
@@ -105,6 +106,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf8.h \
 	mbfilter_uuencode.h \
 	mbfilter_cp51932.h \
+	mbfilter_cp850.h \
 	unicode_prop.h \
 	unicode_table_big5.h \
 	unicode_table_cns11643.h \
@@ -131,6 +133,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	unicode_table_koi8r.h \
 	unicode_table_koi8u.h \
 	unicode_table_armscii8.h \
+	unicode_table_cp850.h \
 	unicode_table_uhc.h
 
 mbfilter_iso8859_2.c: unicode_table_iso8859_2.h
