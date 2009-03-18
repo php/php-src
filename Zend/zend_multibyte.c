@@ -37,8 +37,8 @@ static zend_encoding* zend_multibyte_detect_utf_encoding(char *script, int scrip
 /*
  * encodings
  */
-const char *ucs2_aliases[] = {"ISO-10646-UCS-2", "UCS2" , "UNICODE", NULL};
-zend_encoding encoding_ucs2 = {
+static const char *ucs2_aliases[] = {"ISO-10646-UCS-2", "UCS2" , "UNICODE", NULL};
+static zend_encoding encoding_ucs2 = {
 	NULL,
 	NULL,
 	"UCS-2",
@@ -46,7 +46,7 @@ zend_encoding encoding_ucs2 = {
 	0
 };
 
-zend_encoding encoding_ucs2be = {
+static zend_encoding encoding_ucs2be = {
 	NULL,
 	NULL,
 	"UCS-2BE",
@@ -54,7 +54,7 @@ zend_encoding encoding_ucs2be = {
 	0
 };
 
-zend_encoding encoding_ucs2le = {
+static zend_encoding encoding_ucs2le = {
 	NULL,
 	NULL,
 	"UCS-2LE",
@@ -62,8 +62,8 @@ zend_encoding encoding_ucs2le = {
 	0
 };
 
-const char *ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
-zend_encoding encoding_ucs4 = {
+static const char *ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
+static zend_encoding encoding_ucs4 = {
 	NULL,
 	NULL,
 	"UCS-4",
@@ -71,7 +71,7 @@ zend_encoding encoding_ucs4 = {
 	0
 };
 
-zend_encoding encoding_ucs4be = {
+static zend_encoding encoding_ucs4be = {
 	NULL,
 	NULL,
 	"UCS-4BE",
@@ -79,7 +79,7 @@ zend_encoding encoding_ucs4be = {
 	0
 };
 
-zend_encoding encoding_ucs4le = {
+static zend_encoding encoding_ucs4le = {
 	NULL,
 	NULL,
 	"UCS-4LE",
@@ -87,8 +87,8 @@ zend_encoding encoding_ucs4le = {
 	0
 };
 
-const char *utf32_aliases[] = {"utf32", NULL};
-zend_encoding encoding_utf32 = {
+static const char *utf32_aliases[] = {"utf32", NULL};
+static zend_encoding encoding_utf32 = {
 	NULL,
 	NULL,
 	"UTF-32",
@@ -96,7 +96,7 @@ zend_encoding encoding_utf32 = {
 	0
 };
 
-zend_encoding encoding_utf32be = {
+static zend_encoding encoding_utf32be = {
 	NULL,
 	NULL,
 	"UTF-32BE",
@@ -104,7 +104,7 @@ zend_encoding encoding_utf32be = {
 	0
 };
 
-zend_encoding encoding_utf32le = {
+static zend_encoding encoding_utf32le = {
 	NULL,
 	NULL,
 	"UTF-32LE",
@@ -112,8 +112,8 @@ zend_encoding encoding_utf32le = {
 	0
 };
 
-const char *utf16_aliases[] = {"utf16", NULL};
-zend_encoding encoding_utf16 = {
+static const char *utf16_aliases[] = {"utf16", NULL};
+static zend_encoding encoding_utf16 = {
 	NULL,
 	NULL,
 	"UTF-16",
@@ -121,7 +121,7 @@ zend_encoding encoding_utf16 = {
 	0
 };
 
-zend_encoding encoding_utf16be = {
+static zend_encoding encoding_utf16be = {
 	NULL,
 	NULL,
 	"UTF-16BE",
@@ -129,7 +129,7 @@ zend_encoding encoding_utf16be = {
 	0
 };
 
-zend_encoding encoding_utf16le = {
+static zend_encoding encoding_utf16le = {
 	NULL,
 	NULL,
 	"UTF-16LE",
@@ -137,8 +137,8 @@ zend_encoding encoding_utf16le = {
 	0
 };
 
-const char *utf8_aliases[] = {"utf8", NULL};
-zend_encoding encoding_utf8 = {
+static const char *utf8_aliases[] = {"utf8", NULL};
+static zend_encoding encoding_utf8 = {
 	NULL,
 	NULL,
 	"UTF-8",
@@ -146,8 +146,8 @@ zend_encoding encoding_utf8 = {
 	1
 };
 
-const char *ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "cp367", "csASCII", NULL};
-zend_encoding encoding_ascii = {
+static const char *ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "cp367", "csASCII", NULL};
+static zend_encoding encoding_ascii = {
 	NULL,
 	NULL,
 	"ASCII",
@@ -155,8 +155,8 @@ zend_encoding encoding_ascii = {
 	1
 };
 
-const char *euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
-zend_encoding encoding_euc_jp = {
+static const char *euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
+static zend_encoding encoding_euc_jp = {
 	NULL,
 	NULL,
 	"EUC-JP",
@@ -164,8 +164,8 @@ zend_encoding encoding_euc_jp = {
 	1
 };
 
-const char *sjis_aliases[] = {"x-sjis", "SJIS", "SHIFT-JIS", NULL};
-zend_encoding encoding_sjis = {
+static const char *sjis_aliases[] = {"x-sjis", "SJIS", "SHIFT-JIS", NULL};
+static zend_encoding encoding_sjis = {
 	sjis_input_filter,
 	sjis_output_filter,
 	"Shift_JIS",
@@ -173,8 +173,8 @@ zend_encoding encoding_sjis = {
 	0
 };
 
-const char *eucjp_win_aliases[] = {"eucJP-open", NULL};
-zend_encoding encoding_eucjp_win = {
+static const char *eucjp_win_aliases[] = {"eucJP-open", NULL};
+static zend_encoding encoding_eucjp_win = {
 	NULL,
 	NULL,
 	"eucJP-win",
@@ -182,8 +182,8 @@ zend_encoding encoding_eucjp_win = {
 	1
 };
 
-const char *sjis_win_aliases[] = {"SJIS-open", "MS_Kanji", "Windows-31J", "CP932", NULL};
-zend_encoding encoding_sjis_win = {
+static const char *sjis_win_aliases[] = {"SJIS-open", "MS_Kanji", "Windows-31J", "CP932", NULL};
+static zend_encoding encoding_sjis_win = {
 	/* sjis-filters does not care about diffs of Shift_JIS and CP932 */
 	sjis_input_filter,
 	sjis_output_filter,
@@ -192,8 +192,8 @@ zend_encoding encoding_sjis_win = {
 	0
 };
 
-const char *jis_aliases[] = {"ISO-2022-JP", NULL};
-zend_encoding encoding_jis = {
+static const char *jis_aliases[] = {"ISO-2022-JP", NULL};
+static zend_encoding encoding_jis = {
 	NULL,
 	NULL,
 	"JIS",
@@ -201,8 +201,8 @@ zend_encoding encoding_jis = {
 	0
 };
 
-const char *euc_cn_aliases[] = {"CN-GB", "EUC_CN", "eucCN", "x-euc-cn", "gb2312", NULL};
-zend_encoding encoding_euc_cn = {
+static const char *euc_cn_aliases[] = {"CN-GB", "EUC_CN", "eucCN", "x-euc-cn", "gb2312", NULL};
+static zend_encoding encoding_euc_cn = {
 	NULL,
 	NULL,
 	"EUC-CN",
@@ -210,8 +210,8 @@ zend_encoding encoding_euc_cn = {
 	1
 };
 
-const char *cp936_aliases[] = {"CP-936", NULL};
-zend_encoding encoding_cp936 = {
+static const char *cp936_aliases[] = {"CP-936", NULL};
+static zend_encoding encoding_cp936 = {
 	NULL,
 	NULL,
 	"CP936",
@@ -219,8 +219,8 @@ zend_encoding encoding_cp936 = {
 	0
 };
 
-const char *hz_aliases[] = {"HZ-GB-2312", NULL};
-zend_encoding encoding_hz = {
+static const char *hz_aliases[] = {"HZ-GB-2312", NULL};
+static zend_encoding encoding_hz = {
 	NULL,
 	NULL,
 	"HZ",
@@ -228,8 +228,8 @@ zend_encoding encoding_hz = {
 	0
 };
 
-const char *euc_tw_aliases[] = {"EUC_TW", "eucTW", "x-euc-tw", NULL};
-zend_encoding encoding_euc_tw = {
+static const char *euc_tw_aliases[] = {"EUC_TW", "eucTW", "x-euc-tw", NULL};
+static zend_encoding encoding_euc_tw = {
 	NULL,
 	NULL,
 	"EUC-TW",
@@ -237,8 +237,8 @@ zend_encoding encoding_euc_tw = {
 	1
 };
 
-const char *big5_aliases[] = {"BIG5", "CN-BIG5", "BIG-FIVE", "BIGFIVE", "CP950", NULL};
-zend_encoding encoding_big5 = {
+static const char *big5_aliases[] = {"BIG5", "CN-BIG5", "BIG-FIVE", "BIGFIVE", "CP950", NULL};
+static zend_encoding encoding_big5 = {
 	NULL,
 	NULL,
 	"BIG-5",
@@ -246,8 +246,8 @@ zend_encoding encoding_big5 = {
 	0
 };
 
-const char *euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
-zend_encoding encoding_euc_kr = {
+static const char *euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
+static zend_encoding encoding_euc_kr = {
 	NULL,
 	NULL,
 	"EUC-KR",
@@ -255,8 +255,8 @@ zend_encoding encoding_euc_kr = {
 	1
 };
 
-const char *uhc_aliases[] = {"CP949", NULL};
-zend_encoding encoding_uhc = {
+static const char *uhc_aliases[] = {"CP949", NULL};
+static zend_encoding encoding_uhc = {
 	NULL,
 	NULL,
 	"UHC",
@@ -264,7 +264,7 @@ zend_encoding encoding_uhc = {
 	1
 };
 
-zend_encoding encoding_2022kr = {
+static zend_encoding encoding_2022kr = {
 	NULL,
 	NULL,
 	"ISO-2022-KR",
@@ -272,8 +272,8 @@ zend_encoding encoding_2022kr = {
 	0
 };
 
-const char *cp1252_aliases[] = {"cp1252", NULL};
-zend_encoding encoding_cp1252 = {
+static const char *cp1252_aliases[] = {"cp1252", NULL};
+static zend_encoding encoding_cp1252 = {
 	NULL,
 	NULL,
 	"Windows-1252",
@@ -281,8 +281,8 @@ zend_encoding encoding_cp1252 = {
 	1
 };
 
-const char *iso_8859_1_aliases[] = {"ISO_8859-1", "latin1", NULL};
-zend_encoding encoding_8859_1 = {
+static const char *iso_8859_1_aliases[] = {"ISO_8859-1", "latin1", NULL};
+static zend_encoding encoding_8859_1 = {
 	NULL,
 	NULL,
 	"ISO-8859-1",
@@ -290,8 +290,8 @@ zend_encoding encoding_8859_1 = {
 	1
 };
 
-const char *iso_8859_2_aliases[] = {"ISO_8859-2", "latin2", NULL};
-zend_encoding encoding_8859_2 = {
+static const char *iso_8859_2_aliases[] = {"ISO_8859-2", "latin2", NULL};
+static zend_encoding encoding_8859_2 = {
 	NULL,
 	NULL,
 	"ISO-8859-2",
@@ -299,8 +299,8 @@ zend_encoding encoding_8859_2 = {
 	1
 };
 
-const char *iso_8859_3_aliases[] = {"ISO_8859-3", "latin3", NULL};
-zend_encoding encoding_8859_3 = {
+static const char *iso_8859_3_aliases[] = {"ISO_8859-3", "latin3", NULL};
+static zend_encoding encoding_8859_3 = {
 	NULL,
 	NULL,
 	"ISO-8859-3",
@@ -308,8 +308,8 @@ zend_encoding encoding_8859_3 = {
 	1
 };
 
-const char *iso_8859_4_aliases[] = {"ISO_8859-4", "latin4", NULL};
-zend_encoding encoding_8859_4 = {
+static const char *iso_8859_4_aliases[] = {"ISO_8859-4", "latin4", NULL};
+static zend_encoding encoding_8859_4 = {
 	NULL,
 	NULL,
 	"ISO-8859-4",
@@ -317,8 +317,8 @@ zend_encoding encoding_8859_4 = {
 	1
 };
 
-const char *iso_8859_5_aliases[] = {"ISO_8859-5", "cyrillic", NULL};
-zend_encoding encoding_8859_5 = {
+static const char *iso_8859_5_aliases[] = {"ISO_8859-5", "cyrillic", NULL};
+static zend_encoding encoding_8859_5 = {
 	NULL,
 	NULL,
 	"ISO-8859-5",
@@ -326,8 +326,8 @@ zend_encoding encoding_8859_5 = {
 	1
 };
 
-const char *iso_8859_6_aliases[] = {"ISO_8859-6", "arabic", NULL};
-zend_encoding encoding_8859_6 = {
+static const char *iso_8859_6_aliases[] = {"ISO_8859-6", "arabic", NULL};
+static zend_encoding encoding_8859_6 = {
 	NULL,
 	NULL,
 	"ISO-8859-6",
@@ -335,8 +335,8 @@ zend_encoding encoding_8859_6 = {
 	1
 };
 
-const char *iso_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
-zend_encoding encoding_8859_7 = {
+static const char *iso_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
+static zend_encoding encoding_8859_7 = {
 	NULL,
 	NULL,
 	"ISO-8859-7",
@@ -344,8 +344,8 @@ zend_encoding encoding_8859_7 = {
 	1
 };
 
-const char *iso_8859_8_aliases[] = {"ISO_8859-8", "hebrew", NULL};
-zend_encoding encoding_8859_8 = {
+static const char *iso_8859_8_aliases[] = {"ISO_8859-8", "hebrew", NULL};
+static zend_encoding encoding_8859_8 = {
 	NULL,
 	NULL,
 	"ISO-8859-8",
@@ -353,8 +353,8 @@ zend_encoding encoding_8859_8 = {
 	1
 };
 
-const char *iso_8859_9_aliases[] = {"ISO_8859-9", "latin5", NULL};
-zend_encoding encoding_8859_9 = {
+static const char *iso_8859_9_aliases[] = {"ISO_8859-9", "latin5", NULL};
+static zend_encoding encoding_8859_9 = {
 	NULL,
 	NULL,
 	"ISO-8859-9",
@@ -362,8 +362,8 @@ zend_encoding encoding_8859_9 = {
 	1
 };
 
-const char *iso_8859_10_aliases[] = {"ISO_8859-10", "latin6", NULL};
-zend_encoding encoding_8859_10 = {
+static const char *iso_8859_10_aliases[] = {"ISO_8859-10", "latin6", NULL};
+static zend_encoding encoding_8859_10 = {
 	NULL,
 	NULL,
 	"ISO-8859-10",
@@ -371,8 +371,8 @@ zend_encoding encoding_8859_10 = {
 	1
 };
 
-const char *iso_8859_13_aliases[] = {"ISO_8859-13", NULL};
-zend_encoding encoding_8859_13 = {
+static const char *iso_8859_13_aliases[] = {"ISO_8859-13", NULL};
+static zend_encoding encoding_8859_13 = {
 	NULL,
 	NULL,
 	"ISO-8859-13",
@@ -380,8 +380,8 @@ zend_encoding encoding_8859_13 = {
 	1
 };
 
-const char *iso_8859_14_aliases[] = {"ISO_8859-14", "latin8", NULL};
-zend_encoding encoding_8859_14 = {
+static const char *iso_8859_14_aliases[] = {"ISO_8859-14", "latin8", NULL};
+static zend_encoding encoding_8859_14 = {
 	NULL,
 	NULL,
 	"ISO-8859-14",
@@ -389,8 +389,8 @@ zend_encoding encoding_8859_14 = {
 	1
 };
 
-const char *iso_8859_15_aliases[] = {"ISO_8859-15", NULL};
-zend_encoding encoding_8859_15 = {
+static const char *iso_8859_15_aliases[] = {"ISO_8859-15", NULL};
+static zend_encoding encoding_8859_15 = {
 	NULL,
 	NULL,
 	"ISO-8859-15",
@@ -398,8 +398,8 @@ zend_encoding encoding_8859_15 = {
 	1
 };
 
-const char *cp1251_aliases[] = {"CP1251", "CP-1251", "WINDOWS-1251", NULL};
-zend_encoding encoding_cp1251 = {
+static const char *cp1251_aliases[] = {"CP1251", "CP-1251", "WINDOWS-1251", NULL};
+static zend_encoding encoding_cp1251 = {
 	NULL,
 	NULL,
 	"Windows-1251",
@@ -407,8 +407,8 @@ zend_encoding encoding_cp1251 = {
 	1
 };
 
-const char *cp866_aliases[] = {"CP866", "CP-866", "IBM-866", NULL};
-zend_encoding encoding_cp866 = {
+static const char *cp866_aliases[] = {"CP866", "CP-866", "IBM-866", NULL};
+static zend_encoding encoding_cp866 = {
 	NULL,
 	NULL,
 	"CP866",
@@ -416,8 +416,8 @@ zend_encoding encoding_cp866 = {
 	1
 };
 
-const char *koi8r_aliases[] = {"KOI8-R", "KOI8R", NULL};
-zend_encoding encoding_koi8r = {
+static const char *koi8r_aliases[] = {"KOI8-R", "KOI8R", NULL};
+static zend_encoding encoding_koi8r = {
 	NULL,
 	NULL,
 	"KOI8-R",
@@ -425,7 +425,7 @@ zend_encoding encoding_koi8r = {
 	1
 };
 
-zend_encoding *zend_encoding_table[] = {
+static zend_encoding *zend_encoding_table[] = {
 	&encoding_ucs4,
 	&encoding_ucs4be,
 	&encoding_ucs4le,
