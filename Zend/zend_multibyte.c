@@ -426,6 +426,33 @@ static zend_encoding encoding_koi8r = {
 	1
 };
 
+static const char *koi8u_aliases[] = {"KOI8-U", "KOI8U", NULL};
+static zend_encoding encoding_koi8u = {
+	NULL,
+	NULL,
+	"KOI8-U",
+	(const char *(*)[])&koi8u_aliases,
+	1
+};
+
+static const char *cp1254_aliases[] = {"cp1254", NULL};
+static zend_encoding encoding_cp1254 = {
+	NULL,
+	NULL,
+	"Windows-1254",
+	(const char *(*)[])&cp1254_aliases,
+	1
+};
+
+static const char *armscii8_aliases[] = {"ArmSCII-8", "ArmSCII8", "ARMSCII-8", "ARMSCII8", NULL};
+static zend_encoding encoding_armscii8 = {
+	NULL,
+	NULL,
+	"ArmSCII-81254",
+	(const char *(*)[])&armscii8_aliases,
+	1
+};
+
 static zend_encoding *zend_encoding_table[] = {
 	&encoding_ucs4,
 	&encoding_ucs4be,
@@ -471,6 +498,9 @@ static zend_encoding *zend_encoding_table[] = {
 	&encoding_cp1251,
 	&encoding_cp866,
 	&encoding_koi8r,
+	&encoding_koi8u,
+	&encoding_armscii8,
+	&encoding_cp1254,
 	NULL
 };
 
