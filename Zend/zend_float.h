@@ -21,10 +21,12 @@
 #ifndef ZEND_FLOAT_H
 #define ZEND_FLOAT_H
 
-#define ZEND_FLOAT_DECLARE				XPFPA_DECLARE
-#define ZEND_FLOAT_ENSURE()				XPFPA_SWITCH_DOUBLE()
-#define ZEND_FLOAT_RESTORE()			XPFPA_RESTORE()
-#define ZEND_FLOAT_RETURN(val)			XPFPA_RETURN_DOUBLE(val)
+/*
+  Define functions for FP initialization and de-initialization.
+*/
+extern ZEND_API void zend_init_fpu(TSRMLS_D);
+extern ZEND_API void zend_shutdown_fpu(TSRMLS_D);
+extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
 
 /* Copy of the contents of xpfpa.h (which is under public domain)
    See http://wiki.php.net/rfc/rounding for details.
@@ -45,7 +47,7 @@
    For further details, please visit:
    http://www.christian-seiler.de/projekte/fpmath/
 
-   Version: 20081026 */
+   Version: 20090317 */
 
 /*
  Implementation notes:
@@ -69,11 +71,8 @@
 /* MSVC detection (MSVC people usually don't use autoconf) */
 #ifdef _MSC_VER
 # if _MSC_VER >= 1500
-   /* Disable it, it slowdowns the floating operation more than
-      anything else, by a factor 3 (using Bench.php (mandel and 
-      mandel2 for example)*/
    /* Visual C++ 2008 or higher, supports _controlfp_s */
-   /*#  define HAVE__CONTROLFP_S */
+#  define HAVE__CONTROLFP_S
 # else
    /* Visual C++ (up to 2005), supports _controlfp */
 #  define HAVE__CONTROLFP
@@ -86,6 +85,19 @@
 
 /* float.h defines _controlfp_s */
 # include <float.h>
+
+# define XPFPA_HAVE_CW 1
+# define XPFPA_CW_DATATYPE \
+            unsigned int
+
+# define XPFPA_STORE_CW(vptr) do { \
+            _controlfp_s((unsigned int *)(vptr), 0, 0); \
+        } while (0)
+
+# define XPFPA_RESTORE_CW(vptr) do { \
+            unsigned int _xpfpa_fpu_cw; \
+            _controlfp_s(&_xpfpa_fpu_cw, *((unsigned int *)(vptr)), _MCW_PC); \
+        } while (0)
 
 # define XPFPA_DECLARE \
             unsigned int _xpfpa_fpu_oldcw, _xpfpa_fpu_cw;
@@ -141,6 +153,18 @@
 # define XPFPA_DECLARE \
             unsigned int _xpfpa_fpu_oldcw;
 
+# define XPFPA_HAVE_CW 1
+# define XPFPA_CW_DATATYPE \
+            unsigned int
+
+# define XPFPA_STORE_CW(vptr) do { \
+            *((unsigned int *)(vptr)) = _controlfp(0, 0); \
+        } while (0)
+
+# define XPFPA_RESTORE_CW(vptr) do { \
+            _controlfp(*((unsigned int *)(vptr)), _MCW_PC); \
+        } while (0)
+
 # define XPFPA_SWITCH_DOUBLE() do { \
             _xpfpa_fpu_oldcw = _controlfp(0, 0); \
             _controlfp(_PC_53, _MCW_PC); \
@@ -188,6 +212,18 @@
 # define XPFPA_DECLARE \
             fpu_control_t _xpfpa_fpu_oldcw, _xpfpa_fpu_cw;
 
+# define XPFPA_HAVE_CW 1
+# define XPFPA_CW_DATATYPE \
+            fpu_control_t
+
+# define XPFPA_STORE_CW(vptr) do { \
+            _FPU_GETCW((*((fpu_control_t *)(vptr)))); \
+        } while (0)
+
+# define XPFPA_RESTORE_CW(vptr) do { \
+            _FPU_SETCW((*((fpu_control_t *)(vptr)))); \
+        } while (0)
+
 # define XPFPA_SWITCH_DOUBLE() do { \
             _FPU_GETCW(_xpfpa_fpu_oldcw); \
             _xpfpa_fpu_cw = (_xpfpa_fpu_oldcw & ~_FPU_EXTENDED & ~_FPU_SINGLE) | _FPU_DOUBLE; \
@@ -234,6 +270,18 @@
 
 # define XPFPA_DECLARE \
             fp_prec_t _xpfpa_fpu_oldprec;
+
+# define XPFPA_HAVE_CW 1
+# define XPFPA_CW_DATATYPE \
+            fp_prec_t
+
+# define XPFPA_STORE_CW(vptr) do { \
+            *((fp_prec_t *)(vptr)) = fpgetprec(); \
+        } while (0)
+
+# define XPFPA_RESTORE_CW(vptr) do { \
+            fpsetprec(*((fp_prec_t *)(vptr))); \
+        } while (0)
 
 # define XPFPA_SWITCH_DOUBLE() do { \
             _xpfpa_fpu_oldprec = fpgetprec(); \
@@ -298,6 +346,18 @@
 # define XPFPA_DECLARE \
             unsigned int _xpfpa_fpu_oldcw, _xpfpa_fpu_cw;
 
+# define XPFPA_HAVE_CW 1
+# define XPFPA_CW_DATATYPE \
+            unsigned int
+
+# define XPFPA_STORE_CW(vptr) do { \
+            __asm__ __volatile__ ("fnstcw %0" : "=m" (*((unsigned int *)(vptr)))); \
+        } while (0)
+
+# define XPFPA_RESTORE_CW(vptr) do { \
+            __asm__ __volatile__ ("fldcw %0" : : "m" (*((unsigned int *)(vptr)))); \
+        } while (0)
+
 # define XPFPA_SWITCH_DOUBLE() do { \
             __asm__ __volatile__ ("fnstcw %0" : "=m" (*&_xpfpa_fpu_oldcw)); \
             _xpfpa_fpu_cw = (_xpfpa_fpu_oldcw & ~0x100) | 0x200; \
@@ -345,6 +405,10 @@
   generated code will behave as planned.
 */
 # define XPFPA_DECLARE                      /* NOP */
+# define XPFPA_HAVE_CW                      0
+# define XPFPA_CW_DATATYPE                  unsigned int
+# define XPFPA_STORE_CW(variable)           /* NOP */
+# define XPFPA_RESTORE_CW(variable)         /* NOP */
 # define XPFPA_SWITCH_DOUBLE()              /* NOP */
 # define XPFPA_SWITCH_SINGLE()              /* NOP */
 # define XPFPA_SWITCH_DOUBLE_EXTENDED()     /* NOP */

@@ -24,7 +24,6 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_multiply.h"
-#include "zend_float.h"
 
 #include <math.h>
 #include <float.h>
@@ -94,10 +93,8 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
-	ZEND_FLOAT_DECLARE
 	double tmp_value;
 
-	ZEND_FLOAT_ENSURE();
 	if (value >= 0.0) {
 		tmp_value = floor(value + 0.5);
 		if ((mode == PHP_ROUND_HALF_DOWN && value == (-0.5 + tmp_value)) ||
@@ -116,7 +113,7 @@ static inline double php_round_helper(double value, int mode) {
 		}
 	}
 
-	ZEND_FLOAT_RETURN(tmp_value);
+	return tmp_value;
 }
 /* }}} */
 
@@ -126,12 +123,9 @@ static inline double php_round_helper(double value, int mode) {
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
-	ZEND_FLOAT_DECLARE
 	double f1, f2;
 	double tmp_value;
 	int precision_places;
-
-	ZEND_FLOAT_ENSURE();
 
 	precision_places = 14 - php_intlog10abs(value);
 
@@ -163,7 +157,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		}
 		/* This value is beyond our precision, so rounding it is pointless */
 		if (fabs(tmp_value) >= 1e15) {
-			ZEND_FLOAT_RETURN(value);
+			return value;
 		}
 	}
 
@@ -196,7 +190,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		}
 	}
 
-	ZEND_FLOAT_RETURN(tmp_value);
+	return tmp_value;
 }
 /* }}} */
 
