@@ -8553,6 +8553,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*binary_op)(zval
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -8803,6 +8807,10 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, ZE
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -8894,6 +8902,10 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, Z
 	zval *property = &opline->op2.u.constant;
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -10070,6 +10082,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*binary_op)(zval *
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -10321,6 +10337,10 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEND
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -10412,6 +10432,10 @@ static int zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEN
 	zval *property = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -11591,6 +11615,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*binary_op)(zval *
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -11842,6 +11870,10 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEND
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -11933,6 +11965,10 @@ static int zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEN
 	zval *property = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -12926,6 +12962,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*binary_op)(zva
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -13607,6 +13647,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*binary_op)(zval *r
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -13857,6 +13901,10 @@ static int zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND_
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -13948,6 +13996,10 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND
 	zval *property = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_VAR == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -15017,6 +15069,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int (*binary_op)(z
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -15266,6 +15322,10 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op,
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -15357,6 +15417,10 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op
 	zval *property = &opline->op2.u.constant;
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -16041,6 +16105,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*binary_op)(zva
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -16291,6 +16359,10 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, Z
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -16382,6 +16454,10 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, 
 	zval *property = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -17022,6 +17098,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*binary_op)(zva
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -17272,6 +17352,10 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, Z
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -17363,6 +17447,10 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, 
 	zval *property = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -18003,6 +18091,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -18269,6 +18361,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*binary_op)(zval
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -18518,6 +18614,10 @@ static int zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, ZE
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -18609,6 +18709,10 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, Z
 	zval *property = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_UNUSED == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -20711,6 +20815,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*binary_op)(zval 
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -20960,6 +21068,10 @@ static int zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZEN
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -21051,6 +21163,10 @@ static int zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZE
 	zval *property = &opline->op2.u.constant;
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -22220,6 +22336,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*binary_op)(zval *r
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -22470,6 +22590,10 @@ static int zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND_
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -22561,6 +22685,10 @@ static int zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND
 	zval *property = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -23733,6 +23861,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*binary_op)(zval *r
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -23983,6 +24115,10 @@ static int zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND_
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -24074,6 +24210,10 @@ static int zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND
 	zval *property = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -25059,6 +25199,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*binary_op)(zval
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -25739,6 +25883,10 @@ static int zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binary_op)(zval *re
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	EX_T(result->u.var).var.ptr_ptr = NULL;
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
@@ -25988,6 +26136,10 @@ static int zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_O
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
 
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -26079,6 +26231,10 @@ static int zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_
 	zval *property = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
+
+	if (IS_CV == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;

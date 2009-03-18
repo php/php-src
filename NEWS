@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
+- Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).
+  (Dmitry)
 - Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect). (Mikko, Pierre)
 - Fixed bug #47644 (Valid integers are truncated with json_decode()). (Scott)
 - Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
