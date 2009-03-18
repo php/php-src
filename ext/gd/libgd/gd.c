@@ -860,23 +860,27 @@ static void gdImageBrushApply (gdImagePtr im, int x, int y)
 
 static void gdImageTileApply (gdImagePtr im, int x, int y)
 {
+	gdImagePtr tile = im->tile;
 	int srcx, srcy;
 	int p;
-	if (!im->tile) {
+	if (!tile) {
 		return;
 	}
-	srcx = x % gdImageSX(im->tile);
-	srcy = y % gdImageSY(im->tile);
+	srcx = x % gdImageSX(tile);
+	srcy = y % gdImageSY(tile);
 	if (im->trueColor) {
-		p = gdImageGetTrueColorPixel(im->tile, srcx, srcy);
-		if (p != gdImageGetTransparent (im->tile)) {
+		p = gdImageGetPixel(tile, srcx, srcy);
+		if (p != gdImageGetTransparent (tile)) {
+			if (!tile->trueColor) {
+				p = gdTrueColorAlpha(tile->red[p], tile->green[p], tile->blue[p], tile->alpha[p]);
+			}
 			gdImageSetPixel(im, x, y, p);
 		}
 	} else {
-		p = gdImageGetPixel(im->tile, srcx, srcy);
+		p = gdImageGetPixel(tile, srcx, srcy);
 		/* Allow for transparency */
-		if (p != gdImageGetTransparent(im->tile)) {
-			if (im->tile->trueColor) {
+		if (p != gdImageGetTransparent(tile)) {
+			if (tile->trueColor) {
 				/* Truecolor tile. Very slow on a palette destination. */
 				gdImageSetPixel(im, x, y, gdImageColorResolveAlpha(im,
 											gdTrueColorGetRed(p),
