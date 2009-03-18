@@ -963,17 +963,8 @@ num_index:
 
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
-			switch (type) {
-				case BP_VAR_R:
-				case BP_VAR_IS:
-				case BP_VAR_UNSET:
-					retval = &EG(uninitialized_zval_ptr);
-					break;
-				default:
-					retval = &EG(error_zval_ptr);
-					break;
-			}
-			break;
+			return (type == BP_VAR_W || type == BP_VAR_RW) ?
+				&EG(error_zval_ptr) : &EG(uninitialized_zval_ptr);
 	}
 	return retval;
 }
@@ -1155,12 +1146,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 			break;
 
 		case IS_NULL:
-			if (container == EG(error_zval_ptr)) {
-				if (result) {
-					AI_SET_PTR(result->var, EG(error_zval_ptr));
-					PZVAL_LOCK(EG(error_zval_ptr));
-				}
-			} else if (result) {
+			if (result) {
 				/* for read-mode only */
 				AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
 				PZVAL_LOCK(EG(uninitialized_zval_ptr));
@@ -1230,8 +1216,8 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 						zval_ptr_dtor(&overloaded_result);
 					}
 				} else if (result) {
-					AI_SET_PTR(result->var, EG(error_zval_ptr));
-					PZVAL_LOCK(EG(error_zval_ptr));
+					AI_SET_PTR(result->var, EG(uninitialized_zval_ptr));
+					PZVAL_LOCK(EG(uninitialized_zval_ptr));
 				}
 				if (dim_is_tmp_var) {
 					zval_ptr_dtor(&dim);
