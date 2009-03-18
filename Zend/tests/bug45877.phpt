@@ -1,5 +1,7 @@
 --TEST--
 Bug #45877 (Array key '2147483647' left as string)
+--INI--
+precision=20
 --FILE--
 <?php
 $keys = array(PHP_INT_MAX,
