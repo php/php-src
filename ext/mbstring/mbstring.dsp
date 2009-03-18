@@ -366,6 +366,10 @@ SOURCE=.\libmbfl\filters\mbfilter_koi8r.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_koi8u.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\filters\mbfilter_armscii8.c
 # End Source File
 # Begin Source File
@@ -675,6 +679,10 @@ SOURCE=.\libmbfl\filters\mbfilter_koi8r.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_koi8u.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\filters\mbfilter_armscii8.h
 # End Source File
 # Begin Source File
@@ -892,6 +900,10 @@ SOURCE=.\libmbfl\filters\unicode_table_jis.h
 # Begin Source File
 
 SOURCE=.\libmbfl\filters\unicode_table_koi8r.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_koi8u.h
 # End Source File
 # Begin Source File
 
