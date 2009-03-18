@@ -1736,10 +1736,10 @@ ZEND_API int increment_function(zval *op1)
 		case IS_STRING: {
 				long lval;
 				double dval;
-				char *strval = Z_STRVAL_P(op1);
 
-				switch (is_numeric_string(strval, Z_STRLEN_P(op1), &lval, &dval, 0)) {
+				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
+						efree(Z_STRVAL_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
@@ -1747,11 +1747,10 @@ ZEND_API int increment_function(zval *op1)
 						} else {
 							ZVAL_LONG(op1, lval+1);
 						}
-						efree(strval); /* should never be empty_string */
 						break;
 					case IS_DOUBLE:
+						efree(Z_STRVAL_P(op1));
 						ZVAL_DOUBLE(op1, dval+1);
-						efree(strval); /* should never be empty_string */
 						break;
 					default:
 						/* Perl style string increment */
