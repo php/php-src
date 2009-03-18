@@ -6,8 +6,7 @@ Installing PHP
    1. General Installation Considerations
    2. Installation on Windows systems
 
-        Windows Installer (PHP 5.2 and later)
-        Windows Installer (PHP 5.1.0 and earlier)
+        Windows Installer
         Manual Installation Steps
         ActiveScript
         Microsoft IIS / PWS
@@ -340,9 +339,9 @@ c:\php
    |
    |-..
    |
-   |-php.ini-dist         -- default php.ini settings
+   |-php.ini-development  -- development php.ini settings
    |
-   |-php.ini-recommended  -- recommended php.ini settings
+   |-php.ini-production   -- recommended php.ini settings for production
    |
    |-php4ts.dll           -- core PHP DLL
    |
@@ -392,9 +391,9 @@ c:\php
    |
    |-..
    |
-   |-php.ini-dist         -- default php.ini settings
+   |-php.ini-development  -- development php.ini settings
    |
-   |-php.ini-recommended  -- recommended php.ini settings
+   |-php.ini-production   -- recommended php.ini settings for production
    |
    |-php5activescript.dll
    |
@@ -464,12 +463,12 @@ c:\php
    - logoff isn't enough).
 
    The next step is to set up a valid configuration file for PHP, php.ini.
-   There are two ini files distributed in the zip file, php.ini-dist and
-   php.ini-recommended. We advise you to use php.ini-recommended, because
-   we optimized the default settings in this file for performance, and
-   security. Read this well documented file carefully because it has
-   changes from php.ini-dist that will drastically affect your setup. Some
-   examples are display_errors being off and magic_quotes_gpc being off.
+   There are two ini files distributed in the zip file, php.ini-development
+   and php.ini-production. We advise you to use php.ini-production, 
+   because we optimized the default settings in this file for performance, 
+   and security. Read this well documented file carefully because it has
+   changes from php.ini-production that will drastically affect your setup.
+   Some examples are display_errors being off and magic_quotes_gpc being off.
    In addition to reading these, study the ini settings and set every
    element manually yourself. If you would like to achieve the best
    security, then this is the way for you, although PHP works fine with
@@ -1858,7 +1857,7 @@ cgi error:
    example, set it with something like:
    --with-config-file-path=/etc
 
-   And then you would copy php.ini-dist from the distribution to
+   And then you would copy php.ini-production from the distribution to
    /etc/php.ini and edit it to make any local changes you want.
    --with-config-file-scan-dir=PATH
 
