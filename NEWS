@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
+- Fixed bug #43073, (TrueType bounding box is wrong for angle<>0) (Martin McNickle)
 - Fixed PECL Bug #16035 (OCI8: oci_connect without ORACLE_HOME defined causes segfault) (Chris Jones/Oracle Corp.)
 - Fixed PECL Bug #15988 (OCI8: sqlnet.ora isn't read with older Oracle libraries) (Chris Jones/Oracle Corp.)
 - Fixed PECL Bug #14268 (Allow "pecl install oci8" command to "autodetect" an Instant Client RPM install) (Chris Jones/Oracle Corp.)
