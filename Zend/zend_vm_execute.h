@@ -2643,7 +2643,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -2681,7 +2681,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -3216,7 +3216,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -3254,7 +3254,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -3684,7 +3684,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -3722,7 +3722,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -3908,7 +3908,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -3946,7 +3946,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -4344,7 +4344,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -4382,7 +4382,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -6000,10 +6000,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -6469,10 +6466,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -6940,10 +6934,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -7505,10 +7496,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -10384,10 +10372,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -10418,7 +10403,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -10456,7 +10441,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -12199,10 +12184,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -12234,7 +12216,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -12272,7 +12254,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -13948,7 +13930,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
-		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
@@ -14010,10 +13992,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -14045,7 +14024,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -14083,7 +14062,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -14947,7 +14926,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -14985,7 +14964,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -16350,7 +16329,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
-		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
@@ -16411,10 +16390,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -16445,7 +16421,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
 		if (!ce) {
-			zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
+			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
 		EX(called_scope) = ce;
 	} else {
@@ -16483,7 +16459,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 				EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 			}
 			if (!EX(fbc)) {
-				zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
 			}
 		}
 
@@ -17763,10 +17739,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -18885,10 +18858,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -19951,10 +19921,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -21277,10 +21244,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -24147,10 +24111,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -25796,10 +25757,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -27436,7 +27394,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
-		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
@@ -27497,10 +27455,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
@@ -29629,7 +29584,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		PZVAL_LOCK(*value_ptr_ptr);
 	}
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
-		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	variable_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
@@ -29689,10 +29644,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
-	if (!EX(object)) {
-		EX(called_scope) = NULL;
-		EX(object) = NULL;
-	} else if (EX(fbc) && (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		EX(object) = NULL;
 	} else {
 		if (!PZVAL_IS_REF(EX(object))) {
