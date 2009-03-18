@@ -1652,14 +1652,24 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	int ret = i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R));
+	zval *val = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	int ret;
 
-	FREE_OP1();
+	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(val) == IS_BOOL) {
+		ret = Z_LVAL_P(val);
+	} else {
+		ret = i_zend_is_true(val);
+		FREE_OP1();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
+	}
 	if (!ret) {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_JMP(opline->op2.u.jmp_addr);
+		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
+		ZEND_VM_CONTINUE();
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1669,14 +1679,24 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	int ret = i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R));
+	zval *val = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	int ret;
 
-	FREE_OP1();
+	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(val) == IS_BOOL) {
+		ret = Z_LVAL_P(val);
+	} else {
+		ret = i_zend_is_true(val);
+		FREE_OP1();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
+	}
 	if (ret) {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_JMP(opline->op2.u.jmp_addr);
+		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
+		ZEND_VM_CONTINUE();
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1686,13 +1706,19 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	int retval = i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R));
+	zval *val = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	int retval;
 
-	FREE_OP1();
-
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		ZEND_VM_CONTINUE();
-	} else if (EXPECTED(retval != 0)) {
+	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(val) == IS_BOOL) {
+		retval = Z_LVAL_P(val);
+	} else {
+		retval = i_zend_is_true(val);
+		FREE_OP1();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
+	}
+	if (EXPECTED(retval != 0)) {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
@@ -1711,16 +1737,26 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	int retval = i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R));
+	zval *val = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	int retval;
 
-	FREE_OP1();
+	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(val) == IS_BOOL) {
+		retval = Z_LVAL_P(val);
+	} else {
+		retval = i_zend_is_true(val);
+		FREE_OP1();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
+	}
 	Z_LVAL(EX_T(opline->result.u.var).tmp_var) = retval;
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 	if (!retval) {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_JMP(opline->op2.u.jmp_addr);
+		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
+		ZEND_VM_CONTINUE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1729,16 +1765,26 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
-	int retval = i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R));
+	zval *val = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	int retval;
 
-	FREE_OP1();
+	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(val) == IS_BOOL) {
+		retval = Z_LVAL_P(val);
+	} else {
+		retval = i_zend_is_true(val);
+		FREE_OP1();
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
+	}
 	Z_LVAL(EX_T(opline->result.u.var).tmp_var) = retval;
 	Z_TYPE(EX_T(opline->result.u.var).tmp_var) = IS_BOOL;
 	if (retval) {
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
-		ZEND_VM_JMP(opline->op2.u.jmp_addr);
+		ZEND_VM_SET_OPCODE(opline->op2.u.jmp_addr);
+		ZEND_VM_CONTINUE();
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
