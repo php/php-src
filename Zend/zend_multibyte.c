@@ -444,11 +444,11 @@ static zend_encoding encoding_cp1254 = {
 	1
 };
 
-static const char *armscii8_aliases[] = {"ArmSCII-8", "ArmSCII8", "ARMSCII-8", "ARMSCII8", NULL};
+static const char *armscii8_aliases[] = { "ArmSCII8", "ARMSCII-8", "ARMSCII8", NULL};
 static zend_encoding encoding_armscii8 = {
 	NULL,
 	NULL,
-	"ArmSCII-81254",
+	"ArmSCII-8",
 	(const char *(*)[])&armscii8_aliases,
 	1
 };
