@@ -303,6 +303,10 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	znode *result = &opline->result;
 	int have_get_ptr = 0;
 
+	if (OP1_TYPE == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
 
@@ -342,17 +346,14 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		if (!have_get_ptr) {
 			zval *z = NULL;
 
-			switch (opline->extended_value) {
-				case ZEND_ASSIGN_OBJ:
-					if (Z_OBJ_HT_P(object)->read_property) {
-						z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R TSRMLS_CC);
-					}
-					break;
-				case ZEND_ASSIGN_DIM:
-					if (Z_OBJ_HT_P(object)->read_dimension) {
-						z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R TSRMLS_CC);
-					}
-					break;
+			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+				if (Z_OBJ_HT_P(object)->read_property) {
+					z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R TSRMLS_CC);
+				}
+			} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
+				if (Z_OBJ_HT_P(object)->read_dimension) {
+					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R TSRMLS_CC);
+				}
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
@@ -368,13 +369,10 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(&z);
 				binary_op(z, z, value TSRMLS_CC);
-				switch (opline->extended_value) {
-					case ZEND_ASSIGN_OBJ:
-						Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-						break;
-					case ZEND_ASSIGN_DIM:
-						Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
-						break;
+				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+					Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
+					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
 				if (!RETURN_VALUE_UNUSED(result)) {
 					EX_T(result->u.var).var.ptr = z;
@@ -412,33 +410,29 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 	zend_free_op free_op1, free_op2, free_op_data2, free_op_data1;
 	zval **var_ptr;
 	zval *value;
-	zend_bool increment_opline = 0;
 
 	switch (opline->extended_value) {
 		case ZEND_ASSIGN_OBJ:
 			ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 			break;
 		case ZEND_ASSIGN_DIM: {
-				zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
+				zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 
-				if (object_ptr && OP1_TYPE != IS_CV && !OP1_FREE) {
-					Z_ADDREF_PP(object_ptr);  /* undo the effect of get_obj_zval_ptr_ptr() */
-				}
-
-				if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+				if (OP1_TYPE == IS_VAR && !container) {
+					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+				} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+					if (OP1_TYPE == IS_VAR && !OP1_FREE) {
+						Z_ADDREF_PP(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+					}
 					ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 				} else {
 					zend_op *op_data = opline+1;
 					zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-					zval **container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
-					if (OP1_TYPE == IS_VAR && !container) {
-						zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-					}
 					zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), container, dim, IS_OP2_TMP_FREE(), BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
 					var_ptr = _get_zval_ptr_ptr_var(&op_data->op2, EX(Ts), &free_op_data2 TSRMLS_CC);
-					increment_opline = 1;
+					ZEND_VM_INC_OPCODE();
 				}
 			}
 			break;
@@ -460,9 +454,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		}
 		FREE_OP2();
 		FREE_OP1_VAR_PTR();
-		if (increment_opline) {
-			ZEND_VM_INC_OPCODE();
-		}
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -486,8 +477,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 	}
 	FREE_OP2();
 
-	if (increment_opline) {
-		ZEND_VM_INC_OPCODE();
+	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
@@ -559,6 +549,10 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval **retval = &EX_T(opline->result.u.var).var.ptr;
 	int have_get_ptr = 0;
+
+	if (OP1_TYPE == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
@@ -653,6 +647,10 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	zval *retval = &EX_T(opline->result.u.var).tmp_var;
 	int have_get_ptr = 0;
 
+	if (OP1_TYPE == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
+	}
+
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
 	object = *object_ptr;
 
@@ -744,7 +742,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
-	if (*var_ptr == EG(error_zval_ptr)) {
+	if (OP1_TYPE == IS_VAR && *var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
 			PZVAL_LOCK(EG(uninitialized_zval_ptr));
@@ -785,7 +783,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
-	if (*var_ptr == EG(error_zval_ptr)) {
+	if (OP1_TYPE == IS_VAR && *var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
 			PZVAL_LOCK(EG(uninitialized_zval_ptr));
@@ -826,7 +824,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
-	if (*var_ptr == EG(error_zval_ptr)) {
+	if (OP1_TYPE == IS_VAR && *var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			EX_T(opline->result.u.var).tmp_var = *EG(uninitialized_zval_ptr);
 		}
@@ -864,7 +862,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	if (OP1_TYPE == IS_VAR && !var_ptr) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
-	if (*var_ptr == EG(error_zval_ptr)) {
+	if (OP1_TYPE == IS_VAR && *var_ptr == EG(error_zval_ptr)) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			EX_T(opline->result.u.var).tmp_var = *EG(uninitialized_zval_ptr);
 		}
@@ -1276,17 +1274,6 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 	zend_free_op free_op2;
 	zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (container == EG(error_zval_ptr)) {
-		if (!RETURN_VALUE_UNUSED(&opline->result)) {
-			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(error_zval_ptr));
-			PZVAL_LOCK(EG(error_zval_ptr));
-		}
-		FREE_OP2();
-		FREE_OP1();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-
 	if (Z_TYPE_P(container) != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
 		if (type != BP_VAR_IS) {
 			zend_error(E_NOTICE, "Trying to get property of non-object");
@@ -1551,16 +1538,12 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	zend_op *opline = EX(opline);
 	zend_op *op_data = opline+1;
 	zend_free_op free_op1;
-	zval **object_ptr;
+	zval **object_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
-	if (OP1_TYPE == IS_CV || EX_T(opline->op1.u.var).var.ptr_ptr) {
-		/* not an array offset */
-		object_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
-	} else {
-		object_ptr = NULL;
+	if (OP1_TYPE == IS_VAR && !object_ptr) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
-
-	if (object_ptr && Z_TYPE_PP(object_ptr) == IS_OBJECT) {
+	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
@@ -1579,9 +1562,6 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		zval **variable_ptr_ptr;
 
-		if (OP1_TYPE == IS_VAR && !object_ptr) {
-			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-		}
 		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, IS_OP2_TMP_FREE(), BP_VAR_W TSRMLS_CC);
 		FREE_OP2();
 
@@ -1622,7 +1602,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	zval *value = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval **variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
-	if (!variable_ptr_ptr) {
+	if (OP1_TYPE == IS_VAR && !variable_ptr_ptr) {
 		if (zend_assign_to_string_offset(&EX_T(opline->op1.u.var), value, OP2_TYPE TSRMLS_CC)) {
 			if (!RETURN_VALUE_UNUSED(&opline->result)) {
 				EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
@@ -2981,10 +2961,6 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 
 	if (!obj || Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error_noreturn(E_ERROR, "__clone method called on non-object");
-		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
-		Z_ADDREF_P(EX_T(opline->result.u.var).var.ptr);
-		FREE_OP1_IF_VAR();
-		ZEND_VM_NEXT_OPCODE();
 	}
 
 	ce = Z_OBJCE_P(obj);
@@ -2996,8 +2972,6 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
-		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
-		Z_ADDREF_P(EX_T(opline->result.u.var).var.ptr);
 	}
 
 	if (ce && clone) {
@@ -3517,7 +3491,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	long index;
 
-	if (container) {
+	if (OP1_TYPE != IS_VAR || container) {
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
 			SEPARATE_ZVAL_IF_NOT_REF(container);
 		}
@@ -3635,7 +3609,7 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (container) {
+	if (OP1_TYPE != IS_VAR || container) {
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
 			SEPARATE_ZVAL_IF_NOT_REF(container);
 		}
@@ -4051,7 +4025,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	int result = 0;
 	long index;
 
-	if (container) {
+	if (OP1_TYPE != IS_VAR || container) {
 		zend_free_op free_op2;
 		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
