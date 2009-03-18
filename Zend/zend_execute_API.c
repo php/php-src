@@ -32,6 +32,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_vm.h"
+#include "zend_float.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
