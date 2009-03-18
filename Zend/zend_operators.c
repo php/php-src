@@ -1998,21 +1998,13 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				ZVAL_LONG(result, zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), "", 0));
 				return SUCCESS;
 
-			case TYPE_PAIR(IS_NULL, IS_UNICODE): {
-				UChar *empty_str = USTR_MAKE("");
-
-				ZVAL_LONG(result, zend_u_binary_strcmp(empty_str, 0, Z_USTRVAL_P(op2), Z_USTRLEN_P(op2)));
-				efree(empty_str);
+			case TYPE_PAIR(IS_NULL, IS_UNICODE):
+				ZVAL_LONG(result, zend_u_binary_strcmp(EMPTY_STR, 0, Z_USTRVAL_P(op2), Z_USTRLEN_P(op2)));
 				return SUCCESS;
-			}
 
-			case TYPE_PAIR(IS_UNICODE, IS_NULL): {
-				UChar *empty_str = USTR_MAKE("");
-
-				ZVAL_LONG(result, zend_u_binary_strcmp(Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), empty_str, 0));
-				efree(empty_str);
+			case TYPE_PAIR(IS_UNICODE, IS_NULL):
+				ZVAL_LONG(result, zend_u_binary_strcmp(Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), EMPTY_STR, 0));
 				return SUCCESS;
-			}
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
 				ZVAL_LONG(result, 1);
@@ -2450,24 +2442,23 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 		case IS_STRING: {
 				long lval;
 				double dval;
-				char *strval = Z_STRVAL_P(op1);
 
-				switch (is_numeric_string(strval, Z_STRLEN_P(op1), &lval, &dval, 0)) {
+				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
+						efree(Z_STRVAL_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
 							ZVAL_DOUBLE(op1, d+1);
 						} else {
-						Z_LVAL_P(op1) = lval+1;
-						Z_TYPE_P(op1) = IS_LONG;
+							Z_LVAL_P(op1) = lval+1;
+							Z_TYPE_P(op1) = IS_LONG;
 						}
-						efree(strval); /* should never be empty_string */
 						break;
 					case IS_DOUBLE:
+						efree(Z_STRVAL_P(op1));
 						Z_DVAL_P(op1) = dval+1;
 						Z_TYPE_P(op1) = IS_DOUBLE;
-						efree(strval); /* should never be empty_string */
 						break;
 					default:
 						/* Perl style string increment */
@@ -2479,24 +2470,23 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 		case IS_UNICODE: {
 				long lval;
 				double dval;
-				UChar *ustrval = Z_USTRVAL_P(op1);
 
-				switch (is_numeric_unicode(ustrval, Z_USTRLEN_P(op1), &lval, &dval, 0)) {
+				switch (is_numeric_unicode(Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
+						efree(Z_USTRVAL_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
 							ZVAL_DOUBLE(op1, d+1);
 						} else {
-						Z_LVAL_P(op1) = lval+1;
-						Z_TYPE_P(op1) = IS_LONG;
+							Z_LVAL_P(op1) = lval+1;
+							Z_TYPE_P(op1) = IS_LONG;
 						}
-						efree(ustrval); /* should never be empty_string */
 						break;
 					case IS_DOUBLE:
+						efree(Z_USTRVAL_P(op1));
 						Z_DVAL_P(op1) = dval+1;
 						Z_TYPE_P(op1) = IS_DOUBLE;
-						efree(ustrval); /* should never be empty_string */
 						break;
 					default:
 						/* Perl style string increment */
