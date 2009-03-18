@@ -66,7 +66,7 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 
 #define TEMP_VAR_STACK_LIMIT 2000
 
-static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref TSRMLS_DC) /* {{{ */
+static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref TSRMLS_DC) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
 		Z_SET_REFCOUNT_P(z, 1);
@@ -83,7 +83,7 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, in
 }
 /* }}} */
 
-static inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC) /* {{{ */
+static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC) /* {{{ */
 {
 	if (!Z_DELREF_P(z)) {
 		if (z != &EG(uninitialized_zval)) {
@@ -182,7 +182,7 @@ static zend_always_inline zval *_get_zval_ptr_tmp(const znode *node, const temp_
 }
 /* }}} */
 
-static inline zval *_get_zval_ptr_var_string_offset(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
+static zval *_get_zval_ptr_var_string_offset(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	temp_variable *T = &T(node->u.var);
 	zval *str = T->str_offset.str;
@@ -240,7 +240,7 @@ static zend_always_inline zval *_get_zval_ptr_var(const znode *node, const temp_
 }
 /* }}} */
 
-static inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC) /* {{{ */
+static zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC) /* {{{ */
 {
 	zend_compiled_variable *cv = &CV_DEF_OF(var);
 	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
@@ -313,7 +313,7 @@ static inline zval *_get_zval_ptr(znode *node, const temp_variable *Ts, zend_fre
 }
 /* }}} */
 
-static inline zval **_get_zval_ptr_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
+static zend_always_inline zval **_get_zval_ptr_ptr_var(const znode *node, const temp_variable *Ts, zend_free_op *should_free TSRMLS_DC) /* {{{ */
 {
 	zval** ptr_ptr = T(node->u.var).var.ptr_ptr;
 
@@ -352,7 +352,7 @@ static inline zval **_get_zval_ptr_ptr(const znode *node, const temp_variable *T
 }
 /* }}} */
 
-static inline zval *_get_obj_zval_ptr_unused(TSRMLS_D) /* {{{ */
+static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D) /* {{{ */
 {
 	if (EXPECTED(EG(This) != NULL)) {
 		return EG(This);
@@ -379,7 +379,7 @@ static inline zval **_get_obj_zval_ptr_ptr(const znode *op, const temp_variable 
 }
 /* }}} */
 
-static inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D) /* {{{ */
+static zend_always_inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D) /* {{{ */
 {
 	if (EXPECTED(EG(This) != NULL)) {
 		return &EG(This);
