@@ -348,7 +348,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 				zend_hash_index_find(ht, index, (void **) &retval);
 				return retval;
 			} else {
-				zend_error(E_NOTICE, "Undefined offset:  %ld", Z_LVAL_P(offset));
+				zend_error(E_NOTICE, "Undefined offset:  %ld", index);
 				return &EG(uninitialized_zval_ptr);
 			}
 		} else {
