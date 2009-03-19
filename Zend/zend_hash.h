@@ -400,18 +400,42 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 /* {{{ ZEND_HANDLE_*_NUMERIC macros */
 #define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
 	register const char *tmp = key;											\
-	const char *end = key + length - 1;										\
-	long idx;																\
 																			\
 	if (*tmp == '-') {														\
 		tmp++;																\
 	}																		\
-	if ((*tmp >= '1' && *tmp <= '9' && (end - tmp) < MAX_LENGTH_OF_LONG) ||	\
-	    (*tmp == '0' && (end - tmp) == 1)) {								\
-		/* possibly a numeric index without leading zeroes */				\
-		idx = (*tmp++ - '0');												\
-		while (1) {															\
-			if (tmp == end && *tmp == '\0') { /* a numeric index */			\
+	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
+		const char *end = key + length - 1;									\
+		long idx;															\
+																			\
+		if (*end != '\0') { /* not a null terminated string */				\
+			break;															\
+		} else if (*tmp == '0') {											\
+			if (end - tmp != 1) {											\
+				/* don't accept numbers with leading zeros */				\
+				break;														\
+			}																\
+			idx = 0;														\
+		} else if (end - tmp > MAX_LENGTH_OF_LONG - 1) {					\
+			/* don't accept too long strings */								\
+			break;															\
+		} else {															\
+			if (end - tmp == MAX_LENGTH_OF_LONG - 1) {						\
+				end--; /* check overflow in last digit later */				\
+			}																\
+			idx = (*tmp++ - '0');											\
+			while (tmp != end && *tmp >= '0' && *tmp <= '9') {				\
+				idx = (idx * 10) + (*tmp++ - '0');							\
+			}																\
+			if (tmp != end) {												\
+				break;														\
+			}																\
+			if (end != key + length - 1) {									\
+				/* last digit can cause overflow */							\
+				if (*tmp < '0' || *tmp > '9' || idx > LONG_MAX / 10) {		\
+					break;													\
+				}															\
+				idx = (idx * 10) + (*tmp - '0');							\
 				if (*key == '-') {											\
 					idx = -idx;												\
 					if (idx > 0) { /* overflow */							\
@@ -420,30 +444,52 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 				} else if (idx < 0) { /* overflow */						\
 					break;													\
 				}															\
-				return func;												\
-			} else if (*tmp >= '0' && *tmp <= '9') {						\
-				idx = (idx * 10) + (*tmp++ - '0');							\
-			} else {														\
-				break;														\
+			} else if (*key == '-') {										\
+				idx = -idx;													\
 			}																\
 		}																	\
+		return func;														\
 	}																		\
 } while (0)
 
-#define ZEND_HANDLE_U_NUMERIC(key, length, func) do {						\
-	register const UChar *tmp = key;										\
-	const UChar *end = key + length - 1;									\
-	long idx;																\
+#define ZEND_HANDLE_U_NUMERIC(key, length, func) do {							\
+	register const UChar *tmp = key;											\
 																			\
 	if (*tmp == '-') {														\
 		tmp++;																\
 	}																		\
-	if ((*tmp >= '1' && *tmp <= '9' && (end - tmp) < MAX_LENGTH_OF_LONG) ||	\
-	    (*tmp == '0' && (end - tmp) == 1)) {								\
-		/* possibly a numeric index without leading zeroes */				\
-		idx = (*tmp++ - '0');												\
-		while (1) {															\
-			if (tmp == end && *tmp == '\0') { /* a numeric index */			\
+	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
+		const UChar *end = key + length - 1;									\
+		long idx;															\
+																			\
+		if (*end != '\0') { /* not a null terminated string */				\
+			break;															\
+		} else if (*tmp == '0') {											\
+			if (end - tmp != 1) {											\
+				/* don't accept numbers with leading zeros */				\
+				break;														\
+			}																\
+			idx = 0;														\
+		} else if (end - tmp > MAX_LENGTH_OF_LONG - 1) {					\
+			/* don't accept too long strings */								\
+			break;															\
+		} else {															\
+			if (end - tmp == MAX_LENGTH_OF_LONG - 1) {						\
+				end--; /* check overflow in last digit later */				\
+			}																\
+			idx = (*tmp++ - '0');											\
+			while (tmp != end && *tmp >= '0' && *tmp <= '9') {				\
+				idx = (idx * 10) + (*tmp++ - '0');							\
+			}																\
+			if (tmp != end) {												\
+				break;														\
+			}																\
+			if (end != key + length - 1) {									\
+				/* last digit can cause overflow */							\
+				if (*tmp < '0' || *tmp > '9' || idx > LONG_MAX / 10) {		\
+					break;													\
+				}															\
+				idx = (idx * 10) + (*tmp - '0');							\
 				if (*key == '-') {											\
 					idx = -idx;												\
 					if (idx > 0) { /* overflow */							\
@@ -452,13 +498,11 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 				} else if (idx < 0) { /* overflow */						\
 					break;													\
 				}															\
-				return func;												\
-			} else if (*tmp >= '0' && *tmp <= '9') {						\
-				idx = (idx * 10) + (*tmp++ - '0');							\
-			} else {														\
-				break;														\
+			} else if (*key == '-') {										\
+				idx = -idx;													\
 			}																\
 		}																	\
+		return func;														\
 	}																		\
 } while (0)
 /* }}} */
