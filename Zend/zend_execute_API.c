@@ -1123,11 +1123,10 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 
 	if (retval_ptr) {
 		int l = strlen(str);
-		Z_STRLEN(pv) = l + sizeof("return  ;") - 1;
+		Z_STRLEN(pv) = l + sizeof("return ;") - 1;
 		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, l);
-		Z_STRVAL(pv)[Z_STRLEN(pv) - 2] = ' ';
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
 		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
 	} else {
