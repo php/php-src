@@ -375,7 +375,7 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, char *data, long 
 	long total_size;
 	long shm_varpos;
 
-	total_size = ((long) (len + sizeof(sysvshm_chunk) - 1) / 4) * 4 + 4; /* 4-byte alligment */
+	total_size = ((long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(long)) * sizeof(long) + sizeof(long); /* long alligment */
 
 	if ((shm_varpos = php_check_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);

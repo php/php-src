@@ -256,7 +256,7 @@
 #define NULL_UCHARP                   ((UChar* )0)
 
 #ifndef PLATFORM_UNALIGNED_WORD_ACCESS
-#define WORD_ALIGNMENT_SIZE       SIZEOF_INT
+#define WORD_ALIGNMENT_SIZE       SIZEOF_LONG
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
   (pad_size) = WORD_ALIGNMENT_SIZE \
