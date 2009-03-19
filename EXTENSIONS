@@ -449,7 +449,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           phar
-PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>
+PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>, Steph Fox <sfox@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
