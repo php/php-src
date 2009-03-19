@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
 - Fixed bug #47265 (generating phar.phar fails because of safe_mode). (Greg)
 - Fixed bug #47243 (OCI8: Crash at shutdown on Windows) (Chris Jones/Oracle Corp.)
+- Fixed bug #47231 (offsetGet error using incorrect offset). (Etienne)
 - Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
 - Fixed bug #47085 (rename() returns true even if the file in PHAR does not
   exist). (Greg)
