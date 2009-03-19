@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
 - Fixed bug #47546 (Default value for limit parameter in explode is 0, not -1).
   (Kalle)
+- Fixed bug #47487 (performance degraded when reading large chunks after fix of
+  bug #44607). (Arnaud)
 - Fixed bug #47435 (FILTER_FLAG_NO_PRIV_RANGE does not work with ipv6
   addresses in the filter extension). (Ilia)
 - Fixed bug #47430 (Errors after writing to nodeValue parameter of an absent 
