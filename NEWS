@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   (Denis Giffeler, Moriyoshi)
 
 - Fixed bug #47678 (Allow loadExtension to be disabled in SQLite3). (Scott)
+- Fixed bug #47671 (Cloning SplObjectStorage instances). (Etienne)
 - Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
 - Fixed bug #47593 (interface_exists() returns false when using absolute 
   namespace path). (Kalle, Felipe)
