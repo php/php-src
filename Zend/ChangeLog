@@ -1,3 +1,121 @@
+2009-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Removed unnecassary checks
+
+2009-03-18  Moriyoshi Koizumi  <mozo@mozo.jp>
+
+    * (PHP_5_3)
+      zend_multibyte.c:
+      - Add support for CP850 encoding (patch by Denis Giffeler)
+
+    * (PHP_5_3)
+      zend_multibyte.c:
+      - Typo.
+
+    * (PHP_5_3)
+      zend_multibyte.c:
+      - Add entries for the encodings that are already supported by mbstring but
+        not listed here.
+
+    * (PHP_5_3)
+      zend_multibyte.c:
+      - staticise private symbols.
+
+2009-03-18  Matt Wilmas  <php_lists@realplain.com>
+
+    * tests/bug45877.phpt:
+      Fixed test on 64-bit (thanks Antony)
+
+2009-03-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Improved speed of conditional jump instructions by checking for most useful
+      case (conditional expression)
+
+    * zend_execute.c
+      zend_execute.c:
+      Inline only the most useful code
+
+    * (PHP_5_2)
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug47704.phpt:
+      Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets)
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug47704.phpt
+      tests/bug47704.phpt
+      tests/bug47704.phpt
+      tests/bug47704.phpt:
+      Fixed bug #47704 (crashes on some "bad" operations with string offsets)
+      Removed unnecessary checks
+
+    * (PHP_5_3)
+      zend_float.c:
+      Forgotten file (sorry)
+
+    * zend_operators.c
+      zend_operators.c:
+      optimization
+
+    * Makefile.am
+      Makefile.am
+      Zend.dsp
+      Zend.dsp
+      ZendTS.dsp
+      zend.c
+      zend.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_float.c
+      zend_float.c
+      zend_float.h
+      zend_float.h
+      zend_globals.h
+      zend_globals.h
+      zend_operators.c
+      zend_operators.c
+      zend_strtod.c
+      zend_strtod.c:
+      Fixed floating point mathematic speed degradation (Christian)
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      Forgotten include
+
+    * zend_hash.c
+      zend_hash.h
+      zend_hash.h:
+      Better fix for bug #45877 (smaller and faster)
+
+2009-03-18  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend.h
+      zend_hash.h
+      zend_operators.h
+      tests/bug45877.phpt:
+      MFH: Fixed bug #45877 (Array key '2147483647' left as string)
+
+    * zend.h
+      zend_hash.h
+      zend_operators.h
+      tests/bug45877.phpt
+      tests/bug45877.phpt:
+      Fixed bug #45877 (Array key '2147483647' left as string)
+
 2009-03-17  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * tests/bug43343.phpt:
