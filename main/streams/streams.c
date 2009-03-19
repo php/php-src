@@ -551,16 +551,16 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 		efree(chunk_buf);
 	} else {	/* Unfiltered Binary stream */
-		/* reduce buffer memory consumption if possible, to avoid a realloc */
-		if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
-			memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
-			stream->writepos -= stream->readpos;
-			stream->readpos = 0;
-		}
 		/* is there enough data in the buffer ? */
-		while (stream->writepos - stream->readpos < (off_t)size) {
+		if (stream->writepos - stream->readpos < (off_t)size) {
 			size_t justread = 0;
-			size_t toread;
+
+			/* reduce buffer memory consumption if possible, to avoid a realloc */
+			if (stream->readbuf.s && stream->readbuflen - stream->writepos < stream->chunk_size) {
+				memmove(stream->readbuf.s, stream->readbuf.s + stream->readpos, stream->writepos - stream->readpos);
+				stream->writepos -= stream->readpos;
+				stream->readpos = 0;
+			}
 
 			/* grow the buffer if required
 			 * TODO: this can fail for persistent streams */
@@ -569,14 +569,9 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 				stream->readbuf.s = (char*)perealloc(stream->readbuf.s, stream->readbuflen, stream->is_persistent);
 			}
 
-			toread = stream->readbuflen - stream->writepos;
-			justread = stream->ops->read(stream, stream->readbuf.s + stream->writepos, toread TSRMLS_CC);
-
-			if (justread != (size_t)-1) {
+			justread = stream->ops->read(stream, stream->readbuf.s + stream->writepos, stream->readbuflen - stream->writepos TSRMLS_CC);
+			if (justread != (size_t)-1 && justread != 0) {
 				stream->writepos += justread;
-			}
-			if (stream->eof || justread != toread) {
-				break;
 			}
 		}
 	}
@@ -1114,10 +1109,25 @@ PHPAPI void *_php_stream_get_line(php_stream *stream, int buf_type, zstr buf, si
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
 {
 	char *e, *buf;
-	size_t toread;
+	size_t toread, len;
 	int skip = 0;
 
-	php_stream_fill_read_buffer(stream, maxlen TSRMLS_CC);
+	len = stream->writepos - stream->readpos;
+
+	while (len < maxlen) {
+
+		size_t just_read;
+		toread = MIN(maxlen - len, stream->chunk_size);
+
+		php_stream_fill_read_buffer(stream, len + toread TSRMLS_CC);
+
+		just_read = (stream->writepos - stream->readpos) - len;
+		len += just_read;
+
+		if (just_read < toread) {
+			break;
+		}
+	}
 
 	if (delim_len == 0 || !delim) {
 		toread = maxlen;
