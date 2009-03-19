@@ -56,14 +56,12 @@ static int timeout_thread_initialized=0;
 
 UChar u_main[sizeof("main")];
 UChar u_return[sizeof("return ")];
-UChar u_semicolon[sizeof(" ;")];
-UChar u_doublecolon[sizeof(" ;")];
+UChar u_doublecolon[sizeof("::")];
 
 void init_unicode_strings(void)
 {
 	u_charsToUChars("main", u_main, sizeof("main"));
 	u_charsToUChars("return ", u_return, sizeof("return "));
-	u_charsToUChars(" ;", u_semicolon, sizeof(" ;"));
 	u_charsToUChars("::", u_doublecolon, sizeof("::"));
 }
 
@@ -1235,11 +1233,13 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 		UChar *str = string.u;
 
 		if (retval_ptr) {
-			Z_USTRLEN(pv) = u_strlen(str) + sizeof("return  ;") - 1;
+			int l = u_strlen(str);
+			Z_USTRLEN(pv) = l + sizeof("return ;") - 1;
 			Z_USTRVAL(pv) = eumalloc(Z_USTRLEN(pv) + 1);
-			u_strcpy(Z_USTRVAL(pv), u_return);
-			u_strcat(Z_USTRVAL(pv), str);
-			u_strcat(Z_USTRVAL(pv), u_semicolon);
+			u_memcpy(Z_USTRVAL(pv), u_return, sizeof("return ") - 1);
+			u_memcpy(Z_USTRVAL(pv) + sizeof("return ") - 1, str, l);
+			Z_USTRVAL(pv)[Z_USTRLEN(pv) - 1] = 0x3B /*';'*/;
+			Z_USTRVAL(pv)[Z_USTRLEN(pv)] = 0;
 		} else {
 			Z_USTRLEN(pv) = u_strlen(str);
 			Z_USTRVAL(pv) = str;
@@ -1248,11 +1248,13 @@ ZEND_API int zend_u_eval_string(zend_uchar type, zstr string, zval *retval_ptr, 
 		char *str = string.s;
 
 		if (retval_ptr) {
-			Z_STRLEN(pv) = strlen(str)+sizeof("return  ;") - 1;
+			int l = strlen(str);
+			Z_STRLEN(pv) = l + sizeof("return ;") - 1;
 			Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
-			strcpy(Z_STRVAL(pv), "return ");
-			strcat(Z_STRVAL(pv), str);
-			strcat(Z_STRVAL(pv), " ;");
+			memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
+			memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, l);
+			Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
+			Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
 		} else {
 			Z_STRLEN(pv) = strlen(str);
 			Z_STRVAL(pv) = str;

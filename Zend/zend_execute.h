@@ -54,7 +54,6 @@ typedef union _temp_variable {
 BEGIN_EXTERN_C()
 ZEND_API extern UChar u_main[sizeof("main")];
 ZEND_API extern UChar u_return[sizeof("return ")];
-ZEND_API extern UChar u_semicolon[sizeof(" ;")];
 ZEND_API extern UChar u_doublecolon[sizeof("::")];
 
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
