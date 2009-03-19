@@ -289,16 +289,27 @@ static void json_create_zval(zval **z, smart_str *buf, int type TSRMLS_DC)
 
     if (type == IS_LONG)
     {
-		long l = strtol(buf->c, NULL, 10);
-		double d = zend_strtod(buf->c, NULL);
-		if (d > LONG_MAX || d < LONG_MIN) {
-			ZVAL_DOUBLE(*z, d);
-		} else {
-			ZVAL_LONG(*z, l);
+		if (buf->c[0] == '-') {
+			buf->len--;
 		}
+
+		if (buf->len >= MAX_LENGTH_OF_LONG - 1) {
+			if (buf->len == MAX_LENGTH_OF_LONG - 1) {
+				int cmp = strcmp(buf->c + (buf->c[0] == '-'), long_min_digits);
+
+				if (!(cmp < 0 || (cmp == 0 && buf->c[0] == '-'))) {
+					goto use_double;
+				}
+			} else {
+				goto use_double;
+			}
+		}
+
+		ZVAL_LONG(*z, strtol(buf->c, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {
+use_double:
         ZVAL_DOUBLE(*z, zend_strtod(buf->c, NULL));
     }
     else if (type == IS_STRING)
