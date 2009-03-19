@@ -229,7 +229,11 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	if (H->link == NULL) {
 		goto cleanup;
 	}
-	
+
+	if (DBSETOPT(H->link, DBTEXTLIMIT, "2147483647") == FAIL) {
+		goto cleanup;
+	}
+
 	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
 		goto cleanup;
 	}
