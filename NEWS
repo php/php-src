@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.10
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 
-- Fixed bug #47721 (Aligment issues in mbstring and sysvshm extension)
+- Fixed bug #47721 (Alignment issues in mbstring and sysvshm extension)
   (crrodriguez at opensuse dot org, Ilia)
 - Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).
   (Dmitry)
