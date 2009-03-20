@@ -1,3 +1,20 @@
+2009-03-19  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_execute_API.c:
+      MFH: Removed extra space from eval string
+
+    * zend_execute.h
+      zend_execute_API.c:
+      MFB (zend_execute_API.c v1.331.2.20.2.13): "Avoid strcpy() & strcat()"
+      Removed extra space from eval string, and unnecessary variable
+
+2009-03-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.h
+      zend_hash.h:
+      Fixed check for long integer overflow
+
 2009-03-18  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h
