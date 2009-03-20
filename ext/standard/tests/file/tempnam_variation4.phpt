@@ -5,6 +5,16 @@ Test tempnam() function: usage variations - permissions(0000 to 0777) of dir
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
+// Skip if being run by root
+$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip cannot be run as root');
+}
+
+unlink($filename);
 ?>
 --FILE--
 <?php
