@@ -29,6 +29,7 @@
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
 - Fixed bug #43073, (TrueType bounding box is wrong for angle<>0) (Martin McNickle)
+- Fixed bug #38805 (PDO truncates text from SQL Server text data type field) (Steph)
 
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
