@@ -32,11 +32,12 @@ sapi/cli/php [-c /path/to/php.ini] run-tests.php [ext/foo/tests/GLOB]
 
 [Which "php" executable "make test" look for]
 ---------------------------------------------
- You must use TEST_PHP_EXECUTABLE environment variable to explicitly
-select the php executable to be used to run the tests. That can either
-be the CLI or CGI executable.
+If you are running the run-tests.php script from the command line (as above)
+you must set the TEST_PHP_EXECUTABLE environment variable to explicitly
+select the PHP executable that is to be tested, that is, used to run the test scripts.
 
- "make test" executes "run-tests.php" script with "php" binary.  Some
+If you run the tests using make test, the PHP CLI and CGI executables are 
+automatically set for you. "make test" executes "run-tests.php" script with the CLI binary.  Some
 test scripts such as session must be executed by CGI SAPI. Therefore,
 you must build PHP with CGI SAPI to perform all tests.
 
