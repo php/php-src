@@ -455,6 +455,11 @@ static void sapi_nsapi_flush(void *server_context)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)server_context;
 	TSRMLS_FETCH();
+	
+	if (!rc) {
+		/* we have no context, so no flushing needed. This fixes a SIGSEGV on shutdown */
+		return;
+	}
 
 	if (!SG(headers_sent)) {
 		sapi_send_headers(TSRMLS_C);
@@ -826,6 +831,7 @@ void NSAPI_PUBLIC php5_close(void *vparam)
 	}
 #endif	
 
+	sapi_shutdown();
 	tsrm_shutdown();
 
 	log_error(LOG_INFORM, "php5_close", NULL, NULL, "Shutdown PHP Module");
