@@ -4,6 +4,17 @@ Test lchown() function : error functionality
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
 if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
+// Skip if being run by root
+$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$fp = fopen($filename, 'w');
+fclose($fp);
+if(fileowner($filename) == 0) {
+        unlink ($filename);
+        die('skip cannot be run as root');
+}
+
+unlink($filename);
+
 ?>
 --FILE--
 <?php
