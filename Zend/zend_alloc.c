@@ -111,8 +111,12 @@ static void zend_mm_panic(const char *message) /* {{{ */
 
 #if defined(HAVE_MEM_MMAP_ANON) || defined(HAVE_MEM_MMAP_ZERO)
 # ifdef HAVE_MREMAP
+#  ifndef _GNU_SOURCE
 #   define _GNU_SOURCE
+#  endif
+#  ifndef __USE_GNU
 #   define __USE_GNU
+#  endif
 # endif
 # include <sys/mman.h>
 # ifndef MAP_ANON
