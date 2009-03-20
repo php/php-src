@@ -1082,6 +1082,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 	int                  rfc_colon;
 
 	if (!format_len) {
+		*return_len = 0;
 		if (UG(unicode)) {
 			return (char*)eustrdup(EMPTY_STR);
 		} else {		
