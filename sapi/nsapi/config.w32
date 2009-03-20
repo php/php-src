@@ -9,6 +9,7 @@ ARG_WITH('nsapi-libs', 'Where to find NSAPI libraries', null);
 if (PHP_NSAPI != "no") {
 	if (PHP_ZTS == "no") {
 		WARNING("NSAPI module requires an --enable-zts build of PHP");
+		PHP_NSAPI = "no"
 	} else if (CHECK_HEADER_ADD_INCLUDE("nsapi.h", "CFLAGS_NSAPI",
 			PHP_NSAPI + ';' + PHP_NSAPI_INCLUDES) &&
 			CHECK_LIB("ns-httpd*.lib", "nsapi", PHP_NSAPI + ";" + PHP_NSAPI_LIBS)) {
