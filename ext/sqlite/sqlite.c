@@ -2578,7 +2578,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			return;
 		}
 		RES_FROM_OBJECT_RESTORE_ERH(res, object, &error_handling);
-		if (!ZEND_NUM_ARGS()) {
+		if (!class_name) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
@@ -2589,7 +2589,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			return;
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
-		if (ZEND_NUM_ARGS() < 2) {
+		if (!class_name) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
