@@ -2357,7 +2357,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
 	zval *object = getThis();
-	char *class_name;
+	char *class_name = NULL;
 	int class_name_len;
 	zend_class_entry *ce;
 	zval dataset;
@@ -2374,7 +2374,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			return;
 		}
 		RES_FROM_OBJECT_RESTORE_ERH(res, object, &error_handling);
-		if (!ZEND_NUM_ARGS()) {
+		if (!class_name) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
@@ -2385,7 +2385,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			return;
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
-		if (ZEND_NUM_ARGS() < 2) {
+		if (!class_name) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
