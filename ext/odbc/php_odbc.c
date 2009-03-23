@@ -1629,17 +1629,15 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
-	SQLLEN rownum = -1;
+	SQLLEN rownum;
 	zval *pv_res, *tmp;
-	long pv_row;
+	long pv_row - 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &pv_res, &pv_row) == FAILURE) {
 		return;
 	}
 	
-	if (ZEND_NUM_ARGS() > 1) {
-		rownum = pv_row;
-	}
+	rownum = pv_row;
 #else
 	zval *pv_res, *tmp;
 
@@ -1928,11 +1926,11 @@ PHP_FUNCTION(solid_fetch_prev)
    Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
-	SQLLEN rownum = 1;
+	SQLLEN rownum;
 	odbc_result *result;
 	RETCODE rc;
 	zval *pv_res;
-	long pv_row;
+	long pv_row = 1;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
@@ -1942,9 +1940,7 @@ PHP_FUNCTION(odbc_fetch_row)
 		return;
 	}
 	
-	if (ZEND_NUM_ARGS() > 1){
-		rownum = pv_row;
-	}
+	rownum = pv_row;
 	
 	ZEND_FETCH_RESOURCE(result, odbc_result *, &pv_res, -1, "ODBC result", le_result);
 	
@@ -3307,19 +3303,17 @@ PHP_FUNCTION(odbc_foreignkeys)
 PHP_FUNCTION(odbc_gettypeinfo)
 {
 	zval *pv_conn;
-	long pv_data_type;
+	long pv_data_type = SQL_ALL_TYPES;
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
-	SQLSMALLINT data_type = SQL_ALL_TYPES;
+	SQLSMALLINT data_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &pv_conn, &pv_data_type) == FAILURE) {
 		return;
 	}
 	
-	if (ZEND_NUM_ARGS() > 1) {
-		data_type = (SQLSMALLINT) pv_data_type;
-	}
+	data_type = (SQLSMALLINT) pv_data_type;
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, &pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
