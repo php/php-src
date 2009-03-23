@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 RC 2
+- Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()).
+  (matteo at beccati dot com)
 
 24 Mar 2009, PHP 5.3.0 RC 1
 - Upgraded bundled sqlite to version 3.6.11. (Scott)
@@ -22,7 +24,7 @@ PHP                                                                        NEWS
 - Fixed bug #47572 (Undefined constant causes segmentation fault). (Felipe)
 - Fixed bug #47549 (get_defined_constants() return array with broken
   array categories). (Ilia)
-- Fixed Bug #47443 (metaphone('scratch') returns wrong result). (Felipe)
+- Fixed bug #47443 (metaphone('scratch') returns wrong result). (Felipe)
 - Fixed bug #47438 (mysql_fetch_field ignores zero offset). (Johannes)
 - Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
 - Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)

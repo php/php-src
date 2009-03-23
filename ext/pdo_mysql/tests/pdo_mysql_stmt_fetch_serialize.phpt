@@ -131,7 +131,6 @@ object(myclass)#4 (1) {
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
 myclass::unserialize('C:7:"myclass":19:{Data from serialize}')
-myclass::__construct(PDO shall not call __construct())
 object(myclass)#%d (1) {
   ["myprotected":protected]=>
   string(19) "a protected propery"
