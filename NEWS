@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 200?, PHP 5.3.0 RC 2
+
 24 Mar 2009, PHP 5.3.0 RC 1
 - Upgraded bundled sqlite to version 3.6.11. (Scott)
 - Upgraded bundled libmagic to 5.00 in the fileinfo extension. (Scott)
