@@ -22,20 +22,32 @@
 ; The syntax of the file is extremely simple.  Whitespace and Lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
 ; Section headers (e.g. [Foo]) are also silently ignored, even though
-; they might mean something in the future. The exceptions to this rule are
-; section headers starting with [HOST= or [PATH=
+; they might mean something in the future. 
+
+; Directives following the section heading [PATH=/www/mysite] only
+; apply to PHP files in the /www/mysite directory.  Directives
+; following the section heading [HOST=www.example.com] only apply to
+; PHP files served from www.example.com.  Directives set in these
+; special sections cannot be overridden by user-defined INI files or
+; at runtime. Currently, [PATH=] and [HOST=] sections only work under
+; CGI/FastCGI.
 ; http://www.php.net/manual/en/ini.sections.php
 
 ; Directives are specified using the following syntax:
 ; directive = value
 ; Directive names are *case sensitive* - foo=bar is different from FOO=bar.
+; Directives are variables used to configure PHP or PHP extensions.
+; There is no name validation.  If PHP can't find an expected
+; directive because it is not set or is mistyped, a default value will be used.
 
 ; The value can be a string, a number, a PHP constant (e.g. E_ALL or M_PI), one
 ; of the INI constants (On, Off, True, False, Yes, No and None) or an expression
-; (e.g. E_ALL & ~E_NOTICE), or a quoted string ("foo").
+; (e.g. E_ALL & ~E_NOTICE), a quoted string ("bar"), or a reference to a
+; previously set variable or directive (e.g. ${foo})
 
 ; Expressions in the INI file are limited to bitwise operators and parentheses:
 ; |  bitwise OR
+; ^  bitwise XOR
 ; &  bitwise AND
 ; ~  bitwise NOT
 ; !  boolean NOT
@@ -461,7 +473,7 @@ memory_limit = 128M
 ; development and early testing.
 ;
 ; Error Level Constants:
-; E_ALL             - All errors and warnings (doesn't include E_STRICT)
+; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 6.0.0)
 ; E_ERROR           - fatal run-time errors
 ; E_RECOVERABLE_ERROR  - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
@@ -916,7 +928,7 @@ default_socket_timeout = 60
 ;
 ;   extension=/path/to/extension/msql.so
 ;
-; If you only provide the name of the extension, PHP will look for it in it's
+; If you only provide the name of the extension, PHP will look for it in its
 ; default extension directory.
 ;
 ; Windows Extensions
@@ -1075,7 +1087,7 @@ smtp_port = 25
 mail.add_x_header = On
 
 ; Log all mail() calls including the full path of the script, line #, to address and headers
-mail.log =
+;mail.log =
 
 [SQL]
 ; http://www.php.net/manual/en/ini.core.php#ini.sql.safe-mode
@@ -1678,7 +1690,12 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
-;mbstring.strict_encoding = Off
+;mbstring.strict_detection = Off
+
+; This directive specifies the regex pattern of content types for which mb_output_handler()
+; is activated.
+; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
+;mbstring.http_output_conv_mimetype=
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
