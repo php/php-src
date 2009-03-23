@@ -280,7 +280,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		pdo_dbh_t *pdbh = NULL;
 
 		if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT, (void**)&v)) {
-			if (Z_TYPE_PP(v) == IS_STRING) {
+			if (Z_TYPE_PP(v) == IS_STRING && !is_numeric_string(Z_STRVAL_PP(v), Z_STRLEN_PP(v), NULL, NULL, 0) && Z_STRLEN_PP(v) > 0) {
 				/* user specified key */
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
 						username ? username : "",
@@ -372,7 +372,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 	if (!call_factory) {
 		/* we got a persistent guy from our cache */
-		return;
+		goto options;
 	}
 
 	if (driver->db_handle_factory(dbh, options TSRMLS_CC)) {
@@ -396,7 +396,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		}
 
 		dbh->driver = driver;
-
+options:
 		if (options) {
 			zval **attr_value;
 			zstr str_key;
@@ -1054,7 +1054,7 @@ static PHP_METHOD(PDO, errorInfo)
 		int current_index;
 
 		error_count_diff = error_expected_count - error_count;
-		for (current_index = 0; current_index > error_count_diff; current_index++) {
+		for (current_index = 0; current_index < error_count_diff; current_index++) {
 			add_next_index_null(return_value);
 		}
 	}
@@ -1378,18 +1378,7 @@ static int dbh_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-#if PHP_MAJOR_VERSION < 6
-static zend_object_value dbh_ze1_clone_obj(zval *object TSRMLS_DC)
-{
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(object)->name);
-	return object->value.obj;
-}
-#endif
-
 static zend_object_handlers pdo_dbh_object_handlers;
-#if PHP_MAJOR_VERSION < 6
-static zend_object_handlers pdo_dbh_object_handlers_ze1;
-#endif
 
 void pdo_dbh_init(TSRMLS_D)
 {
@@ -1403,13 +1392,6 @@ void pdo_dbh_init(TSRMLS_D)
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
 	
-#if PHP_MAJOR_VERSION < 6
-	memcpy(&pdo_dbh_object_handlers_ze1, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbh_object_handlers_ze1.get_method = dbh_method_get;
-	pdo_dbh_object_handlers_ze1.compare_objects = dbh_compare;
-	pdo_dbh_object_handlers_ze1.clone_obj = dbh_ze1_clone_obj;
-#endif
-
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (long)PDO_PARAM_BOOL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (long)PDO_PARAM_NULL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INT",  (long)PDO_PARAM_INT);
@@ -1596,11 +1578,7 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	dbh->def_stmt_ce = pdo_dbstmt_ce;
 	
 	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbh_free_storage, NULL TSRMLS_CC);
-#if PHP_MAJOR_VERSION < 6
-	retval.handlers = EG(ze1_compatibility_mode) ? &pdo_dbh_object_handlers_ze1 : &pdo_dbh_object_handlers;
-#else
 	retval.handlers = &pdo_dbh_object_handlers;
-#endif
 	
 	return retval;
 }
