@@ -3,6 +3,6 @@
 #define PHP_MAJOR_VERSION 5
 #define PHP_MINOR_VERSION 3
 #define PHP_RELEASE_VERSION 0
-#define PHP_EXTRA_VERSION "beta2-dev"
-#define PHP_VERSION "5.3.0beta2-dev"
+#define PHP_EXTRA_VERSION "RC1"
+#define PHP_VERSION "5.3.0RC1"
 #define PHP_VERSION_ID 50300
