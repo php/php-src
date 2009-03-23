@@ -80,17 +80,14 @@ object(myclass)#%d (0) {
 
 And now magic PDO using fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE)...
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
-myclass::__construct('Called by PDO') - note that it must not be called when unserializing
 object(myclass)#%d (0) {
 }
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
-myclass::__construct(NULL) - note that it must not be called when unserializing
 object(myclass)#%d (0) {
 }
 
 And now PDO using setFetchMode(PDO::FETCH:CLASS|PDO::FETCH_SERIALIZE) + fetch()...
 myclass::unserialize('Data fetched from DB to be given to unserialize()')
-myclass::__construct('Called by PDO') - note that it must not be called when unserializing
 object(myclass)#%d (0) {
 }
 done!
