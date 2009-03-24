@@ -1295,7 +1295,7 @@ PHP_MINFO_FUNCTION(gd)
 	{
 		char tmp[12];
 		snprintf(tmp, sizeof(tmp), "%d", gdJpegGetVersionInt());
-		php_info_print_table_row(2, "JEPG Support", "enabled");
+		php_info_print_table_row(2, "JPEG Support", "enabled");
 		php_info_print_table_row(2, "libJPEG Version", tmp);
 	}
 #endif
