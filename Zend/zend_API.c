@@ -2295,7 +2295,6 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			fname_len = strlen(ptr->fname);
 			lowercase_name = zend_str_tolower_dup(ptr->fname, fname_len);
 			if (zend_hash_exists(target_function_table, lowercase_name, fname_len+1)) {
-				efree(lowercase_name);
 				zend_error(error_type, "Function registration failed - duplicate name - %v%s%s", scope ? scope->name : EMPTY_ZSTR, scope ? "::" : "", ptr->fname);
 			}
 			efree(lowercase_name);
