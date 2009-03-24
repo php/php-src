@@ -54,9 +54,13 @@ MySQLPDOTest::skip();
 ?>
 --EXPECTF--
 Emulated Prepared Statements...
-array(1) {
+array(3) {
   [0]=>
   string(5) "00000"
+  [1]=>
+  NULL
+  [2]=>
+  NULL
 }
 array(1) {
   [0]=>
@@ -65,9 +69,13 @@ array(1) {
     string(1) "a"
   }
 }
-array(1) {
+array(3) {
   [0]=>
   string(5) "00000"
+  [1]=>
+  NULL
+  [2]=>
+  NULL
 }
 array(1) {
   [0]=>
@@ -85,6 +93,6 @@ array(1) {
 }
 Native Prepared Statements...
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '; SELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '%SSELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
 
 Fatal error: Call to a member function errorInfo() on a non-object in %s on line %d
