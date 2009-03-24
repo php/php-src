@@ -220,8 +220,8 @@ copy_file_list($build_dir, $pecl_dir, $pecl_targets);
 $text_files = array(
 	"LICENSE" => 		"license.txt",
 	"NEWS" => 			"news.txt",
-	"php.ini-dist" => 	"php.ini-dist",
-	"php.ini-recommended" => "php.ini-recommended",
+	"php.ini-development" => 	"php.ini-development",
+	"php.ini-production" => "php.ini-production",
 	"win32/install.txt" => 	"install.txt",
 	"win32/pws-php5cgi.reg" => "pws-php5cgi.reg",
 	"win32/pws-php5isapi.reg" => "pws-php5isapi.reg",
