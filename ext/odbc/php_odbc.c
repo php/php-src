@@ -1631,7 +1631,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	SQLUSMALLINT RowStatus[1];
 	SQLLEN rownum;
 	zval *pv_res, *tmp;
-	long pv_row = 1;
+	long pv_row = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &pv_res, &pv_row) == FAILURE) {
 		return;
