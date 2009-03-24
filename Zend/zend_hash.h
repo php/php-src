@@ -408,101 +408,66 @@ ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, 
 		const char *end = key + length - 1;									\
 		long idx;															\
 																			\
-		if (*end != '\0') { /* not a null terminated string */				\
+		if ((*end != '\0') /* not a null terminated string */				\
+		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
+		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
+		 || (SIZEOF_LONG == 4 &&											\
+		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
+		     *tmp > '2')) { /* overflow */									\
 			break;															\
-		} else if (*tmp == '0') {											\
-			if (end - tmp != 1) {											\
-				/* don't accept numbers with leading zeros */				\
-				break;														\
-			}																\
-			idx = 0;														\
-		} else if (end - tmp > MAX_LENGTH_OF_LONG - 1) {					\
-			/* don't accept too long strings */								\
-			break;															\
-		} else {															\
-			if (end - tmp == MAX_LENGTH_OF_LONG - 1) {						\
-				end--; /* check overflow in last digit later */				\
-			}																\
-			idx = (*tmp++ - '0');											\
-			while (tmp != end && *tmp >= '0' && *tmp <= '9') {				\
-				idx = (idx * 10) + (*tmp++ - '0');							\
-			}																\
-			if (tmp != end) {												\
-				break;														\
-			}																\
-			if (end != key + length - 1) {									\
-				/* last digit can cause overflow */							\
-				if (*tmp < '0' || *tmp > '9' || idx > LONG_MAX / 10) {		\
-					break;													\
-				}															\
-				idx = (idx * 10) + (*tmp - '0');							\
-				if (*key == '-') {											\
-					idx = -idx;												\
-					if (idx > 0) { /* overflow */							\
-						break;												\
-					}														\
-				} else if (idx < 0) { /* overflow */						\
-					break;													\
-				}															\
-			} else if (*key == '-') {										\
-				idx = -idx;													\
-			}																\
 		}																	\
-		return func;														\
+		idx = (*tmp - '0');													\
+		while (++tmp != end && *tmp >= '0' && *tmp <= '9') {				\
+			idx = (idx * 10) + (*tmp - '0');								\
+		}																	\
+		if (tmp == end) {													\
+			if (*key == '-') {												\
+				idx = -idx;													\
+				if (idx > 0) { /* overflow */								\
+					break;													\
+				}															\
+			} else if (idx < 0) { /* overflow */							\
+				break;														\
+			}																\
+			return func;													\
+		}																	\
 	}																		\
 } while (0)
 
-#define ZEND_HANDLE_U_NUMERIC(key, length, func) do {							\
-	register const UChar *tmp = key;											\
+#define ZEND_HANDLE_U_NUMERIC(key, length, func) do {						\
+	register const UChar *tmp = key;										\
 																			\
-	if (*tmp == '-') {														\
+	if (*tmp == 0x2D /*'-'*/ ) {											\
 		tmp++;																\
 	}																		\
-	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
-		const UChar *end = key + length - 1;									\
+	if (*tmp >= 0x30 /*'0'*/ && *tmp <= 0x39 /*'9'*/) {						\
+		/* possibly a numeric index */										\
+		const UChar *end = key + length - 1;								\
 		long idx;															\
 																			\
-		if (*end != '\0') { /* not a null terminated string */				\
+		if ((*end != 0) /* not a null terminated string */					\
+		 || (*tmp == 0x30 && length > 2) /* numbers with leading zeros */	\
+		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
+		 || (SIZEOF_LONG == 4 &&											\
+		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
+		     *tmp > 0x32 /*'2'*/)) { /* overflow */							\
 			break;															\
-		} else if (*tmp == '0') {											\
-			if (end - tmp != 1) {											\
-				/* don't accept numbers with leading zeros */				\
-				break;														\
-			}																\
-			idx = 0;														\
-		} else if (end - tmp > MAX_LENGTH_OF_LONG - 1) {					\
-			/* don't accept too long strings */								\
-			break;															\
-		} else {															\
-			if (end - tmp == MAX_LENGTH_OF_LONG - 1) {						\
-				end--; /* check overflow in last digit later */				\
-			}																\
-			idx = (*tmp++ - '0');											\
-			while (tmp != end && *tmp >= '0' && *tmp <= '9') {				\
-				idx = (idx * 10) + (*tmp++ - '0');							\
-			}																\
-			if (tmp != end) {												\
-				break;														\
-			}																\
-			if (end != key + length - 1) {									\
-				/* last digit can cause overflow */							\
-				if (*tmp < '0' || *tmp > '9' || idx > LONG_MAX / 10) {		\
-					break;													\
-				}															\
-				idx = (idx * 10) + (*tmp - '0');							\
-				if (*key == '-') {											\
-					idx = -idx;												\
-					if (idx > 0) { /* overflow */							\
-						break;												\
-					}														\
-				} else if (idx < 0) { /* overflow */						\
-					break;													\
-				}															\
-			} else if (*key == '-') {										\
-				idx = -idx;													\
-			}																\
 		}																	\
-		return func;														\
+		idx = (*tmp - '0');													\
+		while (++tmp != end && *tmp >= 0x30 && *tmp <= 0x39) {				\
+			idx = (idx * 10) + (*tmp - 0x30);								\
+		}																	\
+		if (tmp == end) {													\
+			if (*key == 0x2D) {												\
+				idx = -idx;													\
+				if (idx > 0) { /* overflow */								\
+					break;													\
+				}															\
+			} else if (idx < 0) { /* overflow */							\
+				break;														\
+			}																\
+			return func;													\
+		}																	\
 	}																		\
 } while (0)
 /* }}} */
