@@ -1294,9 +1294,9 @@ PHP_FUNCTION(gd_info)
 	add_ascii_assoc_bool(return_value, "GIF Create Support", 0);
 #endif
 #ifdef HAVE_GD_JPG
-	add_ascii_assoc_bool(return_value, "JPG Support", 1);
+	add_ascii_assoc_bool(return_value, "JPEG Support", 1);
 #else
-	add_ascii_assoc_bool(return_value, "JPG Support", 0);
+	add_ascii_assoc_bool(return_value, "JPEG Support", 0);
 #endif
 #ifdef HAVE_GD_PNG
 	add_ascii_assoc_bool(return_value, "PNG Support", 1);
