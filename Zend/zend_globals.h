@@ -292,8 +292,6 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	
-	zend_llist used_state_stacks;
-
 #ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
 	unsigned char *script_org;
