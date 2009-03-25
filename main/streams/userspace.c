@@ -250,6 +250,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	{
 		reset to start of dir list;
 	}
+
+	function stream_lock($operation)
+	{
+		return true / false;
+	}
   
 	}}} **/
 
