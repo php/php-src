@@ -25,7 +25,7 @@ if (NULL !== ($tmp = @mysql_db_query($link)))
 	printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 require('table.inc');
-if (!$res = mysql_db_query($db, 'SELECT id, label FROM test ORDER BY id LIMIT 1', $link))
+if (!$res = @mysql_db_query($db, 'SELECT id, label FROM test ORDER BY id LIMIT 1', $link))
 	printf("[004] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 $row = mysql_fetch_assoc($res);
@@ -40,7 +40,7 @@ if (ini_get('unicode.semantics') && !is_unicode($row['label'])) {
 mysql_free_result($res);
 
 
-if (!$res = mysql_db_query($db, 'SELECT id, label FROM test ORDER BY id LIMIT 1'))
+if (!$res = @mysql_db_query($db, 'SELECT id, label FROM test ORDER BY id LIMIT 1'))
 	printf("[007] [%d] %s\n", mysql_errno(), mysql_error());
 
 $row = mysql_fetch_assoc($res);
