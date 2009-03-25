@@ -5169,6 +5169,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC) == FAILURE) {
+		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 		php_output_end(TSRMLS_C);
 		if (filename_type == IS_UNICODE) {
 			efree(filename);
