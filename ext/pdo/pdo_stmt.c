@@ -1537,12 +1537,12 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			/* no break */
 		case 2:
 			stmt->fetch.cls.ctor_args = ctor_args; /* we're not going to free these */
-			if (Z_TYPE_P(arg2) != IS_STRING) {
+			if (Z_TYPE_P(arg2) != IS_STRING && Z_TYPE_P(arg2) != IS_UNICODE) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid class name (should be a string)" TSRMLS_CC);
 				error = 1;
 				break;
 			} else {
-				stmt->fetch.cls.ce = zend_fetch_class(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+				stmt->fetch.cls.ce = zend_u_fetch_class(Z_TYPE_P(arg2), Z_UNIVAL_P(arg2), Z_UNILEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 				if (!stmt->fetch.cls.ce) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class" TSRMLS_CC);
 					error = 1;
@@ -2746,9 +2746,11 @@ static int row_call_method(
 static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 {
 	static zend_internal_function ctor = {0};
+	int namelen = sizeof("__construct");
 
 	ctor.type = ZEND_INTERNAL_FUNCTION;
-	pdo_zstr_sval(ctor.function_name) = "__construct";
+	ctor.function_name.u = malloc(UBYTES(namelen));
+	u_charsToUChars("__construct", ctor.function_name.u, namelen);	
 
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbstmt_constructor);

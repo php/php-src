@@ -1033,9 +1033,9 @@ static PHP_METHOD(PDO, errorInfo)
 	array_init(return_value);
 
 	if (dbh->query_stmt) {
-		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
+		add_next_index_ascii_string(return_value, dbh->query_stmt->error_code, 1);
 	} else {
-		add_next_index_string(return_value, dbh->error_code, 1);
+		add_next_index_ascii_string(return_value, dbh->error_code, 1);
 	}
 
 	if (dbh->methods->fetch_err) {
@@ -1265,7 +1265,6 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	const zend_function_entry *funcs;
 	zend_function func;
 	zend_internal_function *ifunc = (zend_internal_function*)&func;
-	int namelen;
 	char *lc_name;
 
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
@@ -1282,9 +1281,12 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, NULL, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
+		int namelen = strlen(funcs->fname)+1;
+		
 		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
-		pdo_zstr_sval(ifunc->function_name) = (char*)funcs->fname;
+		ifunc->function_name.u = malloc(UBYTES(namelen));
+		u_charsToUChars(funcs->fname, ifunc->function_name.u, namelen);
 		ifunc->scope = dbh->ce;
 		ifunc->prototype = NULL;
 		if (funcs->arg_info) {
@@ -1309,10 +1311,9 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 		} else {
 			ifunc->fn_flags = ZEND_ACC_PUBLIC;
 		}
-		namelen = strlen(funcs->fname);
 		lc_name = emalloc(namelen+1);
 		zend_str_tolower_copy(lc_name, funcs->fname, namelen);
-		zend_hash_add(dbh->cls_methods[kind], lc_name, namelen+1, &func, sizeof(func), NULL);
+		zend_ascii_hash_add(dbh->cls_methods[kind], lc_name, namelen+1, &func, sizeof(zend_function), NULL);
 		efree(lc_name);
 		funcs++;
 	}
@@ -1365,7 +1366,7 @@ static union _zend_function *dbh_method_get(
 	}
 
 out:
-	if (std_object_handlers.get_method) {
+	if (!fbc && std_object_handlers.get_method) {
 		fbc = std_object_handlers.get_method(object_pp, method_name, method_len TSRMLS_CC);
 	}
 
