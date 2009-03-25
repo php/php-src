@@ -279,8 +279,6 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	
-	zend_llist used_state_stacks;
-
 	UConverter *input_conv;     /* converter for flex input */
 	UConverter *output_conv;    /* converter for data from flex output */
 	zend_bool encoding_checked;
