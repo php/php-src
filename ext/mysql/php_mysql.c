@@ -1472,9 +1472,7 @@ PHP_FUNCTION(mysql_db_query)
 		CHECK_LINK(id);
 	}
 
-	if (MySG(trace_mode) || !strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
-		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_query() instead.");
-	}
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_query() instead");
 	
 	php_mysql_do_query_general(query, query_len, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
 }
