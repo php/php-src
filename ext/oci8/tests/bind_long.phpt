@@ -33,6 +33,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-unicode(32) "da852396d08c9ef9fbdf914db1d6d5bb"
-int(276)
+unicode(32) "5c7c34abf7ea51936785062dbfcaeddc"
+int(394)
 Done
