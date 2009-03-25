@@ -34,7 +34,7 @@ array(%d) {
   bool%a
   ["GIF Create Support"]=>
   bool%a
-  ["JPG Support"]=>
+  ["JPEG Support"]=>
   bool%a
   ["PNG Support"]=>
   bool%a
