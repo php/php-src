@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 RC 2
+- Fixed bug #47699 (autoload and late static binding). (Dmitry)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()).
   (matteo at beccati dot com)
 - Fixed bug #42362 - (HTTP status codes 204 and 304 should not be gzipped).
