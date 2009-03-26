@@ -578,7 +578,7 @@ report_memleaks = On
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
-http://www.php.net/manual/en/errorfunc.configuration.php#ini.track-errors
+; http://www.php.net/manual/en/errorfunc.configuration.php#ini.track-errors
 track_errors = Off
 
 ; Turn off normal error reporting and emit XML-RPC error XML
