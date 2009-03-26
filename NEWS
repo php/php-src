@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 200?, PHP 5.3.0 RC 2
 - Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).
   (Matteo)
+- Fixed bug #47771 (Exception during object construction from arg call calls
+  object's destructor). (Dmitry)
 - Fixed bug #47699 (autoload and late static binding). (Dmitry)
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
