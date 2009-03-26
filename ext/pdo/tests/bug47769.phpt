@@ -19,7 +19,7 @@ class test extends PDO
 	}
 }
 
-$test = new test('sqlite:memory');
+$test = new test('sqlite::memory:');
 $test->quote('foo');
 $test->isProtected();
 
