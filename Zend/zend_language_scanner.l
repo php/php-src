@@ -1881,6 +1881,10 @@ inline_char_handler:
 	char *s;
 	int bprefix = (yytext[0] != '<') ? 1 : 0;
 
+	/* save old heredoc label */
+	Z_STRVAL_P(zendlval) = CG(heredoc);
+	Z_STRLEN_P(zendlval) = CG(heredoc_len);
+
 	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+bprefix+3;
