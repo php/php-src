@@ -5,6 +5,7 @@
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
+- Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
 
 - Fixed bug #47772 (FILTER_VALIDATE_EMAIL allows foo@bar. addresses). (Ilia)
 - Fixed bug #47721 (Alignment issues in mbstring and sysvshm extension)
