@@ -691,7 +691,7 @@ use_double:
 }
 
 object ":" uiv ":" ["]	{
-	size_t len, len2, len3, maxlen;
+	size_t len, len2, maxlen;
 	long elements;
 	zstr class_name;
 	zend_class_entry *ce;
