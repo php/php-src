@@ -768,13 +768,13 @@ common_scalar:
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 	|	T_NS_C						{ $$ = $1; }
-	|	start_heredoc T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
-	|	start_heredoc T_END_HEREDOC { if (CG(literal_type) == IS_UNICODE) { ZVAL_EMPTY_UNICODE(&$$.u.constant); } else { ZVAL_EMPTY_STRING(&$$.u.constant); } INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
+	|	start_heredoc T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+	|	start_heredoc T_END_HEREDOC { if (CG(literal_type) == IS_UNICODE) { ZVAL_EMPTY_UNICODE(&$$.u.constant); } else { ZVAL_EMPTY_STRING(&$$.u.constant); } INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
 ;
 
 start_heredoc:
-		T_START_HEREDOC  { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; }
-	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; }
+		T_START_HEREDOC  { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; $$ = $1; }
+	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; $$ = $1; }
 ;
 
 
@@ -802,7 +802,7 @@ scalar:
 	|	common_scalar			{ $$ = $1; }
 	|	'"' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '"' { $$ = $3; }
 	|	T_BINARY_DOUBLE { CG(literal_type) = IS_STRING; } encaps_list '"' { $$ = $3; }
-	|	start_heredoc encaps_list T_END_HEREDOC { $$ = $2; }
+	|	start_heredoc encaps_list T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
 ;
 
 
