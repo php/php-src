@@ -166,12 +166,8 @@ typedef struct _zend_fcall_info_cache {
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
 		int _len = class_name_len;								\
-		if (UG(unicode)) {										\
-			class_container.name.u = (UChar *)malloc(UBYTES(_len+1));				\
-			u_charsToUChars(class_name, class_container.name.u, _len+1);	\
-		} else {															\
-			class_container.name.s = zend_strndup(class_name, _len);		\
-		}														\
+		class_container.name.u = (UChar *)malloc(UBYTES(_len+1));		\
+		u_charsToUChars(class_name, class_container.name.u, _len+1);	\
 		class_container.name_length = _len;				        \
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
@@ -326,18 +322,10 @@ ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object
 ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
 #define zend_update_property_text(ce, obj, key, key_len, str) \
-	if (UG(unicode)) { \
-		zend_update_property_unicode(ce, obj, key, key_len, (str).u TSRMLS_CC); \
-	} else { \
-		zend_update_property_string(ce, obj, key, key_len, (str).s TSRMLS_CC); \
-	}
+	zend_update_property_unicode(ce, obj, key, key_len, (str).u TSRMLS_CC);
 
 #define zend_update_property_textl(ce, obj, key, key_len, str, len) \
-	if (UG(unicode)) { \
-		zend_update_property_unicodel(ce, obj, key, key_len, str.u, len TSRMLS_CC); \
-	} else { \
-		zend_update_property_stringl(ce, obj, key, key_len, str.s, len TSRMLS_CC); \
-	}
+	zend_update_property_unicodel(ce, obj, key, key_len, str.u, len TSRMLS_CC);
 
 
 ZEND_API int zend_update_static_property(zend_class_entry *scope, char *name, int name_length, zval *value TSRMLS_DC);
@@ -458,59 +446,39 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *v
 		add_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_assoc_string_ex(arg, key, key_len, (str).s, duplicate); \
-		} \
+		add_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_assoc_string_ex(arg, key, key_len, str, flags) add_assoc_stringl_ex(arg, key, key_len, str, strlen(str), flags)
@@ -602,59 +570,39 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, z
 		add_ascii_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_ascii_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_ascii_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_ascii_assoc_string_ex(arg, key, key_len, (str).s, duplicate); \
-		} \
+		add_ascii_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_ascii_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_ascii_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_ascii_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_ascii_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_ascii_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_ascii_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_ascii_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_ascii_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_ascii_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_ascii_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_ascii_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -747,59 +695,39 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval
 		add_rt_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_rt_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_rt_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_rt_assoc_string_ex(arg, key, key_len, (str).s, duplicate); \
-		} \
+		add_rt_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_rt_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_rt_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_rt_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_rt_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_rt_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len  = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_rt_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len  = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_rt_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_rt_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_rt_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_rt_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_rt_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -892,59 +820,39 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zv
 		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
 #define add_utf8_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_utf8_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_utf8_assoc_string_ex(arg, key, key_len, (str).s, duplicate); \
-		} \
+		add_utf8_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_utf8_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_utf8_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_utf8_assoc_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_utf8_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_utf8_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_utf8_assoc_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_utf8_assoc_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_utf8_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_utf8_assoc_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -1047,59 +955,39 @@ ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval 
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
 	} while (0)
 #define add_utf8_property_text_ex(arg, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_utf8_property_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_utf8_property_string_ex(arg, key, key_len, (str).s, duplicate); \
-		} \
+		add_utf8_property_unicode_ex(arg, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_utf8_property_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_utf8_property_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_utf8_property_stringl_ex(arg, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_utf8_property_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_utf8_property_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_utf8_property_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_utf8_property_rt_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_utf8_property_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_utf8_property_utf8_stringl_ex(arg, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_utf8_property_stringl_ex(arg, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_utf8_property_unicodel_ex(arg, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -1166,59 +1054,39 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 		add_u_assoc_zval_ex(arg, key_type, key, key_len, ___tmp); \
 	} while (0)
 #define add_u_assoc_text_ex(arg, type, key, key_len, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_u_assoc_unicode_ex(arg, type, key, key_len, (str).u, duplicate); \
-		} else { \
-			add_u_assoc_string_ex(arg, type, key, key_len, (str).s, duplicate); \
-		} \
+		add_u_assoc_unicode_ex(arg, type, key, key_len, (str).u, duplicate); \
 	} while (0)
 #define add_u_assoc_textl_ex(arg, type, key, key_len, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_u_assoc_unicodel_ex(arg, type, key, key_len, (str).u, length, duplicate); \
-		} else { \
-			add_u_assoc_stringl_ex(arg, type, key, key_len, (str).s, length, duplicate); \
-		} \
+		add_u_assoc_unicodel_ex(arg, type, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_u_assoc_ascii_stringl_ex(arg, type, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
-		} else { \
-			add_u_assoc_stringl_ex(arg, type, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_u_assoc_rt_stringl_ex(arg, type, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_u_assoc_stringl_ex(arg, type, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_u_assoc_utf8_stringl_ex(arg, type, key, key_len, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_u_assoc_stringl_ex(arg, type, key, key_len, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_u_assoc_unicodel_ex(arg, type, key, key_len, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -1311,59 +1179,39 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 		add_index_zval(arg, idx, ___tmp); \
 	} while (0)
 #define add_index_text(arg, idx, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_index_unicode(arg, idx, (str).u, duplicate); \
-		} else { \
-			add_index_string(arg, idx, (str).s, duplicate); \
-		} \
+		add_index_unicode(arg, idx, (str).u, duplicate); \
 	} while (0)
 #define add_index_textl(arg, idx, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_index_unicodel(arg, idx, (str).u, length, duplicate); \
-		} else { \
-			add_index_stringl(arg, idx, (str).s, length, duplicate); \
-		} \
+		add_index_unicodel(arg, idx, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_index_ascii_stringl(arg, idx, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-			add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
-		} else { \
-			add_index_stringl(arg, idx, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
+		add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_index_rt_stringl(arg, idx, str, length, flags) do {\
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_index_stringl(arg, idx, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 #define add_index_utf8_stringl(arg, idx, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(str); \
-			} \
-		} else { \
-			add_index_stringl(arg, idx, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_index_unicodel(arg, idx, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(str); \
 		} \
 	} while (0)
 
@@ -1435,59 +1283,39 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		add_next_index_zval(arg, ___tmp); \
 	} while (0)
 #define add_next_index_text(arg, str, duplicate) do { \
-		if (UG(unicode)) { \
-			add_next_index_unicode(arg, (str).u, duplicate); \
-		} else { \
-			add_next_index_string(arg, (str).s, duplicate); \
-		} \
+		add_next_index_unicode(arg, (str).u, duplicate); \
 	} while (0)
 #define add_next_index_textl(arg, str, length, duplicate) do { \
-		if (UG(unicode)) { \
-			add_next_index_unicodel(arg, (str).u, length, duplicate); \
-		} else { \
-			add_next_index_stringl(arg, (str).s, length, duplicate); \
-		} \
+		add_next_index_unicodel(arg, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_next_index_ascii_stringl(arg, str, length, flags) do { \
-		if (UG(unicode)) { \
-			int ___u_len = length; \
-			UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
-			___u_str[___u_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree((char*)(str)); \
-			} \
-			add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
-		} else { \
-			add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		int ___u_len = length; \
+		UChar *___u_str = zend_ascii_to_unicode((str), (___u_len)+1 ZEND_FILE_LINE_CC); \
+		___u_str[___u_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree((char*)(str)); \
 		} \
+		add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
 	} while (0)
 #define add_next_index_rt_stringl(arg, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree((char*)(str)); \
-			} \
-		} else { \
-			add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree((char*)(str)); \
 		} \
 	} while (0)
 #define add_next_index_utf8_stringl(arg, str, length, flags) do { \
-		if (UG(unicode)) { \
-			UChar *___u_str; \
-			int ___u_len; \
-			if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
-				add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree((char*)(str)); \
-			} \
-		} else { \
-			add_next_index_stringl(arg, (char*)(str), length, (flags) & ZSTR_DUPLICATE); \
+		UChar *___u_str; \
+		int ___u_len; \
+		if (zend_string_to_unicode(UG(utf8_conv), &___u_str, &___u_len, str, length TSRMLS_CC) == SUCCESS) { \
+			add_next_index_unicodel(arg, ___u_str, ___u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree((char*)(str)); \
 		} \
 	} while (0)
 
@@ -1685,78 +1513,50 @@ END_EXTERN_C()
 	}
 
 #define ZVAL_ASCII_STRING(z, s, flags) { \
-		if (UG(unicode)) { \
-			char *__s = (char*)(s); \
-			int __s_len = strlen(__s); \
-			UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
-			u_str[__s_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
-		} else { \
-			const char *__s=(s);					\
-			Z_STRLEN_P(z) = strlen(__s);	\
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) :(char*) __s);	\
-			Z_TYPE_P(z) = IS_STRING;        \
+		char *__s = (char*)(s); \
+		int __s_len = strlen(__s); \
+		UChar *u_str = zend_ascii_to_unicode(__s, __s_len+1 ZEND_FILE_LINE_CC); \
+		u_str[__s_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(__s); \
 		} \
+		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 	}
 
 #define ZVAL_ASCII_STRINGL(z, s, l, flags) { \
-		if (UG(unicode)) { \
-			char *__s = (char*)(s); \
-			int __s_len  = (l); \
-			UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
-			u_str[__s_len] = 0; \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-			ZVAL_UNICODEL(z, u_str, __s_len, 0); \
-		} else { \
-			const char *__s=(s); int __l=l;	\
-			Z_STRLEN_P(z) = __l;	    \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : (char*)__s);	\
-			Z_TYPE_P(z) = IS_STRING;    \
+		char *__s = (char*)(s); \
+		int __s_len  = (l); \
+		UChar *u_str = zend_ascii_to_unicode((__s), (__s_len)+1 ZEND_FILE_LINE_CC); \
+		u_str[__s_len] = 0; \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(__s); \
 		} \
+		ZVAL_UNICODEL(z, u_str, __s_len, 0); \
 	}
 
 #define ZVAL_U_STRING(conv, z, s, flags) { \
-		if (UG(unicode)) { \
-			char *__s = (char *)(s); \
-			int __s_len = strlen(__s); \
-			UChar *u_str; \
-			int u_len; \
-			if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
-				ZVAL_UNICODEL(z, u_str, u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-		} else { \
-			char *__s=(char *)(s); \
-			Z_STRLEN_P(z) = strlen(__s); \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : (char*)__s); \
-			Z_TYPE_P(z) = IS_STRING; \
+		char *__s = (char *)(s); \
+		int __s_len = strlen(__s); \
+		UChar *u_str; \
+		int u_len; \
+		if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(__s); \
 		} \
 	}
 
 #define ZVAL_U_STRINGL(conv, z, s, l, flags) { \
-		if (UG(unicode)) { \
-			char *__s = (char *)(s); \
-			int __s_len = (l); \
-			UChar *u_str; \
-			int u_len; \
-			if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
-				ZVAL_UNICODEL(z, u_str, u_len, 0); \
-			} \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-		} else { \
-			char *__s=(char *)(s); int __l=l; \
-			Z_STRLEN_P(z) = __l; \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s); \
-			Z_TYPE_P(z) = IS_STRING; \
+		char *__s = (char *)(s); \
+		int __s_len = (l); \
+		UChar *u_str; \
+		int u_len; \
+		if (zend_string_to_unicode(conv, &u_str, &u_len, __s, __s_len TSRMLS_CC) == SUCCESS) { \
+			ZVAL_UNICODEL(z, u_str, u_len, 0); \
+		} \
+		if ((flags) & ZSTR_AUTOFREE) { \
+			efree(__s); \
 		} \
 	}
 
@@ -1847,28 +1647,16 @@ END_EXTERN_C()
 
 #define ZVAL_TEXT(z, t, duplicate)					\
 		do {										\
-			if (UG(unicode)) {						\
-				ZVAL_UNICODE(z, t.u, duplicate);	\
-			} else {								\
-				ZVAL_STRING(z, t.s, duplicate);		\
-			}										\
+			ZVAL_UNICODE(z, t.u, duplicate);		\
 		} while (0);
 
 #define ZVAL_TEXTL(z, t, l, duplicate)				\
 		do {										\
-			if (UG(unicode)) {						\
-				ZVAL_UNICODEL(z, t.u, l, duplicate);\
-			} else {								\
-				ZVAL_STRINGL(z, t.s, l, duplicate);	\
-			}										\
+			ZVAL_UNICODEL(z, t.u, l, duplicate);	\
 		} while (0);
 
 #define ZVAL_EMPTY_TEXT(z) \
-		if (UG(unicode)) { \
-			ZVAL_EMPTY_UNICODE(z); \
-		} else { \
-			ZVAL_EMPTY_STRING(z); \
-		}
+			ZVAL_EMPTY_UNICODE(z);
 
 #define ZVAL_ENC_STRINGL(z, t, conv, s, l, flags) { \
 		if (t == IS_UNICODE) { \

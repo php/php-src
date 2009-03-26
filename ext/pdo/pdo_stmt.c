@@ -2308,9 +2308,7 @@ static union _zend_function *dbstmt_method_get(
 #if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
 #endif
-#ifdef IS_UNICODE
-	zend_uchar ztype = UG(unicode) ? IS_UNICODE : IS_STRING;
-#endif
+	zend_uchar ztype = IS_UNICODE;
 
 	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 
@@ -2720,9 +2718,7 @@ static union _zend_function *row_method_get(
 {
 	zend_function *fbc;
 	zstr lc_method_name;
-#ifdef IS_UNICODE
-	zend_uchar ztype = UG(unicode) ? IS_UNICODE : IS_STRING;
-#endif
+	zend_uchar ztype = IS_UNICODE;
 
 	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 
@@ -2768,7 +2764,7 @@ static int row_get_classname(const zval *object,  zstr *class_name, zend_uint *c
 	if (parent) {
 		return FAILURE;
 	} else {
-		*class_name = ezstrndup(ZEND_STR_TYPE, ZSTR("PDORow"), sizeof("PDORow") - 1);
+		*class_name = ezstrndup(IS_UNICODE, ZSTR("PDORow"), sizeof("PDORow") - 1);
 		*class_name_len = sizeof("PDORow")-1;
 		return SUCCESS;
 	}

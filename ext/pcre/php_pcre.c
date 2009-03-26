@@ -270,13 +270,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_uchar utype, char *r
 			zend_hash_clean(&PCRE_G(pcre_cache));
 		} else {
 #if HAVE_SETLOCALE
-			if (!strcmp(pce->locale, locale) && UG(unicode) == pce->unicode_mode) {
+			if (!strcmp(pce->locale, locale)) {
 				return pce;
 			}
 #else
-			if (UG(unicode) == pce->unicode_mode) {
-				return pce;
-			}
+			return pce;
 #endif
 		}
 	}
@@ -435,7 +433,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_uchar utype, char *r
 	new_entry.extra = extra;
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
-	new_entry.unicode_mode = UG(unicode);
 #if HAVE_SETLOCALE
 	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
@@ -451,7 +448,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_uchar utype, char *r
  */
 PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
 {
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, strlen(regex) TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(IS_UNICODE, regex, strlen(regex) TSRMLS_CC);
 
 	if (extra) {
 		*extra = pce ? pce->extra : NULL;
@@ -468,7 +465,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
  */
 PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *preg_options, int *compile_options TSRMLS_DC)
 {
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, strlen(regex) TSRMLS_CC);
+	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(IS_UNICODE, regex, strlen(regex) TSRMLS_CC);
 	
 	if (extra) {
 		*extra = pce ? pce->extra : NULL;
@@ -519,16 +516,12 @@ static inline void add_offset_pair(zval *result, zend_uchar utype, char *str, in
 	
 	if (name) {
 		zval_add_ref(&match_pair);
-		if (UG(unicode)) {
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *u = NULL;
-			int u_len;
-			zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, name, strlen(name), &status);
-			zend_u_hash_update(Z_ARRVAL_P(result), IS_UNICODE, ZSTR(u), u_len+1, &match_pair, sizeof(zval *), NULL);
-			efree(u);
-		} else {
-			zend_hash_update(Z_ARRVAL_P(result), name, strlen(name)+1, &match_pair, sizeof(zval *), NULL);
-		}
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u = NULL;
+		int u_len;
+		zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, name, strlen(name), &status);
+		zend_u_hash_update(Z_ARRVAL_P(result), IS_UNICODE, ZSTR(u), u_len+1, &match_pair, sizeof(zval *), NULL);
+		efree(u);
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
 }
@@ -749,14 +742,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 						 * arrays with empty strings.
 						 */
 						if (count < num_subpats) {
-							if (UG(unicode)) {
-								for (; i < num_subpats; i++) {
-									add_next_index_unicode(match_sets[i], EMPTY_STR, 1);
-								}
-							} else {
-								for (; i < num_subpats; i++) {
-									add_next_index_string(match_sets[i], "", 1);
-								}
+							for (; i < num_subpats; i++) {
+								add_next_index_unicode(match_sets[i], EMPTY_STR, 1);
 							}
 						}
 					} else {
@@ -854,18 +841,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
 		int u_len;
 		for (i = 0; i < num_subpats; i++) {
 			if (subpat_names[i]) {
-				if (UG(unicode)) {
-					zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
-					zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
-									   u_len+1, &match_sets[i], sizeof(zval *), NULL);
-					Z_ADDREF_P(match_sets[i]);
-					efree(u);
-					status = U_ZERO_ERROR;
-				} else {
-					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i],
-									 strlen(subpat_names[i])+1, &match_sets[i], sizeof(zval *), NULL);
-					Z_ADDREF_P(match_sets[i]);
-				}
+				zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, subpat_names[i], strlen(subpat_names[i]), &status);
+				zend_u_hash_update(Z_ARRVAL_P(subpats), IS_UNICODE, ZSTR(u),
+								   u_len+1, &match_sets[i], sizeof(zval *), NULL);
+				Z_ADDREF_P(match_sets[i]);
+				efree(u);
+				status = U_ZERO_ERROR;
 			}
 			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
@@ -1492,7 +1473,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 					switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key, &string_key_len, &num_key, 0, NULL))
 					{
 					case HASH_KEY_IS_UNICODE:
-						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+						if (utype == IS_UNICODE || utype != IS_STRING) {
 							add_u_assoc_utf8_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
 						} else {
 							add_u_assoc_stringl_ex(return_value, IS_UNICODE, string_key, string_key_len, result, result_len, 0);
@@ -1500,7 +1481,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 						break;
 
 					case HASH_KEY_IS_STRING:
-						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+						if (utype == IS_UNICODE || utype != IS_STRING) {
 							add_u_assoc_utf8_stringl_ex(return_value, IS_STRING, string_key, string_key_len, result, result_len, ZSTR_AUTOFREE);
 						} else {
 							add_u_assoc_stringl_ex(return_value, IS_STRING, string_key, string_key_len, result, result_len, 0);
@@ -1508,7 +1489,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 						break;
 
 					case HASH_KEY_IS_LONG:
-						if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+						if (utype == IS_UNICODE || utype != IS_STRING) {
 							add_index_utf8_stringl(return_value, num_key, result, result_len, ZSTR_AUTOFREE);
 						} else {
 							add_index_stringl(return_value, num_key, result, result_len, 0);
@@ -1527,7 +1508,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		old_replace_count = replace_count;
 		if ((result = php_replace_in_subject(regex, replace, &subject, &result_len, limit, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 			if (!is_filter || replace_count > old_replace_count) {
-				if (utype == IS_UNICODE || (UG(unicode) && utype != IS_STRING)) {
+				if (utype == IS_UNICODE || utype != IS_STRING) {
 					RETVAL_UTF8_STRINGL(result, result_len, ZSTR_AUTOFREE);
 				} else {
 					RETVAL_STRINGL(result, result_len, 0);
@@ -1818,11 +1799,7 @@ static PHP_FUNCTION(preg_quote)
 	}
 
 	if (delim && *delim) {
-		if (UG(unicode)) {
-			U8_GET((unsigned char*)delim, 0, 0, delim_len, delim_char);
-		} else {
-			delim_char = (UChar32)delim[0];
-		}
+		U8_GET((unsigned char*)delim, 0, 0, delim_len, delim_char);
 		quote_delim = 1;
 	}
 	
@@ -1831,7 +1808,7 @@ static PHP_FUNCTION(preg_quote)
 	   sequence is 4 bytes, so the multiplier is (4+1). In non-Unicode mode, we
 	   have to assume that any character can be '\0', which needs 4 chars to
 	   be escaped. */
-	out_str = safe_emalloc(UG(unicode)?5:4, in_str_len, 1);
+	out_str = safe_emalloc(5, in_str_len, 1);
 	
 	/* Go through the string and quote necessary characters */
 	for(p = in_str, q = out_str; p != in_str_end; p++) {

@@ -243,7 +243,7 @@ static zend_always_inline zval *_get_zval_ptr_var(const znode *node, const temp_
 static zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC) /* {{{ */
 {
 	zend_compiled_variable *cv = &CV_DEF_OF(var);
-	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar utype = IS_UNICODE;
 
 	if (!EG(active_symbol_table) ||
 	    zend_u_hash_quick_find(EG(active_symbol_table), utype, cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
@@ -482,7 +482,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC) /* {{{ */
 
 static inline char * zend_verify_arg_class_kind(zend_arg_info *cur_arg_info, ulong fetch_type, zstr *class_name, zend_class_entry **pce TSRMLS_DC) /* {{{ */
 {
-	*pce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, (fetch_type | ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
+	*pce = zend_u_fetch_class(IS_UNICODE, cur_arg_info->class_name, cur_arg_info->class_name_len, (fetch_type | ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 
 	*class_name = (*pce) ? (*pce)->name: cur_arg_info->class_name;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -650,7 +650,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 
 static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC) /* {{{ */
 {
-	if (UG(unicode) && Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
+	if (Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
 		convert_to_unicode(T->str_offset.str);
 	}
 
@@ -877,7 +877,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 
 	switch (ztype) {
 		case IS_NULL:
-			ztype = ZEND_STR_TYPE;
+			ztype = IS_UNICODE;
 			offset_key = EMPTY_ZSTR;
 			offset_key_length = 0;
 			goto fetch_string_dim;
@@ -889,7 +889,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 			offset_key_length = Z_UNILEN_P(dim);
 
 fetch_string_dim:
-			if (UG(unicode) && ht == &EG(symbol_table) && ztype == IS_UNICODE) {
+			if (ht == &EG(symbol_table) && ztype == IS_UNICODE) {
 				/* Identifier normalization */
 				UChar *norm;
 				int norm_len;

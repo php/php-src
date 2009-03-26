@@ -403,10 +403,8 @@ ZEND_API zstr get_active_function_name(TSRMLS_D) /* {{{ */
 
 				if (function_name.v) {
 					return function_name;
-				} else if (UG(unicode)) {
-					ret.u = u_main;
 				} else {
-					ret.s = "main";
+					ret.u = u_main;
 				}
 				return ret;
 			}
@@ -533,22 +531,20 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		refcount = Z_REFCOUNT_P(p);
 		is_ref = Z_ISREF_P(p);
 
-		if (!zend_u_get_constant_ex(ZEND_STR_TYPE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
+		if (!zend_u_get_constant_ex(IS_UNICODE, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			zstr actual = Z_UNIVAL_P(p);
-			if ((UG(unicode) && (colon.u = u_memrchr(Z_USTRVAL_P(p), ':', Z_USTRLEN_P(p))) && colon.u > Z_USTRVAL_P(p) && *(colon.u - 1) == ':') ||
-				(!UG(unicode) && (colon.s = zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p))) && colon.s > Z_STRVAL_P(p) && *(colon.s - 1) == ':')
-			) {
+			if ((colon.u = u_memrchr(Z_USTRVAL_P(p), ':', Z_USTRLEN_P(p))) && colon.u > Z_USTRVAL_P(p) && *(colon.u - 1) == ':') {
 				zend_error(E_ERROR, "Undefined class constant '%v'", actual);
 			} else {
 				zstr save = actual, slash;
 				int actual_len = Z_UNILEN_P(p);
-				if(ZEND_STR_TYPE == IS_UNICODE) {
+				if(IS_UNICODE == IS_UNICODE) {
 					slash.u = u_memrchr(actual.u, '\\', actual_len);
 				} else {
 					slash.s = zend_memrchr(actual.s, '\\', actual_len);
 				}
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && slash.v != NULL) {
-					if(ZEND_STR_TYPE == IS_UNICODE) {
+					if(IS_UNICODE == IS_UNICODE) {
 						actual.u = slash.u + 1;
 						actual_len -= (actual.u - Z_USTRVAL_P(p));
 					} else {
@@ -558,12 +554,12 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 					if (inline_change) {
 						int type = Z_TYPE_P(p);
-						ZVAL_ZSTRL(p, ZEND_STR_TYPE, actual, actual_len, 1);
+						ZVAL_ZSTRL(p, IS_UNICODE, actual, actual_len, 1);
 						Z_TYPE_P(p) = type;
 						actual = Z_UNIVAL_P(p);
 					}
 				}
-				if(ZEND_STR_TYPE == IS_UNICODE && actual.u[0] == '\\') {
+				if(IS_UNICODE == IS_UNICODE && actual.u[0] == '\\') {
 					if (inline_change) {
 						memmove(Z_USTRVAL_P(p), Z_USTRVAL_P(p)+1, UBYTES(Z_USTRLEN_P(p)));
 						--Z_USTRLEN_P(p);
@@ -571,7 +567,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 						++actual.u;
 					}
 					--actual_len;
-				} else if(ZEND_STR_TYPE == IS_STRING && actual.s[0] == '\\') {
+				} else if(IS_UNICODE == IS_STRING && actual.s[0] == '\\') {
 					if (inline_change) {
 						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
 						--Z_STRLEN_P(p);
@@ -582,16 +578,16 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				}
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					int fix_save = 0;
-					if (ZEND_STR_TYPE == IS_UNICODE && save.u[0] == '\\') {
+					if (IS_UNICODE == IS_UNICODE && save.u[0] == '\\') {
 						save.u++;
 						fix_save = 1;
-					} else if (ZEND_STR_TYPE == IS_STRING && save.s[0] == '\\') {
+					} else if (IS_UNICODE == IS_STRING && save.s[0] == '\\') {
 						save.s++;
 						fix_save = 1;
 					}
 					zend_error(E_ERROR, "Undefined constant '%v'", save);
 					if (fix_save) {
-						(ZEND_STR_TYPE == IS_UNICODE)?--save.u:--save.s;
+						--save.u;
 					}
 					if (inline_change) {
 						efree(save.v);
@@ -602,7 +598,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					efree(save.v);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",  actual,  actual);
-				Z_TYPE_P(p) = UG(unicode) ? IS_UNICODE : IS_STRING;
+				Z_TYPE_P(p) = IS_UNICODE;
 				if (!inline_change) {
 					ZVAL_ZSTRL(p, Z_TYPE_P(p), actual, actual_len, 0);
 					zval_copy_ctor(p);
@@ -646,60 +642,33 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				continue;
 			}
 			Z_TYPE_PP(element) &= ~IS_CONSTANT_INDEX;
-			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(p), &str_index, &str_index_len, &num_index, 0, NULL) != (UG(unicode) ? HASH_KEY_IS_UNICODE : HASH_KEY_IS_STRING)) {
+			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(p), &str_index, &str_index_len, &num_index, 0, NULL) != HASH_KEY_IS_UNICODE) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_u_get_constant_ex(ZEND_STR_TYPE, str_index, str_index_len - 3, &const_value, scope, (UG(unicode) ? str_index.u[str_index_len-2] : str_index.s[str_index_len-2]) TSRMLS_CC)) {
-				if (UG(unicode)) {
-					UChar *actual, *save = str_index.u;
-					if ((colon.u = u_memrchr(str_index.u, ':', str_index_len - 3)) && colon.u > str_index.u && *(colon.u-1) == ':') {
-						zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
-						str_index_len -= ((colon.u - str_index.u) + 1);
-						str_index.u = colon.u + 1;
-					} else {
-						if (str_index.u[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
-							if ((actual = (UChar *)u_memrchr(str_index.u, '\\', str_index_len - 3))) {
-								actual++;
-							str_index_len -= (actual - str_index.u);
-							str_index.u = actual;
-						}
-						}
-						if (str_index.u[0] == '\\') {
-							++str_index.u;
-							--str_index_len;
-						}
-						if (save[0] == '\\') {
-							++save;
-						}
-						if ((str_index.u[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
-							zend_error(E_ERROR, "Undefined constant '%r'", save);
-						}
-					}
+			if (!zend_u_get_constant_ex(IS_UNICODE, str_index, str_index_len - 3, &const_value, scope, str_index.u[str_index_len-2] TSRMLS_CC)) {
+				UChar *actual, *save = str_index.u;
+				if ((colon.u = u_memrchr(str_index.u, ':', str_index_len - 3)) && colon.u > str_index.u && *(colon.u-1) == ':') {
+					zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
+					str_index_len -= ((colon.u - str_index.u) + 1);
+					str_index.u = colon.u + 1;
 				} else {
-					char *actual, *save = str_index.s;
-					if ((colon.s = zend_memrchr(str_index.s, ':', str_index_len - 3)) && colon.s > str_index.s  && *(colon.s-1) == ':') {
-						zend_error(E_ERROR, "Undefined class constant '%v'", str_index);
-						str_index_len -= ((colon.s - str_index.s) + 1);
-						str_index.s = colon.s + 1;
-					} else {
-						if (str_index.s[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
-							if ((actual = (char *)zend_memrchr(str_index.s, '\\', str_index_len - 3))) {
-								actual++;
-							str_index_len -= (actual - str_index.s);
-							str_index.s = actual;
-						}
-						}
-						if (str_index.s[0] == '\\') {
-							++str_index.s;
-							--str_index_len;
-						}
-						if (save[0] == '\\') {
-							++save;
-						}
-						if ((str_index.s[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
-							zend_error(E_ERROR, "Undefined constant '%s'", save);
-						}
+					if (str_index.u[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
+						if ((actual = (UChar *)u_memrchr(str_index.u, '\\', str_index_len - 3))) {
+							actual++;
+						str_index_len -= (actual - str_index.u);
+						str_index.u = actual;
+					}
+					}
+					if (str_index.u[0] == '\\') {
+						++str_index.u;
+						--str_index_len;
+					}
+					if (save[0] == '\\') {
+						++save;
+					}
+					if ((str_index.u[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
+						zend_error(E_ERROR, "Undefined constant '%r'", save);
 					}
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
@@ -1176,9 +1145,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	EG(autoload_func) = fcall_cache.function_handler;
 
-	if (UG(unicode)) {
-		zval_dtor(&autoload_function);
-	}
+	zval_dtor(&autoload_function);
 
 	zval_ptr_dtor(&class_name_ptr);
 
@@ -1781,7 +1748,7 @@ ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC) /* 
 
 ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 {
-	zend_uchar type = ZEND_STR_TYPE;
+	zend_uchar type = IS_UNICODE;
 	zend_uint i;
 	zend_execute_data *ex;
 

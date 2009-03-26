@@ -862,11 +862,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 
 	if (output.size) {
 		MAKE_STD_ZVAL(temp);
-		if (UG(unicode)) {
-			ZVAL_U_STRINGL(obj->converter->conv, temp, (char *) output.bp, output.size-1, 1);
-		} else {
-			ZVAL_STRINGL(temp, (char *) output.bp, output.size-1, 1);
-		}
+		ZVAL_U_STRINGL(obj->converter->conv, temp, (char *) output.bp, output.size-1, 1);
 		zend_ascii_hash_update(obj->std.properties, "value", sizeof("value"), (void *)&temp, sizeof(zval *), NULL);
 	}
 
@@ -1091,11 +1087,9 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, int len, char *e
 		}
 	}
 
-	if (UG(unicode)) {
-		obj->converter = emalloc(sizeof(PHPTidyConv));
-		obj->converter->conv = ucnv_open(tidyOptGetEncName(obj->ptdoc->doc, TidyOutCharEncoding), &Uerror);
-		obj->converter->ref_count = 1;
-	}
+	obj->converter = emalloc(sizeof(PHPTidyConv));
+	obj->converter->conv = ucnv_open(tidyOptGetEncName(obj->ptdoc->doc, TidyOutCharEncoding), &Uerror);
+	obj->converter->ref_count = 1;
 
 	tidyBufInit(&buf);
 	tidyBufAttach(&buf, (byte *) string, len);

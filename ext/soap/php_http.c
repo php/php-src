@@ -867,9 +867,7 @@ try_again:
 			array_init(zcookie);
 			MAKE_STD_ZVAL(zvalue);
 			ZVAL_STRINGL(zvalue, eqpos + 1, cookie_len, 1);
-			if (UG(unicode)) {
-				zval_string_to_unicode_ex(zvalue, UG(utf8_conv) TSRMLS_CC);
-			}
+			zval_string_to_unicode_ex(zvalue, UG(utf8_conv) TSRMLS_CC);
 			add_index_zval(zcookie, 0, zvalue);
 
 			if (sempos != NULL) {

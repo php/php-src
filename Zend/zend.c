@@ -280,23 +280,19 @@ str_type:
 						if (class_name.s[0]=='*') {
 							ZEND_PUTS_EX(":protected");
 						} else {
-							ZEND_PUTS_EX(":");
-							if (UG(unicode)) {
-								UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
-								UErrorCode status = U_ZERO_ERROR;
-								char *s = NULL;
-								int s_len;
+							UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+							UErrorCode status = U_ZERO_ERROR;
+							char *s = NULL;
+							int s_len;
 
-								zend_unicode_to_string_ex(conv, &s, &s_len, class_name.u, u_strlen(class_name.u), &status);
-								if (U_FAILURE(status)) {
-									zend_error(E_WARNING, "Could not convert Unicode to printable form");
-									return;
-								}
-								ZEND_WRITE_EX(s, s_len);
-								efree(s);
-							} else {
-								ZEND_PUTS_EX(class_name.s);
+							ZEND_PUTS_EX(":");
+							zend_unicode_to_string_ex(conv, &s, &s_len, class_name.u, u_strlen(class_name.u), &status);
+							if (U_FAILURE(status)) {
+								zend_error(E_WARNING, "Could not convert Unicode to printable form");
+								return;
 							}
+							ZEND_WRITE_EX(s, s_len);
+							efree(s);
 							ZEND_PUTS_EX(":private");
 						}
 					}
@@ -484,11 +480,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		default:
 			*expr_copy = *expr;
 			zval_copy_ctor(expr_copy);
-			if (UG(unicode)) {
-				convert_to_string_with_converter(expr_copy, ZEND_U_CONVERTER(UG(output_encoding_conv)));
-			} else {
-				convert_to_string(expr_copy);
-			}
+			convert_to_string_with_converter(expr_copy, ZEND_U_CONVERTER(UG(output_encoding_conv)));
 			break;
 	}
 	Z_TYPE_P(expr_copy) = IS_STRING;
@@ -651,22 +643,18 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
 				if (class_name.v) {
-					if (UG(unicode)) {
-						UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
-						UErrorCode status = U_ZERO_ERROR;
-						char *s = NULL;
-						int s_len;
+					UConverter *conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+					UErrorCode status = U_ZERO_ERROR;
+					char *s = NULL;
+					int s_len;
 
-						zend_unicode_to_string_ex(conv, &s, &s_len, class_name.u, clen, &status);
-						if (U_FAILURE(status)) {
-							zend_error(E_WARNING, "Could not convert Unicode to printable form");
-							return;
-						}
-						ZEND_WRITE_EX(s, s_len);
-						efree(s);
-					} else {
-						ZEND_PUTS_EX(class_name.s);
+					zend_unicode_to_string_ex(conv, &s, &s_len, class_name.u, clen, &status);
+					if (U_FAILURE(status)) {
+						zend_error(E_WARNING, "Could not convert Unicode to printable form");
+						return;
 					}
+					ZEND_WRITE_EX(s, s_len);
+					efree(s);
 				} else {
 					ZEND_PUTS_EX("Unknown Class");
 				}
@@ -756,7 +744,7 @@ static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
 	CG(asp_tags) = asp_tags_default;
 	CG(short_tags) = short_tags_default;
 	CG(compiler_options) = compiler_options_default;
-	CG(literal_type) = ZEND_STR_TYPE;
+	CG(literal_type) = IS_UNICODE;
 }
 /* }}} */
 
@@ -790,16 +778,7 @@ static void free_u_zend_constant(zend_constant *c) /* {{{ */
 static void function_to_unicode(zend_function *func TSRMLS_DC) /* {{{ */
 {
 	if (func->common.function_name.s) {
-		if (UG(unicode)) {
-			func->common.function_name.u = zend_ustrdup(func->common.function_name.u);
-		} else {
-			UChar *uname;
-			int len = strlen(func->common.function_name.s) + 1;
-	
-			uname = malloc(UBYTES(len));
-			u_charsToUChars(func->common.function_name.s, uname, len);
-			func->common.function_name.u = uname;
-		}
+		func->common.function_name.u = zend_ustrdup(func->common.function_name.u);
 	}
 	if (func->common.arg_info) {
 		zend_arg_info *args;
@@ -926,7 +905,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	zend_set_default_compile_time_values(TSRMLS_C);
 
 	CG(interactive) = 0;
-	CG(literal_type) = ZEND_STR_TYPE;
+	CG(literal_type) = IS_UNICODE;
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_u_hash_init_ex(compiler_globals->auto_globals, global_auto_globals_table->nNumOfElements, NULL, NULL, 1, UG(unicode), 0);
@@ -1235,28 +1214,25 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 void zend_register_standard_ini_entries(TSRMLS_D) /* {{{ */
 {
 	int module_number = 0;
-
+	UConverter *old_runtime_encoding_conv;
+	UErrorCode status = U_ZERO_ERROR;
+		
 	REGISTER_INI_ENTRIES();
 
 	/* Make copies of HashTables with UNICODE */
+	old_runtime_encoding_conv = UG(runtime_encoding_conv);
+	UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
 
-	if (UG(unicode)) {
-		UConverter *old_runtime_encoding_conv;
-		UErrorCode status = U_ZERO_ERROR;
+	zend_hash_to_unicode(CG(function_table), (apply_func_t)function_to_unicode TSRMLS_CC);
+	CG(function_table)->pDestructor = ZEND_U_FUNCTION_DTOR;
+	zend_hash_to_unicode(CG(class_table), (apply_func_t)class_to_unicode TSRMLS_CC);
+	zend_hash_to_unicode(CG(auto_globals), NULL TSRMLS_CC);
+	zend_hash_to_unicode(EG(zend_constants), (apply_func_t)const_to_unicode TSRMLS_CC);
+	EG(zend_constants)->pDestructor = ZEND_U_CONSTANT_DTOR;
 
-		old_runtime_encoding_conv = UG(runtime_encoding_conv);
-		UG(runtime_encoding_conv) = ucnv_open("ASCII", &status);
+	ucnv_close(UG(runtime_encoding_conv));
+	UG(runtime_encoding_conv) = old_runtime_encoding_conv;
 
-		zend_hash_to_unicode(CG(function_table), (apply_func_t)function_to_unicode TSRMLS_CC);
-		CG(function_table)->pDestructor = ZEND_U_FUNCTION_DTOR;
-		zend_hash_to_unicode(CG(class_table), (apply_func_t)class_to_unicode TSRMLS_CC);
-		zend_hash_to_unicode(CG(auto_globals), NULL TSRMLS_CC);
-		zend_hash_to_unicode(EG(zend_constants), (apply_func_t)const_to_unicode TSRMLS_CC);
-		EG(zend_constants)->pDestructor = ZEND_U_CONSTANT_DTOR;
-
-		ucnv_close(UG(runtime_encoding_conv));
-		UG(runtime_encoding_conv) = old_runtime_encoding_conv;
-	}
 	zend_startup_builtin_functions(TSRMLS_C);
 }
 /* }}} */
@@ -1631,7 +1607,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			va_copy(usr_copy, args);
 			Z_STRLEN_P(z_error_message) = zend_vspprintf(&Z_STRVAL_P(z_error_message), 0, format, usr_copy);
 			Z_TYPE_P(z_error_message) = IS_STRING;
-			if (UG(unicode)) {
+			{
 				char *str = Z_STRVAL_P(z_error_message);
 				int len  = Z_STRLEN_P(z_error_message);
 

@@ -82,12 +82,11 @@ void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_fl
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
 		size_t len = pce->name_length;
 		zval *tmp;
-		zend_uchar ztype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-		if (zend_u_hash_find(Z_ARRVAL_P(list), ztype, pce->name, len+1, (void*)&tmp) == FAILURE) {
+		if (zend_u_hash_find(Z_ARRVAL_P(list), IS_UNICODE, pce->name, len+1, (void*)&tmp) == FAILURE) {
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_TEXTL(tmp, pce->name, pce->name_length, 1);
-			zend_u_hash_add(Z_ARRVAL_P(list), ztype, pce->name, len+1, &tmp, sizeof(zval *), NULL);
+			zend_u_hash_add(Z_ARRVAL_P(list), IS_UNICODE, pce->name, len+1, &tmp, sizeof(zval *), NULL);
 		}
 	}
 }
@@ -127,13 +126,9 @@ zstr spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_l
 	zstr rv;
 	zstr zprop;
 
-	if (UG(unicode)) {
-		zprop.u = zend_ascii_to_unicode(prop_name, prop_len + 1 ZEND_FILE_LINE_CC);
-		zend_u_mangle_property_name(&rv, name_len, IS_UNICODE, ce->name, ce->name_length, zprop, prop_len, 0);
-		efree(zprop.v);
-	} else {
-		zend_mangle_property_name(&rv.s, name_len, ce->name.s, ce->name_length, prop_name, prop_len, 0);
-	}
+	zprop.u = zend_ascii_to_unicode(prop_name, prop_len + 1 ZEND_FILE_LINE_CC);
+	zend_u_mangle_property_name(&rv, name_len, IS_UNICODE, ce->name, ce->name_length, zprop, prop_len, 0);
+	efree(zprop.v);
 	return rv;
 }
 /* }}} */

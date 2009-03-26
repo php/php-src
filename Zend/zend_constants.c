@@ -38,11 +38,9 @@ void free_zend_constant(zend_constant *c) /* {{{ */
 void copy_zend_constant(zend_constant *c) /* {{{ */
 {
 	TSRMLS_FETCH();
-	if (UG(unicode)) {
-		c->name.u = zend_ustrndup(c->name.u, c->name_len - 1);
-	} else {
-		c->name.s = zend_strndup(c->name.s, c->name_len - 1);
-	}
+
+	c->name.u = zend_ustrndup(c->name.u, c->name_len - 1);
+
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -192,19 +190,15 @@ ZEND_API void zend_register_long_constant(const char *name, uint name_len, long 
 {
 	zend_constant c;
 
-	if (UG(unicode)) {
-		c.name.u = malloc(UBYTES(name_len));
-		u_charsToUChars(name, c.name.u, name_len);
-		c.name_len = name_len;
-	} else {
-		c.name.s = zend_strndup(name, name_len-1);
-		c.name_len = name_len;
-	}
+	c.name.u = malloc(UBYTES(name_len));
+	u_charsToUChars(name, c.name.u, name_len);
+	c.name_len = name_len;
+
 	Z_TYPE(c.value) = IS_LONG;
 	Z_LVAL(c.value) = lval;
 	c.flags = flags;
 	c.module_number = module_number;
-	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
+	zend_u_register_constant(IS_UNICODE, &c TSRMLS_CC);
 }
 /* }}} */
 
@@ -212,19 +206,15 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 {
 	zend_constant c;
 
-	if (UG(unicode)) {
-		c.name.u = malloc(UBYTES(name_len));
-		u_charsToUChars(name, c.name.u, name_len);
-		c.name_len = name_len;
-	} else {
-		c.name.s = zend_strndup(name, name_len-1);
-		c.name_len = name_len;
-	}
+	c.name.u = malloc(UBYTES(name_len));
+	u_charsToUChars(name, c.name.u, name_len);
+	c.name_len = name_len;
+
 	Z_TYPE(c.value) = IS_DOUBLE;
 	Z_DVAL(c.value) = dval;
 	c.flags = flags;
 	c.module_number = module_number;
-	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
+	zend_u_register_constant(IS_UNICODE, &c TSRMLS_CC);
 }
 /* }}} */
 
@@ -232,31 +222,24 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 {
 	zend_constant c;
 
-	if (UG(unicode)) {
-		c.name.u = malloc(UBYTES(name_len));
-		u_charsToUChars(name, c.name.u, name_len);
-		c.name_len = name_len;
-		Z_TYPE(c.value) = IS_UNICODE;
-		if (flags & CONST_PERSISTENT) {
-			Z_USTRVAL(c.value) = malloc(UBYTES(strlen+1));
-		} else {
-			Z_USTRVAL(c.value) = emalloc(UBYTES(strlen+1));
-		}
-		u_charsToUChars(strval, Z_USTRVAL(c.value), strlen+1);
-		Z_USTRLEN(c.value) = strlen;
-		if (!(flags & CONST_PERSISTENT)) {
-			efree(strval);
-		}
+	c.name.u = malloc(UBYTES(name_len));
+	u_charsToUChars(name, c.name.u, name_len);
+	c.name_len = name_len;
+	Z_TYPE(c.value) = IS_UNICODE;
+	if (flags & CONST_PERSISTENT) {
+		Z_USTRVAL(c.value) = malloc(UBYTES(strlen+1));
 	} else {
-		c.name.s = zend_strndup(name, name_len-1);
-		c.name_len = name_len;
-		Z_TYPE(c.value) = IS_STRING;
-		Z_STRVAL(c.value) = strval;
-		Z_STRLEN(c.value) = strlen;
+		Z_USTRVAL(c.value) = emalloc(UBYTES(strlen+1));
 	}
+	u_charsToUChars(strval, Z_USTRVAL(c.value), strlen+1);
+	Z_USTRLEN(c.value) = strlen;
+	if (!(flags & CONST_PERSISTENT)) {
+		efree(strval);
+	}
+	
 	c.flags = flags;
 	c.module_number = module_number;
-	zend_u_register_constant(ZEND_STR_TYPE, &c TSRMLS_CC);
+	zend_u_register_constant(IS_UNICODE, &c TSRMLS_CC);
 }
 /* }}} */
 
@@ -573,26 +556,22 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC) /* {{{ */
 {
-	if (UG(unicode)) {
-		UChar *ustr;
+	UChar *ustr;
 
-		if (c->name.s) {
-			ustr = malloc(UBYTES(c->name_len));
-			u_charsToUChars(c->name.s, ustr, c->name_len);
-			free(c->name.s);
-			c->name.u = ustr;
-		}
-		if (Z_TYPE(c->value) == IS_STRING || (Z_TYPE(c->value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-			ustr = pemalloc(UBYTES(Z_STRLEN(c->value)+1), c->flags & CONST_PERSISTENT);
-			u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value)+1);
-			pefree(Z_STRVAL(c->value), c->flags & CONST_PERSISTENT);
-			Z_USTRVAL(c->value) = ustr;
-			if (Z_TYPE(c->value) == IS_STRING) Z_TYPE(c->value) = IS_UNICODE;
-		}
-		return zend_u_register_constant(IS_UNICODE, c TSRMLS_CC);
-	} else {
-		return zend_u_register_constant(IS_STRING, c TSRMLS_CC);
+	if (c->name.s) {
+		ustr = malloc(UBYTES(c->name_len));
+		u_charsToUChars(c->name.s, ustr, c->name_len);
+		free(c->name.s);
+		c->name.u = ustr;
 	}
+	if (Z_TYPE(c->value) == IS_STRING || (Z_TYPE(c->value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		ustr = pemalloc(UBYTES(Z_STRLEN(c->value)+1), c->flags & CONST_PERSISTENT);
+		u_charsToUChars(Z_STRVAL(c->value), ustr, Z_STRLEN(c->value)+1);
+		pefree(Z_STRVAL(c->value), c->flags & CONST_PERSISTENT);
+		Z_USTRVAL(c->value) = ustr;
+		if (Z_TYPE(c->value) == IS_STRING) Z_TYPE(c->value) = IS_UNICODE;
+	}
+	return zend_u_register_constant(IS_UNICODE, c TSRMLS_CC);
 }
 /* }}} */
 

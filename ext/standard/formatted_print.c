@@ -1272,18 +1272,11 @@ PHP_FUNCTION(user_sprintf)
 	int len;
 	zstr result;
 
-	if (!UG(unicode)) {
-		if ((result.s = php_formatted_print(ht, &len, 0, 0, PHP_RUNTIME TSRMLS_CC))==NULL) {
-			RETURN_FALSE;
-		}
-		RETVAL_STRINGL(result.s, len, 0);
-	} else {
-		result = php_u_formatted_print(ht, &len, 0, 0, PHP_RUNTIME TSRMLS_CC);
-		if (result.v == NULL) {
-			RETURN_FALSE;
-		}
-		RETVAL_UNICODEL(result.u, len, 0);
+	result = php_u_formatted_print(ht, &len, 0, 0, PHP_RUNTIME TSRMLS_CC);
+	if (result.v == NULL) {
+		RETURN_FALSE;
 	}
+	RETVAL_UNICODEL(result.u, len, 0);
 }
 /* }}} */
 
@@ -1294,18 +1287,11 @@ PHP_FUNCTION(vsprintf)
 	int len;
 	zstr result;
 
-	if (!UG(unicode)) {
-		if ((result.s = php_formatted_print(ht, &len, 1, 0, PHP_RUNTIME TSRMLS_CC))==NULL) {
-			RETURN_FALSE;
-		}
-		RETVAL_STRINGL(result.s, len, 0);
-	} else {
-		result = php_u_formatted_print(ht, &len, 1, 0, PHP_RUNTIME TSRMLS_CC);
-		if (result.v == NULL) {
-			RETURN_FALSE;
-		}
-		RETVAL_UNICODEL(result.u, len, 0);
+	result = php_u_formatted_print(ht, &len, 1, 0, PHP_RUNTIME TSRMLS_CC);
+	if (result.v == NULL) {
+		RETURN_FALSE;
 	}
+	RETVAL_UNICODEL(result.u, len, 0);
 }
 /* }}} */
 
@@ -1316,15 +1302,9 @@ PHP_FUNCTION(user_printf)
 	int len;
 	zstr result;
 
-	if (!UG(unicode)) {
-		if ((result.s = php_formatted_print(ht, &len, 0, 0, PHP_OUTPUT TSRMLS_CC))==NULL) {
-			RETURN_FALSE;
-		}
-	} else {
-		result = php_u_formatted_print(ht, &len, 0, 0, PHP_OUTPUT TSRMLS_CC);
-		if (result.v == NULL) {
-			RETURN_FALSE;
-		}
+	result = php_u_formatted_print(ht, &len, 0, 0, PHP_OUTPUT TSRMLS_CC);
+	if (result.v == NULL) {
+		RETURN_FALSE;
 	}
 	
 	PHPWRITE(result.s, len);
@@ -1339,16 +1319,10 @@ PHP_FUNCTION(vprintf)
 {
 	int len;
 	zstr result;
-	
-	if (!UG(unicode)) {
-		if ((result.s = php_formatted_print(ht, &len, 1, 0, PHP_OUTPUT TSRMLS_CC))==NULL) {
-			RETURN_FALSE;
-		}
-	} else {
-		result = php_u_formatted_print(ht, &len, 1, 0, PHP_OUTPUT TSRMLS_CC);
-		if (result.v == NULL) {
-			RETURN_FALSE;
-		}
+
+	result = php_u_formatted_print(ht, &len, 1, 0, PHP_OUTPUT TSRMLS_CC);
+	if (result.v == NULL) {
+		RETURN_FALSE;
 	}
 
 	PHPWRITE(result.s, len);
@@ -1377,7 +1351,7 @@ PHP_FUNCTION(fprintf)
 	php_stream_from_zval(stream, &arg1);
 
 	if (Z_TYPE_PP(arg2) != IS_STRING && Z_TYPE_PP(arg2) != IS_UNICODE) {
-		convert_to_text_ex(arg2);
+		convert_to_unicode_ex(arg2);
 	}
 
 	if (Z_TYPE_PP(arg2) == IS_STRING) {
@@ -1419,7 +1393,7 @@ PHP_FUNCTION(vfprintf)
 	php_stream_from_zval(stream, &arg1);
 
 	if (Z_TYPE_PP(arg2) != IS_STRING && Z_TYPE_PP(arg2) != IS_UNICODE) {
-		convert_to_text_ex(arg2);
+		convert_to_unicode_ex(arg2);
 	}
 
 	if (Z_TYPE_PP(arg2) == IS_STRING) {

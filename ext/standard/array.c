@@ -1262,69 +1262,36 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, zstr var_name, int var
 {
 	Z_UNILEN_P(result) = Z_UNILEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len;
 
-	if (UG(unicode)) {
-		Z_TYPE_P(result) = IS_UNICODE;
-		Z_USTRVAL_P(result) = eumalloc(Z_USTRLEN_P(result) + 1);
-		u_memcpy(Z_USTRVAL_P(result), Z_USTRVAL_P(prefix), Z_USTRLEN_P(prefix));
+	Z_TYPE_P(result) = IS_UNICODE;
+	Z_USTRVAL_P(result) = eumalloc(Z_USTRLEN_P(result) + 1);
+	u_memcpy(Z_USTRVAL_P(result), Z_USTRVAL_P(prefix), Z_USTRLEN_P(prefix));
 
-		if (add_underscore) {
-			Z_USTRVAL_P(result)[Z_USTRLEN_P(prefix)] = (UChar) 0x5f /*'_'*/;
-		}
-
-		if (var_name_type == IS_UNICODE) {
-			u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0), var_name.u, var_name_len + 1);
-		} else {
-			UChar *buf;
-			int buf_len;
-			UErrorCode status = U_ZERO_ERROR;
-
-			zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
-									&buf, &buf_len, var_name.s, var_name_len, &status);
-			if (U_FAILURE(status)) {
-				zval_dtor(result);
-				ZVAL_NULL(result);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert variable name to Unicode string");
-				return FAILURE;
-			}
-			if (buf_len > var_name_len) {
-				Z_USTRLEN_P(result) = Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0) + buf_len;
-				Z_USTRVAL_P(result) = eurealloc(Z_USTRVAL_P(result), Z_USTRLEN_P(result) + 1);
-			}
-			u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0), buf, buf_len + 1);
-			efree(buf);
-		}
-	} else {
-		Z_TYPE_P(result) = IS_STRING;
-		Z_STRVAL_P(result) = emalloc(Z_STRLEN_P(result) + 1);
-		memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
-
-		if (add_underscore) {
-			Z_STRVAL_P(result)[Z_STRLEN_P(prefix)] = '_';
-		}
-
-		if (var_name_type == IS_STRING) {
-			memcpy(Z_STRVAL_P(result) + Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0), var_name.s, var_name_len + 1);
-		} else {
-			char *buf;
-			int buf_len;
-			UErrorCode status = U_ZERO_ERROR;
-
-			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &buf, &buf_len, var_name.u, var_name_len, &status);
-			if (U_FAILURE(status)) {
-				zval_dtor(result);
-				ZVAL_NULL(result);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert variable name to string");
-				return FAILURE;
-			}
-			if (buf_len > var_name_len) {
-				Z_STRLEN_P(result) = Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + buf_len;
-				Z_STRVAL_P(result) = erealloc(Z_STRVAL_P(result), Z_STRLEN_P(result) + 1);
-			}
-			memcpy(Z_STRVAL_P(result) + Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0), buf, buf_len + 1);
-			efree(buf);
-		}
+	if (add_underscore) {
+		Z_USTRVAL_P(result)[Z_USTRLEN_P(prefix)] = (UChar) 0x5f /*'_'*/;
 	}
 
+	if (var_name_type == IS_UNICODE) {
+		u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0), var_name.u, var_name_len + 1);
+	} else {
+		UChar *buf;
+		int buf_len;
+		UErrorCode status = U_ZERO_ERROR;
+
+		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+								&buf, &buf_len, var_name.s, var_name_len, &status);
+		if (U_FAILURE(status)) {
+			zval_dtor(result);
+			ZVAL_NULL(result);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert variable name to Unicode string");
+			return FAILURE;
+		}
+		if (buf_len > var_name_len) {
+			Z_USTRLEN_P(result) = Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0) + buf_len;
+			Z_USTRVAL_P(result) = eurealloc(Z_USTRVAL_P(result), Z_USTRLEN_P(result) + 1);
+		}
+		u_memcpy(Z_USTRVAL_P(result)+Z_USTRLEN_P(prefix) + (add_underscore ? 1 : 0), buf, buf_len + 1);
+		efree(buf);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -1361,7 +1328,7 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		convert_to_text(prefix);
+		convert_to_unicode(prefix);
 		if (Z_UNILEN_P(prefix) && !php_valid_var_name(Z_UNIVAL_P(prefix), Z_UNILEN_P(prefix), Z_TYPE_P(prefix))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
 			return;
@@ -1402,7 +1369,7 @@ PHP_FUNCTION(extract)
 			zval num;
 
 			ZVAL_LONG(&num, num_key);
-			convert_to_text(&num);
+			convert_to_unicode(&num);
 			php_prefix_varname(&final_name, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num), 1 TSRMLS_CC);
 			zval_dtor(&num);
 		} else {
@@ -1458,10 +1425,8 @@ PHP_FUNCTION(extract)
 				break;
 		}
 
-		if (UG(unicode) && Z_TYPE(final_name) == IS_STRING) {
+		if (Z_TYPE(final_name) == IS_STRING) {
 			convert_to_unicode(&final_name);
-		} else if (!UG(unicode) && Z_TYPE(final_name) == IS_UNICODE) {
-			convert_to_string(&final_name);
 		}
 
 		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_UNIVAL(final_name), Z_UNILEN(final_name), Z_TYPE(final_name))) {
@@ -1646,7 +1611,7 @@ PHP_FUNCTION(array_fill_keys)
 			if (Z_TYPE_PP(entry) != IS_STRING && Z_TYPE_PP(entry) != IS_UNICODE) {
 				key = **entry;
 				zval_copy_ctor(&key);
-				convert_to_text(&key);
+				convert_to_unicode(&key);
 				key_ptr = &key;
 			}
 
@@ -4552,7 +4517,7 @@ PHP_FUNCTION(array_key_exists)
 			}
 			RETURN_FALSE;
 		case IS_NULL:
-			if (zend_u_hash_exists(array, (UG(unicode) ? IS_UNICODE : IS_STRING), EMPTY_ZSTR, 1)) {
+			if (zend_u_hash_exists(array, IS_UNICODE, EMPTY_ZSTR, 1)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
@@ -4687,7 +4652,7 @@ PHP_FUNCTION(array_combine)
 			if (Z_TYPE_PP(entry_keys) != IS_STRING && Z_TYPE_PP(entry_keys) != IS_UNICODE) {
 				key = **entry_keys;
 				zval_copy_ctor(&key);
-				convert_to_text(&key);
+				convert_to_unicode(&key);
 				key_ptr = &key;
 			}
 

@@ -513,7 +513,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_long_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, intern->flags);
+	add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
 	efree(pnstr.v);
 
 	ALLOC_INIT_ZVAL(dllist_array);
@@ -530,7 +530,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	}
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_zval_ex(&zrv, ZEND_STR_TYPE, pnstr, pnlen+1, dllist_array);
+	add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, dllist_array);
 	efree(pnstr.v);
 
 	return rv;

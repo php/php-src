@@ -268,7 +268,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	}
 
 	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
-	zend_u_symtable_update(rv, ZEND_STR_TYPE, zname, name_len+1, &storage, sizeof(zval *), NULL);
+	zend_u_symtable_update(rv, IS_UNICODE, zname, name_len+1, &storage, sizeof(zval *), NULL);
 	efree(zname.v);
 
 	return rv;

@@ -606,12 +606,6 @@ int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TS
 		n = zend_stream_read(file_handle, buf, len TSRMLS_CC);
 	}
 #endif
-	
-	/* Don't make any conversions if unicode=off */
-	if (!UG(unicode)) {
-		return n;
-	}
-
 	/* Autodetect encoding */
 	if (!SCNG(encoding_checked)) {
 		int32_t    signatureLength;
@@ -867,7 +861,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	tmp = *source_string;
 	zval_copy_ctor(&tmp);
 	if (Z_TYPE(tmp) != IS_STRING && Z_TYPE(tmp) != IS_UNICODE) {
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 	}
 	source_string = &tmp;
 
@@ -1555,10 +1549,10 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state(TSRMLS_C);
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	return T_STRING;
@@ -1841,10 +1835,10 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 
 
 <ST_LOOKING_FOR_VARNAME>{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	yy_pop_state(TSRMLS_C);
@@ -1962,48 +1956,30 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 	zstr class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL_ZSTR;
 	zstr func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL_ZSTR;
 	size_t len = 0;
+	size_t len1;
 
-	if (UG(unicode)) {
-		size_t len1;
-
-		if (class_name.u) {
-			len += len1 = u_strlen(class_name.u);
-			len += 2;
-		}
-		if (func_name.u) {
-			len += u_strlen(func_name.u);
-		} else {
-			func_name.u = EMPTY_STR;
-		}
-		Z_USTRLEN_P(zendlval) = len;
-		Z_USTRVAL_P(zendlval) = eumalloc(len+1);
-		if (class_name.u) {
-			u_strcpy(Z_USTRVAL_P(zendlval), class_name.u);
-			Z_USTRVAL_P(zendlval)[len1] = 0x3a;   /* ':' */
-			Z_USTRVAL_P(zendlval)[len1+1] = 0x3a; /* ':' */
-			Z_USTRVAL_P(zendlval)[len1+2] = 0;
-		} else {
-			Z_USTRVAL_P(zendlval)[0] = 0;
-		}
-		u_strcat(Z_USTRVAL_P(zendlval), func_name.u);
-		Z_TYPE_P(zendlval) = IS_UNICODE;
-	} else {
-		if (class_name.s) {
-			len += strlen(class_name.s) + 2;
-		}
-		if (func_name.s) {
-			len += strlen(func_name.s);
-		}
-
-		Z_STRVAL_P(zendlval) = emalloc(len+1);
-		Z_STRLEN_P(zendlval) = sprintf(Z_STRVAL_P(zendlval), "%s%s%s",
-			class_name.s ? class_name.s : "",
-			class_name.s && func_name.s ? "::" : "",
-			func_name.s ? func_name.s : ""
-			);
-		Z_STRLEN_P(zendlval) = strlen(Z_STRVAL_P(zendlval));
-		Z_TYPE_P(zendlval) = IS_STRING;
+	if (class_name.u) {
+		len += len1 = u_strlen(class_name.u);
+		len += 2;
 	}
+	if (func_name.u) {
+		len += u_strlen(func_name.u);
+	} else {
+		func_name.u = EMPTY_STR;
+	}
+	Z_USTRLEN_P(zendlval) = len;
+	Z_USTRVAL_P(zendlval) = eumalloc(len+1);
+	if (class_name.u) {
+		u_strcpy(Z_USTRVAL_P(zendlval), class_name.u);
+		Z_USTRVAL_P(zendlval)[len1] = 0x3a;   /* ':' */
+		Z_USTRVAL_P(zendlval)[len1+1] = 0x3a; /* ':' */
+		Z_USTRVAL_P(zendlval)[len1+2] = 0;
+	} else {
+		Z_USTRVAL_P(zendlval)[0] = 0;
+	}
+	u_strcat(Z_USTRVAL_P(zendlval), func_name.u);
+	Z_TYPE_P(zendlval) = IS_UNICODE;
+
 	return T_METHOD_C;
 }
 
@@ -2168,10 +2144,10 @@ inline_char_handler:
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	return T_VARIABLE;
@@ -2183,20 +2159,20 @@ inline_char_handler:
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
 
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	return T_VARIABLE;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, (yytext+1), (yyleng-1), IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	return T_VARIABLE;
@@ -2221,10 +2197,10 @@ inline_char_handler:
 }
 
 <ST_IN_SCRIPTING>{LABEL} {
-	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
-	if (UG(unicode) && !zend_check_and_normalize_identifier(zendlval)) {
+	if (!zend_check_and_normalize_identifier(zendlval)) {
 		return 0;
 	}
 	return T_STRING;
@@ -2312,7 +2288,7 @@ inline_char_handler:
 	zval temp;
 
 	HANDLE_NEWLINES(yytext, yyleng);
-	if (!zend_copy_scanner_string(&temp, yytext, yyleng, UG(unicode)?IS_UNICODE:IS_STRING, SCNG(output_conv) TSRMLS_CC)) {
+	if (!zend_copy_scanner_string(&temp, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
 		return 0;
 	}
 	CG(doc_comment) = temp.value.uni.val;
@@ -2357,12 +2333,7 @@ inline_char_handler:
 /* ("{"*|"$"*) handles { or $ at the end of a string (or the entire contents)
  */
 <ST_IN_SCRIPTING>(["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
-	if (UG(unicode)) {
-		return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext+1, yyleng-2, '"' TSRMLS_CC);
-		return T_CONSTANT_ENCAPSED_STRING;
-	}
+	return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
 }
 
 
@@ -2373,12 +2344,7 @@ inline_char_handler:
 
 
 <ST_IN_SCRIPTING>([']([^'\\]|("\\"{ANY_CHAR}))*[']) {
-	if (UG(unicode)) {
-		return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
-	} else {
-		zend_scan_binary_single_string(zendlval, yytext+1, yyleng-2 TSRMLS_CC);
-		return T_CONSTANT_ENCAPSED_STRING;
-	}
+	return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
 }
 
 

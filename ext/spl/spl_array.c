@@ -703,7 +703,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 	
 		base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
 		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
-		zend_u_symtable_update(rv, ZEND_STR_TYPE, zname, name_len+1, &storage, sizeof(zval *), NULL);
+		zend_u_symtable_update(rv, IS_UNICODE, zname, name_len+1, &storage, sizeof(zval *), NULL);
 		efree(zname.v);
 	
 		return rv;
@@ -778,10 +778,8 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSR
 
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
 		do {
-			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == (UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING)) {
-				if (!string_length || 
-				    ((UG(unicode) && string_key.u[0]) ||
-				     (!UG(unicode) && string_key.s[0]))) {
+			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == HASH_KEY_IS_UNICODE) {
+				if (!string_length || string_key.u[0]) {
 					return SUCCESS;
 				}
 			} else {

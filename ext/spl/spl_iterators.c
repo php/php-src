@@ -766,7 +766,7 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, zstr
 
 	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
 	if (!function_handler) {
-		if (zend_u_hash_find(&Z_OBJCE_P(zobj)->function_table, UG(unicode)?IS_UNICODE:IS_STRING, method, method_len+1, (void **) &function_handler) == FAILURE) {
+		if (zend_u_hash_find(&Z_OBJCE_P(zobj)->function_table, IS_UNICODE, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(zobj)->get_method) {
 				*object_ptr = zobj;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
@@ -935,7 +935,7 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 		zval_dtor(return_value);
 		ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1, 1);
 	} else if (Z_TYPE_PP(data) != IS_UNICODE && Z_TYPE_PP(data) != IS_STRING) {
-		convert_to_text(return_value);
+		convert_to_unicode(return_value);
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
@@ -982,9 +982,8 @@ SPL_METHOD(RecursiveTreeIterator, setPrefixPart)
 SPL_METHOD(RecursiveTreeIterator, getPrefix)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_uchar                 return_type = (UG(unicode) ? IS_UNICODE : IS_STRING);
 
-	spl_recursive_tree_iterator_get_prefix(object, return_value, return_type TSRMLS_CC);
+	spl_recursive_tree_iterator_get_prefix(object, return_value, IS_UNICODE TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto string RecursiveTreeIterator::getEntry() U
@@ -1001,9 +1000,8 @@ SPL_METHOD(RecursiveTreeIterator, getEntry)
 SPL_METHOD(RecursiveTreeIterator, getPostfix)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	zend_uchar                 return_type = (UG(unicode) ? IS_UNICODE : IS_STRING);
 
-	spl_recursive_tree_iterator_get_postfix(object, return_value, return_type TSRMLS_CC);
+	spl_recursive_tree_iterator_get_postfix(object, return_value, IS_UNICODE TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto mixed RecursiveTreeIterator::current() U
@@ -1105,7 +1103,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (Z_TYPE(key) != IS_UNICODE && Z_TYPE(key) != IS_STRING) {
-		convert_to_text(&key);
+		convert_to_unicode(&key);
 	}
 	return_type = Z_TYPE(key);
 
@@ -1208,7 +1206,7 @@ static union _zend_function *spl_dual_it_get_method(zval **object_ptr, zstr meth
 
 	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
 	if (!function_handler) {
-		if (zend_u_hash_find(&intern->inner.ce->function_table, UG(unicode)?IS_UNICODE:IS_STRING, method, method_len+1, (void **) &function_handler) == FAILURE) {
+		if (zend_u_hash_find(&intern->inner.ce->function_table, IS_UNICODE, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(intern->inner.zobject)->get_method) {
 				*object_ptr = intern->inner.zobject;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len TSRMLS_CC);
@@ -1413,7 +1411,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			intern->u.regex.mode = mode;
 			intern->u.regex.regex = estrndup(regex, regex_len);
-			intern->u.regex.pce = pcre_get_compiled_regex_cache(ZEND_STR_TYPE, regex, regex_len TSRMLS_CC);
+			intern->u.regex.pce = pcre_get_compiled_regex_cache(IS_UNICODE, regex, regex_len TSRMLS_CC);
 			if (intern->u.regex.pce == NULL) {
 				/* pcre_get_compiled_regex_cache has already sent error */
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
@@ -1814,7 +1812,7 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		ALLOC_INIT_ZVAL(intern->current.data);
-		php_pcre_match_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, &zcount, 
+		php_pcre_match_impl(intern->u.regex.pce, IS_UNICODE, subject, subject_len, &zcount, 
 			intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0 TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 0);
@@ -1827,14 +1825,14 @@ SPL_METHOD(RegexIterator, accept)
 		}
 		zval_ptr_dtor(&intern->current.data);
 		ALLOC_INIT_ZVAL(intern->current.data);
-		php_pcre_split_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, intern->current.data, -1, intern->u.regex.preg_flags TSRMLS_CC);
+		php_pcre_split_impl(intern->u.regex.pce, IS_UNICODE, subject, subject_len, intern->current.data, -1, intern->u.regex.preg_flags TSRMLS_CC);
 		count = zend_hash_num_elements(Z_ARRVAL_P(intern->current.data));
 		RETVAL_BOOL(count > 1);
 		break;
 
 	case REGIT_MODE_REPLACE:
 		replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1 TSRMLS_CC);
-		result = php_pcre_replace_impl(intern->u.regex.pce, ZEND_STR_TYPE, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
+		result = php_pcre_replace_impl(intern->u.regex.pce, IS_UNICODE, subject, subject_len, replacement, 0, &result_len, 0, NULL TSRMLS_CC);
 		
 		if (intern->u.regex.flags & REGIT_USE_KEY) {
 			if (intern->current.key_type != HASH_KEY_IS_LONG) {
@@ -2345,11 +2343,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			} else {
 				*intern->u.caching.zstr = *intern->current.data;
 			}
-			if (UG(unicode)) {
-				zend_make_unicode_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
-			} else {
-				zend_make_string_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
-			}
+			zend_make_unicode_zval(intern->u.caching.zstr, &expr_copy, &use_copy);
 			if (use_copy) {
 				*intern->u.caching.zstr = expr_copy;
 				INIT_PZVAL(intern->u.caching.zstr);
@@ -2443,13 +2437,13 @@ SPL_METHOD(CachingIterator, __toString)
 			RETURN_UNICODEL(intern->current.str_key.u, intern->current.str_key_len-1, 1);
 		} else {
 			RETVAL_LONG(intern->current.int_key);
-			convert_to_text(return_value);
+			convert_to_unicode(return_value);
 			return;
 		}
 	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
 		*return_value = *intern->current.data;
 		zval_copy_ctor(return_value);
-		convert_to_text(return_value);
+		convert_to_unicode(return_value);
 		INIT_PZVAL(return_value);
 		return;
 	}

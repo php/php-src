@@ -99,11 +99,8 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
-	if (UG(unicode)) {
-		invoke->internal_function.function_name.u = USTR_MAKE(ZEND_INVOKE_FUNC_NAME);
-	} else {
-		invoke->internal_function.function_name.s = estrndup(ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1);
-	}
+	invoke->internal_function.function_name.u = USTR_MAKE(ZEND_INVOKE_FUNC_NAME);
+
 	return invoke;
 }
 /* }}} */
@@ -126,12 +123,11 @@ static zend_function *zend_closure_get_method(zval **object_ptr, zstr method_nam
 {
 	unsigned int lc_name_len;
 	zstr lc_name;
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
-	lc_name = zend_u_str_case_fold(type, method_name, method_len, 1, &lc_name_len);
+	lc_name = zend_u_str_case_fold(IS_UNICODE, method_name, method_len, 1, &lc_name_len);
 	if ((lc_name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
-		(ZEND_U_EQUAL(type, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))
+		(ZEND_U_EQUAL(IS_UNICODE, lc_name, lc_name_len, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))
 	) {
 		efree(lc_name.v);
 		return zend_get_closure_invoke_method(*object_ptr TSRMLS_CC);

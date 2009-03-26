@@ -113,11 +113,7 @@ PHP_FUNCTION(settype)
 	} else if (!strcasecmp(new_type, "binary")) { /* explicit binary cast */
 		convert_to_string(*var);
 	} else if (!strcasecmp(new_type, "string")) { /* runtime string type */
-		if (UG(unicode)) {
-			convert_to_unicode(*var);
-		} else {
-			convert_to_string(*var);
-		}
+		convert_to_unicode(*var);
 	} else if (!strcasecmp(new_type, "unicode")) { /* explicit unicode cast */
 		convert_to_unicode(*var);
 	} else if (!strcasecmp(new_type, "array")) {
@@ -189,11 +185,7 @@ PHP_FUNCTION(strval)
 		return;
 	}
 
-	if (UG(unicode)) {
-		zend_make_unicode_zval(*num, &expr_copy, &use_copy);
-	} else {
-		zend_make_string_zval(*num, &expr_copy, &use_copy);
-	}
+	zend_make_unicode_zval(*num, &expr_copy, &use_copy);
 	if (use_copy) {
 		tmp = &expr_copy;
 		RETVAL_ZVAL(tmp, 0, 0);
@@ -224,7 +216,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			if (ce->name_length != sizeof(INCOMPLETE_CLASS) - 1) {
 				/* We can get away with this because INCOMPLETE_CLASS is ascii and has a 1:1 relationship with unicode */
 				RETURN_TRUE;
-			} else if (UG(unicode)) {
+			} else {
 #ifndef PHP_WIN32
 				U_STRING_DECL(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
 				U_STRING_INIT(uIncompleteClass, (INCOMPLETE_CLASS), sizeof(INCOMPLETE_CLASS) - 1);
@@ -244,10 +236,6 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 				}
 				/* Non-ascii class name means it can't be INCOMPLETE_CLASS and is therefore okay */
 #endif
-			} else {
-				if (!memcmp(ce->name.s, INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS))) {
-					RETURN_FALSE;
-				}
 			}
 		}
 		if (type == IS_RESOURCE) {

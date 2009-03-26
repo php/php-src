@@ -318,16 +318,12 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 							tmp = master_to_zval(NULL, val);
 						}
 					}
-					if (UG(unicode)) {
-						UErrorCode status = U_ZERO_ERROR;
-						zstr u_name;
-						int u_name_len;
-						zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, param->paramName, strlen(param->paramName), &status);
-						add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, tmp);
-						efree(u_name.u);
-					} else {
-						add_assoc_zval(return_value, param->paramName, tmp);
-					}
+					UErrorCode status = U_ZERO_ERROR;
+					zstr u_name;
+					int u_name_len;
+					zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, param->paramName, strlen(param->paramName), &status);
+					add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, tmp);
+					efree(u_name.u);
 
 					param_count++;
 
@@ -349,38 +345,23 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 						tmp = master_to_zval(NULL, val);
 						if (val->name) {
-							if (UG(unicode)) {
-								UErrorCode status = U_ZERO_ERROR;
-								zstr u_name;
-								int u_name_len;
-								zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)val->name, strlen((char*)val->name), &status);
-								if (zend_u_hash_find(Z_ARRVAL_P(return_value), IS_UNICODE, u_name, u_name_len+1, (void**)&arr) == SUCCESS) {
-									add_next_index_zval(*arr, tmp);
-								} else if (val->next && get_node(val->next, (char*)val->name)) {
-									zval *arr;
+							UErrorCode status = U_ZERO_ERROR;
+							zstr u_name;
+							int u_name_len;
+							zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)val->name, strlen((char*)val->name), &status);
+							if (zend_u_hash_find(Z_ARRVAL_P(return_value), IS_UNICODE, u_name, u_name_len+1, (void**)&arr) == SUCCESS) {
+								add_next_index_zval(*arr, tmp);
+							} else if (val->next && get_node(val->next, (char*)val->name)) {
+								zval *arr;
 
-									MAKE_STD_ZVAL(arr);
-									array_init(arr);
-									add_next_index_zval(arr, tmp);
-									add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, arr);
-								} else {
-									add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, tmp);
-								}
-								efree(u_name.u);
+								MAKE_STD_ZVAL(arr);
+								array_init(arr);
+								add_next_index_zval(arr, tmp);
+								add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, arr);
 							} else {
-								if (zend_hash_find(Z_ARRVAL_P(return_value), (char*)val->name, strlen((char*)val->name)+1, (void**)&arr) == SUCCESS) {
-									add_next_index_zval(*arr, tmp);
-								} else if (val->next && get_node(val->next, (char*)val->name)) {
-									zval *arr;
-
-									MAKE_STD_ZVAL(arr);
-									array_init(arr);
-									add_next_index_zval(arr, tmp);
-									add_assoc_zval(return_value, (char*)val->name, arr);
-								} else {
-									add_assoc_zval(return_value, (char*)val->name, tmp);
-								}
+								add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, tmp);
 							}
+							efree(u_name.u);
 						} else {
 							add_next_index_zval(return_value, tmp);
 						}
@@ -432,16 +413,12 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					smart_str_free(&key);
 				}
 				val = master_to_zval(enc, trav);
-				if (UG(unicode)) {
-					UErrorCode status = U_ZERO_ERROR;
-					zstr u_name;
-					int u_name_len;
-					zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)trav->name, strlen((char*)trav->name), &status);
-					add_u_assoc_zval_ex(soap_headers, IS_UNICODE, u_name, u_name_len+1, val);
-					efree(u_name.u);
-				} else {
-					add_assoc_zval(soap_headers, (char*)trav->name, val);
-				}
+				UErrorCode status = U_ZERO_ERROR;
+				zstr u_name;
+				int u_name_len;
+				zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)trav->name, strlen((char*)trav->name), &status);
+				add_u_assoc_zval_ex(soap_headers, IS_UNICODE, u_name, u_name_len+1, val);
+				efree(u_name.u);
 			}
 			trav = trav->next;
 		}

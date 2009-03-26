@@ -1360,7 +1360,7 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 		case OCI_SUCCESS_WITH_INFO:
 			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
 			if (errbuf) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %R", (UG(unicode) ? IS_UNICODE : IS_STRING), errbuf);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: %R", IS_UNICODE, errbuf);
 				efree(errbuf);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_SUCCESS_WITH_INFO: failed to fetch error message");
@@ -1375,7 +1375,7 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 		case OCI_ERROR:
 			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
 			if (errbuf) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R", (UG(unicode) ? IS_UNICODE : IS_STRING), errbuf);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R", IS_UNICODE, errbuf);
 				efree(errbuf);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to fetch error message");
@@ -1415,7 +1415,7 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 	if (error_code) {
 		int err_buf_len;
 
-		if (UG(unicode) && error_handle == OCI_G(err)) {
+		if (error_handle == OCI_G(err)) {
 			/* global err handle is not Unicode aware */
 			UChar *tmp_buf;
 			int tmp_buf_len;
@@ -1432,16 +1432,9 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 				efree(tmp_buf);
 			}
 		} else {
-			if (UG(unicode)) {
-				err_buf_len = u_strlen((UChar *)err_buf);
-				if (err_buf_len && err_buf[UBYTES(err_buf_len - 1)] == '\n') { /* UTODO */
-					err_buf[UBYTES(err_buf_len - 1)] = '\0';
-				}
-			} else {
-				err_buf_len = strlen((char *)err_buf);
-				if (err_buf_len && err_buf[err_buf_len - 1] == '\n') {
-					err_buf[err_buf_len - 1] = '\0';
-				}
+			err_buf_len = u_strlen((UChar *)err_buf);
+			if (err_buf_len && err_buf[UBYTES(err_buf_len - 1)] == '\n') { /* UTODO */
+				err_buf[UBYTES(err_buf_len - 1)] = '\0';
 			}
 
 			if (err_buf_len && error_buf) {
@@ -1463,11 +1456,7 @@ int php_oci_fetch_sqltext_offset(php_oci_statement *statement,	zstr *sqltext, ub
 	*sqltext = NULL_ZSTR;
 	*error_offset = 0;
 
-	if (UG(unicode)) {
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) &(sqltext->u), (ub4 *)&sqltext_len, OCI_ATTR_STATEMENT, statement->err));
-	} else {
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) &(sqltext->s), (ub4 *)&sqltext_len, OCI_ATTR_STATEMENT, statement->err));
-	}
+	PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (dvoid *) &(sqltext->u), (ub4 *)&sqltext_len, OCI_ATTR_STATEMENT, statement->err));
 
 	if (statement->errcode != OCI_SUCCESS) {
 		statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -1582,7 +1571,7 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 	 */
 	if ((session_mode & (OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) || (new_password_len)) {
 		use_spool = 0;
-	} else if (UG(unicode)) {
+	} else {
 		/* Pre 10.1 session pool does not support unicode - bypass pool */
 #ifndef HAVE_OCI_LOB_READ2	/* For finding 10.1+ client */
 		use_spool = 0;
@@ -1595,7 +1584,7 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 
 	/* DRCP: connection_class is an attribute of a connection */
 	if (OCI_G(connection_class)){
-		smart_str_appendl_ex(&hashed_details, OCI_G(connection_class), (ub4)UG(unicode) ? USTR_BYTES(type, u_strlen((UChar *)OCI_G(connection_class))) : strlen(OCI_G(connection_class)), 0);
+		smart_str_appendl_ex(&hashed_details, OCI_G(connection_class), (ub4)USTR_BYTES(type, u_strlen((UChar *)OCI_G(connection_class))), 0);
 	}
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
 
@@ -1611,31 +1600,8 @@ php_oci_connection *php_oci_do_connect_ex(zstr username, int username_len, zstr 
 	}
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
 
-	if (!UG(unicode)) {
-		if (charset.s && *charset.s) {
-			PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), (CONST oratext *)charset.s));
-			if (!charsetid) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid character set name: %s", charset.s);
-			} else {
-				smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
-			}
-		}
-
-		/* use NLS_LANG if no or invalid charset specified */
-		if (!charsetid) {
-			size_t rsize = 0;
-			sword result;
-
-			PHP_OCI_CALL_RETURN(result, OCINlsEnvironmentVariableGet, (&charsetid_nls_lang, 0, OCI_NLS_CHARSET_ID, 0, &rsize));
-			if (result != OCI_SUCCESS) {
-				charsetid_nls_lang = 0;
-			}
-			smart_str_append_unsigned_ex(&hashed_details, charsetid_nls_lang, 0);
-		}
-	} else {
-		charsetid = OCI_UTF16ID;
-		smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
-	}
+	charsetid = OCI_UTF16ID;
+	smart_str_append_unsigned_ex(&hashed_details, charsetid, 0);
 
 	timestamp = time(NULL);
 
@@ -2196,11 +2162,7 @@ int php_oci_server_get_version(php_oci_connection *connection, zstr *version TSR
 		return 1;
 	}
 
-	if (UG(unicode)) {
-		version->u = eustrdup((UChar *)version_buff);
-	} else {
-		version->s = estrdup(version_buff);
-	}
+	version->u = eustrdup((UChar *)version_buff);
 	return 0;
 } /* }}} */
 
@@ -2385,7 +2347,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 				if (fetch_mode & PHP_OCI_NUM) {
 					Z_ADDREF_P(element);
 				}
-				add_u_assoc_zval(return_value, (UG(unicode) ? IS_UNICODE : IS_STRING), column->name, element);
+				add_u_assoc_zval(return_value, IS_UNICODE, column->name, element);
 			}
 
 		} else {
@@ -2393,7 +2355,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 				add_index_null(return_value, i);
 			}
 			if (fetch_mode & PHP_OCI_ASSOC) {
-				add_u_assoc_null(return_value, (UG(unicode) ? IS_UNICODE : IS_STRING), column->name);
+				add_u_assoc_null(return_value, IS_UNICODE, column->name);
 			}
 		}
 	}
@@ -2828,7 +2790,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 
 		/* Set the Connection class and purity if OCI client version >= 11g */
 #if (OCI_MAJOR_VERSION > 10)
-		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCIAttrSet, ((dvoid *) connection->authinfo,(ub4) OCI_HTYPE_SESSION, (dvoid *) OCI_G(connection_class), (ub4)UG(unicode) ? USTR_BYTES(type, u_strlen((UChar *)OCI_G(connection_class))) : strlen(OCI_G(connection_class)), (ub4)OCI_ATTR_CONNECTION_CLASS, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCIAttrSet, ((dvoid *) connection->authinfo,(ub4) OCI_HTYPE_SESSION, (dvoid *) OCI_G(connection_class), (ub4)USTR_BYTES(type, u_strlen((UChar *)OCI_G(connection_class))), (ub4)OCI_ATTR_CONNECTION_CLASS, OCI_G(err)));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);

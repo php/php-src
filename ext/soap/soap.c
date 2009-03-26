@@ -433,25 +433,9 @@ char* soap_unicode_to_string(UChar *ustr, int ustr_len TSRMLS_DC)
 
 void soap_decode_string(zval *ret, char* str TSRMLS_DC)
 {
-	if (UG(unicode)) {
-		/* TODO: unicode support */
-		ZVAL_STRING(ret, str, 1);
-		zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
-	} else if (SOAP_GLOBAL(encoding) != NULL) {
-		xmlBufferPtr in  = xmlBufferCreateStatic(str, strlen(str));
-		xmlBufferPtr out = xmlBufferCreate();
-		int n = xmlCharEncOutFunc(SOAP_GLOBAL(encoding), out, in);
-
-		if (n >= 0) {
-			ZVAL_STRING(ret, (char*)xmlBufferContent(out), 1);
-		} else {
-			ZVAL_STRING(ret, str, 1);
-		}
-		xmlBufferFree(out);
-		xmlBufferFree(in);
-	} else {
-		ZVAL_STRING(ret, str, 1);
-	}
+	/* TODO: unicode support */
+	ZVAL_STRING(ret, str, 1);
+	zval_string_to_unicode_ex(ret, UG(utf8_conv) TSRMLS_CC);
 }
 
 char* soap_encode_string_ex(zend_uchar type, zstr data, int len TSRMLS_DC)
@@ -1301,9 +1285,7 @@ PHP_METHOD(SoapFault, __toString)
 	zval_ptr_dtor(&trace);
 
 	RETVAL_STRINGL(str, len, 0);
-	if (UG(unicode)) {
-		zval_string_to_unicode(return_value TSRMLS_CC);
-	}
+	zval_string_to_unicode(return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -3085,18 +3067,15 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	INIT_ZVAL(param0);
 	params[0] = &param0;
 	ZVAL_STRINGL(params[0], buf, buf_size, 1);
-	if (UG(unicode)) {
-    	zval_string_to_unicode_ex(params[0], UG(utf8_conv) TSRMLS_CC);
-	}
+   	zval_string_to_unicode_ex(params[0], UG(utf8_conv) TSRMLS_CC);
+
 	INIT_ZVAL(param1);
 	params[1] = &param1;
 	if (location == NULL) {
 		ZVAL_NULL(params[1]);
 	} else {
 		ZVAL_STRING(params[1], location, 1);
-		if (UG(unicode)) {
-    		zval_string_to_unicode_ex(params[1], UG(utf8_conv) TSRMLS_CC);
-		}
+   		zval_string_to_unicode_ex(params[1], UG(utf8_conv) TSRMLS_CC);
 	}
 	INIT_ZVAL(param2);
 	params[2] = &param2;
@@ -3104,9 +3083,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		ZVAL_NULL(params[2]);
 	} else {
 		ZVAL_STRING(params[2], action, 1);
-		if (UG(unicode)) {
-    		zval_string_to_unicode_ex(params[2], UG(utf8_conv) TSRMLS_CC);
-		}
+   		zval_string_to_unicode_ex(params[2], UG(utf8_conv) TSRMLS_CC);
 	}
 	INIT_ZVAL(param3);
 	params[3] = &param3;
@@ -3643,9 +3620,7 @@ PHP_METHOD(SoapClient, __doRequest)
 	} else if (make_http_soap_request(this_ptr, buf.s, buf_size, location.s, action.s, version,
 	    &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC)) {
 		return_value->type = IS_STRING;
-		if (UG(unicode)) {
-			zval_string_to_unicode_ex(return_value, UG(utf8_conv) TSRMLS_CC);
-		}
+		zval_string_to_unicode_ex(return_value, UG(utf8_conv) TSRMLS_CC);
 	}
 	if (buf_type == IS_UNICODE) {
 		efree(buf.s);
@@ -3779,9 +3754,7 @@ PHP_METHOD(SoapClient, __setLocation)
 	}
 	if (client->location) {
 		RETVAL_STRING(client->location, 1);
-		if (UG(unicode)) {
-			zval_string_to_unicode_ex(return_value, UG(utf8_conv) TSRMLS_CC);
-		}
+		zval_string_to_unicode_ex(return_value, UG(utf8_conv) TSRMLS_CC);
 		efree(client->location);
 		client->location = NULL;
 	} else {

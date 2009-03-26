@@ -103,17 +103,13 @@ PHP_LIBXML_API void php_libxml_shutdown(void);
 
 #define ZVAL_XML_STRING(z, s, flags) {								\
 	UConverter *libxml_utf_conv = NULL;								\
-	if (UG(unicode)) {												\
-		libxml_utf_conv = UG(utf8_conv);							\
-	}																\
+	libxml_utf_conv = UG(utf8_conv);								\
 	ZVAL_U_STRING(libxml_utf_conv, z, s, flags);					\
 }
 
 #define ZVAL_XML_STRING_LEN(z, s, l, flags) {								\
 	UConverter *libxml_utf_conv = NULL;								\
-	if (UG(unicode)) {												\
-		libxml_utf_conv = UG(utf8_conv);							\
-	}																\
+	libxml_utf_conv = UG(utf8_conv);								\
 	ZVAL_U_STRINGL(libxml_utf_conv, z, s, l, flags);					\
 }
 

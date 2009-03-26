@@ -231,23 +231,17 @@ PHP_FUNCTION(headers_sent)
 		case 2:
 			zval_dtor(arg2);
 			ZVAL_LONG(arg2, line);
-		case 1:
-			zval_dtor(arg1);
-			if (UG(unicode)) {
+		case 1: {
 				UChar *ufile;
 				int ufile_len;
+
+				zval_dtor(arg1);
 
 				if (file && SUCCESS == php_stream_path_decode(NULL, &ufile, &ufile_len, file, strlen(file), REPORT_ERRORS, FG(default_context))) {
 					ZVAL_UNICODEL(arg1, ufile, ufile_len, 0);
 				} else {
 					ZVAL_EMPTY_UNICODE(arg1);
 				}
-			} else {
-				if (file) {
-					ZVAL_STRING(arg1, file, 1);
-				} else {
-					ZVAL_STRING(arg1, "", 1);
-				}	
 			}
 			break;
 	}

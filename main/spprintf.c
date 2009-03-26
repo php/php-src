@@ -605,11 +605,7 @@ static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt,
 					break;
 
 				case 'v':
-					if (UG(unicode)) {
-						goto fmt_unicode;
-					} else {
-						goto fmt_string;
-					}
+					goto fmt_unicode;
 					break;
 
 				case 'R':

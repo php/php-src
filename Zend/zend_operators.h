@@ -323,7 +323,7 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 #define convert_to_string_with_converter(op, conv) _convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode(op)               _convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode_with_converter(op, conv) _convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define convert_to_text(op) (UG(unicode)?convert_to_unicode(op):convert_to_string(op))
+#define convert_to_text(op) convert_to_unicode(op)
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 
@@ -424,7 +424,7 @@ END_EXTERN_C()
 #define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
 #define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
-#define convert_to_text_ex(ppzv)	if (UG(unicode)) {convert_to_unicode_ex(ppzv);} else {convert_to_string_ex(ppzv);}
+#define convert_to_text_ex(ppzv)	convert_to_unicode_ex(ppzv);
 
 #define convert_to_string_with_converter_ex(ppzv, conv) \
 	if (Z_TYPE_PP(ppzv) != IS_STRING) {					\

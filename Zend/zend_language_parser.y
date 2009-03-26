@@ -638,7 +638,7 @@ expr_without_variable:
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
-	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, UG(unicode)?IS_UNICODE:IS_STRING TSRMLS_CC); }
+	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); }
 	|	T_UNICODE_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); }
 	|	T_BINARY_CAST expr	{ zend_do_cast(&$$, &$2, IS_STRING TSRMLS_CC); }
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
@@ -649,7 +649,7 @@ expr_without_variable:
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
 	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
-	|	'`' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } backticks_expr '`' { zend_do_shell_exec(&$$, &$3 TSRMLS_CC); }
+	|	'`' { CG(literal_type) = IS_UNICODE; } backticks_expr '`' { zend_do_shell_exec(&$$, &$3 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	function is_reference '(' { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
 			parameter_list ')' lexical_vars '{' inner_statement_list '}' {  zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
@@ -773,7 +773,7 @@ common_scalar:
 ;
 
 start_heredoc:
-		T_START_HEREDOC  { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; $$ = $1; }
+		T_START_HEREDOC  { CG(literal_type) = IS_UNICODE; $$ = $1; }
 	|	T_BINARY_HEREDOC { CG(literal_type) = IS_STRING; $$ = $1; }
 ;
 
@@ -800,7 +800,7 @@ scalar:
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_RT, 0 TSRMLS_CC); }
 	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); $2 = $$; zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT, 0 TSRMLS_CC); }
 	|	common_scalar			{ $$ = $1; }
-	|	'"' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '"' { $$ = $3; }
+	|	'"' { CG(literal_type) = IS_UNICODE; } encaps_list '"' { $$ = $3; }
 	|	T_BINARY_DOUBLE { CG(literal_type) = IS_STRING; } encaps_list '"' { $$ = $3; }
 	|	start_heredoc encaps_list T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
 ;

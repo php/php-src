@@ -551,9 +551,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 					value = sxe_get_value(value TSRMLS_CC);
 					INIT_PZVAL(value);
 					new_value = 1;
-					if (UG(unicode)) {
-						convert_to_string_with_converter(value, UG(utf8_conv));
-					}
+					convert_to_string_with_converter(value, UG(utf8_conv));
 					break;
 				}
 				/* break is missing intentionally */
@@ -1102,16 +1100,12 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 					array_init(zattr);
 					sxe_properties_add(rv, "@attributes", sizeof("@attributes"), zattr TSRMLS_CC);
 				}
-				if (UG(unicode)) {
-					UErrorCode status = U_ZERO_ERROR;
-					zstr u_name;
-					int u_name_len;
-					zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)attr->name, namelen, &status);
-					add_u_assoc_zval_ex(zattr, IS_UNICODE, u_name, u_name_len, value);
-					efree(u_name.u);
-				} else {
-					add_assoc_zval_ex(zattr, (char*)attr->name, namelen, value);
-				}
+				UErrorCode status = U_ZERO_ERROR;
+				zstr u_name;
+				int u_name_len;
+				zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)attr->name, namelen, &status);
+				add_u_assoc_zval_ex(zattr, IS_UNICODE, u_name, u_name_len, value);
+				efree(u_name.u);
 			}
 			attr = attr->next;
 		}
@@ -1424,19 +1418,15 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns TSRMLS
 	prefix_len = strlen(prefix) + 1;
 
 	if (zend_ascii_hash_exists(Z_ARRVAL_P(return_value), prefix, prefix_len) == 0) {
-		if (UG(unicode)) {
-			UErrorCode status = U_ZERO_ERROR;
-			UChar *u_str;
-			zstr u_prefix;
-			int u_len, u_prefix_len;
-			int length = strlen((char*)ns->href);
-			zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, (char*)ns->href, length, &status);
-			zend_string_to_unicode_ex(UG(utf8_conv), &u_prefix.u, &u_prefix_len, prefix, prefix_len, &status);
-			add_u_assoc_unicodel_ex(return_value, IS_UNICODE, u_prefix, u_prefix_len, u_str, u_len, 0);
-			efree(u_prefix.u);
-		} else {
-			add_assoc_string_ex(return_value, prefix, prefix_len, (char*)ns->href, 1);
-		}
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u_str;
+		zstr u_prefix;
+		int u_len, u_prefix_len;
+		int length = strlen((char*)ns->href);
+		zend_string_to_unicode_ex(UG(utf8_conv), &u_str, &u_len, (char*)ns->href, length, &status);
+		zend_string_to_unicode_ex(UG(utf8_conv), &u_prefix.u, &u_prefix_len, prefix, prefix_len, &status);
+		add_u_assoc_unicodel_ex(return_value, IS_UNICODE, u_prefix, u_prefix_len, u_str, u_len, 0);
+		efree(u_prefix.u);
 	}
 }
 /* }}} */
@@ -1937,7 +1927,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC) /* {{{ */
 
 	MAKE_STD_ZVAL(retval);
 
-	if (sxe_object_cast(z, retval, UG(unicode)?IS_UNICODE:IS_STRING, NULL TSRMLS_CC)==FAILURE) {
+	if (sxe_object_cast(z, retval, IS_UNICODE, NULL TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}
@@ -2407,20 +2397,13 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 		return HASH_KEY_NON_EXISTANT;
 	}
 
-	if (UG(unicode)) {
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 
-		namelen = xmlStrlen(curnode->name);
-		zend_string_to_unicode_ex(UG(utf8_conv), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
-		*str_key_len = u_len + 1;
-		return HASH_KEY_IS_UNICODE;
-	} else {
-		namelen = xmlStrlen(curnode->name);
-		str_key->s = estrndup((char *)curnode->name, namelen);
-		*str_key_len = namelen + 1;
-		return HASH_KEY_IS_STRING;
-	}
+	namelen = xmlStrlen(curnode->name);
+	zend_string_to_unicode_ex(UG(utf8_conv), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
+	*str_key_len = u_len + 1;
+	return HASH_KEY_IS_UNICODE;
 }
 /* }}} */
 

@@ -403,43 +403,28 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	while (s < e && (p = memchr(s, '&', (e - s)))) {
 last_value:
 		if ((val = memchr(s, '=', (p - s)))) { /* have a value */
-			if (UG(unicode)) {
-				UChar *u_var, *u_val;
-				int u_var_len, u_val_len;
-				int var_len;
-				int val_len;
-				UErrorCode status1 = U_ZERO_ERROR, status2 = U_ZERO_ERROR;
+			UChar *u_var, *u_val;
+			int u_var_len, u_val_len;
+			int var_len;
+			int val_len;
+			UErrorCode status1 = U_ZERO_ERROR, status2 = U_ZERO_ERROR;
 
-				var = s;
-				var_len = val - s;
+			var = s;
+			var_len = val - s;
 
-				php_url_decode(var, var_len);
-				val++;
-				val_len = php_url_decode(val, (p - val));
-				zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status1);
-				zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status2);
-				if (U_SUCCESS(status1) && U_SUCCESS(status2)) {
-					/* UTODO add input filtering */
-					php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
-				} else {
-					/* UTODO set a user-accessible flag to indicate that conversion failed? */
-				}
-				efree(u_var);
-				efree(u_val);
+			php_url_decode(var, var_len);
+			val++;
+			val_len = php_url_decode(val, (p - val));
+			zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status1);
+			zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status2);
+			if (U_SUCCESS(status1) && U_SUCCESS(status2)) {
+				/* UTODO add input filtering */
+				php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
 			} else {
-				unsigned int val_len, new_val_len;
-
-				var = s;
-
-				php_url_decode(var, (val - s));
-				val++;
-				val_len = php_url_decode(val, (p - val));
-				val = estrndup(val, val_len);
-				if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-				}
-				efree(val);
+				/* UTODO set a user-accessible flag to indicate that conversion failed? */
 			}
+			efree(u_var);
+			efree(u_val);
 		}
 		s = p + 1;
 	}
@@ -565,51 +550,38 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		var_len = strlen(var);
 		php_url_decode(var, var_len);
 
-		if (UG(unicode)) {
-			UChar *u_var, *u_val;
-			int u_var_len, u_val_len;
-			UErrorCode status = U_ZERO_ERROR;
+		UChar *u_var, *u_val;
+		int u_var_len, u_val_len;
+		UErrorCode status = U_ZERO_ERROR;
 
-			zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status);
+		zend_string_to_unicode_ex(input_conv, &u_var, &u_var_len, var, var_len, &status);
+		if (U_FAILURE(status)) {
+			/* UTODO set a user-accessible flag to indicate that conversion failed? */
+			efree(u_var);
+			goto next_var;
+		}
+
+		if (val) { /* have a value */
+			int val_len;
+			/* unsigned int new_val_len; see below */
+
+			val_len = php_url_decode(val, strlen(val));
+			zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status);
 			if (U_FAILURE(status)) {
 				/* UTODO set a user-accessible flag to indicate that conversion failed? */
 				efree(u_var);
+				efree(u_val);
 				goto next_var;
 			}
-
-			if (val) { /* have a value */
-				int val_len;
-				/* unsigned int new_val_len; see below */
-
-				val_len = php_url_decode(val, strlen(val));
-				zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status);
-				if (U_FAILURE(status)) {
-					/* UTODO set a user-accessible flag to indicate that conversion failed? */
-					efree(u_var);
-					efree(u_val);
-					goto next_var;
-				}
-				php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
-				/* UTODO need to make input_filter Unicode aware */
-				/*
-				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-				}
-				*/
-				efree(u_var);
-				efree(u_val);
-			} else {
-				u_val_len = 0;
-				u_val = USTR_MAKE("");
-				php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
-				/*
-				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-				}
-				*/
-				efree(u_var);
-				efree(u_val);
+			php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
+			/* UTODO need to make input_filter Unicode aware */
+			/*
+			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 			}
+			*/
+			efree(u_var);
+			efree(u_val);
 		} else {
 			if (val) { /* have a value */
 				int val_len;

@@ -919,7 +919,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
 	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_UNICODE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -954,7 +954,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
  	    Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_text(&tmp_varname);
+		convert_to_unicode(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -1980,7 +1980,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -2642,7 +2642,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, CV)
 		*EX(CVs)[opline->op2.u.var] = EG(exception);
 	} else {
 		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.u.var);
-		zend_u_hash_quick_update(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value,
+		zend_u_hash_quick_update(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value,
 		    &EG(exception), sizeof(zval *), (void**)&EX(CVs)[opline->op2.u.var]);
 	}
 	EG(exception) = NULL;
@@ -3179,7 +3179,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3297,7 +3297,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (UG(unicode) && Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
 		if (Z_TYPE_P(inc_filename) != IS_UNICODE) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
@@ -3450,7 +3450,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_del(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+			if (zend_u_hash_quick_del(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
 				while (ex && ex->symbol_table == EG(active_symbol_table)) {
 					int i;
 
@@ -3458,7 +3458,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 						for (i = 0; i < ex->op_array->last_var; i++) {
 							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
 								ex->op_array->vars[i].name_len == cv->name_len &&
-								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(ZEND_STR_TYPE, cv->name_len))) {
+								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(IS_UNICODE, cv->name_len))) {
 								ex->CVs[i] = NULL;
 								break;
 							}
@@ -3480,7 +3480,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 	if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 		varname = &tmp;
 	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 		Z_ADDREF_P(varname);
@@ -3559,7 +3559,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -3606,7 +3606,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -4001,7 +4001,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 		} else if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_find(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+			if (zend_u_hash_quick_find(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
 				isset = 0;
 			}
 		} else {		
@@ -4015,7 +4015,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 		if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 			tmp = *varname;
 			zval_copy_ctor(&tmp);
-			convert_to_text(&tmp);
+			convert_to_unicode(&tmp);
 			varname = &tmp;
 		}
 
@@ -4099,7 +4099,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -4121,7 +4121,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -4555,6 +4555,10 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 
 ZEND_VM_HANDLER(151, ZEND_U_NORMALIZE, CONST|TMP|VAR|CV, ANY)
 {
+	zval var_copy;
+	int use_copy;
+	UChar *norm;
+	int norm_len;
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *string = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -4565,25 +4569,19 @@ ZEND_VM_HANDLER(151, ZEND_U_NORMALIZE, CONST|TMP|VAR|CV, ANY)
 		zendi_zval_copy_ctor(*result);
 	}
 
-	if (UG(unicode)) {
-		zval var_copy;
-		int use_copy;
-		UChar *norm;
-		int norm_len;
-
-		zend_make_unicode_zval(result, &var_copy, &use_copy);
-		if (use_copy) {
-			zval_dtor(result);
-			*result = var_copy;
-		}
-		if (zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
-			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
-		} else if (norm != Z_USTRVAL_P(result)) {
-			efree(Z_USTRVAL_P(result));
-			ZVAL_UNICODEL(result, norm, norm_len, 0);
-		}
+	zend_make_unicode_zval(result, &var_copy, &use_copy);
+	if (use_copy) {
+		zval_dtor(result);
+		*result = var_copy;
 	}
+	if (zend_normalize_identifier(&norm, &norm_len,
+								   Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
+		zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+	} else if (norm != Z_USTRVAL_P(result)) {
+		efree(Z_USTRVAL_P(result));
+		ZVAL_UNICODEL(result, norm, norm_len, 0);
+	}
+
 	FREE_OP1_IF_VAR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -4632,7 +4630,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, CONST)
 	zend_op *opline = EX(opline);
 	zend_op_array *op_array;
 
-	if (zend_u_hash_quick_find(EG(function_table), UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), Z_LVAL(opline->op2.u.constant), (void *) &op_array) == FAILURE ||
+	if (zend_u_hash_quick_find(EG(function_table), IS_UNICODE, Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), Z_LVAL(opline->op2.u.constant), (void *) &op_array) == FAILURE ||
 	    op_array->type != ZEND_USER_FUNCTION) {
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}

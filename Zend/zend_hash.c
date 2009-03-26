@@ -331,71 +331,54 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 
 ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
+	zstr key;
+	int ret;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-
-		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
-		ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
-		efree(key.u);
-		return ret;
-	} else {
-		return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
-	}
+	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+	ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-
-		ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, u_len+1, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 	}
+
+	ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, u_len+1, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	efree(key.u);
+	return ret;	
 }
 /* }}} */
 
 ZEND_API int _zend_utf8_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-
-		ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, u_len+1, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return _zend_u_hash_add_or_update(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
 	}
+
+	ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, u_len+1, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
@@ -688,69 +671,53 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 
 ZEND_API int zend_ascii_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-
-		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
-		ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, nKeyLength, 0, HASH_DEL_KEY);
-		efree(key.u);
-		return ret;
-	} else {
-		return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, 0, HASH_DEL_KEY);
-	}
+	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+	ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, nKeyLength, 0, HASH_DEL_KEY);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int zend_rt_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, u_len+1, 0, HASH_DEL_KEY);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, 0, HASH_DEL_KEY);
 	}
+	ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, u_len+1, 0, HASH_DEL_KEY);
+	efree(key.u);
+	return ret;
+	
 }
 /* }}} */
 
 ZEND_API int zend_utf8_hash_del(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, u_len+1, 0, HASH_DEL_KEY);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_del_key_or_index(ht, IS_STRING, ZSTR(arKey), nKeyLength, 0, HASH_DEL_KEY);
 	}
+	ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, u_len+1, 0, HASH_DEL_KEY);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
@@ -1166,69 +1133,52 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
 
 ZEND_API int zend_ascii_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
+	zstr key;
+	int ret;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-
-		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
-		ret = zend_u_hash_find(ht, IS_UNICODE, key, nKeyLength, pData);
-		efree(key.u);
-		return ret;
-	} else {
-		return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
-	}
+	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+	ret = zend_u_hash_find(ht, IS_UNICODE, key, nKeyLength, pData);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int zend_rt_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_find(ht, IS_UNICODE, key, u_len+1, pData);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 	}
+	ret = zend_u_hash_find(ht, IS_UNICODE, key, u_len+1, pData);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int zend_utf8_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_find(ht, IS_UNICODE, key, u_len+1, pData);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_find(ht, IS_STRING, ZSTR(arKey), nKeyLength, pData);
 	}
+	ret = zend_u_hash_find(ht, IS_UNICODE, key, u_len+1, pData);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
@@ -1316,69 +1266,52 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyL
 
 ZEND_API int zend_ascii_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-
-		key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
-		ret = zend_u_hash_exists(ht, IS_UNICODE, key, nKeyLength);
-		efree(key.u);
-		return ret;
-	} else {
-		return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
-	}
+	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
+	ret = zend_u_hash_exists(ht, IS_UNICODE, key, nKeyLength);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int zend_rt_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_exists(ht, IS_UNICODE, key, u_len+1);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
-    }
+	}
+	ret = zend_u_hash_exists(ht, IS_UNICODE, key, u_len+1);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 
 ZEND_API int zend_utf8_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength) /* {{{ */
 {
+	zstr key;
+	int ret;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		zstr key;
-		int ret;
-		UErrorCode status = U_ZERO_ERROR;
-		int u_len;
-
-		zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
-		if (U_FAILURE(status)) {
-			ZEND_HASH_CVT_ERROR();
-			goto string_key;
-		}
-		ret = zend_u_hash_exists(ht, IS_UNICODE, key, u_len+1);
-		efree(key.u);
-		return ret;
-	} else {
-string_key:
+	zend_string_to_unicode_ex(ZEND_U_CONVERTER(UG(utf8_conv)), &key.u, &u_len, arKey, nKeyLength-1, &status);
+	if (U_FAILURE(status)) {
+		ZEND_HASH_CVT_ERROR();
 		return zend_u_hash_exists(ht, IS_STRING, ZSTR(arKey), nKeyLength);
-    }
+	}
+	ret = zend_u_hash_exists(ht, IS_UNICODE, key, u_len+1);
+	efree(key.u);
+	return ret;
 }
 /* }}} */
 

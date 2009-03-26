@@ -107,7 +107,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	zend_bool destroy;
 	int token_line = 1;
 
-	CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING;
+	CG(literal_type) = IS_UNICODE;
 
 	array_init(return_value);
 

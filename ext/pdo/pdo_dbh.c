@@ -452,11 +452,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	ZVAL_ASCII_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
 	std_object_handlers.write_property(object, &z_key, query_string TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
-#ifdef IS_UNICODE
-	if (UG(unicode)) {
-		zval_dtor(&z_key);
-	}
-#endif
+	zval_dtor(&z_key);
 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
@@ -1336,9 +1332,7 @@ static union _zend_function *dbh_method_get(
 	zval *object = *object_pp;
 #endif
 	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
-#ifdef IS_UNICODE
-	zend_uchar ztype = UG(unicode) ? IS_UNICODE : IS_STRING;
-#endif
+	zend_uchar ztype = IS_UNICODE;
 
 	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 

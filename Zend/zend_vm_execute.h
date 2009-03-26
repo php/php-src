@@ -1234,7 +1234,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		*EX(CVs)[opline->op2.u.var] = EG(exception);
 	} else {
 		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.u.var);
-		zend_u_hash_quick_update(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value,
+		zend_u_hash_quick_update(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value,
 		    &EG(exception), sizeof(zval *), (void**)&EX(CVs)[opline->op2.u.var]);
 	}
 	EG(exception) = NULL;
@@ -1291,7 +1291,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
 	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_UNICODE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -1325,7 +1325,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND
  	    Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_text(&tmp_varname);
+		convert_to_unicode(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -1892,7 +1892,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (UG(unicode) && Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
 		if (Z_TYPE_P(inc_filename) != IS_UNICODE) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
@@ -2045,7 +2045,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_del(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+			if (zend_u_hash_quick_del(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
 				while (ex && ex->symbol_table == EG(active_symbol_table)) {
 					int i;
 
@@ -2053,7 +2053,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 						for (i = 0; i < ex->op_array->last_var; i++) {
 							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
 								ex->op_array->vars[i].name_len == cv->name_len &&
-								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(ZEND_STR_TYPE, cv->name_len))) {
+								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(IS_UNICODE, cv->name_len))) {
 								ex->CVs[i] = NULL;
 								break;
 							}
@@ -2075,7 +2075,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 		varname = &tmp;
 	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 		Z_ADDREF_P(varname);
@@ -2285,7 +2285,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_
 		} else if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_find(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+			if (zend_u_hash_quick_find(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
 				isset = 0;
 			}
 		} else {
@@ -2299,7 +2299,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_
 		if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 			tmp = *varname;
 			zval_copy_ctor(&tmp);
-			convert_to_text(&tmp);
+			convert_to_unicode(&tmp);
 			varname = &tmp;
 		}
 
@@ -2411,6 +2411,10 @@ static int ZEND_FASTCALL  ZEND_TICKS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval var_copy;
+	int use_copy;
+	UChar *norm;
+	int norm_len;
 	zend_op *opline = EX(opline);
 
 	zval *string = &opline->op1.u.constant;
@@ -2421,24 +2425,17 @@ static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		zendi_zval_copy_ctor(*result);
 	}
 
-	if (UG(unicode)) {
-		zval var_copy;
-		int use_copy;
-		UChar *norm;
-		int norm_len;
-
-		zend_make_unicode_zval(result, &var_copy, &use_copy);
-		if (use_copy) {
-			zval_dtor(result);
-			*result = var_copy;
-		}
-		if (zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
-			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
-		} else if (norm != Z_USTRVAL_P(result)) {
-			efree(Z_USTRVAL_P(result));
-			ZVAL_UNICODEL(result, norm, norm_len, 0);
-		}
+	zend_make_unicode_zval(result, &var_copy, &use_copy);
+	if (use_copy) {
+		zval_dtor(result);
+		*result = var_copy;
+	}
+	if (zend_normalize_identifier(&norm, &norm_len,
+								   Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
+		zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+	} else if (norm != Z_USTRVAL_P(result)) {
+		efree(Z_USTRVAL_P(result));
+		ZVAL_UNICODEL(result, norm, norm_len, 0);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -2976,7 +2973,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3053,7 +3050,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_CONST_HANDLER(
 	zend_op *opline = EX(opline);
 	zend_op_array *op_array;
 
-	if (zend_u_hash_quick_find(EG(function_table), UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), Z_LVAL(opline->op2.u.constant), (void *) &op_array) == FAILURE ||
+	if (zend_u_hash_quick_find(EG(function_table), IS_UNICODE, Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), Z_LVAL(opline->op2.u.constant), (void *) &op_array) == FAILURE ||
 	    op_array->type != ZEND_USER_FUNCTION) {
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
@@ -3501,7 +3498,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3973,7 +3970,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -4169,7 +4166,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -4640,7 +4637,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -4724,7 +4721,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
 	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_UNICODE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -4759,7 +4756,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_O
  	    Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_text(&tmp_varname);
+		convert_to_unicode(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -5316,7 +5313,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (UG(unicode) && Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
 		if (Z_TYPE_P(inc_filename) != IS_UNICODE) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
@@ -5469,7 +5466,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_del(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+			if (zend_u_hash_quick_del(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
 				while (ex && ex->symbol_table == EG(active_symbol_table)) {
 					int i;
 
@@ -5477,7 +5474,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 						for (i = 0; i < ex->op_array->last_var; i++) {
 							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
 								ex->op_array->vars[i].name_len == cv->name_len &&
-								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(ZEND_STR_TYPE, cv->name_len))) {
+								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(IS_UNICODE, cv->name_len))) {
 								ex->CVs[i] = NULL;
 								break;
 							}
@@ -5499,7 +5496,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 		varname = &tmp;
 	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 		Z_ADDREF_P(varname);
@@ -5709,7 +5706,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HA
 		} else if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_find(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+			if (zend_u_hash_quick_find(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
 				isset = 0;
 			}
 		} else {
@@ -5723,7 +5720,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HA
 		if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 			tmp = *varname;
 			zval_copy_ctor(&tmp);
-			convert_to_text(&tmp);
+			convert_to_unicode(&tmp);
 			varname = &tmp;
 		}
 
@@ -5858,6 +5855,10 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 
 static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval var_copy;
+	int use_copy;
+	UChar *norm;
+	int norm_len;
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *string = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
@@ -5868,24 +5869,17 @@ static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		zendi_zval_copy_ctor(*result);
 	}
 
-	if (UG(unicode)) {
-		zval var_copy;
-		int use_copy;
-		UChar *norm;
-		int norm_len;
-
-		zend_make_unicode_zval(result, &var_copy, &use_copy);
-		if (use_copy) {
-			zval_dtor(result);
-			*result = var_copy;
-		}
-		if (zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
-			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
-		} else if (norm != Z_USTRVAL_P(result)) {
-			efree(Z_USTRVAL_P(result));
-			ZVAL_UNICODEL(result, norm, norm_len, 0);
-		}
+	zend_make_unicode_zval(result, &var_copy, &use_copy);
+	if (use_copy) {
+		zval_dtor(result);
+		*result = var_copy;
+	}
+	if (zend_normalize_identifier(&norm, &norm_len,
+								   Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
+		zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+	} else if (norm != Z_USTRVAL_P(result)) {
+		efree(Z_USTRVAL_P(result));
+		ZVAL_UNICODEL(result, norm, norm_len, 0);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -6209,7 +6203,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -6351,7 +6345,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -6682,7 +6676,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -6826,7 +6820,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -7157,7 +7151,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -7301,7 +7295,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -7397,7 +7391,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -7727,7 +7721,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -7869,7 +7863,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -8111,7 +8105,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
 	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_UNICODE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -8146,7 +8140,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_O
  	    Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_text(&tmp_varname);
+		convert_to_unicode(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -8812,7 +8806,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (UG(unicode) && Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
 		if (Z_TYPE_P(inc_filename) != IS_UNICODE) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
@@ -8965,7 +8959,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_del(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+			if (zend_u_hash_quick_del(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
 				while (ex && ex->symbol_table == EG(active_symbol_table)) {
 					int i;
 
@@ -8973,7 +8967,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 						for (i = 0; i < ex->op_array->last_var; i++) {
 							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
 								ex->op_array->vars[i].name_len == cv->name_len &&
-								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(ZEND_STR_TYPE, cv->name_len))) {
+								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(IS_UNICODE, cv->name_len))) {
 								ex->CVs[i] = NULL;
 								break;
 							}
@@ -8995,7 +8989,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 		varname = &tmp;
 	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 		Z_ADDREF_P(varname);
@@ -9361,7 +9355,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HA
 		} else if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_find(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+			if (zend_u_hash_quick_find(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
 				isset = 0;
 			}
 		} else {
@@ -9375,7 +9369,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HA
 		if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 			tmp = *varname;
 			zval_copy_ctor(&tmp);
-			convert_to_text(&tmp);
+			convert_to_unicode(&tmp);
 			varname = &tmp;
 		}
 
@@ -9492,6 +9486,10 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 
 static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval var_copy;
+	int use_copy;
+	UChar *norm;
+	int norm_len;
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *string = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
@@ -9502,25 +9500,19 @@ static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		zendi_zval_copy_ctor(*result);
 	}
 
-	if (UG(unicode)) {
-		zval var_copy;
-		int use_copy;
-		UChar *norm;
-		int norm_len;
-
-		zend_make_unicode_zval(result, &var_copy, &use_copy);
-		if (use_copy) {
-			zval_dtor(result);
-			*result = var_copy;
-		}
-		if (zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
-			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
-		} else if (norm != Z_USTRVAL_P(result)) {
-			efree(Z_USTRVAL_P(result));
-			ZVAL_UNICODEL(result, norm, norm_len, 0);
-		}
+	zend_make_unicode_zval(result, &var_copy, &use_copy);
+	if (use_copy) {
+		zval_dtor(result);
+		*result = var_copy;
 	}
+	if (zend_normalize_identifier(&norm, &norm_len,
+								   Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
+		zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+	} else if (norm != Z_USTRVAL_P(result)) {
+		efree(Z_USTRVAL_P(result));
+		ZVAL_UNICODEL(result, norm, norm_len, 0);
+	}
+
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -10759,7 +10751,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -11071,7 +11063,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -11138,7 +11130,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -11185,7 +11177,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -11300,7 +11292,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -11322,7 +11314,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -12644,7 +12636,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -12889,7 +12881,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -12956,7 +12948,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -13003,7 +12995,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -13118,7 +13110,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -13140,7 +13132,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -14513,7 +14505,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -14758,7 +14750,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -14825,7 +14817,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -14872,7 +14864,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -14987,7 +14979,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -15009,7 +15001,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -15684,7 +15676,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -16975,7 +16967,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	int function_name_strlen;
 	zend_free_op free_op1;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -17218,7 +17210,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -17285,7 +17277,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -17332,7 +17324,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -17447,7 +17439,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -17469,7 +17461,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -18382,7 +18374,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	int function_name_strlen;
 
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -18547,7 +18539,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -18594,7 +18586,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -18707,7 +18699,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -18729,7 +18721,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -19571,7 +19563,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -19668,7 +19660,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -19715,7 +19707,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -19828,7 +19820,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -19850,7 +19842,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -20692,7 +20684,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -20789,7 +20781,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -20836,7 +20828,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -20949,7 +20941,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -20971,7 +20963,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -22072,7 +22064,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	int function_name_strlen;
 
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -22168,7 +22160,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -22215,7 +22207,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -22328,7 +22320,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -22350,7 +22342,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -22664,7 +22656,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zval_dtor(&z_conv);
 		ucnv_close(script_enc_conv);
 	} else if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, ZEND_STR_TYPE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, IS_UNICODE, ZEND_U_CONVERTER(UG(output_encoding_conv)) TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
@@ -22698,7 +22690,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OP
  	    Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_text(&tmp_varname);
+		convert_to_unicode(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -23354,7 +23346,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (UG(unicode) && Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
 		if (Z_TYPE_P(inc_filename) != IS_UNICODE) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
@@ -23507,7 +23499,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zend_execute_data *ex = EX(prev_execute_data);
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_del(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
+			if (zend_u_hash_quick_del(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value) == SUCCESS) {
 				while (ex && ex->symbol_table == EG(active_symbol_table)) {
 					int i;
 
@@ -23515,7 +23507,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 						for (i = 0; i < ex->op_array->last_var; i++) {
 							if (ex->op_array->vars[i].hash_value == cv->hash_value &&
 								ex->op_array->vars[i].name_len == cv->name_len &&
-								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(ZEND_STR_TYPE, cv->name_len))) {
+								!memcmp(ex->op_array->vars[i].name.v, cv->name.v, USTR_BYTES(IS_UNICODE, cv->name_len))) {
 								ex->CVs[i] = NULL;
 								break;
 							}
@@ -23537,7 +23529,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_text(&tmp);
+		convert_to_unicode(&tmp);
 		varname = &tmp;
 	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 		Z_ADDREF_P(varname);
@@ -23747,7 +23739,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HAN
 		} else if (EG(active_symbol_table)) {
 			zend_compiled_variable *cv = &CV_DEF_OF(opline->op1.u.var);
 
-			if (zend_u_hash_quick_find(EG(active_symbol_table), ZEND_STR_TYPE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
+			if (zend_u_hash_quick_find(EG(active_symbol_table), IS_UNICODE, cv->name, cv->name_len+1, cv->hash_value, (void **) &value) == FAILURE) {
 				isset = 0;
 			}
 		} else {
@@ -23761,7 +23753,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HAN
 		if (Z_TYPE_P(varname) != IS_STRING && Z_TYPE_P(varname) != IS_UNICODE) {
 			tmp = *varname;
 			zval_copy_ctor(&tmp);
-			convert_to_text(&tmp);
+			convert_to_unicode(&tmp);
 			varname = &tmp;
 		}
 
@@ -23877,6 +23869,10 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval var_copy;
+	int use_copy;
+	UChar *norm;
+	int norm_len;
 	zend_op *opline = EX(opline);
 
 	zval *string = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
@@ -23887,24 +23883,17 @@ static int ZEND_FASTCALL  ZEND_U_NORMALIZE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		zendi_zval_copy_ctor(*result);
 	}
 
-	if (UG(unicode)) {
-		zval var_copy;
-		int use_copy;
-		UChar *norm;
-		int norm_len;
-
-		zend_make_unicode_zval(result, &var_copy, &use_copy);
-		if (use_copy) {
-			zval_dtor(result);
-			*result = var_copy;
-		}
-		if (zend_normalize_identifier(&norm, &norm_len,
-		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
-			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
-		} else if (norm != Z_USTRVAL_P(result)) {
-			efree(Z_USTRVAL_P(result));
-			ZVAL_UNICODEL(result, norm, norm_len, 0);
-		}
+	zend_make_unicode_zval(result, &var_copy, &use_copy);
+	if (use_copy) {
+		zval_dtor(result);
+		*result = var_copy;
+	}
+	if (zend_normalize_identifier(&norm, &norm_len,
+								   Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0) == FAILURE) {
+		zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+	} else if (norm != Z_USTRVAL_P(result)) {
+		efree(Z_USTRVAL_P(result));
+		ZVAL_UNICODEL(result, norm, norm_len, 0);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -25137,7 +25126,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	int function_name_strlen;
 
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -25279,7 +25268,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -25346,7 +25335,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -25393,7 +25382,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -25506,7 +25495,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -25528,7 +25517,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -26841,7 +26830,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -26985,7 +26974,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -27052,7 +27041,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -27099,7 +27088,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -27212,7 +27201,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -27234,7 +27223,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -28597,7 +28586,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	int function_name_strlen;
 	zend_free_op free_op2;
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -28741,7 +28730,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -28808,7 +28797,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -28855,7 +28844,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -28968,7 +28957,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -28990,7 +28979,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
@@ -29561,7 +29550,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -30844,7 +30833,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	int function_name_strlen;
 
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(called_scope));
 
@@ -30986,7 +30975,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 				zend_u_symtable_update(Z_ARRVAL_P(array_ptr), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
-				zend_u_hash_update(Z_ARRVAL_P(array_ptr), ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+				zend_u_hash_update(Z_ARRVAL_P(array_ptr), IS_UNICODE, EMPTY_ZSTR, sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -31053,7 +31042,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 						int  offset_len  = Z_UNILEN_P(offset);
 						int free_offset = 0;
 
-						if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 							/* Identifier normalization */
 							UChar *norm;
 							int norm_len;
@@ -31100,7 +31089,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 						break;
 					}
 					case IS_NULL:
-						zend_u_hash_del(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""));
+						zend_u_hash_del(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""));
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -31213,7 +31202,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 					int  offset_len = Z_UNILEN_P(offset);
 					int  free_offset = 0;
 
-					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+					if (ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
 						/* Identifier normalization */
 						UChar *norm;
 						int norm_len;
@@ -31235,7 +31224,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 					break;
 				}
 				case IS_NULL:
-					if (zend_u_hash_find(ht, ZEND_STR_TYPE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
+					if (zend_u_hash_find(ht, IS_UNICODE, EMPTY_ZSTR, sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
