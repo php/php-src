@@ -2185,8 +2185,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 		}
 
 		if (result_type == PHPSQLITE_ASSOC) {
-			if (UG(unicode) &&
-				SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &(colname.u), &colname_len, (char*)colnames[i], strlen((char*)colnames[i]) TSRMLS_CC)) {
+			if (SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &(colname.u), &colname_len, (char*)colnames[i], strlen((char*)colnames[i]) TSRMLS_CC)) {
 				colname_type = IS_UNICODE;
 				if (SQLITE_G(assoc_case) == 1) {
 					UChar *tmp;
@@ -2397,8 +2396,7 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 
 			Z_ADDREF_P(decoded);
 
-			if (UG(unicode) &&
-				SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &colname, &colname_len, (char*)colnames[j], strlen((char*)colnames[j]) TSRMLS_CC)) {
+			if (SUCCESS == zend_string_to_unicode(SQLITE2_CONV, &colname, &colname_len, (char*)colnames[j], strlen((char*)colnames[j]) TSRMLS_CC)) {
 				add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(colname), colname_len + 1, decoded);
 				efree(colname);
 			} else {

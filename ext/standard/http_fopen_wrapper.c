@@ -637,7 +637,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
 
-				if (UG(unicode) && strchr(mode, 't')) {
+				if (strchr(mode, 't')) {
 					charset = php_http_detect_charset(http_header_line + sizeof("Content-type: "));
 				}
 
@@ -796,7 +796,7 @@ out:
 	}
 
 	if (charset) {
-		if (stream && UG(unicode) && strchr(mode, 't')) {
+		if (stream && strchr(mode, 't')) {
 			php_stream_encoding_apply(stream, 0, charset, UG(to_error_mode), NULL);
 		}
 		efree(charset);

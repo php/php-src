@@ -257,7 +257,7 @@ int spl_autoload(const zstr class_name, const zstr lc_name, int class_name_len, 
 			}
 
 			efree(class_file);
-			return zend_u_hash_exists(EG(class_table), ZEND_STR_TYPE, lc_name, class_name_len+1);
+			return zend_u_hash_exists(EG(class_table), IS_UNICODE, lc_name, class_name_len+1);
 		}
 	}
 	efree(class_file);
@@ -271,7 +271,6 @@ PHP_FUNCTION(spl_autoload)
 	zstr class_name, lc_name;
 	zstr file_exts = Z_UNIVAL(SPL_G(autoload_extensions));
 	int class_name_len, file_exts_len = Z_UNILEN(SPL_G(autoload_extensions)), found = 0;
-	int unicode = UG(unicode);
 	zstr copy, pos1, pos2;
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);
@@ -281,18 +280,15 @@ PHP_FUNCTION(spl_autoload)
 		RETURN_FALSE;
 	}
 
-	copy = pos1 = ezstrndup(ZEND_STR_TYPE, file_exts, file_exts_len);
-	lc_name = zend_u_str_tolower_dup(ZEND_STR_TYPE, class_name, class_name_len);
-	while(pos1.v && (unicode ? *pos1.u : *pos1.s) && !EG(exception)) {
+	copy = pos1 = ezstrndup(IS_UNICODE, file_exts, file_exts_len);
+	lc_name = zend_u_str_tolower_dup(IS_UNICODE, class_name, class_name_len);
+	while(pos1.v && *pos1.u && !EG(exception)) {
 		EG(return_value_ptr_ptr) = original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
-		if (unicode) {
-			pos2.u = u_strchr(pos1.u, ',');
-			if (pos2.u) *pos2.u = '\0';
-		} else {
-			pos2.s = strchr(pos1.s, ',');
-			if (pos2.s) *pos2.s = '\0';
+		pos2.u = u_strchr(pos1.u, ',');
+		if (pos2.u) {
+			*pos2.u = '\0';
 		}
 		if (spl_autoload(class_name, lc_name, class_name_len, pos1 TSRMLS_CC)) {
 			found = 1;
@@ -300,10 +296,8 @@ PHP_FUNCTION(spl_autoload)
 		}
 		if (!pos2.v) {
 			pos1.v = NULL;
-		} else if (unicode) {
+		} else {
 			pos1.u = pos2.u + 1;
-		} else{
-			pos1.s = pos2.s + 1;
 		}
 	}
 	efree(lc_name.v);
@@ -334,7 +328,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 			return;
 		}
 		zval_dtor(global);
-		ZVAL_ZSTRL(global, ZEND_STR_TYPE, file_exts, file_exts_len, 1);
+		ZVAL_ZSTRL(global, IS_UNICODE, file_exts, file_exts_len, 1);
 	}
 
 	RETURN_ZVAL(global, 1, 0);
@@ -370,11 +364,11 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	MAKE_STD_ZVAL(zclass_name);
-	ZVAL_ZSTRL(zclass_name, ZEND_STR_TYPE, class_name, class_name_len, 1);
+	ZVAL_ZSTRL(zclass_name, IS_UNICODE, class_name, class_name_len, 1);
 	if (SPL_G(autoload_functions)) {
 		int l_autoload_running = SPL_G(autoload_running);
 		SPL_G(autoload_running) = 1;
-		lc_name = zend_u_str_tolower_dup(ZEND_STR_TYPE, class_name, class_name_len);
+		lc_name = zend_u_str_tolower_dup(IS_UNICODE, class_name, class_name_len);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			func_name_type = zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
@@ -384,7 +378,7 @@ PHP_FUNCTION(spl_autoload_call)
 			if (retval) {
 				zval_ptr_dtor(&retval);					
 			}
-			if (zend_u_hash_exists(EG(class_table), ZEND_STR_TYPE, lc_name, class_name_len+1)) {
+			if (zend_u_hash_exists(EG(class_table), IS_UNICODE, lc_name, class_name_len+1)) {
 				break;
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);

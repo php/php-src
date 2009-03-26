@@ -1055,11 +1055,7 @@ static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *f
 
 	va_start(ap, format);
 
-	if (UG(unicode)) {
-		c = vuspprintf((UChar**)str, size, format, ap) * sizeof(UChar);
-	} else {
-		c = vspprintf(str, size, format, ap);
-	}
+	c = vuspprintf((UChar**)str, size, format, ap) * sizeof(UChar);
 	va_end(ap);
 	return c;
 }
@@ -1083,11 +1079,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 
 	if (!format_len) {
 		*return_len = 0;
-		if (UG(unicode)) {
-			return (char*)eustrdup(EMPTY_STR);
-		} else {		
-			return estrdup("");
-		}
+		return (char*)eustrdup(EMPTY_STR);
 	}
 
 	loc_dat = date_get_locale_data(UG(default_locale));
@@ -1236,11 +1228,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 		timelib_time_offset_dtor(offset);
 	}
 
-	if (UG(unicode)) {
-		*return_len = string.len / 2;
-	} else {
-		*return_len = string.len;
-	}
+	*return_len = string.len / 2;
 	return string.c;
 }
 
@@ -1260,11 +1248,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 
 	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
 
-	if (UG(unicode)) {
-		RETVAL_UNICODE((UChar*)string, 0);
-	} else {
-		RETVAL_STRING(string, 0);
-	}
+	RETVAL_UNICODE((UChar*)string, 0);
 }
 /* }}} */
 
@@ -1734,13 +1718,9 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 
 	if (real_len && real_len != buf_len) {
 		buf = (char *) erealloc(buf, real_len + 1);
-		if (UG(unicode)) {
-			RETVAL_RT_STRINGL(buf, real_len, 1);
-			efree(buf);
-			return;
-		} else {
-			RETURN_STRINGL(buf, real_len, 0);
-		}
+		RETVAL_RT_STRINGL(buf, real_len, 1);
+		efree(buf);
+		return;
 	}
 	efree(buf);
 	RETURN_FALSE;
@@ -2186,11 +2166,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	/* first we add the date and time in ISO format */
 	str = date_format("Y-m-d H:i:s", 12, &return_len, dateobj->time, 1, 0 TSRMLS_CC);
 	MAKE_STD_ZVAL(zv);
-	if (UG(unicode)) {
-		ZVAL_UNICODEL(zv, (UChar*) str, return_len - 1, 0);
-	} else {
-		ZVAL_STRINGL(zv, str, return_len - 1, 0);
-	}
+	ZVAL_UNICODEL(zv, (UChar*) str, return_len - 1, 0);
 	zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
 
 	/* then we add the timezone name (or similar) */
@@ -2816,11 +2792,7 @@ PHP_FUNCTION(date_format)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0 TSRMLS_CC);
-	if (UG(unicode)) {
-		RETURN_UNICODEL((UChar*) str, length, 0);
-	} else {
-		RETURN_STRINGL(str, length, 0);
-	}
+	RETURN_UNICODEL((UChar*) str, length, 0);
 }
 /* }}} */
 
@@ -2839,11 +2811,7 @@ PHP_FUNCTION(date_format_locale)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
 	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1 TSRMLS_CC);
-	if (UG(unicode)) {
-		RETURN_UNICODEL((UChar*)str, length, 0);
-	} else {
-		RETURN_STRINGL(str, length, 0);
-	}
+	RETURN_UNICODEL((UChar*)str, length, 0);
 }
 /* }}} */
 
@@ -3399,11 +3367,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		MAKE_STD_ZVAL(element); \
 		array_init(element); \
 		add_ascii_assoc_long(element, "ts",     timestamp_begin); \
-		if (UG(unicode)) { \
-			add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
-		} else { \
-			add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
-		} \
+		add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
 		add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
 		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx], 1); \
@@ -3413,11 +3377,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		MAKE_STD_ZVAL(element); \
 		array_init(element); \
 		add_ascii_assoc_long(element, "ts",     ts); \
-		if (UG(unicode)) { \
-			add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
-		} else { \
-			add_assoc_string(element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
-		} \
+		add_ascii_assoc_unicode(element, "time", (UChar*) php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
 		add_ascii_assoc_long(element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
 		add_ascii_assoc_bool(element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
 		add_ascii_assoc_ascii_string(element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1); \

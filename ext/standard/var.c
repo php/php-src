@@ -777,11 +777,7 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 	smart_str_appendl(buf, "O:", 2);
 	smart_str_append_long(buf, name_len);
 	smart_str_appendl(buf, ":\"", 2);
-	if (UG(unicode)) {
-		php_var_serialize_ustr(buf, class_name.u, name_len);
-	} else {
-		smart_str_appendl(buf, class_name.s, name_len);
-	}
+	php_var_serialize_ustr(buf, class_name.u, name_len);
 	smart_str_appendl(buf, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
@@ -835,7 +831,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 			}
 			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), (void **) &name, &pos);
 
-			if (Z_TYPE_PP(name) != (UG(unicode) ? IS_UNICODE : IS_STRING)) {
+			if (Z_TYPE_PP(name) != IS_UNICODE) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
 				/* we should still add element even if it's not OK,
 				 * since we already wrote the length of the array before */
@@ -980,13 +976,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_long(buf, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
-
-						if (UG(unicode)) {
-							php_var_serialize_ustr(buf, Z_OBJCE_P(struc)->name.u, Z_OBJCE_P(struc)->name_length);
-						} else {
-							smart_str_appendl(buf, Z_OBJCE_P(struc)->name.s, Z_OBJCE_P(struc)->name_length);
-						}
-
+						php_var_serialize_ustr(buf, Z_OBJCE_P(struc)->name.u, Z_OBJCE_P(struc)->name_length);
 						smart_str_appendl(buf, "\":", 2);
 
 						smart_str_append_long(buf, serialized_length);
@@ -1143,9 +1133,7 @@ PHP_FUNCTION(serialize)
 
 	if (buf.c) {
 		RETVAL_ASCII_STRINGL(buf.c, buf.len, 0);
-		if (UG(unicode)) {
-			smart_str_free(&buf);
-		}
+		smart_str_free(&buf);
 	} else {
 		RETURN_NULL();
 	}

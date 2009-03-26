@@ -2107,10 +2107,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
    ************************ */
 
 #define USTR_EQUAL(s1, len1, s2, len2) \
-	((len1) == (len2) && \
-	(UG(unicode) ? \
-	 (zend_u_binary_strcmp((s1).u, (len1), (s2).u, (len2)) == 0) \
-	 : (zend_binary_strcmp((s1).s, (len1), (s2).s, (len2)) == 0)))
+	((len1) == (len2) && zend_u_binary_strcmp((s1).u, (len1), (s2).u, (len2)) == 0)
 
 static inline void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *progress TSRMLS_DC) /* {{{ */
 {

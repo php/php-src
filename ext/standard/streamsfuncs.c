@@ -542,17 +542,13 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	add_ascii_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
-		if (UG(unicode)) {
-			UChar *decoded_path = NULL;
-			int decoded_path_len = 0;
+		UChar *decoded_path = NULL;
+		int decoded_path_len = 0;
 
-			if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context)) {
-				add_ascii_assoc_unicodel(return_value, "uri", decoded_path, decoded_path_len, 0);
-			} else {
-				add_ascii_assoc_null(return_value, "uri");
-			}
+		if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context)) {
+			add_ascii_assoc_unicodel(return_value, "uri", decoded_path, decoded_path_len, 0);
 		} else {
-			add_ascii_assoc_string(return_value, "uri", stream->orig_path, 1);
+			add_ascii_assoc_null(return_value, "uri");
 		}
 	}
 
@@ -1684,6 +1680,8 @@ PHP_FUNCTION(stream_resolve_include_path)
 
 	while (ptr < end) {
 		char *s = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+		UChar *upath;
+		int upath_len;
 
 		if (!s) {
 			s = end;
@@ -1714,17 +1712,10 @@ PHP_FUNCTION(stream_resolve_include_path)
 			continue;
 		}
 
-		if (UG(unicode)) {
-			UChar *upath;
-			int upath_len;
-
-			if (SUCCESS == php_stream_path_decode(NULL, &upath, &upath_len, buffer, (s - ptr) + 1 + filename_len, REPORT_ERRORS, context)) {
-				RETURN_UNICODEL(upath, upath_len, 0);
-			} else {
-				/* Fallback */
-				RETURN_STRINGL(buffer, (s - ptr) + 1 + filename_len, 1);
-			}
+		if (SUCCESS == php_stream_path_decode(NULL, &upath, &upath_len, buffer, (s - ptr) + 1 + filename_len, REPORT_ERRORS, context)) {
+			RETURN_UNICODEL(upath, upath_len, 0);
 		} else {
+			/* Fallback */
 			RETURN_STRINGL(buffer, (s - ptr) + 1 + filename_len, 1);
 		}
 	}

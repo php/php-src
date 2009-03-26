@@ -146,11 +146,7 @@ PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 	object_properties = Z_OBJPROP_P(object);
 
 	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		if (UG(unicode)) {
-			retval.u = eustrndup(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val));
-		} else {
-			retval.s = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-		}
+		retval.u = eustrndup(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val));
 
 		if (nlen) {
 			*nlen = Z_UNILEN_PP(val);

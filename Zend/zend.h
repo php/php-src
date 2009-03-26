@@ -583,7 +583,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_METHOD	(1<<2)
 
 /* default engine string type */
-#define ZEND_STR_TYPE (UG(unicode) ? IS_UNICODE : IS_STRING)
+#define ZEND_STR_TYPE IS_UNICODE
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions TSRMLS_DC);
 void zend_shutdown(TSRMLS_D);

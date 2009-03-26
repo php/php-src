@@ -460,12 +460,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(class_map), &pos);
 			     zend_hash_get_current_data_ex(SOAP_GLOBAL(class_map), (void **) &tmp, &pos) == SUCCESS;
 			     zend_hash_move_forward_ex(SOAP_GLOBAL(class_map), &pos)) {
-				if ((!UG(unicode) &&
-				     Z_TYPE_PP(tmp) == IS_STRING &&
-				     ce->name_length == Z_STRLEN_PP(tmp) &&
-				     zend_binary_strncasecmp(ce->name.s, ce->name_length, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), ce->name_length) == 0) ||
-				    (UG(unicode) &&
-				     Z_TYPE_PP(tmp) == IS_UNICODE &&
+				if ((Z_TYPE_PP(tmp) == IS_UNICODE &&
 				     ce->name_length == Z_USTRLEN_PP(tmp) &&
 				     zend_u_binary_strncasecmp(ce->name.u, ce->name_length, Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp), ce->name_length) == 0)) {
 

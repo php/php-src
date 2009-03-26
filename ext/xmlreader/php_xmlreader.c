@@ -124,7 +124,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
  	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_text(&tmp_member);
+		convert_to_unicode(&tmp_member);
 		member = &tmp_member;
 	}
 
@@ -158,7 +158,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
  	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_text(&tmp_member);
+		convert_to_unicode(&tmp_member);
 		member = &tmp_member;
 	}
 
@@ -200,7 +200,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
  	if (member->type != IS_STRING && member->type != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_text(&tmp_member);
+		convert_to_unicode(&tmp_member);
 		member = &tmp_member;
 	}
 

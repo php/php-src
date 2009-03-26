@@ -1769,14 +1769,10 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		result_type = IS_STRING;
-	} else if (Z_TYPE_P(op1) == IS_UNICODE || Z_TYPE_P(op2) == IS_UNICODE || UG(unicode)) {
+	} else {
 		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
 		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 		result_type = IS_UNICODE;
-	} else {
-		result_type = IS_STRING;
-		zend_make_string_zval(op1, &op1_copy, &use_copy1);
-		zend_make_string_zval(op2, &op2_copy, &use_copy2);
 	}
 
 	if (use_copy1) {
@@ -1825,13 +1821,8 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 	zval op1_copy, op2_copy;
 	int use_copy1, use_copy2;
 
-	if (UG(unicode)) {
-		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
-		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
-	} else {
-		zend_make_string_zval(op1, &op1_copy, &use_copy1);
-		zend_make_string_zval(op2, &op2_copy, &use_copy2);
-	}
+	zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
+	zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 
 	if (use_copy1) {
 		op1 = &op1_copy;
@@ -1840,11 +1831,7 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		op2 = &op2_copy;
 	}
 
-	if (UG(unicode)) {
-		Z_LVAL_P(result) = zend_u_binary_zval_strcmp(op1, op2);
-	} else {
-		Z_LVAL_P(result) = zend_binary_zval_strcmp(op1, op2);
-	}
+	Z_LVAL_P(result) = zend_u_binary_zval_strcmp(op1, op2);
 	Z_TYPE_P(result) = IS_LONG;
 
 	if (use_copy1) {
@@ -1862,13 +1849,8 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 	zval op1_copy, op2_copy;
 	int use_copy1, use_copy2;
 
-	if (UG(unicode)) {
-		zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
-		zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
-	} else {
-		zend_make_string_zval(op1, &op1_copy, &use_copy1);
-		zend_make_string_zval(op2, &op2_copy, &use_copy2);
-	}
+	zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
+	zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 
 	if (use_copy1) {
 		op1 = &op1_copy;
@@ -1877,11 +1859,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		op2 = &op2_copy;
 	}
 
-	if (UG(unicode)) {
-		Z_LVAL_P(result) = ucol_strcoll(UG(default_collator)->coll, Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), Z_USTRVAL_P(op2), Z_USTRLEN_P(op2));
-	} else {
-		Z_LVAL_P(result) = strcoll(Z_STRVAL_P(op1), Z_STRVAL_P(op2));
-	}
+	Z_LVAL_P(result) = ucol_strcoll(UG(default_collator)->coll, Z_USTRVAL_P(op1), Z_USTRLEN_P(op1), Z_USTRVAL_P(op2), Z_USTRLEN_P(op2));
 	Z_TYPE_P(result) = IS_LONG;
 
 	if (use_copy1) {

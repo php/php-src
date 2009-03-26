@@ -80,14 +80,10 @@ PHP_FUNCTION(readlink)
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	if (UG(unicode)) {
-		if (SUCCESS == php_stream_path_decode(NULL, &target, &target_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context))) {
-			RETURN_UNICODEL(target, target_len, 0);
-		} else {
-			RETURN_FALSE;
-		}
+	if (SUCCESS == php_stream_path_decode(NULL, &target, &target_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context))) {
+		RETURN_UNICODEL(target, target_len, 0);
 	} else {
-		RETURN_STRING(buff, 1);
+		RETURN_FALSE;
 	}
 }
 /* }}} */

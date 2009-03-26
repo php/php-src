@@ -227,19 +227,15 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 /* {{{ sapi_update_default_charset */
 SAPI_API void sapi_update_default_charset(TSRMLS_D)
 {
-	if (UG(unicode)) {
-		const char *canonical_name = NULL;
-		UErrorCode status = U_ZERO_ERROR;
+	const char *canonical_name = NULL;
+	UErrorCode status = U_ZERO_ERROR;
 
-		canonical_name = ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status);
-		/*
-		 * UTODO handle NULL return which signifies that MIME standard has no
-		 * name for this converter
-		 */
-		SG(default_charset) = (char *)ucnv_getStandardName(canonical_name, "MIME", &status);
-	} else {
-		SG(default_charset) = zend_ini_string("default_charset", sizeof("default_charset"), 0);
-	}
+	canonical_name = ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status);
+	/*
+	 * UTODO handle NULL return which signifies that MIME standard has no
+	 * name for this converter
+	 */
+	SG(default_charset) = (char *)ucnv_getStandardName(canonical_name, "MIME", &status);
 }
 /* }}} */
 

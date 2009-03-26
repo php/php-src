@@ -1486,9 +1486,7 @@ PHP_FUNCTION(get_html_translation_table)
 		return;
 	}
 
-	if (UG(unicode)) {
-		charset = cs_utf_8;
-	}
+	charset = cs_utf_8;
 
 	array_init(return_value);
 
@@ -1505,18 +1503,11 @@ PHP_FUNCTION(get_html_translation_table)
 					if (entity_map[j].table[i] == NULL)
 						continue;
 
-					if (UG(unicode)) {
-						cp = (UChar)(i + entity_map[j].basechar);
-						key_len = zend_codepoint_to_uchar(cp, key);
-						key[key_len] = 0;
-						snprintf(buffer, sizeof(buffer), "&%s;", entity_map[j].table[i]);
-						add_u_assoc_ascii_string_ex(return_value, IS_UNICODE, ZSTR(key), key_len+1, buffer, 1);
-					} else {
-						/* no wide chars here, because charset is always cs_8859_1 */
-						ind[0] = i + entity_map[j].basechar;
-						snprintf(buffer, sizeof(buffer), "&%s;", entity_map[j].table[i]);
-						add_assoc_string(return_value, ind, buffer, 1);
-					}
+					cp = (UChar)(i + entity_map[j].basechar);
+					key_len = zend_codepoint_to_uchar(cp, key);
+					key[key_len] = 0;
+					snprintf(buffer, sizeof(buffer), "&%s;", entity_map[j].table[i]);
+					add_u_assoc_ascii_string_ex(return_value, IS_UNICODE, ZSTR(key), key_len+1, buffer, 1);
 				}
 			}
 			/* break thru */

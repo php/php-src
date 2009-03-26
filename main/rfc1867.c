@@ -2160,11 +2160,7 @@ fileupload_done:
 
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
-	if (UG(unicode)) {
-		rfc1867_post_handler_unicode(content_type_dup, arg TSRMLS_CC);
-	} else {
-		rfc1867_post_handler_legacy(content_type_dup, arg TSRMLS_CC);
-	}
+	rfc1867_post_handler_unicode(content_type_dup, arg TSRMLS_CC);
 }
 
 /*

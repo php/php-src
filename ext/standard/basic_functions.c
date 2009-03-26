@@ -4768,7 +4768,7 @@ PHP_FUNCTION(call_user_method)
 		RETURN_FALSE;
 	}
 
-	convert_to_text(callback);
+	convert_to_unicode(callback);
 
 	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, n_params, params, 0, NULL TSRMLS_CC) == SUCCESS) {
 		if (retval_ptr) {
@@ -4802,7 +4802,7 @@ PHP_FUNCTION(call_user_method_array)
 		RETURN_FALSE;
 	}
 
-	convert_to_text(callback);
+	convert_to_unicode(callback);
 
 	params_ar = HASH_OF(params);
 	num_elems = zend_hash_num_elements(params_ar);
@@ -5214,7 +5214,7 @@ PHP_FUNCTION(highlight_string)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|b", &expr, &i) == FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_text_ex(expr);
+	convert_to_unicode_ex(expr);
 
 	if (i) {
 		php_output_start_default(TSRMLS_C);
@@ -5481,7 +5481,7 @@ PHP_FUNCTION(set_include_path)
 		new_value.s = temp;
 		new_value_len = temp_len;
 		free_new_value = 1;
-	} else if (UG(unicode)) {
+	} else {
 		UErrorCode status = U_ZERO_ERROR;
 
 		if (ucnv_getType(ZEND_U_CONVERTER(UG(filesystem_encoding_conv))) != UCNV_UTF8) {
@@ -5721,7 +5721,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	if (Z_TYPE_P(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE_P(tick_fe.arguments[0]) != IS_OBJECT) {
-		convert_to_text_ex(&tick_fe.arguments[0]);
+		convert_to_unicode_ex(&tick_fe.arguments[0]);
 	}
 
 	if (!BG(user_tick_functions)) {
@@ -5758,7 +5758,7 @@ PHP_FUNCTION(unregister_tick_function)
 	}
 
 	if (Z_TYPE_P(function) != IS_ARRAY) {
-		convert_to_text(function);
+		convert_to_unicode(function);
 	}
 
 	tick_fe.arguments = (zval **) emalloc(sizeof(zval *));
@@ -5889,11 +5889,10 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			zval_copy_ctor(&name);
 			INIT_PZVAL(&name);
 
-			if (UG(unicode)) {
-				convert_to_unicode_with_converter(element, UG(utf8_conv));
-				convert_to_unicode_with_converter(&name, UG(utf8_conv));
-			}
-			zend_u_symtable_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, Z_UNIVAL(name), Z_UNILEN(name) + 1, &element, sizeof(zval *), NULL);
+			convert_to_unicode_with_converter(element, UG(utf8_conv));
+			convert_to_unicode_with_converter(&name, UG(utf8_conv));
+
+			zend_u_symtable_update(Z_ARRVAL_P(arr), IS_UNICODE, Z_UNIVAL(name), Z_UNILEN(name) + 1, &element, sizeof(zval *), NULL);
 			zval_dtor(&name);
 			break;
 
@@ -5921,28 +5920,21 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				zstr key;
 				int key_len;
 
-				if (UG(unicode)) {
-					if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
-						return;
-					}
-				} else {
-					key.s = Z_STRVAL_P(arg1);
-					key_len = Z_STRLEN_P(arg1);
+				if (zend_string_to_unicode(UG(utf8_conv), &key.u, &key_len, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) TSRMLS_CC) == FAILURE) {
+					return;
 				}
 
-				if (zend_u_hash_find(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, (void **) &find_hash) == FAILURE) {
+				if (zend_u_hash_find(Z_ARRVAL_P(arr), IS_UNICODE, key, key_len+1, (void **) &find_hash) == FAILURE) {
 					ALLOC_ZVAL(hash);
 					INIT_PZVAL(hash);
 					array_init(hash);
 
-					zend_u_hash_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, key, key_len+1, &hash, sizeof(zval *), NULL);
+					zend_u_hash_update(Z_ARRVAL_P(arr), IS_UNICODE, key, key_len+1, &hash, sizeof(zval *), NULL);
 				} else {
 					hash = *find_hash;
 				}
 
-				if (UG(unicode)) {
-					efree(key.u);
-				}
+				efree(key.u);
 			}
 
 			if (Z_TYPE_P(hash) != IS_ARRAY) {
@@ -5956,9 +5948,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
 
-			if (UG(unicode)) {
-				convert_to_unicode_with_converter(element, UG(utf8_conv));
-			}
+			convert_to_unicode_with_converter(element, UG(utf8_conv));
 
 			if (arg3 && Z_STRLEN_P(arg3) > 0) {
 				add_assoc_zval_ex(hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3) + 1, element);
@@ -5987,10 +5977,9 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 		zval_copy_ctor(&name);
 		INIT_PZVAL(&name);
 
-		if (UG(unicode)) {
-			convert_to_unicode_with_converter(&name, UG(utf8_conv));
-		}
-		zend_u_symtable_update(Z_ARRVAL_P(arr), ZEND_STR_TYPE, Z_UNIVAL(name), Z_UNILEN(name) + 1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+		convert_to_unicode_with_converter(&name, UG(utf8_conv));
+
+		zend_u_symtable_update(Z_ARRVAL_P(arr), IS_UNICODE, Z_UNIVAL(name), Z_UNILEN(name) + 1, &BG(active_ini_file_section), sizeof(zval *), NULL);
 		zval_dtor(&name);
 	} else if (arg2) {
 		zval *active_arr;
@@ -6123,7 +6112,7 @@ static int copy_request_variable(void *pDest TSRMLS_DC, int num_args, va_list ar
 	} else {
 		zval num;
 		ZVAL_LONG(&num, hash_key->h);
-		convert_to_text(&num);
+		convert_to_unicode(&num);
 		php_prefix_varname(&new_key, prefix, Z_UNIVAL(num), Z_UNILEN(num), Z_TYPE(num), 0 TSRMLS_CC);
 		zval_dtor(&num);
 	}
@@ -6155,7 +6144,7 @@ PHP_FUNCTION(import_request_variables)
 	}
 
 	if (ZEND_NUM_ARGS() > 1) {
-		convert_to_text(prefix);
+		convert_to_unicode(prefix);
 
 		if (Z_UNILEN_P(prefix) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No prefix specified - possible security hazard");

@@ -45,7 +45,7 @@ PHP_FUNCTION(uniqid)
 {
 	zstr prefix = EMPTY_ZSTR;
 	int prefix_len = 0;
-	zend_uchar str_type = ZEND_STR_TYPE;
+	zend_uchar str_type = IS_UNICODE;
 #if defined(__CYGWIN__)
 	zend_bool more_entropy = 1;
 #else

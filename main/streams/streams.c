@@ -2358,7 +2358,7 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 PHPAPI void php_stream_fix_encoding(php_stream *stream, const char *mode, php_stream_context *context TSRMLS_DC)
 {
 	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
-	if (stream && strchr(mode, 't') && UG(unicode)) {
+	if (stream && strchr(mode, 't')) {
 		/* Only apply implicit unicode.to. filter if the wrapper didn't do it for us */
 		if ((php_stream_filter_product(&stream->writefilters, IS_UNICODE) == IS_UNICODE) && 
 			(strchr(mode, 'w') || strchr(mode, 'a') || strchr(mode, '+'))) {

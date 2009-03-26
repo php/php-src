@@ -172,9 +172,7 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
 			memcpy(*(ctx->lob_data) + *(ctx->lob_len), bufxp, (size_t) lenp);
 			*(ctx->lob_len) += lenp;
 			
-			if (UG(unicode)) {
-				*(*(ctx->lob_data) + *(ctx->lob_len) + 1) = 0;
-			}
+			*(*(ctx->lob_data) + *(ctx->lob_len) + 1) = 0;
 			*(*(ctx->lob_data) + *(ctx->lob_len)) = 0;
 			
 			return OCI_CONTINUE;

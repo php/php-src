@@ -281,10 +281,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, zst
 		if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 			/* we we're looking for a private prop but found a non private one of the same name */
 			return FAILURE;
-		} else if (!UG(unicode) && strcmp(prop_info_name.s+1, property_info->name.s+1)) {
-			/* we we're looking for a private prop but found a private one of the same name but another class */
-			return FAILURE;
-		} else if (UG(unicode) && u_strcmp(prop_info_name.u+1, property_info->name.u+1)) {
+		} else if (u_strcmp(prop_info_name.u+1, property_info->name.u+1)) {
 			/* we we're looking for a private prop but found a private one of the same name but another class */
 			return FAILURE;
 		}
@@ -307,14 +304,14 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
 		zend_u_hash_init(zobj->guards, 0, NULL, NULL, 0, UG(unicode));
-	} else if (zend_u_hash_quick_find(zobj->guards, UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void **) pguard) == SUCCESS) {
+	} else if (zend_u_hash_quick_find(zobj->guards, IS_UNICODE, property_info->name, property_info->name_length+1, property_info->h, (void **) pguard) == SUCCESS) {
 		return SUCCESS;
 	}
 	stub.in_get = 0;
 	stub.in_set = 0;
 	stub.in_unset = 0;
 	stub.in_isset = 0;
-	return zend_u_hash_quick_add(zobj->guards, UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void**)&stub, sizeof(stub), (void**) pguard);
+	return zend_u_hash_quick_add(zobj->guards, IS_UNICODE, property_info->name, property_info->name_length+1, property_info->h, (void**)&stub, sizeof(stub), (void**) pguard);
 }
 /* }}} */
 
@@ -330,12 +327,12 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC) /* 
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
 
-	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
-		convert_to_text(tmp_member);
+		convert_to_unicode(tmp_member);
 		member = tmp_member;
 	}
 
@@ -404,12 +401,12 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 
 	zobj = Z_OBJ_P(object);
 
-	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
-		convert_to_text(tmp_member);
+		convert_to_unicode(tmp_member);
 		member = tmp_member;
 	}
 
@@ -568,10 +565,10 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 
 	zobj = Z_OBJ_P(object);
 
-	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
-		convert_to_text(&tmp_member);
+		convert_to_unicode(&tmp_member);
 		member = &tmp_member;
 	}
 
@@ -614,12 +611,12 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC) /* {{{
 
 	zobj = Z_OBJ_P(object);
 
-	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
-		convert_to_text(tmp_member);
+		convert_to_unicode(tmp_member);
 		member = tmp_member;
 	}
 
@@ -731,7 +728,7 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 	ce = ce->parent;
 	while (ce) {
 		if (ce == EG(scope)) {
-			if (zend_u_hash_find(&ce->function_table, UG(unicode)?IS_UNICODE:IS_STRING, function_name_strval, function_name_strlen+1, (void **) &fbc)==SUCCESS
+			if (zend_u_hash_find(&ce->function_table, IS_UNICODE, function_name_strval, function_name_strlen+1, (void **) &fbc)==SUCCESS
 				&& fbc->op_array.fn_flags & ZEND_ACC_PRIVATE
 				&& fbc->common.scope == EG(scope)) {
 				return fbc;
@@ -797,11 +794,7 @@ static inline union _zend_function *zend_get_user_call_function(zend_object *zob
 	call_user_call->num_args = 0;
 	call_user_call->scope = zobj->ce;
 	call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-	if (UG(unicode)) {
-		call_user_call->function_name.u = eustrndup(method_name.u, method_len);
-	} else {
-		call_user_call->function_name.s = estrndup(method_name.s, method_len);
-	}
+	call_user_call->function_name.u = eustrndup(method_name.u, method_len);
 	call_user_call->pass_rest_by_reference = 0;
 	call_user_call->return_reference = ZEND_RETURN_VALUE;
 
@@ -818,7 +811,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, zstr method_
 	zval *object = *object_ptr;
 
 	/* FIXME: type is default */
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar type = IS_UNICODE;
 
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
 	lc_method_name = zend_u_str_case_fold(type, method_name, method_len, 1, &lc_method_name_len);
@@ -966,11 +959,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uc
 			call_user_call->num_args = 0;
 			call_user_call->scope = ce;
 			call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-			if (UG(unicode)) {
-				call_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
-			} else {
-				call_user_call->function_name.s = estrndup(function_name_strval.s, function_name_strlen);
-			}
+			call_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
 			call_user_call->pass_rest_by_reference = 0;
 			call_user_call->return_reference = ZEND_RETURN_VALUE;
 
@@ -984,13 +973,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_uc
 			callstatic_user_call->num_args = 0;
 			callstatic_user_call->scope    = ce;
 			callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
-
-			if (UG(unicode)) {
-				callstatic_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
-			} else {
-				callstatic_user_call->function_name.s = estrndup(function_name_strval.s, function_name_strlen);
-			}
-
+			callstatic_user_call->function_name.u = eustrndup(function_name_strval.u, function_name_strlen);
 			callstatic_user_call->pass_rest_by_reference = 0;
 			callstatic_user_call->return_reference       = ZEND_RETURN_VALUE;
 
@@ -1043,7 +1026,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		std_property_info.flags = ZEND_ACC_PUBLIC;
 		std_property_info.name = property_name;
 		std_property_info.name_length = property_name_len;
-		std_property_info.h = zend_u_get_hash_value(UG(unicode)?IS_UNICODE:IS_STRING, std_property_info.name, std_property_info.name_length+1);
+		std_property_info.h = zend_u_get_hash_value(IS_UNICODE, std_property_info.name, std_property_info.name_length+1);
 		std_property_info.ce = ce;
 		property_info = &std_property_info;
 	}
@@ -1061,7 +1044,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 
 	zend_update_class_constants(tmp_ce TSRMLS_CC);
 
-	zend_u_hash_quick_find(CE_STATIC_MEMBERS(tmp_ce), UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
+	zend_u_hash_quick_find(CE_STATIC_MEMBERS(tmp_ce), IS_UNICODE, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
 
 	if (!retval) {
 		if (silent) {
@@ -1145,12 +1128,12 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 
 	zobj = Z_OBJ_P(object);
 
-	if (Z_TYPE_P(member) != IS_UNICODE && (UG(unicode) || Z_TYPE_P(member) != IS_STRING)) {
+	if (Z_TYPE_P(member) != IS_UNICODE) {
 		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
-		convert_to_text(tmp_member);
+		convert_to_unicode(tmp_member);
 		member = tmp_member;
 	}
 
@@ -1243,11 +1226,7 @@ int zend_std_object_get_class_name(const zval *object, zstr *class_name, zend_ui
 	}
 
 	*class_name_len = ce->name_length;
-	if (UG(unicode)) {
-		class_name->u = eustrndup(ce->name.u, ce->name_length);
-	} else {
-		class_name->s = estrndup(ce->name.s, ce->name_length);
-	}
+	class_name->u = eustrndup(ce->name.u, ce->name_length);
 	return SUCCESS;
 }
 /* }}} */
@@ -1276,7 +1255,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					zend_error(E_ERROR, "Method %v::__toString() must not throw an exception", ce->name);
                 	return FAILURE;
                 }
-				if (Z_TYPE_P(retval) == (UG(unicode)?IS_UNICODE:IS_STRING)) {
+				if (Z_TYPE_P(retval) == IS_UNICODE) {
 					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
 						zval_dtor(readobj);
@@ -1340,7 +1319,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
 {
 	zstr key;
-	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar utype = IS_UNICODE;
 	zend_class_entry *ce;
 
 	if (Z_TYPE_P(obj) != IS_OBJECT) {

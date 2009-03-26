@@ -521,6 +521,9 @@ no_results:
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
+		UChar *path;
+		int path_len;
+		
 		if (PG(open_basedir) && *PG(open_basedir)) {
 			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
 				basedir_limit = 1;
@@ -546,18 +549,12 @@ no_results:
 				continue;
 			}
 		}
-		if (UG(unicode)) {
-			UChar *path;
-			int path_len;
 
-			if (SUCCESS == php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, globbuf.gl_pathv[n]+cwd_skip, 
-								strlen(globbuf.gl_pathv[n]+cwd_skip), REPORT_ERRORS, FG(default_context))) {
-				add_next_index_unicodel(return_value, path, path_len, 0);
-			} else {
-				/* Fallback on string version, path_decode will emit warning */
-				add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
-			}
+		if (SUCCESS == php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, globbuf.gl_pathv[n]+cwd_skip, 
+							strlen(globbuf.gl_pathv[n]+cwd_skip), REPORT_ERRORS, FG(default_context))) {
+			add_next_index_unicodel(return_value, path, path_len, 0);
 		} else {
+			/* Fallback on string version, path_decode will emit warning */
 			add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 		}
 	}
@@ -607,18 +604,14 @@ PHP_FUNCTION(scandir)
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		if (UG(unicode)) {
-			UChar *path;
-			int path_len;
+		UChar *path;
+		int path_len;
 
-			if (SUCCESS == php_stream_path_decode(NULL, &path, &path_len, namelist[i], strlen(namelist[i]), REPORT_ERRORS, context)) {
-				add_next_index_unicodel(return_value, path, path_len, 0);
-				efree(namelist[i]);
-			} else {
-				/* Fallback on using the non-unicode version, path_decode will emit the warning for us */
-				add_next_index_string(return_value, namelist[i], 0);
-			}
+		if (SUCCESS == php_stream_path_decode(NULL, &path, &path_len, namelist[i], strlen(namelist[i]), REPORT_ERRORS, context)) {
+			add_next_index_unicodel(return_value, path, path_len, 0);
+			efree(namelist[i]);
 		} else {
+			/* Fallback on using the non-unicode version, path_decode will emit the warning for us */
 			add_next_index_string(return_value, namelist[i], 0);
 		}
 	}

@@ -283,9 +283,7 @@ php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, l
 			if (column == NULL) {
 				continue;
 			} else if ((int) column->name_len == column_name_len) {
-				if (!UG(unicode) && !strncmp(column->name.s, column_name.s, column_name_len)) {
-					return column;
-				} else if (UG(unicode) && !u_strncmp(column->name.u, column_name.u, column_name_len)) {
+				if (!u_strncmp(column->name.u, column_name.u, column_name_len)) {
 					return column;
 				}
 			}
@@ -556,12 +554,8 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			}
 			PHP_OCI_CALL(OCIDescriptorFree, (param, OCI_DTYPE_PARAM));
 
-			if (UG(unicode)) {
-				outcol->name_len = TEXT_CHARS(outcol->name_len);
-				outcol->name.u = eustrndup((UChar*) colname, outcol->name_len);
-			} else {
-				outcol->name.s = estrndup((char*) colname, outcol->name_len);
-			}
+			outcol->name_len = TEXT_CHARS(outcol->name_len);
+			outcol->name.u = eustrndup((UChar*) colname, outcol->name_len);
 
 			/* find a user-setted define */
 			if (statement->defines) {
@@ -894,11 +888,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						ub2 curr_element_length = TEXT_CHARS(bind->array.element_lengths[i]);
 						if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 							zval_dtor(*entry);
-							if (UG(unicode)) {
-								tmp.u = ((UChar *)bind->array.elements)+TEXT_CHARS(i*bind->array.max_length);
-							} else {
-								tmp.s = (char *)(((text *)bind->array.elements)+(i*bind->array.max_length));
-							}
+							tmp.u = ((UChar *)bind->array.elements)+TEXT_CHARS(i*bind->array.max_length);
 
 							ZVAL_TEXTL(*entry, tmp, curr_element_length, 1);
 							zend_hash_move_forward(hash);
@@ -989,7 +979,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, zstr name, int name_len, 
 		case SQLT_AFC:
 		case SQLT_CHR: /* SQLT_CHR is the default value when type was not specified */
 			if (Z_TYPE_P(var) != IS_NULL) {
-				convert_to_text(var);
+				convert_to_unicode(var);
 			}
 			if (maxlength == -1) {
 				switch (Z_TYPE_P(var)) {
@@ -1148,15 +1138,10 @@ sb4 php_oci_bind_in_callback(
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
 		/* "normal string bind */
-		convert_to_text(val);
+		convert_to_unicode(val);
 
-		if (UG(unicode)) {
-			*bufpp = Z_UNIVAL_P(val).v;
-			*alenp = UBYTES(Z_UNILEN_P(val));
-		} else {
-			*bufpp = Z_STRVAL_P(val);
-			*alenp = Z_STRLEN_P(val);
-		}
+		*bufpp = Z_UNIVAL_P(val).v;
+		*alenp = UBYTES(Z_UNILEN_P(val));
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else if (phpbind->statement != 0) {
 		/* RSET */
@@ -1236,34 +1221,18 @@ sb4 php_oci_bind_out_callback(
 		*indpp = &phpbind->indicator;
 		retval = OCI_CONTINUE;
 	} else {
-		if (UG(unicode)) {
-			convert_to_unicode(val);
-			zval_dtor(val);
+		convert_to_unicode(val);
+		zval_dtor(val);
 
-			Z_UNILEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-			Z_UNIVAL_P(val).v = ecalloc(1, UBYTES(Z_UNILEN_P(phpbind->zval) + 1));
+		Z_UNILEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
+		Z_UNIVAL_P(val).v = ecalloc(1, UBYTES(Z_UNILEN_P(phpbind->zval) + 1));
 
-			*alenpp = (ub4*) &Z_UNILEN_P(phpbind->zval);
-			*bufpp = Z_UNIVAL_P(phpbind->zval).v;
-			*piecep = OCI_ONE_PIECE;
-			*rcodepp = &phpbind->retcode;
-			*indpp = &phpbind->indicator;
-			retval = OCI_CONTINUE;
-		} else {
-			convert_to_string(val);
-			zval_dtor(val);
-
-			Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-			Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(phpbind->zval) + 1);
-
-			/* XXX we assume that zend-zval len has 4 bytes */
-			*alenpp = (ub4*) &Z_STRLEN_P(phpbind->zval);
-			*bufpp = Z_STRVAL_P(phpbind->zval);
-			*piecep = OCI_ONE_PIECE;
-			*rcodepp = &phpbind->retcode;
-			*indpp = &phpbind->indicator;
-			retval = OCI_CONTINUE;
-		}
+		*alenpp = (ub4*) &Z_UNILEN_P(phpbind->zval);
+		*bufpp = Z_UNIVAL_P(phpbind->zval).v;
+		*piecep = OCI_ONE_PIECE;
+		*rcodepp = &phpbind->retcode;
+		*indpp = &phpbind->indicator;
+		retval = OCI_CONTINUE;
 	}
 	return retval;
 }
@@ -1460,7 +1429,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	if (maxlength == -1) {
 		zend_hash_internal_pointer_reset(hash);
 		while (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
-			convert_to_text_ex(entry);
+			convert_to_unicode_ex(entry);
 			if (Z_UNILEN_PP(entry) > maxlength) {
 				maxlength = Z_UNILEN_PP(entry) + 1;
 			}
@@ -1469,13 +1438,9 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	}
 	
 	bind = emalloc(sizeof(php_oci_bind));
-	if (UG(unicode)) {
-		bind->array.elements		= (UChar *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(UChar), 0);
-		memset(bind->array.elements, 0, max_table_length * sizeof(UChar) * (maxlength + 1));
-	} else {
-		bind->array.elements		= (text *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(text), 0);
-		memset(bind->array.elements, 0, max_table_length * sizeof(text) * (maxlength + 1));
-	}
+	bind->array.elements		= (UChar *)safe_emalloc(max_table_length * (maxlength + 1), sizeof(UChar), 0);
+	memset(bind->array.elements, 0, max_table_length * sizeof(UChar) * (maxlength + 1));
+
 	bind->array.current_length	= zend_hash_num_elements(Z_ARRVAL_P(var));
 	bind->array.old_length		= bind->array.current_length;
 	bind->array.max_length		= TEXT_BYTES(maxlength);
@@ -1488,7 +1453,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 	
 	for (i = 0; i < bind->array.current_length; i++) {
 		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
-			convert_to_text_ex(entry);
+			convert_to_unicode_ex(entry);
 			bind->array.element_lengths[i] = TEXT_BYTES(Z_UNILEN_PP(entry));
 			if (Z_UNILEN_PP(entry) == 0) {
 				bind->array.indicators[i] = -1;
@@ -1504,16 +1469,12 @@ php_oci_bind *php_oci_bind_array_helper_string(zval* var, long max_table_length,
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			int element_length;
 			
-			convert_to_text_ex(entry);
+			convert_to_unicode_ex(entry);
 			element_length = (maxlength > Z_UNILEN_PP(entry)) ? Z_UNILEN_PP(entry) : maxlength;
 			
-			if (UG(unicode)) {
-				memcpy((UChar *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).u, TEXT_BYTES(element_length));
-				((UChar *)bind->array.elements)[i*maxlength + element_length] = '\0';
-			} else {
-				memcpy((text *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).s, element_length);
-				((text *)bind->array.elements)[i*maxlength + element_length] = '\0';
-			}
+			memcpy((UChar *)bind->array.elements + i*maxlength, Z_UNIVAL_PP(entry).u, TEXT_BYTES(element_length));
+			((UChar *)bind->array.elements)[i*maxlength + element_length] = '\0';
+
 			zend_hash_move_forward(hash);
 		} else {
 			break;
@@ -1628,12 +1589,8 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 			
-			convert_to_text_ex(entry);
-			if (UG(unicode)) {
-				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)Z_UNIVAL_PP(entry).s, UBYTES(Z_UNILEN_PP(entry)), NULL, 0, NULL, 0, &oci_date));
-			} else {
-				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, 0, NULL, 0, &oci_date));
-			}
+			convert_to_unicode_ex(entry);
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)Z_UNIVAL_PP(entry).s, UBYTES(Z_UNILEN_PP(entry)), NULL, 0, NULL, 0, &oci_date));
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */
@@ -1649,13 +1606,9 @@ php_oci_bind *php_oci_bind_array_helper_date(zval* var, long max_table_length, p
 			zend_hash_move_forward(hash);
 		} else {
 			
-			if (UG(unicode)) {
-				UChar *tmp = USTR_MAKE("01-JAN-00");
-				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)tmp, UBYTES(sizeof("01-JAN-00")-1), NULL, 0, NULL, 0, &oci_date));
-				efree(tmp);
-			} else {
-				PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)"01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
-			}
+			UChar *tmp = USTR_MAKE("01-JAN-00");
+			PHP_OCI_CALL_RETURN(connection->errcode, OCIDateFromText, (connection->err, (CONST text *)tmp, UBYTES(sizeof("01-JAN-00")-1), NULL, 0, NULL, 0, &oci_date));
+			efree(tmp);
 
 			if (connection->errcode != OCI_SUCCESS) {
 				/* failed to convert string to date */

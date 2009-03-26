@@ -35,7 +35,7 @@ static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, 
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
 
-	zend_u_call_method(retval, pce, &pce->constructor, ZEND_STR_TYPE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
+	zend_u_call_method(retval, pce, &pce->constructor, IS_UNICODE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
 	return 0;
 }
 /* }}} */
@@ -45,7 +45,7 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, 
 {
 	spl_instantiate(pce, retval, alloc TSRMLS_CC);
 	
-	zend_u_call_method(retval, pce, &pce->constructor, ZEND_STR_TYPE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
+	zend_u_call_method(retval, pce, &pce->constructor, IS_UNICODE, pce->constructor->common.function_name, USTR_LEN(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
 	return 0;
 }
 /* }}} */

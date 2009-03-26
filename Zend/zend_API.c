@@ -205,13 +205,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "double";
 		case IS_STRING:
 		{
-			TSRMLS_FETCH();
-
-			if (UG(unicode)) {
-				return "binary string";
-			} else {
-				return "string";
-			}
+			return "binary string";
 		}
 		case IS_OBJECT:
 			return "object";
@@ -344,7 +338,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 	}
 
 	if (c == 'x') {
-		c = UG(unicode) ? 'u' : 's';
+		c = 'u';
 	}
 
 	switch (c) {
@@ -498,11 +492,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						if (UG(unicode)) {
-							return "binary string";
-						} else {
-							return "string";
-						}
+						return "binary string";
 				}
 			}
 			break;
@@ -610,7 +600,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						if (return_null) {
 							*p = NULL_ZSTR;
 							*pl = 0;
-							*type = UG(unicode)?IS_UNICODE:IS_STRING;
+							*type = IS_UNICODE;
 							break;
 						}
 						/* break omitted intentionally */
@@ -618,13 +608,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_BOOL:
-						if (UG(unicode)) {
-							convert_to_unicode_ex(arg);
-							RETURN_AS_UNICODE(arg, p, pl, type);
-						} else {
-							convert_to_string_ex(arg);
-							RETURN_AS_STRING(arg, p, pl, type);
-						}
+						convert_to_unicode_ex(arg);
+						RETURN_AS_UNICODE(arg, p, pl, type);
 						break;
 
 					case IS_STRING:
@@ -636,8 +621,8 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 						break;
 
 					case IS_OBJECT:
-						if (parse_arg_object_to_string(arg, (char**)p, pl, UG(unicode) ? IS_UNICODE : IS_STRING TSRMLS_CC) == SUCCESS) {
-							*type = UG(unicode)?IS_UNICODE:IS_STRING;
+						if (parse_arg_object_to_string(arg, (char**)p, pl, IS_UNICODE TSRMLS_CC) == SUCCESS) {
+							*type = IS_UNICODE;
 							break;
 						}
 
@@ -751,7 +736,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					*p = *arg;
 				} else {
 					if (ce) {
-						*ret_type = UG(unicode)?IS_UNICODE:IS_STRING;
+						*ret_type = IS_UNICODE;
 						return ce->name.v;
 					} else {
 						return "object";
@@ -769,7 +754,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 					*pce = NULL;
 					break;
 				}
-				convert_to_text_ex(arg);
+				convert_to_unicode_ex(arg);
 				if (zend_u_lookup_class(Z_TYPE_PP(arg), Z_UNIVAL_PP(arg), Z_UNILEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
 					*pce = NULL;
 				} else {
@@ -1029,7 +1014,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		}
 
 		if (T_arg_type == -1) {
-			T_arg_type = ZEND_STR_TYPE;
+			T_arg_type = IS_UNICODE;
 		}
 	}
 
@@ -2020,15 +2005,11 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	unsigned int lcname_len;
 	zstr lcname;
 	int name_len;
-	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
+	zend_uchar utype = IS_UNICODE;
 
 	/* we don't care if the function name is longer, in fact lowercasing only
 	 * the beginning of the name speeds up the check process */
-	if (UG(unicode)) {
-		name_len = u_strlen(fptr->common.function_name.u);
-	} else {
-		name_len = strlen(fptr->common.function_name.s);
-	}
+	name_len = u_strlen(fptr->common.function_name.u);
 	lcname = zend_u_str_case_fold(utype, fptr->common.function_name, name_len, 0, &lcname_len);
 
 	if (lcname_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 &&
@@ -2125,58 +2106,43 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 	if (scope) {
 		lc_class_name_len = scope->name_length;
-		if (UG(unicode)) {
-			if ((lc_class_name.u = u_memrchr(scope->name.u, ':', lc_class_name_len))) {
-				lc_class_name.u++;
-				lc_class_name_len -= (lc_class_name.u - scope->name.u);
-			} else {
-				lc_class_name = scope->name;
-			}
+		if ((lc_class_name.u = u_memrchr(scope->name.u, ':', lc_class_name_len))) {
+			lc_class_name.u++;
+			lc_class_name_len -= (lc_class_name.u - scope->name.u);
 		} else {
-			if ((lc_class_name.s = zend_memrchr(scope->name.s, ':', lc_class_name_len))) {
-				lc_class_name.s++;
-				lc_class_name_len -= (lc_class_name.s - scope->name.s);
-			} else {
-				lc_class_name = scope->name;
-			}
+			lc_class_name = scope->name;
 		}
-		lc_class_name = zend_u_str_case_fold(ZEND_STR_TYPE, lc_class_name, lc_class_name_len, 0, &lc_class_name_len);
+
+		lc_class_name = zend_u_str_case_fold(IS_UNICODE, lc_class_name, lc_class_name_len, 0, &lc_class_name_len);
 	}
 
 	while (ptr->fname) {
+		int len = strlen(ptr->fname)+1;
 		internal_function->handler = ptr->handler;
-		if (UG(unicode)) {
-			int len = strlen(ptr->fname)+1;
 
-			internal_function->function_name.u = malloc(UBYTES(len));
-			u_charsToUChars(ptr->fname, internal_function->function_name.u, len);
-		} else {
-			internal_function->function_name.s = (char*)ptr->fname;
-		}
+		internal_function->function_name.u = malloc(UBYTES(len));
+		u_charsToUChars(ptr->fname, internal_function->function_name.u, len);
+
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		if (ptr->arg_info) {
-			if (UG(unicode)) {
-				zend_arg_info *args;
-				int n = ptr->num_args;
+			zend_arg_info *args;
+			int n = ptr->num_args;
 
-				args = internal_function->arg_info = malloc((n + 1) * sizeof(zend_arg_info));
-				memcpy(args, ptr->arg_info+1, (n + 1) * sizeof(zend_arg_info));
-				while (n > 0) {
-					--n;
-					if (args[n].name.s) {
-						UChar *uname = malloc(UBYTES(args[n].name_len + 1));
-						u_charsToUChars(args[n].name.s, uname, args[n].name_len+1);
-						args[n].name.u = uname;
-					}
-					if (args[n].class_name.s) {
-						UChar *uname = malloc(UBYTES(args[n].class_name_len + 1));
-						u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len+1);
-						args[n].class_name.u = uname;
-					}
+			args = internal_function->arg_info = malloc((n + 1) * sizeof(zend_arg_info));
+			memcpy(args, ptr->arg_info+1, (n + 1) * sizeof(zend_arg_info));
+			while (n > 0) {
+				--n;
+				if (args[n].name.s) {
+					UChar *uname = malloc(UBYTES(args[n].name_len + 1));
+					u_charsToUChars(args[n].name.s, uname, args[n].name_len+1);
+					args[n].name.u = uname;
 				}
-			} else {
-				internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
+				if (args[n].class_name.s) {
+					UChar *uname = malloc(UBYTES(args[n].class_name_len + 1));
+					u_charsToUChars(args[n].class_name.s, uname, args[n].class_name_len+1);
+					args[n].class_name.u = uname;
+				}
 			}
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
@@ -2248,9 +2214,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			 * a constructor already.
 			 */
 			unsigned int lc_func_name_len;
-			zstr lc_func_name = zend_u_str_case_fold(ZEND_STR_TYPE, internal_function->function_name, fname_len, 0, &lc_func_name_len);
+			zstr lc_func_name = zend_u_str_case_fold(IS_UNICODE, internal_function->function_name, fname_len, 0, &lc_func_name_len);
 
-			if ((lc_func_name_len == lc_class_name_len) && !memcmp(lc_func_name.v, lc_class_name.v, UG(unicode)?UBYTES(lc_class_name_len):lc_class_name_len) && !ctor) {
+			if ((lc_func_name_len == lc_class_name_len) && !memcmp(lc_func_name.v, lc_class_name.v, UBYTES(lc_class_name_len)) && !ctor) {
 				ctor = reg_function;
 			} else if ((fname_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME))) {
 				ctor = reg_function;
@@ -2529,8 +2495,8 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
 	}
 
-	lcname = zend_u_str_case_fold(ZEND_STR_TYPE, class_entry->name, class_entry->name_length, 0, &lcname_len);
-	zend_u_hash_update(CG(class_table), ZEND_STR_TYPE, lcname, lcname_len+1, &class_entry, sizeof(zend_class_entry *), NULL);
+	lcname = zend_u_str_case_fold(IS_UNICODE, class_entry->name, class_entry->name_length, 0, &lcname_len);
+	zend_u_hash_update(CG(class_table), IS_UNICODE, lcname, lcname_len+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	efree(lcname.v);
 	return class_entry;
 }
@@ -2916,10 +2882,8 @@ get_function_via_handler:
 				zstr method = mname;
 				int method_len = mlen;
 
-				if (UG(unicode) && Z_TYPE_P(callable) == IS_STRING) {
+				if (Z_TYPE_P(callable) == IS_STRING) {
 					zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.u, &method_len, mname.s, mlen TSRMLS_CC);
-				} else if (!UG(unicode) && Z_TYPE_P(callable) == IS_UNICODE) {
-					zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &method.s, &method_len, mname.u, mlen TSRMLS_CC);
 				}	
 				fcc->function_handler = Z_OBJ_HT_P(fcc->object_ptr)->get_method(&fcc->object_ptr, method, method_len TSRMLS_CC);
 				if (method.v != mname.v) {
@@ -3055,48 +3019,28 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				fcc->object_ptr = object_ptr;
 				fcc->calling_scope = Z_OBJCE_P(object_ptr);
 				if (callable_name) {
-					if (UG(unicode)) {
-						Z_TYPE_P(callable_name) = IS_UNICODE;
-						Z_USTRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_P(callable) + 2;
-						Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
-						memcpy(Z_USTRVAL_P(callable_name), fcc->calling_scope->name.u, UBYTES(fcc->calling_scope->name_length));
-						Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
-						Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
-						if (Z_TYPE_P(callable) == IS_UNICODE) {
-							u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL_P(callable), Z_USTRLEN_P(callable)+1);
-						} else {
-							zval *method = callable;
-							zval copy;
-							int use_copy;
-
-							zend_make_unicode_zval(method, &copy, &use_copy);
-							u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
-							zval_dtor(&copy);
-						}
+					Z_TYPE_P(callable_name) = IS_UNICODE;
+					Z_USTRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_P(callable) + 2;
+					Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+					memcpy(Z_USTRVAL_P(callable_name), fcc->calling_scope->name.u, UBYTES(fcc->calling_scope->name_length));
+					Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
+					Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
+					if (Z_TYPE_P(callable) == IS_UNICODE) {
+						u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL_P(callable), Z_USTRLEN_P(callable)+1);
 					} else {
-						Z_TYPE_P(callable_name) = IS_STRING;
-						Z_STRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_P(callable) + 2;
-						Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name)+1);
-						memcpy(Z_STRVAL_P(callable_name), fcc->calling_scope->name.s, fcc->calling_scope->name_length);
-						Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
-						Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
-						if (Z_TYPE_P(callable) == IS_STRING) {
-							memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL_P(callable), Z_STRLEN_P(callable)+1);
-						} else {
-							zval *method = callable;
-							zval copy;
-							int use_copy;
+						zval *method = callable;
+						zval copy;
+						int use_copy;
 
-							zend_make_string_zval(method, &copy, &use_copy);
-							memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL(copy), Z_STRLEN(copy)+1);
-							zval_dtor(&copy);
-						}
+						zend_make_unicode_zval(method, &copy, &use_copy);
+						u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
+						zval_dtor(&copy);
 					}
 				}
 			} else if (callable_name) {
 				*callable_name = *callable;
 				zval_copy_ctor(callable_name);
-				convert_to_text(callable_name);
+				convert_to_unicode(callable_name);
 			}
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				fcc->called_scope = fcc->calling_scope;
@@ -3133,58 +3077,30 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 
 					if (Z_TYPE_PP(obj) == IS_STRING || Z_TYPE_PP(obj) == IS_UNICODE) {
 						if (callable_name) {
-							if (UG(unicode)) {
-								Z_TYPE_P(callable_name) = IS_UNICODE;
-								Z_USTRLEN_P(callable_name) = Z_UNILEN_PP(obj) + Z_UNILEN_PP(method) + 2;
-								Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
-								if (Z_TYPE_PP(obj) == IS_UNICODE) {
-									u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL_PP(obj), Z_USTRLEN_PP(obj));
-								} else {
-									zval copy;
-									int use_copy;
-
-									zend_make_unicode_zval(*obj, &copy, &use_copy);
-									u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL(copy), Z_USTRLEN(copy));
-									zval_dtor(&copy);
-								}
-								Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)] = ':';
-								Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)+1] = ':';
-								if (Z_TYPE_PP(method) == IS_UNICODE) {
-									u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
-								} else {
-									zval copy;
-									int use_copy;
-
-									zend_make_unicode_zval(*method, &copy, &use_copy);
-									u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
-									zval_dtor(&copy);
-								}
+							Z_TYPE_P(callable_name) = IS_UNICODE;
+							Z_USTRLEN_P(callable_name) = Z_UNILEN_PP(obj) + Z_UNILEN_PP(method) + 2;
+							Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+							if (Z_TYPE_PP(obj) == IS_UNICODE) {
+								u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL_PP(obj), Z_USTRLEN_PP(obj));
 							} else {
-								Z_TYPE_P(callable_name) = IS_STRING;
-								Z_STRLEN_P(callable_name) = Z_UNILEN_PP(obj) + Z_UNILEN_PP(method) + 2;
-								Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name)+1);
-								if (Z_TYPE_PP(obj) == IS_STRING) {
-									memcpy(Z_STRVAL_P(callable_name), Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-								} else {
-									zval copy;
-									int use_copy;
+								zval copy;
+								int use_copy;
 
-									zend_make_string_zval(*obj, &copy, &use_copy);
-									memcpy(Z_STRVAL_P(callable_name), Z_STRVAL(copy), Z_STRLEN(copy));
-									zval_dtor(&copy);
-								}
-								Z_STRVAL_P(callable_name)[Z_UNILEN_PP(obj)] = ':';
-								Z_STRVAL_P(callable_name)[Z_UNILEN_PP(obj)+1] = ':';
-								if (Z_TYPE_PP(method) == IS_STRING) {
-									memcpy(Z_STRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_STRVAL_PP(method), Z_STRLEN_PP(method)+1);
-								} else {
-									zval copy;
-									int use_copy;
+								zend_make_unicode_zval(*obj, &copy, &use_copy);
+								u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL(copy), Z_USTRLEN(copy));
+								zval_dtor(&copy);
+							}
+							Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)] = ':';
+							Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)+1] = ':';
+							if (Z_TYPE_PP(method) == IS_UNICODE) {
+								u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
+							} else {
+								zval copy;
+								int use_copy;
 
-									zend_make_string_zval(*method, &copy, &use_copy);
-									memcpy(Z_STRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_STRVAL(copy), Z_STRLEN(copy)+1);
-									zval_dtor(&copy);
-								}
+								zend_make_unicode_zval(*method, &copy, &use_copy);
+								u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
+								zval_dtor(&copy);
 							}
 						}
 
@@ -3206,40 +3122,21 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						fcc->object_ptr = *obj;
 
 						if (callable_name) {
-							if (UG(unicode)) {
-								Z_TYPE_P(callable_name) = IS_UNICODE;
-								Z_USTRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_PP(method) + 2;
-								Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
-								memcpy(Z_USTRVAL_P(callable_name), fcc->calling_scope->name.u, UBYTES(fcc->calling_scope->name_length));
-								Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
-								Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
-								if (Z_TYPE_PP(method) == IS_UNICODE) {
-									u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
-								} else {
-									zval copy;
-									int use_copy;
-
-									zend_make_unicode_zval(*method, &copy, &use_copy);
-									u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
-									zval_dtor(&copy);
-								}
+							Z_TYPE_P(callable_name) = IS_UNICODE;
+							Z_USTRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_PP(method) + 2;
+							Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+							memcpy(Z_USTRVAL_P(callable_name), fcc->calling_scope->name.u, UBYTES(fcc->calling_scope->name_length));
+							Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
+							Z_USTRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
+							if (Z_TYPE_PP(method) == IS_UNICODE) {
+								u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
 							} else {
-								Z_TYPE_P(callable_name) = IS_STRING;
-								Z_STRLEN_P(callable_name) = fcc->calling_scope->name_length + Z_UNILEN_PP(method) + 2;
-								Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name)+1);
-								memcpy(Z_STRVAL_P(callable_name), fcc->calling_scope->name.s, fcc->calling_scope->name_length);
-								Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length] = ':';
-								Z_STRVAL_P(callable_name)[fcc->calling_scope->name_length+1] = ':';
-								if (Z_TYPE_PP(method) == IS_STRING) {
-									memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL_PP(method), Z_STRLEN_PP(method)+1);
-								} else {
-									zval copy;
-									int use_copy;
+								zval copy;
+								int use_copy;
 
-									zend_make_string_zval(*method, &copy, &use_copy);
-									memcpy(Z_STRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_STRVAL(copy), Z_STRLEN(copy)+1);
-									zval_dtor(&copy);
-								}
+								zend_make_unicode_zval(*method, &copy, &use_copy);
+								u_memcpy(Z_USTRVAL_P(callable_name)+fcc->calling_scope->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
+								zval_dtor(&copy);
 							}
 						}
 
@@ -3286,19 +3183,11 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				if (callable_name) {
 					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
 
-					if (UG(unicode)) {
-						Z_TYPE_P(callable_name) = IS_UNICODE;
-						Z_USTRLEN_P(callable_name) = ce->name_length + sizeof("::__invoke") - 1;
-						Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
-						u_memcpy(Z_USTRVAL_P(callable_name), ce->name.u, ce->name_length);
-						u_charsToUChars("::__invoke", Z_USTRVAL_P(callable_name) + ce->name_length, sizeof("::__invoke"));
-					} else {
-						Z_TYPE_P(callable_name) = IS_STRING;
-						Z_STRLEN_P(callable_name) = ce->name_length + sizeof("::__invoke") - 1;
-						Z_STRVAL_P(callable_name) = emalloc(Z_STRLEN_P(callable_name) + 1);
-						memcpy(Z_STRVAL_P(callable_name), ce->name.s, ce->name_length);
-						memcpy(Z_STRVAL_P(callable_name) + ce->name_length, "::__invoke", sizeof("::__invoke"));
-					}
+					Z_TYPE_P(callable_name) = IS_UNICODE;
+					Z_USTRLEN_P(callable_name) = ce->name_length + sizeof("::__invoke") - 1;
+					Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
+					u_memcpy(Z_USTRVAL_P(callable_name), ce->name.u, ce->name_length);
+					u_charsToUChars("::__invoke", Z_USTRVAL_P(callable_name) + ce->name_length, sizeof("::__invoke"));
 				}
 				return 1;
 			}
@@ -3308,7 +3197,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 			if (callable_name) {
 				*callable_name = *callable;
 				zval_copy_ctor(callable_name);
-				convert_to_text(callable_name);
+				convert_to_unicode(callable_name);
 			}
 			if (error) zend_spprintf(error, 0, "no array or string given");
 			return 0;
@@ -3612,19 +3501,15 @@ ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, z
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type, zstr doc_comment, int doc_comment_len TSRMLS_DC) /* {{{ */
 {
-	if (UG(unicode)) {
-		zstr uname;
-		int ret;
-		ALLOCA_FLAG(use_heap)
+	zstr uname;
+	int ret;
+	ALLOCA_FLAG(use_heap)
 
-		uname.u = do_alloca(UBYTES(name_length+1), use_heap);
-		u_charsToUChars(name, uname.u, name_length+1);
-		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
-		free_alloca(uname.u, use_heap);
-		return ret;
-	} else {
-		return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
-	}
+	uname.u = do_alloca(UBYTES(name_length+1), use_heap);
+	u_charsToUChars(name, uname.u, name_length+1);
+	ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, doc_comment, doc_comment_len TSRMLS_CC);
+	free_alloca(uname.u, use_heap);
+	return ret;
 }
 /* }}} */
 
@@ -3636,19 +3521,15 @@ ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, zstr
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC) /* {{{ */
 {
-	if (UG(unicode)) {
-		zstr uname;
-		int ret;
-		ALLOCA_FLAG(use_heap)
+	zstr uname;
+	int ret;
+	ALLOCA_FLAG(use_heap)
 
-		uname.u = do_alloca(UBYTES(name_length+1), use_heap);
-		u_charsToUChars(name, uname.u, name_length+1);
-		ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
-		free_alloca(uname.u, use_heap);
-		return ret;
-	} else {
-		return zend_u_declare_property_ex(ce, IS_STRING, ZSTR(name), name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
-	}
+	uname.u = do_alloca(UBYTES(name_length+1), use_heap);
+	u_charsToUChars(name, uname.u, name_length+1);
+	ret = zend_u_declare_property_ex(ce, IS_UNICODE, uname, name_length, property, access_type, NULL_ZSTR, 0 TSRMLS_CC);
+	free_alloca(uname.u, use_heap);
+	return ret;
 }
 /* }}} */
 
@@ -3718,14 +3599,10 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		ALLOC_PERMANENT_ZVAL(property);
-		if (UG(unicode)) {
-			Z_TYPE_P(property) = IS_UNICODE;
-			Z_USTRVAL_P(property) = malloc(UBYTES(len+1));
-			u_charsToUChars(value, Z_USTRVAL_P(property), len+1);
-			Z_USTRLEN_P(property) = len;
-		} else {
-			ZVAL_STRINGL(property, zend_strndup(value, len), len, 0);
-		}
+		Z_TYPE_P(property) = IS_UNICODE;
+		Z_USTRVAL_P(property) = malloc(UBYTES(len+1));
+		u_charsToUChars(value, Z_USTRVAL_P(property), len+1);
+		Z_USTRLEN_P(property) = len;
 	} else {
 		ALLOC_ZVAL(property);
 		ZVAL_ASCII_STRINGL(property, value, len, 1);
@@ -3741,14 +3618,10 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		ALLOC_PERMANENT_ZVAL(property);
-		if (UG(unicode)) {
-			Z_TYPE_P(property) = IS_UNICODE;
-			Z_USTRVAL_P(property) = malloc(UBYTES(value_len+1));
-			u_charsToUChars(value, Z_USTRVAL_P(property), value_len+1);
-			Z_USTRLEN_P(property) = value_len;
-		} else {
-			ZVAL_STRINGL(property, zend_strndup(value, value_len), value_len, 0);
-		}
+		Z_TYPE_P(property) = IS_UNICODE;
+		Z_USTRVAL_P(property) = malloc(UBYTES(value_len+1));
+		u_charsToUChars(value, Z_USTRVAL_P(property), value_len+1);
+		Z_USTRLEN_P(property) = value_len;
 	} else {
 		ALLOC_ZVAL(property);
 		ZVAL_ASCII_STRINGL(property, value, value_len, 1);
@@ -3830,14 +3703,10 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const cha
 
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		ALLOC_PERMANENT_ZVAL(constant);
-		if (UG(unicode)) {
-			Z_TYPE_P(constant) = IS_UNICODE;
-			Z_USTRVAL_P(constant) = malloc(UBYTES(value_length+1));
-			u_charsToUChars(value, Z_USTRVAL_P(constant), value_length+1);
-			Z_USTRLEN_P(constant) = value_length;
-		} else {
-			ZVAL_STRINGL(constant, zend_strndup(value, value_length), value_length, 0);
-		}
+		Z_TYPE_P(constant) = IS_UNICODE;
+		Z_USTRVAL_P(constant) = malloc(UBYTES(value_length+1));
+		u_charsToUChars(value, Z_USTRVAL_P(constant), value_length+1);
+		Z_USTRLEN_P(constant) = value_length;
 	} else {
 		ALLOC_ZVAL(constant);
 		ZVAL_ASCII_STRINGL(constant, value, value_length, 1);
@@ -4303,7 +4172,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, char *name, in
 ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...) /* {{{ */
 {
 	va_list ap;
-	int best_type = ZEND_STR_TYPE;
+	int best_type = IS_UNICODE;
 	int type;
 
 	if (num_args <= 0) return (zend_uchar)-1;

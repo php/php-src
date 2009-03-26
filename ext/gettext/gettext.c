@@ -159,9 +159,8 @@ PHP_MINFO_FUNCTION(php_gettext)
 
 #define RETVAL_FS_STRING(s, f) \
 	RETVAL_STRING((s), (f)); \
-	if (UG(unicode)) { \
-		zval_string_to_unicode_ex(return_value, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)) TSRMLS_CC); \
-	}
+	zval_string_to_unicode_ex(return_value, ZEND_U_CONVERTER(UG(filesystem_encoding_conv)) TSRMLS_CC);
+
 #define RETURN_FS_STRING(s, f) \
 	RETVAL_FS_STRING((s), (f)); \
 	return;

@@ -344,11 +344,7 @@ int php_oci_collection_append_number(php_oci_collection *collection, zstr number
 	OCINumber oci_number;
 	php_oci_connection *connection = collection->connection;
 
-	if (UG(unicode)) {
-		element_double = zend_u_strtod(number.u, NULL);
-	} else {
-		element_double = zend_strtod(number.s, NULL);
-	}
+	element_double = zend_u_strtod(number.u, NULL);
 			
 	PHP_OCI_CALL_RETURN(connection->errcode, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
@@ -507,13 +503,8 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 				return 1;
 			}
 
-			if (UG(unicode)) {
-				ZVAL_UNICODEL(*result_element, (UChar *)buff, TEXT_CHARS(buff_len), 1);
-				/* Z_UNIVAL_P(*result_element)[buff_len] = 0; XXX */
-			} else {
-				ZVAL_STRINGL(*result_element, (char *)buff, buff_len, 1);
-				Z_STRVAL_P(*result_element)[buff_len] = '\0';
-			}
+			ZVAL_UNICODEL(*result_element, (UChar *)buff, TEXT_CHARS(buff_len), 1);
+			/* Z_UNIVAL_P(*result_element)[buff_len] = 0; XXX */
 
 			return 0;
 			break;
@@ -529,11 +520,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 			if (str) {
 				PHP_OCI_CALL_RETURN(str_len, OCIStringSize, (connection->env, oci_string));
 
-				if (UG(unicode)) {
-					ZVAL_UNICODEL(*result_element, (UChar *)str, TEXT_CHARS(str_len), 1);
-				} else {
-					ZVAL_STRINGL(*result_element, (char *)str, str_len, 1);
-				}
+				ZVAL_UNICODEL(*result_element, (UChar *)str, TEXT_CHARS(str_len), 1);
 			}
 			return 0;
 		}
@@ -642,11 +629,7 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 	OCINumber oci_number;
 	php_oci_connection *connection = collection->connection;
 
-	if (UG(unicode)) {
-		element_double = zend_u_strtod(number.u, NULL);
-	} else {
-		element_double = zend_strtod(number.s, NULL);
-	}
+	element_double = zend_u_strtod(number.u, NULL);
 			
 	PHP_OCI_CALL_RETURN(connection->errcode, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 

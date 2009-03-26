@@ -620,7 +620,7 @@ PHP_FUNCTION(file_put_contents)
 	int filename_len;
 	zval *data;
 	int numchars = 0;
-	long flags = ((argc < 3) && UG(unicode)) ? PHP_FILE_TEXT : 0;
+	long flags = (argc < 3) ? PHP_FILE_TEXT : 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	char mode[3] = { 'w', 0, 0 };
@@ -938,18 +938,15 @@ PHP_FUNCTION(tempnam)
 	}
 
 	if ((fd = php_open_temporary_fd(dir, p, &opened_path TSRMLS_CC)) >= 0) {
+		UChar *utmpnam;
+		int utmpnam_len;
+		
 		close(fd);
-		if (UG(unicode)) {
-			UChar *utmpnam;
-			int utmpnam_len;
 
-			if (SUCCESS == php_stream_path_decode(NULL, &utmpnam, &utmpnam_len, opened_path, strlen(opened_path), REPORT_ERRORS, FG(default_context))) {
-				RETVAL_UNICODEL(utmpnam, utmpnam_len, 0);
-			}
-			efree(opened_path);
-		} else {
-			RETVAL_STRING(opened_path, 0);
+		if (SUCCESS == php_stream_path_decode(NULL, &utmpnam, &utmpnam_len, opened_path, strlen(opened_path), REPORT_ERRORS, FG(default_context))) {
+			RETVAL_UNICODEL(utmpnam, utmpnam_len, 0);
 		}
+		efree(opened_path);
 	}
 	efree(p);
 }
@@ -2759,10 +2756,9 @@ PHP_FUNCTION(realpath)
 #ifdef ZTS
 		if (VCWD_ACCESS(resolved_path_buff, F_OK)) {
 			RETVAL_FALSE;
-		} else
+		} else 
 #endif
-
-		if (UG(unicode)) {
+		{
 			UChar *path;
 			int path_len;
 
@@ -2772,8 +2768,6 @@ PHP_FUNCTION(realpath)
 				/* Fallback */
 				RETVAL_STRING(resolved_path_buff, 1);
 			}
-		} else {
-			RETVAL_STRING(resolved_path_buff, 1);
 		}
 	} else {
 		RETVAL_FALSE;
@@ -2935,10 +2929,6 @@ PHP_FUNCTION(sys_get_temp_dir)
 	UChar *utemp_dir;
 	char *temp_dir = (char *)php_get_temporary_directory();
 	int temp_dir_len = strlen(temp_dir), utemp_dir_len;
-
-	if (!UG(unicode)) {
-		RETURN_STRINGL(temp_dir, temp_dir_len, 1);
-	}
 
 	/* else UG(unicode) */
 	if (FAILURE == php_stream_path_decode(NULL, &utemp_dir, &utemp_dir_len, temp_dir, temp_dir_len, REPORT_ERRORS, FG(default_context))) {

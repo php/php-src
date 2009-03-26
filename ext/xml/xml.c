@@ -413,12 +413,7 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 		len = _xml_xmlcharlen(s);
 	}
 
-	if (UG(unicode)) {
-		ZVAL_UTF8_STRINGL(ret, (char *)s, len, ZSTR_DUPLICATE);
-	} else {
-		Z_TYPE_P(ret) = IS_STRING;
-		Z_STRVAL_P(ret) = xml_utf8_decode(s, len, &Z_STRLEN_P(ret), encoding);
-	}
+	ZVAL_UTF8_STRINGL(ret, (char *)s, len, ZSTR_DUPLICATE);
 
 	return ret;
 }
@@ -492,7 +487,7 @@ static void xml_set_handler(zval **handler, zval **data TSRMLS_DC)
 
 	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
 	if (Z_TYPE_PP(data) != IS_ARRAY && Z_TYPE_PP(data) != IS_OBJECT) {
-		convert_to_text_ex(data);
+		convert_to_unicode_ex(data);
 		if (((Z_TYPE_PP(data)==IS_UNICODE) && (Z_USTRLEN_PP(data) == 0)) ||
 			((Z_TYPE_PP(data)==IS_STRING) && (Z_STRLEN_PP(data) == 0))) {
 
@@ -791,11 +786,7 @@ static char *_xml_decode_tag(xml_parser *parser, const char *tag)
 
 	TSRMLS_FETCH();
 
-	if (UG(unicode)) {
-		newstr = xml_utf8_decode(tag, strlen(tag), &out_len, NULL);
-	} else {
-		newstr = xml_utf8_decode(tag, strlen(tag), &out_len, parser->target_encoding);
-	}
+	newstr = xml_utf8_decode(tag, strlen(tag), &out_len, NULL);
 
 	if (parser->case_folding) {
 		php_strtoupper(newstr, out_len);
@@ -830,11 +821,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 			while (attributes && *attributes) {
 				att = _xml_decode_tag(parser, attributes[0]);
-				if (UG(unicode)) {
-					val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, NULL);
-				} else {
-					val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
-				}
+				val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, NULL);
 
 				add_utf8_assoc_utf8_stringl(args[2], att, val, val_len, ZSTR_AUTOFREE);
 
@@ -871,11 +858,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 			while (attributes && *attributes) {
 				att = _xml_decode_tag(parser, attributes[0]);
-				if (UG(unicode)) {
-					val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, NULL);
-				} else {
-					val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
-				}
+				val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, NULL);
 
 				add_utf8_assoc_utf8_stringl(atr, att, val, val_len, ZSTR_AUTOFREE);
 
@@ -979,11 +962,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 			TSRMLS_FETCH();
 			
-			if (UG(unicode)) {
-				decoded_value = xml_utf8_decode(s,len,&decoded_len,NULL);
-			} else {
-				decoded_value = xml_utf8_decode(s,len,&decoded_len,parser->target_encoding);
-			}
+			decoded_value = xml_utf8_decode(s,len,&decoded_len,NULL);
 			for (i = 0; i < decoded_len; i++) {
 				switch (decoded_value[i]) {
 				case ' ':
@@ -1812,11 +1791,7 @@ PHP_FUNCTION(utf8_decode)
 	if (data_type == IS_UNICODE) {
 		RETURN_UNICODEL(data, data_len, 1);
 	}
-	if (UG(unicode)) {
-		decoded = xml_utf8_decode(data, data_len, &len, NULL);
-	} else {
-		decoded = xml_utf8_decode(data, data_len, &len, "ISO-8859-1");
-	}
+	decoded = xml_utf8_decode(data, data_len, &len, NULL);
 
 	if (decoded == NULL) {
 		RETURN_FALSE;

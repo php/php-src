@@ -134,17 +134,17 @@ static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
 
 #define USTR_FREE(ustr) do { if (ustr) { efree(ustr); } } while (0);
 #define UBYTES(len) ((len) * sizeof(UChar))
-#define USTR_LEN(str) (UG(unicode)?u_strlen((str).u):strlen((str).s))
-#define USTR_VAL(str) (UG(unicode)?(str).u:(str).s)
+#define USTR_LEN(str) u_strlen((str).u)
+#define USTR_VAL(str) (str).u
 
 #define USTR_BYTES(__type, __length) \
 	((__type == IS_UNICODE)?UBYTES(__length):__length)
 
 #define TEXT_BYTES(__chars_len) \
-	(UG(unicode) ? UBYTES(__chars_len) : __chars_len)
+	UBYTES(__chars_len)
 
 #define TEXT_CHARS(__bytes_len) \
-	(UG(unicode) ? (__bytes_len / sizeof(UChar)) : __bytes_len)
+	(__bytes_len / sizeof(UChar))
 
 #define USTR_MAKE(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_CC)
 #define USTR_MAKE_REL(cs) zend_ascii_to_unicode(cs, sizeof(cs) ZEND_FILE_LINE_RELAY_CC)

@@ -856,7 +856,7 @@ int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node expo
 	php_libxml_initialize();
 	export_hnd.export_func = export_function;
 
-	return zend_u_hash_add(&php_libxml_exports, ZEND_STR_TYPE, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
+	return zend_u_hash_add(&php_libxml_exports, IS_UNICODE, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
 }
 
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
@@ -870,7 +870,7 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		if (zend_u_hash_find(&php_libxml_exports, UG(unicode)?IS_UNICODE:IS_STRING, ce->name, ce->name_length + 1, (void **) &export_hnd)  == SUCCESS) {
+		if (zend_u_hash_find(&php_libxml_exports, IS_UNICODE, ce->name, ce->name_length + 1, (void **) &export_hnd)  == SUCCESS) {
 			node = export_hnd->export_func(object TSRMLS_CC);
 		}
 	}
