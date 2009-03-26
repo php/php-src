@@ -1,3 +1,25 @@
+2009-03-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_globals.h
+      zend_globals.h
+      zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h:
+      Fixed bug #47038 (Memory leak in include)
+
+    * zend_interfaces.c
+      zend_interfaces.c
+      tests/bug47699.phpt:
+      Fixed bug #47699 (autoload and late static binding)
+
+    * tests/bug47699.phpt
+      tests/bug47699.phpt:
+      
+      file bug47699.phpt was initially added on branch PHP_5_3.
+
 2009-03-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
