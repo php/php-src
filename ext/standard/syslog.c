@@ -36,8 +36,6 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-static void start_syslog(TSRMLS_D);
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(syslog)
