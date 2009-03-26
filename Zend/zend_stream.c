@@ -29,6 +29,9 @@
 #include <sys/stat.h>
 #if HAVE_SYS_MMAN_H
 # include <sys/mman.h>
+# ifndef PAGE_SIZE
+#  define PAGE_SIZE 4096
+# endif
 #endif
 
 ZEND_DLIMPORT int isatty(int fd);
@@ -217,7 +220,9 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 
 	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
 #if HAVE_MMAP
-		if (file_handle->handle.fp) {
+		if (file_handle->handle.fp &&
+		    size != 0 &&
+		    ((size - 1) % PAGE_SIZE) <= PAGE_SIZE - ZEND_MMAP_AHEAD) {
 			/*  *buf[size] is zeroed automatically by the kernel */
 			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
 			if (*buf != MAP_FAILED) {
