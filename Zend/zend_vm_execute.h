@@ -633,8 +633,13 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	while (EX(fbc)) {
 		EX(called_scope) = (zend_class_entry*)zend_ptr_stack_pop(&EG(arg_types_stack));
 		if (EX(object)) {
-			if (IS_CTOR_USED(EX(called_scope))) {
-				Z_DELREF_P(EX(object));
+			if (IS_CTOR_CALL(EX(called_scope))) {
+				if (IS_CTOR_USED(EX(called_scope))) {
+					Z_DELREF_P(EX(object));
+				}
+				if (Z_REFCOUNT_P(EX(object)) == 1) {
+					zend_object_store_ctor_failed(EX(object) TSRMLS_CC);
+				}
 			}
 			zval_ptr_dtor(&EX(object));
 		}
