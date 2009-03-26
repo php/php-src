@@ -37,8 +37,6 @@ void free_zend_constant(zend_constant *c) /* {{{ */
 
 void copy_zend_constant(zend_constant *c) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	c->name.u = zend_ustrndup(c->name.u, c->name_len - 1);
 
 	if (!(c->flags & CONST_PERSISTENT)) {

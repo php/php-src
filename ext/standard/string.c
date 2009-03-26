@@ -3643,7 +3643,6 @@ PHP_FUNCTION(chr)
 	UChar buf[2];
 	int buf_len;
 	long num;
-	char temp[2];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) {
 		return;

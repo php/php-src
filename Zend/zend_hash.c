@@ -333,7 +333,6 @@ ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, const char *arKey, ui
 {
 	zstr key;
 	int ret;
-	TSRMLS_FETCH();
 
 	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
 	ret = _zend_u_hash_add_or_update(ht, IS_UNICODE, key, nKeyLength, pData, nDataSize, pDest, flag ZEND_FILE_LINE_CC);
@@ -673,7 +672,6 @@ ZEND_API int zend_ascii_hash_del(HashTable *ht, const char *arKey, uint nKeyLeng
 {
 	zstr key;
 	int ret;
-	TSRMLS_FETCH();
 
 	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
 	ret = zend_u_hash_del_key_or_index(ht, IS_UNICODE, key, nKeyLength, 0, HASH_DEL_KEY);
@@ -1135,7 +1133,6 @@ ZEND_API int zend_ascii_hash_find(const HashTable *ht, const char *arKey, uint n
 {
 	zstr key;
 	int ret;
-	TSRMLS_FETCH();
 
 	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
 	ret = zend_u_hash_find(ht, IS_UNICODE, key, nKeyLength, pData);
@@ -1268,7 +1265,6 @@ ZEND_API int zend_ascii_hash_exists(HashTable *ht, const char *arKey, uint nKeyL
 {
 	zstr key;
 	int ret;
-	TSRMLS_FETCH();
 
 	key.u = zend_ascii_to_unicode(arKey, nKeyLength ZEND_FILE_LINE_CC);
 	ret = zend_u_hash_exists(ht, IS_UNICODE, key, nKeyLength);

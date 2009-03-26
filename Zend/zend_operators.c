@@ -2330,8 +2330,6 @@ static void increment_unicode(zval *str) /* {{{ */
     int ch;
 
 	if (Z_USTRLEN_P(str) == 0) {
-		TSRMLS_FETCH();
-
 		USTR_FREE(Z_USTRVAL_P(str));
 		ZVAL_ASCII_STRINGL(str, "1", sizeof("1")-1, 1);
 		return;
