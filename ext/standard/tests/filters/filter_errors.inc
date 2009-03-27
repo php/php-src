@@ -1,6 +1,9 @@
 <?php
 
 function filter_errors_skipif($needle) {
+	if (!function_exists('fnmatch')) {
+		die('skip fnmatch() not available');
+	}
 	$filters = stream_get_filters();
 	foreach($filters as $filter) {
 		if (fnmatch($filter, $needle)) return;
