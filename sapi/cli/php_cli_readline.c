@@ -286,7 +286,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number, 0);
-		if (!textlen || (UG(unicode) ? !zend_cmp_unicode_and_string(name.u, (char *)text, textlen) : !strncmp(name.s, text, textlen))) {
+		if (!textlen || !zend_cmp_unicode_and_string(name.u, (char *)text, textlen)) {
 			if (pData) {
 				zend_hash_get_current_data(ht, pData);
 			}
@@ -307,25 +307,18 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(active_symbol_table), NULL TSRMLS_CC);
 	if (retval) {
-		if (UG(unicode)) {
-			int32_t tmp_len, len;
-			UErrorCode status = U_ZERO_ERROR;
+		int32_t tmp_len, len;
+		UErrorCode status = U_ZERO_ERROR;
 
-			len = u_strlen((UChar *)retval);
-			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-									  (UChar *)retval, len, &status);
+		len = u_strlen((UChar *)retval);
+		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+								  (UChar *)retval, len, &status);
 
-			retval = malloc(tmp_len + 2);
-			retval[0] = '$';
-			strcpy(&retval[1], tmp);
-			rl_completion_append_character = '\0';
-			efree(tmp);
-		} else {
-			retval = malloc(strlen(tmp) + 2);
-			retval[0] = '$';
-			strcpy(&retval[1], tmp);
-			rl_completion_append_character = '\0';
-		}
+		retval = malloc(tmp_len + 2);
+		retval[0] = '$';
+		strcpy(&retval[1], tmp);
+		rl_completion_append_character = '\0';
+		efree(tmp);
 	}
 	return retval;
 } /* }}} */
@@ -337,22 +330,18 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 
 	retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
 	if (retval) {
-		rl_completion_append_character = '(';
+		char *tmp;
+		int32_t tmp_len, len;
+		UErrorCode status = U_ZERO_ERROR;
+				
+		rl_completion_append_character = '(';	
 
-		if (UG(unicode)) {
-			char *tmp;
-			int32_t tmp_len, len;
-			UErrorCode status = U_ZERO_ERROR;
+		len = u_strlen((UChar *)func->common.function_name.u);
+		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len,
+								  (UChar *)func->common.function_name.u, len, &status);
 
-			len = u_strlen((UChar *)func->common.function_name.u);
-			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len,
-									  (UChar *)func->common.function_name.u, len, &status);
-
-			retval = strdup(tmp);
-			efree(tmp);
-		} else {
-			retval = strdup(func->common.function_name.s);
-		}
+		retval = strdup(tmp);
+		efree(tmp);
 	}
 	
 	return retval;
@@ -363,22 +352,18 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&pce TSRMLS_CC);
 	if (retval) {
+		char *tmp;
+		int32_t tmp_len, len;
+		UErrorCode status = U_ZERO_ERROR;
+			
 		rl_completion_append_character = '\0';
 
-		if (UG(unicode)) {
-			char *tmp;
-			int32_t tmp_len, len;
-			UErrorCode status = U_ZERO_ERROR;
+		len = u_strlen((UChar *)(*pce)->name.u);
+		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+								  (UChar *)(*pce)->name.u, len, &status);
 
-			len = u_strlen((UChar *)(*pce)->name.u);
-			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-									  (UChar *)(*pce)->name.u, len, &status);
-
-			retval = strdup(tmp);
-			efree(tmp);
-		} else {
-			retval = strdup((*pce)->name.s);
-		}
+		retval = strdup(tmp);
+		efree(tmp);
 	}
 	
 	return retval;
@@ -389,22 +374,18 @@ static char *cli_completion_generator_define(const char *text, int textlen, int 
 	zend_class_entry **pce;
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce TSRMLS_CC);
 	if (retval) {
+		char *tmp;
+		int32_t tmp_len, len;
+		UErrorCode status = U_ZERO_ERROR;
+			
 		rl_completion_append_character = '\0';
 
-		if (UG(unicode)) {
-			char *tmp;
-			int32_t tmp_len, len;
-			UErrorCode status = U_ZERO_ERROR;
+		len = u_strlen((UChar *)retval);
+		zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+								  (UChar *)retval, len, &status);
 
-			len = u_strlen((UChar *)retval);
-			zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
-									  (UChar *)retval, len, &status);
-
-			retval = strdup(tmp);
-			efree(tmp);
-		} else {
-			retval = strdup(retval);
-		}
+		retval = strdup(tmp);
+		efree(tmp);
 	}
 	
 	return retval;
