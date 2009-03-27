@@ -910,21 +910,18 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 					*/
 					if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
-						if (UG(unicode)) {
-							zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-													 zend_hash_key->ustr,
-													 zend_hash_key->ulen + 1,
-													 zend_hash_key->key,
-													 (void *) &data, sizeof(zval *), NULL);
-						} else
+						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
+												 zend_hash_key->ustr,
+												 zend_hash_key->ulen + 1,
+												 zend_hash_key->key,
+												 (void *) &data, sizeof(zval *), NULL);
+#else
+						zend_hash_quick_update(Z_ARRVAL_P(row),
+											   field->name,
+											   field->name_length + 1,
+											   zend_hash_key->key,
+											   (void *) &data, sizeof(zval *), NULL);
 #endif
-						{
-							zend_hash_quick_update(Z_ARRVAL_P(row),
-												   field->name,
-												   field->name_length + 1,
-												   zend_hash_key->key,
-												   (void *) &data, sizeof(zval *), NULL);
-						}
 					} else {
 						zend_hash_index_update(Z_ARRVAL_P(row),
 											   zend_hash_key->key,
@@ -1143,21 +1140,18 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 				*/
 				if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
-					if (UG(unicode)) {
-						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-												 zend_hash_key->ustr,
-												 zend_hash_key->ulen + 1,
-												 zend_hash_key->key,
-												 (void *) &data, sizeof(zval *), NULL);
-					} else
+					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
+											 zend_hash_key->ustr,
+											 zend_hash_key->ulen + 1,
+											 zend_hash_key->key,
+											 (void *) &data, sizeof(zval *), NULL);
+#else
+					zend_hash_quick_update(Z_ARRVAL_P(row),
+										   field->name,
+										   field->name_length + 1,
+										   zend_hash_key->key,
+										   (void *) &data, sizeof(zval *), NULL);
 #endif
-					{
-						zend_hash_quick_update(Z_ARRVAL_P(row),
-											   field->name,
-											   field->name_length + 1,
-											   zend_hash_key->key,
-											   (void *) &data, sizeof(zval *), NULL);
-					}
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row),
 										   zend_hash_key->key,
@@ -1419,21 +1413,18 @@ mysqlnd_fetch_row_async_buffered(MYSQLND_RES *result, void *param, unsigned int 
 				*/
 				if (result->meta->zend_hash_keys[i].is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
-					if (UG(unicode)) {
-						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-												 result->meta->zend_hash_keys[i].ustr,
-												 result->meta->zend_hash_keys[i].ulen + 1,
-												 result->meta->zend_hash_keys[i].key,
-												 (void *) &data, sizeof(zval *), NULL);
-					} else
+					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
+											 result->meta->zend_hash_keys[i].ustr,
+											 result->meta->zend_hash_keys[i].ulen + 1,
+											 result->meta->zend_hash_keys[i].key,
+											 (void *) &data, sizeof(zval *), NULL);
+#else
+					zend_hash_quick_update(Z_ARRVAL_P(row),
+										   result->meta->fields[i].name,
+										   result->meta->fields[i].name_length + 1,
+										   result->meta->zend_hash_keys[i].key,
+										   (void *) &data, sizeof(zval *), NULL);
 #endif
-					{
-						zend_hash_quick_update(Z_ARRVAL_P(row),
-											   result->meta->fields[i].name,
-											   result->meta->fields[i].name_length + 1,
-											   result->meta->zend_hash_keys[i].key,
-											   (void *) &data, sizeof(zval *), NULL);
-					}
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row),
 										   result->meta->zend_hash_keys[i].key,

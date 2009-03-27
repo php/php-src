@@ -663,12 +663,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		(charset = mysqlnd_find_charset_name(conn->options.charset_name)))
 	{
 		auth_packet->charset_no	= charset->nr;
-#if PHP_MAJOR_VERSION >= 6
-	} else if (UG(unicode)) {
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#endif
 	} else {
+#if PHP_MAJOR_VERSION >= 6		
+		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
+#else
 		auth_packet->charset_no	= greet_packet.charset_no;
+#endif
 	}
 	auth_packet->db			= db;
 	auth_packet->db_len		= db_len;

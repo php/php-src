@@ -39,13 +39,6 @@ char * mysqlnd_palloc_get_zval_name = "mysqlnd_palloc_get_zval";
 #endif
 
 
-#if PHP_MAJOR_VERSION < 6
-#define IS_UNICODE_DISABLED  (1)
-#else
-#define IS_UNICODE_DISABLED  (!UG(unicode))
-#endif
-
-
 /* {{{ _mysqlnd_palloc_init_cache */
 PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size TSRMLS_DC)
 {
