@@ -2680,7 +2680,7 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-/* {{{ proto void date_modify(DateTime object, string modify)
+/* {{{ proto DateTime date_modify(DateTime object, string modify)
    Alters the timestamp.
 */
 PHP_FUNCTION(date_modify)
@@ -2711,7 +2711,7 @@ PHP_FUNCTION(date_modify)
 }
 /* }}} */
 
-/* {{{ proto void date_add(DateTime object, DateInterval interval)
+/* {{{ proto DateTime date_add(DateTime object, DateInterval interval)
    Adds an interval to the current date in object.
 */
 PHP_FUNCTION(date_add)
@@ -2756,7 +2756,7 @@ PHP_FUNCTION(date_add)
 }
 /* }}} */
 
-/* {{{ proto void date_sub(DateTime object, DateInterval interval)
+/* {{{ proto DateTime date_sub(DateTime object, DateInterval interval)
    Subtracts an interval to the current date in object.
 */
 PHP_FUNCTION(date_sub)
@@ -2834,7 +2834,7 @@ PHP_FUNCTION(date_timezone_get)
 }
 /* }}} */
 
-/* {{{ proto void date_timezone_set(DateTime object, DateTimeZone object)
+/* {{{ proto DateTime date_timezone_set(DateTime object, DateTimeZone object)
    Sets the timezone for the DateTime object.
 */
 PHP_FUNCTION(date_timezone_set)
@@ -2896,7 +2896,7 @@ PHP_FUNCTION(date_offset_get)
 }
 /* }}} */
 
-/* {{{ proto void date_time_set(DateTime object, long hour, long minute[, long second])
+/* {{{ proto DateTime date_time_set(DateTime object, long hour, long minute[, long second])
    Sets the time.
 */
 PHP_FUNCTION(date_time_set)
@@ -2919,7 +2919,7 @@ PHP_FUNCTION(date_time_set)
 }
 /* }}} */
 
-/* {{{ proto void date_date_set(DateTime object, long year, long month, long day)
+/* {{{ proto DateTime date_date_set(DateTime object, long year, long month, long day)
    Sets the date.
 */
 PHP_FUNCTION(date_date_set)
@@ -2942,7 +2942,7 @@ PHP_FUNCTION(date_date_set)
 }
 /* }}} */
 
-/* {{{ proto void date_isodate_set(DateTime object, long year, long week[, long day])
+/* {{{ proto DateTime date_isodate_set(DateTime object, long year, long week[, long day])
    Sets the ISO date.
 */
 PHP_FUNCTION(date_isodate_set)
@@ -2968,7 +2968,7 @@ PHP_FUNCTION(date_isodate_set)
 }
 /* }}} */
 
-/* {{{ proto void date_timestamp_set(DateTime object, long unixTimestamp)
+/* {{{ proto DateTime date_timestamp_set(DateTime object, long unixTimestamp)
    Sets the date and time based on an Unix timestamp.
 */
 PHP_FUNCTION(date_timestamp_set)
