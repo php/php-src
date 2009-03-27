@@ -5,7 +5,6 @@ PHP                                                                        NEWS
   (Matteo)
 - Fixed bug #47771 (Exception during object construction from arg call calls
   object's destructor). (Dmitry)
-- Fixed bug #47769 (Strange extends PDO). (Felipe)
 - Fixed bug #47714 (autoloading classes inside exception_handler leads to
   crashes). (Dmitry)
 - Fixed bug #47699 (autoload and late static binding). (Dmitry)
