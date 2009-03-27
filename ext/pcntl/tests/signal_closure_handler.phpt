@@ -20,7 +20,6 @@ echo "Done!\n";
 
 ?>
 --EXPECTF--
-Deprecated: Ticks is deprecated and will be removed in PHP 6 in %s on line %d
 Start!
 Signal handler called!
 Done!
