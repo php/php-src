@@ -957,11 +957,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					break;
 
 				case 'v':
-					if (UG(unicode)) {
-						goto fmt_unicode;
-					} else {
-						goto fmt_string;
-					}
+					goto fmt_unicode;
 					break;
 
 				case 'R':

@@ -544,48 +544,45 @@ PHPAPI void mysqlnd_palloc_stats(const MYSQLND_ZVAL_PCACHE * const cache, zval *
 {
 	if (cache) {
 #if PHP_MAJOR_VERSION >= 6
+		UChar *ustr;
+		int ulen;
+			
 		TSRMLS_FETCH();
 #endif
 
 		LOCK_PCACHE(cache);
 		array_init(return_value);
 #if PHP_MAJOR_VERSION >= 6
-		if (UG(unicode)) {
-			UChar *ustr;
-			int ulen;
-
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "put_hits", sizeof("put_hits") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "put_misses", sizeof("put_misses") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "get_hits", sizeof("get_hits") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "get_misses", sizeof("get_misses") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "size", sizeof("size") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "free_items", sizeof("free_items") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "references", sizeof("references") TSRMLS_CC);
-			add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
-			efree(ustr);
-		} else
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "put_hits", sizeof("put_hits") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "put_misses", sizeof("put_misses") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "get_hits", sizeof("get_hits") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "get_misses", sizeof("get_misses") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "size", sizeof("size") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "free_items", sizeof("free_items") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, "references", sizeof("references") TSRMLS_CC);
+		add_u_assoc_long_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, cache->put_hits);
+		efree(ustr);
+#else
+		add_assoc_long_ex(return_value, "put_hits",		sizeof("put_hits"),		cache->put_hits);
+		add_assoc_long_ex(return_value, "put_misses",	sizeof("put_misses"),	cache->put_misses);
+		add_assoc_long_ex(return_value, "get_hits",		sizeof("get_hits"),		cache->get_hits);
+		add_assoc_long_ex(return_value, "get_misses",	sizeof("get_misses"),	cache->get_misses);
+		add_assoc_long_ex(return_value, "size",			sizeof("size"),			cache->max_items);
+		add_assoc_long_ex(return_value, "free_items",	sizeof("free_items"),	cache->free_items);
+		add_assoc_long_ex(return_value, "references",	sizeof("references"),	cache->references);
 #endif
-		{
-			add_assoc_long_ex(return_value, "put_hits",		sizeof("put_hits"),		cache->put_hits);
-			add_assoc_long_ex(return_value, "put_misses",	sizeof("put_misses"),	cache->put_misses);
-			add_assoc_long_ex(return_value, "get_hits",		sizeof("get_hits"),		cache->get_hits);
-			add_assoc_long_ex(return_value, "get_misses",	sizeof("get_misses"),	cache->get_misses);
-			add_assoc_long_ex(return_value, "size",			sizeof("size"),			cache->max_items);
-			add_assoc_long_ex(return_value, "free_items",	sizeof("free_items"),	cache->free_items);
-			add_assoc_long_ex(return_value, "references",	sizeof("references"),	cache->references);
-		}
 		UNLOCK_PCACHE(cache);
 	} else {
 		ZVAL_NULL(return_value);
