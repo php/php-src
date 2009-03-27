@@ -625,7 +625,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length, port = MYSQL_PORT;
 	long client_flags = 0;
 	php_mysql_conn *mysql=NULL;
-	char *encoding = mysql_character_set_name(mysql->conn);
+	char *encoding;
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
 #endif
@@ -789,6 +789,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifdef MYSQL_HAS_SET_CHARSET
 			mysql_set_character_set(mysql->conn, "utf8");
 #else
+			encoding = mysql_character_set_name(mysql->conn);
 			if (strcasecmp((char*)encoding, "utf8")) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
