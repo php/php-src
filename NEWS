@@ -8,6 +8,7 @@
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
 
 - Fixed bug #47772 (FILTER_VALIDATE_EMAIL allows foo@bar. addresses). (Ilia)
+- Fixed bug #47769 (Strange extends PDO). (Felipe)
 - Fixed bug #47721 (Alignment issues in mbstring and sysvshm extension)
   (crrodriguez at opensuse dot org, Ilia)
 - Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).

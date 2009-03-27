@@ -1277,7 +1277,7 @@ static union _zend_function *dbh_method_get(
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
-	if (zend_hash_find(&dbh->ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+	if ((fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {
@@ -1290,23 +1290,14 @@ static union _zend_function *dbh_method_get(
 
 		if (zend_hash_find(dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
 				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-
 			if (!fbc) {
 				fbc = NULL;
 			}
-
-			goto out;
 		}
 		/* got it */
 	}
 
 out:
-	if (!fbc) {
-		if (std_object_handlers.get_method) {
-			fbc = std_object_handlers.get_method(object_pp, lc_method_name, method_len TSRMLS_CC);
-		}
-	}
-
 	efree(lc_method_name);
 	return fbc;
 }
