@@ -1728,6 +1728,8 @@ static int php_output_wrapper(const char *str, uint str_length)
 static void core_globals_ctor(php_core_globals *core_globals TSRMLS_DC)
 {
 	memset(core_globals, 0, sizeof(*core_globals));
+
+	php_startup_ticks(TSRMLS_C);
 }
 /* }}} */
 #endif
@@ -1754,6 +1756,8 @@ static void core_globals_dtor(php_core_globals *core_globals TSRMLS_DC)
 	if (core_globals->allow_url_include_list) {
 		free(core_globals->allow_url_include_list);
 	}
+
+	php_shutdown_ticks(TSRMLS_C);
 }
 /* }}} */
 
@@ -1893,6 +1897,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
+#else
+	php_startup_ticks(TSRMLS_C);
 #endif
 	gc_globals_ctor(TSRMLS_C);
 
@@ -2050,11 +2056,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types(TSRMLS_C);
 
-	if (php_startup_ticks(TSRMLS_C) == FAILURE) {
-		php_printf("Unable to start PHP ticks\n");
-		return FAILURE;
-	}
-
 	/* startup extensions staticly compiled in */
 	if (php_register_internal_extensions_func(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
@@ -2155,7 +2156,6 @@ void php_module_shutdown(TSRMLS_D)
 	WSACleanup();
 #endif
 
-	php_shutdown_ticks(TSRMLS_C);
 	sapi_flush(TSRMLS_C);
 
 	zend_shutdown(TSRMLS_C);
