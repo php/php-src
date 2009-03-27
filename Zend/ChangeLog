@@ -1,3 +1,96 @@
+2009-03-26  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_constants.c
+      zend_hash.c
+      zend_object_handlers.c
+      zend_operators.c:
+      - Removed unused variables
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_closures.c
+      zend_compile.c
+      zend_constants.c
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_hash.c
+      zend_ini.c
+      zend_ini_parser.y
+      zend_language_parser.y
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_object_handlers.c
+      zend_operators.c
+      zend_operators.h
+      zend_unicode.h
+      zend_variables.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Removed:
+             - UG(unicode) checks
+             - pcre_cache_entry.unicode_mode
+      - Changed:
+             - ZEND_STR_TYPE -> IS_UNICODE
+             - convert_to_text -> convert_to_unicode
+             - convert_to_text_ex -> convert_to_unicode_ex
+      
+      (Felipe, Steph)
+
+2009-03-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_stream.c
+      zend_stream.c
+      tests/bug47596.phpt:
+      Fixed bug #47596 (Bus error on parsing file)
+
+    * tests/bug47596.phpt
+      tests/bug47596.phpt:
+      
+      file bug47596.phpt was initially added on branch PHP_5_3.
+
+    * zend_language_parser.y
+      zend_language_parser.y
+      zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_language_scanner.l
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h
+      tests/bug47516.phpt:
+      Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
+      double quote)
+
+    * tests/bug47516.phpt
+      tests/bug47516.phpt:
+      
+      file bug47516.phpt was initially added on branch PHP_5_3.
+
+    * zend.c
+      zend.c
+      tests/bug47714.phpt
+      tests/bug47714.phpt
+      tests/bug47714.phpt:
+      Fixed bug #47714 (autoloading classes inside exception_handler leads to
+      crashes)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug47771.phpt:
+      Fixed bug #47771 (Exception during object construction from arg call calls
+      object's destructor)
+
+    * tests/bug47771.phpt
+      tests/bug47771.phpt:
+      
+      file bug47771.phpt was initially added on branch PHP_5_3.
+
 2009-03-25  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_globals.h
