@@ -625,6 +625,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length, port = MYSQL_PORT;
 	long client_flags = 0;
 	php_mysql_conn *mysql=NULL;
+	char *encoding = mysql_character_set_name(mysql->conn);
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
 #endif
@@ -757,9 +758,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #else
 			mysql->conn = mysql_init(persistent);
 #endif
-			if (UG(unicode)) {
-				mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
-			}
+			mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
 
 			if (connect_timeout != -1) {
 				mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
@@ -787,17 +786,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 
 #if !defined(MYSQL_USE_MYSQLND)
-			if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
-				mysql_set_character_set(mysql->conn, "utf8");
+			mysql_set_character_set(mysql->conn, "utf8");
 #else
-				char *encoding = mysql_character_set_name(mysql->conn);
-				if (strcasecmp((char*)encoding, "utf8")) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
-					MYSQL_DO_CONNECT_RETURN_FALSE();
-				}	
+			if (strcasecmp((char*)encoding, "utf8")) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
+				MYSQL_DO_CONNECT_RETURN_FALSE();
+			}	
 #endif
-			}
 #endif
 
 			/* hash it up */
@@ -827,9 +823,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif	
 			if (mysql_ping(mysql->conn)) {
 				if (mysql_errno(mysql->conn) == 2006) {
-					if (UG(unicode)) {
-						mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
-					}
+					mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
 #ifndef MYSQL_USE_MYSQLND
 					if (mysql_real_connect(mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL)
 #else
@@ -843,17 +837,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
 #if !defined(MYSQL_USE_MYSQLND)
-					if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
-						mysql_set_character_set(mysql->conn, "utf8");
+					mysql_set_character_set(mysql->conn, "utf8");
 #else
-						char *encoding = mysql_character_set_name(mysql->conn);
-						if (strcasecmp((char*)encoding, "utf8")) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
-							MYSQL_DO_CONNECT_RETURN_FALSE();
-						}	
+					if (strcasecmp((char*)encoding, "utf8")) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
+						MYSQL_DO_CONNECT_RETURN_FALSE();
+					}	
 #endif
-					}
 #endif
 					mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 				}
@@ -913,9 +904,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		mysql->conn = mysql_init(persistent);
 #endif
 
-		if (UG(unicode)) {
-			mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
-		}
+		mysql_options(mysql->conn, MYSQL_SET_CHARSET_NAME, "utf8");
+
 		if (connect_timeout != -1) {
 			mysql_options(mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
 		}
@@ -946,17 +936,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 #if !defined(MYSQL_USE_MYSQLND)
-		if (UG(unicode)) {
 #ifdef MYSQL_HAS_SET_CHARSET
-			mysql_set_character_set(mysql->conn, "utf8");
+		mysql_set_character_set(mysql->conn, "utf8");
 #else
-			char *encoding = mysql_character_set_name(mysql->conn);
-			if (strcasecmp((char*)encoding, "utf8")) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
-				MYSQL_DO_CONNECT_RETURN_FALSE();
-			}	
+		if (strcasecmp((char*)encoding, "utf8")) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't connect in Unicode mode. Client library was compiled with default charset %s", encoding);
+			MYSQL_DO_CONNECT_RETURN_FALSE();
+		}	
 #endif
-		}
 #endif
 		mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 
@@ -1284,7 +1271,7 @@ PHP_FUNCTION(mysql_set_charset)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	/* Only allow the use of this function with unicode.semantics=On */
-	if (UG(unicode) && (csname_len != 4  || strncasecmp(csname, "utf8", 4))) {
+	if (csname_len != 4  || strncasecmp(csname, "utf8", 4)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Character set %s is not supported when running PHP with unicode.semantics=On.", csname);
 		RETURN_FALSE;
 	}
@@ -2037,7 +2024,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 
 			MAKE_STD_ZVAL(data);
 
-			if (UG(unicode) && !IS_BINARY_DATA(mysql_field)) {
+			if (!IS_BINARY_DATA(mysql_field)) {
 				UChar *ustr;
 				int ulen;
 
@@ -2051,19 +2038,16 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 				add_index_zval(return_value, i, data);
 			}
 			if (result_type & MYSQL_ASSOC) {
+				UChar *ustr;
+				int ulen;
+				
 				if (result_type & MYSQL_NUM) {
 					Z_ADDREF_P(data);
 				}
-				if (UG(unicode)) {
-					UChar *ustr;
-					int ulen;
 
-					zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysql_field->name, strlen(mysql_field->name) TSRMLS_CC);
-					add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, data);
-					efree(ustr);
-				} else {
-					add_assoc_zval(return_value, mysql_field->name, data);
-				}
+				zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysql_field->name, strlen(mysql_field->name) TSRMLS_CC);
+				add_u_assoc_zval_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1, data);
+				efree(ustr);
 			}
 		} else {
 			/* NULL value. */
@@ -2072,16 +2056,12 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			}
 
 			if (result_type & MYSQL_ASSOC) {
-				if (UG(unicode)) {
-					UChar *ustr;
-					int ulen;
+				UChar *ustr;
+				int ulen;
 
-					zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysql_field->name, strlen(mysql_field->name) TSRMLS_CC);
-					add_u_assoc_null_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1);
-					efree(ustr);
-				} else {
-					add_assoc_null(return_value, mysql_field->name);
-				}
+				zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysql_field->name, strlen(mysql_field->name) TSRMLS_CC);
+				add_u_assoc_null_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen + 1);
+				efree(ustr);
 			}
 		}
 	}

@@ -529,9 +529,7 @@ PHP_FUNCTION(mysqli_change_user)
 	}
 
 	/* Change user resets the charset in the server, change it back */
-	if (UG(unicode)) {
-		mysql_set_character_set(mysql->mysql, "utf8");
-	}
+	mysql_set_character_set(mysql->mysql, "utf8");
 
 	RETURN_TRUE;
 }
@@ -753,7 +751,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 				zval *the_var = copies && copies[i]? copies[i]:stmt->param.vars[i];
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
-						if (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE) {
+						if (Z_TYPE_P(the_var) == IS_UNICODE) {
 							if (the_var == stmt->param.vars[i]) { 
 								php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
 								the_var = copies[i];
@@ -905,9 +903,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								tmp[10]= '\0';
 								/* unsigned int > INT_MAX is 10 digits - ALWAYS */
 								ZVAL_UTF8_STRINGL(stmt->result.vars[i], tmp, 10, 0);
-								if (UG(unicode)) {
-									efree(tmp);
-								}
+								efree(tmp);
 								break;
 							}
 #endif
@@ -1478,7 +1474,7 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	if (UG(unicode) && Z_TYPE_P(callback_func) != IS_ARRAY && Z_TYPE_P(callback_func) != IS_OBJECT) {
+	if (Z_TYPE_P(callback_func) != IS_ARRAY && Z_TYPE_P(callback_func) != IS_OBJECT) {
 		convert_to_string(callback_func);
 	}
 

@@ -227,10 +227,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		new_connection = TRUE;
 	}
 
-	if (UG(unicode)) {
-		mysql_options(mysql->mysql, MYSQL_SET_CHARSET_NAME, "utf8");
-	}
-
+	mysql_options(mysql->mysql, MYSQL_SET_CHARSET_NAME, "utf8");
 
 #ifdef HAVE_EMBEDDED_MYSQLI
 	if (hostname_len) {
@@ -260,9 +257,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	}
 
 	/* when PHP runs in unicode, set default character set to utf8 */
-	if (UG(unicode)) {
-		mysql->conv = UG(utf8_conv);
-	}
+	mysql->conv = UG(utf8_conv);
 
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
@@ -947,7 +942,7 @@ PHP_FUNCTION(mysqli_set_charset)
 
 	/* check unicode modus */
 	/* todo: we need also to support UCS2. This will not work when using SET NAMES */
-	if (UG(unicode) && (csname_len != 4  || strncasecmp(cs_name, "utf8", 4))) {
+	if (csname_len != 4  || strncasecmp(cs_name, "utf8", 4)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Character set %s is not supported when running PHP with unicode.semantics=On.", cs_name);
 		RETURN_FALSE;
 	}
@@ -1003,24 +998,14 @@ PHP_FUNCTION(mysqli_get_charset)
 	state = 1;	/* all charsets are compiled in */
 #endif
 
-	if (UG(unicode)) {
-		add_property_utf8_string(return_value, "charset", (name) ? (char *)name : "", 1);
-		add_property_utf8_string(return_value, "collation", (collation) ? (char *)collation : "", 1);
-		add_property_utf8_string(return_value, "dir", (dir) ? (char *)dir : "", 1);
-	} else {
-		add_property_string(return_value, "charset", (name) ? (char *)name : "", 1);
-		add_property_string(return_value, "collation",(collation) ? (char *)collation : "", 1);
-		add_property_string(return_value, "dir", (dir) ? (char *)dir : "", 1);
-	}
+	add_property_utf8_string(return_value, "charset", (name) ? (char *)name : "", 1);
+	add_property_utf8_string(return_value, "collation", (collation) ? (char *)collation : "", 1);
+	add_property_utf8_string(return_value, "dir", (dir) ? (char *)dir : "", 1);
 	add_property_long(return_value, "min_length", minlength);
 	add_property_long(return_value, "max_length", maxlength);
 	add_property_long(return_value, "number", number);
 	add_property_long(return_value, "state", state);
-	if (UG(unicode)) {
-		add_property_utf8_string(return_value, "comment", (comment) ? (char *)comment : "", 1);
-	} else {
-		add_property_string(return_value, "comment", (comment) ? (char *)comment : "", 1);
-	}
+	add_property_utf8_string(return_value, "comment", (comment) ? (char *)comment : "", 1);
 }
 /* }}} */
 #endif
