@@ -7,5 +7,4 @@ namespace test;
 echo "ok\n";
 ?>
 --EXPECTF--
-Deprecated: Ticks is deprecated and will be removed in PHP 6 in %s on line %d
 ok
