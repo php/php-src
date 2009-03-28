@@ -25,7 +25,7 @@ echo "ok\n";
 signal dispatched
 
 Warning: pcntl_signal() expects at least 2 parameters, 0 given in %s
-bool(false)
+NULL
 bool(true)
 
 Warning: pcntl_signal(): Invalid value for handle argument specified in %s
