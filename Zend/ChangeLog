@@ -1,3 +1,11 @@
+2009-03-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/bug43027.phpt
+      tests/jump12.phpt:
+      Removed deprecation warning for ticks
+
 2009-03-26  Felipe Pena  <felipensp@gmail.com>
 
     * zend_constants.c
