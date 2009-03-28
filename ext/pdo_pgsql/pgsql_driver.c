@@ -232,13 +232,13 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		if (S->cursor_name) {
 			efree(S->cursor_name);
 		}
-		/* TODO: check how scrollable cursors related to prepared statements */
 		spprintf(&S->cursor_name, 0, "pdo_pgsql_cursor_%08x", (unsigned int) stmt);
+		emulate = 1;
 	}
 
 #if HAVE_PQPREPARE
 
-	if (driver_options) {
+	else if (driver_options) {
 		if (pdo_attr_lval(driver_options,
 				PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, 0 TSRMLS_CC) == 1) {
 			emulate = 1;
