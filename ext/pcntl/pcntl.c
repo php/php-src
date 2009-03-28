@@ -924,6 +924,14 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 	}
 
+	/*
+	 * sigtimedwait and sigwaitinfo can return 0 on success on some 
+	 * platforms, e.g. NetBSD
+	 */
+	if (!signo && siginfo.si_signo) {
+		signo = siginfo.si_signo;
+	}
+
 	if (signo > 0 && user_siginfo) {
 		if (Z_TYPE_P(user_siginfo) != IS_ARRAY) {
 			zval_dtor(user_siginfo);
