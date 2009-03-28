@@ -757,7 +757,7 @@ PHP_FUNCTION(pcntl_signal)
 	zend_bool restart_syscalls = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (!PCNTL_G(spares)) {
