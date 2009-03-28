@@ -115,9 +115,6 @@ UPGRADE NOTES - PHP 5.3
 5. Deprecated
 =============
 
-- Ticks: declare(ticks=N) and register_tick_function() both now trigger an
-  E_DEPRECATED notice.
-
 - define_syslog_variables() is deprecated.
 
 - All ereg functions are deprecated. Use PCRE (preg_*()) instead.
