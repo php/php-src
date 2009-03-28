@@ -5,6 +5,7 @@ Postgres
 if (!extension_loaded('pdo_pgsql')) print 'skip'; ?>
 --REDIRECTTEST--
 # magic auto-configuration
+# Also update config.inc if you make changes here... 
 
 $config = array(
 	'TESTS' => 'ext/pdo/tests'
