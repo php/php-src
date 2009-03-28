@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 200?, PHP 5.3.0 RC 2
 - Undeprecated ticks. (Arnaud)
 
+- Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).
   (Matteo)
 - Fixed bug #47771 (Exception during object construction from arg call calls

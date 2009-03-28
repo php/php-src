@@ -129,6 +129,24 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	S->current_row = 0;
 
+	if (S->cursor_name) {
+		char *q = NULL;
+		spprintf(&q, 0, "DECLARE %s SCROLL CURSOR WITH HOLD FOR %s", S->cursor_name, stmt->active_query_string);
+		S->result = PQexec(H->server, q);
+		efree(q);
+
+		/* check if declare failed */
+		status = PQresultStatus(S->result);
+		if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
+			pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
+			return 0;
+		}
+
+		/* fetch to be able to get the number of tuples later, but don't advance the cursor pointer */
+		spprintf(&q, 0, "FETCH FORWARD 0 FROM %s", S->cursor_name);
+		S->result = PQexec(H->server, q);
+		efree(q);
+	} else
 #if HAVE_PQPREPARE
 	if (S->stmt_name) {
 		/* using a prepared statement */
@@ -182,12 +200,7 @@ stmt_retry:
 				0);
 	} else
 #endif
-	if (S->cursor_name) {
-		char *q = NULL;
-		spprintf(&q, 0, "DECLARE %s CURSOR FOR %s", S->cursor_name, stmt->active_query_string);
-		S->result = PQexec(H->server, q);
-		efree(q);
-	} else {
+	{
 		S->result = PQexec(H->server, stmt->active_query_string);
 	}
 	status = PQresultStatus(S->result);
@@ -350,19 +363,23 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
 	if (S->cursor_name) {
-		char *ori_str;
+		char *ori_str = NULL;
 		char *q = NULL;
 		ExecStatusType status;
 
 		switch (ori) {
-			case PDO_FETCH_ORI_NEXT: 	ori_str = "FORWARD"; break;
-			case PDO_FETCH_ORI_PRIOR:	ori_str = "BACKWARD"; break;
-			case PDO_FETCH_ORI_REL:		ori_str = "RELATIVE"; break;
+			case PDO_FETCH_ORI_NEXT: 	spprintf(&ori_str, 0, "NEXT"); break;
+			case PDO_FETCH_ORI_PRIOR:	spprintf(&ori_str, 0, "BACKWARD"); break;
+			case PDO_FETCH_ORI_FIRST:	spprintf(&ori_str, 0, "FIRST"); break;
+			case PDO_FETCH_ORI_LAST:	spprintf(&ori_str, 0, "LAST"); break;
+			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE %ld", offset); break;
+			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE %ld", offset); break;
 			default:
 				return 0;
 		}
 		
-		spprintf(&q, 0, "FETCH %s %ld FROM %s", ori_str, offset, S->cursor_name);
+		spprintf(&q, 0, "FETCH %s FROM %s", ori_str, S->cursor_name);
+		efree(ori_str);
 		S->result = PQexec(S->H->server, q);
 		efree(q);
 		status = PQresultStatus(S->result);
@@ -372,9 +389,12 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			return 0;
 		}
 
-		S->current_row = 1;
-		return 1;	
-		
+		if (PQntuples(S->result)) {
+			S->current_row = 1;
+			return 1;
+		} else {
+			return 0;
+		}
 	} else {
 		if (S->current_row < stmt->row_count) {
 			S->current_row++;
