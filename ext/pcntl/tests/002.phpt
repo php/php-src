@@ -68,7 +68,7 @@ if ($pid == -1) {
 	var_dump(pcntl_sigtimedwait(array(SIGTERM), $signo, PHP_INT_MAX, PHP_INT_MAX));
 } else {
 	$siginfo = NULL;
-	pcntl_sigtimedwait(array(SIGINT), $siginfo, PHP_INT_MAX, 999999999);
+	pcntl_sigtimedwait(array(SIGINT), $siginfo, 3600, 0);
 	exit;
 }
 
