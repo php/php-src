@@ -164,21 +164,20 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TS
 
 	mysqlnd_array_init(return_value, STAT_LAST);
 	for (i = 0; i < STAT_LAST; i++) {
+#if PHP_MAJOR_VERSION >= 6
+		UChar *ustr, *tstr;
+		int ulen, tlen;
+#endif
 		char tmp[22];
 		
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
 #if PHP_MAJOR_VERSION >= 6
-		{
-			UChar *ustr, *tstr;
-			int ulen, tlen;
-
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysqlnd_stats_values_names[i].s,
-									mysqlnd_stats_values_names[i].l + 1 TSRMLS_CC);
-			zend_string_to_unicode(UG(utf8_conv), &tstr, &tlen, tmp, strlen(tmp) + 1 TSRMLS_CC);
-			add_u_assoc_unicode_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen, tstr, 1);
-			efree(ustr);
-			efree(tstr);
-		}
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysqlnd_stats_values_names[i].s,
+								mysqlnd_stats_values_names[i].l + 1 TSRMLS_CC);
+		zend_string_to_unicode(UG(utf8_conv), &tstr, &tlen, tmp, strlen(tmp) + 1 TSRMLS_CC);
+		add_u_assoc_unicode_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen, tstr, 1);
+		efree(ustr);
+		efree(tstr);
 #else
 		add_assoc_string_ex(return_value, mysqlnd_stats_values_names[i].s,
 							mysqlnd_stats_values_names[i].l + 1, tmp, 1);
