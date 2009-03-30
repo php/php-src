@@ -1107,6 +1107,7 @@ static int mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list 
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
+			zval tmp;
 			zstr class_name;
 			zend_uint class_name_len;
 			int dup;
@@ -1115,16 +1116,11 @@ static int mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list 
 
 			dup = zend_get_object_classname(*arg, &class_name, &class_name_len TSRMLS_CC);
 
-			if (UG(unicode)) {
-				zval tmp;
+			ZVAL_UNICODEL(&tmp, class_name.u, class_name_len, 1);
+			convert_to_string_with_converter(&tmp, ZEND_U_CONVERTER(UG(output_encoding_conv)));
+			TRACE_APPEND_STRL(Z_STRVAL(tmp), Z_STRLEN(tmp));
+			zval_dtor(&tmp);
 
-				ZVAL_UNICODEL(&tmp, class_name.u, class_name_len, 1);
-				convert_to_string_with_converter(&tmp, ZEND_U_CONVERTER(UG(output_encoding_conv)));
-				TRACE_APPEND_STRL(Z_STRVAL(tmp), Z_STRLEN(tmp));
-				zval_dtor(&tmp);
-			} else {
-				TRACE_APPEND_STRL(class_name.s, class_name_len);
-			}
 			if(!dup) {
 				efree(class_name.v);
 			}
