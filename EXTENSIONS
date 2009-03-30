@@ -169,7 +169,7 @@ STATUS:              Working
 COMMENT:             Working 
 -------------------------------------------------------------------------------
 EXTENSION:           pdo
-PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>, Ilia Alshanetsky <iliaa@php.net>
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Wez Furlong <wez@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
