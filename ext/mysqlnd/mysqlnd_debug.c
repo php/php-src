@@ -618,7 +618,7 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_debug_init */
-MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D)
+PHPAPI MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D)
 {
 	MYSQLND_DEBUG *ret = ecalloc(1, sizeof(MYSQLND_DEBUG));
 #ifdef ZTS
