@@ -3367,7 +3367,6 @@ PHP_FUNCTION(odbc_primarykeys)
 	char *cat = NULL, *schema = NULL, *table = NULL;
 	int cat_len, schema_len, table_len;
 	RETCODE rc;
-	int argc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
 		return;
