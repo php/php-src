@@ -215,7 +215,7 @@ static int sapi_isapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static int sapi_isapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_isapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	return SAPI_HEADER_ADD;
 }
