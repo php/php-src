@@ -30,7 +30,7 @@ pz9H9wBlz/Nmw12YtfCmGqpIFAxpRGFQTGPNJWr4FdZkUM792lm7Sf3zzSvi8Ruz
 M3dwifRsZyZyruy4tMsu
 -----END CERTIFICATE-----
 ";
-$cert = str_replace("\\n", "\n", $csr);
+$cert = (binary)str_replace("\\n", "\n", $csr);
 $arr = openssl_x509_parse($cert);
 var_dump($arr['hash']);
 echo "Done";
