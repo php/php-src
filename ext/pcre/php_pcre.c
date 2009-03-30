@@ -515,10 +515,10 @@ static inline void add_offset_pair(zval *result, zend_uchar utype, char *str, in
 	add_next_index_long(match_pair, prev->cp_offset);
 	
 	if (name) {
-		zval_add_ref(&match_pair);
 		UErrorCode status = U_ZERO_ERROR;
 		UChar *u = NULL;
 		int u_len;
+		zval_add_ref(&match_pair);
 		zend_string_to_unicode_ex(UG(utf8_conv), &u, &u_len, name, strlen(name), &status);
 		zend_u_hash_update(Z_ARRVAL_P(result), IS_UNICODE, ZSTR(u), u_len+1, &match_pair, sizeof(zval *), NULL);
 		efree(u);

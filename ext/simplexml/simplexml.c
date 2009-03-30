@@ -1089,6 +1089,9 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		while (attr) {
 			if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
 				xmlChar *tmp;
+				UErrorCode status = U_ZERO_ERROR;
+				zstr u_name;
+				int u_name_len;
 
 				MAKE_STD_ZVAL(value);
 				tmp = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
@@ -1100,9 +1103,6 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 					array_init(zattr);
 					sxe_properties_add(rv, "@attributes", sizeof("@attributes"), zattr TSRMLS_CC);
 				}
-				UErrorCode status = U_ZERO_ERROR;
-				zstr u_name;
-				int u_name_len;
 				zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)attr->name, namelen, &status);
 				add_u_assoc_zval_ex(zattr, IS_UNICODE, u_name, u_name_len, value);
 				efree(u_name.u);
@@ -2385,6 +2385,8 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 	xmlNodePtr curnode = NULL;
 	php_sxe_object *intern;
 	int namelen;
+	UErrorCode status = U_ZERO_ERROR;
+	int u_len;
 
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 	curobj = iterator->sxe->iter.data;
@@ -2396,9 +2398,6 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 	if (!curnode) {
 		return HASH_KEY_NON_EXISTANT;
 	}
-
-	UErrorCode status = U_ZERO_ERROR;
-	int u_len;
 
 	namelen = xmlStrlen(curnode->name);
 	zend_string_to_unicode_ex(UG(utf8_conv), &str_key->u, &u_len, (char*)curnode->name, namelen, &status);
