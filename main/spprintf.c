@@ -76,6 +76,7 @@
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
+#define _GNU_SOURCE
 #include "php.h"
 
 #include <stddef.h>
