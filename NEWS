@@ -6,7 +6,6 @@ PHP                                                                        NEWS
 - Fixed bug #47819 (Getting pdo_mysql.so: undefined symbol: mysqlnd_debug_init
   at startup). (Johannes)
 - Fixed bug #47816 (pcntl tests failing on NetBSD). (Matteo)
-- Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).
   (Matteo)
 - Fixed bug #47771 (Exception during object construction from arg call calls
@@ -18,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
   double quote). (Dmitry)
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
+- Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
 - Fixed bug #42362 (HTTP status codes 204 and 304 should not be gzipped).
   (Scott, Edward Z. Yang)
