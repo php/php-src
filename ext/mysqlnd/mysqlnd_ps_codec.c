@@ -685,7 +685,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 #if PHP_MAJOR_VERSION < 6
 				if (Z_TYPE_P(the_var) != IS_STRING)
 #elif PHP_MAJOR_VERSION >= 6
-				if (Z_TYPE_P(the_var) != IS_STRING || (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE))
+				if (Z_TYPE_P(the_var) != IS_STRING || Z_TYPE_P(the_var) == IS_UNICODE)
 #endif
 				{
 					if (!copies || !copies[i]) {
@@ -693,7 +693,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 					}
 					the_var = copies[i];
 #if PHP_MAJOR_VERSION >= 6
-					if (UG(unicode) && Z_TYPE_P(the_var) == IS_UNICODE) {
+					if (Z_TYPE_P(the_var) == IS_UNICODE) {
 						zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
 					}
 #endif

@@ -51,23 +51,19 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 		zstr	string_key;
 		uint	string_key_len;
 		ulong	num_key;
+		int     s_len;
 		char 	*s = NULL;
 
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &string_key, &string_key_len, &num_key, 0, &pos_values);
 
 		convert_to_string(*values_entry);
 
-		if (UG(unicode)) {
-			int s_len;
-			if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
-									   &s, &s_len, string_key.u, string_key_len TSRMLS_CC) == SUCCESS) {
-				php_info_print_table_row(2, s, Z_STRVAL_PP(values_entry));
-			}
-			if (s) {
-				mnd_efree(s);
-			}
-		} else {
-			php_info_print_table_row(2, string_key.s, Z_STRVAL_PP(values_entry));
+		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
+								   &s, &s_len, string_key.u, string_key_len TSRMLS_CC) == SUCCESS) {
+			php_info_print_table_row(2, s, Z_STRVAL_PP(values_entry));
+		}
+		if (s) {
+			mnd_efree(s);
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);

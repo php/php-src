@@ -143,6 +143,10 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 {
 	unsigned int i = 0;
 	php_mysql_packet_res_field field_packet;
+#if PHP_MAJOR_VERSION >= 6
+	UChar *ustr;
+	int ulen;
+#endif
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
@@ -212,39 +216,33 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 #if PHP_MAJOR_VERSION >= 6
-		if (UG(unicode)) {
-			UChar *ustr;
-			int ulen;
-			zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen,
-								   meta->fields[i].name,
-								   meta->fields[i].name_length TSRMLS_CC);
-			if ((meta->zend_hash_keys[i].is_numeric =
-				 			mysqlnd_unicode_is_key_numeric(ustr, ulen + 1, &idx)))
-			{
-				meta->zend_hash_keys[i].key = idx;
-				mnd_efree(ustr);
-			} else {
-				meta->zend_hash_keys[i].ustr.u = ustr;
-				meta->zend_hash_keys[i].ulen = ulen;
-				meta->zend_hash_keys[i].key = zend_u_get_hash_value(IS_UNICODE, ZSTR(ustr), ulen + 1);
-			}
-
-		} else 
-#endif
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen,
+							   meta->fields[i].name,
+							   meta->fields[i].name_length TSRMLS_CC);
+		if ((meta->zend_hash_keys[i].is_numeric =
+						mysqlnd_unicode_is_key_numeric(ustr, ulen + 1, &idx)))
 		{
-			/* For BC we have to check whether the key is numeric and use it like this */
-			if ((meta->zend_hash_keys[i].is_numeric =
-						mysqlnd_is_key_numeric(field_packet.metadata->name,
-											   field_packet.metadata->name_length + 1,
-											   &idx)))
-			{
-				meta->zend_hash_keys[i].key = idx;
-			} else {
-				meta->zend_hash_keys[i].key =
-						zend_get_hash_value(field_packet.metadata->name,
-											field_packet.metadata->name_length + 1);
-			}
+			meta->zend_hash_keys[i].key = idx;
+			mnd_efree(ustr);
+		} else {
+			meta->zend_hash_keys[i].ustr.u = ustr;
+			meta->zend_hash_keys[i].ulen = ulen;
+			meta->zend_hash_keys[i].key = zend_u_get_hash_value(IS_UNICODE, ZSTR(ustr), ulen + 1);
 		}
+#else
+		/* For BC we have to check whether the key is numeric and use it like this */
+		if ((meta->zend_hash_keys[i].is_numeric =
+					mysqlnd_is_key_numeric(field_packet.metadata->name,
+										   field_packet.metadata->name_length + 1,
+										   &idx)))
+		{
+			meta->zend_hash_keys[i].key = idx;
+		} else {
+			meta->zend_hash_keys[i].key =
+					zend_get_hash_value(field_packet.metadata->name,
+										field_packet.metadata->name_length + 1);
+		}
+#endif
 	}
 	PACKET_FREE_ALLOCA(field_packet);
 
