@@ -214,7 +214,9 @@ copy_file_list($build_dir, "$dist_dir", $sapi_targets);
 copy_file_list($build_dir, "$dist_dir/ext", $ext_targets);
 
 /* pecl sapi and extensions */
-copy_file_list($build_dir, $pecl_dir, $pecl_targets);
+if(sizeof($pecl_targets)) {
+	copy_file_list($build_dir, $pecl_dir, $pecl_targets);
+}
 
 /* populate reading material */
 $text_files = array(
