@@ -28,7 +28,7 @@ var_dump(timezone_offset_get($tz, $date));
 ===DONE===
 --EXPECTF--
 *** Testing timezone_offset_get() : basic functionality ***
-int(0)
+%rint\(0\)|int\(3600\)%r
 %rint\(-18000\)|int\(-14400\)%r
 %rint\(-28800\)|int\(-25200\)%r
 ===DONE===
