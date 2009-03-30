@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 200?, PHP 5.3.0 RC 2
 - Undeprecated ticks. (Arnaud)
 
+- Fixed bug #47819 (Getting pdo_mysql.so: undefined symbol: mysqlnd_debug_init
+  at startup). (Johannes)
 - Fixed bug #47816 (pcntl tests failing on NetBSD). (Matteo)
 - Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).

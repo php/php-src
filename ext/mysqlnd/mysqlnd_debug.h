@@ -58,7 +58,7 @@ struct st_mysqlnd_debug
 };
 
 
-MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D);
+PHPAPI MYSQLND_DEBUG *mysqlnd_debug_init(TSRMLS_D);
 
 #define MYSQLND_MEM_D 	TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
 
