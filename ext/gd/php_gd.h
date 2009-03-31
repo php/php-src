@@ -25,7 +25,9 @@
 #define HAVE_GDIMAGECREATEFROMPNG 1
 
 #if HAVE_LIBFREETYPE
-#define ENABLE_GD_TTF
+# ifndef ENABLE_GD_TTF
+#  define ENABLE_GD_TTF
+# endif
 #endif
 
 #if HAVE_LIBGD
