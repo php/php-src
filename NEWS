@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #47828 (openssl_x509_parse() segfaults when a UTF-8 conversion
   fails). (Scott, Kees Cook, Pierre)
 - Fixed bug #47769 (Strange extends PDO). (Felipe)
+- Fixed bug #47745 (FILTER_VALIDATE_INT doesn't allow minimum integer).
+  (Dmitry)
 - Fixed bug #47721 (Alignment issues in mbstring and sysvshm extension)
   (crrodriguez at opensuse dot org, Ilia)
 - Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).
