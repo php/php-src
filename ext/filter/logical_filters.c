@@ -74,14 +74,12 @@
 
 static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
 	long ctx_value;
-	long sign = 1;
+	long sign = 0;
 	const char *end = str + str_len;
-	double dval;
-	long overflow;
 
 	switch (*str) {
 		case '-':
-			sign = -1;
+			sign = 1;
 		case '+':
 			str++;
 		default:
@@ -95,22 +93,29 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 		return -1;
 	}
 
+	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
+	 || (SIZEOF_LONG == 4 && end - str == MAX_LENGTH_OF_LONG - 1 && *str > '2')) {
+		/* overflow */
+		return -1;
+	}
+
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
-			ZEND_SIGNED_MULTIPLY_LONG(ctx_value, 10, ctx_value, dval, overflow);
-			if (overflow) {
-				return -1;
-			}
-			ctx_value += ((*(str++)) - '0');
-			if (ctx_value & LONG_SIGN_MASK) {
-				return -1;
-			}
+			ctx_value = (ctx_value * 10) + (*(str++) - '0');								\
 		} else {
 			return -1;
 		}
 	}
+	if (sign) {
+		ctx_value = -ctx_value;
+		if (ctx_value > 0) { /* overflow */
+			return -1;
+		}
+	} else if (ctx_value < 0) { /* overflow */
+		return -1;
+	}
 
-	*ret = ctx_value * sign;
+	*ret = ctx_value;
 	return 1;
 }
 /* }}} */
