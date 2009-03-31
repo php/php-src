@@ -18,7 +18,8 @@ PHP                                                                        NEWS
   (crrodriguez at opensuse dot org, Ilia)
 - Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).
   (Dmitry)
-- Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect). (Mikko, Pierre)
+- Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect).
+  (Mikko, Pierre)
 - Fixed bug #47644 (Valid integers are truncated with json_decode()). (Scott)
 - Fixed bug #47639 (pg_copy_from() WARNING: nonstandard use of \\ in a string
   literal). (Ilia)
@@ -32,12 +33,14 @@ PHP                                                                        NEWS
   addresses in the filter extension). (Ilia)
 - Fixed bug #47430 (Errors after writing to nodeValue parameter of an absent 
   previousSibling). (Rob)
-- Fixed bug #46882 (Serialize / Unserialize misbehaviour under OS with different
-  bit numbers). (Matt)
+- Fixed bug #46882 (Serialize / Unserialize misbehaviour under OS with
+  different bit numbers). (Matt)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
-- Fixed bug #43073, (TrueType bounding box is wrong for angle<>0) (Martin McNickle)
-- Fixed bug #38805 (PDO truncates text from SQL Server text data type field) (Steph)
+- Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
+  (Martin McNickle)
+- Fixed bug #38805 (PDO truncates text from SQL Server text data type
+  field). (Steph)
 
 26 Feb 2009, PHP 5.2.9
 - Changed __call() to be invoked on private/protected method access, similar to
