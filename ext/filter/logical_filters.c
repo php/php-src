@@ -34,8 +34,6 @@
 # include <arpa/inet.h>
 #endif
 
-#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
-
 #ifndef INADDR_NONE
 # define INADDR_NONE ((unsigned long int) -1)
 #endif
@@ -74,7 +72,7 @@
 
 static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
 	long ctx_value;
-	long sign = 0;
+	int sign = 0;
 	const char *end = str + str_len;
 
 	switch (*str) {
@@ -101,7 +99,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
-			ctx_value = (ctx_value * 10) + (*(str++) - '0');								\
+			ctx_value = (ctx_value * 10) + (*(str++) - '0');
 		} else {
 			return -1;
 		}
