@@ -282,9 +282,7 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsi
 static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-	const char *_str;
-	size_t _str_len;
-	char *str;
+	const char *str;
 	zval *flags;
 	
 	if (!S->stmt) {
@@ -320,21 +318,15 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 			break;
 	}
 
-	_str = sqlite3_column_decltype(S->stmt, colno);
-	_str_len = strlen(_str);
-	if (_str) {
-		str = emalloc(_str_len);
-		strcpy(str, _str);
-		add_assoc_string(return_value, "sqlite:decl_type", str, 1);
+	str = sqlite3_column_decltype(S->stmt, colno);
+	if (str) {
+		add_assoc_string(return_value, "sqlite:decl_type", (char *)str, 1);
 	}
 
 #ifdef SQLITE_ENABLE_COLUMN_METADATA
-	_str = sqlite3_column_table_name(S->stmt, colno);
-	_str_len = strlen(_str);
-	if (_str) {
-		str = emalloc(_str_len);
-		strcpy(str, _str);
-		add_assoc_string(return_value, "table", str, 1);
+	str = sqlite3_column_table_name(S->stmt, colno);
+	if (str) {
+		add_assoc_string(return_value, "table", (char *)str, 1);
 	}
 #endif
 
