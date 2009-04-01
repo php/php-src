@@ -112,6 +112,13 @@ function copy_file_list($source_dir, $dest_dir, $list)
 	global $is_debug, $dist_dir;
 
 	foreach ($list as $item) {
+		if (empty($item)) {
+			continue;
+		} elseif (!is_file($source_dir . DIRECTORY_SEPARATOR . $item)) {
+			echo "WARNING: $item not found\n";
+			continue;
+		}
+
 		echo "Copying $item from $source_dir to $dest_dir\n";
 		copy($source_dir . DIRECTORY_SEPARATOR . $item, $dest_dir . DIRECTORY_SEPARATOR . $item);
 		if ($is_debug) {
