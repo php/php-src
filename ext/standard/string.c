@@ -1137,7 +1137,7 @@ PHP_FUNCTION(wordwrap)
 
 /* {{{ php_explode
  */
-PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, int limit)
+PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, long limit)
 {
 	char *p1, *p2, *endp;
 
@@ -1152,7 +1152,7 @@ PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, ze
 			add_next_index_stringl(return_value, p1, p2-p1, 1);
 			p1 = p2 + delim_len;
 		} while ( (p2 = php_memnstr(p1, delim, delim_len, endp)) != NULL &&
-				  (limit == -1 || --limit > 1) );
+				  --limit > 1 );
 
 		if ( p1 <= endp ) {
 			add_next_index_stringl(return_value, p1, endp-p1, 1);
@@ -1163,12 +1163,10 @@ PHPAPI void php_explode(char *delim, uint delim_len, char *str, uint str_len, ze
 
 /* {{{ php_explode_negative_limit
  */
-PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, int limit)
+PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, uint str_len, zend_uchar str_type, zval *return_value, long limit)
 {
-#define EXPLODE_ALLOC_STEP 50
+#define EXPLODE_ALLOC_STEP 64
 	char *p1, *p2, *endp;
-	int allocated = EXPLODE_ALLOC_STEP, found = 0, i = 0, to_return = 0;
-	char **positions = safe_emalloc(allocated, sizeof(char *), 0);
 
 	endp = str + str_len;
 	p1 = str;
@@ -1180,6 +1178,10 @@ PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, u
 		by doing nothing we return empty array
 		*/
 	} else {
+		int allocated = EXPLODE_ALLOC_STEP, found = 0;
+		long i, to_return;
+		char **positions = emalloc(allocated * sizeof(char *));
+
 		positions[found++] = p1;
 		do {
 			if ( found >= allocated ) {
@@ -1195,8 +1197,8 @@ PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, u
 			add_next_index_stringl(return_value, positions[i],
 									   (positions[i+1]-delim_len) - positions[i], 1);
 		}
+		efree(positions);
 	}
-	efree(positions);
 #undef EXPLODE_ALLOC_STEP
 }
 /* }}} */
@@ -1204,7 +1206,7 @@ PHPAPI void php_explode_negative_limit(char *delim, uint delim_len, char *str, u
 /* {{{ php_u_explode
  * Unicode capable version of php_explode()
  */
-static void php_u_explode(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, int limit)
+static void php_u_explode(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, long limit)
 {
 	UChar *p1, *p2, *endp;
 
@@ -1219,7 +1221,7 @@ static void php_u_explode(UChar *delim, uint delim_len, UChar *str, uint str_len
 			add_next_index_unicodel(return_value, p1, p2-p1, 1);
 			p1 = (UChar *)p2 + delim_len;
 		} while ((p2 = zend_u_memnstr(p1, delim, delim_len, endp)) != NULL &&
-				  (limit == -1 || --limit > 1) );
+				  --limit > 1 );
 
 		if ( p1 <= endp ) {
 			add_next_index_unicodel(return_value, p1, endp-p1, 1);
@@ -1231,12 +1233,10 @@ static void php_u_explode(UChar *delim, uint delim_len, UChar *str, uint str_len
 /* {{{ php_u_explode_negative_limit
  * Unicode capable version of php_explode_negative_limit()
  */
-static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, int limit)
+static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *str, uint str_len, zval *return_value, long limit)
 {
-#define EXPLODE_ALLOC_STEP 50
+#define EXPLODE_ALLOC_STEP 64
 	UChar *p1, *p2, *endp;
-	int allocated = EXPLODE_ALLOC_STEP, found = 0, i = 0, to_return = 0;
-	UChar **positions = safe_emalloc(allocated, sizeof(UChar *), 0);
 
 	endp = str + str_len;
 	p1 = str;
@@ -1248,6 +1248,10 @@ static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *st
 		by doing nothing we return empty array
 		*/
 	} else {
+		int allocated = EXPLODE_ALLOC_STEP, found = 0;
+		long i, to_return;
+		UChar **positions = emalloc(allocated * sizeof(UChar *));
+
 		positions[found++] = p1;
 		do {
 			if ( found >= allocated ) {
@@ -1263,8 +1267,8 @@ static void php_u_explode_negative_limit(UChar *delim, uint delim_len, UChar *st
 			add_next_index_unicodel(return_value, positions[i],
 									(positions[i+1]-delim_len) - positions[i], 1);
 		}
+		efree(positions);
 	}
-	efree(positions);
 #undef EXPLODE_ALLOC_STEP
 }
 /* }}} */
@@ -1276,10 +1280,9 @@ PHP_FUNCTION(explode)
 	void		*str, *delim;
 	int			str_len, delim_len;
 	zend_uchar	str_type, delim_type;
-	long		limit = -1;
-	int			argc = ZEND_NUM_ARGS();
+	long		limit = LONG_MAX; /* No limit */
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "TT|l", &delim, &delim_len, &delim_type,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT|l", &delim, &delim_len, &delim_type,
 							  &str, &str_len, &str_type, &limit) == FAILURE) {
 		return;
 	}
@@ -1292,7 +1295,7 @@ PHP_FUNCTION(explode)
 	array_init(return_value);
 
 	if ( str_len == 0 ) {
-	  	if (limit >= 0 || argc == 2) {
+	  	if (limit >= 0) {
 			if ( str_type == IS_UNICODE ) {
 				add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 0);
 			} else {
@@ -1302,14 +1305,13 @@ PHP_FUNCTION(explode)
 		return;
 	}
 
-
-	if (limit == 0 || limit == 1) {
+	if (limit > 1) {
 		if ( str_type == IS_UNICODE ) {
-			add_index_unicodel(return_value, 0, (UChar *)str, str_len, 1);
+			php_u_explode((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
 		} else {
-			add_index_stringl(return_value, 0, (char *)str, str_len, 1);
+			php_explode((char *)delim, delim_len, (char *)str, str_len, str_type, return_value, limit);
 		}
-	} else if (limit < -1 && argc == 3) {
+	} else if (limit < 0) {
 		if ( str_type == IS_UNICODE ) {
 			php_u_explode_negative_limit((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
 		} else {
@@ -1317,9 +1319,9 @@ PHP_FUNCTION(explode)
 		}
 	} else {
 		if ( str_type == IS_UNICODE ) {
-			php_u_explode((UChar *)delim, delim_len, (UChar *)str, str_len, return_value, limit);
+			add_index_unicodel(return_value, 0, (UChar *)str, str_len, 1);
 		} else {
-			php_explode((char *)delim, delim_len, (char *)str, str_len, str_type, return_value, limit);
+			add_index_stringl(return_value, 0, (char *)str, str_len, 1);
 		}
 	}
 }
