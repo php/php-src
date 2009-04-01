@@ -256,6 +256,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			  res_count = zend_hash_num_elements(fn->responseParameters);
 				zend_hash_internal_pointer_reset(fn->responseParameters);
 				while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
+					UErrorCode status = U_ZERO_ERROR;
+					zstr u_name;
+					int u_name_len;
+
 					param = (*h_param);
 					if (fnb->style == SOAP_DOCUMENT) {
 						if (param->element) {
@@ -318,9 +322,6 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 							tmp = master_to_zval(NULL, val);
 						}
 					}
-					UErrorCode status = U_ZERO_ERROR;
-					zstr u_name;
-					int u_name_len;
 					zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, param->paramName, strlen(param->paramName), &status);
 					add_u_assoc_zval_ex(return_value, IS_UNICODE, u_name, u_name_len+1, tmp);
 					efree(u_name.u);
@@ -396,6 +397,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			if (trav->type == XML_ELEMENT_NODE) {
 				encodePtr enc = NULL;
 				zval* val;
+				UErrorCode status = U_ZERO_ERROR;
+				zstr u_name;
+				int u_name_len;
 
 				if (hdrs) {
 					smart_str key = {0};
@@ -413,9 +417,6 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					smart_str_free(&key);
 				}
 				val = master_to_zval(enc, trav);
-				UErrorCode status = U_ZERO_ERROR;
-				zstr u_name;
-				int u_name_len;
 				zend_string_to_unicode_ex(UG(utf8_conv), &u_name.u, &u_name_len, (char*)trav->name, strlen((char*)trav->name), &status);
 				add_u_assoc_zval_ex(soap_headers, IS_UNICODE, u_name, u_name_len+1, val);
 				efree(u_name.u);
