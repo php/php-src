@@ -928,7 +928,7 @@ PHP_FUNCTION(wordwrap)
 
 /* {{{ php_explode
  */
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit) 
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit) 
 {
 	char *p1, *p2, *endp;
 
@@ -944,7 +944,7 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 			add_next_index_stringl(return_value, p1, p2 - p1, 1);
 			p1 = p2 + Z_STRLEN_P(delim);
 		} while ((p2 = php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL &&
-				 (limit == -1 || --limit > 1));
+				 --limit > 1);
 
 		if (p1 <= endp)
 			add_next_index_stringl(return_value, p1, endp-p1, 1);
@@ -954,12 +954,10 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit)
 
 /* {{{ php_explode_negative_limit
  */
-PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, int limit) 
+PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, long limit) 
 {
-#define EXPLODE_ALLOC_STEP 50
+#define EXPLODE_ALLOC_STEP 64
 	char *p1, *p2, *endp;
-	int allocated = EXPLODE_ALLOC_STEP, found = 0, i = 0, to_return = 0;
-	char **positions = safe_emalloc(allocated, sizeof(char *), 0);
 	
 	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
 
@@ -972,6 +970,10 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 		by doing nothing we return empty array
 		*/
 	} else {
+		int allocated = EXPLODE_ALLOC_STEP, found = 0;
+		long i, to_return;
+		char **positions = emalloc(allocated * sizeof(char *));
+
 		positions[found++] = p1;
 		do {
 			if (found >= allocated) {
@@ -989,8 +991,8 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 					1
 				);
 		}
+		efree(positions);
 	}
-	efree(positions);
 #undef EXPLODE_ALLOC_STEP
 }
 /* }}} */
@@ -1000,8 +1002,7 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 PHP_FUNCTION(explode)
 {
 	zval **str, **delim;
-	long limit = -1;
-	int argc = ZEND_NUM_ARGS();
+	long limit = LONG_MAX; /* No limit */
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|l", &delim, &str, &limit) == FAILURE) {
 		return;
@@ -1018,19 +1019,18 @@ PHP_FUNCTION(explode)
 	array_init(return_value);
 
 	if (! Z_STRLEN_PP(str)) {
-	  	if (limit >= 0 || argc == 2) {
+	  	if (limit >= 0) {
 			add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
 		} 
 		return;
 	}
 
-
-	if (limit == 0 || limit == 1) {
-		add_index_stringl(return_value, 0, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-	} else if (limit < -1 && argc == 3) {
+	if (limit > 1) {
+		php_explode(*delim, *str, return_value, limit);
+	} else if (limit < 0) {
 		php_explode_negative_limit(*delim, *str, return_value, limit);
 	} else {
-		php_explode(*delim, *str, return_value, limit);
+		add_index_stringl(return_value, 0, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
 	}
 }
 /* }}} */

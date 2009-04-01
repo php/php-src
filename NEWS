@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   crashes). (Dmitry)
 - Fixed bug #47699 (autoload and late static binding). (Dmitry)
 - Fixed bug #47596 (Bus error on parsing file). (Dmitry)
+- Fixed bug #47560 (explode()'s limit parameter odd behaviour). (Matt)
 - Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
   double quote). (Dmitry)
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
