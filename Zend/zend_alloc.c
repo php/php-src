@@ -150,7 +150,12 @@ static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_
 {
 	zend_mm_segment *ret;
 #ifdef HAVE_MREMAP
+#if defined(__NetBSD__)
+	/* NetBSD 5 supports mremap but takes an extra newp argument */
+	ret = (zend_mm_segment*)mremap(segment, segment->size, segment, size, MREMAP_MAYMOVE);
+#else
 	ret = (zend_mm_segment*)mremap(segment, segment->size, size, MREMAP_MAYMOVE);
+#endif
 	if (ret == MAP_FAILED) {
 #endif
 		ret = storage->handlers->_alloc(storage, size);
