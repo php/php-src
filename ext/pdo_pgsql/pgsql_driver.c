@@ -233,7 +233,9 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			efree(S->cursor_name);
 		}
 		spprintf(&S->cursor_name, 0, "pdo_pgsql_cursor_%08x", (unsigned int) stmt);
+#if HAVE_PQPREPARE
 		emulate = 1;
+#endif
 	}
 
 #if HAVE_PQPREPARE
