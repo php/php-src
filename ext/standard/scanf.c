@@ -574,7 +574,7 @@ notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
 mixedXPG:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"\%\" and \"\%n$\" conversion specifiers");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
 			goto error;
 		}
 
