@@ -1066,6 +1066,12 @@ static PHP_METHOD(PDO, query)
 	char *statement;
 	int statement_len;
 
+	/* Return a meaningful error when no parameters were passed */
+	if (!ZEND_NUM_ARGS()) {
+		zend_parse_parameters(0 TSRMLS_CC, "z|z", NULL, NULL);
+		RETURN_FALSE;
+	}
+	
 	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &statement,
 			&statement_len)) {
 		RETURN_FALSE;
@@ -1096,8 +1102,8 @@ static PHP_METHOD(PDO, query)
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL TSRMLS_CC)) {
+		PDO_STMT_CLEAR_ERR();
 		if (ZEND_NUM_ARGS() == 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
-			PDO_STMT_CLEAR_ERR();
 
 			/* now execute the statement */
 			PDO_STMT_CLEAR_ERR();
