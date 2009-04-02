@@ -2927,12 +2927,18 @@ get_function_via_handler:
 					fcc->object_ptr = EG(This);
 					if (error) {
 						zend_spprintf(error, 0, "non-static method %v::%v() %s be called statically, assuming $this from compatible context %v", fcc->calling_scope->name, fcc->function_handler->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
+						if (severity == E_ERROR) {
+							retval = 0;
+						}
 					} else if (retval) {
 						zend_error(severity, "Non-static method %v::%v() %s be called statically, assuming $this from compatible context %v", fcc->calling_scope->name, fcc->function_handler->common.function_name, verb, Z_OBJCE_P(EG(This))->name);
 					}
 				} else {
 					if (error) {
 						zend_spprintf(error, 0, "non-static method %v::%v() %s be called statically", fcc->calling_scope->name, fcc->function_handler->common.function_name, verb);
+						if (severity == E_ERROR) {
+							retval = 0;
+						}
 					} else if (retval) {
 						zend_error(severity, "Non-static method %v::%v() %s be called statically", fcc->calling_scope->name, fcc->function_handler->common.function_name, verb);
 					}

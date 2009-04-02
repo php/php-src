@@ -433,20 +433,28 @@ PHP_FUNCTION(is_callable)
 {
 	zval *var, **callable_name = NULL;
 	zval name;
+	char *error;
 	zend_bool retval;
 	zend_bool syntax_only = 0;
+	int check_flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bZ", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
 
-	syntax_only = syntax_only ? IS_CALLABLE_CHECK_SYNTAX_ONLY : 0;
+	if (syntax_only) {
+		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
+	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable(var, syntax_only, &name TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		REPLACE_ZVAL_VALUE(callable_name, &name, 0);
 	} else {
-		retval = zend_is_callable(var, syntax_only, NULL TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
+	}
+	if (error) {
+		/* ignore errors */
+		efree(error);
 	}
 
 	RETURN_BOOL(retval);
