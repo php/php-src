@@ -1,3 +1,13 @@
+2009-04-01  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_alloc.c
+      zend_alloc.c:
+      - MFH: Fixed bug #47852 (Compilation failure in zend_alloc.c) (Matteo)
+
+    * zend_alloc.c:
+      - Fixed bug #47852 (Compilation failure in zend_alloc.c) (Matteo)
+
 2009-03-27  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_3)
