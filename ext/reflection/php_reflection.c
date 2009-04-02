@@ -218,6 +218,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 	INIT_PZVAL(return_value);
 }
 
+#ifdef ilia_0
 static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value TSRMLS_DC) /* {{{ */
 {
 	zval **value;
@@ -229,6 +230,7 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 	}
 }
 /* }}} */
+#endif
 
 static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC)
 {
