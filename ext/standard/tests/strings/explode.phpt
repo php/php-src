@@ -64,9 +64,7 @@ array(1) {
   [0]=>
   string(11) "otherstring"
 }
-array(1) {
-  [0]=>
-  string(11) "otherstring"
+array(0) {
 }
 array(7) {
   [0]=>
@@ -132,16 +130,6 @@ array(21) {
   [20]=>
   string(1) "-"
 }
-array(4) {
-  [0]=>
-  string(10) "a lazy dog"
-  [1]=>
-  string(5) "jumps"
-  [2]=>
-  string(4) "over"
-  [3]=>
-  string(0) ""
-}
 array(3) {
   [0]=>
   string(10) "a lazy dog"
@@ -149,6 +137,12 @@ array(3) {
   string(5) "jumps"
   [2]=>
   string(4) "over"
+}
+array(2) {
+  [0]=>
+  string(10) "a lazy dog"
+  [1]=>
+  string(5) "jumps"
 }
 array(1) {
   [0]=>
@@ -158,13 +152,11 @@ array(0) {
 }
 array(0) {
 }
-array(3) {
+array(2) {
   [0]=>
   string(10) "a lazy dog"
   [1]=>
   string(11) "jumps::over"
-  [2]=>
-  string(0) ""
 }
 array(1) {
   [0]=>
