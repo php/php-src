@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.12. (Scott)
 
 - Fixed bug #47856 (stristr() converts needle to lower-case). (Ilia)
+- Fixed bug #47851 (is_callable throws fatal error). (Dmitry)
 - Fixed bug #47819 (Getting pdo_mysql.so: undefined symbol: mysqlnd_debug_init
   at startup). (Johannes)
 - Fixed bug #47816 (pcntl tests failing on NetBSD). (Matteo)
