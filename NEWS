@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
 - Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
+- Fixed bug #44173 (PDO->query() parameter parsing/checking needs an 
+  update). (Matteo)
 - Fixed bug #42362 (HTTP status codes 204 and 304 should not be gzipped).
   (Scott, Edward Z. Yang)
 
