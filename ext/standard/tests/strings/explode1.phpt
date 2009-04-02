@@ -113,11 +113,9 @@ bool(false)
 Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 3 --
-array(2) {
+array(1) {
   [0]=>
   string(10) "1234NULL23"
-  [1]=>
-  string(43) "00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -134,7 +132,7 @@ array(2) {
   string(43) "00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 4 --
-array(6) {
+array(5) {
   [0]=>
   string(14) "1234NULL23abcd"
   [1]=>
@@ -145,8 +143,6 @@ array(6) {
   string(0) ""
   [4]=>
   string(0) ""
-  [5]=>
-  string(38) "TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -163,7 +159,7 @@ array(2) {
   string(42) "0000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 5 --
-array(6) {
+array(5) {
   [0]=>
   string(14) "1234NULL23abcd"
   [1]=>
@@ -174,8 +170,6 @@ array(6) {
   string(0) ""
   [4]=>
   string(0) ""
-  [5]=>
-  string(38) "TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -192,7 +186,7 @@ array(2) {
   string(42) "0000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 6 --
-array(6) {
+array(5) {
   [0]=>
   string(0) ""
   [1]=>
@@ -203,8 +197,6 @@ array(6) {
   string(12) ".234444true-"
   [4]=>
   string(0) ""
-  [5]=>
-  string(12) ".24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -234,13 +226,11 @@ bool(false)
 Warning: explode(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 8 --
-array(3) {
+array(2) {
   [0]=>
   string(28) "1234NULL23abcd00000TRUEFALSE"
   [1]=>
   string(12) "1.234444true"
-  [2]=>
-  string(13) "1.24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -257,11 +247,9 @@ array(2) {
   string(27) "1.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 9 --
-array(2) {
+array(1) {
   [0]=>
   string(28) "1234NULL23abcd00000TRUEFALSE"
-  [1]=>
-  string(23) "4444true-11.24%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -278,7 +266,7 @@ array(2) {
   string(23) "4444true-11.24%PHP%ZEND"
 }
 -- Iteration 10 --
-array(7) {
+array(6) {
   [0]=>
   string(3) "123"
   [1]=>
@@ -291,8 +279,6 @@ array(7) {
   string(0) ""
   [5]=>
   string(9) "true-11.2"
-  [6]=>
-  string(9) "%PHP%ZEND"
 }
 array(1) {
   [0]=>
@@ -309,13 +295,11 @@ array(2) {
   string(53) "NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 11 --
-array(3) {
+array(2) {
   [0]=>
   string(48) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24"
   [1]=>
   string(3) "PHP"
-  [2]=>
-  string(4) "ZEND"
 }
 array(1) {
   [0]=>
@@ -353,7 +337,7 @@ array(1) {
 }
 
 *** Testing explode() for maximum limit of string with Limit = -1 ***
-array(52) {
+array(51) {
   [0]=>
   string(1) "1"
   [1]=>
@@ -455,8 +439,6 @@ array(52) {
   [49]=>
   string(2) "55"
   [50]=>
-  string(1) "1"
-  [51]=>
   string(1) "1"
 }
 

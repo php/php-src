@@ -33,15 +33,13 @@ array(2) {
 }
 
 -- negative limit (since PHP 5.1) --
-array(4) {
+array(3) {
   [0]=>
   string(3) "one"
   [1]=>
   string(3) "two"
   [2]=>
   string(5) "three"
-  [3]=>
-  string(4) "four"
 }
 
 -- negative limit (since PHP 5.1) with null string -- 
