@@ -61,7 +61,6 @@ unicode(36) "6f6e650074776f00746872656500666f7572"
 unicode(6) "6f6e65"
 unicode(6) "74776f"
 unicode(10) "7468726565"
-unicode(8) "666f7572"
 
 -- large limit = -100 --
 unicode(6) "6f6e65"

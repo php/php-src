@@ -65,9 +65,7 @@ array(1) {
   [0]=>
   unicode(11) "otherstring"
 }
-array(1) {
-  [0]=>
-  unicode(11) "otherstring"
+array(0) {
 }
 array(7) {
   [0]=>
@@ -133,16 +131,6 @@ array(21) {
   [20]=>
   unicode(1) "-"
 }
-array(4) {
-  [0]=>
-  unicode(10) "a lazy dog"
-  [1]=>
-  unicode(5) "jumps"
-  [2]=>
-  unicode(4) "over"
-  [3]=>
-  unicode(0) ""
-}
 array(3) {
   [0]=>
   unicode(10) "a lazy dog"
@@ -150,6 +138,12 @@ array(3) {
   unicode(5) "jumps"
   [2]=>
   unicode(4) "over"
+}
+array(2) {
+  [0]=>
+  unicode(10) "a lazy dog"
+  [1]=>
+  unicode(5) "jumps"
 }
 array(1) {
   [0]=>
@@ -159,13 +153,11 @@ array(0) {
 }
 array(0) {
 }
-array(3) {
+array(2) {
   [0]=>
   unicode(10) "a lazy dog"
   [1]=>
   unicode(11) "jumps::over"
-  [2]=>
-  unicode(0) ""
 }
 array(1) {
   [0]=>
