@@ -1113,8 +1113,8 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 			}
 
 			/* cleanup after ourselves.  what a sty! */
-			zval_dtor(data.xmlrpc_method);
-			FREE_ZVAL(data.xmlrpc_method);
+			zval_ptr_dtor(&data.xmlrpc_method);
+
 			zval_dtor(data.return_data);
 			FREE_ZVAL(data.return_data);
 
