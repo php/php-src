@@ -1,3 +1,9 @@
+2009-04-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c:
+      Fixed bug #47851 (is_callable throws fatal error)
+
 2009-04-01  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
