@@ -30,12 +30,6 @@ ZEND_API int gc_globals_id;
 ZEND_API zend_gc_globals gc_globals;
 #endif
 
-/* Forward declarations */
-static int children_scan_black(zval **pz TSRMLS_DC);
-static int children_mark_grey(zval **pz TSRMLS_DC);
-static int children_collect_white(zval **pz TSRMLS_DC);
-static int children_scan(zval **pz TSRMLS_DC);
-
 static void root_buffer_dtor(zend_gc_globals *gc_globals TSRMLS_DC)
 {
 	if (gc_globals->buf) {
@@ -272,18 +266,12 @@ ZEND_API void gc_remove_zval_from_buffer(zval *zv TSRMLS_DC)
 	((zval_gc_info*)zv)->u.buffered = NULL;
 }
 
-static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
-{
-	GC_SET_BLACK(obj->buffered);
-
-	if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
-	             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-		zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_scan_black TSRMLS_CC);
-	}
-}
-
 static void zval_scan_black(zval *pz TSRMLS_DC)
 {
+	Bucket *p;
+
+tail_call:
+	p = NULL;
 	GC_ZVAL_SET_BLACK(pz);
 
 	if (Z_TYPE_P(pz) == IS_OBJECT && EG(objects_store).object_buckets) {
@@ -291,43 +279,61 @@ static void zval_scan_black(zval *pz TSRMLS_DC)
 
 		obj->refcount++;
 		if (GC_GET_COLOR(obj->buffered) != GC_BLACK) {
-			zobj_scan_black(obj, pz TSRMLS_CC);
+			GC_SET_BLACK(obj->buffered);
+			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+				p = Z_OBJPROP_P(pz)->pListHead;
+			}
 		}
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
 		if (Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-			zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_scan_black TSRMLS_CC);
+			p = Z_ARRVAL_P(pz)->pListHead;
 		}
 	}
+	while (p != NULL) {
+		pz = *(zval**)p->pData;
+		if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+			pz->refcount__gc++;
+		}
+		if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
+			if (p->pListNext == NULL) {
+				goto tail_call;
+			} else {
+				zval_scan_black(pz TSRMLS_CC);
+			}
+		}
+		p = p->pListNext;
+	}
 }
 
-static int children_scan_black(zval **pz TSRMLS_DC)
+static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 {
-	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
-		(*pz)->refcount__gc++;
-	}
+	Bucket *p;
 
-	if (GC_ZVAL_GET_COLOR(*pz) != GC_BLACK) {
-		zval_scan_black(*pz TSRMLS_CC);
-	}
-
-	return 0;
-}
-
-static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
-{
-	if (GC_GET_COLOR(obj->buffered) != GC_GREY) {
-		GC_BENCH_INC(zobj_marked_grey);
-		GC_SET_COLOR(obj->buffered, GC_GREY);
-		if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
-		             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-			zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_mark_grey TSRMLS_CC);
+	GC_SET_BLACK(obj->buffered);
+	if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+	             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+		p = Z_OBJPROP_P(pz)->pListHead;
+		while (p != NULL) {
+			pz = *(zval**)p->pData;
+			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+				pz->refcount__gc++;
+			}
+			if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
+				zval_scan_black(pz TSRMLS_CC);
+			}
+			p = p->pListNext;
 		}
 	}
 }
 
 static void zval_mark_grey(zval *pz TSRMLS_DC)
 {
+	Bucket *p;
+
+tail_call:
 	if (GC_ZVAL_GET_COLOR(pz) != GC_GREY) {
+		p = NULL;
 		GC_BENCH_INC(zval_marked_grey);
 		GC_ZVAL_SET_COLOR(pz, GC_GREY);
 
@@ -335,24 +341,56 @@ static void zval_mark_grey(zval *pz TSRMLS_DC)
 			struct _store_object *obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].bucket.obj;
 
 			obj->refcount--;
-			zobj_mark_grey(obj, pz TSRMLS_CC);
+			if (GC_GET_COLOR(obj->buffered) != GC_GREY) {
+				GC_BENCH_INC(zobj_marked_grey);
+				GC_SET_COLOR(obj->buffered, GC_GREY);
+				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+					p = Z_OBJPROP_P(pz)->pListHead;
+				}
+			}
 		} else if (Z_TYPE_P(pz) == IS_ARRAY) {
 			if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
 				GC_ZVAL_SET_BLACK(pz);
 			} else {
-				zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_mark_grey TSRMLS_CC);
+				p = Z_ARRVAL_P(pz)->pListHead;
 			}
+		}
+		while (p != NULL) {
+			pz = *(zval**)p->pData;
+			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+				pz->refcount__gc--;
+			}
+			if (p->pListNext == NULL) {
+				goto tail_call;
+			} else {
+				zval_mark_grey(pz TSRMLS_CC);
+			}
+			p = p->pListNext;
 		}
 	}
 }
 
-static int children_mark_grey(zval **pz TSRMLS_DC)
+static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 {
-	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
-		(*pz)->refcount__gc--;
+	Bucket *p;
+
+	if (GC_GET_COLOR(obj->buffered) != GC_GREY) {
+		GC_BENCH_INC(zobj_marked_grey);
+		GC_SET_COLOR(obj->buffered, GC_GREY);
+		if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+		             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+			p = Z_OBJPROP_P(pz)->pListHead;
+			while (p != NULL) {
+				pz = *(zval**)p->pData;
+				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+					pz->refcount__gc--;
+				}
+				zval_mark_grey(pz TSRMLS_CC);
+				p = p->pListNext;
+			}
+		}
 	}
-	zval_mark_grey(*pz TSRMLS_CC);
-	return 0;
 }
 
 static void gc_mark_roots(TSRMLS_D)
@@ -386,8 +424,56 @@ static void gc_mark_roots(TSRMLS_D)
 	}
 }
 
+static int zval_scan(zval *pz TSRMLS_DC)
+{
+	Bucket *p;
+
+tail_call:	
+	if (GC_ZVAL_GET_COLOR(pz) == GC_GREY) {
+		p = NULL;
+		if (pz->refcount__gc > 0) {
+			zval_scan_black(pz TSRMLS_CC);
+		} else {
+			GC_ZVAL_SET_COLOR(pz, GC_WHITE);
+			if (Z_TYPE_P(pz) == IS_OBJECT && EG(objects_store).object_buckets) {
+				struct _store_object *obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].bucket.obj;
+
+				if (GC_GET_COLOR(obj->buffered) == GC_GREY) {
+					if (obj->refcount > 0) {
+						zobj_scan_black(obj, pz TSRMLS_CC);
+					} else {
+						GC_SET_COLOR(obj->buffered, GC_WHITE);
+						if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+						             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+							p = Z_OBJPROP_P(pz)->pListHead;
+						}
+					}
+				}
+			} else if (Z_TYPE_P(pz) == IS_ARRAY) {
+				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
+					GC_ZVAL_SET_BLACK(pz);
+				} else {
+					p = Z_ARRVAL_P(pz)->pListHead;
+				}
+			}
+		}
+		while (p != NULL) {
+			if (p->pListNext == NULL) {
+				pz = *(zval**)p->pData;
+				goto tail_call;
+			} else {
+				zval_scan(*(zval**)p->pData TSRMLS_CC);
+			}
+			p = p->pListNext;
+		}
+	}
+	return 0;
+}
+
 static void zobj_scan(zval *pz TSRMLS_DC)
 {
+	Bucket *p;
+
 	if (EG(objects_store).object_buckets) {
 		struct _store_object *obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].bucket.obj;
 
@@ -398,38 +484,15 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 				GC_SET_COLOR(obj->buffered, GC_WHITE);
 				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
 				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-					zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_scan TSRMLS_CC);
+					p = Z_OBJPROP_P(pz)->pListHead;
+					while (p != NULL) {
+						zval_scan(*(zval**)p->pData TSRMLS_CC);
+						p = p->pListNext;
+					}
 				}
 			}
 		}
 	}
-}
-
-static int zval_scan(zval *pz TSRMLS_DC)
-{
-	if (GC_ZVAL_GET_COLOR(pz) == GC_GREY) {
-		if (pz->refcount__gc > 0) {
-			zval_scan_black(pz TSRMLS_CC);
-		} else {
-			GC_ZVAL_SET_COLOR(pz, GC_WHITE);
-			if (Z_TYPE_P(pz) == IS_OBJECT) {
-				zobj_scan(pz TSRMLS_CC);
-			} else if (Z_TYPE_P(pz) == IS_ARRAY) {
-				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
-					GC_ZVAL_SET_BLACK(pz);
-				} else {
-					zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_scan TSRMLS_CC);
-				}
-			}
-		}
-	}
-	return 0;
-}
-
-static int children_scan(zval **pz TSRMLS_DC)
-{
-	zval_scan(*pz TSRMLS_CC);
-	return 0;
 }
 
 static void gc_scan_roots(TSRMLS_D)
@@ -451,33 +514,29 @@ static void gc_scan_roots(TSRMLS_D)
 	}
 }
 
-static void zobj_collect_white(zval *pz TSRMLS_DC)
-{
-	if (EG(objects_store).object_buckets) {
-		zend_object_handle handle = Z_OBJ_HANDLE_P(pz);
-		struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
-		if (obj->buffered == (gc_root_buffer*)GC_WHITE) {
-			GC_SET_BLACK(obj->buffered);
-
-			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
-			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
-				zend_hash_apply(Z_OBJPROP_P(pz), (apply_func_t) children_collect_white TSRMLS_CC);
-			}
-		}
-	}
-}
-
 static void zval_collect_white(zval *pz TSRMLS_DC)
 {
+	Bucket *p;
+
+tail_call:
 	if (((zval_gc_info*)(pz))->u.buffered == (gc_root_buffer*)GC_WHITE) {
+		p = NULL;
 		GC_ZVAL_SET_BLACK(pz);
 
-		if (Z_TYPE_P(pz) == IS_OBJECT) {
-			zobj_collect_white(pz TSRMLS_CC);
+		if (Z_TYPE_P(pz) == IS_OBJECT && EG(objects_store).object_buckets) {
+			struct _store_object *obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].bucket.obj;
+
+			if (obj->buffered == (gc_root_buffer*)GC_WHITE) {
+				GC_SET_BLACK(obj->buffered);
+
+				if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+				             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+					p = Z_OBJPROP_P(pz)->pListHead;
+				}
+			}
 		} else {
 			if (Z_TYPE_P(pz) == IS_ARRAY) {
-				zend_hash_apply(Z_ARRVAL_P(pz), (apply_func_t) children_collect_white TSRMLS_CC);
+				p = Z_ARRVAL_P(pz)->pListHead;
 			}
 		}
 
@@ -485,16 +544,46 @@ static void zval_collect_white(zval *pz TSRMLS_DC)
 		pz->refcount__gc++;
 		((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 		GC_G(zval_to_free) = (zval_gc_info*)pz;
+
+		while (p != NULL) {
+			pz = *(zval**)p->pData;
+			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+				pz->refcount__gc++;
+			}
+			if (p->pListNext == NULL) {
+				goto tail_call;
+			} else {
+				zval_collect_white(pz TSRMLS_CC);
+			}
+			p = p->pListNext;
+		}
 	}
 }
 
-static int children_collect_white(zval **pz TSRMLS_DC)
+static void zobj_collect_white(zval *pz TSRMLS_DC)
 {
-	if (Z_TYPE_PP(pz) != IS_ARRAY || Z_ARRVAL_PP(pz) != &EG(symbol_table)) {
-		(*pz)->refcount__gc++;
+	Bucket *p;
+
+	if (EG(objects_store).object_buckets) {
+		struct _store_object *obj = &EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].bucket.obj;
+
+		if (obj->buffered == (gc_root_buffer*)GC_WHITE) {
+			GC_SET_BLACK(obj->buffered);
+
+			if (EXPECTED(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(pz)].valid &&
+			             Z_OBJ_HANDLER_P(pz, get_properties) != NULL)) {
+				p = Z_OBJPROP_P(pz)->pListHead;
+				while (p != NULL) {
+					pz = *(zval**)p->pData;
+					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
+						pz->refcount__gc++;
+					}
+					zval_collect_white(pz TSRMLS_CC);
+					p = p->pListNext;
+				}
+			}
+		}
 	}
-	zval_collect_white(*pz TSRMLS_CC);
-	return 0;
 }
 
 static void gc_collect_roots(TSRMLS_D)
