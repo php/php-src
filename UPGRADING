@@ -391,6 +391,13 @@ UPGRADE NOTES - PHP 5.3
                        DateTime::getLastErrors()
        - PDO_Firebird: PDO::setAttribute()
        - Reflection:   ReflectionProperty::setAccessible()
+                       ReflectionFunction::getClosureThis()
+                       ReflectionFunction::inNamespace()
+                       ReflectionFunction::getNamespaceName()
+                       ReflectionFunction::getShortName()
+                       ReflectionClass::inNamespace()
+                       ReflectionClass::getNamespaceName()
+                       ReflectionClass::getShortName()
        - XSL:          XSLTProcessor::setProfiling()
 
      h. New class constants
