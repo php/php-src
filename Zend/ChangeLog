@@ -1,3 +1,9 @@
+2009-04-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_gc.c
+      zend_gc.c:
+      Improved GC speed and reduced stack usage
+
 2009-04-02  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
