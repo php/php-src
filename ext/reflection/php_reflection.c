@@ -4726,7 +4726,7 @@ ZEND_METHOD(reflection_property, getValue)
 		}
 		zend_u_unmangle_property_name(IS_UNICODE, ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
 		prop_name_len = u_strlen(prop_name.u);
-		member_p = zend_u_read_property(Z_OBJCE_P(object), object, IS_UNICODE, prop_name, prop_name_len, 1 TSRMLS_CC);
+		member_p = zend_u_read_property(ref->ce, object, IS_UNICODE, prop_name, prop_name_len, 1 TSRMLS_CC);
 		*return_value= *member_p;
 		zval_copy_ctor(return_value);
 		INIT_PZVAL(return_value);
@@ -4807,7 +4807,7 @@ ZEND_METHOD(reflection_property, setValue)
 		}
 		zend_u_unmangle_property_name(IS_UNICODE, ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
 		prop_name_len = u_strlen(prop_name.u);
-		zend_u_update_property(Z_OBJCE_P(object), object, IS_UNICODE, prop_name, prop_name_len, value TSRMLS_CC);
+		zend_u_update_property(ref->ce, object, IS_UNICODE, prop_name, prop_name_len, value TSRMLS_CC);
 	}
 }
 /* }}} */
