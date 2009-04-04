@@ -1060,7 +1060,6 @@ static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
-	BOOL f;
 	HANDLE hFile; 
 
 	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
