@@ -3886,38 +3886,11 @@ PHP_FUNCTION(imap_mime_header_decode)
 }
 /* }}} */
 
-/* {{{ _php_rfc822_len
- * Calculate string length based on imap's rfc822_cat function.
- */	
-static int _php_rfc822_len(char *str)
-{
-	int len;
-	char *p;
-
-	if (!str || !*str) {
-		return 0;
-	}
-
-	/* strings with special characters will need to be quoted, as a safety measure we
-	 * add 2 bytes for the quotes just in case.
-	 */
-	len = strlen(str) + 2;
-	p = str;
-	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
-	 * our buffer length to account for these characters.
-	 */
-	while ((p = strpbrk(p, "\\\""))) {
-		p++;
-		len++;
-	}
-
-	return len;
-}
-/* }}} */
 
 /* Support Functions */
 
 #ifdef HAVE_RFC822_OUTPUT_ADDRESS_LIST
+
 /* {{{ _php_rfc822_soutr
  */
 static long _php_rfc822_soutr (void *stream, char *string)
@@ -3952,6 +3925,36 @@ static char* _php_rfc822_write_address(ADDRESS *addresslist TSRMLS_DC)
 /* }}} */
 
 #else
+
+/* {{{ _php_rfc822_len
+ * Calculate string length based on imap's rfc822_cat function.
+ */	
+static int _php_rfc822_len(char *str)
+{
+	int len;
+	char *p;
+
+	if (!str || !*str) {
+		return 0;
+	}
+
+	/* strings with special characters will need to be quoted, as a safety measure we
+	 * add 2 bytes for the quotes just in case.
+	 */
+	len = strlen(str) + 2;
+	p = str;
+	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
+	 * our buffer length to account for these characters.
+	 */
+	while ((p = strpbrk(p, "\\\""))) {
+		p++;
+		len++;
+	}
+
+	return len;
+}
+/* }}} */
+
 
 /* {{{ _php_imap_get_address_size
  */
