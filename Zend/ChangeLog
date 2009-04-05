@@ -1,3 +1,16 @@
+2009-04-04  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_compile.c
+      tests/objects_002.phpt
+      tests/objects_003.phpt
+      tests/objects_004.phpt
+      tests/objects_005.phpt
+      tests/objects_006.phpt
+      tests/objects_007.phpt
+      tests/objects_008.phpt
+      tests/objects_009.phpt:
+      - Synced old changes
+
 2009-04-03  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_gc.c
