@@ -3,7 +3,7 @@ Bug #38325 (spl_autoload_register() gaves wrong line for "class not found")
 --FILE--
 <?php
 spl_autoload_register();
-new Foo();
+new ThisClassDoesNotExistEverFoo();
 ?>
 --EXPECTF--
-Fatal error: spl_autoload(): Class Foo could not be loaded in %s on line 3
+Fatal error: spl_autoload(): Class ThisClassDoesNotExistEverFoo could not be loaded in %s on line 3
