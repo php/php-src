@@ -770,7 +770,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 		return SUCCESS;
 	}
 }
-#endif /* HAVE_HASH_EXT */
+#endif /* HAVE_HASH_EXT }}} */
 
 	return FAILURE;
 }
