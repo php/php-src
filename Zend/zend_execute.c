@@ -183,7 +183,6 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 		if (T->str_offset.str->type != IS_STRING
 			|| ((int)T->str_offset.offset < 0)
 			|| (T->str_offset.str->value.str.len <= (int)T->str_offset.offset)) {
-			zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
 			ptr->value.str.val = STR_EMPTY_ALLOC();
 			ptr->value.str.len = 0;
 		} else {
@@ -1133,6 +1132,9 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 						break;
 				}
 				if (result) {
+					if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+					}
 					container = *container_ptr;
 					result->str_offset.str = container;
 					PZVAL_LOCK(container);
