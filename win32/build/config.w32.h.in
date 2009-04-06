@@ -4,6 +4,8 @@
 */
 
 /* Define the minimum supported version */
+#undef _WIN32_WINNT
+#undef NTDDI_VERSION
 #define _WIN32_WINNT 0x500
 #define NTDDI_VERSION  _WIN32_WIN2K
 
