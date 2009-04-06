@@ -254,6 +254,7 @@ y2k_compliance = On
 ;   On = Enabled and buffer is unlimited. (Use with caution)
 ;   Off = Disabled
 ;   Integer = Enables the buffer and sets its maximum size in bytes.
+; Note: This directive is hardcoded to Off for the CLI SAPI
 ; Default Value: Off
 ; Development Value: 4096
 ; Production Value: 4096
@@ -302,6 +303,7 @@ zlib.output_compression = Off
 ; and every HTML block.  Turning this option on has serious performance
 ; implications and is generally recommended for debugging purposes only.
 ; http://www.php.net/manual/en/outcontrol.configuration.php#ini.implicit-flush
+; Note: This directive is hardcoded to On for the CLI SAPI
 implicit_flush = Off
 
 ; The unserialize callback function will be called (with the undefined class'
@@ -434,11 +436,13 @@ expose_php = On
 
 ; Maximum execution time of each script, in seconds
 ; http://www.php.net/manual/en/info.configuration.php#ini.max-execution-time
+; Note: This directive is hardcoded to 0 for the CLI SAPI
 max_execution_time = 30     
 
 ; Maximum amount of time each script may spend parsing request data. It's a good
 ; idea to limit this time on productions servers in order to eliminate unexpectedly
 ; long running scripts. 
+; Note: This directive is hardcoded to -1 for the CLI SAPI
 ; Default Value: -1 (Unlimited)
 ; Development Value: 60 (60 seconds)
 ; Production Value: 60 (60 seconds)
@@ -592,6 +596,7 @@ track_errors = On
 ; links to documentation related to that error. This directive controls whether
 ; those HTML links appear in error messages or not. For performance and security
 ; reasons, it's recommended you disable this on production servers.
+; Note: This directive is hardcoded to Off for the CLI SAPI
 ; Default Value: On
 ; Development Value: On
 ; Production value: Off
@@ -707,6 +712,7 @@ register_long_arrays = Off
 ; enabled, registering these variables consumes CPU cycles and memory each time
 ; a script is executed. For performance reasons, this feature should be disabled
 ; on production servers.
+; Note: This directive is hardcoded to On for the CLI SAPI
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
