@@ -295,7 +295,7 @@ PS_OPEN_FUNC(files)
 		argv[argc++] = last;
 		last = ++p;
 		p = strchr(p, ';');
-		if (argc > 2) break;
+		if (argc > 1) break;
 	}
 	argv[argc++] = last;
 

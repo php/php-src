@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
+- Fixed segfault on invalid session.save_path. (Hannes)
 
 - Fixed bug #47845 (PDO_Firebird omits first row from query). (Lars W)
 - Fixed bug #47831 (Compile warning for strnlen() in main/spprintf.c).
