@@ -3270,9 +3270,6 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
-		while (fci->param_count) {
-			zval_ptr_dtor(fci->params[--fci->param_count]);
-		}
 		if (free_mem) {
 			efree(fci->params);
 			fci->params = NULL;
@@ -3320,7 +3317,6 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void *) &arg, &pos) == SUCCESS) {
 		*params++ = arg;
-		Z_ADDREF_P(*arg);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
 	}
 
@@ -3343,7 +3339,6 @@ ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval
 		fci->params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
 
 		for (i = 0; i < argc; ++i) {
-			Z_ADDREF_P(*(argv[i]));
 			fci->params[i] = argv[i];
 		}
 	}
@@ -3369,7 +3364,6 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 
 		for (i = 0; i < argc; ++i) {
 			arg = va_arg(*argv, zval **);
-			Z_ADDREF_P(*arg);
 			fci->params[i] = arg;
 		}
 	}
