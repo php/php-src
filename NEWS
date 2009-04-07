@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.10
+- Updated to version 2009.5 (2009e) (Derick)
+
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
 
