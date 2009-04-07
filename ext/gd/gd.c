@@ -54,6 +54,10 @@
 #endif
 
 #if HAVE_LIBGD
+#if !HAVE_GD_BUNDLED
+# include "libgd/gd_compat.h"
+#endif
+
 
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
@@ -75,7 +79,6 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # ifdef HAVE_LIBFREETYPE
 #  include <ft2build.h>
 #  include FT_FREETYPE_H
-# else
 # endif
 #endif
 
@@ -1181,8 +1184,10 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 #endif
 /* }}} */
 
-#ifdef HAVE_GD_BUNDLED
-#define PHP_GD_VERSION_STRING "bundled (2.0.28 compatible)"
+#if HAVE_GD_BUNDLED
+#define PHP_GD_VERSION_STRING "bundled (2.0.34 compatible)"
+#else
+#define PHP_GD_VERSION_STRING "2.0"
 #endif
 
 /* {{{ PHP_MINFO_FUNCTION
@@ -1212,6 +1217,7 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 		php_info_print_table_row(2, "FreeType Version", tmp);
 	}
+#else
 	php_info_print_table_row(2, "FreeType Linkage", "with unknown library");
 #endif
 #endif
@@ -1231,8 +1237,8 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_JPG
 	{
 		char tmp[12];
-		snprintf(tmp, sizeof(tmp), "%d", gdJpegGetVersionInt());
-		php_info_print_table_row(2, "JPG Support", "enabled");
+		snprintf(tmp, sizeof(tmp), "%s", gdJpegGetVersionString());
+		php_info_print_table_row(2, "JPEG Support", "enabled");
 		php_info_print_table_row(2, "libJPEG Version", tmp);
 	}
 #endif

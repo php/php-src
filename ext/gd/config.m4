@@ -309,7 +309,7 @@ elif test "$PHP_GD" != "no"; then
   fi
 
   GD_MODULE_TYPE=external
-  extra_sources="gdcache.c"
+  extra_sources="gdcache.c libgd/gd_compat.c"
 
   GD_FEATURES=`$GDLIB_CONFIG --features`
 
