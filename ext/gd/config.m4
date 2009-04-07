@@ -351,11 +351,6 @@ dnl Extra libraries and libpaths needed to link with libgd
   GD_LIBS=`$GDLIB_CONFIG --libs`
 
   PHP_EVAL_LIBLINE([$GD_LDFLAGS $GD_LIBS -L$GD_LIBDIR -lgd], GD_SHARED_LIBADD)
-
-dnl Build test
-  PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
-    AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-  ], [ -L$GD_LIBDIR $GD_SHARED_LIBADD ])
 fi
 
 dnl
