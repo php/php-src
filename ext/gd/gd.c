@@ -54,6 +54,10 @@
 #endif
 
 #if HAVE_LIBGD
+#if !HAVE_GD_BUNDLED
+# include "libgd/gd_compat.h"
+#endif
+
 
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
@@ -69,7 +73,6 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #include <gdfontmb.h> /* 3 Medium bold font */
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
-#include <gdhelpers.h>
 
 #ifdef HAVE_GD_WBMP
 #include "libgd/wbmp.h"
@@ -1294,7 +1297,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_JPG
 	{
 		char tmp[12];
-		snprintf(tmp, sizeof(tmp), "%d", gdJpegGetVersionInt());
+		snprintf(tmp, sizeof(tmp), "%s", gdJpegGetVersionString());
 		php_info_print_table_row(2, "JPEG Support", "enabled");
 		php_info_print_table_row(2, "libJPEG Version", tmp);
 	}
