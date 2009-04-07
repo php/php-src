@@ -307,6 +307,7 @@ elif test "$PHP_GD" != "no"; then
   else
     AC_MSG_ERROR([gdlib-config not found.])
   fi
+  PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
   GD_MODULE_TYPE=external
   extra_sources="gdcache.c libgd/gd_compat.c"
@@ -384,6 +385,8 @@ dnl T1LIB support is gdlib independent
     GD_CFLAGS=`$GDLIB_CONFIG --cflags`
     GDLIB_CFLAGS="-I$GD_INCDIR $GD_CFLAGS"
     GD_HEADER_DIRS="ext/gd/"
+    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
+
   fi
 
   PHP_INSTALL_HEADERS([$GD_HEADER_DIRS])
