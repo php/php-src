@@ -1,3 +1,25 @@
+2009-04-06  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_execute.c
+      tests/bug39304.phpt
+      tests/bug41919.phpt:
+      - Fixed bug #47903 ("@" operator does not work with string offsets (PHP_5_2
+      only!))
+        (MFH: #39018)
+
+2009-04-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      tests/bug47880.phpt:
+      Bug #47880 (crashes in call_user_func_array())
+
+    * tests/bug47880.phpt
+      tests/bug47880.phpt:
+      
+      file bug47880.phpt was initially added on branch PHP_5_3.
+
 2009-04-04  Felipe Pena  <felipensp@gmail.com>
 
     * zend_compile.c
