@@ -252,6 +252,10 @@ gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile, int ignore_warning);
 
 int gdJpegGetVersionInt();
 const char * gdPngGetVersionString();
+
+int gdJpegGetVersionInt();
+const char * gdJpegGetVersionString();
+
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
         of bytes fetched. 0 is EOF, not an error! */
