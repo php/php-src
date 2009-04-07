@@ -48,9 +48,9 @@
 #ifdef PHP_WIN32
 # include <io.h>
 # include <fcntl.h>
-#include <windows.h>
-#include <Winuser.h>
-#include <Wingdi.h>
+# include <windows.h>
+# include <Winuser.h>
+# include <Wingdi.h>
 #endif
 
 #if HAVE_LIBGD
