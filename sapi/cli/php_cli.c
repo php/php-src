@@ -91,6 +91,12 @@
 
 #include "php_getopt.h"
 
+#ifndef PHP_WIN32
+# define php_select(m, r, w, e, t)	select(m, r, w, e, t)
+#else
+# include "win32/select.h"
+#endif
+
 PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_files;
 
@@ -228,15 +234,38 @@ static void print_extensions(TSRMLS_D) /* {{{ */
 #define STDOUT_FILENO 1
 #endif
 
+static inline int sapi_cli_select(int fd)
+{
+	fd_set wfd, dfd;
+	struct timeval tv;
+	int ret;
+
+	FD_ZERO(&wfd);
+	FD_ZERO(&dfd);
+
+	PHP_SAFE_FD_SET(fd, &wfd);
+
+	tv.tv_sec = FG(default_socket_timeout);
+	tv.tv_usec = 0;
+
+	ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
+
+	return ret != -1;
+}
+
 static inline size_t sapi_cli_single_write(const char *str, uint str_length) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
 
-	ret = write(STDOUT_FILENO, str, str_length);
+	do {
+		ret = write(STDOUT_FILENO, str, str_length);
+	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
+
 	if (ret <= 0) {
 		return 0;
 	}
+
 	return ret;
 #else
 	size_t ret;
