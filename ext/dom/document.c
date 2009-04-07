@@ -1245,6 +1245,9 @@ PHP_FUNCTION(dom_document_import_node)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
+		if ((recursive == 0) && (nodep->type == XML_ELEMENT_NODE)) {
+			recursive = 2;
+		}
 		retnodep = xmlDocCopyNode(nodep, docp, recursive);
 		if (!retnodep) {
 			RETURN_FALSE;
