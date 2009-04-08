@@ -1020,6 +1020,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
 	char dummy = 1;
+	ulong hash;
 	ALLOCA_FLAG(use_heap)
 
 	if (name == NULL || !name_length) {
@@ -1035,7 +1036,9 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		lc_length -= 1;
 	}
 
-	if (zend_hash_find(EG(class_table), lc_name, lc_length, (void **) ce) == SUCCESS) {
+	hash = zend_inline_hash_func(lc_name, lc_length);
+
+	if (zend_hash_quick_find(EG(class_table), lc_name, lc_length, hash, (void **) ce) == SUCCESS) {
 		free_alloca(lc_free, use_heap);
 		return SUCCESS;
 	}
@@ -1053,7 +1056,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);
 	}
 
-	if (zend_hash_add(EG(in_autoload), lc_name, lc_length, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
+	if (zend_hash_quick_add(EG(in_autoload), lc_name, lc_length, hash, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		free_alloca(lc_free, use_heap);
 		return FAILURE;
 	}
@@ -1090,7 +1093,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 
 	zval_ptr_dtor(&class_name_ptr);
 
-	zend_hash_del(EG(in_autoload), lc_name, lc_length);
+	zend_hash_quick_del(EG(in_autoload), lc_name, lc_length, hash);
 
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
@@ -1101,7 +1104,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 		return FAILURE;
 	}
 
-	retval = zend_hash_find(EG(class_table), lc_name, lc_length, (void **) ce);
+	retval = zend_hash_quick_find(EG(class_table), lc_name, lc_length, hash, (void **) ce);
 	free_alloca(lc_free, use_heap);
 	return retval;
 }
