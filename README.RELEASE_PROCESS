@@ -253,3 +253,38 @@ number, and remove the RC from there.
   II. For PHP5: Set $CURRENT_QA_RELEASE_5 to false
 
 12. Rebuild the English and Japanese docs (ask Derick)
+
+
+Re-releasing the same version (or -pl)
+------------------------------------
+
+1. Commit the new binaries to ``phpweb/distributions/``
+
+2. Edit ``phpweb/include/version.inc`` and change (X=major release number):
+
+ a. If only releasing for one OS, make sure you edit only those variables
+
+ b. ``$PHP_X_VERSION`` to the correct version
+
+ c. ``$PHP_X_DATE`` to the release date
+
+ d. ``$PHP_X_MD5`` array and update all the md5 sums
+
+ e. Make sure there are no outdated "notes" or edited "date" keys in the
+ ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
+
+3. Add a short notice to phpweb stating that there is a new release, and
+highlight the major important things (security fixes) and when it is important
+to upgrade.
+
+ a. Call php bin/createNewsEntry in your local phpweb checkout
+
+ b. Add the content for the news entry
+
+4. Commit all the changes (``include/version.inc``, ``archive/archive.xml``,
+``archive/entries/YYYY-MM-DD-N.xml``)
+
+5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
+php-general@lists.php.net and internals@lists.php.net with a text similar to
+the news entry.
+
