@@ -80,7 +80,7 @@ struct _zend_extension {
 	op_array_dtor_func_t op_array_dtor;
 
 	int (*api_no_check)(int api_no);
-	void *reserved2;
+	int (*build_id_check)(const char* build_id);
 	void *reserved3;
 	void *reserved4;
 	void *reserved5;
