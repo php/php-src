@@ -1063,6 +1063,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	char dummy = 1;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
+	ulong hash;
 
 	if (name.v == NULL || !name_length) {
 		return FAILURE;
@@ -1086,7 +1087,9 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 		lc_name_len -= 1;
 	}
 
-	if (zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len + 1, (void **) ce) == SUCCESS) {
+	hash = zend_u_inline_hash_func(type, lc_name, lc_name_len + 1);
+
+	if (zend_u_hash_quick_find(EG(class_table), type, lc_name, lc_name_len + 1, hash, (void **) ce) == SUCCESS) {
 		if (do_normalize) {
 			efree(lc_free.v);
 		}
@@ -1108,7 +1111,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 		zend_u_hash_init(EG(in_autoload), 0, NULL, NULL, 0, UG(unicode));
 	}
 
-	if (zend_u_hash_add(EG(in_autoload), type, lc_name, lc_name_len + 1, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
+	if (zend_u_hash_quick_add(EG(in_autoload), type, lc_name, lc_name_len + 1, hash, (void**)&dummy, sizeof(char), NULL) == FAILURE) {
 		if (do_normalize) {
 			efree(lc_free.v);
 		}
@@ -1149,7 +1152,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	zval_ptr_dtor(&class_name_ptr);
 
-	zend_u_hash_del(EG(in_autoload), type, lc_name, lc_name_len + 1);
+	zend_u_hash_quick_del(EG(in_autoload), type, lc_name, lc_name_len + 1, hash);
 
 	if (retval_ptr) {
 		zval_ptr_dtor(&retval_ptr);
@@ -1162,7 +1165,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 		return FAILURE;
 	}
 
-	retval = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len + 1, (void **) ce);
+	retval = zend_u_hash_quick_find(EG(class_table), type, lc_name, lc_name_len + 1, hash, (void **) ce);
 	if (do_normalize) {
 		efree(lc_free.v);
 	}
