@@ -1245,16 +1245,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 	if (is_method) {
 		if (zend_u_hash_add(&CG(active_class_entry)->function_table, Z_TYPE(function_name->u.constant), lcname, lcname_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
-			zend_op_array *child_op_array, *parent_op_array;
-			if (CG(active_class_entry)->parent
-			    && (zend_u_hash_find(&CG(active_class_entry)->function_table, Z_TYPE(function_name->u.constant), name, name_len+1, (void **) &child_op_array) == SUCCESS)
-			    && (zend_u_hash_find(&CG(active_class_entry)->parent->function_table, Z_TYPE(function_name->u.constant), name, name_len+1, (void **) &parent_op_array) == SUCCESS)
-					&& (child_op_array == parent_op_array)) {
-				zend_u_hash_update(&CG(active_class_entry)->function_table, Z_TYPE(function_name->u.constant), name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-			} else {
-				efree(lcname.v);
-				zend_error(E_COMPILE_ERROR, "Cannot redeclare %v::%R()", CG(active_class_entry)->name, Z_TYPE(function_name->u.constant), name);
-			}
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare %v::%R()", CG(active_class_entry)->name, Z_TYPE(function_name->u.constant), name);
 		}
 
 		if (fn_flags & ZEND_ACC_ABSTRACT) {
@@ -2982,29 +2973,26 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_b
 {
 	zend_function *function;
 
-	if (opline->opcode != ZEND_DECLARE_FUNCTION) {
-		zend_error(E_COMPILE_ERROR, "Internal compiler error.  Please report!");
-	}
-
 	zend_u_hash_find(function_table, Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (void *) &function);
 	if (zend_u_hash_add(function_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, function, sizeof(zend_function), NULL)==FAILURE) {
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
-		zend_function *function;
+		zend_function *old_function;
 
-		if (zend_u_hash_find(function_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void *) &function)==SUCCESS
-			&& function->type==ZEND_USER_FUNCTION
-			&& ((zend_op_array *) function)->last>0) {
-			zend_error(error_level, "Cannot redeclare %R() (previously declared in %s:%d)",
-				Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
-						((zend_op_array *) function)->filename,
-						((zend_op_array *) function)->opcodes[0].lineno);
-		} else if (((zend_internal_function *)function)->module) {
-			zend_error(error_level, "Cannot redeclare %R() (internal function exists in module %s)",
-				Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
-						((zend_internal_function *)function)->module->name);
-		} else {
-			zend_error(error_level, "Cannot redeclare %R()", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
+		if (zend_u_hash_find(function_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void *) &old_function)==SUCCESS) {
+			if (old_function->type == ZEND_USER_FUNCTION &&
+			    old_function->op_array.last > 0) {
+				zend_error(error_level, "Cannot redeclare %v() (previously declared in %s:%d)",
+					function->common.function_name,
+					old_function->op_array.filename,
+					old_function->op_array.opcodes[0].lineno);
+			} else if (old_function->type == ZEND_INTERNAL_FUNCTION &&
+			           old_function->internal_function.module) {
+				zend_error(error_level, "Cannot redeclare %v() (internal function exists in module %s)",
+					function->common.function_name,
+					old_function->internal_function.module->name);
+			}
 		}
+		zend_error(error_level, "Cannot redeclare %v()", function->common.function_name);
 		return FAILURE;
 	} else {
 		(*function->op_array.refcount)++;
@@ -3077,13 +3065,6 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op *opline, HashTa
 	/* Register the derived class */
 	if (zend_u_hash_add(class_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %v", ce->name);
-		ce->refcount--;
-		zend_hash_destroy(&ce->function_table);
-		zend_hash_destroy(&ce->default_properties);
-		zend_hash_destroy(&ce->properties_info);
-		zend_hash_destroy(&ce->default_static_members);
-		zend_hash_destroy(&ce->constants_table);
-		return NULL;
 	}
 	return ce;
 }
@@ -3560,8 +3541,6 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
-	do_inherit_parent_constructor(ce TSRMLS_CC);
-
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
@@ -3586,7 +3565,7 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
 		zend_verify_abstract_class(ce TSRMLS_CC);
-		if (ce->parent || ce->num_interfaces) {
+		if (ce->num_interfaces) {
 			do_verify_abstract_class(TSRMLS_C);
 		}
 	}
