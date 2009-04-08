@@ -17,7 +17,7 @@ Class C {
 }
 ?>
 --EXPECTF--
-unicode(%d) "%sreflectionObject_FileInfo_basic.php"
+unicode(%d) "%sReflectionObject_FileInfo_basic.php"
 int(12)
 int(14)
 bool(false)
