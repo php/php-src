@@ -211,7 +211,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_sqlite
-PRIMARY MAINTAINER:  Unknown
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
@@ -223,7 +223,7 @@ STATUS:              Working
 COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0 (Since 4.3.2 in PECL)
