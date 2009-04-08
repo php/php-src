@@ -856,9 +856,14 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
-	zend_function *fbc;
+	char *lc_function_name;
+	zend_function *fbc;	
+	
+	lc_function_name = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 
-	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
+	if (zend_hash_find(&ce->function_table, lc_function_name, function_name_strlen+1, (void **) &fbc)==FAILURE) {
+		efree(lc_function_name);
+
 		if (ce->__call &&
 		    EG(This) &&
 		    Z_OBJ_HT_P(EG(This))->get_class_entry &&
@@ -886,6 +891,8 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 			zend_error(E_ERROR, "Call to undefined method %s::%s()", class_name, function_name_strval);
 		}
 	}
+	efree(lc_function_name);
+
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
 	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {

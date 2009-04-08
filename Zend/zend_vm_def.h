@@ -1795,7 +1795,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(OP2_TYPE != IS_UNUSED) {
-		char *function_name_strval;
+		char *function_name_strval = NULL;
 		int function_name_strlen;
 		zend_bool is_const = (OP2_TYPE == IS_CONST);
 		zend_free_op free_op2;
@@ -1808,15 +1808,17 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 
 			if (Z_TYPE_P(function_name) != IS_STRING) {
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
+			} else {
+				function_name_strval = Z_STRVAL_P(function_name);
+				function_name_strlen = Z_STRLEN_P(function_name);
 			}
-			function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
-			function_name_strlen = function_name->value.str.len;
 		}
 
-		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		if (function_name_strval) {
+			EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+		}
 
 		if (!is_const) {
-			efree(function_name_strval);
 			FREE_OP2();
 		}
 	} else {

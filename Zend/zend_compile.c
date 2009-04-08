@@ -1536,11 +1536,8 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *method_n
 		    memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
 			zval_dtor(&opline->op2.u.constant);
 			SET_UNUSED(opline->op2);
-			efree(lcname);
-		} else {
-			efree(opline->op2.u.constant.value.str.val);
-			opline->op2.u.constant.value.str.val = lcname;
 		}
+		efree(lcname);
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
