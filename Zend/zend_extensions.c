@@ -81,7 +81,7 @@ int zend_load_extension(const char *path)
 		}
 	} else if (strcmp(ZEND_EXTENSION_BUILD_ID, extension_version_info->build_id) &&
 	           (!new_extension->build_id_check || new_extension->build_id_check(ZEND_EXTENSION_BUILD_ID) != SUCCESS)) {
-		fprintf(stderr, "Cannot load %s - it was build with configuration %s, whereas running engine is %s\n",
+		fprintf(stderr, "Cannot load %s - it was built with configuration %s, whereas running engine is %s\n",
 					new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
 		DL_UNLOAD(handle);
 		return FAILURE;
