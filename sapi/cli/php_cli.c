@@ -230,7 +230,7 @@ static void print_extensions(TSRMLS_D) /* {{{ */
 #define STDOUT_FILENO 1
 #endif
 
-static inline int sapi_cli_select(int fd)
+static inline int sapi_cli_select(int fd TSRMLS_DC)
 {
 	fd_set wfd, dfd;
 	struct timeval tv;
@@ -249,14 +249,14 @@ static inline int sapi_cli_select(int fd)
 	return ret != -1;
 }
 
-static inline size_t sapi_cli_single_write(const char *str, uint str_length) /* {{{ */
+static inline size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
 
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
-	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
+	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO TSRMLS_CC));
 
 	if (ret <= 0) {
 		return 0;
@@ -287,7 +287,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 
 	while (remaining > 0)
 	{
-		ret = sapi_cli_single_write(ptr, remaining);
+		ret = sapi_cli_single_write(ptr, remaining TSRMLS_CC);
 		if (!ret) {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			php_handle_aborted_connection();
@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[])
 					pos = 0;
 					
 					if (php_last_char != '\0' && php_last_char != '\n') {
-						sapi_cli_single_write("\n", 1);
+						sapi_cli_single_write("\n", 1 TSRMLS_CC);
 					}
 
 					if (EG(exception)) {
