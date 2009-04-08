@@ -25,7 +25,7 @@ Class C {
 }
 ?>
 --EXPECTF--
-unicode(%d) "%sreflectionClass_FileInfo_basic.php"
+unicode(%d) "%sReflectionClass_FileInfo_basic.php"
 int(20)
 int(22)
 bool(false)
