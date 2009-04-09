@@ -233,7 +233,7 @@ after processing all input lines
 .TP
 .PD 1
 .B \-s
-Display colour syntax highlighted source
+Outputs HTML syntax highlighted source
 .TP
 .PD 0
 .B \-\-version
@@ -247,7 +247,7 @@ Version number
 .TP
 .PD 1
 .B \-w
-Display source with stripped comments and whitespace
+Outputs source with stripped comments and whitespace
 .TP
 .PD 0
 .B \-\-zend\-extension \fIfile\fP
