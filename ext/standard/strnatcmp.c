@@ -116,10 +116,10 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		ca = *ap; cb = *bp;
 
 		/* skip over leading spaces or zeros */
-		while (isspace((int)(unsigned char)ca) || (ca == '0' && ap+1 < aend))
+		while (isspace((int)(unsigned char)ca) || (ca == '0' && (ap+1 < aend) && (*(ap+1)!='.')))
 			ca = *++ap;
 
-		while (isspace((int)(unsigned char)cb) || (cb == '0' && bp+1 < bend))
+		while (isspace((int)(unsigned char)cb) || (cb == '0' && (bp+1 < bend) && (*(bp+1)!='.')))
 			cb = *++bp;
 
 		/* process run of digits */
