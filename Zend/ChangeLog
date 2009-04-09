@@ -1,3 +1,64 @@
+2009-04-08  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_extensions.h:
+      iadd utility macro
+
+    * (PHP_5_3)
+      zend_extensions.h:
+      add utility macro
+
+2009-04-08  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_extensions.c:
+      MFH: Changed spelling from "build" to "built"
+
+    * zend_extensions.c:
+      Changed spelling from "build" to "built"
+
+2009-04-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      Improved specialization (IS_CONST can't be IS_OBJECT)
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Calculate hash value once
+
+    * zend_compile.c
+      zend_compile.c:
+      Removed deprecated code and fixed function name in error message
+
+    * zend_extensions.c
+      zend_extensions.c
+      zend_extensions.h
+      zend_extensions.h:
+      Added ability to check build_id by extension
+
+2009-04-08  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/bug47801.phpt
+      tests/bug47801.phpt:
+      - Added test
+
+    * tests/bug47801.phpt
+      tests/bug47801.phpt
+      tests/bug47801.phpt:
+        1.1.4;
+      file bug47801.phpt was initially added on branch PHP_5_2.
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      - Fixed bug #47801 (__call() accessed via parent:: operator is provided
+      incorrect method name)
+
 2009-04-06  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
