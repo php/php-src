@@ -334,7 +334,9 @@ function ut_main()
 		array( "abc", 0, 2, "ab" ),
 		array( "Abc", -4, 1, "false" ),
 		array( "ababc", 1, 2, "ba" ),
+		array( "ababc", 0, 10, "ababc" ),
 		
+		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, 10 , "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -1, "Op" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -2, "O" ),
@@ -953,6 +955,8 @@ substring of "Abc" from "1" - grapheme_substr with length 1 = b == b
 substring of "abc" from "0" - grapheme_substr with length 2 = ab == ab
 substring of "Abc" from "-4" - grapheme_substr with length 1 = false == false
 substring of "ababc" from "1" - grapheme_substr with length 2 = ba == ba
+substring of "ababc" from "0" - grapheme_substr with length 10 = ababc == ababc
+substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length 10 = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr = Opq == Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -1 = Op == Op
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -2 = O == O
