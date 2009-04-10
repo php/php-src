@@ -542,7 +542,7 @@ PHP_FUNCTION(grapheme_substr)
 		length += iter_val;
 	}
 	
-	if ( UBRK_DONE == sub_str_end_pos ) {
+	if ( UBRK_DONE == sub_str_end_pos && length < 0) {
 	
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length not contained in string", 1 TSRMLS_CC );
 	
