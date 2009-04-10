@@ -17,7 +17,7 @@
 ; 6. The directory from the --with-config-file-path compile time option, or the
 ; Windows directory (C:\windows or C:\winnt)
 ; See the PHP docs for more specific information.
-; http://www.php.net/manual/en/configuration.file.php
+; http://php.net/configuration.file
 
 ; The syntax of the file is extremely simple.  Whitespace and Lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
@@ -31,7 +31,7 @@
 ; special sections cannot be overridden by user-defined INI files or
 ; at runtime. Currently, [PATH=] and [HOST=] sections only work under
 ; CGI/FastCGI.
-; http://www.php.net/manual/en/ini.sections.php
+; http://php.net/ini.sections
 
 ; Directives are specified using the following syntax:
 ; directive = value
@@ -208,7 +208,7 @@
 ;;;;;;;;;;;;;;;;;;;;
 
 ; Enable the PHP scripting language engine under Apache.
-; http://www.php.net/manual/en/apache.configuration.php#ini.engine
+; http://php.net/engine
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
@@ -222,19 +222,19 @@ engine = On
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
-; http://www.php.net/manual/en/ini.core.php#ini.short-open-tag
+; http://php.net/short-open-tag
 short_open_tag = Off
 
 ; Allow ASP-style <% %> tags.
-; http://www.php.net/manual/en/ini.core.php#ini.asp-tags
+; http://php.net/asp-tags
 asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
-; http://www.php.net/manual/en/ini.core.php#ini.precision
+; http://php.net/precision
 precision = 14
 
 ; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
-; http://www.php.net/manual/en/ini.core.php#ini.y2k-compliance
+; http://php.net/y2k-compliance
 y2k_compliance = On
 
 ; Output buffering is a mechanism for controlling how much output data
@@ -258,7 +258,7 @@ y2k_compliance = On
 ; Default Value: Off
 ; Development Value: 4096
 ; Production Value: 4096
-; http://www.php.net/manual/en/outcontrol.configuration.php#ini.output-buffering
+; http://php.net/output-buffering
 output_buffering = 4096
 
 ; You can redirect all of the output of your scripts to a function.  For
@@ -273,7 +273,7 @@ output_buffering = 4096
 ;   and you cannot use both "ob_gzhandler" and "zlib.output_compression".
 ; Note: output_handler must be empty if this is set 'On' !!!!
 ;   Instead you must use zlib.output_handler.
-; http://www.php.net/manual/en/outcontrol.configuration.php#ini.output-handler
+; http://php.net/output-handler
 ;output_handler =
 
 ; Transparent output compression using the zlib library
@@ -285,16 +285,16 @@ output_buffering = 4096
 ;   performance, enable output_buffering in addition.
 ; Note: You need to use zlib.output_handler instead of the standard
 ;   output_handler, or otherwise the output will be corrupted.
-; http://www.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression
+; http://php.net/zlib.output-compression
 zlib.output_compression = Off
 
-; http://www.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression-level
+; http://php.net/zlib.output-compression-level
 ;zlib.output_compression_level = -1
 
 ; You cannot specify additional output handlers if zlib.output_compression
 ; is activated here. This setting does the same as output_handler but in
 ; a different order.
-; http://www.php.net/manual/en/zlib.configuration.php#ini.zlib.output-handler
+; http://php.net/zlib.output-handler
 ;zlib.output_handler =
 
 ; Implicit flush tells PHP to tell the output layer to flush itself
@@ -302,7 +302,7 @@ zlib.output_compression = Off
 ; PHP function flush() after each and every call to print() or echo() and each
 ; and every HTML block.  Turning this option on has serious performance
 ; implications and is generally recommended for debugging purposes only.
-; http://www.php.net/manual/en/outcontrol.configuration.php#ini.implicit-flush
+; http://php.net/implicit-flush
 ; Note: This directive is hardcoded to On for the CLI SAPI
 implicit_flush = Off
 
@@ -330,29 +330,29 @@ serialize_precision = 100
 ; Default Value: On (Suppress warnings)
 ; Development Value: Off (Issue warnings)
 ; Production Value: Off (Issue warnings)
-; http://www.php.net/manual/en/ini.core.php#ini.allow-call-time-pass-reference
+; http://php.net/allow-call-time-pass-reference
 allow_call_time_pass_reference = Off
 
 ; Safe Mode
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode
+; http://php.net/safe-mode
 safe_mode = Off
 
 ; By default, Safe Mode does a UID compare check when
 ; opening files. If you want to relax this to a GID compare,
 ; then turn on safe_mode_gid.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode-gid
+; http://php.net/safe-mode-gid
 safe_mode_gid = Off
 
 ; When safe_mode is on, UID/GID checks are bypassed when
 ; including files from this directory and its subdirectories.
 ; (directory must also be in include_path or full path must
 ; be used when including)
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode-include-dir
+; http://php.net/safe-mode-include-dir
 safe_mode_include_dir =
 
 ; When safe_mode is on, only executables located in the safe_mode_exec_dir
 ; will be allowed to be executed via the exec family of functions.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode-exec-dir
+; http://php.net/safe-mode-exec-dir
 safe_mode_exec_dir =
 
 ; Setting certain environment variables may be a potential security breach.
@@ -362,37 +362,37 @@ safe_mode_exec_dir =
 ; environment variables that begin with PHP_ (e.g. PHP_FOO=BAR).
 ; Note:  If this directive is empty, PHP will let the user modify ANY
 ;   environment variable!
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode-allowed-env-vars
+; http://php.net/safe-mode-allowed-env-vars
 safe_mode_allowed_env_vars = PHP_
 
 ; This directive contains a comma-delimited list of environment variables that
 ; the end user won't be able to change using putenv().  These variables will be
 ; protected even if safe_mode_allowed_env_vars is set to allow to change them.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.safe-mode-protected-env-vars
+; http://php.net/safe-mode-protected-env-vars
 safe_mode_protected_env_vars = LD_LIBRARY_PATH
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
 ; or per-virtualhost web server configuration file. This directive is
 ; *NOT* affected by whether Safe Mode is turned On or Off.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.open-basedir
+; http://php.net/open-basedir
 ;open_basedir =
 
 ; This directive allows you to disable certain functions for security reasons.
 ; It receives a comma-delimited list of function names. This directive is
 ; *NOT* affected by whether Safe Mode is turned On or Off.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.disable-functions
+; http://php.net/disable-functions
 disable_functions =
 
 ; This directive allows you to disable certain classes for security reasons.
 ; It receives a comma-delimited list of class names. This directive is
 ; *NOT* affected by whether Safe Mode is turned On or Off.
-; http://www.php.net/manual/en/ini.sect.safe-mode.php#ini.disable-classes
+; http://php.net/disable-classes
 disable_classes =
 
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <span style="color: ???????"> would work.
-; http://www.php.net/manual/en/misc.configuration.php#ini.syntax-highlighting
+; http://php.net/syntax-highlighting
 ;highlight.string  = #DD0000
 ;highlight.comment = #FF9900
 ;highlight.keyword = #007700
@@ -404,19 +404,19 @@ disable_classes =
 ; the request. Consider enabling it if executing long requests, which may end up
 ; being interrupted by the user or a browser timing out. PHP's default behavior
 ; is to disable this feature.
-; http://www.php.net/manual/en/misc.configuration.php#ini.ignore-user-abort
+; http://php.net/ignore-user-abort
 ;ignore_user_abort = On
 
 ; Determines the size of the realpath cache to be used by PHP. This value should
 ; be increased on systems where PHP opens many files to reflect the quantity of
 ; the file operations performed.
-; http://www.php.net/manual/en/ini.core.php#ini.realpath-cache-size
+; http://php.net/realpath-cache-size
 ;realpath_cache_size = 16k
 
 ; Duration of time, in seconds for which to cache realpath information for a given
 ; file or directory. For systems with rarely changing files, consider increasing this
 ; value.
-; http://www.php.net/manual/en/ini.core.php#ini.realpath-cache-ttl
+; http://php.net/realpath-cache-ttl
 ;realpath_cache_ttl = 120
 
 ;;;;;;;;;;;;;;;;;
@@ -427,7 +427,7 @@ disable_classes =
 ; (e.g. by adding its signature to the Web server header).  It is no security
 ; threat in any way, but it makes it possible to determine whether you use PHP
 ; on your server or not.
-; http://www.php.net/manual/en/ini.core.php#ini.expose-php
+; http://php.net/expose-php
 expose_php = On
 
 ;;;;;;;;;;;;;;;;;;;
@@ -435,7 +435,7 @@ expose_php = On
 ;;;;;;;;;;;;;;;;;;;
 
 ; Maximum execution time of each script, in seconds
-; http://www.php.net/manual/en/info.configuration.php#ini.max-execution-time
+; http://php.net/max-execution-time
 ; Note: This directive is hardcoded to 0 for the CLI SAPI
 max_execution_time = 30     
 
@@ -446,15 +446,15 @@ max_execution_time = 30
 ; Default Value: -1 (Unlimited)
 ; Development Value: 60 (60 seconds)
 ; Production Value: 60 (60 seconds)
-; http://www.php.net/manual/en/info.configuration.php#ini.max-input-time
+; http://php.net/max-input-time
 max_input_time = 60
 
 ; Maximum input variable nesting level
-; http://www.php.net/manual/en/info.configuration.php#ini.max-input-nesting-level
+; http://php.net/max-input-nesting-level
 ;max_input_nesting_level = 64
 
 ; Maximum amount of memory a script may consume (128MB)
-; http://www.php.net/manual/en/ini.core.php#ini.memory-limit
+; http://php.net/memory-limit
 memory_limit = 128M
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -510,7 +510,7 @@ memory_limit = 128M
 ; Default Value: E_ALL & ~E_NOTICE
 ; Development Value: E_ALL | E_STRICT
 ; Production Value: E_ALL & ~E_DEPRECATED
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.error-reporting
+; http://php.net/error-reporting
 error_reporting = E_ALL & ~E_DEPRECATED
 
 ; This directive controls whether or not and where PHP will output errors,
@@ -527,7 +527,7 @@ error_reporting = E_ALL & ~E_DEPRECATED
 ; Default Value: On
 ; Development Value: On
 ; Production Value: Off
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.display-errors
+; http://php.net/display-errors
 display_errors = Off
 
 ; The display of errors which occur during PHP's startup sequence are handled
@@ -538,7 +538,7 @@ display_errors = Off
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.display-startup-errors
+; http://php.net/display-startup-errors
 display_startup_errors = Off
 
 ; Besides displaying errors, PHP can also log errors to locations such as a
@@ -548,29 +548,29 @@ display_startup_errors = Off
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: On
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.log-errors
+; http://php.net/log-errors
 log_errors = On
 
 ; Set maximum length of log_errors. In error_log information about the source is
 ; added. The default is 1024 and 0 allows to not apply any maximum length at all.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.log-errors-max-len
+; http://php.net/log-errors-max-len
 log_errors_max_len = 1024
 
 ; Do not log repeated messages. Repeated errors must occur in same file on same
 ; line unless ignore_repeated_source is set true.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.ignore-repeated-errors
+; http://php.net/ignore-repeated-errors
 ignore_repeated_errors = Off
 
 ; Ignore source of message when ignoring repeated messages. When this setting
 ; is On you will not log errors with repeated messages from different files or
 ; source lines.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.ignore-repeated-source
+; http://php.net/ignore-repeated-source
 ignore_repeated_source = Off
 
 ; If this parameter is set to Off, then memory leaks will not be shown (on
 ; stdout or in the log). This has only effect in a debug compile, and if
 ; error reporting includes E_WARNING in the allowed list
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.report-memleaks
+; http://php.net/report-memleaks
 report_memleaks = On
 
 ; This setting is on by default.
@@ -582,11 +582,11 @@ report_memleaks = On
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.track-errors
+; http://php.net/track-errors
 track_errors = Off
 
 ; Turn off normal error reporting and emit XML-RPC error XML
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.xmlrpc-errors
+; http://php.net/xmlrpc-errors
 ;xmlrpc_errors = 0
 
 ; An XML-RPC faultCode
@@ -600,38 +600,38 @@ track_errors = Off
 ; Default Value: On
 ; Development Value: On
 ; Production value: Off
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.html-errors
+; http://php.net/html-errors
 html_errors = Off
 
 ; If html_errors is set On PHP produces clickable error messages that direct
 ; to a page describing the error or function causing the error in detail.
-; You can download a copy of the PHP manual from http://www.php.net/docs.php
+; You can download a copy of the PHP manual from http://php.net/docs
 ; and change docref_root to the base URL of your local copy including the
 ; leading '/'. You must also specify the file extension being used including
 ; the dot. PHP's default behavior is to leave these settings empty.
 ; Note: Never use this feature for production boxes.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.docref-root
+; http://php.net/docref-root
 ; Examples
 ;docref_root = "/phpmanual/"
 
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.docref-ext
+; http://php.net/docref-ext
 ;docref_ext = .html
 
 ; String to output before an error message. PHP's default behavior is to leave
 ; this setting blank.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.error-prepend-string
+; http://php.net/error-prepend-string
 ; Example:
 ;error_prepend_string = "<font color=#ff0000>"
 
 ; String to output after an error message. PHP's default behavior is to leave
 ; this setting blank.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.error-append-string
+; http://php.net/error-append-string
 ; Example:
 ;error_append_string = "</font>"
 
 ; Log errors to specified file. PHP's default behavior is to leave this value
 ; empty.
-; http://www.php.net/manual/en/errorfunc.configuration.php#ini.error-log
+; http://php.net/error-log
 ; Example:
 ;error_log = php_errors.log
 ; Log errors to syslog (Event Log on NT, not valid in Windows 95).
@@ -645,14 +645,14 @@ html_errors = Off
 
 ; The separator used in PHP generated URLs to separate arguments.
 ; PHP's default setting is "&".
-; http://www.php.net/manual/en/ini.core.php#ini.arg-separator.output
+; http://php.net/arg-separator.output
 ; Example:
 ;arg_separator.output = "&amp;"
 
 ; List of separator(s) used by PHP to parse input URLs into variables.
 ; PHP's default setting is "&".
 ; NOTE: Every character in this directive is considered as separator!
-; http://www.php.net/manual/en/ini.core.php#ini.arg-separator.input
+; http://php.net/arg-separator.input
 ; Example:
 ;arg_separator.input = ";&"
 
@@ -667,7 +667,7 @@ html_errors = Off
 ; Default Value: "EGPCS"
 ; Development Value: "GPCS"
 ; Production Value: "GPCS";
-; http://www.php.net/manual/en/ini.core.php#ini.variables-order
+; http://php.net/variables-order
 variables_order = "GPCS"
 
 ; This directive determines which super global data (G,P,C,E & S) should
@@ -680,7 +680,7 @@ variables_order = "GPCS"
 ; Default Value: None
 ; Development Value: "GP"
 ; Production Value: "GP"
-; http://www.php.net/manual/en/ini.core.php#ini.request-order
+; http://php.net/request-order
 request_order = "GP"
 
 ; Whether or not to register the EGPCS variables as global variables.  You may
@@ -691,7 +691,7 @@ request_order = "GP"
 ; You should do your best to write your scripts so that they do not require
 ; register_globals to be on;  Using form variables as globals can easily lead
 ; to possible security problems, if the code is not very well thought of.
-; http://www.php.net/manual/en/ini.core.php#ini.register-globals
+; http://php.net/register-globals
 register_globals = Off
 
 ; Determines whether the deprecated long $HTTP_*_VARS type predefined variables
@@ -701,7 +701,7 @@ register_globals = Off
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
-; http://www.php.net/manual/en/ini.core.php#ini.register-long-arrays
+; http://php.net/register-long-arrays
 register_long_arrays = Off
 
 ; This directive determines whether PHP registers $argv & $argc each time it
@@ -716,7 +716,7 @@ register_long_arrays = Off
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
-; http://www.php.net/manual/en/ini.core.php#ini.register-argc-argv
+; http://php.net/register-argc-argv
 register_argc_argv = Off
 
 ; When enabled, the SERVER and ENV variables are created when they're first
@@ -724,11 +724,11 @@ register_argc_argv = Off
 ; are not used within a script, having this directive on will result in a
 ; performance gain. The PHP directives register_globals, register_long_arrays,
 ; and register_argc_argv must be disabled for this directive to have any affect.
-; http://www.php.net/manual/en/ini.core.php#ini.auto-globals-jit
+; http://php.net/auto-globals-jit
 auto_globals_jit = On
 
 ; Maximum size of POST data that PHP will accept.
-; http://www.php.net/manual/en/ini.core.php#ini.post-max-size
+; http://php.net/post-max-size
 post_max_size = 8M
 
 ; Magic quotes are a preprocessing feature of PHP where PHP will attempt to
@@ -744,23 +744,23 @@ post_max_size = 8M
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
-; http://www.php.net/manual/en/info.configuration.php#ini.magic-quotes-gpc
+; http://php.net/magic-quotes-gpc
 magic_quotes_gpc = Off
 
 ; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-; http://www.php.net/manual/en/info.configuration.php#ini.magic-quotes-runtime
+; http://php.net/magic-quotes-runtime
 magic_quotes_runtime = Off
 
 ; Use Sybase-style magic quotes (escape ' with '' instead of \').
-; http://www.php.net/manual/en/sybase.configuration.php#ini.magic-quotes-sybase
+; http://php.net/magic-quotes-sybase
 magic_quotes_sybase = Off
 
 ; Automatically add files before PHP document.
-; http://www.php.net/manual/en/ini.core.php#ini.auto-prepend-file
+; http://php.net/auto-prepend-file
 auto_prepend_file =
 
 ; Automatically add files after PHP document.
-; http://www.php.net/manual/en/ini.core.php#ini.auto-append-file
+; http://php.net/auto-append-file
 auto_append_file =
 
 ; As of 4.0b4, PHP always outputs a character encoding by default in
@@ -768,16 +768,16 @@ auto_append_file =
 ; set it to be empty.
 ;
 ; PHP's built-in default is text/html
-; http://www.php.net/manual/en/ini.core.php#ini.default-mimetype
+; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
 ; PHP's default character set is set to empty.
-; http://www.php.net/manual/en/ini.core.php#ini.default-charset
+; http://php.net/default-charset
 ;default_charset = "iso-8859-1"
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
 ; to disable this feature.
-; http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data
+; http://php.net/always-populate-raw-post-data
 ;always_populate_raw_post_data = On
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -791,36 +791,36 @@ default_mimetype = "text/html"
 ;include_path = ".;c:\php\includes"
 ;
 ; PHP's default setting for include_path is ".;/path/to/php/pear"
-; http://www.php.net/manual/en/ini.core.php#ini.include-path
+; http://php.net/include-path
 
 ; The root of the PHP pages, used only if nonempty.
 ; if PHP was not compiled with FORCE_REDIRECT, you SHOULD set doc_root
 ; if you are running php as a CGI under any web server (other than IIS)
 ; see documentation for security issues.  The alternate is to use the
 ; cgi.force_redirect configuration below
-; http://www.php.net/manual/en/ini.core.php#ini.doc-root
+; http://php.net/doc-root
 doc_root =
 
 ; The directory under which PHP opens the script using /~username used only
 ; if nonempty.
-; http://www.php.net/manual/en/ini.core.php#ini.user-dir
+; http://php.net/user-dir
 user_dir =
 
 ; Directory in which the loadable extensions (modules) reside.
-; http://www.php.net/manual/en/ini.core.php#ini.extension-dir
+; http://php.net/extension-dir
 ; extension_dir = "./"
 
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
 ; disabled on them.
-; http://www.php.net/manual/en/info.configuration.php#ini.enable-dl
+; http://php.net/enable-dl
 enable_dl = Off
 
 ; cgi.force_redirect is necessary to provide security running PHP as a CGI under
 ; most web servers.  Left undefined, PHP turns this on by default.  You can
 ; turn it off here AT YOUR OWN RISK
 ; **You CAN safely turn this off for IIS, in fact, you MUST.**
-; http://www.php.net/manual/en/ini.core.php#ini.cgi.force-redirect
+; http://php.net/cgi.force-redirect
 ;cgi.force_redirect = 1
 
 ; if cgi.nph is enabled it will force cgi to always sent Status: 200 with
@@ -831,7 +831,7 @@ enable_dl = Off
 ; (iPlanet) web servers, you MAY need to set an environment variable name that PHP
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
-; http://www.php.net/manual/en/ini.core.php#ini.cgi.redirect-status-env
+; http://php.net/cgi.redirect-status-env
 ;cgi.redirect_status_env = ;
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
@@ -840,7 +840,7 @@ enable_dl = Off
 ; this to 1 will cause PHP CGI to fix its paths to conform to the spec.  A setting
 ; of zero causes PHP to behave as before.  Default is 1.  You should fix your scripts
 ; to use SCRIPT_FILENAME rather than PATH_TRANSLATED.
-; http://www.php.net/manual/en/ini.core.php#ini.cgi.fix-pathinfo
+; http://php.net/cgi.fix-pathinfo
 ;cgi.fix_pathinfo=1
 
 ; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
@@ -848,7 +848,7 @@ enable_dl = Off
 ; security context that the request runs under.  mod_fastcgi under Apache
 ; does not currently support this feature (03/17/2002)
 ; Set to 1 if running under IIS.  Default is zero.
-; http://www.php.net/manual/en/ini.core.php#ini.fastcgi.impersonate
+; http://php.net/fastcgi.impersonate
 ;fastcgi.impersonate = 1;
 
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
@@ -860,7 +860,7 @@ enable_dl = Off
 ; is supported by Apache. When this option is set to 1 PHP will send
 ; RFC2616 compliant header.
 ; Default is zero.
-; http://www.php.net/manual/en/ini.core.php#ini.cgi.rfc2616-headers
+; http://php.net/cgi.rfc2616-headers
 ;cgi.rfc2616_headers = 0
 
 ;;;;;;;;;;;;;;;;
@@ -868,16 +868,16 @@ enable_dl = Off
 ;;;;;;;;;;;;;;;;
 
 ; Whether to allow HTTP file uploads.
-; http://www.php.net/manual/en/ini.core.php#ini.file-uploads
+; http://php.net/file-uploads
 file_uploads = On
 
 ; Temporary directory for HTTP uploaded files (will use system default if not
 ; specified).
-; http://www.php.net/manual/en/ini.core.php#ini.upload-tmp-dir
+; http://php.net/upload-tmp-dir
 ;upload_tmp_dir =
 
 ; Maximum allowed size for uploaded files.
-; http://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize
+; http://php.net/upload-max-filesize
 upload_max_filesize = 2M
 
 ;;;;;;;;;;;;;;;;;;
@@ -885,24 +885,24 @@ upload_max_filesize = 2M
 ;;;;;;;;;;;;;;;;;;
 
 ; Whether to allow the treatment of URLs (like http:// or ftp://) as files.
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.allow-url-fopen
+; http://php.net/allow-url-fopen
 allow_url_fopen = On
 
 ; Whether to allow include/require to open URLs (like http:// or ftp://) as files.
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.allow-url-include
+; http://php.net/allow-url-include
 allow_url_include = Off
 
 ; Define the anonymous ftp password (your email address). PHP's default setting
 ; for this is empty.
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.from
+; http://php.net/from
 ;from="john@doe.com"
 
 ; Define the User-Agent string. PHP's default setting for this is empty.
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.user-agent
+; http://php.net/user-agent
 ;user_agent="PHP"
 
 ; Default timeout for socket based streams (seconds)
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.default-socket-timeout
+; http://php.net/default-socket-timeout
 default_socket_timeout = 60
 
 ; If your scripts have to deal with files from Macintosh systems,
@@ -910,7 +910,7 @@ default_socket_timeout = 60
 ; unix or win32 systems, setting this flag will cause PHP to
 ; automatically detect the EOL character in those files so that
 ; fgets() and file() will work regardless of the source of the file.
-; http://www.php.net/manual/en/filesystem.configuration.php#ini.auto-detect-line-endings
+; http://php.net/auto-detect-line-endings
 ;auto_detect_line_endings = Off
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -992,26 +992,26 @@ default_socket_timeout = 60
 
 [Date]
 ; Defines the default timezone used by the date functions
-; http://www.php.net/manual/en/datetime.configuration.php#ini.date.timezone
+; http://php.net/date.timezone
 ;date.timezone =
 
-; http://www.php.net/manual/en/datetime.configuration.php#ini.date.default-latitude
+; http://php.net/date.default-latitude
 ;date.default_latitude = 31.7667
 
-; http://www.php.net/manual/en/datetime.configuration.php#ini.date.default-longitude
+; http://php.net/date.default-longitude
 ;date.default_longitude = 35.2333
 
-; http://www.php.net/manual/en/datetime.configuration.php#ini.date.sunrise-zenith
+; http://php.net/date.sunrise-zenith
 ;date.sunrise_zenith = 90.583333
 
-; http://www.php.net/manual/en/datetime.configuration.php#ini.date.sunset-zenith
+; http://php.net/date.sunset-zenith
 ;date.sunset_zenith = 90.583333
 
 [filter]
-; http://www.php.net/manual/en/filter.configuration.php#ini.filter.default
+; http://php.net/filter.default
 ;filter.default = unsafe_raw
 
-; http://www.php.net/manual/en/filter.configuration.php#ini.filter.default-flags
+; http://php.net/filter.default-flags
 ;filter.default_flags =
 
 [iconv]
@@ -1023,7 +1023,7 @@ default_socket_timeout = 60
 ;intl.default_locale = 
 
 [sqlite]
-; http://www.php.net/manual/en/sqlite.configuration.php#ini.sqlite.assoc-case
+; http://php.net/sqlite.assoc-case
 ;sqlite.assoc_case = 0
 
 [sqlite3]
@@ -1031,26 +1031,26 @@ default_socket_timeout = 60
 
 [Pcre]
 ;PCRE library backtracking limit.
-; http://www.php.net/manual/en/pcre.configuration.php#ini.pcre.backtrack-limit
+; http://php.net/pcre.backtrack-limit
 ;pcre.backtrack_limit=100000
 
 ;PCRE library recursion limit. 
 ;Please note that if you set this value to a high number you may consume all 
 ;the available process stack and eventually crash PHP (due to reaching the 
 ;stack size limit imposed by the Operating System).
-; http://www.php.net/manual/en/pcre.configuration.php#ini.pcre.recursion-limit
+; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
 
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
-; http://www.php.net/manual/en/ref.pdo-odbc.php#ini.pdo-odbc.connection-pooling
+; http://php.net/pdo-odbc.connection-pooling
 ;pdo_odbc.connection_pooling=strict
 
 [Phar]
-; http://www.php.net/manual/en/phar.configuration.php#ini.phar.readonly
+; http://php.net/phar.readonly
 ;phar.readonly = On
 
-; http://www.php.net/manual/en/phar.configuration.php#ini.phar.require-hash
+; http://php.net/phar.require-hash
 ;phar.require_hash = On
 
 ;phar.cache_list =
@@ -1059,22 +1059,22 @@ default_socket_timeout = 60
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
 ; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
 ; runtime, you can define these variables by calling define_syslog_variables().
-; http://www.php.net/manual/en/network.configuration.php#ini.define-syslog-variables
+; http://php.net/define-syslog-variables
 define_syslog_variables  = Off
 
 [mail function]
 ; For Win32 only.
-; http://www.php.net/manual/en/mail.configuration.php#ini.smtp
+; http://php.net/smtp
 SMTP = localhost
-; http://www.php.net/manual/en/mail.configuration.php#ini.smtp-port
+; http://php.net/smtp-port
 smtp_port = 25
 
 ; For Win32 only.
-; http://www.php.net/manual/en/mail.configuration.php#ini.sendmail-from
+; http://php.net/sendmail-from
 ;sendmail_from = me@example.com
 
 ; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
-; http://www.php.net/manual/en/mail.configuration.php#ini.sendmail-path
+; http://php.net/sendmail-path
 ;sendmail_path =
 
 ; Force the addition of the specified parameters to be passed as extra parameters
@@ -1089,79 +1089,79 @@ mail.add_x_header = On
 ;mail.log =
 
 [SQL]
-; http://www.php.net/manual/en/ini.core.php#ini.sql.safe-mode
+; http://php.net/sql.safe-mode
 sql.safe_mode = Off
 
 [ODBC]
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.default-db
+; http://php.net/odbc.default-db
 ;odbc.default_db    =  Not yet implemented
 
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.default-user
+; http://php.net/odbc.default-user
 ;odbc.default_user  =  Not yet implemented
 
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.default-pw
+; http://php.net/odbc.default-pw
 ;odbc.default_pw    =  Not yet implemented
 
 ; Allow or prevent persistent links.
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.allow-persistent
+; http://php.net/odbc.allow-persistent
 odbc.allow_persistent = On
 
 ; Check that a connection is still valid before reuse.
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.check-persistent
+; http://php.net/odbc.check-persistent
 odbc.check_persistent = On
 
 ; Maximum number of persistent links.  -1 means no limit.
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.max-persistent
+; http://php.net/odbc.max-persistent
 odbc.max_persistent = -1
 
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.max-links
+; http://php.net/odbc.max-links
 odbc.max_links = -1
 
 ; Handling of LONG fields.  Returns number of bytes to variables.  0 means
 ; passthru.
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.defaultlrl
+; http://php.net/odbc.defaultlrl
 odbc.defaultlrl = 4096
 
 ; Handling of binary data.  0 means passthru, 1 return as is, 2 convert to char.
 ; See the documentation on odbc_binmode and odbc_longreadlen for an explanation
-; of uodbc.defaultlrl and uodbc.defaultbinmode
-; http://www.php.net/manual/en/odbc.configuration.php#ini.uodbc.defaultbinmode
+; of odbc.defaultlrl and odbc.defaultbinmode
+; http://php.net/odbc.defaultbinmode
 odbc.defaultbinmode = 1
 
 ;birdstep.max_links = -1
 
 [MySQL]
 ; Allow or prevent persistent links.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.allow-persistent
+; http://php.net/mysql.allow-persistent
 mysql.allow_persistent = On
 
 ; Maximum number of persistent links.  -1 means no limit.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.max-persistent
+; http://php.net/mysql.max-persistent
 mysql.max_persistent = -1
 
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.max-links
+; http://php.net/mysql.max-links
 mysql.max_links = -1
 
 ; Default port number for mysql_connect().  If unset, mysql_connect() will use
 ; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
 ; at MYSQL_PORT.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.default-port
+; http://php.net/mysql.default-port
 mysql.default_port =
 
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
 ; MySQL defaults.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.default-socket
+; http://php.net/mysql.default-socket
 mysql.default_socket =
 
 ; Default host for mysql_connect() (doesn't apply in safe mode).
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.default-host
+; http://php.net/mysql.default-host
 mysql.default_host =
 
 ; Default user for mysql_connect() (doesn't apply in safe mode).
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.default-user
+; http://php.net/mysql.default-user
 mysql.default_user =
 
 ; Default password for mysql_connect() (doesn't apply in safe mode).
@@ -1169,42 +1169,42 @@ mysql.default_user =
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysql.default_password")
 ; and reveal this password!  And of course, any users with read access to this
 ; file will be able to reveal the password as well.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.default-password
+; http://php.net/mysql.default-password
 mysql.default_password =
 
 ; Maximum time (in seconds) for connect timeout. -1 means no limit
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.connect-timeout
+; http://php.net/mysql.connect-timeout
 mysql.connect_timeout = 60
 
 ; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
 ; SQL-Errors will be displayed.
-; http://www.php.net/manual/en/mysql.configuration.php#ini.mysql.trace-mode
+; http://php.net/mysql.trace-mode
 mysql.trace_mode = Off
 
 [MySQLi]
 
 ; Maximum number of links.  -1 means no limit.
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.max-links
+; http://php.net/mysqli.max-links
 mysqli.max_links = -1
 
 ; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
 ; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
 ; at MYSQL_PORT.
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.default-port
+; http://php.net/mysqli.default-port
 mysqli.default_port = 3306
 
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
 ; MySQL defaults.
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.default-socket
+; http://php.net/mysqli.default-socket
 mysqli.default_socket =
 
 ; Default host for mysql_connect() (doesn't apply in safe mode).
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.default-host
+; http://php.net/mysqli.default-host
 mysqli.default_host =
 
 ; Default user for mysql_connect() (doesn't apply in safe mode).
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.default-user
+; http://php.net/mysqli.default-user
 mysqli.default_user =
 
 ; Default password for mysqli_connect() (doesn't apply in safe mode).
@@ -1212,7 +1212,7 @@ mysqli.default_user =
 ; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_pw")
 ; and reveal this password!  And of course, any users with read access to this
 ; file will be able to reveal the password as well.
-; http://www.php.net/manual/en/mysqli.configuration.php#ini.mysqli.default-pw
+; http://php.net/mysqli.default-pw
 mysqli.default_pw =
 
 ; Allow or prevent reconnect
@@ -1222,25 +1222,25 @@ mysqli.reconnect = Off
 
 ; Connection: Enables privileged connections using external
 ; credentials (OCI_SYSOPER, OCI_SYSDBA)
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.privileged-connect
+; http://php.net/oci8.privileged-connect
 ;oci8.privileged_connect = Off
 
 ; Connection: The maximum number of persistent OCI8 connections per
 ; process. Using -1 means no limit.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.max-persistent
+; http://php.net/oci8.max-persistent
 ;oci8.max_persistent = -1
 
 ; Connection: The maximum number of seconds a process is allowed to
 ; maintain an idle persistent connection. Using -1 means idle
 ; persistent connections will be maintained forever.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.persistent-timeout
+; http://php.net/oci8.persistent-timeout
 ;oci8.persistent_timeout = -1
 
 ; Connection: The number of seconds that must pass before issuing a
 ; ping during oci_pconnect() to check the connection validity. When
 ; set to 0, each oci_pconnect() will cause a ping. Using -1 disables
 ; pings completely.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.ping-interval
+; http://php.net/oci8.ping-interval
 ;oci8.ping_interval = 60
 
 ; Connection: Set this to a user chosen connection class to be used
@@ -1258,86 +1258,86 @@ mysqli.reconnect = Off
 
 ; Tuning: This option enables statement caching, and specifies how
 ; many statements to cache. Using 0 disables statement caching.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.statement-cache-size
+; http://php.net/oci8.statement-cache-size
 ;oci8.statement_cache_size = 20
 
 ; Tuning: Enables statement prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.default-prefetch
+; http://php.net/oci8.default-prefetch
 ;oci8.default_prefetch = 100
 
 ; Compatibility. Using On means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.
-; http://www.php.net/manual/en/oci8.configuration.php#ini.oci8.old-oci-close-semantics
+; http://php.net/oci8.old-oci-close-semantics
 ;oci8.old_oci_close_semantics = Off
 
 [PostgresSQL]
 ; Allow or prevent persistent links.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.allow-persistent
+; http://php.net/pgsql.allow-persistent
 pgsql.allow_persistent = On
 
 ; Detect broken persistent links always with pg_pconnect().
 ; Auto reset feature requires a little overheads.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.auto-reset-persistent
+; http://php.net/pgsql.auto-reset-persistent
 pgsql.auto_reset_persistent = Off
 
 ; Maximum number of persistent links.  -1 means no limit.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.max-persistent
+; http://php.net/pgsql.max-persistent
 pgsql.max_persistent = -1
 
 ; Maximum number of links (persistent+non persistent).  -1 means no limit.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.max-links
+; http://php.net/pgsql.max-links
 pgsql.max_links = -1
 
 ; Ignore PostgreSQL backends Notice message or not.
 ; Notice message logging require a little overheads.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.ignore-notice
+; http://php.net/pgsql.ignore-notice
 pgsql.ignore_notice = 0
 
 ; Log PostgreSQL backends Noitce message or not.
 ; Unless pgsql.ignore_notice=0, module cannot log notice message.
-; http://www.php.net/manual/en/pgsql.configuration.php#ini.pgsql.log-notice
+; http://php.net/pgsql.log-notice
 pgsql.log_notice = 0
 
 [Sybase-CT]
 ; Allow or prevent persistent links.
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.allow-persistent
+; http://php.net/sybct.allow-persistent
 sybct.allow_persistent = On
 
 ; Maximum number of persistent links.  -1 means no limit.
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.max-persistent
+; http://php.net/sybct.max-persistent
 sybct.max_persistent = -1
 
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.max-links
+; http://php.net/sybct.max-links
 sybct.max_links = -1
 
 ; Minimum server message severity to display.
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.min-server-severity
+; http://php.net/sybct.min-server-severity
 sybct.min_server_severity = 10
 
 ; Minimum client message severity to display.
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.min-client-severity
+; http://php.net/sybct.min-client-severity
 sybct.min_client_severity = 10
 
 ; Set per-context timeout
-; http://www.php.net/manual/en/sybase.configuration.php#ini.sybct.timeout
+; http://php.net/sybct.timeout
 ;sybct.timeout=
 
 ;sybct.packet_size
 
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
-; http://www.php.net/manual/en/bc.configuration.php#ini.bcmath.scale
+; http://php.net/bcmath.scale
 bcmath.scale = 0
 
 [browscap]
-; http://www.php.net/manual/en/misc.configuration.php#ini.browscap
+; http://php.net/browscap
 ;browscap = extra/browscap.ini
 
 [Session]
 ; Handler used to store/retrieve data.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.save-handler
+; http://php.net/session.save-handler
 session.save_handler = files
 
 ; Argument passed to save_handler.  In the case of files, this is the path
@@ -1366,49 +1366,49 @@ session.save_handler = files
 ;
 ; where MODE is the octal representation of the mode. Note that this
 ; does not overwrite the process's umask.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.save-path
+; http://php.net/session.save-path
 ;session.save_path = "/tmp"
 
 ; Whether to use cookies.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.use-cookies
+; http://php.net/session.use-cookies
 session.use_cookies = 1
 
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cookie-secure
+; http://php.net/session.cookie-secure
 ;session.cookie_secure =
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combatting
 ; session hijacking when not specifying and managing your own session id. It is
 ; not the end all be all of session hijacking defense, but it's a good start.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.use-only-cookies
+; http://php.net/session.use-only-cookies
 session.use_only_cookies = 1
 
 ; Name of the session (used as cookie name).
-; http://www.php.net/manual/en/session.configuration.php#ini.session.name
+; http://php.net/session.name
 session.name = PHPSESSID
 
 ; Initialize session on request startup.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.auto-start
+; http://php.net/session.auto-start
 session.auto_start = 0
 
 ; Lifetime in seconds of cookie or, if 0, until browser is restarted.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cookie-lifetime
+; http://php.net/session.cookie-lifetime
 session.cookie_lifetime = 0
 
 ; The path for which the cookie is valid.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cookie-path
+; http://php.net/session.cookie-path
 session.cookie_path = /
 
 ; The domain for which the cookie is valid.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cookie-domain
+; http://php.net/session.cookie-domain
 session.cookie_domain =
 
 ; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cookie-httponly
+; http://php.net/session.cookie-httponly
 session.cookie_httponly = 
 
 ; Handler used to serialize data.  php is the standard serializer of PHP.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.serialize-handler
+; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
 ; Defines the probability that the 'garbage collection' process is started
@@ -1420,7 +1420,7 @@ session.serialize_handler = php
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
-; http://www.php.net/manual/en/session.configuration.php#ini.session.gc-probability
+; http://php.net/session.gc-probability
 session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
@@ -1434,12 +1434,12 @@ session.gc_probability = 1
 ; Default Value: 100
 ; Development Value: 1000
 ; Production Value: 1000
-; http://www.php.net/manual/en/session.configuration.php#ini.session.gc-divisor
+; http://php.net/session.gc-divisor
 session.gc_divisor = 1000
 
 ; After this number of seconds, stored data will be seen as 'garbage' and
 ; cleaned up by the garbage collection process.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.gc-maxlifetime
+; http://php.net/session.gc-maxlifetime
 session.gc_maxlifetime = 1440
 
 ; NOTE: If you are using the subdirectory option for storing session files
@@ -1463,7 +1463,7 @@ session.gc_maxlifetime = 1440
 ; Default Value: On
 ; Development Value: On
 ; Production Value: Off
-; http://www.php.net/manual/en/session.configuration.php#ini.session.bug-compat-42
+; http://php.net/session.bug-compat-42
 session.bug_compat_42 = Off
 
 ; This setting controls whether or not you are warned by PHP when initializing a
@@ -1472,34 +1472,34 @@ session.bug_compat_42 = Off
 ; Default Value: On
 ; Development Value: On
 ; Production Value: Off
-; http://www.php.net/manual/en/session.configuration.php#ini.session.bug-compat-warn
+; http://php.net/session.bug-compat-warn
 session.bug_compat_warn = Off
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
 ; considered as valid.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.referer-check
+; http://php.net/session.referer-check
 session.referer_check =
 
 ; How many bytes to read from the file.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.entropy-length
+; http://php.net/session.entropy-length
 session.entropy_length = 0
 
 ; Specified here to create the session id.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.entropy-file
+; http://php.net/session.entropy-file
 ;session.entropy_file = /dev/urandom
 session.entropy_file =
 
-; http://www.php.net/manual/en/session.configuration.php#ini.session.entropy-length
+; http://php.net/session.entropy-length
 ;session.entropy_length = 16
 
 ; Set to {nocache,private,public,} to determine HTTP caching aspects
 ; or leave this empty to avoid sending anti-caching headers.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cache-limiter
+; http://php.net/session.cache-limiter
 session.cache_limiter = nocache
 
 ; Document expires after n minutes.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.cache-expire
+; http://php.net/session.cache-expire
 session.cache_expire = 180
 
 ; trans sid support is disabled by default.
@@ -1511,14 +1511,14 @@ session.cache_expire = 180
 ;   in publically accessible computer.
 ; - User may access your site with the same session ID
 ;   always using URL stored in browser's history or bookmarks.
-; http://www.php.net/manual/en/session.configuration.php#ini.session.use-trans-sid
+; http://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
 ; Select a hash function for use in generating session ids.
 ; Possible Values 
 ;   0  (MD5 128 bits)
 ;   1  (SHA-1 160 bits)
-; http://www.php.net/manual/en/session.configuration.php#ini.session.hash-function
+; http://php.net/session.hash-function
 session.hash_function = 0
 
 ; Define how many bits are stored in each character when converting
@@ -1530,7 +1530,7 @@ session.hash_function = 0
 ; Default Value: 4
 ; Development Value: 5
 ; Production Value: 5
-; http://www.php.net/manual/en/session.configuration.php#ini.session.hash-bits-per-character
+; http://php.net/session.hash-bits-per-character
 session.hash_bits_per_character = 5
 
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
@@ -1541,7 +1541,7 @@ session.hash_bits_per_character = 5
 ; Default Value: "a=href,area=href,frame=src,form=,fieldset="
 ; Development Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; Production Value: "a=href,area=href,frame=src,input=src,form=fakeentry"
-; http://www.php.net/manual/en/session.configuration.php#ini.url-rewriter.tags
+; http://php.net/url-rewriter.tags
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 [MSSQL]
@@ -1598,65 +1598,65 @@ mssql.secure_connection = Off
 
 [Assertion]
 ; Assert(expr); active by default.
-; http://www.php.net/manual/en/info.configuration.php#ini.assert.active
+; http://php.net/assert.active
 ;assert.active = On
 
 ; Issue a PHP warning for each failed assertion.
-; http://www.php.net/manual/en/info.configuration.php#ini.assert.warning
+; http://php.net/assert.warning
 ;assert.warning = On
 
 ; Don't bail out by default.
-; http://www.php.net/manual/en/info.configuration.php#ini.assert.bail
+; http://php.net/assert.bail
 ;assert.bail = Off
 
 ; User-function to be called if an assertion fails.
-; http://www.php.net/manual/en/info.configuration.php#ini.assert.callback
+; http://php.net/assert.callback
 ;assert.callback = 0
 
 ; Eval the expression with current error_reporting().  Set to true if you want
 ; error_reporting(0) around the eval().
-; http://www.php.net/manual/en/info.configuration.php#ini.assert.quiet-eval
+; http://php.net/assert.quiet-eval
 ;assert.quiet_eval = 0
 
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
-; http://www.php.net/manual/en/com.configuration.php#ini.com.typelib-file
+; http://php.net/com.typelib-file
 ;com.typelib_file =
 
 ; allow Distributed-COM calls
-; http://www.php.net/manual/en/com.configuration.php#ini.com.allow-dcom
+; http://php.net/com.allow-dcom
 ;com.allow_dcom = true
 
 ; autoregister constants of a components typlib on com_load()
-; http://www.php.net/manual/en/com.configuration.php#ini.com.autoregister-typelib
+; http://php.net/com.autoregister-typelib
 ;com.autoregister_typelib = true
 
 ; register constants casesensitive
-; http://www.php.net/manual/en/com.configuration.php#ini.com.autoregister-casesensitive
+; http://php.net/com.autoregister-casesensitive
 ;com.autoregister_casesensitive = false
 
 ; show warnings on duplicate constant registrations
-; http://www.php.net/manual/en/com.configuration.php#ini.com.autoregister-verbose
+; http://php.net/com.autoregister-verbose
 ;com.autoregister_verbose = true
 
 [mbstring]
 ; language for internal character representation.
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.language
+; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
 ; internal/script encoding.
 ; Some encoding cannot work as internal encoding.
 ; (e.g. SJIS, BIG5, ISO-2022-*)
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.internal-encoding
+; http://php.net/mbstring.internal-encoding
 ;mbstring.internal_encoding = EUC-JP
 
 ; http input encoding.
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.http-input
+; http://php.net/mbstring.http-input
 ;mbstring.http_input = auto
 
 ; http output encoding. mb_output_handler must be
 ; registered as output buffer to function
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.http-output
+; http://php.net/mbstring.http-output
 ;mbstring.http_output = SJIS
 
 ; enable automatic encoding translation according to
@@ -1664,17 +1664,17 @@ mssql.secure_connection = Off
 ; converted to internal encoding by setting this to On.
 ; Note: Do _not_ use automatic encoding translation for
 ;       portable libs/applications.
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.encoding-translation
+; http://php.net/mbstring.encoding-translation
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
 ; auto means
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.detect-order
+; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
 ; substitute_character used when character cannot be converted
 ; one from another
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.substitute-character
+; http://php.net/mbstring.substitute-character
 ;mbstring.substitute_character = none;
 
 ; overload(replace) single byte functions by mbstring functions.
@@ -1685,7 +1685,7 @@ mssql.secure_connection = Off
 ; 1: Overload mail() function
 ; 2: Overload str*() functions
 ; 4: Overload ereg*() functions
-; http://www.php.net/manual/en/mbstring.configuration.php#ini.mbstring.func-overload
+; http://php.net/mbstring.func-overload
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
@@ -1700,7 +1700,7 @@ mssql.secure_connection = Off
 ; Tell the jpeg decode to ignore warnings and try to create
 ; a gd image. The warning will then be displayed as notices
 ; disabled by default
-; http://www.php.net/manual/en/image.configuration.php#ini.image.jpeg-ignore-warning
+; http://php.net/gd.jpeg-ignore-warning
 ;gd.jpeg_ignore_warning = 0
 
 [exif]
@@ -1709,47 +1709,47 @@ mssql.secure_connection = Off
 ; given by corresponding encode setting. When empty mbstring.internal_encoding
 ; is used. For the decode settings you can distinguish between motorola and
 ; intel byte order. A decode setting cannot be empty.
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.encode-unicode
+; http://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
 
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.decode-unicode-motorola
+; http://php.net/exif.decode-unicode-motorola
 ;exif.decode_unicode_motorola = UCS-2BE
 
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.decode-unicode-intel
+; http://php.net/exif.decode-unicode-intel
 ;exif.decode_unicode_intel    = UCS-2LE
 
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.encode-jis
+; http://php.net/exif.encode-jis
 ;exif.encode_jis =
 
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.decode-jis-motorola
+; http://php.net/exif.decode-jis-motorola
 ;exif.decode_jis_motorola = JIS
 
-; http://www.php.net/manual/en/exif.configuration.php#ini.exif.decode-jis-intel
+; http://php.net/exif.decode-jis-intel
 ;exif.decode_jis_intel    = JIS
 
 [Tidy]
 ; The path to a default tidy configuration file to use when using tidy
-; http://www.php.net/manual/en/tidy.configuration.php#ini.tidy.default-config
+; http://php.net/tidy.default-config
 ;tidy.default_config = /usr/local/lib/php/default.tcfg
 
 ; Should tidy clean and repair output automatically?
 ; WARNING: Do not use this option if you are generating non-html content
 ; such as dynamic images
-; http://www.php.net/manual/en/tidy.configuration.php#ini.tidy.clean-output
+; http://php.net/tidy.clean-output
 tidy.clean_output = Off
 
 [soap]
 ; Enables or disables WSDL caching feature.
-; http://www.php.net/manual/en/soap.configuration.php#ini.soap.wsdl-cache-enabled
+; http://php.net/soap.wsdl-cache-enabled
 soap.wsdl_cache_enabled=1
 
 ; Sets the directory name where SOAP extension will put cache files.
-; http://www.php.net/manual/en/soap.configuration.php#ini.soap.wsdl-cache-dir
+; http://php.net/soap.wsdl-cache-dir
 soap.wsdl_cache_dir="/tmp"
 
 ; (time to live) Sets the number of second while cached file will be used 
 ; instead of original one.
-; http://www.php.net/manual/en/soap.configuration.php#ini.soap.wsdl-cache-ttl
+; http://php.net/soap.wsdl-cache-ttl
 soap.wsdl_cache_ttl=86400
 
 [sysvshm]
