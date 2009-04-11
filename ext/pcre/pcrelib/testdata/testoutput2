@@ -9638,4 +9638,206 @@ No first char
 No need char
 Starting byte set: x y z 
 
+/(?(?=.*b)b|^)/CI
+Capturing subpattern count = 0
+Partial matching not supported
+Options:
+No first char
+No need char
+   adc
+--->adc
+ +0 ^       (?(?=.*b)b|^)
+ +2 ^       (?=.*b)
+ +5 ^       .*
+ +7 ^  ^    b
+ +7 ^ ^     b
+ +7 ^^      b
+ +7 ^       b
++12 ^       )
++13 ^       
+ 0: 
+   abc 
+--->abc
+ +0 ^       (?(?=.*b)b|^)
+ +2 ^       (?=.*b)
+ +5 ^       .*
+ +7 ^  ^    b
+ +7 ^ ^     b
+ +7 ^^      b
+ +8 ^ ^     )
+ +9 ^       b
+ +0  ^      (?(?=.*b)b|^)
+ +2  ^      (?=.*b)
+ +5  ^      .*
+ +7  ^ ^    b
+ +7  ^^     b
+ +7  ^      b
+ +8  ^^     )
+ +9  ^      b
++10  ^^     |
++13  ^^     
+ 0: b
+   
+/(?(?=b).*b|^d)/I
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+No first char
+No need char
+
+/(?(?=.*b).*b|^d)/I
+Capturing subpattern count = 0
+Partial matching not supported
+No options
+First char at start or follows newline
+No need char
+
+/a?|b?/P
+    abc
+ 0: a
+    ** Failers
+ 0: 
+    ddd\N   
+No match: POSIX code 17: match failed
+
+/xyz/C
+  xyz 
+--->xyz
+ +0 ^       x
+ +1 ^^      y
+ +2 ^ ^     z
+ +3 ^  ^    
+ 0: xyz
+  abcxyz 
+--->abcxyz
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  abcxyz\Y
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  ** Failers 
+No match
+  abc
+No match
+  abc\Y
+--->abc
+ +0 ^       x
+ +0  ^      x
+ +0   ^     x
+ +0    ^    x
+No match
+  abcxypqr  
+No match
+  abcxypqr\Y  
+--->abcxypqr
+ +0 ^            x
+ +0  ^           x
+ +0   ^          x
+ +0    ^         x
+ +1    ^^        y
+ +2    ^ ^       z
+ +0     ^        x
+ +0      ^       x
+ +0       ^      x
+ +0        ^     x
+ +0         ^    x
+No match
+
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+--->"ab"
+ +0 ^        ^
+ +1 ^        "
+ +2 ^^       ((?(?=[a])[^"])|b)*
+ +3 ^^       (?(?=[a])[^"])
+ +5 ^^       (?=[a])
+ +8 ^^       [a]
++11 ^ ^      )
++12 ^^       [^"]
++16 ^ ^      )
++17 ^ ^      |
+ +3 ^ ^      (?(?=[a])[^"])
+ +5 ^ ^      (?=[a])
+ +8 ^ ^      [a]
++21 ^ ^      "
++18 ^ ^      b
++19 ^  ^     )
+ +3 ^  ^     (?(?=[a])[^"])
+ +5 ^  ^     (?=[a])
+ +8 ^  ^     [a]
++21 ^  ^     "
++22 ^   ^    $
++23 ^   ^    
+ 0: "ab"
+ 1: 
+
+/^"((?(?=[a])[^"])|b)*"$/
+    "ab"
+ 0: "ab"
+ 1: 
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: Y
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+Failed: reference to non-existent subpattern at offset 5
+
+/^X(?&N)(a)(?|(b)|(q))(c)(d)(?<N>Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: c
+ 4: d
+ 5: Y
+ 
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
+/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
+/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
+    XYabcdY
+ 0: XYabcdY
+ 1: a
+ 2: b
+ 3: <unset>
+ 4: <unset>
+ 5: c
+ 6: d
+ 7: Y
+
 / End of testinput2 /

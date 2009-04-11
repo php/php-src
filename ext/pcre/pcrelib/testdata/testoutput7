@@ -4573,8 +4573,6 @@ No match
     abq
 No match
 
-/ab{1,}bc/
-
 /ab+bc/
     abbbbc
  0: abbbbc
@@ -7253,5 +7251,123 @@ No match
 No match
     ab  
 No match
+
+/X$/E
+    X
+ 0: X
+    ** Failers 
+No match
+    X\n 
+No match
+
+/X$/
+    X
+ 0: X
+    X\n 
+ 0: X
+
+/xyz/C
+  xyz 
+--->xyz
+ +0 ^       x
+ +1 ^^      y
+ +2 ^ ^     z
+ +3 ^  ^    
+ 0: xyz
+  abcxyz 
+--->abcxyz
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  abcxyz\Y
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  ** Failers 
+No match
+  abc
+No match
+  abc\Y
+--->abc
+ +0 ^       x
+ +0  ^      x
+ +0   ^     x
+ +0    ^    x
+No match
+  abcxypqr  
+No match
+  abcxypqr\Y  
+--->abcxypqr
+ +0 ^            x
+ +0  ^           x
+ +0   ^          x
+ +0    ^         x
+ +1    ^^        y
+ +2    ^ ^       z
+ +0     ^        x
+ +0      ^       x
+ +0       ^      x
+ +0        ^     x
+ +0         ^    x
+No match
+  
+/(?C)ab/
+  ab
+--->ab
+  0 ^      a
+ 0: ab
+  \C-ab
+ 0: ab
+  
+/ab/C
+  ab
+--->ab
+ +0 ^      a
+ +1 ^^     b
+ +2 ^ ^    
+ 0: ab
+  \C-ab    
+ 0: ab
+
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+--->"ab"
+ +0 ^        ^
+ +1 ^        "
+ +2 ^^       ((?(?=[a])[^"])|b)*
++21 ^^       "
+ +3 ^^       (?(?=[a])[^"])
++18 ^^       b
+ +5 ^^       (?=[a])
+ +8  ^       [a]
++11  ^^      )
++12 ^^       [^"]
++16 ^ ^      )
++17 ^ ^      |
++21 ^ ^      "
+ +3 ^ ^      (?(?=[a])[^"])
++18 ^ ^      b
+ +5 ^ ^      (?=[a])
+ +8   ^      [a]
++19 ^  ^     )
++21 ^  ^     "
+ +3 ^  ^     (?(?=[a])[^"])
++18 ^  ^     b
+ +5 ^  ^     (?=[a])
+ +8    ^     [a]
++17 ^  ^     |
++22 ^   ^    $
++23 ^   ^    
+ 0: "ab"
+    \C-"ab"
+ 0: "ab"
 
 / End of testinput7 /

@@ -18,6 +18,7 @@ PATTERN at the start of a line.
 ./testdata/grepinput:608:Check up on PATTERN near the end.
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx:5:Pattern
+./testdata/grepinputx:42:This line contains pattern not on a line by itself.
 ---------------------------- Test 6 ------------------------------
 7:PATTERN at the start of a line.
 8:In the middle of a line, PATTERN appears.
@@ -25,6 +26,7 @@ PATTERN at the start of a line.
 608:Check up on PATTERN near the end.
 3:Here is the pattern again.
 5:Pattern
+42:This line contains pattern not on a line by itself.
 ---------------------------- Test 7 ------------------------------
 ./testdata/grepinput
 ./testdata/grepinputx
@@ -75,12 +77,13 @@ RC=1
 39:nineteen
 40:twenty
 41:
-42:This is the last line of this file.
+43:This is the last line of this file.
 ---------------------------- Test 12 -----------------------------
 Pattern
 ---------------------------- Test 13 -----------------------------
 Here is the pattern again.
 That time it was on a line by itself.
+This line contains pattern not on a line by itself.
 ---------------------------- Test 14 -----------------------------
 ./testdata/grepinputx:To pat or not to pat, that is the question.
 ---------------------------- Test 15 -----------------------------
@@ -157,6 +160,7 @@ eighteen
 nineteen
 twenty
 
+This line contains pattern not on a line by itself.
 This is the last line of this file.
 ---------------------------- Test 25 -----------------------------
 15-
@@ -207,6 +211,7 @@ eighteen
 nineteen
 twenty
 
+This line contains pattern not on a line by itself.
 This is the last line of this file.
 ---------------------------- Test 27 -----------------------------
 four
@@ -227,6 +232,7 @@ eighteen
 nineteen
 twenty
 
+This line contains pattern not on a line by itself.
 This is the last line of this file.
 ---------------------------- Test 28 -----------------------------
 14-of lines all by themselves.
@@ -279,6 +285,7 @@ eighteen
 nineteen
 twenty
 
+This line contains pattern not on a line by itself.
 This is the last line of this file.
 ---------------------------- Test 30 -----------------------------
 ./testdata/grepinput-4-features should be added at the end, because some of the tests involve the
@@ -299,6 +306,11 @@ This is the last line of this file.
 ./testdata/grepinputx:3:Here is the pattern again.
 ./testdata/grepinputx-4-
 ./testdata/grepinputx:5:Pattern
+--
+./testdata/grepinputx-39-nineteen
+./testdata/grepinputx-40-twenty
+./testdata/grepinputx-41-
+./testdata/grepinputx:42:This line contains pattern not on a line by itself.
 ---------------------------- Test 31 -----------------------------
 ./testdata/grepinput:7:PATTERN at the start of a line.
 ./testdata/grepinput:8:In the middle of a line, PATTERN appears.
@@ -317,6 +329,9 @@ This is the last line of this file.
 ./testdata/grepinputx-6-That time it was on a line by itself.
 ./testdata/grepinputx-7-
 ./testdata/grepinputx-8-To pat or not to pat, that is the question.
+--
+./testdata/grepinputx:42:This line contains pattern not on a line by itself.
+./testdata/grepinputx-43-This is the last line of this file.
 ---------------------------- Test 32 -----------------------------
 ./testdata/grepinputx
 ---------------------------- Test 33 -----------------------------
@@ -336,11 +351,11 @@ aaaaa0
 aaaaa2
 RC=0
 ======== STDERR ========
-pcregrep: pcre_exec() error -8 while matching this line:
+pcregrep: pcre_exec() error -8 while matching this text:
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 pcregrep: error -8 means that a resource limit was exceeded
 pcregrep: check your regex for nested unlimited loops
-pcregrep: pcre_exec() error -8 while matching this line:
+pcregrep: pcre_exec() error -8 while matching this text:
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ---------------------------- Test 38 ------------------------------
 This line contains a binary zero here > < for testing.
@@ -388,8 +403,10 @@ PUT NEW DATA ABOVE THIS LINE.
 ---------------------------- Test 49 ------------------------------
 ---------------------------- Test 50 ------------------------------
 over the lazy dog.
+This time it jumps and jumps and jumps.
 ---------------------------- Test 51 ------------------------------
 fox [1;31mjumps[00m
+This time it [1;31mjumps[00m and [1;31mjumps[00m and [1;31mjumps[00m.
 ---------------------------- Test 52 ------------------------------
 36972,6
 36990,4
@@ -402,3 +419,7 @@ fox [1;31mjumps[00m
 596:28,4
 597:15,5
 597:32,4
+---------------------------- Test 54 -----------------------------
+Here is the [1;31mpattern[00m again.
+That time it was on a [1;31mline by itself[00m.
+This line contains [1;31mpattern[00m not on a [1;31mline by itself[00m.

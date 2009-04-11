@@ -2733,8 +2733,6 @@
     abc
     abq
 
-/ab{1,}bc/
-
 /ab+bc/
     abbbbc
 
@@ -4391,5 +4389,36 @@
     a\nX\nXb 
     ** Failers
     ab  
+
+/X$/E
+    X
+    ** Failers 
+    X\n 
+
+/X$/
+    X
+    X\n 
+
+/xyz/C
+  xyz 
+  abcxyz 
+  abcxyz\Y
+  ** Failers 
+  abc
+  abc\Y
+  abcxypqr  
+  abcxypqr\Y  
+  
+/(?C)ab/
+  ab
+  \C-ab
+  
+/ab/C
+  ab
+  \C-ab    
+
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+    \C-"ab"
 
 / End of testinput7 /
