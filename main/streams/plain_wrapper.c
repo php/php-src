@@ -67,7 +67,11 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			/* unknown mode */
 			return FAILURE;
 	}
-
+#if defined(O_NONBLOCK)
+	if (strchr(mode, 'n')) {
+		flags |= O_NONBLOCK;
+	}
+#endif
 	if (strchr(mode, '+')) {
 		flags |= O_RDWR;
 	} else if (flags) {
