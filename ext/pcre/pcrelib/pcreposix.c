@@ -272,6 +272,7 @@ BOOL nosub =
 
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
+if ((eflags & REG_NOTEMPTY) != 0) options |= PCRE_NOTEMPTY;
 
 ((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 

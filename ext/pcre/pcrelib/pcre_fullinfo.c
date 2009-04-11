@@ -87,7 +87,7 @@ if (re->magic_number != MAGIC_NUMBER)
 switch (what)
   {
   case PCRE_INFO_OPTIONS:
-  *((unsigned long int *)where) = re->options & PUBLIC_OPTIONS;
+  *((unsigned long int *)where) = re->options & PUBLIC_COMPILE_OPTIONS;
   break;
 
   case PCRE_INFO_SIZE:

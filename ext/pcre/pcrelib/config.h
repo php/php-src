@@ -50,7 +50,10 @@ them both to 0; an emulation function will be used. */
 
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
    character codes, define this macro as 1. On systems that can use
-   "configure", this can be done via --enable-ebcdic. */
+   "configure", this can be done via --enable-ebcdic. PCRE will then assume
+   that all input strings are in EBCDIC. If you do not define this macro, PCRE
+   will assume input strings are ASCII or UTF-8 Unicode. It is not possible to
+   build a version of PCRE that supports both EBCDIC and UTF-8. */
 /* #undef EBCDIC */
 
 /* Define to 1 if you have the `bcopy' function. */
@@ -259,13 +262,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.8"
+#define PACKAGE_STRING "PCRE 7.9"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.8"
+#define PACKAGE_VERSION "7.9"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -313,12 +316,15 @@ them both to 0; an emulation function will be used. */
 /* Define to enable support for Unicode properties */
 /* #undef SUPPORT_UCP */
 
-/* Define to enable support for the UTF-8 Unicode encoding. */
+/* Define to enable support for the UTF-8 Unicode encoding. This will work
+   even in an EBCDIC environment, but it is incompatible with the EBCDIC
+   macro. That is, PCRE can support *either* EBCDIC code *or* ASCII/UTF-8, but
+   not both at once. */
 /* #undef SUPPORT_UTF8 */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.8"
+#define VERSION "7.9"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

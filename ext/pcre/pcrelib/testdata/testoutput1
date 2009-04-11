@@ -6609,4 +6609,41 @@ No match
     fooabcfoo
 No match
 
+/(?(?=.*b)b|^)/
+   adc
+ 0: 
+   abc 
+ 0: b
+
+/(?(?=^.*b)b|^)/
+   adc
+ 0: 
+   abc 
+No match
+
+/(?(?=.*b)b|^)*/
+   adc
+ 0: 
+   abc 
+ 0: 
+
+/(?(?=.*b)b|^)+/
+   adc
+ 0: 
+   abc 
+ 0: b
+
+/(?(?=b).*b|^d)/
+    abc
+ 0: b
+
+/(?(?=.*b).*b|^d)/
+    abc
+ 0: ab
+
+/^%((?(?=[a])[^%])|b)*%$/
+    %ab%
+ 0: %ab%
+ 1: 
+
 / End of testinput1 /
