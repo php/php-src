@@ -2726,4 +2726,51 @@ a random value. /Ix
 
 /(abc|pqr|123){0}[xyz]/SI
 
+/(?(?=.*b)b|^)/CI
+   adc
+   abc 
+   
+/(?(?=b).*b|^d)/I
+
+/(?(?=.*b).*b|^d)/I
+
+/a?|b?/P
+    abc
+    ** Failers
+    ddd\N   
+
+/xyz/C
+  xyz 
+  abcxyz 
+  abcxyz\Y
+  ** Failers 
+  abc
+  abc\Y
+  abcxypqr  
+  abcxypqr\Y  
+
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+
+/^"((?(?=[a])[^"])|b)*"$/
+    "ab"
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+    XYabcdY
+
+/^X(?&N)(a)(?|(b)|(q))(c)(d)(?<N>Y)/
+    XYabcdY
+ 
+/^X(?7)(a)(?|(b)|(q)(r)(s))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
 / End of testinput2 /

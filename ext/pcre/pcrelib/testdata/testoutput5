@@ -1641,4 +1641,15 @@ No match
     A\x{1ec5}ABCXYZ
  0: X
 
+/(*UTF8)\x{1234}/
+  abcd\x{1234}pqr
+ 0: \x{1234}
+
+/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
+Capturing subpattern count = 0
+Options: bsr_unicode utf8
+Forced newline sequence: CRLF
+First char = 'a'
+Need char = 'b'
+
 / End of testinput5 /
