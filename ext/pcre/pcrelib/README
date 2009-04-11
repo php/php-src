@@ -85,6 +85,10 @@ documentation is supplied in two other forms:
      in various ways, and rooted in a file called index.html, is distributed in
      doc/html and installed in <prefix>/share/doc/pcre/html.
 
+Users of PCRE have contributed files containing the documentation for various
+releases in CHM format. These can be found in the Contrib directory of the FTP
+site (see next section).
+
 
 Contributions by users of PCRE
 ------------------------------
@@ -161,10 +165,13 @@ library. You can read more about them in the pcrebuild man page.
   it will try to find a C++ compiler and C++ header files, and if it succeeds,
   it will try to build the C++ wrapper.
 
-. If you want to make use of the support for UTF-8 character strings in PCRE,
-  you must add --enable-utf8 to the "configure" command. Without it, the code
-  for handling UTF-8 is not included in the library. (Even when included, it
-  still has to be enabled by an option at run time.)
+. If you want to make use of the support for UTF-8 Unicode character strings in
+  PCRE, you must add --enable-utf8 to the "configure" command. Without it, the
+  code for handling UTF-8 is not included in the library. Even when included,
+  it still has to be enabled by an option at run time. When PCRE is compiled
+  with this option, its input can only either be ASCII or UTF-8, even when
+  running on EBCDIC platforms. It is not possible to use both --enable-utf8 and
+  --enable-ebcdic at the same time.
 
 . If, in addition to support for UTF-8 character strings, you want to include
   support for the \P, \p, and \X sequences that recognize Unicode character
@@ -255,11 +262,13 @@ library. You can read more about them in the pcrebuild man page.
   pcre_chartables.c.dist. See "Character tables" below for further information.
 
 . It is possible to compile PCRE for use on systems that use EBCDIC as their
-  default character code (as opposed to ASCII) by specifying
+  character code (as opposed to ASCII) by specifying
 
   --enable-ebcdic
 
-  This automatically implies --enable-rebuild-chartables (see above).
+  This automatically implies --enable-rebuild-chartables (see above). However,
+  when PCRE is built this way, it always operates in EBCDIC. It cannot support
+  both EBCDIC and UTF-8.
 
 . It is possible to compile pcregrep to use libz and/or libbz2, in order to
   read .gz and .bz2 files (respectively), by specifying one or both of
@@ -286,7 +295,9 @@ library. You can read more about them in the pcrebuild man page.
   to specify something like LIBS="-lncurses" as well. This is because, to quote
   the readline INSTALL, "Readline uses the termcap functions, but does not link
   with the termcap or curses library itself, allowing applications which link
-  with readline the to choose an appropriate library."
+  with readline the to choose an appropriate library." If you get error
+  messages about missing functions tgetstr, tgetent, tputs, tgetflag, or tgoto,
+  this is the problem, and linking with the ncurses library should fix it.
 
 The "configure" script builds the following files for the basic C library:
 
@@ -753,4 +764,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 05 September 2008
+Last updated: 21 March 2009

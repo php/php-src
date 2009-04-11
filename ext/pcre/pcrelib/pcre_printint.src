@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,11 @@ hexadecimal. We don't use isprint() because that can vary from system to system
 (even without the use of locales) and we want the output always to be the same,
 for testing purposes. This macro is used in pcretest as well as in this file. */
 
+#ifdef EBCDIC
+#define PRINTABLE(c) ((c) >= 64 && (c) < 255)
+#else
 #define PRINTABLE(c) ((c) >= 32 && (c) < 127)
+#endif
 
 /* The table of operator names. */
 

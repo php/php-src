@@ -1746,5 +1746,15 @@ No match
     \x{10b}\x{10a}
  0: \x{10b}\x{10a}
  1: \x{10b}
+    
+/The next two tests are for property support in non-UTF-8 mode/
+
+/(?:\p{Lu}|\x20)+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+ 0: A P\xc2T\xc9 TODAY
+
+/[\p{Lu}\x20]+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+ 0: A P\xc2T\xc9 TODAY
 
 / End of testinput6 /

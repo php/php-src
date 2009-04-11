@@ -39,8 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 /* This module contains an internal function that is used to match an extended
-class (one that contains characters whose values are > 255). It is used by both
-pcre_exec() and pcre_def_exec(). */
+class. It is used by both pcre_exec() and pcre_def_exec(). */
 
 
 #include "config.h"
@@ -53,7 +52,7 @@ pcre_exec() and pcre_def_exec(). */
 *************************************************/
 
 /* This function is called to match a character against an extended class that
-might contain values > 255.
+might contain values > 255 and/or Unicode properties.
 
 Arguments:
   c           the character
@@ -102,7 +101,7 @@ while ((t = *data++) != XCL_END)
 #ifdef SUPPORT_UCP
   else  /* XCL_PROP & XCL_NOTPROP */
     {
-    const ucd_record * prop = GET_UCD(c);
+    const ucd_record *prop = GET_UCD(c);
 
     switch(*data)
       {
