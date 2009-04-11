@@ -252,8 +252,6 @@ number, and remove the RC from there.
 
   II. For PHP5: Set $CURRENT_QA_RELEASE_5 to false
 
-12. Rebuild the English and Japanese docs (ask Derick)
-
 
 Re-releasing the same version (or -pl)
 ------------------------------------
