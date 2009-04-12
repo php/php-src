@@ -3863,7 +3863,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 	int         x, y, i, j, new_a;
 	float       new_r, new_g, new_b;
 	int         new_pxl, pxl=0;
-	gdImagePtr  srcback;
+	gdImagePtr  srcback, srctrans;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
@@ -3873,6 +3873,10 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 
 	/* We need the orinal image with each safe neoghb. pixel */
 	srcback = gdImageCreateTrueColor (src->sx, src->sy);
+	srcback->saveAlphaFlag = 1;
+	srctrans = gdImageColorAllocateAlpha(srcback, 0, 0, 0, 127);
+	gdImageFill(srcback, 0, 0, srctrans);
+
 	gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
 
 	if (srcback==NULL) {
