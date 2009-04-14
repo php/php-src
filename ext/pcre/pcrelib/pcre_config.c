@@ -102,11 +102,11 @@ switch (what)
   break;
 
   case PCRE_CONFIG_MATCH_LIMIT:
-  *((unsigned int *)where) = MATCH_LIMIT;
+  *((unsigned long int *)where) = MATCH_LIMIT;
   break;
 
   case PCRE_CONFIG_MATCH_LIMIT_RECURSION:
-  *((unsigned int *)where) = MATCH_LIMIT_RECURSION;
+  *((unsigned long int *)where) = MATCH_LIMIT_RECURSION;
   break;
 
   case PCRE_CONFIG_STACKRECURSE:

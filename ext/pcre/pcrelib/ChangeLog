@@ -1,6 +1,128 @@
 ChangeLog for PCRE
 ------------------
 
+Version 7.9 11-Apr-09
+---------------------
+
+1.  When building with support for bzlib/zlib (pcregrep) and/or readline
+    (pcretest), all targets were linked against these libraries. This included
+    libpcre, libpcreposix, and libpcrecpp, even though they do not use these
+    libraries. This caused unwanted dependencies to be created. This problem
+    has been fixed, and now only pcregrep is linked with bzlib/zlib and only
+    pcretest is linked with readline.
+
+2.  The "typedef int BOOL" in pcre_internal.h that was included inside the
+    "#ifndef FALSE" condition by an earlier change (probably 7.8/18) has been
+    moved outside it again, because FALSE and TRUE are already defined in AIX,
+    but BOOL is not.
+
+3.  The pcre_config() function was treating the PCRE_MATCH_LIMIT and
+    PCRE_MATCH_LIMIT_RECURSION values as ints, when they should be long ints.
+
+4.  The pcregrep documentation said spaces were inserted as well as colons (or
+    hyphens) following file names and line numbers when outputting matching
+    lines. This is not true; no spaces are inserted. I have also clarified the
+    wording for the --colour (or --color) option.
+
+5.  In pcregrep, when --colour was used with -o, the list of matching strings
+    was not coloured; this is different to GNU grep, so I have changed it to be
+    the same.
+
+6.  When --colo(u)r was used in pcregrep, only the first matching substring in
+    each matching line was coloured. Now it goes on to look for further matches
+    of any of the test patterns, which is the same behaviour as GNU grep.
+
+7.  A pattern that could match an empty string could cause pcregrep to loop; it
+    doesn't make sense to accept an empty string match in pcregrep, so I have
+    locked it out (using PCRE's PCRE_NOTEMPTY option). By experiment, this
+    seems to be how GNU grep behaves.
+
+8.  The pattern (?(?=.*b)b|^) was incorrectly compiled as "match must be at
+    start or after a newline", because the conditional assertion was not being
+    correctly handled. The rule now is that both the assertion and what follows
+    in the first alternative must satisfy the test.
+
+9.  If auto-callout was enabled in a pattern with a conditional group whose
+    condition was an assertion, PCRE could crash during matching, both with
+    pcre_exec() and pcre_dfa_exec().
+
+10. The PCRE_DOLLAR_ENDONLY option was not working when pcre_dfa_exec() was
+    used for matching.
+
+11. Unicode property support in character classes was not working for
+    characters (bytes) greater than 127 when not in UTF-8 mode.
+
+12. Added the -M command line option to pcretest.
+
+14. Added the non-standard REG_NOTEMPTY option to the POSIX interface.
+
+15. Added the PCRE_NO_START_OPTIMIZE match-time option.
+
+16. Added comments and documentation about mis-use of no_arg in the C++
+    wrapper.
+
+17. Implemented support for UTF-8 encoding in EBCDIC environments, a patch
+    from Martin Jerabek that uses macro names for all relevant character and
+    string constants.
+
+18. Added to pcre_internal.h two configuration checks: (a) If both EBCDIC and
+    SUPPORT_UTF8 are set, give an error; (b) If SUPPORT_UCP is set without
+    SUPPORT_UTF8, define SUPPORT_UTF8. The "configure" script handles both of
+    these, but not everybody uses configure.
+
+19. A conditional group that had only one branch was not being correctly
+    recognized as an item that could match an empty string. This meant that an
+    enclosing group might also not be so recognized, causing infinite looping
+    (and probably a segfault) for patterns such as ^"((?(?=[a])[^"])|b)*"$
+    with the subject "ab", where knowledge that the repeated group can match
+    nothing is needed in order to break the loop.
+
+20. If a pattern that was compiled with callouts was matched using pcre_dfa_
+    exec(), but without supplying a callout function, matching went wrong.
+
+21. If PCRE_ERROR_MATCHLIMIT occurred during a recursion, there was a memory
+    leak if the size of the offset vector was greater than 30. When the vector
+    is smaller, the saved offsets during recursion go onto a local stack
+    vector, but for larger vectors malloc() is used. It was failing to free
+    when the recursion yielded PCRE_ERROR_MATCH_LIMIT (or any other "abnormal"
+    error, in fact).
+
+22. There was a missing #ifdef SUPPORT_UTF8 round one of the variables in the
+    heapframe that is used only when UTF-8 support is enabled. This caused no
+    problem, but was untidy.
+
+23. Steven Van Ingelgem's patch to CMakeLists.txt to change the name
+    CMAKE_BINARY_DIR to PROJECT_BINARY_DIR so that it works when PCRE is
+    included within another project.
+
+24. Steven Van Ingelgem's patches to add more options to the CMake support,
+    slightly modified by me:
+
+      (a) PCRE_BUILD_TESTS can be set OFF not to build the tests, including
+          not building pcregrep.
+
+      (b) PCRE_BUILD_PCREGREP can be see OFF not to build pcregrep, but only
+          if PCRE_BUILD_TESTS is also set OFF, because the tests use pcregrep.
+
+25. Forward references, both numeric and by name, in patterns that made use of
+    duplicate group numbers, could behave incorrectly or give incorrect errors,
+    because when scanning forward to find the reference group, PCRE was not
+    taking into account the duplicate group numbers. A pattern such as
+    ^X(?3)(a)(?|(b)|(q))(Y) is an example.
+
+26. Changed a few more instances of "const unsigned char *" to USPTR, making
+    the feature of a custom pointer more persuasive (as requested by a user).
+
+27. Wrapped the definitions of fileno and isatty for Windows, which appear in
+    pcretest.c, inside #ifndefs, because it seems they are sometimes already
+    pre-defined.
+
+28. Added support for (*UTF8) at the start of a pattern.
+
+29. Arrange for flags added by the "release type" setting in CMake to be shown
+    in the configuration summary.
+
+
 Version 7.8 05-Sep-08
 ---------------------
 

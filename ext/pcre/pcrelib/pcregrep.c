@@ -69,6 +69,7 @@ POSSIBILITY OF SUCH DAMAGE.
 typedef int BOOL;
 
 #define MAX_PATTERN_COUNT 100
+#define OFFSET_SIZE 99
 
 #if BUFSIZ > 8192
 #define MBUFTHIRD BUFSIZ
@@ -819,6 +820,60 @@ if (after_context > 0 && lastmatchnumber > 0)
 
 
 /*************************************************
+*   Apply patterns to subject till one matches   *
+*************************************************/
+
+/* This function is called to run through all patterns, looking for a match. It
+is used multiple times for the same subject when colouring is enabled, in order
+to find all possible matches.
+
+Arguments:
+  matchptr    the start of the subject
+  length      the length of the subject to match
+  offsets     the offets vector to fill in
+  mrc         address of where to put the result of pcre_exec()
+
+Returns:      TRUE if there was a match
+              FALSE if there was no match
+              invert if there was a non-fatal error
+*/
+
+static BOOL
+match_patterns(char *matchptr, size_t length, int *offsets, int *mrc)
+{
+int i;
+for (i = 0; i < pattern_count; i++)
+  {
+  *mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0,
+    PCRE_NOTEMPTY, offsets, OFFSET_SIZE);
+  if (*mrc >= 0) return TRUE;
+  if (*mrc == PCRE_ERROR_NOMATCH) continue;
+  fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", *mrc);
+  if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
+  fprintf(stderr, "this text:\n");
+  fwrite(matchptr, 1, length, stderr);  /* In case binary zero included */
+  fprintf(stderr, "\n");
+  if (error_count == 0 &&
+      (*mrc == PCRE_ERROR_MATCHLIMIT || *mrc == PCRE_ERROR_RECURSIONLIMIT))
+    {
+    fprintf(stderr, "pcregrep: error %d means that a resource limit "
+      "was exceeded\n", *mrc);
+    fprintf(stderr, "pcregrep: check your regex for nested unlimited loops\n");
+    }
+  if (error_count++ > 20)
+    {
+    fprintf(stderr, "pcregrep: too many errors - abandoned\n");
+    exit(2);
+    }
+  return invert;    /* No more matching; don't show the line again */
+  }
+
+return FALSE;  /* No match, no errors */
+}
+
+
+
+/*************************************************
 *            Grep an individual file             *
 *************************************************/
 
@@ -851,7 +906,7 @@ int linenumber = 1;
 int lastmatchnumber = 0;
 int count = 0;
 int filepos = 0;
-int offsets[99];
+int offsets[OFFSET_SIZE];
 char *lastmatchrestart = NULL;
 char buffer[3*MBUFTHIRD];
 char *ptr = buffer;
@@ -907,9 +962,9 @@ way, the buffer is shifted left and re-filled. */
 
 while (ptr < endptr)
   {
-  int i, endlinelength;
+  int endlinelength;
   int mrc = 0;
-  BOOL match = FALSE;
+  BOOL match;
   char *matchptr = ptr;
   char *t = ptr;
   size_t length, linelength;
@@ -917,9 +972,10 @@ while (ptr < endptr)
   /* At this point, ptr is at the start of a line. We need to find the length
   of the subject string to pass to pcre_exec(). In multiline mode, it is the
   length remainder of the data in the buffer. Otherwise, it is the length of
-  the next line. After matching, we always advance by the length of the next
-  line. In multiline mode the PCRE_FIRSTLINE option is used for compiling, so
-  that any match is constrained to be in the first line. */
+  the next line, excluding the terminating newline. After matching, we always
+  advance by the length of the next line. In multiline mode the PCRE_FIRSTLINE
+  option is used for compiling, so that any match is constrained to be in the
+  first line. */
 
   t = end_of_line(t, endptr, &endlinelength);
   linelength = t - ptr - endlinelength;
@@ -934,6 +990,7 @@ while (ptr < endptr)
       #include <time.h>
       struct timeval start_time, end_time;
       struct timezone dummy;
+      int i;
 
       if (jfriedl_XT)
       {
@@ -959,7 +1016,8 @@ while (ptr < endptr)
 
 
       for (i = 0; i < jfriedl_XR; i++)
-          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0, 0, offsets, 99) >= 0);
+          match = (pcre_exec(pattern_list[0], hints_list[0], ptr, length, 0,
+              PCRE_NOTEMPTY, offsets, OFFSET_SIZE) >= 0);
 
       if (gettimeofday(&end_time, &dummy) != 0)
               perror("bad gettimeofday");
@@ -978,37 +1036,11 @@ while (ptr < endptr)
 
   ONLY_MATCHING_RESTART:
 
-  /* Run through all the patterns until one matches. Note that we don't include
-  the final newline in the subject string. */
+  /* Run through all the patterns until one matches or there is an error other
+  than NOMATCH. This code is in a subroutine so that it can be re-used for
+  finding subsequent matches when colouring matched lines. */
 
-  for (i = 0; i < pattern_count; i++)
-    {
-    mrc = pcre_exec(pattern_list[i], hints_list[i], matchptr, length, 0, 0,
-      offsets, 99);
-    if (mrc >= 0) { match = TRUE; break; }
-    if (mrc != PCRE_ERROR_NOMATCH)
-      {
-      fprintf(stderr, "pcregrep: pcre_exec() error %d while matching ", mrc);
-      if (pattern_count > 1) fprintf(stderr, "pattern number %d to ", i+1);
-      fprintf(stderr, "this line:\n");
-      fwrite(matchptr, 1, linelength, stderr);  /* In case binary zero included */
-      fprintf(stderr, "\n");
-      if (error_count == 0 &&
-          (mrc == PCRE_ERROR_MATCHLIMIT || mrc == PCRE_ERROR_RECURSIONLIMIT))
-        {
-        fprintf(stderr, "pcregrep: error %d means that a resource limit "
-          "was exceeded\n", mrc);
-        fprintf(stderr, "pcregrep: check your regex for nested unlimited loops\n");
-        }
-      if (error_count++ > 20)
-        {
-        fprintf(stderr, "pcregrep: too many errors - abandoned\n");
-        exit(2);
-        }
-      match = invert;    /* No more matching; don't show the line again */
-      break;
-      }
-    }
+  match = match_patterns(matchptr, length, offsets, &mrc);
 
   /* If it's a match or a not-match (as required), do what's wanted. */
 
@@ -1058,7 +1090,11 @@ while (ptr < endptr)
           fprintf(stdout, "%d,%d", (int)(filepos + matchptr + offsets[0] - ptr),
             offsets[1] - offsets[0]);
         else
+          {
+          if (do_colour) fprintf(stdout, "%c[%sm", 0x1b, colour_string);
           fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+          if (do_colour) fprintf(stdout, "%c[00m", 0x1b);
+          }
         fprintf(stdout, "\n");
         matchptr += offsets[1];
         length -= offsets[1];
@@ -1195,17 +1231,33 @@ while (ptr < endptr)
       else
 #endif
 
-      /* We have to split the line(s) up if colouring. */
+      /* We have to split the line(s) up if colouring, and search for further
+      matches. */
 
       if (do_colour)
         {
+        int last_offset = 0;
         fwrite(ptr, 1, offsets[0], stdout);
         fprintf(stdout, "%c[%sm", 0x1b, colour_string);
         fwrite(ptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
         fprintf(stdout, "%c[00m", 0x1b);
-        fwrite(ptr + offsets[1], 1, (linelength + endlinelength) - offsets[1],
+        for (;;)
+          {
+          last_offset += offsets[1];
+          matchptr += offsets[1];
+          length -= offsets[1];
+          if (!match_patterns(matchptr, length, offsets, &mrc)) break;
+          fwrite(matchptr, 1, offsets[0], stdout);
+          fprintf(stdout, "%c[%sm", 0x1b, colour_string);
+          fwrite(matchptr + offsets[0], 1, offsets[1] - offsets[0], stdout);
+          fprintf(stdout, "%c[00m", 0x1b);
+          }
+        fwrite(ptr + last_offset, 1, (linelength + endlinelength) - last_offset,
           stdout);
         }
+
+      /* Not colouring; no need to search for further matches */
+
       else fwrite(ptr, 1, linelength + endlinelength, stdout);
       }
 
@@ -1817,16 +1869,18 @@ const char *error;
 
 /* Set the default line ending value from the default in the PCRE library;
 "lf", "cr", "crlf", and "any" are supported. Anything else is treated as "lf".
-*/
+Note that the return values from pcre_config(), though derived from the ASCII
+codes, are the same in EBCDIC environments, so we must use the actual values
+rather than escapes such as as '\r'. */
 
 (void)pcre_config(PCRE_CONFIG_NEWLINE, &i);
 switch(i)
   {
-  default:                 newline = (char *)"lf"; break;
-  case '\r':               newline = (char *)"cr"; break;
-  case ('\r' << 8) | '\n': newline = (char *)"crlf"; break;
-  case -1:                 newline = (char *)"any"; break;
-  case -2:                 newline = (char *)"anycrlf"; break;
+  default:               newline = (char *)"lf"; break;
+  case 13:               newline = (char *)"cr"; break;
+  case (13 << 8) | 10:   newline = (char *)"crlf"; break;
+  case -1:               newline = (char *)"any"; break;
+  case -2:               newline = (char *)"anycrlf"; break;
   }
 
 /* Process the options */

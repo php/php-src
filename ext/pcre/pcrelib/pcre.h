@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE_MAJOR          7
-#define PCRE_MINOR          8
+#define PCRE_MINOR          9
 #define PCRE_PRERELEASE     
-#define PCRE_DATE           2008-09-05
+#define PCRE_DATE           2009-04-11
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE, the appropriate
@@ -95,7 +95,8 @@ it is needed here for malloc. */
 extern "C" {
 #endif
 
-/* Options */
+/* Options. Some are compile-time only, some are run-time only, and some are
+both, so we keep them all distinct. */
 
 #define PCRE_CASELESS           0x00000001
 #define PCRE_MULTILINE          0x00000002
@@ -125,6 +126,8 @@ extern "C" {
 #define PCRE_BSR_ANYCRLF        0x00800000
 #define PCRE_BSR_UNICODE        0x01000000
 #define PCRE_JAVASCRIPT_COMPAT  0x02000000
+#define PCRE_NO_START_OPTIMIZE  0x04000000
+#define PCRE_NO_START_OPTIMISE  0x04000000
 
 /* Exec-time and get/set-time error codes */
 

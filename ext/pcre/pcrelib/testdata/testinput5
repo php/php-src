@@ -480,4 +480,9 @@ can't tell the difference.) --/
 /X/8f<any> 
     A\x{1ec5}ABCXYZ
 
+/(*UTF8)\x{1234}/
+  abcd\x{1234}pqr
+
+/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
+
 / End of testinput5 /
