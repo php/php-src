@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 RC 2
 - Undeprecated ticks. (Arnaud)
-- Upgraded bundled sqlite to version 3.6.12. (Scott)
+- Upgraded bundled sqlite to version 3.6.13. (Ilia)
 - Upgraded bundled PCRE to version 7.9. (Nuno)
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
