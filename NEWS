@@ -11,8 +11,6 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 
 - Fixed bug #47946 (ImageConvolution overwrites background). (Ilia)
-- Fixed bug #47930 (ext/filter crashes if extension bails out in activate). 
-  (Stas)
 - Fixed bug #47903 ("@" operator does not work with string offsets). (Felipe)
 - Fixed bug #47893 (CLI aborts on non blocking stdout). (Arnaud)
 - Fixed bug #47849 (Non-deep import loses the namespace). (Rob)
