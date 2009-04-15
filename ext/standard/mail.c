@@ -76,7 +76,7 @@ extern long php_getuid(void);
 PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
-	unsigned long h = 5381L;
+	unsigned int h = 5381;
 	int j, str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
