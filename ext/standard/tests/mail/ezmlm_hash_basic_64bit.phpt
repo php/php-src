@@ -20,6 +20,6 @@ var_dump(ezmlm_hash(b"foo@somewhere.com"));
 ===Done===
 --EXPECT--
 *** Testing ezmlm_hash() : basic functionality ***
-int(27)
-int(48)
+int(1)
+int(7)
 ===Done===
