@@ -1897,6 +1897,220 @@ php_stream_filter_factory consumed_filter_factory = {
 
 /* }}} */
 
+/* {{{ chunked filter implementation */
+typedef enum _php_chunked_filter_state {
+	CHUNK_SIZE_START,
+	CHUNK_SIZE,
+	CHUNK_SIZE_EXT_START,
+	CHUNK_SIZE_EXT,
+	CHUNK_SIZE_CR,
+	CHUNK_SIZE_LF,
+	CHUNK_BODY,
+	CHUNK_BODY_CR,
+	CHUNK_BODY_LF,
+	CHUNK_TRAILER,
+	CHUNK_ERROR
+} php_chunked_filter_state;
+
+typedef struct _php_chunked_filter_data {
+	php_chunked_filter_state state;
+	int chunk_size;
+	int persistent;
+} php_chunked_filter_data;
+
+static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
+{
+	char *p = buf;
+	char *end = p + len;
+	char *out = buf;
+	int out_len = 0;
+
+	while (p < end) {
+		switch (data->state) {
+			case CHUNK_SIZE_START:
+				data->chunk_size = 0;
+			case CHUNK_SIZE:
+				while (p < end) {
+					if (*p >= '0' && *p <= '9') {
+						data->chunk_size = (data->chunk_size * 16) + (*p - '0');
+					} else if (*p >= 'A' && *p <= 'F') {
+						data->chunk_size = (data->chunk_size * 16) + (*p - 'A' + 10);
+					} else if (*p >= 'a' && *p <= 'f') {
+						data->chunk_size = (data->chunk_size * 16) + (*p - 'a' + 10);
+					} else if (data->state == CHUNK_SIZE_START) {
+						data->state = CHUNK_ERROR;
+						break;
+					} else {
+						data->state = CHUNK_SIZE_EXT_START;
+						break;
+					}
+					data->state = CHUNK_SIZE;
+					p++;
+				}
+				if (data->state == CHUNK_ERROR) {
+					continue;
+				} else if (p == end) {
+					return out_len;
+				}
+			case CHUNK_SIZE_EXT_START:
+				if (*p == ';'|| *p == '\r' || *p == '\n') {
+					data->state = CHUNK_SIZE_EXT;
+ 				} else {
+					data->state = CHUNK_ERROR;
+					continue;
+				}
+			case CHUNK_SIZE_EXT:
+				/* skip extension */
+				while (p < end && *p != '\r' && *p != '\n') {
+					p++;
+				}
+				if (p == end) {
+					return out_len;
+				}
+			case CHUNK_SIZE_CR:
+				if (*p == '\r') {
+					p++;
+					if (p == end) {
+						data->state = CHUNK_SIZE_LF;
+						return out_len;
+					}
+				}
+			case CHUNK_SIZE_LF:
+				if (*p == '\n') {
+					p++;
+					if (data->chunk_size == 0) {
+						/* last chunk */
+						data->state = CHUNK_TRAILER;
+						continue;
+					} else if (p == end) {
+						data->state = CHUNK_BODY;
+						return out_len;
+					}
+				} else {
+					data->state = CHUNK_ERROR;
+					continue;
+				}
+			case CHUNK_BODY:
+				if (end - p >= data->chunk_size) {
+					if (p != out) {
+						memmove(out, p, data->chunk_size);
+					}
+					out += data->chunk_size;
+					out_len += data->chunk_size;
+					p += data->chunk_size;
+					if (p == end) {
+						data->state = CHUNK_BODY_CR;
+						return out_len;
+					}
+				} else {
+					if (p != out) {
+						memmove(out, p, end - p);
+					}
+					data->chunk_size -= end - p;
+					out_len += end - p;
+					return out_len;
+				}
+			case CHUNK_BODY_CR:
+				if (*p == '\r') {
+					p++;
+					if (p == end) {
+						data->state = CHUNK_BODY_LF;
+						return out_len;
+					}
+				}
+			case CHUNK_BODY_LF:
+				if (*p == '\n') {
+					p++;
+					data->state = CHUNK_SIZE_START;
+					continue;
+				} else {
+					data->state = CHUNK_ERROR;
+					continue;
+				}
+			case CHUNK_TRAILER:
+				/* ignore trailer */
+				p = end;
+				continue;
+			case CHUNK_ERROR:
+				if (p != out) {
+					memmove(out, p, end - p);
+				}
+				out_len += end - p;
+				return out_len;	
+		}
+	}
+	return out_len;
+}
+
+static php_stream_filter_status_t php_chunked_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
+	php_chunked_filter_data *data = (php_chunked_filter_data *) thisfilter->abstract;
+
+	while (buckets_in->head) {
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		consumed += bucket->buflen;
+		bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);	
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+	}
+
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
+}
+
+static void php_chunked_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+{
+	if (thisfilter && thisfilter->abstract) {
+		php_chunked_filter_data *data = (php_chunked_filter_data *) thisfilter->abstract;
+		pefree(data, data->persistent);
+	}
+}
+
+static php_stream_filter_ops chunked_filter_ops = {
+	php_chunked_filter,
+	php_chunked_dtor,
+	"dechunk"
+};
+
+static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+{
+	php_stream_filter_ops *fops = NULL;
+	php_chunked_filter_data *data;
+
+	if (strcasecmp(filtername, "dechunk")) {
+		return NULL;
+	}
+
+	/* Create this filter */
+	data = (php_chunked_filter_data *)pecalloc(1, sizeof(php_chunked_filter_data), persistent);
+	if (!data) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", sizeof(php_chunked_filter_data));
+		return NULL;
+	}
+	data->state = CHUNK_SIZE_START;
+	data->chunk_size = 0;
+	data->persistent = persistent;
+	fops = &chunked_filter_ops;
+
+	return php_stream_filter_alloc(fops, data, persistent);
+}
+
+static php_stream_filter_factory chunked_filter_factory = {
+	chunked_filter_create
+};
+/* }}} */
+
 static const struct {
 	php_stream_filter_ops *ops;
 	php_stream_filter_factory *factory;
@@ -1907,6 +2121,7 @@ static const struct {
 	{ &strfilter_strip_tags_ops, &strfilter_strip_tags_factory },
 	{ &strfilter_convert_ops, &strfilter_convert_factory },
 	{ &consumed_filter_ops, &consumed_filter_factory },
+	{ &chunked_filter_ops, &chunked_filter_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
 };

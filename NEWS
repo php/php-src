@@ -6,6 +6,11 @@ PHP                                                                        NEWS
 - Upgraded bundled PCRE to version 7.9. (Nuno)
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
+- Added "dechunk" filter which can decode HTTP responces with chunked
+  transfer-encoding. HTTP streams use this filter automatically in case
+  "Transfer-Encoding: chunked" header presents in responce. It's possible to
+  disable this behaviour using "http"=>array("auto_decode"=>0) in stream
+  context. (Dmitry)
 
 - Fixed bug #47880 (crashes in call_user_func_array()). (Dmitry)
 - Fixed bug #47856 (stristr() converts needle to lower-case). (Ilia)
@@ -28,6 +33,8 @@ PHP                                                                        NEWS
 - Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
   double quote). (Dmitry)
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
+- Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
+  "Transfer-Encoding: chunked"). (Dmitry)
 - Fixed bug #46108 (DateTime - Memory leak when unserializing). (Felipe)
 - Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
