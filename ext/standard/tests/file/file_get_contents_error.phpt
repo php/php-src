@@ -38,9 +38,12 @@ echo "\n*** Done ***\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/file_put_contents_error.tmp");
-unlink($file_path."/file_put_contents1.tmp");
-
+if(file_exists($file_path."/file_put_contents_error.tmp")) {
+  unlink($file_path."/file_put_contents_error.tmp");
+}
+if(file_exists($file_path."/file_put_contents1.tmp")) {
+  unlink($file_path."/file_put_contents1.tmp");
+}
 ?>
 --EXPECTF--
 *** Testing error conditions ***

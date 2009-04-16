@@ -18,7 +18,7 @@ mkdir($dest_dir);
 /* Testing rename() on soft and hard links with different permissions */
 echo "\n*** Testing rename() on soft links ***\n";
 // create the file
-$filename = $file_path."/rename_variation1.tmp";
+$filename = $file_path."/rename_variation2.tmp";
 @unlink($filename);
 var_dump(touch($filename));
 
@@ -49,9 +49,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation1.tmp");
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
+unlink($file_path."/rename_variation2.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
 --EXPECTF--

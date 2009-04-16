@@ -76,8 +76,12 @@ echo "Done\n";
 $file_path = dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation6";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation6.tmp";
+if(file_exists($filename)) {
 unlink($filename);
+}
+if(file_exists($dirname)) {
 rmdir($dirname);
+}
 ?>
 --EXPECTF--
 *** Creating links in a directory without permission to allow the operation ***
