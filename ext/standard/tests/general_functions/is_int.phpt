@@ -144,13 +144,12 @@ var_dump( is_integer(TRUE, FALSE) );
 var_dump( is_long(TRUE, FALSE) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--

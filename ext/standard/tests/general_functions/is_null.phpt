@@ -135,13 +135,12 @@ var_dump( is_null() );
 var_dump( is_null(NULL, null) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_null() with valid null values ***
 -- Iteration 1 --

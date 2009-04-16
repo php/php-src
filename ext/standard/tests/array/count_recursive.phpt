@@ -125,7 +125,6 @@ var_dump( count(array(), "") );
 
 echo "\nDone";
 
---CLEAN--
 /* closing the resource handles */
 fclose( $resource1 );
 closedir( $resource2 );

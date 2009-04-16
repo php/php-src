@@ -135,13 +135,12 @@ var_dump( is_bool() );
 var_dump( is_bool(TRUE, FALSE) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close resources
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_bool() with valid boolean values ***
 -- Iteration 1 --

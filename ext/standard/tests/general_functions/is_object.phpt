@@ -146,13 +146,12 @@ var_dump( is_object() );
 var_dump( is_object($myClass_object, $myClass_object) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_object() with valid objects ***
 -- Iteration 1 --

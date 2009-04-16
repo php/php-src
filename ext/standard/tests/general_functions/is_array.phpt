@@ -106,12 +106,10 @@ var_dump( is_array() );
 var_dump( is_array ($fp, $fp) );
  
 echo "Done\n";
-?>
---CLEAN--
 /* close resources */
 fclose($fp);
 closedir($dfp);
-
+?>
 --EXPECTF--
 *** Testing is_array() on different type of arrays ***
 -- Iteration 1 --
