@@ -39,7 +39,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_text.txt';
+$file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>
