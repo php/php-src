@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
 - Fixed segfault on invalid session.save_path. (Hannes)
 
+- Fixed bug #47981 (error handler not called regardless). (Hannes)
 - Fixed bug #47969 (ezmlm_hash() returns different values depend on OS).
   (Ilia)
 - Fixed bug #47946 (ImageConvolution overwrites background). (Ilia)
