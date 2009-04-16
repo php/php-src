@@ -168,6 +168,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) {
 #if LIBCURL_VERSION_NUM < 0x071100
 	char *copystr = NULL;
 #endif
+	TSRMLS_FETCH();
 
 	/* Disable file:// if open_basedir or safe_mode are used */
 	if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
@@ -1171,7 +1172,7 @@ PHP_FUNCTION(curl_init)
 
 	if (argc > 0) {
 		if (!php_curl_option_url(ch, Z_STRVAL_PP(url), Z_STRLEN_PP(url))) {
-			_php_curl_close_ex(ch);
+			_php_curl_close_ex(ch TSRMLS_CC);
 			RETURN_FALSE;
 		}
 	}
