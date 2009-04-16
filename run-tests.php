@@ -1753,7 +1753,7 @@ COMMAND $cmd
 		$wanted_re = preg_replace('/\r\n/', "\n", $wanted);
 
 		if (isset($section_text['EXPECTF'])) {
-			
+
 			// do preg_quote, but miss out any %r delimited sections
 			$temp = "";
 			$r = "%r";
@@ -1773,7 +1773,7 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),	'/');
+				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
 				// add the re unquoted.
 				$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
 				$startOffset = $end + 2;
@@ -1828,14 +1828,14 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 
-                        if (!$leaked && !$failed_headers) {
-                            if (isset($section_text['XFAIL'] )) {
-                                $warn = true;
-                                $info = " (warn: XFAIL section but test passes)";
-                            }else {
-                                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                                return 'PASSED';
-                            }
+			if (!$leaked && !$failed_headers) {
+				if (isset($section_text['XFAIL'] )) {
+					$warn = true;
+					$info = " (warn: XFAIL section but test passes)";
+				}else {
+					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+					return 'PASSED';
+				}
 			}
 		}
 
@@ -1857,14 +1857,14 @@ COMMAND $cmd
 				$php = $old_php;
 			}
 
-                        if (!$leaked && !$failed_headers) {
-                            if (isset($section_text['XFAIL'] )) {
-                                $warn = true;
-                                $info = " (warn: XFAIL section but test passes)";
-                            }else {
-                                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                                return 'PASSED';
-                            }
+			if (!$leaked && !$failed_headers) {
+				if (isset($section_text['XFAIL'] )) {
+					$warn = true;
+					$info = " (warn: XFAIL section but test passes)";
+				}else {
+					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+					return 'PASSED';
+				}
 			}
 		}
 
