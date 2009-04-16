@@ -88,6 +88,7 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 #include "filters/mbfilter_armscii8.h"
+#include "filters/mbfilter_cp850.h"
 
 static const struct mbfl_identify_vtbl vtbl_identify_false = {
 	mbfl_no_encoding_pass,
@@ -133,6 +134,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_8859_14,
 	&vtbl_identify_8859_15,
 	&vtbl_identify_armscii8,
+	&vtbl_identify_cp850,
 	&vtbl_identify_false,
 	NULL
 };
