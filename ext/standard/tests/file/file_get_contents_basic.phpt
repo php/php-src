@@ -30,12 +30,6 @@ delete_files($file_path, 1);
 
 echo "\n*** Done ***";
 ?>
---CLEAN--
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/file_put_contents.tmp");
-unlink($file_path."/file_put_contents1.tmp");
-?>
 --EXPECTF--
 *** Testing the basic functionality of the file_get_contents() function ***
 -- Testing with simple valid data file --

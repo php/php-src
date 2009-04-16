@@ -40,15 +40,6 @@ for($loop_counter = 0; $loop_counter < count($link_string); $loop_counter++) {
 
 echo "Done\n";
 ?>
---CLEAN--
-<?php
-$name_prefix = dirname(__FILE__)."/readlink_realpath_variation2";
-unlink("$name_prefix/home/tests/link/readlink_realpath_variation2.tmp");
-rmdir("$name_prefix/home/tests/link/");
-rmdir("$name_prefix/home/tests/");
-rmdir("$name_prefix/home/");
-rmdir("$name_prefix/");
-?>
 --EXPECTF--
 *** Testing readlink() and realpath() : usage variations ***
 

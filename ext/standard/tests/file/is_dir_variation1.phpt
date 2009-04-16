@@ -29,7 +29,6 @@ echo "\n*** Done ***";
 <?php
 $file_path = dirname(__FILE__);
 $dir_name = $file_path."/is_dir_variation1";
-unlink($file_path."/is_dir_variation1.tmp");
 rmdir($dir_name."/is_dir_variation1_sub");
 rmdir($dir_name);
 ?>

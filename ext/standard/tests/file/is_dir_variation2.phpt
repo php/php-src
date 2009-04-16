@@ -56,12 +56,24 @@ echo "\n*** Done ***";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/is_dir_variation2_symlink");
-unlink($file_path."/is_dir_variation2_link");
-unlink($file_path."/is_dir_variation2_symlink.tmp");
-unlink($file_path."/is_dir_variation2_link.tmp");
-unlink($file_path."/is_dir_variation2.tmp");
-rmdir($file_path."/is_dir_variation2");
+if(file_exists($file_path."/is_dir_variation2_symlink")) {
+  unlink($file_path."/is_dir_variation2_symlink");
+}
+if(file_exists($file_path."/is_dir_variation2_symlink")) {
+  unlink($file_path."/is_dir_variation2_symlink");
+}
+if(file_exists($file_path."/is_dir_variation2_symlink.tmp")) {
+  unlink($file_path."/is_dir_variation2_symlink.tmp");
+}
+if(file_exists($file_path."/is_dir_variation2_link.tmp")) {
+  unlink($file_path."/is_dir_variation2_link.tmp");
+}
+if(file_exists($file_path."/is_dir_variation2.tmp")) {
+  unlink($file_path."/is_dir_variation2.tmp");
+}
+if(file_exists($file_path."/is_dir_variation2")) {
+  rmdir($file_path."/is_dir_variation2");
+}
 ?>
 --EXPECTF--
 *** Testing is_dir() with dir and links to dir ***

@@ -34,7 +34,6 @@ var_dump( compare_stats($old_stat, $new_stat, $keys_to_compare) );
 ===Done===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/rename_basic.tmp");
 unlink(dirname(__FILE__)."/rename_basic_new.tmp");
 ?>
 --EXPECT--

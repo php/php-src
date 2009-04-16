@@ -74,7 +74,9 @@ echo "\n*** Done ***";
 <?php
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation53.tmp";
-unlink($filename);
+if(file_exists($filename)) {
+  unlink($filename);
+}
 ?>
 --EXPECT--
 *** Test fscanf(): to read a file when file pointer is pointing to EOF ***

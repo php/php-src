@@ -156,13 +156,27 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/005_variation_softlink.tmp");
-unlink($file_path."/005_variation_hardlink.tmp");
-unlink($file_path."/005_variation1.tmp");
-unlink($file_path."/005_variation_copy.tmp");
-unlink($file_path."/005_variation_touch.tmp");
-unlink($file_path."/005_variation_touch_fly.tmp");
-unlink($file_path."/005_variation_touch_new.tmp");
+if(file_exists($file_path."/005_variation_softlink.tmp")) {
+  unlink($file_path."/005_variation_softlink.tmp");
+}
+if(file_exists($file_path."/005_variation_hardlink.tmp")) {
+  unlink($file_path."/005_variation_hardlink.tmp");
+}
+if(file_exists($file_path."/005_variation1.tmp")) {
+  unlink($file_path."/005_variation1.tmp");
+}
+if(file_exists($file_path."/005_variation_copy.tmp")) {
+  unlink($file_path."/005_variation_copy.tmp");
+}
+if(file_exists($file_path."/005_variation_touch.tmp")) {
+  unlink($file_path."/005_variation_touch.tmp");
+}
+if(file_exists($file_path."/005_variation_touch_fly.tmp")) {
+  unlink($file_path."/005_variation_touch_fly.tmp");
+}
+if(file_exists($file_path."/005_variation_touch_new.tmp")) {
+  unlink($file_path."/005_variation_touch_new.tmp");
+}
 ?>
 --EXPECTF--
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
