@@ -149,13 +149,12 @@ var_dump( strval() );
 var_dump( strval( $scalars[0], $scalars[1]) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing str_val() with scalar values***
 -- Iteration 1 --

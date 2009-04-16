@@ -139,13 +139,12 @@ var_dump( is_double( $floats[0], $floats[1]) );
 var_dump( is_real( $floats[0], $floats[1]) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used 
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_float(), is_double() and is_real() with float values***
 -- Iteration 1 --

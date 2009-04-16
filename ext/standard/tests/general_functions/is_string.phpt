@@ -148,13 +148,12 @@ var_dump( is_string() );
 var_dump( is_string("string", "test") );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_string() with valid string values ***
 -- Iteration 1 --
