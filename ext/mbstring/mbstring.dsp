@@ -374,6 +374,10 @@ SOURCE=.\libmbfl\filters\mbfilter_armscii8.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_cp850.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\mbfl\mbfilter_pass.c
 # End Source File
 # Begin Source File
@@ -687,6 +691,10 @@ SOURCE=.\libmbfl\filters\mbfilter_armscii8.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_cp850.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\mbfl\mbfilter_pass.h
 # End Source File
 # Begin Source File
@@ -908,6 +916,10 @@ SOURCE=.\libmbfl\filters\unicode_table_koi8u.h
 # Begin Source File
 
 SOURCE=.\libmbfl\filters\unicode_table_armscii8.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_cp850.h
 # End Source File
 # Begin Source File
 

@@ -90,6 +90,7 @@
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
 #include "filters/mbfilter_armscii8.h"
+#include "filters/mbfilter_cp850.h"
 
 static void mbfl_convert_filter_reset_vtbl(mbfl_convert_filter *filter);
 
@@ -216,6 +217,8 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_byte2le,
 	&vtbl_armscii8_wchar,
 	&vtbl_wchar_armscii8,
+	&vtbl_cp850_wchar,
+	&vtbl_wchar_cp850,
 	&vtbl_pass,
 	NULL
 };
