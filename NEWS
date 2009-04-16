@@ -525,7 +525,7 @@ PHP                                                                        NEWS
   . Added pcntl_sigtimedwait().
 
 - Improved SOAP extension:
-  . Added support for element names in context of XMLShema's <any>. (Dmitry)
+  . Added support for element names in context of XMLSchema's <any>. (Dmitry)
   . Added ability to use Traversable objects instead of plain arrays.
     (Joshua Reese, Dmitry)
   . Fixed possible crash bug caused by an uninitialized value. (Zdash Urf)
