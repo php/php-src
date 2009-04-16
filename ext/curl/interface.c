@@ -147,6 +147,7 @@ static struct gcry_thread_cbs php_curl_gnutls_tsl = {
 #endif
 /* }}} */
 
+static void _php_curl_close_ex(php_curl *ch TSRMLS_DC);
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
@@ -1170,6 +1171,7 @@ PHP_FUNCTION(curl_init)
 
 	if (argc > 0) {
 		if (!php_curl_option_url(ch, Z_STRVAL_PP(url), Z_STRLEN_PP(url))) {
+			_php_curl_close_ex(ch);
 			RETURN_FALSE;
 		}
 	}
@@ -1331,6 +1333,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_PROTOCOLS:
 #endif
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM >= 0x71304
+			if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when in safe_mode or an open_basedir is set");
+					RETVAL_FALSE;
+					return 1;
+			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 		case CURLOPT_FOLLOWLOCATION:
@@ -2011,10 +2020,8 @@ PHP_FUNCTION(curl_close)
 
 /* {{{ _php_curl_close()
    List destructor for curl handles */
-static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 {
-	php_curl *ch = (php_curl *) rsrc->ptr;
-
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
@@ -2050,6 +2057,15 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(ch->handlers->read);
 	efree(ch->handlers);
 	efree(ch);
+}	
+/* }}} */
+
+/* {{{ _php_curl_close()
+   List destructor for curl handles */
+static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_curl *ch = (php_curl *) rsrc->ptr;
+	_php_curl_close_ex(ch TSRMLS_CC);
 }	
 /* }}} */
 
