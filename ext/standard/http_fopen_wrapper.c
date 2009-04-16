@@ -111,6 +111,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
+	php_stream_filter *transfer_encoding = NULL;
 
 	tmp_line[0] = '\0';
 
@@ -597,6 +598,25 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
 				file_size = atoi(http_header_line + 16);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
+			} else if (!strncasecmp(http_header_line, "Transfer-Encoding: chunked", sizeof("Transfer-Encoding: chunked"))) {
+
+				/* create filter to decode response body */
+				if (!(options & STREAM_ONLY_GET_HEADERS)) {
+					long decode = 1;
+
+					if (context && php_stream_context_get_option(context, "http", "auto_decode", &tmpzval) == SUCCESS) {
+						SEPARATE_ZVAL(tmpzval);
+						convert_to_boolean(*tmpzval);
+						decode = Z_LVAL_PP(tmpzval);
+					}
+					if (decode) {
+						transfer_encoding = php_stream_filter_create("dechunk", NULL, php_stream_is_persistent(stream) TSRMLS_CC);
+						if (transfer_encoding) {
+							/* don't store transfer-encodeing header */
+							continue;
+						}
+					}
+				}
 			}
 
 			if (http_header_line[0] == '\0') {
@@ -740,6 +760,11 @@ out:
 		 * the stream */
 		stream->position = 0;
 
+		if (transfer_encoding) {
+			php_stream_filter_append(&stream->readfilters, transfer_encoding);
+		}
+	} else if (transfer_encoding) {
+		php_stream_filter_free(transfer_encoding TSRMLS_CC);
 	}
 
 	return stream;
