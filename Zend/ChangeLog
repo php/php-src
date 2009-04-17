@@ -1,3 +1,24 @@
+2009-04-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      tests/bug47981.phpt:
+       MFH: Fixed bug#47981 (error handler not called regardless)
+
+    * (PHP_5_3)
+      zend_compile.c
+      tests/bug47981.phpt:
+      MFH: Fixed bug#47981 (error handler not called regardless)
+
+    * tests/bug47981.phpt
+      tests/bug47981.phpt
+      tests/bug47981.phpt:
+        1.1.4;
+      Fixed bug#47981 (error handler not called regardless)
+
+    * zend_compile.c:
+      Fixed bug#47981 (error handler not called regardless)
+
 2009-04-08  Stanislav Malyshev  <stas@zend.com>
 
     * zend_extensions.h:
