@@ -27,7 +27,7 @@
 #include "php.h"
 #ifdef ZEND_ENGINE_2
 # include "zend_exceptions.h"
-#else
+#endif
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
