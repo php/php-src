@@ -629,12 +629,15 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	switch (Z_TYPE_P(data)) {
-		case IS_RESOURCE:
-			numbytes = (int) php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL);
-			if ((size_t)numbytes == PHP_STREAM_FAILURE) {
+		case IS_RESOURCE: {
+			size_t len;
+			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 				numbytes = -1;
+			} else {
+				numbytes = len;
 			}
 			break;
+		}
 		case IS_NULL:
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -1839,7 +1842,7 @@ safe_to_copy:
 	deststream = php_stream_open_wrapper(dest, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 
 	if (srcstream && deststream) {
-		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL) == PHP_STREAM_FAILURE ? FAILURE : SUCCESS;
+		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
 	if (srcstream) {
 		php_stream_close(srcstream);
