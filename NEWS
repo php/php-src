@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Fixed bug #47969 (ezmlm_hash() returns different values depend on OS).
   (Ilia)
 - Fixed bug #47946 (ImageConvolution overwrites background). (Ilia)
+- Fixed bug #47937 (system() calls sapi_flush() regardless of output
+  buffering). (Ilia)
 - Fixed bug #47903 ("@" operator does not work with string offsets). (Felipe)
 - Fixed bug #47893 (CLI aborts on non blocking stdout). (Arnaud)
 - Fixed bug #47849 (Non-deep import loses the namespace). (Rob)

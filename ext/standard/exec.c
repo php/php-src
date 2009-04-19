@@ -131,7 +131,9 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 
 			if (type == 1) {
 				PHPWRITE(buf, bufl);
-				sapi_flush(TSRMLS_C);
+				if (OG(ob_nesting_level) < 1) {
+					sapi_flush(TSRMLS_C);
+				}
 			} else if (type == 2) {
 				/* strip trailing whitespaces */	
 				l = bufl;
