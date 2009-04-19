@@ -1297,17 +1297,23 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	return len;
 }
 
-/* Returns the number of bytes moved, or PHP_STREAM_FAILURE on failure. */
-PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
+/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
+PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
 {
 	char buf[CHUNK_SIZE];
 	size_t readchunk;
 	size_t haveread = 0;
 	size_t didread;
+	size_t dummy;
 	php_stream_statbuf ssbuf;
 
+	if (!len) {
+		len = &dummy;
+	}
+
 	if (maxlen == 0) {
-		return 0;
+		*len = 0;
+		return SUCCESS;
 	}
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
@@ -1323,7 +1329,8 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 		 && !S_ISCHR(ssbuf.sb.st_mode)
 #endif
 		) {
-			return 0;
+			*len = 0;
+			return SUCCESS;
 		}
 	}
 
@@ -1337,14 +1344,16 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 			mapped = php_stream_write(dest, p, mapped);
 
 			php_stream_mmap_unmap(src);
+
+			*len = mapped;
 			
 			/* we've got at least 1 byte to read. 
 			 * less than 1 is an error */
 
 			if (mapped > 0) {
-				return mapped;
+				return SUCCESS;
 			}
-			return PHP_STREAM_FAILURE;
+			return FAILURE;
 		}
 	}
 
@@ -1369,7 +1378,8 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
 				if (didwrite == 0) {
-					return PHP_STREAM_FAILURE;
+					*len = haveread - (didread - towrite);
+					return FAILURE;
 				}
 
 				towrite -= didwrite;
@@ -1384,13 +1394,15 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 		}
 	}
 
+	*len = haveread;
+
 	/* we've got at least 1 byte to read. 
 	 * less than 1 is an error */
 
 	if (haveread > 0) {
-		return haveread;
+		return SUCCESS;
 	}
-	return PHP_STREAM_FAILURE;
+	return FAILURE;
 }
 
 /* Returns the number of bytes moved.
@@ -1399,11 +1411,12 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 ZEND_ATTRIBUTE_DEPRECATED
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
 {
-	size_t ret = _php_stream_copy_to_stream_ex(src, dest, maxlen STREAMS_REL_CC TSRMLS_CC);
-	if (ret == 0 && maxlen != 0) {
+	size_t len;
+	int ret = _php_stream_copy_to_stream_ex(src, dest, maxlen, &len STREAMS_REL_CC TSRMLS_CC);
+	if (ret == SUCCESS && len == 0 && maxlen != 0) {
 		return 1;
 	}
-	return ret;
+	return len;
 }
 /* }}} */
 
