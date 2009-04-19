@@ -1288,7 +1288,8 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	return len;
 }
 
-PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
+/* Returns the number of bytes moved, or PHP_STREAM_FAILURE on failure. */
+PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
 {
 	char buf[CHUNK_SIZE];
 	size_t readchunk;
@@ -1305,8 +1306,6 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 
 	if (php_stream_stat(src, &ssbuf) == 0) {
-		/* in the event that the source file is 0 bytes, return 1 to indicate success
-		 * because opening the file to write had already created a copy */
 		if (ssbuf.sb.st_size == 0
 #ifdef S_ISFIFO
 		 && !S_ISFIFO(ssbuf.sb.st_mode)
@@ -1315,7 +1314,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 		 && !S_ISCHR(ssbuf.sb.st_mode)
 #endif
 		) {
-			return 1;
+			return 0;
 		}
 	}
 
@@ -1329,8 +1328,14 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			mapped = php_stream_write(dest, p, mapped);
 
 			php_stream_mmap_unmap(src);
+			
+			/* we've got at least 1 byte to read. 
+			 * less than 1 is an error */
 
-			return mapped;
+			if (mapped > 0) {
+				return mapped;
+			}
+			return PHP_STREAM_FAILURE;
 		}
 	}
 
@@ -1354,22 +1359,40 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
 				if (didwrite == 0) {
-					return 0;	/* error */
+					return PHP_STREAM_FAILURE;
 				}
 
 				towrite -= didwrite;
 				writeptr += didwrite;
 			}
 		} else {
-			return haveread;
+			break;
 		}
 
 		if (maxlen - haveread == 0) {
 			break;
 		}
 	}
-	return haveread;
 
+	/* we've got at least 1 byte to read. 
+	 * less than 1 is an error */
+
+	if (haveread > 0) {
+		return haveread;
+	}
+	return PHP_STREAM_FAILURE;
+}
+
+/* Returns the number of bytes moved.
+ * Returns 1 when source len is 0. 
+ * Deprecated in favor of php_stream_copy_to_stream_ex() */
+PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
+{
+	size_t ret = _php_stream_copy_to_stream_ex(src, dest, maxlen STREAMS_REL_CC TSRMLS_CC);
+	if (ret == 0 && maxlen != 0) {
+		return 1;
+	}
+	return ret;
 }
 /* }}} */
 
