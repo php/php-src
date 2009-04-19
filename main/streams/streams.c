@@ -1768,14 +1768,14 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 }
 
 /* Designed for copying UChars (taking into account both maxlen and maxchars) */
-PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
+PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
 {
 	size_t haveread = 0;
 	php_stream_statbuf ssbuf;
 
 	if (src->readbuf_type == IS_STRING) {
 		/* Called incorrectly, don't do that. */
-		return _php_stream_copy_to_stream(src, dest, maxlen STREAMS_CC TSRMLS_CC);
+		return _php_stream_copy_to_stream_ex(src, dest, maxlen STREAMS_CC TSRMLS_CC);
 	}
 
 	if (maxlen == 0 || maxchars == 0) {
@@ -1787,8 +1787,6 @@ PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, siz
 	}
 
 	if (php_stream_stat(src, &ssbuf) == 0) {
-		/* in the event that the source file is 0 bytes, return 1 to indicate success
-		 * because opening the file to write had already created a copy */
 		if (ssbuf.sb.st_size == 0
 #ifdef S_ISFIFO
 		 && !S_ISFIFO(ssbuf.sb.st_mode)
@@ -1797,7 +1795,7 @@ PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, siz
 		 && !S_ISCHR(ssbuf.sb.st_mode)
 #endif
 		) {
-			return 1;
+			return 0;
 		}
 	}
 
@@ -1829,14 +1827,14 @@ PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, siz
 			while(towrite) {
 				didwrite = php_stream_write_unicode(dest, writeptr, towrite);
 				if (didwrite == 0) {
-					return 0;	/* error */
+					return PHP_STREAM_FAILURE;
 				}
 
 				towrite -= didwrite;
 				writeptr += didwrite;
 			}
 		} else {
-			return haveread;
+			break;
 		}
 
 		if (maxchars == 0 || maxlen - haveread == 0) {
@@ -1844,18 +1842,36 @@ PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, siz
 		}
 	}
 
-	return haveread;
+	/* we've got at least 1 byte to read. 
+	 * less than 1 is an error */
+
+	if (haveread > 0) {
+		return haveread;
+	}
+	return PHP_STREAM_FAILURE;
+}
+
+/* see _php_stream_copy_to_stream() */
+ZEND_ATTRIBUTE_DEPRECATED
+PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
+{
+	size_t ret = _php_stream_ucopy_to_stream_ex(src, dest, maxlen, maxchars STREAMS_REL_CC TSRMLS_CC);
+	if (ret == 0 && maxlen != 0 && maxchars != 0) {
+		return 1;
+	}
+	return ret;
 }
 
 /* Optimized for copying octets from source stream */
-PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
+/* Returns the number of bytes moved, or PHP_STREAM_FAILURE on failure. */
+PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
 {
 	size_t haveread = 0;
 	php_stream_statbuf ssbuf;
 
 	if (src->readbuf_type == IS_UNICODE) {
 		/* Called incorrectly, don't do that. */
-		return _php_stream_ucopy_to_stream(src, dest, maxlen, -1 STREAMS_CC TSRMLS_CC);
+		return _php_stream_ucopy_to_stream_ex(src, dest, maxlen, -1 STREAMS_CC TSRMLS_CC);
 	}
 
 	if (maxlen == 0) {
@@ -1867,8 +1883,6 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 
 	if (php_stream_stat(src, &ssbuf) == 0) {
-		/* in the event that the source file is 0 bytes, return 1 to indicate success
-		 * because opening the file to write had already created a copy */
 		if (ssbuf.sb.st_size == 0
 #ifdef S_ISFIFO
 		 && !S_ISFIFO(ssbuf.sb.st_mode)
@@ -1877,7 +1891,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 		 && !S_ISCHR(ssbuf.sb.st_mode)
 #endif
 		) {
-			return 1;
+			return 0;
 		}
 	}
 
@@ -1891,8 +1905,14 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			mapped = php_stream_write(dest, p, mapped);
 
 			php_stream_mmap_unmap(src);
+			
+			/* we've got at least 1 byte to read. 
+			 * less than 1 is an error */
 
-			return mapped;
+			if (mapped > 0) {
+				return mapped;
+			}
+			return PHP_STREAM_FAILURE;
 		}
 	}
 
@@ -1919,14 +1939,14 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
 				if (didwrite == 0) {
-					return 0;	/* error */
+					return PHP_STREAM_FAILURE;
 				}
 
 				towrite -= didwrite;
 				writeptr += didwrite;
 			}
 		} else {
-			return haveread;
+			break;
 		}
 
 		if (maxlen - haveread == 0) {
@@ -1934,7 +1954,26 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 		}
 	}
 
-	return haveread;
+	/* we've got at least 1 byte to read. 
+	 * less than 1 is an error */
+
+	if (haveread > 0) {
+		return haveread;
+	}
+	return PHP_STREAM_FAILURE;
+}
+
+/* Returns the number of bytes moved.
+ * Returns 1 when source len is 0. 
+ * Deprecated in favor of php_stream_copy_to_stream_ex() */
+ZEND_ATTRIBUTE_DEPRECATED
+PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC)
+{
+	size_t ret = _php_stream_copy_to_stream_ex(src, dest, maxlen STREAMS_REL_CC TSRMLS_CC);
+	if (ret == 0 && maxlen != 0) {
+		return 1;
+	}
+	return ret;
 }
 /* }}} */
 
