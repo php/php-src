@@ -21,5 +21,5 @@ var_dump(file_get_contents(dirname(__FILE__) . '/test.other'));
 ?>
 --EXPECT--
 string(40) "AwCFRi98wqppK23l2/7kIY8AlyEdAgAAAEdCTUI="
-int(0)
+bool(false)
 string(0) ""
