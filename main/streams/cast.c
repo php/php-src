@@ -214,9 +214,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 			newstream = php_stream_fopen_tmpfile();
 			if (newstream) {
-				size_t copied = php_stream_copy_to_stream(stream, newstream, PHP_STREAM_COPY_ALL);
+				size_t copied = php_stream_copy_to_stream_ex(stream, newstream, PHP_STREAM_COPY_ALL);
 
-				if (copied == 0) {
+				if (copied == PHP_STREAM_FAILURE) {
 					php_stream_close(newstream);
 				} else {
 					int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
@@ -332,7 +332,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	(*newstream)->open_lineno = origstream->open_lineno;
 #endif
 
-	if (php_stream_copy_to_stream(origstream, *newstream, PHP_STREAM_COPY_ALL) == 0) {
+	if (php_stream_copy_to_stream_ex(origstream, *newstream, PHP_STREAM_COPY_ALL) == PHP_STREAM_FAILURE) {
 		php_stream_close(*newstream);
 		*newstream = NULL;
 		return PHP_STREAM_CRITICAL;

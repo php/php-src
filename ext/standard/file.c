@@ -662,7 +662,10 @@ PHP_FUNCTION(file_put_contents)
 
 	switch (Z_TYPE_P(data)) {
 		case IS_RESOURCE:
-			numchars = php_stream_copy_to_stream(srcstream, stream, PHP_STREAM_COPY_ALL);
+			numchars = (int) php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL);
+			if ((size_t)numchars == PHP_STREAM_FAILURE) {
+				numchars = -1;
+			}
 			break;
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
@@ -1949,7 +1952,7 @@ safe_to_copy:
 	deststream = php_stream_open_wrapper(dest, "wb", REPORT_ERRORS, NULL);
 
 	if (srcstream && deststream) {
-		ret = php_stream_copy_to_stream(srcstream, deststream, PHP_STREAM_COPY_ALL) == 0 ? FAILURE : SUCCESS;
+		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL) == PHP_STREAM_FAILURE ? FAILURE : SUCCESS;
 	}
 	if (srcstream) {
 		php_stream_close(srcstream);
