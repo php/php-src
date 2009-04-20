@@ -97,7 +97,7 @@ PHP_FUNCTION(dns_check_record)
 	int type = DNS_TYPE_MX;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
-	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
+	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
 		return;
@@ -191,7 +191,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 		case DNS_TYPE_HINFO:
 		case DNS_TYPE_TEXT:
 			{
-				int i = 0;
+				DWORD i = 0;
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
 				char *txt, *txt_dst;
@@ -302,7 +302,6 @@ PHP_FUNCTION(dns_get_record)
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	int addtl_recs = 0;
-	IN_ADDR ipaddr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
 		return;
