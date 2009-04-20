@@ -337,6 +337,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 typedef struct {
 	zend_function *func_ptr;
 	zval *obj;
+	zval *closure;
 	zend_class_entry *ce;
 } autoload_func_info;
 
@@ -344,6 +345,9 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 {
 	if (alfi->obj) {
 		zval_ptr_dtor(&alfi->obj);
+	}
+	if (alfi->closure) {
+		zval_ptr_dtor(&alfi->closure);
 	}
 }
 
@@ -485,9 +489,14 @@ PHP_FUNCTION(spl_autoload_register)
 				RETURN_FALSE;
 			}
 		}
+		alfi.closure = NULL;
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
 		obj_ptr = fcc.object_ptr;
+		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
+			alfi.closure = zcallable;
+			Z_ADDREF_P(zcallable);
+		}
 		if (error) {
 			efree(error);
 		}
@@ -531,6 +540,7 @@ PHP_FUNCTION(spl_autoload_register)
 			spl_alfi.func_ptr = spl_func_ptr;
 			spl_alfi.obj = NULL;
 			spl_alfi.ce = NULL;
+			spl_alfi.closure = NULL;
 			zend_hash_add(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload"), &spl_alfi, sizeof(autoload_func_info), NULL);
 			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
 				/* Move the newly created element to the head of the hashtable */
