@@ -303,7 +303,6 @@ PHP_FUNCTION(dns_get_record)
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	int addtl_recs = 0;
-	IN_ADDR ipaddr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzz", &hostname, &hostname_len, &type_param, &authns, &addtl) == FAILURE) {
 		return;
