@@ -191,7 +191,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 		case DNS_TYPE_HINFO:
 		case DNS_TYPE_TEXT:
 			{
-				int i = 0;
+				DWORD i = 0;
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
 				char *txt, *txt_dst;
