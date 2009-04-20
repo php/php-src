@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 
 - Fixed bug #47997 (stream_copy_to_stream returns 1 on empty streams). (Arnaud)
+- Fixed bug #47991 (SSL streams fail if error stack contains items). (Mikko)
 - Fixed bug #47981 (error handler not called regardless). (Hannes)
 - Fixed bug #47969 (ezmlm_hash() returns different values depend on OS).
   (Ilia)
