@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unicode/ustdio.h>
 
 #include <stdio.h>
 #ifdef PHP_WIN32
