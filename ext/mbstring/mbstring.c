@@ -933,169 +933,6 @@ void _php_mb_free_regex(void *opaque)
 /* }}} */
 #endif
 
-#ifdef ZEND_MULTIBYTE
-/* {{{ char *php_mb_encoding_detector()
- * Interface for Zend Engine
- */
-static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t arg_length, char *arg_list TSRMLS_DC)
-{
-	mbfl_string string;
-	const char *ret;
-	enum mbfl_no_encoding *elist;
-	int size, *list;
-
-	/* make encoding list */
-	list = NULL;
-	size = 0;
-	php_mb_parse_encoding_list(arg_list, strlen(arg_list), &list, &size, 0 TSRMLS_CC);
-	if (size <= 0) {
-		return NULL;
-	}
-	if (size > 0 && list != NULL) {
-		elist = list;
-	} else {
-		elist = MBSTRG(current_detect_order_list);
-		size = MBSTRG(current_detect_order_list_size);
-	}
-
-	mbfl_string_init(&string);
-	string.no_language = MBSTRG(language);
-	string.val = (unsigned char *)arg_string;
-	string.len = arg_length;
-	ret = mbfl_identify_encoding_name(&string, elist, size, 0);
-	if (list != NULL) {
-		efree((void *)list);
-	}
-	if (ret != NULL) {
-		return estrdup(ret);
-	} else {
-		return NULL;
-	}
-}
-/* }}} */
-
-/*	{{{ int php_mb_encoding_converter() */
-static int php_mb_encoding_converter(unsigned char **to, size_t *to_length,
-		const unsigned char *from, size_t from_length,
-		const char *encoding_to, const char *encoding_from TSRMLS_DC)
-{
-	mbfl_string string, result, *ret;
-	enum mbfl_no_encoding from_encoding, to_encoding;
-	mbfl_buffer_converter *convd;
-
-	/* new encoding */
-	to_encoding = mbfl_name2no_encoding(encoding_to);
-	if (to_encoding == mbfl_no_encoding_invalid) {
-		return -1;
-	}	
-	/* old encoding */
-	from_encoding = mbfl_name2no_encoding(encoding_from);
-	if (from_encoding == mbfl_no_encoding_invalid) {
-		return -1;
-	}
-	/* initialize string */
-	mbfl_string_init(&string);
-	mbfl_string_init(&result);
-	string.no_encoding = from_encoding;
-	string.no_language = MBSTRG(language);
-	string.val = (unsigned char*)from;
-	string.len = from_length;
-
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
-	if (convd == NULL) {
-		return -1;
-	}
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	if (ret != NULL) {
-		*to = ret->val;
-		*to_length = ret->len;
-	}
-
-	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-	mbfl_buffer_converter_delete(convd);
-
-	return ret ? 0 : -1;
-}
-/* }}} */
-
-/* {{{ int php_mb_oddlen()
- *	returns number of odd (e.g. appears only first byte of multibyte
- *	character) chars
- */
-static size_t php_mb_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC)
-{
-	mbfl_string mb_string;
-
-	mbfl_string_init(&mb_string);
-	mb_string.no_language = MBSTRG(language);
-	mb_string.no_encoding = mbfl_name2no_encoding(encoding);
-	mb_string.val = (unsigned char *)string;
-	mb_string.len = length;
-
-	if (mb_string.no_encoding == mbfl_no_encoding_invalid) {
-		return 0;
-	}
-	return mbfl_oddlen(&mb_string);
-}
-/* }}} */
-
-/* {{{ php_mb_set_zend_encoding() */
-static int php_mb_set_zend_encoding(TSRMLS_D)
-{
-	/* 'd better use mbfl_memory_device? */
-	char *name, *list = NULL;
-	int n, *entry, list_size = 0;
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
-
-	/* notify script encoding to Zend Engine */
-	entry = MBSTRG(script_encoding_list);
-	n = MBSTRG(script_encoding_list_size);
-	while (n > 0) {
-		name = (char *)mbfl_no_encoding2name(*entry);
-		if (name) {
-			list_size += strlen(name) + 1;
-			if (!list) {
-				list = (char*)emalloc(list_size);
-				*list = '\0';
-			} else {
-				list = (char*)erealloc(list, list_size);
-				strcat(list, ",");
-			}
-			strcat(list, name);
-		}
-		entry++;
-		n--;
-	}
-	zend_multibyte_set_script_encoding(list, (list ? strlen(list) : 0) TSRMLS_CC);
-	if (list) {
-		efree(list);
-	}
-	encoding_detector = php_mb_encoding_detector;
-	encoding_converter = php_mb_encoding_converter;
-	encoding_oddlen = php_mb_oddlen;
-
-	/* TODO: make independent from mbstring.encoding_translation? */
-	if (MBSTRG(encoding_translation)) {
-		/* notify internal encoding to Zend Engine */
-		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
-		zend_multibyte_set_internal_encoding(name TSRMLS_CC);
-	}
-
-	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen TSRMLS_CC);
-
-	return 0;
-}
-/* }}} */
-#endif /* ZEND_MULTIBYTE */
-
-
 /* {{{ php_mb_nls_get_default_detect_order_list */
 static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, enum mbfl_no_encoding **plist, int* plist_size)
 {
@@ -4881,6 +4718,169 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 	return n;
 }
 /* }}} */
+
+#ifdef ZEND_MULTIBYTE
+
+/* {{{ php_mb_set_zend_encoding() */
+static int php_mb_set_zend_encoding(TSRMLS_D)
+{
+	/* 'd better use mbfl_memory_device? */
+	char *name, *list = NULL;
+	int n, *entry, list_size = 0;
+	zend_encoding_detector encoding_detector;
+	zend_encoding_converter encoding_converter;
+	zend_encoding_oddlen encoding_oddlen;
+
+	/* notify script encoding to Zend Engine */
+	entry = MBSTRG(script_encoding_list);
+	n = MBSTRG(script_encoding_list_size);
+	while (n > 0) {
+		name = (char *)mbfl_no_encoding2name(*entry);
+		if (name) {
+			list_size += strlen(name) + 1;
+			if (!list) {
+				list = (char*)emalloc(list_size);
+				*list = '\0';
+			} else {
+				list = (char*)erealloc(list, list_size);
+				strcat(list, ",");
+			}
+			strcat(list, name);
+		}
+		entry++;
+		n--;
+	}
+	zend_multibyte_set_script_encoding(list, (list ? strlen(list) : 0) TSRMLS_CC);
+	if (list) {
+		efree(list);
+	}
+	encoding_detector = php_mb_encoding_detector;
+	encoding_converter = php_mb_encoding_converter;
+	encoding_oddlen = php_mb_oddlen;
+
+	/* TODO: make independent from mbstring.encoding_translation? */
+	if (MBSTRG(encoding_translation)) {
+		/* notify internal encoding to Zend Engine */
+		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
+		zend_multibyte_set_internal_encoding(name TSRMLS_CC);
+	}
+
+	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen TSRMLS_CC);
+
+	return 0;
+}
+/* }}} */
+
+/* {{{ char *php_mb_encoding_detector()
+ * Interface for Zend Engine
+ */
+static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t arg_length, char *arg_list TSRMLS_DC)
+{
+	mbfl_string string;
+	const char *ret;
+	enum mbfl_no_encoding *elist;
+	int size, *list;
+
+	/* make encoding list */
+	list = NULL;
+	size = 0;
+	php_mb_parse_encoding_list(arg_list, strlen(arg_list), &list, &size, 0 TSRMLS_CC);
+	if (size <= 0) {
+		return NULL;
+	}
+	if (size > 0 && list != NULL) {
+		elist = list;
+	} else {
+		elist = MBSTRG(current_detect_order_list);
+		size = MBSTRG(current_detect_order_list_size);
+	}
+
+	mbfl_string_init(&string);
+	string.no_language = MBSTRG(language);
+	string.val = (unsigned char *)arg_string;
+	string.len = arg_length;
+	ret = mbfl_identify_encoding_name(&string, elist, size, 0);
+	if (list != NULL) {
+		efree((void *)list);
+	}
+	if (ret != NULL) {
+		return estrdup(ret);
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
+/*	{{{ int php_mb_encoding_converter() */
+static int php_mb_encoding_converter(unsigned char **to, size_t *to_length,
+		const unsigned char *from, size_t from_length,
+		const char *encoding_to, const char *encoding_from TSRMLS_DC)
+{
+	mbfl_string string, result, *ret;
+	enum mbfl_no_encoding from_encoding, to_encoding;
+	mbfl_buffer_converter *convd;
+
+	/* new encoding */
+	to_encoding = mbfl_name2no_encoding(encoding_to);
+	if (to_encoding == mbfl_no_encoding_invalid) {
+		return -1;
+	}	
+	/* old encoding */
+	from_encoding = mbfl_name2no_encoding(encoding_from);
+	if (from_encoding == mbfl_no_encoding_invalid) {
+		return -1;
+	}
+	/* initialize string */
+	mbfl_string_init(&string);
+	mbfl_string_init(&result);
+	string.no_encoding = from_encoding;
+	string.no_language = MBSTRG(language);
+	string.val = (unsigned char*)from;
+	string.len = from_length;
+
+	/* initialize converter */
+	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
+	if (convd == NULL) {
+		return -1;
+	}
+	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
+	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+
+	/* do it */
+	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
+	if (ret != NULL) {
+		*to = ret->val;
+		*to_length = ret->len;
+	}
+
+	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
+	mbfl_buffer_converter_delete(convd);
+
+	return ret ? 0 : -1;
+}
+/* }}} */
+
+/* {{{ int php_mb_oddlen()
+ *	returns number of odd (e.g. appears only first byte of multibyte
+ *	character) chars
+ */
+static size_t php_mb_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC)
+{
+	mbfl_string mb_string;
+
+	mbfl_string_init(&mb_string);
+	mb_string.no_language = MBSTRG(language);
+	mb_string.no_encoding = mbfl_name2no_encoding(encoding);
+	mb_string.val = (unsigned char *)string;
+	mb_string.len = length;
+
+	if (mb_string.no_encoding == mbfl_no_encoding_invalid) {
+		return 0;
+	}
+	return mbfl_oddlen(&mb_string);
+}
+/* }}} */
+#endif /* ZEND_MULTIBYTE */
 
 #endif	/* HAVE_MBSTRING */
 
