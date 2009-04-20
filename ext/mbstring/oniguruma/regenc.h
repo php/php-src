@@ -4,7 +4,7 @@
   regenc.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,15 +65,17 @@
 #else  /* ONIG_RUBY_M17N */
 
 #define USE_UNICODE_FULL_RANGE_CTYPE
+/* following must not use with USE_CRNL_AS_LINE_TERMINATOR */
+/* #define USE_UNICODE_ALL_LINE_TERMINATORS */  /* see Unicode.org UTF#18 */
 
 #define ONIG_ENCODING_INIT_DEFAULT           ONIG_ENCODING_ASCII
 
 /* for encoding system implementation (internal) */
-ONIG_EXTERN int onigenc_ascii_get_all_pair_ambig_codes P_((OnigAmbigType flag, OnigPairAmbigCodes** acs));
-ONIG_EXTERN int onigenc_nothing_get_all_comp_ambig_codes P_((OnigAmbigType flag, OnigCompAmbigCodes** acs));
-ONIG_EXTERN int onigenc_iso_8859_1_get_all_pair_ambig_codes P_((OnigAmbigType flag, OnigPairAmbigCodes** acs));
-ONIG_EXTERN int onigenc_ess_tsett_get_all_comp_ambig_codes P_((OnigAmbigType flag, OnigCompAmbigCodes** acs));
-ONIG_EXTERN int onigenc_not_support_get_ctype_code_range P_((int ctype, OnigCodePoint* sbr[], OnigCodePoint* mbr[]));
+ONIG_EXTERN int onigenc_ascii_get_all_pair_ambig_codes P_((OnigAmbigType flag, const OnigPairAmbigCodes** acs));
+ONIG_EXTERN int onigenc_nothing_get_all_comp_ambig_codes P_((OnigAmbigType flag, const OnigCompAmbigCodes** acs));
+ONIG_EXTERN int onigenc_iso_8859_1_get_all_pair_ambig_codes P_((OnigAmbigType flag, const OnigPairAmbigCodes** acs));
+ONIG_EXTERN int onigenc_ess_tsett_get_all_comp_ambig_codes P_((OnigAmbigType flag, const OnigCompAmbigCodes** acs));
+ONIG_EXTERN int onigenc_not_support_get_ctype_code_range P_((int ctype, const OnigCodePoint* sbr[], const OnigCodePoint* mbr[]));
 ONIG_EXTERN int onigenc_is_mbc_newline_0x0a P_((const UChar* p, const UChar* end));
 
 /* methods for single byte encoding */
@@ -105,7 +107,7 @@ ONIG_EXTERN int onigenc_get_all_fold_match_code_ss_0xdf P_((OnigCodePoint** code
 
 /* in enc/unicode.c */
 ONIG_EXTERN int onigenc_unicode_is_code_ctype P_((OnigCodePoint code, unsigned int ctype));
-ONIG_EXTERN int onigenc_unicode_get_ctype_code_range P_((int ctype, OnigCodePoint* sbr[], OnigCodePoint* mbr[]));
+ONIG_EXTERN int onigenc_unicode_get_ctype_code_range P_((int ctype, const OnigCodePoint* sbr[], const OnigCodePoint* mbr[]));
 
 
 #define ONIGENC_ISO_8859_1_TO_LOWER_CASE(c) \
@@ -115,10 +117,10 @@ ONIG_EXTERN int onigenc_unicode_get_ctype_code_range P_((int ctype, OnigCodePoin
 #define ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(code,ctype) \
   ((OnigEnc_Unicode_ISO_8859_1_CtypeTable[code] & ctype) != 0)
 
-ONIG_EXTERN UChar OnigEncISO_8859_1_ToLowerCaseTable[];
-ONIG_EXTERN UChar OnigEncISO_8859_1_ToUpperCaseTable[];
-ONIG_EXTERN unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[];
-ONIG_EXTERN OnigPairAmbigCodes OnigAsciiPairAmbigCodes[];
+ONIG_EXTERN const UChar OnigEncISO_8859_1_ToLowerCaseTable[];
+ONIG_EXTERN const UChar OnigEncISO_8859_1_ToUpperCaseTable[];
+ONIG_EXTERN const unsigned short OnigEnc_Unicode_ISO_8859_1_CtypeTable[];
+ONIG_EXTERN const OnigPairAmbigCodes OnigAsciiPairAmbigCodes[];
 
 #endif /* is not ONIG_RUBY_M17N */
 
@@ -133,7 +135,7 @@ extern int  onig_is_in_code_range P_((const UChar* p, OnigCodePoint code));
 ONIG_EXTERN OnigEncoding  OnigEncDefaultCharEncoding;
 ONIG_EXTERN const UChar* OnigEncAsciiToLowerCaseTable;
 ONIG_EXTERN const UChar  OnigEncAsciiToUpperCaseTable[];
-ONIG_EXTERN unsigned short OnigEncAsciiCtypeTable[];
+ONIG_EXTERN const unsigned short OnigEncAsciiCtypeTable[];
 
 #define ONIGENC_ASCII_CODE_TO_LOWER_CASE(c) OnigEncAsciiToLowerCaseTable[c]
 #define ONIGENC_ASCII_CODE_TO_UPPER_CASE(c) OnigEncAsciiToUpperCaseTable[c]

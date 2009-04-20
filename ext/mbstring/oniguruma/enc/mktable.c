@@ -2,7 +2,7 @@
   mktable.c
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2004  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  * SUCH DAMAGE.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #define NOT_RUBY
@@ -614,15 +615,10 @@ static int IsPunct(int enc, int c)
     if (c >= 0x3c && c <= 0x3e) return 1;
   }
 
-  if (c >= 0x21 && c <= 0x23) return 1;
-  if (c >= 0x25 && c <= 0x2a) return 1;
-  if (c >= 0x2c && c <= 0x2f) return 1;
-  if (c >= 0x3a && c <= 0x3b) return 1;
-  if (c >= 0x3f && c <= 0x40) return 1;
-  if (c >= 0x5b && c <= 0x5d) return 1;
-  if (c == 0x5f) return 1;
-  if (c == 0x7b) return 1;
-  if (c == 0x7d) return 1;
+  if (c >= 0x21 && c <= 0x2f) return 1;
+  if (c >= 0x3a && c <= 0x40) return 1;
+  if (c >= 0x5b && c <= 0x60) return 1;
+  if (c >= 0x7b && c <= 0x7e) return 1;
 
   switch (enc) {
   case ISO_8859_1:

@@ -182,9 +182,9 @@ int main() { return foo(10, "", 3.14); }
       PHP_EVAL_LIBLINE([$MBSTRING_SHARED_LIBADD], LDFLAGS)
       AC_MSG_CHECKING([if oniguruma has an invalid entry for KOI8 encoding])
       AC_TRY_LINK([
-  #include <oniguruma.h>
+#include <oniguruma.h>
       ], [
-  return (int)(ONIG_ENCODING_KOI8 + 1);
+return (int)(ONIG_ENCODING_KOI8 + 1);
       ], [
         AC_MSG_RESULT([no])
       ], [
@@ -228,6 +228,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_byte4.c
      libmbfl/filters/mbfilter_cp1251.c
      libmbfl/filters/mbfilter_cp1252.c
+     libmbfl/filters/mbfilter_cp1254.c
      libmbfl/filters/mbfilter_cp866.c
      libmbfl/filters/mbfilter_cp932.c
      libmbfl/filters/mbfilter_cp936.c
@@ -255,6 +256,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_iso8859_8.c
      libmbfl/filters/mbfilter_iso8859_9.c
      libmbfl/filters/mbfilter_jis.c
+     libmbfl/filters/mbfilter_iso2022_jp_ms.c
      libmbfl/filters/mbfilter_koi8r.c
      libmbfl/filters/mbfilter_armscii8.c
      libmbfl/filters/mbfilter_qprint.c
@@ -268,6 +270,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_utf7imap.c
      libmbfl/filters/mbfilter_utf8.c
      libmbfl/filters/mbfilter_uuencode.c
+     libmbfl/filters/mbfilter_koi8u.c
      libmbfl/filters/mbfilter_cp850.c
      libmbfl/mbfl/mbfilter.c
      libmbfl/mbfl/mbfilter_8bit.c
@@ -291,9 +294,9 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/nls/nls_zh.c
      libmbfl/nls/nls_hy.c
      libmbfl/nls/nls_tr.c
+     libmbfl/nls/nls_ua.c
     ])
     PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
-
     PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
   else
     dnl
@@ -337,8 +340,8 @@ PHP_ARG_ENABLE([mbregex_backtrack], [whether to check multibyte regex backtrack]
                             MBSTRING: Disable multibyte regex backtrack check], yes, no)
 
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
-[  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
-                            If DIR is not set, the bundled libmbfl will be used], no, no)
+[  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl.  DIR is the libmbfl base
+                            install directory [BUNDLED]], no, no)
 
 PHP_ARG_WITH(onig, [for external oniguruma],
 [  --with-onig[=DIR]         MBSTRING: Use external oniguruma. DIR is the oniguruma install prefix.

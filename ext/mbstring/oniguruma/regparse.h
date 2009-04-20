@@ -4,7 +4,7 @@
   regparse.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #define N_CTYPE        (1<< 2)
 #define N_ANYCHAR      (1<< 3)
 #define N_BACKREF      (1<< 4)
-#define N_QUALIFIER    (1<< 5)
+#define N_QUANTIFIER   (1<< 5)
 #define N_EFFECT       (1<< 6)
 #define N_ANCHOR       (1<< 7)
 #define N_LIST         (1<< 8)
@@ -52,7 +52,7 @@
 #define NSTRING(node)      ((node)->u.str)
 #define NCCLASS(node)      ((node)->u.cclass)
 #define NCTYPE(node)       ((node)->u.ctype)
-#define NQUALIFIER(node)   ((node)->u.qualifier)
+#define NQUANTIFIER(node)  ((node)->u.quantifier)
 #define NANCHOR(node)      ((node)->u.anchor)
 #define NBACKREF(node)     ((node)->u.backref)
 #define NEFFECT(node)      ((node)->u.effect)
@@ -67,7 +67,7 @@
 #define CTYPE_XDIGIT            (1<<6)
 #define CTYPE_NOT_XDIGIT        (1<<7)
 
-#define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_PL)
+#define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_ML)
 #define ANCHOR_END_BUF_MASK      (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF)
 
 #define EFFECT_MEMORY           (1<<0)
@@ -76,7 +76,7 @@
 
 #define NODE_STR_MARGIN         16
 #define NODE_STR_BUF_SIZE       24  /* sizeof(CClassNode) - sizeof(int)*4 */
-#define NODE_BACKREFS_SIZE       7
+#define NODE_BACKREFS_SIZE       6
 
 #define NSTR_RAW                (1<<0) /* by backslashed number */
 #define NSTR_AMBIG              (1<<1)
@@ -124,12 +124,14 @@ typedef struct {
   int lower;
   int upper;
   int greedy;
-  int by_number;         /* {n,m} */
   int target_empty_info;
   struct _Node* head_exact;
   struct _Node* next_head_exact;
   int is_refered;     /* include called node. don't eliminate even if {0} */
-} QualifierNode;
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  int comb_exp_check_num;  /* 1,2,3...: check,  0: no check  */
+#endif
+} QuantifierNode;
 
 /* status bits */
 #define NST_MIN_FIXED             (1<<0)
@@ -145,6 +147,8 @@ typedef struct {
 #define NST_NAMED_GROUP           (1<<10)
 #define NST_NAME_REF              (1<<11)
 #define NST_IN_REPEAT             (1<<12) /* STK_REPEAT is nested in stack. */
+#define NST_NEST_LEVEL            (1<<13)
+#define NST_BY_NUMBER             (1<<14) /* {n,m} */
 
 #define SET_EFFECT_STATUS(node,f)      (node)->u.effect.state |=  (f)
 #define CLEAR_EFFECT_STATUS(node,f)    (node)->u.effect.state &= ~(f)
@@ -165,7 +169,9 @@ typedef struct {
 #define IS_CALL_RECURSION(cn)          (((cn)->state & NST_RECURSION)  != 0)
 #define IS_CALL_NAME_REF(cn)           (((cn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
-#define IS_QUALIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
+#define IS_BACKREF_NEST_LEVEL(bn)      (((bn)->state & NST_NEST_LEVEL) != 0)
+#define IS_QUANTIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
+#define IS_QUANTIFIER_BY_NUMBER(qn)     (((qn)->state & NST_BY_NUMBER)  != 0)
 
 typedef struct {
   int state;
@@ -212,6 +218,7 @@ typedef struct {
   int     back_num;
   int     back_static[NODE_BACKREFS_SIZE];
   int*    back_dynamic;
+  int     nest_level;
 } BackrefNode;
 
 typedef struct {
@@ -223,15 +230,15 @@ typedef struct {
 typedef struct _Node {
   int type;
   union {
-    StrNode       str;
-    CClassNode    cclass;
-    QualifierNode qualifier;
-    EffectNode    effect;
+    StrNode        str;
+    CClassNode     cclass;
+    QuantifierNode quantifier;
+    EffectNode     effect;
 #ifdef USE_SUBEXP_CALL
-    CallNode      call;
+    CallNode       call;
 #endif
-    BackrefNode   backref;
-    AnchorNode    anchor;
+    BackrefNode    backref;
+    AnchorNode     anchor;
     struct {
       struct _Node* left;
       struct _Node* right;
@@ -274,6 +281,12 @@ typedef struct {
   int             mem_alloc;
   Node*           mem_nodes_static[SCANENV_MEMNODES_SIZE];
   Node**          mem_nodes_dynamic;
+#ifdef USE_COMBINATION_EXPLOSION_CHECK
+  int num_comb_exp_check;
+  int comb_exp_max_regnum;
+  int curr_max_regnum;
+  int has_recursion;
+#endif
 } ScanEnv;
 
 
@@ -290,11 +303,10 @@ typedef struct {
 extern int    onig_renumber_name_table P_((regex_t* reg, GroupNumRemap* map));
 #endif
 
-extern int    onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
 extern int    onig_strncmp P_((const UChar* s1, const UChar* s2, int n));
 extern void   onig_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
 extern int    onig_scan_unsigned_number P_((UChar** src, const UChar* end, OnigEncoding enc));
-extern void   onig_reduce_nested_qualifier P_((Node* pnode, Node* cnode));
+extern void   onig_reduce_nested_quantifier P_((Node* pnode, Node* cnode));
 extern void   onig_node_conv_to_str_node P_((Node* node, int raw));
 extern int    onig_node_str_cat P_((Node* node, const UChar* s, const UChar* end));
 extern void   onig_node_free P_((Node* node));
@@ -303,7 +315,7 @@ extern Node*  onig_node_new_anchor P_((int type));
 extern Node*  onig_node_new_str P_((const UChar* s, const UChar* end));
 extern Node*  onig_node_new_list P_((Node* left, Node* right));
 extern void   onig_node_str_clear P_((Node* node));
-extern int    onig_free_node_list();
+extern int    onig_free_node_list P_((void));
 extern int    onig_names_free P_((regex_t* reg));
 extern int    onig_parse_make_tree P_((Node** root, const UChar* pattern, const UChar* end, regex_t* reg, ScanEnv* env));
 

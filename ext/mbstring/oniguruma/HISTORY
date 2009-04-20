@@ -1,5 +1,457 @@
 History
 
+2007/08/16: Version 4.7.1
+
+2007/08/16: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
+2007/07/04: [spec] (thanks K.Takata)
+                   ONIG_OPTION_SINGLELINE: '$' -> '\Z'  (as Perl)
+2007/07/04: [dist] (thanks K.Takata)
+                   fix documents API and API.ja.
+
+2007/06/18: Version 4.7.0
+
+2007/06/18: [test] success in ruby 1.9.0 (2007-04-06) [i686-linux].
+2007/06/18: [bug]  (thanks KUBO Takehiro)
+                   WORD_ALIGNMENT_SIZE must be sizeof(OnigCodePoint).
+2007/06/05: [impl] add #ifndef vsnprintf in regint.h.
+2007/06/05: [bug]  should check USE_CRNL_AS_LINE_TERMINATOR case
+                   in onig_search().
+
+2007/04/12: Version 4.6.2
+
+2007/04/09: [impl] change STATE_CHECK_BUFF_MAX_SIZE value from 0x8000
+                   to 0x4000.
+2007/03/26: [impl] add 'void' to function declarations.
+
+2007/03/06: Version 4.6.1
+
+2007/03/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2007/03/06: [bug]  add #include <malloc.h> for bcc32.
+                   (In bcc32, alloca() is declared in malloc.h.)
+2007/03/06: [impl] remove including version.h of Ruby.
+2007/03/02: [bug]  invalid optimization for semi-end-buf in onig_search().
+                   ex. /\n\Z/.match("aaaaaaaaaa\n")
+2007/03/02: [impl] move range > start check position in end_buf process.
+
+2007/02/08: Version 4.6.0
+
+2007/02/08: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2007/01/09: [tune] select_opt_exact_info() didn't work for empty info.
+                   ex. /.a/ make MAP info instead of EXACT info.
+2006/12/29: [impl] add print_enc_string() for ONIG_DEBUG mode.
+2006/12/22: [spec] should check too short multibyte char in parse_exp().
+                   add USE_PAD_TO_SHORT_BYTE_CHAR.
+                   ex. /\x00/ in UTF16 should be error.
+
+2006/11/17: Version 4.5.1
+
+2006/11/17: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/11/15: [impl] remove CHECK_INTERRUPT.
+2006/11/10: [bug]  0x24, 0x2b, 0x3c, 0x3d, 0x3e, 0x5e, 0x60, 0x7c, 0x7e
+                   should be [:punct:].
+2006/11/08: [impl] rename QUALIFIER -> QUANTIFIER.
+2006/11/07: [bug]  (thanks Byte)
+                   add 0xa3 <=> 0xb3 to CaseFoldMap[] for KOI8-R.
+
+2006/11/06: Version 4.5.0
+
+2006/11/06: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/11/06: [API]  remove ONIGENC_AMBIGUOUS_MATCH_COMPOUND.
+2006/11/06: [spec] change ONIG_OPTION_FIND_LONGEST to search all of 
+                   the string range.
+                   add USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE.
+
+2006/10/30: Version 4.4.6
+
+2006/10/30: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/10/30: [impl] (thanks K.Takata)
+                   add THREAD_SYSTEM_INIT and THREAD_SYSTEM_END.
+2006/10/30: [bug]  (thanks Wolfgang Nadasi-Donner)
+                   invalid offset value was used in STATE_CHECK_BUFF_INIT().
+
+2006/10/24: Version 4.4.5
+
+2006/10/24: [test] success in ruby 1.9.0 (2006-10-23) [i686-linux].
+2006/10/24: [impl] escape -Wall warning.
+2006/10/24: [tune] (thanks Kornelius Kalnbach)
+                   String#scan for long string needs long time compare with
+                   old Ruby
+                   by initialization time for combination explosion check
+                   ex. ("test " * 100_000).scan(/\w*\s?/)
+                   change STATE_CHECK_BUFF_MAX_SIZE from 0x8000000 to 0x8000.
+                   reduce initialization area of state_check_buff.
+2006/10/16: [bug]  (thanks Akinori Musha)
+                   first argument of rb_warn() should be format string.
+2006/10/10: [impl] add msa.state_check_buff_size initialization
+                   in onig_search().
+2006/10/10: [bug]  should call onig_st_free_table() in
+                   onig_free_shared_cclass_table().
+2006/10/10: [impl] remove OP_WORD_SB and OP_WORD_MB.
+2006/09/29: [impl] initialize state_check_buff_size in STATE_CHECK_BUFF_INIT().
+                   make valgrind happy.
+2006/09/22: [impl] convert to ascii for parameter string in
+                   onig_error_code_to_str().
+                   add enc member into OnigErrorInfo.
+
+2006/09/19: Version 4.4.4
+
+2006/09/19: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/19: [impl] (thanks KOYAMA Tetsuji)
+                   HAVE_STDARG_PROTOTYPES was not defined in Mac OS X
+                   by Xcode 2.4(gcc 4.0.1) problem. [php-dev 1312] etc...
+
+2006/09/15: Version 4.4.3
+
+2006/09/15: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/15: [bug]  (thanks Allan Odgaard)
+                   out of range access in bm_search_notrev().
+                   (p < s)
+
+2006/09/08: Version 4.4.2
+
+2006/09/08: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/09/08: [bug]  (thanks K.Takata)
+                   out of range access in bm_search_notrev().
+2006/09/04: [spec] (thanks K.Takata)
+                   allow look-behind in negative look-behind.
+                   ex. /(?<!(?<=a)b|c)d/
+
+2006/08/29: Version 4.4.1
+
+2006/08/29: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/08/29: [dist] (thanks Seiji Masugata)
+                    add configure option --enable-combination-explosion-check
+
+2006/08/25: Version 4.4.0
+
+2006/08/25: [test] success in ruby 1.9.0 (2006-08-22) [i686-linux].
+2006/08/25: [impl] add_state_check_num() should be enclosed in
+                   ifdef USE_COMBINATION_EXPLOSION_CHECK.
+2006/08/23: [spec] config USE_COMBINATION_EXPLOSION_CHECK is enabled
+                   in Ruby mode only.
+2006/08/22: [impl] remove last line comma in enum OpCode.
+2006/08/22: [impl] remove OP_STATE_CHECK_ANYCHAR_STAR_PEEK_NEXT and
+                   OP_STATE_CHECK_ANYCHAR_ML_STAR_PEEK_NEXT.
+2006/08/22: [impl] remove OP_BACKREF3.
+
+2006/08/21: Version 4.3.1
+
+2006/08/21: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/21: [impl] change stack type values
+                   and re-define STK_MASK_TO_VOID_TARGET etc...
+2006/08/21: [impl] set repeat_range[].upper to 0x7fffffff as infinite.
+2006/08/21: [impl] add STATE_CHECK_BUFF_MALLOC_THRESHOLD_SIZE.
+2006/08/21: [impl] reduce (?:a*){n,m}, (?:a+){n,m} => (?:a*){n,n}, (?:a+){n,n}
+2006/09/21: [impl] reduce (a*){n,m}, (a+){n,m} => (a*){n,n}, (a+){n,n}
+                   if backreference is not used.
+2006/08/17: [bug]  should check scan_env.num_call > 0 for backrefed pattern
+                   in combination explosion check.
+
+2006/08/17: Version 4.3.0
+
+2006/08/17: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/17: [new]  add config USE_COMBINATION_EXPLOSION_CHECK.
+                   check /(.+)*/, /(\s*foo\s*)*/ etc...
+            [API]  add num_comb_exp_check member in regex_t.
+            [dist] change LTVERSION value to "1:0:0" in configure.in.
+2006/08/15: [bug]  OP_REPEAT_INC process in match_at().
+                   should check repeat-count >= range-upper and
+                   range-upper may be infinite.
+
+2006/08/11: Version 4.2.3
+
+2006/08/11: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/10: [impl] remove double call in set_qualifier().
+2006/08/10: [impl] remove by_number member in QualifierNode.
+2006/08/09: [impl] remove a comma at the end of enum ReduceType
+                   for escape warning on Mac OS X.
+2006/08/07: [impl] remove warning in regcomp.c.
+2006/08/07: [spec] move definition of USE_BACKREF_AT_LEVEL into NOT_RUBY.
+
+2006/08/03: Version 4.2.2
+
+2006/08/03: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/08/03: [bug]  (thanks Hiroyuki Yamamoto)
+                   segmentation fault in regexec(). (POSIX API)
+2006/08/02: [bug]  combination of \G in look-ahead/look-behind and other
+                   anchors(\A, \z, \Z) cause invalid result.
+                   ex. /(?!\G)a\z/.match("ba")
+                   start arg. of MATCH_ARG_INIT() should be original
+                   arg. of onig_search().
+
+2006/07/31: Version 4.2.1
+
+2006/07/31: [test] success in ruby 1.9.0 (2006-07-28) [i686-linux].
+2006/07/31: [bug] (thanks Kimura Minoru)
+                   re-implement bm_search_notrev().
+2006/07/31: [impl] bm_search_notrev() refactoring.
+2006/07/31: [bug]  (thanks Kimura Minoru)
+                   fix incomplete multibyte string in exact info.
+2006/07/31: [impl] (thanks Seiji Masugata)
+                   remove cast in va_init_list() for Intel C Compiler.
+
+2006/07/18: Version 4.2.0
+
+2006/07/18: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/07/18: [new]  (thanks Wolfgang Nadasi-Donner)
+                   add back reference with nest level.
+                   \k<name+n>, \k<name-n>
+2006/07/11: [impl] change long to unsigned long for ONIG_OPTION_XXX
+                   and ONIG_SYN_XXX number literals.
+
+2006/07/03: Version 4.1.2
+
+2006/07/03: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/07/03: [spec] (thanks Wolfgang Nadasi-Donner)
+                   allow \G in look-behind.
+                   add ANCHOR_BEGIN_POSITION flag in setup_tree().
+2006/06/12: [impl] (thanks matz)
+                    fix cast from char* to const char*
+                    in onig_snprintf_with_pattern().
+                    fix cast from char* to const char*
+                    for PopularQStr[] and ReduceQStr[].
+
+2006/05/22: Version 4.1.1
+
+2006/05/22: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/05/22: [impl] add position string argument to STACK_BASE_CHECK().
+2006/05/22: [bug]  (thanks NARUSE, Yui)
+                   add STK_NULL_CHECK_END to IS_TO_VOID_TARGET().
+                   ex. core dump in
+                   /(?<pare>\(([^\(\)]++|\g<pare>)*+\))/.match('((a))')
+
+2006/05/15: Version 4.1.0
+
+2006/05/15: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/05/15: [impl] thread atomic changes for onig_end() and
+                   onig_free_node_list().
+2006/05/15: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2005/05/15: [dist] update API, API.ja, FAQ, FAQ.ja.
+2006/05/15: [spec] remove onig_recompile(), onig_recompile_deluxe()
+                   and re_recompile_pattern().
+                   add config USE_RECOMPILE_API.
+2006/05/15: [impl] improved thread safe implementation of onig_search()
+                   and onig_match().
+
+2006/05/11: Version 4.0.4
+
+2006/05/11: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/05/11: [bug]  (thanks Yuji Kaneda)
+                   dead-lock in onig_end().              
+2006/05/11: [dist] update index.html.
+
+2006/05/08: Version 4.0.3
+
+2006/05/08: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/05/08: [bug]  (thanks Allan Odgaard)
+                   Segmentation fault in backward search.
+                   ex. /^\t.*$/
+2006/04/18: [dist] update index.html.
+2006/04/05: [dist] update index.html.
+2006/03/24: [dist] update doc/RE, doc/RE.ja.
+
+2006/03/23: Version 4.0.2
+
+2006/03/22: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
+2006/03/22: [impl] add both of ONIG_OPTION_DONT_CAPTURE_GROUP
+                   and ONIG_OPTION_CAPTURE_GROUP check.
+2006/03/22: [spec] add error code ONIGERR_INVALID_COMBINATION_OF_OPTIONS.
+2006/03/22: [impl] remove USE_NAMED_GROUP condition from
+                   ONIG_OPTION_DONT_CAPTURE_GROUP check in parse_effect().
+2006/03/22: [new]  add API onig_noname_group_capture_is_active().
+2006/03/01: [spec] rename regex object type from regex_t to OnigRegexType.
+                   add typedef OnigRegexType regex_t
+                   unless ONIG_ESCAPE_REGEX_T_COLLISION is defined.
+2006/02/27: [spec] change ONIG_MAX_MULTI_BYTE_RANGES_NUM from 1000
+                   to 10000.  (for docdiff program)
+2006/02/17: [dist] change COPYING year 2005 -> 2006.
+
+2006/02/07: Version 4.0.1
+
+2006/02/07: [test] success in ruby 1.9.0 (2005-11-28) [i686-linux].
+2006/02/07: [bug]  memory leaks in onig_free_shared_cclass_table().
+2006/02/03: [ruby] add -m 0644 option to install command in "make 19".
+2006/02/03: [impl] rename ANCHOR_ANYCHAR_STAR_PL to ANCHOR_ANYCHAR_STAR_ML.
+                   change from IS_POSIXLINE() to IS_MULTILINE()
+                   for ANCHOR_ANYCHAR_START/_ML decision
+                   in optimize_node_left().
+2006/01/26: [dist] update index.html for Oniguruma 2.5.3.
+2006/01/25: [dist] update URL in index.html.
+
+2006/01/24: Version 4.0.0
+
+2006/01/24: [test] success in ruby 1.9.0 (2005-11-28) [i386-cygwin].
+2006/01/24: [test] success in ruby 1.9.0 (2005-11-28) [i686-linux].
+2006/01/24: [dist] remove warnings from sample/encode.c.
+2006/01/24: [dist] change install description in README(.ja).
+2006/01/24: [dist] remove re.c.XXX.patch from distribution and CVS.
+2006/01/24: [dist] --- support shared library ---
+                   use GNU libtool/automake.
+                   change configure.in and add Makefile.am, sample/Makefile.am.
+                   add AUTHORS file.
+2006/01/24: [dist] test programs return exit code -1 when test fails. 
+2006/01/24: [bug] (thanks KIMURA Koichi)
+                   invalid syntax definition in ONIG_SYNTAX_GREP.
+                   ONIG_SYN_OP_BRACE_INTERVAL
+                   -> ONIG_SYN_OP_ESC_BRACE_INTERVAL
+2006/01/23: [dist] fix configure.in for onig-config.
+2006/01/19: [new]  add new config USE_UNICODE_ALL_LINE_TERMINATORS.
+                   (U+000d, U+0085, U+2028, U+2029)
+2005/12/29: [dist] change pmatch array size to 25 in testconv.rb.
+2005/12/26: [dist] fix name in test.rb.
+2005/12/26: [dist] update index.html for 2.5.1.
+
+2005/11/29: Version 3.9.1
+
+2005/11/29: [test] success in ruby 1.9.0 (2005-11-28) [i686-linux].
+2005/11/24: [test] success in ruby 1.9.0 (2005-08-09) [i686-linux].
+2005/11/21: [test] success in ruby 1.9.0 (2005-11-20) [i386-cygwin].
+2005/11/21: [bug]  (thanks Allan Odgaard)
+                   utf-8 character comments in extended mode leads 
+                   invalid result.
+                   ex. /(?x)(?<= # <any-utf-8 multibyte char>o\n~) /
+                   fix onigenc_unicode_is_code_ctype() and
+                   utf8_is_code_ctype().
+2005/11/20: [bug]  (thanks MATSUMOTO Satoshi) (thanks Isao Sonobe)
+                   begin-line anchor and BM search optimization leads
+                   invalid result in UTF-16/32.
+                   fix in set_optimize_exact_info().
+
+2005/11/20: Version 3.9.0
+
+2005/11/20: [test] success in ruby 1.9.0 (2005-11-20) [i386-cygwin].
+2005/11/20: [test] success in ruby 1.9.0 (2005-10-18) [i386-cygwin].
+2005/11/20: [new]  add new config USE_CRNL_AS_LINE_TERMINATOR.
+                   (!!! NO SUPPORT experimental option !!!)
+2005/11/15: [bug]  (thanks Allan Odgaard)
+                   tok->escape was not cleared in fetch_token_in_cc().
+                   ex. [\s&&[^\n]] makes wrong result.
+2005/10/18: [impl] (thanks nobu)
+                   change sjis_mbc_enc_len()
+                   and node_new_cclass_by_codepoint_range() scope to static.
+2005/09/05: [dist] remove link to MultiFind.
+2005/09/01: [dist] add link to yagrep.
+
+2005/08/23: Version 3.8.9
+
+2005/08/23: [test] success in ruby 1.9.0 (2005-08-09) [i686-linux].
+2005/08/23: [inst] fix Makefile.in for make ctest/ptest.
+
+2005/08/23: Version 3.8.8
+
+2005/08/23: [test] success in ruby 1.9.0 (2005-08-09) [i686-linux].
+2005/08/23: [impl] split is_code_in_cc() from onig_is_code_in_cc().
+2005/08/23: [impl] should check DATA_ENSURE() at OP_CCLASS_NODE in match_at().
+2005/08/23: [impl] (thanks akr)
+                   add ONIG_OPTION_MAXBIT for escape conflict with
+                   Ruby's option.
+2005/08/22: [impl] escape GCC 4.0 warnings for testc.c.
+2005/08/22: [bug]  (thanks nobu, matz) [ruby-dev:26840]
+                   UTF-8 0xFE, 0xFF handling bug in code_is_in_cclass_node().
+                   abort on /\S*/ =~ "\xfe"
+2005/08/22: [impl] escape GCC 4.0 warnings for sample/*.c.
+2005/08/22: [impl] fix testconvu.rb.
+2005/08/22: [impl] escape GCC 4.0 warnings.
+
+2005/08/09: Version 3.8.7
+
+2005/08/09: [test] success in ruby 1.9.0 (2005-08-09) [i686-linux].
+2005/08/09: [bug]  (thanks Allan Odgaard)
+                   should not call enc_len() for s == range
+                   in onig_search().
+2005/08/01: [dist] add mkdir $prefix, mkdir $exec_prefix to make install.
+
+2005/07/27: Version 3.8.6
+
+2005/07/27: [test] success in ruby 1.9.0 (2005-07-26) [i686-linux].
+2005/07/27: [impl] update onig-config.in.
+2005/07/26: [new]  (thanks Yen-Ju Chen)
+                   add Oniguruma configuration check program.
+                   (onig-config.in)
+
+2005/07/14: Version 3.8.5
+
+2005/07/14: [test] success in ruby 1.9.0 (2005-07-14) [i686-linux].
+2005/07/11: [test] success in ruby 1.9.0 (2005-07-04) [i686-linux].
+2005/07/11: [bug]  (thanks nobu) [ruby-dev:26505]
+                   invalid handling for /\c\x/ and /\C-\x/.
+                   fix fetch_escaped_value().
+2005/07/05: [impl] (thanks Alexey Zakhlestine)
+                   escape GCC 4.0 warnings.
+
+2005/07/01: Version 3.8.4
+
+2005/07/01: [test] success in ruby 1.9.0 (2005-07-01) [i686-linux].
+2005/06/30: [test] success in ruby 1.9.0 (2005-06-28) [i686-linux].
+2005/06/30: [dist] add GB 18030 test to sample/encode.c.
+2005/06/30: [impl] escape warning of gb18030_left_adjust_char_head().
+2005/06/30: [new]  (contributed by KUBO Takehiro)
+                   add new character encoding ONIG_ENCODING_GB18030.
+2005/06/30: [bug]  invalid ctype check for multibyte encodings.
+                   ("graph", "print")
+                   fix onigenc_mb2/4_is_code_ctype(), 
+                   eucjp_is_code_ctype() and sjis_is_code_ctype().
+2005/06/30: [bug]  invalid conversion from code point to mbc in
+                   onigenc_mb4_code_to_mbc().
+
+2005/06/28: Version 3.8.3
+
+2005/06/28: [test] success in ruby 1.9.0 (2005-06-28) [i686-linux].
+2005/06/27: [test] success in ruby 1.9.0 (2005-05-31) [i686-linux].
+2005/06/27: [bug]  (thanks Wolfgang Nadasi-Donner)
+                   invalid check for never ending recursion.
+                   lower zero quantifier should be treated as
+                   a non-recursive call alternative.
+                   ex. /(?<bal>[^()]*(\(\g<bal>\)[^()]*)*)/
+2005/06/15: [impl] add divide_ambig_string_node_sub().
+2005/06/15: [dist] add a test to sample/encode.c.
+2005/06/10: [new]  add ONIG_SYNTAX_PERL_NG. (Perl + named group)
+
+2005/06/01: Version 3.8.2
+
+2005/06/01: [test] success in ruby 1.9.0 (2005-05-31) [i686-linux].
+2005/05/31: [dist] add doc/FAQ and doc/FAQ.ja.
+2005/05/31: [impl] minor change in node_new().
+2005/05/30: [test] success in ruby 1.9.0 (2005-05-11) [i686-linux].
+2005/05/30: [bug]  (thanks Allan Odgaard)
+                   FreeNodeList null check should be on thread-atomic
+                   in node_new().
+
+2005/05/11: Version 3.8.1
+
+2005/05/11: [test] success in ruby 1.9.0 (2005-05-11) [i386-mswin32].
+2005/05/11: [dist] update win32/Makefile (make 19).
+2005/05/11: [test] success in ruby 1.9.0 (2005-05-11) [i686-linux].
+2005/05/06: [test] success in ruby 1.9.0 (2005-05-06) [i686-linux].
+2005/05/06: [impl] (thanks nobu) [ruby-core:4815]
+                   add #ifdef USE_VARIABLE_META_CHARS to goto label.
+2005/04/25: [test] success in ruby 1.9.0 (2005-04-25) [i686-linux].
+2005/04/25: [impl] change DEFAULT_WARN_FUNCTION and DEFAULT_VERB_WARN_FUNCTION
+                   to onig_rb_warn() and onig_rb_warning().
+
+2005/04/15: Version 3.8.0
+
+2005/04/15: [test] success in ruby 1.9.0 (2005-04-14) [i686-linux].
+2005/04/01: [test] success in ruby 1.9.0 (2005-03-24) [i686-linux].
+2005/04/01: [impl] (thanks Joe Orton)
+                   (thanks Moriyoshi Koizumi)
+                   many const-ification to many *.[ch] files.
+
+2005/03/25: Version 3.7.2
+
+2005/03/25: [test] success in ruby 1.9.0 (2005-03-24) [i686-linux].
+2005/03/23: [test] success in ruby 1.9.0 (2005-03-20) [i686-linux].
+2005/03/23: [test] success in ruby 1.9.0 (2005-03-08) [i686-linux].
+2005/03/23: [new]  add ONIG_SYNTAX_ASIS.
+2005/03/23: [new]  add ONIG_SYN_OP2_INEFFECTIVE_ESCAPE.
+2005/03/09: [spec] rename MBCTYPE_XXX to RE_MBCTYPE_XXX. (GNU API)
+2005/03/08: [test] success in ruby 1.9.0 (2005-03-08) [i686-linux].
+2005/03/08: [impl] (thanks matz) [ruby-dev:25783]
+                   should not allocate memory for key data in st.c.
+                   move st_*_strend() functions from st.c. fixed some
+	           potential memory leaks.
+                   (imported from Ruby 1.9 2005-03-08)
+
 2005/03/07: Version 3.7.1
 
 2005/03/07: [test] success in ruby 1.9.0 (2005-03-07) [i686-linux].
@@ -24,7 +476,7 @@ History
                    remove reggnu.c from make 19.
 2005/02/19: [dist] update doc/API and doc/API.ja.
 2005/02/19: [test] success in ruby 1.9.0 (2005-02-19) [i386-cygwin].
-2005/02/19: [impl] (thanks Alexey Zakhlestin)
+2005/02/19: [impl] (thanks Alexey Zakhlestine)
                    change UChar* to const UChar* in oniguruma.h,
                    regenc.h and regparse.h.
 2005/02/13: [impl] change UChar* to const UChar* in oniguruma.h and
@@ -1358,16 +1810,29 @@ History
 [test: test]
 [memo: memo]
 --
-<branch>
-svn mkdir http://localhost/repos/branches -m ""
-svn mkdir http://localhost/repos/branches/oniguruma -m ""
-svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/branches/oniguruma/2.X -m "branch for 8-bit encodings only"
-
-<create tag>
-svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/tags/oniguruma/X.X.X -m "onigdXXXXXXXX"
-
-<show all tags>
+<CVS: show all tags>
 cvs history -T
 
-<add tag>
+<CVS: add tag>
 cvs rtag "VERSION_X_X_X" oniguruma
+
+
+<GNU Autotools: bootstrap>
+* write Makefile.am and configure.in.
+> aclocal
+> libtoolize
+> automake --foreign --add-missing
+> autoconf
+> configure --with-rubydir=... CFLAGS="-O2 -Wall"
+
+
+<GNU libtool: version management>
+
+  VERSION = current:revision:age
+
+  current:  interface number (from 0)
+  revision: implementation number of same interface (from 0)
+  age:      number of supported previous interfaces
+            (if current only supported then age == 0)
+
+//END

@@ -39,83 +39,91 @@ foreach($inputs as $input) {
 ?>
 
 --EXPECTF---- 
+
 -- Iteration 1 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 2 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 3 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 4 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 5 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 6 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 7 --
 Without $regs arg:
-int(1)
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
 With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL
 
 -- Iteration 8 --
 Without $regs arg:
-int(1)
-With $regs arg:
-int(1)
-array(1) {
-  [0]=>
-  bool(false)
-}
 
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+With $regs arg:
+
+Warning: mb_ereg(): empty pattern in %s on line %d
+bool(false)
+NULL

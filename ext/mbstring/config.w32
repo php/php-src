@@ -3,6 +3,7 @@
 
 ARG_ENABLE("mbstring", "multibyte string functions", "no");
 ARG_ENABLE("mbregex", "multibyte regex support", "no");
+ARG_ENABLE("mbregex-backtrack", "check multibyte regex backtrack", "yes");
 
 if (PHP_MBSTRING == "yes") {
 
@@ -11,7 +12,7 @@ if (PHP_MBSTRING == "yes") {
 	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
 		"ext\\mbstring\\oniguruma\\config.h", true);
 	
-	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", null,
+	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", true,
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 		-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
 		/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
@@ -28,10 +29,12 @@ if (PHP_MBSTRING == "yes") {
 		mbfilter_iso8859_2.c mbfilter_iso8859_3.c mbfilter_iso8859_4.c \
 		mbfilter_iso8859_5.c mbfilter_iso8859_6.c mbfilter_iso8859_7.c \
 		mbfilter_iso8859_8.c mbfilter_iso8859_9.c mbfilter_jis.c \
+		mbfilter_iso2022_jp_ms.c \
 		mbfilter_koi8r.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
 		mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
 		mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
-		mbfilter_uuencode.c mbfilter_armscii8.c", "mbstring");
+		mbfilter_koi8u.c mbfilter_cp1254.c \
+		mbfilter_uuencode.c mbfilter_armscii8.c mbfilter_cp850.c ", "mbstring");
 
 	ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \
 		mbfilter_pass.c mbfilter_wchar.c mbfl_convert.c mbfl_encoding.c \
@@ -40,7 +43,7 @@ if (PHP_MBSTRING == "yes") {
 
 	ADD_SOURCES("ext/mbstring/libmbfl/nls", "nls_de.c nls_en.c nls_ja.c \
 		nls_kr.c nls_neutral.c nls_ru.c nls_uni.c nls_zh.c nls_hy.c \
-		nls_tr.c", "mbstring");
+		nls_ua.c nls_tr.c", "mbstring");
 
 	AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 	AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
@@ -53,6 +56,9 @@ if (PHP_MBSTRING == "yes") {
 		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		AC_DEFINE('HAVE_MBREGEX', 1);
 		AC_DEFINE('HAVE_ONIG', 1);
+		if (PHP_MBREGEX_BACKTRACK != "no") {
+			AC_DEFINE('USE_COMBINATION_EXPLOSION_CHECK', 1);
+		}
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
 			regenc.c regexec.c reggnu.c regparse.c regposerr.c \
 			regext.c regsyntax.c regtrav.c regversion.c st.c", "mbstring");
@@ -62,7 +68,7 @@ if (PHP_MBSTRING == "yes") {
 			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
 			iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c \
 			koi8.c koi8_r.c sjis.c utf8.c unicode.c utf16_be.c utf16_le.c \
-			utf32_be.c utf32_le.c", "mbstring");
+			utf32_be.c utf32_le.c gb18030.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 	}
 }

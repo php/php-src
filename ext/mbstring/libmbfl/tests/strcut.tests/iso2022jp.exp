@@ -1,0 +1,129 @@
+#!/usr/bin/expect -f
+proc begin_strcut_test {_from _length} {
+    global spawn_id from length
+    set from $_from
+    set length $_length
+
+    spawn tests/strcut Japanese "ISO-2022-JP" $_from $_length
+    set timeout 10
+
+    expect_after {
+        "\[^\r\n\]*\r\n" { fail $test }
+    }
+}
+
+begin_strcut_test -1 2
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "\x1b\$B%F%9%H%F%9%H\x1b(B\r"
+sleep 1
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 2 -1
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "\x1b\$B%F%9%H%F%9%H\x1b(B\r"
+sleep 1
+expect {
+    -ex "***ERROR***\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 3 2
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "%74%74 (2)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "\x1b\$B%F%9%H%F%9%H\x1b(B\r"
+sleep 1
+expect {
+    -ex " (0)\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 5 8
+
+set test "asciish characters ($from, $length)"
+send "testtest\r"
+expect {
+    -ex "%65%73%74 (3)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+sleep 1
+send "\x1b\$B%F%9%H%F%9%H\x1b(B\r"
+sleep 1
+expect {
+    -ex "%1b%24%42%25%39%1b%28%42 (8)\r\n" { pass $test }
+}
+
+close
+begin_strcut_test 1 15
+
+set test "asciish characters ($from, $length)"
+send "testestestestestes\r"
+expect {
+     "%65%73%74%65%73%74%65%73%74%65%73%74%65%73%74 (15)\r\n" { pass $test }
+}
+
+set test "non-asciish characters ($from, $length)"
+send "\x1b\$B%F%9%H%F%9%H\x1b(B\r"
+sleep 1
+expect {
+    -ex "%1b%24%42%25%46%25%39%25%48%25%46%1b%28%42 (14)\r\n" { pass $test }
+}
+close
+begin_strcut_test 8 20
+
+set test "non-asciish characters (2) ($from, $length)"
+send "\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x24\x46\x24\x39\x24\x48\x1b\x28\x49\x4a\x5e\x4a\x5e\x4a\x5e\x43\x3d\x44\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\r"
+sleep 1
+expect {
+    -ex "%74%1b%24%42%25%39%1b%28%42%74%1b%24%42%25%48%24%46%1b%28%42 (20)\r\n" {
+        pass $test
+    }
+}
+
+begin_strcut_test 8 21
+
+set test "non-asciish characters (2) ($from, $length)"
+sleep 1
+send "\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x24\x46\x24\x39\x24\x48\x1b\x28\x49\x4a\x5e\x4a\x5e\x4a\x5e\x43\x3d\x44\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\r"
+expect {
+    -ex "%74%1b%24%42%25%39%1b%28%42%74%1b%24%42%25%48%24%46%1b%28%42 (20)\r\n" {
+        pass $test
+    }
+}
+
+begin_strcut_test 11 17
+
+set test "non-asciish characters (2) ($from, $length)"
+sleep 1
+send "\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x24\x46\x24\x39\x24\x48\x1b\x28\x49\x4a\x5e\x4a\x5e\x4a\x5e\x43\x3d\x44\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\x1b\x24\x42\x25\x46\x1b\x28\x42\x74\x1b\x24\x42\x25\x39\x1b\x28\x42\x74\x1b\x24\x42\x25\x48\x1b\x28\x42\x74\r"
+expect {
+    -ex "%1b%24%42%25%39%1b%28%42%74%1b%24%42%25%48%1b%28%42 (17)\r\n" {
+        pass $test
+    }
+}
+
+
+# vim: sts=4 sw=4 ts=4 et

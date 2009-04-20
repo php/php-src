@@ -2,7 +2,7 @@
   reggnu.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,7 @@ re_compile_pattern(const char* pattern, int size, regex_t* reg, char* ebuf)
   return r;
 }
 
+#ifdef USE_RECOMPILE_API
 extern int
 re_recompile_pattern(const char* pattern, int size, regex_t* reg, char* ebuf)
 {
@@ -113,6 +114,7 @@ re_recompile_pattern(const char* pattern, int size, regex_t* reg, char* ebuf)
   }
   return r;
 }
+#endif
 
 extern void
 re_free_pattern(regex_t* reg)
@@ -151,16 +153,16 @@ re_mbcinit(int mb_code)
   OnigEncoding enc;
 
   switch (mb_code) {
-  case MBCTYPE_ASCII:
+  case RE_MBCTYPE_ASCII:
     enc = ONIG_ENCODING_ASCII;
     break;
-  case MBCTYPE_EUC:
+  case RE_MBCTYPE_EUC:
     enc = ONIG_ENCODING_EUC_JP;
     break;
-  case MBCTYPE_SJIS:
+  case RE_MBCTYPE_SJIS:
     enc = ONIG_ENCODING_SJIS;
     break;
-  case MBCTYPE_UTF8:
+  case RE_MBCTYPE_UTF8:
     enc = ONIG_ENCODING_UTF8;
     break;
   default:

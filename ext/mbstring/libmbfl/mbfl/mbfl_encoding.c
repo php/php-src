@@ -59,15 +59,18 @@
 #include "filters/mbfilter_sjis.h"
 #include "filters/mbfilter_cp51932.h"
 #include "filters/mbfilter_jis.h"
+#include "filters/mbfilter_iso2022_jp_ms.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_koi8r.h"
+#include "filters/mbfilter_koi8u.h"
 #include "filters/mbfilter_cp866.h"
 #include "filters/mbfilter_cp932.h"
 #include "filters/mbfilter_cp936.h"
 #include "filters/mbfilter_cp1251.h"
 #include "filters/mbfilter_cp1252.h"
+#include "filters/mbfilter_cp1254.h"
 #include "filters/mbfilter_iso8859_1.h"
 #include "filters/mbfilter_iso8859_2.h"
 #include "filters/mbfilter_iso8859_3.h"
@@ -156,6 +159,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_2022jp,
 	&mbfl_encoding_2022jpms,
 	&mbfl_encoding_cp1252,
+	&mbfl_encoding_cp1254,
 	&mbfl_encoding_8859_1,
 	&mbfl_encoding_8859_2,
 	&mbfl_encoding_8859_3,
@@ -181,6 +185,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_cp1251,
 	&mbfl_encoding_cp866,
 	&mbfl_encoding_koi8r,
+	&mbfl_encoding_koi8u,
 	&mbfl_encoding_armscii8,
 	&mbfl_encoding_cp850,
 	NULL
@@ -197,16 +202,16 @@ mbfl_name2encoding(const char *name)
 		return NULL;
 	}
 
-	i = 0;
-	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL){
+ 	i = 0;
+ 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL){
 		if (strcasecmp(encoding->name, name) == 0) {
 			return encoding;
 		}
 	}
 
-	/* serch MIME charset name */
-	i = 0;
-	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
+ 	/* search MIME charset name */
+ 	i = 0;
+ 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
 		if (encoding->mime_name != NULL) {
 			if (strcasecmp(encoding->mime_name, name) == 0) {
 				return encoding;
@@ -214,12 +219,12 @@ mbfl_name2encoding(const char *name)
 		}
 	}
 
-	/* serch aliases */
-	i = 0;
-	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
+ 	/* search aliases */
+ 	i = 0;
+ 	while ((encoding = mbfl_encoding_ptr_list[i++]) != NULL) {
 		if (encoding->aliases != NULL) {
-			j = 0;
-			while ((*encoding->aliases)[j] != NULL) {
+ 			j = 0;
+ 			while ((*encoding->aliases)[j] != NULL) {
 				if (strcasecmp((*encoding->aliases)[j], name) == 0) {
 					return encoding;
 				}
