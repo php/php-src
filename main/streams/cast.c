@@ -219,7 +219,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 				if (ret != SUCCESS) {
 					php_stream_close(newstream);
 				} else {
-					int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
+					int retcode = php_stream_cast(newstream, castas | flags, (void**)ret, show_err);
 
 					if (retcode == SUCCESS)
 						rewind(*(FILE**)ret);
