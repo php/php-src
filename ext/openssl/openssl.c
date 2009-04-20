@@ -4367,6 +4367,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 	char *cipherlist = NULL;
 	int ok = 1;
 
+	ERR_clear_error();
 
 	/* look at context options in the stream and set appropriate verification flags */
 	if (GET_VER_OPT("verify_peer") && zval_is_true(*val)) {
