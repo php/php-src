@@ -199,6 +199,11 @@ typedef unsigned long long uint64_t;
 #define MYSQLND_LLU_SPEC "%llu"
 #endif
 
+#ifdef _AIX
+#define MYSQLND_LL_SPEC "%lli"
+#define MYSQLND_LLU_SPEC "%llu"
+#endif
+
 #define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
 #define L64(x) x##LL
