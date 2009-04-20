@@ -34,16 +34,12 @@
 
 extern const mbfl_encoding mbfl_encoding_jis;
 extern const mbfl_encoding mbfl_encoding_2022jp;
-extern const mbfl_encoding mbfl_encoding_2022jpms;
 extern const struct mbfl_identify_vtbl vtbl_identify_2022jp;
-extern const struct mbfl_identify_vtbl vtbl_identify_2022jpms;
 extern const struct mbfl_identify_vtbl vtbl_identify_jis;
 extern const struct mbfl_convert_vtbl vtbl_jis_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_jis;
 extern const struct mbfl_convert_vtbl vtbl_2022jp_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jp;
-extern const struct mbfl_convert_vtbl vtbl_2022jpms_wchar;
-extern const struct mbfl_convert_vtbl vtbl_wchar_2022jpms;
  
 int mbfl_filt_conv_jis_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter);

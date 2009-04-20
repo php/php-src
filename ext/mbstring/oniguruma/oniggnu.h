@@ -35,10 +35,10 @@
 extern "C" {
 #endif
 
-#define MBCTYPE_ASCII         0
-#define MBCTYPE_EUC           1
-#define MBCTYPE_SJIS          2
-#define MBCTYPE_UTF8          3
+#define RE_MBCTYPE_ASCII         0
+#define RE_MBCTYPE_EUC           1
+#define RE_MBCTYPE_SJIS          2
+#define RE_MBCTYPE_UTF8          3
 
 /* GNU regex options */
 #ifndef RE_NREGS

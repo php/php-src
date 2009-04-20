@@ -1,0 +1,47 @@
+#!/usr/bin/expect -f
+spawn tests/strwidth Japanese UTF-8
+set timeout 1
+
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+
+set test "basic test"
+send "testtest\r"
+expect {
+    "8\r\n" { pass $test }
+}
+
+set test "CJK kanji"
+send "漢字\r"
+expect {
+    "4\r\n" { pass $test }
+}
+
+set test "CJK hiragana"
+send "ひらがな\r"
+expect {
+    "8\r\n" { pass $test }
+}
+
+set test "CJK katakana"
+send "カタカナ\r"
+expect {
+    "8\r\n" { pass $test }
+}
+
+set test "Fullwidth symbols (1)"
+send "〜！”＃＄％＆’（））\r"
+expect {
+    "20\r\n" { pass $test }
+}
+
+set test "Halfwidth symbols assumed to be fullwidth in JISX0208 (2)"
+send "○●◎\r"
+expect {
+    "3\r\n" { pass $test }
+}
+
+close
+
+# vim: sts=4 sw=4 ts=4 et encoding=UTF-8

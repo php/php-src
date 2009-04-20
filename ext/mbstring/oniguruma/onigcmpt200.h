@@ -29,6 +29,12 @@
 #define REGCODE_EUCJP         REG_ENCODING_EUC_JP
 #define REGCODE_SJIS          REG_ENCODING_SJIS
 
+/* Don't use REGCODE_XXXX. (obsoleted) */
+#define MBCTYPE_ASCII         RE_MBCTYPE_ASCII
+#define MBCTYPE_EUC           RE_MBCTYPE_EUC
+#define MBCTYPE_SJIS          RE_MBCTYPE_SJIS
+#define MBCTYPE_UTF8          RE_MBCTYPE_UTF8
+
 typedef unsigned char*   RegTransTableType;
 #define RegOptionType    OnigOptionType
 #define RegDistance      OnigDistance

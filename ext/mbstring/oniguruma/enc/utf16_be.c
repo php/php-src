@@ -2,7 +2,7 @@
   utf16_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #define UTF16_IS_SURROGATE_FIRST(c)    (c >= 0xd8 && c <= 0xdb)
 #define UTF16_IS_SURROGATE_SECOND(c)   (c >= 0xdc && c <= 0xdf)
 
-static int EncLen_UTF16[] = {
+static const int EncLen_UTF16[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -63,6 +63,12 @@ utf16be_is_mbc_newline(const UChar* p, const UChar* end)
   if (p + 1 < end) {
     if (*(p+1) == 0x0a && *p == 0x00)
       return 1;
+#ifdef USE_UNICODE_ALL_LINE_TERMINATORS
+    if ((*(p+1) == 0x0d || *(p+1) == 0x85) && *p == 0x00)
+      return 1;
+    if (*p == 0x20 && (*(p+1) == 0x29 || *(p+1) == 0x28))
+      return 1;
+#endif
   }
   return 0;
 }
@@ -120,18 +126,6 @@ utf16be_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
 
   if (*p == 0) {
     p++;
-    if (end > p + 2 &&
-	(flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0 &&
-	((*p == 's' && *(p+2) == 's') ||
-	((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	 (*p == 'S' && *(p+2) == 'S'))) &&
-        *(p+1) == 0) {
-      *lower++ = '\0';
-      *lower   = 0xdf;
-      (*pp) += 4;
-      return 2;
-    }
-
     *lower++ = '\0';
     if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
 	 ONIGENC_IS_MBC_ASCII(p)) ||
@@ -171,20 +165,6 @@ utf16be_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
     int c, v;
 
     p++;
-    if ((flag & ONIGENC_AMBIGUOUS_MATCH_COMPOUND) != 0) {
-      if (end > p + 2 &&
-	  ((*p == 's' && *(p+2) == 's') ||
-	   ((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	    (*p == 'S' && *(p+2) == 'S'))) &&
-          *(p+1) == 0) {
-        (*pp) += 2;
-        return TRUE;
-      }
-      else if (*p == 0xdf) {
-        return TRUE;
-      }
-    }
-
     if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
 	 ONIGENC_IS_MBC_ASCII(p)) ||
 	((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
@@ -228,8 +208,7 @@ OnigEncodingType OnigEncodingUTF16_BE = {
   4,            /* max byte length */
   2,            /* min byte length */
   (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_COMPOUND),
+   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
   {
       (OnigCodePoint )'\\'                       /* esc */
     , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */

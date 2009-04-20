@@ -29,55 +29,43 @@ foreach($inputs as $input) {
 };
 ?>
 --EXPECTF--
--- Iteration 1 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
+-- Iteration 1 --
 
 Warning: mb_strtolower(): Unknown encoding "12345" in %s on line %d
 bool(false)
-
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtoupper(): Unknown encoding "12345" in %s on line %d
 bool(false)
 
 -- Iteration 2 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "1.23456789E-9" in %s on line %d
 bool(false)
-
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtoupper(): Unknown encoding "1.23456789E-9" in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-
 Warning: mb_strtolower(): Unknown encoding "1" in %s on line %d
 bool(false)
-
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
 
 Warning: mb_strtoupper(): Unknown encoding "1" in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-string(12) "hello, world"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
-string(12) "HELLO, WORLD"
+Warning: mb_strtoupper(): Unknown encoding "" in %s on line %d
+bool(false)
 
 -- Iteration 5 --
 
-Warning: mb_strtolower(): Illegal character encoding specified in %s on line %d
-string(12) "hello, world"
+Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
+bool(false)
 
-Warning: mb_strtoupper(): Illegal character encoding specified in %s on line %d
-string(12) "HELLO, WORLD"
-
+Warning: mb_strtoupper(): Unknown encoding "" in %s on line %d
+bool(false)
