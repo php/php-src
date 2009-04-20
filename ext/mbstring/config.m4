@@ -191,7 +191,7 @@ return (int)(ONIG_ENCODING_KOI8 + 1);
         AC_MSG_RESULT([yes])
         AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1], [define to 1 if oniguruma has an invalid entry for KOI8 encoding])
       ])
-      LDFLAGS=$save_old_LDFLAGS  
+      LDFLAGS=$save_old_LDFLAGS
     fi
 
     PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
