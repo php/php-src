@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   context. (Dmitry)
 
 - Fixed bug #48023 (spl_autoload_register didn't store closures). (Etienne)
+- Fixed bug #48004 (Error handler prevents creation of default object).
+  (Dmitry)
 - Fixed bug #47880 (crashes in call_user_func_array()). (Dmitry)
 - Fixed bug #47856 (stristr() converts needle to lower-case). (Ilia)
 - Fixed bug #47851 (is_callable throws fatal error). (Dmitry)
