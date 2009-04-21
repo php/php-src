@@ -2251,6 +2251,11 @@ PHP_FUNCTION(ldap_8859_to_t61)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, port)
+#ifdef HAVE_ORALDAP
+	ZEND_ARG_INFO(0, wallet)
+	ZEND_ARG_INFO(0, wallet_passwd)
+	ZEND_ARG_INFO(0, authmode)
+#endif
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_resource, 0, 0, 1)
