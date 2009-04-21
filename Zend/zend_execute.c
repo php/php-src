@@ -578,9 +578,9 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0) ||
 		    (Z_TYPE_P(object) == IS_UNICODE && Z_USTRLEN_P(object) == 0)) {
 			SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
-			zval_dtor(object);
+			zval_dtor(*object_ptr);
+			object_init(*object_ptr);
 			object = *object_ptr;
-			object_init(object);
 			zend_error(E_STRICT, "Creating default object from empty value");
 		} else {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -592,8 +592,6 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 			return;
 		}
 	}
-
- 	/* here we are sure we are dealing with an object */
 
 	/* separate our value if necessary */
 	if (value_op->op_type == IS_TMP_VAR) {
