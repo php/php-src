@@ -286,7 +286,7 @@ PHP_MINFO_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_connect([string host [, int port]])
+/* {{{ proto resource ldap_connect([string host [, int port [, string wallet [, string wallet_passwd [, int authmode]]]]])
    Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
 {
