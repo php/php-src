@@ -559,13 +559,13 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 
 static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval *property_name, znode *value_op, const temp_variable *Ts, int opcode TSRMLS_DC) /* {{{ */
 {
-	zval *object;
+	zval *object = *object_ptr;
 	zend_free_op free_value;
 	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
 	zval **retval = &T(result->u.var).var.ptr;
 
-	if (Z_TYPE_P(*object_ptr) != IS_OBJECT) {
-		if (*object_ptr == EG(error_zval_ptr)) {
+	if (Z_TYPE_P(object) != IS_OBJECT) {
+		if (object == EG(error_zval_ptr)) {
 			if (!RETURN_VALUE_UNUSED(result)) {
 				*retval = EG(uninitialized_zval_ptr);
 				PZVAL_LOCK(*retval);
@@ -573,14 +573,15 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 			FREE_OP(free_value);
 			return;
 		}
-		if (Z_TYPE_PP(object_ptr) == IS_NULL ||
-		    (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0) ||
-		    (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0) ||
-		    (Z_TYPE_PP(object_ptr) == IS_UNICODE && Z_USTRLEN_PP(object_ptr) == 0)) {
-			zend_error(E_STRICT, "Creating default object from empty value");
+		if (Z_TYPE_P(object) == IS_NULL ||
+		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
+		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0) ||
+		    (Z_TYPE_P(object) == IS_UNICODE && Z_USTRLEN_P(object) == 0)) {
 			SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
-			zval_dtor(*object_ptr);
-			object_init(*object_ptr);
+			zval_dtor(object);
+			object = *object_ptr;
+			object_init(object);
+			zend_error(E_STRICT, "Creating default object from empty value");
 		} else {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (!RETURN_VALUE_UNUSED(result)) {
@@ -593,7 +594,6 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 	}
 
  	/* here we are sure we are dealing with an object */
- 	object = *object_ptr;
 
 	/* separate our value if necessary */
 	if (value_op->op_type == IS_TMP_VAR) {
