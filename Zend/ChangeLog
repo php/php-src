@@ -1,3 +1,17 @@
+2009-04-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute.c
+      zend_execute.c
+      tests/bug48004.phpt:
+      Fixed bug #48004 (Error handler prevents creation of default object)
+
+    * tests/bug48004.phpt
+      tests/bug48004.phpt:
+      
+      file bug48004.phpt was initially added on branch PHP_5_3.
+
 2009-04-16  Hannes Magnusson  <hannes.magnusson@gmail.com>
 
     * (PHP_5_2)
