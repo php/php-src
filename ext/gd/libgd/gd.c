@@ -3873,15 +3873,14 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 
 	/* We need the orinal image with each safe neoghb. pixel */
 	srcback = gdImageCreateTrueColor (src->sx, src->sy);
+	if (srcback==NULL) {
+		return 0;
+	}
 	srcback->saveAlphaFlag = 1;
 	srctrans = gdImageColorAllocateAlpha(srcback, 0, 0, 0, 127);
 	gdImageFill(srcback, 0, 0, srctrans);
 
 	gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
-
-	if (srcback==NULL) {
-		return 0;
-	}
 
 	f = GET_PIXEL_FUNCTION(src);
 
@@ -3939,11 +3938,10 @@ int gdImageSelectiveBlur( gdImagePtr src)
 
 	/* We need the orinal image with each safe neoghb. pixel */
 	srcback = gdImageCreateTrueColor (src->sx, src->sy);
-	gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
-
 	if (srcback==NULL) {
 		return 0;
 	}
+	gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
 
 	f = GET_PIXEL_FUNCTION(src);
 
