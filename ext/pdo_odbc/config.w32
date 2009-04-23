@@ -13,7 +13,7 @@ if (PHP_PDO_ODBC != "no") {
 
 	} else {
 		WARNING("pdo_odbc support can't be enabled, headers or libraries are missing (SDK)")
-		PHP_LIBXML = "no"
+		PHP_PDO_ODBC = "no"
 	}
 }
 
