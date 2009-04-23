@@ -619,8 +619,14 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 					return 0;
 				} else {
 					*ptr = php_pdo_pgsql_unescape_bytea(*ptr, &tmp_len);
-					*len = tmp_len;
-					*caller_frees = 1;
+					if (!tmp_len) {
+						/* Empty string, return as empty stream */
+						*ptr = (char *)php_stream_memory_open(TEMP_STREAM_READONLY, "", 0);
+						*len = 0;
+					} else {
+						*len = tmp_len;
+						*caller_frees = 1;
+					}
 				}
 				break;
 			case PDO_PARAM_NULL:

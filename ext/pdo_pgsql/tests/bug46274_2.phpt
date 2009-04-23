@@ -47,11 +47,13 @@ $res = $db->query("SELECT blob1 from test_one_blob");
 var_dump($x = $res->fetch());
 var_dump(fread($x['blob1'], 10));
 
-// Empty string
+// Resource
 var_dump($res->fetch());
+var_dump(fread($x['blob1'], 10));
 
-// Empty string
+// Resource
 var_dump($res->fetch());
+var_dump(fread($x['blob1'], 10));
 
 // NULL
 var_dump($res->fetch());
@@ -69,16 +71,18 @@ array(2) {
 string(3) "foo"
 array(2) {
   ["blob1"]=>
-  string(0) ""
+  resource(%d) of type (stream)
   [0]=>
-  string(0) ""
+  resource(%d) of type (stream)
 }
+string(0) ""
 array(2) {
   ["blob1"]=>
-  string(0) ""
+  resource(%d) of type (stream)
   [0]=>
-  string(0) ""
+  resource(%d) of type (stream)
 }
+string(0) ""
 array(2) {
   ["blob1"]=>
   NULL
