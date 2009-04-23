@@ -146,8 +146,16 @@ if (VCVERS >= 1400) {
 	}
 }
 
-if (VCVERS >= 1500) {
-	ADD_FLAG('CFLAGS', ' /MP ');
+ARG_WITH('mp', 'Tell VC9 use up to [n,auto,disable] processes for compilation', 'auto');
+if (VCVERS >= 1500 && PHP_MP != 'disable') {
+		if(PHP_MP == 'auto') {
+			 ADD_FLAG('CFLAGS', ' /MP ');
+		}
+		if(parseInt(PHP_MP) != 0) {
+			ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+		} else {
+			STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+		}
 }
 
 // General link flags
