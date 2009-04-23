@@ -1,3 +1,13 @@
+2009-04-22  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_3)
+      zend_compile.c:
+      MFH: fix DVAL_TO_LVAL conversion for static array indexes, related to bug
+      #46701
+
+    * zend_compile.c:
+      fix DVAL_TO_LVAL conversion for static array indexes, related to bug #46701
+
 2009-04-21  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
