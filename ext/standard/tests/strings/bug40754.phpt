@@ -27,8 +27,8 @@ var_dump(substr("abcde", $v, $v));
 
 ?>
 --EXPECTF--	
-string(4) "bcde"
-string(6) "abcdex"
+%unicode|string%(4) "bcde"
+%unicode|string%(6) "abcdex"
 bool(false)
 bool(false)
 

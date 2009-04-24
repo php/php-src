@@ -42,7 +42,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 string(%d) "X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html%r; charset=.*|%r
 
 
 <?php
@@ -50,12 +50,12 @@ Content-type: text/html
 "
 string(%d) "Status: 404 Not Found
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html%r; charset=.*|%r
 
 No input file specified.
 "
 string(%d) "X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html%r; charset=.*|%r
 
 <?php  class test { function foo() {} } ?>
 "
