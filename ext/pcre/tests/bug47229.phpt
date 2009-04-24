@@ -19,19 +19,19 @@ preg_match("/a\-{1,}/", 'a\----a', $m);
 var_dump($m);
 
 ?>
---EXPECT--
-string(13) "\-oh really\?"
+--EXPECTF--
+%string|unicode%(13) "\-oh really\?"
 array(1) {
   [0]=>
-  string(4) "a---"
+  %string|unicode%(4) "a---"
 }
 array(1) {
   [0]=>
-  string(1) "a"
+  %string|unicode%(1) "a"
 }
 array(1) {
   [0]=>
-  string(5) "a----"
+  %string|unicode%(5) "a----"
 }
 array(0) {
 }
