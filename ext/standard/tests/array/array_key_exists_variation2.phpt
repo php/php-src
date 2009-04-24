@@ -206,9 +206,7 @@ Warning: array_key_exists() expects parameter 2 to be array, Unicode string give
 NULL
 
 -- Iteration 22 --
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(false)
 
 -- Iteration 23 --
 

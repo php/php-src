@@ -29,16 +29,16 @@ $input = array(
   5 => $value4
 );
 
-var_dump( array_unique($input) );
+var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unique() : array with reference variables for $input argument ***
 array(2) {
   [0]=>
   int(0)
   [1]=>
-  &unicode(5) "hello"
+  &%unicode|string%(5) "hello"
 }
 Done

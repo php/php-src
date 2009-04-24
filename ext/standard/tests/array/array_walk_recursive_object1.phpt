@@ -49,7 +49,17 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_walk_recursive() : object functionality ***
+%unicode|string%(18) "%r\0%rMyClass%r\0%rpri_value"
+int(10)
+int(1)
 
-Warning: array_walk_recursive() expects parameter 1 to be array, object given in %s on line %d
-NULL
+%unicode|string%(9) "pub_value"
+int(10)
+int(1)
+
+%unicode|string%(12) "%r\0%r*%r\0%rpro_value"
+int(10)
+int(1)
+
+bool(true)
 Done

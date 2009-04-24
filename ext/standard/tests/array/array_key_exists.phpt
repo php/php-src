@@ -118,7 +118,7 @@ var_dump(array_key_exists("var", $key_check_obj->arr)); //found,  key is in memb
 var_dump( array_key_exists($key_check_obj, $key_check_obj) );
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -280,23 +280,13 @@ Warning: array_key_exists(): The first argument should be either a string or an 
 bool(false)
 
 *** Testing operation on objects ***
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
 bool(true)
 
-Warning: array_key_exists() expects parameter 2 to be array, object given in %s on line %d
-NULL
+Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
+bool(false)
 Done
