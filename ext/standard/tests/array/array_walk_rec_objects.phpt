@@ -29,9 +29,16 @@ array_walk_recursive($var, "walk");
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: array_walk_recursive() expects parameter 1 to be array, object given in %s on line %d
+%unicode|string%(3) "foo"
+%unicode|string%(3) "foo"
+%unicode|string%(3) "bar"
+%unicode|string%(3) "bar"
+%unicode|string%(13) "%r\0%rtest%r\0%rvar_pri"
+%unicode|string%(12) "test_private"
+%unicode|string%(10) "%r\0%r*%r\0%rvar_pro"
+%unicode|string%(14) "test_protected"
+%unicode|string%(7) "var_pub"
+%unicode|string%(11) "test_public"
 
-Warning: array_walk_recursive() expects parameter 1 to be array, object given in %s on line %d
-
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, %unicode_string_optional% given in %s on line %d
 Done
