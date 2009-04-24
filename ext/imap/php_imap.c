@@ -1251,7 +1251,7 @@ PHP_FUNCTION(imap_body)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
-	body = mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, (myargc==3 ? Z_LVAL_PP(pflags) : NIL));
+	body = mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body_len, (myargc==3 ? Z_LVAL_PP(pflags) : NIL));
 	if (body_len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
