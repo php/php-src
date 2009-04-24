@@ -26,9 +26,9 @@ var_dump(chunk_split("abcde", $v, "abc"));
 var_dump(substr("abcde", $v, $v));
 
 ?>
---EXPECTF--
-unicode(4) "bcde"
-unicode(6) "abcdex"
+--EXPECTF--	
+%unicode|string%(4) "bcde"
+%unicode|string%(6) "abcdex"
 bool(false)
 bool(false)
 
@@ -59,5 +59,5 @@ bool(false)
 Warning: strripos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 int(2)
-unicode(8) "abcdeabc"
+string(8) "abcdeabc"
 bool(false)

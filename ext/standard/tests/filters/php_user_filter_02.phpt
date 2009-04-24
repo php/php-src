@@ -9,4 +9,4 @@ class foo extends php_user_filter {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of foo::filter() must be compatible with that of php_user_filter::filter() in %s on line %d
+Strict Standards: Declaration of foo::filter() should be compatible with that of php_user_filter::filter() in %s on line %d

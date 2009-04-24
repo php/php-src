@@ -14,4 +14,4 @@ class bar extends php_user_filter {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of bar::filter() must be compatible with that of php_user_filter::filter() in %s on line %d
+Strict Standards: Declaration of bar::filter() should be compatible with that of php_user_filter::filter() in %s on line %d
