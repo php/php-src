@@ -531,6 +531,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	
 	while (var) {
 		int var_len;
+		/* unsigned int new_val_len; see below */
 		UChar *u_var, *u_val;
 		int u_var_len, u_val_len;
 		UErrorCode status = U_ZERO_ERROR;
@@ -562,7 +563,6 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 		if (val) { /* have a value */
 			int val_len;
-			/* unsigned int new_val_len; see below */
 
 			val_len = php_url_decode(val, strlen(val));
 			zend_string_to_unicode_ex(input_conv, &u_val, &u_val_len, val, val_len, &status);
@@ -572,38 +572,19 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 				efree(u_val);
 				goto next_var;
 			}
-			php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
-			/* UTODO need to make input_filter Unicode aware */
-			/*
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-			}
-			*/
-			efree(u_var);
-			efree(u_val);
 		} else {
-			if (val) { /* have a value */
-				int val_len;
-				unsigned int new_val_len;
-
-				val_len = php_url_decode(val, strlen(val));
-				val = estrndup(val, val_len);
-				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-				}
-				efree(val);
-			} else {
-				int val_len;
-				unsigned int new_val_len;
-
-				val_len = 0;
-				val = estrndup("", val_len);
-				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-				}
-				efree(val);
-			}
+			u_val_len = 0;
+			u_val = eustrndup(EMPTY_STR, 0);
 		}
+		php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
+		/* UTODO need to make input_filter Unicode aware */
+		/*
+		if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+			php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+		}
+		*/
+		efree(u_var);
+		efree(u_val);
 next_var:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
