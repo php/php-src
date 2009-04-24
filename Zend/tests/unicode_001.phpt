@@ -1,5 +1,7 @@
 --TEST--
 Comparing size of binary and unicode strings
+--INI--
+unicode.runtime_encoding=utf-8
 --FILE--
 <?php 
 
