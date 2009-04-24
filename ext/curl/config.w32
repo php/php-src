@@ -10,8 +10,8 @@ if (PHP_CURL != "no") {
 			CHECK_LIB("libeay32.lib", "curl", PHP_CURL) 
 		&& CHECK_LIB("winmm.lib", "curl", PHP_CURL)
 		&& CHECK_LIB("wldap32.lib", "curl", PHP_CURL)
-		&& (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "curl", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "curl", PHP_ZIP))) || 
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_ZIP)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
+		&& (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "curl", PHP_CURL))) || 
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "curl", PHP_CURL)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
 		EXTENSION("curl", "interface.c multi.c streams.c", true);
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
