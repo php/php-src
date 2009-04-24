@@ -1574,7 +1574,11 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 					EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 					ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 					INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
-					ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(op_data->op2.u.var).str_offset.str)+EX_T(op_data->op2.u.var).str_offset.offset, 1, 1);
+					if (Z_TYPE_P(EX_T(op_data->op2.u.var).str_offset.str) == IS_STRING) {
+						ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(op_data->op2.u.var).str_offset.str)+EX_T(op_data->op2.u.var).str_offset.offset, 1, 1);
+					} else {
+						ZVAL_UNICODEL(EX_T(opline->result.u.var).var.ptr, Z_USTRVAL_P(EX_T(op_data->op2.u.var).str_offset.str)+EX_T(op_data->op2.u.var).str_offset.offset, 1, 1);
+					}
 				}
 			} else if (!RETURN_VALUE_UNUSED(&opline->result)) {
 				AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
@@ -1609,7 +1613,11 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 				EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 				ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 				INIT_PZVAL(EX_T(opline->result.u.var).var.ptr);
-				ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(opline->op1.u.var).str_offset.str)+EX_T(opline->op1.u.var).str_offset.offset, 1, 1);
+				if (Z_TYPE_P(EX_T(opline->op1.u.var).str_offset.str) == IS_STRING) {
+					ZVAL_STRINGL(EX_T(opline->result.u.var).var.ptr, Z_STRVAL_P(EX_T(opline->op1.u.var).str_offset.str)+EX_T(opline->op1.u.var).str_offset.offset, 1, 1);
+				} else {
+					ZVAL_UNICODEL(EX_T(opline->result.u.var).var.ptr, Z_USTRVAL_P(EX_T(opline->op1.u.var).str_offset.str)+EX_T(opline->op1.u.var).str_offset.offset, 1, 1);
+				}
 			}
 		} else if (!RETURN_VALUE_UNUSED(&opline->result)) {
 			AI_SET_PTR(EX_T(opline->result.u.var).var, EG(uninitialized_zval_ptr));
