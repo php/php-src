@@ -54,9 +54,9 @@ unicode(0) ""
 -- Iteration 4 --
 unicode(0) ""
 -- Iteration 5 --
-unicode(5) "hello"
+unicode(18) "<htmL>hello</htmL>"
 -- Iteration 6 --
-unicode(5) "hello"
+unicode(18) "<htmL>hello</htmL>"
 -- Iteration 7 --
 unicode(9) "HtMl text"
 -- Iteration 8 --

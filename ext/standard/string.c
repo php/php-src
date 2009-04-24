@@ -6253,7 +6253,8 @@ int php_u_tag_find(UChar *tag, int len, UChar *set, int set_len)
 
 	while (!done) {
 		U16_NEXT(tag, idx, len, ch);
-		switch (u_tolower(ch)) {
+		ch = u_tolower(ch);
+		switch (ch) {
 		case '<':
 			*(n++) = ch;
 			break;
@@ -6403,6 +6404,9 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 			break;
 
 		case 0x3C: /* '<' */
+			if (in_q) {
+				break;
+			}
 			U16_GET(buf, 0, idx, len, next);
 			if (u_isWhitespace(next) == TRUE) {
 				goto reg_u_char;
