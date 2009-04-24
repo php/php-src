@@ -114,38 +114,38 @@ array(1) {
 -- Iteration 6 --
 array(4) {
   [0]=>
-  string(3) "a"
+  %unicode|string%(3) "a"
   [1]=>
-  string(5) "aaaa
+  %unicode|string%(5) "aaaa
 "
   [2]=>
-  string(1) "b"
+  %unicode|string%(1) "b"
   [4]=>
-  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  %unicode|string%(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
 array(4) {
   [0]=>
-  string(5) "a\v\f"
+  %unicode|string%(5) "a\v\f"
   [1]=>
-  string(6) "aaaa\r"
+  %unicode|string%(6) "aaaa\r"
   [2]=>
-  string(1) "b"
+  %unicode|string%(1) "b"
   [4]=>
-  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  %unicode|string%(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
 array(3) {
-  ["h1"]=>
-  string(1) "
+  [%b|u%"h1"]=>
+  %unicode|string%(1) "
 "
-  ["h2"]=>
-  string(88) "hello world
+  [%b|u%"h2"]=>
+  %unicode|string%(88) "hello world
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  ["h3"]=>
-  string(88) "hello
+  [%b|u%"h3"]=>
+  %unicode|string%(88) "hello
  world	
 1111		 != 2222
 heredoc
@@ -154,15 +154,15 @@ double quoted string. withdifferentwhitespaces"
 -- Iteration 9 --
 array(2) {
   [1]=>
-  string(3) "one"
+  %unicode|string%(3) "one"
   [2]=>
-  string(3) "two"
+  %unicode|string%(3) "two"
 }
 -- Iteration 10 --
 array(2) {
-  ["one"]=>
+  [%b|u%"one"]=>
   int(1)
-  ["two"]=>
+  [%b|u%"two"]=>
   int(2)
 }
 -- Iteration 11 --
@@ -176,55 +176,55 @@ array(3) {
 }
 -- Iteration 12 --
 array(2) {
-  ["one"]=>
-  string(3) "ten"
-  ["two"]=>
-  string(6) "twenty"
+  [%b|u%"one"]=>
+  %unicode|string%(3) "ten"
+  [%b|u%"two"]=>
+  %unicode|string%(6) "twenty"
 }
 -- Iteration 13 --
 array(3) {
-  ["one"]=>
+  [%b|u%"one"]=>
   int(1)
   [2]=>
-  string(3) "two"
+  %unicode|string%(3) "two"
   [4]=>
-  string(4) "four"
+  %unicode|string%(4) "four"
 }
 -- Iteration 14 --
 array(2) {
-  [""]=>
-  string(4) "null"
-  ["NULL"]=>
+  [%b|u%""]=>
+  %unicode|string%(4) "null"
+  [%b|u%"NULL"]=>
   NULL
 }
 -- Iteration 15 --
 array(4) {
   [1]=>
-  string(4) "true"
+  %unicode|string%(4) "true"
   [0]=>
-  string(5) "false"
-  ["false"]=>
+  %unicode|string%(5) "false"
+  [%b|u%"false"]=>
   bool(false)
-  ["true"]=>
+  [%b|u%"true"]=>
   bool(true)
 }
 -- Iteration 16 --
 array(2) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
+  [%b|u%""]=>
+  %unicode|string%(6) "emptys"
+  [%b|u%"emptyd"]=>
+  %unicode|string%(0) ""
 }
 -- Iteration 17 --
 array(2) {
   [1]=>
-  string(0) ""
+  %unicode|string%(0) ""
   [6]=>
   bool(true)
 }
 -- Iteration 18 --
 array(3) {
-  [""]=>
+  [%b|u%""]=>
   int(4)
   [0]=>
   int(5)

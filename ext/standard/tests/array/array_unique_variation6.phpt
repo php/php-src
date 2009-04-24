@@ -39,6 +39,6 @@ array(2) {
   [0]=>
   int(0)
   [1]=>
-  &string(5) "hello"
+  &%unicode|string%(5) "hello"
 }
 Done
