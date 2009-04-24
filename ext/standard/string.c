@@ -6519,7 +6519,7 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
 			}
-			if (state && prev1 != 0x27 /*'\\'*/ && (!in_q || ch == in_q)) {
+			if (state && prev1 != 0x5C /*'\\'*/ && (!in_q || ch == in_q)) {
 				if (in_q) {
 					in_q = 0;
 				} else {
