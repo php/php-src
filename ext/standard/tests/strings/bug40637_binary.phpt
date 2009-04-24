@@ -9,5 +9,5 @@ var_dump(strip_tags($html));
 echo "Done\n";
 ?>
 --EXPECT--
-unicode(4) "Text"
+string(4) "Text"
 Done
