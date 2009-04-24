@@ -148,7 +148,7 @@ if (VCVERS >= 1400) {
 
 ARG_WITH('mp', 'Tell VC9 use up to [n,auto,disable] processes for compilation', 'auto');
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
-		if(PHP_MP == 'auto') {
+		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
 		} else {
 			if(parseInt(PHP_MP) != 0) {
