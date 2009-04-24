@@ -24,7 +24,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html%r; charset=.*|%r
 
 string(%d) "%s/x"
 Done

@@ -11,7 +11,7 @@ if (!$fp) {
 }
 else {
 	/* Likewise, writes will always appear to succeed */
-    $x = fwrite($fp,"\n");
+    $x = fwrite($fp,b"\n");
 	var_dump($x);
 	/* But reads should always fail */
     $content = fread($fp, 40);
