@@ -109,31 +109,31 @@ foreach($inputs as $key =>$value) {
 *** Testing pathinfo() : usage variation ***
 
 --int 0--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --int 1--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --int 12345--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --int -12345--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --float 10.5--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --float -10.5--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --float 12.3456789000e10--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --float -12.3456789000e10--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --float .5--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --empty array--
 Error: 2 - pathinfo() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
@@ -152,40 +152,40 @@ Error: 2 - pathinfo() expects parameter 1 to be string (Unicode or binary), arra
 NULL
 
 --uppercase NULL--
-string(0) ""
+%unicode|string%(0) ""
 
 --lowercase null--
-string(0) ""
+%unicode|string%(0) ""
 
 --lowercase true--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --lowercase false--
-string(0) ""
+%unicode|string%(0) ""
 
 --uppercase TRUE--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --uppercase FALSE--
-string(0) ""
+%unicode|string%(0) ""
 
 --empty string DQ--
-string(0) ""
+%unicode|string%(0) ""
 
 --empty string SQ--
-string(0) ""
+%unicode|string%(0) ""
 
 --instance of classWithToString--
-unicode(1) "."
+%unicode|string%(1) "."
 
 --instance of classWithoutToString--
 Error: 2 - pathinfo() expects parameter 1 to be string (Unicode or binary), object given, %s(%d)
 NULL
 
 --undefined var--
-string(0) ""
+%unicode|string%(0) ""
 
 --unset var--
-string(0) ""
+%unicode|string%(0) ""
 ===DONE===
 

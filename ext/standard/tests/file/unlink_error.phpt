@@ -73,6 +73,7 @@ bool(false)
 
 Warning: unlink() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
+bool(true)
 
 -- Testing unlink() on invalid arguments --
 
@@ -88,7 +89,7 @@ Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: unlink() expects parameter 2 to be resource, %unicode_string_optional% given in %s on line %d
 bool(false)
 
 Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d

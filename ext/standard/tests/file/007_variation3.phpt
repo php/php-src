@@ -25,7 +25,7 @@ require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 3, "bytes");
 $file = $file_path."/007_variation3.tmp";
-$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 
 echo "*** Test fopen() & fclose() functions:  with 'w' mode ***\n";
 $file_handle = fopen($file, "w");  //opening the file "w" mode
@@ -35,7 +35,7 @@ var_dump( ftell($file_handle) );  //Initial file pointer position, expected at t
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 rewind($file_handle);
-var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: bool(false)
+var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: empty string
 var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the begining of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
@@ -57,16 +57,14 @@ unlink(dirname(__FILE__)."/007_variation3.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'w' mode ***
 resource(%d) of type (stream)
-unicode(6) "stream"
+%unicode|string%(6) "stream"
 int(0)
-
-Notice: fwrite(): 37 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(37)
 int(37)
-bool(false)
+string(0) ""
 int(0)
 bool(true)
-unicode(7) "Unknown"
+%unicode|string%(7) "Unknown"
 int(37)
 int(0)
 bool(true)

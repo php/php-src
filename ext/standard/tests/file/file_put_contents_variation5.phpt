@@ -5,7 +5,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 
-$thisTestDir = basename(__FILE__, ".php") . ".dir";
+
+$thisTestDir = dirname(__FILE__) . '/' .basename(__FILE__, ".php") . ".directory";
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
@@ -23,7 +24,7 @@ runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
 
-chdir(dirname(__FILE__));
+chdir(dirname('__FILE__'));
 rmdir($thisTestDir);
 
 

@@ -19,8 +19,8 @@ foreach ($a as $str) {
 	var_dump($val1 === $val2);
 }
 
-var_dump(sha1($str, true));
-var_dump(sha1_file($filename, true));
+var_dump(bin2hex(sha1($str, true)));
+var_dump(bin2hex(sha1_file($filename, true)));
 
 @unlink($filename);
 
@@ -44,8 +44,8 @@ bool(true)
 unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
-string(20) "%s"
-string(20) "%s"
+unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+unicode(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 
 Warning: sha1_file(%ssha1.dat): failed to open stream: No such file or directory in %s on line %d
 Done

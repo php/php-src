@@ -6,6 +6,7 @@ $data1 = $data2 = $data3 = $data4 = $data5 = $data6 = <<<'EOD'
 <?php echo __FILE__ . "\n";?>
 
 EOD;
+/*<?*/
 
 class mystream 
 {
@@ -31,7 +32,7 @@ class mystream
 		$this->options = $options;
 
 		$split = parse_url($path);
-		if ($split["host"] !== "GLOBALS" || 
+		if ($split["host"] !== b"GLOBALS" || 
 		    empty($split["path"]) ||
 		    empty($GLOBALS[substr($split["path"],1)])) {
 		    return false;

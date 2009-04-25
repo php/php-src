@@ -8,10 +8,10 @@ if (!function_exists("inet_pton")) die("skip no inet_pton()");
 --FILE--
 <?php
 
-$packed = pack("CCCC", 127, 0, 0, 1);
+$packed = chr(127) . chr(0) . chr(0) . chr(1);
 var_dump(inet_ntop((binary)$packed));
 
-$packed = pack("CCCC", 255, 255, 255, 0);
+$packed = chr(255) . chr(255) . chr(255) . chr(0);
 var_dump(inet_ntop((binary)$packed));
 
 var_dump(inet_ntop());
@@ -31,15 +31,15 @@ $array = array(
 	b"0.0.0.0",
 	);
 foreach ($array as $val) {
-	var_dump($packed = inet_pton($val));
+	var_dump(bin2hex($packed = inet_pton($val)));
 	var_dump(inet_ntop($packed));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(9) "127.0.0.1"
-unicode(13) "255.255.255.0"
+--EXPECTF--	
+%unicode|string%(9) "127.0.0.1"
+%unicode|string%(13) "255.255.255.0"
 
 Warning: inet_ntop() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
@@ -64,12 +64,12 @@ bool(false)
 
 Warning: inet_pton(): Unrecognized address abra in %s on line %d
 bool(false)
-string(%d) "%s"
-unicode(9) "127.0.0.1"
-string(%d) "%s"
-unicode(14) "66.163.161.116"
-string(%d) "%s"
-unicode(15) "255.255.255.255"
-string(%d) "%s"
-unicode(7) "0.0.0.0"
+%unicode|string%(%d) "7f000001"
+%unicode|string%(9) "127.0.0.1"
+%unicode|string%(%d) "42a3a174"
+%unicode|string%(14) "66.163.161.116"
+%unicode|string%(%d) "ffffffff"
+%unicode|string%(15) "255.255.255.255"
+%unicode|string%(%d) "00000000"
+%unicode|string%(7) "0.0.0.0"
 Done

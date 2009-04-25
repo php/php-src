@@ -13,4 +13,4 @@ fclose($tcp_socket);
 
 ?>
 --EXPECT--
-bool(false)
+string(0) ""

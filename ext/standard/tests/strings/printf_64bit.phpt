@@ -227,7 +227,7 @@ printf("%d", $tempstring);
 --EXPECTF--
 *** Output for zero argument ***
 
-Warning: Wrong parameter count for printf() in %s on line %d
+Warning: printf() expects at least 1 parameter, 0 given in %s on line %d
 
 *** Output for insufficient number of arguments ***
 
@@ -645,10 +645,10 @@ Array
 -123456
 123456
 -123456
-120000
--120000
-+120000
--120000
+1.2e+5
+-1.2e+5
++1.2e+5
+-1.2e+5
 123456
 -123456
 1.0E+5
@@ -657,10 +657,10 @@ Array
 -123456
 123456
 -123456
-120000
--120000
-+120000
--120000
+1.2E+5
+-1.2E+5
++1.2E+5
+-1.2E+5
 
 *** Output for '%%%.2f' as the format parameter ***
 %12345678900.00
@@ -669,6 +669,8 @@ Array
 %
 
 *** Output for precision value more than maximum ***
+
+Notice: printf(): Requested precision of 988 digits was truncated to PHP maximum of %d digits in %s on line %d
 12345678900.0000000000000000000000000000000000000000
 
 *** Output for invalid width(-15) specifier ***

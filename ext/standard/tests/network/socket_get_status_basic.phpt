@@ -11,7 +11,7 @@ fclose($tcp_socket);
 --EXPECTF--
 array(8) {
   [u"stream_type"]=>
-  unicode(%d) "tcp_socket%s"
+  unicode(%d) "tcp_socket%S"
   [u"mode"]=>
   unicode(2) "r+"
   [u"unread_bytes"]=>

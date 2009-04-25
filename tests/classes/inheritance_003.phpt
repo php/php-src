@@ -17,4 +17,5 @@ class B extends A
 ===DONE===
 --EXPECTF--
 
-Fatal error: Declaration of B::f() must be compatible with that of A::f() in %sinheritance_003.php on line %d
+Strict Standards: Declaration of B::f() should be compatible with that of A::f() in %sinheritance_003.php on line %d
+===DONE===

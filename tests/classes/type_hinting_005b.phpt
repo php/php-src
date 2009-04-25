@@ -9,4 +9,6 @@ Class D extends C { function f($a) {} }
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Declaration of D::f() must be compatible with that of C::f() in %s on line 5
+Strict Standards: Declaration of D::f() should be compatible with that of C::f() in %s on line 5
+No hint, should be array.
+==DONE==
