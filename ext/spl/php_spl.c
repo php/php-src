@@ -311,7 +311,22 @@ PHP_FUNCTION(spl_autoload)
 	EG(active_op_array) = original_active_op_array;
 
 	if (!found && !SPL_G(autoload_running)) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %v could not be loaded", class_name);
+		/* For internal errors, we generate E_ERROR, for direct calls an exception is thrown.
+		 * The "scope" is determined by an opcode, if it is ZEND_FETCH_CLASS we know function was called indirectly by
+		 * the Zend engine.
+		 */
+
+		char *sclass_name;
+		int sclass_name_len;
+
+		zend_unicode_to_string(ZEND_U_CONVERTER(UG(output_encoding_conv)), &sclass_name, &sclass_name_len, 
+				class_name.u, class_name_len);
+
+		if (active_opline->opcode != ZEND_FETCH_CLASS) {
+			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", sclass_name);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", sclass_name);
+		}
 	}
 } /* }}} */
 
