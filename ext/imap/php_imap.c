@@ -2200,7 +2200,7 @@ PHP_FUNCTION(imap_fetchstructure)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
 		RETURN_FALSE;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	if (msgno < 1) {
