@@ -71,13 +71,14 @@ if (!defined("PHP_VERSION_ID")) {
 	define("PHP_MAJOR_VERSION", $major);
 }
 
-// __DIR__ and FILE_BINARY is available from 5.3.0
+// __DIR__ is available from 5.3.0
 if (PHP_VERSION_ID < 50300) {
 	define('__DIR__', realpath(dirname(__FILE__)));
-	define('FILE_BINARY', 0);
+	// FILE_BINARY is available from 5.2.7
+	if (PHP_VERSION_ID < 50207) {
+		define('FILE_BINARY', 0);
+	}	
 }
-
-
 
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
