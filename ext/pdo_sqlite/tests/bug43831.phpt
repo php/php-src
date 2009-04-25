@@ -1,5 +1,7 @@
 --TEST--
 Bug #43831 ($this gets mangled when extending PDO with persistent connection)
+--SKIPIF--
+<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
 --FILE--
 <?php
 
