@@ -46,7 +46,7 @@ stream_wrapper_register("myFile", "FileStream")
     or die("Failed to register protocol");
 
 $tmp_dir = __DIR__;
-$tn = tempnam($tmp_dir, 'foo');
+$tn = (binary) tempnam($tmp_dir, 'foo');
 if (!$tn) {
   die("tempnam failed");
 }

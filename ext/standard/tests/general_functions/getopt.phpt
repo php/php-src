@@ -11,14 +11,14 @@ variables_order=GPS
 ?>
 --EXPECT--
 array(5) {
-  [u"v"]=>
+  ["v"]=>
   bool(false)
-  [u"h"]=>
+  ["h"]=>
   bool(false)
-  [u"d"]=>
-  unicode(4) "test"
-  [u"m"]=>
-  unicode(4) "1234"
-  [u"t"]=>
+  ["d"]=>
+  string(4) "test"
+  ["m"]=>
+  string(4) "1234"
+  ["t"]=>
   bool(false)
 }

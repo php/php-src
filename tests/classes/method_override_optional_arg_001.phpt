@@ -28,4 +28,6 @@ $b->foo(1);
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::foo() must be compatible with that of A::foo() in %s on line %d
+Strict Standards: Declaration of C::foo() should be compatible with that of A::foo() in %s on line %d
+int(1)
+int(3)

@@ -25,7 +25,7 @@ require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "wb", "007_variation", 19, "bytes");
 $file = $file_path."/007_variation19.tmp";
-$string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
+$string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 
 echo "*** Test fopen() & fclose() functions:  with 'wb' mode ***\n";
 $file_handle = fopen($file, "wb");  //opening the file "wb" mode
@@ -57,16 +57,14 @@ unlink(dirname(__FILE__)."/007_variation19.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'wb' mode ***
 resource(%d) of type (stream)
-unicode(6) "stream"
+%unicode|string%(6) "stream"
 int(0)
-
-Notice: fwrite(): 37 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(37)
 int(37)
-bool(false)
+string(0) ""
 int(0)
 bool(true)
-unicode(7) "Unknown"
+%unicode|string%(7) "Unknown"
 int(37)
 int(0)
 bool(true)
