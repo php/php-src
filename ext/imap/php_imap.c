@@ -1191,7 +1191,7 @@ PHP_FUNCTION(imap_reopen)
 	zval *streamind;
 	char *mailbox;
 	int mailbox_len;
-	long options = NULL, retries = NULL;
+	long options = 0, retries = 0;
 	pils *imap_le_struct; 
 	MAILSTREAM *imap_stream;
 	long flags=NIL;
@@ -1561,7 +1561,7 @@ PHP_FUNCTION(imap_body)
 	pils *imap_le_struct; 
 	int msgindex, argc = ZEND_NUM_ARGS();
 	char *body;
-	unsigned long body_len;
+	unsigned long body_len = 0;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &streamind, &msgno, &flags) == FAILURE) {
 		return;
@@ -2845,7 +2845,7 @@ PHP_FUNCTION(imap_setflag_full)
 	zval *streamind;
 	char *sequence, *flag;
 	int sequence_len, flag_len;
-	long flags = NULL;
+	long flags = 0;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|l", &streamind, &sequence, &sequence_len, &flag, &flag_len, &flags) == FAILURE) {
