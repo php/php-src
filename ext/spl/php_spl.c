@@ -315,17 +315,10 @@ PHP_FUNCTION(spl_autoload)
 		 * The "scope" is determined by an opcode, if it is ZEND_FETCH_CLASS we know function was called indirectly by
 		 * the Zend engine.
 		 */
-
-		char *sclass_name;
-		int sclass_name_len;
-
-		zend_unicode_to_string(ZEND_U_CONVERTER(UG(output_encoding_conv)), &sclass_name, &sclass_name_len, 
-				class_name.u, class_name_len);
-
 		if (active_opline->opcode != ZEND_FETCH_CLASS) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", sclass_name);
+			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %v could not be loaded", class_name.u);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", sclass_name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %v could not be loaded", class_name.u);
 		}
 	}
 } /* }}} */
