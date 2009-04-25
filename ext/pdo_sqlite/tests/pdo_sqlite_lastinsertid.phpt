@@ -1,5 +1,7 @@
 --TEST--
 PDO_sqlite: Testing lastInsertId()
+--SKIPIF--
+<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
 --FILE--
 <?php
 
