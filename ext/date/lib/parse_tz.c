@@ -49,7 +49,7 @@
 #define timelib_conv_int(l) ((l & 0x000000ff) << 24) + ((l & 0x0000ff00) << 8) + ((l & 0x00ff0000) >> 8) + ((l & 0xff000000) >> 24)
 #endif
 
-static void read_preamble(char **tzf, timelib_tzinfo *tz)
+static void read_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	/* skip ID */
 	*tzf += 4;
@@ -67,7 +67,7 @@ static void read_preamble(char **tzf, timelib_tzinfo *tz)
 	*tzf += 13;
 }
 
-static void read_header(char **tzf, timelib_tzinfo *tz)
+static void read_header(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	uint32_t buffer[6];
 
@@ -81,7 +81,7 @@ static void read_header(char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(buffer);
 }
 
-static void read_transistions(char **tzf, timelib_tzinfo *tz)
+static void read_transistions(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	int32_t *buffer = NULL;
 	uint32_t i;
@@ -110,7 +110,7 @@ static void read_transistions(char **tzf, timelib_tzinfo *tz)
 	tz->trans_idx = cbuffer;
 }
 
-static void read_types(char **tzf, timelib_tzinfo *tz)
+static void read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	unsigned char *buffer;
 	int32_t *leap_buffer;
@@ -191,7 +191,7 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 	}
 }
 
-static void read_location(char **tzf, timelib_tzinfo *tz)
+static void read_location(const unsigned char **tzf, timelib_tzinfo *tz)
 {
 	uint32_t buffer[3];
 	uint32_t comments_len;
@@ -317,11 +317,11 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
 	if (seek_to_tz_position(&tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
-		read_preamble((char**) &tzf, tmp);
-		read_header((char**) &tzf, tmp);
-		read_transistions((char**) &tzf, tmp);
-		read_types((char**) &tzf, tmp);
-		read_location((char**) &tzf, tmp);
+		read_preamble(&tzf, tmp);
+		read_header(&tzf, tmp);
+		read_transistions(&tzf, tmp);
+		read_types(&tzf, tmp);
+		read_location(&tzf, tmp);
 	} else {
 		tmp = NULL;
 	}
