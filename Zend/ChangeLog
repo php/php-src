@@ -1,3 +1,14 @@
+2009-04-24  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * tests/unicode_001.phpt:
+      Fix tests
+
+    * zend_vm_execute.h:
+      zend_vm_gen
+
+    * zend_vm_def.h:
+      Fix handling of unicode string offsets (tests/strings/bug22592.phpt)
+
 2009-04-22  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_3)
