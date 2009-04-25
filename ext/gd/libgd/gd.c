@@ -26,12 +26,10 @@ extern float floorf(float x);
 #endif
 #if HAVE_FABSF == 0
 /* float fabsf(float x); */
-# undef fabsf
 # define fabsf(x) ((float)(fabs(x)))
 #endif
 #if HAVE_FLOORF == 0
 /* float floorf(float x);*/
-# undef floorf
 # define floorf(x) ((float)(floor(x)))
 #endif
 
