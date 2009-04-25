@@ -1,5 +1,7 @@
 --TEST--
 Directory class behaviour.
+--SKIPIF--
+<?php if (!extension_loaded("reflection")) die("skip"); ?>
 --FILE--
 <?php
 /* 
