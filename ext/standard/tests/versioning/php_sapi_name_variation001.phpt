@@ -11,4 +11,4 @@ Testfest 2009 Munich
 echo php_sapi_name();
 ?>
 --EXPECT--
-cgi-fcgi
+cgi
