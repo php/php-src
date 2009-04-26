@@ -134,26 +134,6 @@ typedef php_ps_globals zend_ps_globals;
 extern zend_module_entry session_module_entry;
 #define phpext_session_ptr &session_module_entry
 
-PHP_FUNCTION(session_name);
-PHP_FUNCTION(session_module_name);
-PHP_FUNCTION(session_save_path);
-PHP_FUNCTION(session_id);
-PHP_FUNCTION(session_regenerate_id);
-PHP_FUNCTION(session_decode);
-PHP_FUNCTION(session_register);
-PHP_FUNCTION(session_unregister);
-PHP_FUNCTION(session_is_registered);
-PHP_FUNCTION(session_encode);
-PHP_FUNCTION(session_start);
-PHP_FUNCTION(session_destroy);
-PHP_FUNCTION(session_unset);
-PHP_FUNCTION(session_set_save_handler);
-PHP_FUNCTION(session_cache_expire);
-PHP_FUNCTION(session_cache_limiter);
-PHP_FUNCTION(session_set_cookie_params);
-PHP_FUNCTION(session_get_cookie_params);
-PHP_FUNCTION(session_write_close);
-
 #ifdef ZTS
 #define PS(v) TSRMG(ps_globals_id, php_ps_globals *, v)
 #else
@@ -229,7 +209,7 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT; \
 				zend_hash_move_forward(_ht)) {				\
 			if (key_type == HASH_KEY_IS_LONG) {                                             \
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld.", num_key); \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld", num_key); \
 				continue;                                                               \
 			}										\
 			key_length--;										\

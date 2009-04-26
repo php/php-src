@@ -35,8 +35,8 @@ session_destroy();
 --EXPECTF--
 <a href="/link?PHPSESSID=abtest">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in %s on line %d
+Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
 <a href="/link?PHPSESSID=abtest">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in %s on line %d
+Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
 <a href="/link?PHPSESSID=abtest">

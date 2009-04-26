@@ -100,63 +100,63 @@ ob_end_flush();
 -- Iteration 1 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0. in %s on line %d
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 2 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1. in %s on line %d
+Notice: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 3 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 12345. in %s on line %d
+Notice: session_encode(): Skipping numeric key 12345 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 4 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -2345. in %s on line %d
+Notice: session_encode(): Skipping numeric key -2345 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 5 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 10. in %s on line %d
+Notice: session_encode(): Skipping numeric key 10 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 6 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key -10. in %s on line %d
+Notice: session_encode(): Skipping numeric key -10 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 7 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key %s. in %s on line %d
+Notice: session_encode(): Skipping numeric key %s in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 8 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0. in %s on line %d
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 9 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0. in %s on line %d
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
@@ -173,28 +173,28 @@ bool(true)
 -- Iteration 12 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1. in %s on line %d
+Notice: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 13 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0. in %s on line %d
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 14 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 1. in %s on line %d
+Notice: session_encode(): Skipping numeric key 1 in %s on line %d
 bool(false)
 bool(true)
 
 -- Iteration 15 --
 bool(true)
 
-Notice: session_encode(): Skipping numeric key 0. in %s on line %d
+Notice: session_encode(): Skipping numeric key 0 in %s on line %d
 bool(false)
 bool(true)
 
@@ -245,7 +245,7 @@ bool(true)
 
 Strict Standards: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: session_encode(): Skipping numeric key %d. in %s on line %d
+Notice: session_encode(): Skipping numeric key %d in %s on line %d
 bool(false)
 bool(true)
 Done
