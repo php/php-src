@@ -1104,25 +1104,6 @@ PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "IMAP c-Client Version", CCLIENTVERSION);
-#if HAVE_IMAP2007e
-	php_info_print_table_row(2, "IMAP c-Client Version", "2007e");
-#elif HAVE_IMAP2007d
-	php_info_print_table_row(2, "IMAP c-Client Version", "2007d");
-#elif HAVE_IMAP2007b
-	php_info_print_table_row(2, "IMAP c-Client Version", "2007b");
-#elif HAVE_IMAP2007a
-	php_info_print_table_row(2, "IMAP c-Client Version", "2007a");
-#elif HAVE_IMAP2004
-	php_info_print_table_row(2, "IMAP c-Client Version", "2004");
-#elif HAVE_IMAP2001
-	php_info_print_table_row(2, "IMAP c-Client Version", "2001");
-#elif HAVE_IMAP2000
-	php_info_print_table_row(2, "IMAP c-Client Version", "2000");
-#elif defined(IMAP41)
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");
-#else
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.0");
-#endif
 #if HAVE_IMAP_SSL
 	php_info_print_table_row(2, "SSL Support", "enabled");
 #endif
