@@ -65,7 +65,7 @@ derived::dPro = dPro
 derived::xPro = nPub
 derived::dPri = dPri
 derived::xPri = nPri
-derived::rPub = rPub
-derived::rPro = rPro
-derived::stat = rStat
+root::rPub = rPub
+root::rPro = rPro
+root::stat = rStat
 ===DONE===
