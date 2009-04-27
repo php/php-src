@@ -61,17 +61,21 @@ if test "$PHP_XMLRPC" != "no"; then
     fi
   fi
 
-  if test "$PHP_ICONV_DIR" != "no"; then
-    PHP_ICONV=$PHP_ICONV_DIR
-  fi
+  dnl if iconv is shared or missing then we should build iconv ourselves
+  if test "$PHP_ICONV_SHARED" = "yes" || test "$PHP_ICONV" = "no"; then
+
+    if test "$PHP_ICONV_DIR" != "no"; then
+      PHP_ICONV=$PHP_ICONV_DIR
+    fi
   
-  if test -z "$PHP_ICONV" || test "$PHP_ICONV" = "no"; then
-    PHP_ICONV=yes
-  fi
+    if test -z "$PHP_ICONV" || test "$PHP_ICONV" = "no"; then
+      PHP_ICONV=yes
+    fi
   
-  PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
-    AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
-  ])
+    PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
+      AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
+    ])
+  fi
 fi
 
 if test "$PHP_XMLRPC" = "yes"; then
