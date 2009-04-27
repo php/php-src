@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   disable this behaviour using "http"=>array("auto_decode"=>0) in stream
   context. (Dmitry)
 
+- Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
 - Fixed bug #48023 (spl_autoload_register didn't store closures). (Etienne)
 - Fixed bug #48004 (Error handler prevents creation of default object).
