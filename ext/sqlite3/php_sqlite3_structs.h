@@ -68,6 +68,7 @@ typedef struct _php_sqlite3_db_object  {
 	int initialised;
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
+	zend_bool exception;
 
 	zend_llist free_list;
 } php_sqlite3_db_object;
