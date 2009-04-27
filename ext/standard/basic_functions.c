@@ -4777,7 +4777,9 @@ PHP_FUNCTION(call_user_method)
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE_P(callback), Z_UNIVAL_P(callback));
 	}
-	efree(params);
+	if (n_params) {
+		efree(params);
+	}
 }
 /* }}} */
 
