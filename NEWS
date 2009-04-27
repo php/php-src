@@ -1,9 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 RC 2
-- Undeprecated ticks. (Arnaud)
 - Upgraded bundled sqlite to version 3.6.13. (Ilia)
 - Upgraded bundled PCRE to version 7.9. (Nuno)
+
+- Undeprecated ticks. (Arnaud)
+
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
 - Added "dechunk" filter which can decode HTTP responses with chunked
@@ -33,8 +35,6 @@ PHP                                                                        NEWS
 - Fixed bug #47714 (autoloading classes inside exception_handler leads to
   crashes). (Dmitry)
 - Fixed bug #47699 (autoload and late static binding). (Dmitry)
-- Fixed bug #47695 (build error when xmlrpc and iconv are compiled
-  against different iconv versions). (Scott)
 - Fixed bug #47662 (Support more than 127 subpatterns in preg_match). (Nuno)
 - Fixed bug #47596 (Bus error on parsing file). (Dmitry)
 - Fixed bug #47560 (explode()'s limit parameter odd behaviour). (Matt)
