@@ -156,71 +156,71 @@ Modifiers for method TestClass::__autoload():
 int(65792)
 
 
-Modifiers for method DerivedClass::foo():
+Modifiers for method TestClass::foo():
 int(65792)
 
 
-Modifiers for method DerivedClass::stat():
+Modifiers for method TestClass::stat():
 int(257)
 
 
-Modifiers for method DerivedClass::priv():
+Modifiers for method TestClass::priv():
 int(66560)
 
 
-Modifiers for method DerivedClass::prot():
+Modifiers for method TestClass::prot():
 int(66048)
 
 
-Modifiers for method DerivedClass::fin():
+Modifiers for method TestClass::fin():
 int(65796)
 
 
-Modifiers for method DerivedClass::__destruct():
+Modifiers for method TestClass::__destruct():
 int(16640)
 
 
-Modifiers for method DerivedClass::__call():
+Modifiers for method TestClass::__call():
 int(256)
 
 
-Modifiers for method DerivedClass::__clone():
+Modifiers for method TestClass::__clone():
 int(33024)
 
 
-Modifiers for method DerivedClass::__get():
+Modifiers for method TestClass::__get():
 int(256)
 
 
-Modifiers for method DerivedClass::__set():
+Modifiers for method TestClass::__set():
 int(256)
 
 
-Modifiers for method DerivedClass::__unset():
+Modifiers for method TestClass::__unset():
 int(256)
 
 
-Modifiers for method DerivedClass::__isset():
+Modifiers for method TestClass::__isset():
 int(256)
 
 
-Modifiers for method DerivedClass::__tostring():
+Modifiers for method TestClass::__tostring():
 int(256)
 
 
-Modifiers for method DerivedClass::__sleep():
+Modifiers for method TestClass::__sleep():
 int(65792)
 
 
-Modifiers for method DerivedClass::__wakeup():
+Modifiers for method TestClass::__wakeup():
 int(65792)
 
 
-Modifiers for method DerivedClass::__set_state():
+Modifiers for method TestClass::__set_state():
 int(65792)
 
 
-Modifiers for method DerivedClass::__autoload():
+Modifiers for method TestClass::__autoload():
 int(65792)
 
 
