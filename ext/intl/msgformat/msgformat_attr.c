@@ -33,7 +33,6 @@
  */
 PHP_FUNCTION( msgfmt_get_pattern )
 {
-	UChar  value_buf[64];
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
