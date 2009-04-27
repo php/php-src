@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   (crrodriguez at opensuse dot org, Ilia)
 - Fixed bug #47704 (PHP crashes on some "bad" operations with string offsets).
   (Dmitry)
+- Fixed bug #47695 (build error when xmlrpc and iconv are compiled
+  against different iconv versions). (Scott)
 - Fixed bug #47667 (ZipArchive::OVERWRITE seems to have no effect).
   (Mikko, Pierre)
 - Fixed bug #47644 (Valid integers are truncated with json_decode()). (Scott)
