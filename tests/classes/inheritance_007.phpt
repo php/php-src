@@ -21,17 +21,17 @@ $b->b();
 array(2) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [%u|b%"name"]=>
-    %string|unicode%(1) "B"
-    [%u|b%"class"]=>
-    %string|unicode%(1) "B"
+    ["name"]=>
+    string(1) "B"
+    ["class"]=>
+    string(1) "B"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [%u|b%"name"]=>
-    %string|unicode%(1) "A"
-    [%u|b%"class"]=>
-    %string|unicode%(1) "B"
+    ["name"]=>
+    string(1) "A"
+    ["class"]=>
+    string(1) "B"
   }
 }
 In A::A
