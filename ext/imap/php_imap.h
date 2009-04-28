@@ -115,6 +115,7 @@ PHP_FUNCTION(imap_body);
 PHP_FUNCTION(imap_fetchstructure);
 PHP_FUNCTION(imap_fetchbody);
 PHP_FUNCTION(imap_savebody);
+PHP_FUNCTION(imap_gc);
 PHP_FUNCTION(imap_expunge);
 PHP_FUNCTION(imap_delete);
 PHP_FUNCTION(imap_undelete);
