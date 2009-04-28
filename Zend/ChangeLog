@@ -1,3 +1,10 @@
+2009-04-27  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      FlexLexer.h
+      flex.skl:
+      - MFH: Fixed bug #47254 (Wrong Reflection for extends class)
+
 2009-04-24  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * tests/unicode_001.phpt:
