@@ -167,6 +167,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_expunge, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_gc, 0, 0, 1)
+	ZEND_ARG_INFO(0, stream_id)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_close, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_INFO(0, options)
@@ -468,6 +473,7 @@ const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_savebody,							arginfo_imap_savebody)
 	PHP_FE(imap_fetchheader,						arginfo_imap_fetchheader)
 	PHP_FE(imap_fetchstructure,						arginfo_imap_fetchstructure)
+	PHP_FE(imap_gc,										arginfo_imap_gc)
 	PHP_FE(imap_expunge,							arginfo_imap_expunge)
 	PHP_FE(imap_delete,								arginfo_imap_delete)
 	PHP_FE(imap_undelete,							arginfo_imap_undelete)
@@ -1025,6 +1031,15 @@ PHP_MINIT_FUNCTION(imap)
 	ENCOTHER                unknown
 	*/
 
+	REGISTER_LONG_CONSTANT("IMAP_GC_ELT", GC_ELT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_GC_ENV", GC_ENV , CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_GC_TEXTS", GC_TEXTS , CONST_PERSISTENT | CONST_CS);
+	/*
+	GC_ELT                 message cache elements
+	GC_ENV                 ENVELOPEs and BODYs
+	GC_TEXTS               texts
+	*/
+
 	le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 	return SUCCESS;
 }
@@ -1463,6 +1478,31 @@ PHP_FUNCTION(imap_expunge)
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	mail_expunge (imap_le_struct->imap_stream);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool imap_gc(resource stream_id, int flags)
+   This function garbage collects (purges) the cache of entries of a specific type. */
+PHP_FUNCTION(imap_gc)
+{
+	zval *streamind;
+	pils *imap_le_struct;
+	long flags;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &streamind, &flags) == FAILURE) {
+		return;
+	}
+
+	if (flags && ((flags & ~(GC_TEXTS | GC_ELT | GC_ENV)) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
+
+	mail_gc(imap_le_struct->imap_stream, flags);
 
 	RETURN_TRUE;
 }
