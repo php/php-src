@@ -275,7 +275,7 @@ static inline int add_next_index_object(zval *arg, zval *tmp TSRMLS_DC)
  */
 FOBJECTLIST *mail_newfolderobjectlist(void)
 {
-  return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
+	return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
 }
 /* }}} */
 
@@ -1150,11 +1150,11 @@ PHP_FUNCTION(imap_close)
 		convert_to_long_ex(options);
 		flags = Z_LVAL_PP(options);
 
-                /* Check that flags is exactly equal to PHP_EXPUNGE or Zero*/
-                if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
-                        php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
-                         RETURN_FALSE;
-                }
+		/* Check that flags is exactly equal to PHP_EXPUNGE or Zero*/
+		if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
+			RETURN_FALSE;
+		}
 
 		/* Do the translation from PHP's internal PHP_EXPUNGE define to c-client's CL_EXPUNGE */
 		if (flags & PHP_EXPUNGE) {
@@ -1242,10 +1242,10 @@ PHP_FUNCTION(imap_body)
 	if (myargc == 3) {
 		convert_to_long_ex(pflags);
 		flags = Z_LVAL_PP(pflags);
-	        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-       	       		RETURN_FALSE;
-       		}
+		if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+			RETURN_FALSE;
+		}
 	}
 
 	if ((myargc == 3) && (flags & FT_UID)) {
@@ -1881,10 +1881,10 @@ PHP_FUNCTION(imap_fetchstructure)
 		convert_to_long_ex(pflags);
 		flags = Z_LVAL_PP(pflags);
 
-	        if (flags && ((flags & ~FT_UID) != 0)) {
-       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-       	        	RETURN_FALSE;
-       		}
+		if (flags && ((flags & ~FT_UID) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+			RETURN_FALSE;
+		}
 	}
 
 	object_init(return_value);
@@ -1917,7 +1917,7 @@ PHP_FUNCTION(imap_fetchbody)
 	zval **streamind, **msgno, **sec, **pflags;
 	pils *imap_le_struct;
 	char *body;
-        long flags=0L;
+	long flags=0L;
 	unsigned long len;
 	int myargc=ZEND_NUM_ARGS();
 
@@ -1933,10 +1933,10 @@ PHP_FUNCTION(imap_fetchbody)
 	if (myargc == 4) {
 		convert_to_long_ex(pflags);
 		flags = Z_LVAL_PP(pflags);
- 		if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-                	RETURN_FALSE;
-       		 }
+		if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+			RETURN_FALSE;
+		}
 	}
 
 	if (myargc < 4 || !(flags & FT_UID)) {
@@ -2690,7 +2690,7 @@ PHP_FUNCTION(imap_fetchheader)
 	zval **streamind, **msgno, **pflags;
 	pils *imap_le_struct;
 	int msgindex, myargc = ZEND_NUM_ARGS();
-        long flags=0L;
+	long flags=0L;
 
 	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &pflags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -2701,12 +2701,12 @@ PHP_FUNCTION(imap_fetchheader)
 	convert_to_long_ex(msgno);
 	if (myargc == 3) {
 		convert_to_long_ex(pflags);
-                flags =  Z_LVAL_PP(pflags);
-	        if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
-       	        	php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-       	        	RETURN_FALSE;
+		flags =  Z_LVAL_PP(pflags);
+		if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+			RETURN_FALSE;
 		}
-        }
+	}
 
 
 	if ((myargc == 3) && (flags & FT_UID)) {
@@ -2950,9 +2950,9 @@ PHP_FUNCTION(imap_fetch_overview)
 	if(myargc == 3) {
 		convert_to_long_ex(pflags);
 		flags = Z_LVAL_PP(pflags);
-                if (flags && ((flags & ~FT_UID) != 0)) {
+		if (flags && ((flags & ~FT_UID) != 0)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-		 	RETURN_FALSE;
+			RETURN_FALSE;
 		}
 	}
 
