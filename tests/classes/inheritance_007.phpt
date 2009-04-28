@@ -24,14 +24,14 @@ array(2) {
     ["name"]=>
     string(1) "B"
     ["class"]=>
-    string(1) "B"
+    string(1) "A"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(1) "A"
     ["class"]=>
-    string(1) "B"
+    string(1) "A"
   }
 }
 In A::A
