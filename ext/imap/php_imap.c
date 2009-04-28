@@ -1526,11 +1526,11 @@ PHP_FUNCTION(imap_close)
 	if (argc == 2) {
 		flags = options;
 
-                /* Check that flags is exactly equal to PHP_EXPUNGE or zero */
-                if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
-                        php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
-                         RETURN_FALSE;
-                }
+		/* Check that flags is exactly equal to PHP_EXPUNGE or zero */
+		if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the flags parameter");
+			RETURN_FALSE;
+		}
 
 		/* Do the translation from PHP's internal PHP_EXPUNGE define to c-client's CL_EXPUNGE */
 		if (flags & PHP_EXPUNGE) {
@@ -1611,11 +1611,10 @@ PHP_FUNCTION(imap_body)
 		return;
 	}
 
-        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-                RETURN_FALSE;
-        }
-
+	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2214,10 +2213,10 @@ PHP_FUNCTION(imap_fetchstructure)
 		return;
 	}
 
-        if (flags && ((flags & ~FT_UID) != 0)) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-                RETURN_FALSE;
-        }
+	if (flags && ((flags & ~FT_UID) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2264,11 +2263,10 @@ PHP_FUNCTION(imap_fetchbody)
 		return;
 	}
 
-        if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-                RETURN_FALSE;
-        }
-
+	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2997,10 +2995,10 @@ PHP_FUNCTION(imap_fetchheader)
 		return;
 	}
 
-        if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
-                RETURN_FALSE;
-        }
+	if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid value for the options parameter");
+		RETURN_FALSE;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
