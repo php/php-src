@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
 - Fixed segfault on invalid session.save_path. (Hannes)
+- Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
 - Fixed bug #47997 (stream_copy_to_stream returns 1 on empty streams). (Arnaud)
 - Fixed bug #47991 (SSL streams fail if error stack contains items). (Mikko)
@@ -16,8 +17,6 @@ PHP                                                                        NEWS
 - Fixed bug #47969 (ezmlm_hash() returns different values depend on OS).
   (Ilia)
 - Fixed bug #47946 (ImageConvolution overwrites background). (Ilia)
-- Fixed bug #47940, (memory leak imap_body()). 
-  (jake dot levitt at mailtrust dot com, Pierre)
 - Fixed bug #47937 (system() calls sapi_flush() regardless of output
   buffering). (Ilia)
 - Fixed bug #47903 ("@" operator does not work with string offsets). (Felipe)
