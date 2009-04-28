@@ -89,6 +89,13 @@
 
 #include "SAPI.h"
 #include "rfc1867.h"
+
+#if HAVE_SYS_MMAN_H
+# include <sys/mman.h>
+# ifndef PAGE_SIZE
+#  define PAGE_SIZE 4096
+# endif
+#endif
 /* }}} */
 
 PHPAPI int (*php_register_internal_extensions_func)(TSRMLS_D) = php_register_internal_extensions;
@@ -1134,8 +1141,10 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		handle->handle.stream.isatty  = 0;
 		/* can we mmap immeadiately? */
 		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
-		len = php_zend_stream_fsizer(stream TSRMLS_CC) + ZEND_MMAP_AHEAD;
-		if (php_stream_mmap_possible(stream)
+		len = php_zend_stream_fsizer(stream TSRMLS_CC);
+		if (len != 0
+		&& ((len - 1) % PAGE_SIZE) <= PAGE_SIZE - ZEND_MMAP_AHEAD
+		&& php_stream_mmap_possible(stream)
 		&& (p = php_stream_mmap_range(stream, 0, len, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped_len)) != NULL) {
 			handle->handle.stream.closer   = php_zend_stream_mmap_closer;
 			handle->handle.stream.mmap.buf = p;
