@@ -114,19 +114,19 @@ fclose($res);
 *** Testing ip2long() : usage variation ***
 
 --int 0--
-int(0)
+bool(false)
 
 --int 1--
-int(1)
+bool(false)
 
 --int 12345--
-int(12345)
+bool(false)
 
 --int -12345--
 bool(false)
 
 --float 10.5--
-int(167772165)
+bool(false)
 
 --float -10.5--
 bool(false)
@@ -138,7 +138,7 @@ bool(false)
 bool(false)
 
 --float .5--
-int(5)
+bool(false)
 
 --empty array--
 Error: 2 - ip2long() expects parameter 1 to be binary string, array given, %s(%d)
@@ -163,13 +163,13 @@ bool(false)
 bool(false)
 
 --lowercase true--
-int(1)
+bool(false)
 
 --lowercase false--
 bool(false)
 
 --uppercase TRUE--
-int(1)
+bool(false)
 
 --uppercase FALSE--
 bool(false)
