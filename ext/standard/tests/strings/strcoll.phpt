@@ -11,7 +11,8 @@ Testfest 2009 Munich
  $b = 'A';
 
 setlocale (LC_COLLATE, 'C');
-print "C: " . strcoll ($a, $b) . "\n"; // prints 1
+print "C: " . strcoll ($a, $b) . "\n"; // prints 32
 ?>
---EXPECT--
-C: 1
+--EXPECTF--
+Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+C: -1
