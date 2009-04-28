@@ -76,6 +76,7 @@ static const filter_list_entry filter_list[] = {
 #endif
 
 static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
+static unsigned int php_sapi_filter_init(TSRMLS_D);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_input, 0, 0, 2)
@@ -270,7 +271,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
 
-	sapi_register_input_filter(php_sapi_filter);
+	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
 	return SUCCESS;
 }
@@ -338,6 +339,17 @@ static filter_list_entry php_find_filter(long id) /* {{{ */
 	return filter_list[0];
 }
 /* }}} */
+
+static unsigned int php_sapi_filter_init(TSRMLS_D)
+{
+	IF_G(get_array) = NULL;
+	IF_G(post_array) = NULL;
+	IF_G(cookie_array) = NULL;
+	IF_G(server_array) = NULL;
+	IF_G(env_array) = NULL;
+	IF_G(session_array) = NULL;
+	return SUCCESS;
+}
 
 static void php_zval_filter(zval **value, long filter, long flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {

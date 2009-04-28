@@ -345,6 +345,9 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 			sapi_module.activate(TSRMLS_C);
 		}
 	}
+	if (sapi_module.input_filter_init ) {
+		sapi_module.input_filter_init(TSRMLS_C);
+	}
 }
 
 /*
@@ -410,6 +413,9 @@ SAPI_API void sapi_activate(TSRMLS_D)
 		if (sapi_module.activate) {
 			sapi_module.activate(TSRMLS_C);
 		}
+	}
+	if (sapi_module.input_filter_init ) {
+		sapi_module.input_filter_init(TSRMLS_C);
 	}
 }
 
@@ -852,13 +858,14 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC))
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D))
 {
 	TSRMLS_FETCH();
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
 	sapi_module.input_filter = input_filter;
+	sapi_module.input_filter_init = input_filter_init;
 	return SUCCESS;
 }
 
