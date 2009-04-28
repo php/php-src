@@ -4329,37 +4329,44 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 /* }}} */
 #endif /* HAVE_INET_PTON */
 
-
-
 /* {{{ proto int ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
-	zval **str;
+	char *addr;
+	int addr_len;
+#ifdef HAVE_INET_PTON
+	struct in_addr ip;
+#else
 	unsigned long int ip;
+#endif
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(str);
-
-	if (Z_STRLEN_PP(str) == 0 || (ip = inet_addr(Z_STRVAL_PP(str))) == INADDR_NONE) {
-		/* the only special case when we should return -1 ourselves,
-		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-		 * not -1 or ~0 because of 32/64bit issues.
-		 */
-		if (Z_STRLEN_PP(str) == sizeof("255.255.255.255") - 1 &&
-			!memcmp(Z_STRVAL_PP(str), "255.255.255.255", sizeof("255.255.255.255") - 1)) {
-			RETURN_LONG(0xFFFFFFFF);
-		}
-		
+#ifdef HAVE_INET_PTON
+	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
-
+	RETURN_LONG(ntohl(ip.s_addr));
+#else
+	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
+		/* The only special case when we should return -1 ourselves,
+		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
+		 * not -1 or ~0 because of 32/64bit issues. */
+		if (addr_len == sizeof("255.255.255.255") - 1 &&
+			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
+		) {
+			RETURN_LONG(0xFFFFFFFF);
+		}
+		RETURN_FALSE;
+	}
 	RETURN_LONG(ntohl(ip));
+#endif
 }
 /* }}} */
+
 
 /* {{{ proto string long2ip(int proper_address)
    Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
