@@ -832,7 +832,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
 
-		if (entry->uncompressed_filesize != php_stream_copy_to_stream(efp, entry->cfp, entry->uncompressed_filesize)) {
+		if (SUCCESS != phar_stream_copy_to_stream(efp, entry->cfp, entry->uncompressed_filesize, NULL)) {
 			spprintf(p->error, 0, "unable to copy compressed file contents of file \"%s\" while creating new phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -936,7 +936,7 @@ continue_dir:
 
 	if (!not_really_modified && entry->is_modified) {
 		if (entry->cfp) {
-			if (entry->compressed_filesize != php_stream_copy_to_stream(entry->cfp, p->filefp, entry->compressed_filesize)) {
+			if (SUCCESS != phar_stream_copy_to_stream(entry->cfp, p->filefp, entry->compressed_filesize, NULL)) {
 				spprintf(p->error, 0, "unable to write compressed contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 				return ZEND_HASH_APPLY_STOP;
 			}
@@ -950,7 +950,7 @@ continue_dir:
 
 			phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC);
 
-			if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), p->filefp, entry->uncompressed_filesize)) {
+			if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), p->filefp, entry->uncompressed_filesize, NULL)) {
 				spprintf(p->error, 0, "unable to write contents of file \"%s\" in zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 				return ZEND_HASH_APPLY_STOP;
 			}
@@ -976,7 +976,7 @@ continue_dir:
 			}
 		}
 
-		if (!entry->is_dir && entry->compressed_filesize && entry->compressed_filesize != php_stream_copy_to_stream(p->old, p->filefp, entry->compressed_filesize)) {
+		if (!entry->is_dir && entry->compressed_filesize && SUCCESS != phar_stream_copy_to_stream(p->old, p->filefp, entry->compressed_filesize, NULL)) {
 			spprintf(p->error, 0, "unable to copy contents of file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
 			return ZEND_HASH_APPLY_STOP;
 		}
@@ -1240,11 +1240,15 @@ nocentralerror:
 	PHAR_SET_32(eocd.cdir_offset, cdir_offset);
 	php_stream_seek(pass.centralfp, 0, SEEK_SET);
 
-	if (cdir_size != php_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL)) {
-		if (error) {
-			spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
+	{
+		size_t len;
+		int ret = phar_stream_copy_to_stream(pass.centralfp, pass.filefp, PHP_STREAM_COPY_ALL, &len);
+		if (SUCCESS != ret || len != cdir_size) {
+			if (error) {
+				spprintf(error, 4096, "phar zip flush of \"%s\" failed: unable to write central-directory", phar->fname);
+			}
+			goto temperror;
 		}
-		goto temperror;
 	}
 
 	php_stream_close(pass.centralfp);
@@ -1311,7 +1315,7 @@ nocentralerror:
 			return EOF;
 		}
 		php_stream_rewind(pass.filefp);
-		php_stream_copy_to_stream(pass.filefp, phar->fp, PHP_STREAM_COPY_ALL);
+		phar_stream_copy_to_stream(pass.filefp, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 		/* we could also reopen the file in "rb" mode but there is no need for that */
 		php_stream_close(pass.filefp);
 	}
