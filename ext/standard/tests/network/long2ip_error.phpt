@@ -27,11 +27,11 @@ var_dump( long2ip($proper_address, $extra_arg) );
 
 -- Testing long2ip() function with Zero arguments --
 
-Warning: Wrong parameter count for long2ip() in %s on line %d
+Warning: long2ip() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing long2ip() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for long2ip() in %s on line %d
+Warning: long2ip() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 ===DONE===

@@ -126,20 +126,20 @@ string(15) "255.255.255.246"
 string(7) "0.0.0.0"
 
 --empty array--
-Error: 8 - Array to string conversion, %s(%d)
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --int indexed array--
-Error: 8 - Array to string conversion, %s(%d)
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --associative array--
-Error: 8 - Array to string conversion, %s(%d)
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 --uppercase NULL--
 string(7) "0.0.0.0"
@@ -181,9 +181,8 @@ string(7) "0.0.0.0"
 string(7) "0.0.0.0"
 
 --instance of classWithoutToString--
-Error: 4096 - Object of class classWithoutToString could not be converted to string, %s(%d)
-Error: 8 - Object of class classWithoutToString to string conversion, %s(%d)
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, object given, %s(%d)
+NULL
 
 --undefined var--
 string(7) "0.0.0.0"
@@ -192,5 +191,6 @@ string(7) "0.0.0.0"
 string(7) "0.0.0.0"
 
 --resource--
-string(7) "0.0.0.0"
+Error: 2 - long2ip() expects parameter 1 to be string, resource given, %s(%d)
+NULL
 ===DONE===
