@@ -893,7 +893,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 		link = source;
 	}
 
-	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), dest->fp, link->uncompressed_filesize)) {
+	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), dest->fp, link->uncompressed_filesize, NULL)) {
 		php_stream_close(dest->fp);
 		dest->fp_type = PHAR_FP;
 		if (error) {
@@ -994,7 +994,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	php_stream_filter_append(&ufp->writefilters, filter);
 	php_stream_seek(phar_get_entrypfp(entry TSRMLS_CC), phar_get_fp_offset(entry TSRMLS_CC), SEEK_SET);
 
-	if (php_stream_copy_to_stream(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize) != entry->compressed_filesize) {
+	if (SUCCESS != phar_stream_copy_to_stream(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize, NULL)) {
 		spprintf(error, 4096, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		return FAILURE;
@@ -1131,7 +1131,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 		link = entry;
 	}
 
-	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize)) {
+	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
 		}
