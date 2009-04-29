@@ -11,8 +11,11 @@ Testfest 2009 Munich
  $b = 'A';
 
 setlocale (LC_COLLATE, 'C');
-print "C: " . strcoll ($a, $b) . "\n"; // prints 32
+$result = strcoll($a, $b);
+if($result > 0) {
+	echo "Pass\n";
+}
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-C: -1
+--EXPECT--
+Pass
+
