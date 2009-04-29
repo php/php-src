@@ -521,6 +521,23 @@ extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TS
 # endif
 #endif
 
+#if PHP_VERSION_ID < 50209
+static inline size_t phar_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
+{
+	size_t ret = php_stream_copy_to_stream(src, dest, maxlen);
+	if (len) {
+		*len = ret;
+	}
+	if (ret) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+#else
+# define phar_stream_copy_to_stream(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
+
+#endif
+
 #if PHP_VERSION_ID >= 60000
 typedef zstr phar_zstr;
 #define PHAR_STR(a, b)	\

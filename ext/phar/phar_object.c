@@ -298,23 +298,31 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 
 				zend_try {
 					zend_execute(new_op_array TSRMLS_CC);
+					if (PHAR_G(cwd)) {
+						efree(PHAR_G(cwd));
+						PHAR_G(cwd) = NULL;
+						PHAR_G(cwd_len) = 0;
+					}
+
+					PHAR_G(cwd_init) = 0;
+					efree(name);
+					destroy_op_array(new_op_array TSRMLS_CC);
+					efree(new_op_array);
+
+
+					if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
+						zval_ptr_dtor(EG(return_value_ptr_ptr));
+					}
 				} zend_catch {
+					if (PHAR_G(cwd)) {
+						efree(PHAR_G(cwd));
+						PHAR_G(cwd) = NULL;
+						PHAR_G(cwd_len) = 0;
+					}
+
+					PHAR_G(cwd_init) = 0;
+					efree(name);
 				} zend_end_try();
-				destroy_op_array(new_op_array TSRMLS_CC);
-				efree(new_op_array);
-
-				if (PHAR_G(cwd)) {
-					efree(PHAR_G(cwd));
-					PHAR_G(cwd) = NULL;
-					PHAR_G(cwd_len) = 0;
-				}
-
-				PHAR_G(cwd_init) = 0;
-				efree(name);
-
-				if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-					zval_ptr_dtor(EG(return_value_ptr_ptr));
-				}
 
 				zend_bailout();
 			}
@@ -1414,7 +1422,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	uint str_key_len, base_len = p_obj->l, fname_len;
 	phar_entry_data *data;
 	php_stream *fp;
-	long contents_len;
+	size_t contents_len;
 	char *fname, *error = NULL, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
 	phar_zstr key;
 	char *str_key;
@@ -1716,7 +1724,7 @@ after_open_fp:
 		data->internal_file->fp_type = PHAR_UFP;
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
-		contents_len = php_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL);
+		phar_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 	}
@@ -1998,7 +2006,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 		link = entry;
 	}
 
-	if (link->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize)) {
+	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
@@ -3560,7 +3568,7 @@ PHP_METHOD(Phar, offsetGet)
 static void phar_add_file(phar_archive_data **pphar, char *filename, int filename_len, char *cont_str, int cont_len, zval *zresource TSRMLS_DC)
 {
 	char *error;
-	long contents_len;
+	size_t contents_len;
 	phar_entry_data *data;
 	php_stream *contents_file;
 
@@ -3594,7 +3602,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", filename);
 					return;
 				}
-				contents_len = php_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL);
+				phar_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
 
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
@@ -4151,7 +4159,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return FAILURE;
 	}
 
-	if (entry->uncompressed_filesize != php_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize)) {
+	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize, NULL)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
