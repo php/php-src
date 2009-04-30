@@ -57,7 +57,7 @@ PHP                                                                        NEWS
 - Fixed bug #47254 (Wrong Reflection for extends class). (Felipe)
 - Fixed bug #46882 (Serialize / Unserialize misbehaviour under OS with
   different bit numbers). (Matt)
-- Fixed bug #45997 (safe_mode bypass with exec/sytem/passthru (windows only)).
+- Fixed bug #45997 (safe_mode bypass with exec/system/passthru (windows only)).
   (Pierre)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
