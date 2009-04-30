@@ -1,5 +1,7 @@
 --TEST--
 Bug #45161 (Reusing a curl handle leaks memory)
+--SKIPIF--
+<?php $curl_version = curl_version(); if ($curl_version['version_number'] < 0x071100) die("skip: test works only with curl >= 7.17.0"); ?>
 --FILE--
 <?php
 
