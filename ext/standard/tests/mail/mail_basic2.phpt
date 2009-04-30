@@ -1,12 +1,12 @@
 --TEST--
 Test mail() function : basic functionality 
---INI--
-sendmail_path=echo --- > mailBasic2.out
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Won't run on Windows");
 ?>
+--INI--
+sendmail_path="echo --- > /tmp/php_test_mailBasic2.out"
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
@@ -24,7 +24,7 @@ $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = 'KHeaders';
 $additional_parameters = "Extras";
-$outFile = "mailBasic2.out";
+$outFile = "/tmp/php_test_mailBasic2.out";
 @unlink($outFile);
 
 echo "-- extra parameters --\n";
@@ -37,7 +37,7 @@ var_dump( mail($to, $subject, $message, $additional_headers, $additional_paramet
 
 sleep(5);
 echo file_get_contents($outFile);
-//unlink($outFile);
+unlink($outFile);
 ?>
 ===DONE===
 --EXPECT--
