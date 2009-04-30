@@ -175,7 +175,7 @@ stmt_retry:
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (!strcmp(sqlstate, "42P05")) {
-						char buf[100]; /* stmt_name == "pdo_pgsql_cursor_%08x" */
+						char buf[100]; /* stmt_name == "pdo_crsr_%016lx" */
 						PGresult *res;
 						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
 						res = PQexec(H->server, buf);
@@ -467,110 +467,6 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-/* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
-   Renamed to php_pdo_pgsql_unescape_bytea() */
-/*
- *		PQunescapeBytea - converts the null terminated string representation
- *		of a bytea, strtext, into binary, filling a buffer. It returns a
- *		pointer to the buffer which is NULL on error, and the size of the
- *		buffer in retbuflen. The pointer may subsequently be used as an
- *		argument to the function free(3). It is the reverse of PQescapeBytea.
- *
- *		The following transformations are reversed:
- *		'\0' == ASCII  0 == \000
- *		'\'' == ASCII 39 == \'
- *		'\\' == ASCII 92 == \\
- *
- *		States:
- *		0	normal		0->1->2->3->4
- *		1	\			   1->5
- *		2	\0			   1->6
- *		3	\00
- *		4	\000
- *		5	\'
- *		6	\\
- */
-static unsigned char *php_pdo_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
-{
-	size_t		buflen;
-	unsigned char *buffer,
-			   *sp,
-			   *bp;
-	unsigned int state = 0;
-
-	if (strtext == NULL)
-		return NULL;
-	buflen = strlen(strtext);	/* will shrink, also we discover if
-								 * strtext */
-	buffer = (unsigned char *) emalloc(buflen);	/* isn't NULL terminated */
-	for (bp = buffer, sp = strtext; *sp != '\0'; bp++, sp++)
-	{
-		switch (state)
-		{
-			case 0:
-				if (*sp == '\\')
-					state = 1;
-				*bp = *sp;
-				break;
-			case 1:
-				if (*sp == '\'')	/* state=5 */
-				{				/* replace \' with 39 */
-					bp--;
-					*bp = '\'';
-					buflen--;
-					state = 0;
-				}
-				else if (*sp == '\\')	/* state=6 */
-				{				/* replace \\ with 92 */
-					bp--;
-					*bp = '\\';
-					buflen--;
-					state = 0;
-				}
-				else
-				{
-					if (isdigit(*sp))
-						state = 2;
-					else
-						state = 0;
-					*bp = *sp;
-				}
-				break;
-			case 2:
-				if (isdigit(*sp))
-					state = 3;
-				else
-					state = 0;
-				*bp = *sp;
-				break;
-			case 3:
-				if (isdigit(*sp))		/* state=4 */
-				{
-					unsigned char *start, *end, buf[4]; /* 000 + '\0' */
-					
-					bp -= 3;
-					memcpy(buf, sp-2, 3);
-					buf[3] = '\0';
-					start = buf;
- 					*bp = (unsigned char)strtoul(start, (char **)&end, 8);
-					buflen -= 3;
-					state = 0;
-				}
-				else
-				{
-					*bp = *sp;
-					state = 0;
-				}
-				break;
-		}
-	}
-	buffer = erealloc(buffer, buflen+1);
-	buffer[buflen] = '\0';
-
-	*retbuflen = buflen;
-	return buffer;
-}
-
 static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
@@ -618,12 +514,20 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 					*len = 0;
 					return 0;
 				} else {
-					*ptr = php_pdo_pgsql_unescape_bytea(*ptr, &tmp_len);
+					char *tmp_ptr = PQunescapeBytea(*ptr, &tmp_len);
+					if (!tmp_ptr) {
+						/* PQunescapeBytea returned an error */
+						*len = 0;
+						return 0;
+					}
 					if (!tmp_len) {
 						/* Empty string, return as empty stream */
 						*ptr = (char *)php_stream_memory_open(TEMP_STREAM_READONLY, "", 0);
+						PQfreemem(tmp_ptr);
 						*len = 0;
 					} else {
+						*ptr = estrndup(tmp_ptr, tmp_len);
+						PQfreemem(tmp_ptr);
 						*len = tmp_len;
 						*caller_frees = 1;
 					}
