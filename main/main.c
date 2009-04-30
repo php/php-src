@@ -96,6 +96,9 @@
 #  define PAGE_SIZE 4096
 # endif
 #endif
+#ifdef PHP_WIN32
+# define PAGE_SIZE 4096
+#endif
 /* }}} */
 
 PHPAPI int (*php_register_internal_extensions_func)(TSRMLS_D) = php_register_internal_extensions;
