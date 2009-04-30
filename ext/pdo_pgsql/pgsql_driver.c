@@ -232,7 +232,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		if (S->cursor_name) {
 			efree(S->cursor_name);
 		}
-		spprintf(&S->cursor_name, 0, "pdo_pgsql_cursor_%08x", (unsigned int) stmt);
+		spprintf(&S->cursor_name, 0, "pdo_crsr_%016lx", (unsigned long) stmt);
 #if HAVE_PQPREPARE
 		emulate = 1;
 #endif
@@ -264,7 +264,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			return 0;
 		}
 
-		spprintf(&S->stmt_name, 0, "pdo_pgsql_stmt_%08x", (unsigned int)stmt);
+		spprintf(&S->stmt_name, 0, "pdo_stmt_%016lx", (unsigned long)stmt);
 		/* that's all for now; we'll defer the actual prepare until the first execute call */
 	
 		if (nsql) {
@@ -300,9 +300,7 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		return -1;
 	}
 	H->pgoid = PQoidValue(res);
-#if HAVE_PQCMDTUPLES
 	ret = atol(PQcmdTuples(res));
-#endif
 	PQclear(res);
 
 	return ret;
@@ -312,16 +310,17 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 {
 	unsigned char *escaped;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	size_t tmp_len;
 	
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
-			escaped = PQescapeByteaConn(H->server, unquoted, unquotedlen, quotedlen);
+			escaped = PQescapeByteaConn(H->server, unquoted, unquotedlen, &tmp_len);
 #else
-			escaped = PQescapeBytea(unquoted, unquotedlen, quotedlen);
+			escaped = PQescapeBytea(unquoted, unquotedlen, &tmp_len);
 #endif
-			*quotedlen += 1;
+			*quotedlen = (int)tmp_len + 1;
 			*quoted = emalloc(*quotedlen + 1);
 			memcpy((*quoted)+1, escaped, *quotedlen-2);
 			(*quoted)[0] = '\'';
@@ -402,11 +401,9 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 			break;
 
 		case PDO_ATTR_SERVER_VERSION:
-#ifdef HAVE_PQPROTOCOLVERSION
 			if (PQprotocolVersion(H->server) >= 3) { /* PostgreSQL 7.4 or later */
 				ZVAL_STRING(return_value, (char*)PQparameterStatus(H->server, "server_version"), 1);
 			} else /* emulate above via a query */
-#endif
 			{
 				PGresult *res = PQexec(H->server, "SELECT VERSION()");
 				if (res && PQresultStatus(res) == PGRES_TUPLES_OK) {
@@ -456,7 +453,6 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 		case PDO_ATTR_SERVER_INFO: {
 			int spid = PQbackendPID(H->server);
 			char *tmp;
-#ifdef HAVE_PQPROTOCOLVERSION
 			spprintf(&tmp, 0, 
 				"PID: %d; Client Encoding: %s; Is Superuser: %s; Session Authorization: %s; Date Style: %s", 
 				spid,
@@ -464,9 +460,6 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 				(char*)PQparameterStatus(H->server, "is_superuser"),
 				(char*)PQparameterStatus(H->server, "session_authorization"),
 				(char*)PQparameterStatus(H->server, "DateStyle"));
-#else 
-			spprintf(&tmp, 0, "PID: %d", spid);
-#endif
 			ZVAL_STRING(return_value, tmp, 0);
 		}
 			break;
