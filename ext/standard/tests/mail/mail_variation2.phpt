@@ -1,7 +1,7 @@
 --TEST--
 Test mail() function : variation force extra parameters
 --INI--
-sendmail_path=echo --- > mailBasic2.out
+sendmail_path="echo --- > /tmp/php_test_mailVariation2.out"
 mail.force_extra_parameters="forced params"
 --SKIPIF--
 <?php
@@ -23,7 +23,7 @@ echo "*** Testing mail() : basic functionality ***\n";
 $to = 'user@company.com';
 $subject = 'Test Subject';
 $message = 'A Message';
-$outFile = "mailBasic2.out";
+$outFile = "/tmp/php_test_mailVariation2.out";
 @unlink($outFile);
 
 var_dump( mail($to, $subject, $message) );
