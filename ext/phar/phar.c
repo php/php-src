@@ -1262,7 +1262,11 @@ int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int al
 	/* next try to create a new file */
 	if (FAILURE == phar_detect_phar_fname_ext(fname, fname_len, &ext_str, &ext_len, !is_data, 1, 1 TSRMLS_CC)) {
 		if (error) {
-			spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
+			if (ext_len == -2) {
+				spprintf(error, 0, "Cannot create a phar archive from a URL like \"%s\".  Phar objects can only be created from local files", fname);
+			} else {
+				spprintf(error, 0, "Cannot create phar '%s', file extension (or combination) not recognised", fname);
+			}
 		}
 		return FAILURE;
 	}
@@ -1903,6 +1907,12 @@ int phar_detect_phar_fname_ext(const char *filename, int filename_len, const cha
 	pos = memchr(filename, '/', filename_len);
 
 	if (pos && pos != filename) {
+		/* check for url like http:// or phar:// */
+		if (*(pos - 1) == ':' && (pos - filename) < filename_len - 1 && *(pos + 1) == '/') {
+			*ext_len = -2;
+			*ext_str = NULL;
+			return FAILURE;
+		}
 		if (zend_hash_exists(&(PHAR_GLOBALS->phar_alias_map), (char *) filename, pos - filename)) {
 			*ext_str = pos;
 			*ext_len = -1;
