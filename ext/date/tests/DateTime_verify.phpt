@@ -1,5 +1,7 @@
 --TEST--
 Test DateTime class registration
+--SKIPIF--
+<?php if (!extension_loaded("reflection")) die("skip"); ?>
 --FILE--
 <?php
 
