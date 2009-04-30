@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #47969 (ezmlm_hash() returns different values depend on OS).
   (Ilia)
 - Fixed bug #47946 (ImageConvolution overwrites background). (Ilia)
+- Fixed bug #47940 (memory leaks in imap_body). (Pierre, Jake Levitt)
 - Fixed bug #47937 (system() calls sapi_flush() regardless of output
   buffering). (Ilia)
 - Fixed bug #47903 ("@" operator does not work with string offsets). (Felipe)

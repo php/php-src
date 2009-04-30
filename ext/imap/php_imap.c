@@ -487,7 +487,7 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
 	/* plug in our gets */
-	mail_parameters(NIL, SET_GETS, (void *) php_mail_gets);
+	mail_parameters(NIL, SET_GETS, (void *) NIL);
 
 	/* set default timeout values */
 	mail_parameters(NIL, SET_OPENTIMEOUT, (void *) FG(default_socket_timeout));
@@ -1266,7 +1266,6 @@ PHP_FUNCTION(imap_body)
 	} else {
 		RETVAL_STRINGL(body, body_len, 1);
 	}
-	free(body);
 }
 /* }}} */
 
@@ -1995,7 +1994,9 @@ PHP_FUNCTION(imap_savebody)
 	}
 
 	IMAPG(gets_stream) = writer;
+	mail_parameters(NIL, SET_GETS, (void *) php_mail_gets);
 	mail_fetchbody_full(imap_ptr->imap_stream, msgno, section, NULL, flags);
+	mail_parameters(NIL, SET_GETS, (void *) NIL);
 	IMAPG(gets_stream) = NULL;
 
 	if (close_stream) {
