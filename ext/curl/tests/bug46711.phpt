@@ -1,9 +1,5 @@
 --TEST--
-#46711 (lost memory when foreach is used for values passed to curl_setopt())
---SKIP--
-<?php
-if (!extension_loaded('curl')) die('skip need curl to work');
-?>
+Bug #46711 (lost memory when foreach is used for values passed to curl_setopt())
 --FILE--
 <?php
 $ch = curl_init();
