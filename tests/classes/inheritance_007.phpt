@@ -1,5 +1,7 @@
 --TEST--
 Ensure inherited old-style constructor doesn't block other methods.
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class A {
