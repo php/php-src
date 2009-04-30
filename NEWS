@@ -53,6 +53,8 @@ PHP                                                                        NEWS
   update). (Matteo)
 - Fixed bug #42362 (HTTP status codes 204 and 304 should not be gzipped).
   (Scott, Edward Z. Yang)
+- Fixed PECL bug #16338 (phar extension uses php_stream_copy_to_stream). (Greg)
+- Fixed PECL bug #14646 (phar error message unclear with php stream wrappers). (Greg)
 - Fixed an issue with ReflectionProperty::setAccessible().
   (Sebastian, Roman Borschel)
 
