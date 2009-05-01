@@ -202,14 +202,10 @@ static inline UChar *php_ap_to_unicode(char *in, int32_t in_len, int32_t *out_le
 	UErrorCode status = U_ZERO_ERROR;
 	UChar *buf;
 	int buf_len = 0;
-	UConverter *input_conv = UG(http_input_encoding_conv);
+	UConverter *input_conv = ZEND_U_CONVERTER(UG(http_input_encoding_conv));
 
-	if (!input_conv) {
-		input_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
-	}
-
-	input_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
 	zend_string_to_unicode_ex(input_conv, &buf, &buf_len, in, in_len, &status);
+
 	if (U_SUCCESS(status)) {
 		if (out_len)
 			*out_len = buf_len;
@@ -1134,6 +1130,9 @@ var_done:
 					efree(array_index);
 				}
 				array_index = eustrndup(start_arr+1, array_len-2);   
+
+				if (abuf) efree(abuf);
+				abuf = eustrndup(param, u_strlen(param)-array_len);
 			}
 
 			if (lbuf) {
@@ -1141,11 +1140,6 @@ var_done:
 			}
 			llen = u_strlen(param) + MAX_SIZE_OF_INDEX + 1;
 			lbuf = eumalloc(llen);
-
-			if (is_arr_upload) {
-				if (abuf) efree(abuf);
-				abuf = eustrndup(param, u_strlen(param)-array_len);
-			}
 
 			/* The \ check should technically be needed for win32 systems only where
 			 * it is a valid path separator. However, IE in all its wisdom always sends
