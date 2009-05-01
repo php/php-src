@@ -1136,7 +1136,6 @@ var_done:
 				array_index = eustrndup(start_arr+1, array_len-2);   
 			}
 
-			/* Add $foo_name */
 			if (lbuf) {
 				efree(lbuf);
 			}
@@ -1146,9 +1145,6 @@ var_done:
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
 				abuf = eustrndup(param, u_strlen(param)-array_len);
-				u_snprintf(lbuf, llen, "%S_name[%S]", abuf, array_index);
-			} else {
-				u_snprintf(lbuf, llen, "%S_name", param);
 			}
 
 			/* The \ check should technically be needed for win32 systems only where
@@ -1160,14 +1156,6 @@ var_done:
 			s = u_strrchr(filename, '\\');
 			if ((tmp = u_strrchr(filename, 0x2f /*'/'*/)) > s) {
 				s = tmp;
-			}
-
-			if (!is_anonymous) {
-				if (s && s > filename) {
-					safe_u_php_register_variable(lbuf, s+1, u_strlen(s+1), NULL, 0 TSRMLS_CC);
-				} else {
-					safe_u_php_register_variable(lbuf, filename, u_strlen(filename), NULL, 0 TSRMLS_CC);
-				}
 			}
 
 			/* Add $foo[name] */
@@ -1201,16 +1189,6 @@ var_done:
 				}
 			}
 
-			/* Add $foo_type */
-			if (is_arr_upload) {
-				u_snprintf(lbuf, llen, "%S_type[%S]", abuf, array_index);
-			} else {
-				u_snprintf(lbuf, llen, "%S_type", param);
-			}
-			if (!is_anonymous) {
-				safe_u_php_register_variable(lbuf, ucd, ucd_len, NULL, 0 TSRMLS_CC);
-			}
-
 			/* Add $foo[type] */
 			if (is_arr_upload) {
 				u_snprintf(lbuf, llen, "%S[type][%S]", abuf, array_index);
@@ -1224,11 +1202,6 @@ var_done:
 
 			/* Initialize variables */
 			add_u_protected_variable(param TSRMLS_CC);
-
-			/* if param is of form xxx[.*] this will cut it to xxx */
-			if (!is_anonymous) {
-				safe_u_php_register_variable(param, temp_filename, u_strlen(temp_filename), NULL, 1 TSRMLS_CC);
-			}
 
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
@@ -1263,16 +1236,6 @@ var_done:
 					u_snprintf(lbuf, llen, "%S[error]", param);
 				}
 				register_u_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
-
-				/* Add $foo_size */
-				if (is_arr_upload) {
-					u_snprintf(lbuf, llen, "%S_size[%S]", abuf, array_index);
-				} else {
-					u_snprintf(lbuf, llen, "%S_size", param);
-				}
-				if (!is_anonymous) {
-					safe_u_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
-				}	
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
