@@ -130,6 +130,8 @@ static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
 
 #define ZSTR_LEN(__type, __str) ((__type==IS_UNICODE)?u_strlen(__str.u):strlen(__str.s))
 
+#define ZBYTES(__type, __len) (((__type) == IS_UNICODE) ? UBYTES((__len)) : (__len))
+
 #define ZEND_U_CONVERTER(c) ((c)?(c):UG(fallback_encoding_conv))
 
 #define USTR_FREE(ustr) do { if (ustr) { efree(ustr); } } while (0);

@@ -2458,9 +2458,45 @@ ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_
 }
 /* }}} */
 
+ZEND_API UChar *_safe_eumalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+{
+	size = safe_address(size, sizeof(UChar), 0);
+	offset = safe_address(offset, sizeof(UChar), 0);
+	return (UChar*) _safe_emalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+}
+/* }}} */
+
+ZEND_API zstr _safe_ezmalloc(int type, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(_safe_emalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	} else {
+		return ZSTR(_safe_eumalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	}
+}
+/* }}} */
+
 ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset) /* {{{ */
 {
 	return pemalloc(safe_address(nmemb, size, offset), 1);
+}
+/* }}} */
+
+ZEND_API UChar *_safe_umalloc(size_t nmemb, size_t size, size_t offset) /* {{{ */
+{
+	size = safe_address(size, sizeof(UChar), 0);
+	offset = safe_address(size, sizeof(UChar), 0);
+	return pemalloc(safe_address(nmemb, size, offset), 1);
+}
+/* }}} */
+
+ZEND_API zstr _safe_zmalloc(int type, size_t nmemb, size_t size, size_t offset) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(_safe_malloc(nmemb, size, offset));
+	} else {
+		return ZSTR(_safe_umalloc(nmemb, size, offset));
+	}
 }
 /* }}} */
 
@@ -2470,9 +2506,45 @@ ZEND_API void *_safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offse
 }
 /* }}} */
 
+ZEND_API UChar *_safe_eurealloc(UChar *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+{
+	size = safe_address(size, sizeof(UChar), 0);
+	offset = safe_address(offset, sizeof(UChar), 0);
+	return (UChar*) _safe_erealloc(ptr, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+}
+/* }}} */
+
+ZEND_API zstr _safe_ezrealloc(int type, zstr str, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(_safe_erealloc(str.v, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	} else {
+		return ZSTR(_safe_eurealloc(str.u, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	}
+}
+/* }}} */
+
 ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset) /* {{{ */
 {
 	return perealloc(ptr, safe_address(nmemb, size, offset), 1);
+}
+/* }}} */
+
+ZEND_API UChar *_safe_urealloc(UChar *ptr, size_t nmemb, size_t size, size_t offset) /* {{{ */
+{
+	size = safe_address(size, sizeof(UChar), 0);
+	offset = safe_address(offset, sizeof(UChar), 0);
+	return (UChar*) perealloc(ptr, safe_address(nmemb, size, offset), 1);
+}
+/* }}} */
+
+ZEND_API zstr _safe_zrealloc(int type, zstr str, size_t nmemb, size_t size, size_t offset) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(_safe_realloc(str.s, nmemb, size, offset));
+	} else {
+		return ZSTR(_safe_urealloc(str.u, nmemb, size, offset));
+	}
 }
 /* }}} */
 
@@ -2516,6 +2588,16 @@ ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 	}
 	u_memcpy(p, s, length);
 	return p;
+}
+/* }}} */
+
+ZEND_API zstr _ezstrdup(int type, const zstr str ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(_estrdup(str.s ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	} else {
+		return ZSTR(_eustrdup(str.u ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
+	}
 }
 /* }}} */
 
@@ -2613,6 +2695,16 @@ ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length) /* {{{ */
 		return ZSTR(zend_strndup(s.s, length));
 	} else {
 		return ZSTR(zend_ustrndup(s.u, length));
+	}
+}
+/* }}} */
+
+ZEND_API zstr zend_zstrdup(int type, const zstr s) /* {{{ */
+{
+	if (type == IS_STRING) {
+		return ZSTR(strdup(s.s));
+	} else {
+		return ZSTR(zend_ustrdup(s.u));
 	}
 }
 /* }}} */
