@@ -24,7 +24,7 @@ try {
 ?>
 ===DONE===
 --EXPECT--
-Cannot create a phar archive from a URL like "http://should.fail.com".  Phar objects can only be created from local files
-Cannot create a phar archive from a URL like "http://".  Phar objects can only be created from local files
+Cannot create a phar archive from a URL like "http://should.fail.com". Phar objects can only be created from local files
+Cannot create a phar archive from a URL like "http://". Phar objects can only be created from local files
 Cannot create phar 'http:/', file extension (or combination) not recognised
 ===DONE===
