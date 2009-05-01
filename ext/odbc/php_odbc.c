@@ -1274,7 +1274,7 @@ PHP_FUNCTION(odbc_execute)
 			}
 
 			otype = (*tmp)->type;
-			convert_to_string(*tmp);
+			convert_to_string_ex(tmp);
 			if (Z_TYPE_PP(tmp) != IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
