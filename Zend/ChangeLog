@@ -1,3 +1,10 @@
+2009-04-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      tests/bug39018.phpt
+      tests/bug39018_2.phpt:
+      - Added missing tests from this branch..*sigh*
+
 2009-04-27  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
