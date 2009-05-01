@@ -17,7 +17,7 @@
  *
  * This filter iterator assumes that the inner iterator 
  */
-class RegexIterator implements FilterIterator
+class RegexIterator extends FilterIterator
 {
 	const USE_KEY     = 0x00000001; /**< If present in $flags the the key is 
 	                                     used rather then the current value. */
