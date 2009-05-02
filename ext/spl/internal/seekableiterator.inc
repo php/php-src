@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief class SeekableIterator
  * @author  Marcus Boerger
- * @date    2003 - 2006
+ * @date    2003 - 2009
  *
  * SPL - Standard PHP Library
  */

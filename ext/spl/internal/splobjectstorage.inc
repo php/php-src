@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief class SplObjectStorage
  * @author  Marcus Boerger
- * @date    2003 - 2008
+ * @date    2003 - 2009
  *
  * SPL - Standard PHP Library
  */
