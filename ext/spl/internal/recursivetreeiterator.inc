@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief   class RecursiveTreeIterator
  * @author  Marcus Boerger, Johannes Schlueter
- * @date    2005
+ * @date    2005 - 2009
  *
  * SPL - Standard PHP Library
  */
