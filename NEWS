@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
+- Fixed bug #48132 (configure check for curl ssl support fails with
+  --disable-rpath). (Jani)
 - Fixed bug #48038 (odbc_execute changes variables used to form params array).
   (Felipe)
 - Fixed bug #47997 (stream_copy_to_stream returns 1 on empty streams). (Arnaud)
