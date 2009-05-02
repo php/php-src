@@ -103,10 +103,10 @@ PHP_FUNCTION(pdo_drivers)
 	HashPosition pos;
 	pdo_driver_t **pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
 	}
-	
+
 	array_init(return_value);
 
 	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
