@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief class SplQueue
  * @author  Etienne Kneuss
- * @date    2008
+ * @date    2008 - 2009
  *
  * SPL - Standard PHP Library
  */
