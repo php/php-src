@@ -655,13 +655,13 @@ retry:
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
 						zval_ptr_dtor(&snmpval);
-						snmp_free_pdu(pdu);
+						snmp_free_pdu(response);
 						snmp_close(ss);
 						return;
 					} else if (st == SNMP_CMD_GETNEXT) {
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
-						snmp_free_pdu(pdu);
+						snmp_free_pdu(response);
 						snmp_close(ss);
 						return;
 					} else if (st == SNMP_CMD_WALK) {
@@ -700,28 +700,28 @@ retry:
 					}
 					if (st == SNMP_CMD_GET) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
-							snmp_free_pdu(pdu);
+							snmp_free_pdu(response);
 							goto retry;
 						}
 					} else if (st == SNMP_CMD_SET) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
-							snmp_free_pdu(pdu);
+							snmp_free_pdu(response);
 							goto retry;
 						}
 					} else if (st == SNMP_CMD_GETNEXT) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
-							snmp_free_pdu(pdu);
+							snmp_free_pdu(response);
 							goto retry;
 						}
 					} else if (st >= SNMP_CMD_WALK) { /* Here we do walks. */
 						if ((pdu = snmp_fix_pdu(response, ((session->version == SNMP_VERSION_1)
 										? SNMP_MSG_GETNEXT
 										: SNMP_MSG_GETBULK))) != NULL) {
-							snmp_free_pdu(pdu);
+							snmp_free_pdu(response);
 							goto retry;
 						}
 					}
-					snmp_free_pdu(pdu);
+					snmp_free_pdu(response);
 					snmp_close(ss);
 					if (st == SNMP_CMD_WALK || st == SNMP_CMD_REALWALK) {
 						zval_dtor(return_value);
