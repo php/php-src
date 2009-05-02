@@ -1127,15 +1127,15 @@ static PHP_METHOD(PDO, __sleep)
 }
 /* }}} */
 
-/* {{{ proto array pdo_drivers()
+/* {{{ proto array PDO::getAvailableDrivers()
    Return array of available PDO drivers */
 static PHP_METHOD(PDO, getAvailableDrivers)
 {
 	HashPosition pos;
 	pdo_driver_t **pdriver;
 
-	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 	
 	array_init(return_value);
