@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Improved IMAP support (Pierre):
   - Added imap_gc to clear the imap cache
   - Added imap_utf8_to_mutf7 and imap_mutf7_to_utf8
+
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
 - Added "dechunk" filter which can decode HTTP responses with chunked
@@ -123,6 +124,7 @@ PHP                                                                        NEWS
 - Fixed PECL Bug #14268 (Allow "pecl install oci8" command to "autodetect" an
   Instant Client RPM install) (Chris Jones/Oracle Corp.)
 
+
 29 Jan 2009, PHP 5.3.0 Beta 1
 - Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
 
@@ -217,6 +219,7 @@ PHP                                                                        NEWS
   strings). (magicaltux, Scott)
 - Fixed bug #45820 (Allow empty keys in ArrayObject). (Etienne)
 - Fixed bug #45791 (json_decode() doesn't convert 0e0 to a double). (Scott)
+
 
 04 Dec 2008, PHP 5.3.0 Alpha 3
 - Upgraded bundled PCRE to version 7.8. (Nuno)
