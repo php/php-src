@@ -33,7 +33,7 @@
  */
 PHP_FUNCTION( collator_get_locale )
 {
-	int    type        = 0;
+	long   type        = 0;
 	char*  locale_name = NULL;
 
 	COLLATOR_METHOD_INIT_VARS
