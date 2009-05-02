@@ -1,3 +1,20 @@
+2009-05-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_variables.h:
+      - Fix compile warning in debug mode
+
+    * (PHP_5_2)
+      zend_variables.c:
+      - ws / cs (separated from another commit coming next)
+
+2009-05-01  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * zend.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_unicode.h:
+      Added missing UChar* and zstr malloc variants
+
 2009-04-30  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
