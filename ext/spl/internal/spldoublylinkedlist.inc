@@ -3,7 +3,7 @@
  * @ingroup SPL
  * @brief class SplDoublyLinkedList
  * @author  Etienne Kneuss
- * @date    2008
+ * @date    2009
  *
  * SPL - Standard PHP Library
  */

@@ -4,7 +4,7 @@
  * @brief class MultipleIterator
  * @author  Johannes Schlueter
  * @author  Marcus Boerger
- * @date    2008
+ * @date    2008 - 2009
  *
  * SPL - Standard PHP Library
  */
