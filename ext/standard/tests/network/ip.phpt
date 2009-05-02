@@ -48,20 +48,20 @@ string(7) "0.0.0.0"
 int(1118019956)
 string(14) "66.163.161.116"
 
-Warning: Wrong parameter count for ip2long() in %s on line %d
+Warning: ip2long() expects exactly 1 parameter, 0 given in %s on line 17
 NULL
 bool(false)
 bool(false)
 int(1869573999)
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: ip2long() expects parameter 1 to be string, array given in %s on line 21
+NULL
 
-Warning: Wrong parameter count for long2ip() in %s on line %d
+Warning: long2ip() expects exactly 1 parameter, 0 given in %s on line 23
 NULL
 string(13) "255.254.82.80"
 string(7) "0.0.0.0"
 
-Notice: Array to string conversion in %s on line %d
-string(7) "0.0.0.0"
+Warning: long2ip() expects parameter 1 to be string, array given in %s on line 26
+NULL
 Done
