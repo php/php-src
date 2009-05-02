@@ -6,6 +6,9 @@ PHP                                                                        NEWS
 
 - Undeprecated ticks. (Arnaud)
 
+- Improved IMAP support (Pierre):
+  - Added imap_gc to clear the imap cache
+  - Added imap_utf8_to_mutf7 and imap_mutf7_to_utf8
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
 - Added "dechunk" filter which can decode HTTP responses with chunked
