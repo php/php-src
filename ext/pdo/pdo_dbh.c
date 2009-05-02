@@ -1181,7 +1181,7 @@ static PHP_METHOD(PDO, __sleep)
 }
 /* }}} */
 
-/* {{{ proto array pdo_drivers()
+/* {{{ proto array PDO::getAvailableDrivers()
    Return array of available PDO drivers */
 static PHP_METHOD(PDO, getAvailableDrivers)
 {
