@@ -1,5 +1,7 @@
 --TEST--
 Bug #47027 (var_export doesn't show numeric indices on ArrayObject)
+--SKIPIF--
+<?php extension_loaded("spl") or die("skip"); ?>
 --FILE--
 <?php
 $ao = new ArrayObject(array (2 => "foo", "bar" => "baz"));
