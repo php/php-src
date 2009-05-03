@@ -555,6 +555,7 @@ static zend_object_value date_object_clone_period(zval *this_ptr TSRMLS_DC);
 
 static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC);
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC);
+static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 
 zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS_DC);
@@ -2063,6 +2064,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_interval.clone_obj = date_object_clone_interval;
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
+	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -2290,6 +2292,34 @@ static zend_object_value date_object_clone_interval(zval *this_ptr TSRMLS_DC)
 
 	/** FIX ME ADD CLONE STUFF **/
 	return new_ov;
+}
+
+static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
+{
+	HashTable *props;
+	zval *zv;
+	php_interval_obj     *intervalobj;
+
+
+	intervalobj = (php_interval_obj *) zend_object_store_get_object(object TSRMLS_CC);
+
+	props = intervalobj->std.properties;
+
+#define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
+	MAKE_STD_ZVAL(zv); \
+	ZVAL_LONG(zv, intervalobj->diff->f); \
+	zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zval), NULL);
+
+	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("m", m);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("d", d);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
+
+	return props;
 }
 
 static inline zend_object_value date_object_new_period_ex(zend_class_entry *class_type, php_period_obj **ptr TSRMLS_DC)
