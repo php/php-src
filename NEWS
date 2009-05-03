@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
   (sdteffen[at]gmail[dot].com, Pierre)
 
+- Added timezone_version_get() to retrieve the version of the used timezone
+  database. (Derick)
 - Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
   open(2) system call. (Mikko)
 - Added "dechunk" filter which can decode HTTP responses with chunked
