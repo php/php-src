@@ -1135,7 +1135,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			/* year */
 			case 'L': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->y % 100); break;
-			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s%04d", t->y < 0 ? "-" : "", abs((int) t->y)); break;
+			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s%04ld", t->y < 0 ? "-" : "", llabs(t->y)); break;
 
 			/* time */
 			case 'a': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
