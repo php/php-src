@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #48132 (configure check for curl ssl support fails with
   --disable-rpath). (Jani)
+- Fixed bug #48058 (Year formatter goes wrong with out-of-int range). (Derick)
 - Fixed bug #48038 (odbc_execute changes variables used to form params array).
   (Felipe)
 - Fixed bug #47997 (stream_copy_to_stream returns 1 on empty streams). (Arnaud)
@@ -64,6 +65,8 @@ PHP                                                                        NEWS
   different bit numbers). (Matt)
 - Fixed bug #45997 (safe_mode bypass with exec/system/passthru (windows only)).
   (Pierre)
+- Fixed bug #45822 (Near infinite-loops while parsing huge relative offsets).
+  (Derick, Mike Sullivan)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
 - Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
