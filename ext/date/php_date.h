@@ -79,6 +79,7 @@ PHP_FUNCTION(timezone_transitions_get);
 PHP_FUNCTION(timezone_location_get);
 PHP_FUNCTION(timezone_identifiers_list);
 PHP_FUNCTION(timezone_abbreviations_list);
+PHP_FUNCTION(timezone_version_get);
 
 PHP_METHOD(DateInterval, __construct);
 PHP_FUNCTION(date_interval_format);

@@ -328,6 +328,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_timezone_abbreviations_list, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_version_get, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_create_from_date_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, time)
 ZEND_END_ARG_INFO()
@@ -398,6 +401,7 @@ const zend_function_entry date_functions[] = {
 	PHP_FE(timezone_location_get, arginfo_timezone_location_get)
 	PHP_FE(timezone_identifiers_list, arginfo_timezone_identifiers_list)
 	PHP_FE(timezone_abbreviations_list, arginfo_timezone_abbreviations_list)
+	PHP_FE(timezone_version_get, arginfo_timezone_version_get)
 
 	PHP_FE(date_interval_create_from_date_string, arginfo_date_interval_create_from_date_string)
 	PHP_FE(date_interval_format, arginfo_date_interval_format)
@@ -3757,6 +3761,18 @@ PHP_FUNCTION(timezone_identifiers_list)
 			add_next_index_string(return_value, table[i].id, 1);
 		}
 	};
+}
+/* }}} */
+
+/* {{{ proto array timezone_version_get()
+   Returns the Olson database version number.
+*/
+PHP_FUNCTION(timezone_version_get)
+{
+	const timelib_tzdb *tzdb;
+
+	tzdb = DATE_TIMEZONEDB;
+	RETURN_STRING(tzdb->version, 1);
 }
 /* }}} */
 
