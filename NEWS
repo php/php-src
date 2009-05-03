@@ -117,6 +117,7 @@ PHP                                                                        NEWS
 - Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator).
   (David C.)
 - Fixed bug #45877 (Array key '2147483647' left as string). (Matt)
+- Fixed bug #45682 (Unable to var_dump(DateInterval)). (Derick)
 - Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
 - Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
   connection). (Felipe)
