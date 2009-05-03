@@ -456,6 +456,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_HEADER);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPHEADER);
 	REGISTER_CURL_CONSTANT(CURLOPT_NOPROGRESS);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROGRESSFUNCTION);
 	REGISTER_CURL_CONSTANT(CURLOPT_NOBODY);
 	REGISTER_CURL_CONSTANT(CURLOPT_FAILONERROR);
 	REGISTER_CURL_CONSTANT(CURLOPT_UPLOAD);
@@ -902,6 +903,87 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 }
 /* }}} */
 
+/* {{{ curl_progress
+ */
+static size_t curl_progress(void *clientp,
+                        double dltotal,
+                        double dlnow,
+                        double ultotal,
+                        double ulnow)
+{
+	php_curl       *ch = (php_curl *) clientp;
+	php_curl_progress  *t  = ch->handlers->progress;
+	int             length = -1;
+	size_t	rval = 0;
+
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_progress() called\n");
+	fprintf(stderr, "clientp = %x, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
+#endif
+
+	switch (t->method) {
+		case PHP_CURL_USER: {
+			zval **argv[4];
+			zval  *zdltotal = NULL;
+			zval  *zdlnow = NULL;
+			zval  *zultotal = NULL;
+			zval  *zulnow = NULL;
+			zval  *retval_ptr;
+			int   error;
+			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
+
+			MAKE_STD_ZVAL(zdltotal);
+			MAKE_STD_ZVAL(zdlnow);
+			MAKE_STD_ZVAL(zultotal);
+			MAKE_STD_ZVAL(zulnow);
+			
+			ZVAL_LONG(zdltotal, dltotal);
+			ZVAL_LONG(zdlnow, dlnow);
+			ZVAL_LONG(zultotal, ultotal);
+			ZVAL_LONG(zulnow, ulnow);
+
+			argv[0] = &zdltotal;
+			argv[1] = &zdlnow;
+			argv[2] = &zultotal;
+			argv[3] = &zulnow;
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = t->func_name;
+			fci.object_ptr = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 4;
+			fci.params = argv;
+			fci.no_separation = 0;
+			fci.symbol_table = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
+				length = -1;
+			} else if (retval_ptr) {
+				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
+					convert_to_long_ex(&retval_ptr);
+				}
+				if(0 != Z_LVAL_P(retval_ptr))
+					rval = 1;
+				zval_ptr_dtor(&retval_ptr);
+			}
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(argv[2]);
+			zval_ptr_dtor(argv[3]);
+			break;
+		}
+	}
+	return rval;
+}
+/* }}} */
+
+
 /* {{{ curl_read
  */
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
@@ -1199,6 +1281,7 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write        = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
+	(*ch)->handlers->progress     = ecalloc(1, sizeof(php_curl_progress));
 
 	(*ch)->in_callback = 0;
 	(*ch)->header.str_len = 0;
@@ -1591,6 +1674,17 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			zval_add_ref(zvalue);
 			ch->handlers->read->func_name = *zvalue;
 			ch->handlers->read->method = PHP_CURL_USER;
+			break;
+		case CURLOPT_PROGRESSFUNCTION:
+			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
+			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
+			if (ch->handlers->progress->func_name) {
+				zval_ptr_dtor(&ch->handlers->progress->func_name);
+				ch->handlers->progress->fci_cache = empty_fcall_info_cache;
+			}
+			zval_add_ref(zvalue);
+			ch->handlers->progress->func_name = *zvalue;
+			ch->handlers->progress->method = PHP_CURL_USER;
 			break;
 		case CURLOPT_HEADERFUNCTION:
 			if (ch->handlers->write_header->func_name) {
@@ -2214,6 +2308,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(ch->handlers->write);
 	efree(ch->handlers->write_header);
 	efree(ch->handlers->read);
+	efree(ch->handlers->progress);
 	efree(ch->handlers);
 	efree(ch);
 }	

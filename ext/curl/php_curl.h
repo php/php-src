@@ -97,10 +97,17 @@ typedef struct {
 } php_curl_read;
 
 typedef struct {
+	zval 		*func_name;
+	zend_fcall_info_cache fci_cache;
+	int    	        method;
+} php_curl_progress;
+
+typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
 	zval           *passwd;
+	php_curl_progress *progress;
 } php_curl_handlers;
 
 struct _php_curl_error  {
