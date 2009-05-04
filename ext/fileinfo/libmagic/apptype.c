@@ -77,7 +77,7 @@ file_os2_apptype(struct magic_set *ms, const char *fn, const void *buf,
 		}
 		(void)fclose(fp);
 	}
-	rc = DosQueryAppType(path, &type);
+	rc = DosQueryAppType((unsigned char *)path, &type);
 
 	if (fn == NULL) {
 		unlink(path);
