@@ -809,6 +809,8 @@ user_dir =
 ; Directory in which the loadable extensions (modules) reside.
 ; http://php.net/extension-dir
 ; extension_dir = "./"
+; On windows:
+; extension_dir = "ext"
 
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
