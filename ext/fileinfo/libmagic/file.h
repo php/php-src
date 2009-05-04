@@ -387,7 +387,12 @@ protected size_t file_mbswidth(const char *);
 protected const char *file_getbuffer(struct magic_set *);
 protected ssize_t sread(int, void *, size_t, int);
 protected int file_check_mem(struct magic_set *, unsigned int);
-protected int file_looks_utf8(const unsigned char *, size_t, unichar *, size_t *);
+protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
+    size_t *);
+#ifdef __EMX__
+protected int file_os2_apptype(struct magic_set *, const char *, const void *,
+    size_t);
+#endif /* __EMX__ */
 
 extern const char *file_names[];
 extern const size_t file_nnames;
