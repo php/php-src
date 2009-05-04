@@ -31,6 +31,11 @@
 #include "lib/timelib.h"
 #include <time.h>
 
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+static inline int64_t llabs( int64_t i ) { return i >= 0? i: -i; }
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
