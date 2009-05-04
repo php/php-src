@@ -8,3 +8,4 @@ var_dump(isset($LOG_ERR));
 ?>
 --EXPECTF--
 bool(true)
+PHP Warning:  Directive 'define_syslog_variables' is deprecated in PHP 5.3 and greater in Unknown on line 0

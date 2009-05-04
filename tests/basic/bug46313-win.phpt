@@ -60,3 +60,6 @@ string(12) "o1"
 bool(true)
 string(%d) "%s"
 bool(true)
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+PHP Warning:  Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
+

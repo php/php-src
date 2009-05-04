@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, PHP 5.3.0 RC 2
 - Upgraded bundled sqlite to version 3.6.13. (Ilia)
@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   disable this behaviour using "http"=>array("auto_decode"=>0) in stream
   context. (Dmitry)
 - Added ability to throw exceptions from SQLite3 instead of warnings. (Scott)
+- Added startup notices for deprecated ini settings. (Kalle)
 
 - Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)

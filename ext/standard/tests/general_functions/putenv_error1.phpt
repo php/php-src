@@ -22,3 +22,4 @@ Warning: putenv(): Safe Mode warning: Cannot set environment variable 'BAZ' - it
 it worked
 it worked
 ==DONE==
+PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0

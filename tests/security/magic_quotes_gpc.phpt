@@ -10,3 +10,4 @@ echo $_GET['a'],"\n";
 ?>
 --EXPECT--
 abc\'\"\0123
+PHP Warning:  Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0

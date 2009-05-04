@@ -35,4 +35,4 @@ Deprecated: Function session_register() is deprecated in %s on line %d
 
 Deprecated: Function session_register() is deprecated in %s on line %d
 baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}
-
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0

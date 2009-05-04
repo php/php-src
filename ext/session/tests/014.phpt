@@ -40,3 +40,4 @@ Warning: ini_set(): A session is active. You cannot change the session module's 
 
 Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
 <a href="/link?PHPSESSID=abtest">
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
