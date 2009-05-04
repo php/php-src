@@ -310,9 +310,11 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					efree(new_op_array);
 
 
+#if PHP_VERSION_ID < 50300
 					if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 						zval_ptr_dtor(EG(return_value_ptr_ptr));
 					}
+#endif
 				} zend_catch {
 					if (PHAR_G(cwd)) {
 						efree(PHAR_G(cwd));
