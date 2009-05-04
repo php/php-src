@@ -423,9 +423,14 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 		switch (sa->sa_family) {
 #if HAVE_GETADDRINFO && HAVE_IPV6
 			case AF_INET6:
-				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
-				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
-				socklen = sizeof(struct sockaddr_in6);
+				if (strstr(bindto, ':')) {
+					((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
+					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+					socklen = sizeof(struct sockaddr_in6);
+				} else {
+					socklen = 0;
+					sa = NULL;
+				}
 				break;
 #endif
 			case AF_INET:
@@ -786,9 +791,14 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		switch (sa->sa_family) {
 #if HAVE_GETADDRINFO && HAVE_IPV6
 			case AF_INET6:
-				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
-				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
-				socklen = sizeof(struct sockaddr_in6);
+				if (strstr(bindto, ':')) {
+					((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
+					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+					socklen = sizeof(struct sockaddr_in6);
+				} else {
+					socklen = 0;
+					sa = NULL;
+				}
 				break;
 #endif
 			case AF_INET:
@@ -808,7 +818,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			if (bindto) {
 				struct sockaddr *local_address = NULL;
 				int local_address_len = 0;
-			
+
 				if (sa->sa_family == AF_INET) {
 					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));
 

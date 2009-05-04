@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
+- Fixed bug #48131 (Don't try to bind ipv4 addresses to ipv6 ips via
+  bindto). (Ilia)
 - Fixed bug #48132 (configure check for curl ssl support fails with
   --disable-rpath). (Jani)
 - Fixed bug #48058 (Year formatter goes wrong with out-of-int range). (Derick)
