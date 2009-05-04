@@ -260,11 +260,14 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 				 * make sure that we have a separator first.
 				 */
 				if (*m->desc) {
-					printed_something = 1;
 					if ((e = handle_annotation(ms, m)) != 0)
 						return e;
-					if (print_sep(ms, firstline) == -1)
-						return -1;
+					if (!printed_something) {
+						printed_something = 1;
+						if (print_sep(ms, firstline)
+						    == -1)
+							return -1;
+					}
 				}
 				/*
 				 * This continuation matched.  Print
