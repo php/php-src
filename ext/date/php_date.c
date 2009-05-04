@@ -33,7 +33,6 @@
 
 #ifdef PHP_WIN32
 # include "win32/php_stdint.h"
-static inline int64_t llabs( int64_t i ) { return i >= 0? i: -i; }
 #endif
 
 /* {{{ arginfo */
