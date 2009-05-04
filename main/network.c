@@ -792,7 +792,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		switch (sa->sa_family) {
 #if HAVE_GETADDRINFO && HAVE_IPV6
 			case AF_INET6:
-				if (strstr(bindto, ':')) {
+				if (bindto && strstr(bindto, ':')) {
 					((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
 					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
 					socklen = sizeof(struct sockaddr_in6);
