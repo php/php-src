@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 
 - Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
   (sdteffen[at]gmail[dot].com, Pierre)
+- Implemented FR #47739 (Missing cURL option do disable IPv6) (Pierre)
 
 - Added timezone_version_get() to retrieve the version of the used timezone
   database. (Derick)
