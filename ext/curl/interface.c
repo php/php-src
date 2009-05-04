@@ -757,6 +757,13 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLPROTO_ALL);
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x070f01
+	REGISTER_CURL_CONSTANT(CURLOPT_FTP_FILEMETHOD);
+	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_MULTICWD);
+	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_NOCWD);
+	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_SINGLECWD);
+#endif
+
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (!CRYPTO_get_id_callback()) {
 		int i, c = CRYPTO_num_locks();
@@ -1517,6 +1524,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_PROTOCOLS:
 #endif
 		case CURLOPT_IPRESOLVE:
+		case CURLOPT_FTP_FILEMETHOD:
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
