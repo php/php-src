@@ -59,6 +59,7 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_string.h"
+#include "ext/date/php_date.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -473,7 +474,6 @@ static int module_shutdown = 0;
 PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 {
 	int fd = -1;
-	struct tm tmbuf;
 	time_t error_time;
 
 	/* Try to use the specified logging location. */
