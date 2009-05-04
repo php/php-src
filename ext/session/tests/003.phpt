@@ -43,3 +43,4 @@ array(1) {
     int(2)
   }
 }
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0

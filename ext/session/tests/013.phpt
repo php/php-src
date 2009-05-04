@@ -25,3 +25,4 @@ print "I live\n";
 ?>
 --EXPECT--
 I live
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0

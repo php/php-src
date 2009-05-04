@@ -1901,16 +1901,27 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* Check for deprecated directives */
 	{
 		static const char *directives[] = {
-			"zend.ze1_compatibility_mode",
+			"define_syslog_variables", 
+			"register_globals", 
+			"register_long_arrays", 
+			"safe_mode", 
+			"magic_quotes_gpc", 
+			"magic_quotes_runtime", 
+			"magic_quotes_sybase", 
 			NULL};
 		const char **p = directives;
 		long val;
 
 		while (*p) {
 			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_WARNING, "Directive '%s' is no longer supported in PHP 5.3 and greater", *p);
+				zend_error(E_WARNING, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
 			}
 			++p;
+		}
+
+		/* This is not too nice, but since its the only one theres no need for extra stuff here */
+		if (cfg_get_long("zend.ze1_compatibility_mode", &val) == SUCCESS && val) {
+			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
 		}
 	}
 

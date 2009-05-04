@@ -146,3 +146,4 @@ array(1) {
 int(123)
 DESTROY: abtest
 CLOSE
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0

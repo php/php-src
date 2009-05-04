@@ -16,3 +16,4 @@ Warning: putenv(): Safe Mode warning: Cannot override protected environment vari
 
 Warning: putenv(): Safe Mode warning: Cannot override protected environment variable 'BAZ' in %s on line %d
 ==DONE==
+PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0

@@ -94,3 +94,4 @@ if ($failed == false) {
 *** Testing define_syslog_variables() : variation ***
 PASSED
 ===DONE===
+PHP Warning:  Directive 'define_syslog_variables' is deprecated in PHP 5.3 and greater in Unknown on line 0

@@ -77,3 +77,4 @@ object(b)#%d (1) {
     string(5) "hallo"
   }
 }
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0

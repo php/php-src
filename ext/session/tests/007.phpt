@@ -61,3 +61,5 @@ array(1) {
   ["c"]=>
   &float(3.14)
 }
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
