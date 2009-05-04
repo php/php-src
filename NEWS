@@ -7,14 +7,13 @@ PHP                                                                        NEWS
 - Undeprecated ticks. (Arnaud)
 
 - Improved IMAP support (Pierre):
-  - Added imap_gc to clear the imap cache
-  - Added imap_utf8_to_mutf7 and imap_mutf7_to_utf8
+  . Added imap_gc() to clear the imap cache
+  . Added imap_utf8_to_mutf7() and imap_mutf7_to_utf8()
 
 - Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
   (sdteffen[at]gmail[dot].com, Pierre)
-- Implemented FR #47739 (Missing cURL option do disable IPv6) (Pierre)
-- Implemented FR #39637 (Missing cURL option CURLOPT_FTP_FILEMETHOD)
-  (Pierre)
+- Implemented FR #47739 (Missing cURL option do disable IPv6). (Pierre)
+- Implemented FR #39637 (Missing cURL option CURLOPT_FTP_FILEMETHOD). (Pierre)
 
 - Added timezone_version_get() to retrieve the version of the used timezone
   database. (Derick)
