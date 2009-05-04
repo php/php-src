@@ -62,9 +62,6 @@ FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
 #include <unistd.h>	/* for read() */
 #endif
 
-#ifdef HAVE_LOCALE_H
-#include <locale.h>
-#endif
 #ifndef PHP_WIN32
 # include <netinet/in.h>		/* for byte swapping */
 #endif
@@ -83,12 +80,6 @@ FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
 # undef S_IFLNK
 # undef S_IFIFO
 #endif
-
-#ifdef __EMX__
-private char *apptypeName = NULL;
-protected int file_os2_apptype(struct magic_set *ms, const char *fn,
-    const void *buf, size_t nb);
-#endif /* __EMX__ */
 
 private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
@@ -305,13 +296,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	}
 
 	if (!stream) {
-				if (unreadable_info(ms, sb.st_mode,
-#ifdef __CYGWIN
-						    tmp
-#else
-						    inname
-#endif
-						    ) == -1)
+		if (unreadable_info(ms, sb.st_mode, inname) == -1)
 			goto done;
 		rv = 0;
 		goto done;

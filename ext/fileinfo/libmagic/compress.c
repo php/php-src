@@ -84,6 +84,7 @@ private const struct {
 					    /* ...only first file examined */
 	{ "BZh",      3, { "bzip2", "-cd", NULL }, 1 },		/* bzip2-ed */
 	{ "LZIP",     4, { "lzip", "-cdq", NULL }, 1 },
+ 	{ "\3757zXZ\0",6,{ "xz", "-cd", NULL }, 1 },		/* XZ Utils */
 };
 
 #define NODATA ((size_t)~0)
@@ -488,6 +489,8 @@ err:
 #else
 		(void)wait(NULL);
 #endif
+		(void) close(fdin[0]);
+		
 		return n;
 	}
 }
