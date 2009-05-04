@@ -527,7 +527,7 @@ PHP_FUNCTION(hash_final)
 }
 /* }}} */
 
-/* {{{ proto resource hash_copy(resource context) U
+/* {{{ proto resource hash_copy(resource context)
 Copy hash resource */
 PHP_FUNCTION(hash_copy)
 {
@@ -647,6 +647,8 @@ static void mhash_init(INIT_FUNC_ARGS)
 	zend_register_module_ex(&mhash_module_entry TSRMLS_CC);
 }
 
+/* {{{ proto string mhash(int hash, string data [, string key])
+   Hash data with hash */
 PHP_FUNCTION(mhash)
 {
 	zval **z_algorithm;
@@ -660,7 +662,7 @@ PHP_FUNCTION(mhash)
 	convert_to_long_ex(z_algorithm);
 	algorithm = Z_LVAL_PP(z_algorithm);
 
-	/* need to conver the first parameter from int to string */
+	/* need to convert the first parameter from int constant to string algorithm name */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
 		struct mhash_bc_entry algorithm_lookup = mhash_to_hash[algorithm];
 		if (algorithm_lookup.hash_name) {
@@ -676,7 +678,10 @@ PHP_FUNCTION(mhash)
 		WRONG_PARAM_COUNT;
 	}
 }
+/* }}} */
 
+/* {{{ proto string mhash_get_hash_name(int hash)
+   Gets the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
 {
 	long algorithm;
@@ -693,7 +698,10 @@ PHP_FUNCTION(mhash_get_hash_name)
 	}
 	RETURN_FALSE;
 }
+/* }}} */
 
+/* {{{ proto int mhash_count(void)
+   Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -701,7 +709,10 @@ PHP_FUNCTION(mhash_count)
 	}
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
+/* }}} */
 
+/* {{{ proto int mhash_get_block_size(int hash)
+   Gets the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
 	long algorithm;
@@ -721,9 +732,12 @@ PHP_FUNCTION(mhash_get_block_size)
 		}
 	}
 }
+/* }}} */
 
 #define SALT_SIZE 8
 
+/* {{{ proto string mhash_keygen_s2k(int hash, string input_password, string salt, int bytes)
+   Generates a key using hash functions */
 PHP_FUNCTION(mhash_keygen_s2k)
 {
 	long algorithm, bytes;
@@ -789,6 +803,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 		}
 	}
 }
+/* }}} */
 
 #endif
 
