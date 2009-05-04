@@ -238,7 +238,8 @@ typedef uint64_t  uintmax_t;
 #define INTMAX_C   INT64_C
 #define UINTMAX_C  UINT64_C
 
-#define llabs(i) (i >= 0? i : -i)
+static __inline int64_t llabs( int64_t i ) { return i >= 0? i: -i; }
+
 #endif // __STDC_CONSTANT_MACROS ]
 
 
