@@ -81,7 +81,7 @@
 #define HTTP_HEADER_CONTENT_LENGTH	16
 #define HTTP_HEADER_TYPE			32
 
-php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -390,7 +390,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strcat(scratch, ":");
 		strcat(scratch, resource->pass);
 
-		tmp = php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
+		tmp = (char*)php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
 		
 		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", tmp) > 0) {
 			php_stream_write(stream, scratch, strlen(scratch));
@@ -665,7 +665,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		unsigned char *s, *e;	\
 		int l;	\
 		l = php_url_decode(val, strlen(val));	\
-		s = val; e = s + l;	\
+		s = (unsigned char*)val; e = s + l;	\
 		while (s < e) {	\
 			if (iscntrl(*s)) {	\
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid redirect URL! %s", new_path);	\
@@ -724,22 +724,22 @@ out:
 
 	return stream;
 }
+/* }}} */
 
-php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, 1 STREAMS_CC TSRMLS_CC);
 }
+/* }}} */
 
-static int php_stream_http_stream_stat(php_stream_wrapper *wrapper,
-		php_stream *stream,
-		php_stream_statbuf *ssb
-		TSRMLS_DC)
+static int php_stream_http_stream_stat(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
 {
 	/* one day, we could fill in the details based on Date: and Content-Length:
 	 * headers.  For now, we return with a failure code to prevent the underlying
 	 * file's details from being used instead. */
 	return -1;
 }
+/* }}} */
 
 static php_stream_wrapper_ops http_stream_wops = {
 	php_stream_url_wrap_http,
