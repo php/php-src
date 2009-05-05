@@ -20,6 +20,7 @@ if (PHP_IMAP == "yes") {
 		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
 		AC_DEFINE('HAVE_NEW_MIME2TEXT', 1, 'Have utf8_mime2text', true);
 		AC_DEFINE('HAVE_RFC822_OUTPUT_ADDRESS_LIST', 1, 'Have rfc822_output_address_list', true);
+		AC_DEFINE('HAVE_IMAP_MUTF7', 1, 'Have modified utf7 support', true);
 	} else {
 		WARNING("imap not enabled; libraries and headers not found");
 	}
