@@ -12,6 +12,6 @@ parse_str("val=%22probably+a+bug%22");
 echo $val . "\n";
 ?>
 --EXPECT--	
-\"probably a bug\"
-\"probably a bug\"
 PHP Warning:  Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
+\"probably a bug\"
+\"probably a bug\"
