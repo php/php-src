@@ -19,6 +19,7 @@ echo $HTTP_SESSION_VARS;
 echo "\nok\n";
 ?>
 --EXPECTF--
+PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP %d.%d and greater in Unknown on line 0
 ok
 
 Warning: session_start(): Cannot send session cookie - headers already sent by (output started at %sunset_cv05.php on line %d
