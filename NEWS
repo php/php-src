@@ -22,7 +22,7 @@ PHP                                                                        NEWS
   open(2) system call. (Mikko)
 - Added "dechunk" filter which can decode HTTP responses with chunked
   transfer-encoding. HTTP streams use this filter automatically in case
-  "Transfer-Encoding: chunked" header presents in response. It's possible to
+  "Transfer-Encoding: chunked" header is present in response. It's possible to
   disable this behaviour using "http"=>array("auto_decode"=>0) in stream
   context. (Dmitry)
 - Added ability to throw exceptions from SQLite3 instead of warnings. (Scott)
