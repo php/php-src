@@ -48,6 +48,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 #include "php_curl.h"
 
 static size_t on_data_available(char *data, size_t size, size_t nmemb, void *ctx)
@@ -258,6 +259,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	php_stream *stream;
 	php_curl_stream *curlstream;
 	zval *tmp, **ctx_opt = NULL;
+	struct curl_slist *slist = NULL;
 
 	curlstream = emalloc(sizeof(php_curl_stream));
 	memset(curlstream, 0, sizeof(php_curl_stream));
@@ -306,6 +308,15 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	
 	/* TODO: read cookies and options from context */
 	if (context && !strncasecmp(filename, "http", sizeof("http")-1)) {
+		/* Protocol version */
+		if (SUCCESS == php_stream_context_get_option(context, "http", "protocol_version", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_DOUBLE) {
+			if (Z_DVAL_PP(ctx_opt) == 1.1) {
+				curl_easy_setopt(curlstream->curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			} else {
+				curl_easy_setopt(curlstream->curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+			}
+		}
+
 		if (SUCCESS == php_stream_context_get_option(context, "http", "curl_verify_ssl_host", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_BOOL && Z_LVAL_PP(ctx_opt) == 1) {
 			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 1);
 		} else {
@@ -321,20 +332,34 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		if (SUCCESS == php_stream_context_get_option(context, "http", "user_agent", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
 			curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, Z_STRVAL_PP(ctx_opt));
 		}
-		if (SUCCESS == php_stream_context_get_option(context, "http", "header", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_ARRAY) {
-			HashPosition pos;
-			zval **header = NULL;
-			struct curl_slist *hl = NULL;
+		if (SUCCESS == php_stream_context_get_option(context, "http", "header", &ctx_opt)) {
+			if (Z_TYPE_PP(ctx_opt) == IS_ARRAY) {
+				HashPosition pos;
+				zval **header = NULL;
 			
-			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(ctx_opt), &pos);
-				SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(ctx_opt), (void *)&header, &pos);
-				zend_hash_move_forward_ex(Z_ARRVAL_PP(ctx_opt), &pos)) {
-				if (Z_TYPE_PP(header) == IS_STRING) {
-					hl = curl_slist_append(hl, Z_STRVAL_PP(header));
+				for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(ctx_opt), &pos);
+					SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(ctx_opt), (void *)&header, &pos);
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(ctx_opt), &pos)
+				) {
+					if (Z_TYPE_PP(header) == IS_STRING) {
+						slist = curl_slist_append(slist, Z_STRVAL_PP(header));
+					}
 				}
+			} else if (Z_TYPE_PP(ctx_opt) == IS_STRING && Z_STRLEN_PP(ctx_opt)) {
+				char *p, *token, *trimmed, *copy_ctx_opt;
+
+				copy_ctx_opt = php_trim(Z_STRVAL_PP(ctx_opt), Z_STRLEN_PP(ctx_opt), NULL, 0, NULL, 3 TSRMLS_CC);
+				p = php_strtok_r(copy_ctx_opt, "\r\n", &token);
+				while (p) {
+					trimmed = php_trim(p, strlen(p), NULL, 0, NULL, 3 TSRMLS_CC);
+					slist = curl_slist_append(slist, trimmed);
+					efree(trimmed);
+					p = php_strtok_r(NULL, "\r\n", &token);
+				}
+				efree(copy_ctx_opt);
 			}
-			if (hl) {
-				curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, hl);
+			if (slist) {
+				curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, slist);
 			}
 		}
 		if (SUCCESS == php_stream_context_get_option(context, "http", "method", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
@@ -467,7 +492,9 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 			return NULL;
 		}
 	}
-	
+	if (slist) {
+		curl_slist_free_all(slist);
+	}
 	return stream;
 }
 
