@@ -351,6 +351,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, buf)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_IMAP_MUTF7
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf8_to_mutf7, 0, 0, 1)
 	ZEND_ARG_INFO(0, in)
 ZEND_END_ARG_INFO()
@@ -358,6 +359,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mutf7_to_utf8, 0, 0, 1)
 	ZEND_ARG_INFO(0, in)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setflag_full, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
@@ -517,8 +519,10 @@ const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_search,								arginfo_imap_search)
 	PHP_FE(imap_utf7_decode,						arginfo_imap_utf7_decode)
 	PHP_FE(imap_utf7_encode,						arginfo_imap_utf7_encode)
+#ifdef HAVE_IMAP_MUTF7
 	PHP_FE(imap_utf8_to_mutf7,						arginfo_imap_utf8_to_mutf7)
 	PHP_FE(imap_mutf7_to_utf8,						arginfo_imap_mutf7_to_utf8)
+#endif
 	PHP_FE(imap_mime_header_decode,					arginfo_imap_mime_header_decode)
 	PHP_FE(imap_thread,								arginfo_imap_thread)
 	PHP_FE(imap_timeout,								arginfo_imap_timeout)
@@ -2338,7 +2342,7 @@ PHP_FUNCTION(imap_savebody)
 	IMAPG(gets_stream) = writer;
 	mail_parameters(NIL, SET_GETS, (void *) php_mail_gets);
 	mail_fetchbody_full(imap_ptr->imap_stream, msgno, section, NULL, flags);
-	mail_parameters(NIL, SET_GETS, (void *) NIL);
+	mail_parameters(NIL, SET_GETS, (void *) NULL);
 	IMAPG(gets_stream) = NULL;
 
 	if (close_stream) {
@@ -2891,6 +2895,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #undef B64
 #undef UNB64
 
+#ifdef HAVE_IMAP_MUTF7
 static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *in;
@@ -2937,6 +2942,7 @@ PHP_FUNCTION(imap_utf8_to_mutf7)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+#endif
 
 /* {{{ proto string imap_mutf7_to_utf8(string in)
    Decode a modified UTF-7 string to UTF-8 */
