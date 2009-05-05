@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
 - Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
   "Transfer-Encoding: chunked"). (Dmitry)
+- Fixed bug #46817 (tokenizer misses last single-line comment (PHP 5.3+, with
+  re2c lexer)). (Matt, Shire)
 - Fixed bug #46108 (DateTime - Memory leak when unserializing). (Felipe)
 - Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
 - Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
