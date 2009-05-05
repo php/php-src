@@ -31,7 +31,7 @@
 #include <time.h>
 
 #ifdef PHP_WIN32
-static inline __int64 llabs( __int64 i ) { return i >= 0? i: -i; }
+static __inline __int64 llabs( __int64 i ) { return i >= 0? i: -i; }
 #endif
 
 /* {{{ arginfo */
