@@ -91,6 +91,7 @@ if ($failed == false) {
 ?>
 ===DONE===
 --EXPECT--
+PHP Warning:  Directive 'define_syslog_variables' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing define_syslog_variables() : variation ***
 PASSED
 ===DONE===

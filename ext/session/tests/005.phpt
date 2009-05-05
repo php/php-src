@@ -85,6 +85,7 @@ var_dump($baz); var_dump($arr); var_dump($c);
 session_destroy();
 ?>
 --EXPECTF--
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#2 (2) {
@@ -146,4 +147,4 @@ array(1) {
 int(123)
 DESTROY: abtest
 CLOSE
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+

@@ -58,6 +58,7 @@ var_dump($HTTP_SESSION_VARS);
 session_destroy();
 ?>
 --EXPECTF--
+PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
 NULL
 session_write_close(): Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively
 array(1) {
@@ -69,4 +70,4 @@ array(1) {
   ["c"]=>
   float(3.14)
 }
-PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
+
