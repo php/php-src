@@ -165,8 +165,10 @@ PHP_FUNCTION(imap_search);
 PHP_FUNCTION(imap_utf8);
 PHP_FUNCTION(imap_utf7_decode);
 PHP_FUNCTION(imap_utf7_encode);
+#ifdef HAVE_IMAP_MUTF7
 PHP_FUNCTION(imap_utf8_to_mutf7);
 PHP_FUNCTION(imap_mutf7_to_utf8);
+#endif
 PHP_FUNCTION(imap_mime_header_decode);
 PHP_FUNCTION(imap_thread);
 PHP_FUNCTION(imap_timeout);
