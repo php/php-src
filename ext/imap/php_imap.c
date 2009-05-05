@@ -21,7 +21,7 @@
    |          Chuck Hagenbuch     <chuck@horde.org>                       |
    |          Andrew Skalski      <askalski@chekinc.com>                  |
    |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
-   |          Jani Taskinen       <sniper@iki.fi>                         |
+   |          Jani Taskinen       <jani.taskinen@iki.fi>                  |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
@@ -59,7 +59,7 @@
 MAILSTREAM DEFAULTPROTO;
 #endif
 
-#define CRLF	 "\015\012"
+#define CRLF	"\015\012"
 #define CRLF_LEN sizeof("\015\012") - 1
 #define PHP_EXPUNGE 32768
 #define PHP_IMAP_ADDRESS_SIZE_BUF 10
@@ -72,7 +72,6 @@ MAILSTREAM DEFAULTPROTO;
 #else
 # define PHP_IMAP_EXPORT
 #endif
-
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
@@ -652,7 +651,7 @@ static inline int add_next_index_object(zval *arg, zval *tmp TSRMLS_DC)
  */
 FOBJECTLIST *mail_newfolderobjectlist(void)
 {
-  return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
+	return (FOBJECTLIST *) memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
 }
 /* }}} */
 
@@ -775,7 +774,6 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 }
 /* }}} */
 
-
 /* {{{ mail_getquota
  *
  * Mail GET_ACL callback
@@ -791,9 +789,7 @@ void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 	}
 }
 /* }}} */
-
 #endif
-
 
 /* {{{ PHP_GINIT_FUNCTION
  */
@@ -849,7 +845,7 @@ PHP_MINIT_FUNCTION(imap)
 
 #ifndef PHP_WIN32
 	auth_link(&auth_log);		/* link in the log authenticator */
-	auth_link(&auth_md5);       /* link in the cram-md5 authenticator */
+	auth_link(&auth_md5);		/* link in the cram-md5 authenticator */
 #if HAVE_IMAP_KRB && defined(HAVE_IMAP_AUTH_GSS)
 	auth_link(&auth_gss);		/* link in the gss authenticator */
 #endif
@@ -910,7 +906,6 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("CL_EXPUNGE", PHP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
 	/* expunge silently */
 
-
 	/* Fetch options */
 
 	REGISTER_LONG_CONSTANT("FT_UID", FT_UID, CONST_PERSISTENT | CONST_CS);
@@ -924,7 +919,6 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("FT_PREFETCHTEXT", FT_PREFETCHTEXT, CONST_PERSISTENT | CONST_CS);
 	/* IMAP prefetch text when fetching header */
 
-
 	/* Flagging options */
 
 	REGISTER_LONG_CONSTANT("ST_UID", ST_UID, CONST_PERSISTENT | CONST_CS);
@@ -934,14 +928,12 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("ST_SET", ST_SET, CONST_PERSISTENT | CONST_CS);
 	/* set vs. clear */
 
-
 	/* Copy options */
 
 	REGISTER_LONG_CONSTANT("CP_UID", CP_UID, CONST_PERSISTENT | CONST_CS);
 	/* argument is a UID sequence */
 	REGISTER_LONG_CONSTANT("CP_MOVE", CP_MOVE, CONST_PERSISTENT | CONST_CS);
 	/* delete from source after copying */
-
 
 	/* Search/sort options */
 
@@ -955,7 +947,6 @@ PHP_MINIT_FUNCTION(imap)
 	/* free sort program after finished */
 	REGISTER_LONG_CONSTANT("SO_NOSERVER", SO_NOSERVER, CONST_PERSISTENT | CONST_CS);
 	/* don't do server-based sort */
-
 
 	/* Status options */
 
@@ -971,7 +962,6 @@ PHP_MINIT_FUNCTION(imap)
 	/* UID validity value */
 	REGISTER_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
 	/* get all status information */
-
 
 	/* Bits for mm_list() and mm_lsub() */
 
@@ -1442,7 +1432,6 @@ PHP_FUNCTION(imap_setacl)
 }
 /* }}} */
 
-
 /* {{{ proto array imap_getacl(resource stream_id, string mailbox)
 	Gets the ACL for a given mailbox */
 PHP_FUNCTION(imap_getacl)
@@ -1474,9 +1463,7 @@ PHP_FUNCTION(imap_getacl)
 	IMAPG(imap_acl_list) = NIL;
 }
 /* }}} */
-
 #endif /* HAVE_IMAP2000 || HAVE_IMAP2001 */
-
 
 /* {{{ proto bool imap_expunge(resource stream_id)
    Permanently delete all messages marked for deletion */
@@ -1604,7 +1591,7 @@ PHP_FUNCTION(imap_headers)
 			strlcat(tmp, "} ", sizeof(tmp));
 		}
 		mail_fetchsubject(t = tmp + strlen(tmp), imap_le_struct->imap_stream, msgno, (long)25);
-		snprintf(t += strlen(t), sizeof(tmp) - strlen(tmp),  " (%ld chars)", cache->rfc822_size);
+		snprintf(t += strlen(t), sizeof(tmp) - strlen(tmp), " (%ld chars)", cache->rfc822_size);
 		add_next_index_string(return_value, tmp, 1);
 	}
 }
@@ -2077,7 +2064,6 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 	mail_free_envelope(&en);
 }
 /* }}} */
-
 
 /* KMLANG */
 /* {{{ proto array imap_lsub(resource stream_id, string ref, string pattern)
@@ -2613,7 +2599,6 @@ PHP_FUNCTION(imap_utf8)
 }
 /* }}} */
 
-
 /* {{{ macros for the modified utf7 conversion functions
  *
  * author: Andrew Skalski <askalski@chek.com>
@@ -2626,12 +2611,12 @@ PHP_FUNCTION(imap_utf8)
 #define B64CHAR(c) (isalnum(c) || (c) == '+' || (c) == ',')
 
 /* map the low 64 bits of `n' to the modified-base64 characters */
-#define B64(n)  ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-                "abcdefghijklmnopqrstuvwxyz0123456789+,"[(n) & 0x3f])
+#define B64(n)	("ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+				"abcdefghijklmnopqrstuvwxyz0123456789+,"[(n) & 0x3f])
 
 /* map the modified-base64 character `c' to its 64 bit value */
-#define UNB64(c)        ((c) == '+' ? 62 : (c) == ',' ? 63 : (c) >= 'a' ? \
-                        (c) - 71 : (c) >= 'A' ? (c) - 65 : (c) + 4)
+#define UNB64(c)	((c) == '+' ? 62 : (c) == ',' ? 63 : (c) >= 'a' ? \
+					(c) - 71 : (c) >= 'A' ? (c) - 65 : (c) + 4)
 /* }}} */
 
 /* {{{ proto string imap_utf7_decode(string buf)
@@ -2896,7 +2881,7 @@ PHP_FUNCTION(imap_utf7_encode)
 #undef UNB64
 
 #ifdef HAVE_IMAP_MUTF7
-static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *in;
 	int in_len;
@@ -2906,7 +2891,7 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in, &in_len, UG(utf8_conv)) == FAILURE) {
 			return;
 		}
-	
+
 		if (in_len < 1) {
 			RETURN_EMPTY_STRING();
 		}
@@ -2935,6 +2920,7 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_UTF8_STRING(out, ZSTR_DUPLICATE);
 	}
 }
+/* }}} */
 
 /* {{{ proto string imap_utf8_to_mutf7(string in)
    Encode a UTF-8 string to modified UTF-7 */
@@ -2942,6 +2928,7 @@ PHP_FUNCTION(imap_utf8_to_mutf7)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
 /* {{{ proto string imap_mutf7_to_utf8(string in)
    Decode a modified UTF-7 string to UTF-8 */
@@ -2949,6 +2936,7 @@ PHP_FUNCTION(imap_mutf7_to_utf8)
 {
 	php_imap_mutf7(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 #endif
 
 /* {{{ proto bool imap_setflag_full(resource stream_id, string sequence, string flag [, int options])
@@ -3093,14 +3081,14 @@ PHP_FUNCTION(imap_fetchheader)
    Get the unique message id associated with a standard sequential message number */
 PHP_FUNCTION(imap_uid)
 {
- 	zval *streamind;
- 	long msgno;
+	zval *streamind;
+	long msgno;
 	pils *imap_le_struct;
- 	int msgindex;
+	int msgindex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &streamind, &msgno) == FAILURE) {
- 		return;
- 	}
+		return;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -3118,17 +3106,17 @@ PHP_FUNCTION(imap_uid)
    Get the sequence number associated with a UID */
 PHP_FUNCTION(imap_msgno)
 {
- 	zval *streamind;
- 	long msgno;
+	zval *streamind;
+	long msgno;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &streamind, &msgno) == FAILURE) {
- 		return;
- 	}
+		return;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
- 	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msgno));
+	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msgno));
 }
 /* }}} */
 
@@ -3136,21 +3124,21 @@ PHP_FUNCTION(imap_msgno)
    Get status info from a mailbox */
 PHP_FUNCTION(imap_status)
 {
- 	zval *streamind;
- 	char *mbx;
- 	int mbx_len;
- 	long flags;
+	zval *streamind;
+	char *mbx;
+	int mbx_len;
+	long flags;
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl", &streamind, &mbx, &mbx_len, &flags) == FAILURE) {
- 		return;
- 	}
+		return;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	object_init(return_value);
 
- 	if (mail_status(imap_le_struct->imap_stream, mbx, flags)) {
+	if (mail_status(imap_le_struct->imap_stream, mbx, flags)) {
 		add_property_long(return_value, "flags", IMAPG(status_flags));
 		if (IMAPG(status_flags) & SA_MESSAGES) {
 			add_property_long(return_value, "messages", IMAPG(status_messages));
@@ -3187,8 +3175,8 @@ PHP_FUNCTION(imap_bodystruct)
 	BODY *body;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &streamind, &msg, &section, &section_len) == FAILURE) {
- 		return;
- 	}
+		return;
+	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -3213,24 +3201,23 @@ PHP_FUNCTION(imap_bodystruct)
 
 	if (body->subtype) {
 		add_property_long(return_value, "ifsubtype", 1);
-		add_property_string(return_value, "subtype",  body->subtype, 1);
+		add_property_string(return_value, "subtype", body->subtype, 1);
 	} else {
 		add_property_long(return_value, "ifsubtype", 0);
 	}
 
 	if (body->description) {
 		add_property_long(return_value, "ifdescription", 1);
-		add_property_string(return_value, "description",  body->description, 1);
+		add_property_string(return_value, "description", body->description, 1);
 	} else {
 		add_property_long(return_value, "ifdescription", 0);
 	}
 	if (body->id) {
 		add_property_long(return_value, "ifid", 1);
-		add_property_string(return_value, "id",  body->id, 1);
+		add_property_string(return_value, "id", body->id, 1);
 	} else {
 		add_property_long(return_value, "ifid", 0);
 	}
-
 
 	if (body->size.lines) {
 		add_property_long(return_value, "lines", body->size.lines);
@@ -3295,9 +3282,9 @@ PHP_FUNCTION(imap_bodystruct)
    Read an overview of the information in the headers of the given message sequence */
 PHP_FUNCTION(imap_fetch_overview)
 {
- 	zval *streamind;
- 	char *sequence;
- 	int sequence_len;
+	zval *streamind;
+	char *sequence;
+	int sequence_len;
 	pils *imap_le_struct;
 	zval *myoverview;
 	char *address;
@@ -3564,7 +3551,7 @@ PHP_FUNCTION(imap_mail_compose)
 		}
 	}
 
- 	zend_hash_move_forward(Z_ARRVAL_P(body));
+	zend_hash_move_forward(Z_ARRVAL_P(body));
 
 	while (zend_hash_get_current_data(Z_ARRVAL_P(body), (void **) &data) == SUCCESS) {
 		if (Z_TYPE_PP(data) == IS_ARRAY) {
@@ -3738,7 +3725,7 @@ PHP_FUNCTION(imap_mail_compose)
 		/* yucky default */
 			if (!cookie) {
 				cookie = "-";
-			} else if (strlen(cookie) > (SENDBUFLEN - 2 - 2 - 2)) {  /* validate cookie length -- + CRLF * 2 */
+			} else if (strlen(cookie) > (SENDBUFLEN - 2 - 2 - 2)) { /* validate cookie length -- + CRLF * 2 */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The boudary should be no longer then 4kb");
 				RETVAL_FALSE;
 				goto done;
@@ -3787,7 +3774,6 @@ done:
 	mail_free_envelope(&env);
 }
 /* }}} */
-
 
 /* {{{ _php_imap_mail
  */
@@ -4216,7 +4202,6 @@ PHP_FUNCTION(imap_mime_header_decode)
 }
 /* }}} */
 
-
 /* Support Functions */
 
 #ifdef HAVE_RFC822_OUTPUT_ADDRESS_LIST
@@ -4230,7 +4215,6 @@ static long _php_rfc822_soutr (void *stream, char *string)
 	smart_str_appendl(ret, string, len);
 	return LONGT;
 }
-
 /* }}} */
 
 /* {{{ _php_rfc822_write_address
@@ -4465,21 +4449,21 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 
 	if (body->subtype) {
 		add_property_long(arg, "ifsubtype", 1);
-		add_property_string(arg, "subtype",  body->subtype, 1);
+		add_property_string(arg, "subtype", body->subtype, 1);
 	} else {
 		add_property_long(arg, "ifsubtype", 0);
 	}
 
 	if (body->description) {
 		add_property_long(arg, "ifdescription", 1);
-		add_property_string(arg, "description",  body->description, 1);
+		add_property_string(arg, "description", body->description, 1);
 	} else {
 		add_property_long(arg, "ifdescription", 0);
 	}
 
 	if (body->id) {
 		add_property_long(arg, "ifid", 1);
-		add_property_string(arg, "id",  body->id, 1);
+		add_property_string(arg, "id", body->id, 1);
 	} else {
 		add_property_long(arg, "ifid", 0);
 	}
@@ -4568,7 +4552,6 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 }
 /* }}} */
-
 
 /* imap_thread, stealing this from header cclient -rjs3 */
 /* {{{ build_thread_tree_helper
@@ -4715,8 +4698,7 @@ PHP_FUNCTION(imap_timeout)
 /* }}} */
 
 #define GETS_FETCH_SIZE 8196LU
-/* {{{ php_mail_gets */
-static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md)
+static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md) /* {{{ */
 {
 	TSRMLS_FETCH();
 
