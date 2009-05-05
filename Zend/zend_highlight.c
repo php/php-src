@@ -142,14 +142,8 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				zend_printf("<span style=\"color: %s\">", last_color);
 			}
 		}
-		switch (token_type) {
-			case T_END_HEREDOC:
-				zend_html_puts(token.value.str.val, token.value.str.len TSRMLS_CC);
-				break;
-			default:
-				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
-				break;
-		}
+
+		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
@@ -168,19 +162,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			efree(token.value.str.val);
 		}
 		token.type = 0;
-	}
-
-	/* handler for trailing comments, see bug #42767 */
-	if (LANG_SCNG(yy_leng) && LANG_SCNG(yy_text) < LANG_SCNG(yy_limit)) {
-		if (last_color != syntax_highlighter_ini->highlight_comment) {
-			if (last_color != syntax_highlighter_ini->highlight_html) {
-				zend_printf("</span>");
-			}
-			if (syntax_highlighter_ini->highlight_comment != syntax_highlighter_ini->highlight_html) {
-				zend_printf("<span style=\"color: %s\">", syntax_highlighter_ini->highlight_comment);
-			}
-		}
-		zend_html_puts(LANG_SCNG(yy_text), (LANG_SCNG(yy_limit) - LANG_SCNG(yy_text)) TSRMLS_CC);
 	}
 
 	if (last_color != syntax_highlighter_ini->highlight_html) {
