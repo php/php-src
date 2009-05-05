@@ -115,13 +115,19 @@ do {																			\
 	} \
 }
 
+/* To save initial string length after scanning to first variable, CG(doc_comment_len) can be reused */
+#define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) CG(doc_comment_len) = (len)
+#define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    CG(doc_comment_len)
+
+#define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x7F)
+
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
 BEGIN_EXTERN_C()
 
 static void _yy_push_state(int new_state TSRMLS_DC)
- {
+{
 	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
 	YYSETCONDITION(new_state);
 }
@@ -1324,63 +1330,8 @@ LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
-ANY_CHAR [^\x00]
+ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
-NULL [\x00]{1}
-
-/*
- * LITERAL_DOLLAR matches unescaped $ that aren't followed by a label character
- * or a { and therefore will be taken literally. The case of literal $ before
- * a variable or "${" is handled in a rule for each string type
- */
-DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
-BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
-HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
-
-/*
- * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
- * special cases need to be handled. HEREDOC_CHARS doesn't allow a line to
- * match when { or $, and/or \ is at the end. (("{"*|"$"*)"\\"?) handles that,
- * along with cases where { or $, and/or \ is the ONLY thing on a line
- *
- * The other case is when a line contains a label, followed by ONLY
- * { or $, and/or \  Handled by ({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))
- */
-HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEWLINE})
-
-/*
- * This pattern is just used in the next 2 for matching { or literal $, and/or
- * \ escape sequence immediately at the beginning of a line or after a label
- */
-HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
-
-/*
- * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
- * matching after a newline that starts with either a non-label character or a
- * label that isn't followed by a newline. Like HEREDOC_CHARS, they won't match
- * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
- * or "{$", is handled in the heredoc rules
- *
- * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
- * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
- * character or ; from matching on a possible (real) ending label
- */
-HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
-HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
-
-/*
- * CHARS matches everything up to a variable or "{$"
- * {'s are matched as long as they aren't followed by a $
- * The case of { before "{$" is handled in a rule for each string type
- *
- * For heredocs, matching continues across/after newlines if/when it's known
- * that the next line doesn't contain a possible ending label
- */
-DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
-BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
-HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
-
-NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-Z0-9_\x7f-\xff;\n\r]|(";"[^\n\r])))))
 
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
@@ -2037,6 +1988,14 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 }
 
 <INITIAL>"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"'php'"){WHITESPACE}*">" {
+	YYCTYPE *bracket = zend_memrchr(yytext, '<', yyleng - (sizeof("script language=php>") - 1));
+
+	if (bracket != SCNG(yy_text)) {
+		/* Handle previously scanned HTML, as possible <script> tags found are assumed to not be PHP's */
+		YYCURSOR = bracket;
+		goto inline_html;
+	}
+
 	HANDLE_NEWLINES(yytext, yyleng);
 	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
 	Z_STRLEN_P(zendlval) = yyleng;
@@ -2107,28 +2066,47 @@ NOWDOC_CHARS        ([^\n\r]|{NEWLINE}+([^a-zA-Z_\x7f-\xff\n\r]|({LABEL}([^a-zA-
 }
 
 <INITIAL>{ANY_CHAR} {
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
 
 inline_char_handler:
 
 	while (1) {
 		YYCTYPE *ptr = memchr(YYCURSOR, '<', YYLIMIT - YYCURSOR);
 
-		if (ptr == NULL) {
-			YYCURSOR = YYLIMIT;
-			yyleng   = YYCURSOR - SCNG(yy_text);
-			break;
+		YYCURSOR = ptr ? ptr + 1 : YYLIMIT;
 
-		} else {
-			YYCURSOR = ptr + 1;
-
-			/* stop if it may be an opening tag (<?, <%, <script>). this condition is not optimal though */
-			if (YYCURSOR < YYLIMIT && (*YYCURSOR == '?' || *YYCURSOR == '%' || *YYCURSOR == 's')) {
-				--YYCURSOR;
-				yyleng = YYCURSOR - SCNG(yy_text);
-				break;
+		if (YYCURSOR < YYLIMIT) {
+			switch (*YYCURSOR) {
+				case '?':
+					if (CG(short_tags) || !strncasecmp(YYCURSOR + 1, "php", 3)) { /* Assume [ \t\n\r] follows "php" */
+						break;
+					}
+					continue;
+				case '%':
+					if (CG(asp_tags)) {
+						break;
+					}
+					continue;
+				case 's':
+				case 'S':
+					/* Probably NOT an opening PHP <script> tag, so don't end the HTML chunk yet
+					 * If it is, the PHP <script> tag rule checks for any HTML scanned before it */
+					YYCURSOR--;
+					yymore();
+				default:
+					continue;
 			}
+
+			YYCURSOR--;
 		}
+
+		break;
 	}
+
+inline_html:
+	yyleng = YYCURSOR - SCNG(yy_text);
 
 	Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
 	Z_STRLEN_P(zendlval) = yyleng;
@@ -2192,7 +2170,6 @@ inline_char_handler:
 	/* Invalid rule to return a more explicit parse error with proper line number */
 	yyless(0);
 	yy_pop_state(TSRMLS_C);
-	ZVAL_EMPTY_TEXT(zendlval); /* Empty since it won't be used */
 	return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -2215,96 +2192,76 @@ inline_char_handler:
 
 
 <ST_IN_SCRIPTING>"#"|"//" {
-	BEGIN(ST_ONE_LINE_COMMENT);
-	yymore();
-}
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '\r':
+				if (*YYCURSOR == '\n') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			case '\n':
+				CG(zend_lineno)++;
+				break;
+			case '%':
+				if (!CG(asp_tags)) {
+					continue;
+				}
+				/* fall through */
+			case '?':
+				if (*YYCURSOR == '>') {
+					YYCURSOR--;
+					break;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
 
-<ST_ONE_LINE_COMMENT>"?"|"%"|">" {
-	yymore();
-}
-
-<ST_ONE_LINE_COMMENT>[^\n\r?%>]*{ANY_CHAR} {
-	switch (yytext[yyleng-1]) {
-		case '?': case '%': case '>':
-			yyless(yyleng-1);
-			yymore();
-			break;
-		case '\n':
-			CG(zend_lineno)++;
-			/* intentional fall through */
-		default:
-			Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-			Z_STRLEN_P(zendlval) = yyleng;
-			Z_TYPE_P(zendlval) = IS_STRING;
-			BEGIN(ST_IN_SCRIPTING);
-			return T_COMMENT;
+		break;
 	}
-}
 
-<ST_ONE_LINE_COMMENT>{NEWLINE} {
-	Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-	Z_STRLEN_P(zendlval) = yyleng;
-	Z_TYPE_P(zendlval) = IS_STRING;
-	BEGIN(ST_IN_SCRIPTING);
-	CG(zend_lineno)++;
+	yyleng = YYCURSOR - SCNG(yy_text);
+
 	return T_COMMENT;
 }
 
-<ST_ONE_LINE_COMMENT>"?>"|"%>" {
-    if (CG(asp_tags) || yytext[yyleng-2] != '%') { /* asp comment? */
-		Z_STRVAL_P(zendlval) = yytext; /* no copying - intentional */
-		Z_STRLEN_P(zendlval) = yyleng-2;
-		Z_TYPE_P(zendlval) = IS_STRING;
-		yyless(yyleng - 2);
-		BEGIN(ST_IN_SCRIPTING);
-		return T_COMMENT;
+<ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
+	int doc_com;
+
+	if (yyleng > 2) {
+		doc_com = 1;
+		RESET_DOC_COMMENT();
 	} else {
-		yymore();
+		doc_com = 0;
 	}
-}
 
-<ST_IN_SCRIPTING>"/**"{WHITESPACE} {
-	RESET_DOC_COMMENT();
-	BEGIN(ST_DOC_COMMENT);
-	yymore();
-}
-
-<ST_COMMENT,ST_DOC_COMMENT>{NULL} {
-	zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
-	return 0;
-}
-
-<ST_IN_SCRIPTING>"/*" {
-	BEGIN(ST_COMMENT);
-	yymore();
-}
-
-
-<ST_COMMENT,ST_DOC_COMMENT>[^*]+ {
-	yymore();
-}
-
-<ST_DOC_COMMENT>"*/" {
-	zval temp;
-
-	HANDLE_NEWLINES(yytext, yyleng);
-	if (!zend_copy_scanner_string(&temp, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
-		return 0;
+	while (YYCURSOR < YYLIMIT) {
+		if (*YYCURSOR++ == '*' && *YYCURSOR == '/') {
+			break;
+		}
 	}
-	CG(doc_comment) = temp.value.uni.val;
-	CG(doc_comment_len) = temp.value.uni.len;
-	BEGIN(ST_IN_SCRIPTING);
-	return T_DOC_COMMENT;
-}
 
-<ST_COMMENT>"*/" {
+	if (YYCURSOR < YYLIMIT) {
+		YYCURSOR++;
+	} else {
+		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+	}
+
+	yyleng = YYCURSOR - SCNG(yy_text);
 	HANDLE_NEWLINES(yytext, yyleng);
-	BEGIN(ST_IN_SCRIPTING);
+
+	if (doc_com) {
+		zval tmp;
+
+		if (!zend_copy_scanner_string(&tmp, yytext, yyleng, IS_UNICODE, SCNG(output_conv) TSRMLS_CC)) {
+			return 0;
+		}
+		CG(doc_comment) = tmp.value.uni.val;
+		CG(doc_comment_len) = tmp.value.uni.len;
+		return T_DOC_COMMENT;
+	}
+
 	return T_COMMENT;
-}
-
-<ST_COMMENT,ST_DOC_COMMENT>"*" {
-	yymore();
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
@@ -2330,39 +2287,84 @@ inline_char_handler:
 }
 
 
-/* ("{"*|"$"*) handles { or $ at the end of a string (or the entire contents)
- */
-<ST_IN_SCRIPTING>(["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
-	return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
+<ST_IN_SCRIPTING>b?['] {
+	int bprefix = (yytext[0] != '\'') ? 1 : 0;
+
+	while (1) {
+		if (YYCURSOR < YYLIMIT) {
+			if (*YYCURSOR == '\'') {
+				YYCURSOR++;
+				yyleng = YYCURSOR - SCNG(yy_text);
+
+				break;
+			} else if (*YYCURSOR++ == '\\' && YYCURSOR < YYLIMIT) {
+				YYCURSOR++;
+			}
+		} else {
+			yyleng = YYLIMIT - SCNG(yy_text);
+
+			/* Unclosed single quotes; treat similar to double quotes, but without a separate token
+			 * for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
+			 * rule, which continued in ST_IN_SCRIPTING state after the quote */
+			return T_ENCAPSED_AND_WHITESPACE;
+		}
+	}
+
+	if (bprefix) {
+		zend_scan_binary_single_string(zendlval, yytext+2, yyleng-3 TSRMLS_CC);
+		return T_CONSTANT_ENCAPSED_STRING;
+	} else {
+		return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
+	}
 }
 
 
-<ST_IN_SCRIPTING>(b["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
-	zend_scan_binary_escape_string(zendlval, yytext+2, yyleng-3, '"' TSRMLS_CC);
-	return T_CONSTANT_ENCAPSED_STRING;
-}
+<ST_IN_SCRIPTING>b?["] {
+	int bprefix = (yytext[0] != '"') ? 1 : 0;
 
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '"':
+				yyleng = YYCURSOR - SCNG(yy_text);
 
-<ST_IN_SCRIPTING>([']([^'\\]|("\\"{ANY_CHAR}))*[']) {
-	return zend_scan_unicode_single_string(zendlval TSRMLS_CC);
-}
+				if (bprefix) {
+					zend_scan_binary_escape_string(zendlval, yytext+2, yyleng-3, '"' TSRMLS_CC);
+					return T_CONSTANT_ENCAPSED_STRING;
+				} else {
+					return zend_scan_unicode_escape_string(zendlval, yytext+1, yyleng-2, 0x22 /*'"'*/, T_CONSTANT_ENCAPSED_STRING TSRMLS_CC);
+				}
+			case '$':
+				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '{':
+				if (*YYCURSOR == '$') {
+					break;
+				}
+				continue;
+			case '\\':
+				if (YYCURSOR < YYLIMIT) {
+					YYCURSOR++;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
 
+		YYCURSOR--;
+		break;
+	}
 
-<ST_IN_SCRIPTING>("b'"([^'\\]|("\\"{ANY_CHAR}))*[']) {
-	zend_scan_binary_single_string(zendlval, yytext+2, yyleng-3 TSRMLS_CC);
-	return T_CONSTANT_ENCAPSED_STRING;
-}
+	/* Remember how much was scanned to save rescanning */
+	SET_DOUBLE_QUOTES_SCANNED_LENGTH(YYCURSOR - SCNG(yy_text) - yyleng);
 
+	YYCURSOR = SCNG(yy_text) + yyleng;
 
-<ST_IN_SCRIPTING>["] {
 	BEGIN(ST_DOUBLE_QUOTES);
-	return '"';
+	return bprefix ? T_BINARY_DOUBLE : '"';
 }
 
-<ST_IN_SCRIPTING>b["] {
-	BEGIN(ST_DOUBLE_QUOTES);
-	return T_BINARY_DOUBLE;
-}
 
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 	char *s;
@@ -2398,7 +2400,7 @@ inline_char_handler:
 
 	/* Check for ending label on the next line */
 	if (CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, CG(heredoc_len))) {
-		unsigned char *end = YYCURSOR + CG(heredoc_len);
+		YYCTYPE *end = YYCURSOR + CG(heredoc_len);
 
 		if (*end == ';') {
 			end++;
@@ -2419,54 +2421,6 @@ inline_char_handler:
 }
 
 
-/* Match everything up to and including a possible ending label, so if the label
- * doesn't match, it's kept with the rest of the string
- *
- * {HEREDOC_NEWLINE}+ handles the case of more than one newline sequence that
- * couldn't be matched with HEREDOC_CHARS, because of the following label
- */
-<ST_HEREDOC>{HEREDOC_CHARS}*{HEREDOC_NEWLINE}+{LABEL}";"?[\n\r] {
-	char *end = yytext + yyleng - 1;
-
-	if (end[-1] == ';') {
-		end--;
-		yyleng--;
-	}
-
-	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
-		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
-
-		/* May have matched fooLABEL; make sure there's a newline before it */
-		if (yytext[len] != '\n') {
-			if (yytext[len] != '\r') {
-				yyless(yyleng - 1);
-				yymore();
-			}
-		} else if (len > 0 && yytext[len - 1] == '\r') {
-			len--; /* Windows newline */
-		}
-
-		/* Go back before label, to match in ST_END_HEREDOC state. yytext will include
-		 * newline before label, for zend_highlight/strip, tokenizer, etc. */
-		yyless(yyleng - CG(heredoc_len) - 1); /* 1 for newline after label */
-
-		CG(increment_lineno) = 1; /* For newline before label */
-		BEGIN(ST_END_HEREDOC);
-
-		if (CG(literal_type) == IS_UNICODE) {
-			return zend_scan_unicode_escape_string(zendlval, yytext, len, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-		} else {
-			zend_scan_binary_escape_string(zendlval, yytext, len, 0 TSRMLS_CC);
-			return T_ENCAPSED_AND_WHITESPACE;
-		}
-	} else {
-		/* Go back to end of label, so the next match works correctly in case of
-		 * a variable or another label at the beginning of the next line */
-		yyless(yyleng - 1);
-		yymore();
-	}
-}
-
 <ST_END_HEREDOC>{ANY_CHAR} {
 	YYCURSOR += CG(heredoc_len) - 1;
 	yyleng = CG(heredoc_len);
@@ -2480,129 +2434,11 @@ inline_char_handler:
 }
 
 
-/* Will only match when $ follows: "{$" */
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{" {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	Z_LVAL_P(zendlval) = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
+	yyless(1);
 	return T_CURLY_OPEN;
-}
-
-
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ {
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-/* "{"{2,}|"$"{2,} handles { before "{$" or literal $ before a variable or "${"
- * (("{"+|"$"+)["]) handles { or $ at the end of a string
- *
- * Same for backquotes and heredocs, except the second case doesn't apply to
- * heredocs. yyless(yyleng - 1) is used to correct taking one character too many
- */
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
-	yyless(yyleng - 1);
-
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-
-<ST_BACKQUOTE>{BACKQUOTE_CHARS}+ {
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-<ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
-	yyless(yyleng - 1);
-
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-
-/* ({HEREDOC_NEWLINE}+({LABEL}";"?)?)? handles the possible case of newline
- * sequences, possibly followed by a label, that couldn't be matched with
- * HEREDOC_CHARS because of a following variable or "{$"
- *
- * This doesn't affect real ending labels, as they are followed by a newline,
- * which will result in a longer match for the correct rule if present
- */
-<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)? {
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
-	yyless(yyleng - 1);
-
-	if (CG(literal_type) == IS_UNICODE) {
-		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
-	} else {
-		zend_scan_binary_escape_string(zendlval, yytext, yyleng, 0 TSRMLS_CC);
-		return T_ENCAPSED_AND_WHITESPACE;
-	}
-}
-
-
-<ST_NOWDOC>({NOWDOC_CHARS}+{NEWLINE}+|{NEWLINE}+){LABEL}";"?[\n\r] {
-	char *end = yytext + yyleng - 1;
-
-	if (end[-1] == ';') {
-		end--;
-		yyleng--;
-	}
-
-	if (yyleng > CG(heredoc_len) && !memcmp(end - CG(heredoc_len), CG(heredoc), CG(heredoc_len))) {
-		int len = yyleng - CG(heredoc_len) - 2; /* 2 for newline before and after label */
-
-		/* May have matched fooLABEL; make sure there's a newline before it */
-		if (yytext[len] != '\n') {
-			if (yytext[len] != '\r') {
-				yyless(yyleng - 1);
-				yymore();
-			}
-		} else if (len > 0 && yytext[len - 1] == '\r') {
-			len--; /* Windows newline */
-		}
-
-		/* Go back before label, to match in ST_END_HEREDOC state. yytext will include
-		 * newline before label, for zend_highlight/strip, tokenizer, etc. */
-		yyless(yyleng - CG(heredoc_len) - 1); /* 1 for newline after label */
-
-		CG(increment_lineno) = 1; /* For newline before label */
-		BEGIN(ST_END_HEREDOC);
-
-		if (!zend_copy_scanner_string(zendlval, yytext, len, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
-			return 0;
-		}
-		HANDLE_NEWLINES(yytext, len);
-		return T_ENCAPSED_AND_WHITESPACE;
-	} else {
-		/* Go back to end of label, so the next match works correctly in case of
-		 * another label at the beginning of the next line */
-		yyless(yyleng - 1);
-		yymore();
-	}
 }
 
 
@@ -2611,15 +2447,250 @@ inline_char_handler:
 	return '"';
 }
 
-
 <ST_BACKQUOTE>[`] {
 	BEGIN(ST_IN_SCRIPTING);
 	return '`';
 }
 
-<*>{NULL} { return 0; } /* EOF */
+
+<ST_DOUBLE_QUOTES>{ANY_CHAR} {
+	if (GET_DOUBLE_QUOTES_SCANNED_LENGTH()) {
+		YYCURSOR += GET_DOUBLE_QUOTES_SCANNED_LENGTH() - 1;
+		SET_DOUBLE_QUOTES_SCANNED_LENGTH(0);
+
+		goto double_quotes_scan_done;
+	}
+
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
+		YYCURSOR++;
+	}
+
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '"':
+				break;
+			case '$':
+				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '{':
+				if (*YYCURSOR == '$') {
+					break;
+				}
+				continue;
+			case '\\':
+				if (YYCURSOR < YYLIMIT) {
+					YYCURSOR++;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+
+		YYCURSOR--;
+		break;
+	}
+
+double_quotes_scan_done:
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x22 /*'"'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '"' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	}
+}
+
+
+<ST_BACKQUOTE>{ANY_CHAR} {
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
+		YYCURSOR++;
+	}
+
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '`':
+				break;
+			case '$':
+				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '{':
+				if (*YYCURSOR == '$') {
+					break;
+				}
+				continue;
+			case '\\':
+				if (YYCURSOR < YYLIMIT) {
+					YYCURSOR++;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+
+		YYCURSOR--;
+		break;
+	}
+
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng, 0x60 /*'`'*/, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng, '`' TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	}
+}
+
+
+<ST_HEREDOC>{ANY_CHAR} {
+	int newline = 0;
+
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+
+	YYCURSOR--;
+
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '\r':
+				if (*YYCURSOR == '\n') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			case '\n':
+				/* Check for ending label on the next line */
+				if (IS_LABEL_START(*YYCURSOR) && CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, CG(heredoc), CG(heredoc_len))) {
+					YYCTYPE *end = YYCURSOR + CG(heredoc_len);
+
+					if (*end == ';') {
+						end++;
+					}
+
+					if (*end == '\n' || *end == '\r') {
+						/* newline before label will be subtracted from returned text, but
+						 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
+						if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
+							newline = 2; /* Windows newline */
+						} else {
+							newline = 1;
+						}
+
+						CG(increment_lineno) = 1; /* For newline before label */
+						BEGIN(ST_END_HEREDOC);
+
+						goto heredoc_scan_done;
+					}
+				}
+				continue;
+			case '$':
+				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '{':
+				if (*YYCURSOR == '$') {
+					break;
+				}
+				continue;
+			case '\\':
+				if (YYCURSOR < YYLIMIT && *YYCURSOR != '\n' && *YYCURSOR != '\r') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+
+		YYCURSOR--;
+		break;
+	}
+
+heredoc_scan_done:
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	if (CG(literal_type) == IS_UNICODE) {
+		return zend_scan_unicode_escape_string(zendlval, yytext, yyleng - newline, 0, T_ENCAPSED_AND_WHITESPACE TSRMLS_CC);
+	} else {
+		zend_scan_binary_escape_string(zendlval, yytext, yyleng - newline, 0 TSRMLS_CC);
+		return T_ENCAPSED_AND_WHITESPACE;
+	}
+}
+
+
+<ST_NOWDOC>{ANY_CHAR} {
+	int newline = 0;
+
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+
+	YYCURSOR--;
+
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '\r':
+				if (*YYCURSOR == '\n') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			case '\n':
+				/* Check for ending label on the next line */
+				if (IS_LABEL_START(*YYCURSOR) && CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, CG(heredoc), CG(heredoc_len))) {
+					YYCTYPE *end = YYCURSOR + CG(heredoc_len);
+
+					if (*end == ';') {
+						end++;
+					}
+
+					if (*end == '\n' || *end == '\r') {
+						/* newline before label will be subtracted from returned text, but
+						 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
+						if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
+							newline = 2; /* Windows newline */
+						} else {
+							newline = 1;
+						}
+
+						CG(increment_lineno) = 1; /* For newline before label */
+						BEGIN(ST_END_HEREDOC);
+
+						goto nowdoc_scan_done;
+					}
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+	}
+
+nowdoc_scan_done:
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	if (!zend_copy_scanner_string(zendlval, yytext, yyleng - newline, CG(literal_type), SCNG(output_conv) TSRMLS_CC)) {
+		return 0;
+	}
+	HANDLE_NEWLINES(yytext, yyleng - newline);
+	return T_ENCAPSED_AND_WHITESPACE;
+}
+
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 	goto restart;
 }
