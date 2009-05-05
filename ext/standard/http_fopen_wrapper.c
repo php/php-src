@@ -330,13 +330,31 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	/* send it */
 	php_stream_write(stream, scratch, strlen(scratch));
 
-	if (context &&
-		php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS &&
-		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval)) {
-		/* Remove newlines and spaces from start and end,
-		   php_trim will estrndup() */
-		tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
-		if (strlen(tmp) > 0) {
+	if (context && php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS) {
+		tmp = NULL;
+		
+		if (Z_TYPE_PP(tmpzval) == IS_ARRAY) {
+			HashPosition pos;
+			zval **tmpheader = NULL;
+			smart_str tmpstr = {0};
+
+			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(tmpzval), &pos);
+				SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(tmpzval), (void *)&tmpheader, &pos);
+				zend_hash_move_forward_ex(Z_ARRVAL_PP(tmpzval), &pos)
+			) {
+				if (Z_TYPE_PP(tmpheader) == IS_STRING) {
+					smart_str_appendl(&tmpstr, Z_STRVAL_PP(tmpheader), Z_STRLEN_PP(tmpheader));
+					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
+				}
+			}
+			smart_str_0(&tmpstr);
+			tmp = tmpstr.c;
+		}
+		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval)) {
+			/* Remove newlines and spaces from start and end php_trim will estrndup() */
+			tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
+		}
+		if (tmp && strlen(tmp) > 0) {
 			if (!header_init) { /* Remove post headers for redirects */
 				int l = strlen(tmp);
 				char *s, *s2, *tmp_c = estrdup(tmp);
