@@ -73,6 +73,7 @@ var_dump($arr);
 session_destroy();
 ?>
 --EXPECT--
+PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#2 (2) {
@@ -109,4 +110,3 @@ array(1) {
   }
 }
 DESTROY: abtest
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
