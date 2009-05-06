@@ -1,3 +1,28 @@
+2009-05-05  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      tests/unset_cv05.phpt
+      tests/unset_cv06.phpt:
+      Fixed tests - thanks mgdm
+
+2009-05-05  Matt Wilmas  <php_lists@realplain.com>
+
+    * zend_language_scanner.c
+      zend_language_scanner.c
+      zend_language_scanner_defs.h
+      zend_language_scanner_defs.h:
+      Regenerate
+
+    * (PHP_5_3)
+      zend_highlight.c
+      zend_language_scanner.l:
+      MFH: Implemented manual scanning for strings/comments, plus misc. fixes
+
+    * zend_highlight.c
+      zend_language_scanner.l:
+      Implemented manual scanning for strings/comments, plus misc. fixes
+      For details, see http://news.php.net/php.internals/43808
+
 2009-05-01  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_variables.h:
