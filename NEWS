@@ -11,8 +11,8 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
-- Fixed bug #45092 (header HTTP context option not being used when compiled
-  using --with-curlwrappers). (Jani)
+- Fixed bug #48156 (Added support for lcov v1.7). (Ilia)
+
 - Fixed bug #48131 (Don't try to bind ipv4 addresses to ipv6 ips via
   bindto). (Ilia)
 - Fixed bug #48132 (configure check for curl ssl support fails with
@@ -75,6 +75,8 @@ PHP                                                                        NEWS
   Takeshi Abe)
 - Fixed bug #45191 (error_log ignores date.timezone php.ini val when
   setting logging timestamps). (Derick)
+- Fixed bug #45092 (header HTTP context option not being used when compiled
+  using --with-curlwrappers). (Jani)
 - Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
   (Martin McNickle)
 - Fixed bug #38805 (PDO truncates text from SQL Server text data type
