@@ -18,4 +18,3 @@ echo addcslashes($_GET['a'],"\0") . "\n";
 unsafe_raw
 
 1\0
-PHP Warning:  Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
