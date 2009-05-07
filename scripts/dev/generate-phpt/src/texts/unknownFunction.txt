@@ -1,0 +1,4 @@
+
+The function name is not a valid PHP function name.
+Check that the extension containing the function is loaded.
+
