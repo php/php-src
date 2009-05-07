@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Added ability to throw exceptions from SQLite3 instead of warnings. (Scott)
 - Added startup notices for deprecated ini settings. (Kalle)
 
+- Fixed bug #48185 (warning: value computed is not used in
+  pdo_sqlite_stmt_get_col line 271). (Matteo)
 - Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
 - Fixed bug #48034 (PHP crashes when script is 8192 (8KB) bytes long). (Dmitry)
