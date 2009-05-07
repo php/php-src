@@ -1805,19 +1805,19 @@ ZEND_FUNCTION(get_loaded_extensions)
 /* }}} */
 
 
-/* {{{ proto array get_defined_constants([mixed categorize])
+/* {{{ proto array get_defined_constants([bool categorize])
    Return an array containing the names and values of all defined constants */
 ZEND_FUNCTION(get_defined_constants)
 {
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc != 0 && argc != 1) {
-		ZEND_WRONG_PARAM_COUNT();
+	zend_bool categorize = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &categorize) == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
 
-	if (argc) {
+	if (categorize) {
 		HashPosition pos;
 		zend_constant *val;
 		int module_number;
