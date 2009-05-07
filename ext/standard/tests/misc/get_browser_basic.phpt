@@ -25,7 +25,7 @@ unicode.output_encoding = utf-8
  * Alias to functions: 
  */
 
-$browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.php';
+$browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';
 
 /* Needed for the unicode_decode() call later */
 unicode_set_error_mode( TO_UNICODE, U_CONV_ERROR_ESCAPE_UNICODE );
