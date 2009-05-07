@@ -23,7 +23,7 @@ browscap=ext/standard/tests/misc/browscap.ini
  * Alias to functions: 
  */
 
-$browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.php';
+$browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';
 
 echo "*** Testing get_browser() : basic functionality ***\n";
 
