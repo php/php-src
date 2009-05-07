@@ -94,7 +94,8 @@ PHP_METHOD(sqlite3, open)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
-	char *filename, *encryption_key, *fullpath;
+	zstr filename;
+	char *encryption_key, *fullpath;
 	zend_uchar filename_type;
 	int filename_len, encryption_key_len = 0;
 	long flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
@@ -116,17 +117,17 @@ PHP_METHOD(sqlite3, open)
 	}
 
 	if (filename_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &filename, &filename_len, (UChar *)filename, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+		if (php_stream_path_encode(NULL, &filename.s, &filename_len, filename.u, filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 			zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unable to decode filepath", 0 TSRMLS_CC);
 			return;
 		}
 	}
 
-	if (strncmp(filename, ":memory:", 8) != 0) {
-		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+	if (strncmp(filename.s, ":memory:", 8) != 0) {
+		if (!(fullpath = expand_filepath(filename.s, NULL TSRMLS_CC))) {
 			zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unable to expand filepath", 0 TSRMLS_CC);
 			if (filename_type == IS_UNICODE) {
-				efree(filename);
+				efree(filename.s);
 			}
 			return;
 		}
@@ -134,17 +135,17 @@ PHP_METHOD(sqlite3, open)
 		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "open_basedir prohibits opening %s", fullpath);
 			if (filename_type == IS_UNICODE) {
-				efree(filename);
+				efree(filename.s);
 			}
 			efree(fullpath);
 			return;
 		}
 	} else {
-		fullpath = estrdup(filename);
+		fullpath = estrdup(filename.s);
 	}
 
 	if (filename_type == IS_UNICODE) {
-		efree(filename);
+		efree(filename.s);
 	}
 
 #if SQLITE_VERSION_NUMBER >= 3005000
@@ -1264,7 +1265,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
+/* {{{ proto bool SQLite3Stmt::bindParam(mixed parameter_number, mixed parameter [, int type]) U
    Bind Paramater to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindParam)
 {
@@ -1295,7 +1296,7 @@ PHP_METHOD(sqlite3stmt, bindParam)
 }
 /* }}} */
 
-/* {{{ proto bool SQLite3Stmt::bindValue(inte parameter_number, mixed parameter [, int type])
+/* {{{ proto bool SQLite3Stmt::bindValue(mixed parameter_number, mixed parameter [, int type]) U
    Bind Value of a parameter to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindValue)
 {
@@ -1654,7 +1655,7 @@ PHP_METHOD(sqlite3result, finalize)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3Result::__construct()
+/* {{{ proto int SQLite3Result::__construct() U
    __constructor for SQLite3Result. */
 PHP_METHOD(sqlite3result, __construct)
 {
