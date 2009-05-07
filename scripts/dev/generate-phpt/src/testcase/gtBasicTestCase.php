@@ -30,7 +30,7 @@ abstract class gtBasicTestCase extends gtTestCase {
   }
   
   public function addBasicEcho() {
-    $this->testCase[] = "echo \"*** Test by calling method or function with its expected arguments ***\\n\"";
+    $this->testCase[] = "echo \"*** Test by calling method or function with its expected arguments ***\\n\";";
     $this->testCase = gtCodeSnippet::appendBlankLines(1, $this->testCase );
   }
 }

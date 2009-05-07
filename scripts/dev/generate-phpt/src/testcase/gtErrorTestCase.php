@@ -45,7 +45,7 @@ abstract class gtErrorTestCase extends gtTestCase {
   }
   
  public function addErrorEcho() {
-    $this->testCase[] = "echo \"*** Test by calling method or function with incorrect numbers of arguments ***\\n\"";
+    $this->testCase[] = "echo \"*** Test by calling method or function with incorrect numbers of arguments ***\\n\";";
     $this->testCase = gtCodeSnippet::appendBlankLines(1, $this->testCase );
   }
 }
