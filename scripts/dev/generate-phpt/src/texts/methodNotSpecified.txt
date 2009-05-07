@@ -1,0 +1,4 @@
+
+You have given a class name but not supplied a method name to test.
+The method name is required.
+
