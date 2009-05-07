@@ -31,7 +31,7 @@ UPGRADE NOTES - PHP 5.3
 1. Reserved words and classes
 =============================
 
-- **namespace**, **use** and **goto** are now reserved keywords.
+- **namespace** and **goto** are now reserved keywords.
 
 - **Closure** is now a reserved class. (Used by lambda and closure.)
 
