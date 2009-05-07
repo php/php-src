@@ -60,7 +60,7 @@ int(%d)
 Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for get_defined_constants() in %s on line %d
+Warning: get_defined_constants() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 string(5) "array"
 string(5) "array"
