@@ -7655,6 +7655,7 @@ SQLITE_PRIVATE void sqlite3PCacheSetDefault(void);
 # define SQLITE_OS_WINCE 0
 #endif
 
+#include <ctype.h>
 
 /*
 ** Define the maximum size of a temporary filename
