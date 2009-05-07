@@ -31,7 +31,7 @@ UPGRADE NOTES - PHP 5.3
 1. Reserved words and classes
 =============================
 
-- **namespace** and **goto** are now reserved keywords.
+- **namespace**, **use** and **goto** are now reserved keywords.
 
 - **Closure** is now a reserved class. (Used by lambda and closure.)
 
@@ -234,7 +234,14 @@ UPGRADE NOTES - PHP 5.3
 - PHP Windows binaries target i586 or later. i386 and i486 are not supported.
 
 - Windows support has been added for the following functions: getopt(),
-  imagecolorclosesthwb(), mcrypt_create_iv(), inet_ntop() and inet_pton().
+  imagecolorclosesthwb(), mcrypt_create_iv(), inet_ntop(), inet_pton(), 
+  getmxrr(), checkdnsrr(), dns_get_record(), linkinfo(), readlink(), 
+  symlink(), link(), fnmatch(), stream_socket_pair(), time_nanosleep(), 
+  time_sleep_until() and socket_create_pair().
+
+- Its now possible to use hardlinks on Windows using the link() function, 
+  and symbolic links via the symlink() function. Hardlinks are available 
+  as of Windows 2000 and symbolic links as of Windows Vista.
 
 ===================
 12. New in PHP 5.3:
