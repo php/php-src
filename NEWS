@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 3
+- Upgraded bundled sqlite to version 3.6.14. (Scott)
 
 07 May 2009, PHP 5.3.0 RC 2
 - Upgraded bundled sqlite to version 3.6.13. (Ilia)
