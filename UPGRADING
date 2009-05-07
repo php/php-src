@@ -228,8 +228,8 @@ UPGRADE NOTES - PHP 5.3
 11. Windows support
 ===================
 
-- The minimum Windows version is now Windows 2000. (Windows 98 and NT4 are no
-  longer supported).
+- The minimum Windows version is now Windows 2000. (Windows 98, ME and NT4 are
+  no longer supported).
 
 - PHP Windows binaries target i586 or later. i386 and i486 are not supported.
 
