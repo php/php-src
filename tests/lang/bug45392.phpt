@@ -6,14 +6,12 @@ display_errors=stderr
 <?php
 echo __LINE__ . "\n";
 ini_set('memory_limit', 100);
-ob_start(NULL, 10);
 echo __LINE__ ."\n";
 ob_start();
 $i = 0;
 while($i++ < 5000)  {
   echo str_repeat("may not be displayed ", 42);
 }
-ob_end_flush();
 ob_end_clean();
 ?>
 --EXPECTF--
