@@ -1,4 +1,5 @@
 --TEST--
+Testing lambda function in set_exception_handler()
 --FILE--
 <?php
 function au($class) {
