@@ -779,7 +779,6 @@ PHP_FUNCTION(file_put_contents)
 
 /* {{{ proto array file(string filename [, int flags[, resource context]]) U
    Read entire file into an array */
-/* UTODO: Accept unicode contents */
 PHP_FUNCTION(file)
 {
 	zval **ppfilename;
@@ -801,7 +800,7 @@ PHP_FUNCTION(file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr!", &ppfilename, &flags, &zcontext) == FAILURE) {
 		return;
 	}
-	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT | PHP_FILE_TEXT)) {
+	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT | PHP_FILE_TEXT | PHP_FILE_BINARY)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
 		RETURN_FALSE;
 	}
@@ -809,7 +808,7 @@ PHP_FUNCTION(file)
 	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
-	text_mode = flags & PHP_FILE_TEXT;
+	text_mode = !(flags & PHP_FILE_BINARY);
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
