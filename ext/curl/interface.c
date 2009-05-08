@@ -449,10 +449,12 @@ PHP_MINIT_FUNCTION(curl)
 	   of options and which version they were introduced */
 
 	/* Constants for curl_setopt() */
+#if LIBCURL_VERSION_NUM > 0x070a07 /* CURLOPT_IPRESOLVE is available since curl 7.10.8 */
 	REGISTER_CURL_CONSTANT(CURLOPT_IPRESOLVE);
 	REGISTER_CURL_CONSTANT(CURL_IPRESOLVE_WHATEVER);
 	REGISTER_CURL_CONSTANT(CURL_IPRESOLVE_V4);
 	REGISTER_CURL_CONSTANT(CURL_IPRESOLVE_V6);
+#endif
 	REGISTER_CURL_CONSTANT(CURLOPT_DNS_USE_GLOBAL_CACHE);
 	REGISTER_CURL_CONSTANT(CURLOPT_DNS_CACHE_TIMEOUT);
 	REGISTER_CURL_CONSTANT(CURLOPT_PORT);
@@ -1528,8 +1530,12 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_REDIR_PROTOCOLS:
 		case CURLOPT_PROTOCOLS:
 #endif
+#if LIBCURL_VERSION_NUM > 0x070a07 /* CURLOPT_IPRESOLVE is available since curl 7.10.8 */
 		case CURLOPT_IPRESOLVE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070f01
 		case CURLOPT_FTP_FILEMETHOD:
+#endif
 			convert_to_long_ex(zvalue);
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
