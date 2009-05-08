@@ -785,7 +785,7 @@ parse_eol:
 		} else {
 			do {
 				int windows_eol = 0;
-				if (eol_marker == '\n' && *(p - 1) == '\r') {
+				if (p != target_buf && eol_marker == '\n' && *(p - 1) == '\r') {
 					windows_eol++;
 				}
 				if (skip_blank_lines && !(p-s-windows_eol)) {
