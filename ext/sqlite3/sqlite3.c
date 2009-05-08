@@ -33,6 +33,7 @@
 
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "SAPI.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
 
