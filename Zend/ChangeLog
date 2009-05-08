@@ -1,3 +1,14 @@
+2009-05-07  Felipe Pena  <felipensp@gmail.com>
+
+    * tests/bug47714.phpt
+      tests/bug47714.phpt:
+      - Missing title
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      tests/017.phpt:
+      - MFH: Parameter parsing changes for get_defined_constants() (Kalle)
+
 2009-05-05  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * (PHP_5_3)
