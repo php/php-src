@@ -2033,7 +2033,9 @@ wrong_label:
 
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {
 	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
-	return 0;
+	yyless(yyleng - 1);
+	BEGIN(ST_IN_SCRIPTING);
+	return T_COMMENT;
 }
 
 
