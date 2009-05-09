@@ -922,7 +922,9 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
 
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling TSRMLS_CC);
-	RETVAL_ZVAL(*data, 1, 0);
+	if (data && *data) {
+		RETVAL_ZVAL(*data, 1, 0);
+	}
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		zval_dtor(return_value);
 		ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1, 1);
@@ -1006,7 +1008,11 @@ SPL_METHOD(RecursiveTreeIterator, current)
 		zval                      **data;
 
 		iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
-		RETURN_ZVAL(*data, 1, 0);
+		if (data && *data) {
+			RETURN_ZVAL(*data, 1, 0);
+		} else {
+			RETURN_NULL();
+		}
 	}
 
 	spl_recursive_tree_iterator_get_prefix(object, &prefix TSRMLS_CC);
@@ -2729,7 +2735,9 @@ SPL_METHOD(NoRewindIterator, current)
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->inner.iterator->funcs->get_current_data(intern->inner.iterator, &data TSRMLS_CC);
-	RETURN_ZVAL(*data, 1, 0);
+	if (data && *data) {
+		RETURN_ZVAL(*data, 1, 0);
+	}
 } /* }}} */
 
 /* {{{ proto void NoRewindIterator::next()
@@ -3041,6 +3049,9 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 	if (EG(exception)) {
 		return ZEND_HASH_APPLY_STOP;
 	}
+	if (data == NULL || *data == NULL) {
+		return ZEND_HASH_APPLY_STOP;
+	}
 	if (iter->funcs->get_current_key) {
 		key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 		if (EG(exception)) {
@@ -3070,6 +3081,9 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser 
 
 	iter->funcs->get_current_data(iter, &data TSRMLS_CC);
 	if (EG(exception)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
+	if (data == NULL || *data == NULL) {
 		return ZEND_HASH_APPLY_STOP;
 	}
 	Z_ADDREF_PP(data);
