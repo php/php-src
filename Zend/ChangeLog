@@ -1,3 +1,22 @@
+2009-05-08  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      zend_compile.c
+      zend_highlight.c
+      zend_language_scanner.l:
+      MFH: Better fix for bug #42767 (at source instead of workaround); also
+      fixes unclosed comments in tokenizer
+      
+      - Plus minor cleanup of unnecessary code, to match 5.3...
+
+2009-05-08  Scott MacVicar  <scott@macvicar.net>
+
+    * zend_API.c:
+      PPC machines mark char as unsigned, rather than signed.
+      This caused a segfault when using the T type for zend_parse_parameters
+      because the default value
+      ended up being 255 and never -1
+
 2009-05-07  Felipe Pena  <felipensp@gmail.com>
 
     * tests/bug47714.phpt
