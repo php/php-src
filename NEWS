@@ -63,6 +63,8 @@ PHP                                                                        NEWS
 - Fixed bug #47560 (explode()'s limit parameter odd behaviour). (Matt)
 - Fixed bug #47535 (Compilation failure in ps_fetch_from_1_to_8_bytes()).
   (Johannes)
+- Fixed bug #47534 (RecursiveDiteratoryIterator::getChildren ignoring
+  CURRENT_AS_PATHNAME). (Etienne)
 - Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
   double quote). (Dmitry)
 - Fixed bug #47038 (Memory leak in include). (Dmitry)
