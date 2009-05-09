@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 3
 - Upgraded bundled sqlite to version 3.6.14. (Scott)
+- Upgraded bundled libmagic to 5.03 in the fileinfo extension. (Scott)
 
 - Disabled SQLite3::loadExtension for threaded SAPIs. (Scott)
 
