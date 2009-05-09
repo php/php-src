@@ -10,7 +10,6 @@
 
 */
 
-CREDIT_LINE("Assert", "Thies C. Arntzen");
 CREDIT_LINE("BC Math", "Andi Gutmans");
 CREDIT_LINE("Bzip2", "Sterling Hughes");
 CREDIT_LINE("Calendar", "Shane Caraveo, Colin Viebrock, Hartmut Holzgraefe, Wez Furlong");
