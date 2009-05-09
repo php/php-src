@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
+- Added support for Sun CC (FR #46595 and FR #46513). (David Soria Parra)
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)

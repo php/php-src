@@ -17,11 +17,15 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   test "[$]$1" = "no" && $1=yes
 ])dnl
 dnl
+
+test -z "$CFLAGS" && auto_cflags=1
+
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
-AC_PROG_CC
+AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
+PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
 
 dnl Support systems with system libraries in e.g. /usr/lib64
@@ -115,6 +119,15 @@ if test "$PHP_DEBUG" = "yes"; then
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -O0"
+  fi
+  if test "$SUNCC" = "yes"; then
+    if test -n "$auto_cflags"; then
+      CFLAGS="-g"
+      CXXFLAGS="-g"
+    else
+      CFLAGS="$CFLAGS -g"
+      CXXFLAGS="$CFLAGS -g"
+    fi
   fi
 else
   PHP_DEBUG=0

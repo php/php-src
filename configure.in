@@ -140,8 +140,9 @@ esac
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
-AC_PROG_CC
+AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
+PHP_DETECT_SUNCC
 AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
@@ -187,6 +188,10 @@ case $host_cpu in
       CFLAGS="$CFLAGS -ieee"
     fi
     ;;
+  sparc*)
+    if test "$SUNCC" = "yes"; then
+      CFLAGS="$CFLAGS -xmemalign=8s"
+    fi
 esac
 
 case $host_alias in
@@ -731,6 +736,15 @@ if test "$PHP_GCOV" = "yes"; then
   dnl Add the special gcc flags
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
   CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
+  if test "$SUNCC" = "yes"; then
+    if test -n "$auto_cflags"; then
+      CFLAGS="-g"
+      CXXFLAGS="-g"
+    else
+      CFLAGS="$CFLAGS -g"
+      CXXFLAGS="$CFLAGS -g"
+    fi
+  fi
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
