@@ -1,11 +1,14 @@
 #define	FILE_VERSION_MAJOR	5
-#define	patchlevel		2
+#define	patchlevel		3
 
 /*
  * Patchlevel file for Ian Darwin's MAGIC command.
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
  *
  * $Log$
+ * Revision 1.4  2009/05/04 20:52:43  scottmac
+ * Update libmagic to 5.02
+ *
  * Revision 1.3  2009/03/15 23:02:35  scottmac
  * Update fileinfo to libmagic 5.00 and remove dependency on dirent.h on Windows
  *
