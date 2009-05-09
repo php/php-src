@@ -600,7 +600,9 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 	zval                      **data;
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
-	RETURN_ZVAL(*data, 1, 0);
+	if (data && *data) {
+		RETURN_ZVAL(*data, 1, 0);
+	}
 } /* }}} */
 
 /* {{{ proto void RecursiveIteratorIterator::next() U
