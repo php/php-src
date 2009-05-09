@@ -920,7 +920,7 @@ AC_DEFUN([PHP_GEN_BUILD_DIRS],[
 ])
 
 dnl
-dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx[, zend_ext]]]]])
+dnl PHP_NEW_EXTENSION(extname, sources [, shared [, sapi_class [, extra-cflags [, cxx [, zend_ext]]]]])
 dnl
 dnl Includes an extension in the build.
 dnl
@@ -968,12 +968,15 @@ dnl ---------------------------------------------- Shared module
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" = "cli"; then
 dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
-    if test "$PHP_SAPI" = "cgi"; then
-      PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
-      EXT_STATIC="$EXT_STATIC $1"
-    else
-      PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
-    fi
+    case "$PHP_SAPI" in
+      cgi|embed[)]
+        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
+        EXT_STATIC="$EXT_STATIC $1"
+        ;;
+      *[)]
+        PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
+        ;;
+    esac
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
   fi
   PHP_ADD_BUILD_DIR($ext_builddir)
