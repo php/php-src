@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 
 - Disabled SQLite3::loadExtension for threaded SAPIs. (Scott)
 
+
 07 May 2009, PHP 5.3.0 RC 2
 - Upgraded bundled sqlite to version 3.6.13. (Ilia)
 - Upgraded bundled PCRE to version 7.9. (Nuno)
@@ -273,9 +274,6 @@ PHP                                                                        NEWS
 - Added concatenation option to bz2.decompress stream filter.
   (Keisial at gmail dot com, Greg)
 - Added support for using compressed connections with PDO_mysql. (Johannes)
-
-- Implemented FR #46595 (Use cc as the default compiler). (David Soria Parra)
-- Implemented FR #46513 (Missing compiler flags for suncc).  (David Soria Parra)
 
 - Deprecated define_syslog_variables(). (Kalle)
 - Deprecated ereg extension. (Felipe)
