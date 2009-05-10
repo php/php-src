@@ -1840,6 +1840,11 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	return dest;
 }
 
+ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length)
+{
+	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
+}
+
 ZEND_API void zend_str_tolower(char *str, unsigned int length)
 {
 	register unsigned char *p = (unsigned char*)str;
