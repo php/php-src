@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2009 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -63,6 +63,7 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
+/* {{{ DVAL_TO_LVAL */
 #define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
 #ifdef _WIN64
 # define DVAL_TO_LVAL(d, l) \
@@ -75,11 +76,11 @@ END_EXTERN_C()
 # define DVAL_TO_LVAL(d, l) \
 	if ((d) >= LONG_MAX) { \
 		(l) = LONG_MAX; \
-	} else if ((d) <=  LONG_MIN) { \
+	} else if ((d) <= LONG_MIN) { \
 		(l) = LONG_MIN; \
-	} else {\
+	} else { \
 		(l) = (long) (d); \
-	} 
+	}
 #else
 # define DVAL_TO_LVAL(d, l) \
 	if ((d) > LONG_MAX) { \
@@ -94,11 +95,12 @@ END_EXTERN_C()
 		} else { \
 			(l) = (long) (d); \
 		} \
-	} 
+	}
 #endif
+/* }}} */
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
-#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a'  && (c) <= 'f'))
+#define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
@@ -246,7 +248,7 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 		return (char *)memchr(p, *needle, (end-p));
 	}
 
-	if(needle_len > end-haystack) {
+	if (needle_len > end-haystack) {
 		return NULL;
 	}
 
@@ -318,15 +320,8 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
-END_EXTERN_C()
+ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length);
 
-static inline char *
-zend_str_tolower_dup(const char *source, unsigned int length)
-{
-	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
-}
-
-BEGIN_EXTERN_C()
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
@@ -346,14 +341,15 @@ ZEND_API long zend_atol(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()
+
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
-	if ((*ppzv)->type!=IS_##upper_type) {					\
+	if (Z_TYPE_PP(ppzv)!=IS_##upper_type) {					\
 		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
 		convert_to_##lower_type(*ppzv);						\
 	}
 
 #define convert_to_explicit_type(pzv, type)		\
-    do {										\
+	do {										\
 		switch (type) {							\
 			case IS_NULL:						\
 				convert_to_null(pzv);			\
@@ -361,26 +357,26 @@ END_EXTERN_C()
 			case IS_LONG:						\
 				convert_to_long(pzv);			\
 				break;							\
-			case IS_DOUBLE: 					\
-				convert_to_double(pzv); 		\
-				break; 							\
-			case IS_BOOL: 						\
-				convert_to_boolean(pzv); 		\
-				break; 							\
-			case IS_ARRAY: 						\
-				convert_to_array(pzv); 			\
-				break; 							\
-			case IS_OBJECT: 					\
-				convert_to_object(pzv); 		\
-				break; 							\
-			case IS_STRING: 					\
-				convert_to_string(pzv); 		\
-				break; 							\
-			default: 							\
-				assert(0); 						\
-				break; 							\
+			case IS_DOUBLE:						\
+				convert_to_double(pzv);			\
+				break;							\
+			case IS_BOOL:						\
+				convert_to_boolean(pzv);		\
+				break;							\
+			case IS_ARRAY:						\
+				convert_to_array(pzv);			\
+				break;							\
+			case IS_OBJECT:						\
+				convert_to_object(pzv);			\
+				break;							\
+			case IS_STRING:						\
+				convert_to_string(pzv);			\
+				break;							\
+			default:							\
+				assert(0);						\
+				break;							\
 		}										\
-	} while (0);								\
+	} while (0);
 
 #define convert_to_explicit_type_ex(ppzv, str_type)	\
 	if (Z_TYPE_PP(ppzv) != str_type) {				\
@@ -397,8 +393,8 @@ END_EXTERN_C()
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
 
 #define convert_scalar_to_number_ex(ppzv)							\
-	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {		\
-		if (!Z_ISREF_PP(ppzv)) {										\
+	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {	\
+		if (!Z_ISREF_PP(ppzv)) {									\
 			SEPARATE_ZVAL(ppzv);									\
 		}															\
 		convert_scalar_to_number(*ppzv TSRMLS_CC);					\
@@ -429,11 +425,11 @@ END_EXTERN_C()
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
 #define Z_RESVAL_P(zval_p)		Z_RESVAL(*zval_p)
-#define Z_OBJVAL_P(zval_p)      Z_OBJVAL(*zval_p)
-#define Z_OBJ_HANDLE_P(zval_p)  Z_OBJ_HANDLE(*zval_p)
-#define Z_OBJ_HT_P(zval_p)      Z_OBJ_HT(*zval_p)
-#define Z_OBJ_HANDLER_P(zval_p, h) Z_OBJ_HANDLER(*zval_p, h)
-#define Z_OBJDEBUG_P(zval_p,is_tmp) Z_OBJDEBUG(*zval_p,is_tmp)
+#define Z_OBJVAL_P(zval_p)		Z_OBJVAL(*zval_p)
+#define Z_OBJ_HANDLE_P(zval_p)	Z_OBJ_HANDLE(*zval_p)
+#define Z_OBJ_HT_P(zval_p)		Z_OBJ_HT(*zval_p)
+#define Z_OBJ_HANDLER_P(zval_p, h)	Z_OBJ_HANDLER(*zval_p, h)
+#define Z_OBJDEBUG_P(zval_p,is_tmp)	Z_OBJDEBUG(*zval_p,is_tmp)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
 #define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
@@ -444,11 +440,11 @@ END_EXTERN_C()
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 #define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)
-#define Z_OBJVAL_PP(zval_pp)    Z_OBJVAL(**zval_pp)
-#define Z_OBJ_HANDLE_PP(zval_p) Z_OBJ_HANDLE(**zval_p)
-#define Z_OBJ_HT_PP(zval_p)     Z_OBJ_HT(**zval_p)
-#define Z_OBJ_HANDLER_PP(zval_p, h) Z_OBJ_HANDLER(**zval_p, h)
-#define Z_OBJDEBUG_PP(zval_pp,is_tmp) Z_OBJDEBUG(**zval_pp,is_tmp)
+#define Z_OBJVAL_PP(zval_pp)	Z_OBJVAL(**zval_pp)
+#define Z_OBJ_HANDLE_PP(zval_p)	Z_OBJ_HANDLE(**zval_p)
+#define Z_OBJ_HT_PP(zval_p)		Z_OBJ_HT(**zval_p)
+#define Z_OBJ_HANDLER_PP(zval_p, h)		Z_OBJ_HANDLER(**zval_p, h)
+#define Z_OBJDEBUG_PP(zval_pp,is_tmp)	Z_OBJDEBUG(**zval_pp,is_tmp)
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
@@ -456,7 +452,7 @@ END_EXTERN_C()
 
 #if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)
 /* This is performance improvement of tolower() on Windows and VC2005
- * GIves 10-18% on bench.php
+ * Gives 10-18% on bench.php
  */
 #define ZEND_USE_TOLOWER_L 1
 #endif
