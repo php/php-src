@@ -70,35 +70,35 @@ END_EXTERN_C()
 #define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
 #ifdef _WIN64
 # define DVAL_TO_LVAL(d, l) \
-       if ((d) > LONG_MAX) { \
-               (l) = (long)(unsigned long)(__int64) (d); \
-       } else { \
-               (l) = (long) (d); \
-       }
+	if ((d) > LONG_MAX) { \
+		(l) = (long)(unsigned long)(__int64) (d); \
+	} else { \
+		(l) = (long) (d); \
+	}
 #elif !defined(_WIN64) && __WORDSIZE == 64
 # define DVAL_TO_LVAL(d, l) \
-       if ((d) >= LONG_MAX) { \
-               (l) = LONG_MAX; \
-       } else if ((d) <=  LONG_MIN) { \
-               (l) = LONG_MIN; \
-       } else {\
-               (l) = (long) (d); \
-       }
+	if ((d) >= LONG_MAX) { \
+		(l) = LONG_MAX; \
+	} else if ((d) <= LONG_MIN) { \
+		(l) = LONG_MIN; \
+	} else { \
+		(l) = (long) (d); \
+	}
 #else
 # define DVAL_TO_LVAL(d, l) \
-       if ((d) > LONG_MAX) { \
-               if ((d) > MAX_UNSIGNED_INT) { \
-                       (l) = LONG_MAX; \
-               } else { \
-                       (l) = (unsigned long) (d); \
-               } \
-       } else { \
-               if((d) < LONG_MIN) { \
-                       (l) = LONG_MIN; \
-               } else { \
-                       (l) = (long) (d); \
-               } \
-       }
+	if ((d) > LONG_MAX) { \
+		if ((d) > MAX_UNSIGNED_INT) { \
+			(l) = LONG_MAX; \
+		} else { \
+			(l) = (unsigned long) (d); \
+		} \
+	} else { \
+		if((d) < LONG_MIN) { \
+			(l) = LONG_MIN; \
+		} else { \
+			(l) = (long) (d); \
+		} \
+	}
 #endif
 /* }}} */
 
@@ -258,7 +258,8 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
 	}
-	if(needle_len > end-haystack) {
+
+	if (needle_len > end-haystack) {
 		return NULL;
 	}
 
@@ -319,11 +320,12 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);
-#define convert_to_string(op)		     	 _convert_to_string((op) ZEND_FILE_LINE_CC)
-#define convert_to_string_with_converter(op, conv) _convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define convert_to_unicode(op)               _convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define convert_to_unicode_with_converter(op, conv) _convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define convert_to_text(op) convert_to_unicode(op)
+
+#define convert_to_string(op)						_convert_to_string((op) ZEND_FILE_LINE_CC)
+#define convert_to_string_with_converter(op, conv)	_convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_unicode(op)						_convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_unicode_with_converter(op, conv)	_convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_text(op)							convert_to_unicode(op)
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 
@@ -371,6 +373,7 @@ ZEND_API long zend_atol(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()
+
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
 	if (Z_TYPE_PP(ppzv)!=IS_##upper_type) {					\
 		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
@@ -378,7 +381,7 @@ END_EXTERN_C()
 	}
 
 #define convert_to_explicit_type(pzv, type)		\
-    do {										\
+	do {										\
 		switch (type) {							\
 			case IS_NULL:						\
 				convert_to_null(pzv);			\
@@ -386,29 +389,29 @@ END_EXTERN_C()
 			case IS_LONG:						\
 				convert_to_long(pzv);			\
 				break;							\
-			case IS_DOUBLE: 					\
-				convert_to_double(pzv); 		\
-				break; 							\
-			case IS_BOOL: 						\
-				convert_to_boolean(pzv); 		\
-				break; 							\
-			case IS_ARRAY: 						\
-				convert_to_array(pzv); 			\
-				break; 							\
-			case IS_OBJECT: 					\
-				convert_to_object(pzv); 		\
-				break; 							\
-			case IS_STRING: 					\
-				convert_to_string(pzv); 		\
-				break; 							\
-			case IS_UNICODE: 					\
+			case IS_DOUBLE:						\
+				convert_to_double(pzv);			\
+				break;							\
+			case IS_BOOL:						\
+				convert_to_boolean(pzv);		\
+				break;							\
+			case IS_ARRAY:						\
+				convert_to_array(pzv);			\
+				break;							\
+			case IS_OBJECT:						\
+				convert_to_object(pzv);			\
+				break;							\
+			case IS_STRING:						\
+				convert_to_string(pzv);			\
+				break;							\
+			case IS_UNICODE:					\
 				convert_to_unicode(pzv);		\
-				break; 							\
-			default: 							\
-				assert(0); 						\
-				break; 							\
+				break;							\
+			default:							\
+				assert(0);						\
+				break;							\
 		}										\
-	} while (0);								\
+	} while (0);
 
 #define convert_to_explicit_type_ex(ppzv, str_type)	\
 	if (Z_TYPE_PP(ppzv) != str_type) {				\
@@ -459,7 +462,7 @@ END_EXTERN_C()
 #define Z_RESVAL(zval)			(zval).value.lval
 #define Z_UNIVAL(zval)			(zval).value.uni.val
 #define Z_UNILEN(zval)			(zval).value.uni.len
-#define Z_UNISIZE(zval)         ((Z_TYPE(zval)==IS_UNICODE) ? Z_UNILEN(zval)*sizeof(UChar) : Z_UNILEN(zval))
+#define Z_UNISIZE(zval)			((Z_TYPE(zval)==IS_UNICODE) ? Z_UNILEN(zval)*sizeof(UChar) : Z_UNILEN(zval))
 #define Z_OBJDEBUG(zval,is_tmp)	(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&is_tmp TSRMLS_CC):(is_tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
@@ -474,14 +477,14 @@ END_EXTERN_C()
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
 #define Z_RESVAL_P(zval_p)		Z_RESVAL(*zval_p)
-#define Z_OBJVAL_P(zval_p)      Z_OBJVAL(*zval_p)
-#define Z_OBJ_HANDLE_P(zval_p)  Z_OBJ_HANDLE(*zval_p)
-#define Z_OBJ_HT_P(zval_p)      Z_OBJ_HT(*zval_p)
-#define Z_OBJ_HANDLER_P(zval_p, h) Z_OBJ_HANDLER(*zval_p, h)
+#define Z_OBJVAL_P(zval_p)		Z_OBJVAL(*zval_p)
+#define Z_OBJ_HANDLE_P(zval_p)	Z_OBJ_HANDLE(*zval_p)
+#define Z_OBJ_HT_P(zval_p)		Z_OBJ_HT(*zval_p)
+#define Z_OBJ_HANDLER_P(zval_p, h)	Z_OBJ_HANDLER(*zval_p, h)
 #define Z_UNIVAL_P(zval_p)		Z_UNIVAL(*zval_p)
 #define Z_UNILEN_P(zval_p)		Z_UNILEN(*zval_p)
-#define Z_UNISIZE_P(zval_p)     Z_UNISIZE(*zval_p)
-#define Z_OBJDEBUG_P(zval_p,is_tmp) Z_OBJDEBUG(*zval_p,is_tmp)
+#define Z_UNISIZE_P(zval_p)		Z_UNISIZE(*zval_p)
+#define Z_OBJDEBUG_P(zval_p,is_tmp)	Z_OBJDEBUG(*zval_p,is_tmp)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
 #define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
@@ -495,14 +498,14 @@ END_EXTERN_C()
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 #define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)
-#define Z_OBJVAL_PP(zval_pp)    Z_OBJVAL(**zval_pp)
-#define Z_OBJ_HANDLE_PP(zval_p) Z_OBJ_HANDLE(**zval_p)
-#define Z_OBJ_HT_PP(zval_p)     Z_OBJ_HT(**zval_p)
-#define Z_OBJ_HANDLER_PP(zval_p, h) Z_OBJ_HANDLER(**zval_p, h)
+#define Z_OBJVAL_PP(zval_pp)	Z_OBJVAL(**zval_pp)
+#define Z_OBJ_HANDLE_PP(zval_p)	Z_OBJ_HANDLE(**zval_p)
+#define Z_OBJ_HT_PP(zval_p)		Z_OBJ_HT(**zval_p)
+#define Z_OBJ_HANDLER_PP(zval_p, h)		Z_OBJ_HANDLER(**zval_p, h)
 #define Z_UNIVAL_PP(zval_pp)	Z_UNIVAL(**zval_pp)
 #define Z_UNILEN_PP(zval_pp)	Z_UNILEN(**zval_pp)
-#define Z_UNISIZE_PP(zval_pp)   Z_UNISIZE(**zval_pp)
-#define Z_OBJDEBUG_PP(zval_pp,is_tmp) Z_OBJDEBUG(**zval_pp,is_tmp)
+#define Z_UNISIZE_PP(zval_pp)	Z_UNISIZE(**zval_pp)
+#define Z_OBJDEBUG_PP(zval_pp,is_tmp)	Z_OBJDEBUG(**zval_pp,is_tmp)
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
