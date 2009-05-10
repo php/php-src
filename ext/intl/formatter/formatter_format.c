@@ -54,11 +54,7 @@ PHP_FUNCTION( numfmt_format )
 
 	if(type == FORMAT_TYPE_DEFAULT) {
 		if(Z_TYPE_PP(number) == IS_STRING) {
-			SEPARATE_ZVAL_IF_NOT_REF(number);
-			if ((Z_TYPE_PP(number)=is_numeric_string(Z_STRVAL_PP(number), Z_STRLEN_PP(number), 
-				&Z_LVAL_PP(number), &Z_DVAL_PP(number), 1)) == 0) {
-				ZVAL_LONG(*number, 0);
-			}
+			convert_scalar_to_number_ex(number);
 		}
 
 		if(Z_TYPE_PP(number) == IS_LONG) {
