@@ -433,8 +433,8 @@ END_EXTERN_C()
 	}
 
 #define convert_scalar_to_number_ex(ppzv)							\
-	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {		\
-		if (!(*ppzv)->is_ref) {										\
+	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {	\
+		if (!Z_ISREF_PP(ppzv)) {									\
 			SEPARATE_ZVAL(ppzv);									\
 		}															\
 		convert_scalar_to_number(*ppzv TSRMLS_CC);					\
