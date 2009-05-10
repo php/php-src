@@ -182,7 +182,9 @@ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TS
  */
 void intl_errors_reset( intl_error* err TSRMLS_DC )
 {
-	intl_error_reset( err TSRMLS_CC );
+	if(err) {
+		intl_error_reset( err TSRMLS_CC );
+	}
 	intl_error_reset( NULL TSRMLS_CC );
 }
 /* }}} */
@@ -191,7 +193,9 @@ void intl_errors_reset( intl_error* err TSRMLS_DC )
  */
 void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_DC )
 {
-	intl_error_set_custom_msg( err, msg, copyMsg TSRMLS_CC );
+	if(err) {
+		intl_error_set_custom_msg( err, msg, copyMsg TSRMLS_CC );
+	}
 	intl_error_set_custom_msg( NULL, msg, copyMsg TSRMLS_CC );
 }
 /* }}} */
@@ -200,7 +204,9 @@ void intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_
  */
 void intl_errors_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC )
 {
-	intl_error_set_code( err, err_code TSRMLS_CC );
+	if(err) {
+		intl_error_set_code( err, err_code TSRMLS_CC );
+	}
 	intl_error_set_code( NULL, err_code TSRMLS_CC );
 }
 /* }}} */
