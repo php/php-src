@@ -173,9 +173,7 @@ UErrorCode intl_error_get_code( intl_error* err TSRMLS_DC )
  */
 void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC )
 {
-	if(err) {
-		intl_error_set_code( err, code TSRMLS_CC );
-	}
+	intl_error_set_code( err, code TSRMLS_CC );
 	intl_error_set_custom_msg( err, msg, copyMsg TSRMLS_CC );
 }
 /* }}} */
