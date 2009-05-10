@@ -50,7 +50,7 @@ typedef struct _intl_data {
     intl_error_set_code( NULL, (err) TSRMLS_CC );							\
     if( U_FAILURE((err)) )													\
     {																		\
-        intl_errors_set_custom_msg( NULL, msg, 0 TSRMLS_CC );				\
+        intl_error_set_custom_msg( NULL, msg, 0 TSRMLS_CC );				\
         RETURN_FALSE;														\
     }
 
