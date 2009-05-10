@@ -4204,10 +4204,6 @@ PHP_FUNCTION(array_rand)
 		num_avail--;
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
 	}
-
-	if (num_req_val == num_avail) {
-		array_data_shuffle(return_value TSRMLS_CC);
-	}
 }
 /* }}} */
 

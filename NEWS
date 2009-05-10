@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
+- Fixed bug #48224 (Incorrect shuffle in array_rand). (Etienne)
 - Fixed bug #48221 (memory leak when passing invalid xslt parameter). (Felipe)
 - Fixed bug #48206 (Iterating over an invalid data structure
   with RecursiveIteratorIterator leads to a segfault). (Scott)
