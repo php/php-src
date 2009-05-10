@@ -94,8 +94,14 @@
 
 /* {{{ prototypes */
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
+
 static PHP_GINIT_FUNCTION(mbstring);
 static PHP_GSHUTDOWN_FUNCTION(mbstring);
+
+static size_t php_mb_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC);
+static int php_mb_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC);
+static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t arg_length, char *arg_list TSRMLS_DC);
+static int php_mb_set_zend_encoding(TSRMLS_D);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -866,7 +872,7 @@ static void _php_mb_free_regex(void *opaque);
 
 #if HAVE_ONIG
 /* {{{ _php_mb_compile_regex */
-void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
+static void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
 {
 	php_mb_regex_t *retval;
 	OnigErrorInfo err_info;
@@ -887,7 +893,7 @@ void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
 /* }}} */
 
 /* {{{ _php_mb_match_regex */
-int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
+static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 {
 	return onig_search((php_mb_regex_t *)opaque, (const OnigUChar *)str,
 			(const OnigUChar*)str + str_len, (const OnigUChar *)str,
@@ -896,14 +902,14 @@ int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 /* }}} */
 
 /* {{{ _php_mb_free_regex */
-void _php_mb_free_regex(void *opaque)
+static void _php_mb_free_regex(void *opaque)
 {
 	onig_free((php_mb_regex_t *)opaque);
 }
 /* }}} */
 #elif HAVE_PCRE || HAVE_BUNDLED_PCRE
 /* {{{ _php_mb_compile_regex */
-void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
+static void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
 {
 	pcre *retval;
 	const char *err_str;
@@ -918,7 +924,7 @@ void *_php_mb_compile_regex(const char *pattern TSRMLS_DC)
 /* }}} */
 
 /* {{{ _php_mb_match_regex */
-int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
+static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 {
 	return pcre_exec((pcre *)opaque, NULL, str, (int)str_len, 0,
 			0, NULL, 0) >= 0;
@@ -926,7 +932,7 @@ int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 /* }}} */
 
 /* {{{ _php_mb_free_regex */
-void _php_mb_free_regex(void *opaque)
+static void _php_mb_free_regex(void *opaque)
 {
 	pcre_free(opaque);
 }
@@ -4720,7 +4726,6 @@ MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int
 /* }}} */
 
 #ifdef ZEND_MULTIBYTE
-
 /* {{{ php_mb_set_zend_encoding() */
 static int php_mb_set_zend_encoding(TSRMLS_D)
 {
@@ -4812,9 +4817,7 @@ static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t ar
 /* }}} */
 
 /*	{{{ int php_mb_encoding_converter() */
-static int php_mb_encoding_converter(unsigned char **to, size_t *to_length,
-		const unsigned char *from, size_t from_length,
-		const char *encoding_to, const char *encoding_from TSRMLS_DC)
+static int php_mb_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC)
 {
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;

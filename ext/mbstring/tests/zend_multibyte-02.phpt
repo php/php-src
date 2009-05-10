@@ -2,9 +2,10 @@
 zend multibyte (2)
 --SKIPIF--
 <?php
-ini_set("mbstring.script_encoding", "SJIS");
-ini_set("mbstring.script_encoding", "***") != "SJIS" and
+ini_set("mbstring.script_encoding","SJIS");
+if (ini_set("mbstring.script_encoding","SJIS") != "SJIS") {
 	die("skip zend-multibyte is not available");
+}
 ?>
 --INI--
 mbstring.script_encoding=UTF-8
