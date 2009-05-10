@@ -1418,6 +1418,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin.sin_family = AF_INET;
 
 			if (arg6 == NULL) {
+				efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
@@ -1446,6 +1447,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin6.sin6_family = AF_INET6;
 
 			if (arg6 == NULL) {
+				efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
