@@ -39,8 +39,6 @@ PHP                                                                        NEWS
 - Added ability to throw exceptions from SQLite3 instead of warnings. (Scott)
 - Added startup notices for deprecated ini settings. (Kalle)
 
-- Fixed bug #48204 (xmlwriter_open_uri() does not emit warnings on invalid
-  paths). (Ilia)
 - Fixed bug #48185 (warning: value computed is not used in
   pdo_sqlite_stmt_get_col line 271). (Matteo)
 - Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
