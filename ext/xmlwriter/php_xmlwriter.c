@@ -1787,6 +1787,7 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 		if (source_type == IS_UNICODE) {
 			efree(source);
 		}
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to resolve file path");
 		RETURN_FALSE;
 	}
 
