@@ -1755,6 +1755,7 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 
 	valid_file = _xmlwriter_get_valid_file_path(source, resolved_path, MAXPATHLEN TSRMLS_CC);
 	if (!valid_file) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to resolve file path");
 		RETURN_FALSE;
 	}
 
