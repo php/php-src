@@ -1001,7 +1001,6 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			break;
 		case IS_RESOURCE: {
 			long tmp = Z_LVAL_P(op);
-			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
 			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #%ld", tmp);
@@ -1013,7 +1012,6 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%ld", lval);
 			break;
 		case IS_DOUBLE: {
-			TSRMLS_FETCH();
 			dval = Z_DVAL_P(op);
 			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
@@ -1028,7 +1026,6 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 			return FAILURE;
 		case IS_OBJECT: {
 			int retval = FAILURE;
-			TSRMLS_FETCH();
 
 			convert_object_to_type(op, IS_STRING, convert_to_string);
 
@@ -1070,12 +1067,8 @@ static int convert_scalar_to_array(zval *op, int type TSRMLS_DC) /* {{{ */
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		case IS_OBJECT:
-			{
-				/* OBJECTS_OPTIMIZE */
-				TSRMLS_FETCH();
-				object_init(op);
-				zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
-			}
+			object_init(op);
+			zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
 			break;
 	}
 
@@ -1146,13 +1139,8 @@ ZEND_API int convert_to_object(zval *op) /* {{{ */
 		case IS_OBJECT:
 			break;
 		case IS_NULL:
-			{
-				/* OBJECTS_OPTIMIZE */
-				TSRMLS_FETCH();
-
-				object_init(op);
-				break;
-			}
+			object_init(op);
+			break;
 		default:
 			return convert_scalar_to_array(op, IS_OBJECT TSRMLS_CC);
 	}
