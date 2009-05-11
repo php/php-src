@@ -282,9 +282,9 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 			case IS_STRING:											\
 				Z_LVAL(holder) = strtol(Z_STRVAL_P(op), NULL, 10);	\
 				break;												\
-			case IS_UNICODE:                                        \
+			case IS_UNICODE:										\
 				Z_LVAL(holder) = zend_u_strtol(Z_USTRVAL_P(op), NULL, 10);	\
-				break;                                              \
+				break;											  \
 			case IS_ARRAY:											\
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
@@ -332,15 +332,15 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 					Z_LVAL(holder) = 1;								\
 				}													\
 				break;												\
-			case IS_UNICODE:                                        \
+			case IS_UNICODE:										\
 				if (Z_USTRLEN_P(op) == 0	 						\
 					|| (Z_USTRLEN_P(op)==1 &&	 					\
 						(Z_USTRVAL_P(op)[0]=='0'))) {				\
-					Z_LVAL(holder) = 0;		                        \
-				} else {                                            \
-					Z_LVAL(holder) = 1;		                        \
-				}                                                   \
-				break;                                              \
+					Z_LVAL(holder) = 0;								\
+				} else {											\
+					Z_LVAL(holder) = 1;								\
+				}												   \
+				break;											  \
 			case IS_ARRAY:											\
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
@@ -873,7 +873,7 @@ static UChar* zend_u_format_gdouble(double dnum, int ndigit, UChar *result) /* {
 
 ZEND_API int _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC) /* {{{ */
 {
-    return _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
+	return _convert_to_unicode_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
 }
 /* }}} */
 
@@ -923,7 +923,7 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 			Z_USTRVAL_P(op) = eustrndup(result, result_len);
 			Z_USTRLEN_P(op) = result_len;
 			break;
-	    }
+		}
 		case IS_DOUBLE: {
 			UChar num_buf[NUM_BUF_SIZE], *result;
 			double dval = Z_DVAL_P(op);
@@ -995,8 +995,8 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 
 ZEND_API int _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-    TSRMLS_FETCH();
-    return _convert_to_string_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
+	TSRMLS_FETCH();
+	return _convert_to_string_with_converter(op, ZEND_U_CONVERTER(UG(runtime_encoding_conv)) TSRMLS_CC ZEND_FILE_LINE_CC);
 }
 /* }}} */
 
@@ -1906,7 +1906,7 @@ static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
 
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-    int ret;
+	int ret;
 	int converted = 0;
 	zval op1_copy, op2_copy;
 	zval *op_free;
@@ -2013,7 +2013,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT &&
-					           Z_OBJ_HT_P(op1)->cast_object) {
+							   Z_OBJ_HT_P(op1)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, op_free, Z_TYPE_P(op2), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
@@ -2032,7 +2032,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT &&
-					           Z_OBJ_HT_P(op2)->cast_object) {
+							   Z_OBJ_HT_P(op2)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, op_free, Z_TYPE_P(op1), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
@@ -2245,12 +2245,12 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 
 static void increment_string(zval *str) /* {{{ */
 {
-    int carry=0;
-    int pos=Z_STRLEN_P(str)-1;
-    char *s=Z_STRVAL_P(str);
-    char *t;
-    int last=0; /* Shut up the compiler warning */
-    int ch;
+	int carry=0;
+	int pos=Z_STRLEN_P(str)-1;
+	char *s=Z_STRVAL_P(str);
+	char *t;
+	int last=0; /* Shut up the compiler warning */
+	int ch;
 
 	if (Z_STRLEN_P(str) == 0) {
 		STR_FREE(Z_STRVAL_P(str));
@@ -2260,74 +2260,74 @@ static void increment_string(zval *str) /* {{{ */
 	}
 
 	while (pos >= 0) {
-        ch = s[pos];
-        if (ch >= 'a' && ch <= 'z') {
-            if (ch == 'z') {
-                s[pos] = 'a';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last=LOWER_CASE;
-        } else if (ch >= 'A' && ch <= 'Z') {
-            if (ch == 'Z') {
-                s[pos] = 'A';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last=UPPER_CASE;
-        } else if (ch >= '0' && ch <= '9') {
-            if (ch == '9') {
-                s[pos] = '0';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last = NUMERIC;
-        } else {
-            carry=0;
-            break;
-        }
-        if (carry == 0) {
-            break;
-        }
-        pos--;
-    }
+		ch = s[pos];
+		if (ch >= 'a' && ch <= 'z') {
+			if (ch == 'z') {
+				s[pos] = 'a';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last=LOWER_CASE;
+		} else if (ch >= 'A' && ch <= 'Z') {
+			if (ch == 'Z') {
+				s[pos] = 'A';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last=UPPER_CASE;
+		} else if (ch >= '0' && ch <= '9') {
+			if (ch == '9') {
+				s[pos] = '0';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last = NUMERIC;
+		} else {
+			carry=0;
+			break;
+		}
+		if (carry == 0) {
+			break;
+		}
+		pos--;
+	}
 
-    if (carry) {
-        t = (char *) emalloc(Z_STRLEN_P(str)+1+1);
-        memcpy(t+1, Z_STRVAL_P(str), Z_STRLEN_P(str));
-        Z_STRLEN_P(str)++;
-        t[Z_STRLEN_P(str)] = '\0';
-        switch (last) {
-            case NUMERIC:
-            	t[0] = '1';
-            	break;
-            case UPPER_CASE:
-            	t[0] = 'A';
-            	break;
-            case LOWER_CASE:
-            	t[0] = 'a';
-            	break;
-        }
-        STR_FREE(Z_STRVAL_P(str));
-        Z_STRVAL_P(str) = t;
-    }
+	if (carry) {
+		t = (char *) emalloc(Z_STRLEN_P(str)+1+1);
+		memcpy(t+1, Z_STRVAL_P(str), Z_STRLEN_P(str));
+		Z_STRLEN_P(str)++;
+		t[Z_STRLEN_P(str)] = '\0';
+		switch (last) {
+			case NUMERIC:
+				t[0] = '1';
+				break;
+			case UPPER_CASE:
+				t[0] = 'A';
+				break;
+			case LOWER_CASE:
+				t[0] = 'a';
+				break;
+		}
+		STR_FREE(Z_STRVAL_P(str));
+		Z_STRVAL_P(str) = t;
+	}
 }
 /* }}} */
 
 static void increment_unicode(zval *str) /* {{{ */
 {
-    int carry=0;
-    int pos=Z_USTRLEN_P(str)-1;
-    UChar *s=Z_USTRVAL_P(str);
-    UChar *t;
-    int last=0; /* Shut up the compiler warning */
-    int ch;
+	int carry=0;
+	int pos=Z_USTRLEN_P(str)-1;
+	UChar *s=Z_USTRVAL_P(str);
+	UChar *t;
+	int last=0; /* Shut up the compiler warning */
+	int ch;
 
 	if (Z_USTRLEN_P(str) == 0) {
 		USTR_FREE(Z_USTRVAL_P(str));
@@ -2336,63 +2336,63 @@ static void increment_unicode(zval *str) /* {{{ */
 	}
 
 	while (pos >= 0) {
-        ch = s[pos];
-        if (ch >= 'a' && ch <= 'z') {
-            if (ch == 'z') {
-                s[pos] = 'a';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last=LOWER_CASE;
-        } else if (ch >= 'A' && ch <= 'Z') {
-            if (ch == 'Z') {
-                s[pos] = 'A';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last=UPPER_CASE;
-        } else if (ch >= '0' && ch <= '9') {
-            if (ch == '9') {
-                s[pos] = '0';
-                carry=1;
-            } else {
-                s[pos]++;
-                carry=0;
-            }
-            last = NUMERIC;
-        } else {
-            carry=0;
-            break;
-        }
-        if (carry == 0) {
-            break;
-        }
-        pos--;
-    }
+		ch = s[pos];
+		if (ch >= 'a' && ch <= 'z') {
+			if (ch == 'z') {
+				s[pos] = 'a';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last=LOWER_CASE;
+		} else if (ch >= 'A' && ch <= 'Z') {
+			if (ch == 'Z') {
+				s[pos] = 'A';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last=UPPER_CASE;
+		} else if (ch >= '0' && ch <= '9') {
+			if (ch == '9') {
+				s[pos] = '0';
+				carry=1;
+			} else {
+				s[pos]++;
+				carry=0;
+			}
+			last = NUMERIC;
+		} else {
+			carry=0;
+			break;
+		}
+		if (carry == 0) {
+			break;
+		}
+		pos--;
+	}
 
-    if (carry) {
-        t = (UChar *) eumalloc(Z_USTRLEN_P(str)+1+1);
-        memcpy(t+1, Z_USTRVAL_P(str), UBYTES(Z_USTRLEN_P(str)));
-        Z_USTRLEN_P(str)++;
-        t[Z_USTRLEN_P(str)] = 0;
-        switch (last) {
-            case NUMERIC:
-            	t[0] = '1';
-            	break;
-            case UPPER_CASE:
-            	t[0] = 'A';
-            	break;
-            case LOWER_CASE:
-            	t[0] = 'a';
-            	break;
-        }
-        USTR_FREE(Z_USTRVAL_P(str));
-        Z_USTRVAL_P(str) = t;
-    }
+	if (carry) {
+		t = (UChar *) eumalloc(Z_USTRLEN_P(str)+1+1);
+		memcpy(t+1, Z_USTRVAL_P(str), UBYTES(Z_USTRLEN_P(str)));
+		Z_USTRLEN_P(str)++;
+		t[Z_USTRLEN_P(str)] = 0;
+		switch (last) {
+			case NUMERIC:
+				t[0] = '1';
+				break;
+			case UPPER_CASE:
+				t[0] = 'A';
+				break;
+			case LOWER_CASE:
+				t[0] = 'a';
+				break;
+		}
+		USTR_FREE(Z_USTRVAL_P(str));
+		Z_USTRVAL_P(str) = t;
+	}
 }
 /* }}} */
 
@@ -2563,7 +2563,7 @@ ZEND_API int zval_is_true(zval *op) /* {{{ */
 #ifdef ZEND_USE_TOLOWER_L
 ZEND_API void zend_update_current_locale(void) /* {{{ */
 {
-        current_locale = _get_current_locale();
+	current_locale = _get_current_locale();
 }
 /* }}} */
 #endif
