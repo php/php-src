@@ -36,7 +36,7 @@ if (PHP_PHAR != "no") {
 		}
 	}
 	if (PHP_HASH != "no") {
-		if (PHP_HASH_SHARED == "no") {
+		if (!PHP_HASH_SHARED) {
 			AC_DEFINE("PHAR_HASH_OK", 1);
 		} else {
 			WARNING('Phar: sha256/sha512 signature support disabled if ext/hash is built shared');
