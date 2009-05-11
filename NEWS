@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 - Fixed bug #48221 (memory leak when passing invalid xslt parameter). (Felipe)
 - Fixed bug #48206 (Iterating over an invalid data structure
   with RecursiveIteratorIterator leads to a segfault). (Scott)
+- Fixed bug #48204 (xmlwriter_open_uri() does not emit warnings on invalid
+  paths). (Ilia)
 - Fixed bug #48156 (Added support for lcov v1.7). (Ilia)
 - Fixed bug #48131 (Don't try to bind ipv4 addresses to ipv6 ips via
   bindto). (Ilia)
