@@ -563,6 +563,8 @@ ZEND_METHOD(exception, getTraceAsString)
 	zval *trace;
 	char *res = estrdup(""), **str = &res, *s_tmp;
 	int res_len = 0, *len = &res_len, num = 0;
+	
+	DEFAULT_0_PARAMS;
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
 	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 3, str, len, &num);
@@ -582,6 +584,9 @@ ZEND_METHOD(exception, getTraceAsString)
 ZEND_METHOD(exception, getPrevious)
 {
 	zval *previous;
+
+	DEFAULT_0_PARAMS;
+
 	previous = zend_read_property(default_exception_ce, getThis(), "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 	RETURN_ZVAL(previous, 1, 0);
 }
@@ -607,6 +612,8 @@ ZEND_METHOD(exception, __toString)
 	int len = 0;
 	zend_fcall_info fci;
 	zval fname;
+	
+	DEFAULT_0_PARAMS;
 
 	exception = getThis();
 	ZVAL_ASCII_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 1);
