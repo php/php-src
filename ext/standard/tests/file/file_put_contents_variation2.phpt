@@ -23,7 +23,7 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 
-$filename = 'fwriteVar5.tmp';
+$filename = __DIR__ . '/fwriteVar5.tmp';
 
 
 
