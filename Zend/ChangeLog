@@ -1,3 +1,16 @@
+2009-05-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      zend_operators.c
+      zend_operators.h:
+      sync with HEAD
+
+    * zend_operators.h:
+      ws
+
+    * zend_operators.h:
+      MFB: missing part of the GC stuff
+
 2009-05-08  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_2)
