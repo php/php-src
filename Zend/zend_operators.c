@@ -624,12 +624,8 @@ static void convert_scalar_to_array(zval *op, int type TSRMLS_DC) /* {{{ */
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		case IS_OBJECT:
-			{
-				/* OBJECTS_OPTIMIZE */
-				TSRMLS_FETCH();
-				object_init(op);
-				zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
-			}
+			object_init(op);
+			zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
 			break;
 	}
 }
@@ -694,13 +690,8 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 		case IS_OBJECT:
 			break;
 		case IS_NULL:
-			{
-				/* OBJECTS_OPTIMIZE */
-				TSRMLS_FETCH();
-
-				object_init(op);
-				break;
-			}
+			object_init(op);
+			break;
 		default:
 			convert_scalar_to_array(op, IS_OBJECT TSRMLS_CC);
 			break;
