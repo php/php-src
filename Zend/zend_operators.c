@@ -284,7 +284,7 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				break;												\
 			case IS_UNICODE:										\
 				Z_LVAL(holder) = zend_u_strtol(Z_USTRVAL_P(op), NULL, 10);	\
-				break;											  \
+				break;												\
 			case IS_ARRAY:											\
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
@@ -339,8 +339,8 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 					Z_LVAL(holder) = 0;								\
 				} else {											\
 					Z_LVAL(holder) = 1;								\
-				}												   \
-				break;											  \
+				}													\
+				break;												\
 			case IS_ARRAY:											\
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
@@ -365,17 +365,17 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 		zval dst;																			\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype, NULL TSRMLS_CC) == FAILURE) {		\
 			zend_error(E_RECOVERABLE_ERROR, 												\
-			"Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,			\
-			zend_get_type_by_const(ctype));													\
+				"Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,		\
+				zend_get_type_by_const(ctype));												\
 		} else {																			\
 			zval_dtor(op);																	\
 			Z_TYPE_P(op) = ctype;															\
 			op->value = dst.value;															\
 		}																					\
 	} else {																				\
-		if(Z_OBJ_HT_P(op)->get) {															\
+		if (Z_OBJ_HT_P(op)->get) {															\
 			zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);								\
-			if(Z_TYPE_P(newop) != IS_OBJECT) {												\
+			if (Z_TYPE_P(newop) != IS_OBJECT) {												\
 				/* for safety - avoid loop */												\
 				zval_dtor(op);																\
 				*op = *newop;																\
@@ -810,13 +810,13 @@ static UChar* zend_u_format_gdouble(double dnum, int ndigit, UChar *result) /* {
 	/* if decimal point position is less than precision, cut zeros only in fractional part */
 	if (decpt <= ndigit) {
 		i = ndigit - 1;
-		while (i > 0 && i >= decpt && p1[i] == (UChar) 0x30  /*'0'*/) {
+		while (i > 0 && i >= decpt && p1[i] == (UChar) 0x30 /*'0'*/) {
 			ndigit--;
 			i--;
 		}
 	} else {
 	/* otherwise cut all trailing zeros */
-		for (i = ndigit - 1; i > 0 && p1[i] == (UChar) 0x30  /*'0'*/; i--) {
+		for (i = ndigit - 1; i > 0 && p1[i] == (UChar) 0x30 /*'0'*/; i--) {
 			ndigit--;
 		}
 	}
@@ -950,8 +950,8 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 				zval dst;
 				if (Z_OBJ_HT_P(op)->cast_object(op, &dst, IS_UNICODE, conv TSRMLS_CC) == FAILURE) {
 					zend_error(E_RECOVERABLE_ERROR,
-							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
-							   zend_get_type_by_const(IS_UNICODE));
+						"Object of class %v could not be converted to %s",
+						Z_OBJCE_P(op)->name, zend_get_type_by_const(IS_UNICODE));
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_UNICODE;
@@ -959,9 +959,9 @@ ZEND_API int _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRML
 					retval = SUCCESS;
 				}
 			} else {
-				if(Z_OBJ_HT_P(op)->get) {
+				if (Z_OBJ_HT_P(op)->get) {
 					zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
-					if(Z_TYPE_P(newop) != IS_OBJECT) {
+					if (Z_TYPE_P(newop) != IS_OBJECT) {
 						/* for safety - avoid loop */
 						zval_dtor(op);
 						*op = *newop;
@@ -1058,8 +1058,8 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 				zval dst;
 				if (Z_OBJ_HT_P(op)->cast_object(op, &dst, IS_STRING, conv TSRMLS_CC) == FAILURE) {
 					zend_error(E_RECOVERABLE_ERROR,
-							   "Object of class %v could not be converted to %s", Z_OBJCE_P(op)->name,
-							   zend_get_type_by_const(IS_STRING));
+						"Object of class %v could not be converted to %s",
+						Z_OBJCE_P(op)->name, zend_get_type_by_const(IS_STRING));
 				} else {
 					zval_dtor(op);
 					Z_TYPE_P(op) = IS_STRING;
@@ -1067,9 +1067,9 @@ ZEND_API int _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS
 					retval = SUCCESS;
 				}
 			} else {
-				if(Z_OBJ_HT_P(op)->get) {
+				if (Z_OBJ_HT_P(op)->get) {
 					zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
-					if(Z_TYPE_P(newop) != IS_OBJECT) {
+					if (Z_TYPE_P(newop) != IS_OBJECT) {
 						/* for safety - avoid loop */
 						zval_dtor(op);
 						*op = *newop;
@@ -2012,8 +2012,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						ret = compare_function(result, op_free, op2 TSRMLS_CC);
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
-					} else if (Z_TYPE_P(op2) != IS_OBJECT &&
-							   Z_OBJ_HT_P(op1)->cast_object) {
+					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, op_free, Z_TYPE_P(op2), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
@@ -2031,8 +2030,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						ret = compare_function(result, op1, op_free TSRMLS_CC);
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
-					} else if (Z_TYPE_P(op1) != IS_OBJECT &&
-							   Z_OBJ_HT_P(op2)->cast_object) {
+					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
 						ALLOC_INIT_ZVAL(op_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, op_free, Z_TYPE_P(op1), NULL TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
@@ -2163,11 +2161,11 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-   if (is_identical_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
-	  return FAILURE;
-   }
-   Z_LVAL_P(result) = !Z_LVAL_P(result);
-   return SUCCESS;
+	if (is_identical_function(result, op1, op2 TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+	Z_LVAL_P(result) = !Z_LVAL_P(result);
+	return SUCCESS;
 }
 /* }}} */
 
