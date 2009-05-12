@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 - Fixed bug #48132 (configure check for curl ssl support fails with
   --disable-rpath). (Jani)
 - Fixed bug #48070 (PDO_OCI: Segfault when using persistent connection).
-  (Pierre, Matteo)
+  (Pierre, Matteo, jarismar dot php at gmail dot com)
 - Fixed bug #48058 (Year formatter goes wrong with out-of-int range). (Derick)
 - Fixed bug #48038 (odbc_execute changes variables used to form params array).
   (Felipe)
