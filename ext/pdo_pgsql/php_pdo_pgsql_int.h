@@ -65,8 +65,8 @@ typedef struct {
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
-	zend_bool is_prepared;
 #endif
+	zend_bool is_prepared;
 } pdo_pgsql_stmt;
 
 typedef struct {
