@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #48227 (NumberFormatter::format leaks memory). (Felipe)
 - Fixed bug #48200 (compile failure with mbstring.c when 
   --enable-zend-multibyte is used). (Jani)
+- Fixed bug #48188 (Cannot execute a scrollable cursors twice with
+  PDO_PGSQL). (Matteo)
 
 
 07 May 2009, PHP 5.3.0 RC 2

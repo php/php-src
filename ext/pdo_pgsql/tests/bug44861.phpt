@@ -38,6 +38,12 @@ $res = $dbh->prepare("SELECT ?", $aParams);
 $res->execute(array("it's working"));
 var_dump($res->fetch(PDO::FETCH_NUM));
 
+
+// Test bug #48188, trying to execute again
+$res->execute(array("try again"));
+var_dump($res->fetchColumn());
+var_dump($res->fetchColumn());
+
 ?>
 --EXPECT--
 string(4) "row1"
@@ -76,3 +82,5 @@ array(1) {
   [0]=>
   string(12) "it's working"
 }
+string(9) "try again"
+bool(false)
