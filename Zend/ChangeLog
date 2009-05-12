@@ -1,3 +1,35 @@
+2009-05-11  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_exceptions.c
+      tests/exception_010.phpt
+      tests/exception_010.phpt
+      tests/exception_010.phpt:
+      - Fix code && new test
+
+    * zend_exceptions.c
+      zend_exceptions.c
+      zend_exceptions.c:
+      - Added missing param checks
+
+2009-05-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      zend_operators.c:
+      MFH:- Removed unnecessary TSRMLS_FETCH() calls
+
+    * zend_operators.c:
+      - Removed unnecessary TSRMLS_FETCH() calls
+
+    * zend_operators.c:
+      - Syncing with PHP_5_3 (merging some stuff that was not merged before for
+      some reason)
+
+    * zend_operators.c:
+      - And more CS fixes
+
+    * zend_operators.c:
+      - Nuked more whitespace
+
 2009-05-10  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_3)
