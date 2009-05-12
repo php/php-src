@@ -1,5 +1,7 @@
 --TEST--
 Bug #13142 (strtotime handling of "M d H:i:s Y" format)
+--INI--
+date.timezone=US/Eastern
 --SKIPIF--
 <?php
 if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
@@ -8,7 +10,7 @@ if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
 ?>
 --FILE--
 <?php
-putenv("TZ=US/Eastern");
+
 if (date('T') == 'GMT') {
 	putenv("TZ=EST5EDT4,M4.1.0,M10.5.0");
 }

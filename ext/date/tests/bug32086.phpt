@@ -1,8 +1,10 @@
 --TEST--
 Bug #32086 (strtotime don't work in DST)
+--INI--
+date.timezone=America/Sao_Paulo
 --FILE--
 <?php
-putenv("TZ=America/Sao_Paulo");
+
 echo $g = strtotime("2004-11-01"), "\n";
 echo $i = strtotime("2004-11-01 +1 day"), "\n";
 echo $j = strtotime("+1 day", $g), "\n";

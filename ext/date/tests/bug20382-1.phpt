@@ -1,8 +1,9 @@
 --TEST--
 Bug #20382 [1] (strtotime ("Monday", $date) produces wrong result on DST changeover)
+--INI--
+date.timezone=Europe/Amsterdam
 --FILE--
 <?php
-	putenv("TZ=Europe/Amsterdam");
 	$tStamp = mktime (17, 17, 17, 10, 27, 2004);
 	echo "tStamp=". date("l Y-m-d H:i:s T", $tStamp). "\n";
 	

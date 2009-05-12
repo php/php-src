@@ -32,16 +32,16 @@ if (!@putenv("TZ=EST5") || getenv("TZ") != 'EST5') {
 	);
 
 	echo "*** GMT0\n";
-	putenv ("TZ=GMT0");
+	date_default_timezone_set("GMT0");
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
 
 	echo "*** US/Eastern\n";
-	putenv("TZ=US/Eastern");
+	date_default_timezone_set("US/Eastern");
 	if( date("T") == "GMT" ) {
 		// POSIX style
-		putenv ("TZ=EST5EDT4,M4.1.0,M10.5.0");
+		date_default_timezone_set("EST5EDT4,M4.1.0,M10.5.0");
 	}
 
 	foreach ($dates as $date) {
