@@ -12,7 +12,7 @@ echo "Done\n";
 --EXPECT--
 Array
 (
-    [1] => -30000
+    [1] => 4294937296
 )
 Array
 (
