@@ -777,6 +777,13 @@ PHP_FUNCTION(unpack)
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
+						if (sizeof(long) > 4) {
+ 							if (type == 'l') {
+								v = (signed int) v; 
+							} else {
+								v = (unsigned int) v;
+							}
+						}
 						add_rt_assoc_long(return_value, n, v);
 						break;
 					}
