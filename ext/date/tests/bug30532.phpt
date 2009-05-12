@@ -1,8 +1,10 @@
 --TEST--
 Bug #30532 (strtotime - crossing daylight savings time)
+--INI--
+date.timezone=America/New_York
 --FILE--
 <?php
-putenv("TZ=America/New_York");
+
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +1 hour'))."\n";
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +2 hours'))."\n";
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +3 hours'))."\n";

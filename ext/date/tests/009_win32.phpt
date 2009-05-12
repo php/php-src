@@ -34,17 +34,17 @@ var_dump(gmstrftime("blah", $t));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: strftime() expects at least 1 parameter, 0 given in C:\Users\pierre\Documents\php-sdk\vc9\x86\php_5_3\ext\date\tests\009_win32.php on line 5
+Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)
-string(147) "Tue Tuesday Jun June 06/27/06 00:00:00 27 00 12 178 06 00 AM 00 26 26 2 06/27/06 00:00:00 06 2006 W. Europe Daylight Time W. Europe Daylight Time %"
+string(%d) "Tue Tuesday Jun June 06/27/06 00:00:00 27 00 12 178 06 00 AM 00 26 26 2 06/27/06 00:00:00 06 2006 %s"
 string(5) "%q %a"
 string(4) "blah"
 
-Warning: gmstrftime() expects at least 1 parameter, 0 given in C:\Users\pierre\Documents\php-sdk\vc9\x86\php_5_3\ext\date\tests\009_win32.php on line 15
+Warning: gmstrftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)
-string(146) "Mon Monday Jun June 06/26/06 21:00:00 26 21 09 177 06 00 PM 00 26 26 1 06/26/06 21:00:00 06 2006 W. Europe Standard Time W. Europe Standard Time %"
+string(%d) "Mon Monday Jun June 06/26/06 21:00:00 26 21 09 177 06 00 PM 00 26 26 1 06/26/06 21:00:00 06 2006 %s"
 string(5) "%q %a"
 string(4) "blah"
 Done

@@ -1,10 +1,9 @@
 --TEST--
 date_default_timezone_get() function [3]
 --INI--
-date.timezone=
+date.timezone=Europe/Rome
 --FILE--
 <?php
-	putenv('TZ=Europe/Rome');
 	echo date_default_timezone_get(), "\n";
 
 	date_default_timezone_set("America/Chicago");

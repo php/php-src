@@ -1,8 +1,9 @@
 --TEST--
 Bug #35425 (idate() function ignores timezone settings)
+--INI--
+date.timezone=America/Montreal
 --FILE--
 <?php
-putenv('TZ=America/Montreal');
 
 $time = mktime(1,1,1,1,1,2005);
 foreach (array('B','d','h','H','i','I','L','m','s','t','U','w','W','y','Y','z','Z') as $v) {

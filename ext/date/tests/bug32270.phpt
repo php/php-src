@@ -1,8 +1,9 @@
 --TEST--
 Bug #32270 (strtotime/date behavior)
+--INI--
+date.timezone=America/Los_Angeles
 --FILE--
 <?php
-putenv("TZ=America/Los_Angeles");
 
 echo date("m/d/Y H:i:s T", -2145888000)."\n";
 

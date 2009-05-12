@@ -1,8 +1,9 @@
 --TEST--
 Bug #32555 (strtotime("tomorrow") can return false)
+--INI--
+date.timezone=US/Eastern
 --FILE--
 <?php
-putenv("TZ=US/Eastern");
 
 $stamp = 1112427000;
 print strftime('%c %Z',strtotime('now',$stamp)) ."\n";
