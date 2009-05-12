@@ -70,15 +70,13 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 		S = (pdo_oci_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
 		pdo_err = &stmt->error_code;
-		if (einfo->errmsg) {
-			efree(einfo->errmsg);
-		}
 	}
 	else {
 		einfo = &H->einfo;
-		if (einfo->errmsg) {
-			pefree(einfo->errmsg, dbh->is_persistent);
-		}
+	}
+
+	if (einfo->errmsg) {
+		pefree(einfo->errmsg, dbh->is_persistent);
 	}
 
 	einfo->errmsg = NULL;
