@@ -564,8 +564,8 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 		zend_guard *guard;
 
 		if (!zobj->ce->__get ||
-		    zend_get_property_guard(zobj, property_info, member, &guard) != SUCCESS ||
-		    guard->in_get) {
+			zend_get_property_guard(zobj, property_info, member, &guard) != SUCCESS ||
+			(property_info && guard->in_get)) {
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
