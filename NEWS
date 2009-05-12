@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   literal). (Ilia)
 - Fixed bug #47616 (curl keeps crashing). (Felipe)
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
+- Fixed bug #47564 (unpacking unsigned long 32bit bit endian returns wrong
+  result). (Ilia)
 - Fixed bug #47487 (performance degraded when reading large chunks after fix of
   bug #44607). (Arnaud)
 - Fixed bug #47468 (enable cli|cgi-only extensions for embed sapi). (Jani)
