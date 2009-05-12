@@ -38,8 +38,8 @@ typedef struct {
 	ub2			charset;
 	sword		last_err;
 
-	unsigned attached:1;
-	unsigned _reserved:31;
+	unsigned	attached:1;
+	unsigned	_reserved:31;
 
 	pdo_oci_error_info einfo;
 } pdo_oci_db_handle;
@@ -51,7 +51,9 @@ typedef struct {
 	sb2			indicator;
 
 	char *data;
-	unsigned long datalen;
+	ub4 datalen;
+
+	ub2 dtype;
 
 } pdo_oci_column;
 
@@ -60,10 +62,11 @@ typedef struct {
 	OCIStmt		*stmt;
 	OCIError	*err;
 	sword		last_err;
-	ub2		stmt_type;
-	ub4		exec_type;
+	ub2			stmt_type;
+	ub4			exec_type;
 	pdo_oci_column *cols;
 	pdo_oci_error_info einfo;
+	unsigned int have_blobs:1;
 } pdo_oci_stmt;
 
 typedef struct {

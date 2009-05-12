@@ -44,21 +44,21 @@ $dbh->exec ("drop table bug_6364_t");
 ?>
 
 --EXPECTF--
-unicode(4) "val4"
-unicode(4) "val5"
+string(4) "val4"
+string(4) "val5"
 array(10) {
   ["c1"]=>
-  unicode(2) "p1"
+  string(2) "p1"
   [0]=>
-  unicode(2) "p1"
+  string(2) "p1"
   ["c2"]=>
-  unicode(2) "p2"
+  string(2) "p2"
   [1]=>
-  unicode(2) "p2"
+  string(2) "p2"
   ["c3"]=>
-  unicode(2) "p3"
+  string(2) "p3"
   [2]=>
-  unicode(2) "p3"
+  string(2) "p3"
   ["c4"]=>
   NULL
   [3]=>

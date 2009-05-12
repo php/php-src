@@ -57,25 +57,25 @@ echo "Done\n";
 Test 1 - Force column names to lower case
 int(2)
 array(1) {
-  [u"dummy"]=>
-  unicode(1) "X"
+  ["dummy"]=>
+  string(1) "X"
 }
 Test 2 - Leave column names as returned by the database driver
 int(0)
 array(1) {
-  [u"DUMMY"]=>
-  unicode(1) "X"
+  ["DUMMY"]=>
+  string(1) "X"
 }
 Test 3 - Force column names to upper case
 int(1)
 array(1) {
-  [u"DUMMY"]=>
-  unicode(1) "X"
+  ["DUMMY"]=>
+  string(1) "X"
 }
 Test 4 - Setting on statement has no effect.  Attempt lower case but get upper
 Mode desired is 2
 array(1) {
-  [u"DUMMY"]=>
-  unicode(1) "X"
+  ["DUMMY"]=>
+  string(1) "X"
 }
 Done
