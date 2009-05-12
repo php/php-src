@@ -1,23 +1,41 @@
 --TEST--
-Bug #44861 (scrollable cursor don't work with pgsql)
+PDO Common: Bug #44861 (scrollable cursor don't work with pgsql)
 --SKIPIF--
-<?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+<?php # vim:ft=php
+if (!extension_loaded('pdo')) die('skip');
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) die('skip no driver');
+$allowed = array('oci', 'pgsql');
+$ok = false;
+foreach ($allowed as $driver) {
+	if (!strncasecmp(getenv('PDOTEST_DSN'), $driver, strlen($driver))) {
+		$ok = true;
+	}
+}
+if (!$ok) {
+	die("skip Scrollable cursors not supported");
+}
+require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$dbh = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
 
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$query = "SELECT 'row1' AS r UNION SELECT 'row2' UNION SELECT 'row3' UNION SELECT 'row4'";
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
+	$from = 'FROM DUAL';
+} else {
+	$from = '';
+}
+
+$query = "SELECT 'row1' AS r $from UNION SELECT 'row2' $from UNION SELECT 'row3' $from UNION SELECT 'row4' $from";
 $aParams = array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL);
 
-$res = $dbh->prepare($query, $aParams);
+$res = $db->prepare($query, $aParams);
 $res->execute();
 var_dump($res->fetchColumn());
 var_dump($res->fetchColumn());
@@ -34,7 +52,7 @@ var_dump($res->fetch(PDO::FETCH_NUM, PDO::FETCH_ORI_REL, -1));
 var_dump($res->fetchAll(PDO::FETCH_ASSOC));
 
 // Test binding params via emulated prepared query
-$res = $dbh->prepare("SELECT ?", $aParams);
+$res = $db->prepare("SELECT ? $from", $aParams);
 $res->execute(array("it's working"));
 var_dump($res->fetch(PDO::FETCH_NUM));
 
