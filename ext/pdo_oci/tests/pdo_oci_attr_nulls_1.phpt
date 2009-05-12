@@ -56,6 +56,6 @@ PDO::ATTR_ORACLE_NULLS: PDO::NULL_EMPTY_STRING: int(1)
 NULL
 NULL
 PDO::ATTR_ORACLE_NULLS: PDO::NULL_TO_STRING: int(2)
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 Done

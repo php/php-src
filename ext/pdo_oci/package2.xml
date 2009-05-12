@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>PDO_OCI</name>
+ <channel>pecl.php.net</channel>
+ <summary>Oracle Call Interface driver for PDO</summary>
+ <description>This extension provides an Oracle driver for PDO.
+ </description>
+ <lead>
+  <name>Wez Furlong</name>
+  <user>wez</user>
+  <email>wez@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2006-05-01</date>
+ <version>
+  <release>1.0.1</release>
+  <api>1.0.1</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+- Added support for BINARY_DOUBLE and BINARY_FLOAT to PDO_OCI and OCI8
+  (also fixes bug #36764). (Tony)
+- Fixed bug #35907 (PDO_OCI uses hardcoded lib path $ORACLE_HOME/lib). (Tony)
+- Repackage with package2.xml
+- Improved handling of long columns
+- Fixed PECL Bug #5722; implemented LOB support.
+
+You require Oracle OCI 8 or higher client libraries (instantclient is also
+supported) installed on the machine where you intend to build and/or use this
+package.
+   
+If you are running on windows, you can download the binary from here:
+http://pecl4win.php.net/ext.php/php_pdo_oci.dll
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="oci_driver.c" role="src" />
+   <file name="oci_statement.c" role="src" />
+   <file name="pdo_oci.c" role="src" />
+   <file name="php_pdo_oci.h" role="src" />
+   <file name="php_pdo_oci_int.h" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.0.3</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+   <package>
+    <name>pdo</name>
+    <channel>pecl.php.net</channel>
+    <min>1.0.3</min>
+    <providesextension>PDO</providesextension>
+   </package>
+  </required>
+ </dependencies>
+ <providesextension>PDO_OCI</providesextension>
+ <extsrcrelease />
+</package>

@@ -17,5 +17,5 @@ var_dump($dbh->getAttribute(PDO::ATTR_DRIVER_NAME));
 echo "Done\n";
 ?>
 --EXPECT--
-unicode(3) "oci"
+string(3) "oci"
 Done

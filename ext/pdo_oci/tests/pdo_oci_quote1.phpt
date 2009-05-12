@@ -2,7 +2,6 @@
 Test PDO->quote() for PDO_OCI
 --SKIPIF--
 <?php
-die('skip triggers query errors');
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
@@ -42,7 +41,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Unquoted : NULL
-Quoted   : unicode(2) "''"
+Quoted   : string(2) "''"
 array(1) {
   [0]=>
   array(1) {
@@ -50,8 +49,8 @@ array(1) {
     NULL
   }
 }
-Unquoted : unicode(0) ""
-Quoted   : unicode(2) "''"
+Unquoted : string(0) ""
+Quoted   : string(2) "''"
 array(1) {
   [0]=>
   array(1) {
@@ -59,106 +58,106 @@ array(1) {
     NULL
   }
 }
-Unquoted : unicode(1) "a"
-Quoted   : unicode(3) "'a'"
+Unquoted : string(1) "a"
+Quoted   : string(3) "'a'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(1) "a"
+    string(1) "a"
   }
 }
-Unquoted : unicode(2) "ab"
-Quoted   : unicode(4) "'ab'"
+Unquoted : string(2) "ab"
+Quoted   : string(4) "'ab'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(2) "ab"
+    string(2) "ab"
   }
 }
-Unquoted : unicode(3) "abc"
-Quoted   : unicode(5) "'abc'"
+Unquoted : string(3) "abc"
+Quoted   : string(5) "'abc'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(3) "abc"
+    string(3) "abc"
   }
 }
-Unquoted : unicode(5) "ab'cd"
-Quoted   : unicode(8) "'ab''cd'"
+Unquoted : string(5) "ab'cd"
+Quoted   : string(8) "'ab''cd'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(5) "ab'cd"
+    string(5) "ab'cd"
   }
 }
-Unquoted : unicode(4) "a\b
+Unquoted : string(4) "a\b
 "
-Quoted   : unicode(6) "'a\b
+Quoted   : string(6) "'a\b
 '"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(4) "a\b
+    string(4) "a\b
 "
   }
 }
-Unquoted : unicode(1) "'"
-Quoted   : unicode(4) "''''"
+Unquoted : string(1) "'"
+Quoted   : string(4) "''''"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(1) "'"
+    string(1) "'"
   }
 }
-Unquoted : unicode(2) "''"
-Quoted   : unicode(6) "''''''"
+Unquoted : string(2) "''"
+Quoted   : string(6) "''''''"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(2) "''"
+    string(2) "''"
   }
 }
-Unquoted : unicode(2) "a'"
-Quoted   : unicode(5) "'a'''"
+Unquoted : string(2) "a'"
+Quoted   : string(5) "'a'''"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(2) "a'"
+    string(2) "a'"
   }
 }
-Unquoted : unicode(2) "'z"
-Quoted   : unicode(5) "'''z'"
+Unquoted : string(2) "'z"
+Quoted   : string(5) "'''z'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(2) "'z"
+    string(2) "'z"
   }
 }
-Unquoted : unicode(4) "a''b"
-Quoted   : unicode(8) "'a''''b'"
+Unquoted : string(4) "a''b"
+Quoted   : string(8) "'a''''b'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(4) "a''b"
+    string(4) "a''b"
   }
 }
-Unquoted : unicode(1) """
-Quoted   : unicode(3) "'"'"
+Unquoted : string(1) """
+Quoted   : string(3) "'"'"
 array(1) {
   [0]=>
   array(1) {
     ["t"]=>
-    unicode(1) """
+    string(1) """
   }
 }
 Done
