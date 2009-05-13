@@ -1345,7 +1345,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	}
 
 	if (fp) {
-		if (phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC) == SUCCESS) {
+		if (phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error TSRMLS_CC) == SUCCESS) {
 			if ((*pphar)->is_data || !PHAR_G(readonly)) {
 				(*pphar)->is_writeable = 1;
 			}
@@ -1519,7 +1519,7 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 		fname_len = strlen(actual);
 	}
 
-	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, error TSRMLS_CC);
+	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error TSRMLS_CC);
 
 	if (actual) {
 		efree(actual);
@@ -1563,7 +1563,7 @@ static inline char *phar_strnstr(const char *buf, int buf_len, const char *searc
  * that the manifest is proper, then pass it to phar_parse_pharfile().  SUCCESS
  * or FAILURE is returned and pphar is set to a pointer to the phar's manifest
  */
-static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, int is_data, char **error TSRMLS_DC) /* {{{ */
 {
 	const char token[] = "__HALT_COMPILER();";
 	const char zip_magic[] = "PK\x03\x04";
@@ -1706,7 +1706,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 			if (got > 512) {
 				if (phar_is_tar(pos, fname)) {
 					php_stream_rewind(fp);
-					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, compression, error TSRMLS_CC);
+					return phar_parse_tarfile(fp, fname, fname_len, alias, alias_len, pphar, is_data, compression, error TSRMLS_CC);
 				}
 			}
 		}
@@ -2380,7 +2380,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error TSRMLS_
 		fname_len = strlen(actual);
 	}
 
-	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, error TSRMLS_CC);
+	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error TSRMLS_CC);
 
 	if (actual) {
 		efree(actual);
