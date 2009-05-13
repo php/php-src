@@ -18,6 +18,7 @@ $tar = new tarmaker($fname, 'none');
 $tar->init();
 $tar->addFile('tar_004.php', '<?php var_dump(__FILE__);');
 $tar->addFile('internal/file/here', "hi there!\n");
+$tar->addFile('.phar/stub.php', "__HALT_COMPILER();");
 $tar->close();
 
 try {
