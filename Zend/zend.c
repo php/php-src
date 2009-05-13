@@ -863,7 +863,7 @@ void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
 	zend_try {
-		zend_hash_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
+		zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
 	} zend_end_try();
 }
 /* }}} */
