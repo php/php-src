@@ -91,6 +91,8 @@ PHP                                                                        NEWS
   setting logging timestamps). (Derick)
 - Fixed bug #45092 (header HTTP context option not being used when compiled
   using --with-curlwrappers). (Jani)
+- Fixed bug #44996 (xmlrpc_decode() ignores time zone on iso8601.datetime).
+  (Ilia, kawai at apache dot org) 
 - Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
   (Martin McNickle)
 - Fixed bug #38805 (PDO truncates text from SQL Server text data type
