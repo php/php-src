@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 
 - Disabled SQLite3::loadExtension for threaded SAPIs. (Scott)
 
+- Fixed bug #48257 (PharData throws exception with non-phar tar). (Greg)
 - Fixed bug #48227 (NumberFormatter::format leaks memory). (Felipe)
 - Fixed bug #48200 (compile failure with mbstring.c when 
   --enable-zend-multibyte is used). (Jani)
