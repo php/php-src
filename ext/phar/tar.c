@@ -192,7 +192,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -496,8 +496,14 @@ bail:
 		}
 	} while (read != 0);
 
+	if (zend_hash_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		myphar->is_data = 0;
+	} else {
+		myphar->is_data = 1;
+	}
+
 	/* ensure signature set */
-	if (PHAR_G(require_hash) && !myphar->signature) {
+	if (!myphar->is_data && PHAR_G(require_hash) && !myphar->signature) {
 		php_stream_close(fp);
 		phar_destroy_phar_data(myphar TSRMLS_CC);
 		if (error) {
@@ -513,12 +519,6 @@ bail:
 	myphar->fname_len = fname_len;
 	myphar->fp = fp;
 	p = strrchr(myphar->fname, '/');
-
-	if (zend_hash_exists(&(myphar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
-		myphar->is_data = 0;
-	} else {
-		myphar->is_data = 1;
-	}
 
 	if (p) {
 		myphar->ext = memchr(p, '.', (myphar->fname + fname_len) - p);
