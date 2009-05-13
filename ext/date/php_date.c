@@ -570,17 +570,11 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS_DC);
 
-/* This is need to ensure that session extension request shutdown occurs 1st, because it uses the date extension */ 
-static const zend_module_dep date_deps[] = {
-	ZEND_MOD_OPTIONAL("session")
-	{NULL, NULL, NULL}
-};
-
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
-	date_deps,
+	NULL,
 	"date",                     /* extension name */
 	date_functions,             /* function list */
 	PHP_MINIT(date),            /* process startup */

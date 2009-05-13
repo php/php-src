@@ -79,8 +79,7 @@ END {
 	out_count = 0;
 	
 	while (count(mods)) {
-		# count down, since we need to assemble it in reverse order
-		for (i = mod_count-1; i >= 0; --i) {
+		for (i = 0; i <= mod_count; i++) {
 			if (i in mods) {
 				do_deps(i);
 			}
