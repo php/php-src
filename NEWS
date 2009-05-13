@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #48248 (SIGSEGV when access to private property via &__get). 
   (Felipe)
+- Fixed bug #48240 (DBA Segmentation fault dba_nextkey). (Felipe)
 - Fixed bug #48224 (Incorrect shuffle in array_rand). (Etienne)
 - Fixed bug #48221 (memory leak when passing invalid xslt parameter). (Felipe)
 - Fixed bug #48206 (Iterating over an invalid data structure
