@@ -219,7 +219,7 @@ DBA_NEXTKEY_FUNC(db4)
 		gkey.flags |= DB_DBT_MALLOC;
 		gval.flags |= DB_DBT_MALLOC;
 	}
-	if (dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT) == 0) {
+	if (dba->cursor && dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT) == 0) {
 		if (gkey.data) {
 			nkey = estrndup(gkey.data, gkey.size);
 			if (newlen) *newlen = gkey.size;
