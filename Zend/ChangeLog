@@ -1,3 +1,19 @@
+2009-05-12  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug48248.phpt
+      tests/bug48248.phpt:
+      - MFH: Fixed bug #48248 (SIGSEGV when access to private property via
+      &__get)
+
+    * zend_object_handlers.c
+      tests/bug48248.phpt
+      tests/bug48248.phpt
+      tests/bug48248.phpt:
+      - Fixed bug #48248 (SIGSEGV when access to private property via &__get)
+
 2009-05-11  Felipe Pena  <felipensp@gmail.com>
 
     * zend_exceptions.c
