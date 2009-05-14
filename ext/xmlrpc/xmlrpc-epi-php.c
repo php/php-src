@@ -67,6 +67,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "ext/date/php_date.h"
 #include "php_ini.h"
 #include "php_xmlrpc.h"
 #include "xmlrpc.h"
@@ -1300,7 +1301,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
 			if(newtype == xmlrpc_datetime) {
 				XMLRPC_VALUE v = XMLRPC_CreateValueDateTime_ISO8601(NULL, value->value.str.val);
 				if(v) {
-					time_t timestamp = (time_t) php_parse_date(XMLRPC_GetValueDateTime_ISO8601(v), NULL);
+					time_t timestamp = (time_t) php_parse_date((char *)XMLRPC_GetValueDateTime_ISO8601(v), NULL);
 					if(timestamp) {
 						zval* ztimestamp;
 
