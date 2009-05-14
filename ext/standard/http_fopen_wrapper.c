@@ -450,7 +450,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				 have_header |= HTTP_HEADER_TYPE;
 			}
 		}
-		efree(tmp);
+		if (tmp) {
+			efree(tmp);
+		}
 	}
 
 	/* auth header if it was specified */
