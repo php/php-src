@@ -3026,7 +3026,7 @@ PHP_FUNCTION(odbc_tables)
 	int cat_len = 0, schema_len = 0, table_len = 0, type_len = 0;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ssss", &pv_conn, &cat, &cat_len, &schema, &schema_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len, 
 		&table, &table_len, &type, &type_len) == FAILURE) {
 		return;
 	}
@@ -3093,7 +3093,7 @@ PHP_FUNCTION(odbc_columns)
 	int cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ssss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &column, &column_len) == FAILURE) {
 		return;
 	}
@@ -3120,10 +3120,6 @@ PHP_FUNCTION(odbc_columns)
 	 */
 	if (table && table_len && schema && schema_len == 0) {
 		schema = NULL;
-	}
-
-	if (cat && cat_len == 0) {
-		cat = NULL;
 	}
 
 	rc = SQLColumns(result->stmt, 
@@ -3161,7 +3157,7 @@ PHP_FUNCTION(odbc_columns)
 PHP_FUNCTION(odbc_columnprivileges)
 {
 	zval *pv_conn;
-	odbc_result   *result = NULL;
+	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat, *schema, *table, *column;
 	int cat_len, schema_len, table_len, column_len;
@@ -3187,10 +3183,6 @@ PHP_FUNCTION(odbc_columnprivileges)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
-	}
-	
-	if (cat_len == 0) {
-		cat = NULL;
 	}
 
 	rc = SQLColumnPrivileges(result->stmt, 
@@ -3231,11 +3223,11 @@ PHP_FUNCTION(odbc_foreignkeys)
 	zval *pv_conn;
 	odbc_result *result = NULL;
 	odbc_connection *conn;
-	char *pcat, *pschema, *ptable, *fcat, *fschema, *ftable;
-	int pcat_len, pschema_len, ptable_len, fcat_len, fschema_len, ftable_len;
+	char *pcat = NULL, *pschema, *ptable, *fcat, *fschema, *ftable;
+	int pcat_len = 0, pschema_len, ptable_len, fcat_len, fschema_len, ftable_len;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssssss", &pv_conn, &pcat, &pcat_len, &pschema, &pschema_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!sssss", &pv_conn, &pcat, &pcat_len, &pschema, &pschema_len, 
 		&ptable, &ptable_len, &fcat, &fcat_len, &fschema, &fschema_len, &ftable, &ftable_len) == FAILURE) {
 		return;
 	}
@@ -3267,10 +3259,6 @@ PHP_FUNCTION(odbc_foreignkeys)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
-	}
-	
-	if (pcat_len == 0) {
-		pcat = NULL;
 	}
 
 	rc = SQLForeignKeys(result->stmt, 
@@ -3716,10 +3704,10 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL;
-	int cat_len, schema_len, table_len;
+	int cat_len = 0, schema_len, table_len;
 	RETCODE rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
 		return;
 	}
 
@@ -3738,10 +3726,6 @@ PHP_FUNCTION(odbc_tableprivileges)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
-	}
-	
-	if (cat_len == 0) {
-		cat = NULL;
 	}
 
 	rc = SQLTablePrivileges(result->stmt, 
