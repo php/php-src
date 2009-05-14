@@ -298,40 +298,41 @@ END_EXTERN_C()
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
 
-#define HANDLE_NUMERIC(key, length, func) {												\
-	register char *tmp=key;																\
-																						\
-	if (*tmp=='-') {																	\
-		tmp++;																			\
-	}																					\
-	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
-		char *end=key+length-1;															\
-		long idx;																		\
-																						\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
-			break;																		\
-		}																				\
-		while (tmp<end) {																\
-			if (!(*tmp>='0' && *tmp<='9')) {											\
-				break;																	\
-			}																			\
-			tmp++;																		\
-		}																				\
-		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			if (*key=='-') {															\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MIN) {													\
-					return func;														\
-				}																		\
-			} else {																	\
-				idx = strtol(key, NULL, 10);											\
-				if (idx!=LONG_MAX) {													\
-					return func;														\
-				}																		\
-			}																			\
-		}																				\
-	} while (0);																		\
-}
+#define HANDLE_NUMERIC(key, length, func) do {								\
+	register const char *tmp = key;											\
+																			\
+	if (*tmp == '-') {														\
+		tmp++;																\
+	}																		\
+	if (*tmp >= '0' && *tmp <= '9') { /* possibly a numeric index */		\
+		const char *end = key + length - 1;									\
+		long idx;															\
+																			\
+		if ((*end != '\0') /* not a null terminated string */				\
+		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
+		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
+		 || (SIZEOF_LONG == 4 &&											\
+		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
+		     *tmp > '2')) { /* overflow */									\
+			break;															\
+		}																	\
+		idx = (*tmp - '0');													\
+		while (++tmp != end && *tmp >= '0' && *tmp <= '9') {				\
+			idx = (idx * 10) + (*tmp - '0');								\
+		}																	\
+		if (tmp == end) {													\
+			if (*key == '-') {												\
+				idx = -idx;													\
+				if (idx > 0) { /* overflow */								\
+					break;													\
+				}															\
+			} else if (idx < 0) { /* overflow */							\
+				break;														\
+			}																\
+			return func;													\
+		}																	\
+	}																		\
+} while (0)
 
 
 static inline int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\
@@ -343,7 +344,7 @@ static inline int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLeng
 
 static inline int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx))
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
 	return zend_hash_del(ht, arKey, nKeyLength);
 }
 

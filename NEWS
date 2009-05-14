@@ -83,6 +83,7 @@ PHP                                                                        NEWS
   different bit numbers). (Matt)
 - Fixed bug #45997 (safe_mode bypass with exec/system/passthru (windows only)).
   (Pierre)
+- Fixed bug #45877 (Array key '2147483647' left as string). (Matt)
 - Fixed bug #45822 (Near infinite-loops while parsing huge relative offsets).
   (Derick, Mike Sullivan)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
