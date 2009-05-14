@@ -77,7 +77,7 @@ END {
 	out_count = 0;
 	
 	while (count(mods)) {
-		for (i = 0; i < mod_count - 1; i++) {
+		for (i = 0; i <= mod_count - 1; i++) {
 			if (i in mods) {
 				do_deps(i);
 			}
