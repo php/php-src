@@ -703,10 +703,6 @@ PHP                                                                        NEWS
 - Fixed PECL bug #12794 (PDOStatement->nextRowset() doesn't work). (Johannes)
 - Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
 
-- Fixed bug #45622 (isset($arrayObject->p) misbehaves with ArrayObject::
-  ARRAY_AS_PROPS set). (robin_fernandes at uk dot ibm dot com, Arnaud)
-- Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private
-  prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
 - Fixed bug #45430 (windows implementation of crypt is not thread safe).
