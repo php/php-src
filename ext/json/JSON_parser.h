@@ -6,7 +6,7 @@
 #include "php.h"
 #include "ext/standard/php_smart_str.h"
 
-#define JSON_PARSER_MAX_DEPTH 512
+#define JSON_PARSER_DEFAULT_DEPTH 512
 
 typedef struct JSON_parser_struct {
     int state;
@@ -14,8 +14,8 @@ typedef struct JSON_parser_struct {
     int top;
 	int error_code;
     int* stack;
-    zval *the_zstack[JSON_PARSER_MAX_DEPTH];
-
+    zval **the_zstack;
+    zval *the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
 } * JSON_parser;
 
 enum error_codes {
