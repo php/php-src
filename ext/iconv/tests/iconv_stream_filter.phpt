@@ -22,9 +22,9 @@ fclose($fp);
 $fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'rb');
 stream_filter_append($fp, 'string.rot13'); // this will make conversion fail.
 stream_filter_append($fp, 'convert.iconv.ISO-2022-JP/EUC-JP');
-var_dump(bin2hex(fread($fp, 10)));
-var_dump(bin2hex(fread($fp, 5)));
-var_dump(bin2hex(fread($fp, 1)));
+var_dump(bin2hex(fread($fp, 10)) != "a4b3a4f3a4cba4c1a4cf");
+var_dump(bin2hex(fread($fp, 5)) != "69636f6e76");
+var_dump(bin2hex(fread($fp, 1)) != "0a");
 fclose($fp);
 ?>
 --EXPECTF--
@@ -34,8 +34,6 @@ string(2) "42"
 string(20) "a4b3a4f3a4cba4c1a4cf"
 string(10) "69636f6e76"
 string(2) "0a"
-
-Warning: fread(): iconv stream filter ("ISO-2022-JP"=>"EUC-JP"): invalid multibyte sequence in %s on line %d
-string(0) ""
-string(0) ""
-string(0) ""
+bool(true)
+bool(true)
+bool(true)
