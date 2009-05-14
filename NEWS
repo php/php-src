@@ -90,6 +90,7 @@ PHP                                                                        NEWS
   (Derick, Mike Sullivan)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
+- Fixed bug #45540 (stream_context_create creates bad http request). (Arnaud)
 - Fixed bug #45191 (error_log ignores date.timezone php.ini val when
   setting logging timestamps). (Derick)
 - Fixed bug #45092 (header HTTP context option not being used when compiled
@@ -98,6 +99,8 @@ PHP                                                                        NEWS
   (Ilia, kawai at apache dot org) 
 - Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
   (Martin McNickle)
+- Fixed bug #42663 (gzinflate() try to allocate all memory with truncated
+  data). (Arnaud)
 - Fixed bug #42414 (some odbc_*() functions incompatible with Oracle ODBC 
   driver). (jhml at gmx dot net)
 - Fixed bug #38805 (PDO truncates text from SQL Server text data type
