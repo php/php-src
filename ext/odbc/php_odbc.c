@@ -3127,6 +3127,10 @@ PHP_FUNCTION(odbc_columns)
 		schema = NULL;
 	}
 
+	if (cat && cat_len == 0) {
+		cat = NULL;
+	}
+
 	rc = SQLColumns(result->stmt, 
 			cat, (SQLSMALLINT) cat_len,
 			schema, (SQLSMALLINT) schema_len,
@@ -3188,6 +3192,10 @@ PHP_FUNCTION(odbc_columnprivileges)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
+	}
+	
+	if (cat_len == 0) {
+		cat = NULL;
 	}
 
 	rc = SQLColumnPrivileges(result->stmt, 
@@ -3264,6 +3272,10 @@ PHP_FUNCTION(odbc_foreignkeys)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
+	}
+	
+	if (pcat_len == 0) {
+		pcat = NULL;
 	}
 
 	rc = SQLForeignKeys(result->stmt, 
@@ -3387,6 +3399,10 @@ PHP_FUNCTION(odbc_primarykeys)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
+	}
+	
+	if (cat_len == 0) {
+		cat = NULL;
 	}
 
 	rc = SQLPrimaryKeys(result->stmt, 
@@ -3589,6 +3605,10 @@ PHP_FUNCTION(odbc_specialcolumns)
 		efree(result);
 		RETURN_FALSE;
 	}
+	
+	if (cat_len == 0) {
+		cat = NULL;
+	}
 
 	rc = SQLSpecialColumns(result->stmt, 
 			type,
@@ -3658,6 +3678,10 @@ PHP_FUNCTION(odbc_statistics)
 		efree(result);
 		RETURN_FALSE;
 	}
+	
+	if (cat_len == 0) {
+		cat = NULL;
+	}
 
 	rc = SQLStatistics(result->stmt, 
 			cat, SAFE_SQL_NTS(cat),
@@ -3720,6 +3744,10 @@ PHP_FUNCTION(odbc_tableprivileges)
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLAllocStmt");
 		efree(result);
 		RETURN_FALSE;
+	}
+	
+	if (cat_len == 0) {
+		cat = NULL;
 	}
 
 	rc = SQLTablePrivileges(result->stmt, 
