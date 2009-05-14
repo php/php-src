@@ -40,8 +40,8 @@ bool(true)
 Warning: odbc_free_result(): supplied resource is not a valid ODBC result resource in %s on line %d
 bool(false)
 
-Warning: odbc_free_result() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+Warning: odbc_free_result(): supplied argument is not a valid ODBC result resource in %s on line %d
+bool(false)
 
 Warning: odbc_fetch_row(): %d is not a valid ODBC result resource in %s on line %d
 bool(false)

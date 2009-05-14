@@ -28,5 +28,5 @@ bool(false)
 Warning: odbc_columns(): SQL error: Failed to fetch error message, SQL state HY000 in SQLColumns in %s on line %d
 bool(false)
 
-Warning: odbc_fetch_row() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+Warning: odbc_fetch_row(): supplied argument is not a valid ODBC result resource in %s on line %d
+bool(false)

@@ -18,8 +18,8 @@ var_dump(odbc_data_source($conn, SQL_FETCH_FIRST));
 Warning: odbc_data_source(): Invalid fetch type (0) in %s on line %d
 bool(false)
 
-Warning: odbc_data_source() expects parameter 2 to be long, string given in %s on line %d
-NULL
+Warning: odbc_data_source(): Invalid fetch type (0) in %s on line %d
+bool(false)
 array(%d) {
 %a
 }
