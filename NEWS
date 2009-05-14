@@ -96,6 +96,8 @@ PHP                                                                        NEWS
   (Ilia, kawai at apache dot org) 
 - Fixed bug #43073 (TrueType bounding box is wrong for angle<>0).
   (Martin McNickle)
+- Fixed bug #42414 (some odbc_*() functions incompatible with Oracle ODBC 
+  driver). (jhml at gmx dot net)
 - Fixed bug #38805 (PDO truncates text from SQL Server text data type
   field). (Steph)
 
