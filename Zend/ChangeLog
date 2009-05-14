@@ -1,3 +1,13 @@
+2009-05-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_3)
+      zend.c:
+      MFH: Fixed module loading order and made request shutdown functions also to
+           be loaded in reverse like all other shutdowns are.
+
+    * zend.c:
+      - Fixed bug #48247 (PHP crashes on errors during startup)
+
 2009-05-12  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
