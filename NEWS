@@ -709,7 +709,6 @@ PHP                                                                        NEWS
   prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
   static methods). (robin_fernandes at uk dot ibm dot com)
-- Fixed bug #45540 (stream_context_create creates bad http request). (Arnaud)
 - Fixed bug #45430 (windows implementation of crypt is not thread safe).
   (Pierre)
 - Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
@@ -776,8 +775,6 @@ PHP                                                                        NEWS
 - Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
 - Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
 - Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
-- Fixed bug #42663 (gzinflate() try to allocate all memory with truncated
-  data). (Arnaud)
 - Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
   (Jani, Scott)
 - Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
