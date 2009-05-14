@@ -50,15 +50,6 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
-  PHP_CHECK_LIBRARY(history, add_history,
-  [
-    PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
-  ], [
-    AC_MSG_ERROR(history library required by readline not found)
-  ], [
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
-
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
 elif test "$PHP_LIBEDIT" != "no"; then
