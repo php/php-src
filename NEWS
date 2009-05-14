@@ -90,6 +90,10 @@ PHP                                                                        NEWS
   (Derick, Mike Sullivan)
 - Fixed bug #45799 (imagepng() crashes on empty image). (Martin McNickle,
   Takeshi Abe)
+- Fixed bug #45622 (isset($arrayObject->p) misbehaves with ArrayObject::
+  ARRAY_AS_PROPS set). (robin_fernandes at uk dot ibm dot com, Arnaud)
+- Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private
+  prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45540 (stream_context_create creates bad http request). (Arnaud)
 - Fixed bug #45191 (error_log ignores date.timezone php.ini val when
   setting logging timestamps). (Derick)
