@@ -1,7 +1,5 @@
 --TEST--
 SPL: ArrayObject::__construct basic usage with ArrayObject::STD_PROP_LIST|ArrayObject::ARRAY_AS_PROPS.
---XFAIL--
-Will fail unless the PHP53 fix to bug 45622 is backported to PHP52
 --FILE--
 <?php
 class C {
