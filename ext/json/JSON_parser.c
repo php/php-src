@@ -247,6 +247,11 @@ new_JSON_parser(int depth)
     jp->top = -1;
 	jp->error_code = PHP_JSON_ERROR_NONE;
     jp->stack = (int*)ecalloc(depth, sizeof(int));
+    if (depth > JSON_PARSER_DEFAULT_DEPTH) {
+        jp->the_zstack = (zval **)safe_emalloc(depth, sizeof(zval), 0);
+    } else {
+        jp->the_zstack = &jp->the_static_zstack[0];
+    }
     push(jp, MODE_DONE);
     return jp;
 }
@@ -258,6 +263,9 @@ int
 free_JSON_parser(JSON_parser jp)
 {
     efree((void*)jp->stack);
+    if (jp->the_zstack != &jp->the_static_zstack[0]) {
+        efree(jp->the_zstack);
+    }
     efree((void*)jp);
     return false;
 }

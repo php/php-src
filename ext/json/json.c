@@ -507,7 +507,7 @@ static PHP_FUNCTION(json_decode)
 	int str_len, utf16_len;
 	zend_uchar str_type;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-	long depth = JSON_PARSER_MAX_DEPTH;
+	long depth = JSON_PARSER_DEFAULT_DEPTH;
 	zval *z;
 	unsigned short *utf16;
 	JSON_parser jp;
@@ -535,9 +535,8 @@ static PHP_FUNCTION(json_decode)
 		}
 	}
 
-	/* can be removed once we remove the max depth limit */
-	if (depth <= 0 || depth > JSON_PARSER_MAX_DEPTH) {
-		depth = JSON_PARSER_MAX_DEPTH;
+	if (depth <= 0) {
+		depth = JSON_PARSER_DEFAULT_DEPTH;
 	}
 
 	ALLOC_INIT_ZVAL(z);
