@@ -536,7 +536,8 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		depth = JSON_PARSER_DEFAULT_DEPTH;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must greater than zero.");
+		RETURN_NULL();
 	}
 
 	ALLOC_INIT_ZVAL(z);
