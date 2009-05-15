@@ -1,3 +1,19 @@
+2009-05-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_2)
+      zend.c:
+      MFH: Fixed module loading order and made request shutdown functions also to
+           be loaded in reverse like all other shutdowns are.
+
+2009-05-14  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      zend.h
+      zend_hash.h
+      zend_operators.h
+      tests/bug45877.phpt:
+      MFH: Fixed bug #45877 (Array key '2147483647' left as string)
+
 2009-05-13  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_3)
