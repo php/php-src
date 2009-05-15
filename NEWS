@@ -3,8 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.10
 - Updated timezone database to version 2009.7 (2009g) (Derick)
 
-- Reverted the default value of array_unique()'s sorting type flag parameter to
-  SORT_STRING for the sake of backwards compatibility. (Moriyoshi)
+- Changed default value of array_unique()'s optional sorting type parameter
+  back to SORT_STRING to fix backwards compatibility breakage introduced in 
+  PHP 5.2.9. (Moriyoshi)
 
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
