@@ -495,7 +495,7 @@ static PHP_FUNCTION(bzcompress)
 	   + .01 x length of data + 600 which is the largest size the results of the compression 
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net 
 	   for pointing this out).  */
-	dest_len   = source_len + (0.01 * source_len) + 600;
+	dest_len   = (unsigned int) (source_len + (0.01 * source_len) + 600);
 	
 	/* Allocate the destination buffer */
 	dest = emalloc(dest_len + 1);
@@ -559,15 +559,15 @@ static PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-		dest = safe_erealloc(dest, 1, bzs.avail_out+1, size );
+		dest = safe_erealloc(dest, 1, bzs.avail_out+1, (size_t) size );
 		bzs.next_out = dest + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-		dest = safe_erealloc(dest, 1, size, 1);
+		dest = safe_erealloc(dest, 1, (size_t) size, 1);
 		dest[size] = '\0';
-		RETVAL_STRINGL(dest, size, 0);
+		RETVAL_STRINGL(dest, (int) size, 0);
 	} else { /* real error */
 		efree(dest);
 		RETVAL_LONG(error);
