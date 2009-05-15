@@ -119,6 +119,17 @@ UPGRADE NOTES - PHP 5.3
 
 - All ereg functions are deprecated. Use PCRE (preg_*()) instead.
 
+- The following ini directives will now emit an E_DEPRECATED warning 
+  upon startup if they are activated:
+
+        - define_syslog_variables
+        - register_globals
+        - register_long_arrays
+        - safe_mode
+        - magic_quotes_gpc
+        - magic_quotes_runtime
+        - magic_quotes_sybase
+
 ===============
 6. Undeprecated
 ===============
@@ -183,7 +194,8 @@ UPGRADE NOTES - PHP 5.3
 9. Changes in INI directives
 ============================
 
-- zend.ze1_compatibility_mode has been removed.
+- zend.ze1_compatibility_mode has been removed. If this ini directive is set 
+  to on, then an E_ERROR is emitted at startup.
 
 - A new user initialization mechanism and config variables have been added:
   user_ini.filename and user_ini.cache_ttl
