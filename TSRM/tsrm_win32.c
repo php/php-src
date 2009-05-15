@@ -252,7 +252,7 @@ TSRM_API int pclose(FILE *stream)
 	}
 
 	fflush(process->stream);
-    fclose(process->stream);
+	fclose(process->stream);
 
 	WaitForSingleObject(process->prochnd, INFINITE);
 	GetExitCodeProcess(process->prochnd, &termstat);
