@@ -475,14 +475,14 @@ static PHP_FUNCTION(bzerror)
    Compresses a string into BZip2 encoded data */
 static PHP_FUNCTION(bzcompress)
 {
-	zstr	source;		/* String to compress */
-	int	source_len;
-	zend_uchar source_type;
-	long	block_size = 4,		/* Block size for compression algorithm */
-		work_factor = 0;	/* Work factor for compression algorithm */
-	char	*dest = NULL;		/* Destination to place the compressed data into */
-	int	dest_len = 0;
-	int	error;			/* Error Container */
+	zstr		 source;		/* String to compress */
+	int		 source_len;
+	zend_uchar	 source_type;
+	long		 block_size = 4,	/* Block size for compression algorithm */
+			 work_factor = 0;	/* Work factor for compression algorithm */
+	char		*dest = NULL;		/* Destination to place the compressed data into */
+	int		 dest_len = 0;
+	int		 error;			/* Error Container */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|ll", &source, &source_len, &source_type, &block_size, &work_factor) == FAILURE) {
 		return;
@@ -492,7 +492,9 @@ static PHP_FUNCTION(bzcompress)
 	 * This is the largest size the results of the compression could possibly be,
 	 * at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net for pointing this out).
 	 */
-	dest_len   = source_len + (0.01 * source_len) + 600;
+	dest_len   = (int) (source_len + (0.01 * source_len) + 600);
+
+	/* Allocate the destination buffer */
 	dest = emalloc(dest_len + 1);
 	
 	if (source_type == IS_UNICODE) {
@@ -559,15 +561,15 @@ static PHP_FUNCTION(bzdecompress)
 		/* compression is better then 2:1, need to allocate more memory */
 		bzs.avail_out = source_len;
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-		dest = erealloc(dest, size + bzs.avail_out + 1);
+		dest = erealloc(dest, (size_t) (size + bzs.avail_out + 1));
 		bzs.next_out = dest + size;
 	}
 
 	if (error == BZ_STREAM_END || error == BZ_OK) {
 		size = (bzs.total_out_hi32 * (unsigned int) -1) + bzs.total_out_lo32;
-		dest = erealloc(dest, size + 1);
+		dest = erealloc(dest, (size_t) (size + 1));
 		dest[size] = '\0';
-		RETVAL_STRINGL(dest, size, 0);
+		RETVAL_STRINGL(dest, (int) size, 0);
 	} else { /* real error */
 		efree(dest);
 		RETVAL_LONG(error);
