@@ -57,6 +57,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, json)
 	ZEND_ARG_INFO(0, assoc)
+	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_json_last_error, 0)
@@ -475,7 +476,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 }
 /* }}} */
 
-/* {{{ proto string json_encode(mixed data) U
+/* {{{ proto string json_encode(mixed data [, long options]) U
    Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
