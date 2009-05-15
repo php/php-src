@@ -57,6 +57,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, json)
 	ZEND_ARG_INFO(0, assoc)
+	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_json_last_error, 0)
