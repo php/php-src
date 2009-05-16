@@ -1,3 +1,8 @@
+2009-05-15  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_builtin_functions.c:
+      - Missing zend_exceptions.h (Kalle)
+
 2009-05-14  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_2)
