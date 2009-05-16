@@ -146,7 +146,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect = 0;
 	char *transport_string, *errstr = NULL;
-	int transport_len, have_header = 0, request_fulluri = 0;
+	int transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
 	char *charset = NULL;
@@ -600,9 +600,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			} else {
 				response_code = 0;
 			}
+			if (context && SUCCESS==php_stream_context_get_option(context, "http", "ignore_errors", &tmpzval)) {
+				ignore_errors = zend_is_true(*tmpzval);
+			}
 			/* when we request only the header, don't fail even on error codes */
-			if ((options & STREAM_ONLY_GET_HEADERS) ||
-				(context && php_stream_context_get_option(context, "http", "ignore_errors",  &tmpzval) == SUCCESS && zend_is_true(*tmpzval)) ) {
+			if ((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) {
 				reqok = 1;
 			}
 			/* all status codes in the 2xx range are defined by the specification as successful;
@@ -704,7 +706,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 	
 	if (!reqok || location[0] != '\0') {
-		if (options & STREAM_ONLY_GET_HEADERS && redirect_max <= 1) {
+		if (((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) && redirect_max <= 1) {
 			goto out;
 		}
 
