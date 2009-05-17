@@ -1767,8 +1767,8 @@ PHPAPI size_t _php_stream_copy_to_mem_ex(php_stream *src, zend_uchar rettype, vo
 	return len;
 }
 
-/* Designed for copying UChars (taking into account both maxlen and maxchars) */
-PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars, size_t *len STREAMS_DC TSRMLS_DC)
+zend_always_inline
+static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars, size_t *len, int utype STREAMS_DC TSRMLS_DC)
 {
 	size_t haveread = 0;
 	php_stream_statbuf ssbuf;
@@ -1778,12 +1778,7 @@ PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, 
 		len = &dummy;
 	}
 
-	if (src->readbuf_type == IS_STRING) {
-		/* Called incorrectly, don't do that. */
-		return _php_stream_copy_to_stream_ex(src, dest, maxlen, len STREAMS_CC TSRMLS_CC);
-	}
-
-	if (maxlen == 0 || maxchars == 0) {
+	if (maxlen == 0 || (utype == IS_UNICODE && maxchars == 0)) {
 		*len = 0;
 		return SUCCESS;
 	}
@@ -1803,111 +1798,7 @@ PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, 
 		}
 	}
 
-	while(1) {
-		UChar buf[CHUNK_SIZE];
-		size_t readchunk = CHUNK_SIZE;
-		size_t didread;
-
-		if (maxlen && (maxlen - haveread) < readchunk) {
-			readchunk = maxlen - haveread;
-		}
-
-		didread = php_stream_read_unicode_ex(src, buf, readchunk, maxchars);
-
-		if (didread) {
-			/* extra paranoid */
-			size_t didwrite, towrite;
-			UChar *writeptr;
-
-			if (maxchars > 0) {
-				/* Determine number of chars in this buf */
-				maxchars -= u_countChar32(buf, didread);
-			}
-
-			towrite = didread;
-			writeptr = buf;
-			haveread += didread;
-
-			while(towrite) {
-				didwrite = php_stream_write_unicode(dest, writeptr, towrite);
-				if (didwrite == 0) {
-					*len = haveread - (didread - towrite);
-					return FAILURE;
-				}
-
-				towrite -= didwrite;
-				writeptr += didwrite;
-			}
-		} else {
-			break;
-		}
-
-		if (maxchars == 0 || maxlen - haveread == 0) {
-			break;
-		}
-	}
-	
-	*len = haveread;
-
-	/* we've got at least 1 byte to read. 
-	 * less than 1 is an error */
-
-	if (haveread > 0) {
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-
-/* see _php_stream_copy_to_stream() */
-ZEND_ATTRIBUTE_DEPRECATED
-PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
-{
-	size_t len;
-	int ret = _php_stream_ucopy_to_stream_ex(src, dest, maxlen, maxchars, &len STREAMS_REL_CC TSRMLS_CC);
-	if (ret == SUCCESS && maxlen != 0 && maxchars != 0) {
-		return 1;
-	}
-	return len;
-}
-
-/* Optimized for copying octets from source stream */
-/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
-PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
-{
-	size_t haveread = 0;
-	php_stream_statbuf ssbuf;
-	size_t dummy;
-
-	if (!len) {
-		len = &dummy;
-	}
-
-	if (src->readbuf_type == IS_UNICODE) {
-		/* Called incorrectly, don't do that. */
-		return _php_stream_ucopy_to_stream_ex(src, dest, maxlen, -1, len STREAMS_CC TSRMLS_CC);
-	}
-
-	if (maxlen == 0) {
-		*len = 0;
-		return SUCCESS;
-	}
-
-	if (maxlen == PHP_STREAM_COPY_ALL) {
-		maxlen = 0;
-	}
-
-	if (php_stream_stat(src, &ssbuf) == 0) {
-		if (ssbuf.sb.st_size == 0
-#ifdef S_ISREG
-			&& S_ISREG(ssbuf.sb.st_mode)
-#endif
-		) {
-			*len = 0;
-			return SUCCESS;
-		}
-	}
-
-	if (php_stream_mmap_possible(src)) {
+	if (utype == IS_STRING && php_stream_mmap_possible(src)) {
 		char *p;
 		size_t mapped;
 
@@ -1931,40 +1822,48 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 	}
 
 	while(1) {
-		char buf[CHUNK_SIZE];
-		size_t readchunk = sizeof(buf);
+		zstr buf;
+		union { char s; UChar u; } _buf[CHUNK_SIZE];
+		size_t readchunk = sizeof(_buf) / sizeof(_buf[0]);
 		size_t didread;
+
+		buf.v = _buf;
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
 		}
 
-		didread = php_stream_read(src, buf, readchunk);
+		didread = php_stream_u_read_ex(src, utype, buf, readchunk, maxchars);
 
 		if (didread) {
 			/* extra paranoid */
 			size_t didwrite, towrite;
-			char *writeptr;
+			zstr writeptr;
+
+			if (utype == IS_UNICODE && maxchars > 0) {
+				/* Determine number of chars in this buf */
+				maxchars -= u_countChar32(buf.u, didread);
+			}
 
 			towrite = didread;
 			writeptr = buf;
 			haveread += didread;
 
 			while(towrite) {
-				didwrite = php_stream_write(dest, writeptr, towrite);
+				didwrite = php_stream_u_write(dest, utype, writeptr, towrite);
 				if (didwrite == 0) {
 					*len = haveread - (didread - towrite);
 					return FAILURE;
 				}
 
 				towrite -= didwrite;
-				writeptr += didwrite;
+				writeptr.v += ZBYTES(utype, didwrite);
 			}
 		} else {
 			break;
 		}
 
-		if (maxlen - haveread == 0) {
+		if (maxlen - haveread == 0 || (utype == IS_UNICODE && maxchars == 0)) {
 			break;
 		}
 	}
@@ -1978,6 +1877,31 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 		return SUCCESS;
 	}
 	return FAILURE;
+}
+
+/* Designed for copying UChars (taking into account both maxlen and maxchars) */
+PHPAPI size_t _php_stream_ucopy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars, size_t *len STREAMS_DC TSRMLS_DC)
+{
+	return _php_stream_copy_to_stream_common(src, dest, maxlen, maxchars, len, IS_UNICODE STREAMS_REL_CC TSRMLS_CC);
+}
+
+/* see _php_stream_copy_to_stream() */
+ZEND_ATTRIBUTE_DEPRECATED
+PHPAPI size_t _php_stream_ucopy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t maxchars STREAMS_DC TSRMLS_DC)
+{
+	size_t len;
+	int ret = _php_stream_ucopy_to_stream_ex(src, dest, maxlen, maxchars, &len STREAMS_REL_CC TSRMLS_CC);
+	if (ret == SUCCESS && maxlen != 0 && maxchars != 0) {
+		return 1;
+	}
+	return len;
+}
+
+/* Optimized for copying octets from source stream */
+/* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
+PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
+{
+	return _php_stream_copy_to_stream_common(src, dest, maxlen, 0, len, IS_STRING STREAMS_REL_CC TSRMLS_CC);
 }
 
 /* Returns the number of bytes moved.
