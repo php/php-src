@@ -1603,12 +1603,12 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 		char *p;
 		size_t mapped;
 
-		p = php_stream_mmap_range(stream, php_stream_tell(stream), PHP_STREAM_COPY_ALL, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
+		p = php_stream_mmap_range(stream, php_stream_tell(stream), PHP_STREAM_MMAP_ALL, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
 			PHPWRITE(p, mapped);
 
-			php_stream_mmap_unmap(stream);
+			php_stream_mmap_unmap_ex(stream, mapped);
 
 			return mapped;
 		}
@@ -1916,7 +1916,7 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 		if (p) {
 			mapped = php_stream_write(dest, p, mapped);
 
-			php_stream_mmap_unmap(src);
+			php_stream_mmap_unmap_ex(src, mapped);
 
 			*len = mapped;
 			
