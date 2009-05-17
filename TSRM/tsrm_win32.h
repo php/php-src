@@ -63,6 +63,7 @@ typedef struct {
 	int				process_size;
 	int				shm_size;
 	char			*comspec;
+	HANDLE impersonation_token;
 } tsrm_win32_globals;
 
 #ifdef ZTS
