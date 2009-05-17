@@ -305,6 +305,12 @@ PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int maxle
 #define php_stream_read_unicode(stream, buf, maxlen)	_php_stream_read_unicode((stream), (buf), (maxlen), -1 TSRMLS_CC)
 #define php_stream_read_unicode_ex(stream, buf, maxlen, maxchars)	_php_stream_read_unicode((stream), (buf), (maxlen), (maxchars) TSRMLS_CC)
 
+#define php_stream_u_read_ex(stream, type, zbuf, maxlen, maxchars) ((type == IS_UNICODE) ? \
+		php_stream_read_unicode_ex(stream, zbuf.u, maxlen, maxchars) : \
+		php_stream_read(stream, zbuf.s, maxlen))
+
+#define php_stream_u_read(stream, type, zbuf, maxlen) php_stream_u_read_ex(stream, type, zbuf, maxlen, -1)
+	
 PHPAPI UChar *_php_stream_read_unicode_chars(php_stream *stream, int *pchars TSRMLS_DC);
 #define  php_stream_read_unicode_chars(stream, pchars) _php_stream_read_unicode_chars((stream), (pchars) TSRMLS_CC)
 
