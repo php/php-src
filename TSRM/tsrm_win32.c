@@ -23,6 +23,7 @@
 #include <io.h>
 #include <process.h>
 #include <time.h>
+#include <errno.h>
 
 #define TSRM_INCLUDE_FULL_WINDOWS_HEADERS
 
@@ -45,6 +46,7 @@ static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 	globals->process_size = 0;
 	globals->shm_size	  = 0;
 	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
+	globals->impersonation_token = NULL;
 }
 
 static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
@@ -86,21 +88,82 @@ TSRM_API void tsrm_win32_shutdown(void)
 
 TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 {
+	SECURITY_INFORMATION sec_info = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
+	GENERIC_MAPPING gen_map = { FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_GENERIC_EXECUTE, FILE_ALL_ACCESS };
+	DWORD priv_set_length = sizeof(PRIVILEGE_SET);
+
+	PRIVILEGE_SET privilege_set = {0};
+	DWORD sec_desc_length = 0, desired_access = 0, granted_access = 0;
+	BYTE * psec_desc = NULL;
+	BOOL fAccess = FALSE;
+	HANDLE process_token = NULL;
+	TSRMLS_FETCH();
+
 	if (mode == 1 /*X_OK*/) {
-#if 1
-		/* This code is not supported by Windows 98,
-		 * but we don't support it anymore */
 		DWORD type;
-
-		return GetBinaryType(pathname, &type)?0:-1;
-#else
-		SHFILEINFO sfi;
-
-		return access(pathname, 0) == 0 &&
-			SHGetFileInfo(pathname, 0, &sfi, sizeof(SHFILEINFO), SHGFI_EXETYPE) != 0 ? 0 : -1;
-#endif
+		return GetBinaryType(pathname, &type) ? 0 : -1;
 	} else {
-		return access(pathname, mode);
+		if(access(pathname, mode)) {
+				return errno;
+		}
+
+		/* Do a full access check because access() will only check read-only attribute */
+		if(mode == 0 || mode > 6) {
+			desired_access = FILE_GENERIC_READ;
+		} else if(mode <= 2) {
+				desired_access = FILE_GENERIC_WRITE;
+		} else if(mode <= 4) {
+				desired_access = FILE_GENERIC_READ;
+		} else { // if(mode <= 6)
+				desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
+		}
+
+		/* Get size of security buffer. Call is expected to fail */
+		if(GetFileSecurity(pathname, sec_info, NULL, 0, &sec_desc_length)) {
+			goto Finished;
+		}
+
+		psec_desc = (BYTE *)malloc(sec_desc_length);
+		if(psec_desc == NULL ||
+			 !GetFileSecurity(pathname, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+			goto Finished;
+		}
+
+		if(TWG(impersonation_token) == NULL) {
+
+			if(!OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_QUERY, &process_token)) {
+				goto Finished;
+			}
+
+			/* Access check requires impersonation token. Create a duplicate token. */
+			if(!DuplicateToken(process_token, SecurityImpersonation, &TWG(impersonation_token))) {
+				goto Finished;
+			}
+		}
+
+		if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
+				goto Finished;
+		}
+
+Finished:
+
+		/* impersonation_token will be closed when the process dies */
+		if(process_token != NULL) {
+			CloseHandle(process_token);
+			process_token = NULL;
+		}
+
+		if(psec_desc != NULL) {
+			free(psec_desc);
+			psec_desc = NULL;
+		}
+
+		if(fAccess == FALSE) {
+			errno = EACCES;
+			return errno;
+		} else {
+			return 0;
+		}
 	}
 }
 
