@@ -920,14 +920,14 @@ PHP_METHOD(sqlite3, createAggregate)
 	}
 
 	if (!zend_is_callable(step_callback, 0, &callback_name TSRMLS_CC)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name);
+		php_sqlite3_error(db_obj, "Not a valid callback function %v", Z_UNIVAL(callback_name));
 		zval_dtor(&callback_name);
 		RETURN_FALSE;
 	}
 	zval_dtor(&callback_name);
 
 	if (!zend_is_callable(fini_callback, 0, &callback_name TSRMLS_CC)) {
-		php_sqlite3_error(db_obj, "Not a valid callback function %s", callback_name);
+		php_sqlite3_error(db_obj, "Not a valid callback function %v", Z_UNIVAL(callback_name));
 		zval_dtor(&callback_name);
 		RETURN_FALSE;
 	}
