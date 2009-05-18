@@ -49,37 +49,3 @@ array(1) {
     }
   }
 }
---UEXPECT--
-array(1) {
-  [0]=>
-  object(stdClass)#1 (1) {
-    [u"a"]=>
-    object(stdClass)#2 (0) {
-    }
-  }
-}
-array(1) {
-  [0]=>
-  object(stdClass)#1 (2) {
-    [u"a"]=>
-    object(stdClass)#2 (0) {
-    }
-    [u"b"]=>
-    object(stdClass)#3 (0) {
-    }
-  }
-}
-array(1) {
-  [0]=>
-  object(stdClass)#1 (3) {
-    [u"a"]=>
-    object(stdClass)#2 (0) {
-    }
-    [u"b"]=>
-    object(stdClass)#3 (0) {
-    }
-    [u"c"]=>
-    object(stdClass)#2 (0) {
-    }
-  }
-}
