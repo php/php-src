@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 6                                                        |
    +----------------------------------------------------------------------+
@@ -86,7 +86,7 @@ static int ps_files_valid_key(const char *key)
 	}
 
 	len = p - key;
-	
+
 	if (len == 0) {
 		ret = 0;
 	}
@@ -100,7 +100,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	const char *p;
 	int i;
 	int n;
-	
+
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
 		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
@@ -142,18 +142,18 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 			efree(newbuf);
 		}
 	}
-	
+
 	return buf;
 }
 
 #ifndef O_BINARY
-#define O_BINARY 0
-#endif 
+# define O_BINARY 0
+#endif
 
 static void ps_files_close(ps_files *data)
 {
 	if (data->fd != -1) {
-#ifdef PHP_WIN32 
+#ifdef PHP_WIN32
 		/* On Win32 locked files that are closed without being explicitly unlocked
 		   will be unlocked only when "system resources become available". */
 		flock(data->fd, LOCK_UN);
@@ -199,8 +199,8 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 					return;
 				}
 				if (
-					S_ISLNK(sbuf.st_mode) && 
-					 php_check_open_basedir(buf TSRMLS_CC)
+					S_ISLNK(sbuf.st_mode) &&
+					php_check_open_basedir(buf TSRMLS_CC)
 				) {
 					close(data->fd);
 					return;
@@ -218,8 +218,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			}
 #endif
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, 
-					strerror(errno), errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
 		}
 	}
 }
@@ -248,7 +247,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	/* Prepare buffer (dirname never changes) */
 	memcpy(buf, dirname, dirname_len);
 	buf[dirname_len] = PHP_DIR_SEPARATOR;
-	
+
 	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
@@ -263,7 +262,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 				buf[dirname_len + entry_len + 1] = '\0';
 
 				/* check whether its last access was more than maxlifet ago */
-				if (VCWD_STAT(buf, &sbuf) == 0 && 
+				if (VCWD_STAT(buf, &sbuf) == 0 &&
 #ifdef NETWARE
 						(now - sbuf.st_mtime.tv_sec) > maxlifetime) {
 #else
@@ -300,7 +299,7 @@ PS_OPEN_FUNC(files)
 			return FAILURE;
 		}
 	}
-	
+
 	/* split up input parameter */
 	last = save_path;
 	p = strchr(save_path, ';');
@@ -320,7 +319,7 @@ PS_OPEN_FUNC(files)
 			return FAILURE;
 		}
 	}
-	
+
 	if (argc > 2) {
 		errno = 0;
 		filemode = strtol(argv[1], NULL, 8);
@@ -332,15 +331,15 @@ PS_OPEN_FUNC(files)
 	save_path = argv[argc - 1];
 
 	data = ecalloc(1, sizeof(*data));
-	
+
 	data->fd = -1;
 	data->dirdepth = dirdepth;
 	data->filemode = filemode;
 	data->basedir_len = strlen(save_path);
 	data->basedir = estrndup(save_path, data->basedir_len);
-	
+
 	PS_SET_MOD_DATA(data);
-	
+
 	return SUCCESS;
 }
 
@@ -401,7 +400,7 @@ PS_READ_FUNC(files)
 		efree(*val);
 		return FAILURE;
 	}
-	
+
 	return SUCCESS;
 }
 
@@ -415,11 +414,8 @@ PS_WRITE_FUNC(files)
 		return FAILURE;
 	}
 
-	/* 
-	 * truncate file, if the amount of new data is smaller than
-	 * the existing data set.
-	 */
-	
+	/* Truncate file if the amount of new data is smaller than the existing data set. */
+
 	if (vallen < (int)data->st_size) {
 		ftruncate(data->fd, 0);
 	}
@@ -454,11 +450,10 @@ PS_DESTROY_FUNC(files)
 
 	if (data->fd != -1) {
 		ps_files_close(data);
-	
+
 		if (VCWD_UNLINK(buf) == -1) {
 			/* This is a little safety check for instances when we are dealing with a regenerated session
-			 * that was not yet written to disk
-			 */
+			 * that was not yet written to disk. */
 			if (!VCWD_ACCESS(buf, F_OK)) {
 				return FAILURE;
 			}
@@ -468,14 +463,14 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
-PS_GC_FUNC(files) 
+PS_GC_FUNC(files)
 {
 	PS_FILES_DATA;
-	
+
 	/* we don't perform any cleanup, if dirdepth is larger than 0.
 	   we return SUCCESS, since all cleanup should be handled by
 	   an external entity (i.e. find -ctime x | xargs rm) */
-	   
+
 	if (data->dirdepth == 0) {
 		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime TSRMLS_CC);
 	}
