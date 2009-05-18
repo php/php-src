@@ -2117,7 +2117,7 @@ PHP_FUNCTION(curl_getinfo)
 	long		option = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zid, &option) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
