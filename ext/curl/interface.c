@@ -2000,7 +2000,7 @@ type_conflict:
 PHP_FUNCTION(curl_setopt)
 {
 	zval       *zid, **zvalue;
-	long	   options;
+	long		options;
 	php_curl    *ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &zid, &options, &zvalue) == FAILURE) {
