@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
+- Fixed bug #48313 (fgetcsv() does not return null for empty rows). (Ilia)
 - Fixed bug #48309 (stream_copy_to_stream() and fpasstru() do not update stream
   position of plain files). (Arnaud)
 - Fixed bug #48307 (stream_copy_to_stream() copies 0 bytes when $source is a 

@@ -2384,8 +2384,12 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, size
 		}
 
 		/* 3. Now pass our field back to php */
-		*comp_end = '\0';
-		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
+		if (comp_end - temp) {
+			*comp_end = '\0';
+			add_next_index_stringl(return_value, temp, comp_end - temp, 1);
+		} else {
+			add_next_index_null(return_value);
+		}
 	} while (inc_len > 0);
 
 out:
