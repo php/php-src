@@ -137,8 +137,7 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 	zval **sym_track = NULL;
 
 	IF_SESSION_VARS() {
-		zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1,
-				(void *) &sym_track);
+		zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, (void *) &sym_track);
 	} else {
 		return;
 	}
@@ -165,8 +164,7 @@ PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSR
 	int ret = FAILURE;
 
 	IF_SESSION_VARS() {
-		ret = zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
-				namelen+1, (void **) state_var);
+		ret = zend_rt_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, (void **) state_var);
 	}
 	return ret;
 }
@@ -203,7 +201,7 @@ static char *php_session_encode(int *newlen TSRMLS_DC) /* {{{ */
 			ret = NULL;
 		}
 	} else {
-		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session");
 	}
 	return ret;
 }
@@ -294,17 +292,15 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 	gettimeofday(&tv, NULL);
 
-	if (zend_ascii_hash_find(&EG(symbol_table), "_SERVER",
-				sizeof("_SERVER"), (void **) &array) == SUCCESS &&
+	if (zend_ascii_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &array) == SUCCESS &&
 		Z_TYPE_PP(array) == IS_ARRAY &&
-		zend_ascii_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR",
-				sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS) {
+		zend_ascii_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS
+	) {
 		remote_addr = Z_STRVAL_PP(token);
 	}
 
 	/* maximum 15+19+19+10 bytes */
-	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", 
-			tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
+	spprintf(&buf, 0, "%.15s%ld%ld%0.8F", remote_addr ? remote_addr : "", tv.tv_sec, (long int)tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 
 	switch (PS(hash_func)) {
 		case PS_HASH_FUNC_MD5:
@@ -443,8 +439,7 @@ new_session:
 	/* Question: if you create a SID here, should you also try to read data?
 	 * I'm not sure, but while not doing so will remove one session operation
 	 * it could prove usefull for those sites which wish to have "default"
-	 * session information
-	 */
+	 * session information. */
 	php_session_track_init(TSRMLS_C);
 	PS(invalid_session_id) = 0;
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
@@ -689,15 +684,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "4",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
 
 	/* Upload progress */
-	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",
-	                                                "1",     ZEND_INI_PERDIR, OnUpdateBool,        rfc1867_enabled, php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.upload_progress.prefix",
-	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateUTF8String,  rfc1867_prefix,  php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.upload_progress.name",
-	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateUTF8String,  rfc1867_name,    php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
-	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
-	                                                   "0",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
+	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",	"1",							ZEND_INI_PERDIR, OnUpdateBool,        rfc1867_enabled, php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.upload_progress.prefix",		"upload_progress_",				ZEND_INI_PERDIR, OnUpdateUTF8String,  rfc1867_prefix,  php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.upload_progress.name",		"PHP_SESSION_UPLOAD_PROGRESS",	ZEND_INI_PERDIR, OnUpdateUTF8String,  rfc1867_name,    php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.upload_progress.freq",		"1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",	"0",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
 
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
@@ -920,10 +911,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 	PS_SERIALIZER_ENTRY(php_binary)
 };
 
-PHPAPI int php_session_register_serializer(
-		const char *name, 
-		int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
-		int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
+PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
 {
 	int ret = -1;
 	int i;
@@ -1008,9 +996,9 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 	}
 
 	n = slprintf(buf, sizeof(buf), "%s, %02d %s %d %02d:%02d:%02d GMT", /* SAFE */
-				week_days[tm.tm_wday], tm.tm_mday, 
-				month_names[tm.tm_mon], tm.tm_year + 1900, 
-				tm.tm_hour, tm.tm_min, 
+				week_days[tm.tm_wday], tm.tm_mday,
+				month_names[tm.tm_mon], tm.tm_year + 1900,
+				tm.tm_hour, tm.tm_min,
 				tm.tm_sec);
 	memcpy(ubuf, buf, n);
 	ubuf[n] = '\0';
@@ -1106,8 +1094,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)",
-				output_start_filename, output_start_lineno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cache limiter - headers already sent");
 		}
@@ -1147,8 +1134,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)",
-				output_start_filename, output_start_lineno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cookie - headers already sent by (output started at %s:%d)", output_start_filename, output_start_lineno);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot send session cookie - headers already sent");
 		}
@@ -1318,17 +1304,14 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 	lensess = strlen(PS(session_name));
 
-	/*
-	 * Cookies are preferred, because initially
-	 * cookie and get variables will be available. 
-	 */
+	/* Cookies are preferred, because initially
+	 * cookie and get variables will be available. */
 
 	if (!PS(id)) {
-		if (PS(use_cookies) && zend_ascii_hash_find(&EG(symbol_table), "_COOKIE",
-					sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
+		if (PS(use_cookies) && zend_ascii_hash_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_ascii_hash_find(Z_ARRVAL_PP(data), PS(session_name),
-					lensess + 1, (void **) &ppid) == SUCCESS) {
+				zend_ascii_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+		) {
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
 			PS(send_cookie) = 0;
@@ -1336,36 +1319,34 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_ascii_hash_find(&EG(symbol_table), "_GET",
-					sizeof("_GET"), (void **) &data) == SUCCESS &&
+				zend_ascii_hash_find(&EG(symbol_table), "_GET", sizeof("_GET"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name),
-					lensess + 1, (void **) &ppid) == SUCCESS) {
+				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+		) {
 			PPID2SID;
 			PS(send_cookie) = 0;
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_ascii_hash_find(&EG(symbol_table), "_POST",
-					sizeof("_POST"), (void **) &data) == SUCCESS &&
+				zend_ascii_hash_find(&EG(symbol_table), "_POST", sizeof("_POST"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name),
-					lensess + 1, (void **) &ppid) == SUCCESS) {
+				zend_rt_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+		) {
 			PPID2SID;
 			PS(send_cookie) = 0;
 		}
 	}
 
-	/* check the REQUEST_URI symbol for a string of the form
-	   '<session-name>=<session-id>' to allow URLs of the form
-	   http://yoursite/<session-name>=<session-id>/script.php */
+	/* Check the REQUEST_URI symbol for a string of the form
+	 * '<session-name>=<session-id>' to allow URLs of the form
+	 * http://yoursite/<session-name>=<session-id>/script.php */
 
 	if (!PS(use_only_cookies) && !PS(id) && PG(http_globals)[TRACK_VARS_SERVER] &&
-			zend_ascii_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI",
-				sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
+			zend_ascii_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
 			Z_TYPE_PP(data) == IS_STRING &&
 			(p = strstr(Z_STRVAL_PP(data), PS(session_name))) &&
-			p[lensess] == '=') {
+			p[lensess] == '='
+	) {
 		char *q;
 
 		p += lensess + 1;
@@ -1375,17 +1356,17 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	/* check whether the current request was referred to by
-	   an external site which invalidates the previously found id */
+	/* Check whether the current request was referred to by
+	 * an external site which invalidates the previously found id. */
 
 	if (PS(id) &&
 			PS(extern_referer_chk)[0] != '\0' &&
 			PG(http_globals)[TRACK_VARS_SERVER] &&
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER",
-				sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
 			Z_TYPE_PP(data) == IS_STRING &&
 			Z_STRLEN_PP(data) != 0 &&
-			strstr(Z_STRVAL_PP(data), PS(extern_referer_chk)) == NULL) {
+			strstr(Z_STRVAL_PP(data), PS(extern_referer_chk)) == NULL
+	) {
 		efree(PS(id));
 		PS(id) = NULL;
 		PS(send_cookie) = 1;
@@ -1452,18 +1433,19 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
    Set session cookie parameters */
 static PHP_FUNCTION(session_set_cookie_params)
 {
-	/* lifetime is really a numeric, but the alter_ini_entry method wants a string */
-	char *lifetime, *path = NULL, *domain = NULL;
-	int lifetime_len, path_len, domain_len, argc = ZEND_NUM_ARGS();
+	zval **lifetime = NULL;
+	char *path = NULL, *domain = NULL;
+	int path_len, domain_len, argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
 
 	if (!PS(use_cookies) ||
-		zend_parse_parameters(argc TSRMLS_CC, "s|ssbb", &lifetime, &lifetime_len, &path, &path_len,
-						&domain, &domain_len, &secure, &httponly) == FAILURE) {
+		zend_parse_parameters(argc TSRMLS_CC, "Z|ssbb", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
-	zend_alter_ini_entry("session.cookie_lifetime", sizeof("session.cookie_lifetime"), lifetime, lifetime_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	convert_to_string_ex(lifetime);
+
+	zend_alter_ini_entry("session.cookie_lifetime", sizeof("session.cookie_lifetime"), Z_STRVAL_PP(lifetime), Z_STRLEN_PP(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 	if (path) {
 		zend_alter_ini_entry("session.cookie_path", sizeof("session.cookie_path"), path, path_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
@@ -1482,7 +1464,7 @@ static PHP_FUNCTION(session_set_cookie_params)
 /* }}} */
 
 /* {{{ proto array session_get_cookie_params(void) U
-   Return the session cookie parameters */ 
+   Return the session cookie parameters */
 static PHP_FUNCTION(session_get_cookie_params)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1730,18 +1712,18 @@ static PHP_FUNCTION(session_cache_limiter)
    Return the current cache expire. If new_cache_expire is given, the current cache_expire is replaced with new_cache_expire */
 static PHP_FUNCTION(session_cache_expire)
 {
-	/* Expires is really a numeric, but the alter_ini_entry method wants a string */
-	char *expires = NULL;
-	int expires_len;
+	zval **expires = NULL;
+	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&", &expires, &expires_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|Z", &expires) == FAILURE) {
 		return;
 	}
 
 	RETVAL_LONG(PS(cache_expire));
 
-	if (expires) {
-		zend_alter_ini_entry("session.cache_expire", sizeof("session.cache_expire"), expires, expires_len, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	if (argc == 1) {
+		convert_to_string_ex(expires);
+		zend_alter_ini_entry("session.cache_expire", sizeof("session.cache_expire"), Z_STRVAL_PP(expires), Z_STRLEN_PP(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	}
 }
 /* }}} */
@@ -1934,7 +1916,7 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_get_cookie_params, arginfo_session_void)
 	PHP_FE(session_write_close,       arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
-	{NULL, NULL, NULL} 
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -2115,9 +2097,9 @@ static inline void php_session_rfc1867_early_find_sid(php_session_rfc1867_progre
 
 	if (PS(use_cookies)) {
 		sapi_module.treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);
-		if (PG(http_globals)[TRACK_VARS_COOKIE]
-			&& zend_u_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), Z_TYPE(progress->sname), Z_UNIVAL(progress->sname), Z_UNILEN(progress->sname)+1, (void **)&ppid) == SUCCESS) {
-
+		if (PG(http_globals)[TRACK_VARS_COOKIE] &&
+			zend_u_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), Z_TYPE(progress->sname), Z_UNIVAL(progress->sname), Z_UNILEN(progress->sname)+1, (void **)&ppid) == SUCCESS
+		) {
 			zval_dtor(&progress->sid);
 			ZVAL_ZVAL(&progress->sid, *ppid, 1, 0);
 			convert_to_string(&progress->sid);
@@ -2129,9 +2111,9 @@ static inline void php_session_rfc1867_early_find_sid(php_session_rfc1867_progre
 		return;
 	}
 	sapi_module.treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);
-	if (PG(http_globals)[TRACK_VARS_GET]
-		&& zend_u_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), Z_TYPE(progress->sname), Z_UNIVAL(progress->sname), Z_UNILEN(progress->sname)+1, (void **)&ppid) == SUCCESS) {
-
+	if (PG(http_globals)[TRACK_VARS_GET] &&
+		zend_u_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), Z_TYPE(progress->sname), Z_UNIVAL(progress->sname), Z_UNILEN(progress->sname)+1, (void **)&ppid) == SUCCESS
+	) {
 		zval_dtor(&progress->sid);
 		ZVAL_ZVAL(&progress->sid, *ppid, 1, 0);
 		convert_to_string(&progress->sid);
@@ -2218,7 +2200,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			multipart_event_formdata *data = (multipart_event_formdata *) event_data;
 			size_t name_len, value_len;
 			zstr str;
-			
+
 			/* orig callback may have modified *data->newlength */
 			if (data->newlength) {
 				value_len = *data->newlength;
@@ -2253,15 +2235,14 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_START: {
 			multipart_event_file_start *data = (multipart_event_file_start *) event_data;
 
-			/* Do nothing when $_POST[session.upload_progress.name] is not set 
+			/* Do nothing when $_POST[session.upload_progress.name] is not set
 			 * or when no session id was sent */
 			if (!Z_TYPE(progress->sid) || !Z_TYPE(progress->key)) {
 				break;
 			}
-			
+
 			/* First FILE_START event, initializing */
 			if (!progress->data) {
-
 				php_rinit_session(0 TSRMLS_CC);
 				PS(id) = estrndup(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid));
 				PS(apply_trans_sid) = progress->apply_trans_sid;
@@ -2307,7 +2288,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_ascii_assoc_zval_ex(progress->current_file, "bytes_processed", sizeof("bytes_processed"), progress->current_file_bytes_processed);
 
 			add_next_index_zval(progress->files, progress->current_file);
-			
+
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
@@ -2319,7 +2300,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !Z_TYPE(progress->key)) {
 				break;
 			}
-			
+
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
@@ -2332,7 +2313,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !Z_TYPE(progress->key)) {
 				break;
 			}
-			
+
 			if (data->temp_filename.v) {
 				add_ascii_assoc_text_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename, 1);
 			}
