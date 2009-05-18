@@ -26,39 +26,31 @@ ps_module ps_mod_user = {
 	PS_MOD(user)
 };
 
-#define SESS_ZVAL_LONG(val, a) 					\
-{											\
-	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_LONG; 						\
-	Z_LVAL_P(a) = val; 					\
+#define SESS_ZVAL_LONG(val, a)						\
+{													\
+	MAKE_STD_ZVAL(a);								\
+	ZVAL_LONG(a, val);								\
 }
 
-#define SESS_ZVAL_STRING(vl, a) 					\
-{											\
-	int len = strlen(vl); 					\
-	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_STRING; 					\
-	Z_STRLEN_P(a) = len; 				\
-	Z_STRVAL_P(a) = estrndup(vl, len); 	\
+#define SESS_ZVAL_STRING(vl, a)						\
+{													\
+	char *__vl = vl;								\
+	SESS_ZVAL_STRINGN(__vl, strlen(__vl), a);		\
 }
 
-#define SESS_ZVAL_STRINGN(vl, ln, a) 			\
-{											\
-	MAKE_STD_ZVAL(a); 						\
-	Z_TYPE_P(a) = IS_STRING; 					\
-	Z_STRLEN_P(a) = ln; 					\
-	Z_STRVAL_P(a) = estrndup(vl, ln); 	\
+#define SESS_ZVAL_STRINGN(vl, ln, a)				\
+{													\
+	MAKE_STD_ZVAL(a);								\
+	ZVAL_STRINGL(a, vl, ln, 1);						\
 }
-
 
 static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 {
 	int i;
 	zval *retval = NULL;
-	
+
 	MAKE_STD_ZVAL(retval);
-	if (call_user_function(EG(function_table), NULL, func, retval, 
-				argc, argv TSRMLS_CC) == FAILURE) {
+	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC) == FAILURE) {
 		zval_ptr_dtor(&retval);
 		retval = NULL;
 	}
@@ -70,24 +62,23 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 	return retval;
 }
 
-#define STDVARS1 							\
-	zval *retval; 							\
+#define STDVARS1							\
+	zval *retval;							\
 	int ret = FAILURE
 
 #define STDVARS								\
 	STDVARS1;								\
 	char *mdata = PS_GET_MOD_DATA();		\
-	if (!mdata) 							\
-		return FAILURE
+	if (!mdata) { return FAILURE; }
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 
-#define FINISH 								\
+#define FINISH								\
 	if (retval) {							\
 		convert_to_long(retval);			\
-		ret = Z_LVAL_P(retval);			\
+		ret = Z_LVAL_P(retval);				\
 		zval_ptr_dtor(&retval);				\
-	} 										\
+	}										\
 	return ret
 
 PS_OPEN_FUNC(user)
@@ -95,21 +86,20 @@ PS_OPEN_FUNC(user)
 	zval *args[2];
 	static char dummy = 0;
 	STDVARS1;
-	
-	SESS_ZVAL_STRING(save_path, args[0]);
-	SESS_ZVAL_STRING(session_name, args[1]);
-	
+
+	SESS_ZVAL_STRING((char*)save_path, args[0]);
+	SESS_ZVAL_STRING((char*)session_name, args[1]);
+
 	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
 	if (retval) {
 		/* This is necessary to fool the session module. Yes, it's safe to
 		 * use a static. Neither mod_user nor the session module itself will
 		 * ever touch this pointer. It could be set to 0xDEADBEEF for all the
 		 * difference it makes, but for the sake of paranoia it's set to some
-		 * valid value.
-		*/
+		 * valid value. */
 		PS_SET_MOD_DATA(&dummy);
 	}
-	
+
 	FINISH;
 }
 
@@ -129,10 +119,10 @@ PS_READ_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING((char*)key, args[0]);
 
 	retval = ps_call_handler(PSF(read), 1, args TSRMLS_CC);
-	
+
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_STRING) {
 			*val = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
@@ -149,9 +139,9 @@ PS_WRITE_FUNC(user)
 {
 	zval *args[2];
 	STDVARS;
-	
-	SESS_ZVAL_STRING(key, args[0]);
-	SESS_ZVAL_STRINGN(val, vallen, args[1]);
+
+	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STRINGN((char*)val, vallen, args[1]);
 
 	retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
 
@@ -163,7 +153,7 @@ PS_DESTROY_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING((char*)key, args[0]);
 
 	retval = ps_call_handler(PSF(destroy), 1, args TSRMLS_CC);
 
