@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -42,9 +42,7 @@
 /* For php_uint32 */
 #include "ext/standard/basic_functions.h"
 
-/*
- * this list holds all data associated with one session 
- */
+/* This list holds all data associated with one session. */
 
 typedef struct ps_sd {
 	struct ps_sd *next;
@@ -67,21 +65,21 @@ typedef struct {
 static ps_mm *ps_mm_instance = NULL;
 
 #if 0
-#define ps_mm_debug(a) printf a
+# define ps_mm_debug(a) printf a
 #else
-#define ps_mm_debug(a)
+# define ps_mm_debug(a)
 #endif
 
 static inline php_uint32 ps_sd_hash(const char *data, int len)
 {
 	php_uint32 h;
 	const char *e = data + len;
-	
+
 	for (h = 2166136261U; data < e; ) {
 		h *= 16777619;
 		h ^= *data++;
 	}
-	
+
 	return h;
 }
 
@@ -91,10 +89,10 @@ static void hash_split(ps_mm *data)
 	ps_sd **nhash;
 	ps_sd **ohash, **ehash;
 	ps_sd *ps, *next;
-	
+
 	nmax = ((data->hash_max + 1) << 1) - 1;
 	nhash = mm_calloc(data->mm, nmax + 1, sizeof(*data->hash));
-	
+
 	if (!nhash) {
 		/* no further memory to expand hash table */
 		return;
@@ -119,9 +117,9 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 	php_uint32 hv, slot;
 	ps_sd *sd;
 	int keylen;
-	
+
 	keylen = strlen(key);
-	
+
 	sd = mm_malloc(data->mm, sizeof(ps_sd) + keylen);
 	if (!sd) {
 		TSRMLS_FETCH();
@@ -132,24 +130,25 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 
 	hv = ps_sd_hash(key, keylen);
 	slot = hv & data->hash_max;
-	
+
 	sd->ctime = 0;
 	sd->hv = hv;
 	sd->data = NULL;
 	sd->alloclen = sd->datalen = 0;
-	
+
 	memcpy(sd->key, key, keylen + 1);
-	
+
 	sd->next = data->hash[slot];
 	data->hash[slot] = sd;
 
 	data->hash_cnt++;
-	
+
 	if (!sd->next) {
-		if (data->hash_cnt >= data->hash_max)
+		if (data->hash_cnt >= data->hash_max) {
 			hash_split(data);
+		}
 	}
-	
+
 	ps_mm_debug(("inserting %s(%p) into slot %d\n", key, sd, slot));
 
 	return sd;
@@ -161,19 +160,22 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 
 	slot = ps_sd_hash(sd->key, strlen(sd->key)) & data->hash_max;
 
-	if (data->hash[slot] == sd)
+	if (data->hash[slot] == sd) {
 		data->hash[slot] = sd->next;
-	else {
+	} else {
 		ps_sd *prev;
 
 		/* There must be some entry before the one we want to delete */
 		for (prev = data->hash[slot]; prev->next != sd; prev = prev->next);
 		prev->next = sd->next;
 	}
-		
+
 	data->hash_cnt--;
-	if (sd->data) 
+
+	if (sd->data) {
 		mm_free(data->mm, sd->data);
+	}
+
 	mm_free(data->mm, sd);
 }
 
@@ -184,22 +186,25 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 
 	hv = ps_sd_hash(key, strlen(key));
 	slot = hv & data->hash_max;
-	
-	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next)
-		if (ret->hv == hv && !strcmp(ret->key, key)) 
+
+	for (prev = NULL, ret = data->hash[slot]; ret; prev = ret, ret = ret->next) {
+		if (ret->hv == hv && !strcmp(ret->key, key)) {
 			break;
-	
+		}
+	}
+
 	if (ret && rw && ret != data->hash[slot]) {
 		/* Move the entry to the top of the linked list */
-		
-		if (prev)
+		if (prev) {
 			prev->next = ret->next;
+		}
+
 		ret->next = data->hash[slot];
 		data->hash[slot] = ret;
 	}
 
 	ps_mm_debug(("lookup(%s): ret=%p,hv=%u,slot=%d\n", key, ret, hv, slot));
-	
+
 	return ret;
 }
 
@@ -214,6 +219,9 @@ static int ps_mm_initialize(ps_mm *data, const char *path)
 	data->owner = getpid();
 	data->mm = mm_create(0, path);
 	if (!data->mm) {
+		TSRMLS_FETCH();
+
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mm_create(0, %s) failed, err %s", path, mm_error());
 		return FAILURE;
 	}
 
@@ -236,14 +244,17 @@ static void ps_mm_destroy(ps_mm *data)
 	/* This function is called during each module shutdown,
 	   but we must not release the shared memory pool, when
 	   an Apache child dies! */
-	if (data->owner != getpid()) return;
+	if (data->owner != getpid()) {
+		return;
+	}
 
-	for (h = 0; h < data->hash_max + 1; h++)
+	for (h = 0; h < data->hash_max + 1; h++) {
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_sd_destroy(data, sd);
 		}
-	
+	}
+
 	mm_free(data->mm, data->hash);
 	mm_destroy(data->mm);
 	free(data);
@@ -258,17 +269,17 @@ PHP_MINIT_FUNCTION(ps_mm)
 	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-   	if (!ps_mm_instance) {
+	if (!ps_mm_instance) {
 		return FAILURE;
 	}
 
 	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
 		return FAILURE;
 	}
-		
-	/* Directory + '/' + File + Module Name + Effective UID + \0 */	
+
+	/* Directory + '/' + File + Module Name + Effective UID + \0 */
 	ps_mm_path = emalloc(save_path_len + 1 + (sizeof(PS_MM_FILE) - 1) + mod_name_len + euid_len + 1);
-	
+
 	memcpy(ps_mm_path, PS(save_path), save_path_len);
 	if (PS(save_path)[save_path_len - 1] != DEFAULT_SLASH) {
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
@@ -282,15 +293,15 @@ PHP_MINIT_FUNCTION(ps_mm)
 	ps_mm_path[save_path_len + euid_len] = '\0';
 
 	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
-		
+
 	efree(ps_mm_path);
-   
+
 	if (ret != SUCCESS) {
 		free(ps_mm_instance);
 		ps_mm_instance = NULL;
 		return FAILURE;
 	}
-	
+
 	php_session_register_module(&ps_mod_mm);
 	return SUCCESS;
 }
@@ -307,12 +318,12 @@ PHP_MSHUTDOWN_FUNCTION(ps_mm)
 PS_OPEN_FUNC(mm)
 {
 	ps_mm_debug(("open: ps_mm_instance=%p\n", ps_mm_instance));
-	
-	if (!ps_mm_instance)
+
+	if (!ps_mm_instance) {
 		return FAILURE;
-	
+	}
 	PS_SET_MOD_DATA(ps_mm_instance);
-	
+
 	return SUCCESS;
 }
 
@@ -330,7 +341,7 @@ PS_READ_FUNC(mm)
 	int ret = FAILURE;
 
 	mm_lock(data->mm, MM_LOCK_RD);
-	
+
 	sd = ps_sd_lookup(data, key, 0);
 	if (sd) {
 		*vallen = sd->datalen;
@@ -341,7 +352,7 @@ PS_READ_FUNC(mm)
 	}
 
 	mm_unlock(data->mm);
-	
+
 	return ret;
 }
 
@@ -360,8 +371,9 @@ PS_WRITE_FUNC(mm)
 
 	if (sd) {
 		if (vallen >= sd->alloclen) {
-			if (data->mm) 
+			if (data->mm) {
 				mm_free(data->mm, sd->data);
+			}
 			sd->alloclen = vallen + 1;
 			sd->data = mm_malloc(data->mm, sd->alloclen);
 
@@ -379,7 +391,7 @@ PS_WRITE_FUNC(mm)
 	}
 
 	mm_unlock(data->mm);
-	
+
 	return sd ? SUCCESS : FAILURE;
 }
 
@@ -387,28 +399,29 @@ PS_DESTROY_FUNC(mm)
 {
 	PS_MM_DATA;
 	ps_sd *sd;
-	
+
 	mm_lock(data->mm, MM_LOCK_RW);
-	
+
 	sd = ps_sd_lookup(data, key, 0);
-	if (sd)
+	if (sd) {
 		ps_sd_destroy(data, sd);
-	
+	}
+
 	mm_unlock(data->mm);
-	
+
 	return SUCCESS;
 }
 
-PS_GC_FUNC(mm) 
+PS_GC_FUNC(mm)
 {
 	PS_MM_DATA;
 	time_t limit;
 	ps_sd **ohash, **ehash;
 	ps_sd *sd, *next;
-	
+
 	*nrdels = 0;
 	ps_mm_debug(("gc\n"));
-		
+
 	time(&limit);
 
 	limit -= maxlifetime;
@@ -416,7 +429,7 @@ PS_GC_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RW);
 
 	ehash = data->hash + data->hash_max + 1;
-	for (ohash = data->hash; ohash < ehash; ohash++)
+	for (ohash = data->hash; ohash < ehash; ohash++) {
 		for (sd = *ohash; sd; sd = next) {
 			next = sd->next;
 			if (sd->ctime < limit) {
@@ -425,9 +438,10 @@ PS_GC_FUNC(mm)
 				(*nrdels)++;
 			}
 		}
+	}
 
 	mm_unlock(data->mm);
-	
+
 	return SUCCESS;
 }
 
