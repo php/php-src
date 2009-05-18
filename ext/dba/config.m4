@@ -97,6 +97,10 @@ PHP_ARG_WITH(db1,,
 PHP_ARG_WITH(dbm,,
 [  --with-dbm[=DIR]          DBA: DBM support], no, no)
 
+PHP_ARG_WITH(tcadb,,
+[  --with-tcadb[=DIR]        DBA: Tokyo Cabinet abstract DB support], no, no)
+
+
 dnl
 dnl Library checks
 dnl
@@ -192,6 +196,37 @@ if test "$PHP_NDBM" != "no"; then
   PHP_DBA_STD_ATTACH
 fi
 PHP_DBA_STD_RESULT(ndbm)
+
+dnl TCADB
+if test "$PHP_TCADB" != "no"; then
+  PHP_DBA_STD_BEGIN
+  for i in $PHP_TCADB /usr/local /usr; do
+	if test -f "$i/include/tcadb.h"; then
+	  THIS_PREFIX=$i
+	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
+	  THIS_INCLUDE=$i/include/tcadb.h
+	  break
+	fi
+  done
+
+  if test -n "$THIS_INCLUDE"; then
+	for LIB in tokyocabinet; do
+	  PHP_CHECK_LIBRARY($LIB, tcadbopen, [
+		AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+		AC_DEFINE(DBA_TCADB, 1, [ ])
+		THIS_LIBS=$LIB
+	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+	  if test -n "$THIS_LIBS"; then
+		break
+	  fi
+	done
+  fi
+
+  PHP_DBA_STD_ASSIGN
+  PHP_DBA_STD_CHECK
+  PHP_DBA_STD_ATTACH
+fi
+PHP_DBA_STD_RESULT(tcadb)
 
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
@@ -569,7 +604,7 @@ if test "$HAVE_DBA" = "1"; then
     AC_MSG_RESULT([yes])
   fi
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db1.c dba_db2.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db1.c dba_db2.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c dba_qdbm.c dba_tcadb.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
