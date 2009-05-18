@@ -284,7 +284,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -361,7 +360,6 @@ PHP_MINFO_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM > 0x070a06 /* 7.10.7 */
 			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
 #endif
-
 #if LIBCURL_VERSION_NUM > 0x070a05 /* 7.10.6 */
 			{"Debug", CURL_VERSION_DEBUG},
 			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
@@ -999,8 +997,9 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
-				if(0 != Z_LVAL_P(retval_ptr))
+				if (0 != Z_LVAL_P(retval_ptr)) {
 					rval = 1;
+				}
 				zval_ptr_dtor(&retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
@@ -1405,7 +1404,7 @@ PHP_FUNCTION(curl_copy_handle)
 	zval		*zid;
 	php_curl	*ch, *dupch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
 
@@ -1621,7 +1620,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				}
 			}
 #endif
-
 			if (option == CURLOPT_URL) {
 				if (!php_curl_option_url(ch, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue))) {
 					RETVAL_FALSE;
@@ -1637,7 +1635,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				zend_llist_add_element(&ch->to_free.str, &copystr);
 #endif
 			}
-
 			break;
 		}
 		case CURLOPT_FILE:
@@ -1760,11 +1757,11 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				struct HttpPost  *first = NULL;
 				struct HttpPost  *last  = NULL;
 				char             *postval;
-				zstr             string_key;
-				char		 *key;
-				ulong		 num_key;
-				uint             string_key_len;
-				int		 type = -1;
+				zstr              string_key;
+				char             *key;
+				ulong             num_key;
+				uint              string_key_len;
+				int               type = -1;
 
 				postfields = HASH_OF(*zvalue);
 				if (!postfields) {
@@ -1995,10 +1992,10 @@ type_conflict:
 PHP_FUNCTION(curl_setopt)
 {
 	zval       *zid, **zvalue;
-	long		options;
-	php_curl    *ch;
+	long        options;
+	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
@@ -2069,7 +2066,7 @@ PHP_FUNCTION(curl_exec)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
 
@@ -2111,7 +2108,7 @@ PHP_FUNCTION(curl_getinfo)
 	php_curl	*ch;
 	long		option = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zid, &option) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
 		return;
 	}
 
@@ -2262,7 +2259,7 @@ PHP_FUNCTION(curl_error)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
 
@@ -2280,7 +2277,7 @@ PHP_FUNCTION(curl_errno)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
 
@@ -2297,7 +2294,7 @@ PHP_FUNCTION(curl_close)
 	zval		*zid;
 	php_curl	*ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
 
