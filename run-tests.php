@@ -2254,6 +2254,19 @@ EXPECTED FAILED TEST SUMMARY
 		$failed_test_summary .=  "=====================================================================\n";
 	}
 
+	if (count($PHP_FAILED_TESTS['WARNED'])) {
+		$failed_test_summary .= '
+=====================================================================
+WARNED TEST SUMMARY
+---------------------------------------------------------------------
+';
+		foreach ($PHP_FAILED_TESTS['WARNED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		}
+
+		$failed_test_summary .=  "=====================================================================\n";
+	}
+
 	if (count($PHP_FAILED_TESTS['LEAKED'])) {
 		$failed_test_summary .= '
 =====================================================================
