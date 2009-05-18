@@ -223,7 +223,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt_array, 0)
 	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, options)/* ARRAY_INFO(0, options, 0) */
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_curl_exec, 0)
@@ -1264,7 +1264,7 @@ static void curl_free_slist(void **slist)
 PHP_FUNCTION(curl_version)
 {
 	curl_version_info_data *d;
-	long                    uversion = CURLVERSION_NOW;
+	long uversion = CURLVERSION_NOW;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &uversion) == FAILURE) {
 		return;
@@ -1750,7 +1750,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				uint              string_key_len;
 
 				postfields = HASH_OF(*zvalue);
-				if (! postfields) {
+				if (!postfields) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS");
 					RETVAL_FALSE;
 					return 1;
@@ -1929,8 +1929,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
-	zval        *zid, **zvalue;
-	long        zoption;
+	zval       *zid, **zvalue;
+	long       zoption;
 	php_curl    *ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &zoption, &zvalue) == FAILURE) {
