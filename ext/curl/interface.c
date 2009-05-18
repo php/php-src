@@ -2044,16 +2044,15 @@ PHP_FUNCTION(curl_getinfo)
 {
 	zval        *zid;
 	php_curl    *ch;
-	int          argc = ZEND_NUM_ARGS();
 	long         option = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (argc < 2) {
+	if (ZEND_NUM_ARGS() < 2) {
 		char   *s_code;
 		long    l_code;
 		double  d_code;
