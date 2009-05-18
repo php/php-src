@@ -147,6 +147,7 @@ static struct gcry_thread_cbs php_curl_gnutls_tsl = {
 #endif
 /* }}} */
 
+static void _php_curl_close_ex(php_curl *ch TSRMLS_DC);
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
@@ -162,29 +163,44 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
  #define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-#define PHP_CURL_CHECK_OPEN_BASEDIR(str, len, __ret)													\
-	if ((PG(open_basedir) && *PG(open_basedir)) &&                                                \
-	    strncasecmp(str, "file:", sizeof("file:") - 1) == 0)								\
-	{ 																							\
-		php_url *tmp_url; 																		\
-															\
-		if (!(tmp_url = php_url_parse_ex(str, len))) {											\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", str);				\
-			php_curl_ret(__ret);											\
-		} 																						\
-															\
-		if (!php_memnstr(str, tmp_url->path, strlen(tmp_url->path), str + len)) {				\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL '%s' contains unencoded control characters", str);	\
-			php_url_free(tmp_url); 																\
-			php_curl_ret(__ret);											\
-		}													\
-																								\
-		if (tmp_url->query || tmp_url->fragment || php_check_open_basedir(tmp_url->path TSRMLS_CC)) { \
-			php_url_free(tmp_url); 																\
-			php_curl_ret(__ret);											\
-		} 																						\
-		php_url_free(tmp_url); 																	\
+static int php_curl_option_url(php_curl *ch, const char *url, const int len) {
+	CURLcode     error=CURLE_OK;
+#if LIBCURL_VERSION_NUM < 0x071100
+	char *copystr = NULL;
+#endif
+	TSRMLS_FETCH();
+
+	/* Disable file:// if open_basedir or safe_mode are used */
+	if ((PG(open_basedir) && *PG(open_basedir))) {
+#if LIBCURL_VERSION_NUM >= 0x071304
+		error = curl_easy_setopt(ch->cp, CURLOPT_PROTOCOLS, CURLPROTO_ALL & ~CURLPROTO_FILE);
+#else
+		php_url *uri;
+
+		if (!(uri = php_url_parse_ex(url, len))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL '%s'", url);
+			return 0;
+		}
+
+		if (!strncasecmp("file", uri->scheme, sizeof("file"))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol 'file' disabled in cURL");
+			php_url_free(uri);
+			return 0;
+		}
+		php_url_free(uri);
+#endif
 	}
+	/* Strings passed to libcurl as 'char *' arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
+#if LIBCURL_VERSION_NUM >= 0x071100
+	error = curl_easy_setopt(ch->cp, CURLOPT_URL, url);
+#else
+	copystr = estrndup(url, len);
+	error = curl_easy_setopt(ch->cp, CURLOPT_URL, copystr);
+	zend_llist_add_element(&ch->to_free.str, &copystr);
+#endif
+
+	return (error == CURLE_OK ? 1 : 0);
+}
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_version, 0, 0, 0)
@@ -1371,15 +1387,10 @@ PHP_FUNCTION(curl_init)
 #endif
 
 	if (url.v) {
-#if LIBCURL_VERSION_NUM >= 0x071100
-		curl_easy_setopt(ch->cp, CURLOPT_URL, url.s);
-#else
-		char *urlcopy;
-
-		urlcopy = estrndup(url.s, url_len);
-		curl_easy_setopt(ch->cp, CURLOPT_URL, urlcopy);
-		zend_llist_add_element(&ch->to_free.str, &urlcopy);
-#endif
+		if (!php_curl_option_url(ch, url.s, url_len)) {
+			_php_curl_close_ex(ch TSRMLS_CC);
+			RETURN_FALSE;
+		}
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
@@ -1550,6 +1561,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_FTP_FILEMETHOD:
 #endif
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM >= 0x71304
+			if ((PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when open_basedir is set");
+					RETVAL_FALSE;
+					return 1;
+			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 		case CURLOPT_FOLLOWLOCATION:
@@ -1597,23 +1615,33 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 
 			convert_to_string_ex(zvalue);
-
-			if (option == CURLOPT_URL
 #if LIBCURL_VERSION_NUM >= 0x071300
-				|| option == CURLOPT_SSH_PUBLIC_KEYFILE || option == CURLOPT_SSH_PRIVATE_KEYFILE
-#endif
-			) {
-				PHP_CURL_CHECK_OPEN_BASEDIR(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue), 1);
-			}
+			if (
+				option == CURLOPT_SSH_PUBLIC_KEYFILE || option == CURLOPT_SSH_PRIVATE_KEYFILE
 
-#if LIBCURL_VERSION_NUM >= 0x071100
-			/* Strings passed to libcurl as ’char *’ arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
-			error = curl_easy_setopt(ch->cp, option, Z_STRVAL_PP(zvalue));
-#else
-			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
-			error = curl_easy_setopt(ch->cp, option, copystr);
-			zend_llist_add_element(&ch->to_free.str, &copystr);
+			) {
+				if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
+					RETVAL_FALSE;
+					return 1;
+				}
+			}
 #endif
+
+			if (option == CURLOPT_URL) {
+				if (!php_curl_option_url(ch, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue))) {
+					RETVAL_FALSE;
+					return 1;
+				}
+			} else {
+#if LIBCURL_VERSION_NUM >= 0x071100
+				/* Strings passed to libcurl as ’char *’ arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
+				error = curl_easy_setopt(ch->cp, option, Z_STRVAL_PP(zvalue));
+#else
+				copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+				error = curl_easy_setopt(ch->cp, option, copystr);
+				zend_llist_add_element(&ch->to_free.str, &copystr);
+#endif
+			}
 
 			break;
 		}
@@ -2295,10 +2323,8 @@ PHP_FUNCTION(curl_close)
 
 /* {{{ _php_curl_close()
    List destructor for curl handles */
-static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 {
-	php_curl *ch = (php_curl *) rsrc->ptr;
-
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
@@ -2322,6 +2348,9 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (ch->handlers->write_header->func_name) {
 		zval_ptr_dtor(&ch->handlers->write_header->func_name);
 	}
+	if(ch->handlers->progress->func_name) {
+		zval_ptr_dtor(&ch->handlers->progress->func_name);
+	}
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);
 	}
@@ -2335,6 +2364,15 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(ch->handlers->progress);
 	efree(ch->handlers);
 	efree(ch);
+}
+/* }}} */
+
+/* {{{ _php_curl_close()
+   List destructor for curl handles */
+static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_curl *ch = (php_curl *) rsrc->ptr;
+	_php_curl_close_ex(ch TSRMLS_CC);
 }
 /* }}} */
 
