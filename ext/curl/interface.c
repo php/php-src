@@ -158,13 +158,14 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
- #define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
+# define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
 #else
- #define php_curl_ret(__ret) RETVAL_FALSE; return;
+# define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_url(php_curl *ch, const char *url, const int len) {
-	CURLcode     error=CURLE_OK;
+static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* {{{ */
+{
+	CURLcode error = CURLE_OK;
 #if LIBCURL_VERSION_NUM < 0x071100
 	char *copystr = NULL;
 #endif
@@ -201,6 +202,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) {
 
 	return (error == CURLE_OK ? 1 : 0);
 }
+/* }}} */
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_version, 0, 0, 0)
@@ -282,7 +284,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -347,7 +348,7 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_row(2, "Age", str);
 
 	/* To update on each new cURL release using src/main.c in cURL sources */
-	if(d->features) {
+	if (d->features) {
 		struct feat {
 			const char *name;
 			int bitmask;
@@ -456,7 +457,6 @@ PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl", module_number);
-
 
 	/* See http://curl.haxx.se/lxr/source/docs/libcurl/symbols-in-versions
 	   or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list 
@@ -938,11 +938,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 /* {{{ curl_progress
  */
-static size_t curl_progress(void *clientp,
-                        double dltotal,
-                        double dlnow,
-                        double ultotal,
-                        double ulnow)
+static size_t curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl       *ch = (php_curl *) clientp;
 	php_curl_progress  *t  = ch->handlers->progress;
@@ -1001,8 +997,9 @@ static size_t curl_progress(void *clientp,
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
-				if(0 != Z_LVAL_P(retval_ptr))
+				if (0 != Z_LVAL_P(retval_ptr)) {
 					rval = 1;
+				}
 				zval_ptr_dtor(&retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
@@ -1015,7 +1012,6 @@ static size_t curl_progress(void *clientp,
 	return rval;
 }
 /* }}} */
-
 
 /* {{{ curl_read
  */
@@ -1329,10 +1325,10 @@ static void alloc_curl_handle(php_curl **ch)
    Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
-	php_curl    *ch;
-	CURL        *cp;
-	char	    *url = NULL;
-	int	     url_len = 0;
+	php_curl	*ch;
+	CURL		*cp;
+	char		*url = NULL;
+	int		url_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
 		return;
@@ -1388,14 +1384,14 @@ PHP_FUNCTION(curl_init)
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
-	zval      *zid;
-	CURL      *cp;
-	php_curl  *ch;
-	php_curl  *dupch;
+	CURL		*cp;
+	zval		*zid;
+	php_curl	*ch, *dupch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
 	cp = curl_easy_duphandle(ch->cp);
@@ -1930,16 +1926,16 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 PHP_FUNCTION(curl_setopt)
 {
 	zval       *zid, **zvalue;
-	long       zoption;
-	php_curl    *ch;
+	long        options;
+	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &zoption, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (!_php_curl_setopt(ch, zoption, zvalue, return_value TSRMLS_CC)) {
+	if (!_php_curl_setopt(ch, options, zvalue, return_value TSRMLS_CC)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1953,24 +1949,24 @@ PHP_FUNCTION(curl_setopt_array)
 {
 	zval		*zid, *arr, **entry;
 	php_curl	*ch;
-	long		option;
+	ulong		option;
 	HashPosition	pos;
-	char 		*string_key;
-	uint 		str_key_len;
+	char		*string_key;
+	uint		str_key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &zid, &arr) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
-		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) != HASH_KEY_IS_LONG) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
-		if (_php_curl_setopt(ch, option, entry, return_value TSRMLS_CC)) {
+		if (_php_curl_setopt(ch, (long) option, entry, return_value TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
@@ -2000,9 +1996,9 @@ void _php_curl_cleanup_handle(php_curl *ch)
    Perform a cURL session */
 PHP_FUNCTION(curl_exec)
 {
-	zval       *zid;
-	php_curl   *ch;
-	CURLcode    error;
+	CURLcode	error;
+	zval		*zid;
+	php_curl	*ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
@@ -2042,9 +2038,9 @@ PHP_FUNCTION(curl_exec)
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
-	zval        *zid;
-	php_curl    *ch;
-	long         option = 0;
+	zval		*zid;
+	php_curl	*ch;
+	long		option = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zid, &option) == FAILURE) {
 		return;
@@ -2194,8 +2190,8 @@ PHP_FUNCTION(curl_getinfo)
    Return a string contain the last error for the current session */
 PHP_FUNCTION(curl_error)
 {
-	zval       *zid;
-	php_curl   *ch;
+	zval		*zid;
+	php_curl	*ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
@@ -2212,8 +2208,8 @@ PHP_FUNCTION(curl_error)
    Return an integer containing the last error number */
 PHP_FUNCTION(curl_errno)
 {
-	zval       *zid;
-	php_curl   *ch;
+	zval		*zid;
+	php_curl	*ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
@@ -2229,8 +2225,8 @@ PHP_FUNCTION(curl_errno)
    Close a cURL session */
 PHP_FUNCTION(curl_close)
 {
-	zval       *zid;
-	php_curl   *ch;
+	zval		*zid;
+	php_curl	*ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zid) == FAILURE) {
 		return;
