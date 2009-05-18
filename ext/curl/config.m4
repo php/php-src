@@ -10,6 +10,7 @@ PHP_ARG_WITH(curlwrappers, if we should use cURL for url streams,
 [  --with-curlwrappers     Use cURL for url streams], no, no)
 
 if test "$PHP_CURL" != "no"; then
+  AC_MSG_CHECKING($PHP_CURL ..........................)
   if test -r $PHP_CURL/include/curl/easy.h; then
     CURL_DIR=$PHP_CURL
   else
