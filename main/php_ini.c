@@ -170,19 +170,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 
 /* php.ini support */
 #define PHP_EXTENSION_TOKEN		"extension"
-#ifdef ZTS
-# if (ZEND_DEBUG)
-# define ZEND_EXTENSION_TOKEN	"zend_extension_debug_ts"
-# else
-# define ZEND_EXTENSION_TOKEN	"zend_extension_ts"
-# endif
-#else
-# if (ZEND_DEBUG)
-# define ZEND_EXTENSION_TOKEN	"zend_extension_debug"
-# else
-# define ZEND_EXTENSION_TOKEN	"zend_extension"
-# endif
-#endif
+#define ZEND_EXTENSION_TOKEN	"zend_extension"
 
 /* {{{ config_zval_dtor
  */
