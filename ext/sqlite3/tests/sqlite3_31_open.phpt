@@ -9,12 +9,14 @@ Jelle Lampaert
 <?php
 
 try {
-  $db = new SQLite3('db1.db');
-  $db->open('db1.db');
+  $db = new SQLite3(__DIR__ . '/db1.db');
+  $db->open(__DIR__ . '/db1.db');
 } catch (Exception $ex) {
   var_dump($ex->getMessage());
 }
 
 ?>
+--CLEAN--
+<?php @unlink(__DIR__ . '/db1.db'); ?>
 --EXPECTF--
 %string|unicode%(29) "Already initialised DB Object"
