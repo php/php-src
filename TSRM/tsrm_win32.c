@@ -68,6 +68,10 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
 	}
 
 	free(globals->comspec);
+
+	If(globals->impersonation_token) {
+		CloseHandle(globals->impersonation_token);
+	}
 }
 
 TSRM_API void tsrm_win32_startup(void)
