@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Upgraded bundled libmagic to 5.03 in the fileinfo extension. (Scott)
 
 - Added the ability for json_decode() to take a user specified depth. (Scott)
+- Coalesce all the zend_extension_* variables into zend_extension. (Derick)
 
 - Disabled SQLite3::loadExtension for threaded SAPIs. (Scott)
 
