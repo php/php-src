@@ -1298,8 +1298,7 @@ PHP_FUNCTION(curl_version)
 		array_init(protocol_list);
 
 		while (*p != NULL) {
-			add_next_index_ascii_string(protocol_list, *p, 1);
-			*p++;
+			add_next_index_ascii_string(protocol_list, *p++, 1);
 		}
 		CAAZ("protocols", protocol_list);
 	}
@@ -1411,7 +1410,7 @@ PHP_FUNCTION(curl_copy_handle)
 	php_curl	*ch, *dupch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zid) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
