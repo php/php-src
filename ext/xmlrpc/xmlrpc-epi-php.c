@@ -490,7 +490,7 @@ static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht) /* {{{ */
 {
 	int bArray = 0, bStruct = 0, bMixed = 0;
 	unsigned long num_index;
-	char* my_key;
+	zstr my_key;
 
 	zend_hash_internal_pointer_reset(ht);
 	while (1) {
@@ -558,7 +558,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					{
 						unsigned long num_index;
 						zval** pIter;
-						char* my_key;
+						zstr my_key;
 						HashTable *ht = NULL;
 
 						ht = HASH_OF(val);
@@ -585,7 +585,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 									if (res == HASH_KEY_IS_LONG) {
 										XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(0, *pIter, depth++ TSRMLS_CC));
 									} else {
-										XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key, *pIter, depth++ TSRMLS_CC));
+										XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key.s, *pIter, depth++ TSRMLS_CC));
 									}
 									if (ht) {
 										ht->nApplyCount--;
