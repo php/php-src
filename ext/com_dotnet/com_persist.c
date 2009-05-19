@@ -157,7 +157,7 @@ static HRESULT STDMETHODCALLTYPE stm_seek(IStream *This, LARGE_INTEGER dlibMove,
 		return STG_E_INVALIDFUNCTION;
 	}
 	
-	offset = dlibMove.QuadPart;
+	offset = (off_t) dlibMove.QuadPart;
 
 	ret = php_stream_seek(stm->stream, offset, whence);
 
@@ -261,7 +261,7 @@ static void istream_destructor(php_istream *stm)
 		return;
 	}
 
-	if (Z_REFCOUNT_P(stm) > 0) {
+	if (stm->refcount > 0) {
 		CoDisconnectObject((IUnknown*)stm, 0);
 	}
 
@@ -275,13 +275,14 @@ PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
 
-	if (stm == NULL)
+	if (stm == NULL) {
 		return NULL;
+	}
 
 	memset(stm, 0, sizeof(*stm));
 	stm->engine_thread = GetCurrentThreadId();
 	stm->lpVtbl = &php_istream_vtbl;
-	Z_SET_REFCOUNT_P(stm, 1);
+	stm->refcount = 1;
 	stm->stream = stream;
 
 	zend_list_addref(stream->rsrc_id);

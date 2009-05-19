@@ -38,7 +38,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
 	int keytype;
-	char *strindex;
+	zstr strindex;
 	int strindexlen;
 	long intindex = -1;
 	long max_index = 0;
