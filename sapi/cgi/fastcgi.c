@@ -746,7 +746,7 @@ static int fcgi_read_request(fcgi_request *req)
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		unsigned char *p = buf + sizeof(fcgi_header);
 		HashPosition pos;
-		char * str_index;
+		zstr key;
 		uint str_length;
 		ulong num_index;
 		int key_type;
@@ -763,13 +763,13 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 
 		zend_hash_internal_pointer_reset_ex(req->env, &pos);
-		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+		while ((key_type = zend_hash_get_current_key_ex(req->env, &key, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
 			int zlen;
 			zend_hash_move_forward_ex(req->env, &pos);
 			if (key_type != HASH_KEY_IS_STRING) {
 				continue;
 			}
-			if (zend_hash_find(&fcgi_mgmt_vars, str_index, str_length, (void**) &value) != SUCCESS) {
+			if (zend_hash_find(&fcgi_mgmt_vars, key.s, str_length, (void**) &value) != SUCCESS) {
 				continue;
 			}
 			--str_length;
@@ -793,7 +793,7 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, str_index, str_length);
+			memcpy(p, key.s, str_length);
 			p += str_length;
 			memcpy(p, Z_STRVAL_PP(value), zlen);
 			p += zlen;

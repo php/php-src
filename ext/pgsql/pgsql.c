@@ -2636,7 +2636,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	long colno=0;
+	unsigned long colno=0;
 	int pg_numrows, pg_row;
 	size_t num_fields;
 
@@ -5095,6 +5095,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC) 
 {
 	HashPosition pos;
+	zstr zfield;
 	char *field = NULL;
 	uint field_len = -1;
 	ulong num_idx = -1;
@@ -5122,7 +5123,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		skip_field = 0;
 		new_val = NULL;
 		
-		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
+		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &zfield, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get array key type");
 			err = 1;
 		}
@@ -5134,6 +5135,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Accepts only string key for values");
 			err = 1;
 		}
+		field = zfield.s;
 		if (!err && zend_hash_find(Z_ARRVAL_P(meta), field, field_len, (void **)&def) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid field name (%s) in values", field);
 			err = 1;
@@ -5784,8 +5786,8 @@ static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt T
 PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, ulong opt, char **sql TSRMLS_DC)
 {
 	zval **val, *converted = NULL;
+	zstr zfld;
 	char buf[256];
-	char *fld;
 	smart_str querystr = {0};
 	int key_type, ret = FAILURE;
 	uint fld_len;
@@ -5819,13 +5821,13 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	smart_str_appends(&querystr, " (");
 	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
-	while ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld,
+	while ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &zfld,
 					&fld_len, &num_idx, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
 		if (key_type == HASH_KEY_IS_LONG) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects associative array for values to be inserted");
 			goto cleanup;
 		}
-		smart_str_appendl(&querystr, fld, fld_len - 1);
+		smart_str_appendl(&querystr, zfld.s, fld_len - 1);
 		smart_str_appendc(&querystr, ',');
 		zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
 	}
@@ -5925,24 +5927,24 @@ PHP_FUNCTION(pg_insert)
 static inline int build_assignment_string(smart_str *querystr, HashTable *ht, const char *pad, int pad_len TSRMLS_DC)
 {
 	HashPosition pos;
+	zstr zfld;
 	uint fld_len;
 	int key_type;
 	ulong num_idx;
-	char *fld;
 	char buf[256];
 	zval **val;
 
 	for (zend_hash_internal_pointer_reset_ex(ht, &pos);
 		 zend_hash_get_current_data_ex(ht, (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(ht, &pos)) {
-		 key_type = zend_hash_get_current_key_ex(ht, &fld, &fld_len, &num_idx, 0, &pos);		
+		 key_type = zend_hash_get_current_key_ex(ht, &zfld, &fld_len, &num_idx, 0, &pos);		
 		if (key_type == HASH_KEY_IS_LONG) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects associative array for values to be inserted");
 			return -1;
 		}
-		smart_str_appendl(querystr, fld, fld_len - 1);
+		smart_str_appendl(querystr, zfld.s, fld_len - 1);
 		smart_str_appendc(querystr, '=');
-		
+
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
 				smart_str_appendl(querystr, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
