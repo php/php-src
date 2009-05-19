@@ -1857,7 +1857,11 @@ static size_t _php_stream_copy_to_stream_common(php_stream *src, php_stream *des
 				}
 
 				towrite -= didwrite;
-				writeptr.v += ZBYTES(utype, didwrite);
+				if (utype == IS_UNICODE) {
+					writeptr.u += didwrite;
+				} else {
+					writeptr.s += didwrite;
+				}
 			}
 		} else {
 			break;
