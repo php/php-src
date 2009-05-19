@@ -967,10 +967,10 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			MAKE_STD_ZVAL(zultotal);
 			MAKE_STD_ZVAL(zulnow);
 
-			ZVAL_LONG(zdltotal, dltotal);
-			ZVAL_LONG(zdlnow, dlnow);
-			ZVAL_LONG(zultotal, ultotal);
-			ZVAL_LONG(zulnow, ulnow);
+			ZVAL_LONG(zdltotal, (long) dltotal);
+			ZVAL_LONG(zdlnow, (long) dlnow);
+			ZVAL_LONG(zultotal, (long) ultotal);
+			ZVAL_LONG(zulnow, (long) ulnow);
 
 			argv[0] = &zdltotal;
 			argv[1] = &zdlnow;
@@ -1071,7 +1071,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 #endif
 			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
-					length = MIN(size * nmemb, Z_STRLEN_P(retval_ptr));
+					length = MIN((int) (size * nmemb), Z_STRLEN_P(retval_ptr));
 					memcpy(data, Z_STRVAL_P(retval_ptr), length);
 				}
 				zval_ptr_dtor(&retval_ptr);
