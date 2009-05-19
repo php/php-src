@@ -339,11 +339,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_create_from_date_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, time)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_format, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_format, 0)
+	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_period_construct, 0, 0, 3)
@@ -3570,7 +3572,7 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 }
 /* }}} */
 
-/* {{{ proto string date_interval_format(DateInterval object)
+/* {{{ proto string date_interval_format(DateInterval object, string format)
    Formats the interval.
 */
 PHP_FUNCTION(date_interval_format)
