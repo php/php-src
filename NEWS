@@ -4,10 +4,12 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.14. (Scott)
 - Upgraded bundled libmagic to 5.03 in the fileinfo extension. (Scott)
 
-- Added the ability for json_decode() to take a user specified depth. (Scott)
-- Coalesce all the zend_extension_* variables into zend_extension. (Derick)
+- Removed all zend_extension_* php.ini directives. Zend extensions are now
+  always loaded using zend_extension directive. (Derick)
 
-- Disabled SQLite3::loadExtension for threaded SAPIs. (Scott)
+- Changed SQLite3::loadExtension() to be disabled for threaded SAPIs. (Scott)
+
+- Added the ability for json_decode() to take a user specified depth. (Scott)
 
 - Fixed bug #48257 (PharData throws exception with non-phar tar). (Greg)
 - Fixed bug #48227 (NumberFormatter::format leaks memory). (Felipe)
