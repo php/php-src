@@ -88,7 +88,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 		}
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-		while (bin < bucket->buflen) {
+		while (bin < (unsigned int) bucket->buflen) {
 
 			if (data->finished) {
 				consumed += bucket->buflen;
@@ -220,7 +220,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 
 		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 
-		while (bin < bucket->buflen) {
+		while (bin < (unsigned int) bucket->buflen) {
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
