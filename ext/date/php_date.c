@@ -18,8 +18,6 @@
 
 /* $Id$ */
 
-#define _ISOC9X_SOURCE
-
 #include "php.h"
 #include "php_streams.h"
 #include "php_main.h"
