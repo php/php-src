@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Added new functions: mhash_keygen_count, mhash_get_keygen_name,
     mhash_keygen_uses_hash, mhash_keygen_uses_salt, mhash_get_keygen_salt_size,
     mhash_keygen.
+- Improved ext/dba; support for Tokyo Cabinet. (Michael Maclean)
 
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
