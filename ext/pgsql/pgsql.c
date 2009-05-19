@@ -2650,7 +2650,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	long colno=0;
+	unsigned long colno=0;
 	int pg_numrows, pg_row;
 	size_t num_fields;
 
