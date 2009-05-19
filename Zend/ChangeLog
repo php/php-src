@@ -1,3 +1,9 @@
+2009-05-18  Zoe Slattery  <zoe.slattery@googlemail.com>
+
+    * (PHP_5_3)
+      tests/029.phpt:
+      Removing redundant UEXPECT
+
 2009-05-15  Felipe Pena  <felipensp@gmail.com>
 
     * zend_builtin_functions.c:
