@@ -1424,7 +1424,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	} else {
 		n = size;
 		while (size) {
-			iv[--size] = 255.0 * php_rand(TSRMLS_C) / RAND_MAX;
+			iv[--size] = (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
 		}
 	}
 	RETURN_STRINGL(iv, n, 0);
