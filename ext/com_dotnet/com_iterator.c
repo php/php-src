@@ -74,8 +74,7 @@ static void com_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC
 	*data = &I->zdata;
 }
 
-static int com_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static int com_iter_get_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
 
@@ -111,7 +110,7 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 		}
 	} else {
 		/* safe array */
-		if (I->key >= I->sa_max) {
+		if (I->key >= (unsigned long) I->sa_max) {
 			I->key = (ulong)-1;
 			return FAILURE;
 		}

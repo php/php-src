@@ -92,10 +92,9 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	zval *return_value;
-	UINT dims;
+	UINT dims, i;
 	SAFEARRAY *sa;
 	LONG ubound, lbound;
-	int i;
 	HRESULT res;
 	
 	MAKE_STD_ZVAL(return_value);
@@ -110,7 +109,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 
 		args = safe_emalloc(proxy->dimensions + 1, sizeof(zval *), 0);
 
-		for (i = 1; i < proxy->dimensions; i++) {
+		for (i = 1; i < (UINT) proxy->dimensions; i++) {
 			args[i-1] = proxy->indices[i];
 		}
 		args[i-1] = offset;
@@ -145,7 +144,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 	sa = V_ARRAY(&proxy->obj->v);
 	dims = SafeArrayGetDim(sa);
 
-	if (proxy->dimensions >= dims) {
+	if ((UINT) proxy->dimensions >= dims) {
 		/* too many dimensions */
 		php_com_throw_exception(E_INVALIDARG, "too many dimensions!" TSRMLS_CC);
 		return return_value;
@@ -212,8 +211,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
-	UINT dims;
-	int i;
+	UINT dims, i;
 	HRESULT res;
 	VARIANT v;
 	
@@ -223,7 +221,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		 * the final value */
 		zval **args = safe_emalloc(proxy->dimensions + 2, sizeof(zval *), 0);
 
-		for (i = 1; i < proxy->dimensions; i++) {
+		for (i = 1; i < (UINT) proxy->dimensions; i++) {
 			args[i-1] = proxy->indices[i];
 		}
 		args[i-1] = offset;
@@ -323,13 +321,13 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(const zval **object, zstr name, int len TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
 }
 
-static int saproxy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
+static int saproxy_call_method(zstr method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	return FAILURE;
 }
@@ -340,14 +338,14 @@ static union _zend_function *saproxy_constructor_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static zend_class_entry *saproxy_class_entry_get(zval *object TSRMLS_DC)
+static zend_class_entry *saproxy_class_entry_get(const zval *object TSRMLS_DC)
 {
 	return php_com_saproxy_class_entry;
 }
 
-static int saproxy_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int saproxy_class_name_get(const zval *object, zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	*class_name = estrndup(php_com_saproxy_class_entry->name.s, php_com_saproxy_class_entry->name_length);
+	(*class_name).s = estrndup(php_com_saproxy_class_entry->name.s, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;
 	return 0;
 }
@@ -521,8 +519,7 @@ static void saproxy_iter_get_data(zend_object_iterator *iter, zval ***data TSRML
 	*data = ptr_ptr;
 }
 
-static int saproxy_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static int saproxy_iter_get_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
 
