@@ -157,7 +157,7 @@ static HRESULT STDMETHODCALLTYPE stm_seek(IStream *This, LARGE_INTEGER dlibMove,
 		return STG_E_INVALIDFUNCTION;
 	}
 	
-	offset = dlibMove.QuadPart;
+	offset = (off_t) dlibMove.QuadPart;
 
 	ret = php_stream_seek(stm->stream, offset, whence);
 
