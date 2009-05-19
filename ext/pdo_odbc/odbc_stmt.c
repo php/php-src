@@ -181,7 +181,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						break;
 				}
 
-				rc = SQLDescribeParam(S->stmt, param->paramno+1, &sqltype, &precision, &scale, &nullable);
+				rc = SQLDescribeParam(S->stmt, (SQLUSMALLINT) param->paramno+1, &sqltype, &precision, &scale, &nullable);
 				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 					/* MS Access, for instance, doesn't support SQLDescribeParam,
 					 * so we need to guess */
@@ -229,7 +229,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					return 0;
 				}
 
-				rc = SQLBindParameter(S->stmt, param->paramno+1,
+				rc = SQLBindParameter(S->stmt, (SQLUSMALLINT) param->paramno+1,
 						P->paramtype, ctype, sqltype, precision, scale,
 						P->paramtype == SQL_PARAM_INPUT ? 
 							(SQLPOINTER)param :
