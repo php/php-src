@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 6.0
 - Unicode support. (Andrei, Dmitry, et al)
 
-- Changed allow_url_fopen/allow_url_include to allow
+- Changed "allow_url_fopen" and "allow_url_include" php.ini directives to allow
   per-wrapper enable/disable and runtime tightening. (Sara)
 
 - Removed undocumented and incomplete support for strings in list() operator.
@@ -25,14 +25,15 @@ PHP                                                                        NEWS
   operands. (Dmitry)
 - Removed Freetype 1.x and GD 1.x support from GD extension. (Pierre)
 
-- Improved ext/zlib; re-implemented non-file related functionality. (Mike)
-- Improved output layer; see README.NEW-OUTPUT-API for internals. (Mike)
+- Improved ext/zlib: re-implemented non-file related functionality. (Mike)
+- Improved output layer. See README.NEW-OUTPUT-API for internals. (Mike)
 - Improved ext/mhash: (Mike)
   . Added keygen constants.
   . Added new functions: mhash_keygen_count, mhash_get_keygen_name,
     mhash_keygen_uses_hash, mhash_keygen_uses_salt, mhash_get_keygen_salt_size,
     mhash_keygen.
-- Improved ext/dba; support for Tokyo Cabinet. (Michael)
+- Improved ext/dba:
+  . Added support for Tokyo Cabinet. (Michael)
 
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
@@ -43,4 +44,3 @@ PHP                                                                        NEWS
 
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
 - Fixed bug #46647 (SplFileObject::fgetcsv segfaults). (Etienne)
-
