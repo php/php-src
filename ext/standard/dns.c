@@ -244,7 +244,7 @@ static char *php_gethostbyname(char *name)
 }
 /* }}} */
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
+#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
 
 /* {{{ proto int dns_check_record(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */
@@ -942,8 +942,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_DN_SKIPNAME && HAVE_DN_EXPAND */
-
-#endif /* HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE)) */
+#endif /* defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE))) */
 
 /*
  * Local variables:
