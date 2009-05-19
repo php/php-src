@@ -46,7 +46,11 @@ static zend_module_dep pdo_dblib_deps[] = {
 };
 #endif
 
+#if PDO_DBLIB_IS_MSSQL
+zend_module_entry pdo_mssql_module_entry = {
+#else
 zend_module_entry pdo_dblib_module_entry = {
+#endif
 #if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_dblib_deps,
