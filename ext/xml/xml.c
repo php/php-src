@@ -1780,7 +1780,7 @@ PHP_FUNCTION(utf8_encode)
 PHP_FUNCTION(utf8_decode)
 {
 	XML_Char *decoded;
-	char *data;
+	zstr data;
 	int len, data_len;
 	zend_uchar data_type;
 
@@ -1789,9 +1789,9 @@ PHP_FUNCTION(utf8_decode)
 	}
 
 	if (data_type == IS_UNICODE) {
-		RETURN_UNICODEL(data, data_len, 1);
+		RETURN_UNICODEL(data.u, data_len, 1);
 	}
-	decoded = xml_utf8_decode(data, data_len, &len, NULL);
+	decoded = xml_utf8_decode(data.s, data_len, &len, NULL);
 
 	if (decoded == NULL) {
 		RETURN_FALSE;
