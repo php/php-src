@@ -48,15 +48,13 @@ PHP_FUNCTION(gethostname);
 #endif
 
 #if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
-
+PHP_FUNCTION(dns_check_record);
 # if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
 PHP_FUNCTION(dns_get_mx);
-PHP_FUNCTION(dns_check_record);
 # endif
 
 #if defined(PHP_WIN32) || HAVE_DNS_FUNCS
 PHP_FUNCTION(dns_get_record);
-
 PHP_MINIT_FUNCTION(dns);
 # endif
 
