@@ -259,7 +259,7 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, int *len TSRMLS_DC);
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
