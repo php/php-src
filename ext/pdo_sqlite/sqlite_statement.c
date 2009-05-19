@@ -244,10 +244,12 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsi
 		default:
 			*ptr = (char*)sqlite3_column_text(S->stmt, colno);
 			*len = sqlite3_column_bytes(S->stmt, colno);
+#if SQLITE_VERSION_NUMBER < 3004000
 			if (*len) {
 				/* sqlite3.h says "the NUL terminator is included in the byte count for TEXT values" */
-				*len--; /* do not remove this, even though it generates a warning */
+				(*len)--;
 			}
+#endif
 			return 1;
 	}
 }
