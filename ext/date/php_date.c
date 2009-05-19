@@ -832,11 +832,6 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
 		return DATEG(timezone);
 	}
-	/* Check environment variable */
-	env = getenv("TZ");
-	if (env && *env && timelib_timezone_id_is_valid(env, tzdb)) {
-		return env;
-	}
 	/* Check config setting for default timezone */
 	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
 		return DATEG(default_timezone);
