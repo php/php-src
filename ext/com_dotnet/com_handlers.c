@@ -434,7 +434,7 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 	}
 }
 
-static zend_class_entry *com_class_entry_get(zval *object TSRMLS_DC)
+static zend_class_entry *com_class_entry_get(const zval *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
@@ -442,7 +442,7 @@ static zend_class_entry *com_class_entry_get(zval *object TSRMLS_DC)
 	return obj->ce;
 }
 
-static int com_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int com_class_name_get(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
