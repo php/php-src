@@ -256,7 +256,7 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 				continue;											\
 			}														\
 			key_length--;											\
-			if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) {	\
+			if (php_get_session_var(key.s, key_length, &struc TSRMLS_CC) == SUCCESS) {	\
 				code;		 										\
 			} 														\
 		}															\
