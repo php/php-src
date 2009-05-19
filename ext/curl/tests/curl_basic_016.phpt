@@ -48,9 +48,9 @@ array(20) {
   ["download_content_length"]=>
   float(0)
   ["upload_content_length"]=>
-  float(0)
+  float(%f)
   ["starttransfer_time"]=>
-  float(0)
+  float(%f)
   ["redirect_time"]=>
   float(0)
 }
