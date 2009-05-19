@@ -187,9 +187,20 @@ if test "$ZEND_DEBUG" = "yes"; then
   if test "$CFLAGS" = "-g -O2"; then
   	CFLAGS=-g
   fi
-  test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
-  test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
-    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
+  changequote({,})
+  if test -n "$GCC"; then
+
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
+
+    "$CC" --help=warnings|grep -q -- '-Wpointer-arith[ \t]' && \
+      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wpointer-arith"
+    "$CC" --help=warnings|grep -q -- '-Wdeclaration-after-statement[ \t]' && \
+      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wdeclaration-after-statement"
+
+    test "$USE_MAINTAINER_MODE" = "yes" && \
+      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
+  fi
+  changequote([,])
 else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
