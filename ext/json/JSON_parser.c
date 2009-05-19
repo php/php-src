@@ -360,7 +360,7 @@ static void utf16_to_utf8(smart_str *buf, unsigned short utf16)
                     | (utf16 & 0x3ff)) + 0x10000;
         buf->len -= 3;
 
-        smart_str_appendc(buf, 0xf0 | (utf32 >> 18));
+        smart_str_appendc(buf, (unsigned char) (0xf0 | (utf32 >> 18)));
         smart_str_appendc(buf, 0x80 | ((utf32 >> 12) & 0x3f));
         smart_str_appendc(buf, 0x80 | ((utf32 >> 6) & 0x3f));
         smart_str_appendc(buf, 0x80 | (utf32 & 0x3f));
