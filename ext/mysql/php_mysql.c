@@ -625,7 +625,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length, port = MYSQL_PORT;
 	long client_flags = 0;
 	php_mysql_conn *mysql=NULL;
+#if !defined(MYSQL_USE_MYSQLND) && !defined(MYSQL_HASH_SET_CHARSET)
 	char *encoding;
+#endif
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
 #endif
@@ -1185,7 +1187,7 @@ PHP_FUNCTION(mysql_thread_id)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG(mysql_thread_id(mysql->conn));
+	RETURN_LONG((long) mysql_thread_id(mysql->conn));
 }
 /* }}} */
 
