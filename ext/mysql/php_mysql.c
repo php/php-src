@@ -1166,7 +1166,7 @@ PHP_FUNCTION(mysql_thread_id)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG(mysql_thread_id(mysql->conn));
+	RETURN_LONG((long) mysql_thread_id(mysql->conn));
 }
 /* }}} */
 

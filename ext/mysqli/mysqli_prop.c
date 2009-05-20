@@ -83,7 +83,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	} else {\
 		l = (__ret_type)__int_func(p);\
 		if (l < LONG_MAX) {\
-			ZVAL_LONG(*retval, l);\
+			ZVAL_LONG(*retval, (long) l);\
 		} else { \
 			char *ret; \
 			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
@@ -156,7 +156,7 @@ static int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_MYSQL *mysql;
-	my_ulonglong rc;
+	long rc;
 
 	MAKE_STD_ZVAL(*retval); 
 
@@ -169,9 +169,9 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	} else {
 		CHECK_STATUS(MYSQLI_STATUS_VALID);
 
-		rc = mysql_affected_rows(mysql->mysql);
+		rc = (long) mysql_affected_rows(mysql->mysql);
 
-		if (rc == (my_ulonglong)-1) {
+		if (rc == (long)-1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
 		} 
@@ -277,7 +277,7 @@ static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_STMT *p;
-	my_ulonglong rc;
+	long rc;
 
 	MAKE_STD_ZVAL(*retval); 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
@@ -287,9 +287,9 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		rc = mysql_stmt_affected_rows(p->stmt);
+		rc = (long) mysql_stmt_affected_rows(p->stmt);
 	
-		if (rc == (my_ulonglong)-1) {
+		if (rc == (long)-1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
 		} 
