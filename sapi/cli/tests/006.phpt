@@ -3,7 +3,7 @@ show information about extension
 --SKIPIF--
 <?php 
 include "skipif.inc"; 
-if (!extension_loaded("reflection")) {
+if (!extension_loaded("reflection") || !extension_loaded("session")) {
 	die("skip");
 }
 ?>
