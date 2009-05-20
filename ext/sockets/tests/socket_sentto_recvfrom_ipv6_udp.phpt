@@ -5,6 +5,7 @@ Test if socket_recvfrom() receives data sent by socket_sendto() via IPv6 UDP
 if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
+require 'ipv6_skipif.inc';
 --FILE--
 <?php
     $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
