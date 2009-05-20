@@ -1,3 +1,24 @@
+2009-05-19  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_3)
+      zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      MFH: Fix bug #47859 parse_ini_file() does not like asterisk (*) in key in
+      the beginning, and allow [*_-] chars at start of ini labels
+
+    * zend_ini_scanner.c
+      zend_ini_scanner.l
+      zend_ini_scanner_defs.h:
+      Fix bug #47859 parse_ini_file() does not like asterisk (*) in key in the
+      beginning, and allow [*_-] chars at start of ini labels
+
+2009-05-19  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * Zend.m4:
+      Add GCC warnings in debug cflags for things likely to break VC builds
+      (-Wpointer-arith -Wdeclaration-after-statement)
+
 2009-05-18  Zoe Slattery  <zoe.slattery@googlemail.com>
 
     * (PHP_5_3)
