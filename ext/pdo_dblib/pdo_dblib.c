@@ -79,7 +79,11 @@ zend_module_entry pdo_dblib_module_entry = {
 };
 
 #if defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL)
+#if PDO_DBLIB_IS_MSSQL
+ZEND_GET_MODULE(pdo_mssql)
+#else
 ZEND_GET_MODULE(pdo_dblib)
+#endif
 #endif
 
 int error_handler(DBPROCESS *dbproc, int severity, int dberr,
