@@ -158,7 +158,7 @@ static
 int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
 								   zval ***args, unsigned int start, const char * const types TSRMLS_DC)
 {
-	int					i;
+	unsigned int i;
 	MYSQLND_PARAM_BIND	*params;
 	enum_func_status	ret = FAIL;
 
@@ -1074,7 +1074,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 	
-	if (offset < 0 || offset >= mysql_num_fields(result)) {
+	if (offset < 0 || offset >= (long) mysql_num_fields(result)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field offset is invalid for resultset");
 		RETURN_FALSE; 
 	}
@@ -2081,7 +2081,7 @@ PHP_FUNCTION(mysqli_refresh)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
-	RETURN_BOOL(!mysql_refresh(mysql->mysql, options));
+	RETURN_BOOL(!mysql_refresh(mysql->mysql, (uint8_t) options));
 }
 /* }}} */
  
@@ -2354,7 +2354,7 @@ PHP_FUNCTION(mysqli_thread_id)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_VALID);
 
-	RETURN_LONG(mysql_thread_id(mysql->mysql));
+	RETURN_LONG((long) mysql_thread_id(mysql->mysql));
 }
 /* }}} */
 

@@ -122,10 +122,10 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 {
-	my_ulonglong row_count;
+	long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
-	row_count = mysql_stmt_affected_rows(S->stmt);
-	if (row_count != (my_ulonglong)-1) {
+	row_count = (long) mysql_stmt_affected_rows(S->stmt);
+	if (row_count != (long)-1) {
 		stmt->row_count = row_count;
 	}
 }
@@ -248,7 +248,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
-	unsigned int i;
+	int i;
 	
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute_prepared_mysqlnd");
 	
@@ -325,13 +325,13 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		stmt->row_count = mysql_num_rows(S->result);
+		stmt->row_count = (long) mysql_num_rows(S->result);
 		stmt->column_count = (int) mysql_num_fields(S->result);
 		S->fields = mysql_fetch_fields(S->result);
 
 	} else {
 		/* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
-		stmt->row_count = row_count;
+		stmt->row_count = (long) row_count;
 	}
 
 	PDO_DBG_RETURN(1);
@@ -343,7 +343,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 #if HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
-	my_ulonglong row_count;
+	long row_count;
 	int ret;
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
@@ -374,7 +374,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 		{
 			/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
-			unsigned int i;
+			int i;
 
 			stmt->column_count = S->stmt->field_count;
 			for (i = 0; i < stmt->column_count; i++) {
@@ -388,12 +388,13 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 			/* if buffered, pre-fetch all the data */
 			if (H->buffered) {
-				if (mysql_stmt_store_result(S->stmt))
+				if (mysql_stmt_store_result(S->stmt)) {
 					PDO_DBG_RETURN(1);
+				}
 			}
 		}
-		row_count = mysql_stmt_affected_rows(S->stmt);
-		if (row_count != (my_ulonglong)-1) {
+		row_count = (long) mysql_stmt_affected_rows(S->stmt);
+		if (row_count != (long)-1) {
 			stmt->row_count = row_count;
 		}
 		PDO_DBG_RETURN(1);
@@ -426,7 +427,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			row_count = 0;
 		} else {
 			S->result = mysql_store_result(H->server);
-			if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
+			if ((long)-1 == (row_count = (long) mysql_affected_rows(H->server))) {
 				pdo_mysql_error_stmt(stmt);
 				PDO_DBG_RETURN(0);
 			}
@@ -493,7 +494,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				PDO_DBG_RETURN(1);
 
 			case PDO_PARAM_EVT_EXEC_PRE:
-				if (S->params_given < S->num_params) {
+				if (S->params_given < (unsigned int) S->num_params) {
 					/* too few parameter bound */
 					PDO_DBG_ERR("too few parameters bound");
 					strcpy(stmt->error_code, "HY093");
@@ -671,7 +672,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
-	unsigned int i;
+	int i;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_describe");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
@@ -690,7 +691,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 	if (cols[0].name) {
 		PDO_DBG_RETURN(1);
 	}
-	for (i=0; i < stmt->column_count; i++) {
+	for (i = 0; i < stmt->column_count; i++) {
 		int namelen;
 
 		if (S->H->fetch_table_names) {
