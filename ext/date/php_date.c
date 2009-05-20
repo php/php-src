@@ -826,8 +826,6 @@ static timelib_tzinfo *php_date_parse_tzfile(char *formal_tzname, const timelib_
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
-	char *env;
-
 	/* Checking configure timezone */
 	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
 		return DATEG(timezone);
