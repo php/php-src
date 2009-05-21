@@ -143,11 +143,8 @@ object(UsesMagic)#2 (2) {
 }
 
 --> isset existent, non-existent and dynamic:
-In UsesMagic::__isset(a)
 bool(true)
-In UsesMagic::__isset(nonexistent)
 bool(false)
-In UsesMagic::__isset(dynamic)
 bool(true)
   Original wrapped object:
 object(C)#1 (5) {
