@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - Fixed bug #48240 (DBA Segmentation fault dba_nextkey). (Felipe)
 - Fixed bug #48224 (Incorrect shuffle in array_rand). (Etienne)
 - Fixed bug #48221 (memory leak when passing invalid xslt parameter). (Felipe)
+- Fixed bug #48207 (CURLOPT_(FILE|WRITEHEADER options do not error out when   
+  working with a non-writable stream). (Ilia)
 - Fixed bug #48206 (Iterating over an invalid data structure
   with RecursiveIteratorIterator leads to a segfault). (Scott)
 - Fixed bug #48204 (xmlwriter_open_uri() does not emit warnings on invalid

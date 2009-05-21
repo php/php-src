@@ -1436,12 +1436,24 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			error = CURLE_OK;
 			switch (option) {
 				case CURLOPT_FILE:
-					ch->handlers->write->fp = fp;
-					ch->handlers->write->method = PHP_CURL_FILE;
+					if (((php_stream *) what)->mode[0] != 'r') {
+						ch->handlers->write->fp = fp;
+						ch->handlers->write->method = PHP_CURL_FILE;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
+						RETVAL_FALSE;
+						return 1;
+					}
 					break;
 				case CURLOPT_WRITEHEADER:
-					ch->handlers->write_header->fp = fp;
-					ch->handlers->write_header->method = PHP_CURL_FILE;
+					if (((php_stream *) what)->mode[0] != 'r') {
+						ch->handlers->write_header->fp = fp;
+						ch->handlers->write_header->method = PHP_CURL_FILE;
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
+						RETVAL_FALSE;
+						return 1;
+					}
 					break;
 				case CURLOPT_INFILE:
 					zend_list_addref(Z_LVAL_PP(zvalue));
