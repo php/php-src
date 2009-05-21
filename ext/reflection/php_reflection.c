@@ -4843,6 +4843,10 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 			break;
 		}
 		ce = tmp_ce;
+		if (tmp_ce == tmp_info->ce) {
+			/* declared in this class, done */
+			break;
+		}
 		tmp_ce = tmp_ce->parent;
 	}
 
