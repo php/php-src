@@ -43,61 +43,66 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 #ifdef PHP_WIN32
-#include <io.h>
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
-#include "win32/winutil.h"
-#include "win32/fnmatch.h"
+# include <io.h>
+# define O_RDONLY _O_RDONLY
+# include "win32/param.h"
+# include "win32/winutil.h"
+# include "win32/fnmatch.h"
 #elif defined(NETWARE)
-#include <sys/param.h>
-#include <sys/select.h>
-#ifdef USE_WINSOCK
-#include <novsock2.h>
+# include <sys/param.h>
+# include <sys/select.h>
+# ifdef USE_WINSOCK
+#  include <novsock2.h>
+# else
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#  include <netdb.h>
+# endif
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
+# if HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
+# if HAVE_SYS_SELECT_H
+#  include <sys/select.h>
+# endif
+# if defined(NETWARE) && defined(USE_WINSOCK)
+#  include <novsock2.h>
+# else
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#  include <netdb.h>
+# endif
+# if HAVE_ARPA_INET_H
+#  include <arpa/inet.h>
+# endif
 #endif
-#else
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#if defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#endif
+
 #include "ext/standard/head.h"
 #include "safe_mode.h"
 #include "php_string.h"
 #include "file.h"
+
 #if HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
+# ifdef PHP_WIN32
+#  include "win32/pwd.h"
+# else
+#  include <pwd.h>
+# endif
 #endif
-#endif
+
 #ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
+# include <sys/time.h>
 #endif
+
 #include "fsock.h"
 #include "fopen_wrappers.h"
 #include "streamsfuncs.h"
 #include "php_globals.h"
 
 #ifdef HAVE_SYS_FILE_H
-#include <sys/file.h>
+# include <sys/file.h>
 #endif
 
 #if MISSING_FCLOSE_DECL
@@ -105,7 +110,7 @@ extern int fclose(FILE *);
 #endif
 
 #ifdef HAVE_SYS_MMAN_H
-#include <sys/mman.h>
+# include <sys/mman.h>
 #endif
 
 #include "scanf.h"
@@ -118,18 +123,18 @@ php_file_globals file_globals;
 #endif
 
 #if defined(HAVE_FNMATCH) && !defined(PHP_WIN32)
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <fnmatch.h>
+# ifndef _GNU_SOURCE
+#  define _GNU_SOURCE
+# endif
+# include <fnmatch.h>
 #endif
 
 #ifdef HAVE_WCHAR_H
-#include <wchar.h>
+# include <wchar.h>
 #endif
 
 #ifndef S_ISDIR
-#define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
+# define S_ISDIR(mode)	(((mode)&S_IFMT) == S_IFDIR)
 #endif
 /* }}} */
 
@@ -199,7 +204,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("LOCK_UN", PHP_LOCK_UN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOCK_NB", PHP_LOCK_NB, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_CONNECT", 		PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_CONNECT",			PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_REQUIRED",	PHP_STREAM_NOTIFY_AUTH_REQUIRED,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_RESULT",		PHP_STREAM_NOTIFY_AUTH_RESULT,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_MIME_TYPE_IS",	PHP_STREAM_NOTIFY_MIME_TYPE_IS,		CONST_CS | CONST_PERSISTENT);
@@ -210,9 +215,9 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_COMPLETED",		PHP_STREAM_NOTIFY_COMPLETED,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_RESOLVE",			PHP_STREAM_NOTIFY_RESOLVE,			CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,		CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_FILTER_READ",			PHP_STREAM_FILTER_READ,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_FILTER_WRITE",			PHP_STREAM_FILTER_WRITE,			CONST_CS | CONST_PERSISTENT);
@@ -240,11 +245,13 @@ PHP_MINIT_FUNCTION(file)
 #elif defined(AF_INET)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef PF_INET6
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
 #elif defined(AF_INET6)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", AF_INET6, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef PF_UNIX
 	REGISTER_LONG_CONSTANT("STREAM_PF_UNIX", PF_UNIX, CONST_CS|CONST_PERSISTENT);
 #elif defined(AF_UNIX)
@@ -255,30 +262,38 @@ PHP_MINIT_FUNCTION(file)
 	/* most people will use this one when calling socket() or socketpair() */
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef IPPROTO_TCP
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef IPPROTO_UDP
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef IPPROTO_ICMP
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef IPPROTO_RAW
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_STREAM", SOCK_STREAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_DGRAM", SOCK_DGRAM, CONST_CS|CONST_PERSISTENT);
+
 #ifdef SOCK_RAW
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_RAW", SOCK_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef SOCK_SEQPACKET
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_SEQPACKET", SOCK_SEQPACKET, CONST_CS|CONST_PERSISTENT);
 #endif
+
 #ifdef SOCK_RDM
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_RDM", SOCK_RDM, CONST_CS|CONST_PERSISTENT);
 #endif
+
 	REGISTER_LONG_CONSTANT("STREAM_PEEK", STREAM_PEEK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_OOB",  STREAM_OOB, CONST_CS | CONST_PERSISTENT);
 
@@ -288,7 +303,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",			PHP_FILE_USE_INCLUDE_PATH,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",			PHP_FILE_IGNORE_NEW_LINES,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_APPEND", 					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
@@ -298,9 +313,9 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FNM_PERIOD",   FNM_PERIOD,   CONST_CS | CONST_PERSISTENT);
-#ifdef FNM_CASEFOLD /* a GNU extension */ /* TODO emulate if not available */
+# ifdef FNM_CASEFOLD /* a GNU extension */ /* TODO emulate if not available */
 	REGISTER_LONG_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_CS | CONST_PERSISTENT);
-#endif
+# endif
 #endif
 
 	return SUCCESS;
@@ -660,7 +675,7 @@ PHP_FUNCTION(file_put_contents)
 
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
-					if ((*tmp)->type != IS_STRING) {
+					if (Z_TYPE_PP(tmp) != IS_STRING) {
 						SEPARATE_ZVAL(tmp);
 						convert_to_string(*tmp);
 					}
@@ -767,8 +782,7 @@ PHP_FUNCTION(file)
 		}
 
 		/* for performance reasons the code is duplicated, so that the if (include_new_line)
-		 * will not need to be done for every single line in the file.
-		 */
+		 * will not need to be done for every single line in the file. */
 		if (include_new_line) {
 			do {
 				p++;
@@ -891,7 +905,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_to_zval(stream, return_value);
 }
 /* }}} */
@@ -906,14 +920,14 @@ PHPAPI PHP_FUNCTION(fclose)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
-	
+
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid stream resource", stream->rsrc_id);
 		RETURN_FALSE;
 	}
-	
+
 	if (!stream->is_persistent) {
 		zend_list_delete(stream->rsrc_id);
 	} else {
@@ -1180,18 +1194,16 @@ PHP_FUNCTION(fscanf)
 	char *buf, *format;
 	size_t len;
 	void *what;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs*", &file_handle, &format, &format_len, &args, &argc) == FAILURE) {
 		return;
 	}
 
 	what = zend_fetch_resource(&file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
 
-	/*
-	 * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
+	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing
-	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc
-	 */
+	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc */
 	if (!what) {
 		if (args) {
 			efree(args);
@@ -1692,7 +1704,7 @@ PHP_FUNCTION(copy)
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	
+
 	if (php_copy_file(source, target TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -1729,7 +1741,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument to copy() function cannot be a directory");
 		return FAILURE;
 	}
-	
+
 	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, NULL)) {
 		case -1:
 			/* non-statable stream */
@@ -1966,7 +1978,7 @@ PHP_FUNCTION(fputcsv)
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
-		
+
 		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
 			zval_dtor(&field);
 		}
@@ -2407,7 +2419,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 	memset((void *)buff, 0, META_DEF_BUFSIZE + 1);
 
 	while (md->ulc || (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)))) {
-		if(php_stream_eof(md->stream)) {
+		if (php_stream_eof(md->stream)) {
 			break;
 		}
 
