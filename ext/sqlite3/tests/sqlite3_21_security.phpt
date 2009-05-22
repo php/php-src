@@ -31,6 +31,6 @@ object(SQLite3)#%d (0) {
 bool(true)
 Above test directory
 
-Warning: SQLite3::__construct(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %s/sqlite3_21_security.php on line %d
+Warning: SQLite3::__construct(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %ssqlite3_21_security.php on line %d
 open_basedir prohibits opening %s
 Done
