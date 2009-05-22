@@ -44,5 +44,7 @@ array(1) {
   [u"a"]=>
   int(1)
 }
-array(0) {
+array(1) {
+  [u"a"]=>
+  int(1)
 }
