@@ -890,27 +890,22 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
 			char *key, *class_name, *prop_name;
 			uint key_len;
-			ulong num_index, h;
+			ulong num_index;
 			int prop_name_len = 0;			
 			zval *prop_copy;
 			zend_property_info *property_info;
+			zval zprop_name;
 
 			zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(properties, &pos);
 
 			zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 			prop_name_len = strlen(prop_name);
-			
-			h = zend_get_hash_value(prop_name, prop_name_len+1);
-			if (zend_hash_quick_find(&ce->properties_info, prop_name, prop_name_len+1, h, (void **) &property_info) == FAILURE) {
-				continue;
-			}
-			
-			if (property_info->flags & ZEND_ACC_SHADOW) {
-				continue;
-			} else if ((property_info->flags & ZEND_ACC_PRIVATE) && EG(scope) != ce) {
-				continue;
-			} else if ((property_info->flags & ZEND_ACC_PROTECTED) && zend_check_protected(ce, EG(scope)) == 0) {
+
+			ZVAL_STRINGL(&zprop_name, prop_name, prop_name_len, 0);
+			property_info = zend_get_property_info(ce, &zprop_name, 1 TSRMLS_CC);
+
+			if (!property_info || property_info == &EG(std_property_info)) {
 				continue;
 			}
 
