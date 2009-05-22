@@ -411,7 +411,6 @@ UPGRADE NOTES - PHP 5.3
                        DateTime::getLastErrors()
        - PDO_Firebird: PDO::setAttribute()
        - Reflection:   ReflectionProperty::setAccessible()
-                       ReflectionFunction::getClosureThis()
                        ReflectionFunction::inNamespace()
                        ReflectionFunction::getNamespaceName()
                        ReflectionFunction::getShortName()
