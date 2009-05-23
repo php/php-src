@@ -292,8 +292,8 @@ struct _zend_unicode_globals {
 	UConverter *fallback_encoding_conv;  /* converter for default encoding for IS_STRING type */
 	UConverter *runtime_encoding_conv;   /* runtime encoding converter */
 	UConverter *output_encoding_conv;    /* output layer converter */
+	UConverter *request_encoding_conv;   /* http request encoding converter */
 	UConverter *script_encoding_conv;    /* default script encoding converter */
-	UConverter *http_input_encoding_conv;/* http input encoding converter */
 	UConverter *filesystem_encoding_conv;/* default filesystem converter (entries, not contents) */ 
 	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
 	UConverter *ascii_conv;				 /* all-purpose ASCII converter */
@@ -301,6 +301,7 @@ struct _zend_unicode_globals {
 	char *stream_encoding;		    /* default stream encoding (contents, not FS entries)
 						Uses name of encoding rather than a real converter
 						because each stream needs its own instance */
+	char *request_encoding_def;   /* the default http request encoding */
 
 	uint16_t from_error_mode;
 	UChar from_subst_char[3];

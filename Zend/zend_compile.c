@@ -104,10 +104,24 @@ static void build_runtime_defined_function_key(zval *result, zend_uchar type, co
 }
 /* }}} */
 
-int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
+ZEND_API int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC) /* {{{ */
 {
 	auto_global->armed = (auto_global->auto_global_callback ? 1 : 0);
 	return 0;
+}
+
+ZEND_API int zend_auto_global_arm_by_name(const char *name, zend_uint name_len TSRMLS_DC) /* {{{ */
+{
+	zend_auto_global *auto_global;
+
+	if (zend_hash_find(CG(auto_globals), name, name_len+1, (void **) &auto_global)==FAILURE) {
+		return FAILURE;
+	}
+
+	auto_global->armed = 1;
+	CG(auto_globals_cache)[auto_global->index] = NULL;
+
+	return SUCCESS;
 }
 /* }}} */
 

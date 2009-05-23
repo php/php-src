@@ -40,3 +40,6 @@
 * See if ext/pcre can ba adjusted to allow operations on pure binary
   strings. Ideal mode would be: convert all IS_UNICODE to UTF-8, assume that
   binary strings with /u modifier are UTF-8, otherwise it's pure binary.
+
+* Optimize for zend_string_to_unicode() and zend_unicode_to_string() for
+  0-length strings.

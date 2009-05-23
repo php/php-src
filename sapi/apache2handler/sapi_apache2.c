@@ -250,19 +250,21 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	int new_val_len;
+	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
+		if (php_register_variable_with_conv(conv, key, strlen(key), val, strlen(val),
+											track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+			php_error(E_WARNING, "Failed to decode _SERVER array entry");
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
-		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
+	if (php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), ctx->r->uri,
+										strlen(ctx->r->uri), track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+		php_error(E_WARNING, "Failed to decode _SERVER array entry");
 	}
 }
 
@@ -491,7 +493,7 @@ static void php_apache_ini_dtor(request_rec *r, request_rec *p TSRMLS_DC)
 typedef struct {
 	HashTable config;
 } php_conf_rec;
-		char *str;
+		zstr str;
 		uint str_len;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php6_module);
 
@@ -499,7 +501,7 @@ typedef struct {
 				zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0,  NULL) == HASH_KEY_IS_STRING;
 				zend_hash_move_forward(&c->config)
 		) {
-			zend_restore_ini_entry(str, str_len, ZEND_INI_STAGE_SHUTDOWN);
+			zend_restore_ini_entry(str.s, str_len, ZEND_INI_STAGE_SHUTDOWN);
 		}	
 	}
 	if (p) {

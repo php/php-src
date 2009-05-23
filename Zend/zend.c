@@ -195,13 +195,17 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("unicode.fallback_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, fallback_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.runtime_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, runtime_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.script_encoding",		NULL,	ZEND_INI_ALL, OnUpdateEncoding, script_encoding_conv, zend_unicode_globals, unicode_globals)
-	STD_ZEND_INI_ENTRY("unicode.http_input_encoding",	NULL,	ZEND_INI_ALL, OnUpdateEncoding, http_input_encoding_conv, zend_unicode_globals, unicode_globals)
 	STD_ZEND_INI_ENTRY("unicode.filesystem_encoding",	NULL,	ZEND_INI_ALL, OnUpdateEncoding, filesystem_encoding_conv, zend_unicode_globals, unicode_globals)
 	/*
 	 * This is used as a default for the stream contexts. It's not an actual
 	 * UConverter because each stream needs its own.
 	 */
 	STD_ZEND_INI_ENTRY("unicode.stream_encoding", "UTF-8", ZEND_INI_ALL, OnUpdateStringUnempty, stream_encoding, zend_unicode_globals, unicode_globals)
+	/*
+	 * This is used as a default for the request encoding. It's not an actual
+	 * UConverter because the request encoding converter is reset on each request.
+	 */
+	STD_ZEND_INI_ENTRY("unicode.request_encoding_default",	"UTF-8",	ZEND_INI_ALL, OnUpdateStringUnempty, request_encoding_def, zend_unicode_globals, unicode_globals)
 ZEND_INI_END()
 
 
@@ -1008,8 +1012,8 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->runtime_encoding_conv = NULL;
 	unicode_globals->output_encoding_conv = NULL;
 	unicode_globals->script_encoding_conv = NULL;
-	unicode_globals->http_input_encoding_conv = NULL;
 	unicode_globals->filesystem_encoding_conv = NULL;
+	unicode_globals->request_encoding_conv = NULL;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
 	zend_set_converter_error_mode(unicode_globals->utf8_conv, ZEND_TO_UNICODE, ZEND_CONV_ERROR_STOP);
 	zend_set_converter_encoding(&unicode_globals->ascii_conv, "US-ASCII");
@@ -1060,11 +1064,6 @@ static void unicode_globals_dtor(zend_unicode_globals *unicode_globals TSRMLS_DC
 		unicode_globals->script_encoding_conv != unicode_globals->utf8_conv &&
 		unicode_globals->script_encoding_conv != unicode_globals->ascii_conv) {
 		ucnv_close(unicode_globals->script_encoding_conv);
-	}
-	if (unicode_globals->http_input_encoding_conv &&
-		unicode_globals->http_input_encoding_conv != unicode_globals->utf8_conv &&
-		unicode_globals->http_input_encoding_conv != unicode_globals->ascii_conv) {
-		ucnv_close(unicode_globals->http_input_encoding_conv);
 	}
 	if (unicode_globals->utf8_conv) {
 		ucnv_close(unicode_globals->utf8_conv);
@@ -1385,12 +1384,24 @@ static void init_unicode_request_globals(TSRMLS_D) /* {{{ */
 	UG(default_locale) = safe_estrdup(uloc_getDefault());
 	UG(default_collator) = NULL;
 
+	if (strcmp(UG(request_encoding_def), "binary") != 0) {
+		if (zend_set_converter_encoding(&UG(request_encoding_conv), UG(request_encoding_def)) == FAILURE) {
+			zend_error(E_CORE_ERROR, "Unrecognized encoding '%s' used for request_encoding", UG(request_encoding_def));
+			return;
+		}
+		zend_set_converter_error_mode(UG(request_encoding_conv), ZEND_TO_UNICODE, ZEND_CONV_ERROR_STOP);
+	}
+
 	zend_reset_locale_deps(TSRMLS_C);
 }
 /* }}} */
 
 static void shutdown_unicode_request_globals(TSRMLS_D) /* {{{ */
 {
+	if (UG(request_encoding_conv)) {
+		ucnv_close(UG(request_encoding_conv));
+		UG(request_encoding_conv) = NULL;
+	}
 	zend_collator_destroy(UG(default_collator));
 	efree(UG(default_locale));
 }

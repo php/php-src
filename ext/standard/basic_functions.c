@@ -861,6 +861,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
 ZEND_END_ARG_INFO()
 #endif
+
+ZEND_BEGIN_ARG_INFO(arginfo_request_set_encoding, 0)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_request_had_errors, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ assert.c */
 ZEND_BEGIN_ARG_INFO(arginfo_assert, 0)
@@ -3363,6 +3370,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(output_reset_rewrite_vars,										arginfo_output_reset_rewrite_vars)
 
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
+
+	PHP_FE(request_set_encoding,											arginfo_request_set_encoding)
+	PHP_FE(request_had_errors,												arginfo_request_had_errors)
 
 	{NULL, NULL, NULL}
 };
@@ -6212,6 +6222,55 @@ PHP_FUNCTION(sys_getloadavg)
 }
 /* }}} */
 #endif
+
+PHP_FUNCTION(request_set_encoding)
+{
+	char *req_enc;
+	int req_enc_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &req_enc, &req_enc_len) == FAILURE) {
+		return;
+	}
+
+	if (req_enc_len == 0 || strcmp(req_enc, "binary") == 0) {
+		/* converter is already unset, no need to re-arm, just return */
+		if (UG(request_encoding_conv) == NULL)
+			return;
+		ucnv_close(UG(request_encoding_conv));
+		UG(request_encoding_conv) = NULL;
+	} else {
+		/* if the converter is the same as the requested one, no need to re-arm, just
+		 * return */
+		if (UG(request_encoding_conv)) {
+			UErrorCode status = U_ZERO_ERROR;
+			const char *current = ucnv_getName(UG(request_encoding_conv), &status);
+			if (!ucnv_compareNames(current, req_enc)) {
+				return;
+			}
+		}
+		if (zend_set_converter_encoding(&UG(request_encoding_conv), req_enc) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unrecognized encoding '%s'", req_enc);
+			RETURN_FALSE;
+		}
+		zend_set_converter_error_mode(UG(request_encoding_conv), ZEND_TO_UNICODE, ZEND_CONV_ERROR_STOP);
+	}
+
+	zend_auto_global_arm_by_name(ZEND_STRL("_GET") TSRMLS_CC);
+	zend_auto_global_arm_by_name(ZEND_STRL("_POST") TSRMLS_CC);
+	zend_auto_global_arm_by_name(ZEND_STRL("_FILES") TSRMLS_CC);
+	zend_auto_global_arm_by_name(ZEND_STRL("_REQUEST") TSRMLS_CC);
+
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(request_had_errors)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(PG(request_decoding_error));
+}
 
 /*
  * Local variables:

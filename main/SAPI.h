@@ -131,6 +131,10 @@ typedef struct _sapi_globals_struct {
 	zend_bool sapi_started;
 	time_t global_request_time;
 	HashTable known_post_content_types;
+
+	/* raw POST and FILES variables from RFC1867 handler */
+	HashTable *rfc1867_vars;
+	HashTable *rfc1867_files_vars;
 } sapi_globals_struct;
 
 
