@@ -41,7 +41,7 @@ PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_arra
 	php_register_variable_safe(IS_STRING, ZSTR(var), ZSTR(strval), strlen(strval), track_vars_array TSRMLS_CC);
 }
 
-PHPAPI int php_register_variable_with_conv(UConverter *conv, char *var, int var_len, char *val, int val_len, zval *array_ptr, int filter_arg  TSRMLS_DC)
+PHPAPI int php_register_variable_with_conv(UConverter *conv, char *var, int var_len, char *val, int val_len, zval *array_ptr, int filter_arg TSRMLS_DC)
 {
 	zstr c_var, c_val;
 	int c_var_len, c_val_len;
@@ -182,7 +182,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 			char *index_s;
 			int new_idx_len = 0;
 
-			if(++nest_level > PG(max_input_nesting_level)) {
+			if (++nest_level > PG(max_input_nesting_level)) {
 				HashTable *ht;
 				/* too many levels of nesting */
 
@@ -321,8 +321,8 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
 	for (p=var; *p; p++) {
 		switch(*p) {
-			case 0x20:   /*' '*/
-			case 0x2e:   /*'.'*/
+			case 0x20: /*' '*/
+			case 0x2e: /*'.'*/
 				*p=0x5f; /*'_'*/
 				break;
 		}
@@ -337,7 +337,7 @@ PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_a
 			UChar *index_s;
 			int new_idx_len = 0;
 
-			if(++nest_level > PG(max_input_nesting_level)) {
+			if (++nest_level > PG(max_input_nesting_level)) {
 				HashTable *ht;
 				/* too many levels of nesting */
 
@@ -474,7 +474,9 @@ last_value:
 SAPI_API SAPI_INPUT_FILTER_FUNC(php_default_input_filter)
 {
 	/* TODO: check .ini setting here and apply user-defined input filter */
-	if(new_val_len) *new_val_len = val_len;
+	if (new_val_len) {
+		*new_val_len = val_len;
+	}
 	return 1;
 }
 
@@ -580,9 +582,9 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			separator = ";\0";
 			break;
 	}
-	
+
 	var = php_strtok_r(res, separator, &strtok_buf);
-	
+
 	while (var) {
 		int var_len, val_len;
 
@@ -686,7 +688,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 				}
 			}
 		}
-	} else 	if (s && *s) {
+	} else if (s && *s) {
 		ss = s;
 		while (ss) {
 			space = strchr(ss, '+');
@@ -845,9 +847,9 @@ static int php_decode_raw_var_array(HashTable *raw_array, zval *track_array TSRM
 	}
 
 	for (zend_hash_internal_pointer_reset(raw_array);
-		 zend_hash_get_current_data(raw_array, (void **)&raw_value) == SUCCESS;
-		 zend_hash_move_forward(raw_array)) {
-
+		zend_hash_get_current_data(raw_array, (void **)&raw_value) == SUCCESS;
+		zend_hash_move_forward(raw_array)
+	) {
 		zend_hash_get_current_key_ex(raw_array, &raw_var, &raw_var_len, &num_index, 0, NULL);
 
 		if (type == IS_UNICODE) {
@@ -913,7 +915,7 @@ int php_hash_environment(TSRMLS_D)
 		{ "_COOKIE", sizeof("_COOKIE"), 0 },
 		{ "_SERVER", sizeof("_SERVER"), 1 },
 		{ "_ENV", sizeof("_ENV"), 1 },
-		{ "_FILES", sizeof("_FILES"), 0 },
+		{ "_FILES", sizeof("_FILES"), 0 }
 	};
 	size_t num_track_vars = sizeof(auto_global_records)/sizeof(struct auto_global_record);
 	size_t i;
@@ -1033,7 +1035,8 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 				zval **argc, **argv;
 
 				if (zend_ascii_hash_find(&EG(symbol_table), "argc", sizeof("argc"), (void**)&argc) == SUCCESS &&
-				    zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS) {
+					zend_ascii_hash_find(&EG(symbol_table), "argv", sizeof("argv"), (void**)&argv) == SUCCESS
+				) {
 					Z_ADDREF_PP(argc);
 					Z_ADDREF_PP(argv);
 					zend_ascii_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), argv, sizeof(zval *), NULL);
@@ -1092,7 +1095,7 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 	array_init(form_variables);
 	INIT_PZVAL(form_variables);
 
-	if(PG(request_order) != NULL) {
+	if (PG(request_order) != NULL) {
 		p = PG(request_order);
 	} else {
 		p = PG(variables_order);
