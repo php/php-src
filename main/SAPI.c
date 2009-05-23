@@ -394,7 +394,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	}
 	SG(rfc1867_uploaded_files) = NULL;
 	SG(rfc1867_vars) = NULL;
-	SG(rfc1867_vars) = NULL;
+	SG(rfc1867_files_vars) = NULL;
 
 	/* handle request mehtod */
 	if (SG(server_context)) {
