@@ -1,3 +1,19 @@
+2009-05-22  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_006.phpt
+      tests/get_class_vars_006.phpt:
+      MFH: Use zend_get_property_info() in get_class_vars() (fixes #46812)
+
+    * zend_builtin_functions.c
+      tests/get_class_vars_003.phpt
+      tests/get_class_vars_006.phpt:
+      Use zend_get_property_info() in get_class_vars() (fixes #46812)
+
 2009-05-19  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_3)
