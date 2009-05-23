@@ -625,6 +625,8 @@ ZEND_API int zend_register_auto_global_ex(const char *name, uint name_len, zend_
 ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC);
 ZEND_API zend_bool zend_u_is_auto_global(zend_uchar type, zstr name, uint name_len TSRMLS_DC);
 ZEND_API zend_bool zend_u_is_auto_global_ex(zend_uchar type, zstr name, uint name_len, zend_bool runtime, zend_auto_global **ret TSRMLS_DC);
+ZEND_API int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC);
+ZEND_API int zend_auto_global_arm_by_name(const char *name, zend_uint name_len TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(const char *varname, zend_uint varname_length TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API size_t zend_u_dirname(UChar *path, size_t len);

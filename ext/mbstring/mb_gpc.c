@@ -326,7 +326,7 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 		val = estrndup(val, val_len);
 		if (sapi_module.input_filter(info->data_type, var, &val, val_len, &new_val_len TSRMLS_CC)) {
 			/* add variable to symbol table */
-			php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+			php_register_variable_safe(IS_STRING, ZSTR(var), ZSTR(val), new_val_len, array_ptr TSRMLS_CC);
 		}
 		efree(val);
 		

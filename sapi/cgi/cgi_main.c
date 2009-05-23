@@ -606,6 +606,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		char **val;
 		ulong idx;
 		int filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
+		UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 		for (zend_hash_internal_pointer_reset_ex(request->env, &pos);
 			 zend_hash_get_current_key_ex(request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
@@ -614,8 +615,9 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		) {
 			unsigned int new_val_len;
 
-			if (sapi_module.input_filter(filter_arg, var.s, val, strlen(*val), &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var.s, *val, new_val_len, array_ptr TSRMLS_CC);
+			if (php_register_variable_with_conv(conv, var.s, strlen(var.s), val, strlen(*val),
+												array_ptr, filter_arg TSRMLS_CC) == FAILURE) {
+				php_error(E_WARNING, "Failed to decode %s array entry", (filter_arg == PARSE_ENV?"_ENV":"_SERVER"));
 			}
 		}
 	}
@@ -625,6 +627,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	unsigned int php_self_len;
 	char *php_self;
+	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
@@ -648,15 +651,17 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		}
 
 		/* Build the special-case PHP_SELF variable for the CGI version */
-		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
-			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		if (php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), php_self,
+											php_self_len, track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+			php_error(E_WARNING, "Failed to decode _SERVER array entry");
 		}
 		efree(php_self);
 	} else {
 		php_self = SG(request_info).request_uri ? SG(request_info).request_uri : "";
 		php_self_len = strlen(php_self);
-		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
-			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		if (php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), php_self,
+											php_self_len, track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+			php_error(E_WARNING, "Failed to decode _SERVER array entry");
 		}
 	}
 }

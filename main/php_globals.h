@@ -154,6 +154,8 @@ struct _php_core_globals {
 
 	zend_bool mail_x_header;
 	char *mail_log;
+
+	zend_bool request_decoding_error;
 };
 
 

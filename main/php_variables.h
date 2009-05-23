@@ -39,10 +39,10 @@ void php_startup_auto_globals(TSRMLS_D);
 extern PHPAPI void (*php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
 PHPAPI void php_register_variable(char *var, char *val, zval *track_vars_array TSRMLS_DC);
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, zval *track_vars_array TSRMLS_DC);
+PHPAPI void php_register_variable_safe(zend_uchar type, zstr var, zstr strval, int str_len, zval *track_vars_array TSRMLS_DC);
 PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_array TSRMLS_DC);
-PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int str_len, zval *track_vars_array TSRMLS_DC);
 PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, zval *track_vars_array TSRMLS_DC);
+PHPAPI int php_register_variable_with_conv(UConverter *conv, char *var, int var_len, char *val, int val_len, zval *array_ptr, int input_type  TSRMLS_DC);
 
 int php_hash_environment(TSRMLS_D);
 END_EXTERN_C()

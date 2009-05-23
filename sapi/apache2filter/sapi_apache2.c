@@ -234,19 +234,21 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
 	int new_val_len;
+	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
+		if (php_register_variable_with_conv(conv, key, strlen(key), val, strlen(val),
+											track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+			php_error(E_WARNING, "Failed to decode _SERVER array entry");
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 		
-	php_register_variable("PHP_SELF", ctx->r->uri, track_vars_array TSRMLS_CC);
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
-		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
+	if (php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), ctx->r->uri,
+										strlen(ctx->r->uri), track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+		php_error(E_WARNING, "Failed to decode _SERVER array entry");
 	}
 }
 

@@ -257,6 +257,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	zval **path_translated;
 	HashTable *symbol_table;
 	unsigned int new_val_len;
+	UConveter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
@@ -268,8 +269,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 			val = "";
 		}
 		val_len = strlen(val);
-		if (sapi_module.input_filter(PARSE_SERVER, elts[i].key, &val, val_len, &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(elts[i].key, val, new_val_len, track_vars_array TSRMLS_CC);
+		if (php_register_variable_with_conv(conv, elts[i].key, strlen(elts[i].key), val,
+											val_len, track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
+			php_error(E_WARNING, "Failed to decode _SERVER array entry");
 		}
 	}
 

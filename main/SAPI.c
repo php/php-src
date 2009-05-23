@@ -118,13 +118,22 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
 	if (SG(request_info).post_entry && SG(request_info).content_type_dup) {
+		/*
+		 * We need to re-populate post_data from the stored raw POST data in case we had
+		 * any before, so that the handler can get to it.
+		 */
+		if (SG(request_info).post_data == NULL && SG(request_info).raw_post_data != NULL) {
+			SG(request_info).post_data = estrndup(SG(request_info).raw_post_data, SG(request_info).raw_post_data_length);
+		}
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg TSRMLS_CC);
 		if (SG(request_info).post_data) {
 			efree(SG(request_info).post_data);
 			SG(request_info).post_data = NULL;
 		}
+#if 0 /* UTODO see if this works */
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
+#endif
 	}
 }
 
@@ -384,6 +393,8 @@ SAPI_API void sapi_activate(TSRMLS_D)
 		SG(request_info).headers_only = 0;
 	}
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(rfc1867_vars) = NULL;
+	SG(rfc1867_vars) = NULL;
 
 	/* handle request mehtod */
 	if (SG(server_context)) {
@@ -467,6 +478,14 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	}
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash(TSRMLS_C);
+	}
+	if (SG(rfc1867_vars)) {
+		zend_hash_destroy(SG(rfc1867_vars));
+		FREE_HASHTABLE(SG(rfc1867_vars));
+	}
+	if (SG(rfc1867_files_vars)) {
+		zend_hash_destroy(SG(rfc1867_files_vars));
+		FREE_HASHTABLE(SG(rfc1867_files_vars));
 	}
 	if (SG(sapi_headers).mimetype) {
 		efree(SG(sapi_headers).mimetype);

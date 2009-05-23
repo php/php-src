@@ -4874,13 +4874,13 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
  */
 PHPAPI UChar *php_u_addslashes(UChar *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
-	return php_u_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
+	return php_u_addslashes_ex(str, length, new_length, should_free TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_u_addslashes_ex
  */
-PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int should_free, int ignore_sybase TSRMLS_DC)
+PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
 	UChar *buf;
 	int32_t buf_len = 0, i = 0;
@@ -4929,13 +4929,13 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int length, int *new_length, int s
  */
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
-	return php_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
+	return php_addslashes_ex(str, length, new_length, should_free TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_addslashes_ex
  */
-PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free, int ignore_sybase TSRMLS_DC)
+PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
 	char *new_str;
