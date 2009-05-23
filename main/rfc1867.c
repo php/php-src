@@ -23,7 +23,7 @@
  *  This product includes software developed by the Apache Group
  *  for use in the Apache HTTP server project (http://www.apache.org/).
  *
- */   
+ */
 
 #include <stdio.h>
 #include "php.h"
@@ -76,13 +76,11 @@ void php_rfc1867_register_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
 }
 
-
 static int unlink_filename(char **filename TSRMLS_DC)
 {
 	VCWD_UNLINK(*filename);
 	return 0;
 }
-
 
 void destroy_uploaded_files_hash(TSRMLS_D)
 {
@@ -113,12 +111,10 @@ typedef struct {
 
 } multipart_buffer;
 
-
 typedef struct {
 	char *key;
 	char *value;
 } mime_header_entry;
-
 
 /*
   fill up the buffer with client data.
@@ -166,7 +162,6 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	return total_read;
 }
 
-
 /* eof if we are out of bytes, or if we hit the final boundary */
 static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 {
@@ -176,7 +171,6 @@ static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 		return 0;
 	}
 }
-
 
 /* create new multipart_buffer structure */
 static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
@@ -190,7 +184,7 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 	self->bufsize = minsize;
 
 	spprintf(&self->boundary, 0, "--%s", boundary);
-	
+
 	self->boundary_next_len = spprintf(&self->boundary_next, 0, "\n--%s", boundary);
 
 	self->buf_begin = self->buffer;
@@ -198,7 +192,6 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 
 	return self;
 }
-
 
 /*
   gets the next CRLF terminated line from the input buffer.
@@ -229,7 +222,7 @@ static char *next_line(multipart_buffer *self)
 		/* bump the pointer */
 		self->buf_begin = ptr + 1;
 		self->bytes_in_buffer -= (self->buf_begin - line);
-	
+
 	} else {	/* no LF found */
 
 		/* buffer isn't completely full, fail */
@@ -245,7 +238,6 @@ static char *next_line(multipart_buffer *self)
 	return line;
 }
 
-
 /* returns the next CRLF terminated line from the client */
 static char *get_line(multipart_buffer *self TSRMLS_DC)
 {
@@ -259,7 +251,6 @@ static char *get_line(multipart_buffer *self TSRMLS_DC)
 	return ptr;
 }
 
-
 /* Free header entry */
 static void php_free_hdr_entry(mime_header_entry *h)
 {
@@ -270,7 +261,6 @@ static void php_free_hdr_entry(mime_header_entry *h)
 		efree(h->value);
 	}
 }
-
 
 /* finds a boundary */
 static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
@@ -290,14 +280,13 @@ static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
 	return 0;
 }
 
-
 /* parse headers */
 static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header TSRMLS_DC)
 {
 	char *line;
 	mime_header_entry prev_entry, entry;
 	int prev_len, cur_len;
-	
+
 	/* didn't find boundary, abort */
 	if (!find_boundary(self, self->boundary TSRMLS_CC)) {
 		return 0;
@@ -308,10 +297,9 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 	while( (line = get_line(self TSRMLS_CC)) && strlen(line) > 0 )
 	{
 		/* add header to table */
-		
 		char *key = line;
 		char *value = NULL;
-		
+
 		/* space in the beginning means same header */
 		if (!isspace(line[0])) {
 			value = strchr(line, ':');
@@ -335,7 +323,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value[cur_len + prev_len] = '\0';
 
 			entry.key = estrdup(prev_entry.key);
-			
+
 			zend_llist_remove_tail(header);
 		} else {
 			continue;
@@ -348,7 +336,6 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 	return 1;
 }
 
-
 static char *php_mime_get_hdr_value(zend_llist header, char *key)
 {
 	mime_header_entry *entry;
@@ -356,7 +343,7 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 	if (key == NULL) {
 		return NULL;
 	}
-	
+
 	entry = zend_llist_get_first(&header);
 	while (entry) {
 		if (!strcasecmp(entry->key, key)) {
@@ -364,11 +351,9 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 		}
 		entry = zend_llist_get_next(&header);
 	}
-	
+
 	return NULL;
 }
-
-
 
 static char *php_ap_getword(char **line, char stop)
 {
@@ -376,7 +361,7 @@ static char *php_ap_getword(char **line, char stop)
 	char *res;
 
 	while (*pos && *pos != stop) {
-		
+
 		if ((quote = *pos) == '"' || quote == '\'') {
 			++pos;
 			while (*pos && *pos != quote) {
@@ -390,7 +375,7 @@ static char *php_ap_getword(char **line, char stop)
 				++pos;
 			}
 		} else ++pos;
-		
+
 	}
 	if (*pos == '\0') {
 		res = estrdup(*line);
@@ -407,8 +392,6 @@ static char *php_ap_getword(char **line, char stop)
 	*line = pos;
 	return res;
 }
-
-
 
 static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 {
@@ -427,7 +410,6 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 	*resp = '\0';
 	return result;
 }
-
 
 static char *php_ap_getword_conf(char **line TSRMLS_DC)
 {
@@ -483,7 +465,6 @@ look_for_quote:
 	return res;
 }
 
-
 /*
   search for a string in a fixed-length byte string.
   if partial is true, partial matches are allowed at the end of the buffer.
@@ -511,7 +492,6 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 
 	return ptr;
 }
-
 
 /* read until a boundary condition */
 static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, int *end TSRMLS_DC)
@@ -556,7 +536,6 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
 	return len;
 }
 
-
 /*
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
@@ -572,7 +551,9 @@ static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *le
 		total_bytes += read_bytes;
 	}
 
-	if (out) out[total_bytes] = '\0';
+	if (out) {
+		out[total_bytes] = '\0';
+	}
 	*len = total_bytes;
 
 	return out;
@@ -580,7 +561,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *le
 
 static void register_raw_var_ex(char *var, zval *value, HashTable *array)
 {
-	zend_hash_update(array, var, strlen(var)+1, &value, sizeof(zval *), NULL);
+	zend_hash_update(array, var, strlen(var) + 1, &value, sizeof(zval *), NULL);
 }
 
 static void register_raw_var(char *var, char *str, int str_len, HashTable *array)
@@ -590,9 +571,7 @@ static void register_raw_var(char *var, char *str, int str_len, HashTable *array
 
 	/* Prepare value */
 	MAKE_STD_ZVAL(new_entry);
-	Z_STRLEN_P(new_entry) = str_len;
-	Z_STRVAL_P(new_entry) = estrndup(str, Z_STRLEN_P(new_entry));
-	Z_TYPE_P(new_entry) = IS_STRING;
+	ZVAL_STRINGL(new_entry, str, str_len, 1);
 
 	register_raw_var_ex(var, new_entry, array);
 }
@@ -634,7 +613,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	if (boundary[0] == '"') {
 		boundary++;
 		boundary_end = strchr(boundary, '"');
-		if (!boundary_end) { 
+		if (!boundary_end) {
 			sapi_module.sapi_error(E_WARNING, "Invalid boundary in multipart/form-data POST data");
 			return;
 		}
@@ -676,12 +655,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		}
 	}
 
-
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
 	{
 		char buff[FILLUNIT];
-		char *cd=NULL,*param=NULL,*filename=NULL, *tmp=NULL;
-		size_t blen=0, wlen=0;
+		char *cd = NULL, *param = NULL, *filename = NULL, *tmp = NULL;
+		size_t blen = 0, wlen = 0;
 		off_t offset;
 
 		zend_llist_clean(&header);
@@ -691,16 +669,16 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		}
 
 		if ((cd = php_mime_get_hdr_value(header, "Content-Disposition"))) {
-			char *pair=NULL;
-			int end=0;
-			
+			char *pair = NULL;
+			int end = 0;
+
 			while (isspace(*cd)) {
 				++cd;
 			}
 
 			while (*cd && (pair = php_ap_getword(&cd, ';')))
 			{
-				char *key=NULL, *word = pair;
+				char *key = NULL, *word = pair;
 
 				while (isspace(*cd)) {
 					++cd;
@@ -729,7 +707,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-				unsigned int value_len; 
+				unsigned int value_len;
 				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
 
 				if (!value) {
@@ -797,7 +775,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 						skip_upload = 1;
 						break;
 					}
-					tmp++;				
+					tmp++;
 				}
 			}
 
@@ -811,7 +789,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					cancel_upload = UPLOAD_ERROR_E;
 				}
 			}
-			
+
 			if (!skip_upload && php_rfc1867_callback != NULL) {
 				multipart_event_file_start event_file_start;
 
@@ -833,14 +811,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 			}
 
-			
 			if (skip_upload) {
 				efree(param);
 				efree(filename);
 				continue;
-			}	
+			}
 
-			if(strlen(filename) == 0) {
+			if (strlen(filename) == 0) {
 #if DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
 #endif
@@ -864,8 +841,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 						continue;
 					}
 				}
-				
-			
+
 				if (PG(upload_max_filesize) > 0 && (total_bytes+blen) > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
@@ -878,7 +854,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
 					wlen = write(fd, buff, blen);
-			
+
 					if (wlen == -1) {
 						/* write failed */
 #if DEBUG_FILE_UPLOAD
@@ -893,9 +869,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					} else {
 						total_bytes += wlen;
 					}
-					
 					offset += wlen;
-				} 
+				}
 			}
 			if (fd!=-1) { /* may not be initialized if file could not be created */
 				close(fd);
@@ -907,12 +882,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				cancel_upload = UPLOAD_ERROR_C;
 			}
 #if DEBUG_FILE_UPLOAD
-			if(strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
+			if (strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
 				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
 				cancel_upload = 5;
 			}
-#endif		
-
+#endif
 			if (php_rfc1867_callback != NULL) {
 				multipart_event_file_end event_file_end;
 
@@ -947,7 +921,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				if (array_index) {
 					efree(array_index);
 				}
-				array_index = estrndup(start_arr+1, array_len-2);   
+				array_index = estrndup(start_arr + 1, array_len - 2);
 			}
 
 			/* Add $foo_name */
@@ -960,7 +934,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			/* The \ check should technically be needed for win32 systems only where
 			 * it is a valid path separator. However, IE in all it's wisdom always sends
 			 * the full path of the file on the user's filesystem, which means that unless
-			 * the user does basename() they get a bogus file name. Until IE's user base drops 
+			 * the user does basename() they get a bogus file name. Until IE's user base drops
 			 * to nill or problem is fixed this code must remain enabled for all systems.
 			 */
 			s = strrchr(filename, '\\');
@@ -985,7 +959,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			/* Possible Content-Type: */
 			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
 				cd = "";
-			} else { 
+			} else {
 				/* fix for Opera 6.01 */
 				s = strchr(cd, ';');
 				if (s != NULL) {
@@ -1028,7 +1002,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					ZVAL_LONG(file_size, 0);
 				} else {
 					ZVAL_LONG(file_size, total_bytes);
-				}	
+				}
 
 				if (is_arr_upload) {
 					snprintf(lbuf, llen, "%s[error][%s]", abuf, array_index);
@@ -1050,10 +1024,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	}
 
 fileupload_done:
-
 	if (php_rfc1867_callback != NULL) {
 		multipart_event_end event_end;
-		
+
 		event_end.post_bytes_processed = SG(read_post_bytes);
 		php_rfc1867_callback(MULTIPART_EVENT_END, &event_end, &event_extra_data TSRMLS_CC);
 	}
