@@ -2081,7 +2081,11 @@ PHP_FUNCTION(mysqli_refresh)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
+#ifdef MYSQLI_USE_MYSQLND
+	RETURN_BOOL(!mysql_refresh(mysql->mysql, (uint8_t) options));
+#else
 	RETURN_BOOL(!mysql_refresh(mysql->mysql, options));
+#endif
 }
 /* }}} */
  
