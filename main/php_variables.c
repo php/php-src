@@ -456,7 +456,7 @@ last_value:
 			php_url_decode(var, var_len);
 			val++;
 			val_len = php_url_decode(val, (p - val));
-			if (php_register_variable_with_conv(conv, var, var_len, val, val_len, array_ptr, PARSE_POST) == FAILURE) {
+			if (php_register_variable_with_conv(conv, var, var_len, val, val_len, array_ptr, PARSE_POST TSRMLS_CC) == FAILURE) {
 				zend_error(E_WARNING, "Failed to decode _POST array");
 				PG(request_decoding_error) = 1;
 				zend_hash_clean(Z_ARRVAL_P(array_ptr));
@@ -611,7 +611,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			val_len = 0;
 		}
 
-		if (php_register_variable_with_conv(conv, var, var_len, val, val_len, array_ptr, arg) == FAILURE) {
+		if (php_register_variable_with_conv(conv, var, var_len, val, val_len, array_ptr, arg TSRMLS_CC) == FAILURE) {
 			zend_error(E_WARNING, "Failed to decode %s array", arg_names[arg]);
 			PG(request_decoding_error) = 1;
 			zend_hash_clean(Z_ARRVAL_P(array_ptr));
@@ -853,12 +853,12 @@ static int php_decode_raw_var_array(HashTable *raw_array, zval *track_array TSRM
 		if (type == IS_UNICODE) {
 			var.u = value.u = NULL;
 
-			if (zend_string_to_unicode(conv, &var.u, &var_len, raw_var.s, raw_var_len) == FAILURE) {
+			if (zend_string_to_unicode(conv, &var.u, &var_len, raw_var.s, raw_var_len TSRMLS_CC) == FAILURE) {
 				return FAILURE;
 			}
 
 			if (Z_TYPE_PP(raw_value) == IS_STRING) {
-				if (zend_string_to_unicode(conv, &value.u, &value_len, Z_STRVAL_PP(raw_value), Z_STRLEN_PP(raw_value)) == FAILURE) {
+				if (zend_string_to_unicode(conv, &value.u, &value_len, Z_STRVAL_PP(raw_value), Z_STRLEN_PP(raw_value) TSRMLS_CC) == FAILURE) {
 					efree(var.u);
 					return FAILURE;
 				}
@@ -1009,7 +1009,7 @@ static zend_bool php_auto_globals_decode_files(char *name, uint name_len TSRMLS_
 		SG(request_info).post_entry->post_handler == rfc1867_post_handler) {
 
 		if (SG(rfc1867_files_vars) == NULL) {
-			sapi_handle_post(NULL TSRMLS_DC);
+			sapi_handle_post(NULL TSRMLS_CC);
 		}
 		if (SG(rfc1867_files_vars) != NULL) {
 			PG(request_decoding_error) = 0;
