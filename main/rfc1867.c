@@ -578,12 +578,12 @@ static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *le
 	return out;
 }
 
-static void register_raw_var_ex(char *var, zval *value, HashTable *array TSRMLS_DC)
+static void register_raw_var_ex(char *var, zval *value, HashTable *array)
 {
-	zend_hash_update(array, var, strlen(var)+1, &value, sizeof(zval *), NULL TSRMLS_CC);
+	zend_hash_update(array, var, strlen(var)+1, &value, sizeof(zval *), NULL);
 }
 
-static void register_raw_var(char *var, char *str, int str_len, HashTable *array TSRMLS_DC)
+static void register_raw_var(char *var, char *str, int str_len, HashTable *array)
 {
 	zval *new_entry;
 	assert(str != NULL);
@@ -594,7 +594,7 @@ static void register_raw_var(char *var, char *str, int str_len, HashTable *array
 	Z_STRVAL_P(new_entry) = estrndup(str, Z_STRLEN_P(new_entry));
 	Z_TYPE_P(new_entry) = IS_STRING;
 
-	register_raw_var_ex(var, new_entry, array TSRMLS_DC);
+	register_raw_var_ex(var, new_entry, array);
 }
 
 /*
@@ -737,7 +737,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					value_len = 0;
 				}
 
-                register_raw_var(param, value, value_len, post_vars TSRMLS_DC);
+                register_raw_var(param, value, value_len, post_vars);
 
 				if (php_rfc1867_callback != NULL) {
 					multipart_event_formdata event_formdata;
@@ -975,9 +975,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				snprintf(lbuf, llen, "%s[name]", param);
 			}
 			if (s && s > filename) {
-				register_raw_var(lbuf, s+1, strlen(s+1), files_vars TSRMLS_CC);
+				register_raw_var(lbuf, s+1, strlen(s+1), files_vars);
 			} else {
-				register_raw_var(lbuf, filename, strlen(filename), files_vars TSRMLS_CC);
+				register_raw_var(lbuf, filename, strlen(filename), files_vars);
 			}
 			efree(filename);
 			s = NULL;
@@ -999,7 +999,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				snprintf(lbuf, llen, "%s[type]", param);
 			}
-			register_raw_var(lbuf, cd, strlen(cd), files_vars TSRMLS_CC);
+			register_raw_var(lbuf, cd, strlen(cd), files_vars);
 
 			/* Restore Content-Type Header */
 			if (s != NULL) {
@@ -1013,7 +1013,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				snprintf(lbuf, llen, "%s[tmp_name]", param);
 			}
-			register_raw_var(lbuf, temp_filename, strlen(temp_filename), files_vars TSRMLS_CC);
+			register_raw_var(lbuf, temp_filename, strlen(temp_filename), files_vars);
 
 			{
 				zval *file_size, *error_type;
@@ -1035,7 +1035,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				} else {
 					snprintf(lbuf, llen, "%s[error]", param);
 				}
-				register_raw_var_ex(lbuf, error_type, files_vars TSRMLS_CC);
+				register_raw_var_ex(lbuf, error_type, files_vars);
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
@@ -1043,7 +1043,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				} else {
 					snprintf(lbuf, llen, "%s[size]", param);
 				}
-				register_raw_var_ex(lbuf, file_size, files_vars TSRMLS_CC);
+				register_raw_var_ex(lbuf, file_size, files_vars);
 			}
 			efree(param);
 		}
