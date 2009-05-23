@@ -13,11 +13,13 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
   fi
 
   if test "$PHP_PDO_FIREBIRD" = "yes"; then
-    FIREBIRD_INCDIR=/opt/firebird/include
-    FIREBIRD_LIBDIR=/opt/firebird/lib
+    FIREBIRD_INCDIR=
+    FIREBIRD_LIBDIR=
+    FIREBIRD_LIBDIR_FLAG=
   else
     FIREBIRD_INCDIR=$PHP_PDO_FIREBIRD/include
     FIREBIRD_LIBDIR=$PHP_PDO_FIREBIRD/$PHP_LIBDIR
+    FIREBIRD_LIBDIR_FLAG=-L$FIREBIRD_LIBDIR
   fi
 
   PHP_CHECK_LIBRARY(fbclient, isc_detach_database,
@@ -34,13 +36,13 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
       ], [
         AC_MSG_ERROR([libfbclient, libgds or libib_util not found! Check config.log for more information.])
       ], [
-        -L$FIREBIRD_LIBDIR
+        $FIREBIRD_LIBDIR_FLAG
       ])
     ], [
-      -L$FIREBIRD_LIBDIR
+      $FIREBIRD_LIBDIR_FLAG
     ])
   ], [
-    -L$FIREBIRD_LIBDIR
+    $FIREBIRD_LIBDIR_FLAG
   ])
  
   PHP_CHECK_PDO_INCLUDES
