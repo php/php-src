@@ -2252,6 +2252,22 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 	phar->is_temporary_alias = source->is_temporary_alias;
 	phar->alias = source->alias;
 
+	if (source->metadata) {
+		zval *t;
+
+		t = source->metadata;
+		ALLOC_ZVAL(phar->metadata);
+		*phar->metadata = *t;
+		zval_copy_ctor(phar->metadata);
+#if PHP_VERSION_ID < 50300
+		phar->metadata->refcount = 1;
+#else
+		Z_SET_REFCOUNT_P(phar->metadata, 1);
+#endif
+
+		phar->metadata_len = 0;
+	}
+
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
 	for (zend_hash_internal_pointer_reset(&source->manifest); SUCCESS == zend_hash_has_more_elements(&source->manifest); zend_hash_move_forward(&source->manifest)) {
 
