@@ -2108,6 +2108,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
 	int inc_len;
+	zend_bool first_field = 1;
 
 	/* initialize internal state */
 	php_mblen(NULL, 0);
@@ -2159,6 +2160,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 		}
 
 	quit_loop_1:
+		if (first_field && bptr == line_end) {
+			add_next_index_null(return_value);
+			break;
+		}
+		first_field = 0;
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (inc_len != 0 && *bptr == enclosure) {
 			int state = 0;
@@ -2355,12 +2361,8 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 		}
 
 		/* 3. Now pass our field back to php */
-		if (comp_end - temp) {
-			*comp_end = '\0';
-			add_next_index_stringl(return_value, temp, comp_end - temp, 1);
-		} else {
-			add_next_index_null(return_value);
-		}
+		*comp_end = '\0';
+		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
 	} while (inc_len > 0);
 
 out:
