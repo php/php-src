@@ -1,3 +1,11 @@
+2009-05-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.c
+      zend_compile.c
+      zend_compile.h
+      zend_globals.h:
+      Implement JIT request decoding support for $_GET and $_POST.
+
 2009-05-22  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_2)
