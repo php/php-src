@@ -553,7 +553,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				response_code = 0;
 			}
 			/* when we request only the header, don't fail even on error codes */
-			if (options & STREAM_ONLY_GET_HEADERS) {
+			if ((options & STREAM_ONLY_GET_HEADERS) ||
+				(context && php_stream_context_get_option(context, "http", "ignore_errors",  &tmpzval) == SUCCESS && zend_is_true(*tmpzval)) ) {
 				reqok = 1;
 			}
 			switch(response_code) {
