@@ -3358,7 +3358,7 @@ PHP_FUNCTION(sqlite_escape_string)
 			sqlite_freemem(ret);
 		}
 	} else {
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	}
 }
 /* }}} */

@@ -1570,7 +1570,7 @@ SXE_METHOD(getName)
 		namelen = xmlStrlen(node->name);
 		RETVAL_XML_STRING_LEN((char *) node->name, namelen, ZSTR_DUPLICATE);
 	} else {
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	}
 }
 /* }}} */
@@ -1853,7 +1853,7 @@ SXE_METHOD(__toString)
 		RETURN_ZVAL(result, 1, 1);
 	} else {
 		zval_ptr_dtor(&result);
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	}
 }
 /* }}} */

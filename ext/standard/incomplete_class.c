@@ -165,7 +165,7 @@ PHPAPI void php_store_class_name(zval *object, zstr name, zend_uint len)
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(val);
-	ZVAL_TEXTL(val, name, len, 1);
+	ZVAL_UNICODEL(val, name.u, len, 1);
 
 	zend_hash_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }

@@ -6174,7 +6174,7 @@ PHP_FUNCTION(import_request_variables)
 		}
 	} else {
 		MAKE_STD_ZVAL(prefix);
-		ZVAL_EMPTY_TEXT(prefix);
+		ZVAL_EMPTY_UNICODE(prefix);
 	}
 
 	for (p = types; p && *p; p++) {

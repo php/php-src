@@ -1881,9 +1881,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (!class_name.v) {
-		ZVAL_EMPTY_TEXT(zendlval);
+		ZVAL_EMPTY_UNICODE(zendlval);
 	} else {
-		ZVAL_TEXT(zendlval, class_name, 1);
+		ZVAL_UNICODE(zendlval, class_name.u, 1);
 	}
 	return T_CLASS_C;
 }
@@ -1896,9 +1896,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	if (!func_name.v) {
-		ZVAL_EMPTY_TEXT(zendlval);
+		ZVAL_EMPTY_UNICODE(zendlval);
 	} else {
-		ZVAL_TEXT(zendlval, func_name, 1);
+		ZVAL_UNICODE(zendlval, func_name.u, 1);
 	}
 	return T_FUNC_C;
 }
@@ -1982,7 +1982,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		*zendlval = *CG(current_namespace);
 		zval_copy_ctor(zendlval);
 	} else {
-		ZVAL_EMPTY_TEXT(zendlval);
+		ZVAL_EMPTY_UNICODE(zendlval);
 	}
 	return T_NS_C;
 }

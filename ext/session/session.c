@@ -2190,8 +2190,8 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			 * we can compare to incomming POST variables name. zvals also allow
 			 * to keep track of length. */
 			ZVAL_RT_STRING(&progress->sname, PS(session_name),   ZSTR_DUPLICATE);
-			ZVAL_TEXT(&progress->prefix,     PS(rfc1867_prefix), 0);
-			ZVAL_TEXT(&progress->name,       PS(rfc1867_name),   0);
+			ZVAL_UNICODE(&progress->prefix,     PS(rfc1867_prefix).u, 0);
+			ZVAL_UNICODE(&progress->name,       PS(rfc1867_name).u,   0);
 
 			PS(rfc1867_progress) = progress;
 		}
@@ -2214,7 +2214,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 				if (USTR_EQUAL(Z_UNIVAL(progress->sname), Z_UNILEN(progress->sname), data->name, name_len)) {
 					zval_dtor(&progress->sid);
-					ZVAL_TEXTL(&progress->sid, (*data->value), value_len, ZSTR_DUPLICATE);
+					ZVAL_UNICODEL(&progress->sid, (*data->value).u, value_len, ZSTR_DUPLICATE);
 					convert_to_string(&progress->sid);
 
 				} else if (USTR_EQUAL(Z_UNIVAL(progress->name), Z_UNILEN(progress->name), data->name, name_len)) {
@@ -2224,7 +2224,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 					memcpy(str.s+TEXT_BYTES(Z_UNILEN(progress->prefix)), (*data->value).v, TEXT_BYTES(value_len+1));
 
 					zval_dtor(&progress->key);
-					ZVAL_TEXTL(&progress->key, str, len, 0);
+					ZVAL_UNICODEL(&progress->key, str.u, len, 0);
 
 					progress->apply_trans_sid = PS(use_trans_sid);
 					php_session_rfc1867_early_find_sid(progress TSRMLS_CC);
@@ -2278,8 +2278,8 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			ALLOC_INIT_ZVAL(progress->current_file_bytes_processed);
 			ZVAL_LONG(progress->current_file_bytes_processed, 0);
 
-			add_ascii_assoc_text_ex(progress->current_file, "field_name",      sizeof("field_name"),      data->name, 1);
-			add_ascii_assoc_text_ex(progress->current_file, "name",            sizeof("name"),            *data->filename, 1);
+			add_ascii_assoc_unicode_ex(progress->current_file, "field_name",      sizeof("field_name"),      data->name.u, 1);
+			add_ascii_assoc_unicode_ex(progress->current_file, "name",            sizeof("name"),            (*data->filename).u, 1);
 			add_ascii_assoc_null_ex(progress->current_file, "tmp_name",        sizeof("tmp_name"));
 			add_ascii_assoc_long_ex(progress->current_file, "error",           sizeof("error"),           0);
 
@@ -2315,7 +2315,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			}
 
 			if (data->temp_filename.v) {
-				add_ascii_assoc_text_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename, 1);
+				add_ascii_assoc_unicode_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename.u, 1);
 			}
 			add_ascii_assoc_long_ex(progress->current_file, "error", sizeof("error"), data->cancel_upload);
 			add_ascii_assoc_bool_ex(progress->current_file, "done",  sizeof("done"),  1);

@@ -94,7 +94,7 @@ int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;
@@ -210,7 +210,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 		RETVAL_XML_STRING(substring, ZSTR_DUPLICATE);
 		xmlFree(substring);
 	} else {
-		RETVAL_EMPTY_TEXT();
+		RETVAL_EMPTY_UNICODE();
 	}
 }
 /* }}} end dom_characterdata_substring_data */

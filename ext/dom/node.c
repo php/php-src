@@ -267,7 +267,7 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if(str != NULL) {
 		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 	
 	if (qname != NULL) {
@@ -761,7 +761,7 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (str == NULL) {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	} else {
 		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 	}
@@ -934,7 +934,7 @@ int dom_node_text_content_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_XML_STRING(*retval, str, ZSTR_DUPLICATE);
 		xmlFree(str);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;

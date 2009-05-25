@@ -136,7 +136,7 @@ int dom_processinginstruction_data_read(dom_object *obj, zval **retval TSRMLS_DC
 		ZVAL_XML_STRING(*retval, content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;

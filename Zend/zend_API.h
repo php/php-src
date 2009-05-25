@@ -321,13 +321,6 @@ ZEND_API void zend_update_property_rt_stringl(zend_class_entry *scope, zval *obj
 ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value TSRMLS_DC);
 ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
-#define zend_update_property_text(ce, obj, key, key_len, str) \
-	zend_update_property_unicode(ce, obj, key, key_len, (str).u TSRMLS_CC);
-
-#define zend_update_property_textl(ce, obj, key, key_len, str, len) \
-	zend_update_property_unicodel(ce, obj, key, key_len, str.u, len TSRMLS_CC);
-
-
 ZEND_API int zend_update_static_property(zend_class_entry *scope, char *name, int name_length, zval *value TSRMLS_DC);
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, char *name, int name_length TSRMLS_DC);
 ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, char *name, int name_length, long value TSRMLS_DC);
@@ -445,12 +438,6 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *v
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
-#define add_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		add_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		add_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-	} while (0)
 
 #define add_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
 		int ___u_len = length; \
@@ -504,8 +491,6 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *v
 #define add_assoc_rt_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_rt_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 #define add_assoc_utf8_string(__arg, __key, __str, __duplicate) add_assoc_utf8_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_utf8_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_utf8_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
-#define add_assoc_text(arg, key, str, duplicate) add_assoc_text_ex(arg, key, strlen(key)+1, str, duplicate)
-#define add_assoc_textl(arg, key, str, length, duplicate) add_assoc_textl_ex(arg, key, strlen(key)+1, str, length, duplicate)
 
 ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
@@ -569,12 +554,6 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, z
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_ascii_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
-#define add_ascii_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		add_ascii_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_ascii_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		add_ascii_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-	} while (0)
 
 #define add_ascii_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
 		int ___u_len = length; \
@@ -629,8 +608,6 @@ ZEND_API int add_ascii_assoc_zval_ex(zval *arg, const char *key, uint key_len, z
 #define add_ascii_assoc_rt_stringl(arg, key, str, length, flags) add_ascii_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_ascii_assoc_utf8_string(arg, key, str, flags) add_ascii_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_ascii_assoc_utf8_stringl(arg, key, str, length, flags) add_ascii_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_ascii_assoc_text(__arg, __key, __str, __duplicate) add_ascii_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
-#define add_ascii_assoc_textl(__arg, __key, __str, __length, __duplicate) add_ascii_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
@@ -694,12 +671,6 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_rt_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
-#define add_rt_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		add_rt_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_rt_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		add_rt_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-	} while (0)
 
 #define add_rt_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
 		int ___u_len  = length; \
@@ -754,8 +725,6 @@ ZEND_API int add_rt_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval
 #define add_rt_assoc_rt_stringl(arg, key, str, length, flags) add_rt_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_rt_assoc_utf8_string(arg, key, str, flags) add_rt_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_rt_assoc_utf8_stringl(arg, key, str, length, flags) add_rt_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_rt_assoc_text(__arg, __key, __str, __duplicate) add_rt_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
-#define add_rt_assoc_textl(__arg, __key, __str, __length, __duplicate) add_rt_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
@@ -819,12 +788,6 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zv
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_utf8_assoc_zval_ex(arg, key, key_len, ___tmp); \
 	} while (0)
-#define add_utf8_assoc_text_ex(arg, key, key_len, str, duplicate) do { \
-		add_utf8_assoc_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_utf8_assoc_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		add_utf8_assoc_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
-	} while (0)
 
 #define add_utf8_assoc_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
 		int ___u_len = length; \
@@ -879,8 +842,6 @@ ZEND_API int add_utf8_assoc_zval_ex(zval *arg, const char *key, uint key_len, zv
 #define add_utf8_assoc_rt_stringl(arg, key, str, length, flags) add_utf8_assoc_rt_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
 #define add_utf8_assoc_utf8_string(arg, key, str, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, strlen(str), flags)
 #define add_utf8_assoc_utf8_stringl(arg, key, str, length, flags) add_utf8_assoc_utf8_stringl_ex(arg, key, strlen(key)+1, str, length, flags)
-#define add_utf8_assoc_text(__arg, __key, __str, __duplicate) add_utf8_assoc_text_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
-#define add_utf8_assoc_textl(__arg, __key, __str, __length, __duplicate) add_utf8_assoc_textl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC);
 
@@ -953,12 +914,6 @@ ZEND_API int add_utf8_property_zval_ex(zval *arg, char *key, uint key_len, zval 
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_utf8_property_zval_ex(arg, key, key_len, ___tmp TSRMLS_CC); \
 		zval_ptr_dtor(&___tmp); /* write_property will add 1 to refcount */ \
-	} while (0)
-#define add_utf8_property_text_ex(arg, key, key_len, str, duplicate) do { \
-		add_utf8_property_unicode_ex(arg, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_utf8_property_textl_ex(arg, key, key_len, str, length, duplicate) do { \
-		add_utf8_property_unicodel_ex(arg, key, key_len, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_utf8_property_ascii_stringl_ex(arg, key, key_len, str, length, flags) do { \
@@ -1053,12 +1008,6 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_u_assoc_zval_ex(arg, key_type, key, key_len, ___tmp); \
 	} while (0)
-#define add_u_assoc_text_ex(arg, type, key, key_len, str, duplicate) do { \
-		add_u_assoc_unicode_ex(arg, type, key, key_len, (str).u, duplicate); \
-	} while (0)
-#define add_u_assoc_textl_ex(arg, type, key, key_len, str, length, duplicate) do { \
-		add_u_assoc_unicodel_ex(arg, type, key, key_len, (str).u, length, duplicate); \
-	} while (0)
 
 #define add_u_assoc_ascii_stringl_ex(arg, type, key, key_len, str, length, flags) do { \
 		int ___u_len = length; \
@@ -1113,8 +1062,6 @@ ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, zstr key, uint key_
 #define add_u_assoc_rt_stringl(arg, key_type, key, str, length, flags) add_u_assoc_rt_stringl_ex(arg, key_type, key, ZSTR_LEN(__key_type, __key)+1, str, length, flags)
 #define add_u_assoc_utf8_string(arg, key_type, key, str, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ZSTR_LEN(__key_type, __key)+1, str, strlen(str), flags)
 #define add_u_assoc_utf8_stringl(arg, key_type, key, str, length, flags) add_u_assoc_utf8_stringl_ex(arg, key_type, key, ZSTR_LEN(__key_type, __key)+1, str, length, flags)
-#define add_u_assoc_text(__arg, __key_type, __key, __str, __duplicate) add_u_assoc_text_ex(__arg, __key_type, __key, ZSTR_LEN(__key_type, __key)+1, __str, __duplicate)
-#define add_u_assoc_textl(__arg, __key_type, __key, __str, __length, __duplicate) add_u_assoc_textl_ex(__arg, __key_type, __key, ZSTR_LEN(__key_type, __key)+1, __str, __length, __duplicate)
 
 ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 
@@ -1177,12 +1124,6 @@ ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_index_zval(arg, idx, ___tmp); \
-	} while (0)
-#define add_index_text(arg, idx, str, duplicate) do { \
-		add_index_unicode(arg, idx, (str).u, duplicate); \
-	} while (0)
-#define add_index_textl(arg, idx, str, length, duplicate) do { \
-		add_index_unicodel(arg, idx, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_index_ascii_stringl(arg, idx, str, length, flags) do { \
@@ -1281,12 +1222,6 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value);
 		MAKE_STD_ZVAL(___tmp); \
 		ZVAL_ZSTRL(___tmp, type, str, length, duplicate); \
 		add_next_index_zval(arg, ___tmp); \
-	} while (0)
-#define add_next_index_text(arg, str, duplicate) do { \
-		add_next_index_unicode(arg, (str).u, duplicate); \
-	} while (0)
-#define add_next_index_textl(arg, str, length, duplicate) do { \
-		add_next_index_unicodel(arg, (str).u, length, duplicate); \
 	} while (0)
 
 #define add_next_index_ascii_stringl(arg, str, length, flags) do { \
@@ -1645,19 +1580,6 @@ END_EXTERN_C()
 		Z_SET_REFCOUNT_P(z, refcount);			\
 	}
 
-#define ZVAL_TEXT(z, t, duplicate)					\
-		do {										\
-			ZVAL_UNICODE(z, t.u, duplicate);		\
-		} while (0);
-
-#define ZVAL_TEXTL(z, t, l, duplicate)				\
-		do {										\
-			ZVAL_UNICODEL(z, t.u, l, duplicate);	\
-		} while (0);
-
-#define ZVAL_EMPTY_TEXT(z) \
-			ZVAL_EMPTY_UNICODE(z);
-
 #define ZVAL_ENC_STRINGL(z, t, conv, s, l, flags) { \
 		if (t == IS_UNICODE) { \
 			char *__s = (char *)(s); \
@@ -1724,9 +1646,6 @@ END_EXTERN_C()
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
-#define RETVAL_TEXT(t, duplicate) ZVAL_TEXT(return_value, t, duplicate)
-#define RETVAL_TEXTL(t, l, duplicate) ZVAL_TEXTL(return_value, t, l, duplicate)
-#define RETVAL_EMPTY_TEXT() 			ZVAL_EMPTY_TEXT(return_value)
 #define RETVAL_ZSTR(type, s, duplicate) ZVAL_ZSTR(return_value, type, s, duplicate)
 #define RETVAL_ZSTRL(type, s, l, duplicate) ZVAL_ZSTRL(return_value, type, s, l, duplicate)
 #define RETVAL_ENC_STRINGL(type, conv, s, l, flags) ZVAL_ENC_STRINGL(return_value, type, conv, s, l, flags)
@@ -1747,9 +1666,6 @@ END_EXTERN_C()
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
-#define RETURN_TEXT(t, duplicate)		{ RETVAL_TEXT(t, duplicate); return; }
-#define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
-#define RETURN_EMPTY_TEXT() 			{ RETVAL_EMPTY_TEXT(); return; }
 #define RETURN_ASCII_STRING(t, flags)		{ RETVAL_ASCII_STRING(t, flags); return; }
 #define RETURN_ASCII_STRINGL(t, l, flags)	{ RETVAL_ASCII_STRINGL(t, l, flags); return; }
 #define RETURN_U_STRING(conv, t, flags)		{ RETVAL_U_STRING(conv, t, flags); return; }

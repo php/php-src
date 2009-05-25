@@ -2220,9 +2220,9 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 			switch (lob_type) {
 				case OCI_IS_CLOB:
 					if (lob_length > 0) {
-						ZVAL_TEXTL(value, lob_buffer, TEXT_CHARS(lob_length), 0);
+						ZVAL_UNICODEL(value, lob_buffer.u, TEXT_CHARS(lob_length), 0);
 					} else {
-						ZVAL_EMPTY_TEXT(value);
+						ZVAL_EMPTY_UNICODE(value);
 					}
 					break;
 				case OCI_IS_BLOB:
@@ -2256,7 +2256,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 				return 0;
 		}
 
-		ZVAL_TEXTL(value, zstr_data, TEXT_CHARS(column_size), 1);
+		ZVAL_UNICODEL(value, zstr_data.u, TEXT_CHARS(column_size), 1);
 	}
 	return 0;
 }

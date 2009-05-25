@@ -1425,7 +1425,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 	if (intern->u.dir.sub_path.v) {
 		RETURN_ZSTRL(intern->u.dir.sub_path_type, intern->u.dir.sub_path, intern->u.dir.sub_path_len, ZSTR_DUPLICATE);
 	} else {
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	}
 }
 /* }}} */
