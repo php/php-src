@@ -1976,18 +1976,18 @@ ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, 
 }
 /* }}} */
 
-ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode) /* {{{ */
+ZEND_API int zend_u_symtable_update_current_key_ex(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode, HashPosition *pos) /* {{{ */
 {
 	zend_uchar key_type;
 
 	if (type == IS_STRING) {
 		key_type = HASH_KEY_IS_STRING;
-		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
+		ZEND_HANDLE_NUMERIC(arKey.s, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, pos));
 	} else {
 		key_type = HASH_KEY_IS_UNICODE;
-		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
+		ZEND_HANDLE_U_NUMERIC(arKey.u, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, pos));
 	}
-	return zend_hash_update_current_key_ex(ht, key_type, arKey, nKeyLength, 0, mode, NULL);
+	return zend_hash_update_current_key_ex(ht, key_type, arKey, nKeyLength, 0, mode, pos);
 }
 /* }}} */
 
@@ -2019,10 +2019,10 @@ ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLen
 }
 /* }}} */
 
-ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength, int mode) /* {{{ */
+ZEND_API int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos) /* {{{ */
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, NULL));
-	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0, mode, NULL);
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL_ZSTR, 0, idx, mode, pos));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, ZSTR(arKey), nKeyLength, 0, mode, pos);
 }
 /* }}} */
 

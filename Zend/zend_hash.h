@@ -374,7 +374,9 @@ ZEND_API int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLen
 ZEND_API int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
 ZEND_API int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength, int mode);
+ZEND_API int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos);
+#define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \
+	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, mode, NULL)
 
 ZEND_API int zend_ascii_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
 ZEND_API int zend_ascii_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
@@ -395,7 +397,9 @@ ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, zstr arKey, 
 ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
 ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
-ZEND_API int zend_u_symtable_update_current_key(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode);
+ZEND_API int zend_u_symtable_update_current_key_ex(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode, HashPosition *pos);
+#define zend_u_symtable_update_current_key(ht,type,arKey,nKeyLength,mode) \
+	zend_u_symtable_update_current_key_ex(ht, type, arKey, nKeyLength, mode, NULL)
 
 /* {{{ ZEND_HANDLE_*_NUMERIC macros */
 #define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
