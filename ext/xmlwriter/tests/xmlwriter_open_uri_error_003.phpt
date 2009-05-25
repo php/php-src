@@ -10,9 +10,7 @@ var_dump(xmlwriter_open_uri('foo/bar.tmp'));
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
---XFAIL--
-Getting error: xmlNewTextWriterFilename : out of memory!
 --EXPECTF--
 
-Warning: xmlwriter_open_uri(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: xmlwriter_open_uri(): Unable to resolve file path in %s on line %d
 bool(false)
