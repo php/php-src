@@ -722,7 +722,7 @@ ZEND_FUNCTION(get_class)
 
 	if (!obj) {
 		if (EG(scope)) {
-			RETURN_TEXTL(EG(scope)->name, EG(scope)->name_length, 1);
+			RETURN_UNICODEL(EG(scope)->name.u, EG(scope)->name_length, 1);
 		} else {
 			zend_error(E_WARNING, "get_class() called without object from outside a class");
 			RETURN_FALSE;
@@ -731,7 +731,7 @@ ZEND_FUNCTION(get_class)
 
 	dup = zend_get_object_classname(obj, &name, &name_len TSRMLS_CC);
 
-	RETURN_TEXTL(name, name_len, dup);
+	RETURN_UNICODEL(name.u, name_len, dup);
 }
 /* }}} */
 
@@ -744,7 +744,7 @@ ZEND_FUNCTION(get_called_class)
 	}
 
 	if (EG(called_scope)) {
-		RETURN_TEXTL(EG(called_scope)->name, EG(called_scope)->name_length, 1);
+		RETURN_UNICODEL(EG(called_scope)->name.u, EG(called_scope)->name_length, 1);
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}
@@ -769,7 +769,7 @@ ZEND_FUNCTION(get_parent_class)
 	if (!ZEND_NUM_ARGS()) {
 		ce = EG(scope);
 		if (ce && ce->parent) {
-			RETURN_TEXTL(ce->parent->name, ce->parent->name_length, 1);
+			RETURN_UNICODEL(ce->parent->name.u, ce->parent->name_length, 1);
 		} else {
 			RETURN_FALSE;
 		}
@@ -778,7 +778,7 @@ ZEND_FUNCTION(get_parent_class)
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(arg)->get_class_name
 			&& Z_OBJ_HT_P(arg)->get_class_name(arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
-			RETURN_TEXTL(name, name_length, 0);
+			RETURN_UNICODEL(name.u, name_length, 0);
 		} else {
 			ce = zend_get_class_entry(arg TSRMLS_CC);
 		}
@@ -791,7 +791,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (ce && ce->parent) {
-		RETURN_TEXTL(ce->parent->name, ce->parent->name_length, 1);
+		RETURN_UNICODEL(ce->parent->name.u, ce->parent->name_length, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1046,7 +1046,7 @@ ZEND_FUNCTION(get_class_methods)
 			    (zend_u_binary_strcasecmp(key.u, key_len-1, mptr->common.function_name.u, len) == 0)) {
 
 				MAKE_STD_ZVAL(method_name);
-				ZVAL_TEXT(method_name, mptr->common.function_name, 1);
+				ZVAL_UNICODE(method_name, mptr->common.function_name.u, 1);
 				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name, sizeof(zval *), NULL);
 			}
 		}
@@ -1571,7 +1571,7 @@ static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int nu
 	     (hash_key->type == IS_UNICODE && hash_key->arKey.u[0] != 0) ||
 	     (hash_key->type == IS_STRING && hash_key->arKey.s[0] != 0))
 		&& (comply_mask == (ce->ce_flags & mask))) {
-		add_next_index_textl(array, ce->name, ce->name_length, 1);
+		add_next_index_unicodel(array, ce->name.u, ce->name_length, 1);
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -2227,17 +2227,17 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		function_name = ptr->function_state.function->common.function_name;
 
 		if (function_name.v) {
-			add_ascii_assoc_text_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+			add_ascii_assoc_unicode_ex(stack_frame, "function", sizeof("function"), function_name.u, 1);
 
 			if (ptr->object && Z_TYPE_P(ptr->object) == IS_OBJECT) {
 				if (ptr->function_state.function->common.scope) {
-					add_ascii_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
+					add_ascii_assoc_unicodel_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name.u, ptr->function_state.function->common.scope->name_length, 1);
 				} else {
 					zend_uint class_name_len;
 					int dup;
 
 					dup = zend_get_object_classname(ptr->object, &class_name, &class_name_len TSRMLS_CC);
-					add_ascii_assoc_text_ex(stack_frame, "class", sizeof("class"), class_name, dup);
+					add_ascii_assoc_unicode_ex(stack_frame, "class", sizeof("class"), class_name.u, dup);
 				}
 				if (provide_object) {
 					add_ascii_assoc_zval_ex(stack_frame, "object", sizeof("object"), ptr->object);
@@ -2246,7 +2246,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 				add_ascii_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
-				add_ascii_assoc_textl_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, ptr->function_state.function->common.scope->name_length, 1);
+				add_ascii_assoc_unicodel_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name.u, ptr->function_state.function->common.scope->name_length, 1);
 				add_ascii_assoc_ascii_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 			}
 

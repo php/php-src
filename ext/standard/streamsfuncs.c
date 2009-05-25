@@ -125,7 +125,7 @@ PHP_FUNCTION(stream_socket_client)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_EMPTY_TEXT(zerrstr);
+		ZVAL_EMPTY_UNICODE(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
@@ -202,7 +202,7 @@ PHP_FUNCTION(stream_socket_server)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_EMPTY_TEXT(zerrstr);
+		ZVAL_EMPTY_UNICODE(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,

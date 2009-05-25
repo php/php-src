@@ -857,7 +857,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						} else {
 							zstr tmp;
 							tmp.s = (char *)buff;
-							ZVAL_TEXTL(*entry, tmp, TEXT_CHARS(buff_len), 1);
+							ZVAL_UNICODEL(*entry, tmp.u, TEXT_CHARS(buff_len), 1);
 						}
 						zend_hash_move_forward(hash);
 					} else {
@@ -869,7 +869,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 							add_next_index_null(bind->zval);
 						} else {
-							add_next_index_textl(bind->zval, tmp, TEXT_CHARS(buff_len), 1);
+							add_next_index_unicodel(bind->zval, tmp.u, TEXT_CHARS(buff_len), 1);
 						}
 					}
 				}
@@ -890,11 +890,11 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 							zval_dtor(*entry);
 							tmp.u = ((UChar *)bind->array.elements)+TEXT_CHARS(i*bind->array.max_length);
 
-							ZVAL_TEXTL(*entry, tmp, curr_element_length, 1);
+							ZVAL_UNICODEL(*entry, tmp.u, curr_element_length, 1);
 							zend_hash_move_forward(hash);
 						} else {
 							tmp.s = (char *)(((text *)bind->array.elements)+(i*bind->array.max_length));
-							add_next_index_textl(bind->zval, tmp, curr_element_length, 1);
+							add_next_index_unicodel(bind->zval, tmp.u, curr_element_length, 1);
 						}
 					}
 				}

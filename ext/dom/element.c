@@ -357,7 +357,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	}
 
 	if (value == NULL) {
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	} else {
 		RETVAL_XML_STRING(value, ZSTR_DUPLICATE);
 		xmlFree(value);
@@ -685,10 +685,10 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 			if (nsptr != NULL) {
 				RETVAL_XML_STRING((char *) nsptr->href, ZSTR_DUPLICATE);
 			} else {
-				RETVAL_EMPTY_TEXT();
+				RETVAL_EMPTY_UNICODE();
 			}
 		} else {
-			RETVAL_EMPTY_TEXT();
+			RETVAL_EMPTY_UNICODE();
 		}
 	}
 

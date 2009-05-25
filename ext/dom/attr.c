@@ -160,7 +160,7 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_XML_STRING(*retval, (char *)content, ZSTR_DUPLICATE);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;

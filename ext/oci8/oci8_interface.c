@@ -300,9 +300,9 @@ PHP_FUNCTION(oci_lob_load)
 	switch (lob_type) {
 		case OCI_IS_CLOB:
 			if (buffer_len > 0) {
-				RETURN_TEXTL(buffer, TEXT_CHARS(buffer_len), 0);
+				RETURN_UNICODEL(buffer.u, TEXT_CHARS(buffer_len), 0);
 			}
-			RETURN_EMPTY_TEXT();
+			RETURN_EMPTY_UNICODE();
 			break;
 		case OCI_IS_BLOB:
 			if (buffer_len > 0) {
@@ -359,9 +359,9 @@ PHP_FUNCTION(oci_lob_read)
 	switch (lob_type) {
 		case OCI_IS_CLOB:
 			if (buffer_len > 0) {
-				RETURN_TEXTL(buffer, TEXT_CHARS(buffer_len), 0);
+				RETURN_UNICODEL(buffer.u, TEXT_CHARS(buffer_len), 0);
 			}
-			RETURN_EMPTY_TEXT();
+			RETURN_EMPTY_UNICODE();
 			break;
 		case OCI_IS_BLOB:
 			if (buffer_len > 0) {
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(oci_field_name)
 	php_oci_out_column *column;
 
 	if ( ( column = php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) ) ) {
-		RETURN_TEXTL(column->name, column->name_len, 1);
+		RETURN_UNICODEL(column->name.u, column->name_len, 1);
 	}
 	RETURN_FALSE;
 }
@@ -1672,10 +1672,10 @@ go_out:
 	if (errcode) {
 		array_init(return_value);
 		add_ascii_assoc_long(return_value, "code", errcode);
-		add_ascii_assoc_text(return_value, "message", ZSTR((char *)errbuf), 0);
+		add_ascii_assoc_unicode(return_value, "message", ZSTR((char *)errbuf).u, 0);
 		add_ascii_assoc_long(return_value, "offset", error_offset);
 		if (sqltext.v) {
-			add_ascii_assoc_text(return_value, "sqltext", sqltext, 1);
+			add_ascii_assoc_unicode(return_value, "sqltext", sqltext.u, 1);
 		} else {
 			add_ascii_assoc_ascii_string(return_value, "sqltext", "", 1);
 		}
@@ -1861,7 +1861,7 @@ PHP_FUNCTION(oci_server_version)
 		RETURN_FALSE;
 	}
 	
-	RETURN_TEXT(version, 0);
+	RETURN_UNICODE(version.u, 0);
 }
 /* }}} */
 

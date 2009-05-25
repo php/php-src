@@ -3228,8 +3228,8 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS
 
 			zval_dtor(callable);
 			array_init(callable);
-			add_next_index_text(callable, fcc.calling_scope->name, 1);
-			add_next_index_text(callable, fcc.function_handler->common.function_name, 1);
+			add_next_index_unicode(callable, fcc.calling_scope->name.u, 1);
+			add_next_index_unicode(callable, fcc.function_handler->common.function_name.u, 1);
 		}
 		if (fcc.function_handler &&
 			((fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&

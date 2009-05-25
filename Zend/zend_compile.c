@@ -468,8 +468,8 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		opline.result.u.EA.type = 0;
 		opline.result.u.var = get_temporary_variable(CG(active_op_array));
 		opline.op1.op_type = IS_CONST;
-		ZVAL_TEXTL(&opline.op1.u.constant,
-			CG(active_op_array)->vars[result->u.var].name,
+		ZVAL_UNICODEL(&opline.op1.u.constant,
+			CG(active_op_array)->vars[result->u.var].name.u,
 			CG(active_op_array)->vars[result->u.var].name_len, 1);
 		SET_UNUSED(opline.op2);
 		opline.op2 = class_node;
@@ -488,8 +488,8 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 			opline.result.u.EA.type = 0;
 			opline.result.u.var = get_temporary_variable(CG(active_op_array));
 			opline.op1.op_type = IS_CONST;
-			ZVAL_TEXTL(&opline.op1.u.constant,
-				CG(active_op_array)->vars[opline_ptr->op1.u.var].name,
+			ZVAL_UNICODEL(&opline.op1.u.constant,
+				CG(active_op_array)->vars[opline_ptr->op1.u.var].name.u,
 				CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len, 1);
 			SET_UNUSED(opline.op2);
 			opline.op2 = class_node;
@@ -632,8 +632,8 @@ void zend_do_assign(znode *result, znode *variable, const znode *value TSRMLS_DC
 				opline->result.u.EA.type = 0;
 				opline->result.u.var = get_temporary_variable(CG(active_op_array));
 				opline->op1.op_type = IS_CONST;
-				ZVAL_TEXTL(&opline->op1.u.constant,
-					CG(active_op_array)->vars[value->u.var].name, 
+				ZVAL_UNICODEL(&opline->op1.u.constant,
+					CG(active_op_array)->vars[value->u.var].name.u, 
 					CG(active_op_array)->vars[value->u.var].name_len, 1);
 				SET_UNUSED(opline->op2);
 				opline->op2.u.EA.type = ZEND_FETCH_LOCAL;

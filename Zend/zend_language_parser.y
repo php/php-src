@@ -677,7 +677,7 @@ function_call:
 		namespace_name '(' { $2.u.opline_num = zend_do_begin_function_call(&$1, 1 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name '(' { $1.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$1.u.constant);  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC); $4.u.opline_num = zend_do_begin_function_call(&$1, 0 TSRMLS_CC); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name '(' { $1.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$1.u.constant);  zend_do_build_namespace_name(&$1, &$1, &$3 TSRMLS_CC); $4.u.opline_num = zend_do_begin_function_call(&$1, 0 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$1, &$$, &$6, 0, $4.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
 	|	T_NS_SEPARATOR namespace_name '(' { $3.u.opline_num = zend_do_begin_function_call(&$2, 0 TSRMLS_CC); }
@@ -703,14 +703,14 @@ function_call:
 class_name:
  		T_STATIC { $$.op_type = IS_CONST; ZVAL_ASCII_STRINGL(&$$.u.constant, "static", sizeof("static")-1, 1);}
  	|	namespace_name { $$ = $1; }
- 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
- 	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); }
+ 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
+ 	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); }
 ;
 
 fully_qualified_class_name:
  		namespace_name { $$ = $1; }
- 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
- 	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); }
+ 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
+ 	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); }
 ;
 
 
@@ -745,7 +745,7 @@ exit_expr:
 ;
 
 backticks_expr:
-		/* empty */	{ ZVAL_EMPTY_TEXT(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
+		/* empty */	{ ZVAL_EMPTY_UNICODE(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
 	|	T_ENCAPSED_AND_WHITESPACE	{ $$ = $1; }
 	|	encaps_list	{ $$ = $1; }
 ;
@@ -781,8 +781,8 @@ start_heredoc:
 static_scalar: /* compile-time evaluated scalars */
 		common_scalar		{ $$ = $1; }
 	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); $2 = $$;zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); $2 = $$;zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
 	|	'+' static_scalar { ZVAL_LONG(&$1.u.constant, 0); add_function(&$2.u.constant, &$1.u.constant, &$2.u.constant TSRMLS_CC); $$ = $2; }
 	|	'-' static_scalar { ZVAL_LONG(&$1.u.constant, 0); sub_function(&$2.u.constant, &$1.u.constant, &$2.u.constant TSRMLS_CC); $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
@@ -797,8 +797,8 @@ scalar:
 		T_STRING_VARNAME		{ $$ = $1; }
 	|	class_constant		{ $$ = $1; }
 	|	namespace_name	{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_RT, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_TEXT(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); $2 = $$; zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT, 0 TSRMLS_CC); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_RT, 0 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_UNICODE(&$$.u.constant);  zend_do_build_full_name(NULL, &$$, &$2, 0 TSRMLS_CC); $2 = $$; zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT, 0 TSRMLS_CC); }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' { CG(literal_type) = IS_UNICODE; } encaps_list '"' { $$ = $3; }
 	|	T_BINARY_DOUBLE { CG(literal_type) = IS_STRING; } encaps_list '"' { $$ = $3; }

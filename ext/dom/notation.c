@@ -60,7 +60,7 @@ int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (nodep->ExternalID) {
 		ZVAL_XML_STRING(*retval, (char *) (nodep->ExternalID), ZSTR_DUPLICATE);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;
@@ -88,7 +88,7 @@ int dom_notation_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (nodep->SystemID) {
 		ZVAL_XML_STRING(*retval, (char *) (nodep->SystemID), ZSTR_DUPLICATE);
 	} else {
-		ZVAL_EMPTY_TEXT(*retval);
+		ZVAL_EMPTY_UNICODE(*retval);
 	}
 
 	return SUCCESS;

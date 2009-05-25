@@ -676,7 +676,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
 	ALLOC_ZVAL(method_name_ptr);
 	INIT_PZVAL(method_name_ptr);
-	ZVAL_TEXT(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
+	ZVAL_UNICODE(method_name_ptr, func->function_name.u, 0); /* no dup - it's a copy */
 
 	/* __call handler is called with two arguments:
 	   method name
@@ -895,7 +895,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 	ALLOC_ZVAL(method_name_ptr);
 	INIT_PZVAL(method_name_ptr);
-	ZVAL_TEXT(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
+	ZVAL_UNICODE(method_name_ptr, func->function_name.u, 0); /* no dup - it's a copy */
 
 	/* __callStatic handler is called with two arguments:
 	   method name

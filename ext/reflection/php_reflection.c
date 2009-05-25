@@ -1145,7 +1145,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 	zval *name;
 
 	MAKE_STD_ZVAL(name);
-	ZVAL_TEXTL(name, ce->name, ce->name_length, 1);
+	ZVAL_UNICODEL(name, ce->name.u, ce->name_length, 1);
 	reflection_instantiate(reflection_class_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
@@ -1193,7 +1193,7 @@ static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_i
 
 	MAKE_STD_ZVAL(name);
 	if (arg_info->name.v) {
-		ZVAL_TEXTL(name, arg_info->name, arg_info->name_len, 1);
+		ZVAL_UNICODEL(name, arg_info->name.u, arg_info->name_len, 1);
 	} else {
 		ZVAL_NULL(name);
 	}
@@ -1218,7 +1218,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	zval *name;
 
 	MAKE_STD_ZVAL(name);
-	ZVAL_TEXT(name, function->common.function_name, 1);
+	ZVAL_UNICODE(name, function->common.function_name.u, 1);
 
 	reflection_instantiate(reflection_function_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
@@ -1238,7 +1238,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
-	ZVAL_TEXT(name, method->common.function_name, 1);
+	ZVAL_UNICODE(name, method->common.function_name.u, 1);
 	ZVAL_UNICODEL(classname, method->common.scope->name.u, method->common.scope->name_length, 1);
 
 	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
@@ -1283,7 +1283,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
-	ZVAL_TEXT(name, prop_name, 1);
+	ZVAL_UNICODE(name, prop_name.u, 1);
 	ZVAL_UNICODEL(classname, prop->ce->name.u, prop->ce->name_length, 1);
 
 	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
@@ -1534,7 +1534,7 @@ ZEND_METHOD(reflection_function, __construct)
 	}
 
 	MAKE_STD_ZVAL(name);
-	ZVAL_TEXT(name, fptr->common.function_name, 1);
+	ZVAL_UNICODE(name, fptr->common.function_name.u, 1);
 	zend_ascii_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -2151,7 +2151,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	
 	MAKE_STD_ZVAL(name);
 	if (arg_info[position].name.v) {
-		ZVAL_TEXTL(name, arg_info[position].name, arg_info[position].name_len, 1);
+		ZVAL_UNICODEL(name, arg_info[position].name.u, arg_info[position].name_len, 1);
 	} else {
 		ZVAL_NULL(name);
 	}
@@ -2594,7 +2594,7 @@ ZEND_METHOD(reflection_method, __construct)
 		ZVAL_ZSTRL(name, type, name_str, name_len, 1);		
 	} else {
 		ZVAL_UNICODEL(classname, mptr->common.scope->name.u, mptr->common.scope->name_length, 1);
-		ZVAL_TEXT(name, mptr->common.function_name, 1);
+		ZVAL_UNICODE(name, mptr->common.function_name.u, 1);
 	}
 	efree(lcname.v);
 	if (free_name_str) {
@@ -2976,7 +2976,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	{
 		RETURN_UNICODEL(Z_USTRVAL_PP(name), backslash.u - Z_USTRVAL_PP(name), 1);
 	}
-	RETURN_EMPTY_TEXT();
+	RETURN_EMPTY_UNICODE();
 }
 /* }}} */
 
@@ -3132,7 +3132,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	
 	if (argument) {
 		MAKE_STD_ZVAL(classname);
-		ZVAL_TEXTL(classname, Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
+		ZVAL_UNICODEL(classname, Z_OBJCE_P(argument)->name.u, Z_OBJCE_P(argument)->name_length, 1);
 		zend_ascii_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &classname, sizeof(zval *), NULL);
 		intern->ptr = Z_OBJCE_P(argument);
 		if (is_object) {
@@ -3148,7 +3148,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		}
 
 		MAKE_STD_ZVAL(classname);
-		ZVAL_TEXTL(classname, (*ce)->name, (*ce)->name_length, 1);
+		ZVAL_UNICODEL(classname, (*ce)->name.u, (*ce)->name_length, 1);
 		zend_ascii_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &classname, sizeof(zval *), NULL);
 
 		intern->ptr = *ce;
@@ -4178,7 +4178,7 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 	array_init(return_value);
 
 	for (i=0; i < ce->num_interfaces; i++) {
-		add_next_index_textl(return_value, ce->interfaces[i]->name, ce->interfaces[i]->name_length, 1);
+		add_next_index_unicodel(return_value, ce->interfaces[i]->name.u, ce->interfaces[i]->name_length, 1);
 	}
 }
 /* }}} */
@@ -4400,7 +4400,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 	{
 		RETURN_UNICODEL(Z_USTRVAL_PP(name), colon.u - Z_USTRVAL_PP(name), 1);
 	}
-	RETURN_EMPTY_TEXT();
+	RETURN_EMPTY_UNICODE();
 }
 /* }}} */
 
@@ -4533,10 +4533,10 @@ ZEND_METHOD(reflection_property, __construct)
 	if (dynam_prop == 0) {
 		zend_u_unmangle_property_name(IS_UNICODE, property_info->name, property_info->name_length, &class_name, &prop_name);
 		ZVAL_UNICODEL(classname, property_info->ce->name.u, property_info->ce->name_length, 1);
-		ZVAL_TEXT(propname, prop_name, 1);
+		ZVAL_UNICODE(propname, prop_name.u, 1);
 	} else {
 		ZVAL_UNICODEL(classname, ce->name.u, ce->name_length, 1);
-		ZVAL_TEXTL(propname, name_str, name_len, 1);
+		ZVAL_UNICODEL(propname, name_str.u, name_len, 1);
 	}
 	zend_ascii_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	zend_ascii_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
@@ -5102,7 +5102,7 @@ static int add_extension_class(zend_class_entry **pce TSRMLS_DC, int num_args, v
 			zend_reflection_class_factory(*pce, zclass TSRMLS_CC);
 			add_u_assoc_zval_ex(class_array, IS_UNICODE, (*pce)->name, (*pce)->name_length + 1, zclass);
 		} else {
-			add_next_index_textl(class_array, (*pce)->name, (*pce)->name_length, 1);
+			add_next_index_unicodel(class_array, (*pce)->name.u, (*pce)->name_length, 1);
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;

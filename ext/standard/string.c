@@ -3193,7 +3193,7 @@ PHP_FUNCTION(chunk_split)
 	}
 
 	if (!str_len) {
-		RETURN_EMPTY_TEXT();
+		RETURN_EMPTY_UNICODE();
 	}
 
 	result.v = php_chunk_split(str.v, str_len, ending.v, ending_len, chunklen, &result_len, str_type);
@@ -5517,7 +5517,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 	convert_to_unicode_ex(subject);
 	Z_TYPE_P(result) = IS_UNICODE;
 	if (Z_UNILEN_PP(subject) == 0) {
-		ZVAL_EMPTY_TEXT(result);
+		ZVAL_EMPTY_UNICODE(result);
 		return;
 	}
 

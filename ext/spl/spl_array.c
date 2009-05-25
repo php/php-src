@@ -1099,7 +1099,7 @@ SPL_METHOD(Array, getIteratorClass)
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_TEXTL(intern->ce_get_iterator->name, intern->ce_get_iterator->name_length, 1);
+	RETURN_UNICODEL(intern->ce_get_iterator->name.u, intern->ce_get_iterator->name_length, 1);
 }
 /* }}} */
 

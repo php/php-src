@@ -672,7 +672,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					}
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
-				ZVAL_TEXTL(&const_value, str_index, str_index_len-3, 1);
+				ZVAL_UNICODEL(&const_value, str_index.u, str_index_len-3, 1);
 			}
 
 			if (Z_REFCOUNT_PP(element) > 1) {
