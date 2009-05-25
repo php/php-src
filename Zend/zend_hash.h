@@ -367,11 +367,14 @@ static inline int zend_symtable_exists(HashTable *ht, const char *arKey, uint nK
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 
-static inline int zend_symtable_update_current_key(HashTable *ht, const char *arKey, uint nKeyLength, int mode)
+static inline int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos)
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, NULL));
-	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, NULL);
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, pos));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, pos);
 }
+#define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \
+	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, mode, NULL)
+
 
 #endif							/* ZEND_HASH_H */
 
