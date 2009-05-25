@@ -28,7 +28,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlwriter.h"
-
+#include "ext/standard/php_string.h"
 
 #if LIBXML_VERSION >= 20605
 static PHP_FUNCTION(xmlwriter_set_indent);
@@ -614,7 +614,10 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 
 	if (uri->scheme != NULL) {
 		/* absolute file uris - libxml only supports localhost or empty host */
-		if (strncasecmp(source, "file:///",8) == 0) {
+		if (strncasecmp(source, "file:///", 8) == 0) {
+			if (strlen(source) == 8) {
+				return NULL;
+			}
 			isFileUri = 1;
 #ifdef PHP_WIN32
 			source += 8;
@@ -622,6 +625,10 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 			source += 7;
 #endif
 		} else if (strncasecmp(source, "file://localhost/",17) == 0) {
+			if (strlen(source) == 17) {
+				return NULL;
+			}
+
 			isFileUri = 1;
 #ifdef PHP_WIN32
 			source += 17;
@@ -631,13 +638,26 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 		}
 	}
 
-	file_dest = source;
-
 	if ((uri->scheme == NULL || isFileUri)) {
+		char file_dirname[MAXPATHLEN];
+		size_t dir_len;
+
 		if (!VCWD_REALPATH(source, resolved_path) && !expand_filepath(source, resolved_path TSRMLS_CC)) {
 			xmlFreeURI(uri);
 			return NULL;
 		}
+
+		memcpy(file_dirname, source, strlen(source));
+		dir_len = php_dirname(file_dirname, strlen(source));
+
+		if (dir_len > 0) {
+			struct stat buf;
+			if (php_sys_stat(file_dirname, &buf) != 0) {
+				xmlFreeURI(uri);
+				return NULL;
+			}
+		}
+
 		file_dest = resolved_path;
 	}
 
