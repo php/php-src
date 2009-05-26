@@ -289,6 +289,7 @@ void gdImageDestroy(gdImagePtr im);
 
 void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 
+int gdImageGetTrueColorPixel (gdImagePtr im, int x, int y);
 int gdImageGetPixel(gdImagePtr im, int x, int y);
 
 void gdImageAABlend(gdImagePtr im);
