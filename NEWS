@@ -85,6 +85,8 @@ PHP                                                                        NEWS
   literal). (Ilia)
 - Fixed bug #47616 (curl keeps crashing). (Felipe)
 - Fixed bug #47598 (FILTER_VALIDATE_EMAIL is locale aware). (Ilia)
+- Fixed bug #47566 (pcntl_wexitstatus() returns signed status).
+  (patch by james at jamesreno dot com)
 - Fixed bug #47564 (unpacking unsigned long 32bit bit endian returns wrong
   result). (Ilia)
 - Fixed bug #47487 (performance degraded when reading large chunks after fix of

@@ -374,9 +374,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 	
 	status_word = (int) Z_LVAL_PP(status);
 
-	/* WEXITSTATUS only returns 8 bits so we *MUST* cast this to signed char
-	   if you want to have valid negative exit codes */
-	RETURN_LONG((signed char) WEXITSTATUS(status_word));
+	RETURN_LONG(WEXITSTATUS(status_word));
 #else
 	RETURN_FALSE;
 #endif
