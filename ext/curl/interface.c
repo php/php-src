@@ -459,7 +459,7 @@ PHP_MINIT_FUNCTION(curl)
 	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl", module_number);
 
 	/* See http://curl.haxx.se/lxr/source/docs/libcurl/symbols-in-versions
-	   or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list 
+	   or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list
 	   of options and which version they were introduced */
 
 	/* Constants for curl_setopt() */
@@ -1673,6 +1673,20 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					ch->handlers->read->fp = fp;
 					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
 					break;
+				case CURLOPT_STDERR:
+					if (((php_stream *) what)->mode[0] != 'r') {
+						if (ch->handlers->stderr) {
+							zval_ptr_dtor(&ch->handlers->stderr);
+						}
+						zval_add_ref(zvalue);
+						ch->handlers->stderr = *zvalue;
+						zend_list_addref(Z_LVAL_PP(zvalue));
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
+						RETVAL_FALSE;
+						return 1;
+					}
+					/* break omitted intentionally */
 				default:
 					error = curl_easy_setopt(ch->cp, option, fp);
 					break;
@@ -2268,6 +2282,11 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
 #endif
 
+	/* Prevent crash inside cURL if passed file has already been closed */
+	if (ch->handlers->stderr && Z_REFCOUNT_P(ch->handlers->stderr) <= 0) {
+		curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
+	}
+
 	curl_easy_cleanup(ch->cp);
 #if LIBCURL_VERSION_NUM < 0x071101
 	zend_llist_clean(&ch->to_free.str);
@@ -2287,11 +2306,14 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	if (ch->handlers->write_header->func_name) {
 		zval_ptr_dtor(&ch->handlers->write_header->func_name);
 	}
-	if(ch->handlers->progress->func_name) {
+	if (ch->handlers->progress->func_name) {
 		zval_ptr_dtor(&ch->handlers->progress->func_name);
 	}
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);
+	}
+	if (ch->handlers->stderr) {
+		zval_ptr_dtor(&ch->handlers->stderr);
 	}
 	if (ch->header.str_len > 0) {
 		efree(ch->header.str);
