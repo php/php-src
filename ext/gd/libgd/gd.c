@@ -26,11 +26,15 @@ extern float floorf(float x);
 #endif
 #if HAVE_FABSF == 0
 /* float fabsf(float x); */
-# define fabsf(x) ((float)(fabs(x)))
+# ifndef fabsf
+#  define fabsf(x) ((float)(fabs(x)))
+# endif
 #endif
 #if HAVE_FLOORF == 0
+# ifndef floorf
 /* float floorf(float x);*/
-#define floorf(x) ((float)(floor(x)))
+#  define floorf(x) ((float)(floor(x)))
+# endif
 #endif
 
 #ifdef _OSD_POSIX		/* BS2000 uses the EBCDIC char set instead of ASCII */
