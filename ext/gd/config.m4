@@ -371,10 +371,10 @@ dnl T1LIB support is gdlib independent
 
   PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
   AC_DEFINE(HAVE_LIBGD,1,[ ])
+  PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
   if test "$GD_MODULE_TYPE" = "builtin"; then
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
-    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
 
     PHP_TEST_BUILD(foobar, [], [
@@ -385,8 +385,6 @@ dnl T1LIB support is gdlib independent
     GD_CFLAGS=`$GDLIB_CONFIG --cflags`
     GDLIB_CFLAGS="-I$GD_INCDIR $GD_CFLAGS"
     GD_HEADER_DIRS="ext/gd/"
-    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
-
   fi
 
   PHP_INSTALL_HEADERS([$GD_HEADER_DIRS])
