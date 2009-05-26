@@ -1827,7 +1827,7 @@ PHP_FUNCTION(mssql_result)
 	ZEND_FETCH_RESOURCE(result, mssql_result *, &mssql_result_index, -1, "MS SQL-result", le_result);	
 
 	if (row < 0 || row >= result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%l)", row);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%ld)", row);
 		RETURN_FALSE;
 	}
 
