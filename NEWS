@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   with RecursiveIteratorIterator leads to a segfault). (Scott)
 - Fixed bug #48204 (xmlwriter_open_uri() does not emit warnings on invalid
   paths). (Ilia)
+- Fixed bug #48203 (Crash when CURLOPT_STDERR is set to regular file). (Jani)
 - Fixed bug #48202 (Out of Memory error message when passing invalid file path)
   (Pierre)
 - Fixed bug #48156 (Added support for lcov v1.7). (Ilia)
