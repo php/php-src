@@ -13,6 +13,7 @@ session.save_handler=files
 --FILE--
 <?php
 $sessdir = dirname(__FILE__).'/sessions/';
+@rmdir($sessdir);
 mkdir($sessdir);
 $save_path = '0;0777;'.$sessdir;
 umask(0);
