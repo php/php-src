@@ -1039,6 +1039,7 @@ static int php_zlib_output_compression_start(TSRMLS_D)
 			break;
 		case 1:
 			ZLIBG(output_compression) = 4096;
+			/* break omitted intentionally */
 		default:
 			/* ZLIBG(compression_coding) should be 0 when zlib compression hasn't been started yet.. */
 			if (ZLIBG(compression_coding) == 0) {
