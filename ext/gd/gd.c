@@ -132,7 +132,6 @@ int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
  * IMAGE_FILTER_MAX_ARGS: define the biggest amout of arguments
  * image_filter array in PHP_FUNCTION(imagefilter)
  * */
-#if HAVE_GD_BUNDLED
 #define IMAGE_FILTER_NEGATE         0
 #define IMAGE_FILTER_GRAYSCALE      1
 #define IMAGE_FILTER_BRIGHTNESS     2
@@ -159,7 +158,7 @@ static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
-#endif
+
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string (zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC);
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
@@ -855,7 +854,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_png2wbmp, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefilter, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filtertype)
@@ -871,7 +869,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
 	ZEND_ARG_INFO(0, div)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
-#endif
 
 #ifdef HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
@@ -1046,10 +1043,8 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagexbm,                                arginfo_imagexbm)
 #endif
 /* gd filters */
-#ifdef HAVE_GD_BUNDLED
 	PHP_FE(imagefilter,     						arginfo_imagefilter)
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
-#endif
 
 	{NULL, NULL, NULL}
 };
@@ -4738,8 +4733,6 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 #endif	/* HAVE_LIBGD */
 
 /* Section Filters */
-#ifdef HAVE_GD_BUNDLED
-
 #define PHP_GD_SINGLE_RES	\
 	zval *SIM;	\
 	gdImagePtr im_src;	\
@@ -5033,9 +5026,9 @@ PHP_FUNCTION(imageconvolution)
 	}
 }
 /* }}} */
-
 /* End section: Filters */
 
+#ifdef HAVE_GD_BUNDLED
 /* {{{ proto bool imageantialias(resource im, bool on)
    Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
