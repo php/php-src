@@ -88,7 +88,7 @@
 /* True globals, no need for thread safety */
 static const int gz_magic[2] = {0x1f, 0x8b};	/* gzip magic header */
 
-static int php_enable_output_compression(int buffer_size TSRMLS_DC);
+static int php_zlib_output_compression_start(TSRMLS_D);
 
 static PHP_MINIT_FUNCTION(zlib);
 static PHP_MSHUTDOWN_FUNCTION(zlib);
@@ -228,6 +228,7 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 /* {{{ OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
+	int status, int_value;
 	char *ini_value;
 
 	if (new_value == NULL) {
@@ -242,8 +243,10 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		new_value_length = sizeof("1");
 	}
 
+	int_value = zend_atoi(new_value, new_value_length);
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
-	if (ini_value != NULL && strlen(ini_value) != 0 && zend_atoi(new_value, new_value_length) != 0) {
+
+	if (ini_value && *ini_value && int_value) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}
@@ -253,9 +256,13 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
-	OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	status = OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
-	return SUCCESS;
+	if (stage == PHP_INI_STAGE_RUNTIME && int_value) {
+		status = php_zlib_output_compression_start(TSRMLS_C);
+	}
+
+	return status;
 }
 /* }}} */
 
@@ -309,18 +316,10 @@ static PHP_MINIT_FUNCTION(zlib)
  */
 static PHP_RINIT_FUNCTION(zlib)
 {
-	uint chunk_size = ZLIBG(output_compression);
-
 	ZLIBG(ob_gzhandler_status) = 0;
 	ZLIBG(compression_coding) = 0;
-	if (chunk_size) {
-		if (chunk_size == 1) {
-			chunk_size = 4096; /* use the default size */
-			ZLIBG(output_compression) = chunk_size;
-		}
-		php_enable_output_compression(chunk_size TSRMLS_CC);
-	}
-	return SUCCESS;
+
+	return php_zlib_output_compression_start(TSRMLS_C);
 }
 /* }}} */
 
@@ -1079,6 +1078,24 @@ static int php_enable_output_compression(int buffer_size TSRMLS_DC)
 
 	if (ZLIBG(output_handler) && strlen(ZLIBG(output_handler))) {
 		php_start_ob_buffer_named(ZLIBG(output_handler), 0, 1 TSRMLS_CC);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_zlib_output_compression_start() */
+static int php_zlib_output_compression_start(TSRMLS_D)
+{
+	switch (ZLIBG(output_compression)) {
+		case 0:
+			break;
+		case 1:
+			ZLIBG(output_compression) = 4096;
+		default:
+			/* ZLIBG(compression_coding) should be 0 when zlib compression hasn't been started yet.. */
+			if (ZLIBG(compression_coding) == 0) {
+				return php_enable_output_compression(ZLIBG(output_compression) TSRMLS_CC);
+			}
 	}
 	return SUCCESS;
 }
