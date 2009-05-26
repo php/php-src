@@ -95,6 +95,7 @@ void php_zlib_output_compression_start(TSRMLS_D)
 			break;
 		case 1:
 			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
+			/* break omitted intentionally */
 		default:
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_ASCII_STRING(tmp, PHP_ZLIB_OUTPUT_HANDLER_NAME, ZSTR_DUPLICATE);
