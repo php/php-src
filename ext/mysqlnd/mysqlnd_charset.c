@@ -404,6 +404,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 144, "ucs2", "ucs2_persian_ci", 2, 2, "", mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{ 145, "ucs2", "ucs2_esperanto_ci", 2, 2, "", mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{ 146, "ucs2", "ucs2_hungarian_ci", 2, 2, "", mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
+	{ 147, "ucs2", "ucs2_sinhala_ci", 2, 2, "", mysqlnd_mbcharlen_ucs2, check_mb_ucs2},
 	{ 192, "utf8", "utf8_general_ci", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 193, "utf8", "utf8_icelandic_ci", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 194, "utf8", "utf8_latvian_ci", 1, 3, "", mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
@@ -423,7 +424,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{ 208, "utf8", "utf8_persian_ci", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 209, "utf8", "utf8_esperanto_ci", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{ 210, "utf8", "utf8_hungarian_ci", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
-	{ 254, "utf8", "utf8_general_cs", 1, 2, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
+	{ 254, "utf8", "utf8_general_cs", 1, 3, "", mysqlnd_mbcharlen_utf8, check_mb_utf8_valid},
 	{   0, NULL, NULL, 0, 0, NULL, NULL, NULL}
 };
 /* }}} */
