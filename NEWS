@@ -113,6 +113,8 @@ PHP                                                                        NEWS
 - Fixed bug #45614 (ArrayIterator::current(), ::key() can show 1st private
   prop of wrapped object). (robin_fernandes at uk dot ibm dot com, Arnaud)
 - Fixed bug #45540 (stream_context_create creates bad http request). (Arnaud)
+- Fixed bug #45202 (zlib.output_compression can not be set with ini_set()).
+  (Jani)
 - Fixed bug #45191 (error_log ignores date.timezone php.ini val when
   setting logging timestamps). (Derick)
 - Fixed bug #45092 (header HTTP context option not being used when compiled
