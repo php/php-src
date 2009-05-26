@@ -1080,7 +1080,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("gd.jpeg_ignore_warning", "0", PHP_INI_ALL, NULL)
 PHP_INI_END()
 /* }}} */
-	
+
 /* {{{ php_free_gd_image
  */
 static void php_free_gd_image(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -1102,7 +1102,6 @@ static void php_free_gd_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(fp);
 }
 /* }}} */
-
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
@@ -1141,7 +1140,7 @@ PHP_MINIT_FUNCTION(gd)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	
+
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPEG", 2, CONST_CS | CONST_PERSISTENT);
@@ -1162,6 +1161,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
+
 /* GD2 image format types */
 #ifdef GD2_FMT_RAW
 	REGISTER_LONG_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
@@ -1208,19 +1208,20 @@ PHP_MINIT_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 
-/*
- * cannot include #include "png.h"
- * /usr/include/pngconf.h:310:2: error: #error png.h already includes setjmp.h with some additional fixup.
- * as error, use the values for now...
- */
-	REGISTER_LONG_CONSTANT("PNG_NO_FILTER",		0x00, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE",	0x08, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB",	0x10, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_UP",		0x20, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG",	0x40, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH",	0x80, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS",	0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
+	/*
+	 * cannot include #include "png.h"
+	 * /usr/include/pngconf.h:310:2: error: #error png.h already includes setjmp.h with some additional fixup.
+	 * as error, use the values for now...
+	 */
+	REGISTER_LONG_CONSTANT("PNG_NO_FILTER",	    0x00, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE",   0x08, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB",    0x10, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_UP",     0x20, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG",    0x40, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH",  0x80, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS",   0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
 #endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1263,6 +1264,7 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
 	{
 		char tmp[256];
+
 #ifdef FREETYPE_PATCH
 		snprintf(tmp, sizeof(tmp), "%d.%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
 #elif defined(FREETYPE_MAJOR)
@@ -1798,7 +1800,6 @@ PHP_FUNCTION(imagealphablending)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageAlphaBlending(im, blend);
 
 	RETURN_TRUE;
@@ -1818,7 +1819,6 @@ PHP_FUNCTION(imagesavealpha)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageSaveAlpha(im, save);
 
 	RETURN_TRUE;
@@ -1839,7 +1839,6 @@ PHP_FUNCTION(imagelayereffect)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageAlphaBlending(im, effect);
 
 	RETURN_TRUE;
@@ -1861,12 +1860,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
 		RETURN_FALSE;
 	}
-
 	RETURN_LONG((long)ct);
 }
 /* }}} */
@@ -3176,9 +3173,7 @@ PHP_FUNCTION(imagesetpixel)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageSetPixel(im, x, y, col);
-
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3222,7 +3217,6 @@ PHP_FUNCTION(imagedashedline)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageDashedLine(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
@@ -3241,7 +3235,6 @@ PHP_FUNCTION(imagerectangle)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
@@ -3260,7 +3253,6 @@ PHP_FUNCTION(imagefilledrectangle)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageFilledRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
 }
@@ -3333,7 +3325,6 @@ PHP_FUNCTION(imagefilltoborder)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageFillToBorder(im, x, y, border, col);
 	RETURN_TRUE;
 }
@@ -3352,7 +3343,6 @@ PHP_FUNCTION(imagefill)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageFill(im, x, y, col);
 	RETURN_TRUE;
 }
@@ -3364,7 +3354,7 @@ PHP_FUNCTION(imagecolorstotal)
 {
 	zval *IM;
 	gdImagePtr im;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &IM) == FAILURE) {
 		return;
 	}
@@ -4133,7 +4123,6 @@ PHP_FUNCTION(imagepsfreefont)
 	}
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
-
 	zend_list_delete(Z_LVAL_P(fnt));
 	RETURN_TRUE;
 }
@@ -5042,9 +5031,7 @@ PHP_FUNCTION(imageantialias)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-
 	gdImageAntialias(im, alias);
-
 	RETURN_TRUE;
 }
 /* }}} */
