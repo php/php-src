@@ -1781,6 +1781,9 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 		RETURN_FALSE;
 	}
 
+	/* TODO: Fix either the PHP stream or libxml APIs: it can then detect when a given 
+		 path is valid and not report out of memory error. Once it is done, remove the
+		 directory check in _xmlwriter_get_valid_file_path */
 #ifndef ZEND_ENGINE_2
 	ioctx = php_xmlwriter_streams_IO_open_write_wrapper(valid_file TSRMLS_CC);
 	if (ioctx == NULL) {
