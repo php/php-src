@@ -274,7 +274,7 @@ if test "$PHP_GD" = "yes"; then
                  libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
                  libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
                  libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c libgd/gd_gif_in.c \
-                 libgd/xbm.c libgd/gd_gif_out.c libgd/gd_security.c libgd/gd_filter.c libgd/gd_pixelate.c"
+                 libgd/xbm.c libgd/gd_gif_out.c libgd/gd_security.c libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c"
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS([fabsf floorf])
@@ -298,6 +298,7 @@ dnl These are always defined with bundled library
   AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])
   AC_DEFINE(HAVE_GD_FONTCACHESHUTDOWN,1, [ ])
   AC_DEFINE(HAVE_GD_FONTMUTEX,        1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])
 
 elif test "$PHP_GD" != "no"; then
 
@@ -310,7 +311,7 @@ elif test "$PHP_GD" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
   GD_MODULE_TYPE=external
-  extra_sources="gdcache.c libgd/gd_compat.c libgd/gd_filter.c libgd/gd_pixelate.c"
+  extra_sources="gdcache.c libgd/gd_compat.c libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c"
 
   GD_FEATURES=`$GDLIB_CONFIG --features`
 
@@ -350,7 +351,7 @@ dnl GD library path
 dnl Extra libraries and libpaths needed to link with libgd
   GD_LDFLAGS=`$GDLIB_CONFIG --ldflags`
   GD_LIBS=`$GDLIB_CONFIG --libs`
-
+  PHP_CHECK_LIBRARY(gd, gdImageEllipse,         [AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_EVAL_LIBLINE([$GD_LDFLAGS $GD_LIBS -L$GD_LIBDIR -lgd], GD_SHARED_LIBADD)
 fi
 
@@ -362,7 +363,6 @@ if test "$PHP_GD" != "no"; then
 dnl These defines are always available
 dnl FIXME: Cleanup the sources so that these are not needed!
   AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])
-  AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])
   AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])
   AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])
 
