@@ -5,13 +5,12 @@
 #endif
 
 #include "gd_intern.h"
+
 /* Filters function added on 2003/12
- * by Pierre-Alain Joye (pajoye@pearfr.org)
+ * by Pierre-Alain Joye (pierre@php.net)
  **/
 /* Begin filters function */
-#ifndef HAVE_GET_TRUE_COLOR
 #define GET_PIXEL_FUNCTION(src)(src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
-#endif
 
 /* invert src image */
 int gdImageNegate(gdImagePtr src)
