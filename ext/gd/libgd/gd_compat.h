@@ -49,6 +49,10 @@ enum gdPixelateMode {
 
 int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
 
+#if !HAVE_GD_IMAGEELLIPSE
+void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
+#endif
+
 
 #endif
 
