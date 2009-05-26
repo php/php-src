@@ -34,47 +34,51 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 #ifdef PHP_WIN32
-#define O_RDONLY _O_RDONLY
-#include "win32/param.h"
+# define O_RDONLY _O_RDONLY
+# include "win32/param.h"
 #else
-#include <sys/param.h>
+# include <sys/param.h>
 /* #include <sys/uio.h> */
 #endif
+
 #include "ext/standard/head.h"
 #include "safe_mode.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 #include "php_zlib.h"
 #include "fopen_wrappers.h"
+
 #if HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
+# ifdef PHP_WIN32
+#  include "win32/pwd.h"
+# else
+#  include <pwd.h>
+# endif
 #endif
-#endif
+
 #if defined(HAVE_UNISTD_H) && defined(PHP_WIN32)
-#undef HAVE_UNISTD_H
+# undef HAVE_UNISTD_H
 #endif
 
 #ifdef COMPILE_DL_ZLIB
-#ifndef PUTS
-#define PUTS(a) php_printf("%s",a)
-#endif
-#ifndef PUTC
-#define PUTC(a) PUTS(a)
-#endif
-#ifndef PHPWRITE
-#define PHPWRITE(a,n) php_write((a),(n) TSRMLS_CC)
-#endif
+# ifndef PUTS
+#  define PUTS(a) php_printf("%s",a)
+# endif
+# ifndef PUTC
+#  define PUTC(a) PUTS(a)
+# endif
+# ifndef PHPWRITE
+#  define PHPWRITE(a,n) php_write((a),(n) TSRMLS_CC)
+# endif
 #endif
 
 /* Win32 needs some more memory */
 #ifdef PHP_WIN32
-#define PHP_ZLIB_MODIFIER 100
+# define PHP_ZLIB_MODIFIER 100
 #else
-#define PHP_ZLIB_MODIFIER 1000
+# define PHP_ZLIB_MODIFIER 1000
 #endif
 
 #define OS_CODE			0x03 /* FIXME */
@@ -171,10 +175,10 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FALIAS(gzwrite,		fwrite,			NULL)
 	PHP_FALIAS(gzputs,		fwrite,			NULL)
 	PHP_FE(gzfile,							arginfo_gzfile)
-	PHP_FE(gzcompress,            			arginfo_gzcompress)
-	PHP_FE(gzuncompress,           			arginfo_gzuncompress)
-	PHP_FE(gzdeflate,             			arginfo_gzdeflate)
-	PHP_FE(gzinflate,              			arginfo_gzinflate)
+	PHP_FE(gzcompress,						arginfo_gzcompress)
+	PHP_FE(gzuncompress,					arginfo_gzuncompress)
+	PHP_FE(gzdeflate,						arginfo_gzdeflate)
+	PHP_FE(gzinflate,						arginfo_gzinflate)
 	PHP_FE(gzencode,						arginfo_gzencode)
 	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
 	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
@@ -229,7 +233,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	if (new_value == NULL) {
 		return FAILURE;
 	}
-	
+
 	if (!strncasecmp(new_value, "off", sizeof("off"))) {
 		new_value = "0";
 		new_value_length = sizeof("0");
@@ -238,7 +242,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		new_value_length = sizeof("1");
 	}
 
-	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0); 
+	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
 	if (ini_value != NULL && strlen(ini_value) != 0 && zend_atoi(new_value, new_value_length) != 0) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
@@ -326,7 +330,7 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 	php_unregister_url_stream_wrapper("zlib" TSRMLS_CC);
 	php_stream_filter_unregister_factory("zlib.*" TSRMLS_CC);
-	
+
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
@@ -383,7 +387,7 @@ static PHP_FUNCTION(gzfile)
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
 		if (PG(magic_quotes_runtime)) {
 			int len;
-			
+
 			slashed = php_addslashes(buf, 0, &len, 0 TSRMLS_CC); /* 0 = don't free source string */
 			add_index_stringl(return_value, i++, slashed, len, 0);
 		} else {
@@ -403,7 +407,7 @@ static PHP_FUNCTION(gzopen)
 	long flags = 0;
 	php_stream *stream;
 	int use_include_path = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &filename, &filename_len, &mode, &mode_len, &flags) == FAILURE) {
 		return;
 	}
@@ -416,7 +420,7 @@ static PHP_FUNCTION(gzopen)
 		RETURN_FALSE;
 	}
 	php_stream_to_zval(stream, return_value);
-}	
+}
 /* }}} */
 
 /*
@@ -432,7 +436,7 @@ static PHP_FUNCTION(readgzfile)
 	php_stream *stream;
 	int size;
 	int use_include_path = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
@@ -444,12 +448,12 @@ static PHP_FUNCTION(readgzfile)
 		RETURN_FALSE;
 	}
 	size = php_stream_passthru(stream);
-   	php_stream_close(stream);
+	php_stream_close(stream);
 	RETURN_LONG(size);
 }
 /* }}} */
 
-/* {{{ proto string gzcompress(string data [, int level]) 
+/* {{{ proto string gzcompress(string data [, int level])
    Gzip-compress a string */
 static PHP_FUNCTION(gzcompress)
 {
@@ -472,13 +476,13 @@ static PHP_FUNCTION(gzcompress)
 	if (!s2) {
 		RETURN_FALSE;
 	}
-		
+
 	if (level >= 0) {
 		status = compress2(s2, &l2, data, data_len, level);
 	} else {
 		status = compress(s2, &l2, data, data_len);
 	}
-	
+
 	if (status == Z_OK) {
 		s2 = erealloc(s2, l2 + 1);
 		s2[l2] = '\0';
@@ -491,7 +495,7 @@ static PHP_FUNCTION(gzcompress)
 }
 /* }}} */
 
-/* {{{ proto string gzuncompress(string data [, int length]) 
+/* {{{ proto string gzuncompress(string data [, int length])
    Unzip a gzip-compressed string */
 static PHP_FUNCTION(gzuncompress)
 {
@@ -516,7 +520,7 @@ static PHP_FUNCTION(gzuncompress)
 	 if none was given as a parameter
 	 we try from input length * 2 up to input length * 2^15
 	 doubling it whenever it wasn't big enough
-	 that should be eneugh for all real life cases	
+	 that should be eneugh for all real life cases
 	*/
 	do {
 		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
@@ -537,7 +541,7 @@ static PHP_FUNCTION(gzuncompress)
 }
 /* }}} */
 
-/* {{{ proto string gzdeflate(string data [, int level]) 
+/* {{{ proto string gzdeflate(string data [, int level])
    Gzip-compress a string */
 static PHP_FUNCTION(gzdeflate)
 {
@@ -569,7 +573,7 @@ static PHP_FUNCTION(gzdeflate)
 	if (!s2) {
 		RETURN_FALSE;
 	}
-	
+
 	stream.next_out = s2;
 
 	/* init with -MAX_WBITS disables the zlib internal headers */
@@ -598,7 +602,7 @@ static PHP_FUNCTION(gzdeflate)
 }
 /* }}} */
 
-/* {{{ proto string gzinflate(string data [, int length]) 
+/* {{{ proto string gzinflate(string data [, int length])
    Unzip a gzip-compressed string */
 static PHP_FUNCTION(gzinflate)
 {
@@ -642,7 +646,7 @@ static PHP_FUNCTION(gzinflate)
 	  if none was given as a parameter
 	  we try from input length * 2 up to input length * 2^15
 	  doubling it whenever it wasn't big enough
-	  that should be enaugh for all real life cases	
+	  that should be enaugh for all real life cases
 	*/
 	do {
 		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
@@ -712,7 +716,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	} else {
 		buffer = *p_buffer;
 	}
-	
+
 	ZLIBG(stream).next_out = buffer + start_offset;
 	ZLIBG(stream).avail_out = outlen;
 
@@ -723,7 +727,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 		if ((outlen + start_offset + end_offset) > *p_buffer_len) {
 			buffer = erealloc(buffer, outlen + start_offset + end_offset);
 		}
-		
+
 		ZLIBG(stream).next_out = buffer + start_offset + prev_outlen;
 		ZLIBG(stream).avail_out = prev_outlen * 2;
 
@@ -760,7 +764,7 @@ static int php_deflate_string(const char *str, uint str_length, char **newstr, u
 					/* TODO: print out error */
 					return FAILURE;
 				}
-		
+
 				ZLIBG(crc) = crc32(0L, Z_NULL, 0);
 				break;
 
@@ -769,7 +773,7 @@ static int php_deflate_string(const char *str, uint str_length, char **newstr, u
 					/* TODO: print out error */
 					return FAILURE;
 				}
-				break;		
+				break;
 		}
 	}
 
@@ -865,14 +869,14 @@ static PHP_FUNCTION(gzencode)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 			}
-		
+
 			break;
 		case CODING_DEFLATE:
 			if ((status = deflateInit(&stream, level)) != Z_OK) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 			}
-			break;		
+			break;
 	}
 
 	status = deflate(&stream, Z_FINISH);
@@ -906,7 +910,7 @@ static PHP_FUNCTION(gzencode)
 			trailer[7] = (char) (stream.total_in >> 24) & 0xFF;
 			trailer[8] = '\0';
 		} else {
-			s2[stream.total_out + GZIP_HEADER_LENGTH + (coding == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0)] = '\0'; 
+			s2[stream.total_out + GZIP_HEADER_LENGTH + (coding == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0)] = '\0';
 		}
 		RETURN_STRINGL(s2, stream.total_out + GZIP_HEADER_LENGTH + (coding == CODING_GZIP ? GZIP_FOOTER_LENGTH : 0), 0);
 	} else {
@@ -960,8 +964,9 @@ static PHP_FUNCTION(ob_gzhandler)
 		return;
 	}
 
-	if(ZLIBG(ob_gzhandler_status) == -1)
+	if (ZLIBG(ob_gzhandler_status) == -1) {
 		RETURN_FALSE;
+	}
 
 	zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 
@@ -981,7 +986,7 @@ static PHP_FUNCTION(ob_gzhandler)
 		ZLIBG(ob_gzhandler_status) = -1;
 		RETURN_FALSE;
 	}
-	
+
 	do_start = ((mode & PHP_OUTPUT_HANDLER_START) ? 1 : 0);
 	do_end = ((mode & PHP_OUTPUT_HANDLER_END) ? 1 : 0);
 	Z_STRVAL_P(return_value) = NULL;
