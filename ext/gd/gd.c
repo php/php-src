@@ -3302,12 +3302,7 @@ PHP_FUNCTION(imageellipse)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-#ifdef HAVE_GD_IMAGEELLIPSE  /* this function is missing from GD 2.0.1 */
 	gdImageEllipse(im, cx, cy, w, h, color);
-#else
-	gdImageArc(im, cx, cy, w, h, 0, 360, color);
-#endif
-
 	RETURN_TRUE;
 }
 /* }}} */
