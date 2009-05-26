@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.10
-- Updated timezone database to version 2009.7 (2009g) (Derick)
+- Updated timezone database to version 2009.8 (2009h) (Derick)
 
 - Changed default value of array_unique()'s optional sorting type parameter
   back to SORT_STRING to fix backwards compatibility breakage introduced in 
