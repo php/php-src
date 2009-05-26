@@ -1,6 +1,5 @@
 --TEST--
 Test mb_stripos() function : usage variations - Pass different integers as $offset argument
---XFAIL--
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');

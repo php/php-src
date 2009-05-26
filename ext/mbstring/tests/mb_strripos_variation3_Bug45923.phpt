@@ -1,6 +1,5 @@
 --TEST--
 Test mb_strripos() function : usage variations - pass different data types as $offset arg
---XFAIL--
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
