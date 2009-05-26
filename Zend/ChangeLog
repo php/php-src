@@ -1,3 +1,32 @@
+2009-05-25  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_language_scanner.c
+      zend_language_scanner.l
+      zend_object_handlers.c
+      zend_operators.h:
+      - Dropped *_TEXT* macros in favor of unicode macros direct usage
+
+    * zend_API.h:
+      - Fixed macro (thanks Kalle)
+
+2009-05-25  Sara Golemon  <saramg@gmail.com>
+
+    * (PHP_5_3)
+      zend_hash.h:
+      MFH(r-1.103) Expand zend_symtable_update_current_key to allow specifying
+      HashPosition
+
+    * zend_hash.c
+      zend_hash.h:
+      Expand zend_(u_)symtable_update_current_key to allow specifying
+      HashPosition
+
 2009-05-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.c
