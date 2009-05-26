@@ -66,7 +66,9 @@ typedef short TDS_SHORT;
 #define DBMSGHANDLE(a, b) dbmsghandle(b)
 #define DBSETOPT(a, b, c) dbsetopt(a, b, c, -1)
 #define NO_MORE_RPC_RESULTS 3
+#ifndef dbfreelogin
 #define dbfreelogin dbloginfree
+#endif
 #define dbrpcexec dbrpcsend
 typedef unsigned char	*LPBYTE;
 typedef float           DBFLT4;
