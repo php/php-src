@@ -1,8 +1,9 @@
 #if HAVE_GD_BUNDLED
 # include "gd.h"
+# include "gdhelpers.h"
 #else
 # include <gd.h>
-# include <gdhelpers.h>
+# include "libgd/gdhelpers.h"
 #endif
 
 #include "gd_intern.h"
