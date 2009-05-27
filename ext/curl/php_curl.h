@@ -101,7 +101,7 @@ typedef struct {
 	php_curl_write *write_header;
 	php_curl_read  *read;
 	zval           *passwd;
-	zval           *stderr;
+	zval           *std_err;
 } php_curl_handlers;
 
 struct _php_curl_error  {
