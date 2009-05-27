@@ -141,7 +141,7 @@ typedef struct _mysqli_property_entry {
 #if !defined(MYSQLI_USE_MYSQLND)
 typedef struct {
 	char	error_msg[LOCAL_INFILE_ERROR_LEN];
-	void	*userdata;
+  	void	*userdata;
 } mysqli_local_infile;
 #endif
 
@@ -161,10 +161,12 @@ typedef __int64 my_longlong;
 # else
 #  define PHP_MYSQLI_API
 # endif
-#define MYSQLI_LLU_SPEC "%llu"
-#define MYSQLI_LL_SPEC "%lld"
+/* we need this for PRIu64 and PRId64 */
+#include <inttypes.h>
+#define MYSQLI_LLU_SPEC "%" PRIu64
+#define MYSQLI_LL_SPEC "%" PRId64
 #define L64(x) x##LL
-typedef long long my_longlong;
+typedef int64_t my_longlong;
 #endif
 
 #ifdef ZTS
