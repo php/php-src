@@ -113,10 +113,7 @@ clean-all:
 	-@del /f /q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\*.rc $(BUILD_DIR)\*.dbg $(BUILD_DIR)\*.bin $(BUILD_DIR)\php*.dll $(BUILD_DIR)\php*.exe > NUL
 
 test:
-	<<test_suite_uses_lame_env_vars.bat
-set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\php.exe
-$(BUILD_DIR)\php.exe -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS)
-<<NOKEEP
+	"$(BUILD_DIR)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(BUILD_DIR)\php.exe"
 
 build-snap: generated_files
 	SET PATH=$(PATH);$(PHP_BUILD)\bin
