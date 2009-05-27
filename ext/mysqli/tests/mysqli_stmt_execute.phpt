@@ -62,56 +62,66 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
+	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT ?"))
 		printf("[014] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
+	$limit = 1;
+	if (!mysqli_stmt_bind_param($stmt, "i", $limit))
+		printf("[015] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
 	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[015] Expecting boolean/true, got %s/%s. [%d] %s\n",
+		printf("[016] Expecting boolean/true, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	$id = null;
 	if (!mysqli_stmt_bind_result($stmt, $id) || !mysqli_stmt_fetch($stmt))
-		printf("[016] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+		printf("[017] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if ($id !== 1)
-		printf("[017] Expecting int/1 got %s/%s\n", gettype($id), $id);
+		printf("[018] Expecting int/1 got %s/%s\n", gettype($id), $id);
 
 	if (true !== ($tmp = mysqli_stmt_reset($stmt)))
-		printf("[018] Expecting boolean/true, got %s/%s. [%d] %s\n",
+		printf("[019] Expecting boolean/true, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	printf("Don't know what we should expect\n");
-	var_dump(mysqli_stmt_execute($stmt));
-	var_dump(mysqli_stmt_fetch($stmt));
+	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
+		printf("[020] Expecting boolean/true after reset to prepare status, got %s/%s. [%d] %s\n",
+			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	$id = null;
+	if (!mysqli_stmt_fetch($stmt))
+		printf("[021] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+
+	if ($id !== 1)
+		printf("[022] Expecting int/1 got %s/%s\n", gettype($id), $id);
 
 	mysqli_stmt_close($stmt);
 	if (!$stmt = mysqli_stmt_init($link))
-		printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
-		printf("[020] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+		printf("[024] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (true !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[021] Expecting boolean/true, got %s/%s. [%d] %s\n",
+		printf("[025] Expecting boolean/true, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	if (true !== ($tmp = mysqli_stmt_reset($stmt)))
-		printf("[022] Expecting boolean/true, got %s/%s. [%d] %s\n",
+		printf("[026] Expecting boolean/true, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	printf("Don't know what we should expect\n");
 	var_dump(mysqli_stmt_execute($stmt));
 	var_dump(mysqli_stmt_fetch($stmt));
 
 	mysqli_kill($link, mysqli_thread_id($link));
 
 	if (false !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[023] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[027] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
 
 	if (NULL !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[024] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[028] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	print "done!";
@@ -122,6 +132,9 @@ Warning: mysqli_stmt_execute(): invalid object or resource mysqli_stmt
 
 Warning: mysqli_stmt_execute(): invalid object or resource mysqli_stmt
  in %s on line %d
+bool(true)
+bool(true)
+[027] Expecting boolean/false, got boolean/1
 
 Warning: mysqli_stmt_execute(): Couldn't fetch mysqli_stmt in %s on line %d
 done!
