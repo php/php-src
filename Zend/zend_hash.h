@@ -352,8 +352,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #define zend_u_inline_hash_func(type, arKey, nKeyLength) \
 	zend_inline_hash_func(arKey.s, USTR_BYTES(type, nKeyLength))
 
-ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength);
-ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength);
+#define zend_hash_func(arKey, nKeyLength) zend_get_hash_value(arKey, nKeyLength)
+#define zend_u_hash_func(type, arKey, nKeyLength) zend_u_get_hash_value(type, arKey, nKeyLength)
 
 #if ZEND_DEBUG
 /* debug */
