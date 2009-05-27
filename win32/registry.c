@@ -92,7 +92,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 			if (ht) {
 				if (parent_ht) {
 					HashPosition pos;
-					char *index;
+					zstr index;
 					uint index_len;
 					ulong num;
 					zval **data;
@@ -101,7 +101,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					     zend_hash_get_current_data_ex(parent_ht, (void**)&data, &pos) == SUCCESS &&
 					     zend_hash_get_current_key_ex(parent_ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
 					     zend_hash_move_forward_ex(parent_ht, &pos)) {
-						if (zend_hash_add(ht, index, index_len, data, sizeof(zval*), NULL) == SUCCESS) {
+						if (zend_hash_add(ht, index.s, index_len, data, sizeof(zval*), NULL) == SUCCESS) {
 						    Z_ADDREF_PP(data);
 						}
 					}
@@ -238,7 +238,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 		if (zend_hash_find(PW32G(registry_directories), path, path_len+1, (void**)&pht) == SUCCESS) {
 			HashTable *ht = *pht;
 			HashPosition pos;
-			char *index;
+			zstr index;
 			uint index_len;
 			ulong num;
 			zval **data;
@@ -247,7 +247,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 			     zend_hash_get_current_data_ex(ht, (void**)&data, &pos) == SUCCESS &&
 			     zend_hash_get_current_key_ex(ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
 			     zend_hash_move_forward_ex(ht, &pos)) {
-				zend_alter_ini_entry(index, index_len, Z_STRVAL_PP(data), Z_STRLEN_PP(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				zend_alter_ini_entry(index.s, index_len, Z_STRVAL_PP(data), Z_STRLEN_PP(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			}
 			break;
 		}
