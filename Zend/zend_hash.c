@@ -120,18 +120,6 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 static int zend_hash_do_resize(HashTable *ht);
 
-ZEND_API ulong zend_u_hash_func(zend_uchar type, zstr arKey, uint nKeyLength) /* {{{ */
-{
-	return zend_u_inline_hash_func(type, arKey, nKeyLength);
-}
-/* }}} */
-
-ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength) /* {{{ */
-{
-	return zend_u_hash_func(IS_STRING, ZSTR(arKey), nKeyLength);
-}
-/* }}} */
-
 #define UPDATE_DATA(ht, p, pData, nDataSize)											\
 	if (nDataSize == sizeof(void*)) {													\
 		if ((p)->pData != &(p)->pDataPtr) {												\

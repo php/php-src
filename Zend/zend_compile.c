@@ -1459,7 +1459,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	current_op = &current_op_array->opcodes[current_op_number];
 	current_op->opcode = ZEND_DECLARE_LAMBDA_FUNCTION;
 	zval_dtor(&current_op->op2.u.constant);
-	ZVAL_LONG(&current_op->op2.u.constant, zend_u_hash_func(Z_TYPE(current_op->op1.u.constant), Z_UNIVAL(current_op->op1.u.constant), Z_UNILEN(current_op->op1.u.constant)));
+	ZVAL_LONG(&current_op->op2.u.constant, zend_u_get_hash_value(Z_TYPE(current_op->op1.u.constant), Z_UNIVAL(current_op->op1.u.constant), Z_UNILEN(current_op->op1.u.constant)));
 	current_op->result = *result;
 	if (is_static) {
 	    CG(active_op_array)->fn_flags |= ZEND_ACC_STATIC;
@@ -1695,7 +1695,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 			Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
 			Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
 			Z_UNILEN(opline->op1.u.constant) = len;
-			opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+			opline->extended_value = zend_u_get_hash_value(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
 		} else {
 			opline->extended_value = 0;
 			SET_UNUSED(opline->op1);
@@ -1741,7 +1741,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		type = Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
 		Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
 		Z_UNILEN(opline->op1.u.constant) = len;
-		opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+		opline->extended_value = zend_u_get_hash_value(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
 		if(Z_TYPE(opline->op1.u.constant) == IS_UNICODE) {
 			slash.u = u_memrchr(Z_USTRVAL(opline->op1.u.constant), '\\', Z_USTRLEN(opline->op1.u.constant));
 			if(!slash.u) {
@@ -1765,7 +1765,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		/* this is the length of namespace prefix */
 		Z_LVAL(opline2->op1.u.constant) = prefix_len;
 		/* this is the hash of the non-prefixed part, lowercased */
-		opline2->extended_value = zend_u_hash_func(type, slash, name_len+1);
+		opline2->extended_value = zend_u_get_hash_value(type, slash, name_len+1);
 		SET_UNUSED(opline2->op2);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
@@ -1775,7 +1775,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 			Z_TYPE(opline->op1.u.constant) = Z_TYPE(opline->op2.u.constant);
 			Z_UNIVAL(opline->op1.u.constant) = zend_u_str_case_fold(Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), 0, &len);
 			Z_UNILEN(opline->op1.u.constant) = len;
-			opline->extended_value = zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
+			opline->extended_value = zend_u_get_hash_value(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant) + 1);
 		} else {
 			opline->extended_value = 0;
 			SET_UNUSED(opline->op1);
@@ -2100,7 +2100,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 			opline->opcode = ZEND_DO_FCALL;
 			opline->op1 = *function_name;
-			ZVAL_LONG(&opline->op2.u.constant, zend_u_hash_func(Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant), Z_UNILEN(function_name->u.constant) + 1));
+			ZVAL_LONG(&opline->op2.u.constant, zend_u_get_hash_value(Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant), Z_UNILEN(function_name->u.constant) + 1));
 		} else {
 			opline->opcode = ZEND_DO_FCALL_BY_NAME;
 			SET_UNUSED(opline->op1);
@@ -4158,7 +4158,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 	opline->op1.op_type = IS_CONST;
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
-	ZVAL_LONG(&opline->op2.u.constant, zend_u_hash_func(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant)+1));
+	ZVAL_LONG(&opline->op2.u.constant, zend_u_get_hash_value(Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant)+1));
 	*result = opline->result;
 }
 /* }}} */
