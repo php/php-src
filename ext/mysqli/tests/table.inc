@@ -17,7 +17,7 @@ if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(i
 	exit(1);
 }
 
-if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (1, "a"), (2, "b"), (3, "c"), (4, "d"), (5, "e"), (6, "f")')) {
+if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')")) {
 	printf("[%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 }
 ?>

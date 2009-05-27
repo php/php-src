@@ -270,7 +270,7 @@ require_once('skipifconnectfailure.inc');
 	else
 		mysqli_stmt_close($stmt);
 
-	if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "z")', MYSQLI_USE_RESULT) ||
+	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'z')", MYSQLI_USE_RESULT) ||
 			!mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
 		printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

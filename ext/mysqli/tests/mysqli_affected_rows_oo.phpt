@@ -28,7 +28,7 @@ mysqli->affected_rows
 	if (!$mysqli->query('CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine))
 		printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
 
-	if (!$mysqli->query('INSERT INTO test(id, label) VALUES (1, "a")'))
+	if (!$mysqli->query("INSERT INTO test(id, label) VALUES (1, 'a')"))
 		printf("[005] [%d] %s\n",  $mysqli->errno, $mysqli->error);
 
 	if (1 !== ($tmp = $mysqli->affected_rows))
@@ -39,7 +39,7 @@ mysqli->affected_rows
 	if (-1 !== ($tmp = $mysqli->affected_rows))
 		printf("[007] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$mysqli->query('INSERT INTO test(id, label) VALUES (1, "a") ON DUPLICATE KEY UPDATE id = 4'))
+	if (!$mysqli->query("INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4"))
 		printf("[008] [%d] %s\n",  $mysqli->errno, $mysqli->error);
 
 	if (2 !== ($tmp = $mysqli->affected_rows))
