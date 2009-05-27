@@ -119,8 +119,9 @@ PHP_FUNCTION(imagegrabwindow);
 PHP_FUNCTION(imagegrabscreen);
 #endif
 
-#ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imagerotate);
+
+#ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
 #endif
 
