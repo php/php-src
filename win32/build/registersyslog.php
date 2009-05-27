@@ -3,7 +3,7 @@
 /* This script sets up an event source for use by the php syslog() function. */
 
 if (!extension_loaded("win32std")) {
-	dl("php_win32std.dll");
+	@dl("php_win32std.dll");
 }
 
 $PATH = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\PHP-" . phpversion();
