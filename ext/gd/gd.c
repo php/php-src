@@ -300,14 +300,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagegrabscreen, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagerotate, 0, 0, 3)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, angle)
 	ZEND_ARG_INFO(0, bgdcolor)
 	ZEND_ARG_INFO(0, ignoretransparent)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_GD_IMAGESETTILE
 ZEND_BEGIN_ARG_INFO(arginfo_imagesettile, 0)
@@ -930,8 +928,9 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagegrabscreen,							arginfo_imagegrabscreen)
 #endif
 
-#ifdef HAVE_GD_BUNDLED
 	PHP_FE(imagerotate,     						arginfo_imagerotate)
+
+#ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
 #endif
 
@@ -2104,7 +2103,6 @@ PHP_FUNCTION(imagegrabscreen)
 /* }}} */
 #endif /* PHP_WIN32 */
 
-#ifdef HAVE_GD_BUNDLED
 /* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor [, int ignoretransparent])
    Rotate an image using a custom angle */
 PHP_FUNCTION(imagerotate)
@@ -2130,7 +2128,6 @@ PHP_FUNCTION(imagerotate)
 	}
 }
 /* }}} */
-#endif
 
 #if HAVE_GD_IMAGESETTILE
 /* {{{ proto bool imagesettile(resource image, resource tile)
