@@ -98,10 +98,12 @@ ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 static PHP_GINIT_FUNCTION(mbstring);
 static PHP_GSHUTDOWN_FUNCTION(mbstring);
 
+#ifdef ZEND_MULTIBYTE
 static size_t php_mb_oddlen(const unsigned char *string, size_t length, const char *encoding TSRMLS_DC);
 static int php_mb_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const char *encoding_to, const char *encoding_from TSRMLS_DC);
 static char* php_mb_encoding_detector(const unsigned char *arg_string, size_t arg_length, char *arg_list TSRMLS_DC);
 static int php_mb_set_zend_encoding(TSRMLS_D);
+#endif
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
