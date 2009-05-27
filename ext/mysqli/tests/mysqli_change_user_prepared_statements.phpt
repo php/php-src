@@ -13,8 +13,8 @@ require_once('skipifconnectfailure.inc');
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$stmt = mysqli_prepare($link, 'SELECT "prepared statements should be released"'))
-		printf("[002] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+	if (!$stmt = mysqli_prepare($link, "SELECT 'prepared statements should be released'"))
+		printf("[002] [%d] %s\n", mysqli_errno(), mysqli_error());
 
 	mysqli_change_user($link, $user, $passwd, $db);
 

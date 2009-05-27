@@ -26,17 +26,17 @@ require_once('skipifconnectfailure.inc');
 	if (false !== ($tmp = mysqli_real_query($link, 'THIS IS NOT SQL')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = mysqli_real_query($link, 'SELECT "this is sql but with backslash g"\g')))
+	if (false !== ($tmp = mysqli_real_query($link, "SELECT 'this is sql but with backslash g'\g")))
 		printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if ((0 === mysqli_errno($link)) || ('' == mysqli_error($link)))
 		printf("[006] mysqli_errno()/mysqli_error should return some error\n");
 
-	if (!mysqli_real_query($link, 'SELECT "this is sql but with semicolon" AS valid ; '))
+	if (!mysqli_real_query($link, "SELECT 'this is sql but with semicolon' AS valid ; "))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!is_object($res = mysqli_use_result($link)))
-	printf("[008] Expecting reseult object, got %s/%s [%d] %s\n", gettype($res), $res, mysqli_errno($link), mysqli_error($link));
+	printf("[008] Expecting result object, got %s/%s [%d] %s\n", gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
 	var_dump(mysqli_fetch_assoc($res));
 	mysqli_free_result($res);

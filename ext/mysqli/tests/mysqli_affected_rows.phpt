@@ -36,18 +36,18 @@ mysqli_affected_rows()
 	if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (1, "a")'))
+	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a')"))
 		printf("[008] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[010] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
 	// ignore INSERT error, NOTE: command line returns 0, affected_rows returns -1 as documented
-	mysqli_query($link, 'INSERT INTO test(id, label) VALUES (1, "a")');
+	mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a')");
 	if (-1 !== ($tmp = mysqli_affected_rows($link)))
 		printf("[011] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (1, "a") ON DUPLICATE KEY UPDATE id = 4'))
+	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4"))
 		printf("[012] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
 	if (2 !== ($tmp = mysqli_affected_rows($link)))
