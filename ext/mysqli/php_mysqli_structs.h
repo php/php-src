@@ -296,7 +296,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	} else {				\
 		char *ret;			\
 		/* always used with my_ulonglong -> %llu */ \
-		int l = spprintf(&ret, 0, "%llu", (__val));	\
+		int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (__val));	\
 		RETURN_STRINGL(ret, l, 0);		\
 	}					\
 }
