@@ -36,7 +36,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($link->field_count);
 	var_dump(mysqli_field_count($link));
 
-	if (!$res = mysqli_query($link, 'SELECT NULL as _null, "" AS "", "three" AS "drei"'))
+	if (!$res = mysqli_query($link, "SELECT NULL as _null, '' AS '', 'three' AS 'drei'"))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	var_dump(mysqli_field_count($link));
 	mysqli_free_result($res);
