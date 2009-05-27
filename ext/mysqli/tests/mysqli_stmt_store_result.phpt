@@ -31,7 +31,7 @@ require_once('skipifconnectfailure.inc');
 	if (NULL !== ($tmp = @mysqli_stmt_store_result($stmt)))
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, 'INSERT INTO test(id, label) VALUES (100, "z")') ||
+	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
 		!mysqli_stmt_execute($stmt))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
