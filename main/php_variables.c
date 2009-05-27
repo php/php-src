@@ -563,6 +563,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		} else {
 			free_buffer = 0;
 		}
+		conv = UG(request_encoding_conv);
 	} else if (arg == PARSE_STRING) {		/* String data */
 		res = str;
 		free_buffer = 1;
