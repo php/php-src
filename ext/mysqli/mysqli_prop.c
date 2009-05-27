@@ -158,7 +158,7 @@ static int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_MYSQL *mysql;
-	long rc;
+	my_ulonglong rc;
 
 	MAKE_STD_ZVAL(*retval); 
 
@@ -171,9 +171,9 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	} else {
 		CHECK_STATUS(MYSQLI_STATUS_VALID);
 
-		rc = (long) mysql_affected_rows(mysql->mysql);
+		rc = (my_ulonglong) mysql_affected_rows(mysql->mysql);
 
-		if (rc == (long)-1) {
+		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
 		} 
@@ -182,7 +182,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_LONG(*retval, rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (my_ulonglong) rc);
+			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}
@@ -233,15 +233,14 @@ static int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	if (!p || !p->field_count || !(ret = mysql_fetch_lengths(p)))
-	{
+	if (!p || !p->field_count || !(ret = mysql_fetch_lengths(p))) {
 		ZVAL_NULL(*retval);
 	} else {
 		ulong i;
 
 		array_init(*retval);
 
-		for (i=0; i < p->field_count; i++) {
+		for (i = 0; i < p->field_count; i++) {
 			add_index_long(*retval, i, ret[i]);
 		}
 	}
@@ -279,7 +278,7 @@ static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MY_STMT *p;
-	long rc;
+	my_ulonglong rc;
 
 	MAKE_STD_ZVAL(*retval); 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
@@ -289,9 +288,9 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		rc = (long) mysql_stmt_affected_rows(p->stmt);
+		rc = (my_ulonglong) mysql_stmt_affected_rows(p->stmt);
 	
-		if (rc == (long)-1) {
+		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(*retval, -1);
 			return SUCCESS;
 		} 
@@ -300,7 +299,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_LONG(*retval, rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (my_longlong) rc);
+			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}
