@@ -7,8 +7,6 @@
 # include <gd.h>
 #endif
 
-
-
 const char * gdPngGetVersionString();
 int gdJpegGetVersionString();
 int gdJpegGetVersionInt();
@@ -54,6 +52,8 @@ void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
 #endif
 
 gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent);
+
+int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2);
 
 #endif
 
