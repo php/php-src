@@ -190,9 +190,10 @@ PHP_FUNCTION(image2wbmp);
 
 #if HAVE_GD_BUNDLED
 PHP_FUNCTION(imagelayereffect);
-PHP_FUNCTION(imagecolormatch);
 PHP_FUNCTION(imagexbm);
 #endif
+
+PHP_FUNCTION(imagecolormatch);
 
 PHP_FUNCTION(imagefilter);
 PHP_FUNCTION(imageconvolution);

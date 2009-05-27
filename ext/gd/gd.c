@@ -167,12 +167,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagetruecolortopalette, 0)
 	ZEND_ARG_INFO(0, colorsWanted)
 ZEND_END_ARG_INFO()
 
-#if HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolormatch, 0)
 	ZEND_ARG_INFO(0, im1)
 	ZEND_ARG_INFO(0, im2)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetthickness, 0)
 	ZEND_ARG_INFO(0, im)
@@ -980,9 +978,11 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(image2wbmp,								arginfo_image2wbmp)
 #if HAVE_GD_BUNDLED
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
-	PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
 	PHP_FE(imagexbm,                                arginfo_imagexbm)
 #endif
+
+	PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
+
 /* gd filters */
 	PHP_FE(imagefilter,     						arginfo_imagefilter)
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
@@ -1555,7 +1555,6 @@ PHP_FUNCTION(imagetruecolortopalette)
 }
 /* }}} */
 
-#if HAVE_GD_BUNDLED
 /* {{{ proto bool imagecolormatch(resource im1, resource im2) U
    Makes the colors of the palette version of an image more closely match the true color version */
 PHP_FUNCTION(imagecolormatch)
@@ -1594,7 +1593,6 @@ PHP_FUNCTION(imagecolormatch)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool imagesetthickness(resource im, int thickness) U
    Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
