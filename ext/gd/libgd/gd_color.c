@@ -2,6 +2,7 @@
 # include "gd.h"
 #else
 # include <gd.h>
+# include <gdhelpers.h>
 #endif
 
 #include "gd_intern.h"
