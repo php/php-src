@@ -319,7 +319,9 @@ static PHP_RINIT_FUNCTION(zlib)
 	ZLIBG(ob_gzhandler_status) = 0;
 	ZLIBG(compression_coding) = 0;
 
-	return php_zlib_output_compression_start(TSRMLS_C);
+	php_zlib_output_compression_start(TSRMLS_C);
+
+	return SUCCESS;
 }
 /* }}} */
 
