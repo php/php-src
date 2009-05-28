@@ -86,7 +86,7 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_TYPE_VAR_STRING => array("VARCHAR(32768)", 'varchar'),
 		MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING - TODO add testing',
 		MYSQLI_TYPE_STRING => array('CHAR(1)', 'a'),
-		MYSQLI_TYPE_STRING => array('SET("I", "smash", "the")', 'Will be converted to string although it is a SET...'),
+		MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'Will be converted to string although it is a SET...'),
 		MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL - TODO add testing',
 		MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
 		MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',

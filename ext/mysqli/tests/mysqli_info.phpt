@@ -17,14 +17,14 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require "table.inc";
-	if (!$res = mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "a")'))
+	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// NOTE: empty string, no multiple insert syntax
 	if (!is_string($tmp = mysqli_info($link)) || ('' != $tmp))
 		printf("[004] Expecting string/empty, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$res = mysqli_query($link, 'INSERT INTO test(id, label) VALUES (101, "a"), (102, "b")'))
+	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (101, 'a'), (102, 'b')"))
 		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
@@ -45,7 +45,7 @@ require_once('skipifconnectfailure.inc');
 	if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
 		printf("[010] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$res = mysqli_query($link, 'UPDATE test SET label = "b" WHERE id >= 100'))
+	if (!$res = mysqli_query($link, "UPDATE test SET label = 'b' WHERE id >= 100"))
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
