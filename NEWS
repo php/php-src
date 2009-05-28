@@ -538,7 +538,6 @@ PHP                                                                        NEWS
 - Improved streams:
   . Fixed confusing error message on failure when no errors are logged. (Greg)
   . Added stream_supports_lock() function. (Benjamin Schulz)
-  . Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
   . Added context parameter for copy() function. (Sara)
   . Added "glob://" stream wrapper. (Marcus)
   . Added "params" as optional parameter for stream_context_create(). (Sara)
