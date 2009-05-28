@@ -46,7 +46,7 @@ mysqli_close($link);
 	if ("�İ汾\\0�İ汾" !== ($tmp = mysqli_real_escape_string($link, "�İ汾" . chr(0) . "�İ汾")))
 		printf("[009] Expecting %s, got %s\n", "�İ汾\\0�İ汾", $tmp);
 
-	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "��")'));
+	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '��')"));
 
 	mysqli_close($link);
 	print "done!";
