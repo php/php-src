@@ -536,12 +536,14 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const stmt TSRMLS_DC)
 						stmt->upsert_status.server_status & SERVER_STATUS_CURSOR_EXISTS);
 
 			if (stmt->upsert_status.server_status & SERVER_STATUS_CURSOR_EXISTS) {
+				DBG_INF("cursor exists");
 				stmt->cursor_exists = TRUE;
 				CONN_SET_STATE(conn, CONN_READY);
 				/* Only cursor read */
 				stmt->default_rset_handler = stmt->m->use_result;
 				DBG_INF("use_result");
 			} else if (stmt->flags & CURSOR_TYPE_READ_ONLY) {
+				DBG_INF("asked for cursor but got none");
 				/*
 				  We have asked for CURSOR but got no cursor, because the condition
 				  above is not fulfilled. Then...
@@ -556,6 +558,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const stmt TSRMLS_DC)
 				stmt->default_rset_handler = stmt->m->store_result;
 				DBG_INF("store_result");
 			} else {
+				DBG_INF("no cursor");
 				/* preferred is unbuffered read */
 				stmt->default_rset_handler = stmt->m->use_result;
 				DBG_INF("use_result");
@@ -853,15 +856,10 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 					  stmt->result_bind[i].zv has been already destructed
 					  in mysqlnd_unbuffered_free_last_data()
 					*/
-
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_dtor(stmt->result_bind[i].zv);
 #endif
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
-						stmt->result_bind[i].zv->value = data->value;
-#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-						zval_copy_ctor(stmt->result_bind[i].zv);
-#endif						
 						if (
 							(Z_TYPE_P(data) == IS_STRING
 #if PHP_MAJOR_VERSION >= 6
@@ -872,6 +870,9 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
+						stmt->result_bind[i].zv->value = data->value;
+						// copied data, thus also the ownership. Thus null data
+						ZVAL_NULL(data);
 					}
 				}
 			}
@@ -888,14 +889,15 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 			row_packet->row_buffer = NULL;
 		}
 	} else if (ret == FAIL) {
+		*fetched_anything = FALSE;
 		if (row_packet->error_info.error_no) {
 			stmt->conn->error_info = row_packet->error_info; 
 			stmt->error_info = row_packet->error_info; 
 		}
-		*fetched_anything = FALSE;
 		CONN_SET_STATE(result->conn, CONN_READY);
 		result->unbuf->eof_reached = TRUE; /* so next time we won't get an error */	
 	} else if (row_packet->eof) {
+		*fetched_anything = FALSE;
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
@@ -910,7 +912,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		} else {
 			CONN_SET_STATE(result->conn, CONN_READY);
 		}
-		*fetched_anything = FALSE;
 	}
 
 	DBG_INF_FMT("ret=%s fetched_anything=%d", ret == PASS? "PASS":"FAIL", *fetched_anything);
@@ -944,7 +945,8 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT *stmt TSRMLS_DC)
 
 	MYSQLND_INC_CONN_STATISTIC(&stmt->conn->stats, STAT_PS_UNBUFFERED_SETS);
 	result = stmt->result;
-	
+
+	DBG_INF_FMT("%scursor exists", stmt->cursor_exists? "":"no ");
 	result->m.use_result(stmt->result, TRUE TSRMLS_CC);
 	result->m.fetch_row	= stmt->cursor_exists? mysqlnd_fetch_stmt_row_cursor:
 											   mysqlnd_stmt_fetch_row_unbuffered;
@@ -1002,15 +1004,19 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
-		mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
+		result->unbuf->row_count++;
+		*fetched_anything = TRUE;
 
-		result->unbuf->last_row_data = row_packet->fields;
-		result->unbuf->last_row_buffer = row_packet->row_buffer;
-
-
-		row_packet->fields = NULL;
-		row_packet->row_buffer = NULL;
+		DBG_INF_FMT("skip_extraction=%d", row_packet->skip_extraction); 
 		if (!row_packet->skip_extraction) {
+			mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
+
+			DBG_INF("extracting data");
+			result->unbuf->last_row_data = row_packet->fields;
+			result->unbuf->last_row_buffer = row_packet->row_buffer;
+			row_packet->fields = NULL;
+			row_packet->row_buffer = NULL;
+
 			result->m.row_decoder(result->unbuf->last_row_buffer,
 								  result->unbuf->last_row_data,
 								  row_packet->field_count,
@@ -1025,12 +1031,12 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 					  stmt->result_bind[i].zv has been already destructed
 					  in mysqlnd_unbuffered_free_last_data()
 					*/
-					DBG_INF_FMT("i=%d type=%d", i, Z_TYPE_P(stmt->result_bind[i].zv));
-					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
-						stmt->result_bind[i].zv->value = data->value;
-#ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
-						zval_copy_ctor(stmt->result_bind[i].zv);
+#ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
+					zval_dtor(stmt->result_bind[i].zv);
 #endif
+					DBG_INF_FMT("i=%d bound_var=%p type=%d refc=%u", i, stmt->result_bind[i].zv,
+								Z_TYPE_P(data), Z_REFCOUNT_P(stmt->result_bind[i].zv));
+					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data))) {
 						if ((Z_TYPE_P(data) == IS_STRING
 #if PHP_MAJOR_VERSION >= 6
 							|| Z_TYPE_P(data) == IS_UNICODE
@@ -1040,12 +1046,23 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 						{
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
+						stmt->result_bind[i].zv->value = data->value;
+						// copied data, thus also the ownership. Thus null data
+						ZVAL_NULL(data);
 					}
 				}
 			}
+		} else {
+			DBG_INF("skipping extraction");
+			/*
+			  Data has been allocated and usually mysqlnd_unbuffered_free_last_data()
+			  frees it but we can't call this function as it will cause problems with
+			  the bound variables. Thus we need to do part of what it does or Zend will
+			  report leaks.
+			*/
+			row_packet->row_buffer->free_chunk(row_packet->row_buffer, TRUE TSRMLS_CC);
+			row_packet->row_buffer = NULL;
 		}
-		result->unbuf->row_count++;
-		*fetched_anything = TRUE;
 		/* We asked for one row, the next one should be EOF, eat it */
 		ret = PACKET_READ(row_packet, result->conn);
 		if (row_packet->row_buffer) {
@@ -1491,7 +1508,8 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 		stmt->result_bind = result_bind;
 		for (i = 0; i < stmt->field_count; i++) {
 			/* Prevent from freeing */
-			Z_ADDREF_P(stmt->result_bind[i].zv);		
+			Z_ADDREF_P(stmt->result_bind[i].zv);
+			DBG_INF_FMT("ref of %p = %u", stmt->result_bind[i].zv, Z_REFCOUNT_P(stmt->result_bind[i].zv));
 			/*
 			  Don't update is_ref !!! it's not our job
 			  Otherwise either 009.phpt or mysqli_stmt_bind_result.phpt

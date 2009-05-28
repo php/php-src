@@ -143,10 +143,13 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 		DBG_VOID_RETURN;
 	}
 
+	DBG_INF_FMT("last_row_data=%p", unbuf->last_row_data);
 	if (unbuf->last_row_data) {
 		unsigned int i, ctor_called_count = 0;
 		zend_bool copy_ctor_called;
 		MYSQLND_STATS *global_stats = result->conn? &result->conn->stats:NULL;
+
+		DBG_INF_FMT("%u columns to free", result->field_count);
 		for (i = 0; i < result->field_count; i++) {
 			mysqlnd_palloc_zval_ptr_dtor(&(unbuf->last_row_data[i]),
 										 result->zval_cache, result->type,
@@ -155,6 +158,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 				ctor_called_count++;
 			}
 		}
+		DBG_INF_FMT("copy_ctor_called_count=%u", ctor_called_count);
 		/* By using value3 macros we hold a mutex only once, there is no value2 */
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE3(global_stats,
 											STAT_COPY_ON_WRITE_PERFORMED,
@@ -168,6 +172,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 		unbuf->last_row_data = NULL;
 	}
 	if (unbuf->last_row_buffer) {
+		DBG_INF("Freeing last row buffer");
 		/* Nothing points to this buffer now, free it */
 		unbuf->last_row_buffer->free_chunk(unbuf->last_row_buffer, TRUE TSRMLS_CC);
 		unbuf->last_row_buffer = NULL;
