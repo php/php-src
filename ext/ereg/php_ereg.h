@@ -39,6 +39,7 @@ PHPAPI PHP_FUNCTION(sql_regcase);
 
 ZEND_BEGIN_MODULE_GLOBALS(ereg)
 	HashTable ht_rc;
+	unsigned int lru_counter;
 ZEND_END_MODULE_GLOBALS(ereg)
 
 /* Module functions */
