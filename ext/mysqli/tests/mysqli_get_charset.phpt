@@ -44,7 +44,7 @@ if (!function_exists('mysqli_get_charset'))
 	if (!($character_set_connection = $tmp['charset']) || !($collation_connection = $tmp['collation']))
 		printf("[008] Cannot determine current character set and collation\n");
 
-	if (!$res = mysqli_query($link, $sql = sprintf("SHOW CHARACTER SET LIKE '%s'", $character_set_connection)))
+	if (!$res = mysqli_query($link, $sql = sprintf('SHOW CHARACTER SET LIKE "%s"', $character_set_connection)))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	$tmp = mysqli_fetch_assoc($res);
 	if (empty($tmp))
@@ -53,14 +53,14 @@ if (!function_exists('mysqli_get_charset'))
 	$maxlen = (isset($tmp['Maxlen'])) ? $tmp['Maxlen'] : '';
 	$comment = (isset($tmp['Description'])) ? $tmp['Description'] : '';
 
-	if (!$res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $collation_connection)))
+	if (!$res = mysqli_query($link, sprintf('SHOW COLLATION LIKE "%s"', $collation_connection)))
 		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	$tmp = mysqli_fetch_assoc($res);
 	mysqli_free_result($res);
 	if (!($id = $tmp['Id']))
 		printf("[012] Cannot fetch Id/Number, test will fail\n");
 
-	if (!$res = mysqli_query($link, sprintf("SHOW VARIABLES LIKE 'character_sets_dir'")))
+	if (!$res = mysqli_query($link, sprintf('SHOW VARIABLES LIKE "character_sets_dir"')))
 		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	$tmp = mysqli_fetch_assoc($res);
 	mysqli_free_result($res);

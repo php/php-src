@@ -28,7 +28,7 @@ if (!$IS_MYSQLND)
 			'CREATE TABLE IF NOT EXISTS bogus(id INT)',
 			'SET @a = 1',
 			'SELECT * FROM test ORDER BY id ASC LIMIT 2',
-			"INSERT INTO test(id, label) VALUES (100, 'z')",
+			'INSERT INTO test(id, label) VALUES (100, "z")',
 			'SELECT * FROM test ORDER BY id ASC LIMIT 2',
 			'SELECT',
 			'UPDATE test SET id = 101 WHERE id > 3',
@@ -43,7 +43,7 @@ if (!$IS_MYSQLND)
 	mysqli_real_query($link, "DROP PROCEDURE IF EXISTS p");
 	if (mysqli_real_query($link, 'CREATE PROCEDURE p(IN ver_in VARCHAR(25), OUT ver_out VARCHAR(25)) BEGIN SELECT ver_in INTO ver_out; END;')) {
 			$have_proc = true;
-			$queries[] = "CALL p('myversion', @version)";
+			$queries[] = 'CALL p("myversion", @version)';
 	}
 	mysqli_close($link);
 
@@ -158,10 +158,10 @@ if (!$IS_MYSQLND)
 [003] 'UPDATE test SET id = 101 WHERE id > 3' caused 1062
 [003] 'UPDATE_FIX test SET id = 101 WHERE id > 3' caused 1064
 array(2) {
-  ["id"]=>
-  string(3) "100"
-  ["label"]=>
-  string(1) "z"
+  [%u|b%"id"]=>
+  %unicode|string%(3) "100"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "z"
 }
 [009] [2014] %s
 done!

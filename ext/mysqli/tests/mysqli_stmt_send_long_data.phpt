@@ -41,7 +41,7 @@ require_once('skipifconnectfailure.inc');
 	if (!mysqli_stmt_bind_param($stmt, "ib", $id, $label))
 		printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'max_allowed_packet'"))
+	if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "max_allowed_packet"'))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_assoc($res))

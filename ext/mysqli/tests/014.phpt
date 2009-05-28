@@ -86,29 +86,14 @@ mysqli autocommit/commit/rollback
 Num_of_rows=1
 array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(6) "foobar"
+  %unicode|string%(6) "foobar"
 }
 array(2) {
   [0]=>
-  string(1) "2"
+  %unicode|string%(1) "2"
   [1]=>
-  string(4) "egon"
-}
-done!
---UEXPECTF--
-Num_of_rows=1
-array(2) {
-  [0]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(6) "foobar"
-}
-array(2) {
-  [0]=>
-  unicode(1) "2"
-  [1]=>
-  unicode(4) "egon"
+  %unicode|string%(4) "egon"
 }
 done!

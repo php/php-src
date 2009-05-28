@@ -24,7 +24,7 @@ mysqli.max_links=2
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 	}
-	if (!mysqli_query($link1, "SET @pcondisabled = 'Connection 1'"))
+	if (!mysqli_query($link1, 'SET @pcondisabled = "Connection 1"'))
 		printf("[002] Cannot set user variable to check if we got the same persistent connection, [%d] %s\n",
 			mysqli_errno($link1), mysqli_error($link1));
 
@@ -49,7 +49,7 @@ mysqli.max_links=2
 	printf("Connection 2 (no reuse) - Thread ID -> '%s'\n", $thread_id);
 	mysqli_free_result($res);
 
-	if (!mysqli_query($link2, "SET @pcondisabled = 'Connection 2'"))
+	if (!mysqli_query($link2, 'SET @pcondisabled = "Connection 2"'))
 		printf("[006] Cannot set user variable to check if we got the same persistent connection, [%d] %s\n",
 			mysqli_errno($link2), mysqli_error($link2));
 

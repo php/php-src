@@ -1,8 +1,8 @@
 --TEST--
 function test: mysqli_character_set_name
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -20,8 +20,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-string(%d) "%s"
-done!
---UEXPECTF--
-unicode(%d) "%s"
+%unicode|string%(%d) "%s"
 done!

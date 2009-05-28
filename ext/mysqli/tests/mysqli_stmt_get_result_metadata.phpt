@@ -208,36 +208,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
+  [%u|b%"id"]=>
   int(1)
-  ["label"]=>
-  string(1) "a"
-}
-NULL
-bool(false)
-bool(false)
-id
-label
-_id
-_label
-_null
-_label_concat
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
-done!
---UEXPECTF--
-array(2) {
-  [u"id"]=>
-  int(1)
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 NULL
 bool(false)

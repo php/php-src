@@ -17,15 +17,7 @@ mysqli_driver properties
 --EXPECTF--
 bool(%s)
 int(%d)
-string(%d) "%s"
-int(%d)
-bool(%s)
-int(%d)
-done!
---UEXPECTF--
-bool(%s)
-int(%d)
-unicode(%d) "%s"
+%unicode|string%(%d) "%s"
 int(%d)
 bool(%s)
 int(%d)

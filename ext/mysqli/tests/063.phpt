@@ -1,8 +1,8 @@
 --TEST--
-resultset constructor 
+resultset constructor
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -20,7 +20,5 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump($foo);
 ?>
---EXPECT--
-string(3) "foo"
---UEXPECT--
-unicode(3) "foo"
+--EXPECTF--
+%unicode|string%(3) "foo"

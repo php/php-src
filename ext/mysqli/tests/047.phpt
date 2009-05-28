@@ -50,308 +50,153 @@ require_once('skipifconnectfailure.inc');
 array(2) {
   [0]=>
   object(stdClass)#5 (11) {
-    ["name"]=>
-    string(3) "foo"
-    ["orgname"]=>
-    string(3) "foo"
-    ["table"]=>
-    string(13) "test_affected"
-    ["orgtable"]=>
-    string(13) "test_affected"
-    ["def"]=>
-    string(0) ""
-    ["max_length"]=>
+    [%u|b%"name"]=>
+    %unicode|string%(3) "foo"
+    [%u|b%"orgname"]=>
+    %unicode|string%(3) "foo"
+    [%u|b%"table"]=>
+    %unicode|string%(13) "test_affected"
+    [%u|b%"orgtable"]=>
+    %unicode|string%(13) "test_affected"
+    [%u|b%"def"]=>
+    %unicode|string%(0) ""
+    [%u|b%"max_length"]=>
     int(0)
-    ["length"]=>
+    [%u|b%"length"]=>
     int(%d)
-    ["charsetnr"]=>
+    [%u|b%"charsetnr"]=>
     int(%d)
-    ["flags"]=>
+    [%u|b%"flags"]=>
     int(32768)
-    ["type"]=>
+    [%u|b%"type"]=>
     int(3)
-    ["decimals"]=>
+    [%u|b%"decimals"]=>
     int(0)
   }
   [1]=>
   object(stdClass)#6 (11) {
-    ["name"]=>
-    string(3) "bar"
-    ["orgname"]=>
-    string(3) "bar"
-    ["table"]=>
-    string(13) "test_affected"
-    ["orgtable"]=>
-    string(13) "test_affected"
-    ["def"]=>
-    string(0) ""
-    ["max_length"]=>
+    [%u|b%"name"]=>
+    %unicode|string%(3) "bar"
+    [%u|b%"orgname"]=>
+    %unicode|string%(3) "bar"
+    [%u|b%"table"]=>
+    %unicode|string%(13) "test_affected"
+    [%u|b%"orgtable"]=>
+    %unicode|string%(13) "test_affected"
+    [%u|b%"def"]=>
+    %unicode|string%(0) ""
+    [%u|b%"max_length"]=>
     int(0)
-    ["length"]=>
+    [%u|b%"length"]=>
     int(%d)
-    ["charsetnr"]=>
+    [%u|b%"charsetnr"]=>
     int(%d)
-    ["flags"]=>
+    [%u|b%"flags"]=>
     int(0)
-    ["type"]=>
+    [%u|b%"type"]=>
     int(253)
-    ["decimals"]=>
+    [%u|b%"decimals"]=>
     int(0)
   }
 }
 
 === fetch_field_direct ===
 object(stdClass)#6 (11) {
-  ["name"]=>
-  string(3) "foo"
-  ["orgname"]=>
-  string(3) "foo"
-  ["table"]=>
-  string(13) "test_affected"
-  ["orgtable"]=>
-  string(13) "test_affected"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"orgname"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"table"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(0)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(%d)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(%d)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(32768)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(3)
-  ["decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 object(stdClass)#6 (11) {
-  ["name"]=>
-  string(3) "bar"
-  ["orgname"]=>
-  string(3) "bar"
-  ["table"]=>
-  string(13) "test_affected"
-  ["orgtable"]=>
-  string(13) "test_affected"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(3) "bar"
+  [%u|b%"orgname"]=>
+  %unicode|string%(3) "bar"
+  [%u|b%"table"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(0)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(%d)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(%d)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(0)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(253)
-  ["decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 
 === fetch_field ===
 object(stdClass)#6 (11) {
-  ["name"]=>
-  string(3) "foo"
-  ["orgname"]=>
-  string(3) "foo"
-  ["table"]=>
-  string(13) "test_affected"
-  ["orgtable"]=>
-  string(13) "test_affected"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"orgname"]=>
+  %unicode|string%(3) "foo"
+  [%u|b%"table"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(0)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(%d)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(%d)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(32768)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(3)
-  ["decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 object(stdClass)#5 (11) {
-  ["name"]=>
-  string(3) "bar"
-  ["orgname"]=>
-  string(3) "bar"
-  ["table"]=>
-  string(13) "test_affected"
-  ["orgtable"]=>
-  string(13) "test_affected"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(3) "bar"
+  [%u|b%"orgname"]=>
+  %unicode|string%(3) "bar"
+  [%u|b%"table"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(13) "test_affected"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(0)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(%d)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(%d)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(0)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(253)
-  ["decimals"]=>
-  int(0)
-}
-done!
---UEXPECTF--
-=== fetch_fields ===
-array(2) {
-  [0]=>
-  object(stdClass)#5 (11) {
-    [u"name"]=>
-    unicode(3) "foo"
-    [u"orgname"]=>
-    unicode(3) "foo"
-    [u"table"]=>
-    unicode(13) "test_affected"
-    [u"orgtable"]=>
-    unicode(13) "test_affected"
-    [u"def"]=>
-    unicode(0) ""
-    [u"max_length"]=>
-    int(0)
-    [u"length"]=>
-    int(%d)
-    [u"charsetnr"]=>
-    int(%d)
-    [u"flags"]=>
-    int(32768)
-    [u"type"]=>
-    int(3)
-    [u"decimals"]=>
-    int(0)
-  }
-  [1]=>
-  object(stdClass)#6 (11) {
-    [u"name"]=>
-    unicode(3) "bar"
-    [u"orgname"]=>
-    unicode(3) "bar"
-    [u"table"]=>
-    unicode(13) "test_affected"
-    [u"orgtable"]=>
-    unicode(13) "test_affected"
-    [u"def"]=>
-    unicode(0) ""
-    [u"max_length"]=>
-    int(0)
-    [u"length"]=>
-    int(%d)
-    [u"charsetnr"]=>
-    int(%d)
-    [u"flags"]=>
-    int(0)
-    [u"type"]=>
-    int(253)
-    [u"decimals"]=>
-    int(0)
-  }
-}
-
-=== fetch_field_direct ===
-object(stdClass)#6 (11) {
-  [u"name"]=>
-  unicode(3) "foo"
-  [u"orgname"]=>
-  unicode(3) "foo"
-  [u"table"]=>
-  unicode(13) "test_affected"
-  [u"orgtable"]=>
-  unicode(13) "test_affected"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(0)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(32768)
-  [u"type"]=>
-  int(3)
-  [u"decimals"]=>
-  int(0)
-}
-object(stdClass)#6 (11) {
-  [u"name"]=>
-  unicode(3) "bar"
-  [u"orgname"]=>
-  unicode(3) "bar"
-  [u"table"]=>
-  unicode(13) "test_affected"
-  [u"orgtable"]=>
-  unicode(13) "test_affected"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(0)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(0)
-  [u"type"]=>
-  int(253)
-  [u"decimals"]=>
-  int(0)
-}
-
-=== fetch_field ===
-object(stdClass)#6 (11) {
-  [u"name"]=>
-  unicode(3) "foo"
-  [u"orgname"]=>
-  unicode(3) "foo"
-  [u"table"]=>
-  unicode(13) "test_affected"
-  [u"orgtable"]=>
-  unicode(13) "test_affected"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(0)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(32768)
-  [u"type"]=>
-  int(3)
-  [u"decimals"]=>
-  int(0)
-}
-object(stdClass)#5 (11) {
-  [u"name"]=>
-  unicode(3) "bar"
-  [u"orgname"]=>
-  unicode(3) "bar"
-  [u"table"]=>
-  unicode(13) "test_affected"
-  [u"orgtable"]=>
-  unicode(13) "test_affected"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(0)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(0)
-  [u"type"]=>
-  int(253)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 done!

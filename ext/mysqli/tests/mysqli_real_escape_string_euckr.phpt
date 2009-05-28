@@ -43,7 +43,7 @@ mysqli_close($link);
 	if ("권대성\\0권대성" !== ($tmp = mysqli_real_escape_string($link, "권대성" . chr(0) . "권대성")))
 		printf("[009] Expecting %s, got %s\n", "권대성\\0권대성", $tmp);
 
-	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '권')"));
+	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "권")'));
 
 	mysqli_close($link);
 	print "done!";

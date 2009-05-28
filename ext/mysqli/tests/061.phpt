@@ -51,13 +51,7 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 ?>
 --EXPECT--
 foo-bar
-string-string
+%unicode|string%-%unicode|string%
 rab-oof
-string-string
-done!
---UEXPECTF--
-foo-bar
-unicode-unicode
-rab-oof
-unicode-unicode
+%unicode|string%-%unicode|string%
 done!

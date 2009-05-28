@@ -23,7 +23,7 @@ mysqli.max_links=2
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 	}
-	if (!mysqli_query($link1, "SET @pcondisabled = 'Connection 1'"))
+	if (!mysqli_query($link1, 'SET @pcondisabled = "Connection 1"'))
 		printf("[002] Cannot set user variable to check if we got the same persistent connection, [%d] %s\n",
 			mysqli_errno($link1), mysqli_error($link1));
 

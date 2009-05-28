@@ -41,14 +41,14 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a')") ||
+	if (!mysqli_stmt_prepare($stmt, 'INSERT INTO test(id, label) VALUES (1, "a")') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
+	if (!mysqli_stmt_prepare($stmt, 'INSERT INTO test(id, label) VALUES (100, "z")') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[007] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
@@ -58,7 +58,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
+	if (!mysqli_stmt_prepare($stmt, 'INSERT INTO test(id, label) VALUES (100, "z")') ||
 		!mysqli_stmt_execute($stmt))
 		// NOTE: the error message varies with the MySQL Server version, dump only the error code!
 		printf("[009] [%d] (error message varies with the MySQL Server version, check the error code)\n", mysqli_stmt_errno($stmt));
@@ -70,7 +70,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	$stmt = mysqli_stmt_init($link);
 
-	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4") ||
+	if (!mysqli_stmt_prepare($stmt, 'INSERT INTO test(id, label) VALUES (1, "a") ON DUPLICATE KEY UPDATE id = 4') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[011] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 

@@ -227,5 +227,3 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 ?>
 --EXPECTF--
 done!
---UEXPECTF--
-done!

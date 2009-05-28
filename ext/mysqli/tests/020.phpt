@@ -7,10 +7,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	/* NOTE: There's an option in mysqlnd which controls if data and
-	time are returned as unicode or not. Consider this if you consider
-	adding a UEXPECTF to the test. */
-
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/

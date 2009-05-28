@@ -19,7 +19,7 @@ mysqli.max_links=-1
 	// opens a regular connection
 	require_once("table.inc");
 
-	if (!$res = mysqli_query($link, "SELECT 'works..' as _desc"))
+	if (!$res = mysqli_query($link, 'SELECT "works.." as _desc'))
 		printf("[001] Cannot run query, [%d] %s\n",
 			mysqli_errno($link), mysqli_error($link));
 
@@ -31,7 +31,7 @@ mysqli.max_links=-1
 		printf("[002] Cannot open second regular connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($link2, "SELECT 'works...' as _desc"))
+	if (!$res = mysqli_query($link2, 'SELECT "works..." as _desc'))
 		printf("[003] Cannot run query, [%d] %s\n",
 			mysqli_errno($link2), mysqli_error($link2));
 
@@ -45,7 +45,7 @@ mysqli.max_links=-1
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($plink, "SELECT 'works...' as _desc"))
+	if (!$res = mysqli_query($plink, 'SELECT "works..." as _desc'))
 		printf("[005] Cannot run query, [%d] %s\n",
 			mysqli_errno($plink), mysqli_error($plink));
 
@@ -58,7 +58,7 @@ mysqli.max_links=-1
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($plink2, "SELECT 'works...' as _desc"))
+	if (!$res = mysqli_query($plink2, 'SELECT "works..." as _desc'))
 		printf("[007] Cannot run query, [%d] %s\n",
 			mysqli_errno($plink2), mysqli_error($plink2));
 
@@ -72,7 +72,7 @@ mysqli.max_links=-1
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($plink3, "SELECT 'works...' as _desc"))
+	if (!$res = mysqli_query($plink3, 'SELECT "works..." as _desc'))
 		printf("[009] Cannot run query, [%d] %s\n",
 			mysqli_errno($plink2), mysqli_error($plink2));
 

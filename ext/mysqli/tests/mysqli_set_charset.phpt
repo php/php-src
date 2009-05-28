@@ -6,10 +6,12 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
+if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
+}
+
 if (!function_exists('mysqli_set_charset'))
  	die("skip Function not available");
-if (ini_get("unicode.semantics"))
-	die("skip: mysqli_set_charset() is disabled in unicode");
 
 require_once('connect.inc');
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))

@@ -1,9 +1,9 @@
 --TEST--
 mysqli_query()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -30,26 +30,26 @@ require_once('skipifconnectfailure.inc');
 	if (false !== ($tmp = mysqli_query($link, 'THIS IS NOT SQL')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = mysqli_query($link, "SELECT 'this is sql but with backslash g'\g")))
+	if (false !== ($tmp = mysqli_query($link, 'SELECT "this is sql but with backslash g"\g')))
 		printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if ((0 === mysqli_errno($link)) || ('' == mysqli_error($link)))
 		printf("[006] mysqli_errno()/mysqli_error should return some error\n");
 
-	if (!$res = mysqli_query($link, "SELECT 'this is sql but with semicolon' AS valid ; "))
+	if (!$res = mysqli_query($link, 'SELECT "this is sql but with semicolon" AS valid ; '))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	var_dump(mysqli_fetch_assoc($res));
 	mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SELECT 'a' AS ''"))
+	if (!$res = mysqli_query($link, 'SELECT "a" AS ""'))
 		printf("[007a] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	var_dump($tmp = mysqli_fetch_assoc($res));
 	var_dump($tmp[""]);
 	mysqli_free_result($res);
 
-	if (false !== ($res = mysqli_query($link, "SELECT 'this is sql but with semicolon' AS valid ; SHOW VARIABLES")))
+	if (false !== ($res = mysqli_query($link, 'SELECT "this is sql but with semicolon" AS valid ; SHOW VARIABLES')))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (mysqli_get_server_version($link) > 50000) {
@@ -114,27 +114,14 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  ["valid"]=>
-  string(30) "this is sql but with semicolon"
+  [%u|b%"valid"]=>
+  %unicode|string%(30) "this is sql but with semicolon"
 }
 array(1) {
-  [""]=>
-  string(1) "a"
+  [%u|b%""]=>
+  %unicode|string%(1) "a"
 }
-string(1) "a"
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
-done!
---UEXPECTF--
-array(1) {
-  [u"valid"]=>
-  unicode(30) "this is sql but with semicolon"
-}
-array(1) {
-  [u""]=>
-  unicode(1) "a"
-}
-unicode(1) "a"
+%unicode|string%(1) "a"
 
 Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
 done!

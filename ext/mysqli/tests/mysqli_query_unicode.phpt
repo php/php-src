@@ -36,19 +36,19 @@ mysqli_close($link);
 	if (false !== ($tmp = mysqli_query($link, 'това не е ескюел')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = mysqli_query($link, "SELECT 'това е ескюел, но със обратна наклонена и g'\g")))
+	if (false !== ($tmp = mysqli_query($link, 'SELECT "това е ескюел, но със обратна наклонена и g"\g')))
 		printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if ((0 === mysqli_errno($link)) || ('' == mysqli_error($link)))
 		printf("[006] mysqli_errno()/mysqli_error should return some error\n");
 
-	if (!$res = mysqli_query($link, "SELECT 'това ескюел, но с точка и запетая' AS правилен ; "))
+	if (!$res = mysqli_query($link, 'SELECT "това ескюел, но с точка и запетая" AS правилен ; '))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	var_dump(mysqli_fetch_assoc($res));
 	mysqli_free_result($res);
 
-	if (false !== ($res = mysqli_query($link, "SELECT 'това ескюел, но с точка и запетая' AS правилен ; SHOW VARIABLES")))
+	if (false !== ($res = mysqli_query($link, 'SELECT "това ескюел, но с точка и запетая" AS правилен ; SHOW VARIABLES')))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (mysqli_get_server_version($link) > 50000) {
@@ -125,16 +125,8 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 array(1) {
-  ["правилен"]=>
-  string(59) "това ескюел, но с точка и запетая"
-}
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
-done!
---UEXPECTF--
-array(1) {
-  [u"правилен"]=>
-  unicode(33) "това ескюел, но с точка и запетая"
+  [%u|b%"правилен"]=>
+  %unicode|string%(%d) "това ескюел, но с точка и запетая"
 }
 
 Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d

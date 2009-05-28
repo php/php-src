@@ -57,51 +57,25 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [005]
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 [006]
 NULL
 [008]
 array(5) {
-  ["a"]=>
-  string(1) "2"
-  ["c"]=>
-  string(1) "3"
-  ["C"]=>
-  string(1) "4"
-  ["d"]=>
+  [%u|b%"a"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"c"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"C"]=>
+  %unicode|string%(1) "4"
+  [%u|b%"d"]=>
   NULL
-  ["e"]=>
-  string(1) "1"
-}
-
-Warning: mysqli_result::fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d
-done!
---UEXPECTF--
-[005]
-array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
-}
-[006]
-NULL
-[008]
-array(5) {
-  [u"a"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
-  [u"C"]=>
-  unicode(1) "4"
-  [u"d"]=>
-  NULL
-  [u"e"]=>
-  unicode(1) "1"
+  [%u|b%"e"]=>
+  %unicode|string%(1) "1"
 }
 
 Warning: mysqli_result::fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d

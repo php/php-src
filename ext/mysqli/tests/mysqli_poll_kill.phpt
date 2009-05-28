@@ -174,13 +174,13 @@ if (!$IS_MYSQLND)
 ?>
 --EXPECTF--
 array(1) {
-  ["processed beofre killed"]=>
-  string(1) "1"
+  [%u|b%"processed beofre killed"]=>
+  %unicode|string%(1) "1"
 }
 Fetching from thread %d...
 array(1) {
   [1]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
 }
 
 Warning: mysqli_reap_async_query(): GREET %s

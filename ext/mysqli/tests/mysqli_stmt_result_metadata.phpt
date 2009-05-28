@@ -98,58 +98,27 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
  in %s on line %d
 object(stdClass)#5 (%d) {
-  ["name"]=>
-  string(2) "id"
-  ["orgname"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "test"
-  ["orgtable"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(0)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(11)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(63)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(49155)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(3)
-  ["decimals"]=>
-  int(0)
-}
-
-Warning: mysqli_stmt_result_metadata(): Couldn't fetch mysqli_stmt in %s on line %d
-done!
---UEXPECTF--
-
-Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
- in %s on line %d
-object(stdClass)#5 (%d) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"orgname"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(0)
-  [u"length"]=>
-  int(11)
-  [u"charsetnr"]=>
-  int(63)
-  [u"flags"]=>
-  int(49155)
-  [u"type"]=>
-  int(3)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 

@@ -1,8 +1,8 @@
 --TEST--
 mysqli warning_count, get_warnings
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -27,12 +27,6 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 int(1)
 int(1051)
-string(26) "Unknown table 'not_exists'"
-string(5) "HY000"
-done!
---UEXPECTF--
-int(1)
-int(1051)
-unicode(26) "Unknown table 'not_exists'"
-unicode(5) "HY000"
+%unicode|string%(26) "Unknown table 'not_exists'"
+%unicode|string%(5) "HY000"
 done!
