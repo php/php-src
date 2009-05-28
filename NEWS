@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
+- Fixed bug #48738 (exif_read_data() segfaults on certain corrupted .jpeg 
+  files). (Pierre)
 - Fixed bug #48336 (ReflectionProperty::getDeclaringClass() does not work with
   redeclared property). (patch by Markus dot Lidel at shadowconnect dot com)
 - Fixed bug #48326 (constant MSG_DONTWAIT not defined). (Arnaud)
