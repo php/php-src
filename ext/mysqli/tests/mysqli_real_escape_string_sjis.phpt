@@ -44,7 +44,7 @@ mysqli_close($link);
 	if ("?p??\\0?p??" !== ($tmp = mysqli_real_escape_string($link, "?p??" . chr(0) . "?p??")))
 		printf("[009] Expecting %s, got %s\n", "?p??\\0?p??", $tmp);
 
-	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "?p")'));
+	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '?p')"));
 
 	mysqli_close($link);
 	print "done!";
