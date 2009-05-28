@@ -4,7 +4,7 @@
 
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
-** version 3.6.14.1.  By combining all the individual C code files into this 
+** version 3.6.14.2.  By combining all the individual C code files into this 
 ** single large file, the entire code can be compiled as a one translation
 ** unit.  This allows many compilers to do optimizations that would not be
 ** possible if the files were compiled separately.  Performance improvements
@@ -21,7 +21,7 @@
 ** is also in a separate file.  This file contains only code for the core
 ** SQLite library.
 **
-** This amalgamation was generated on 2009-05-18 18:33:54 UTC.
+** This amalgamation was generated on 2009-05-25 12:49:40 UTC.
 */
 #define SQLITE_CORE 1
 #define SQLITE_AMALGAMATION 1
@@ -601,7 +601,7 @@ extern "C" {
 **
 ** Requirements: [H10011] [H10014]
 */
-#define SQLITE_VERSION         "3.6.14.1"
+#define SQLITE_VERSION         "3.6.14.2"
 #define SQLITE_VERSION_NUMBER  3006014
 
 /*
@@ -59474,6 +59474,22 @@ SQLITE_PRIVATE void sqlite3ExprCachePop(Parse *pParse, int N){
 }
 
 /*
+** When a cached column is reused, make sure that its register is
+** no longer available as a temp register.  ticket #3879:  that same
+** register might be in the cache in multiple places, so be sure to
+** get them all.
+*/
+static void sqlite3ExprCachePinRegister(Parse *pParse, int iReg){
+  int i;
+  struct yColCache *p;
+  for(i=0, p=pParse->aColCache; i<SQLITE_N_COLCACHE; i++, p++){
+    if( p->iReg==iReg ){
+      p->tempReg = 0;
+    }
+  }
+}
+
+/*
 ** Generate code that will extract the iColumn-th column from
 ** table pTab and store the column value in a register.  An effort
 ** is made to store the column value in register iReg, but this is
@@ -59508,7 +59524,7 @@ SQLITE_PRIVATE int sqlite3ExprCodeGetColumn(
       VdbeComment((v, "OPT: tab%d.col%d -> r%d", iTable, iColumn, p->iReg));
 #endif
       p->lru = pParse->iCacheCnt++;
-      p->tempReg = 0;  /* This pins the register, but also leaks it */
+      sqlite3ExprCachePinRegister(pParse, p->iReg);
       return p->iReg;
     }
   }  
