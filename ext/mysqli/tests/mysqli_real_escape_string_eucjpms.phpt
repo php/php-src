@@ -43,7 +43,7 @@ mysqli_close($link);
 	if ("この組み合わせでは\\0この組み合わせでは" !== ($tmp = mysqli_real_escape_string($link, "この組み合わせでは" . chr(0) . "この組み合わせでは")))
 		printf("[009] Expecting %s, got %s\n", "この組み合わせでは\\0この組み合わせでは", $tmp);
 
-	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "こ")'));
+	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'こ')"));
 
 	mysqli_close($link);
 	print "done!";

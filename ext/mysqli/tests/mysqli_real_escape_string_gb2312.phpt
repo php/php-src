@@ -44,7 +44,7 @@ mysqli_close($link);
 	if ("首先\\0首先" !== ($tmp = mysqli_real_escape_string($link, "首先" . chr(0) . "首先")))
 		printf("[009] Expecting %s, got %s\n", "首先\\0首先", $tmp);
 
-	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "首")'));
+	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '首')"));
 
 	mysqli_close($link);
 	print "done!";
