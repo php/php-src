@@ -1373,6 +1373,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const stmt,
 			/* Prevent from freeing */
 			/* Don't update is_ref, or we will leak during conversion */
 			Z_ADDREF_P(stmt->param_bind[i].zv);
+			stmt->param_bind[i].flags = 0;
 			if (stmt->param_bind[i].type == MYSQL_TYPE_LONG_BLOB) {
 				stmt->param_bind[i].flags &= ~MYSQLND_PARAM_BIND_BLOB_USED;
 			}

@@ -100,8 +100,10 @@ void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC
 	zval **data_begin = result->stored_data->data;
 	unsigned int field_count = result->meta->field_count;
 	unsigned int row_count = result->stored_data->row_count;
+	DBG_ENTER("mysqlnd_res_initialize_result_set_rest");
+
 	if (!data_cursor || row_count == result->stored_data->initialized_rows) {
-		return;
+		DBG_VOID_RETURN;
 	}
 	while ((data_cursor - data_begin) < (row_count * field_count)) {
 		if (NULL == data_cursor[0]) {
@@ -128,6 +130,7 @@ void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC
 		}
 		data_cursor += field_count;
 	}
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -1752,6 +1755,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result TSRMLS_DC)
 		  not during mysqli_fetch_field() time.
 		*/
 		if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
+			DBG_INF_FMT("We have decode the whole result set to be able to satisfy this meta request");
 			/* we have to initialize the rest to get the updated max length */
 			mysqlnd_res_initialize_result_set_rest(result TSRMLS_CC);
 		}
@@ -1780,6 +1784,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result,
 		  not during mysqli_fetch_field_direct() time.
 		*/
 		if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
+			DBG_INF_FMT("We have decode the whole result set to be able to satisfy this meta request");
 			/* we have to initialized the rest to get the updated max length */
 			mysqlnd_res_initialize_result_set_rest(result TSRMLS_CC);
 		}
