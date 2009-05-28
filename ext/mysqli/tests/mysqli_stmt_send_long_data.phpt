@@ -80,7 +80,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[012] Expecting boolean/false, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (false !== ($tmp = mysqli_stmt_send_long_data($stmt, PHP_INT_MAX + 1, $blob)))
+	if (false !== ($tmp = @mysqli_stmt_send_long_data($stmt, PHP_INT_MAX + 1, $blob)))
 		printf("[013] Expecting boolean/false, got %s/%s. [%d] %s\n",
 			gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
