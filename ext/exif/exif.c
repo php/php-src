@@ -3188,6 +3188,10 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF start (1)");
 		return;
 	}
+	if (offset_of_ifd > length) {
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid IFD start");
+		return;
+	}
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 	/* First directory starts at offset 8. Offsets starts at 0. */
