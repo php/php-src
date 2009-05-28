@@ -1,3 +1,11 @@
+2009-05-27  David Soria Parra  <dsoria@gmx.net>
+
+    * zend_compile.c
+      zend_hash.c
+      zend_hash.h:
+      Remove duplicated code of zend_hash_func and alias it to
+      zend_get_hash_value
+
 2009-05-25  Felipe Pena  <felipensp@gmail.com>
 
     * zend_API.c
