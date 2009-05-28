@@ -3624,7 +3624,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(EXT), &pos);
 		do {
 			zval ** item;
-			char * key;
+			zstr key;
 			ulong num_key;
 
 			if (zend_hash_get_current_key_ex(HASH_OF(EXT), &key, NULL, &num_key, 0, &pos) != HASH_KEY_IS_STRING) {
@@ -3635,7 +3635,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 				continue;
 			}
 		
-			if (strcmp("linespacing", key) == 0) {
+			if (strcmp("linespacing", key.s) == 0) {
 				convert_to_double_ex(item);
 				strex.flags |= gdFTEX_LINESPACE;
 				strex.linespacing = Z_DVAL_PP(item);
