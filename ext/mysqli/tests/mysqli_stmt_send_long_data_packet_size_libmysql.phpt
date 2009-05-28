@@ -31,7 +31,7 @@ if (stristr(mysqli_get_client_info(), 'mysqlnd'))
 	if (!mysqli_stmt_bind_param($stmt, "ib", $id, $label))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (!$res = mysqli_query($link, 'SHOW VARIABLES LIKE "max_allowed_packet"'))
+	if (!$res = mysqli_query($link, "SHOW VARIABLES LIKE 'max_allowed_packet'"))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (!$row = mysqli_fetch_assoc($res))
