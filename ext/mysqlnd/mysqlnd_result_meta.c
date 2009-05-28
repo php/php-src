@@ -372,8 +372,12 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field");
 	if (meta->current_field >= meta->field_count) {
+		DBG_INF("no more fields");
 		DBG_RETURN(NULL);
 	}
+	DBG_INF_FMT("name=%s max_length=%u",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
+		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[meta->current_field++]);
 }
 /* }}} */
@@ -386,6 +390,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA 
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%d", fieldnr);
+	DBG_INF_FMT("name=%s max_length=%u",
+		meta->fields[meta->current_field].name? meta->fields[meta->current_field].name:"",
+		meta->fields[meta->current_field].max_length);
 	DBG_RETURN(&meta->fields[fieldnr]);
 }
 /* }}} */
