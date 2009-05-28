@@ -2350,7 +2350,7 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 
 	/* Prevent crash inside cURL if passed file has already been closed */
 	if (ch->handlers->std_err && Z_REFCOUNT_P(ch->handlers->std_err) <= 0) {
-		curl_easy_setopt(ch->cp, CURLOPT_STDERR, std_err);
+		curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
 	}
 
 	curl_easy_cleanup(ch->cp);
