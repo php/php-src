@@ -1,9 +1,9 @@
 --TEST--
 mysqli_kill()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -66,15 +66,49 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
-unicode(%d) "%s"
+%unicode|string%(%d) "%s"
 bool(false)
-object(mysqli)#%d (0) {
+object(mysqli)#%d (%d) {
+  [%u|b%"affected_rows"]=>
+  int(-1)
+  [%u|b%"client_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"client_version"]=>
+  int(%d)
+  [%u|b%"connect_errno"]=>
+  int(0)
+  [%u|b%"connect_error"]=>
+  %unicode|string%(0) ""
+  [%u|b%"errno"]=>
+  int(2006)
+  [%u|b%"error"]=>
+  %unicode|string%(26) "MySQL server has gone away"
+  [%u|b%"field_count"]=>
+  int(0)
+  [%u|b%"host_info"]=>
+  %unicode|string%(42) "MySQL host info: Localhost via UNIX socket"
+  [%u|b%"info"]=>
+  %unicode|string%(38) "Records: 6  Duplicates: 0  Warnings: 0"
+  [%u|b%"insert_id"]=>
+  int(0)
+  [%u|b%"server_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"server_version"]=>
+  int(%d)
+  [%u|b%"sqlstate"]=>
+  %unicode|string%(5) "HY000"
+  [%u|b%"protocol_version"]=>
+  int(10)
+  [%u|b%"thread_id"]=>
+  int(%d)
+  [%u|b%"warning_count"]=>
+  int(0)
 }
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
 array(1) {
-  [u"id"]=>
-  unicode(1) "1"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
 }
 
 Warning: mysqli_kill(): processid should have positive value in %s on line %d
