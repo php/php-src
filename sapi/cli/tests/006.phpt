@@ -27,10 +27,6 @@ string(37) "Exception: Extension  does not exist
 "
 string(%d) "Extension [ <persistent> extension #%d date version %s ] {
 
-  - Dependencies {
-    Dependency [ session (Optional) ]
-  }
-
   - INI {
     Entry [ date.timezone <ALL> ]
       Current = ''
