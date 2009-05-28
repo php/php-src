@@ -61,27 +61,27 @@ Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line
 NULL
 int(0)
 object(stdClass)#%d (11) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"orgname"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(%d)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(%d)
-  [u"type"]=>
-  int(%d)
-  [u"decimals"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
+  int(0)
+  [%u|b%"length"]=>
+  int(11)
+  [%u|b%"charsetnr"]=>
+  int(63)
+  [%u|b%"flags"]=>
+  int(49155)
+  [%u|b%"type"]=>
+  int(3)
+  [%u|b%"decimals"]=>
   int(0)
 }
 bool(false)

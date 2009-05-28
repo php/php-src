@@ -1,8 +1,8 @@
 --TEST--
 sqlmode + bind
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -41,6 +41,6 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECT--
-unicode(6) "foobar"
+--EXPECTF--
+%unicode|string%(6) "foobar"
 done!

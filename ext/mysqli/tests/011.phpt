@@ -62,6 +62,6 @@ array(8) {
   [6]=>
   string(6) "foobar"
   [7]=>
-  unicode(11) "mysql rulez"
+  %unicode|string%(11) "mysql rulez"
 }
 done!

@@ -62,16 +62,34 @@ require_once('skipifconnectfailure.inc');
 bool(true)
 bool(true)
 object(mysqli_stmt)#%d (%d) {
+  [%u|b%"affected_rows"]=>
+  int(-1)
+  [%u|b%"insert_id"]=>
+  int(0)
+  [%u|b%"num_rows"]=>
+  int(0)
+  [%u|b%"param_count"]=>
+  int(0)
+  [%u|b%"field_count"]=>
+  int(1)
+  [%u|b%"errno"]=>
+  int(0)
+  [%u|b%"error"]=>
+  %unicode|string%(0) ""
+  [%u|b%"sqlstate"]=>
+  %unicode|string%(5) "00000"
+  [%u|b%"id"]=>
+  int(3)
 }
 bool(true)
 bool(false)
-unicode(0) ""
+%unicode|string%(0) ""
 
 Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, boolean given in %s on line %d
 NULL
 Rows: 3
 array(1) {
   [0]=>
-  unicode(1) "1"
+  %unicode|string%(1) "1"
 }
 done!

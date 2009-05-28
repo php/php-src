@@ -2,8 +2,9 @@
 mysqli_real_escape_string() - sjis
 --SKIPIF--
 <?php
-if (ini_get('unicode.semantics'))
-	die("skip Test cannot be run in unicode mode");
+if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
+}
 
 require_once('skipif.inc');
 require_once('skipifemb.inc');
@@ -44,7 +45,7 @@ mysqli_close($link);
 	if ("?p??\\0?p??" !== ($tmp = mysqli_real_escape_string($link, "?p??" . chr(0) . "?p??")))
 		printf("[009] Expecting %s, got %s\n", "?p??\\0?p??", $tmp);
 
-	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '?p')"));
+	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "?p")'));
 
 	mysqli_close($link);
 	print "done!";

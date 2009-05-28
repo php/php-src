@@ -208,10 +208,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --EXPECTF--
 array(2) {
-  [u"id"]=>
+  [%u|b%"id"]=>
   int(1)
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 NULL
 bool(false)

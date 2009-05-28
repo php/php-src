@@ -1,9 +1,9 @@
 --TEST--
 References to result sets
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -80,71 +80,71 @@ require_once('skipifconnectfailure.inc');
 array(7) refcount(2){
   [0]=>
   array(2) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     long(1) refcount(1)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "a" { 0061 } refcount(1)
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a" refcount(1)
   }
   [1]=>
   array(2) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     long(2) refcount(1)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "b" { 0062 } refcount(1)
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b" refcount(1)
   }
   [2]=>
   array(2) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     long(1) refcount(1)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "a" { 0061 } refcount(1)
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a" refcount(1)
   }
   [3]=>
   array(2) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     long(2) refcount(1)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "b" { 0062 } refcount(1)
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b" refcount(1)
   }
   [4]=>
   array(3) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     &long(3) refcount(2)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "a" { 0061 } refcount(1)
-    [u"id2" { 0069 0064 0032 }]=>
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a" refcount(1)
+    [%u|b%"id2"]=>
     &long(3) refcount(2)
   }
   [5]=>
   array(3) refcount(1){
-    [u"id" { 0069 0064 }]=>
+    [%u|b%"id"]=>
     &long(4) refcount(2)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "b" { 0062 } refcount(1)
-    [u"id2" { 0069 0064 0032 }]=>
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b" refcount(1)
+    [%u|b%"id2"]=>
     &long(4) refcount(2)
   }
   [6]=>
   &object(mysqli_result)#2 (5) refcount(2){
-    ["current_field"]=>
+    [%u|b%"current_field"]=>
     NULL refcount(1)
-    ["field_count"]=>
+    [%u|b%"field_count"]=>
     NULL refcount(1)
-    ["lengths"]=>
+    [%u|b%"lengths"]=>
     NULL refcount(1)
-    ["num_rows"]=>
+    [%u|b%"num_rows"]=>
     NULL refcount(1)
-    ["type"]=>
+    [%u|b%"type"]=>
     NULL refcount(1)
   }
 }
 array(1) refcount(2){
   [0]=>
   array(2) refcount(1){
-    [u"id" { 0069 0064 }]=>
-    unicode(1) "1" { 0031 } refcount(1)
-    [u"label" { 006c 0061 0062 0065 006c }]=>
-    unicode(1) "a" { 0061 } refcount(1)
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1" refcount(1)
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a" refcount(1)
   }
 }
 done!

@@ -2,10 +2,17 @@
 Fetching results from tables of different charsets.
 --SKIPIF--
 <?php
-require_once('skipif.inc'); 
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('skipifunicode.inc');
 require_once('skipifemb.inc');
+
+if (!function_exists('mysqli_set_charset')) {
+	die('skip mysqli_set_charset() not available');
+}
+if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
+}
 ?>
 --FILE--
 <?php
@@ -13,12 +20,6 @@ require_once('skipifemb.inc');
 
 	$tmp	= NULL;
 	$link	= NULL;
-
-	if (ini_get("unicode.semantics")){
-		die('done!');
-	}
-
-
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);

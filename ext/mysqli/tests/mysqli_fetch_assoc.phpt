@@ -70,45 +70,45 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [005]
 array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 [006]
 NULL
 [008]
 array(15) {
-  [u"a"]=>
-  unicode(1) "2"
-  [u"c"]=>
-  unicode(1) "3"
-  [u"C"]=>
-  unicode(1) "4"
-  [u"d"]=>
+  [%u|b%"a"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"c"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"C"]=>
+  %unicode|string%(1) "4"
+  [%u|b%"d"]=>
   NULL
-  [u"e"]=>
-  unicode(1) "1"
+  [%u|b%"e"]=>
+  %unicode|string%(1) "1"
   [-1]=>
-  unicode(1) "5"
+  %unicode|string%(1) "5"
   [-10]=>
-  unicode(1) "6"
+  %unicode|string%(1) "6"
   [-100]=>
-  unicode(1) "7"
+  %unicode|string%(1) "7"
   [-1000]=>
-  unicode(1) "8"
+  %unicode|string%(1) "8"
   [10000]=>
-  unicode(1) "9"
+  %unicode|string%(1) "9"
   [100000]=>
-  unicode(1) "a"
+  %unicode|string%(1) "a"
   [1000000]=>
-  unicode(1) "b"
+  %unicode|string%(1) "b"
   [9]=>
-  unicode(1) "d"
-  [u"01"]=>
-  unicode(1) "e"
-  [u"-02"]=>
-  unicode(1) "f"
+  %unicode|string%(1) "d"
+  [%u|b%"01"]=>
+  %unicode|string%(1) "e"
+  [%u|b%"-02"]=>
+  %unicode|string%(1) "f"
 }
 
 Warning: mysqli_fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d

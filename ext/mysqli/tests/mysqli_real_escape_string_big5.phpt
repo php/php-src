@@ -44,7 +44,7 @@ mysqli_close($link);
 	if ("找到以下內容\\0找到以下內容" !== ($tmp = mysqli_real_escape_string($link, "找到以下內容" . chr(0) . "找到以下內容")))
 		printf("[009] Expecting %s, got %s\n", "找到以下內容\\0找到以下內容", $tmp);
 
-	var_dump(mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, '找')"));
+	var_dump(mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "找")'));
 
 	mysqli_close($link);
 	print "done!";

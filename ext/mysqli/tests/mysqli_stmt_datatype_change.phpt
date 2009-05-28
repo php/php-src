@@ -26,7 +26,7 @@ require_once('skipifconnectfailure.inc');
 	$c2->query("use $db");
 	$c1->query("drop table if exists type_change");
 	$c1->query("create table type_change(a int, b char(10))");
-	$c1->query("insert into type_change values (1, 'one'), (2, 'two')"); 
+	$c1->query("insert into type_change values (1, 'one'), (2, 'two')");
 	$s1 = $c1->prepare("select a from type_change order by a");
 	var_dump($s1->execute(), $s1->bind_result($col1));
 	echo "---- Row 1\n";
@@ -71,7 +71,7 @@ NULL
 ALTER
 bool(true)
 bool(false)
-unicode(34) "Unknown column 'a' in 'field list'"
+%unicode|string%(34) "Unknown column 'a' in 'field list'"
 ---- Row 1
 bool(false)
 int(2)

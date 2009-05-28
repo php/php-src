@@ -173,39 +173,39 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_real_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
-  [u"affected_rows"]=>
+  [%u|b%"affected_rows"]=>
   NULL
-  [u"client_info"]=>
-  unicode(%d) "%s"
-  [u"client_version"]=>
+  [%u|b%"client_info"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"client_version"]=>
   int(%d)
-  [u"connect_errno"]=>
+  [%u|b%"connect_errno"]=>
   int(%d)
-  [u"connect_error"]=>
-  unicode(%d) "%s"
-  [u"errno"]=>
+  [%u|b%"connect_error"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"errno"]=>
   int(%d)
-  [u"error"]=>
-  unicode(%d) "%s"
-  [u"field_count"]=>
+  [%u|b%"error"]=>
+  %unicode|string%(%d) "%s"
+  [%u|b%"field_count"]=>
   NULL
-  [u"host_info"]=>
+  [%u|b%"host_info"]=>
   NULL
-  [u"info"]=>
+  [%u|b%"info"]=>
   NULL
-  [u"insert_id"]=>
+  [%u|b%"insert_id"]=>
   NULL
-  [u"server_info"]=>
+  [%u|b%"server_info"]=>
   NULL
-  [u"server_version"]=>
+  [%u|b%"server_version"]=>
   NULL
-  [u"sqlstate"]=>
+  [%u|b%"sqlstate"]=>
   NULL
-  [u"protocol_version"]=>
+  [%u|b%"protocol_version"]=>
   NULL
-  [u"thread_id"]=>
+  [%u|b%"thread_id"]=>
   NULL
-  [u"warning_count"]=>
+  [%u|b%"warning_count"]=>
   NULL
 }
 done!

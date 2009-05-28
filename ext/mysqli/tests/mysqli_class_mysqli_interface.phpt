@@ -1,7 +1,7 @@
 --TEST--
 Interface of the class mysqli
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
@@ -24,7 +24,7 @@ require_once('skipifconnectfailure.inc');
 		'character_set_name'		=> true,
 		'client_encoding'		=> true,
 		'close'				=> true,
-		'commit'                    	=> true,
+		'commit'	=> true,
 		'connect'			=> true,
 		'dump_debug_info'		=> true,
 		'escape_string'			=> true,
@@ -255,18 +255,18 @@ warning_count
 
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)
-mysqli->client_info = '%s'/unicode ('%s'/unicode)
+mysqli->client_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
 mysqli->client_version =  '%d'/integer ('%d'/integer)
 mysqli->errno = '0'/integer ('0'/integer)
-mysqli->error = ''/unicode (''/unicode)
+mysqli->error = ''/%unicode|string% (''/%unicode|string%)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
-mysqli->sqlstate = '00000'/unicode ('00000'/unicode)
-mysqli->host_info = '%s'/unicode ('%s'/unicode)
-mysqli->info = ''/NULL (''/unicode)
+mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
+mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
+mysqli->info = ''/NULL (''/%unicode|string%)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
 mysqli->protocol_version = '%d'/integer ('%d'/integer)
-mysqli->server_info = '%s'/unicode ('%s'/unicode)
+mysqli->server_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
 mysqli->server_version = '%d'/integer ('%d'/integer)
 mysqli->warning_count = '0'/integer ('0'/integer)
 
@@ -276,6 +276,6 @@ setting mysqli->unknown, mysqli_unknown = '13'
 setting mysqli->unknown, mysqli_unknown = 'friday'
 
 Access hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):
-mysqli->connect_error = ''/unicode (''/unicode)
+mysqli->connect_error = ''/%unicode|string% (''/%unicode|string%)
 mysqli->connect_errno = '0'/integer ('0'/integer)
 done!

@@ -148,25 +148,25 @@ mysqli_connect()
 --EXPECTF--
 Warning: mysqli_connect(): (%d/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 array(1) {
-  [u"testing"]=>
-  unicode(21) "mysqli.default_socket"
+  [%u|b%"testing"]=>
+  %unicode|string%(21) "mysqli.default_socket"
 }
 array(1) {
-  [u"testing"]=>
-  unicode(19) "mysqli.default_port"
+  [%u|b%"testing"]=>
+  %unicode|string%(19) "mysqli.default_port"
 }
 array(1) {
-  [u"testing"]=>
-  unicode(17) "mysqli.default_pw"
+  [%u|b%"testing"]=>
+  %unicode|string%(17) "mysqli.default_pw"
 }
 array(2) {
   [0]=>
-  unicode(19) "mysqli.default_user"
-  [u"testing"]=>
-  unicode(19) "mysqli.default_user"
+  %unicode|string%(19) "mysqli.default_user"
+  [%u|b%"testing"]=>
+  %unicode|string%(19) "mysqli.default_user"
 }
 array(1) {
   [0]=>
-  unicode(19) "mysqli.default_host"
+  %unicode|string%(19) "mysqli.default_host"
 }
 done!

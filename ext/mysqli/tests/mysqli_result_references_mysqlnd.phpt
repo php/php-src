@@ -55,41 +55,41 @@ if (!$IS_MYSQLND)
 array(2) refcount(2){
   [0]=>
   array(4) refcount(1){
-    [u"row_ref" { 0072 006f 0077 005f 0072 0065 0066 }]=>
+    [%u|b%"row_ref"]=>
     &NULL refcount(2)
-    [u"row_copy" { 0072 006f 0077 005f 0063 006f 0070 0079 }]=>
+    [%u|b%"row_copy"]=>
     array(2) refcount(1){
-      [u"id" { 0069 0064 }]=>
-      unicode(1) "1" { 0031 } refcount(2)
-      [u"label" { 006c 0061 0062 0065 006c }]=>
-      unicode(1) "a" { 0061 } refcount(2)
+      [%u|b%"id"]=>
+      %unicode|string%(1) "1" refcount(2)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "a" refcount(2)
     }
-    [u"id_ref" { 0069 0064 005f 0072 0065 0066 }]=>
-    unicode(1) "1" { 0031 } refcount(1)
-    [u"id_copy" { 0069 0064 005f 0063 006f 0070 0079 }]=>
-    unicode(1) "1" { 0031 } refcount(1)
+    [%u|b%"id_ref"]=>
+    %unicode|string%(1) "1" refcount(1)
+    [%u|b%"id_copy"]=>
+    %unicode|string%(1) "1" refcount(1)
   }
   [1]=>
   array(5) refcount(1){
-    [u"row_ref" { 0072 006f 0077 005f 0072 0065 0066 }]=>
+    [%u|b%"row_ref"]=>
     &array(2) refcount(2){
-      [u"id" { 0069 0064 }]=>
-      &unicode(1) "2" { 0032 } refcount(2)
-      [u"label" { 006c 0061 0062 0065 006c }]=>
-      unicode(1) "b" { 0062 } refcount(3)
+      [%u|b%"id"]=>
+      &%unicode|string%(1) "2" refcount(2)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "b" refcount(3)
     }
-    [u"row_copy" { 0072 006f 0077 005f 0063 006f 0070 0079 }]=>
+    [%u|b%"row_copy"]=>
     array(2) refcount(1){
-      [u"id" { 0069 0064 }]=>
-      unicode(1) "2" { 0032 } refcount(2)
-      [u"label" { 006c 0061 0062 0065 006c }]=>
-      unicode(1) "b" { 0062 } refcount(3)
+      [%u|b%"id"]=>
+      %unicode|string%(1) "2" refcount(2)
+      [%u|b%"label"]=>
+      %unicode|string%(1) "b" refcount(3)
     }
-    [u"id_ref" { 0069 0064 005f 0072 0065 0066 }]=>
-    &unicode(1) "2" { 0032 } refcount(2)
-    [u"id_copy" { 0069 0064 005f 0063 006f 0070 0079 }]=>
-    unicode(1) "2" { 0032 } refcount(1)
-    [u"id_copy_mod" { 0069 0064 005f 0063 006f 0070 0079 005f 006d 006f 0064 }]=>
+    [%u|b%"id_ref"]=>
+    &%unicode|string%(1) "2" refcount(2)
+    [%u|b%"id_copy"]=>
+    %unicode|string%(1) "2" refcount(1)
+    [%u|b%"id_copy_mod"]=>
     long(2) refcount(1)
   }
 }

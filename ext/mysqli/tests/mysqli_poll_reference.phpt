@@ -142,11 +142,15 @@ mysqli_close($link);
 			continue;
 		}
 		// WARNING: Due to the reference issue none of these should ever fire!
-		foreach ($reject as $links) {
+		foreach ($reject as $link) {
 			printf("Connection %d was rejected...\n", mysqli_thread_id($link));
+            if (mysqli_thread_id($link) != $thread_id) {
+                printf("[006] Connector %d should have been rejected. But also %d has been rejected.",
+                  $thread_id, mysqli_thread_id($link));
+            }
 			$processed++;
 		}
-		foreach ($errors as $links) {
+		foreach ($errors as $link) {
 			printf("Connection %d has an error...\n", mysqli_thread_id($link));
 			$processed++;
 		}
@@ -194,6 +198,7 @@ mysqli_close($link);
 		}
 	} while ($processed < 2);
 
+	$ready = mysqli_poll($links, $errors, $reject, 0, 50000);
 	mysqli_close($mysqli1);
 	mysqli_close($mysqli2);
 
@@ -202,19 +207,15 @@ mysqli_close($link);
 --EXPECTF--
 bool(true)
 bool(true)
-[002] The queries should have finished already
 bool(true)
 bool(true)
-[003] The queries should have finished already
 bool(true)
 bool(true)
 bool(true)
 Connection %d should be rejected...
-[005] The queries should have finished already
+Connection %d was rejected...
 bool(true)
 bool(true)
-Expected error:
 
-Warning: mysqli_poll(): No stream arrays were passed in %s on line %d
-
+Warning: mysqli_poll(): All arrays passed are clear in %s on line %d
 done!

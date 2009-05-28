@@ -1,8 +1,8 @@
 --TEST--
 multiple binds
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -53,10 +53,10 @@ array(4) {
   [0]=>
   int(1)
   [1]=>
-  unicode(3) "foo"
+  %unicode|string%(3) "foo"
   [2]=>
   int(2)
   [3]=>
-  unicode(3) "bar"
+  %unicode|string%(3) "bar"
 }
 done!

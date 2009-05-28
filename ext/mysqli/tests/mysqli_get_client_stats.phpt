@@ -129,7 +129,7 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('copy_on_write_saved', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('copy_on_write_performed', $new_info, $info, $test_counter);
 	mysqli_get_client_stats_assert_eq('command_buffer_too_small', $new_info, $info, $test_counter);
-	// This is not a mistake that I use string(1) "1" here! Andrey did not go for int to avoid any
+	// This is not a mistake that I use %unicode|string%(1) "1" here! Andrey did not go for int to avoid any
 	// issues for very large numbers and 32 vs. 64bit systems
 	mysqli_get_client_stats_assert_eq('connect_success', $new_info, "1", $test_counter);
 	mysqli_get_client_stats_assert_eq('connect_failure', $new_info, $info, $test_counter);
@@ -860,244 +860,244 @@ mysqlnd.collect_memory_statistics=1
 ?>
 --EXPECTF--
 array(119) {
-  [u"bytes_sent"]=>
-  unicode(1) "0"
-  [u"bytes_received"]=>
-  unicode(1) "0"
-  [u"packets_sent"]=>
-  unicode(1) "0"
-  [u"packets_received"]=>
-  unicode(1) "0"
-  [u"protocol_overhead_in"]=>
-  unicode(1) "0"
-  [u"protocol_overhead_out"]=>
-  unicode(1) "0"
-  [u"bytes_received_ok_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_eof_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_rset_header_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_rset_field_meta_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_rset_row_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_prepare_response_packet"]=>
-  unicode(1) "0"
-  [u"bytes_received_change_user_packet"]=>
-  unicode(1) "0"
-  [u"packets_sent_command"]=>
-  unicode(1) "0"
-  [u"packets_received_ok"]=>
-  unicode(1) "0"
-  [u"packets_received_eof"]=>
-  unicode(1) "0"
-  [u"packets_received_rset_header"]=>
-  unicode(1) "0"
-  [u"packets_received_rset_field_meta"]=>
-  unicode(1) "0"
-  [u"packets_received_rset_row"]=>
-  unicode(1) "0"
-  [u"packets_received_prepare_response"]=>
-  unicode(1) "0"
-  [u"packets_received_change_user"]=>
-  unicode(1) "0"
-  [u"result_set_queries"]=>
-  unicode(1) "0"
-  [u"non_result_set_queries"]=>
-  unicode(1) "0"
-  [u"no_index_used"]=>
-  unicode(1) "0"
-  [u"bad_index_used"]=>
-  unicode(1) "0"
-  [u"slow_queries"]=>
-  unicode(1) "0"
-  [u"buffered_sets"]=>
-  unicode(1) "0"
-  [u"unbuffered_sets"]=>
-  unicode(1) "0"
-  [u"ps_buffered_sets"]=>
-  unicode(1) "0"
-  [u"ps_unbuffered_sets"]=>
-  unicode(1) "0"
-  [u"flushed_normal_sets"]=>
-  unicode(1) "0"
-  [u"flushed_ps_sets"]=>
-  unicode(1) "0"
-  [u"ps_prepared_never_executed"]=>
-  unicode(1) "0"
-  [u"ps_prepared_once_executed"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_server_normal"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_server_ps"]=>
-  unicode(1) "0"
-  [u"rows_buffered_from_client_normal"]=>
-  unicode(1) "0"
-  [u"rows_buffered_from_client_ps"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_client_normal_buffered"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_client_normal_unbuffered"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_client_ps_buffered"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_client_ps_unbuffered"]=>
-  unicode(1) "0"
-  [u"rows_fetched_from_client_ps_cursor"]=>
-  unicode(1) "0"
-  [u"rows_skipped_normal"]=>
-  unicode(1) "0"
-  [u"rows_skipped_ps"]=>
-  unicode(1) "0"
-  [u"copy_on_write_saved"]=>
-  unicode(1) "0"
-  [u"copy_on_write_performed"]=>
-  unicode(1) "0"
-  [u"command_buffer_too_small"]=>
-  unicode(1) "0"
-  [u"connect_success"]=>
-  unicode(1) "0"
-  [u"connect_failure"]=>
-  unicode(1) "0"
-  [u"connection_reused"]=>
-  unicode(1) "0"
-  [u"reconnect"]=>
-  unicode(1) "0"
-  [u"pconnect_success"]=>
-  unicode(1) "0"
-  [u"active_connections"]=>
-  unicode(1) "0"
-  [u"active_persistent_connections"]=>
-  unicode(1) "0"
-  [u"explicit_close"]=>
-  unicode(1) "0"
-  [u"implicit_close"]=>
-  unicode(1) "0"
-  [u"disconnect_close"]=>
-  unicode(1) "0"
-  [u"in_middle_of_command_close"]=>
-  unicode(1) "0"
-  [u"explicit_free_result"]=>
-  unicode(1) "0"
-  [u"implicit_free_result"]=>
-  unicode(1) "0"
-  [u"explicit_stmt_close"]=>
-  unicode(1) "0"
-  [u"implicit_stmt_close"]=>
-  unicode(1) "0"
-  [u"mem_emalloc_count"]=>
-  unicode(1) "0"
-  [u"mem_emalloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_ecalloc_count"]=>
-  unicode(1) "0"
-  [u"mem_ecalloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_erealloc_count"]=>
-  unicode(1) "0"
-  [u"mem_erealloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_efree_count"]=>
-  unicode(1) "0"
-  [u"mem_malloc_count"]=>
-  unicode(1) "0"
-  [u"mem_malloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_calloc_count"]=>
-  unicode(1) "0"
-  [u"mem_calloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_realloc_count"]=>
-  unicode(1) "0"
-  [u"mem_realloc_ammount"]=>
-  unicode(1) "0"
-  [u"mem_free_count"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_null"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_bit"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_tinyint"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_short"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_int24"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_int"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_bigint"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_decimal"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_float"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_double"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_date"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_year"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_time"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_datetime"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_timestamp"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_unicode"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_blob"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_enum"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_set"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_geometry"]=>
-  unicode(1) "0"
-  [u"proto_text_fetched_other"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_null"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_bit"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_tinyint"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_short"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_int24"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_int"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_bigint"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_decimal"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_float"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_double"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_date"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_year"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_time"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_datetime"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_timestamp"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_unicode"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_blob"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_enum"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_set"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_geometry"]=>
-  unicode(1) "0"
-  [u"proto_binary_fetched_other"]=>
-  unicode(1) "0"
+  [%u|b%"bytes_sent"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_sent"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"protocol_overhead_in"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"protocol_overhead_out"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_ok_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_eof_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_rset_header_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_rset_field_meta_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_rset_row_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_prepare_response_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bytes_received_change_user_packet"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_sent_command"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_ok"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_eof"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_rset_header"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_rset_field_meta"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_rset_row"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_prepare_response"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"packets_received_change_user"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"result_set_queries"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"non_result_set_queries"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"no_index_used"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"bad_index_used"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"slow_queries"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"buffered_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"unbuffered_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"ps_buffered_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"ps_unbuffered_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"flushed_normal_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"flushed_ps_sets"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"ps_prepared_never_executed"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"ps_prepared_once_executed"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_server_normal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_server_ps"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_buffered_from_client_normal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_buffered_from_client_ps"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_client_normal_buffered"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_client_normal_unbuffered"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_client_ps_buffered"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_client_ps_unbuffered"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_fetched_from_client_ps_cursor"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_skipped_normal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"rows_skipped_ps"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"copy_on_write_saved"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"copy_on_write_performed"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"command_buffer_too_small"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"connect_success"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"connect_failure"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"connection_reused"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"reconnect"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"pconnect_success"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"active_connections"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"active_persistent_connections"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"explicit_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"implicit_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"disconnect_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"in_middle_of_command_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"explicit_free_result"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"implicit_free_result"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"explicit_stmt_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"implicit_stmt_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_emalloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_emalloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_ecalloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_ecalloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_erealloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_erealloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_efree_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_malloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_malloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_calloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_calloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_realloc_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_realloc_ammount"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"mem_free_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_null"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_bit"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_tinyint"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_short"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_int24"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_int"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_bigint"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_decimal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_float"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_double"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_date"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_year"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_time"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_datetime"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_timestamp"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_string"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_blob"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_enum"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_set"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_geometry"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_text_fetched_other"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_null"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_bit"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_tinyint"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_short"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_int24"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_int"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_bigint"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_decimal"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_float"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_double"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_date"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_year"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_time"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_datetime"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_timestamp"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_string"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_blob"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_enum"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_set"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_geometry"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"proto_binary_fetched_other"]=>
+  %unicode|string%(1) "0"
 }
 Testing buffered normal...
 Testing buffered normal... - SELECT id, label FROM test

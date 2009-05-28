@@ -75,18 +75,18 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 array(7) {
   [0]=>
-  unicode(10) "2002-01-02"
+  %unicode|string%(10) "2002-01-02"
   [1]=>
-  unicode(8) "12:49:00"
+  %unicode|string%(8) "12:49:00"
   [2]=>
-  unicode(19) "2002-01-02 17:46:59"
+  %unicode|string%(19) "2002-01-02 17:46:59"
   [3]=>
   int(2010)
   [4]=>
-  unicode(19) "2010-07-10 00:00:00"
+  %unicode|string%(19) "2010-07-10 00:00:00"
   [5]=>
-  unicode(19) "0000-00-00 00:00:00"
+  %unicode|string%(19) "0000-00-00 00:00:00"
   [6]=>
-  unicode(19) "1999-12-29 00:00:00"
+  %unicode|string%(19) "1999-12-29 00:00:00"
 }
 done!

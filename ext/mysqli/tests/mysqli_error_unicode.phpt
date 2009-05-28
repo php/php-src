@@ -1,8 +1,8 @@
 --TEST--
 mysqli_error()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include "connect.inc";
 
-	$tmp	= NULL; 
+	$tmp	= NULL;
 	$link	= NULL;
 
 	if (!is_null($tmp = @mysqli_error()))
@@ -44,8 +44,8 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-unicode(41) "Table 'няма_такава_таблица' doesn't exist"
+%unicode|string%(%d) "Table 'няма_такава_таблица' doesn't exist"
 
 Warning: mysqli_error(): Couldn't fetch mysqli in %s on line %d
 NULL
-done! 
+done!
