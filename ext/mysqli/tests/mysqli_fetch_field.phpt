@@ -58,82 +58,82 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 object(stdClass)#%d (11) {
-  [u"name"]=>
-  unicode(2) "ID"
-  [u"orgname"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "TEST"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(%d)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "ID"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
+  int(1)
+  [%u|b%"length"]=>
+  int(11)
+  [%u|b%"charsetnr"]=>
+  int(63)
+  [%u|b%"flags"]=>
   int(49155)
-  [u"type"]=>
+  [%u|b%"type"]=>
   int(3)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 object(stdClass)#%d (11) {
-  [u"name"]=>
-  unicode(5) "label"
-  [u"orgname"]=>
-  unicode(5) "label"
-  [u"table"]=>
-  unicode(4) "TEST"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(%d)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(5) "label"
+  [%u|b%"orgname"]=>
+  %unicode|string%(5) "label"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
+  int(1)
+  [%u|b%"length"]=>
+  int(1)
+  [%u|b%"charsetnr"]=>
+  int(8)
+  [%u|b%"flags"]=>
   int(0)
-  [u"type"]=>
+  [%u|b%"type"]=>
   int(254)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 bool(false)
 
 Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
 array(1) {
-  [u"_default_test"]=>
-  unicode(1) "2"
+  [%u|b%"_default_test"]=>
+  %unicode|string%(1) "2"
 }
 object(stdClass)#%d (11) {
-  [u"name"]=>
-  unicode(13) "_default_test"
-  [u"orgname"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(13) "_default_test"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  [u"length"]=>
+  [%u|b%"length"]=>
   int(11)
-  [u"charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(63)
-  [u"flags"]=>
+  [%u|b%"flags"]=>
   int(32769)
-  [u"type"]=>
+  [%u|b%"type"]=>
   int(3)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(0)
 }
 done!

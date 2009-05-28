@@ -15,20 +15,35 @@ Persistent connections and mysqli.max_links
 		die(sprintf("skip Cannot connect [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 	mysqli_query($link, 'DROP USER pcontest');
-	if (!mysqli_query($link, 'CREATE USER pcontest IDENTIFIED BY "pcontest"')) {
+    mysqli_query($link, 'DROP USER pcontest@localhost');
+	if (!mysqli_query($link, 'CREATE USER pcontest@"%" IDENTIFIED BY "pcontest"') ||
+        !mysqli_query($link, 'CREATE USER pcontest@localhost IDENTIFIED BY "pcontest"')) {
 		printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
 		mysqli_close($link);
-		die();
+		die("skip CREATE USER failed");
 	}
 
 	// we might be able to specify the host using CURRENT_USER(), but...
-	if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db))) {
+	if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db)) ||
+        !mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'localhost'", $db))) {
 		printf("skip Cannot GRANT SELECT to second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
 		mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest@localhost');
 		mysqli_query($link, 'DROP USER pcontest');
 		mysqli_close($link);
-		die();
+		die("skip GRANT failed");
 	}
+
+    if (!($link_pcontest = @mysqli_connect($host, 'pcontest', 'pcontest', $db, $port, $socket))) {
+        die(":)");
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest@localhost');
+		mysqli_query($link, 'DROP USER pcontest');
+		mysqli_close($link);
+		die("skip CONNECT using new user failed");
+    }
 	mysqli_close($link);
 ?>
 --INI--
@@ -68,15 +83,20 @@ mysqli.max_persistent=2
 			!mysqli_query($link, 'FLUSH PRIVILEGES'))
 		printf("[005] Cannot change PW of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
+        // change the password for the second DB user and kill the persistent connection
+	if (!mysqli_query($link, 'SET PASSWORD FOR pcontest@localhost = PASSWORD("newpass")') ||
+			!mysqli_query($link, 'FLUSH PRIVILEGES'))
+		printf("[006] Cannot change PW of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
 	// persistent connections cannot be closed but only be killed
 	$pthread_id = mysqli_thread_id($plink);
 	if (!mysqli_query($link, sprintf('KILL %d', $pthread_id)))
-		printf("[006] Cannot KILL persistent connection of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[007] Cannot KILL persistent connection of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	// give the server a second to really kill the thread
 	sleep(1);
 
 	if (!$res = mysqli_query($link, "SHOW FULL PROCESSLIST"))
-		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$running_threads = array();
 	while ($row = mysqli_fetch_assoc($res))
@@ -84,11 +104,11 @@ mysqli.max_persistent=2
 	mysqli_free_result($res);
 
 	if (isset($running_threads[$pthread_id]))
-		printf("[008] Persistent connection has not been killed\n");
+		printf("[009] Persistent connection has not been killed\n");
 
 	// this fails and we have 0 (<= $num_plinks) connections
 	if ($plink = @mysqli_connect('p:' . $host, 'pcontest', 'pcontest', $db, $port, $socket))
-		printf("[009] Can connect using the old password, [%d] %s\n",
+		printf("[010] Can connect using the old password, [%d] %s\n",
 			mysqli_connect_errno($link), mysqli_connect_error($link));
 
 	ob_start();
@@ -140,16 +160,16 @@ mysqli.max_persistent=2
 ?>
 --EXPECTF--
 array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 
 Warning: mysqli_connect(): Too many open persistent links (%d) in %s on line %d

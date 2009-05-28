@@ -5,7 +5,7 @@ mysqli_stmt_get_result()
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-if (!function_exists('mysqli_stmt_get_result')) 
+if (!function_exists('mysqli_stmt_get_result'))
 	die('skip mysqli_stmt_get_result not available');
 ?>
 --FILE--
@@ -153,17 +153,17 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --EXPECTF--
 array(2) {
-  [u"id"]=>
+  [%u|b%"id"]=>
   int(1)
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 NULL
 array(2) {
-  [u"id"]=>
+  [%u|b%"id"]=>
   int(1)
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 NULL
 [017] [2014] Commands out of sync; you can't run this command now

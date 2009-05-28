@@ -61,6 +61,6 @@ array(8) {
   [6]=>
   string(3) "206"
   [7]=>
-  unicode(3) "6.7"
+  %unicode|string%(3) "6.7"
 }
 done!

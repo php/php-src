@@ -5,7 +5,7 @@ mysqli_bind_result (SHOW)
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
-	
+
 	include "connect.inc";
 	$link = mysqli_connect($host, $user, $passwd);
 
@@ -46,8 +46,8 @@ mysqli_bind_result (SHOW)
 --EXPECTF--
 array(2) {
   [0]=>
-  unicode(4) "port"
+  %unicode|string%(4) "port"
   [1]=>
-  unicode(%d) "%s"
+  %unicode|string%(%d) "%s"
 }
 done!

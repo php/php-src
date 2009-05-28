@@ -1,8 +1,8 @@
 --TEST--
-extend mysqli 
+extend mysqli
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -11,7 +11,7 @@ require_once('skipifconnectfailure.inc');
 
 	class foobar extends mysqli {
 		function test () {
-			return ("I like MySQL 4.1");
+			return ("I do not like MySQL 4.1");
 		}
 	}
 
@@ -21,4 +21,4 @@ require_once('skipifconnectfailure.inc');
 	printf("%s\n", $foo->test());
 ?>
 --EXPECT--
-I like MySQL 4.1
+I do not like MySQL 4.1

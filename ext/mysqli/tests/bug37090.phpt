@@ -35,14 +35,14 @@ array(6) {
   [0]=>
   bool(true)
   [1]=>
-  unicode(6) "latin1"
+  string(6) "latin1"
   [2]=>
   bool(true)
   [3]=>
-  unicode(4) "utf8"
+  string(4) "utf8"
   [4]=>
   bool(false)
   [5]=>
-  unicode(4) "utf8"
+  string(4) "utf8"
 }
 done!

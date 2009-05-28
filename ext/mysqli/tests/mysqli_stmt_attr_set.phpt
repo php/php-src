@@ -1,5 +1,5 @@
 --TEST--
-mysqli_stmt_attr_set()
+mysqli_stmt_attr_set() - KNOWN ISSUE: mysqlnd does not check for invalid codes
 --SKIPIF--
 <?php
 require_once('skipif.inc');

@@ -8,8 +8,8 @@ require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
-if (unicode_semantics()) {
-	die('skip set character set not functional with unicode.semantics=On');
+if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
 }
 ?>
 --FILE--

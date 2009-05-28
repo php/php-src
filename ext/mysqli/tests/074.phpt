@@ -1,8 +1,8 @@
 --TEST--
 mysqli_autocommit() tests
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -25,10 +25,10 @@ require_once('skipifconnectfailure.inc');
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "0"
+  %unicode|string%(1) "0"
 }
 bool(true)
 array(1) {
   [0]=>
-  unicode(1) "1"
+  %unicode|string%(1) "1"
 }

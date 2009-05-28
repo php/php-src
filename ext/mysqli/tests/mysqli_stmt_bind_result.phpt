@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include "connect.inc";
 
-	$hint_str_or_unicode = ini_get("unicode.semantics")? "unicode":"string";
+	$hint_str_or_unicode = (version_compare(PHP_VERSION, '5.9.9', '>') == 1) ? "unicode":"string";
 
 	$tmp    = NULL;
 	$link   = NULL;
@@ -316,5 +316,5 @@ Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match numbe
 
 Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
 int(1)
-unicode(1) "a"
+%s(1) "a"
 done!

@@ -1,8 +1,8 @@
 --TEST--
 mysqli multi_query, next_result, more_results
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -29,10 +29,10 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 array(1) {
   [1]=>
-  unicode(1) "1"
+  %unicode|string%(1) "1"
 }
 array(1) {
   [2]=>
-  unicode(1) "2"
+  %unicode|string%(1) "2"
 }
 done!

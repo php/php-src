@@ -78,6 +78,7 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 	mysqli_close($link);
 	print "done!";
 ?>
+
 --EXPECTF--
 array(8) {
   [0]=>
@@ -87,7 +88,7 @@ array(8) {
   [2]=>
   int(4)
   [3]=>
-  unicode(14) "33333333333333"
+  %unicode|string%(14) "33333333333333"
   [4]=>
   int(0)
   [5]=>

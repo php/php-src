@@ -167,15 +167,15 @@ Warning: mysqli_stmt_get_result(): invalid object or resource mysqli_stmt
 [038] [2014] [Commands out of sync; you can't run this command now]
 [039] [0] []
 array(2) {
-  [%s"id"]=>
+  [%u|b%"id"]=>
   int(1)
-  [%s"label"]=>
+  [%u|b%"label"]=>
   %s(1) "a"
 }
 array(2) {
-  [%s"id"]=>
+  [%u|b%"id"]=>
   int(2)
-  [%s"label"]=>
+  [%u|b%"label"]=>
   %s(1) "b"
 }
 

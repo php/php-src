@@ -28,7 +28,7 @@ if ($version[0] <= 4 && $version[1] < 1)
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'latin%'"))
+	if (!$res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin%"'))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$charsets = array();
@@ -57,32 +57,32 @@ if ($version[0] <= 4 && $version[1] < 1)
 
 		if (isset($not_changed['charset_client']) &&
 				$charset != $not_changed['charset_client'] &&
-				mysqli_query($link, sprintf("SET @@character_set_client = '%s'", $charset)))
+				mysqli_query($link, sprintf('SET @@character_set_client = "%s"', $charset)))
 			unset($not_changed['charset_client']);
 
 		if (isset($not_changed['charset_connection']) &&
 				$charset != $not_changed['charset_connection'] &&
-				mysqli_query($link, sprintf("SET @@character_connection = '%s'", $charset)))
+				mysqli_query($link, sprintf('SET @@character_connection = "%s"', $charset)))
 			unset($not_changed['charset_connection']);
 
 		if (isset($not_changed['charset_results']) &&
 				$charset != $not_changed['charset_results'] &&
-				mysqli_query($link, sprintf("SET @@character_set_results = '%s'", $charset)))
+				mysqli_query($link, sprintf('SET @@character_set_results = "%s"', $charset)))
 			unset($not_changed['charset_results']);
 
 		if (isset($not_changed['collation_connection']) &&
 				$collation != $not_changed['collation_connection'] &&
-				mysqli_query($link, sprintf("SET @@collation_connection = '%s'", $collation)))
+				mysqli_query($link, sprintf('SET @@collation_connection = "%s"', $collation)))
 			unset($not_changed['collation_connection']);
 
 		if (isset($not_changed['collation_database']) &&
 				$collation != $not_changed['collation_database'] &&
-				mysqli_query($link, sprintf("SET @@collation_database = '%s'", $collation)))
+				mysqli_query($link, sprintf('SET @@collation_database = "%s"', $collation)))
 			unset($not_changed['collation_database']);
 
 		if (isset($not_changed['collation_server']) &&
 				$collation != $not_changed['collation_server'] &&
-				mysqli_query($link, sprintf("SET @@collation_server = '%s'", $collation)))
+				mysqli_query($link, sprintf('SET @@collation_server = "%s"', $collation)))
 			unset($not_changed['collation_server']);
 
 		if (empty($not_changed))
@@ -129,7 +129,7 @@ if ($version[0] <= 4 && $version[1] < 1)
 		var_dump($defaults);
 	}
 
-	if (ini_get('unicode.semantics')) {
+	if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
 		// charsets cannot take any other value but utf8 in unicode mode
 		$defaults['charset_client'] = 'utf8';
 		$defaults['charset_connection'] = 'utf8';

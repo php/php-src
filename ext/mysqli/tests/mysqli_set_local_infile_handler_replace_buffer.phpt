@@ -48,7 +48,7 @@ mysqli.allow_local_infile=1
 		$ret = "1;'a';\n";
 		$buffer = $ret;
 
-		$num_chars = (ini_get('unicode.semantics')) ? floor($buflen / 2) : $buflen;
+		$num_chars = ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) ? floor($buflen / 2) : $buflen;
 		assert(strlen($buffer) < $num_chars);
 
 		if ($invocation > 10)

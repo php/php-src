@@ -49,9 +49,9 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 	unlink($filename);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 foo-bar
-unicode-unicode
+%unicode|string%-%unicode|string%
 rab-oof
-unicode-unicode
+%unicode|string%-%unicode|string%
 done!
