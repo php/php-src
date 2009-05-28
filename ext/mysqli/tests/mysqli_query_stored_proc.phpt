@@ -99,7 +99,7 @@ END;')) {
 		if (!mysqli_query($link, 'CALL p(@version)'))
 			printf("[011] Cannot call SP, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-		if (!mysqli_query($link, 'SET @version = "unknown"'))
+		if (!mysqli_query($link, "SET @version = 'unknown'"))
 			printf("[012] Cannot reset user variable, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 		if (!mysqli_query($link, 'CALL p(@version)'))
@@ -124,13 +124,13 @@ END;')) {
 
 	if (mysqli_real_query($link, 'CREATE PROCEDURE p(IN ver_in VARCHAR(25), OUT ver_out VARCHAR(25)) BEGIN SELECT ver_in INTO ver_out; END;')) {
 		/* no result set, one input, one output parameter */
-		if (!mysqli_query($link, 'CALL p("myversion", @version)'))
+		if (!mysqli_query($link, "CALL p('myversion', @version)"))
 			printf("[018] Cannot call SP, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-		if (!mysqli_query($link, 'SET @version = "unknown"'))
+		if (!mysqli_query($link, "SET @version = 'unknown'"))
 			printf("[019] Cannot reset user variable, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-		if (!mysqli_query($link, 'CALL p("myversion", @version)'))
+		if (!mysqli_query($link, "CALL p('myversion', @version)"))
 			printf("[020] Cannot call SP, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 		if (!$res = mysqli_query($link, 'SELECT @version as _vers'))

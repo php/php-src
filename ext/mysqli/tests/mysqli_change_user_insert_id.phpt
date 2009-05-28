@@ -28,7 +28,7 @@ if (!$IS_MYSQLND) {
 	if (!mysqli_query($link, 'CREATE TABLE test(id INT AUTO_INCREMENT PRIMARY KEY, label CHAR(10))'))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_query($link, 'INSERT INTO test(id, label) VALUES (100, "z")'))
+	if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'z')"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (($insert_id = mysqli_insert_id($link)) !== 100)

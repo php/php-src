@@ -17,7 +17,7 @@
 			register_shutdown_function("shutdown_clean", $file);
 		}
 
-		if (ini_get('unicode.semantics')) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
 			if (!fwrite($fp, (binary)"'97';'x';\n") ||
 				!fwrite($fp, (binary)"'98';'y';\n") ||
 				!fwrite($fp, (binary)"99;'z';\n")) {
