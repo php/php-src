@@ -31,8 +31,9 @@ require_once('skipifconnectfailure.inc');
 	if (!is_null($tmp = @$res->fetch_field($link)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	while ($tmp = $res->fetch_field())
+	while ($tmp = $res->fetch_field()) {
 		var_dump($tmp);
+	}
 	var_dump($tmp);
 
 	$res->free_result();
