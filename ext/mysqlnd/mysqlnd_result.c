@@ -1736,6 +1736,16 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::fetch_field");
 	if (result->meta) {
+		/*
+		  We optimize the result set, so we don't convert all the data from raw buffer format to
+		  zval arrays during store. In the case someone doesn't read all the lines this will
+		  save time. However, when a metadata call is done, we need to calculate max_length.
+		  We don't have control whether max_length will be used, unfortunately. Otherwise we
+		  could have been able to skip that step.
+		  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
+		  then we can have max_length as dynamic property, which will be calculated during runtime and
+		  not during mysqli_fetch_field() time.
+		*/
 		if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
 			/* we have to initialize the rest to get the updated max length */
 			mysqlnd_res_initialize_result_set_rest(result TSRMLS_CC);
@@ -1754,6 +1764,16 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result,
 {
 	DBG_ENTER("mysqlnd_res::fetch_field_direct");
 	if (result->meta) {
+		/*
+		  We optimize the result set, so we don't convert all the data from raw buffer format to
+		  zval arrays during store. In the case someone doesn't read all the lines this will
+		  save time. However, when a metadata call is done, we need to calculate max_length.
+		  We don't have control whether max_length will be used, unfortunately. Otherwise we
+		  could have been able to skip that step.
+		  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
+		  then we can have max_length as dynamic property, which will be calculated during runtime and
+		  not during mysqli_fetch_field_direct() time.
+		*/
 		if (result->stored_data && (result->stored_data->initialized_rows < result->stored_data->row_count)) {
 			/* we have to initialized the rest to get the updated max length */
 			mysqlnd_res_initialize_result_set_rest(result TSRMLS_CC);
