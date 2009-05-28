@@ -8,9 +8,6 @@ require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_cache_stats')) {
 	die("skip only available with mysqlnd");
 }
-if (ini_get("unicode.semantics")) {
-	die("skip: zval cache works now only in non-unicode mode");
-}
 ?>
 --FILE--
 <?php

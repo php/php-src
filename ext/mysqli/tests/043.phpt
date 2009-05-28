@@ -46,9 +46,3 @@ array(1) {
   string(15) "Rasmus is No. 1"
 }
 done!
---UEXPECF--
-array(1) {
-  [0]=>
-  unicode(15) "Rasmus is No. 1"
-}
-done!

@@ -86,7 +86,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 
-	if (!is_object(($stmt = mysqli_prepare($link, "DO GET_LOCK('testlock', 1)"))))
+	if (!is_object(($stmt = mysqli_prepare($link, 'DO GET_LOCK("testlock", 1)'))))
 		printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_stmt_close($stmt);
 

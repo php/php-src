@@ -1,8 +1,8 @@
 --TEST--
 mysqli_fetch_object with classes
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -45,38 +45,19 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 test_class::__construct(1,2)
 object(test_class)#%d (7) {
-  ["c1"]=>
-  string(1) "0"
-  ["c2"]=>
-  string(5) "35999"
-  ["c3"]=>
+  [%u|b%"c1"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"c2"]=>
+  %unicode|string%(5) "35999"
+  [%u|b%"c3"]=>
   NULL
-  ["c4"]=>
-  string(4) "-500"
-  ["c5"]=>
-  string(6) "-32768"
-  ["c6"]=>
-  string(1) "0"
-  ["c7"]=>
-  string(1) "0"
-}
-Done
---UEXPECTF--
-test_class::__construct(1,2)
-object(test_class)#%d (7) {
-  [u"c1"]=>
-  unicode(1) "0"
-  [u"c2"]=>
-  unicode(5) "35999"
-  [u"c3"]=>
-  NULL
-  [u"c4"]=>
-  unicode(4) "-500"
-  [u"c5"]=>
-  unicode(6) "-32768"
-  [u"c6"]=>
-  unicode(1) "0"
-  [u"c7"]=>
-  unicode(1) "0"
+  [%u|b%"c4"]=>
+  %unicode|string%(4) "-500"
+  [%u|b%"c5"]=>
+  %unicode|string%(6) "-32768"
+  [%u|b%"c6"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"c7"]=>
+  %unicode|string%(1) "0"
 }
 Done

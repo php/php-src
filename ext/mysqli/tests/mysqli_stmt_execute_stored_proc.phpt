@@ -104,7 +104,7 @@ if (mysqli_get_server_version($link) <= 50000) {
 	if (mysqli_real_query($link, 'CREATE PROCEDURE p(IN ver_in VARCHAR(25), OUT ver_out VARCHAR(25)) BEGIN SELECT ver_in INTO ver_out; END;')) {
 		// no result set, one input parameter, output parameter
 		// yes, I really do not want to bind input values...
-		if (!$stmt = mysqli_prepare($link, "CALL p('myversion', @version)"))
+		if (!$stmt = mysqli_prepare($link, 'CALL p("myversion", @version)'))
 			printf("[029] Cannot prepare CALL, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 		if (!mysqli_stmt_execute($stmt))

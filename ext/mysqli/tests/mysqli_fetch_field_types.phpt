@@ -75,7 +75,7 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_TYPE_DATETIME => array('DATETIME', '2007-08-20 18:42:01'),
 		MYSQLI_TYPE_YEAR => array('YEAR', '2007'),
 		MYSQLI_TYPE_ENUM => array('ENUM("everything", "is", "just", "wonderful")', 'is'),
-		// MYSQLI_TYPE_SET	=> array("SET('I', 'smash', 'the')", 'I,smash,the'), - string
+		// MYSQLI_TYPE_SET	=> array('SET("I", "smash", "the")', 'I,smash,the'), - string
 		// MYSQLI_TYPE_TINY_BLOB => array("TINYBLOB", "I got a tiny blog"), - blob
 		// MYSQLI_TYPE_MEDIUM_BLOB => array("MEDIUMBLOB", "No blob for masses"), - blob
 		// MYSQLI_TYPE_LONG_BLOB => array("LONGBLOB", "Small is beautiful?"), - blob
@@ -86,7 +86,7 @@ require_once('skipifconnectfailure.inc');
 		MYSQLI_TYPE_VAR_STRING => array("VARCHAR(32768)", 'varchar'),
 		MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING - TODO add testing',
 		MYSQLI_TYPE_STRING => array('CHAR(1)', 'a'),
-		MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'Will be converted to string although it is a SET...'),
+		MYSQLI_TYPE_STRING => array('SET("I", "smash", "the")', 'Will be converted to string although it is a SET...'),
 		MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL - TODO add testing',
 		MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
 		MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',

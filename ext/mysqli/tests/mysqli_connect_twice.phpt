@@ -1,9 +1,9 @@
 --TEST--
 Calling connect() on an open connection to create a new connection
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
-require_once('skipifemb.inc'); 
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -74,21 +74,11 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 array(1) {
-  ["it_works"]=>
-  string(2) "ok"
+  [%u|b%"it_works"]=>
+  %unicode|string%(2) "ok"
 }
 array(1) {
-  ["syntax"]=>
-  string(18) "works also with oo"
-}
-done!
---UEXPECTF--
-array(1) {
-  [u"it_works"]=>
-  unicode(2) "ok"
-}
-array(1) {
-  [u"syntax"]=>
-  unicode(18) "works also with oo"
+  [%u|b%"syntax"]=>
+  %unicode|string%(18) "works also with oo"
 }
 done!

@@ -63,7 +63,7 @@ require_once('skipifconnectfailure.inc');
 	if (0 !== ($tmp = mysqli_stmt_field_count($stmt)))
 		printf("[017] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!mysqli_stmt_prepare($stmt, "UPDATE test SET label = 'z' WHERE id = 1") ||
+	if (!mysqli_stmt_prepare($stmt, 'UPDATE test SET label = "z" WHERE id = 1') ||
 		!mysqli_stmt_execute($stmt))
 		printf("[018] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 

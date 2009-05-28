@@ -8,9 +8,6 @@ require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_cache_stats')) {
 	die("skip only available with mysqlnd");
 }
-if (ini_get("unicode.semantics")) {
-	die("skip: zval cache works now only in non-unicode mode");
-}
 ?>
 --FILE--
 <?php
@@ -92,37 +89,19 @@ if (ini_get("unicode.semantics")) {
 ?>
 --EXPECTF--
 array(7) {
-  ["put_hits"]=>
+  [%u|b%"put_hits"]=>
   int(0)
-  ["put_misses"]=>
+  [%u|b%"put_misses"]=>
   int(0)
-  ["get_hits"]=>
+  [%u|b%"get_hits"]=>
   int(0)
-  ["get_misses"]=>
+  [%u|b%"get_misses"]=>
   int(0)
-  ["size"]=>
+  [%u|b%"size"]=>
   int(%d)
-  ["free_items"]=>
+  [%u|b%"free_items"]=>
   int(%d)
-  ["references"]=>
-  int(%d)
-}
-done!
---UEXPECTF--
-array(7) {
-  [u"put_hits"]=>
-  int(0)
-  [u"put_misses"]=>
-  int(0)
-  [u"get_hits"]=>
-  int(0)
-  [u"get_misses"]=>
-  int(0)
-  [u"size"]=>
-  int(%d)
-  [u"free_items"]=>
-  int(%d)
-  [u"references"]=>
+  [%u|b%"references"]=>
   int(%d)
 }
 done!

@@ -44,60 +44,27 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
 object(stdClass)#%d (11) {
-  ["name"]=>
-  string(2) "ID"
-  ["orgname"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "TEST"
-  ["orgtable"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "ID"
+  [%u|b%"orgname"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"orgtable"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(%d)
-  ["length"]=>
+  [%u|b%"length"]=>
   int(%d)
-  ["charsetnr"]=>
+  [%u|b%"charsetnr"]=>
   int(%d)
-  ["flags"]=>
+  [%u|b%"flags"]=>
   int(%d)
-  ["type"]=>
+  [%u|b%"type"]=>
   int(%d)
-  ["decimals"]=>
-  int(%d)
-}
-
-Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
-
-Warning: mysqli_fetch_field_direct(): Couldn't fetch mysqli_result in %s on line %d
-done!
---UEXPECTF--
-Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
-object(stdClass)#%d (11) {
-  [u"name"]=>
-  unicode(2) "ID"
-  [u"orgname"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "TEST"
-  [u"orgtable"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(%d)
-  [u"length"]=>
-  int(%d)
-  [u"charsetnr"]=>
-  int(%d)
-  [u"flags"]=>
-  int(%d)
-  [u"type"]=>
-  int(%d)
-  [u"decimals"]=>
+  [%u|b%"decimals"]=>
   int(%d)
 }
 

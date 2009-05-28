@@ -176,55 +176,22 @@ Callback: 0
 Callback: 1
 [037] More results than expected!
 array(2) {
-  ["id"]=>
-  string(2) "97"
-  ["label"]=>
-  string(1) "x"
+  [%u|b%"id"]=>
+  %unicode|string%(2) "97"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "x"
 }
 array(2) {
-  ["id"]=>
-  string(2) "98"
-  ["label"]=>
-  string(1) "y"
+  [%u|b%"id"]=>
+  %unicode|string%(2) "98"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "y"
 }
 array(2) {
-  ["id"]=>
-  string(2) "99"
-  ["label"]=>
-  string(1) "z"
-}
-Callback set to 'callback_error'
-Callback: 0
-[042] LOAD DATA failed, [2000] How to access this error?
-done!
---UEXPECTF--
-Callback set to 'callback_simple'
-Callback: 0
-Callback: 1
-Callback set to 'callback_fclose'
-Callback: 0
-[022] LOAD DATA failed, [2000] File handle closed in handler
-Callback set to 'callback_invalid_args'
-Callback: 0
-Callback: 1
-[037] More results than expected!
-array(2) {
-  [u"id"]=>
-  unicode(2) "97"
-  [u"label"]=>
-  unicode(1) "x"
-}
-array(2) {
-  [u"id"]=>
-  unicode(2) "98"
-  [u"label"]=>
-  unicode(1) "y"
-}
-array(2) {
-  [u"id"]=>
-  unicode(2) "99"
-  [u"label"]=>
-  unicode(1) "z"
+  [%u|b%"id"]=>
+  %unicode|string%(2) "99"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "z"
 }
 Callback set to 'callback_error'
 Callback: 0

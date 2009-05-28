@@ -245,134 +245,67 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 plain vanilla...
 int(1)
-string(1) "a"
+%unicode|string%(1) "a"
 reference, one level...
 int(1)
 int(1)
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, two levels...
 int(1)
 int(1)
 int(1)
-string(1) "a"
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, $GLOBALS...
 int(1)
 int(1)
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, same target...
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, simple object...
 int(1)
-string(1) "a"
+%unicode|string%(1) "a"
 reference, simple object w reference...
 int(1)
-string(1) "a"
+%unicode|string%(1) "a"
 reference, simple object w reference, change after bind...
 int(1)
 int(1)
-string(1) "a"
+%unicode|string%(1) "a"
 int(1)
 reference, one level, change after bind...
 int(1)
 int(1)
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, circle...
 int(1)
-string(1) "a"
-string(1) "a"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 reference, object, forward declaration...
 int(1)
 object(bar)#%d (2) {
-  ["bar"]=>
-  &string(1) "a"
-  ["foo"]=>
-  &string(1) "a"
+  [%u|b%"bar"]=>
+  &%unicode|string%(1) "a"
+  [%u|b%"foo"]=>
+  &%unicode|string%(1) "a"
 }
-string(1) "a"
+%unicode|string%(1) "a"
 references, object, private...
 int(1)
-string(1) "a"
+%unicode|string%(1) "a"
 object(mega_bar)#5 (4) {
   [%s]=>
   &int(1)
-  ["id_ref"]=>
+  [%u|b%"id_ref"]=>
   &int(1)
-  ["bar"]=>
-  &string(1) "a"
-  ["foo"]=>
-  &string(1) "a"
-}
-done!
---UEXPECTF--
-plain vanilla...
-int(1)
-unicode(1) "a"
-reference, one level...
-int(1)
-int(1)
-unicode(1) "a"
-unicode(1) "a"
-reference, two levels...
-int(1)
-int(1)
-int(1)
-unicode(1) "a"
-unicode(1) "a"
-unicode(1) "a"
-reference, $GLOBALS...
-int(1)
-int(1)
-unicode(1) "a"
-unicode(1) "a"
-reference, same target...
-unicode(1) "a"
-unicode(1) "a"
-reference, simple object...
-int(1)
-unicode(1) "a"
-reference, simple object w reference...
-int(1)
-unicode(1) "a"
-reference, simple object w reference, change after bind...
-int(1)
-int(1)
-unicode(1) "a"
-int(1)
-reference, one level, change after bind...
-int(1)
-int(1)
-unicode(1) "a"
-unicode(1) "a"
-reference, circle...
-int(1)
-unicode(1) "a"
-unicode(1) "a"
-reference, object, forward declaration...
-int(1)
-object(bar)#%d (2) {
-  [u"bar"]=>
-  &unicode(1) "a"
-  [u"foo"]=>
-  &unicode(1) "a"
-}
-unicode(1) "a"
-references, object, private...
-int(1)
-unicode(1) "a"
-object(mega_bar)#5 (4) {
-  [u"id":u"mega_bar":private]=>
-  &int(1)
-  [u"id_ref"]=>
-  &int(1)
-  [u"bar"]=>
-  &unicode(1) "a"
-  [u"foo"]=>
-  &unicode(1) "a"
+  [%u|b%"bar"]=>
+  &%unicode|string%(1) "a"
+  [%u|b%"foo"]=>
+  &%unicode|string%(1) "a"
 }
 done!

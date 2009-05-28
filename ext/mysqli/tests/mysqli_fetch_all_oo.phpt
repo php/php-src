@@ -306,16 +306,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "a"
+    %unicode|string%(1) "a"
   }
   [1]=>
   array(2) {
     [0]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
     [1]=>
-    string(1) "b"
+    %unicode|string%(1) "b"
   }
 }
 [007]
@@ -323,16 +323,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "a"
+    %unicode|string%(1) "a"
   }
   [1]=>
   array(2) {
     [0]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
     [1]=>
-    string(1) "b"
+    %unicode|string%(1) "b"
   }
 }
 [008]
@@ -340,41 +340,41 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    string(1) "1"
-    ["id"]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "a"
-    ["label"]=>
-    string(1) "a"
+    %unicode|string%(1) "a"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
   [1]=>
   array(4) {
     [0]=>
-    string(1) "2"
-    ["id"]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "2"
     [1]=>
-    string(1) "b"
-    ["label"]=>
-    string(1) "b"
+    %unicode|string%(1) "b"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b"
   }
 }
 [010]
 array(2) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
   [1]=>
   array(2) {
-    ["id"]=>
-    string(1) "2"
-    ["label"]=>
-    string(1) "b"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "2"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b"
   }
 }
 [011]
@@ -383,17 +383,17 @@ NULL
 array(2) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
   [1]=>
   array(2) {
-    ["id"]=>
-    string(1) "2"
-    ["label"]=>
-    string(1) "b"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "2"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "b"
   }
 }
 [016]
@@ -403,158 +403,27 @@ array(1) {
   [0]=>
   array(11) {
     [0]=>
-    string(1) "1"
-    ["a"]=>
-    string(1) "2"
+    %unicode|string%(1) "1"
+    [%u|b%"a"]=>
+    %unicode|string%(1) "2"
     [1]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
     [2]=>
-    string(1) "3"
-    ["c"]=>
-    string(1) "3"
+    %unicode|string%(1) "3"
+    [%u|b%"c"]=>
+    %unicode|string%(1) "3"
     [3]=>
-    string(1) "4"
-    ["C"]=>
-    string(1) "4"
+    %unicode|string%(1) "4"
+    [%u|b%"C"]=>
+    %unicode|string%(1) "4"
     [4]=>
     NULL
-    ["d"]=>
+    [%u|b%"d"]=>
     NULL
     [5]=>
-    string(1) "1"
-    ["e"]=>
-    string(1) "1"
-  }
-}
-
-Warning: mysqli_result::fetch_all(): Mode can be only MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC or MYSQLI_FETCH_BOTH in %s on line %d
-
-Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d
-done!
---UEXPECTF--
-[005]
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    unicode(1) "1"
-    [1]=>
-    unicode(1) "a"
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    unicode(1) "2"
-    [1]=>
-    unicode(1) "b"
-  }
-}
-[007]
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    unicode(1) "1"
-    [1]=>
-    unicode(1) "a"
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    unicode(1) "2"
-    [1]=>
-    unicode(1) "b"
-  }
-}
-[008]
-array(2) {
-  [0]=>
-  array(4) {
-    [0]=>
-    unicode(1) "1"
-    [u"id"]=>
-    unicode(1) "1"
-    [1]=>
-    unicode(1) "a"
-    [u"label"]=>
-    unicode(1) "a"
-  }
-  [1]=>
-  array(4) {
-    [0]=>
-    unicode(1) "2"
-    [u"id"]=>
-    unicode(1) "2"
-    [1]=>
-    unicode(1) "b"
-    [u"label"]=>
-    unicode(1) "b"
-  }
-}
-[010]
-array(2) {
-  [0]=>
-  array(2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"label"]=>
-    unicode(1) "a"
-  }
-  [1]=>
-  array(2) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"label"]=>
-    unicode(1) "b"
-  }
-}
-[011]
-NULL
-[013]
-array(2) {
-  [0]=>
-  array(2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"label"]=>
-    unicode(1) "a"
-  }
-  [1]=>
-  array(2) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"label"]=>
-    unicode(1) "b"
-  }
-}
-[016]
-NULL
-[017]
-array(1) {
-  [0]=>
-  array(11) {
-    [0]=>
-    unicode(1) "1"
-    [u"a"]=>
-    unicode(1) "2"
-    [1]=>
-    unicode(1) "2"
-    [2]=>
-    unicode(1) "3"
-    [u"c"]=>
-    unicode(1) "3"
-    [3]=>
-    unicode(1) "4"
-    [u"C"]=>
-    unicode(1) "4"
-    [4]=>
-    NULL
-    [u"d"]=>
-    NULL
-    [5]=>
-    unicode(1) "1"
-    [u"e"]=>
-    unicode(1) "1"
+    %unicode|string%(1) "1"
+    [%u|b%"e"]=>
+    %unicode|string%(1) "1"
   }
 }
 

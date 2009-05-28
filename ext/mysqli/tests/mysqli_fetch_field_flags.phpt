@@ -167,7 +167,7 @@ mysqli_close($link);
 				$version = mysqli_get_server_version($link);
 				if ($version <= 50105) {
 					// TODO - check exact version!
-//					$expected_flags = trim(str_replace('UNSIGNED', '', $expected_flags));
+					$expected_flags = trim(str_replace('UNSIGNED', '', $expected_flags));
 				}
 
 			default:
