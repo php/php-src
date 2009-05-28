@@ -1691,11 +1691,11 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					break;
 				case CURLOPT_STDERR:
 					if (((php_stream *) what)->mode[0] != 'r') {
-						if (ch->handlers->stderr) {
-							zval_ptr_dtor(&ch->handlers->stderr);
+						if (ch->handlers->std_err) {
+							zval_ptr_dtor(&ch->handlers->std_err);
 						}
 						zval_add_ref(zvalue);
-						ch->handlers->stderr = *zvalue;
+						ch->handlers->std_err = *zvalue;
 						zend_list_addref(Z_LVAL_PP(zvalue));
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
@@ -2349,8 +2349,8 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 #endif
 
 	/* Prevent crash inside cURL if passed file has already been closed */
-	if (ch->handlers->stderr && Z_REFCOUNT_P(ch->handlers->stderr) <= 0) {
-		curl_easy_setopt(ch->cp, CURLOPT_STDERR, stderr);
+	if (ch->handlers->std_err && Z_REFCOUNT_P(ch->handlers->std_err) <= 0) {
+		curl_easy_setopt(ch->cp, CURLOPT_STDERR, std_err);
 	}
 
 	curl_easy_cleanup(ch->cp);
@@ -2378,8 +2378,8 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);
 	}
-	if (ch->handlers->stderr) {
-		zval_ptr_dtor(&ch->handlers->stderr);
+	if (ch->handlers->std_err) {
+		zval_ptr_dtor(&ch->handlers->std_err);
 	}
 	if (ch->header.str_len > 0) {
 		efree(ch->header.str);
