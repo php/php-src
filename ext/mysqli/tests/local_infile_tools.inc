@@ -58,7 +58,7 @@
 			return false;
 		}
 
-		if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s'
+		if (!@mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s'
 			INTO TABLE test
 			FIELDS TERMINATED BY ';' OPTIONALLY ENCLOSED BY '\''
 			LINES TERMINATED BY '\n'",
