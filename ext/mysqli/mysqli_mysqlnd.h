@@ -40,4 +40,6 @@
 #define mysqli_bg_store_result(r)		mysqlnd_bg_store_result((r))
 #define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
 
+#define HAVE_STMT_NEXT_RESULT
+
 #endif

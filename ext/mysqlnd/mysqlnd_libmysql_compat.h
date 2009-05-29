@@ -101,6 +101,8 @@
 #define mysql_stmt_attr_set(s,a,v)		mysqlnd_stmt_attr_set((s), (a), (v))
 #define mysql_stmt_param_metadata(s)	mysqlnd_stmt_param_metadata((s))
 #define mysql_stmt_result_metadata(s)	mysqlnd_stmt_result_metadata((s))
+#define mysql_stmt_next_result(s)		mysqlnd_stmt_next_result((s))
+#define mysql_stmt_more_results(s)		mysqlnd_stmt_more_results((s))
 #define mysql_thread_safe()				mysqlnd_thread_safe()
 #define mysql_info(r)					mysqlnd_info((r))
 #define mysql_options(r,a,b)			mysqlnd_options((r), (a), (b))
