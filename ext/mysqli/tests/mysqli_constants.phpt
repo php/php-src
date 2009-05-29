@@ -50,7 +50,7 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_GROUP_FLAG"					=> true,
 		"MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED"=> true,
 		"MYSQLI_SERVER_QUERY_NO_INDEX_USED"	=> true,
-		
+
 		"MYSQLI_TYPE_DECIMAL"				=> true,
 		"MYSQLI_TYPE_TINY"					=> true,
 		"MYSQLI_TYPE_SHORT"					=> true,
@@ -85,13 +85,14 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_REPORT_OFF"					=> true,
 		"MYSQLI_SET_CHARSET_NAME"			=> true,
 		"MYSQLI_REFRESH_GRANT"				=> true,
-		"MYSQLI_REFRESH_LOG"				=> true,
+		"MYSQLI_REFRESH_LOG"					=> true,
 		"MYSQLI_REFRESH_TABLES"				=> true,
 		"MYSQLI_REFRESH_HOSTS"				=> true,
 		"MYSQLI_REFRESH_STATUS"				=> true,
 		"MYSQLI_REFRESH_THREADS"			=> true,
 		"MYSQLI_REFRESH_SLAVE"				=> true,
 		"MYSQLI_REFRESH_MASTER"				=> true,
+		"MYSQLI_DEBUG_TRACE_ENABLED"	=> true,
 	);
 
 	/* depends on the build - experimental */
@@ -107,7 +108,6 @@ require_once('skipifconnectfailure.inc');
 		$version = 50007 + 1;
 		$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 		$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
-		$expected_constants['MYSQLI_DEBUG_TRACE_ENABLED'] = true;
 		$expected_constants['MYSQLI_ASYNC'] = true;
 
 	} else {
@@ -118,8 +118,8 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
 	}
 	if ($version > 60005 || $IS_MYSQLND) {
-		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;	
-	} 
+		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
+	}
 
 	if ($version > 50002) {
 		$expected_constants = array_merge($expected_constants, array(
@@ -158,10 +158,14 @@ require_once('skipifconnectfailure.inc');
 	} else if (!$IS_MYSQLND) {
 		/* libmysql only */
 
-		/* are they available in all versions of ext/mysqli ? */
-		$expected_constants["MYSQLI_RPL_MASTER"]	= true;
-		$expected_constants["MYSQLI_RPL_SLAVE"]		= true;
-		$expected_constants["MYSQLI_RPL_ADMIN"]		= true;
+		/* are they available in all versions of ext/mysqli ?
+		... no we must have removed them at some point - for BC, weakening the test
+		*/
+		if (defined("MYSQLI_RPL_MASTER")) {
+			$expected_constants["MYSQLI_RPL_MASTER"]	= true;
+			$expected_constants["MYSQLI_RPL_SLAVE"]		= true;
+			$expected_constants["MYSQLI_RPL_ADMIN"]		= true;
+		}
 	}
 
 
