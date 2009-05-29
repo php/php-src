@@ -39,11 +39,11 @@ already through other measures.
 		$valid_options[] = constant('MYSQLI_OPT_NET_CMD_BUFFER_SIZE');
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_NET_READ_BUFFER_SIZE'))
 		$valid_options[] = constant('MYSQLI_OPT_NET_READ_BUFFER_SIZE');
-	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_YEARS_AS_INT'))
-		$valid_options[] = constant('MYSQLI_OPT_INT_AND_YEARS_AS_INT');
+	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE'))
+		$valid_options[] = constant('MYSQLI_OPT_INT_AND_FLOAT_NATIVE');
 	if (defined('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'))
 		$valid_options[] = constant('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE');
-
+	
 	$tmp    = NULL;
 	$link   = NULL;
 
