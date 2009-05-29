@@ -3981,7 +3981,7 @@ PHP_FUNCTION(imagepstext)
 
 	if (width) {
 		extend = T1_GetExtend(*f_ind);
-		str_path = T1_GetCharOutline(*f_ind, str[0], size, transform);
+		str_path = T1_GetCharOutline(*f_ind, str[0], (float) size, transform);
 
 		if (!str_path) {
 			if (T1_errno) {
@@ -3995,15 +3995,15 @@ PHP_FUNCTION(imagepstext)
 			amount_kern += str[i - 1] == ' ' ? space : 0;
 			add_width = (int) (amount_kern + width) / extend;
 
-			char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, size, transform);
+			char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, (float) size, transform);
 			str_path = T1_ConcatOutlines(str_path, char_path);
 
-			char_path = T1_GetCharOutline(*f_ind, str[i], size, transform);
+			char_path = T1_GetCharOutline(*f_ind, str[i], (float) size, transform);
 			str_path = T1_ConcatOutlines(str_path, char_path);
 		}
 		str_img = T1_AAFillOutline(str_path, 0);
 	} else {
-		str_img = T1_AASetString(*f_ind, str,  str_len, space, T1_KERNING, size, transform);
+		str_img = T1_AASetString(*f_ind, str,  str_len, space, T1_KERNING, (float) size, transform);
 	}
 	if (T1_errno) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error: %s", T1_StrError(T1_errno));
@@ -4070,8 +4070,13 @@ PHP_FUNCTION(imagepsbbox)
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-#define max(a, b) (a > b ? a : b)
-#define min(a, b) (a < b ? a : b)
+#ifndef max
+# define max(a, b) (a > b ? a : b)
+#endif
+#ifndef min
+# define min(a, b) (a < b ? a : b)
+#endif
+
 #define new_x(a, b) (int) ((a) * cos_a - (b) * sin_a)
 #define new_y(a, b) (int) ((a) * sin_a + (b) * cos_a)
 
