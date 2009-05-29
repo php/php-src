@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   (patch by datibbaw@php.net)
 - Fixed potential segfault with converting phars containing metadata to other
   formats (Greg).
+- Added support for the mysql_stmt_next_result() function from libmysql.
+  mysqlnd already supports this and the mysqli function was already there.
+  (Andrey)
 
 
 07 May 2009, PHP 5.3.0 RC 2
