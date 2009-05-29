@@ -40,23 +40,32 @@ require_once('skipifconnectfailure.inc');
 		printf("[007] Expecting string/any non empty, got %s/%s\n", gettype($error), $error);
 	var_dump($res);
 	var_dump($link);
+	if ($IS_MYSQLND) {
+		if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
+			printf("[008] mysqlnd used to be more verbose and used to support SELECT");
+		}
+	} else {
+		if ($link->info != NULL) {
+			printf("[008] Time for wonders - libmysql has started to support SELECT, change test");
+		}
+	}
 
 	mysqli_close($link);
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		printf("[008] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+		printf("[009] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_kill($link, -1);
 	if ((!$res = mysqli_query($link, "SELECT id FROM test LIMIT 1")) ||
 		(!$tmp = mysqli_fetch_assoc($res))) {
-		printf("[009] Connection should not be gone, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[010] Connection should not be gone, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	var_dump($tmp);
 	mysqli_free_result($res);
 	mysqli_close($link);
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		printf("[010] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+		printf("[011] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);      mysqli_kill($link, -1);
 
@@ -82,13 +91,13 @@ object(mysqli)#%d (%d) {
   [%u|b%"errno"]=>
   int(2006)
   [%u|b%"error"]=>
-  %unicode|string%(26) "MySQL server has gone away"
+  %unicode|string%(%d) "%s"
   [%u|b%"field_count"]=>
   int(0)
   [%u|b%"host_info"]=>
-  %unicode|string%(42) "MySQL host info: Localhost via UNIX socket"
+  %unicode|string%(%d) "%s"
   [%u|b%"info"]=>
-  %unicode|string%(38) "Records: 6  Duplicates: 0  Warnings: 0"
+  %s
   [%u|b%"insert_id"]=>
   int(0)
   [%u|b%"server_info"]=>
