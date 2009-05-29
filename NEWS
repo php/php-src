@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2009, PHP 5.2.10
+- Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
+
+- Fixed bug #48738 (exif_read_data() segfaults on certain corrupted .jpeg 
+  files). (Pierre)
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
 
@@ -14,15 +18,12 @@ PHP                                                                        NEWS
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
 - Added support for Sun CC (FR #46595 and FR #46513). (David Soria Parra)
-- Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
 - Fixed memory corruptions while reading properties of zip files. (Ilia)
 - Fixed memory leak in ob_get_clean/ob_get_flush. (Christian)
 - Fixed segfault on invalid session.save_path. (Hannes)
 - Fixed leaks in imap when a mail_criteria is used. (Pierre)
 
-- Fixed bug #48738 (exif_read_data() segfaults on certain corrupted .jpeg 
-  files). (Pierre)
 - Fixed bug #48336 (ReflectionProperty::getDeclaringClass() does not work with
   redeclared property). (patch by Markus dot Lidel at shadowconnect dot com)
 - Fixed bug #48326 (constant MSG_DONTWAIT not defined). (Arnaud)
