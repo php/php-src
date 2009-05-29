@@ -7,6 +7,9 @@ TestFest 2009 - AFUP - Perrick Penet <perrick@noparking.net>
 --FILE--
 <?php
 
+//In January 2008 , level 7.18.0 of the curl lib, many of the messages changed.
+//The final crlf was removed. This test is coded to work with or without the crlf.
+
 $ch = curl_init();
 
 curl_exec($ch);
@@ -17,5 +20,5 @@ curl_close($ch);
 
 ?>
 --EXPECTF--
-%string|unicode%(11) "No URL set!"
+%string|unicode%(%d) "No URL set!%r(|[\r\n]+)%r"
 int(3)
