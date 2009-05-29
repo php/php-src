@@ -44,14 +44,14 @@ new mysqli()
 --EXPECTF--
 1) bail
 
-Warning: mysqli::mysqli(): (HY000/2005): Unknown MySQL server host '%s' (1) in %s on line %d
+Warning: mysqli::mysqli(): (HY000/200%d): %s
 2) be quiet
-%s(%d) "Unknown MySQL server host '%s' (1)"
-int(2005)
+%s(%d) "%s"
+int(200%d)
 3) bail
 
-Warning: mysqli_connect(): (HY000/2005): Unknown MySQL server host '%s' (1) in %s on line %d
+Warning: mysqli_connect(): (HY000/200%d): %s
 4) be quiet
-%s(%d) "Unknown MySQL server host '%s' (1)"
-int(2005)
+%s(%d) "%s"
+int(200%d)
 done!
