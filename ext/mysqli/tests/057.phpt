@@ -33,7 +33,11 @@ require_once('skipifconnectfailure.inc');
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_store_result");
 	var_dump(mysqli_execute($stmt));
 	var_dump(mysqli_stmt_reset($stmt));
+
 	var_dump($stmt = mysqli_prepare($link, "SELECT * FROM test_store_result"));
+	if ($IS_MYSQLND && $stmt->affected_rows !== -1)
+			printf("[001] Expecting -1, got %d\n", $stmt->affected_rows);
+
 	var_dump(mysqli_execute($stmt));
 	var_dump($stmt = @mysqli_prepare($link, "SELECT * FROM test_store_result"), mysqli_error($link));
 	var_dump(mysqli_stmt_reset($stmt));
@@ -63,7 +67,7 @@ bool(true)
 bool(true)
 object(mysqli_stmt)#%d (%d) {
   [%u|b%"affected_rows"]=>
-  int(-1)
+  int(%s)
   [%u|b%"insert_id"]=>
   int(0)
   [%u|b%"num_rows"]=>
