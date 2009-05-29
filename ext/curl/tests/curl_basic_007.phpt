@@ -20,5 +20,5 @@ curl_close($ch);
 
 ?>
 --EXPECTF--
-%string|unicode%(%d) "No URL set!%r(|[\r\n]+)%r"
+%string|unicode%(%d) "No URL set!%w"
 int(3)
