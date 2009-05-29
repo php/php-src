@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.32 2008-12-25 00:08:51 pajoye Exp $
+// $Id: confutils.js,v 1.60.2.1.2.8.2.33 2009-05-29 07:43:07 kalle Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1568,8 +1568,11 @@ function generate_config_h()
 	for (i in keys) {
 		item = configure_hdr.Item(keys[i]);
 		outfile.WriteBlankLines(1);
-		outfile.WriteLine("/* " + item[1] + " */");
 		pieces = item[0];
+
+		if (item[1] != undefined) {
+			outfile.WriteLine("/* " + item[1] + " */");
+		}
 
 		if (typeof(pieces) == "string" && pieces.charCodeAt(0) == 34) {
 			/* quoted string have a maximal length of 2k under vc.
