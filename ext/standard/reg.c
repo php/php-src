@@ -31,9 +31,43 @@ ZEND_DECLARE_MODULE_GLOBALS(reg)
 typedef struct {
 	regex_t preg;
 	int cflags;
+	unsigned int lastuse;
 } reg_cache;
 
 static int reg_magic = 0;
+#define EREG_CACHE_SIZE 4096
+
+/* {{{ ereg_lru_cmp */
+static int ereg_lru_cmp(const void *a, const void *b TSRMLS_DC)
+{
+	Bucket *f = *((Bucket **) a);
+	Bucket *s = *((Bucket **) b);
+
+	if (((reg_cache *)f->pData)->lastuse <
+				((reg_cache *)s->pData)->lastuse) {
+		return -1;
+	} else if (((reg_cache *)f->pData)->lastuse ==
+				((reg_cache *)s->pData)->lastuse) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+/* }}} */
+
+/* {{{ static ereg_clean_cache */
+static int ereg_clean_cache(void *data, void *arg TSRMLS_DC)
+{
+	int *num_clean = (int *)arg;
+
+	if (*num_clean > 0) {
+		(*num_clean)--;
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_STOP;
+	}
+}
+/* }}} */
 
 /* {{{ _php_regcomp
  */
@@ -43,7 +77,17 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	int patlen = strlen(pattern);
 	reg_cache *rc = NULL;
 	TSRMLS_FETCH();
-	
+
+	if (zend_hash_num_elements(&REG(ht_rc)) >= EREG_CACHE_SIZE) {
+		if (REG(lru_counter) >= (1 << 31) || zend_hash_sort(&REG(ht_rc), zend_qsort, ereg_lru_cmp, 0 TSRMLS_CC) == FAILURE) {
+			zend_hash_clean(&REG(ht_rc));
+			REG(lru_counter) = 0;
+		} else {
+			int num_clean = EREG_CACHE_SIZE / 2;
+			zend_hash_apply_with_argument(&REG(ht_rc), ereg_clean_cache, &num_clean TSRMLS_CC);
+		}
+	}
+
 	if(zend_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == SUCCESS
 	   && rc->cflags == cflags) {
 #ifdef HAVE_REGEX_T_RE_MAGIC
@@ -53,6 +97,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 		 */
 		if (rc->preg.re_magic != reg_magic) {
 			zend_hash_clean(&REG(ht_rc));
+			REG(lru_counter) = 0;
 		} else {
 			memcpy(preg, &rc->preg, sizeof(*preg));
 			return r;
@@ -64,6 +109,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 		reg_cache rcp;
 
 		rcp.cflags = cflags;
+		rcp.lastuse = ++(REG(lru_counter));
 		memcpy(&rcp.preg, preg, sizeof(*preg));
 		/*
 		 * Since we don't have access to the actual MAGIC1 definition in the private
@@ -82,6 +128,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 			reg_cache rcp;
 
 			rcp.cflags = cflags;
+			rcp.lastuse = ++(REG(lru_counter));
 			memcpy(&rcp.preg, preg, sizeof(*preg));
 			zend_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
 							 (void *) &rcp, sizeof(rcp), NULL);
@@ -105,6 +152,7 @@ static void _free_reg_cache(reg_cache *rc)
 static void php_reg_init_globals(zend_reg_globals *reg_globals TSRMLS_DC)
 {
 	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
+	reg_globals->lru_counter = 0;
 }
 
 static void php_reg_destroy_globals(zend_reg_globals *reg_globals TSRMLS_DC)
