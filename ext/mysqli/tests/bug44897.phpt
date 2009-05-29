@@ -1,10 +1,15 @@
 --TEST--
-Bug #44879 (	failed to prepare statement)
+Bug #44879 (failed to prepare statement)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+
+if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
+	die("skip: only available in mysqlnd");
+
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
+
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
 }
@@ -45,7 +50,8 @@ if (mysqli_get_server_version($link) <= 50000) {
 	$stmt2 = $link->prepare('SELECT label FROM test WHERE id = ?');
 	if (!is_object($stmt2)) {
 
-		printf("[007] Failed to create new statement object\n");
+		printf("[007] Failed to create new statement object, [%d] %s\n",
+			$link->errno, $link->error);
 
 	} else {
 
