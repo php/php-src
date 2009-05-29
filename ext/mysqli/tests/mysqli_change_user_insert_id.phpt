@@ -1,5 +1,5 @@
 --TEST--
-mysqli_change_user() - LAST_INSERT_ID()
+mysqli_change_user() - LAST_INSERT_ID() - http://bugs.mysql.com/bug.php?id=45184?
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -8,10 +8,11 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$IS_MYSQLND) {
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-		die("skip Can't test server version, might hit known bug http://bugs.mysql.com/bug.php?id=30472");
-	if (mysqli_get_client_version($link) < 50123)
+		die("skip Can't test server version, might hit known bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
+	if (mysqli_get_client_version($link) <= 50135)
 		/* TODO - check wich version got the patch */
-		die(sprintf("skip libmysql %s should have bug http://bugs.mysql.com/bug.php?id=30472", mysqli_get_client_version($link)));
+		die(sprintf("skip libmysql %s should have bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184",
+	 mysqli_get_client_version($link)));
 	mysqli_close($link);
 }
 ?>
@@ -40,9 +41,9 @@ if (!$IS_MYSQLND) {
 	mysqli_change_user($link, $user, $passwd, $db);
 
 	if (($insert_id = mysqli_insert_id($link)) !== 0)
-		printf("[006] Expecting 0, got %d, [%d] %s\n",
-			$insert_id,
-			mysqli_errno($link), mysqli_error($link));
+			printf("[006] Expecting 0, got %d, [%d] %s\n",
+				$insert_id,
+				mysqli_errno($link), mysqli_error($link));
 
 	if (!$res = mysqli_query($link, 'SELECT LAST_INSERT_ID() as _insert_id'))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
