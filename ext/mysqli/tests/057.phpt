@@ -67,7 +67,7 @@ bool(true)
 bool(true)
 object(mysqli_stmt)#%d (%d) {
   [%u|b%"affected_rows"]=>
-  int(%s)
+  int(%i)
   [%u|b%"insert_id"]=>
   int(0)
   [%u|b%"num_rows"]=>

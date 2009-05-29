@@ -52,7 +52,7 @@ object(mysqli)#%d (%d) {
   [%u|b%"field_count"]=>
   int(0)
   [%u|b%"host_info"]=>
-  %unicode|string%(%d) "MySQL host info: %s via %s%s"
+  %unicode|string%(%d) "%s"
   [%u|b%"info"]=>
   NULL
   [%u|b%"insert_id"]=>
