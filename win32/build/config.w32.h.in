@@ -159,7 +159,7 @@
 
 #undef HAVE_ATOF_ACCEPTS_NAN
 #undef HAVE_ATOF_ACCEPTS_INF
-#define HAVE_HUGE_VAL_NAN 1
+#define HAVE_HUGE_VAL_NAN 0 
 
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch
