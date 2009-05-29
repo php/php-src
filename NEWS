@@ -3,10 +3,10 @@ PHP                                                                        NEWS
 ?? Jun 2009, PHP 5.2.10
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
-- Fixed bug #48738 (exif_read_data() segfaults on certain corrupted .jpeg 
-  files). (Pierre)
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
+- Fixed bug #48378 (exif_read_data() segfaults on certain corrupted .jpeg 
+  files). (Pierre)
 
 27 May 2009, PHP 5.2.10RC1
 - Updated timezone database to version 2009.8 (2009h) (Derick)
