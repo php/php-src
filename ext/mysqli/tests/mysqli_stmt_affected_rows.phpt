@@ -211,8 +211,13 @@ require_once('skipifconnectfailure.inc');
 	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
 		printf("[042] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = mysqli_stmt_store_result($stmt)))
-		printf("[043] Expecting boolean/false, got %s\%s\n", gettype($tmp), $tmp);
+	if ($IS_MYSQLND) {
+		if (false !== ($tmp = mysqli_stmt_store_result($stmt)))
+			printf("[043] Expecting boolean/false, got %s\%s\n", gettype($tmp), $tmp);
+	} else {
+		if (true !== ($tmp = mysqli_stmt_store_result($stmt)))
+			printf("[043] Libmysql does not care if the previous statement was bogus, expecting boolean/true, got %s\%s\n", gettype($tmp), $tmp);
+	}
 
 	if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
 		printf("[044] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
