@@ -170,7 +170,7 @@ Callback: 0
 Callback: 1
 Callback set to 'callback_fclose'
 Callback: 0
-[022] LOAD DATA failed, [2000] File handle closed in handler
+[022] LOAD DATA failed, [2000] File handle close%s
 Callback set to 'callback_invalid_args'
 Callback: 0
 Callback: 1
