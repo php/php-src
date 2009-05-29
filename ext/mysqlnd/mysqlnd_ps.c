@@ -588,7 +588,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	SET_ERROR_AFF_ROWS(stmt);
 	SET_ERROR_AFF_ROWS(stmt->conn);
 	
-	if (stmt->result && stmt->state > MYSQLND_STMT_PREPARED && stmt->field_count) {
+	if (stmt->result && stmt->state >= MYSQLND_STMT_PREPARED && stmt->field_count) {
 		/*
 		  We don need to copy the data from the buffers which we will clean.
 		  Because it has already been copied. See
@@ -1192,11 +1192,11 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const stmt TSRMLS_DC)
 			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
 		}
 
-		/* Now the line should be free, if it wasn't */
-
-		DBG_INF("freeing result");
-		/* free_result() doesn't actually free stmt->result but only the buffers */
-		stmt->m->free_result(stmt TSRMLS_CC);
+		/*
+		  Don't free now, let the result be usable. When the stmt will again be
+		  executed then the result set will be cleaned, the bound variables will
+		  be separated before that.
+		*/
 
 		int4store(cmd_buf, stmt->stmt_id);
 		if (CONN_GET_STATE(conn) == CONN_READY &&
