@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? Jun 2009, PHP 5.2.10
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
+- Fixed bug #48434 (memory_get_usage() accuracy). (Arnaud)
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
 - Fixed bug #48409 (crash when exception is thrown while passing function 
