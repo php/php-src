@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
+- Fixed bug #48409 (crash when exception is thrown while passing function 
+  arguments). (Arnaud)
 - Fixed bug #48378 (exif_read_data() segfaults on certain corrupted .jpeg 
   files). (Pierre)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
