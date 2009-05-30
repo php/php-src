@@ -2477,7 +2477,11 @@ ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC)
 	if (real_usage) {
 		return AG(mm_heap)->real_size;
 	} else {
-		return AG(mm_heap)->size;
+		size_t usage = AG(mm_heap)->size;
+#if ZEND_MM_CACHE
+		usage -= AG(mm_heap)->cached;
+#endif
+		return usage;
 	}
 }
 
