@@ -2362,7 +2362,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		EG(called_scope) = EX(called_scope);
 	}
 
-	zend_ptr_stack_3_pop(&EG(arg_types_stack), (void*)&EX(called_scope), (void**)&EX(current_object), (void**)&EX(fbc));
+	EX(called_scope) = zend_ptr_stack_pop(&EG(arg_types_stack));
+	EX(current_object) = zend_ptr_stack_pop(&EG(arg_types_stack));
+	EX(fbc) = zend_ptr_stack_pop(&EG(arg_types_stack));
 	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
@@ -4488,7 +4490,8 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			zval_ptr_dtor(&EX(object));
 		}
 		EX(called_scope) = DECODE_CTOR(EX(called_scope));
-		zend_ptr_stack_2_pop(&EG(arg_types_stack), (void**)&EX(object), (void**)&EX(fbc));
+		EX(object) = zend_ptr_stack_pop(&EG(arg_types_stack));
+		EX(fbc) = zend_ptr_stack_pop(&EG(arg_types_stack));
 	}
 
 	for (i=0; i<EX(op_array)->last_brk_cont; i++) {
