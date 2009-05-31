@@ -456,7 +456,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 					smart_str_appendl(buf, d, len);
 					efree(d);
 				} else {
-					zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
+					zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0", dbl);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -473,7 +473,7 @@ static void json_encode_r(smart_str *buf, zval *val, int options TSRMLS_DC) /* {
 			break;
 
 		default:
-			zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null.");
+			zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null");
 			smart_str_appendl(buf, "null", 4);
 			break;
 	}
@@ -543,7 +543,7 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must greater than zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must greater than zero");
 		RETURN_NULL();
 	}
 
