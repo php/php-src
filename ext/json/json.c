@@ -18,6 +18,12 @@
 
 /* $Id$ */
 
+/*
+ * UTODO
+ * - take a look at json_decode, some weird IS_STRING checks there
+ * - expose encode/decode API once that's done
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
