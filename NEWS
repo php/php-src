@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Changed SQLite3::loadExtension() to be disabled for threaded SAPIs. (Scott)
 
 - Added the ability for json_decode() to take a user specified depth. (Scott)
+- Added support for the mysql_stmt_next_result() function from libmysql.
+  (Andrey)
 
 - Fixed bug #48257 (PharData throws exception with non-phar tar). (Greg)
 - Fixed bug #48227 (NumberFormatter::format leaks memory). (Felipe)
@@ -21,9 +23,6 @@ PHP                                                                        NEWS
   (patch by datibbaw@php.net)
 - Fixed potential segfault with converting phars containing metadata to other
   formats (Greg).
-- Added support for the mysql_stmt_next_result() function from libmysql.
-  mysqlnd already supports this and the mysqli function was already there.
-  (Andrey)
 
 
 07 May 2009, PHP 5.3.0 RC 2
