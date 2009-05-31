@@ -40,6 +40,9 @@ ZEND_END_MODULE_GLOBALS(json)
 # define JSON_G(v) (json_globals.v)
 #endif
 
+PHPAPI void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
+PHPAPI void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC);
+
 #endif  /* PHP_JSON_H */
 
 /*
