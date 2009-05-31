@@ -10,8 +10,11 @@ PHP                                                                        NEWS
   arguments). (Arnaud)
 - Fixed bug #48378 (exif_read_data() segfaults on certain corrupted .jpeg 
   files). (Pierre)
+- Fixed bug #48359 (Script hangs on snmprealwalk if OID is not
+  increasing). (Ilia, simonov at gmail dot com)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
+
 
 27 May 2009, PHP 5.2.10RC1
 - Updated timezone database to version 2009.8 (2009h) (Derick)
