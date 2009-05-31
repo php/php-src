@@ -153,7 +153,7 @@ struct _php_period_obj {
 ZEND_BEGIN_MODULE_GLOBALS(date)
 	char      *default_timezone;
 	char      *timezone;
-	HashTable  tzcache;
+	HashTable *tzcache;
 	timelib_error_container *last_errors;
 ZEND_END_MODULE_GLOBALS(date)
 
