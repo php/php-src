@@ -83,7 +83,6 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC);
 static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC);
 
 static int json_determine_array_type(zval **val TSRMLS_DC)  /* {{{ */
@@ -176,7 +175,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) { /* {{{ */
                         need_comma = 1;
                     }
  
-                    json_encode_r(buf, *data TSRMLS_CC);
+                    php_json_encode(buf, *data TSRMLS_CC);
                 } else if (r == 1) {
                     if (i == HASH_KEY_IS_STRING) {
                         if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
@@ -196,7 +195,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) { /* {{{ */
                         json_escape_string(buf, key, key_len - 1 TSRMLS_CC);
                         smart_str_appendc(buf, ':');
 
-                        json_encode_r(buf, *data TSRMLS_CC);
+                        php_json_encode(buf, *data TSRMLS_CC);
                     } else {
                         if (need_comma) {
                             smart_str_appendc(buf, ',');
@@ -209,7 +208,7 @@ static void json_encode_array(smart_str *buf, zval **val TSRMLS_DC) { /* {{{ */
                         smart_str_appendc(buf, '"');
                         smart_str_appendc(buf, ':');
 
-                        json_encode_r(buf, *data TSRMLS_CC);
+                        php_json_encode(buf, *data TSRMLS_CC);
                     }
                 }
 
@@ -342,7 +341,7 @@ static void json_escape_string(smart_str *buf, char *s, int len TSRMLS_DC) /* {{
 }
 /* }}} */
 
-static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
+PHPAPI void php_json_encode(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
 {
     switch (Z_TYPE_P(val)) {
         case IS_NULL:
@@ -372,7 +371,7 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
 			smart_str_appendl(buf, d, len);
 			efree(d);
                 } else {
-                    zend_error(E_WARNING, "[json] (json_encode_r) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
+                    zend_error(E_WARNING, "[json] (php_json_encode) double %.9g does not conform to the JSON spec, encoded as 0.", dbl);
                     smart_str_appendc(buf, '0');
                 }
             }
@@ -385,12 +384,70 @@ static void json_encode_r(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
             json_encode_array(buf, &val TSRMLS_CC);
             break;
         default:
-            zend_error(E_WARNING, "[json] (json_encode_r) type is unsupported, encoded as null.");
+            zend_error(E_WARNING, "[json] (php_json_encode) type is unsupported, encoded as null.");
             smart_str_appendl(buf, "null", 4);
             break;
     }
 
     return;
+}
+/* }}} */
+
+PHPAPI void php_json_decode(zval *return_value, char *buf, int buf_len, zend_bool assoc) /* {{{ */
+{
+	unsigned short *utf16;
+	int utf16_len;
+	zval *z;
+
+	utf16 = (unsigned short *) safe_emalloc((buf_len+1), sizeof(unsigned short), 1);
+
+	utf16_len = utf8_to_utf16(utf16, buf, buf_len);
+	if (utf16_len <= 0)
+	{
+		if (utf16)
+		{
+			efree(utf16);
+		}
+
+		RETURN_NULL();
+	}
+
+	ALLOC_INIT_ZVAL(z);
+	if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC))
+	{
+		*return_value = *z;
+
+		FREE_ZVAL(z);
+		efree(utf16);
+	}
+	else
+	{
+		double d;
+		int type;
+		long p;
+
+		zval_dtor(z);
+		FREE_ZVAL(z);
+		efree(utf16);
+
+		if (buf_len == 4) {
+			if (!strcasecmp(buf, "null")) {
+				RETURN_NULL();
+			} else if (!strcasecmp(buf, "true")) {
+				RETURN_BOOL(1);
+			}
+		} else if (buf_len == 5 && !strcasecmp(buf, "false")) {
+			RETURN_BOOL(0);
+		}
+		if ((type = is_numeric_string(buf, buf_len, &p, &d, 0)) != 0) {
+			if (type == IS_LONG) {
+				RETURN_LONG(p);
+			} else if (type == IS_DOUBLE) {
+				RETURN_DOUBLE(d);
+			}
+		}
+		RETURN_NULL();
+	}
 }
 /* }}} */
 
@@ -405,7 +462,7 @@ static PHP_FUNCTION(json_encode)
         return;
     }
 
-    json_encode_r(&buf, parameter TSRMLS_CC);
+    php_json_encode(&buf, parameter TSRMLS_CC);
 
     ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
 
@@ -418,10 +475,8 @@ static PHP_FUNCTION(json_encode)
 static PHP_FUNCTION(json_decode)
 {
     char *parameter;
-    int parameter_len, utf16_len;
+    int parameter_len;
     zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-    zval *z;
-    unsigned short *utf16;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &parameter, &parameter_len, &assoc) == FAILURE) {
         return;
@@ -432,55 +487,7 @@ static PHP_FUNCTION(json_decode)
         RETURN_NULL();
     }
 
-    utf16 = (unsigned short *) safe_emalloc((parameter_len+1), sizeof(unsigned short), 1);
-
-    utf16_len = utf8_to_utf16(utf16, parameter, parameter_len);
-    if (utf16_len <= 0)
-    {
-        if (utf16)
-        {
-            efree(utf16);
-        }
-
-        RETURN_NULL();
-    }
-
-    ALLOC_INIT_ZVAL(z);
-    if (JSON_parser(z, utf16, utf16_len, assoc TSRMLS_CC))
-    {
-        *return_value = *z;
-
-        FREE_ZVAL(z);
-        efree(utf16);
-    }
-    else
-    {
-	double d;
-	int type;
-	long p;
-
-        zval_dtor(z);
-        FREE_ZVAL(z);
-        efree(utf16);
-
-	if (parameter_len == 4) {
-		if (!strcasecmp(parameter, "null")) {
-			RETURN_NULL();
-		} else if (!strcasecmp(parameter, "true")) {
-			RETURN_BOOL(1);
-		}
-	} else if (parameter_len == 5 && !strcasecmp(parameter, "false")) {
-		RETURN_BOOL(0);
-	}
-	if ((type = is_numeric_string(parameter, parameter_len, &p, &d, 0)) != 0) {
-		if (type == IS_LONG) {
-			RETURN_LONG(p);
-		} else if (type == IS_DOUBLE) {
-			RETURN_DOUBLE(d);
-		}
-	}
-		RETURN_NULL();
-    }
+	php_json_decode(return_value, parameter, parameter_len, assoc);
 }
 /* }}} */
 
