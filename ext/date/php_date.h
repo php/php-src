@@ -87,7 +87,7 @@ PHP_MINFO_FUNCTION(date);
 ZEND_BEGIN_MODULE_GLOBALS(date)
 	char      *default_timezone;
 	char      *timezone;
-	HashTable  tzcache;
+	HashTable *tzcache;
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
