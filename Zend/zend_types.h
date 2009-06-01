@@ -36,6 +36,12 @@ typedef long zend_intptr_t;
 typedef unsigned long zend_uintptr_t;
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3400
+typedef void* __attribute__((__may_alias__)) zend_alias;
+#else
+typedef void* zend_alias;
+#endif
+
 typedef unsigned int zend_object_handle;
 typedef struct _zend_object_handlers zend_object_handlers;
 
