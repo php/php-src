@@ -20,5 +20,5 @@ curl_close($ch);
 
 ?>
 --EXPECTF--
-%unicode|string%(38) "Couldn't resolve proxy '%s'"
+%unicode|string%(%d) "%r(Couldn't resolve proxy|Could not resolve proxy:)%r %s"
 int(5)
