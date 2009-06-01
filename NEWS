@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   files). (Pierre)
 - Fixed bug #48359 (Script hangs on snmprealwalk if OID is not
   increasing). (Ilia, simonov at gmail dot com)
+- Fixed bug #48273 (snmp*_real_walk() returns SNMP errors as values).
+  (Ilia, lytboris at gmail dot com)
 - Fixed bug #48247 (Crash on errors during startup). (Stas)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
