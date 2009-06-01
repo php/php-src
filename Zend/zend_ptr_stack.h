@@ -81,7 +81,7 @@ static inline void zend_ptr_stack_2_push(zend_ptr_stack *stack, void *a, void *b
 #undef ZEND_PTR_STACK_NUM_ARGS
 }
 
-static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **b, void **c)
+static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, zend_alias *restrict a, zend_alias *restrict b, zend_alias *restrict c)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
@@ -89,7 +89,7 @@ static inline void zend_ptr_stack_3_pop(zend_ptr_stack *stack, void **a, void **
 	stack->top -= 3;
 }
 
-static inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, void **a, void **b)
+static inline void zend_ptr_stack_2_pop(zend_ptr_stack *stack, zend_alias *restrict a, zend_alias *restrict b)
 {
 	*a = *(--stack->top_element);
 	*b = *(--stack->top_element);
