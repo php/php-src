@@ -34,9 +34,6 @@
 #define END_EXTERN_C()
 #endif
 
-#include <stdio.h>
-#include <assert.h>
-
 /*
  * general definitions
  */
@@ -67,6 +64,9 @@
 #endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
+
+#include <stdio.h>
+#include <assert.h>
 
 #ifdef HAVE_UNIX_H
 # include <unix.h>
