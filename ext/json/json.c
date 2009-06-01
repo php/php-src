@@ -393,7 +393,7 @@ PHPAPI void php_json_encode(smart_str *buf, zval *val TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_json_decode(zval *return_value, char *buf, int buf_len, zend_bool assoc) /* {{{ */
+PHPAPI void php_json_decode(zval *return_value, char *buf, int buf_len, zend_bool assoc TSRMLS_DC) /* {{{ */
 {
 	unsigned short *utf16;
 	int utf16_len;
@@ -487,7 +487,7 @@ static PHP_FUNCTION(json_decode)
         RETURN_NULL();
     }
 
-	php_json_decode(return_value, parameter, parameter_len, assoc);
+	php_json_decode(return_value, parameter, parameter_len, assoc TSRMLS_CC);
 }
 /* }}} */
 

@@ -45,7 +45,7 @@ extern zend_module_entry json_module_entry;
 #endif
 
 PHPAPI void php_json_encode(smart_str *buf, zval *val TSRMLS_DC);
-PHPAPI void php_json_decode(zval *return_value, char *buf, int buf_len, zend_bool assoc);
+PHPAPI void php_json_decode(zval *return_value, char *buf, int buf_len, zend_bool assoc TSRMLS_DC);
 
 #endif  /* PHP_JSON_H */
 
