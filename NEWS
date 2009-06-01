@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   files). (Pierre)
 - Fixed bug #48359 (Script hangs on snmprealwalk if OID is not
   increasing). (Ilia, simonov at gmail dot com)
-- Fixed bug #48247 PHP crashes on errors during startup. (Stas)
+- Fixed bug #48247 (Crash on errors during startup). (Stas)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
 
