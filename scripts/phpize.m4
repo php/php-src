@@ -77,6 +77,7 @@ php_debug_is_enabled
 ],[
   PHP_DEBUG=no
 ])
+CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_DEBUG])
 
 AC_MSG_CHECKING([if zts is enabled])
