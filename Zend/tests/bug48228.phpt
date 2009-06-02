@@ -1,7 +1,7 @@
 --TEST--
 Bug #48228 (crash when exception is thrown while passing function arguments)
 --FILE--
-<?
+<?php
 
 function do_throw() {
 	throw new Exception();
