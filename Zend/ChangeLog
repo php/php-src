@@ -1,3 +1,63 @@
+2009-06-01  Nuno Lopes  <nunoplopes@sapo.pt>
+
+    * zend.h:
+      MFB: fix compiler warnings by moving all std includes after include of
+      zend_config.h
+
+    * (PHP_5_3)
+      zend.h:
+      fix compiler warnings by moving all std includes after include of
+      zend_config.h.
+      this also fixes the build with stricter compilers than gcc (like clang)
+
+2009-06-01  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      tests/bug48228.phpt
+      tests/bug48228.phpt
+      tests/bug48408.phpt
+      tests/bug48408.phpt
+      tests/bug48409.phpt
+      tests/bug48409.phpt
+      tests/bug48428.phpt
+      tests/bug48428.phpt:
+      MFH: New tests
+
+    * tests/bug48228.phpt
+      tests/bug48228.phpt
+      tests/bug48228.phpt
+      tests/bug48408.phpt
+      tests/bug48408.phpt
+      tests/bug48408.phpt
+      tests/bug48409.phpt
+      tests/bug48409.phpt
+      tests/bug48409.phpt
+      tests/bug48428.phpt
+      tests/bug48428.phpt
+      tests/bug48428.phpt:
+        1.1.4;
+      New tests
+
+    * (PHP_5_2)
+      zend.h
+      zend.h
+      zend_ptr_stack.h
+      zend_ptr_stack.h
+      zend_types.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h:
+      MFH: better fix for #48409 , #48428 , #48228
+
+    * zend.h
+      zend_ptr_stack.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      better fix for #48409 , #48428 , #48228
+
 2009-05-30  Arnaud Le Blanc  <arnaud.lb@gmail.com>
 
     * (PHP_5_2)
