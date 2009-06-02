@@ -105,11 +105,11 @@ array(1) {
 -----
 array(1) {
   [0]=>
-  string(0) ""
+  NULL
 }
 -----
 array(1) {
   [0]=>
-  string(0) ""
+  NULL
 }
 -----
