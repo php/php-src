@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif
 
 #ifndef URL
-#define URL "http://www.php.net"
+#define URL "http://www.php.net/"
 #endif
 
 #ifndef EXT_VERSION
@@ -65,7 +65,7 @@ BEGIN
 #endif
             VALUE "FileVersion", EXT_VERSION
             VALUE "InternalName", INTERNAL_NAME
-            VALUE "LegalCopyright", "Copyright © 1997-2008 The PHP Group"
+            VALUE "LegalCopyright", "Copyright © 1997-2009 The PHP Group"
             VALUE "LegalTrademarks", "PHP"
             VALUE "OriginalFilename", FILE_NAME
             VALUE "ProductName", "PHP"
