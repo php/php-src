@@ -1,10 +1,12 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2009, PHP 5.2.10
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
 - Fixed bug #48456 (CPPFLAGS not restored properly in phpize.m4).
   (Jani, spisek at kerio dot com)
+- Fixed bug #48448 (Compile failure under IRIX 6.5.30 building cast.c). 
+  (Kalle)
 - Fixed bug #48434 (memory_get_usage() accuracy). (Arnaud)
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
