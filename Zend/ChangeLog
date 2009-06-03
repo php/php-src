@@ -1,3 +1,10 @@
+2009-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug48228.phpt
+      tests/bug48228.phpt
+      tests/bug48228.phpt:
+      fix test
+
 2009-06-01  Nuno Lopes  <nunoplopes@sapo.pt>
 
     * zend.h:
