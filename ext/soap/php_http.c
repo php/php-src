@@ -612,6 +612,11 @@ try_again:
 						smart_str_append_const(&soap_headers, "\", opaque=\"");
 						smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 					}
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "algorithm", sizeof("algorithm"), (void **)&tmp) == SUCCESS &&
+						Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_append_const(&soap_headers, "\", algorithm=\"");
+						smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
 					smart_str_append_const(&soap_headers, "\"\r\n");
 				}
 			} else {
