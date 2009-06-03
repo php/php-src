@@ -1,5 +1,5 @@
 --TEST--
-bug #<bugid> (link not working properly on Windows)
+link not working properly on Windows
 --CREDITS--
 Venkat Raman Don
 --SKIPIF--
