@@ -398,7 +398,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			char *s;
-			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
+			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
 			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
 				response_status = atoi((s + 1));
 			}
@@ -456,7 +456,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:")-1 &&
+			if (h->header_len > sizeof("Status:")-1 && 
 				strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
 			) {
 				if (!ignore_status) {
@@ -565,13 +565,13 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 #endif
 #if !HAVE_SETENV
 	if (value) {
-		len = snprintf(buf, len - 1, "%s=%s", name, value);
+		len = slprintf(buf, len - 1, "%s=%s", name, value);
 		putenv(buf);
 	}
 #endif
 #if !HAVE_UNSETENV
 	if (!value) {
-		len = snprintf(buf, len - 1, "%s=", name);
+		len = slprintf(buf, len - 1, "%s=", name);
 		putenv(buf);
 	}
 #endif
