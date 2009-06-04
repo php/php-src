@@ -3085,11 +3085,9 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 		}
 	}
 	if (offset) {
-	  	long l;
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-			  	DVAL_TO_LVAL(Z_DVAL_P(offset), l);
-				zend_hash_index_update(Z_ARRVAL_P(array_ptr), l, &expr_ptr, sizeof(zval *), NULL);
+				zend_hash_index_update(Z_ARRVAL_P(array_ptr), zend_dval_to_lval(Z_DVAL_P(offset)), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_LONG:
 			case IS_BOOL:
@@ -3408,7 +3406,6 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	long index;
 
 	if (OP1_TYPE != IS_VAR || container) {
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -3420,14 +3417,12 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						index = (long) Z_DVAL_P(offset);
-						zend_hash_index_del(ht, index);
+						zend_hash_index_del(ht, zend_dval_to_lval(Z_DVAL_P(offset)));
 						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
-						index = Z_LVAL_P(offset);
-						zend_hash_index_del(ht, index);
+						zend_hash_index_del(ht, Z_LVAL_P(offset));
 						break;
 					case IS_STRING:
 						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
@@ -3907,7 +3902,6 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_IS);
 	zval **value = NULL;
 	int result = 0;
-	long index;
 
 	if (OP1_TYPE != IS_VAR || container) {
 		zend_free_op free_op2;
@@ -3921,16 +3915,14 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 
 			switch (Z_TYPE_P(offset)) {
 				case IS_DOUBLE:
-					index = (long) Z_DVAL_P(offset);
-					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+					if (zend_hash_index_find(ht, zend_dval_to_lval(Z_DVAL_P(offset)), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
 				case IS_RESOURCE:
 				case IS_BOOL:
 				case IS_LONG:
-					index = Z_LVAL_P(offset);
-					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+					if (zend_hash_index_find(ht, Z_LVAL_P(offset), (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
