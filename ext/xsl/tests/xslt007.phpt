@@ -1,7 +1,7 @@
 --TEST--
 Test 7: Transform To Uri
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
 --FILE--
 <?php
 echo "Test 7: Transform To Uri";
