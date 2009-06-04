@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 
 - Changed SQLite3::loadExtension() to be disabled for threaded SAPIs. (Scott)
 
+- Added constants based on Windows' GetVersionEx information. 
+  PHP_WINDOWS_VERSION_* and PHP_WINDOWS_NT_*. (Pierre)
 - Added the ability for json_decode() to take a user specified depth. (Scott)
 - Added support for the mysql_stmt_next_result() function from libmysql.
   (Andrey)
