@@ -2,7 +2,7 @@
 Test 8: Stream Wrapper Includes
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
+	require_once dirname(__FILE__) .'/skipif.inc';
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --FILE--
