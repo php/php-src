@@ -23,8 +23,9 @@ PHP                                                                        NEWS
   PDO_PGSQL). (Matteo)
 - Fixed bug #38802 (max_redirects and ignore_errors).
   (patch by datibbaw@php.net)
+- Fixed security vulnerability in phar's handling of long tar filenames. (Greg)
 - Fixed potential segfault with converting phars containing metadata to other
-  formats (Greg).
+  formats. (Greg)
 
 
 07 May 2009, PHP 5.3.0 RC 2
