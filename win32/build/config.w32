@@ -355,6 +355,10 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
 	zend_float.c");
 
+if (VCVERS == 1200) {
+	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+}
+
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \

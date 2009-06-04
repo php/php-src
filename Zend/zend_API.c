@@ -343,6 +343,7 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 
 	switch (c) {
 		case 'l':
+		case 'L':
 			{
 				long *p = va_arg(*va, long *);
 				switch (Z_TYPE_PP(arg)) {
@@ -354,7 +355,17 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								*p = (long) d;
+								if (c == 'L') {
+									if (d > LONG_MAX) {
+										*p = LONG_MAX;
+										break;
+									} else if (d < LONG_MIN) {
+										*p = LONG_MIN;
+										break;
+									}
+								}
+
+								*p = zend_dval_to_lval(d);
 							}
 						}
 						break;
@@ -367,14 +378,33 @@ static char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, char **sp
 							if ((type = is_numeric_unicode(Z_USTRVAL_PP(arg), Z_USTRLEN_PP(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								*p = (long) d;
+								if (c == 'L') {
+									if (d > LONG_MAX) {
+										*p = LONG_MAX;
+										break;
+									} else if (d < LONG_MIN) {
+										*p = LONG_MIN;
+										break;
+									}
+								}
+
+								*p = zend_dval_to_lval(d);
 							}
 						}
 						break;
 
+					case IS_DOUBLE:
+						if (c == 'L') {
+							if (Z_DVAL_PP(arg) > LONG_MAX) {
+								*p = LONG_MAX;
+								break;
+							} else if (Z_DVAL_PP(arg) < LONG_MIN) {
+								*p = LONG_MIN;
+								break;
+							}
+						}
 					case IS_NULL:
 					case IS_LONG:
-					case IS_DOUBLE:
 					case IS_BOOL:
 						convert_to_long_ex(arg);
 						*p = Z_LVAL_PP(arg);
