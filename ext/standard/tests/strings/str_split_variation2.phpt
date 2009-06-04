@@ -110,10 +110,9 @@ array(3) {
 Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
 bool(false)
 --Iteration 3 --
-array(1) {
-  [0]=>
-  string(23) "variation2:split_length"
-}
+
+Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
+bool(false)
 --Iteration 4 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d

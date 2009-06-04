@@ -110,7 +110,7 @@ string(8) "fffff6d7"
 string(8) "ffffffff"
 
 -- Iteration 6 --
-string(8) "7fffffff"
+string(1) "0"
 
 -- Iteration 7 --
 string(1) "a"
@@ -119,7 +119,7 @@ string(1) "a"
 string(8) "fffffff6"
 
 -- Iteration 9 --
-string(8) "7fffffff"
+string(8) "be991a08"
 
 -- Iteration 10 --
 string(1) "0"

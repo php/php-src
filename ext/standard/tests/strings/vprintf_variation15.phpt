@@ -58,11 +58,11 @@ foreach($formats as $format) {
 int(16)
 
 -- Iteration 2 --
-2147483647 u 1234 12345
+3755744308 u 1234 12345
 int(23)
 
 -- Iteration 3 --
-   1234000 2147483647 120
+   1234000 2450319192 120
 int(25)
 
 -- Iteration 4 --

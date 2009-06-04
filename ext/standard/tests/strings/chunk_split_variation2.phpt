@@ -98,7 +98,9 @@ string(28) "This is ch*uklen vari*ation*"
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 3 --
-string(26) "This is chuklen variation*"
+
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
+bool(false)
 -- Iteration 4 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d

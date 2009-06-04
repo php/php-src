@@ -118,11 +118,7 @@ array(0) {
 }
 
 -- Iteration 7 --
-array(2) {
-  ["three"]=>
-  int(3)
-  [0]=>
-  int(4)
+array(0) {
 }
 
 -- Iteration 8 --
