@@ -110,7 +110,7 @@ string(16) "fffffffffffff6d7"
 string(16) "7fffffffffffffff"
 
 -- Iteration 6 --
-string(16) "7fffffffffffffff"
+string(1) "0"
 
 -- Iteration 7 --
 string(1) "a"

@@ -28,8 +28,8 @@ var_dump( idate($format, $timestamp) );
 \*\*\* Testing idate\(\) : usage variation \*\*\*
 
 -- Testing idate\(\) function with float 12.3456789000e10 to timestamp --
-int\((2038|5882)\)
+int\((1935|5882)\)
 
 -- Testing idate\(\) function with float -12.3456789000e10 to timestamp --
-int\((1901|-1943)\)
+int\((2004|1901|-1943)\)
 ===DONE===

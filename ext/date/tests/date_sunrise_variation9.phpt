@@ -36,12 +36,12 @@ var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $ze
 \*\*\* Testing date_sunrise\(\) : usage variation \*\*\*
 
 -- Testing date_sunrise\(\) function by passing float 12.3456789000e10 value to time --
-string\(5\) "(08:53|07:49)"
-float\((8.883[0-9]*|8.883[0-9]*|7.821[0-9]*)\)
-int\((-2147466915|123456811756)\)
+string\(5\) "(07:34|07:49)"
+float\((7.566[0-9]*|7.821[0-9]*)\)
+int\((-1097256359|123456811756)\)
 
 -- Testing date_sunrise\(\) function by passing float -12.3456789000e10 value to time --
-string\(5\) "(08:48|08:04)"
-float\((8.810[0-9]*|8.810[0-9]*|8.074[0-9]*)\)
-int\((-2147443882|-123456761731)\)
+string\(5\) "(07:42|08:48|08:04)"
+float\((7.713[0-9]*|8.810[0-9]*|8.074[0-9]*)\)
+int\((1097304168|-2147443882|-123456761731)\)
 ===DONE===

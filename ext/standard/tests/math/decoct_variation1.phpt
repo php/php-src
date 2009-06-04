@@ -111,7 +111,7 @@ string(11) "37777773327"
 string(11) "37777777777"
 
 -- Iteration 6 --
-string(11) "17777777777"
+string(1) "0"
 
 -- Iteration 7 --
 string(2) "12"
@@ -120,7 +120,7 @@ string(2) "12"
 string(11) "37777777766"
 
 -- Iteration 9 --
-string(11) "17777777777"
+string(11) "27646215010"
 
 -- Iteration 10 --
 string(1) "0"
