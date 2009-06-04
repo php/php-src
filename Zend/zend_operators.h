@@ -63,39 +63,24 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
-/* {{{ DVAL_TO_LVAL */
-#define MAX_UNSIGNED_INT ((double) LONG_MAX * 2) + 1
-#ifdef _WIN64
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) > LONG_MAX) { \
-		(l) = (long)(unsigned long)(__int64) (d); \
-	} else { \
-		(l) = (long) (d); \
+#if ZEND_DVAL_TO_LVAL_CAST_OK
+# define zend_dval_to_lval(d) ((long) (d))
+#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+static zend_always_inline long zend_dval_to_lval(double d)
+{
+	if (d > LONG_MAX || d < LONG_MIN) {
+		return (long)(unsigned long)(zend_long64) d;
 	}
-#elif !defined(_WIN64) && __WORDSIZE == 64
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) >= LONG_MAX) { \
-		(l) = LONG_MAX; \
-	} else if ((d) <= LONG_MIN) { \
-		(l) = LONG_MIN; \
-	} else { \
-		(l) = (long) (d); \
-	}
+	return (long) d;
+}
 #else
-# define DVAL_TO_LVAL(d, l) \
-	if ((d) > LONG_MAX) { \
-		if ((d) > MAX_UNSIGNED_INT) { \
-			(l) = LONG_MAX; \
-		} else { \
-			(l) = (unsigned long) (d); \
-		} \
-	} else { \
-		if((d) < LONG_MIN) { \
-			(l) = LONG_MIN; \
-		} else { \
-			(l) = (long) (d); \
-		} \
+static zend_always_inline long zend_dval_to_lval(double d)
+{
+	if (d > LONG_MAX) {
+		return (long)(unsigned long) d;
 	}
+	return (long) d;
+}
 #endif
 /* }}} */
 
