@@ -274,7 +274,7 @@ ZEND_API int convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_LVAL(holder) = 0;									\
 				break;												\
 			case IS_DOUBLE:											\
-				DVAL_TO_LVAL(Z_DVAL_P(op), Z_LVAL(holder));			\
+				Z_LVAL(holder) = zend_dval_to_lval(Z_DVAL_P(op));	\
 				break;												\
 			case IS_STRING:											\
 				Z_LVAL(holder) = strtol(Z_STRVAL_P(op), NULL, 10);	\
@@ -409,7 +409,7 @@ ZEND_API int convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_LONG:
 			break;
 		case IS_DOUBLE:
-			DVAL_TO_LVAL(Z_DVAL_P(op), Z_LVAL_P(op));
+			Z_LVAL_P(op) = zend_dval_to_lval(Z_DVAL_P(op));
 			break;
 		case IS_STRING:
 			{
@@ -1467,7 +1467,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 		ZVAL_LONG(result, ~Z_LVAL_P(op1));
 		return SUCCESS;
 	} else if (Z_TYPE_P(op1) == IS_DOUBLE) {
-		ZVAL_LONG(result, ~(long) Z_DVAL_P(op1));
+		ZVAL_LONG(result, ~zend_dval_to_lval(Z_DVAL_P(op1)));
 		return SUCCESS;
 	} else if (Z_TYPE_P(op1) == IS_STRING) {
 		int i;

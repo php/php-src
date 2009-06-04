@@ -48,6 +48,7 @@ Type specifiers
  h  - array (returned as HashTable*)
  H  - array or HASH_OF(object) (returned as HashTable*)
  l  - long (long)
+ L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (long)
  o  - object of any type (zval*)
  O  - object of specific type given by class entry (zval*, zend_class_entry)
  r  - resource (zval*)
