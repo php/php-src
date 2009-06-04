@@ -481,6 +481,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
+#ifndef STDIN_FILENO
+# define STDIN_FILENO 0
+#endif
 
 static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
@@ -493,7 +496,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 			fcgi_request *request = (fcgi_request*) SG(server_context);
 			tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
 		} else {
-			tmp_read_bytes = read(0, buffer + read_bytes, count_bytes - read_bytes);
+			tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		}
 		if (tmp_read_bytes <= 0) {
 			break;
