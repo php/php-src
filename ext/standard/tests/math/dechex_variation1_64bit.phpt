@@ -110,7 +110,7 @@ unicode(16) "fffffffffffff6d7"
 unicode(16) "7fffffffffffffff"
 
 -- Iteration 6 --
-unicode(16) "7fffffffffffffff"
+unicode(1) "0"
 
 -- Iteration 7 --
 unicode(1) "a"

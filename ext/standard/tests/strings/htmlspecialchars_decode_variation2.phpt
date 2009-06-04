@@ -102,7 +102,7 @@ unicode(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 
 unicode(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 3 --
-unicode(94) "<html>Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
+unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
 
 -- Iteration 4 --
 unicode(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"

@@ -150,7 +150,15 @@ array(4) {
 }
 
 -- Iteration 7 --
-array(0) {
+array(4) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [1]=>
+  int(4)
 }
 
 -- Iteration 8 --

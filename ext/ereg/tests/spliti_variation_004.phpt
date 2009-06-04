@@ -33,16 +33,8 @@ array(1) {
   [0]=>
   string(9) "1 2 3 4 5"
 }
-array(5) {
+array(1) {
   [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "2"
-  [2]=>
-  string(1) "3"
-  [3]=>
-  string(1) "4"
-  [4]=>
-  string(1) "5"
+  string(9) "1 2 3 4 5"
 }
 Done

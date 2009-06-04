@@ -460,7 +460,7 @@ unicode(7) "integer"
 -- Iteration 51 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(-508130303)
 unicode(7) "integer"
 -- Iteration 52 --
 unicode(7) "integer"
@@ -470,7 +470,7 @@ unicode(7) "integer"
 -- Iteration 53 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(1952002105)
 unicode(7) "integer"
 -- Iteration 54 --
 unicode(7) "integer"
@@ -490,7 +490,7 @@ unicode(7) "integer"
 -- Iteration 57 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(343000682)
 unicode(7) "integer"
 -- Iteration 58 --
 unicode(6) "double"
@@ -920,7 +920,7 @@ unicode(7) "integer"
 -- Iteration 51 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(-508130303)
 unicode(7) "integer"
 -- Iteration 52 --
 unicode(7) "integer"
@@ -930,7 +930,7 @@ unicode(7) "integer"
 -- Iteration 53 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(1952002105)
 unicode(7) "integer"
 -- Iteration 54 --
 unicode(7) "integer"
@@ -950,7 +950,7 @@ unicode(7) "integer"
 -- Iteration 57 --
 unicode(6) "double"
 bool(true)
-int(2147483647)
+int(343000682)
 unicode(7) "integer"
 -- Iteration 58 --
 unicode(6) "double"

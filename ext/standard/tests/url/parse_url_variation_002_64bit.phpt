@@ -1,5 +1,7 @@
 --TEST--
 Test parse_url() function : usage variations  - unexpected type for arg 2
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only"); ?>
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
