@@ -894,11 +894,10 @@ class PharCommand extends CLICommand
 		$target = $dir . '/' . $sub;
 
 		if (!file_exists(dirname($target))) {
-			if (!is_writable(dirname($target))) {
-				self::error("Operation could not be completed\n");
-			}
-
-			mkdir(dirname($target));
+			@mkdir(dirname($target), 0777, true);
+		}
+		if (!file_exists(dirname($target))) {
+			self::error("Operation could not be completed\n");
 		}
 
 		echo "$sub";
