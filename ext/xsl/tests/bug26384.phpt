@@ -1,7 +1,7 @@
 --TEST--
 Bug #26384 (domxslt->process causes segfault with xsl:key)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
 --FILE--
 <?php
 $dom = new domDocument;
