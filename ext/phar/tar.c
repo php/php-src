@@ -330,16 +330,19 @@ bail:
 
 		if (!old && hdr->prefix[0] != 0) {
 			char name[256];
+			int i, j;
 
-			strcpy(name, hdr->prefix);
-			/* remove potential buffer overflow */
-			if (hdr->name[99]) {
-				strncat(name, hdr->name, 100);
-			} else {
-				strcat(name, hdr->name);
+			for (i = 0; i < 155; i++) {
+				name[i] = hdr->prefix[i];
+				if (name[i] == '\0') {
+					break;
+				}
+			}
+			for (j = 0; j < 100; j++) {
+				name[i+j] = hdr->name[j];
 			}
 
-			entry.filename_len = strlen(hdr->prefix) + 100;
+			entry.filename_len = i+j;
 
 			if (name[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
@@ -347,8 +350,16 @@ bail:
 			}
 			entry.filename = pestrndup(name, entry.filename_len, myphar->is_persistent);
 		} else {
-			entry.filename = pestrdup(hdr->name, myphar->is_persistent);
-			entry.filename_len = strlen(entry.filename);
+			int i;
+
+			/* calculate strlen, which can be no longer than 100 */
+			for (i = 0; i < 100; i++) {
+				if (hdr->name[i] == '\0') {
+					break;
+				}
+			}
+			entry.filename_len = i;
+			entry.filename = pestrndup(hdr->name, i, myphar->is_persistent);
 
 			if (entry.filename[entry.filename_len - 1] == '/') {
 				/* some tar programs store directories with trailing slash */
