@@ -55,7 +55,7 @@ foreach($formats as $format) {
 unicode(16) "1234567 342391 0"
 
 -- Iteration 2 --
-unicode(23) "2147483647 u 1234 12345"
+unicode(23) "3755744308 u 1234 12345"
 
 -- Iteration 3 --
 unicode(25) "   1234000 1012345    120"

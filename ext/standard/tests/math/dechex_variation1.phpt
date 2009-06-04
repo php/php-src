@@ -110,7 +110,7 @@ unicode(8) "fffff6d7"
 unicode(8) "ffffffff"
 
 -- Iteration 6 --
-unicode(8) "7fffffff"
+unicode(1) "0"
 
 -- Iteration 7 --
 unicode(1) "a"
@@ -119,7 +119,7 @@ unicode(1) "a"
 unicode(8) "fffffff6"
 
 -- Iteration 9 --
-unicode(8) "7fffffff"
+unicode(8) "be991a08"
 
 -- Iteration 10 --
 unicode(1) "0"

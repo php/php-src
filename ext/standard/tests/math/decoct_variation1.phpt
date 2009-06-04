@@ -111,7 +111,7 @@ unicode(11) "37777773327"
 unicode(11) "37777777777"
 
 -- Iteration 6 --
-unicode(11) "17777777777"
+unicode(1) "0"
 
 -- Iteration 7 --
 unicode(2) "12"
@@ -120,7 +120,7 @@ unicode(2) "12"
 unicode(11) "37777777766"
 
 -- Iteration 9 --
-unicode(11) "17777777777"
+unicode(11) "27646215010"
 
 -- Iteration 10 --
 unicode(1) "0"
