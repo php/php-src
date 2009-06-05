@@ -107,7 +107,7 @@ unicode(4) "3039"
 unicode(16) "fffffffffffff6d7"
 
 -- Iteration 5 --
-unicode(16) "7fffffffffffffff"
+unicode(1) "0"
 
 -- Iteration 6 --
 unicode(1) "0"

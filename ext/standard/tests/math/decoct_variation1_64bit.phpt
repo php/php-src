@@ -108,7 +108,7 @@ unicode(5) "30071"
 unicode(22) "1777777777777777773327"
 
 -- Iteration 5 --
-unicode(21) "777777777777777777777"
+unicode(1) "0"
 
 -- Iteration 6 --
 unicode(1) "0"
