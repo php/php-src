@@ -79,9 +79,13 @@ ZEND_API int zend_lookup_class_ex(char *name, int name_length, char *autoload_na
 ZEND_API int zend_u_lookup_class(zend_uchar type, zstr name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length, zstr autoload_name, int do_normalize, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
+ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
+ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 ZEND_API int zend_u_eval_string(zend_uchar type, zstr str, zval *retval_ptr, char *string_name TSRMLS_DC);
+ZEND_API int zend_u_eval_stringl(zend_uchar type, zstr str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_u_eval_string_ex(zend_uchar type, zstr str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
+ZEND_API int zend_u_eval_stringl_ex(zend_uchar type, zstr str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 static inline int i_zend_is_true(zval *op)
 {
