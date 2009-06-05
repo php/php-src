@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[])
 						continue;
 					}
 
-					zend_eval_string(code, NULL, "php shell code" TSRMLS_CC);
+					zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
 					pos = 0;
 					
 					if (php_last_char != '\0' && php_last_char != '\n') {

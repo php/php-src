@@ -1696,7 +1696,7 @@ ZEND_FUNCTION(get_defined_vars)
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(create_function)
 {
-	char *eval_code, *function_name;
+	char *eval_code, function_name[sizeof("0lambda_") + MAX_LENGTH_OF_LONG];
 	int eval_code_length, function_name_length;
 	zstr args, code;
 	int args_len, code_len;
@@ -1740,16 +1740,31 @@ ZEND_FUNCTION(create_function)
 		code_len = len;
 	}
 
-	eval_code_length = sizeof(LAMBDA_DECLARE_ENCODING "function " LAMBDA_TEMP_FUNCNAME)
+	eval_code = (char *) emalloc(sizeof(LAMBDA_DECLARE_ENCODING "function " LAMBDA_TEMP_FUNCNAME)
 			+args_len
 			+2	/* for the args parentheses */
 			+2	/* for the curly braces */
-			+code_len;
+			+code_len);
 
-	eval_code = (char *) emalloc(eval_code_length);
-	sprintf(eval_code, "%sfunction " LAMBDA_TEMP_FUNCNAME "(%s){%s}",
-		(type == IS_UNICODE) ? LAMBDA_DECLARE_ENCODING : "",
-		args.s, code.s);
+	if (type == IS_UNICODE) {
+		eval_code_length = sizeof(LAMBDA_DECLARE_ENCODING "function " LAMBDA_TEMP_FUNCNAME "(") - 1;
+		memcpy(eval_code, LAMBDA_DECLARE_ENCODING "function " LAMBDA_TEMP_FUNCNAME "(", eval_code_length);
+	} else {
+		eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME "(") - 1;
+		memcpy(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(", eval_code_length);
+	}
+
+	memcpy(eval_code + eval_code_length, args.s, args_len);
+	eval_code_length += args_len;
+
+	eval_code[eval_code_length++] = ')';
+	eval_code[eval_code_length++] = '{';
+
+	memcpy(eval_code + eval_code_length, code.s, code_len);
+	eval_code_length += code_len;
+
+	eval_code[eval_code_length++] = '}';
+	eval_code[eval_code_length] = '\0';
 
 	if (type == IS_UNICODE) {
 		efree(args.s);
@@ -1757,7 +1772,7 @@ ZEND_FUNCTION(create_function)
 	}
 
 	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
-	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);
+	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name TSRMLS_CC);
 	efree(eval_code);
 	efree(eval_name);
 
@@ -1771,15 +1786,13 @@ ZEND_FUNCTION(create_function)
 		new_function = *func;
 		function_add_ref(&new_function TSRMLS_CC);
 
-		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
+		function_name[0] = '\0';
 
 		do {
-			sprintf(function_name, "%clambda_%d", 0, ++EG(lambda_count));
-			function_name_length = strlen(function_name+1)+1;
+			function_name_length = 1 + sprintf(function_name + 1, "lambda_%d", ++EG(lambda_count));
 		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
-		RETVAL_ASCII_STRINGL(function_name, function_name_length, 0);
-		efree(function_name);
+		RETURN_ASCII_STRINGL(function_name, function_name_length, 0);
 	} else {
 		RETURN_FALSE;
 	}

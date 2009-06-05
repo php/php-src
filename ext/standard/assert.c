@@ -156,15 +156,18 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE_PP(assertion) == IS_STRING || Z_TYPE_PP(assertion) == IS_UNICODE) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
+		int myeval_len;
 
 		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
 			tmp = **assertion;
 			zval_copy_ctor(&tmp);
 			convert_to_string(&tmp);
 			myeval = Z_STRVAL(tmp);
+			myeval_len = Z_STRLEN(tmp);
 			free_tmp = 1;
 		} else {
 			myeval = Z_STRVAL_PP(assertion);
+			myeval_len = Z_STRLEN_PP(assertion);
 		}
 
 		if (ASSERTG(quiet_eval)) {
@@ -173,7 +176,7 @@ PHP_FUNCTION(assert)
 		}
 
 		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
-		if (zend_eval_string(myeval, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
+		if (zend_eval_stringl(myeval, myeval_len, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			if (free_tmp) {
