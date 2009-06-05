@@ -1673,7 +1673,7 @@ ZEND_FUNCTION(get_defined_vars)
 ZEND_FUNCTION(create_function)
 {
 	char *eval_code, *function_name, *function_args, *function_code;
-	int function_name_length, function_args_len, function_code_len;
+	int eval_code_length, function_name_length, function_args_len, function_code_len;
 	int retval;
 	char *eval_name;
 
@@ -1681,10 +1681,29 @@ ZEND_FUNCTION(create_function)
 		return;
 	}
 
-	zend_spprintf(&eval_code, 0, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", function_args, function_code);
+	eval_code = (char *) emalloc(sizeof("function " LAMBDA_TEMP_FUNCNAME)
+			+function_args_len
+			+2	/* for the args parentheses */
+			+2	/* for the curly braces */
+			+function_code_len);
+
+	eval_code_length = sizeof("function " LAMBDA_TEMP_FUNCNAME "(") - 1;
+	memcpy(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(", eval_code_length);
+
+	memcpy(eval_code + eval_code_length, function_args, function_args_len);
+	eval_code_length += function_args_len;
+
+	eval_code[eval_code_length++] = ')';
+	eval_code[eval_code_length++] = '{';
+
+	memcpy(eval_code + eval_code_length, function_code, function_code_len);
+	eval_code_length += function_code_len;
+
+	eval_code[eval_code_length++] = '}';
+	eval_code[eval_code_length] = '\0';
 
 	eval_name = zend_make_compiled_string_description("runtime-created function" TSRMLS_CC);
-	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);
+	retval = zend_eval_stringl(eval_code, eval_code_length, NULL, eval_name TSRMLS_CC);
 	efree(eval_code);
 	efree(eval_name);
 
@@ -1699,10 +1718,10 @@ ZEND_FUNCTION(create_function)
 		function_add_ref(&new_function);
 
 		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
+		function_name[0] = '\0';
 
 		do {
-			sprintf(function_name, "%clambda_%d", 0, ++EG(lambda_count));
-			function_name_length = strlen(function_name+1)+1;
+			function_name_length = 1 + sprintf(function_name + 1, "lambda_%d", ++EG(lambda_count));
 		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_STRINGL(function_name, function_name_length, 0);
