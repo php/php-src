@@ -165,7 +165,7 @@ void exec_php(BLOBCALLBACK b, PARAMDSC *res, ISC_SHORT *init)
 #endif
 			/* feed it to the parser */
 			zend_first_try {
-				result = zend_eval_string(code, NULL, "Firebird Embedded PHP engine" TSRMLS_CC);
+				result = zend_eval_stringl(code, b->blob_total_length, NULL, "Firebird Embedded PHP engine" TSRMLS_CC);
 			} zend_end_try();
 	}
 	

@@ -1116,7 +1116,7 @@ ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_ent
 }
 /* }}} */
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1125,15 +1125,14 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	int retval;
 
 	if (retval_ptr) {
-		int l = strlen(str);
-		Z_STRLEN(pv) = l + sizeof("return ;") - 1;
+		Z_STRLEN(pv) = str_len + sizeof("return ;") - 1;
 		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
-		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, l);
+		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
 		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
 	} else {
-		Z_STRLEN(pv) = strlen(str);
+		Z_STRLEN(pv) = str_len;
 		Z_STRVAL(pv) = str;
 	}
 	Z_TYPE(pv) = IS_STRING;
@@ -1188,16 +1187,28 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 }
 /* }}} */
 
-ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+{
+	return zend_eval_stringl(str, strlen(str), retval_ptr, string_name TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	int result;
 
-	result = zend_eval_string(str, retval_ptr, string_name TSRMLS_CC);
+	result = zend_eval_stringl(str, str_len, retval_ptr, string_name TSRMLS_CC);
 	if (handle_exceptions && EG(exception)) {
 		zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
 		result = FAILURE;
 	}
 	return result;
+}
+/* }}} */
+
+ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+{
+	return zend_eval_stringl_ex(str, strlen(str), retval_ptr, string_name, handle_exceptions TSRMLS_CC);
 }
 /* }}} */
 
