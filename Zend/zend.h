@@ -407,7 +407,12 @@ struct _zval_struct {
 #define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
 
 #if defined(__GNUC__)
+#if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
+#else
+#define zend_always_inline inline
+#endif
+
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
 #else
