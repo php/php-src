@@ -359,7 +359,7 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 	}
 }
 
-int pass_two(zend_op_array *op_array TSRMLS_DC)
+ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
 
