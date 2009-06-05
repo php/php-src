@@ -34,6 +34,10 @@
 static __inline __int64 llabs( __int64 i ) { return i >= 0? i: -i; }
 #endif
 
+#if defined(__GNUC__) && __GNUC__ < 3
+static __inline __int64_t llabs( __int64_t i ) { return i >= 0 ? i : -i; }
+#endif
+
 /* {{{ arginfo */
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
