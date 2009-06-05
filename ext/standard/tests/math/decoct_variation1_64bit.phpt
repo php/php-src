@@ -108,7 +108,7 @@ string(5) "30071"
 string(22) "1777777777777777773327"
 
 -- Iteration 5 --
-string(21) "777777777777777777777"
+string(1) "0"
 
 -- Iteration 6 --
 string(1) "0"
