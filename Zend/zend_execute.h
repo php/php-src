@@ -169,6 +169,27 @@ static inline int zend_ptr_stack_get_arg(int requested_arg, void **data TSRMLS_D
 	return SUCCESS;
 }
 
+static inline void zend_arg_types_stack_2_pop(zend_ptr_stack *stack, zval **object, zend_function **fbc)
+{
+	void *a, *b;
+
+	zend_ptr_stack_2_pop(stack, &a, &b);
+
+	*object = a;
+	*fbc = b;
+}
+
+static inline void zend_arg_types_stack_3_pop(zend_ptr_stack *stack, zend_class_entry **called_scope, zval **object, zend_function **fbc)
+{
+	void *a, *b, *c;
+
+	zend_ptr_stack_3_pop(stack, &a, &b, &c);
+
+	*called_scope = a;
+	*object = b;
+	*fbc = c;
+}
+
 void execute_new_code(TSRMLS_D);
 
 

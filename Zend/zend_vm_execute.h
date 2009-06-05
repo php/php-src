@@ -302,7 +302,7 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}
-	zend_ptr_stack_2_pop(&EG(arg_types_stack), (zend_alias*)&EX(object), (zend_alias*)&EX(fbc));
+	zend_arg_types_stack_2_pop(&EG(arg_types_stack), &EX(object), &EX(fbc));
 
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 
@@ -562,7 +562,7 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			zval_ptr_dtor(&EX(object));
 		}
-		zend_ptr_stack_2_pop(&EG(arg_types_stack), (zend_alias*)&EX(object), (zend_alias*)&EX(fbc));
+		zend_arg_types_stack_2_pop(&EG(arg_types_stack), &EX(object), &EX(fbc));
 	}
 
 	for (i=0; i<EX(op_array)->last_brk_cont; i++) {
