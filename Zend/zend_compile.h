@@ -599,7 +599,7 @@ void init_op(zend_op *op TSRMLS_DC);
 int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry TSRMLS_DC);
 void print_op_array(zend_op_array *op_array, int optimizations);
-int pass_two(zend_op_array *op_array TSRMLS_DC);
+ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 void zend_do_first_catch(znode *open_parentheses TSRMLS_DC);
 void zend_initialize_try_catch_element(const znode *try_token TSRMLS_DC);
