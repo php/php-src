@@ -1,3 +1,79 @@
+2009-06-04  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      tests/bug39018.phpt
+      tests/int_overflow_64bit.phpt
+      tests/int_underflow_32bit.phpt:
+      MFH: Updated tests after double->long conversion change (basically to match
+      5.2)
+      
+
+    * tests/bug39018.phpt
+      tests/int_overflow_64bit.phpt
+      tests/int_underflow_32bit.phpt:
+      Updated tests after double->long conversion change (basically to match 5.2)
+      
+
+    * (PHP_5_3)
+      Zend.m4
+      zend_API.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      MFH:
+      Restored double->long conversion behavior to that of PHP 5.2 (on most
+      platforms) and prior:
+       * Out-of-range numbers overflow/preserve least significant bits (no
+      LONG_MAX/MIN limit)
+       * See bug #42868 (presumably-rare platform with different results in 5.2)
+       * On 32-bit platforms with 64-bit long type, a zend_long64 cast has been
+      added,
+          otherwise it's the same as 5.2
+       * Use this conversion method everywhere instead of some plain (long)
+      casts
+      
+      Added 'L' parameter parsing specifier to ensure a LONG_MAX/MIN limit:
+       * Essentially what 5.3's new conversion was doing in most cases
+       * Functions with "limit" or "length" type params could be updated to use
+      this,
+          and prevent confusing overflow behavior with huge numbers (*also* in
+      5.2)
+        - See bug #47854, for example; or even #42868 again
+      
+
+    * Zend.m4
+      zend_API.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_operators.c
+      zend_operators.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Restored double->long conversion behavior to that of PHP 5.2 (on most
+      platforms) and prior:
+       * Out-of-range numbers overflow/preserve least significant bits (no
+      LONG_MAX/MIN limit)
+       * See bug #42868 (presumably-rare platform with different results in 5.2)
+       * On 32-bit platforms with 64-bit long type, a zend_long64 cast has been
+      added,
+          otherwise it's the same as 5.2
+       * Use this conversion method everywhere instead of some plain (long)
+      casts
+      
+      Added 'L' parameter parsing specifier to ensure a LONG_MAX/MIN limit:
+       * Essentially what 5.3's new conversion was doing in most cases
+       * Functions with "limit" or "length" type params could be updated to use
+      this,
+          and prevent confusing overflow behavior with huge numbers (*also* in
+      5.2)
+        - See bug #47854, for example; or even #42868 again
+      
+
 2009-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * tests/bug48228.phpt
