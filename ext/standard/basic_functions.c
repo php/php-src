@@ -6036,7 +6036,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	if (filename_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename can not be empty!");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename cannot be empty!");
 		RETURN_FALSE;
 	}
 
