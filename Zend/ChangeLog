@@ -1,3 +1,66 @@
+2009-06-05  Brian Shire  <shire@tekrat.com>
+
+    * (PHP_5_3)
+      zend_compile.h
+      zend_opcode.c:
+      MFH: Make pass_two visible to extensions with ZEND_API (required for
+      optimizer).
+
+    * zend_compile.h
+      zend_opcode.c:
+      Make pass_two visible to extensions with ZEND_API (required for optimizer).
+
+2009-06-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_2)
+      zend.h:
+      We don't have these in gcc2
+
+    * zend.h:
+      No always_inline attribute in gcc2
+
+    * (PHP_5_3)
+      zend.h:
+      There is no always_inline attribute in gcc2
+
+2009-06-05  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_3)
+      zend_builtin_functions.c
+      zend_execute.h
+      zend_execute_API.c:
+      MFH: Added zend_eval_stringl and made create_function(), etc. binary-safe
+
+    * zend_builtin_functions.c
+      zend_execute.h
+      zend_execute_API.c:
+      Added zend_eval_stringl and made create_function(), etc. binary-safe
+
+2009-06-05  Arnaud Le Blanc  <arnaud.lb@gmail.com>
+
+    * (PHP_5_2)
+      zend_execute.h
+      zend_ptr_stack.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      better fix for #48409 , #48428 , #48228
+
+    * (PHP_5_3)
+      zend_execute.h
+      zend_ptr_stack.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      MFH: better fix for #48409 , #48428 , #48228
+
+    * zend_execute.h
+      zend_ptr_stack.h
+      zend_types.h
+      zend_vm_def.h
+      zend_vm_execute.h:
+      better fix for #48409 , #48428 , #48228
+
 2009-06-04  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_3)
