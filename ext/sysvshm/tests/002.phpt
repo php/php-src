@@ -39,21 +39,21 @@ NULL
 Warning: shm_attach() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
+Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
+Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
+Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
+Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
 
 Warning: shm_remove() expects parameter 1 to be resource, boolean given in %s on line %d
 
-Warning: shm_attach(): Segment size must be greater then zero. in %s on line %d
+Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
 bool(false)
 
 Warning: shm_remove() expects parameter 1 to be resource, boolean given in %s on line %d

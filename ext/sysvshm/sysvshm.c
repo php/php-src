@@ -157,7 +157,7 @@ PHP_FUNCTION(shm_attach)
 	}
 
 	if (shm_size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Segment size must be greater then zero.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Segment size must be greater than zero");
 		RETURN_FALSE;
   	}
 

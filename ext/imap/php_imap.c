@@ -3717,7 +3717,7 @@ PHP_FUNCTION(imap_mail_compose)
 			if (!cookie) {
 				cookie = "-";
 			} else if (strlen(cookie) > (SENDBUFLEN - 2 - 2 - 2)) { /* validate cookie length -- + CRLF * 2 */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The boudary should be no longer then 4kb");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The boundary should be no longer than 4kb");
 				RETVAL_FALSE;
 				goto done;
 			}
