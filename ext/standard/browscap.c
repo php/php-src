@@ -122,7 +122,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					current_section_name != NULL &&
 					!strcasecmp(current_section_name, Z_STRVAL_P(arg2))
 				) {
-					zend_error(E_CORE_ERROR, "Invalid browscap ini file: 'Parent' value can not be same as the section name: %s (in file %s)", current_section_name, INI_STR("browscap"));
+					zend_error(E_CORE_ERROR, "Invalid browscap ini file: 'Parent' value cannot be same as the section name: %s (in file %s)", current_section_name, INI_STR("browscap"));
 					return;
 				}
 
