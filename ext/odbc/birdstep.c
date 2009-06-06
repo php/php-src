@@ -369,7 +369,7 @@ PHP_FUNCTION(birdstep_exec)
 	}
 	stat = SQLExecDirect(res->hstmt,query,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Can not execute \"%s\" query",query);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Cannot execute \"%s\" query",query);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
