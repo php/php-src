@@ -19,7 +19,6 @@
    |          Jani Taskinen  <sniper@iki.fi>                              |
    |          Stig Venaas    <venaas@uninett.no>                          |
    |          Doug Goldstein <cardoe@cardoe.com>                          |
-   |          Patrick Allaert <patrickallaert@php.net>                    |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
