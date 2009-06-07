@@ -2080,7 +2080,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
-				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 
@@ -2677,7 +2677,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -3248,7 +3248,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -3714,7 +3714,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -3936,7 +3936,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -4370,7 +4370,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -5342,7 +5342,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
-				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 
@@ -8687,7 +8687,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
-				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 
@@ -10423,7 +10423,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -12228,7 +12228,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -14028,7 +14028,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -14922,7 +14922,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -16415,7 +16415,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		}
 	} else {
 		if(!ce->constructor) {
-			zend_error_noreturn(E_ERROR, "Can not call constructor");
+			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
 		if (EG(This) && Z_OBJCE_P(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error(E_COMPILE_ERROR, "Cannot call private %s::__construct()", ce->name);
@@ -22527,7 +22527,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
-				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.u.opline_num);
 			}
 
