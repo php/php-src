@@ -27,4 +27,4 @@ ok
 Strict Standards: Non-static method foo::aa() should not be called statically in %s on line %d
 ok
 
-Fatal error: Can not call constructor in %s on line %d
+Fatal error: Cannot call constructor in %s on line %d
