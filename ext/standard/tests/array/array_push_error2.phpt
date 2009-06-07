@@ -1,5 +1,5 @@
 --TEST--
-Test array_push() function : error conditions - min and max int values as keys
+Test array_push() function : error conditions - max int value as key
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
@@ -8,17 +8,15 @@ Test array_push() function : error conditions - min and max int values as keys
  */
 
 /*
- * Use PHP's minimum and maximum integer values as array keys
+ * Use PHP's maximum integer value as array key
  * then try and push new elements onto the array
  */
 
 echo "*** Testing array_push() : error conditions ***\n";
 
-$array = array(-PHP_INT_MAX => 'min', PHP_INT_MAX => 'max');
+$array = array(PHP_INT_MAX => 'max');
 
 var_dump(array_push($array, 'new'));
-var_dump($array);
-var_dump(array_push($array, 'var'));
 var_dump($array);
 
 echo "Done";
@@ -26,24 +24,11 @@ echo "Done";
 
 --EXPECTF--
 *** Testing array_push() : error conditions ***
-int(3)
-array(3) {
-  [-%d]=>
-  unicode(3) "min"
-  [%d]=>
-  unicode(3) "max"
-  [-%d]=>
-  unicode(3) "new"
-}
 
 Warning: array_push(): Cannot add element to the array as the next element is already occupied in %s on line %d
 bool(false)
-array(3) {
-  [-%d]=>
-  unicode(3) "min"
+array(1) {
   [%d]=>
   unicode(3) "max"
-  [-%d]=>
-  unicode(3) "new"
 }
 Done

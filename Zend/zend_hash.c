@@ -507,7 +507,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 			UPDATE_DATA(ht, p, pData, nDataSize);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if ((long)h >= (long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h + 1;
+				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
 			}
 			if (pDest) {
 				*pDest = p->pData;
@@ -537,7 +537,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	if ((long)h >= (long)ht->nNextFreeElement) {
-		ht->nNextFreeElement = h + 1;
+		ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
 	}
 	ht->nNumOfElements++;
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);
