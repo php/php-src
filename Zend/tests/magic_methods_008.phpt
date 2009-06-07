@@ -14,4 +14,4 @@ class a extends b {
 
 ?>
 --EXPECTF--
-Fatal error: The magic method __set() must have public visibility and can not be static in %s on line %d
+Fatal error: The magic method __set() must have public visibility and cannot be static in %s on line %d

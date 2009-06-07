@@ -22,4 +22,4 @@ $b = new B();
 $b->test();
 ?>
 --EXPECTF--
-Fatal error: The magic method __call() must have public visibility and can not be static in %s on line %d
+Fatal error: The magic method __call() must have public visibility and cannot be static in %s on line %d
