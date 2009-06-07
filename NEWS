@@ -19,6 +19,8 @@
 - Fixed bug #48273 (snmp*_real_walk() returns SNMP errors as values).
   (Ilia, lytboris at gmail dot com)
 - Fixed bug #48247 (Crash on errors during startup). (Stas)
+- Fixed bug #47836 (array operator [] inconsistency when the array has
+  PHP_INT_MAX index value). (Matt)
 - Fixed bug #46386 (Digest authentication with SOAP module fails against MSSQL 
   SOAP services). (Ilia, lordelph at gmail dot com)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
