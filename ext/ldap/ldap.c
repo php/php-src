@@ -19,6 +19,7 @@
    |          Jani Taskinen  <sniper@iki.fi>                              |
    |          Stig Venaas    <venaas@uninett.no>                          |
    |          Doug Goldstein <cardoe@cardoe.com>                          |
+   |          Patrick Allaert <patrickallaert@php.net>                    |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -972,9 +973,6 @@ PHP_FUNCTION(ldap_get_entries)
 	ldap = ld->link;
 	num_entries = ldap_count_entries(ldap, ldap_result);
 
-	array_init(return_value);
-	add_assoc_long(return_value, "count", num_entries);
-
 	if (num_entries == 0) {
 		RETURN_NULL();
 	}
@@ -984,6 +982,9 @@ PHP_FUNCTION(ldap_get_entries)
 	if (ldap_result_entry == NULL) {
 		RETURN_FALSE;
 	}
+
+	array_init(return_value);
+	add_assoc_long(return_value, "count", num_entries);
 
 	while (ldap_result_entry != NULL) {
 
