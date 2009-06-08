@@ -55,7 +55,7 @@ struct php_sqlite3_fci {
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
 
-	const char *func_name;
+	const UChar *func_name;
 	int argc;
 
 	zval *func, *step, *fini;
