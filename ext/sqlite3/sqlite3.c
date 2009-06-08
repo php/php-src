@@ -1109,8 +1109,8 @@ PHP_METHOD(sqlite3, openBlob)
 }
 /* }}} */
 
-/* {{{ proto void SQLite3::enableExceptions([bool enableExceptions = false])
-   Open a blob as a stream which we can read / write to. */
+/* {{{ proto bool SQLite3::enableExceptions([bool enableExceptions = false])
+   Enables an exception error mode. */
 PHP_METHOD(sqlite3, enableExceptions)
 {
 	php_sqlite3_db_object *db_obj;
@@ -1122,6 +1122,8 @@ PHP_METHOD(sqlite3, enableExceptions)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &enableExceptions) == FAILURE) {
 		return;
 	}
+
+	RETVAL_BOOL(db_obj->exception);
 
 	db_obj->exception = enableExceptions;
 }
