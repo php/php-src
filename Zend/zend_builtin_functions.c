@@ -660,7 +660,7 @@ ZEND_FUNCTION(define)
 		found = zend_hash_find(EG(class_table), class_name, p - name + 1, (void **) &ce);
 
 		if (found != SUCCESS) {
-			zend_error(E_WARNING, "Class '%s' does not exists", class_name);
+			zend_error(E_WARNING, "Class '%s' does not exist", class_name);
 			free_alloca(class_name, use_heap);
 			RETURN_FALSE;
 		}
