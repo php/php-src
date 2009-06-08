@@ -461,6 +461,7 @@ ZEND_FUNCTION(define)
 	zend_bool non_cs = 0;
 	int case_sensitive = CONST_CS;
 	zend_constant c;
+	char *p;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &name, &name_len, &val, &non_cs) == FAILURE) {
 		return;
@@ -468,6 +469,34 @@ ZEND_FUNCTION(define)
 
 	if(non_cs) {
 		case_sensitive = 0;
+	}
+
+	/* class constant, check if there is name and make sure class is valid & exists */
+	if ((p = zend_memnstr(name, "::", sizeof("::") - 1, name + name_len))) {
+		char *class_name;
+		int found;
+		zend_class_entry **ce;
+		ALLOCA_FLAG(use_heap)
+
+		if (p == (name + name_len - sizeof("::") + 1)) {
+			zend_error(E_WARNING, "Class constant must have a name");
+			RETURN_FALSE;
+		} else if (p == name) {
+			zend_error(E_WARNING, "Missing class name");
+			RETURN_FALSE;
+		}
+
+		class_name = do_alloca((p - name + 1), use_heap);
+		zend_str_tolower_copy(class_name, name, (p - name));
+
+		found = zend_hash_find(EG(class_table), class_name, p - name + 1, (void **) &ce);
+
+		if (found != SUCCESS) {
+			zend_error(E_WARNING, "Class '%s' does not exists", class_name);
+			free_alloca(class_name, use_heap);
+			RETURN_FALSE;
+		}
+		free_alloca(class_name, use_heap);
 	}
 
 repeat:
