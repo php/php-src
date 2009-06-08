@@ -664,7 +664,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	{
 		auth_packet->charset_no	= charset->nr;
 	} else {
-#if PHP_MAJOR_VERSION >= 6		
+#if PHP_MAJOR_VERSION >= 6
 		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
 #else
 		auth_packet->charset_no	= greet_packet.charset_no;
@@ -991,7 +991,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND **conn_array, fd_set *fds TS
 #endif
 
 /* {{{ _mysqlnd_poll */
-enum_func_status
+PHPAPI enum_func_status
 _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC)
 {
 
