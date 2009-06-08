@@ -1378,7 +1378,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	bit	= 4;						/* first 2 bits are reserved */
 
 	for (i = 0; current_field < end_field; current_field++, i++) {
-#if 1
+#ifdef USE_ZVAL_CACHE
 		DBG_INF("Trying to use the zval cache");
 		obj = mysqlnd_palloc_get_zval(conn->zval_cache, &allocated TSRMLS_CC);
 		if (allocated) {
@@ -1474,11 +1474,12 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
 		void *obj;
-		zend_bool allocated;
+		zend_bool allocated = TRUE;
 		zend_uchar *this_field_len_pos = p;
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
+#ifdef USE_ZVAL_CACHE
 		obj = mysqlnd_palloc_get_zval(conn->zval_cache, &allocated TSRMLS_CC);
 		if (allocated) {
 			*current_field = (zval *) obj;
@@ -1487,6 +1488,10 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 			*current_field = &((mysqlnd_zval *) obj)->zv;	
 			((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_FREE;
 		}
+#else
+		DBG_INF("Directly creating zval");
+		MAKE_STD_ZVAL(*current_field);
+#endif
 
 		if (current_field > start_field && last_field_was_string) {
 			/*
