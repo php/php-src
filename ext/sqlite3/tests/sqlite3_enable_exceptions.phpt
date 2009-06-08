@@ -23,9 +23,9 @@ var_dump($db->close());
 echo "Done\n";
 ?>
 --EXPECTF--
-NULL
+bool(false)
 no such table: non_existent_table
-NULL
+bool(true)
 
 Warning: SQLite3::query(): no such table: non_existent_table in %s on line %d
 
