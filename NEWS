@@ -3,6 +3,8 @@
 ?? Jun 2009, PHP 5.2.10
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
+- Fixed bug #48469 (ldap_get_entries() memory leaks on empty search results)
+  (Patrick)
 - Fixed bug #48456 (CPPFLAGS not restored properly in phpize.m4).
   (Jani, spisek at kerio dot com)
 - Fixed bug #48448 (Compile failure under IRIX 6.5.30 building cast.c). 
