@@ -1,3 +1,51 @@
+2009-06-07  Matt Wilmas  <php_lists@realplain.com>
+
+    * (PHP_5_2)
+      zend_hash.c
+      zend_hash.c
+      tests/bug47836.phpt
+      tests/bug47836.phpt:
+      MFH: Fixed bug #47836 (array operator [] inconsistency when the array has
+      PHP_INT_MAX index value)
+      Also simplified related array_push() test
+
+    * zend_hash.c
+      tests/bug47836.phpt
+      tests/bug47836.phpt
+      tests/bug47836.phpt:
+      Fixed bug #47836 (array operator [] inconsistency when the array has
+      PHP_INT_MAX index value)
+      Also simplified related array_push() test
+
+    * (PHP_5_3)
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/call_static_006.phpt
+      tests/magic_methods_002.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_010.phpt:
+      MFH: Changed error messages to use "cannot" instead of "can not" (meaning
+      "also can")
+
+    * zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/call_static_006.phpt
+      tests/magic_methods_002.phpt
+      tests/magic_methods_003.phpt
+      tests/magic_methods_004.phpt
+      tests/magic_methods_005.phpt
+      tests/magic_methods_007.phpt
+      tests/magic_methods_008.phpt
+      tests/magic_methods_010.phpt:
+      Changed error messages to use "cannot" instead of "can not" (meaning "also
+      can")
+
 2009-06-05  Brian Shire  <shire@tekrat.com>
 
     * (PHP_5_3)
