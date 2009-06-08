@@ -8,6 +8,7 @@ Check for exif_read_data, magic_quotes_runtime
 --INI--
 output_handler=
 zlib.output_compression=0
+magic_quotes_runtime=1
 --FILE--
 <?php
 /*
@@ -19,6 +20,7 @@ zlib.output_compression=0
 var_dump(exif_read_data(dirname(__FILE__).'/test6.jpg','',true,false));
 ?>
 --EXPECTF--
+PHP Warning:  Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line 0
 array(5) {
   ["FILE"]=>
   array(6) {
