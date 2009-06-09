@@ -409,6 +409,7 @@ PHP_FUNCTION(spl_autoload_call)
 	(ht)->pListTail->pListNext = (ht)->pListHead;			\
 	(ht)->pListHead = (ht)->pListTail;						\
 	(ht)->pListTail = (ht)->pListHead->pListLast;			\
+	(ht)->pListHead->pListNext->pListLast = (ht)->pListHead;\
 	(ht)->pListTail->pListNext = NULL;						\
 	(ht)->pListHead->pListLast = NULL;
 
