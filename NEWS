@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Added the ability for json_decode() to take a user specified depth. (Scott)
 - Added support for the mysql_stmt_next_result() function from libmysql.
   (Andrey)
+- Added support for ACL (is_writable, is_readable, reports now correct results)
+  on Windows. (Pierre, Venkat Raman Don, Kanwaljeet Singla)
 
 - Fixed bug #48493 (spl_autoload_register() doesn't work correctly when prepending
   functions). (Scott)
