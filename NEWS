@@ -24,6 +24,8 @@
 - Fixed bug #48247 (Crash on errors during startup). (Stas)
 - Fixed bug #47836 (array operator [] inconsistency when the array has
   PHP_INT_MAX index value). (Matt)
+- Fixed bug #47042 (cgi sapi is incorrectly removing SCRIPT_FILENAME).
+  (Sriram Natarajan, David Soria Parra)
 - Fixed bug #46386 (Digest authentication with SOAP module fails against MSSQL 
   SOAP services). (Ilia, lordelph at gmail dot com)
 - Fixed bug #46109 (Memory leak when mysqli::init() is called multiple times).
@@ -34,8 +36,7 @@
   (Nuno, Scott)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
-- Fixed bug #47042 (cgi sapi is incorrectly removing SCRIPT_FILENAME).
-  (Sriram Natarajan, David Soria Parra)
+
 
 
 27 May 2009, PHP 5.2.10RC1
