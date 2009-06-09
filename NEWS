@@ -9,10 +9,10 @@
   (Jani, spisek at kerio dot com)
 - Fixed bug #48448 (Compile failure under IRIX 6.5.30 building cast.c). 
   (Kalle)
-- Fixed bug #48434 (memory_get_usage() accuracy). (Arnaud)
+- Fixed bug #48434 (Improve memory_get_usage() accuracy). (Arnaud)
 - Fixed bug #48416 (Force a cache limit in ereg() to stop excessive memory usage).
   (Scott)
-- Fixed bug #48409 (crash when exception is thrown while passing function 
+- Fixed bug #48409 (Crash when exception is thrown while passing function 
   arguments). (Arnaud)
 - Fixed bug #48378 (exif_read_data() segfaults on certain corrupted .jpeg 
   files). (Pierre)
@@ -25,9 +25,11 @@
   PHP_INT_MAX index value). (Matt)
 - Fixed bug #46386 (Digest authentication with SOAP module fails against MSSQL 
   SOAP services). (Ilia, lordelph at gmail dot com)
+- Fixed bug #46109 (Memory leak when mysqli::init() is called multiple times).
+  (Andrey)
 - Fixed bug #44827 (define() is missing error checks for class constants).
   (Ilia)
-- Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
+- Fixed bug #44214 (Crash using preg_replace_callback() and global variables).
   (Nuno, Scott)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
