@@ -46,7 +46,7 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values),
-										(void **)&values_entry, &pos_values) == SUCCESS) {
+		(void **)&values_entry, &pos_values) == SUCCESS) {
 		TSRMLS_FETCH();
 		zstr	string_key;
 		uint	string_key_len;
