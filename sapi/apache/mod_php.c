@@ -257,7 +257,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	zval **path_translated;
 	HashTable *symbol_table;
 	unsigned int new_val_len;
-	UConveter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
