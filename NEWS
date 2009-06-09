@@ -34,6 +34,8 @@
   (Nuno, Scott)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
+- Fixed bug #47042 (cgi sapi is incorrectly removing SCRIPT_FILENAME).
+  (Sriram Natarajan, David Soria Parra)
 
 
 27 May 2009, PHP 5.2.10RC1
