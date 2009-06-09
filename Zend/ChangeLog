@@ -1,3 +1,42 @@
+2009-06-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      zend_builtin_functions.c:
+      - typo
+
+2009-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      Re-apply patch with fixed build
+
+2009-06-08  Antony Dovgal  <tony@daylessday.org>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      fix build, revert faulty patch
+
+    * zend_builtin_functions.c:
+      revert yet another wrongly MFBed fix
+
+2009-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      MFB: Fixed bug #44827 (define() is missing error checks for class
+      constants)
+
+    * (PHP_5_2)
+      zend_builtin_functions.c:
+      
+      MFB: Fixed bug #44827 (define() is missing error checks for class
+      constants)
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      
+      Fixed bug #44827 (define() is missing error checks for class constants)
+
 2009-06-07  Matt Wilmas  <php_lists@realplain.com>
 
     * (PHP_5_2)
