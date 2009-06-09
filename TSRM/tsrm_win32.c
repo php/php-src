@@ -26,7 +26,7 @@
 #include <errno.h>
 
 #define TSRM_INCLUDE_FULL_WINDOWS_HEADERS
-
+#include "SAPI.h"
 #include "TSRM.h"
 
 #ifdef TSRM_WIN32
