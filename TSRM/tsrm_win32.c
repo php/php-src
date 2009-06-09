@@ -251,6 +251,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
+	DWORD dwCreateFlags = 0;
 	char *cmd;
 	process_pair *proc;
 	TSRMLS_FETCH();
@@ -273,7 +274,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	read = (type[0] == 'r') ? TRUE : FALSE;
 	mode = ((str_len == 2) && (type[1] == 'b')) ? O_BINARY : O_TEXT;
 
-
 	if (read) {
 		in = dupHandle(in, FALSE);
 		startup.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
@@ -284,9 +284,14 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
 
+	dwCreateFlags = NORMAL_PRIORITY_CLASS;
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		dwCreateFlags |= CREATE_NO_WINDOW;
+	}
+
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS|CREATE_NO_WINDOW, env, cwd, &startup, &process)) {
+	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
 		return NULL;
 	}
 	free(cmd);
