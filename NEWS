@@ -27,6 +27,8 @@
   SOAP services). (Ilia, lordelph at gmail dot com)
 - Fixed bug #44827 (define() is missing error checks for class constants).
   (Ilia)
+- Fixed bug #44214 (Crash using preg_replace_callback() and global variable).
+  (Nuno, Scott)
 - Fixed bug #42143 (The constant NAN is reported as 0 on Windows)
   (Kanwaljeet Singla, Venkat Raman Don)
 
