@@ -105,9 +105,6 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource variable
-      'resource' => $fp      
 );
 
 // loop through each element of the array for substchar
@@ -230,8 +227,5 @@ bool(false)
 --unset var--
 Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
 bool(false)
-
---resource--
-bool(true)
 ===DONE===
 
