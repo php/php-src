@@ -27,6 +27,7 @@
 
 #define TSRM_INCLUDE_FULL_WINDOWS_HEADERS
 
+#include "SAPI.h"
 #include "TSRM.h"
 
 #ifdef TSRM_WIN32
@@ -251,6 +252,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
+	DWORD dwCreateFlags = 0;
 	char *cmd;
 	process_pair *proc;
 	TSRMLS_FETCH();
@@ -284,9 +286,14 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
 
+	dwCreateFlags = NORMAL_PRIORITY_CLASS;
+	if (strcmp(sapi_module.name, "cli") != 0) {
+		dwCreateFlags |= CREATE_NO_WINDOW;
+	}
+
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS|CREATE_NO_WINDOW, env, cwd, &startup, &process)) {
+	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
 		return NULL;
 	}
 	free(cmd);
