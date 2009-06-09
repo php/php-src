@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   --enable-zend-multibyte is used). (Jani)
 - Fixed bug #48188 (Cannot execute a scrollable cursors twice with
   PDO_PGSQL). (Matteo)
+- Fixed bug #41874 (separate STDOUT and STDERR in exec functions).
+  (Kanwaljeet Singla, Venkat Raman Don, Pierre)
 - Fixed bug #38802 (max_redirects and ignore_errors).
   (patch by datibbaw@php.net)
 - Fixed isset() on sub-directories (isset("blah") if file "blah/foo.php" exists).
