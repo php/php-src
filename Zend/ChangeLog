@@ -1,3 +1,9 @@
+2009-06-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      zend_execute.h:
+      - fix build (void alarm)
+
 2009-06-08  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_2)
