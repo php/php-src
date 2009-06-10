@@ -114,21 +114,17 @@ commit this.
 1. Update in ``php-bugs-web/include/functions.inc`` the ``show_version_option``
 function to include the new RC and commit.
 
-2. Run the bumpRelease script for phpweb in your local checkout
-
- a. ``php bin/bumpRelease 5`` (or ``php bin/bumpRelease 4`` for PHP4)
-
-3. Update ``phpweb/include/version.inc`` (x=major version number)
+2. Update ``phpweb/include/version.inc`` (x=major version number)
 
  a. ``$PHP_x_RC`` = "5.3.0RC1"
 
  b. ``$PHP_x_RC_DATE`` = "06 September 2007"
 
-4. Commit those changes:
+3. Commit those changes:
 
  a. ``cvs commit include/version.inc include/releases.inc``
 
-5. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
+4. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
 
 Rolling a stable release
