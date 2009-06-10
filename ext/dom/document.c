@@ -1966,11 +1966,7 @@ PHP_FUNCTION(dom_document_validate)
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-	
-	if (docp->intSubset == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No DTD given in XML-Document");
-	}
-	
+
 	cvp = xmlNewValidCtxt();
 	
 	cvp->userData = NULL;
