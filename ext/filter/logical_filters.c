@@ -570,7 +570,7 @@ static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
 			}
 			if (*str == ':') {
 				if (compressed || --blocks == 0) {
-					return ipv4 != NULL;
+					return 0;
 				}			
 				if (++str == end || (ipv4 && ipv4 == str)) {
 					return 1;
