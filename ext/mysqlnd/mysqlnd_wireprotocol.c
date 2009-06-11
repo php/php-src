@@ -1344,7 +1344,7 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 			break;
 		}
 	}
-	if (ret == FAIL) {
+	if (ret == FAIL && (*buffer)) {
 		(*buffer)->free_chunk((*buffer), TRUE TSRMLS_CC);
 		*buffer = NULL;
 	}
