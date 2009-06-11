@@ -1,5 +1,14 @@
 --TEST--
 Bug #48203 (Crash when CURLOPT_STDERR is set to regular file)
+--SKIPIF--
+<?php 
+if (!extension_loaded("curl")) {
+	exit("skip curl extension not loaded");
+}
+if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
+	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
+}
+?>
 --FILE--
 <?php
 
