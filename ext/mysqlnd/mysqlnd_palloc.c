@@ -82,11 +82,26 @@ PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size T
 
 
 /* {{{ mysqlnd_palloc_get_cache_reference */
+static inline
 MYSQLND_ZVAL_PCACHE* mysqlnd_palloc_get_cache_reference(MYSQLND_ZVAL_PCACHE * const cache)
 {
 	if (cache) {
 		LOCK_PCACHE(cache);
 		cache->references++;
+		UNLOCK_PCACHE(cache);
+	}
+	return cache;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_palloc_release_cache_reference */
+static inline
+MYSQLND_ZVAL_PCACHE* mysqlnd_palloc_release_cache_reference(MYSQLND_ZVAL_PCACHE * const cache)
+{
+	if (cache) {
+		LOCK_PCACHE(cache);
+		cache->references--;
 		UNLOCK_PCACHE(cache);
 	}
 	return cache;
@@ -122,7 +137,7 @@ void _mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache TSRMLS_DC)
 
 
 /* {{{ _mysqlnd_palloc_init_thd_cache */
-PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC)
+MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC)
 {
 	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
 	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
@@ -163,17 +178,18 @@ MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVA
 {
 	DBG_ENTER("_mysqlnd_palloc_get_thd_cache_reference");
 	if (cache) {
-		++cache->references;
 		DBG_INF_FMT("cache=%p new_refc=%d gc_list.canary1=%p gc_list.canary2=%p",
 					cache, cache->references, cache->gc_list.canary1, cache->gc_list.canary2);
 		mysqlnd_palloc_get_cache_reference(cache->parent);
+		/* No concurrency here, we are in the same thread */
+		++cache->references;
 	}
 	DBG_RETURN(cache);
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_palloc_free_cache */
+/* {{{ mysqlnd_palloc_free_thd_cache */
 /*
   As this call will happen on MSHUTDOWN(), then we don't need to copy the zvals with
   copy_ctor but scrap what they point to with zval_dtor() and then just free our
@@ -230,7 +246,7 @@ PHPAPI void _mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **c
 {
 	DBG_ENTER("_mysqlnd_palloc_free_thd_cache_reference");
 	if (*cache) {
-		--(*cache)->parent->references;
+		mysqlnd_palloc_release_cache_reference((*cache)->parent);
 		DBG_INF_FMT("cache=%p references_left=%d canary1=%p canary2=%p",
 					*cache, (*cache)->references, (*cache)->gc_list.canary1, (*cache)->gc_list.canary2);
 
@@ -528,7 +544,7 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 /* {{{ _mysqlnd_palloc_rinit */
 PHPAPI MYSQLND_THD_ZVAL_PCACHE * _mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cache TSRMLS_DC)
 {
-	return mysqlnd_palloc_init_thd_cache(cache);
+	return mysqlnd_palloc_init_thd_cache(cache TSRMLS_CC);
 }
 /* }}} */
 
