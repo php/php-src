@@ -1650,6 +1650,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			switch (option) {
 				case CURLOPT_FILE:
 					if (((php_stream *) what)->mode[0] != 'r') {
+						zend_list_addref(Z_LVAL_PP(zvalue));
 						ch->handlers->write->fp = fp;
 						ch->handlers->write->method = PHP_CURL_FILE;
 					} else {
@@ -1660,6 +1661,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					break;
 				case CURLOPT_WRITEHEADER:
 					if (((php_stream *) what)->mode[0] != 'r') {
+						zend_list_addref(Z_LVAL_PP(zvalue));
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
 					} else {
