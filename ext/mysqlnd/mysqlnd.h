@@ -318,11 +318,9 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE * _mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cac
 PHPAPI void						 _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * cache TSRMLS_DC);
 
 
-#define mysqlnd_palloc_init_thd_cache(cache) 			_mysqlnd_palloc_init_thd_cache((cache) TSRMLS_CC)
 #define mysqlnd_palloc_free_thd_cache_reference(cache)	_mysqlnd_palloc_free_thd_cache_reference((cache) TSRMLS_CC)
 #define mysqlnd_palloc_get_thd_cache_reference(cache)	_mysqlnd_palloc_get_thd_cache_reference((cache) TSRMLS_CC)
 
-PHPAPI MYSQLND_THD_ZVAL_PCACHE*	_mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC);
 MYSQLND_THD_ZVAL_PCACHE*		_mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache TSRMLS_DC);
 PHPAPI void						_mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **cache TSRMLS_DC);
 
