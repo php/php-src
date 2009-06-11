@@ -1363,7 +1363,10 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	zend_uchar *null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
+#ifdef USE_ZVAL_CACHE
 	zend_bool allocated;
+	void *obj = NULL;
+#endif
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
