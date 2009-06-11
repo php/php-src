@@ -4,6 +4,7 @@
 - Updated timezone database to version 2009.9 (2009i) (Derick)
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
+- Fixed bug #48518 (curl crashes when writing into invalid file handle). (Tony)
 - Fixed bug #48469 (ldap_get_entries() leaks memory on empty search results).
   (Patrick)
 - Fixed bug #48456 (CPPFLAGS not restored properly in phpize.m4).
