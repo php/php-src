@@ -1,7 +1,21 @@
 --TEST--
 Bug #45161 (Reusing a curl handle leaks memory)
 --SKIPIF--
-<?php $curl_version = curl_version(); if ($curl_version['version_number'] < 0x071100) die("skip: test works only with curl >= 7.17.0"); ?>
+<?php 
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	exit("skip not for Windows");
+}
+if (!extension_loaded("curl")) {
+	exit("skip curl extension not loaded");
+}
+if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  {
+	exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
+}
+$curl_version = curl_version(); 
+if ($curl_version['version_number'] < 0x071100) {
+	exit("skip: test works only with curl >= 7.17.0"); 
+}
+?>
 --FILE--
 <?php
 
