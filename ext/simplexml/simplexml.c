@@ -2470,6 +2470,7 @@ const zend_function_entry simplexml_functions[] = { /* {{{ */
 
 static const zend_module_dep simplexml_deps[] = { /* {{{ */
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("spl")
 	{NULL, NULL, NULL}
 };
 /* }}} */
