@@ -42,7 +42,6 @@
 #define MYSQLND_DUMP_HEADER_N_BODY2
 #define MYSQLND_DUMP_HEADER_N_BODY_FULL2
 
-
 #define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type_as_text, packet_type) \
 	{ \
 		if (FAIL == mysqlnd_read_header((conn), &((packet)->header) TSRMLS_CC)) {\
@@ -1364,7 +1363,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	zval **current_field, **end_field, **start_field;
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
 	zend_bool allocated;
-	void *obj;
+	void *obj = NULL;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
