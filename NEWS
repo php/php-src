@@ -1,6 +1,6 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jun 2009, PHP 5.2.10
+11 Jun 2009, PHP 5.2.10
 - Updated timezone database to version 2009.9 (2009i) (Derick)
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 
