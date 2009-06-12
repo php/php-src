@@ -456,7 +456,7 @@ PHP_MINFO_FUNCTION(curl)
 PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
-	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl", module_number);
+	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl_multi", module_number);
 
 	/* See http://curl.haxx.se/lxr/source/docs/libcurl/symbols-in-versions
 	   or curl src/docs/libcurl/symbols-in-versions for a (almost) complete list
