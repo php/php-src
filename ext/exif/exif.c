@@ -3888,7 +3888,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	zval **p_name;
-	int i, ac = ZEND_NUM_ARGS(), ret, sections_needed=0;
+	int i, ret, sections_needed=0;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str=0, *s;
