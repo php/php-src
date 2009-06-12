@@ -13,7 +13,7 @@ var_dump(get_resource_type($ch2));
 
 ?>
 --EXPECTF--
-resource(4) of type (curl)
+resource(%d) of type (curl)
 %string|unicode%(4) "curl"
-resource(5) of type (curl_multi)
+resource(%d) of type (curl_multi)
 %string|unicode%(10) "curl_multi"
