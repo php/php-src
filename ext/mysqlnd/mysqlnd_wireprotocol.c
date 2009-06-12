@@ -42,7 +42,6 @@
 #define MYSQLND_DUMP_HEADER_N_BODY2
 #define MYSQLND_DUMP_HEADER_N_BODY_FULL2
 
-
 #define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type_as_text, packet_type) \
 	{ \
 		if (FAIL == mysqlnd_read_header((conn), &((packet)->header) TSRMLS_CC)) {\
@@ -69,7 +68,6 @@
 											packet_type_to_statistic_packet_count[packet_type], \
 											1); \
 	}
-
 
 extern mysqlnd_packet_methods packet_methods[];
 
@@ -811,7 +809,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	p+= 2;
 
 	/* There is a message */
-	if (packet->header.size > (size_t)(p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
+	if (packet->header.size > (size_t) (p - buf) && (i = php_mysqlnd_net_field_length(&p))) {
 		packet->message = pestrndup((char *)p, MIN(i, sizeof(buf) - (p - buf)), conn->persistent);
 		packet->message_len = i;
 	} else {
@@ -1045,7 +1043,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			packet->warning_count = uint2korr(p);
 			p+=2;
 			/* Check for additional textual data */
-			if (packet->header.size  > (size_t)(p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
+			if (packet->header.size  > (size_t) (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
 				packet->info_or_local_file = mnd_pemalloc(len + 1, conn->persistent);
 				memcpy(packet->info_or_local_file, p, len);
 				packet->info_or_local_file[len] = '\0';
@@ -1946,7 +1944,7 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	DBG_INF_FMT("Prepare packet read: stmt_id=%d fields=%d params=%d",
 				packet->stmt_id, packet->field_count, packet->param_count);
 
-	if ((size_t)(p - begin) > packet->header.size) {
+	if ((size_t) (p - begin) > packet->header.size) {
 		DBG_ERR_FMT("PREPARE packet %d bytes shorter than expected", p - begin - packet->header.size);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
