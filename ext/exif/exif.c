@@ -3888,24 +3888,25 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	zval **p_name;
-	int i, ret, sections_needed=0;
+	int i, ret, sections_needed=0, p_sections_needed_len;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 	image_info_type ImageInfo;
-	char tmp[64], *sections_str=0, *s;
+	char tmp[64], *sections_str = NULL, *p_sections_needed = NULL, *s;
 	char *filename;
 	int filename_len, sections_str_len = 0;
 
-	memset(&ImageInfo, 0, sizeof(ImageInfo));
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sbb", &p_name, &sections_str, &sections_str_len, &sub_arrays, &read_thumbnail) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sbb", &p_name, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
 		return;
 	}
 
 	if (php_stream_path_param_encode(p_name, &filename, &filename_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
 		return;
 	}
+	
+	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if (sections_needed) {
+	if (p_sections_needed) {
+		spprintf(&sections_str, 0, ",%s,", p_sections_needed);
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
 		while(*++s) {
