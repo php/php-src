@@ -3913,17 +3913,17 @@ PHP_FUNCTION(exif_read_data)
 	int p_name_len, p_sections_needed_len = 0;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
-	int i, ac = ZEND_NUM_ARGS(), ret, sections_needed=0;
+	int i, ret, sections_needed=0;
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str, *s;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "s|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
 		return;
 	}
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if (ac >= 2) {
+	if (p_sections_needed) {
 		spprintf(&sections_str, 0, ",%s,", p_sections_needed);
 		/* sections_str DOES start with , and SPACES are NOT allowed in names */
 		s = sections_str;
