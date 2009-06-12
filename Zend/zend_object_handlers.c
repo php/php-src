@@ -782,7 +782,7 @@ static inline zend_class_entry * zend_get_function_root_class(zend_function *fbc
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, zstr method_name, int method_len) /* {{{ */
+static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, const zstr method_name, int method_len) /* {{{ */
 {
 	zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 
@@ -920,7 +920,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, zstr method_name, int method_len) /* {{{ */
+static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, const zstr method_name, int method_len) /* {{{ */
 {
 	zend_internal_function *callstatic_user_call = emalloc(sizeof(zend_internal_function));
 	callstatic_user_call->type     = ZEND_INTERNAL_FUNCTION;
