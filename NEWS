@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2009, PHP 5.2.10
+- Fixed bug #48514 (cURL extension uses same resource name for simple and
+  multi APIs). (Felipe)
 
 11 Jun 2009, PHP 5.2.10RC2
 - Updated timezone database to version 2009.9 (2009i) (Derick)
