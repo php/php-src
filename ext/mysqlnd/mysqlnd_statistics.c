@@ -168,7 +168,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TS
 		UChar *ustr, *tstr;
 		int ulen, tlen;
 #endif
-		char tmp[22];
+		char tmp[25];
 		
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
 #if PHP_MAJOR_VERSION >= 6

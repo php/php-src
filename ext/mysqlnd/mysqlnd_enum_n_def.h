@@ -142,7 +142,6 @@ typedef enum mysqlnd_option
 	MYSQLND_OPT_NET_READ_BUFFER_SIZE = 203,
 } enum_mysqlnd_option;
 
-
 typedef enum mysqlnd_field_types
 {
 	MYSQL_TYPE_DECIMAL,
@@ -176,7 +175,6 @@ typedef enum mysqlnd_field_types
 
 /* Please update this if there is a new type after MYSQL_TYPE_GEOMETRY */
 #define MYSQL_TYPE_LAST		MYSQL_TYPE_GEOMETRY
-
 
 typedef enum mysqlnd_server_option
 {
@@ -241,7 +239,6 @@ typedef enum mysqlnd_server_option
 /* see mysqlnd_charset.c for more information */
 #define MYSQLND_BINARY_CHARSET_NR	63
 
-
 /*
           /-----> CONN_CLOSE  <---------------\
          |           ^                         \
@@ -261,7 +258,6 @@ typedef enum mysqlnd_connection_state
 	CONN_QUIT_SENT, /* object is "destroyed" at this stage */
 } enum_mysqlnd_connection_state;
 
-
 typedef enum mysqlnd_stmt_state
 {
 	MYSQLND_STMT_INITTED = 0,
@@ -272,12 +268,10 @@ typedef enum mysqlnd_stmt_state
 	MYSQLND_STMT_USER_FETCHING, /* fetch_row_buff or fetch_row_unbuf */
 } enum_mysqlnd_stmt_state;
 
-
 typedef enum param_bind_flags
 {
 	MYSQLND_PARAM_BIND_BLOB_USED = 1
 } enum_param_bind_flags;
-
 
 /* PS */
 enum mysqlnd_stmt_attr
@@ -286,7 +280,6 @@ enum mysqlnd_stmt_attr
 	STMT_ATTR_CURSOR_TYPE,
 	STMT_ATTR_PREFETCH_ROWS
 };
-
 enum myslqnd_cursor_type
 {
 	CURSOR_TYPE_NO_CURSOR= 0,
@@ -294,7 +287,6 @@ enum myslqnd_cursor_type
 	CURSOR_TYPE_FOR_UPDATE= 2,
 	CURSOR_TYPE_SCROLLABLE= 4
 };
-
 typedef enum mysqlnd_connection_close_type
 {
 	MYSQLND_CLOSE_EXPLICIT = 0,
@@ -302,7 +294,6 @@ typedef enum mysqlnd_connection_close_type
 	MYSQLND_CLOSE_DISCONNECTED,
 	MYSQLND_CLOSE_LAST	/* for checking, should always be last */
 } enum_connection_close_type;
-
 
 typedef enum mysqlnd_collected_stats
 {

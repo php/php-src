@@ -69,7 +69,6 @@
 											1); \
 	}
 
-
 extern mysqlnd_packet_methods packet_methods[];
 
 static const char *unknown_sqlstate= "HY000";
