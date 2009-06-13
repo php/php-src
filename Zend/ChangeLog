@@ -1,3 +1,27 @@
+2009-06-12  Felipe Pena  <felipensp@gmail.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.c:
+      - Constified method_name arg. in zend_get_user_call_function() and
+      zend_get_user_callstatic_function()
+
+    * (PHP_5_2)
+      zend_object_handlers.c:
+      - MFH some changes (from last fix on 5.3+)
+      - Constified method_name arg in zend_get_user_call_function()
+
+    * (PHP_5_3)
+      zend_object_handlers.c
+      tests/bug48533.phpt:
+      MFH: Fixed bug #48533 (__callStatic is not invoked for private/protected
+      methods)
+
+    * zend_object_handlers.c
+      tests/bug48533.phpt
+      tests/bug48533.phpt:
+      - Fixed bug #48533 (__callStatic is not invoked for private/protected
+      methods)
+
 2009-06-09  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
