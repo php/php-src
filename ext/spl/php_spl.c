@@ -497,10 +497,6 @@ PHP_FUNCTION(spl_autoload_register)
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
 		obj_ptr = fcc.object_ptr;
-		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
-			alfi.closure = zcallable;
-			Z_ADDREF_P(zcallable);
-		}
 		if (error) {
 			efree(error);
 		}
@@ -509,12 +505,27 @@ PHP_FUNCTION(spl_autoload_register)
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
 		efree(func_name);
 
+		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
+			alfi.closure = zcallable;
+			Z_ADDREF_P(zcallable);
+
+			lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zcallable->value.obj.handle));
+			memcpy(lc_name + func_name_len, &(zcallable->value.obj.handle),
+				sizeof(zcallable->value.obj.handle));
+			func_name_len += sizeof(zcallable->value.obj.handle);
+			lc_name[func_name_len] = '\0';
+		}
+
 		if (SPL_G(autoload_functions) && zend_hash_exists(SPL_G(autoload_functions), (char*)lc_name, func_name_len+1)) {
+			if (alfi.closure) {
+				Z_DELREF_P(zcallable);
+			}
 			goto skip;
 		}
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
+			lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zend_object_handle));
 			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 			func_name_len += sizeof(zend_object_handle);
 			lc_name[func_name_len] = '\0';
