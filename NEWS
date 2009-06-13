@@ -35,8 +35,8 @@ PHP                                                                        NEWS
   (Kanwaljeet Singla, Venkat Raman Don, Pierre)
 - Fixed bug #38802 (max_redirects and ignore_errors).
   (patch by datibbaw@php.net)
-- Fixed isset() on sub-directories (isset("blah") if file "blah/foo.php"
-  exists). (Greg)
+- Fixed isset() on phar sub-directories (isset($phar["blah"]) if
+  file "blah/foo.php" exists in the phar archive). (Greg)
 - Fixed security vulnerability in phar's handling of long tar filenames. (Greg)
 - Fixed potential segfault with converting phars containing metadata to other
   formats. (Greg)
