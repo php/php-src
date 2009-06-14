@@ -50,6 +50,8 @@ UPGRADE NOTES - PHP 5.3
 
 - clearstatcache() no longer clears the realpath cache by default.
 
+- call_user_func() now propagates $this even if the callee is the parent class.
+
 - The filesystem functions opendir(), scandir() and dir() now use the default
   context if no context is passed as an argument to them.
 
@@ -76,11 +78,17 @@ UPGRADE NOTES - PHP 5.3
      copy(): context.
      fgetcsv(): escape.
      ini_get_all(): details.
+     json_encode(): options.
      nl2br(): is_xhtml.
      parse_ini_file(): scanner_mode.
      round(): mode.
      stream_context_create(): params.
      strstr(), stristr(): before_needle.
+
+- The new mysqlnd library necessitates using MySQL's newer 41 byte password format.
+  Continued use of the old 16 byte passwords will cause mysql_connect() to produce
+  the following error message: "mysqlnd cannot connect to MySQL 4.1+ using old
+  authentication"
 
 ===================================
 3. Changes made to existing methods
@@ -117,7 +125,8 @@ UPGRADE NOTES - PHP 5.3
 
 - define_syslog_variables() is deprecated.
 
-- All ereg functions are deprecated. Use PCRE (preg_*()) instead.
+- All ereg functions are deprecated and emit E_DEPRECATED errors.
+  Use PCRE (preg_*()) instead.
 
 - The following ini directives will now emit an E_DEPRECATED warning 
   upon startup if they are activated:
@@ -194,6 +203,9 @@ UPGRADE NOTES - PHP 5.3
 9. Changes in INI directives
 ============================
 
+- zend_extension_debug and zend_extension_ts have been removed.
+  Instead use the zend_extension directive to load all Zend Extensions.
+
 - zend.ze1_compatibility_mode has been removed. If this ini directive is set 
   to on, then an E_ERROR is emitted at startup.
 
@@ -236,6 +248,11 @@ UPGRADE NOTES - PHP 5.3
 
       var_dump(0 ?: 'Hello!');
 
+- Namespaces were added:
+
+      namespace my\name;
+      $obj = new \my\name\MyClass;
+
 ===================
 11. Windows support
 ===================
@@ -251,7 +268,20 @@ UPGRADE NOTES - PHP 5.3
   symlink(), link(), fnmatch(), stream_socket_pair(), time_nanosleep(), 
   time_sleep_until() and socket_create_pair().
 
-- Its now possible to use hardlinks on Windows using the link() function, 
+- Improved portability of stat(), touch(), filemtime(), filesize() and related
+  functions (100% portable for the available data)
+
+- The PDO_OCI php_pdo_oci8.dll library (for use with Oracle version 8 client
+  libraries) is no longer being built. Instead, use php_pdo_oci.dll (note no '8')
+  with Oracle 10 or 11 client libraries. Connection to other database versions
+  is supported.
+
+- For the OCI8 extension, a new library php_oci8_11g.dll is available in addition to
+  php_oci8.dll. Only one can be enabled at any time. Use php_oci8.dll with Oracle 10.2
+  client libraries. Use php_oci8_11g.dll with Oracle 11 client libraries. Connection
+  to other database versions is supported.
+
+- It's now possible to use hardlinks on Windows using the link() function, 
   and symbolic links via the symlink() function. Hardlinks are available 
   as of Windows 2000 and symbolic links as of Windows Vista.
 
@@ -298,6 +328,7 @@ UPGRADE NOTES - PHP 5.3
                   date_parse_from_format()
                   date_create_from_format()
                   date_get_last_errors()
+                  timezone_version_get()
        - INI:     parse_ini_string()
        - GMP:     gmp_testbit()
        - Hash:    hash_copy()
@@ -307,6 +338,7 @@ UPGRADE NOTES - PHP 5.3
                   mysqli_poll()
                   mysqli_reap_async_query()
        - Network: gethostname()
+                  header_remove()
        - OpenSSL: openssl_random_pseudo_bytes()
        - PCNTL:   pcntl_signal_dispatch()
                   pcntl_sigprocmask()
