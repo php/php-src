@@ -555,13 +555,15 @@ PHP_FUNCTION(ldap_unbind)
 
 /* {{{ php_set_opts
  */
-static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
+static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, int *old_sizelimit, int *old_timelimit, int *old_deref)
 {
 	/* sizelimit */
 	if (sizelimit > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
+		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_sizelimit);
 		ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &sizelimit);
 #else
+		*old_sizelimit = ldap->ld_sizelimit; 
 		ldap->ld_sizelimit = sizelimit; 
 #endif
 	}
@@ -569,8 +571,10 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 	/* timelimit */
 	if (timelimit > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
+		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_timelimit);
 		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
 #else
+		*old_timelimit = ldap->ld_timelimit; 
 		ldap->ld_timelimit = timelimit; 
 #endif
 	}
@@ -578,8 +582,10 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 	/* deref */
 	if (deref > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
+		ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_deref);
 		ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
 #else
+		*old_deref = ldap->ld_deref; 
 		ldap->ld_deref = deref; 
 #endif
 	}
@@ -600,6 +606,9 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int ldap_sizelimit = -1; 
 	int ldap_timelimit = -1; 
 	int ldap_deref = -1;	 
+	int old_ldap_sizelimit = -1; 
+	int old_ldap_timelimit = -1; 
+	int old_ldap_deref = -1;	 
 	int num_attribs = 0;
 	int i, errno;
 	int myargcount = ZEND_NUM_ARGS();
@@ -735,7 +744,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ldap_filter = Z_STRVAL_PP(entry);
 			}
 
-			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref);
+			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 			/* Run the actual search */	
 			rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly);
@@ -777,7 +786,7 @@ cleanup_parallel:
 			goto cleanup;
 		}
 
-		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref);
+		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */	
 		errno = ldap_search_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_res);
@@ -808,6 +817,8 @@ cleanup_parallel:
 	}
 
 cleanup:
+	// Restoring previous options
+	php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
 	}
