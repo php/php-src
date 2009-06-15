@@ -1,3 +1,47 @@
+2009-06-14  andy wharmby  <wharmby@uk.ibm.com>
+
+    * (PHP_5_2)
+      tests/function_exists_basic.phpt
+      tests/function_exists_error.phpt
+      tests/function_exists_variation1.phpt
+      tests/get_defined_functions_basic.phpt
+      tests/get_defined_functions_error.phpt:
+      Basic tests for function_exists() and get_defined_functions(). Tested on
+      Windows, Linux and Linux 64 bit.
+
+    * tests/function_exists_basic.phpt
+      tests/function_exists_basic.phpt
+      tests/function_exists_error.phpt
+      tests/function_exists_error.phpt
+      tests/function_exists_variation1.phpt
+      tests/function_exists_variation1.phpt
+      tests/get_defined_functions_basic.phpt
+      tests/get_defined_functions_basic.phpt
+      tests/get_defined_functions_error.phpt
+      tests/get_defined_functions_error.phpt:
+      
+      Basic tests for function_exists() and get_defined_functions(). Tested on
+      Windows, Linux and Linux 64 bit.
+
+    * tests/function_exists_basic.phpt
+      tests/function_exists_basic.phpt
+      tests/function_exists_error.phpt
+      tests/function_exists_error.phpt
+      tests/function_exists_variation1.phpt
+      tests/function_exists_variation1.phpt
+      tests/get_defined_functions_basic.phpt
+      tests/get_defined_functions_basic.phpt
+      tests/get_defined_functions_error.phpt
+      tests/get_defined_functions_error.phpt:
+      
+      file function_exists_basic.phpt was initially added on branch PHP_5_3.
+
+2009-06-14  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * zend_execute.h
+      zend_execute.h:
+      - MF53: fix build (void alarm)
+
 2009-06-12  Felipe Pena  <felipensp@gmail.com>
 
     * zend_object_handlers.c
