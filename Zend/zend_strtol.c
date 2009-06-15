@@ -40,6 +40,12 @@
 #include <unicode/utypes.h>
 #include <unicode/uchar.h>
 
+/* Disable false positive warning about LONG_MIN, we could use INT_MIN but requires
+   too much code changes for no gain. */
+#ifdef PHP_WIN32
+# pragma warning (disable:4146)
+#endif
+
 /* long zend_u_strtol (const UChar *nptr, UChar **endptr, int base) {{{ 
  * Convert a Unicode string to a long integer.
  *
