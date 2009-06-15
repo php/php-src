@@ -1824,14 +1824,11 @@ PHP_FUNCTION(curl_exec)
 		RETURN_FALSE;
 	}
 
-	ch->uses++;
-
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
-		--ch->uses;
 		smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
-	--ch->uses;
+
 	if (ch->handlers->write->method == PHP_CURL_RETURN) {
 		RETURN_EMPTY_STRING();
 	} else {
