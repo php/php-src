@@ -41,12 +41,25 @@ static tsrm_win32_globals win32_globals;
 
 static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 {
+	HANDLE process_token = NULL;
+
 	globals->process = NULL;
 	globals->shm	 = NULL;
 	globals->process_size = 0;
 	globals->shm_size	  = 0;
 	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
 	globals->impersonation_token = NULL;
+
+	/* Access check requires impersonation token. Create a duplicate token. */
+	if(OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_QUERY, &process_token)) {
+		DuplicateToken(process_token, SecurityImpersonation, &globals->impersonation_token);
+	}
+
+	/* impersonation_token will be closed when the process dies */
+	if(process_token != NULL) {
+		CloseHandle(process_token);
+		process_token = NULL;
+	}
 }
 
 static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
@@ -111,6 +124,10 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 				return errno;
 		}
 
+		if(TWG(impersonation_token) == NULL) {
+			goto Finished;
+		}
+
 		/* Do a full access check because access() will only check read-only attribute */
 		if(mode == 0 || mode > 6) {
 			desired_access = FILE_GENERIC_READ;
@@ -133,30 +150,11 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			goto Finished;
 		}
 
-		if(TWG(impersonation_token) == NULL) {
-
-			if(!OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_QUERY, &process_token)) {
-				goto Finished;
-			}
-
-			/* Access check requires impersonation token. Create a duplicate token. */
-			if(!DuplicateToken(process_token, SecurityImpersonation, &TWG(impersonation_token))) {
-				goto Finished;
-			}
-		}
-
 		if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
 				goto Finished;
 		}
 
 Finished:
-
-		/* impersonation_token will be closed when the process dies */
-		if(process_token != NULL) {
-			CloseHandle(process_token);
-			process_token = NULL;
-		}
-
 		if(psec_desc != NULL) {
 			free(psec_desc);
 			psec_desc = NULL;
