@@ -4131,7 +4131,7 @@ static void free_longopts(opt_struct *longopts)
 static int parse_opts(char * opts, opt_struct ** result)
 {
 	opt_struct * paras = NULL;
-	int i, count = 0;
+	unsigned int i, count = 0;
 
 	for (i = 0; i < strlen(opts); i++) {
 		if ((opts[i] >= 48 && opts[i] <= 57) ||
