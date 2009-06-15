@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 4
+- Upgraded bundled sqlite to version 3.6.15. (Scott)
+
 - Added phar.phar generation for Windows. (Greg)
 
 - Fixed bug #48541 (spl_autoload_register only registers first closure, then
