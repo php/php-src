@@ -33,19 +33,23 @@
 #include <stdint.h>
 #endif
 
-#ifndef HAVE_INT32_T
-# if SIZEOF_INT == 4
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+#else
+# ifndef HAVE_INT32_T
+#  if SIZEOF_INT == 4
 typedef int int32_t;
-# elif SIZEOF_LONG == 4
+#  elif SIZEOF_LONG == 4
 typedef long int int32_t;
+#  endif
 # endif
-#endif
 
-#ifndef HAVE_UINT32_T
-# if SIZEOF_INT == 4
+# ifndef HAVE_UINT32_T
+#  if SIZEOF_INT == 4
 typedef unsigned int uint32_t;
-# elif SIZEOF_LONG == 4
+#  elif SIZEOF_LONG == 4
 typedef unsigned long int uint32_t;
+#  endif
 # endif
 #endif
 
@@ -62,24 +66,14 @@ typedef unsigned long int uint32_t;
 #endif
 
 #if defined(_MSC_VER)
-typedef unsigned __int64 timelib_ull;
-typedef __int64 timelib_sll;
+typedef uint64_t timelib_ull;
+typedef int64_t timelib_sll;
+# define TIMELIB_LL_CONST(n) n ## i64
 #else
 typedef unsigned long long timelib_ull;
 typedef signed long long timelib_sll;
+# define TIMELIB_LL_CONST(n) n ## ll
 #endif
-
-#if defined(_MSC_VER)
-#define int32_t __int32
-#define uint32_t unsigned __int32
-#endif
-
-#if defined(_MSC_VER)
-#define TIMELIB_LL_CONST(n) n ## i64
-#else
-#define TIMELIB_LL_CONST(n) n ## ll
-#endif
-
 
 typedef struct ttinfo
 {
