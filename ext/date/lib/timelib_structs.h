@@ -34,6 +34,8 @@
 #endif
 
 #ifdef PHP_WIN32
+/* TODO: Remove these hacks/defs once we have the int definitions in main/ 
+	 rathen than in each 2nd extension and win32/ */
 # include "win32/php_stdint.h"
 #else
 # ifndef HAVE_INT32_T
