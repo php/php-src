@@ -8,11 +8,6 @@ ini_set("soap.wsdl_cache_enabled", 0);
 
 function test($map) {
 	var_dump($map, $map[1], $map[2]);die;
-	if(isset($map[2])) {
-		die("Success\n");
-	} else {
-		die("Fail\n");
-	}
 }
 
 $y = new SoapServer(dirname(__FILE__) . '/bug48557.wsdl');
@@ -53,8 +48,6 @@ $request = <<<XML
 </SOAP-ENV:Envelope>
 XML;
 
-#$v = array(1 => 123, "2" => 123.5, "asd" => 555);
-#var_dump($v);die;
 $y->handle($request);
 
 ?>
