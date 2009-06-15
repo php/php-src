@@ -268,6 +268,8 @@ typedef union _zstr {
 extern ZEND_API zstr null_zstr;
 extern ZEND_API zstr empty_zstr;
 
+/* TODO: get rid of this inline as well or figure out a way to deal with:
+  Zend\zend_hash.c(343) : warning C4090: 'function' : different 'const' qualifiers */
 static inline zstr _to_zstr(void *v) {
 	zstr ret;
 	ret.v = v;

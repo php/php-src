@@ -196,7 +196,7 @@ static zval *_get_zval_ptr_var_string_offset(const znode *node, const temp_varia
 	/* T->str_offset.str here is always IS_STRING or IS_UNICODE */
 	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
 		if (((int)T->str_offset.offset<0)
-			|| (Z_STRLEN_P(T->str_offset.str) <= T->str_offset.offset)) {
+			|| ((unsigned int)Z_STRLEN_P(T->str_offset.str) <= T->str_offset.offset)) {
 			Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
 			Z_STRLEN_P(ptr) = 0;
 		} else {
@@ -206,7 +206,7 @@ static zval *_get_zval_ptr_var_string_offset(const znode *node, const temp_varia
 		Z_TYPE_P(ptr) = IS_STRING;
 	} else {
 		if (((int)T->str_offset.offset<0)
-			|| (Z_USTRCPLEN_P(T->str_offset.str) <= T->str_offset.offset)) {
+			|| ((unsigned int)Z_USTRCPLEN_P(T->str_offset.str) <= T->str_offset.offset)) {
 			Z_USTRVAL_P(ptr) = USTR_MAKE("");
 			Z_USTRLEN_P(ptr) = 0;
 		} else {
@@ -659,7 +659,7 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 			return 0;
 		}
 
-		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
+		if (T->str_offset.offset >= (unsigned int)Z_STRLEN_P(T->str_offset.str)) {
 			Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
 			memset(Z_STRVAL_P(T->str_offset.str) + Z_STRLEN_P(T->str_offset.str),
 			       ' ',
@@ -696,7 +696,7 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 			return 0;
 		}
 
-		if (T->str_offset.offset >= Z_USTRLEN_P(T->str_offset.str)) {
+		if (T->str_offset.offset >= (unsigned int)Z_USTRLEN_P(T->str_offset.str)) {
 			Z_USTRVAL_P(T->str_offset.str) = (UChar *) eurealloc(Z_USTRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
 			u_memset(Z_USTRVAL_P(T->str_offset.str) + Z_USTRLEN_P(T->str_offset.str),
 			       ' ',

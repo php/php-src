@@ -506,9 +506,10 @@ static void Bfree(Bigint *v) /* {{{ */
 /* return value is only used as a simple string, so mis-aligned parts
  * inside the Bigint are not at risk on strict align architectures
  */
-static char * rv_alloc(int i) /* {{{ */
+static char * rv_alloc(unsigned int i) /* {{{ */
 {
-	int j, k, *r;
+	unsigned int k;
+	int j, *r;
 
 	j = sizeof(ULong);
 	for(k = 0;

@@ -30,10 +30,10 @@
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
 
-static void handle_whitespace(int *emit_whitespace) /* {{{ */
+static void handle_whitespace(unsigned int *emit_whitespace) /* {{{ */
 {
 	unsigned char c;
-	int i;
+	unsigned int i;
 
 	for (c=0; c<128; c++) {
 		if (emit_whitespace[c]>0) {
@@ -51,9 +51,9 @@ ZEND_API void zend_indent(void) /* {{{ */
 	zval token;
 	int token_type;
 	int in_string=0;
-	int nest_level=0;
-	int emit_whitespace[256];
-	int i;
+	unsigned int nest_level=0;
+	unsigned int emit_whitespace[256];
+	unsigned int i;
 	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);

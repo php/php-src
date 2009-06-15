@@ -867,7 +867,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 	}
 
-	ZEND_VM_STACK_GROW_IF_NEEDED(fci->param_count + 1);
+	ZEND_VM_STACK_GROW_IF_NEEDED((int)(fci->param_count + 1));
 
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
@@ -1806,7 +1806,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				ex->CVs[ex->op_array->this_var] = (zval**)ex->CVs + ex->op_array->last_var + ex->op_array->this_var;
 				*ex->CVs[ex->op_array->this_var] = EG(This);
  			}
-			for (i = 0; i < ex->op_array->last_var; i++) {
+			for (i = 0; i < (zend_uint) ex->op_array->last_var; i++) {
 				if (ex->CVs[i]) {
 					zend_u_hash_quick_update(EG(active_symbol_table),
 						type,
