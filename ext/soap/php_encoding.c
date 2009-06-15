@@ -2726,7 +2726,7 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data)
 			value = master_to_zval(NULL, xmlValue);
 
 			if (Z_TYPE_P(key) == IS_STRING) {
-				zend_hash_update(Z_ARRVAL_P(ret), Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &value, sizeof(zval *), NULL);
+				zend_symtable_update(Z_ARRVAL_P(ret), Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &value, sizeof(zval *), NULL);
 			} else if (Z_TYPE_P(key) == IS_LONG) {
 				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL_P(key), &value, sizeof(zval *), NULL);
 			} else {
