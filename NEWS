@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2009, PHP 5.2.10
+- Fixed bug #48562 (Reference recursion causes segfault when used in 
+  wddx_serialize_vars()). (Felipe)
 - Fixed bug #48557 (Numeric string keys in Apache Hashmaps are not cast to
   integers). (David Zuelke)
 - Fixed bug #48514 (cURL extension uses same resource name for simple and
