@@ -32,6 +32,7 @@
 #ifdef TSRM_WIN32
 
 #include "tsrm_win32.h"
+#include "tsrm_virtual_cwd.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -114,6 +115,11 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 	HANDLE process_token = NULL;
+
+	realpath_cache_bucket * bucket = NULL;
+	char * real_path = NULL;
+	time_t t;
+
 	TSRMLS_FETCH();
 
 	if (mode == 1 /*X_OK*/) {
@@ -121,22 +127,60 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 		return GetBinaryType(pathname, &type) ? 0 : -1;
 	} else {
 		if(access(pathname, mode)) {
-				return errno;
+			return errno;
 		}
+
+		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
+			real_path = (char *)malloc(MAX_PATH);
+			if(tsrm_realpath(pathname, real_path TSRMLS_CC) == NULL) {
+				goto Finished;
+			}
+			pathname = real_path;
+ 		}
+
+		if (CWDG(realpath_cache_size_limit)) {
+			t = time(0);
+			bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+			if(bucket == NULL && real_path == NULL) {
+				/* We used the pathname directly. Call tsrm_realpath */
+				/* so that entry is created in realpath cache */
+				real_path = (char *)malloc(MAX_PATH);
+				if(tsrm_realpath(pathname, real_path TSRMLS_CC) != NULL) {
+					pathname = real_path;
+					bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+				}
+			}
+ 		}
+ 
+ 		/* Do a full access check because access() will only check read-only attribute */
+ 		if(mode == 0 || mode > 6) {
+			if(bucket != NULL && bucket->is_rvalid) {
+				fAccess = bucket->is_readable;
+				goto Finished;
+			}
+ 			desired_access = FILE_GENERIC_READ;
+ 		} else if(mode <= 2) {
+			if(bucket != NULL && bucket->is_wvalid) {
+				fAccess = bucket->is_writable;
+				goto Finished;
+			}
+			desired_access = FILE_GENERIC_WRITE;
+ 		} else if(mode <= 4) {
+			if(bucket != NULL && bucket->is_rvalid) {
+				fAccess = bucket->is_readable;
+				goto Finished;
+			}
+			desired_access = FILE_GENERIC_READ;
+ 		} else { // if(mode <= 6)
+			if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
+				fAccess = bucket->is_readable & bucket->is_writable;
+				goto Finished;
+			}
+			desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
+ 		}
 
 		if(TWG(impersonation_token) == NULL) {
 			goto Finished;
-		}
-
-		/* Do a full access check because access() will only check read-only attribute */
-		if(mode == 0 || mode > 6) {
-			desired_access = FILE_GENERIC_READ;
-		} else if(mode <= 2) {
-				desired_access = FILE_GENERIC_WRITE;
-		} else if(mode <= 4) {
-				desired_access = FILE_GENERIC_READ;
-		} else { // if(mode <= 6)
-				desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
 		}
 
 		/* Get size of security buffer. Call is expected to fail */
@@ -154,10 +198,27 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 				goto Finished;
 		}
 
+		/* Keep the result in realpath_cache */
+		if(bucket != NULL) {
+			if(desired_access == FILE_GENERIC_READ) {
+				bucket->is_rvalid = 1;
+				bucket->is_readable = fAccess;
+			}
+			else if(desired_access == FILE_GENERIC_WRITE) {
+				bucket->is_wvalid = 1;
+				bucket->is_writable = fAccess;
+			}
+		}
+
 Finished:
 		if(psec_desc != NULL) {
 			free(psec_desc);
 			psec_desc = NULL;
+		}
+
+		if(real_path != NULL) {
+			free(real_path);
+			real_path = NULL;
 		}
 
 		if(fAccess == FALSE) {

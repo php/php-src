@@ -471,6 +471,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		}
 		bucket->realpath_len = realpath_len;
 		bucket->is_dir = is_dir;
+#ifdef PHP_WIN32
+		bucket->is_rvalid   = 0;
+		bucket->is_readable = 0;
+		bucket->is_wvalid   = 0;
+		bucket->is_writable = 0;
+#endif
 		bucket->expires = t + CWDG(realpath_cache_ttl);
 		n = bucket->key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 		bucket->next = CWDG(realpath_cache)[n];
@@ -500,6 +506,12 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 		}
 	}
 	return NULL;
+}
+/* }}} */
+
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
+{
+    return realpath_cache_find(path, path_len, t TSRMLS_CC);
 }
 /* }}} */
 

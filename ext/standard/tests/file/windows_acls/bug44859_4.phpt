@@ -1,5 +1,7 @@
 --TEST--
 bug #44859 (incorrect result with NTFS ACL permissions, is_readable)
+--CREDIT--
+Venkat Raman Don
 --SKIPIF--
 <?php 
 include_once __DIR__ . '/common.inc';
@@ -16,9 +18,9 @@ $iteration = array(
 	PHPT_ACL_WRITE|PHPT_ACL_READ => true,
 );
 
-echo "Testing file:\n";
+echo "Testing file with relative path:\n";
 $i = 1;
-$path = __DIR__ . '/a.txt';
+$path = './a.txt';
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
 	clearstatcache(true, $path);
@@ -32,8 +34,8 @@ foreach ($iteration as $perms => $exp) {
 	delete_file($path);
 }
 
-echo "Testing directory:\n";
-$path = __DIR__ . '/adir';
+echo "Testing directory with relative path:\n";
+$path = 'adir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
@@ -50,12 +52,12 @@ foreach ($iteration as $perms => $exp) {
 
 ?>
 --EXPECT--
-Testing file:
+Testing file with relative path:
 Iteration #1: passed.
 Iteration #2: passed.
 Iteration #3: passed.
 Iteration #4: passed.
-Testing directory:
+Testing directory with relative path:
 Iteration #1: passed.
 Iteration #2: passed.
 Iteration #3: passed.
