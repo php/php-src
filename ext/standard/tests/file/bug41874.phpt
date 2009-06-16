@@ -1,5 +1,5 @@
 --TEST--
-bug #42143 (Separate STDOUT and STDERR in exec functions)
+bug #41874 (Separate STDOUT and STDERR in exec functions)
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 		die('skip windows only test');
