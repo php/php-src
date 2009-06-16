@@ -11,7 +11,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 $bases = array(23,
 				-23,
 				23.1,
-				-23,1,
+				-23.1,
 				2.345e1,
 				-2.345e1,
 				0x17,
@@ -19,8 +19,8 @@ $bases = array(23,
 				"23",
 				"23.45",
 				"2.345e1",	
-				2147483647,
-				-2147483648);			
+				PHP_INT_MAX,
+				-PHP_INT_MAX - 1);			
 
 $exponents = array(0,
                1,
@@ -47,9 +47,7 @@ foreach($bases as $base) {
 }
 ?>
 ===Done===
---EXPECTF--
-
-
+--EXPECT--
 Base = 23
 ..... Exponent = 0 Result = 1
 ..... Exponent = 1 Result = 23
@@ -101,37 +99,20 @@ Base = 23.1
 
 
 
-Base = -23
+Base = -23.1
 ..... Exponent = 0 Result = 1
-..... Exponent = 1 Result = -23
-..... Exponent = -1 Result = -0.043478260869565
-..... Exponent = 2 Result = 529
-..... Exponent = -2 Result = 0.001890359168242
-..... Exponent = 3 Result = -12167
-..... Exponent = -3 Result = -8.2189529053999E-5
+..... Exponent = 1 Result = -23.1
+..... Exponent = -1 Result = -0.043290043290043
+..... Exponent = 2 Result = 533.61
+..... Exponent = -2 Result = 0.0018740278480538
+..... Exponent = 3 Result = -12326.391
+..... Exponent = -3 Result = -8.1126746668997E-5
 ..... Exponent = 2.5 Result = NAN
 ..... Exponent = -2.5 Result = NAN
 ..... Exponent = 500 Result = INF
 ..... Exponent = -500 Result = 0
 ..... Exponent = 2147483647 Result = -INF
 ..... Exponent = -2147483648 Result = 0
-
-
-
-Base = 1
-..... Exponent = 0 Result = 1
-..... Exponent = 1 Result = 1
-..... Exponent = -1 Result = 1
-..... Exponent = 2 Result = 1
-..... Exponent = -2 Result = 1
-..... Exponent = 3 Result = 1
-..... Exponent = -3 Result = 1
-..... Exponent = 2.5 Result = 1
-..... Exponent = -2.5 Result = 1
-..... Exponent = 500 Result = 1
-..... Exponent = -500 Result = 1
-..... Exponent = 2147483647 Result = 1
-..... Exponent = -2147483648 Result = 1
 
 
 
