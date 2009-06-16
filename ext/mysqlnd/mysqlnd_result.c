@@ -30,6 +30,9 @@
 #include "mysqlnd_debug.h"
 #include "ext/standard/basic_functions.h"
 
+#define START_FREEING_AFTER_X_ROWS 10
+static void mysqlnd_buffered_free_previous_row(MYSQLND_RES *result, int which TSRMLS_DC);
+
 #define MYSQLND_SILENT
 
 #ifdef MYSQLND_THREADED
@@ -101,11 +104,18 @@ void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC
 	unsigned int field_count = result->meta->field_count;
 	unsigned int row_count = result->stored_data->row_count;
 	DBG_ENTER("mysqlnd_res_initialize_result_set_rest");
+	DBG_INF_FMT("before heap=%lu real=%lu", zend_memory_usage(FALSE TSRMLS_CC), zend_memory_usage(TRUE TSRMLS_CC));
 
 	if (!data_cursor || row_count == result->stored_data->initialized_rows) {
 		DBG_VOID_RETURN;
 	}
 	while ((data_cursor - data_begin) < (row_count * field_count)) {
+		if (START_FREEING_AFTER_X_ROWS < ((data_cursor - data_begin) / result->field_count)) {
+			zval **orig_data_cursor = result->stored_data->data_cursor;
+			result->stored_data->data_cursor = data_cursor;
+			mysqlnd_buffered_free_previous_row(result, START_FREEING_AFTER_X_ROWS TSRMLS_CC);
+			result->stored_data->data_cursor = orig_data_cursor;
+		}
 		if (NULL == data_cursor[0]) {
 			result->stored_data->initialized_rows++;
 			result->m.row_decoder(
@@ -130,6 +140,7 @@ void mysqlnd_res_initialize_result_set_rest(MYSQLND_RES * const result TSRMLS_DC
 		}
 		data_cursor += field_count;
 	}
+	DBG_INF_FMT("after heap=%lu real=%lu", zend_memory_usage(FALSE TSRMLS_CC), zend_memory_usage(TRUE TSRMLS_CC));
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -186,6 +197,53 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 /* }}} */
 
 
+/* {{{ mysqlnd_buffered_free_previous_row */
+static
+void mysqlnd_buffered_free_previous_row(MYSQLND_RES *result, int which TSRMLS_DC)
+{
+	MYSQLND_RES_BUFFERED * set = result->stored_data;
+
+	DBG_ENTER("mysqlnd_buffered_free_previous_row");
+
+	if (!set) {
+		DBG_VOID_RETURN;
+	}
+
+	DBG_INF_FMT("which=%d result->field_count=%d data=%p data_cursor=%p", which, result->field_count, set->data, set->data_cursor);
+	if (set->data_cursor && ((set->data_cursor - (which * result->field_count) ) >= set->data)) {
+		unsigned int i, ctor_called_count = 0;
+		zend_bool copy_ctor_called;
+		MYSQLND_STATS *global_stats = result->conn? &result->conn->stats:NULL;
+		zval **current_row = set->data_cursor - (which * result->field_count);
+
+		DBG_INF_FMT("%u columns to free", result->field_count);
+		for (i = 0; i < result->field_count; i++) {
+			if (current_row[i]) {
+				mysqlnd_palloc_zval_ptr_dtor(&(current_row[i]),
+											 result->zval_cache, result->type,
+											 &copy_ctor_called TSRMLS_CC);
+				if (copy_ctor_called) {
+					ctor_called_count++;
+				}
+				current_row[i] = NULL;
+			}
+		}
+		DBG_INF_FMT("copy_ctor_called_count=%u", ctor_called_count);
+		/* By using value3 macros we hold a mutex only once, there is no value2 */
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE3(global_stats,
+											STAT_COPY_ON_WRITE_PERFORMED,
+											ctor_called_count,
+											STAT_COPY_ON_WRITE_SAVED,
+											result->field_count - ctor_called_count,
+											STAT_COPY_ON_WRITE_PERFORMED, 0);
+	}
+
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+
 /* {{{ mysqlnd_free_buffered_data */
 void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 {
@@ -205,16 +263,15 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 
 		for (col = field_count - 1; col >= 0; --col) {
 			zend_bool copy_ctor_called;
-			if (current_row[0] == NULL) {
-				break;/* row that was never initialized */
-			}
-			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), zval_cache,
+			if (current_row[col] != NULL) {
+				mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), zval_cache,
 										 result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
-			DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
+				DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
 #endif
-			MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
-														   STAT_COPY_ON_WRITE_SAVED);
+				MYSQLND_INC_GLOBAL_STATISTIC(copy_ctor_called? STAT_COPY_ON_WRITE_PERFORMED:
+															   STAT_COPY_ON_WRITE_SAVED);
+			}
 		}
 #if MYSQLND_DEBUG_MEMORY
 		DBG_INF("Freeing current_row & current_buffer");
@@ -1099,6 +1156,10 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 		zval **current_row = set->data_cursor;
 		MYSQLND_FIELD *field = result->meta->fields;
 		struct mysqlnd_field_hash_key *zend_hash_key = result->meta->zend_hash_keys;
+		DBG_INF_FMT("row_num=%u", (set->data_cursor - set->data) / result->meta->field_count);
+		if (START_FREEING_AFTER_X_ROWS < ((set->data_cursor - set->data) / result->field_count)) {
+			mysqlnd_buffered_free_previous_row(result, START_FREEING_AFTER_X_ROWS TSRMLS_CC);
+		}
 
 		if (NULL == current_row[0]) {
 			uint64_t row_num = (set->data_cursor - set->data) / result->meta->field_count;
@@ -1848,6 +1909,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES *result, unsigned int flags,
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	DBG_INF_FMT("flags=%u mysqlnd_extension=%d", flags, extension);
+	DBG_INF_FMT("memory in use: heap_size=%lu real_size=%u", zend_memory_usage(FALSE TSRMLS_CC), zend_memory_usage(TRUE TSRMLS_CC));
 
 	if (!result->m.fetch_row) {
 		RETVAL_NULL();
@@ -1859,7 +1921,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES *result, unsigned int flags,
 	*/
 	mysqlnd_array_init(return_value, mysqlnd_num_fields(result) * 2);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading a row");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading/decoding a row");
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
 		zval_dtor(return_value);
@@ -1877,6 +1939,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES *result, unsigned int flags,
 	  return_value is IS_NULL for no more data and an array for data. Thus it's ok
 	  to return here.
 	*/
+	DBG_INF_FMT("returning: heap_size=%lu real_size=%u", zend_memory_usage(FALSE TSRMLS_CC), zend_memory_usage(TRUE TSRMLS_CC));
 	DBG_VOID_RETURN;
 }
 /* }}} */
