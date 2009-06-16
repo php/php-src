@@ -1326,7 +1326,7 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 			  We need a trailing \0 for the last string, in case of text-mode,
 			  to be able to implement read-only variables.
 			*/
-			(*buffer)->resize_chunk((*buffer), *data_size + 1 TSRMLS_CC);
+			mysqlnd_mempool_resize_chunk((*buffer), *data_size + 1 TSRMLS_CC);
 			/* The position could have changed, recalculate */
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
@@ -1343,7 +1343,7 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL_CHUNK **buffer,
 		}
 	}
 	if (ret == FAIL && (*buffer)) {
-		(*buffer)->free_chunk((*buffer), TRUE TSRMLS_CC);
+		mysqlnd_mempool_free_chunk(*buffer, TRUE TSRMLS_CC);
 		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
@@ -1826,7 +1826,7 @@ void php_mysqlnd_rowp_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	p = (php_mysql_packet_row *) _packet;
 	if (p->row_buffer) {
-		p->row_buffer->free_chunk(p->row_buffer, TRUE TSRMLS_CC);
+		mysqlnd_mempool_free_chunk(p->row_buffer, TRUE TSRMLS_CC);
 		p->row_buffer = NULL;
 	}
 	DBG_INF_FMT("alloca=%d persistent=%d", (int)alloca, (int)p->header.persistent);

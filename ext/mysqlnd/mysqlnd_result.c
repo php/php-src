@@ -177,7 +177,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 	if (unbuf->last_row_buffer) {
 		DBG_INF("Freeing last row buffer");
 		/* Nothing points to this buffer now, free it */
-		unbuf->last_row_buffer->free_chunk(unbuf->last_row_buffer, TRUE TSRMLS_CC);
+		mysqlnd_mempool_free_chunk(unbuf->last_row_buffer, TRUE TSRMLS_CC);
 		unbuf->last_row_buffer = NULL;
 	}
 
@@ -219,7 +219,7 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 #if MYSQLND_DEBUG_MEMORY
 		DBG_INF("Freeing current_row & current_buffer");
 #endif
-		current_buffer->free_chunk(current_buffer, TRUE TSRMLS_CC);
+		mysqlnd_mempool_free_chunk(current_buffer, TRUE TSRMLS_CC);
 	}
 	DBG_INF("Freeing data & row_buffer");
 	if (set->data) {
