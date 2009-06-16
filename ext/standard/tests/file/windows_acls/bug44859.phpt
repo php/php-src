@@ -21,6 +21,7 @@ $i = 1;
 $path = __DIR__ . '/a.txt';
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
+	clearstatcache(true, $path);
 	echo 'Iteration #' . $i++ . ': ';
 	if (is_writable($path) == $exp) {
 		echo "passed.\n";
@@ -36,6 +37,7 @@ $path = __DIR__ . '/adir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
+	clearstatcache(true, $path);
 	echo 'Iteration #' . $i++ . ': ';
 	if (is_writable($path) == $exp) {
 		echo "passed.\n";

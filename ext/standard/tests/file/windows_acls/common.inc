@@ -123,7 +123,6 @@ function create_file($name, $perms) {
 	}
 
 	touch($name);
-	$dst = realpath($name);
 	icacls_set($name, PHPT_ACL_GRANT, $perms);
 }
 
