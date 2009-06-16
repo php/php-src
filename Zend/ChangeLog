@@ -1,3 +1,20 @@
+2009-06-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * zend.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_indent.c
+      zend_ini_scanner.c
+      zend_ini_scanner_defs.h
+      zend_interfaces.c
+      zend_language_scanner.c
+      zend_language_scanner_defs.h
+      zend_stream.c
+      zend_strtod.c
+      zend_strtol.c
+      zend_vm_execute.h:
+      - silent compilation warnings (no MFH yet)
+
 2009-06-14  andy wharmby  <wharmby@uk.ibm.com>
 
     * (PHP_5_2)
