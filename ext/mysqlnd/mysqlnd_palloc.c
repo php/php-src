@@ -139,7 +139,7 @@ void _mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache TSRMLS_DC)
 /* {{{ _mysqlnd_palloc_init_thd_cache */
 MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC)
 {
-	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
+	MYSQLND_THD_ZVAL_PCACHE *ret = mnd_ecalloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
 	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
 	DBG_INF_FMT("ret = %p", ret);
 	
@@ -161,7 +161,7 @@ MYSQLND_THD_ZVAL_PCACHE* mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * con
 	ret->references = 1;
 
 	/* 1. Initialize the GC list */
-	ret->gc_list.ptr_line = calloc(cache->max_items, sizeof(mysqlnd_zval *));
+	ret->gc_list.ptr_line = mnd_ecalloc(cache->max_items, sizeof(mysqlnd_zval *));
 	/* Backward and forward looping is possible */
 	ret->gc_list.last_added = ret->gc_list.ptr_line;
 	ret->gc_list.canary1 = (void*)0xCAFE;
@@ -233,8 +233,8 @@ void mysqlnd_palloc_free_thd_cache(MYSQLND_THD_ZVAL_PCACHE *thd_cache TSRMLS_DC)
 		UNLOCK_PCACHE(global_cache);
 
 	}
-	mnd_free(thd_cache->gc_list.ptr_line);
-	mnd_free(thd_cache);
+	mnd_efree(thd_cache->gc_list.ptr_line);
+	mnd_efree(thd_cache);
 
 	DBG_VOID_RETURN;
 }
@@ -413,6 +413,9 @@ void mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const thd
 {
 	MYSQLND_ZVAL_PCACHE *cache;
 	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
+	if (!*zv) {
+		DBG_VOID_RETURN;
+	}
 	if (thd_cache) {
 		DBG_INF_FMT("cache=%p parent_block=%p last_in_block=%p *zv=%p refc=%d type=%d ",
 					thd_cache,
