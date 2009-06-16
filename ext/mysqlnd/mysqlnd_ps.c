@@ -871,7 +871,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
-						// copied data, thus also the ownership. Thus null data
+						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
 				}
@@ -1047,7 +1047,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
-						// copied data, thus also the ownership. Thus null data
+						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
 				}
