@@ -1,5 +1,5 @@
 --TEST--
-bug #42143 (The constant NAN is reported as 0 on Windows build)
+bug #42143 (Separate STDOUT and STDERR in exec functions)
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 		die('skip windows only test');
