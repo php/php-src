@@ -62,6 +62,7 @@ PHP_FUNCTION(readlink)
 	char *link;
 	int link_len;
 	TCHAR Path[MAXPATHLEN];
+	char path_resolved[MAXPATHLEN];
 	HANDLE hFile;
 	DWORD dwRet;
 
@@ -88,14 +89,17 @@ PHP_FUNCTION(readlink)
 	if (OPENBASEDIR_CHECKPATH(link)) {
 		RETURN_FALSE;
 	}
-
-	hFile = CreateFile(link,                  // file to open
-										 GENERIC_READ,          // open for reading
-										 FILE_SHARE_READ,       // share for reading
-										 NULL,                  // default security
-										 OPEN_EXISTING,         // existing file only
-										 FILE_FLAG_BACKUP_SEMANTICS, // normal file
-										 NULL);                 // no attr. template
+	if (!expand_filepath(link, path_resolved TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+		RETURN_FALSE;
+	}
+	hFile = CreateFile(path_resolved,                  // file to open
+				 GENERIC_READ,          // open for reading
+				 FILE_SHARE_READ,       // share for reading
+				 NULL,                  // default security
+				 OPEN_EXISTING,         // existing file only
+				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
+				 NULL);                 // no attr. template
 
 	if( hFile == INVALID_HANDLE_VALUE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open file (error %d)", GetLastError());
