@@ -25,6 +25,9 @@
 
 MYSQLND_MEMORY_POOL *	mysqlnd_mempool_create(size_t arena_size TSRMLS_DC);
 void 					mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool TSRMLS_DC);
+void					mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
+void					mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC);
+
 
 #endif	/* MYSQLND_BLOCK_ALLOC_H */
 
