@@ -36,7 +36,7 @@ typedef enum {
 	ZEND_HANDLE_FD,
 	ZEND_HANDLE_FP,
 	ZEND_HANDLE_STREAM,
-	ZEND_HANDLE_MAPPED,
+	ZEND_HANDLE_MAPPED
 } zend_stream_type;
 
 typedef struct _zend_mmap {

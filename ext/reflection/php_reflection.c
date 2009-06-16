@@ -186,7 +186,7 @@ typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
 	REF_TYPE_PARAMETER,
-	REF_TYPE_PROPERTY,
+	REF_TYPE_PROPERTY
 } reflection_type_t;
 
 /* Struct for reflection objects */
