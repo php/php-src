@@ -63,14 +63,14 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it
 		}
 		pool->refcount--;
 	} else {
-		mnd_efree(chunk->ptr);
+		mnd_free(chunk->ptr);
 	}
 	if (cache_it && pool->free_chunk_list_elements < MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE) {
 		chunk->ptr = NULL;
 		pool->free_chunk_list[pool->free_chunk_list_elements++] = chunk;
 	} else {
 		/* We did not cache it -> free it */
-		mnd_efree(chunk);
+		mnd_free(chunk);
 	}
 	DBG_VOID_RETURN;
 }
@@ -135,7 +135,7 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 	if (pool->free_chunk_list_elements) {
 		chunk = pool->free_chunk_list[--pool->free_chunk_list_elements];
 	} else {
-		chunk = mnd_emalloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
+		chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
 	}
 
 	chunk->size = size;
@@ -146,7 +146,7 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 	*/
 	chunk->pool = pool;
 	if (size > pool->free_size) {
-		chunk->ptr = mnd_emalloc(size);
+		chunk->ptr = mnd_malloc(size);
 		chunk->from_pool = FALSE;
 	} else {
 		chunk->from_pool = TRUE;
@@ -165,13 +165,13 @@ MYSQLND_MEMORY_POOL *
 mysqlnd_mempool_create(size_t arena_size TSRMLS_DC)
 {
 	/* We calloc, because we free(). We don't mnd_calloc()  for a reason. */
-	MYSQLND_MEMORY_POOL * ret = mnd_ecalloc(1, sizeof(MYSQLND_MEMORY_POOL));
+	MYSQLND_MEMORY_POOL * ret = mnd_calloc(1, sizeof(MYSQLND_MEMORY_POOL));
 	DBG_ENTER("mysqlnd_mempool_create");
 
 	ret->free_size = ret->arena_size = arena_size;
 	ret->refcount = 0;
 	/* OOM ? */
-	ret->arena = mnd_emalloc(ret->arena_size);
+	ret->arena = mnd_malloc(ret->arena_size);
 	ret->get_chunk = mysqlnd_mempool_get_chunk;
 
 	DBG_RETURN(ret);
@@ -187,8 +187,8 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 	if (pool) {
 		/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
 		mysqlnd_mempool_free_contents(pool TSRMLS_CC);
-		mnd_efree(pool->arena);
-		mnd_efree(pool);
+		mnd_free(pool->arena);
+		mnd_free(pool);
 	}
 	DBG_VOID_RETURN;
 }
