@@ -35,6 +35,10 @@
 # include "win32/php_stdint.h"
 #endif
 
+#if defined(__GNUC__) && __GNUC__ < 3
+static __inline __int64_t llabs( __int64_t i ) { return i >= 0 ? i : -i; }
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
