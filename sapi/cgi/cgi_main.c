@@ -706,7 +706,7 @@ static void sapi_cgi_log_message(char *message)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, int path_len, int start TSRMLS_DC)
+static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
@@ -724,18 +724,49 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, int start
 
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
+		int skip = 0; /* Skip the path as it is not part of the DOCUMENT_ROOT */
+		char * real_path;
+		int real_path_len;
+		char *s1, *s2;
+		int s_len;
 
 		/* Clear the expired config */
 		zend_hash_clean(entry->user_config);
 
-		/* Walk through each directory and apply entries to user_config hash */
-		ptr = path + start; /* start is the point where doc_root ends! */
-		while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
-			*ptr = 0;
-			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
-			*ptr = '/';
-			ptr++;
+		if (!IS_ABSOLUTE_PATH(path, path_len)) {
+			real_path = tsrm_realpath(path, NULL TSRMLS_CC);
+			real_path_len = strlen(real_path);
+			path = real_path;
+			path_len = real_path_len;
 		}
+
+		if (path_len > doc_root_len) {
+			s1 = (char *) doc_root;
+			s2 = path;
+			s_len = doc_root_len;
+		} else {
+			s1 = path;
+			s2 = (char *) doc_root;
+			s_len = path_len;
+		}
+
+		/* we have to test if path is part of DOCUMENT_ROOT.
+		  if it is inside the docroot, we scan the tree up to the docroot 
+			to find more user.ini, if not we only scan the current path.
+		  */
+		if (strncmp(s1, s2, s_len) == 0) {
+			ptr = s1 + start;  /* start is the point where doc_root ends! */
+			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
+				*ptr = 0;
+				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+				*ptr = '/';
+				ptr++;
+			}
+		} else {
+			skip = 1;
+			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+		}
+
 		entry->expires = request_time + PG(user_ini_cache_ttl);
 	}
 
@@ -790,10 +821,10 @@ static int sapi_cgi_activate(TSRMLS_D)
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);
-				if (doc_root[doc_root_len - 1] == '/') {
+				if (IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
-				php_cgi_ini_activate_user_config(path, path_len, doc_root_len - 1 TSRMLS_CC);
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1 TSRMLS_CC);
 			}
 		}
 
