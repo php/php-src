@@ -47,6 +47,10 @@ FILE_RCSID("@(#)$File: cdf.c,v 1.17 2009/02/03 20:27:51 christos Exp $")
 #include <unistd.h>
 #endif
 
+#ifndef UINT32_MAX
+# define UINT32_MAX (0xffffffff)
+#endif
+
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
