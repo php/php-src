@@ -724,7 +724,6 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
-		int skip = 0; /* Skip the path as it is not part of the DOCUMENT_ROOT */
 		char * real_path;
 		int real_path_len;
 		char *s1, *s2;
@@ -763,7 +762,6 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 				ptr++;
 			}
 		} else {
-			skip = 1;
 			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
 		}
 
