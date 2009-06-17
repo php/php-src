@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 
 - Added phar.phar generation for Windows. (Greg)
 
+- Fixed bug #48578 (Can't build 5.3 on FBSD 4.11). (Rasmus)
 - Fixed bug #48541 (spl_autoload_register only registers first closure, then
   leaks the others). (Greg)
 - Fixed bug #48533 (__callStatic is not invoked for private/protected methods).
