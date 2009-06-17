@@ -3,11 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.3.0 RC 4
 - Upgraded bundled sqlite to version 3.6.15. (Scott)
 
-- Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
-
 - Added phar.phar generation for Windows. (Greg)
 - Added ACL Cache support on Windows.
   (Kanwaljeet Singla, Pierre, Venkat Raman Don)
+
+- Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
 
 - Fixed bug #48578 (Can't build 5.3 on FBSD 4.11). (Rasmus)
 - Fixed bug #48541 (spl_autoload_register only registers first closure, then
