@@ -348,6 +348,7 @@ static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	}
 
 	spl_ptr_llist_destroy(intern->llist TSRMLS_CC);
+	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 	zval_ptr_dtor(&intern->retval);
 
 	efree(object);
@@ -1036,6 +1037,16 @@ SPL_METHOD(SplDoublyLinkedList, key)
 }
 /* }}} */
 
+/* {{{ proto void SplDoublyLinkedList::prev() U
+   Move to next entry */
+SPL_METHOD(SplDoublyLinkedList, prev)
+{
+	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto void SplDoublyLinkedList::next() U
    Move to next entry */
 SPL_METHOD(SplDoublyLinkedList, next)
@@ -1164,6 +1175,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	SPL_ME(SplDoublyLinkedList, current,         NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, key,             NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, next,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, prev,            NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, valid,           NULL,                           ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
