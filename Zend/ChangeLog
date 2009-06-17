@@ -1,3 +1,24 @@
+2009-06-16  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend.c
+      zend.c:
+      Tweak to make this compile with gcc2
+
+    * (PHP_5_2)
+      zend.c:
+      Another tweak to make 5.2 compile on gcc2
+
+2009-06-16  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      zend_stream.h:
+      - MFH: Fixed build (removed trailing comma) patch by Seiji Masugata
+      <s.masugata at digicom.dnp.co.jp>
+
+    * zend_stream.h:
+      - Fixed build (removed trailing comma) patch by Seiji Masugata <s.masugata
+      at digicom.dnp.co.jp>
+
 2009-06-15  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * zend.h
