@@ -1,15 +1,23 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 4
 - Upgraded bundled sqlite to version 3.6.15. (Scott)
 
 - Added phar.phar generation for Windows. (Greg)
+- Added ACL Cache support on Windows.
+  (Kanwaljeet Singla, Pierre, Venkat Raman Don)
 
 - Fixed bug #48578 (Can't build 5.3 on FBSD 4.11). (Rasmus)
 - Fixed bug #48541 (spl_autoload_register only registers first closure, then
   leaks the others). (Greg)
 - Fixed bug #48533 (__callStatic is not invoked for private/protected methods).
   (Felipe)
+- Fixed bug #47318 (UMR when trying to activate user config). (Pierre)
+- Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
+- Fixed bug #48535 (file_exists returns false when impersonate is used).
+  (Kanwaljeet Singla, Venkat Raman Don)
+- Fixed bug #47767 (include_once does not resolve windows symlinks or junctions)
+  (Kanwaljeet Singla, Venkat Raman Don)
 
 11 Jun 2009, PHP 5.3.0 RC 3
 - Upgraded bundled sqlite to version 3.6.14.2. (Scott, Ilia)
