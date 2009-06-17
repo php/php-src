@@ -23,8 +23,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION PHP_VERSION " $Revision$"
-#define MYSQLND_VERSION_ID PHP_VERSION_ID 
+#define MYSQLND_VERSION "mysqlnd/PHP " PHP_VERSION " $Revision$"
+#define MYSQLND_VERSION_ID PHP_VERSION_ID
 
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 1
