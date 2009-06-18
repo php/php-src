@@ -1,3 +1,10 @@
+2009-06-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend.h
+      zend.h
+      zend.h:
+      Need the gcc version check here too
+
 2009-06-16  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * zend.c
