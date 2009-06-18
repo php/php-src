@@ -201,6 +201,11 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 static
 void mysqlnd_buffered_free_previous_row(MYSQLND_RES *result, int which TSRMLS_DC)
 {
+	return;
+#ifdef JOHANNES_0
+	/* optimization currently disabled as this breaks fetching data with
+	   more than START_FREEING_AFTER_X_ROWS rows */
+
 	MYSQLND_RES_BUFFERED * set = result->stored_data;
 
 	DBG_ENTER("mysqlnd_buffered_free_previous_row");
@@ -239,6 +244,7 @@ void mysqlnd_buffered_free_previous_row(MYSQLND_RES *result, int which TSRMLS_DC
 	}
 
 	DBG_VOID_RETURN;
+#endif
 }
 /* }}} */
 
