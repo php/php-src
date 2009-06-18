@@ -46,10 +46,10 @@ bool(true)
 bool(true)
 bool(true)
 ===DIR===
-bool(false)
+bool(true)
 ===NA===
 bool(false)
 bool(false)
 bool(false)
-bool(false)
+bool(true)
 ===DONE===
