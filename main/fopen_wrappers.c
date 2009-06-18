@@ -451,9 +451,9 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		}
 	} /* if doc_root && path_info */
 
-    if(filename) {
-	    filename = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
-    }
+	if(filename) {
+		filename = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
+	}
 
 	if (!filename) {
 		/* we have to free SG(request_info).path_translated here because
