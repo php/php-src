@@ -17,14 +17,6 @@ echo "*** Testing readdir() : usage variations ***\n";
 var_dump($fp = fopen(__FILE__, "r"));
 var_dump( readdir($fp) );
 
-// get file length over 256 characters
-<<<EOT
-123456789012345678901234567890
-123456789012345678901234567890
-123456789012345678901234567890
-123456789012345678901234567890
-123456789012345678901234567890
-EOT;
 ?>
 ===DONE===
 --EXPECTF--
