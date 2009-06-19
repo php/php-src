@@ -2010,7 +2010,6 @@ PHP_FUNCTION(imagegrabwindow)
 		pPrintWindow(window, memDC, (UINT) client_area);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows API too old");
-		RETURN_FALSE;
 		goto clean;
 	}
 
