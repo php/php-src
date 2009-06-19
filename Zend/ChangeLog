@@ -1,3 +1,12 @@
+2009-06-18  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      zend_object_handlers.c
+      tests/bug48215.phpt
+      tests/bug48215.phpt:
+      Fix bug #48215 - Calling a method with the same name as the parent class
+      calls the constructor instead.
+
 2009-06-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * zend.h
