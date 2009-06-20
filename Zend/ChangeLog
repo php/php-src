@@ -1,3 +1,18 @@
+2009-06-19  Scott MacVicar  <scott@macvicar.net>
+
+    * (PHP_5_3)
+      zend_object_handlers.c
+      tests/bug48215_2.phpt
+      tests/bug48215_2.phpt:
+      Make the check case sensitive, and since we can only have a constructor
+      that matches the class name or is __construct
+      its probably safe to just check for __. This means we can skip lowering
+      the function_name, which is hard to be binary
+      safe sine we don't store the length.
+      
+      If we just did a zend_hash_exists lookup we'd be fine since its stored
+      lowercased already :)
+
 2009-06-18  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
