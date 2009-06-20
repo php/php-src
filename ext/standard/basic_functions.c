@@ -668,10 +668,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_filter, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
 	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, arg1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arg2) /* ARRAY_INFO(0, arg2, 0) */
+	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_INFO(0, ...)
 ZEND_END_ARG_INFO()
 
