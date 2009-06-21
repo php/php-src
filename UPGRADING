@@ -151,7 +151,7 @@ UPGRADE NOTES - PHP 5.3
 
      a. moved out to PECL and actively maintained there
 
-        - fpdf
+        - fdf
         - ming
         - ncurses
 
