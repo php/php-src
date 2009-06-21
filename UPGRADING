@@ -314,7 +314,6 @@ UPGRADE NOTES - PHP 5.3
                   gc_disable()
                   class_alias()
                   get_called_class()
-                  get_extension_funcs()
                   forward_static_call()
                   forward_static_call_array()
                   str_getcsv()
