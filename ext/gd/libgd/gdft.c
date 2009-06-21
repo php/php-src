@@ -784,6 +784,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	double cos_a = cos (angle);
 	int len, i = 0, ch;
 	int x1 = 0, y1 = 0;
+	int xb = x, yb = y;
 	font_t *font;
 	fontkey_t fontkey;
 	char *next;
@@ -924,8 +925,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		/* carriage returns */
 		if (ch == '\r') {
 			penf.x = 0;
-			x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-			y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+			x1 = (int)(- penf.y * sin_a + 32) / 64;
+			y1 = (int)(- penf.y * cos_a + 32) / 64;
 			pen.x = pen.y = 0;
 			previous = 0;		/* clear kerning flag */
 			next++;
@@ -937,8 +938,10 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			penf.x = 0;
 			  penf.y -= (long)(face->size->metrics.height * linespace);
 			  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-			  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-			  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+			  x1 = (int)(- penf.y * sin_a + 32) / 64;
+			  y1 = (int)(- penf.y * cos_a + 32) / 64;
+			  xb = x + x1;
+			  yb = y + y1;
 			  pen.x = pen.y = 0;
 			  previous = 0;		/* clear kerning flag */
 			  next++;
@@ -1088,7 +1091,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 			/* now, draw to our target surface */
 			bm = (FT_BitmapGlyph) image;
-			gdft_draw_bitmap(tc_cache, im, fg, bm->bitmap, x + x1 + ((pen.x + 31) >> 6) + bm->left, y - y1 + ((pen.y + 31) >> 6) - bm->top);
+			gdft_draw_bitmap(tc_cache, im, fg, bm->bitmap, x + x1 + ((pen.x + 31) >> 6) + bm->left, y + y1 + ((pen.y + 31) >> 6) - bm->top);
 		}
 
 		/* record current glyph index for kerning */
@@ -1127,14 +1130,14 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		brect[7] = (int) (normbox.xMin * sin_a + normbox.yMax * cos_a);
 
 		/* scale, round and offset brect */
-		brect[0] = x + gdroundupdown(brect[0], d2 > 0);
-		brect[1] = y - gdroundupdown(brect[1], d1 < 0);
-		brect[2] = x + gdroundupdown(brect[2], d1 > 0);
-		brect[3] = y - gdroundupdown(brect[3], d2 > 0);
-		brect[4] = x + gdroundupdown(brect[4], d2 < 0);
-		brect[5] = y - gdroundupdown(brect[5], d1 > 0);
-		brect[6] = x + gdroundupdown(brect[6], d1 < 0);
-		brect[7] = y - gdroundupdown(brect[7], d2 < 0);
+		brect[0] = xb + gdroundupdown(brect[0], d2 > 0);
+		brect[1] = yb - gdroundupdown(brect[1], d1 < 0);
+		brect[2] = xb + gdroundupdown(brect[2], d1 > 0);
+		brect[3] = yb - gdroundupdown(brect[3], d2 > 0);
+		brect[4] = xb + gdroundupdown(brect[4], d2 < 0);
+		brect[5] = yb - gdroundupdown(brect[5], d1 > 0);
+		brect[6] = xb + gdroundupdown(brect[6], d1 < 0);
+		brect[7] = yb - gdroundupdown(brect[7], d2 < 0);
 	}
 
 	if (tmpstr) {
