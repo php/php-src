@@ -166,11 +166,11 @@ UPGRADE NOTES - PHP 5.3
 
         - hash: The SHA-224 hash algorithm is now supported.
 
-        - oci8a: Calling oci_close() on a persistent connection, or on a variable
+        - oci8: Calling oci_close() on a persistent connection, or on a variable
           that references a persistent connection going out of scope, will now
           roll back any uncommitted transaction. You should explicitly commit or
           rollback as needed.
-          Setting oci8.old_oci_close semantics=On in php.ini gives the old
+          Setting oci8.old_oci_close_semantics=On in php.ini gives the old
           behaviour.
 
         - openssl: There is now support for OpenSSL digest and cipher functions.
@@ -354,6 +354,17 @@ UPGRADE NOTES - PHP 5.3
                   E_USER_DEPRECATED
                   __DIR__
                   __NAMESPACE__
+                  PHP_WINDOWS_VERSION_MAJOR
+                  PHP_WINDOWS_VERSION_MINOR
+                  PHP_WINDOWS_VERSION_BUILD
+                  PHP_WINDOWS_VERSION_PLATFORM
+                  PHP_WINDOWS_VERSION_SP_MAJOR
+                  PHP_WINDOWS_VERSION_SP_MINOR
+                  PHP_WINDOWS_VERSION_SUITEMASK
+                  PHP_WINDOWS_VERSION_PRODUCTTYPE
+                  PHP_WINDOWS_NT_DOMAIN_CONTROLLER
+                  PHP_WINDOWS_NT_SERVER
+                  PHP_WINDOWS_NT_WORKSTATION
        - INI:     INI_SCANNER_NORMAL
                   INI_SCANNER_RAW
        - GD:      IMG_FILTER_PIXELATE
