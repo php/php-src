@@ -235,7 +235,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_basename(tmp, strlen(tmp), NULL, 0, &f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "%s\r\nX-PHP-Originating-Script: %ld:%s\n", headers, php_getuid(), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\r\n%s", php_getuid(), f, headers);
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(), f);
 		}
