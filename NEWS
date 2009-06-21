@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 5
+- Fixed bug #48620 (X-PHP-Originating-Script assumes no trailing CRLF in
+  existing headers). (Ilia)
 - Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
   with new lines) (Takeshi Abe)
 
