@@ -229,6 +229,8 @@ UPGRADE NOTES - PHP 5.3
 
 - Runtime tightening of open_basedir restrictions is now possible.
 
+- The default value of session.use_only_cookies has changed to "1"
+
 ====================
 10. Syntax additions
 ====================
