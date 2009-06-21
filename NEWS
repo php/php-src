@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   existing headers). (Ilia)
 - Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
   with new lines) (Takeshi Abe)
+- Fixed bug #48215 (Calling a method with the same name as the parent class
+  calls the constructor). (Scott)
 
 18 Jun 2009, PHP 5.3.0 RC 4
 - Upgraded bundled sqlite to version 3.6.15. (Scott)
