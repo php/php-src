@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
+- Fixed bug #48276 (date("Y") on big endian machines produces the
+  wrong result). (Scott)
 
 17 Jun 2009, PHP 5.2.10
 - Updated timezone database to version 2009.9 (2009i) (Derick)
