@@ -331,6 +331,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_identifiers_list, 0, 0, 0)
 	ZEND_ARG_INFO(0, what)
+	ZEND_ARG_INFO(0, country)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_timezone_abbreviations_list, 0)
@@ -3737,7 +3738,7 @@ static int check_id_allowed(char *id, long what)
 	return 0;
 }
 
-/* {{{ proto array timezone_identifiers_list([long what])
+/* {{{ proto array timezone_identifiers_list([long what[, string country]])
    Returns numerically index array with all timezone identifiers.
 */
 PHP_FUNCTION(timezone_identifiers_list)
