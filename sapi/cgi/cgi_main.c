@@ -754,7 +754,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 			to find more user.ini, if not we only scan the current path.
 		  */
 		if (strncmp(s1, s2, s_len) == 0) {
-			ptr = s1 + start;  /* start is the point where doc_root ends! */
+			ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
