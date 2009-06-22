@@ -3877,7 +3877,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 	if (srcback==NULL) {
 		return 0;
 	}
-	srcback->saveAlphaFlag = 1;
+	gdImageSaveAlpha(srcback, 1);
 	new_pxl = gdImageColorAllocateAlpha(srcback, 0, 0, 0, 127);
 	gdImageFill(srcback, 0, 0, new_pxl;
 
