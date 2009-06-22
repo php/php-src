@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   php.net, Ilia)
 - Fixed bug #48629 (get_defined_constants() ignores categorize parameter).
   (Felipe)
+- Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
+  with new lines) (Takeshi Abe)
 - Fixed bug #48276 (date("Y") on big endian machines produces the
   wrong result). (Scott)
 
