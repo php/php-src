@@ -3864,7 +3864,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 	int         x, y, i, j, new_a;
 	float       new_r, new_g, new_b;
 	int         new_pxl, pxl=0;
-	gdImagePtr  srcback, srctrans;
+	gdImagePtr  srcback;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
 
@@ -3878,8 +3878,8 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 		return 0;
 	}
 	srcback->saveAlphaFlag = 1;
-	srctrans = gdImageColorAllocateAlpha(srcback, 0, 0, 0, 127);
-	gdImageFill(srcback, 0, 0, srctrans);
+	new_pxl = gdImageColorAllocateAlpha(srcback, 0, 0, 0, 127);
+	gdImageFill(srcback, 0, 0, new_pxl;
 
 	gdImageCopy(srcback, src,0,0,0,0,src->sx,src->sy);
 
