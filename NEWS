@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
+- Fixed bug #48636 (Error compiling of ext/date on netware). (guenter at
+  php.net, Ilia)
 - Fixed bug #48629 (get_defined_constants() ignores categorize parameter).
   (Felipe)
 - Fixed bug #48276 (date("Y") on big endian machines produces the
