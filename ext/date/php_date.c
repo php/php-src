@@ -39,6 +39,10 @@
 static __inline __int64_t llabs( __int64_t i ) { return i >= 0 ? i : -i; }
 #endif
 
+#if defined(NETWARE) && defined(__MWERKS__)
+static __inline long long llabs( long long i ) { return i >= 0 ? i : -i; }
+#endif
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
@@ -2406,7 +2410,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 	}
 	timelib_unixtime2local(now, (timelib_sll) time(NULL));
 
-	timelib_fill_holes(dateobj->time, now, 0);
+	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
 
 	dateobj->time->have_relative = 0;
