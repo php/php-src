@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - Added phar.phar generation for Windows. (Greg)
 - Added ACL Cache support on Windows.
   (Kanwaljeet Singla, Pierre, Venkat Raman Don)
+- Added compatibility mode in GD, imagerotate, image(filled)ellipse 
+  imagefilter, imageconvolution and imagecolormatch are now always enabled.
+  (Pierre)
 
 - Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
 
