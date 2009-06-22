@@ -5,8 +5,6 @@ PHP                                                                        NEWS
   (crrodriguez at opensuse dot org)
 - Fixed bug #48620 (X-PHP-Originating-Script assumes no trailing CRLF in
   existing headers). (Ilia)
-- Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
-  with new lines) (Takeshi Abe)
 - Fixed bug #48215 (Calling a method with the same name as the parent class
   calls the constructor). (Scott)
 
