@@ -375,6 +375,11 @@ UPGRADE NOTES - PHP 5.3
                   JSON_ERROR_STATE_MISMATCH
                   JSON_ERROR_CTRL_CHAR
                   JSON_ERROR_SYNTAX
+                  JSON_FORCE_OBJECT
+                  JSON_HEX_TAG
+                  JSON_HEX_AMP
+                  JSON_HEX_APOS
+                  JSON_HEX_QUOT
        - LDAP:    LDAP_OPT_NETWORK_TIMEOUT
        - PCRE:    PREG_BAD_UTF8_OFFSET_ERROR
        - PCNTL:   SIG_BLOCK
