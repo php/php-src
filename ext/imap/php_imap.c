@@ -3028,7 +3028,7 @@ PHP_FUNCTION(imap_sort)
 
 	slst = mail_sort(imap_le_struct->imap_stream, (argc == 6 ? charset : NIL), spg, mypgm, (argc >= 4 ? flags : NIL));
 
-	if (spg) {
+	if (spg && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&spg);
 	}
 
@@ -4004,7 +4004,7 @@ PHP_FUNCTION(imap_search)
 
 	mail_search_full(imap_le_struct->imap_stream, (argc == 4 ? charset : NIL), pgm, flags);
 
-	if (pgm) {
+	if (pgm && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&pgm);
 	}
 
@@ -4620,7 +4620,7 @@ PHP_FUNCTION(imap_thread)
 
 	pgm = mail_criteria(criteria);
 	top = mail_thread(imap_le_struct->imap_stream, "REFERENCES", NIL, pgm, flags);
-	if (pgm) {
+	if (pgm && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&pgm);
 	}
 
