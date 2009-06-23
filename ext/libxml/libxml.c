@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_libxml_set_streams_context, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_libxml_use_internal_errors, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_use_internal_errors, 0, 0, 0)
 	ZEND_ARG_INFO(0, use_errors)
 ZEND_END_ARG_INFO()
 
