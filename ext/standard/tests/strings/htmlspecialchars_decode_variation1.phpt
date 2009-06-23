@@ -40,8 +40,8 @@ $values = array(
       // float data
       10.5,
       -10.5,
-      10.5e10,
-      10.6E-10,
+      10.1234567e10,
+      10.7654321E-10,
       .5,
 
       // array data
@@ -89,8 +89,8 @@ foreach($values as $value) {
 // close the file resource used
 fclose($file_handle);
 
-echo "Done";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iterator 1 --
@@ -106,9 +106,9 @@ string(4) "10.5"
 -- Iterator 6 --
 string(5) "-10.5"
 -- Iterator 7 --
-string(12) "105000000000"
+string(12) "101234567000"
 -- Iterator 8 --
-string(7) "1.06E-9"
+string(13) "1.07654321E-9"
 -- Iterator 9 --
 string(3) "0.5"
 -- Iterator 10 --
@@ -157,4 +157,5 @@ string(0) ""
 
 Warning: htmlspecialchars_decode() expects parameter 1 to be string, resource given in %s on line %d
 NULL
-Done
+===DONE===
+	
