@@ -2670,7 +2670,7 @@ PHP_FUNCTION(imap_sort)
 
 	slst = mail_sort(imap_le_struct->imap_stream, (myargc == 6 ? Z_STRVAL_PP(charset) : NIL), spg, mypgm, (myargc >= 4 ? Z_LVAL_PP(flags) : NIL));
 
-	if (spg && !(flags & SE_FREE)) {
+	if (spg && myargc >= 4 && !(Z_LVAL_PP(flags) & SE_FREE)) {
 		mail_free_searchpgm(&spg);
 	}
 
