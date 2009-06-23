@@ -334,6 +334,7 @@ UPGRADE NOTES - PHP 5.3
        - GMP:     gmp_testbit()
        - Hash:    hash_copy()
        - JSON:    json_last_error()
+       - libxml:  libxml_disable_entity_loader
        - MySQLi:  mysqli_fetch_all()
                   mysqli_get_connection_stats()
                   mysqli_poll()
