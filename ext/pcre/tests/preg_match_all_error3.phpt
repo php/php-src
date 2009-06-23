@@ -12,7 +12,7 @@ Test preg_match_all() function : error conditions
 echo "*** Testing preg_match_all() : error conditions ***\n";
 $regex = '/[a-z]/';
 $subject = 'string';
-var_dump(preg_match_all($regex, $subject, test));
+var_dump(preg_match_all($regex, $subject, 'test'));
 echo "Done";
 ?>
 --EXPECTF--
