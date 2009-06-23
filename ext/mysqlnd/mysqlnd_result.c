@@ -354,7 +354,7 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 #endif
 			pefree(current_row, set->persistent);
 		}
-		current_buffer->free_chunk(current_buffer, TRUE TSRMLS_CC);
+		mysqlnd_mempool_free_chunk(current_buffer, TRUE TSRMLS_CC);
 	}
 	DBG_INF("Freeing data & row_buffer");
 	pefree(set->data, set->persistent);
