@@ -79,11 +79,14 @@ UPGRADE NOTES - PHP 5.3
      fgetcsv(): escape.
      ini_get_all(): details.
      json_encode(): options.
+     json_decode(): depth.
      nl2br(): is_xhtml.
      parse_ini_file(): scanner_mode.
      round(): mode.
      stream_context_create(): params.
      strstr(), stristr(): before_needle.
+
+- And new mode options for fopen, 'n' (O_NONBLOCK)
 
 - The new mysqlnd library necessitates using MySQL's newer 41 byte password format.
   Continued use of the old 16 byte passwords will cause mysql_connect() to produce
@@ -312,7 +315,11 @@ UPGRADE NOTES - PHP 5.3
        - glob:// stream wrapper
        - phar:// stream wrapper for accessing phar archives
 
-     d. New functions
+     d. New stream filters
+
+       - "dechunk" (HTTP/1.1 chunked transfer encoding)
+
+     e. New functions
 
        - Core:    gc_collect_cycles()
                   gc_enabled()
@@ -337,6 +344,9 @@ UPGRADE NOTES - PHP 5.3
        - INI:     parse_ini_string()
        - GMP:     gmp_testbit()
        - Hash:    hash_copy()
+       - IMAP:    imap_gc()
+                  imap_utf8_to_mutf7()
+                  imap_mutf7_to_utf8()
        - JSON:    json_last_error()
        - libxml:  libxml_disable_entity_loader
        - MySQLi:  mysqli_fetch_all()
@@ -355,7 +365,7 @@ UPGRADE NOTES - PHP 5.3
        - Streams: stream_supports_lock()
                   stream_context_set_default()
 
-     e. New global constants
+     f. New global constants
 
        - Core:    E_DEPRECATED
                   E_USER_DEPRECATED
@@ -374,6 +384,7 @@ UPGRADE NOTES - PHP 5.3
                   PHP_WINDOWS_NT_WORKSTATION
        - INI:     INI_SCANNER_NORMAL
                   INI_SCANNER_RAW
+       - cURL     CURLOPT_PROGRESSFUNCTION
        - GD:      IMG_FILTER_PIXELATE
        - JSON:    JSON_ERROR_NONE
                   JSON_ERROR_DEPTH
@@ -435,7 +446,7 @@ UPGRADE NOTES - PHP 5.3
                   BUS_ADRERR
                   BUS_OBJERR
 
-     f. New classes
+     g. New classes
 
        - Date:    DateInterval
                   DatePeriod
@@ -456,7 +467,7 @@ UPGRADE NOTES - PHP 5.3
                   RecursiveTreeIterator
                   MultipleIterator
 
-     g. New methods
+     h. New methods
 
        - Date:         DateTime::diff()
                        DateTime::add()
@@ -473,7 +484,7 @@ UPGRADE NOTES - PHP 5.3
                        ReflectionClass::getShortName()
        - XSL:          XSLTProcessor::setProfiling()
 
-     h. New class constants
+     i. New class constants
 
        - PDO_Firebird: PDO::FB_ATTR_DATE_FORMAT
                        PDO::FB_ATTR_TIME_FORMAT
