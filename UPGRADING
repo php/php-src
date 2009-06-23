@@ -13,7 +13,6 @@ UPGRADE NOTES - PHP 5.3
      b. no longer maintained
      c. with changed behaviour
      d. no longer possible to disable
-     e. removed functionality
 8. Changes in SAPI support
 9. Changes in INI directives
 10. Syntax additions
@@ -165,6 +164,9 @@ UPGRADE NOTES - PHP 5.3
 
      c. with changed behaviour
 
+        - datetime: date/timefunctions will no longer use the TZ environment
+          variable to guess which timezone should be used.
+
         - hash: The SHA-224 hash algorithm is now supported.
 
         - oci8: Calling oci_close() on a persistent connection, or on a variable
@@ -187,11 +189,6 @@ UPGRADE NOTES - PHP 5.3
         - PCRE
         - Reflection
         - SPL
-
-     e. removed behaviour
-
-        - date/time functions will no longer use the TZ environment variable to
-          guess which timezone should be used.
 
 
 ==========================
