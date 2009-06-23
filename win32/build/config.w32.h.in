@@ -156,6 +156,10 @@
 /* Win32 support proc_open */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
 
+/* inet_ntop() / inet_pton() */
+#define HAVE_INET_PTON 1
+#define HAVE_INET_NTOP 1
+
 #define HAVE_MBLEN
 
 #undef HAVE_ATOF_ACCEPTS_NAN
