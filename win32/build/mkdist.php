@@ -365,7 +365,9 @@ function copy_test_dir($directory, $dest)
 	}
 
 	if ($directory == 'tests') {
-		mkdir($dest . '/tests', 0775, true);
+		if (!is_dir($dest . '/tests')) {
+			mkdir($dest . '/tests', 0775, true);
+		}
 		copy_dir($directory, $dest . '/tests/');
 
 		return false;
@@ -398,23 +400,32 @@ function copy_test_dir($directory, $dest)
 
 function make_phar_dot_phar($dist_dir)
 {
-  if (!extension_loaded('phar')) return;
-  $path_to_php = $dist_dir;
-  $path_to_phar = realpath(__DIR__ . '/../../ext/phar');
-  echo "Generating pharcommand.phar\n";
-  $phar = new Phar($path_to_php . '/pharcommand.phar', 0, 'pharcommand');
-  foreach (new DirectoryIterator($path_to_phar . '/phar') as $file) {
-    if ($file->isDir() || $file == 'phar.php') continue;
-    echo 'adding ', $file, "\n";
-    $phar[(string) $file] = file_get_contents($path_to_phar.  '/phar/' . $file);
-  }
-  $phar->setSignatureAlgorithm(Phar::SHA1);
-  $stub = file($path_to_phar . '/phar/phar.php');
-  unset($stub[0]); // remove hashbang
-  $phar->setStub(implode('', $stub));
+	if (!extension_loaded('phar')) {
+		return;
+	}
 
-  echo "Creating phar.phar.bat\n";
-  file_put_contents($path_to_php . '/phar.phar.bat', "%~dp0php.exe %~dp0pharcommand.phar %1 %2 %3 %4 %5 %6 %7 %8 %9\r\n");
+	$path_to_phar = realpath(__DIR__ . '/../../ext/phar');
+
+	echo "Generating pharcommand.phar\n";
+	$phar = new Phar($dist_dir . '/pharcommand.phar', 0, 'pharcommand');
+
+	foreach (new DirectoryIterator($path_to_phar . '/phar') as $file) {
+		if ($file->isDir() || $file == 'phar.php') {
+			continue;
+		}
+
+		echo 'adding ', $file, "\n";
+		$phar[(string) $file] = file_get_contents($path_to_phar.  '/phar/' . $file);
+	}
+
+	$phar->setSignatureAlgorithm(Phar::SHA1);
+	$stub = file($path_to_phar . '/phar/phar.php');
+
+	unset($stub[0]); // remove hashbang
+	$phar->setStub(implode('', $stub));
+
+	echo "Creating phar.phar.bat\n";
+	file_put_contents($dist_dir . '/phar.phar.bat', "%~dp0php.exe %~dp0pharcommand.phar %*\r\n");
 }
 
 if (!is_dir($test_dir)) {
