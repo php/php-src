@@ -1,3 +1,10 @@
+2009-06-22  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      tests/017.phpt:
+      - Fixed bug #48629 (get_defined_constants() ignores categorize parameter)
+
 2009-06-19  Scott MacVicar  <scott@macvicar.net>
 
     * (PHP_5_3)
