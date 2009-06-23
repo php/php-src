@@ -382,7 +382,9 @@ function copy_test_dir($directory, $dest)
 		$full_path = $directory . '/' . $file;
 		if($file != '.' && $file != '..' && $file != 'CVS' && is_dir($full_path)) {
 			if ($file == 'tests') {
-				mkdir($dest . '/' . $full_path , 0775, true);
+				if (!is_dir($dest . '/' . $full_path)) {
+					mkdir($dest . '/' . $full_path , 0775, true);
+				}
 				copy_dir($full_path, $dest . '/' . $full_path . '/');
 				continue;
 			} else {
