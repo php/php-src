@@ -1604,12 +1604,33 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 		switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len, 1);
+			if (readobj == writeobj) {
+				zval retval;
+				zval *retval_ptr = &retval;
+
+				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len, 1);
+				zval_dtor(readobj);
+				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+			} else {
+				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len, 1);
+			}
 			return SUCCESS;
 		case SPL_FS_DIR:
-			ZVAL_STRING(writeobj, intern->u.dir.entry.d_name, 1);
+			if (readobj == writeobj) {
+				zval retval;
+				zval *retval_ptr = &retval;
+
+				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name, 1);
+				zval_dtor(readobj);
+				ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+			} else {
+				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name, 1);
+			}
 			return SUCCESS;
 		}
+	}
+	if (readobj == writeobj) {
+		zval_dtor(readobj);
 	}
 	ZVAL_NULL(writeobj);
 	return FAILURE;

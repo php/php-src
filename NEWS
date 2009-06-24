@@ -1,6 +1,7 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.0 RC 5
+- Fixed bug #48643 (String functions memory issue). (Dmitry)
 - Fixed bug #48641 (tmpfile() uses old parameter parsing).
   (crrodriguez at opensuse dot org)
 - Fixed bug #48624 (.user.ini never gets parsed). (Pierre)
