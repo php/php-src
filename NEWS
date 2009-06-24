@@ -9,6 +9,8 @@
 - Fixed bug #48619 (imap_search ALL segfaults). (Pierre)
 - Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
   with new lines) (Takeshi Abe)
+- Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using
+  TMPDIR). (Ilia)
 - Fixed bug #48450 (Compile failure under IRIX 6.5.30 building gd.c). (Kalle)
 - Fixed bug #48276 (date("Y") on big endian machines produces the
   wrong result). (Scott)
