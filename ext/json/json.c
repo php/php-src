@@ -544,6 +544,7 @@ static PHP_FUNCTION(json_decode)
 
 	if (depth <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Depth must greater than zero");
+		efree(utf16);
 		RETURN_NULL();
 	}
 
