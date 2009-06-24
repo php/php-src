@@ -21,11 +21,12 @@ UPGRADE NOTES - PHP 5.3
      a. New libraries
      b. New extensions
      c. New stream wrappers
-     d. New functions
-     e. New global constants
-     f. New classes
-     g. New methods
-     h. New class constants
+     d. New stream filters
+     e. New functions
+     f. New global constants
+     g. New classes
+     h. New methods
+     i. New class constants
 
 =============================
 1. Reserved words and classes
@@ -39,6 +40,9 @@ UPGRADE NOTES - PHP 5.3
 2. Changes made to existing functions
 =====================================
 
+- The HTTP stream wrapper now considers all status codes from 200 to 399 to be
+  successful.
+
 - The array functions natsort(), natcasesort(), usort(), uasort(), uksort(),
   array_flip() and array_unique(), no longer accept objects passed as arguments.
   If you need to access their properties using an object, you will need to cast
@@ -48,7 +52,14 @@ UPGRADE NOTES - PHP 5.3
 
 - session_start() now returns FALSE when the session startup fails.
 
+- property_exists() now checks the existence of a property independent of
+  accessibility (like method_exists()).
+
+- The $initial parameter for array_reduce can now be of any type.
+
 - clearstatcache() no longer clears the realpath cache by default.
+
+- realpath() is no longer system dependent and works the same on any platform.
 
 - call_user_func() now propagates $this even if the callee is the parent class.
 
@@ -85,6 +96,7 @@ UPGRADE NOTES - PHP 5.3
      round(): mode.
      stream_context_create(): params.
      strstr(), stristr(): before_needle.
+     sybase_connect(): new.
 
 - And new mode options for fopen, 'n' (O_NONBLOCK)
 
@@ -93,12 +105,24 @@ UPGRADE NOTES - PHP 5.3
   the following error message: "mysqlnd cannot connect to MySQL 4.1+ using old
   authentication"
 
+- The dl() function is now disabled by default, and only available under the cli,
+  cgi and the embed SAPIs.
+
+- Changed opendir(), dir() and scandir() to use default context when no context
+  argument is passed.
+
+- mail() now supports logging of mail sent.
+
+- stream_select(), stream_set_blocking(), stream_set_timeout() and 
+  stream_set_write_buffer() now work with user-space stream wrappers.
 ===================================
 3. Changes made to existing methods
 ===================================
 
 - The magic methods __get(), __set(), __isset(), __unset() and __call() should
   always be public and can no longer be static. Method signatures are enforced.
+
+- The __call() magic method now gets invoked on private/protected method access.
 
 - The __toString() magic method can no longer accept arguments.
 
@@ -130,6 +154,9 @@ UPGRADE NOTES - PHP 5.3
 
 - All ereg functions are deprecated and emit E_DEPRECATED errors.
   Use PCRE (preg_*()) instead.
+
+- Deprecated session_register(), session_unregister() and
+  session_is_registered().
 
 - The following ini directives will now emit an E_DEPRECATED warning 
   upon startup if they are activated:
@@ -164,13 +191,21 @@ UPGRADE NOTES - PHP 5.3
         - fbsql
         - msql
         - sybase (use sybase_ct, which is still in PHP core)
+        - mhash (hash has full BC layer)
 
      c. with changed behaviour
+
+        - dns: dns_check_record() will now return an extra "entries" indice,
+          containing the TXT elements.
 
         - datetime: date/timefunctions will no longer use the TZ environment
           variable to guess which timezone should be used.
 
-        - hash: The SHA-224 hash algorithm is now supported.
+        - cURL now supports SSH
+
+        - hash: The SHA-224 and salsa hash algorithms are now supported.
+
+        - mbstring: Now supports CP850 encoding.
 
         - oci8: Calling oci_close() on a persistent connection, or on a variable
           that references a persistent connection going out of scope, will now
@@ -187,6 +222,9 @@ UPGRADE NOTES - PHP 5.3
           open_basedir restrictions apply, unless "/tmp" is explicitly added to
           the list of allowed paths.
 
+        - SOAP: Now supports sending user supplied HTTP headers.
+
+
      d. no longer possible to disable
 
         - PCRE
@@ -197,6 +235,8 @@ UPGRADE NOTES - PHP 5.3
 ==========================
 8. Changes in SAPI support
 ==========================
+
+- A new SAPI is now available called litespeed.
 
 - FastCGI is now always enabled and can not be disabled. See sapi/cgi/CHANGES
   for more details.
@@ -305,6 +345,7 @@ UPGRADE NOTES - PHP 5.3
 
      b. New extensions
 
+       - enchant
        - fileinfo
        - intl
        - Phar
@@ -318,6 +359,7 @@ UPGRADE NOTES - PHP 5.3
      d. New stream filters
 
        - "dechunk" (HTTP/1.1 chunked transfer encoding)
+       - The bz2.decompress filter now supports concatenation
 
      e. New functions
 
@@ -362,8 +404,13 @@ UPGRADE NOTES - PHP 5.3
                   pcntl_sigtimedwait()
        - PCRE:    preg_filter()
        - SHM:     msg_queue_exists()
+                  shm_has_var()
        - Streams: stream_supports_lock()
                   stream_context_set_default()
+                  stream_context_get_params()
+       - Userspace stream wrappers:
+                  stream_cast()
+                  stream_set_options()
 
      f. New global constants
 
@@ -371,6 +418,7 @@ UPGRADE NOTES - PHP 5.3
                   E_USER_DEPRECATED
                   __DIR__
                   __NAMESPACE__
+                  PHP_MAXPATHLEN
                   PHP_WINDOWS_VERSION_MAJOR
                   PHP_WINDOWS_VERSION_MINOR
                   PHP_WINDOWS_VERSION_BUILD
@@ -397,6 +445,7 @@ UPGRADE NOTES - PHP 5.3
                   JSON_HEX_APOS
                   JSON_HEX_QUOT
        - LDAP:    LDAP_OPT_NETWORK_TIMEOUT
+       - libxml:  LIBXML_LOADED_VERSION 
        - PCRE:    PREG_BAD_UTF8_OFFSET_ERROR
        - PCNTL:   SIG_BLOCK
                   SIG_UNBLOCK
@@ -474,6 +523,7 @@ UPGRADE NOTES - PHP 5.3
                        DateTime::sub()
                        DateTime::createFromFormat()
                        DateTime::getLastErrors()
+       - DOM:          DOMNode::getLineNo()
        - PDO_Firebird: PDO::setAttribute()
        - Reflection:   ReflectionProperty::setAccessible()
                        ReflectionFunction::inNamespace()
@@ -482,6 +532,8 @@ UPGRADE NOTES - PHP 5.3
                        ReflectionClass::inNamespace()
                        ReflectionClass::getNamespaceName()
                        ReflectionClass::getShortName()
+       - SPL           SplObjectStorage::addAll()
+                       SplObjectStorage::removeAll()
        - XSL:          XSLTProcessor::setProfiling()
 
      i. New class constants
@@ -489,3 +541,4 @@ UPGRADE NOTES - PHP 5.3
        - PDO_Firebird: PDO::FB_ATTR_DATE_FORMAT
                        PDO::FB_ATTR_TIME_FORMAT
                        PDO::FB_ATTR_TIMESTAMP_FORMAT
+
