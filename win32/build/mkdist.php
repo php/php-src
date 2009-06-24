@@ -227,11 +227,12 @@ if(sizeof($pecl_targets)) {
 
 /* populate reading material */
 $text_files = array(
-	"LICENSE" => 		"license.txt",
-	"NEWS" => 			"news.txt",
-	"php.ini-development" => 	"php.ini-development",
+	"LICENSE" => "license.txt",
+	"NEWS" => "news.txt",
+	"README.REDIST.BINS" => "readme-redist-bins.txt",
+	"php.ini-development" => "php.ini-development",
 	"php.ini-production" => "php.ini-production",
-	"win32/install.txt" => 	"install.txt",
+	"win32/install.txt" => "install.txt",
 	"win32/pws-php5cgi.reg" => "pws-php5cgi.reg",
 	"win32/pws-php5isapi.reg" => "pws-php5isapi.reg",
 );
