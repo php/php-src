@@ -200,14 +200,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 	{
 		char* s = getenv("TMPDIR");
 		if (s) {
-			int len = strlen(s);
-
-			if (s[len - 1] == DEFAULT_SLASH) {
-				temporary_directory = zend_strndup(s, len - 1);
-			} else {
-				temporary_directory = zend_strndup(s, len);
-			}
-
+			temporary_directory = strdup(s);
 			return temporary_directory;
 		}
 	}
