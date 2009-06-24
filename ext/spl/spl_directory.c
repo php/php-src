@@ -1723,37 +1723,53 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(readobj TSRMLS_CC);
+	int ret;
+	zval retval;
+	zval *retval_ptr = &retval;
 
 	switch (intern->type) {
 	case SPL_FS_INFO:
 	case SPL_FS_FILE:
 		if (type == intern->file_name_type) {
-			ZVAL_ZSTRL(writeobj, intern->file_name_type, intern->file_name, intern->file_name_len, 1);
-			return SUCCESS;
+			ZVAL_ZSTRL(retval_ptr, intern->file_name_type, intern->file_name, intern->file_name_len, 1);
+			ret = SUCCESS;
+			break;
 		}
 		if (type == IS_STRING) {
-			ZVAL_ZSTRL(writeobj, intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
-			zval_unicode_to_string_ex(writeobj, ZEND_U_CONVERTER(((UConverter *)extra)) TSRMLS_CC);
-			return SUCCESS;
+			ZVAL_ZSTRL(retval_ptr, intern->file_name_type, intern->file_name, intern->file_name_len, ZSTR_DUPLICATE);
+			zval_unicode_to_string_ex(retval_ptr, ZEND_U_CONVERTER(((UConverter *)extra)) TSRMLS_CC);
+			ret = SUCCESS;
+			break;
 		}
 		if (type == IS_UNICODE) {
-			ZVAL_ASCII_STRINGL(writeobj, intern->file_name.s, intern->file_name_len, 1);
-			return SUCCESS;
+			ZVAL_ASCII_STRINGL(retval_ptr, intern->file_name.s, intern->file_name_len, 1);
+			ret = SUCCESS;
+			break;
 		}
+		ZVAL_NULL(retval_ptr);
+		ret = FAILURE;
 		break;
 	case SPL_FS_DIR:
 		if (type == IS_STRING) {
-			ZVAL_STRING(writeobj, intern->u.dir.entry.d_name, 1);
-			return SUCCESS;
+			ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name, 1);
+			ret = SUCCESS;
+			break;
 		}
 		if (type == IS_UNICODE) {
-			ZVAL_ASCII_STRING(writeobj, intern->u.dir.entry.d_name, 1);
-			return SUCCESS;
+			ZVAL_ASCII_STRING(retval_ptr, intern->u.dir.entry.d_name, 1);
+			ret = SUCCESS;
+			break;
 		}
-		break;
+	default:
+		ZVAL_NULL(retval_ptr);
+		ret = FAILURE;
+		break;		
 	}
-	ZVAL_NULL(writeobj);
-	return FAILURE;
+	if (readobj == writeobj) {
+		zval_dtor(readobj);
+	}
+	ZVAL_ZVAL(writeobj, retval_ptr, 0, 0);
+	return ret;
 }
 /* }}} */
 
