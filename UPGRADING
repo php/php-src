@@ -128,8 +128,8 @@ UPGRADE NOTES - PHP 5.3
 
 - There is a new magic method, __callStatic().
 
-- count() vs count_elements() handler resolution rules have changed. (This could
-  potentially break custom PHP extensions.)
+- Internal count() vs count_elements() handler resolution rules have changed.
+  (This could potentially break custom PHP extensions.)
 
 - The trailing / has been removed from SplFileInfo and other related directory
   classes.
