@@ -210,16 +210,28 @@ class PharCommand extends CLICommand
 	 */
 	static function cli_arg_typ_loader($arg, $cfg, $key)
 	{
-		if (($arg == '0' || $arg == '1') && !file_exists($arg)) {
+		if (($arg == '0' || $arg == '1') && !file_exists($arg) && substr(PHP_OS, 0, 3) != 'WIN') {
 			$found = NULL;
-			$apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
-			$apiver = trim(substr($apiver, strlen('API Version')));
+			$apiver = false;
+			$path = explode(PATH_SEPARATOR, $_ENV['PATH']);
+			$pear = false;
+			foreach ($path as $component) {
+				if (file_exists($component . DIRECTORY_SEPARATOR . 'pear')
+					&& is_executable($component . DIRECTORY_SEPARATOR . 'pear'))) {
+					$pear = true;
+					break;
+				}
+			}
+			if ($pear) {
+				$apiver = `pear -q info PHP_Archive 2>/dev/null|grep 'API Version'`;
+				$apiver = trim(substr($apiver, strlen('API Version')));
+			}
 			if ($apiver) {
-				self::notice("Pear package PHP_Archive: API Version: $apiver.\n");
+				self::notice("PEAR package PHP_Archive: API Version: $apiver.\n");
 				$files  = explode("\n", `pear list-files PHP_Archive`);
 				$phpdir = `pear config-get php_dir 2>/dev/null`;
 				$phpdir = trim($phpdir);
-				self::notice("Pear package PHP_Archive: $phpdir.\n");
+				self::notice("PEAR package PHP_Archive: $phpdir.\n");
 				if (is_dir($phpdir)) {
 					foreach($files as $ent) {
 						$matches = NULL;
@@ -234,13 +246,13 @@ class PharCommand extends CLICommand
 						}
 					}
 				} else {
-					self::notice("Pear package PHP_Archive: corrupt or inaccessible base dir: $php_dir.\n");
+					self::notice("PEAR package PHP_Archive: corrupt or inaccessible base dir: $php_dir.\n");
 				}
 			}
 			if (isset($found)) {
-				self::notice("Pear package PHP_Archive: $found.\n");
+				self::notice("PEAR package PHP_Archive: $found.\n");
 			} else {
-				$msg = "Pear package PHP_Archive or Archive.php class file not found.\n";
+				$msg = "PEAR package PHP_Archive not installed: generated phar will require PHP's phar extension be enabled.\n";
 				if ($arg == '0') {
 					self::notice($msg);
 				} else {

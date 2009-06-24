@@ -255,6 +255,8 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 			phar_tar_number(hdr->size, sizeof(hdr->size));
 
 		if (((!old && hdr->prefix[0] == 0) || old) && strlen(hdr->name) == sizeof(".phar/signature.bin")-1 && !strncmp(hdr->name, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+			off_t curloc;
+
 			if (size > 511) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has signature that is larger than 511 bytes, cannot process", fname);
@@ -264,6 +266,7 @@ bail:
 				phar_destroy_phar_data(myphar TSRMLS_CC);
 				return FAILURE;
 			}
+			curloc = php_stream_tell(fp);
 			read = php_stream_read(fp, buf, size);
 			if (read != size) {
 				if (error) {
@@ -280,7 +283,7 @@ bail:
 #else
 # define PHAR_GET_32(buffer) (php_uint32) *(buffer)
 #endif
-			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, PHAR_GET_32(buf), buf + 8, PHAR_GET_32(buf + 4), fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
+			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, PHAR_GET_32(buf), buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
 				if (error) {
 					char *save = *error;
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be verified: %s", fname, save);
@@ -288,11 +291,11 @@ bail:
 				}
 				goto bail;
 			}
+			php_stream_seek(fp, curloc + 512, SEEK_SET);
 			/* signature checked out, let's ensure this is the last file in the phar */
-			size = ((size+511)&~511) + 512;
 			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 				/* this is not good enough - seek succeeds even on truncated tars */
-				php_stream_seek(fp, size, SEEK_CUR);
+				php_stream_seek(fp, 512, SEEK_CUR);
 				if ((uint)php_stream_tell(fp) > totalsize) {
 					if (error) {
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
