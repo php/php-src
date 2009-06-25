@@ -235,6 +235,9 @@ UPGRADE NOTES - PHP 5.3
 
         - SOAP: Now supports sending user-supplied HTTP headers.
 
+        - MySQLi: Now supports persistent connections by prepending the hostname 
+          with "p:".
+
      d. no longer possible to disable
 
         - PCRE
