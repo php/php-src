@@ -5,6 +5,10 @@ Test gmstrftime() function : usage variation - Checking Preferred date and time 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if (!setlocale(LC_ALL, "en_US")) {
+    die("skip Locale en_US not available");
+}
+
 ?>
 --FILE--
 <?php
