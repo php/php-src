@@ -2819,6 +2819,11 @@ static int sqlite_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 {
 	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (obj->u.res == NULL) {
+		zend_throw_exception(sqlite_ce_exception, "Row count is not available for this query", 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	if (obj->u.res->buffered) {
 		* count = obj->u.res->nrows;
 		return SUCCESS;
