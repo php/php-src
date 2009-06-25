@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed slightly unclear message in generation of phar.phar. (Greg+others)
 - Fixed memory leak in json_decode() when depth is less than 0. (Felipe)
 
+- Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
 - Fixed bug #48643 (String functions memory issue). (Dmitry)
 - Fixed bug #48641 (tmpfile() uses old parameter parsing).
   (crrodriguez at opensuse dot org)
