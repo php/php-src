@@ -114,6 +114,10 @@ UPGRADE NOTES - PHP 5.3
 - stream_select(), stream_set_blocking(), stream_set_timeout(), and 
   stream_set_write_buffer() now work with user-space stream wrappers.
 
+- getopt() accepts "long options" now on all platforms (including Linux).
+  Optional values and = as seperator for shortopts are now supported.
+
+
 ===================================
 3. Changes made to existing methods
 ===================================
@@ -194,6 +198,7 @@ UPGRADE NOTES - PHP 5.3
         - msql
         - sybase (use sybase_ct, which is still in PHP core)
         - mhash (hash has full BC layer)
+        - mime_magic (use fileinfo, has full BC layer)
 
      c. with changed behaviour
 
@@ -215,6 +220,10 @@ UPGRADE NOTES - PHP 5.3
           rollback as needed.
           The old behavior can be enabled with the INI directive
           oci8.old_oci_close_semantics.
+          Supports Database Resident Connection Pooling (DRCP), Fast
+          Application Notification (FAN) support, Oracle External
+          Authentication (not supported on Windows).
+          oci_bind_by_name() now supports SQLT_AFC (aka CHAR datatype).
 
         - openssl: OpenSSL digest and cipher functions are now supported.
           It is also now possible to access the internal values of DSA, RSA and
@@ -276,6 +285,10 @@ UPGRADE NOTES - PHP 5.3
 
 - The default value of session.use_only_cookies has changed to "1"
 
+- The default value of oci8.default_prefetch has been changed from 10 to 100.
+
+- Added new directive, request_order, control specifically $_REQUEST behavior.
+
 ====================
 10. Syntax additions
 ====================
@@ -291,6 +304,10 @@ UPGRADE NOTES - PHP 5.3
       No variables here...
       LABEL;
 
+- HEREDOC Now supports wrapping the identifier:
+
+      <<<"LABEL" ...
+
 - The ?: operator has been introduced:
 
       var_dump(0 ?: 'Hello!');
@@ -300,8 +317,22 @@ UPGRADE NOTES - PHP 5.3
       namespace my\name;
       $obj = new \my\name\MyClass;
 
-      use \my\name\MyClass as MyClass;
-      $obj = new MyClass;
+- Dynamic access to static methods is now possible:
+
+      $foo::myFunc();
+
+- Exceptions can now be nested:
+
+      class MyCustomException extends Exception {}
+      try {
+          throw new MyCustomException("Something happend", 112);
+      } catch(Exception $e) {
+          throw new InvalidArgumentException("You are doing it wrong!", 911, $e);
+      }
+
+- Exceptions can now be handled in destructors.
+
+- Garbage collector has been added and is enabled by default.
 
 ===================
 11. Windows support
@@ -348,7 +379,7 @@ UPGRADE NOTES - PHP 5.3
      b. New extensions
 
        - enchant
-       - fileinfo
+       - fileinfo (replaces mime_magic)
        - intl
        - Phar
        - SQLite3
@@ -526,6 +557,7 @@ UPGRADE NOTES - PHP 5.3
                        DateTime::createFromFormat()
                        DateTime::getLastErrors()
        - DOM:          DOMNode::getLineNo()
+       - Exception:    Exception::getPrevious()
        - PDO_Firebird: PDO::setAttribute()
        - Reflection:   ReflectionProperty::setAccessible()
                        ReflectionFunction::inNamespace()
