@@ -2213,6 +2213,10 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 
 	props = intervalobj->std.properties;
 
+	if (!intervalobj->initialized) {
+		return props;
+	}
+
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
 	MAKE_STD_ZVAL(zv); \
 	ZVAL_LONG(zv, intervalobj->diff->f); \
