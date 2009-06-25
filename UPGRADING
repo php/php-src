@@ -114,7 +114,7 @@ UPGRADE NOTES - PHP 5.3
 - stream_select(), stream_set_blocking(), stream_set_timeout(), and 
   stream_set_write_buffer() now work with user-space stream wrappers.
 
-- getopt() accepts "long options" now on all platforms (including Linux).
+- getopt() accepts "long options" now on all platforms.
   Optional values and = as seperator for shortopts are now supported.
 
 
