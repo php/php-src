@@ -5,6 +5,9 @@ Test strftime() function : usage variation - Checking Preferred date and time re
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if(!setlocale(LC_ALL, "en_US.utf8", "en_US")) {
+	die("skip Locale en_US.utf8 or en_US is  needed by test and is not available");
+}
 ?>
 --FILE--
 <?php
