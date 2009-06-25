@@ -285,7 +285,7 @@ UPGRADE NOTES - PHP 5.3
   Static HEREDOCs can be used to initialize static variables and class members
   or constants:
 
-      static $foo = <<<'LABEL'
+      static $foo = <<<LABEL
       No variables here...
       LABEL;
 
