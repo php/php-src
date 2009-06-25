@@ -199,7 +199,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 	/* On Unix use the (usual) TMPDIR environment variable. */
 	{
 		char* s = getenv("TMPDIR");
-		if (s) {
+		if (s && *s) {
 			int len = strlen(s);
 
 			if (s[len - 1] == DEFAULT_SLASH) {
