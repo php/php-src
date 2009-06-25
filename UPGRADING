@@ -103,7 +103,7 @@ UPGRADE NOTES - PHP 5.3
 
 - The new mysqlnd library necessitates using MySQL's newer 41-byte password
   format. Continued use of the old 16 byte passwords will cause mysql_connect()
-  and other related functsins to produce the following error message:
+  and other related functions to produce the following error message:
   "mysqlnd cannot connect to MySQL 4.1+ using old authentication"
 
 - The dl() function is now disabled by default, and only available under the
