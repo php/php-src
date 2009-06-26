@@ -346,14 +346,36 @@ UPGRADE NOTES - PHP 5.3
 
 - PHP Windows binaries target i586 or later. i386 and i486 are not supported.
 
+- Support for the IIS SAPI has been dropped. Use the FastCGI SAPI instead 
+  (available for IIS5 and later)). It is also the recommended way to use PHP
+  with IIS (see http://php.iis.net/).
+
+- A new build is available based on the latest Visual C++ Compiler (VC9). 
+  It is  recommended to use it with FastCGI or CLI. Apache's windows binaries 
+  are not compatible with VC9, however you can use apachelounge's build
+  (http://apachelounge.com).
+
+- The x64 binaries are for experimental usage only. They are not meant to be 
+  used in production.
+
+- A new site is available to download windows releases as well as windows only
+  releases: http://windows.php.net. Windows specific releases will be released 
+  to fix security issues in the bundled libraries (libpng, openssl, etc.).
+
 - Windows support has been added for the following functions: getopt(),
   imagecolorclosesthwb(), mcrypt_create_iv(), inet_ntop(), inet_pton(), 
   getmxrr(), checkdnsrr(), dns_get_record(), linkinfo(), readlink(), 
   symlink(), link(), fnmatch(), stream_socket_pair(), time_nanosleep(), 
   time_sleep_until(), and socket_create_pair().
 
+- Crypt supports now all available algorithms on Windows (blowfish included).
+
 - Improved portability of stat(), touch(), filemtime(), filesize() and related
   functions (100% portable for the available data).
+
+- It is now possible to create hard links on Windows using the link() function,
+  and symbolic links using the symlink() function. Hard links are available
+  as of Windows 2000 and symbolic links as of Windows Vista.
 
 - The PDO_OCI php_pdo_oci8.dll library (for use with Oracle version 8 client
   libraries) is no longer being built. Instead, use php_pdo_oci.dll (note no
@@ -366,9 +388,9 @@ UPGRADE NOTES - PHP 5.3
   Oracle 11 client libraries. Connection to other database versions is
   supported.
 
-- It is now possible to create hard links on Windows using the link() function,
-  and symbolic links using the symlink() function. Hard links are available
-  as of Windows 2000 and symbolic links as of Windows Vista.
+- Firebird and SNMP support are no longer available. Firebird may be 
+  reintroduced in the future.
+
 
 ===================
 12. New in PHP 5.3:
