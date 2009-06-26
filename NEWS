@@ -10,7 +10,7 @@ PHP                                                                        NEWS
   . ext/fbsql
   . ext/fdf
   . ext/ncurses
-  . ext/mhsh (BC layer is now entirely within ext/hash)
+  . ext/mhash (BC layer is now entirely within ext/hash)
   . ext/ming
   . ext/msql
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
@@ -124,6 +124,8 @@ PHP                                                                        NEWS
     value. (Hannes)
 
 - Improved Windows support:
+  . Update all libraries to their latest stable version. (Pierre, Rob, Liz, 
+    Garrett).
   . Addes Windows support for stat(), touch(), filemtime(), filesize() and
     related functions. (Pierre)
   . Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
@@ -140,8 +142,14 @@ PHP                                                                        NEWS
     (Pierre)
   . Added support for symlink(), readlink(), linkinfo() and link() on Windows.
     They are available only when the running platform supports them. (Pierre)
+  . the GMP extension now relies on MPIR instead of the GMP library. (Pierre)
   . Added Windows support for stream_socket_pair(). (Kalle)
-
+  . Drop all external dependencies for the core features. (Pierre)
+  . Drastically improve the build procedure (Pierre, Kalle, Rob):
+    . VC9 (visual c++ 2008) or later support
+    . Initial experimental x64 support
+  . MSI installer now supports all recent windows, incl. Win7. 
+    (John, Kanwaljeet Singla)
 
 - Improved and cleaned CGI code:
   . FastCGI is now always enabled and can not be disabled.
@@ -200,6 +208,8 @@ PHP                                                                        NEWS
   . Fixed PECL bug #12431 (OCI8 ping functionality is broken).
   . Allow building (e.g from PECL) the PHP 5.3-based OCI8 code with
     PHP 4.3.9 onwards.
+  . Provide separate extensions for Oracle 11g and 10g on Windows.
+    (Pierre, Chris)
 
 - Improved OpenSSL extension:
   . Added support for OpenSSL digest and cipher functions. (Dmitry)
@@ -312,7 +322,9 @@ PHP                                                                        NEWS
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
 
-
+- Added compatibility mode in GD, imagerotate, image(filled)ellipse 
+  imagefilter, imageconvolution and imagecolormatch are now always enabled.
+  (Pierre)
 - Added array_replace() and array_replace_recursive() functions. (Matt)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue() and set through
