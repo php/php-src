@@ -1,232 +1,34 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.3.0 RC 5
-- Fixed slightly unclear message in generation of phar.phar. (Greg+others)
-- Fixed memory leak in json_decode() when depth is less than 0. (Felipe)
-
-- Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
-- Fixed bug #48643 (String functions memory issue). (Dmitry)
-- Fixed bug #48641 (tmpfile() uses old parameter parsing).
-  (crrodriguez at opensuse dot org)
-- Fixed bug #48624 (.user.ini never gets parsed). (Pierre)
-- Fixed bug #48620 (X-PHP-Originating-Script assumes no trailing CRLF in
-  existing headers). (Ilia)
-- Fixed bug #48215 (Calling a method with the same name as the parent class
-  calls the constructor). (Scott)
-
-18 Jun 2009, PHP 5.3.0 RC 4
+30 Jun 2009, PHP 5.3.0 RC 4
+- Upgraded bundled PCRE to version 7.9. (Nuno)
 - Upgraded bundled sqlite to version 3.6.15. (Scott)
 
-- Added phar.phar generation for Windows. (Greg)
-- Added ACL Cache support on Windows.
-  (Kanwaljeet Singla, Pierre, Venkat Raman Don)
-- Added compatibility mode in GD, imagerotate, image(filled)ellipse 
-  imagefilter, imageconvolution and imagecolormatch are now always enabled.
-  (Pierre)
 
-- Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
+- Moved extensions to PECL (Derick, Lukas, Pierre, Scott):
+  . ext/dbase
+  . ext/fbsql
+  . ext/fdf
+  . ext/ncurses
+  . ext/mhsh (BC layer is now entirely within ext/hash)
+  . ext/ming
+  . ext/msql
+  . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
 
-- Fixed bug #48578 (Can't build 5.3 on FBSD 4.11). (Rasmus)
-- Fixed bug #48541 (spl_autoload_register only registers first closure, then
-  leaks the others). (Greg)
-- Fixed bug #48535 (file_exists returns false when impersonate is used).
-  (Kanwaljeet Singla, Venkat Raman Don)
-- Fixed bug #48533 (__callStatic is not invoked for private/protected methods).
-  (Felipe)
-- Fixed bug #47767 (include_once does not resolve windows symlinks or junctions)
-  (Kanwaljeet Singla, Venkat Raman Don)
-- Fixed bug #47318 (UMR when trying to activate user config). (Pierre)
 
-11 Jun 2009, PHP 5.3.0 RC 3
-- Upgraded bundled sqlite to version 3.6.14.2. (Scott, Ilia)
-- Upgraded bundled libmagic to 5.03 in the fileinfo extension. (Scott)
-
+- Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
+- Removed zend.ze1_compatibility_mode. (Dmitry)
 - Removed all zend_extension_* php.ini directives. Zend extensions are now
   always loaded using zend_extension directive. (Derick)
-
-- Changed SQLite3::loadExtension() to be disabled for threaded SAPIs. (Scott)
-
-- Added constants based on Windows' GetVersionEx information. 
-  PHP_WINDOWS_VERSION_* and PHP_WINDOWS_NT_*. (Pierre)
-- Added the ability for json_decode() to take a user specified depth. (Scott)
-- Added support for the mysql_stmt_next_result() function from libmysql.
-  (Andrey)
-- Added support for ACL (is_writable, is_readable, reports now correct results)
-  on Windows. (Pierre, Venkat Raman Don, Kanwaljeet Singla)
-
-- Fixed bug #48493 (spl_autoload_register() doesn't work correctly when
-  prepending functions). (Scott)
-- Fixed bug #48257 (PharData throws exception with non-phar tar). (Greg)
-- Fixed bug #48227 (NumberFormatter::format leaks memory). (Felipe)
-- Fixed bug #48200 (compile failure with mbstring.c when 
-  --enable-zend-multibyte is used). (Jani)
-- Fixed bug #48188 (Cannot execute a scrollable cursors twice with
-  PDO_PGSQL). (Matteo)
-- Fixed bug #41874 (separate STDOUT and STDERR in exec functions).
-  (Kanwaljeet Singla, Venkat Raman Don, Pierre)
-- Fixed bug #38802 (max_redirects and ignore_errors).
-  (patch by datibbaw@php.net)
-- Fixed isset() on phar sub-directories (isset($phar["blah"]) if
-  file "blah/foo.php" exists in the phar archive). (Greg)
-- Fixed security vulnerability in phar's handling of long tar filenames. (Greg)
-- Fixed potential segfault with converting phars containing metadata to other
-  formats. (Greg)
+- Removed special treatment of "/tmp" in sessions for open_basedir.
+  Note: This undocumented behaviour was introduced in 5.2.2. (Alexey)
+- Removed shebang line check from CGI sapi (checked by scanner). (Dmitry)
 
 
-07 May 2009, PHP 5.3.0 RC 2
-- Upgraded bundled sqlite to version 3.6.13. (Ilia)
-- Upgraded bundled PCRE to version 7.9. (Nuno)
-- Upgraded bundled libmagic to 5.02 in the fileinfo extension. (Scott)
-
-- Undeprecated ticks. (Arnaud)
-
-- Improved IMAP support (Pierre):
-  . Added imap_gc() to clear the imap cache
-  . Added imap_utf8_to_mutf7() and imap_mutf7_to_utf8()
-
-- Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
-  (sdteffen[at]gmail[dot].com, Pierre)
-- Implemented FR #47739 (Missing cURL option do disable IPv6). (Pierre)
-- Implemented FR #39637 (Missing cURL option CURLOPT_FTP_FILEMETHOD). (Pierre)
-
-- Added timezone_version_get() to retrieve the version of the used timezone
-  database. (Derick)
-- Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
-  open(2) system call. (Mikko)
-- Added "dechunk" filter which can decode HTTP responses with chunked
-  transfer-encoding. HTTP streams use this filter automatically in case
-  "Transfer-Encoding: chunked" header is present in response. It's possible to
-  disable this behaviour using "http"=>array("auto_decode"=>0) in stream
-  context. (Dmitry)
-- Added ability to throw exceptions from SQLite3 instead of warnings. (Scott)
-- Added startup notices for deprecated ini settings. (Kalle)
-
-- Fixed bug #48185 (warning: value computed is not used in
-  pdo_sqlite_stmt_get_col line 271). (Matteo)
-- Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
-- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
-- Fixed bug #48034 (PHP crashes when script is 8192 (8KB) bytes long). (Dmitry)
-- Fixed bug #48023 (spl_autoload_register didn't store closures). (Etienne)
-- Fixed bug #48004 (Error handler prevents creation of default object).
-  (Dmitry)
-- Fixed bug #47880 (crashes in call_user_func_array()). (Dmitry)
-- Fixed bug #47856 (stristr() converts needle to lower-case). (Ilia)
-- Fixed bug #47851 (is_callable throws fatal error). (Dmitry)
-- Fixed bug #47819 (Getting pdo_mysql.so: undefined symbol: mysqlnd_debug_init
-  at startup). (Johannes)
-- Fixed bug #47816 (pcntl tests failing on NetBSD). (Matteo)
-- Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).
-  (Matteo)
-- Fixed bug #47771 (Exception during object construction from arg call calls
-  object's destructor). (Dmitry)
-- Fixed bug #47745 (FILTER_VALIDATE_INT doesn't allow minimum integer).
-  (Dmitry)
-- Fixed bug #47714 (autoloading classes inside exception_handler leads to
-  crashes). (Dmitry)
-- Fixed bug #47699 (autoload and late static binding). (Dmitry)
-- Fixed bug #47662 (Support more than 127 subpatterns in preg_match). (Nuno)
-- Fixed bug #47596 (Bus error on parsing file). (Dmitry)
-- Fixed bug #47560 (explode()'s limit parameter odd behaviour). (Matt)
-- Fixed bug #47535 (Compilation failure in ps_fetch_from_1_to_8_bytes()).
-  (Johannes)
-- Fixed bug #47534 (RecursiveDiteratoryIterator::getChildren ignoring
-  CURRENT_AS_PATHNAME). (Etienne)
-- Fixed bug #47516 (nowdoc can not be embed in heredoc but can be embed in
-  double quote). (Dmitry)
-- Fixed bug #47038 (Memory leak in include). (Dmitry)
-- Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
-  "Transfer-Encoding: chunked"). (Dmitry)
-- Fixed bug #46817 (tokenizer misses last single-line comment (PHP 5.3+, with
-  re2c lexer)). (Matt, Shire)
-- Fixed bug #46108 (DateTime - Memory leak when unserializing). (Felipe)
-- Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
-- Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
-- Fixed bug #44173 (PDO->query() parameter parsing/checking needs an 
-  update). (Matteo)
-- Fixed bug #42362 (HTTP status codes 204 and 304 should not be gzipped).
-  (Scott, Edward Z. Yang)
-- Fixed PECL bug #16338 (phar extension uses php_stream_copy_to_stream). (Greg)
-- Fixed PECL bug #14646 (phar error message unclear with php stream wrappers).
-  (Greg)
-- Fixed an issue with ReflectionProperty::setAccessible().
-  (Sebastian, Roman Borschel)
-
-
-24 Mar 2009, PHP 5.3.0 RC 1
-- Upgraded bundled sqlite to version 3.6.11. (Scott)
-- Upgraded bundled libmagic to 5.00 in the fileinfo extension. (Scott)
-
-- Re-enabled phar for big-endian systems after fixing problems. (Greg)
-
-- Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
-- Added JSON_FORCE_OBJECT flag to json_encode(). (Scott, Richard Quadling)
-
-- Added support for CP850 encoding in mbstring extension.
-  (Denis Giffeler, Moriyoshi)
-
-- Fixed bug #47757 (rename JPG to JPEG in phpinfo). (Pierre)
-- Fixed bug #47678 (Allow loadExtension to be disabled in SQLite3). (Scott)
-- Fixed bug #47671 (Cloning SplObjectStorage instances). (Etienne)
-- Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
-- Fixed bug #47593 (interface_exists() returns false when using absolute 
-  namespace path). (Kalle, Felipe)
-- Fixed bug #47572 (Undefined constant causes segmentation fault). (Felipe)
-- Fixed bug #47549 (get_defined_constants() return array with broken
-  array categories). (Ilia)
-- Fixed bug #47443 (metaphone('scratch') returns wrong result). (Felipe)
-- Fixed bug #47438 (mysql_fetch_field ignores zero offset). (Johannes)
-- Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
-- Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)
-- Fixed bug #47359 (Use the expected unofficial mimetype for bmp files).
-  (Scott)
-- Fixed bug #47343 (gc_collect_cycles causes a segfault when called within a
-  destructor in one case). (Dmitry)
-- Fixed bug #47329 (Crash in garbage collector). (Dmitry)
-- Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
-- Fixed bug #47265 (generating phar.phar fails because of safe_mode). (Greg)
-- Fixed bug #47243 (OCI8: Crash at shutdown on Windows) (Chris Jones/Oracle
-  Corp.)
-- Fixed bug #47231 (offsetGet error using incorrect offset). (Etienne)
-- Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
-- Fixed bug #47085 (rename() returns true even if the file in PHAR does not
-  exist). (Greg)
-- Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
-- Fixed bug #46994 (OCI8: CLOB size does not update when using CLOB IN OUT
-  param in stored procedure) (Chris Jones/Oracle Corp.)
-- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers).
-  (David C.)
-- Fixed bug #46623 (OCI8: phpinfo doesn't show compile time ORACLE_HOME with
-  phpize) (Chris Jones/Oracle Corp.)
-- Fixed bug #46542 (Extending PDO class with a __call() function doesn't work
-  as expected). (Johannes)
-- Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
-- Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator).
-  (David C.)
-- Fixed bug #45682 (Unable to var_dump(DateInterval)). (Derick)
-- Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
-- Fixed bug #43831 ($this gets mangled when extending PDO with persistent 
-  connection). (Felipe)
-- Fixed PECL Bug #16035 (OCI8: oci_connect without ORACLE_HOME defined causes
-  segfault) (Chris Jones/Oracle Corp.)
-- Fixed PECL Bug #15988 (OCI8: sqlnet.ora isn't read with older Oracle
-  libraries) (Chris Jones/Oracle Corp.)
-- Fixed PECL Bug #14268 (Allow "pecl install oci8" command to "autodetect" an
-  Instant Client RPM install) (Chris Jones/Oracle Corp.)
-
-
-29 Jan 2009, PHP 5.3.0 Beta 1
-- Upgraded bundled sqlite to version 3.6.10. (Scott, Ilia)
-
-- Deprecated session_register(), session_unregister() and
-  session_is_registered(). (Hannes)
-
-- Improved DNS API
- . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
-   getmxrr(). (Pierre)
- . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
- . Added a new "entries" array in dns_check_record() containing the TXT
-   elements. (Felipe, Pierre)
-
+- Changed PCRE, Reflection and SPL extensions to be always enabled. (Marcus)
+- Changed md5() to use improved implementation. (Solar Designer, Dmitry)
+- Changed HTTP stream wrapper to accept any code between and including
+  200 to 399 as successful. (Mike, Noah Fontes)
 - Changed __call() to be invoked on private/protected method access, similar to
   properties and __get(). (Andrei)
 - Changed dl() to be disabled by default. Enabled only when explicitly
@@ -236,88 +38,6 @@ PHP                                                                        NEWS
   argument is passed. (Sara)
 - Changed open_basedir to allow tightening in runtime contexts. (Sara)
 - Changed PHP/Zend extensions to use flexible build IDs. (Stas)
-
-- Added new Enchant extension. (Pierre)
-
-- Added support for IDN via ICU in intl, idn_to_ascii and idn_to_utf8. (Pierre)
-- Added support for SSH via libssh2 in cURL. (Pierre)
-- Added support for fnmatch() on Windows. (Pierre)
-- Added support for time_nanosleep() and time_sleep_until() on Windows.
-  (Pierre)
-- Added support for symlink(), readlink(), linkinfo() and link() on Windows.
-  They are available only when the running platform supports them. (Pierre)
-- Added support for gray levels PNG image with alpha in GD extension. (Pierre)
-- Added support for salsa hashing functions in HASH extension. (Scott)
-- Added DOMNode::getLineNo to get line number of parsed node. (Rob)
-- Added table info to PDO::getColumnMeta() with SQLite. (Martin Jansen, Scott)
-- Added mail logging functionality that allows logging of mail sent via
-  mail() function. (Ilia)
-- Added json_last_error() to return any error information from json_decode().
-  (Scott)
-- Added gethostname() to return the current system host name. (Ilia)
-- Added shm_has_var() function. (Mike)
-- Added depth parameter to json_decode() to lower the nesting depth from the
-  maximum if required. (Scott)
-- Added ICU support to SQLite3 when using the bundled version. (Scott)
-- Added SQLite3::openBlob() to read a blob value as a stream. (Scott)
-- Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
-- Added SplObjectStorage::addAll/removeAll. (Etienne)
-- Added Windows support for stream_socket_pair(). (Kalle)
-
-- Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
-
-- Disabled Phar for big endian systems due to various crash bugs. (Scott)
-
-- Fixed building of pdo_sqlite without sqlite3. (Scott)
-
-- Fixed bug #47165 (Possible memory corruption when passing return value by
-  reference). (Dmitry)
-- Fixed bug #47145 + #47159 (Always free failed SQLite3 statements). (Scott)
-- Fixed bug #47141 (Unable to fetch error messages from SQLite3
-  when the database can't be opened). (Scott)
-- Fixed bug #47087 (Second parameter of mssql_fetch_array()). (Felipe)
-- Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
-- Fixed bug #47045 (SplObjectStorage instances compared with ==). (Etienne)
-- Fixed bug #46979 (use with non-compound name *has* effect). (Dmitry)
-- Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
-- Fixed bug #46944 (UTF-8 characters outside the BMP aren't encoded correctly).
-  (Scott)
-- Fixed bug #46849 (Cloning DOMDocument doesn't clone the properties). (Rob)
-- Fixed bug #46847 (phpinfo() is missing some settings). (Hannes)
-- Fixed bug #46844 (php scripts or included files with first line starting
-  with # have the 1st line missed from the output). (Ilia)
-- Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
-- Fixed bug #46763 (mb_stristr() wrong output when needle does not exist).
-  (Henrique M. Decaria)
-- Fixed bug #46755 (warning: use statement with non-compound name). (Dmitry)
-- Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error when
-  given bad data). (Ilia)
-- Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
-- Fixed bug #46701 (Creating associative array with long values in the key
-  fails on 32bit linux). (Shire)
-- Fixed bug #46681 (mkdir() fails silently on PHP 5.3). (Hannes)
-- Fixed bug #46653 (can't extend mysqli). (Johannes)
-- Fixed bug #46646 (Restrict serialization on some internal classes like
-  Closure and SplFileInfo using exceptions). (Etienne)
-- Fixed bug #46268 (DateTime::modify() does not reset relative time values).
-  (Derick)
-- Fixed bug #46044 (Mysqli - wrong error message). (Johannes)
-- Fixed bug #45991 (Ini files with the UTF-8 BOM are treated as invalid).
-  (Scott)
-- Fixed bug #45989 (json_decode() doesn't return NULL on certain invalid
-  strings). (magicaltux, Scott)
-- Fixed bug #45820 (Allow empty keys in ArrayObject). (Etienne)
-- Fixed bug #45791 (json_decode() doesn't convert 0e0 to a double). (Scott)
-
-
-04 Dec 2008, PHP 5.3.0 Alpha 3
-- Upgraded bundled PCRE to version 7.8. (Nuno)
-- Upgraded bundled sqlite to version 3.6.6.2. (Scott, Ilia)
-
-- Moved ext/msql to PECL. (Derick, Lukas)
-
-- Removed ext/mhash, the BC layer is now entirely within ext/hash. (Scott)
-
 - Changed error level E_ERROR into E_WARNING in Soap extension methods
   parameter validation. (Felipe)
 - Changed openssl info to show the shared library version number. (Scott)
@@ -325,187 +45,11 @@ PHP                                                                        NEWS
   platforms and with all compilers. (Christian Seiler)
 - Changed round() to act more intuitively when rounding to a certain precision
   and round very large and very small exponents correctly. (Christian Seiler)
-- Changed fileinfo to no longer send errors to stderr. (Scott)
-
-- Added support for namespaces with brackets. (Greg)
-- Added stream_cast() and stream_set_options() to user-space stream wrappers,
-  allowing stream_select(), stream_set_blocking(), stream_set_timeout() and 
-  stream_set_write_buffer() to work with user-space stream wrappers. (Arnaud)
-- Added header_remove() function. (chsc at peytz dot dk, Arnaud)
-- Added stream_context_get_params() function. (Arnaud)
-- Added optional parameter "new" to sybase_connect(). (Timm)
-- Added parse_ini_string() function. (grange at lemonde dot fr, Arnaud) 
-- Added str_getcsv() function. (Sara)
-- Added openssl_random_pseudo_bytes() function. (Scott)
-- Added ability to send user defined HTTP headers with SOAP request.
-  (Brian J.France, Dmitry)
-- Added concatenation option to bz2.decompress stream filter.
-  (Keisial at gmail dot com, Greg)
-- Added support for using compressed connections with PDO_mysql. (Johannes)
-
-- Deprecated define_syslog_variables(). (Kalle)
-- Deprecated ereg extension. (Felipe)
-
-- Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
-- Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
-- Fixed memory leak inside wddx_add_vars() function. (Felipe)
-- Synced changes from libmagic 4.26 to bundled libmagic. (Scott)
-- Fixed check in recode extension to allow builing of recode and mysql
-  extensions when using a recent libmysql. (Johannes)
-
-- Fixed bug #46731 (Missing validation for the options parameter of the
-  imap_fetch_overview() function). (Ilia)
-- Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops).
-  (magicaltux [at] php [dot] net)
-- Fixed bug #46578 (strip_tags() does not honor end-of-comment when it 
-  encounters a single quote). (Felipe)
-- Fixed bug #46546 (Segmentation fault when using declare statement with
-  non-string value). (Felipe)
-- Fixed bug #46421 (SplFileInfo not correctly handling /). (Etienne)
-- Fixed bug #46409 (__invoke method called outside of object context when using
-  array_map). (Dmitry)
-- Fixed bug #46331 - (Segfault when using internal fileinfo magic file on big
-  endian systems). (Scott)
-- Fixed bug #46285 (lastInsertId() returns "0" when a deferenced PDOStatement is
-  executed). (Johannes)
-- Fixed bug #46241 (stacked error handlers, internal error handling in general). 
-  (Etienne)
-- Fixed bug #46238 (Segmentation fault on static call with empty string method).
-  (Felipe)
-- Fixed bug #46205 (Closure - Memory leaks when ReflectionException is thrown).
-  (Dmitry)
-- Fixed bug #46194 (SIGSEGV when requested file is not found). (Greg)
-- Fixed bug #46192 (ArrayObject with objects as storage serialization).
-  (Etienne)
-- Fixed bug #46185 (importNode changes the namespace of an XML element). (Rob)
-- Fixed bug #46178 (memory leak in ext/phar). (Greg)
-- Fixed bug #46160 (SPL - Memory leak when exception is thrown in offsetSet).
-  (Felipe)
-- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect 
-  data). (Greg)
-- Fixed bug #46127 (php_openssl_tcp_sockop_accept forgets to set context
-  on accepted stream) (Mark Karpeles, Pierre)
-- Fixed bug #46115 (Memory leak when calling a method using Reflection).
-  (Dmitry)
-- Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
-- Fixed bug #46099 (Xsltprocessor::setProfiling - memory leak). (Felipe, Rob).
-- Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
-  (Ilia)
-- Fixed bug #46086 (Segfault when accessing fileinfo class properties).
-  (Scott)
-- Fixed bug #46071 (finfo_open() segfaults when using wrong file name on BSD).
-  (Felipe)
-- Fixed bug #46060 (Phar::addEmptyDir() breaks) (Greg)
-- Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
-  (Ilia)
-- Fixed bug #46039 (ArrayObject iteration is slow). (Arnaud)
-- Fixed bug #46033 (Direct instantiation of SQLite3stmt and SQLite3result 
-  cause a segfault.) (Scott)
-- Fixed bug #45976 (Moved SXE from SPL to SimpleXML). (Etienne)
-- Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
-  (Christian Schneider, Arnaud)
-- Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)
-- Fixed bug #45907 (undefined reference to 'PHP_SHA512Init'). (Greg)
-- Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Ilia)
-- Fixed bug #45382 (timeout bug in stream_socket_enable_crypto).
-  (vnegrier at optilian dot com, Ilia)
-- Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
-- Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
-  chx1975 at gmail dot com)
-- Fixed bug #44153 (pdo->errorCode() returns NULL when there are no errors). 
-  (David C.)
-- Fixed bug #44154 (pdo->errorInfo() always have three elements in the
-  returned array). (David C.)
-- Fixed bug #43069 (SoapClient causes 505 HTTP Version not supported error
-  message). (Dmitry)
-- Fixed bug #41534 (SoapClient over HTTPS fails to reestablish connection).
-  (Dmitry)
-
-
-02 Sep 2008, PHP 5.3.0 Alpha 2
-- Removed special treatment of "/tmp" in sessions for open_basedir.
-  Note: This undocumented behaviour was introduced in 5.2.2. (Alexey)
-- Removed shebang line check from CGI sapi (checked by scanner). (Dmitry)
-
 - Changed session_start() to return false when session startup fails. (Jani)
 - Changed property_exists() to check the existence of a property independent of
   accessibility (like method_exists()). (Felipe)
 - Changed array_reduce() to allow mixed $initial (Christian Seiler)
 
-- Added function preg_filter() that does grep and replace in one go. (Marcus)
-- Added system independent realpath() implementation which caches intermediate
-  directories in realpath-cache. (Dmitry)
-- Added optional clear_realpath_cache and filename parameters to
-  clearstatcache(). (Jani, Arnaud)
-- Added litespeed SAPI module. (George Wang)
-- Added ext/hash support to ext/session's ID generator. (Sara)
-- Added quoted_printable_encode() function. (Tony)
-- Added stream_context_set_default() function. (Davey Shafik)
-- Added optional "is_xhtml" parameter to nl2br() which makes the function
-  output <br> when false and <br /> when true (FR #34381). (Kalle)
-- Added PHP_MAXPATHLEN constant (maximum length of a path). (Pierre)
-
-- Improved Windows support and portability for stat(), touch(), filemtime(),
-  filesize() and related functions. (Pierre)
-
-- Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
-  relative time string. (Derick)
-
-- Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
-  multiple calls). (Ilia)
-- Fixed bug #46032 (PharData::__construct() wrong memory read). (Greg)
-- Fixed bug #45826 (custom ArrayObject serialization). (Etienne)
-- Fixed bug #45798 (sqlite3 doesn't notice if variable was bound). (Felipe)
-- Fixed bug #45786 (FastCGI process exited unexpectedly). (Dmitry)
-- Fixed bug #45763 (mysqli::multi_query does not work with mysqlnd). (Johannes)
-- Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
-  (Hannes)
-- Fixed bug #45743 (property_exists fails to find static protected member in
-  child class). (Felipe)
-- Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
-  (Derick)
-- Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
-  fails). (Etienne, Dmitry)
-- Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
-- Fixed bug #45636 (fileinfo ext duplicate strndup). (Derick)
-- Fixed bug #45545 (DateInterval has 4 char limitation for ISO durations).
-  (Derick)
-- Fixed bug #45447 (Filesystem time functions on Vista and server 2008).
-  (Pierre)
-- Fixed bug #45384 (parse_ini_file will result in parse error with no trailing
-  newline). (Arnaud)
-- Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
-- Fixed bug #44842 (parse_ini_file keys that start/end with underscore).
-  (Arnaud)
-- Fixed bug #44100 (Inconsistent handling of static array declarations with
-  duplicate keys). (Dmitry)
-- Fixed bug #43817 (opendir() fails on Windows directories with parent
-  directory unaccessible). (Dmitry)
-- Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
-  handle slashes). (Arnaud)
-- Fixed bug #35980 (touch() works on files but not on directories). (Pierre)
-
-
-01 Aug 2008, PHP 5.3.0 Alpha 1
-- Upgraded bundled PCRE to version 7.7. (Nuno)
-- Upgraded bundled PDO sqlite to version 3.5.9. (Scott)
-
-- Moved extensions to PECL (Pierre):
-  . ext/dbase
-  . ext/fbsql
-  . ext/fdf
-  . ext/ncurses
-  . ext/ming
-  . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
-
-- Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
-- Removed zend.ze1_compatibility_mode. (Dmitry)
-- Deprecated ticks support. (Felipe)
-
-- Changed PCRE, Reflection and SPL extensions to be always enabled. (Marcus)
-- Changed md5() to use improved implementation. (Solar Designer, Dmitry)
-- Changed HTTP stream wrapper to accept any code between and including
-  200 to 399 as successful. (Mike, Noah Fontes)
 
 - Improved PHP syntax and semantics:
   . Added lambda functions and closures. (Christian Seiler, Dmitry)
@@ -579,6 +123,26 @@ PHP                                                                        NEWS
   . Added optional parameter to ini_get_all() to only retrieve the current
     value. (Hannes)
 
+- Improved Windows support:
+  . Addes Windows support for stat(), touch(), filemtime(), filesize() and
+    related functions. (Pierre)
+  . Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
+  . Added inet_pton() and inet_ntop() also for Windows platforms. (Kalle)
+  . Added mcrypt_create_iv() also for Windows platforms. (Pierre)
+  . Added ACL Cache support on Windows.
+    (Kanwaljeet Singla, Pierre, Venkat Raman Don)
+  . Added constants based on Windows' GetVersionEx information. 
+    PHP_WINDOWS_VERSION_* and PHP_WINDOWS_NT_*. (Pierre)
+  . Added support for ACL (is_writable, is_readable, reports now correct
+    results) on Windows. (Pierre, Venkat Raman Don, Kanwaljeet Singla)
+  . Added support for fnmatch() on Windows. (Pierre)
+  . Added support for time_nanosleep() and time_sleep_until() on Windows.
+    (Pierre)
+  . Added support for symlink(), readlink(), linkinfo() and link() on Windows.
+    They are available only when the running platform supports them. (Pierre)
+  . Added Windows support for stream_socket_pair(). (Kalle)
+
+
 - Improved and cleaned CGI code:
   . FastCGI is now always enabled and can not be disabled.
     See sapi/cgi/CHANGES for more details. (Dmitry)
@@ -593,10 +157,21 @@ PHP                                                                        NEWS
   . Added "params" as optional parameter for stream_context_create(). (Sara)
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
+- Improved DNS API
+ . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
+   getmxrr(). (Pierre)
+ . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
+ . Added a new "entries" array in dns_check_record() containing the TXT
+   elements. (Felipe, Pierre)
+
 - Improved hash extension:
   . Changed mhash to be a wrapper layer around the hash extension. (Scott)
   . Added hash_copy() function. (Tony)
   . Added sha224 hash algorithm to the hash extension. (Scott)
+
+- Improved IMAP support (Pierre):
+  . Added imap_gc() to clear the imap cache
+  . Added imap_utf8_to_mutf7() and imap_mutf7_to_utf8()
 
 - Improved mbstring extension:
   . Added "mbstring.http_output_conv_mimetypes" INI directive that allows
@@ -616,6 +191,12 @@ PHP                                                                        NEWS
   . Fixed define of SQLT_BDOUBLE and SQLT_BFLOAT constants with Oracle
     10g ORACLE_HOME builds.
   . Changed default value of oci8.default_prefetch from 10 to 100.
+  . Fixed PECL Bug #16035 (OCI8: oci_connect without ORACLE_HOME defined causes
+    segfault) (Chris Jones/Oracle Corp.)
+  . Fixed PECL Bug #15988 (OCI8: sqlnet.ora isn't read with older Oracle
+    libraries) (Chris Jones/Oracle Corp.)
+  . Fixed PECL Bug #14268 (Allow "pecl install oci8" command to "autodetect" an
+    Instant Client RPM install) (Chris Jones/Oracle Corp.)
   . Fixed PECL bug #12431 (OCI8 ping functionality is broken).
   . Allow building (e.g from PECL) the PHP 5.3-based OCI8 code with
     PHP 4.3.9 onwards.
@@ -670,7 +251,14 @@ PHP                                                                        NEWS
     for crypt_r and the algorithms which are used when OS does not provide
     them. PHP implementations are always used for Windows builds.
 
+- Deprecated session_register(), session_unregister() and
+  session_is_registered(). (Hannes)
+- Deprecated define_syslog_variables(). (Kalle)
+- Deprecated ereg extension. (Felipe)
+
+
 - Added new extensions:
+  . Added Enchant extension as a way to access spell checkers. (Pierre)
   . Added fileinfo extension as replacement for mime_magic extension. (Derick)
   . Added intl extension for Internationalization. (Ed B., Vladimir I.,
     Dmitry L., Stanislav M., Vadim S., Kirti V.)
@@ -724,6 +312,7 @@ PHP                                                                        NEWS
     DateInterval on each iteration, up to an end date or limited by maximum
     number of occurences.
 
+
 - Added array_replace() and array_replace_recursive() functions. (Matt)
 - Added ReflectionProperty::setAccessible() method that allows non-public
   property's values to be read through ::getValue() and set through
@@ -749,138 +338,303 @@ PHP                                                                        NEWS
 - Added PREG_BAD_UTF8_OFFSET_ERROR constant. (Nuno)
 - Added native support for asinh(), acosh(), atanh(), log1p() and expm1().
   (Kalle)
-- Added inet_pton() and inet_ntop() also for Windows platforms. (Kalle, Pierre)
-- Added mcrypt_create_iv() also for Windows platforms. (Pierre)
+- Added LIBXML_LOADED_VERSION constant (libxml2 version currently used). (Rob)
+- Added JSON_FORCE_OBJECT flag to json_encode(). (Scott, Richard Quadling)
+- Added timezone_version_get() to retrieve the version of the used timezone
+  database. (Derick)
+- Added 'n' flag to fopen to allow passing O_NONBLOCK to the underlying
+  open(2) system call. (Mikko)
+- Added "dechunk" filter which can decode HTTP responses with chunked
+  transfer-encoding. HTTP streams use this filter automatically in case
+  "Transfer-Encoding: chunked" header is present in response. It's possible to
+  disable this behaviour using "http"=>array("auto_decode"=>0) in stream
+  context. (Dmitry)
+- Added support for CP850 encoding in mbstring extension.
+  (Denis Giffeler, Moriyoshi)
+- Added stream_cast() and stream_set_options() to user-space stream wrappers,
+  allowing stream_select(), stream_set_blocking(), stream_set_timeout() and 
+  stream_set_write_buffer() to work with user-space stream wrappers. (Arnaud)
+- Added header_remove() function. (chsc at peytz dot dk, Arnaud)
+- Added stream_context_get_params() function. (Arnaud)
+- Added optional parameter "new" to sybase_connect(). (Timm)
+- Added parse_ini_string() function. (grange at lemonde dot fr, Arnaud) 
+- Added str_getcsv() function. (Sara)
+- Added openssl_random_pseudo_bytes() function. (Scott)
+- Added ability to send user defined HTTP headers with SOAP request.
+  (Brian J.France, Dmitry)
+- Added concatenation option to bz2.decompress stream filter.
+  (Keisial at gmail dot com, Greg)
+- Added support for using compressed connections with PDO_mysql. (Johannes)
+- Added the ability for json_decode() to take a user specified depth. (Scott)
+- Added support for the mysql_stmt_next_result() function from libmysql.
+  (Andrey)
+- Added function preg_filter() that does grep and replace in one go. (Marcus)
+- Added system independent realpath() implementation which caches intermediate
+  directories in realpath-cache. (Dmitry)
+- Added optional clear_realpath_cache and filename parameters to
+  clearstatcache(). (Jani, Arnaud)
+- Added litespeed SAPI module. (George Wang)
+- Added ext/hash support to ext/session's ID generator. (Sara)
+- Added quoted_printable_encode() function. (Tony)
+- Added stream_context_set_default() function. (Davey Shafik)
+- Added optional "is_xhtml" parameter to nl2br() which makes the function
+  output <br> when false and <br /> when true (FR #34381). (Kalle)
+- Added PHP_MAXPATHLEN constant (maximum length of a path). (Pierre)
+- Added support for SSH via libssh2 in cURL. (Pierre)
+- Added support for gray levels PNG image with alpha in GD extension. (Pierre)
+- Added support for salsa hashing functions in HASH extension. (Scott)
+- Added DOMNode::getLineNo to get line number of parsed node. (Rob)
+- Added table info to PDO::getColumnMeta() with SQLite. (Martin Jansen, Scott)
+- Added mail logging functionality that allows logging of mail sent via
+  mail() function. (Ilia)
+- Added json_last_error() to return any error information from json_decode().
+  (Scott)
+- Added gethostname() to return the current system host name. (Ilia)
+- Added shm_has_var() function. (Mike)
+- Added depth parameter to json_decode() to lower the nesting depth from the
+  maximum if required. (Scott)
+- Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
+- Added SplObjectStorage::addAll/removeAll. (Etienne)
 
+
+- Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
+  (sdteffen[at]gmail[dot].com, Pierre)
+- Implemented FR #47739 (Missing cURL option do disable IPv6). (Pierre)
+- Implemented FR #39637 (Missing cURL option CURLOPT_FTP_FILEMETHOD). (Pierre)
+
+
+- Fixed an issue with ReflectionProperty::setAccessible().
+  (Sebastian, Roman Borschel)
 - Fixed html_entity_decode() incorrectly converting numeric html entities
   to different characters with cp1251 and cp866. (Scott)
 - Fixed an issue in date() where a : was printed for the O modifier after a P
   modifier was used. (Derick)
 - Fixed exec() on Windows to not eat the first and last double quotes. (Scott)
+- Fixed readlink on Windows in thread safe SAPI (apache2.x etc.). (Pierre)
+- Fixed a bug causing miscalculations with the "last <weekday> of <n> month"
+  relative time string. (Derick)
+- Fixed bug causing the algorithm parameter of mhash() to be modified. (Scott)
+- Fixed invalid calls to free when internal fileinfo magic file is used. (Scott)
+- Fixed memory leak inside wddx_add_vars() function. (Felipe)
+- Fixed check in recode extension to allow builing of recode and mysql
+  extensions when using a recent libmysql. (Johannes)
+
 
 - Fixed PECL bug #12794 (PDOStatement->nextRowset() doesn't work). (Johannes)
 - Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
 
-- Fixed bug #45571 (ReflectionClass::export() shows superclasses' private
-  static methods). (robin_fernandes at uk dot ibm dot com)
-- Fixed bug #45430 (windows implementation of crypt is not thread safe).
-  (Pierre)
-- Fixed bug #45345 (SPLFileInfo::getPathInfo() returning dir info instead of
-  file info). (Etienne)
-- Fixed bug #45179 (--with-mysql-sock fails to compile & work). (Andrey)
-- Fixed bug #45038 (Crash when using DateTimeZone object returned by
-  Date::getTimezone). (Joe Orton, Derick)
-- Fixed bug #45030 (Destination image alpha channel noise when using
-  imagecopyresampled). (Pierre)
-- Fixed bug #44769 (declaring private magic methods should throw error).
-  (Felipe)
-- Fixed bug #44913 (Segfault when using return in combination with nested loops
-  and continue 2). (Dmitry)
-- Fixed bug #44899 (__isset usage changes behavior of empty()). (Etienne)
-- Fixed bug #44897 (failed to prepare statement). (Andrey)
-- Fixed bug #44849 (imagecolorclosesthwb() is not available on Windows).
-  (Kalle)
-- Fixed bug #44805 (rename() function is not portable to Windows). (Pierre)
-- Fixed bug #44779 (filter returns NULL in CLI when it shouldn't). (Arnaud)
-- Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
-- Fixed bug #44660 (Indexed and reference assignment to propery of non-object
-  don't trigger warning). (Dmitry)
-- Fixed bug #44648 (Attribute names not checked for wellformedness). (Rob)
-- Fixed bug #44414 (Incomplete reporting about abstract methods). (Dmitry)
-- Fixed bug #44390 (mysqli_bind_param/bind_result and Object member variables).
-  (Andrey)
-- Fixed bug #44352 (mysqli_connect_error() false negative for host errors).
-  (Andrey)
-- Fixed bug #44336 (Improve pcre UTF-8 string matching performance).
-  (frode at coretrek dot com, Nuno)
-- Fixed bug #44301 (Segfault when an exception is thrown on persistent
-  connections). (Martin Jansen)
-- Fixed bug #44257 (timelib_tz_lookup_table must use float for gmtoffset).
-  (Derick, iuri dot fiedoruk at hp dot com).
-- Fixed bug #44034 (FILE_IGNORE_NEW_LINES in file() does not work as expected
-  when lines end in \r\n). (Ilia)
-- Fixed bug #43960 (strtotime() returns timestamp in the future when given a
-  bogus string). (Derick)
-- Fixed bug #43832 (mysqli_get_charset() doesn't expose charset comment).
-  (Andrey)
-- Fixed bug #43808 (date_create never fails (even when it should)). (Derick)
-- Fixed bug #43527 (DateTime created from a timestamp reports environment
-  timezone). (Derick)
-- Fixed bug #43452 (strings containing a weekday, or a number plus weekday
-  misbehaved if the current day-of-week was same as the one in the phrase).
+- Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
+- Fixed bug #48643 (String functions memory issue). (Dmitry)
+- Fixed bug #48641 (tmpfile() uses old parameter parsing).
+  (crrodriguez at opensuse dot org)
+- Fixed bug #48624 (.user.ini never gets parsed). (Pierre)
+- Fixed bug #48620 (X-PHP-Originating-Script assumes no trailing CRLF in
+  existing headers). (Ilia)
+- Fixed bug #48578 (Can't build 5.3 on FBSD 4.11). (Rasmus)
+- Fixed bug #48535 (file_exists returns false when impersonate is used).
+  (Kanwaljeet Singla, Venkat Raman Don)
+- Fixed bug #48493 (spl_autoload_register() doesn't work correctly when
+  prepending functions). (Scott)
+- Fixed bug #48215 (Calling a method with the same name as the parent class
+  calls the constructor). (Scott)
+- Fixed bug #48200 (compile failure with mbstring.c when 
+  --enable-zend-multibyte is used). (Jani)
+- Fixed bug #48188 (Cannot execute a scrollable cursors twice with PDO_PGSQL).
+  (Matteo)
+- Fixed bug #48185 (warning: value computed is not used in
+  pdo_sqlite_stmt_get_col line 271). (Matteo)
+- Fixed bug #48087 (call_user_method() invalid free of arguments). (Felipe)
+- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
+- Fixed bug #48034 (PHP crashes when script is 8192 (8KB) bytes long). (Dmitry)
+- Fixed bug #48004 (Error handler prevents creation of default object). (Dmitry)
+- Fixed bug #47880 (crashes in call_user_func_array()). (Dmitry)
+- Fixed bug #47856 (stristr() converts needle to lower-case). (Ilia)
+- Fixed bug #47851 (is_callable throws fatal error). (Dmitry)
+- Fixed bug #47816 (pcntl tests failing on NetBSD). (Matteo)
+- Fixed bug #47779 (Wrong value for SIG_UNBLOCK and SIG_SETMASK constants).
+  (Matteo)
+- Fixed bug #47771 (Exception during object construction from arg call calls
+  object's destructor). (Dmitry)
+- Fixed bug #47767 (include_once does not resolve windows symlinks or junctions)
+  (Kanwaljeet Singla, Venkat Raman Don)
+- Fixed bug #47757 (rename JPG to JPEG in phpinfo). (Pierre)
+- Fixed bug #47745 (FILTER_VALIDATE_INT doesn't allow minimum integer). (Dmitry)
+- Fixed bug #47714 (autoloading classes inside exception_handler leads to
+  crashes). (Dmitry)
+- Fixed bug #47671 (Cloning SplObjectStorage instances). (Etienne)
+- Fixed bug #47664 (get_class returns NULL instead of FALSE). (Dmitry)
+- Fixed bug #47662 (Support more than 127 subpatterns in preg_match). (Nuno)
+- Fixed bug #47596 (Bus error on parsing file). (Dmitry)
+- Fixed bug #47572 (Undefined constant causes segmentation fault). (Felipe)
+- Fixed bug #47560 (explode()'s limit parameter odd behaviour). (Matt)
+- Fixed bug #47549 (get_defined_constants() return array with broken array
+  categories). (Ilia)
+- Fixed bug #47535 (Compilation failure in ps_fetch_from_1_to_8_bytes()).
+  (Johannes)
+- Fixed bug #47534 (RecursiveDiteratoryIterator::getChildren ignoring
+  CURRENT_AS_PATHNAME). (Etienne)
+- Fixed bug #47443 (metaphone('scratch') returns wrong result). (Felipe)
+- Fixed bug #47438 (mysql_fetch_field ignores zero offset). (Johannes)
+- Fixed bug #47398 (PDO_Firebird doesn't implements quoter correctly). (Felipe)
+- Fixed bug #47390 (odbc_fetch_into - BC in php 5.3.0). (Felipe)
+- Fixed bug #47359 (Use the expected unofficial mimetype for bmp files). (Scott)
+- Fixed bug #47343 (gc_collect_cycles causes a segfault when called within a
+  destructor in one case). (Dmitry)
+- Fixed bug #47320 ($php_errormsg out of scope in functions). (Dmitry)
+- Fixed bug #47318 (UMR when trying to activate user config). (Pierre)
+- Fixed bug #47243 (OCI8: Crash at shutdown on Windows) (Chris Jones/Oracle
+  Corp.)
+- Fixed bug #47231 (offsetGet error using incorrect offset). (Etienne)
+- Fixed bug #47229 (preg_quote() should escape the '-' char). (Nuno)
+- Fixed bug #47165 (Possible memory corruption when passing return value by
+  reference). (Dmitry)
+- Fixed bug #47087 (Second parameter of mssql_fetch_array()). (Felipe)
+- Fixed bug #47085 (rename() returns true even if the file in PHAR does not
+  exist). (Greg)
+- Fixed bug #47050 (mysqli_poll() modifies improper variables). (Johannes)
+- Fixed bug #47045 (SplObjectStorage instances compared with ==). (Etienne)
+- Fixed bug #47038 (Memory leak in include). (Dmitry)
+- Fixed bug #47031 (Fix constants in DualIterator example). (Etienne)
+- Fixed bug #47021 (SoapClient stumbles over WSDL delivered with
+  "Transfer-Encoding: chunked"). (Dmitry)
+- Fixed bug #46994 (OCI8: CLOB size does not update when using CLOB IN OUT param
+  in stored procedure) (Chris Jones/Oracle Corp.)
+- Fixed bug #46979 (use with non-compound name *has* effect). (Dmitry)
+- Fixed bug #46957 (The tokenizer returns deprecated values). (Felipe)
+- Fixed bug #46944 (UTF-8 characters outside the BMP aren't encoded correctly).
+  (Scott)
+- Fixed bug #46897 (ob_flush() should fail to flush unerasable buffers).
+  (David C.)
+- Fixed bug #46849 (Cloning DOMDocument doesn't clone the properties). (Rob)
+- Fixed bug #46847 (phpinfo() is missing some settings). (Hannes)
+- Fixed bug #46844 (php scripts or included files with first line starting
+  with # have the 1st line missed from the output). (Ilia)
+- Fixed bug #46817 (tokenizer misses last single-line comment (PHP 5.3+, with
+  re2c lexer)). (Matt, Shire)
+- Fixed bug #46811 (ini_set() doesn't return false on failure). (Hannes)
+- Fixed bug #46763 (mb_stristr() wrong output when needle does not exist).
+  (Henrique M. Decaria)
+- Fixed bug #46755 (warning: use statement with non-compound name). (Dmitry)
+- Fixed bug #46746 (xmlrpc_decode_request outputs non-suppressable error when
+  given bad data). (Ilia)
+- Fixed bug #46738 (Segfault when mb_detect_encoding() fails). (Scott)
+- Fixed bug #46731 (Missing validation for the options parameter of the
+  imap_fetch_overview() function). (Ilia)
+- Fixed bug #46711 (cURL curl_setopt leaks memory in foreach loops). (magicaltux
+  [at] php [dot] net)
+- Fixed bug #46701 (Creating associative array with long values in the key fails
+  on 32bit linux). (Shire)
+- Fixed bug #46681 (mkdir() fails silently on PHP 5.3). (Hannes)
+- Fixed bug #46653 (can't extend mysqli). (Johannes)
+- Fixed bug #46646 (Restrict serialization on some internal classes like Closure
+  and SplFileInfo using exceptions). (Etienne)
+- Fixed bug #46623 (OCI8: phpinfo doesn't show compile time ORACLE_HOME with
+  phpize) (Chris Jones/Oracle Corp.)
+- Fixed bug #46578 (strip_tags() does not honor end-of-comment when it
+  encounters a single quote). (Felipe)
+- Fixed bug #46546 (Segmentation fault when using declare statement with
+  non-string value). (Felipe)
+- Fixed bug #46542 (Extending PDO class with a __call() function doesn't work as
+  expected). (Johannes)
+- Fixed bug #46421 (SplFileInfo not correctly handling /). (Etienne)
+- Fixed bug #46347 (parse_ini_file() doesn't support * in keys). (Nuno)
+- Fixed bug #46268 (DateTime::modify() does not reset relative time values).
   (Derick)
-- Fixed bug #43426 (crash on nested call_user_func() calls). (Dmitry)
-- Fixed bug #43323 (Wrong count abstract methods). (Felipe, Dmitry)
-- Fixed bug #43261 (Use ^ as the escape with escapeshellcmd() on Windows).
-  (Scott)
-- Fixed bug #43075 (Support 2007-11-01T24:00:00+00:00). (Derick)
-- Fixed bug #43003 (Invalid timezone reported for DateTime objects constructed
-  using a timestamp). (Derick)
-- Fixed bug #43143 (Warning about empty IV with MCRYPT_MODE_ECB). (Derick)
-- Fixed bug #43136 (possible crash on script execution timeout.
-  The EG(function_state_ptr) is completely removed,
-  EG(current_execute_data)->function_state must be used instead). (Dmitry)
-- Fixed bug #42952 (soap cache file is created with insecure permissions).
+- Fixed bug #46241 (stacked error handlers, internal error handling in general).
+  (Etienne)
+- Fixed bug #46238 (Segmentation fault on static call with empty string method).
+  (Felipe)
+- Fixed bug #46192 (ArrayObject with objects as storage serialization).
+  (Etienne)
+- Fixed bug #46185 (importNode changes the namespace of an XML element). (Rob)
+- Fixed bug #46178 (memory leak in ext/phar). (Greg)
+- Fixed bug #46160 (SPL - Memory leak when exception is thrown in offsetSet).
+  (Felipe)
+- Fixed Bug #46147 (after stream seek, appending stream filter reads incorrect
+  data). (Greg)
+- Fixed bug #46127 (php_openssl_tcp_sockop_accept forgets to set context on
+  accepted stream) (Mark Karpeles, Pierre)
+- Fixed bug #46115 (Memory leak when calling a method using Reflection).
   (Dmitry)
-- Fixed bug #42868 (Floats cast to integer produce unpredictable results).
-  (Zoe Slattery)
-- Fixed bug #42848 (Status: header incorrect under FastCGI). (Dmitry)
-- Fixed bug #42773 (WSDL error causes HTTP 500 Response). (Dmitry)
-- Fixed bug #42736 (xmlrpc_server_call_method() crashes). (Tony)
-- Fixed bug #42657 (ini_get() returns incorrect value when default is NULL).
-  (Jani, Scott)
-- Fixed bug #42637 (SoapFault : Only http and https are allowed). (Bill Moran)
-- Fixed bug #42548 (mysqli PROCEDURE calls can't return result sets). (Hartmut)
-- Fixed bug #42509 (gmp leaks memory when gmp_init() not used). (Stas)
-- Fixed bug #42499 (PDO_MYSQL: multi-statement execution via PDO::exec() makes
-  connection unusable). (Johannes)
-- Fixed bug #42443 (PDO SQLite driver binds integers and booleans as strings).
+- Fixed bug #46110 (XMLWriter - openmemory() and openuri() leak memory on
+  multiple calls). (Ilia)
+- Fixed bug #46108 (DateTime - Memory leak when unserializing). (Felipe)
+- Fixed bug #46106 (Memory leaks when using global statement). (Dmitry)
+- Fixed bug #46099 (Xsltprocessor::setProfiling - memory leak). (Felipe, Rob).
+- Fixed bug #46087 (DOMXPath - segfault on destruction of a cloned object).
+  (Ilia)
+- Fixed bug #46048 (SimpleXML top-level @attributes not part of iterator).
+  (David C.)
+- Fixed bug #46044 (Mysqli - wrong error message). (Johannes)
+- Fixed bug #46042 (memory leaks with reflection of mb_convert_encoding()).
+  (Ilia)
+- Fixed bug #46039 (ArrayObject iteration is slow). (Arnaud)
+- Fixed bug #46033 (Direct instantiation of SQLite3stmt and SQLite3result cause 
+  a segfault.) (Scott)
+- Fixed bug #45991 (Ini files with the UTF-8 BOM are treated as invalid).
   (Scott)
-- Fixed bug #42284 (duplicate of #39700). (Lars W)
-- Fixed bug #42203 (Clear SQLite result sets before closing database). (Scott)
-- Fixed bug #42190 (Constructing DateTime with TimeZone Indicator invalidates
-  DateTimeZone). (Derick)
-- Fixed bug #42069 (parse_ini_file() allows using some non-alpha numeric
-  characters). (Jani)
-- Fixed bug #41997 (pdo_mysql: stored procedure call returning single rowset
-  blocks future queries). (Johannes)
-- Fixed bug #41996 (Problem accessing Oracle ROWID). (Martin Jansen)
-- Fixed bug #41599 (setTime() fails after modify() is used). (Derick)
-- Fixed bug #41522 (PDO firebird driver returns null if it fails to connect).
-  (Lars W)
-- Fixed bug #41135 (PDO SQLite driver binds blobs as strings,
-  use sqlite3_bind_blob() to stop errors with null bytes). (Scott)
-- Fixed bug #39822 (new PDO() doesn't work with firebird). (Lars W)
-- Fixed bug #39700 (NUMERIC error when result precision are 7,8 or 12-14 ).
-  (Lars W)
-- Fixed bug #39457 (Multiple invoked OO connections never close). (Andrey)
-- Fixed bug #39397 (invalid statement handle in Unknown on line 0). (Lars W)
-- Fixed bug #39346 (Unsetting a static variable inside a destructor causes
-  segfault later on). (Dmitry)
-- Fixed bug #39127 (Old-style constructor fallbacks produce strange results).
-  (Tony)
-- Fixed bug #39056 (Interbase NUMERIC data type error). (Lars W)
-- Fixed bug #39018 (Error control operator '@' fails to suppress "Uninitialized
-  string offset"). (Felipe)
-- Fixed bug #38468 (Unexpected creation of cycle). (Dmitry)
-- Fixed bug #37964 (Reflection shows private methods of parent class).
-  (Felipe, Marcus)
-- Fixed bug #37911 (preg_replace_callback() ignores named groups). (Nuno)
-- Fixed bug #37076 (SimpleXML ignores .=). (Felipe, Marcus)
-- Fixed bug #36128 (Interbase PDO - timestamp columns return NULL). (Lars W)
-- Fixed bug #35386 (firebird: first row is null). (Lars W)
-- Fixed bug #35163 (Array elements can lose references). (Dmitry)
-- Fixed bug #32330 (session_destroy, "Failed to initialize storage module",
-  custom session handler). (Gwynne)
-- Fixed bug #32143 (ibase_query() causing IBserver 7 crash with NULL param as
-  link-id). (Lars W)
-- Fixed bug #30907 (ibase_query() crashes (same bug as #32143). (Lars W)
-- Fixed bug #30690 (Resource handle from ibase_execute becomes invalid after
-  return). (Lars W)
-- Fixed bug #29044 (compact() does not have infinite recursion protection).
-  (Tony)
-- Fixed bug #27372 (parse error loading browscap.ini at apache startup).
-  (Jani)
+- Fixed bug #45989 (json_decode() doesn't return NULL on certain invalid
+  strings). (magicaltux, Scott)
+- Fixed bug #45976 (Moved SXE from SPL to SimpleXML). (Etienne)
+- Fixed bug #45928 (large scripts from stdin are stripped at 16K border).
+  (Christian Schneider, Arnaud)
+- Fixed bug #45911 (Cannot disable ext/hash). (Arnaud)
+- Fixed bug #45907 (undefined reference to 'PHP_SHA512Init'). (Greg)
+- Fixed bug #45826 (custom ArrayObject serialization). (Etienne)
+- Fixed bug #45820 (Allow empty keys in ArrayObject). (Etienne)
+- Fixed bug #45791 (json_decode() doesn't convert 0e0 to a double). (Scott)
+- Fixed bug #45786 (FastCGI process exited unexpectedly). (Dmitry)
+- Fixed bug #45757 (FreeBSD4.11 build failure: failed include; stdint.h).
+  (Hannes)
+- Fixed bug #45743 (property_exists fails to find static protected member in
+  child class). (Felipe)
+- Fixed bug #45717 (Fileinfo/libmagic build fails, missing err.h and getopt.h).
+  (Derick)
+- Fixed bug #45706 (Unserialization of classes derived from ArrayIterator
+  fails). (Etienne, Dmitry)
+- Fixed bug #45696 (Not all DateTime methods allow method chaining). (Derick)
+- Fixed bug #45682 (Unable to var_dump(DateInterval)). (Derick)
+- Fixed bug #45447 (Filesystem time functions on Vista and server 2008).
+  (Pierre)
+- Fixed bug #45432 (PDO: persistent connection leak). (Felipe)
+- Fixed bug #45392 (ob_start()/ob_end_clean() and memory_limit). (Ilia)
+- Fixed bug #45384 (parse_ini_file will result in parse error with no trailing
+  newline). (Arnaud)
+- Fixed bug #45382 (timeout bug in stream_socket_enable_crypto). (vnegrier at
+  optilian dot com, Ilia)
+- Fixed bug #45044 (relative paths not resolved correctly). (Dmitry)
+- Fixed bug #44861 (scrollable cursor don't work with pgsql). (Matteo)
+- Fixed bug #44842 (parse_ini_file keys that start/end with underscore).
+  (Arnaud)
+- Fixed bug #44575 (parse_ini_file comment # line problems). (Arnaud)
+- Fixed bug #44409 (PDO::FETCH_SERIALIZE calls __construct()). (Matteo)
+- Fixed bug #44173 (PDO->query() parameter parsing/checking needs an update).
+  (Matteo)
+- Fixed bug #44154 (pdo->errorInfo() always have three elements in the returned
+  array). (David C.)
+- Fixed bug #44153 (pdo->errorCode() returns NULL when there are no errors).
+  (David C.)
+- Fixed bug #44135 (PDO MySQL does not support CLIENT_FOUND_ROWS). (Johannes,
+  chx1975 at gmail dot com)
+- Fixed bug #44100 (Inconsistent handling of static array declarations with
+  duplicate keys). (Dmitry)
+- Fixed bug #43831 ($this gets mangled when extending PDO with persistent
+  connection). (Felipe)
+- Fixed bug #43817 (opendir() fails on Windows directories with parent directory
+  unaccessible). (Dmitry)
+- Fixed bug #43069 (SoapClient causes 505 HTTP Version not supported error
+  message). (Dmitry)
+- Fixed bug #43008 (php://filter uris ignore url encoded filternames and can't
+  handle slashes). (Arnaud)
+- Fixed bug #42362 (HTTP status codes 204 and 304 should not be gzipped).
+  (Scott, Edward Z. Yang)
+- Fixed bug #41874 (separate STDOUT and STDERR in exec functions). (Kanwaljeet
+  Singla, Venkat Raman Don, Pierre)
+- Fixed bug #41534 (SoapClient over HTTPS fails to reestablish connection).
+  (Dmitry)
+- Fixed bug #38802 (max_redirects and ignore_errors). (patch by
+  datibbaw@php.net)
+- Fixed bug #35980 (touch() works on files but not on directories). (Pierre)
 
 17 Jun 2009, PHP 5.2.10
 - Updated timezone database to version 2009.9 (2009i) (Derick)
