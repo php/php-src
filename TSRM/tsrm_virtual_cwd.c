@@ -35,6 +35,9 @@
 #ifdef TSRM_WIN32
 #include <io.h>
 #include "tsrm_win32.h"
+# ifndef IO_REPARSE_TAG_SYMLINK
+#  define IO_REPARSE_TAG_SYMLINK 0xA000000C
+# endif
 #endif
 
 #ifdef NETWARE
@@ -136,6 +139,42 @@ static int php_check_dots(const char *element, int n)
 	free((s)->cwd);
 	
 #ifdef TSRM_WIN32
+
+#ifdef CTL_CODE
+#undef CTL_CODE
+#endif
+#define CTL_CODE(DeviceType,Function,Method,Access) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
+#define FILE_DEVICE_FILE_SYSTEM 0x00000009
+#define METHOD_BUFFERED		0
+#define FILE_ANY_ACCESS 	0
+#define FSCTL_GET_REPARSE_POINT CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 42, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
+
+typedef struct {
+	unsigned long  ReparseTag;
+	unsigned short ReparseDataLength;
+	unsigned short Reserved;
+	union {
+		struct {
+			unsigned short SubstituteNameOffset;
+			unsigned short SubstituteNameLength;
+			unsigned short PrintNameOffset;
+			unsigned short PrintNameLength;
+			unsigned long  Flags;
+			wchar_t        ReparseTarget[1];
+		} SymbolicLinkReparseBuffer;
+		struct {
+			unsigned short SubstituteNameOffset;
+			unsigned short SubstituteNameLength;
+			unsigned short PrintNameOffset;
+			unsigned short PrintNameLength;
+			wchar_t        ReparseTarget[1];
+		} MountPointReparseBuffer;
+		struct {
+			unsigned char  ReparseTarget[1];
+		} GenericReparseBuffer;
+	};
+} REPARSE_DATA_BUFFER;
 
 #define SECS_BETWEEN_EPOCHS (__int64)11644473600
 #define SECS_TO_100NS (__int64)10000000
@@ -471,6 +510,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 		}
 		bucket->realpath_len = realpath_len;
 		bucket->is_dir = is_dir;
+#ifdef PHP_WIN32
+		bucket->is_rvalid   = 0;
+		bucket->is_readable = 0;
+		bucket->is_wvalid   = 0;
+		bucket->is_writable = 0;
+#endif
 		bucket->expires = t + CWDG(realpath_cache_ttl);
 		n = bucket->key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 		bucket->next = CWDG(realpath_cache)[n];
@@ -503,6 +548,12 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, int p
 }
 /* }}} */
 
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
+{
+    return realpath_cache_find(path, path_len, t TSRMLS_CC);
+}
+/* }}} */
+
 #undef LINK_MAX
 #define LINK_MAX 32
 
@@ -518,7 +569,8 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
-	TSRM_ALLOCA_FLAG(use_heap);
+	TSRM_ALLOCA_FLAG(use_heap)
+	TSRM_ALLOCA_FLAG(use_heap_large)
 
 	while (1) {
 		if (len <= start) {
@@ -606,16 +658,103 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			/* continue resolution anyway but don't save result in the cache */
 			save = 0;
 		}
+		
 		if (save) {
-			directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-			if (is_dir && !directory) {
-				/* not a directory */
-				FindClose(hFind);
-				return -1;
-			}
+			FindClose(hFind);
 		}
+
 		tmp = tsrm_do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
+
+		if(save && (data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)) {
+			/* File is a reparse point. Get the target */
+			HANDLE hLink = NULL;
+			REPARSE_DATA_BUFFER * pbuffer;
+			unsigned int retlength = 0, rname_off = 0;
+			int bufindex = 0, rname_len = 0, isabsolute = 0;
+			wchar_t * reparsetarget;
+
+			if(++(*ll) > LINK_MAX) {
+				return -1;
+			}
+
+			hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+			if(hLink == INVALID_HANDLE_VALUE) {
+				return -1;
+			}
+
+			pbuffer = (REPARSE_DATA_BUFFER *)tsrm_do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
+				tsrm_free_alloca(pbuffer, use_heap_large);
+				CloseHandle(hLink);
+				return -1;
+			}
+
+			CloseHandle(hLink);
+
+			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+				rname_len = pbuffer->SymbolicLinkReparseBuffer.PrintNameLength/2;
+				rname_off = pbuffer->SymbolicLinkReparseBuffer.PrintNameOffset/2;
+				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
+				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
+			}
+			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+				rname_len = pbuffer->MountPointReparseBuffer.PrintNameLength/2;
+				rname_off = pbuffer->MountPointReparseBuffer.PrintNameOffset/2;
+				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
+				isabsolute = 1;
+			}
+			else {
+				tsrm_free_alloca(pbuffer, use_heap_large);
+				return -1;
+			}
+
+			/* Convert wide string to narrow string */
+			for(bufindex = 0; bufindex < rname_len; bufindex++) {
+				*(path + bufindex) = (char)(reparsetarget[rname_off + bufindex]);
+			}
+
+			*(path + bufindex) = 0;
+			tsrm_free_alloca(pbuffer, use_heap_large);
+			j = bufindex;
+
+			if(isabsolute == 1) {
+				/* use_realpath is 0 in the call below coz path is absolute*/
+				j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory TSRMLS_CC);
+				if(j < 0) {
+					tsrm_free_alloca(tmp, use_heap);
+					return -1;
+				}
+			}
+			else {
+				if(i + j >= MAXPATHLEN - 1) {
+					tsrm_free_alloca(tmp, use_heap);
+					return -1;
+				}
+
+				memmove(path+i, path, j+1);
+				memcpy(path, tmp, i-1);
+				path[i-1] = DEFAULT_SLASH;
+				j  = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
+				if(j < 0) {
+					tsrm_free_alloca(tmp, use_heap);
+					return -1;
+				}
+			}
+
+			if(link_is_dir) {
+				*link_is_dir = directory;
+			}
+		}
+		else {
+			if (save) {
+				directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+				if (is_dir && !directory) {
+					/* not a directory */
+					return -1;
+				}
+			}
+
 #elif defined(NETWARE)
 		save = 0;
 		tmp = tsrm_do_alloca(len+1, use_heap);
@@ -687,19 +826,18 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef TSRM_WIN32
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
 				tsrm_free_alloca(tmp, use_heap);
-				if (save) FindClose(hFind);
 				return -1;
 			}
 			if (save) {
 				i = strlen(data.cFileName);
 				memcpy(path+j, data.cFileName, i+1);
 				j += i;
-				FindClose(hFind);
 			} else {
 				/* use the original file or directory name as it wasn't found */
 				memcpy(path+j, tmp+i, len-i+1);
 				j += (len-i);
 			}
+		}
 #else
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
 				tsrm_free_alloca(tmp, use_heap);
