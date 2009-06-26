@@ -229,16 +229,20 @@ UPGRADE NOTES - PHP 5.3
 
         - mbstring: Now supports CP850 encoding.
 
-        - oci8: Calling oci_close() on a persistent connection, or on a variable
-          that references a persistent connection going out of scope, will now
-          roll back any uncommitted transaction. You should explicitly commit or
-          rollback as needed.
-          The old behavior can be enabled with the INI directive
+        - oci8: Database Resident Connection Pooling (DRCP) and Fast Application
+          Notification (FAN) are now supported.
+
+          Oracle External Authentication is now supported (except on Windows).
+
+          The oci8 function oci_bind_by_name() now supports SQLT_AFC (aka the
+          CHAR datatype).
+
+          Calling oci_close() on a persistent connection, or when the variable
+          that references a persistent connection goes out of scope, will now
+          trigger a roll back of an uncommitted transaction. To avoid unexpected
+          behavior explicitly issue a commit or roll back as needed. The old
+          behavior can be enabled with the INI directive
           oci8.old_oci_close_semantics.
-          Now supports Database Resident Connection Pooling (DRCP), Fast
-          Application Notification (FAN), and Oracle External
-          Authentication (not supported on Windows).
-          oci_bind_by_name() now supports SQLT_AFC (aka CHAR datatype).
 
         - openssl: OpenSSL digest and cipher functions are now supported.
           It is also now possible to access the internal values of DSA, RSA and
@@ -301,7 +305,7 @@ UPGRADE NOTES - PHP 5.3
 
 - Runtime tightening of open_basedir restrictions is now possible.
 
-- The default value of session.use_only_cookies has changed to "1"
+- The default value of session.use_only_cookies has changed to "1".
 
 - The default value of oci8.default_prefetch has been changed from 10 to 100.
 
@@ -399,12 +403,12 @@ UPGRADE NOTES - PHP 5.3
 - The PDO_OCI php_pdo_oci8.dll library (for use with Oracle version 8 client
   libraries) is no longer being built. Instead, use php_pdo_oci.dll (note no
   '8') with Oracle 10 or 11 client libraries. Connection to other database
-  versions is supported.
+  versions is still supported.
 
 - For the OCI8 extension, a new library php_oci8_11g.dll is available in
   addition to php_oci8.dll. Only one can be enabled at any time. Use
   php_oci8.dll with Oracle 10.2 client libraries. Use php_oci8_11g.dll with
-  Oracle 11 client libraries. Connection to other database versions is
+  Oracle 11 client libraries. Connection to other database versions is still
   supported.
 
 - Firebird and SNMP support are no longer available on Windows. Firebird support
