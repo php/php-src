@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
@@ -129,8 +129,9 @@ PHP                                                                        NEWS
   . Added Windows support for stat(), touch(), filemtime(), filesize() and
     related functions. (Pierre)
   . Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
-  . Added inet_pton() and inet_ntop() also for Windows platforms. (Kalle)
-  . Added mcrypt_create_iv() also for Windows platforms. (Pierre)
+  . Added inet_pton() and inet_ntop() also for Windows platforms. 
+    (Kalle, Pierre)
+  . Added mcrypt_create_iv() for Windows platforms. (Pierre)
   . Added ACL Cache support on Windows.
     (Kanwaljeet Singla, Pierre, Venkat Raman Don)
   . Added constants based on Windows' GetVersionEx information. 
