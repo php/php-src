@@ -126,7 +126,7 @@ PHP                                                                        NEWS
 - Improved Windows support:
   . Update all libraries to their latest stable version. (Pierre, Rob, Liz, 
     Garrett).
-  . Addes Windows support for stat(), touch(), filemtime(), filesize() and
+  . Added Windows support for stat(), touch(), filemtime(), filesize() and
     related functions. (Pierre)
   . Re-added socket_create_pair() for Windows in sockets extension. (Kalle)
   . Added inet_pton() and inet_ntop() also for Windows platforms. (Kalle)
@@ -146,13 +146,13 @@ PHP                                                                        NEWS
   . Added Windows support for stream_socket_pair(). (Kalle)
   . Drop all external dependencies for the core features. (Pierre)
   . Drastically improve the build procedure (Pierre, Kalle, Rob):
-    . VC9 (visual c++ 2008) or later support
+    . VC9 (Visual C++ 2008) or later support
     . Initial experimental x64 support
-  . MSI installer now supports all recent windows, incl. Win7. 
-    (John, Kanwaljeet Singla)
+  . MSI installer now supports all recent Windows versions, including
+    Windows 7. (John, Kanwaljeet Singla)
 
 - Improved and cleaned CGI code:
-  . FastCGI is now always enabled and can not be disabled.
+  . FastCGI is now always enabled and cannot be disabled.
     See sapi/cgi/CHANGES for more details. (Dmitry)
   . Added CGI SAPI -T option which can be used to measure execution
     time of script repeated several times. (Dmitry)
