@@ -68,6 +68,7 @@ static PHP_FUNCTION(libxml_use_internal_errors);
 static PHP_FUNCTION(libxml_get_last_error);
 static PHP_FUNCTION(libxml_clear_errors);
 static PHP_FUNCTION(libxml_get_errors);
+static PHP_FUNCTION(libxml_disable_entity_loader);
 
 static zend_class_entry *libxmlerror_class_entry;
 
@@ -109,6 +110,11 @@ static
 ZEND_BEGIN_ARG_INFO(arginfo_libxml_clear_errors, 0)
 ZEND_END_ARG_INFO()
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_disable_entity_loader, 0, 0, 0)
+	ZEND_ARG_INFO(0, disable)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ extension definition structures */
@@ -118,6 +124,7 @@ static zend_function_entry libxml_functions[] = {
 	PHP_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
 	PHP_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
 	PHP_FE(libxml_get_errors, arginfo_libxml_get_errors)
+	PHP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
 	{NULL, NULL, NULL}
 };
 
@@ -346,6 +353,12 @@ static int php_libxml_streams_IO_close(void *context)
 {
 	TSRMLS_FETCH();
 	return php_stream_close((php_stream*)context);
+}
+
+static xmlParserInputBufferPtr
+php_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc)
+{
+	return NULL;
 }
 
 static xmlParserInputBufferPtr
@@ -820,6 +833,31 @@ static PHP_FUNCTION(libxml_clear_errors)
 	if (LIBXML(error_list)) {
 		zend_llist_clean(LIBXML(error_list));
 	}
+}
+/* }}} */
+
+/* {{{ proto bool libxml_disable_entity_loader([boolean disable]) 
+   Disable/Enable ability to load external entities */
+static PHP_FUNCTION(libxml_disable_entity_loader)
+{
+	zend_bool disable = 1;
+	xmlParserInputBufferCreateFilenameFunc old;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &disable) == FAILURE) {
+		return;
+	}
+
+	if (disable == 0) {
+		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
+	} else {
+		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_noload);
+	}
+
+	if (old == php_libxml_input_buffer_noload) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
