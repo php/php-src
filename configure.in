@@ -217,8 +217,11 @@ case $host_cpu in
     ;;
   sparc*)
     if test "$SUNCC" = "yes"; then
-      CFLAGS="$CFLAGS -xmemalign=8s"
+      CFLAGS="$CFLAGS -xmemalign=8i"
+    else
+      CFLAGS=""
     fi
+    ;;
 esac
 
 dnl activate some gcc specific optimizations for gcc >= 4
