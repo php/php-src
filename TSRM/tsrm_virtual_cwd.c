@@ -646,7 +646,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					memcpy(path, bucket->realpath, bucket->realpath_len + 1);
 				    return bucket->realpath_len;
 				}
-	    		}
+	    	}
 		}
 
 #ifdef TSRM_WIN32
@@ -1099,7 +1099,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;		
 	}
-	
+
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)==0) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
 
