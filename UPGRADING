@@ -115,7 +115,8 @@ UPGRADE NOTES - PHP 5.3
   stream_set_write_buffer() now work with user-space stream wrappers.
 
 - getopt() accepts "long options" now on all platforms.
-  Optional values and = as seperator for shortopts are now supported.
+  Optional values and using = as a separator for short options are now
+  supported.
 
 
 ===================================
@@ -125,7 +126,7 @@ UPGRADE NOTES - PHP 5.3
 - The magic methods __get(), __set(), __isset(), __unset(), and __call() should
   always be public and can no longer be static. Method signatures are enforced.
 
-- The __call() magic method now gets invoked on access to private and protected
+- The __call() magic method is now invoked on access to private and protected
   methods.
 
 - The __toString() magic method can no longer accept arguments.
@@ -158,16 +159,17 @@ UPGRADE NOTES - PHP 5.3
 
 - set_socket_blocking() is deprecated.
 
-- call_user_method() and call_user_method_array() are now deprecated.
+- call_user_method() and call_user_method_array() are now deprecated. Use
+  call_user_func() and call_user_func_array() instead.
 
-- set_magic_quotes_runtime(), magic_quotes_runtime() are now deprecated.
+- The set_magic_quotes_runtime() function is now deprecated.
 
-- mysql_listtables(), mysql_dropdb(), mysql_createdb(),
-  mysql_list_tables(), mysql_drop_db(), mysql_create_db() are now deprecated.
+- mysql_listtables(), mysql_dropdb(), mysql_createdb(), mysql_list_tables(),
+  mysql_drop_db(), and mysql_create_db() are now deprecated.
 
-- All ereg functions are deprecated and emit E_DEPRECATED errors
-  (sql_regcase(), spliti(), split(), ereg_replace(), eregi(),
-  ereg_replace(), ereg()).
+- All ereg functions are now deprecated and emit E_DEPRECATED errors:
+  sql_regcase(), spliti(), split(), ereg_replace(), eregi(),
+  ereg_replace(), and ereg().
   Use the PCRE family of functions (preg_*()) instead.
 
 - mcrypt_generic_end() is deprecated.
@@ -175,9 +177,9 @@ UPGRADE NOTES - PHP 5.3
 - session_register(), session_unregister(), and session_is_registered() are now
   deprecated. Use the $_SESSION superglobal array instead.
 
-- Comments starting with '#' are deprecated in .INI files.
+- Comments starting with '#' are now deprecated in .INI files.
 
-- The following ini directives will now emit an E_DEPRECATED warning 
+- The following INI directives will now emit an E_DEPRECATED warning 
   upon startup if they are activated:
 
         - define_syslog_variables
@@ -233,8 +235,8 @@ UPGRADE NOTES - PHP 5.3
           rollback as needed.
           The old behavior can be enabled with the INI directive
           oci8.old_oci_close_semantics.
-          Supports Database Resident Connection Pooling (DRCP), Fast
-          Application Notification (FAN) support, Oracle External
+          Now supports Database Resident Connection Pooling (DRCP), Fast
+          Application Notification (FAN), and Oracle External
           Authentication (not supported on Windows).
           oci_bind_by_name() now supports SQLT_AFC (aka CHAR datatype).
 
@@ -242,7 +244,7 @@ UPGRADE NOTES - PHP 5.3
           It is also now possible to access the internal values of DSA, RSA and
           DH keys.
 
-        - session: Sessions will no longer store session-files in "/tmp" where
+        - session: Sessions will no longer store session-files in "/tmp" when
           open_basedir restrictions apply, unless "/tmp" is explicitly added to
           the list of allowed paths.
 
@@ -279,7 +281,7 @@ UPGRADE NOTES - PHP 5.3
 - zend_extension_debug and zend_extension_ts have been removed. Always use the
   zend_extension directive to load Zend Extensions.
 
-- zend.ze1_compatibility_mode has been removed. If this ini directive is set to
+- zend.ze1_compatibility_mode has been removed. If this INI directive is set to
   on, then an E_ERROR is emitted at startup.
 
 - There is now support for special sections: [PATH=/opt/httpd/www.example.com/]
@@ -292,9 +294,9 @@ UPGRADE NOTES - PHP 5.3
 - It is now possible to use the full path to load modules using the "extension"
   directive.
 
-- "ini variables" can now be used almost anywhere in a php.ini file.
+- "INI variables" can now be used almost anywhere in a php.ini file.
 
-- It is now possible to use alphanumeric or variable indices in ini option
+- It is now possible to use alphanumeric or variable indices in INI option
   arrays.
 
 - Runtime tightening of open_basedir restrictions is now possible.
@@ -303,13 +305,14 @@ UPGRADE NOTES - PHP 5.3
 
 - The default value of oci8.default_prefetch has been changed from 10 to 100.
 
-- Added new directive, request_order, control specifically $_REQUEST behavior.
+- A new directive, request_order, controls the behavior of $_REQUEST
+  independently of variables_order.
 
 ====================
 10. Syntax additions
 ====================
 
-- NOWDOC is like HEREDOC but with single quotes:
+- NOWDOC: Similar to HEREDOC, but with single quotes:
 
       <<<'LABEL' ...
 
@@ -320,7 +323,8 @@ UPGRADE NOTES - PHP 5.3
       No variables here...
       LABEL;
 
-- HEREDOC Now supports wrapping the identifier:
+- HEREDOC now supports wrapping the identifier with double-quotes, to complement
+  the NOWDOC syntax:
 
       <<<"LABEL" ...
 
@@ -348,7 +352,7 @@ UPGRADE NOTES - PHP 5.3
 
 - Exceptions can now be handled in destructors.
 
-- Garbage collector has been added and is enabled by default.
+- A garbage collector has been added and is enabled by default.
 
 ===================
 11. Windows support
@@ -360,20 +364,22 @@ UPGRADE NOTES - PHP 5.3
 - PHP Windows binaries target i586 or later. i386 and i486 are not supported.
 
 - Support for the IIS SAPI has been dropped. Use the FastCGI SAPI instead 
-  (available for IIS5 and later)). It is also the recommended way to use PHP
+  (available for IIS5 and later)). FastCGI is the recommended way to use PHP
   with IIS (see http://php.iis.net/).
 
 - A new build is available based on the latest Visual C++ Compiler (VC9). 
-  It is  recommended to use it with FastCGI or CLI. Apache's windows binaries 
-  are not compatible with VC9, however you can use apachelounge's build
+  Its use is recommended with FastCGI or CLI. Apache's Windows binaries are not
+  compatible with VC9; however, you can use Apache Lounge's build
   (http://apachelounge.com).
 
 - The x64 binaries are for experimental usage only. They are not meant to be 
   used in production.
 
-- A new site is available to download windows releases as well as windows only
-  releases: http://windows.php.net. Windows specific releases will be released 
-  to fix security issues in the bundled libraries (libpng, openssl, etc.).
+- A new site is available to download Windows releases as well as Windows-only
+  releases: http://windows.php.net. Windows-specific releases will be made to
+  fix security issues in the bundled libraries (libpng, openssl, etc.). Please
+  note that this site does not replace the main PHP site as a source of PHP
+  news, resources, or documentation.
 
 - Windows support has been added for the following functions: getopt(),
   imagecolorclosesthwb(), mcrypt_create_iv(), inet_ntop(), inet_pton(), 
@@ -401,9 +407,8 @@ UPGRADE NOTES - PHP 5.3
   Oracle 11 client libraries. Connection to other database versions is
   supported.
 
-- Firebird and SNMP support are no longer available. Firebird may be 
-  reintroduced in the future.
-
+- Firebird and SNMP support are no longer available on Windows. Firebird support
+  may be reintroduced in the future.
 
 ===================
 12. New in PHP 5.3:
@@ -412,7 +417,8 @@ UPGRADE NOTES - PHP 5.3
      a. New libraries
 
        - mysqlnd is a new core library shipped with PHP. It is a PHP-specific
-         replacement for libmysql.
+         replacement for libmysql and is recommended for all installations for
+         increased performance.
 
      b. New extensions
 
