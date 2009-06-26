@@ -156,8 +156,21 @@ UPGRADE NOTES - PHP 5.3
 
 - define_syslog_variables() is deprecated.
 
-- All ereg functions are deprecated and emit E_DEPRECATED errors.
+- set_socket_blocking() is deprecated.
+
+- call_user_method() and call_user_method_array() are now deprecated.
+
+- set_magic_quotes_runtime(), magic_quotes_runtime() are now deprecated.
+
+- mysql_listtables(), mysql_dropdb(), mysql_createdb(),
+  mysql_list_tables(), mysql_drop_db(), mysql_create_db() are now deprecated.
+
+- All ereg functions are deprecated and emit E_DEPRECATED errors
+  (sql_regcase(), spliti(), split(), ereg_replace(), eregi(),
+  ereg_replace(), ereg()).
   Use the PCRE family of functions (preg_*()) instead.
+
+- mcrypt_generic_end() is deprecated.
 
 - session_register(), session_unregister(), and session_is_registered() are now
   deprecated. Use the $_SESSION superglobal array instead.
