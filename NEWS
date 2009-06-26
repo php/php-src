@@ -1,9 +1,8 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
 - Upgraded bundled sqlite to version 3.6.15. (Scott)
-
 
 - Moved extensions to PECL (Derick, Lukas, Pierre, Scott):
   . ext/dbase
@@ -15,7 +14,6 @@
   . ext/msql
   . ext/sybase (not maintained anymore, sybase_ct has to be used instead)
 
-
 - Removed the experimental RPL (master/slave) functions from mysqli. (Andrey)
 - Removed zend.ze1_compatibility_mode. (Dmitry)
 - Removed all zend_extension_* php.ini directives. Zend extensions are now
@@ -23,7 +21,6 @@
 - Removed special treatment of "/tmp" in sessions for open_basedir.
   Note: This undocumented behaviour was introduced in 5.2.2. (Alexey)
 - Removed shebang line check from CGI sapi (checked by scanner). (Dmitry)
-
 
 - Changed PCRE, Reflection and SPL extensions to be always enabled. (Marcus)
 - Changed md5() to use improved implementation. (Solar Designer, Dmitry)
@@ -49,7 +46,6 @@
 - Changed property_exists() to check the existence of a property independent of
   accessibility (like method_exists()). (Felipe)
 - Changed array_reduce() to allow mixed $initial (Christian Seiler)
-
 
 - Improved PHP syntax and semantics:
   . Added lambda functions and closures. (Christian Seiler, Dmitry)
@@ -167,11 +163,11 @@
   . Added ability to use stream wrappers in include_path. (Gregory, Dmitry)
 
 - Improved DNS API
- . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
-   getmxrr(). (Pierre)
- . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
- . Added a new "entries" array in dns_check_record() containing the TXT
-   elements. (Felipe, Pierre)
+  . Added Windows support for dns_check_record(), dns_get_mx(), checkdnsrr() and
+    getmxrr(). (Pierre)
+  . Added support for old style DNS functions (supports OSX and FBSD). (Scott)
+  . Added a new "entries" array in dns_check_record() containing the TXT
+    elements. (Felipe, Pierre)
 
 - Improved hash extension:
   . Changed mhash to be a wrapper layer around the hash extension. (Scott)
@@ -266,7 +262,6 @@
   session_is_registered(). (Hannes)
 - Deprecated define_syslog_variables(). (Kalle)
 - Deprecated ereg extension. (Felipe)
-
 
 - Added new extensions:
   . Added Enchant extension as a way to access spell checkers. (Pierre)
@@ -409,12 +404,10 @@
 - Added pixelation support in imagefilter(). (Takeshi Abe, Kalle)
 - Added SplObjectStorage::addAll/removeAll. (Etienne)
 
-
 - Implemented FR #41712 (curl progress callback: CURLOPT_PROGRESSFUNCTION).
   (sdteffen[at]gmail[dot].com, Pierre)
 - Implemented FR #47739 (Missing cURL option do disable IPv6). (Pierre)
 - Implemented FR #39637 (Missing cURL option CURLOPT_FTP_FILEMETHOD). (Pierre)
-
 
 - Fixed an issue with ReflectionProperty::setAccessible().
   (Sebastian, Roman Borschel)
@@ -431,7 +424,6 @@
 - Fixed memory leak inside wddx_add_vars() function. (Felipe)
 - Fixed check in recode extension to allow builing of recode and mysql
   extensions when using a recent libmysql. (Johannes)
-
 
 - Fixed PECL bug #12794 (PDOStatement->nextRowset() doesn't work). (Johannes)
 - Fixed PECL bug #12401 (Add support for ATTR_FETCH_TABLE_NAMES). (Johannes)
