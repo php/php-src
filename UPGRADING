@@ -319,13 +319,13 @@ UPGRADE NOTES - PHP 5.3
 - It is now possible to use alphanumeric or variable indices in INI option
   arrays.
 
+- open_basedir is now PHP_INI_ALL
+
 - Runtime tightening of open_basedir restrictions is now possible.
 
 - The default value of session.use_only_cookies has changed to "1".
 
 - The default value of oci8.default_prefetch has been changed from 10 to 100.
-
-- open_basedir is now PHP_INI_ALL
 
 - A new directive, request_order, controls the behavior of $_REQUEST
   independently of variables_order.
