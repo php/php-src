@@ -1,3 +1,10 @@
+2009-06-26  Johannes Schlüter  <johannes@schlueters.de>
+
+    * (PHP_5_3)
+      zend_extensions.h
+      zend_modules.h:
+      Bump version to 5.3.0 and API Nos. up
+
 2009-06-22  Felipe Pena  <felipensp@gmail.com>
 
     * (PHP_5_2)
