@@ -641,7 +641,7 @@ html_errors = On
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
 
-; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
+; Note - track_vars is ALWAYS enabled
 
 ; The separator used in PHP generated URLs to separate arguments.
 ; PHP's default setting is "&".
@@ -763,7 +763,7 @@ auto_prepend_file =
 ; http://php.net/auto-append-file
 auto_append_file =
 
-; As of 4.0b4, PHP always outputs a character encoding by default in
+; By default, PHP will output a character encoding using
 ; the Content-type: header.  To disable sending of the charset, simply
 ; set it to be empty.
 ;
@@ -958,7 +958,6 @@ default_socket_timeout = 60
 ;extension=php_interbase.dll
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
-;extension=php_mime_magic.dll
 ;extension=php_ming.dll
 ;extension=php_mssql.dll
 ;extension=php_mysql.dll
@@ -1346,7 +1345,7 @@ session.save_handler = files
 ; where data files are stored. Note: Windows users have to change this
 ; variable in order to use PHP's session functions.
 ;
-; As of PHP 4.0.1, you can define the path as:
+; The path can be defined as:
 ;
 ;     session.save_path = "N;/path"
 ;
@@ -1758,6 +1757,45 @@ soap.wsdl_cache_ttl=86400
 ; A default size of the shared memory segment
 ;sysvshm.init_mem = 10000
 
+;soap.wsdl_cache_limit=
+;dba.default_handler=
+;pdo_odbc.db2_instance_name=
+;mcrypt.algorithms_dir=
+;mcrypt.modes_dir=
+;ibase.allow_persistent=
+;ibase.max_persistent=
+;ibase.max_links=
+;ibase.default_db=
+;ibase.default_user=
+;ibase.default_password=
+;ibase.default_charset=
+;ibase.timestampformat=
+;ibase.dateformat=
+;ibase.timeformat=
+;mysqli.max_persistent=
+;mysqli.allow_persistent=
+;mysqli.allow_local_infile=
+;mysqli.cache_size=
+;mbstring.script_encoding=
+;mbstring.http_output_conv_mimetypes=
+;pdo_mysql.default_socket=
+;pdo_mysql.debug=
+;pdo_mysql.cache_size=
+;com.code_page=
+;mysql.allow_local_infile=
+;mysql.cache_size=
+;mysqlnd.collect_statistics=
+;mysqlnd.collect_memory_statistics=
+;mysqlnd.debug=
+;mysqlnd.net_cmd_buffer_size=
+;mysqlnd.net_read_buffer_size=
+;mysqlnd.log_mask=
+;odbc.default_cursortype=
+;session.encode_sources=
+;ldap.max_links=
+;sybct.login_timeout=
+;sybct.hostname=
+;sybct.deadlock_retry_count=
 
 ; Local Variables:
 ; tab-width: 4
