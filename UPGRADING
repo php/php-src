@@ -162,6 +162,8 @@ UPGRADE NOTES - PHP 5.3
 - call_user_method() and call_user_method_array() are now deprecated. Use
   call_user_func() and call_user_func_array() instead.
 
+- dl() is deprecated.
+
 - The set_magic_quotes_runtime() function is now deprecated.
 
 - mysql_listtables(), mysql_dropdb(), mysql_createdb(), mysql_list_tables(),
@@ -173,6 +175,10 @@ UPGRADE NOTES - PHP 5.3
   Use the PCRE family of functions (preg_*()) instead.
 
 - mcrypt_generic_end() is deprecated.
+
+- mysql_db_query() is deprecated.
+
+- mysql_escape_string() is deprecated.
 
 - session_register(), session_unregister(), and session_is_registered() are now
   deprecated. Use the $_SESSION superglobal array instead.
@@ -189,6 +195,16 @@ UPGRADE NOTES - PHP 5.3
         - magic_quotes_gpc
         - magic_quotes_runtime
         - magic_quotes_sybase
+
+- The is_dst parameter to mktime() is deprecated.
+
+- Assigning the return value of "new" by reference is deprecated
+
+- Call-time pass-by-reference has been deprecated
+
+- Usage of {} to access string offsets is deprecated
+
+- Passing locale category name as string to setlocale() is deprecated.
 
 ===============
 6. Undeprecated
@@ -309,8 +325,36 @@ UPGRADE NOTES - PHP 5.3
 
 - The default value of oci8.default_prefetch has been changed from 10 to 100.
 
+- open_basedir is now PHP_INI_ALL
+
 - A new directive, request_order, controls the behavior of $_REQUEST
   independently of variables_order.
+
+- New INI directives: 
+  - mail.add_x_header
+  - user_ini.filename
+  - user_ini.cache_ttl
+  - exit_on_timeout
+  - mysqli.allow_persistent
+  - mysqli.default_host
+  - mysqli.default_socket
+  - mysqli.allow_local_infile
+  - mysqli.cache_size
+  - oci8.connection_class
+  - pdo_mysql.default_socket
+  - pdo_mysql.debug
+  - pdo_mysql.cache_size
+  - sqlite3.extension_dir
+  - mysql.default_socket
+  - mysql.allow_local_infile
+  - mysql.cache_size
+  - mysqlnd.collect_statistics
+  - mysqlnd.collect_memory_statistics
+  - mysqlnd.debug
+  - mysqlnd.net_cmd_buffer_size
+  - mysqlnd.net_read_buffer_size
+  - mysqlnd.log_mask
+
 
 ====================
 10. Syntax additions
