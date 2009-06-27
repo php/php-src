@@ -349,7 +349,8 @@ int php_init_config(TSRMLS_D)
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
-
+	static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
+	
 	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) config_zval_dtor, 1) == FAILURE) {
 		return FAILURE;
 	}
@@ -372,7 +373,6 @@ int php_init_config(TSRMLS_D)
 		char *default_location;
 		char *env_location;
 		char *binary_location;
-		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
 #endif
@@ -608,72 +608,83 @@ int php_init_config(TSRMLS_D)
 
 	/* Scan and parse any .ini files found in scan path if path not empty. */
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
-		struct dirent **namelist;
 		int ndir, i;
 		struct stat sb;
 		char ini_file[MAXPATHLEN];
-		char *p;
+		char *p, *last, *path_copy, *ini_path = NULL;
 		zend_file_handle fh;
 		zend_llist scanned_ini_list;
 		zend_llist_element *element;
 		int l, total_l = 0;
 
-		/* Reset active ini section */
-		RESET_ACTIVE_INI_HASH();
+		/* List of found ini files */
+		zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
+		
+		/* Split by paths_separator and load ini-files from all paths */
+		path_copy = estrdup(php_ini_scanned_path);
+		ini_path  = php_strtok_r(path_copy, paths_separator, &last);
 
-		if ((ndir = php_scandir(php_ini_scanned_path, &namelist, 0, php_alphasort)) > 0) {
-			zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
-			memset(&fh, 0, sizeof(fh));
+		while (ini_path != NULL) {
+			struct dirent **namelist;
+			int ini_path_len = strlen(ini_path);
 
-			for (i = 0; i < ndir; i++) {
+			if ((ndir = php_scandir(ini_path, &namelist, 0, php_alphasort)) > 0) {
+				memset(&fh, 0, sizeof(fh));
 
-				/* check for any file with .ini extension */
-				if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
-					free(namelist[i]);
-					continue;
-				}
-				if (IS_SLASH(php_ini_scanned_path[php_ini_scanned_path_len - 1])) {
-					snprintf(ini_file, MAXPATHLEN, "%s%s", php_ini_scanned_path, namelist[i]->d_name);
-				} else {
-					snprintf(ini_file, MAXPATHLEN, "%s%c%s", php_ini_scanned_path, DEFAULT_SLASH, namelist[i]->d_name);
-				}
-				if (VCWD_STAT(ini_file, &sb) == 0) {
-					if (S_ISREG(sb.st_mode)) {
-						if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
-							fh.filename = ini_file;
-							fh.type = ZEND_HANDLE_FP;
+				for (i = 0; i < ndir; i++) {
+					/* check for any file with .ini extension */
+					if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
+						free(namelist[i]);
+						continue;
+					}
+					if (IS_SLASH(ini_path[ini_path_len - 1])) {
+						snprintf(ini_file, MAXPATHLEN, "%s%s", ini_path, namelist[i]->d_name);
+					} else {
+						snprintf(ini_file, MAXPATHLEN, "%s%c%s", ini_path, DEFAULT_SLASH, namelist[i]->d_name);
+					}			
+					if (VCWD_STAT(ini_file, &sb) == 0) {
+						if (S_ISREG(sb.st_mode)) {
+							if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
+								fh.filename = ini_file;
+								fh.type = ZEND_HANDLE_FP;
+								
+								/* Reset active ini section */
+								RESET_ACTIVE_INI_HASH();
 
-							if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash TSRMLS_CC) == SUCCESS) {
-								/* Here, add it to the list of ini files read */
-								l = strlen(ini_file);
-								total_l += l + 2;
-								p = estrndup(ini_file, l);
-								zend_llist_add_element(&scanned_ini_list, &p);
+								if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash TSRMLS_CC) == SUCCESS) {
+									/* Here, add it to the list of ini files read */
+									l = strlen(ini_file);
+									total_l += l + 2;
+									p = estrndup(ini_file, l);
+									zend_llist_add_element(&scanned_ini_list, &p);
+								}
 							}
 						}
 					}
+					free(namelist[i]);
 				}
-				free(namelist[i]);
+				free(namelist);
 			}
-			free(namelist);
-
-			if (total_l) {
-				int php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
-				php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
-				if (!php_ini_scanned_files_len) {
-					*php_ini_scanned_files = '\0';
-				}
-				total_l += php_ini_scanned_files_len;
-				for (element = scanned_ini_list.head; element; element = element->next) {
-					if (php_ini_scanned_files_len) {
-						strlcat(php_ini_scanned_files, ",\n", total_l);
-					}
-					strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
-					strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
-				}
-			}
-			zend_llist_destroy(&scanned_ini_list);
+			ini_path = php_strtok_r(NULL, paths_separator, &last);
 		}
+			
+		if (total_l) {
+			int php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
+			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
+			if (!php_ini_scanned_files_len) {
+				*php_ini_scanned_files = '\0';
+			}
+			total_l += php_ini_scanned_files_len;
+			for (element = scanned_ini_list.head; element; element = element->next) {
+				if (php_ini_scanned_files_len) {
+					strlcat(php_ini_scanned_files, ",\n", total_l);
+				}
+				strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
+				strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
+			}
+		}
+		efree(path_copy);
+		zend_llist_destroy(&scanned_ini_list);
 	} else {
 		/* Make sure an empty php_ini_scanned_path ends up as NULL */
 		php_ini_scanned_path = NULL;
