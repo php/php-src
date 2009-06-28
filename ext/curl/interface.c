@@ -1829,6 +1829,14 @@ PHP_FUNCTION(curl_exec)
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
 
+	/* flush the file handle, so any remaining data is synched to disk */
+	if (ch->handlers->write->method == PHP_CURL_FILE && ch->handlers->write->fp) {
+		fflush(ch->handlers->write->fp);
+	}
+	if (ch->handlers->write_header->method == PHP_CURL_FILE && ch->handlers->write_header->fp) {
+		fflush(ch->handlers->write_header->fp);
+	}
+
 	if (ch->handlers->write->method == PHP_CURL_RETURN) {
 		RETURN_EMPTY_STRING();
 	} else {
