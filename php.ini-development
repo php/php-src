@@ -8,7 +8,7 @@
 
 ; PHP attempts to find and load this configuration from a number of locations.
 ; The following is a summary of its search order:
-; 1. SAPI module specific locamystion.
+; 1. SAPI module specific location.
 ; 2. The PHPRC environment variable. (As of PHP 5.2.0)
 ; 3. A number of predefined registry keys on Windows (As of PHP 5.2.0)
 ; 4. Current working directory (except CLI)
