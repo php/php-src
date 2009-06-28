@@ -343,7 +343,6 @@ UPGRADE NOTES - PHP 5.3
   - oci8.connection_class
   - oci8.events
   - pdo_mysql.default_socket
-  - pdo_mysql.debug
   - pdo_mysql.cache_size
   - sqlite3.extension_dir
   - mysql.default_socket
@@ -351,7 +350,6 @@ UPGRADE NOTES - PHP 5.3
   - mysql.cache_size
   - mysqlnd.collect_statistics
   - mysqlnd.collect_memory_statistics
-  - mysqlnd.debug
   - mysqlnd.net_cmd_buffer_size
   - mysqlnd.net_read_buffer_size
   - mysqlnd.log_mask
