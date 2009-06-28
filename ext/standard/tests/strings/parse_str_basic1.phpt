@@ -1,8 +1,5 @@
 --TEST--
 Test parse_str() function : basic functionality 
---XFAIL--
-Bug 48658: Test currently fails as parse_str() api insists that the optional reult array 
-is pre-defined. 
 --FILE--
 <?php
 		
