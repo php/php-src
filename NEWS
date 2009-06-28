@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
 
+- Fixed bug #48709 (metaphone and 'wh'). (brettz9 at yahoo dot com, Felipe)
 - Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
   formatted). (peter at lvp-media dot com, Felipe)
 - Fixed bug #48661 (phpize is broken with non-bash shells). (Jani)
