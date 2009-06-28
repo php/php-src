@@ -341,6 +341,7 @@ UPGRADE NOTES - PHP 5.3
   - mysqli.allow_local_infile
   - mysqli.cache_size
   - oci8.connection_class
+  - oci8.events
   - pdo_mysql.default_socket
   - pdo_mysql.debug
   - pdo_mysql.cache_size
