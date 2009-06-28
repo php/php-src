@@ -286,7 +286,7 @@ PHP_MINFO_FUNCTION(ldap)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_connect([string host [, int port [, string wallet [, string wallet_passwd [, int authmode]]]]])
+/* {{{ proto resource ldap_connect([string host [, int port [, string wallet [, string wallet_passwd [, int authmode]]]]]) U
    Connect to an LDAP server */
 PHP_FUNCTION(ldap_connect)
 {
@@ -307,7 +307,7 @@ PHP_FUNCTION(ldap_connect)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|slssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s&ls&s&l", &host, &hostlen, UG(utf8_conv), &port, &wallet, &walletlen, UG(utf8_conv), &walletpasswd, &walletpasswdlen, UG(utf8_conv), &authmode) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -385,7 +385,7 @@ static int _get_lderrno(LDAP *ldap)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_bind(resource link [, string dn [, string password]])
+/* {{{ proto bool ldap_bind(resource link [, string dn [, string password]]) U
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
@@ -395,7 +395,7 @@ PHP_FUNCTION(ldap_bind)
 	ldap_linkdata *ld;
 	int rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ss", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s&s&", &link, &ldap_bind_dn, &ldap_bind_dnlen, UG(utf8_conv), &ldap_bind_pw, &ldap_bind_pwlen, UG(utf8_conv)) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -495,7 +495,7 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props]]]]]]])
+/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props]]]]]]]) U
    Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
@@ -511,7 +511,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 	int rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s&s&s&s&s&s&s&", &link, &binddn, &dn_len, UG(utf8_conv), &passwd, &passwd_len, UG(utf8_conv), &sasl_mech, &mech_len, UG(utf8_conv), &sasl_realm, &realm_len, UG(utf8_conv), &sasl_authc_id, &authc_id_len, UG(utf8_conv), &sasl_authz_id, &authz_id_len, UG(utf8_conv), &props, &props_len, UG(utf8_conv)) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -535,7 +535,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 /* }}} */
 #endif /* HAVE_LDAP_SASL */
 
-/* {{{ proto bool ldap_unbind(resource link)
+/* {{{ proto bool ldap_unbind(resource link) U
    Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
@@ -612,6 +612,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int num_attribs = 0;
 	int i, errno;
 	int myargcount = ZEND_NUM_ARGS();
+	int free_base_dn = 0;
 	int ret = 1;
 
 	if (zend_parse_parameters(myargcount TSRMLS_CC, "ZZZ|ZZZZZ", &link, &base_dn, &filter, &attrs, &attrsonly, 
@@ -695,6 +696,11 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			/* If anything else than string is passed, ldap_base_dn = NULL */
 			if (Z_TYPE_PP(base_dn) == IS_STRING) {
 				ldap_base_dn = Z_STRVAL_PP(base_dn);
+			} else if(Z_TYPE_PP(base_dn) == IS_UNICODE){
+				char *tmp = zend_unicode_to_ascii(Z_USTRVAL_PP(base_dn), Z_USTRLEN_PP(base_dn) TSRMLS_CC);
+				ldap_base_dn = estrdup(tmp);
+				efree(tmp);
+				free_base_dn = 1;
 			} else {
 				ldap_base_dn = NULL;
 			}
@@ -733,6 +739,10 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				/* If anything else than string is passed, ldap_base_dn = NULL */
 				if (Z_TYPE_PP(entry) == IS_STRING) {
 					ldap_base_dn = Z_STRVAL_PP(entry);
+				} else if(Z_TYPE_PP(entry) == IS_UNICODE){
+					char *tmp = zend_unicode_to_ascii(Z_USTRVAL_PP(entry), Z_USTRLEN_PP(entry) TSRMLS_CC);
+					ldap_base_dn = estrdup(tmp);
+					free_base_dn = 1;
 				} else {
 					ldap_base_dn = NULL;
 				}
@@ -778,6 +788,11 @@ cleanup_parallel:
 		/* If anything else than string is passed, ldap_base_dn = NULL */
 		if (Z_TYPE_PP(base_dn) == IS_STRING) {
 			ldap_base_dn = Z_STRVAL_PP(base_dn);
+		} else if (Z_TYPE_PP(base_dn) == IS_UNICODE) {
+			char *tmp = zend_unicode_to_ascii(Z_USTRVAL_PP(base_dn), Z_USTRLEN_PP(base_dn) TSRMLS_CC);
+			ldap_base_dn = estrdup(tmp);
+			efree(tmp);
+			free_base_dn = 1;
 		}
 
 		ld = (ldap_linkdata *) zend_fetch_resource(link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
@@ -824,13 +839,16 @@ cleanup:
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
 	}
+	if (free_base_dn) {
+		efree(ldap_base_dn);
+	}
 	if (!ret) {
 		RETVAL_BOOL(ret);
 	}
 }
 /* }}} */
 
-/* {{{ proto resource ldap_read(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_read(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]]) U
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
@@ -838,7 +856,7 @@ PHP_FUNCTION(ldap_read)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_list(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_list(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]]) U
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
@@ -846,7 +864,7 @@ PHP_FUNCTION(ldap_list)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_search(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_search(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]]) U
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
@@ -854,7 +872,7 @@ PHP_FUNCTION(ldap_search)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_free_result(resource result)
+/* {{{ proto bool ldap_free_result(resource result) U
    Free result memory */
 PHP_FUNCTION(ldap_free_result)
 {
@@ -872,7 +890,7 @@ PHP_FUNCTION(ldap_free_result)
 }
 /* }}} */
 
-/* {{{ proto int ldap_count_entries(resource link, resource result)
+/* {{{ proto int ldap_count_entries(resource link, resource result) U
    Count the number of entries in a search result */
 PHP_FUNCTION(ldap_count_entries)
 {
@@ -891,7 +909,7 @@ PHP_FUNCTION(ldap_count_entries)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_first_entry(resource link, resource result)
+/* {{{ proto resource ldap_first_entry(resource link, resource result) U
    Return first result id */
 PHP_FUNCTION(ldap_first_entry)
 {
@@ -920,7 +938,7 @@ PHP_FUNCTION(ldap_first_entry)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_next_entry(resource link, resource result_entry)
+/* {{{ proto resource ldap_next_entry(resource link, resource result_entry) U
    Get next result entry */
 PHP_FUNCTION(ldap_next_entry)
 {
@@ -949,7 +967,7 @@ PHP_FUNCTION(ldap_next_entry)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_entries(resource link, resource result)
+/* {{{ proto array ldap_get_entries(resource link, resource result) U
    Get all result entries */
 PHP_FUNCTION(ldap_get_entries)
 {
@@ -1044,7 +1062,7 @@ PHP_FUNCTION(ldap_get_entries)
 }
 /* }}} */
 
-/* {{{ proto string ldap_first_attribute(resource link, resource result_entry)
+/* {{{ proto string ldap_first_attribute(resource link, resource result_entry) U
    Return first attribute */
 PHP_FUNCTION(ldap_first_attribute)
 {
@@ -1071,7 +1089,7 @@ PHP_FUNCTION(ldap_first_attribute)
 }
 /* }}} */
 
-/* {{{ proto string ldap_next_attribute(resource link, resource result_entry)
+/* {{{ proto string ldap_next_attribute(resource link, resource result_entry) U
    Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
 {
@@ -1109,7 +1127,7 @@ PHP_FUNCTION(ldap_next_attribute)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_attributes(resource link, resource result_entry)
+/* {{{ proto array ldap_get_attributes(resource link, resource result_entry) U
    Get attributes from a search result entry */
 PHP_FUNCTION(ldap_get_attributes)
 {
@@ -1164,7 +1182,7 @@ PHP_FUNCTION(ldap_get_attributes)
 }
 /* }}} */
 
-/* {{{ proto array ldap_get_values_len(resource link, resource result_entry, string attribute)
+/* {{{ proto array ldap_get_values_len(resource link, resource result_entry, string attribute) U
    Get all values with lengths from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
 {
@@ -1175,7 +1193,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	struct berval **ldap_value_len;
 	int i, num_values, attr_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrs", &link, &result_entry, &attr, &attr_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrs&", &link, &result_entry, &attr, &attr_len, UG(utf8_conv)) != SUCCESS) {
 		return;
 	}
 	
@@ -1200,7 +1218,7 @@ PHP_FUNCTION(ldap_get_values_len)
 }
 /* }}} */
 
-/* {{{ proto string ldap_get_dn(resource link, resource result_entry)
+/* {{{ proto string ldap_get_dn(resource link, resource result_entry) U
    Get the DN of a result entry */
 PHP_FUNCTION(ldap_get_dn) 
 {
@@ -1230,7 +1248,7 @@ PHP_FUNCTION(ldap_get_dn)
 }
 /* }}} */
 
-/* {{{ proto array ldap_explode_dn(string dn, int with_attrib)
+/* {{{ proto array ldap_explode_dn(string dn, int with_attrib) U
    Splits DN into its component parts */
 PHP_FUNCTION(ldap_explode_dn)
 {
@@ -1238,7 +1256,7 @@ PHP_FUNCTION(ldap_explode_dn)
 	char *dn, **ldap_value;
 	int i, count, dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &dn, &dn_len, &with_attrib) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&l", &dn, &dn_len, UG(utf8_conv), &with_attrib) != SUCCESS) {
 		return;
 	}
 
@@ -1262,14 +1280,14 @@ PHP_FUNCTION(ldap_explode_dn)
 }
 /* }}} */
 
-/* {{{ proto string ldap_dn2ufn(string dn)
+/* {{{ proto string ldap_dn2ufn(string dn) U
    Convert DN to User Friendly Naming format */
 PHP_FUNCTION(ldap_dn2ufn)
 {
 	char *dn, *ufn;
 	int dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &dn, &dn_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &dn, &dn_len, UG(utf8_conv)) != SUCCESS) {
 		return;
 	}
 	
@@ -1304,7 +1322,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&a", &link, &dn, &dn_len, UG(utf8_conv), &entry) != SUCCESS) {
 		return;
 	}	
 
@@ -1334,6 +1352,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			char *tmp = zend_unicode_to_ascii(attribute.u, attribute_len - 1 TSRMLS_CC);
 			if (tmp) {
 				ldap_mods[i]->mod_type = estrdup(tmp);
+				efree(tmp);
 			} else {
 				goto error_out;
 			}
@@ -1419,7 +1438,7 @@ errexit:
 }
 /* }}} */
 
-/* {{{ proto bool ldap_add(resource link, string dn, array entry)
+/* {{{ proto bool ldap_add(resource link, string dn, array entry) U
    Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
 {
@@ -1430,7 +1449,7 @@ PHP_FUNCTION(ldap_add)
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
-/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry) U
    Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
@@ -1438,7 +1457,7 @@ PHP_FUNCTION(ldap_mod_replace)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry) U
    Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
@@ -1446,7 +1465,7 @@ PHP_FUNCTION(ldap_mod_add)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry)
+/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry) U
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
@@ -1454,7 +1473,7 @@ PHP_FUNCTION(ldap_mod_del)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_delete(resource link, string dn)
+/* {{{ proto bool ldap_delete(resource link, string dn) U
    Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
@@ -1463,7 +1482,7 @@ PHP_FUNCTION(ldap_delete)
 	char *dn;
 	int rc, dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &link, &dn, &dn_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&", &link, &dn, &dn_len, UG(utf8_conv)) != SUCCESS) {
 		return;
 	}
 
@@ -1478,7 +1497,7 @@ PHP_FUNCTION(ldap_delete)
 }
 /* }}} */
 
-/* {{{ proto int ldap_errno(resource link)
+/* {{{ proto int ldap_errno(resource link) U
    Get the current ldap error number */
 PHP_FUNCTION(ldap_errno)
 {
@@ -1495,7 +1514,7 @@ PHP_FUNCTION(ldap_errno)
 }
 /* }}} */
 
-/* {{{ proto string ldap_err2str(int errno)
+/* {{{ proto string ldap_err2str(int errno) U
    Convert error number to error string */
 PHP_FUNCTION(ldap_err2str)
 {
@@ -1509,7 +1528,7 @@ PHP_FUNCTION(ldap_err2str)
 }
 /* }}} */
 
-/* {{{ proto string ldap_error(resource link)
+/* {{{ proto string ldap_error(resource link) U
    Get the current ldap error string */
 PHP_FUNCTION(ldap_error) 
 {
@@ -1529,7 +1548,7 @@ PHP_FUNCTION(ldap_error)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_compare(resource link, string dn, string attr, string value)
+/* {{{ proto bool ldap_compare(resource link, string dn, string attr, string value) U
    Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare) 
 {
@@ -1539,7 +1558,7 @@ PHP_FUNCTION(ldap_compare)
 	ldap_linkdata *ld;
 	int errno;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s&", &link, &dn, &dn_len, UG(utf8_conv), &attr, &attr_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) != SUCCESS) {
 		return;
 	}
 
@@ -1562,7 +1581,7 @@ PHP_FUNCTION(ldap_compare)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sort(resource link, resource result, string sortfilter)
+/* {{{ proto bool ldap_sort(resource link, resource result, string sortfilter) U
    Sort LDAP result entries */
 PHP_FUNCTION(ldap_sort)
 {
@@ -1572,7 +1591,7 @@ PHP_FUNCTION(ldap_sort)
 	int sflen;
 	zend_rsrc_list_entry *le;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrs", &link, &result, &sortfilter, &sflen) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrs&", &link, &result, &sortfilter, &sflen, UG(utf8_conv)) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -1593,7 +1612,7 @@ PHP_FUNCTION(ldap_sort)
 /* }}} */
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
-/* {{{ proto bool ldap_get_option(resource link, int option, mixed retval)
+/* {{{ proto bool ldap_get_option(resource link, int option, mixed retval) U
    Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option) 
 {
@@ -1706,7 +1725,7 @@ PHP_FUNCTION(ldap_get_option)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_set_option(resource link, int option, mixed newval)
+/* {{{ proto bool ldap_set_option(resource link, int option, mixed newval) U
    Set the value of various session-wide parameters */
 PHP_FUNCTION(ldap_set_option) 
 {
@@ -1840,7 +1859,7 @@ PHP_FUNCTION(ldap_set_option)
 					error = 1;
 					break;
 				}
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "oid", sizeof("oid"), (void **) &val) != SUCCESS) {
+				if (zend_utf8_hash_find(Z_ARRVAL_PP(ctrlval), "oid", sizeof("oid"), (void **) &val) != SUCCESS) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Control must have an oid key");
 					error = 1;
 					break;
@@ -1848,7 +1867,7 @@ PHP_FUNCTION(ldap_set_option)
 				ctrl = *ctrlp = emalloc(sizeof(**ctrlp));
 				convert_to_string_ex(val);
 				ctrl->ldctl_oid = Z_STRVAL_PP(val);
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
+				if (zend_utf8_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
 					convert_to_string_ex(val);
 					ctrl->ldctl_value.bv_val = Z_STRVAL_PP(val);
 					ctrl->ldctl_value.bv_len = Z_STRLEN_PP(val);
@@ -1856,7 +1875,7 @@ PHP_FUNCTION(ldap_set_option)
 					ctrl->ldctl_value.bv_val = NULL;
 					ctrl->ldctl_value.bv_len = 0;
 				}
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
+				if (zend_utf8_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
 					convert_to_boolean_ex(val);
 					ctrl->ldctl_iscritical = Z_BVAL_PP(val);
 				} else {
@@ -1888,7 +1907,7 @@ PHP_FUNCTION(ldap_set_option)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_RESULT
-/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals)
+/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals) U
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result) 
 {
@@ -1955,7 +1974,7 @@ PHP_FUNCTION(ldap_parse_result)
 /* }}} */
 #endif
 
-/* {{{ proto resource ldap_first_reference(resource link, resource result)
+/* {{{ proto resource ldap_first_reference(resource link, resource result) U
    Return first reference */
 PHP_FUNCTION(ldap_first_reference)
 {
@@ -1983,7 +2002,7 @@ PHP_FUNCTION(ldap_first_reference)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_next_reference(resource link, resource reference_entry)
+/* {{{ proto resource ldap_next_reference(resource link, resource reference_entry) U
    Get next reference */
 PHP_FUNCTION(ldap_next_reference)
 {
@@ -2012,7 +2031,7 @@ PHP_FUNCTION(ldap_next_reference)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
-/* {{{ proto bool ldap_parse_reference(resource link, resource reference_entry, array referrals)
+/* {{{ proto bool ldap_parse_reference(resource link, resource reference_entry, array referrals) U
    Extract information from reference entry */
 PHP_FUNCTION(ldap_parse_reference)
 {
@@ -2047,7 +2066,7 @@ PHP_FUNCTION(ldap_parse_reference)
 /* }}} */
 #endif
 
-/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn);
+/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn); U
    Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
@@ -2058,7 +2077,7 @@ PHP_FUNCTION(ldap_rename)
 	int dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsssb", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs&s&s&b", &link, &dn, &dn_len, UG(utf8_conv), &newrdn, &newrdn_len, UG(utf8_conv), &newparent, &newparent_len, UG(utf8_conv), &deleteoldrdn) != SUCCESS) {
 		return;
 	}
 
@@ -2087,7 +2106,7 @@ PHP_FUNCTION(ldap_rename)
 /* }}} */
 
 #ifdef HAVE_LDAP_START_TLS_S
-/* {{{ proto bool ldap_start_tls(resource link)
+/* {{{ proto bool ldap_start_tls(resource link) U
    Start TLS */
 PHP_FUNCTION(ldap_start_tls)
 {
@@ -2154,7 +2173,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 }
 /* }}} */
 
-/* {{{ proto bool ldap_set_rebind_proc(resource link, string callback)
+/* {{{ proto bool ldap_set_rebind_proc(resource link, string callback) U
    Set a callback function to do re-binds on referral chasing. */
 PHP_FUNCTION(ldap_set_rebind_proc)
 {
@@ -2168,7 +2187,8 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
-	if (Z_TYPE_P(callback) == IS_STRING && Z_STRLEN_P(callback) == 0) {
+	if ((Z_TYPE_P(callback) == IS_STRING && Z_STRLEN_P(callback) == 0) ||
+	    (Z_TYPE_P(callback) == IS_UNICODE && Z_USTRLEN_P(callback) == 0)) {
 		/* unregister rebind procedure */
 		if (ld->rebindproc != NULL) {
 			zval_dtor(ld->rebindproc);
@@ -2209,7 +2229,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 	char *value;
 	int result, ldap_len;
 		
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &value, &value_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &value, &value_len, UG(utf8_conv)) != SUCCESS) {
 		return;
 	}
 
@@ -2233,7 +2253,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 }
 /* }}} */
 
-/* {{{ proto string ldap_t61_to_8859(string value)
+/* {{{ proto string ldap_t61_to_8859(string value) U
    Translate t61 characters to 8859 characters */
 PHP_FUNCTION(ldap_t61_to_8859)
 {
@@ -2241,7 +2261,7 @@ PHP_FUNCTION(ldap_t61_to_8859)
 }
 /* }}} */
 
-/* {{{ proto string ldap_8859_to_t61(string value)
+/* {{{ proto string ldap_8859_to_t61(string value) U
    Translate 8859 characters to t61 characters */
 PHP_FUNCTION(ldap_8859_to_t61)
 {
