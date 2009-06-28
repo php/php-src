@@ -1048,6 +1048,8 @@ default_socket_timeout = 60
 ; http://php.net/pdo-odbc.connection-pooling
 ;pdo_odbc.connection_pooling=strict
 
+;pdo_odbc.db2_instance_name
+
 [Pdo_mysql]
 ; If mysqlnd is used: Number of cache slots for the internal result set cache
 ; http://php.net/pdo_mysql.cache_size
@@ -1113,6 +1115,10 @@ sql.safe_mode = Off
 
 ; http://php.net/odbc.default-pw
 ;odbc.default_pw    =  Not yet implemented
+
+; Controls the ODBC cursor model. 
+; Default: SQL_CURSOR_STATIC (default).
+;odbc.default_cursortype
 
 ; Allow or prevent persistent links.
 ; http://php.net/odbc.allow-persistent
@@ -1404,6 +1410,18 @@ sybct.min_client_severity = 10
 ;sybct.timeout=
 
 ;sybct.packet_size
+
+; The maximum time in seconds to wait for a connection attempt to succeed before returning failure.
+; Default: one minute
+;sybct.login_timeout=
+
+; The name of the host you claim to be connecting from, for display by sp_who.
+; Default: none
+;sybct.hostname=
+
+; Allows you to define how often deadlocks are to be retried. -1 means "forever".
+; Default: 0
+;sybct.deadlock_retry_count=
 
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
@@ -1718,6 +1736,10 @@ mssql.secure_connection = Off
 ; http://php.net/com.autoregister-verbose
 ;com.autoregister_verbose = true
 
+; The default character set code-page to use when passing strings to and from COM objects.
+; Default: system ANSI code page
+;com.code_page=
+
 [mbstring]
 ; language for internal character representation.
 ; http://php.net/mbstring.language
@@ -1774,6 +1796,10 @@ mssql.secure_connection = Off
 ; is activated.
 ; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
 ;mbstring.http_output_conv_mimetype=
+
+; Allows to set script encoding. Only affects if PHP is compiled with --enable-zend-multibyte
+; Default: ""
+;mbstring.script_encoding=
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
