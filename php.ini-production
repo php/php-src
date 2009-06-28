@@ -1807,11 +1807,18 @@ soap.wsdl_cache_dir="/tmp"
 ; http://php.net/soap.wsdl-cache-ttl
 soap.wsdl_cache_ttl=86400
 
+; Sets the size of the cache limit. (Max. number of WSDL files to cache)
+soap.wsdl_cache_limit = 5
+
 [sysvshm]
 ; A default size of the shared memory segment
 ;sysvshm.init_mem = 10000
 
-;soap.wsdl_cache_limit=
+[ldap]
+; Sets the maximum number of open links or -1 for unlimited.
+ldap.max_links = -1
+
+
 ;dba.default_handler=
 ;pdo_odbc.db2_instance_name=
 ;mcrypt.algorithms_dir=
@@ -1830,8 +1837,6 @@ soap.wsdl_cache_ttl=86400
 ;mbstring.http_output_conv_mimetypes=
 ;com.code_page=
 ;odbc.default_cursortype=
-;session.encode_sources=
-;ldap.max_links=
 ;sybct.login_timeout=
 ;sybct.hostname=
 ;sybct.deadlock_retry_count=
