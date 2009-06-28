@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
+- Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
+  formatted). (peter at lvp-media dot com, Felipe)
 - Fixed bug #48661 (phpize is broken with non-bash shells). (Jani)
 - Fixed bug #48636 (Error compiling of ext/date on netware). (guenter at
   php.net, Ilia)
