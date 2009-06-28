@@ -1,8 +1,5 @@
 --TEST--
 Test parse_str() function : test with badly formed strings
---XFAIL--
-Bug 48658: Test currently fails as parse_str() api insists that the optional reult array 
-is pre-defined. php.net bugzilla 
 --FILE--
 <?php
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )

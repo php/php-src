@@ -6199,7 +6199,7 @@ PHP_FUNCTION(parse_str)
 	int enc_string_len;
 	zval *result = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &enc_string, &enc_string_len, &result) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &enc_string, &enc_string_len, &result) == FAILURE) {
 		return;
 	}
 	
