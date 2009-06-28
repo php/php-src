@@ -1047,6 +1047,16 @@ default_socket_timeout = 60
 ; http://php.net/pdo-odbc.connection-pooling
 ;pdo_odbc.connection_pooling=strict
 
+[Pdo_mysql]
+; If mysqlnd is used: Number of cache slots for the internal result set cache
+; http://php.net/pdo_mysql.cache_size
+pdo_mysql.cache_size = 2000
+
+; Default socket name for local MySQL connects.  If empty, uses the built-in
+; MySQL defaults.
+; http://php.net/pdo_mysql.default-socket
+pdo_mysql.default_socket=
+
 [Phar]
 ; http://php.net/phar.readonly
 ;phar.readonly = On
@@ -1133,9 +1143,17 @@ odbc.defaultbinmode = 1
 ;birdstep.max_links = -1
 
 [MySQL]
+; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
+; http://php.net/mysql.allow_local_infile
+mysql.allow_local_infile = On
+
 ; Allow or prevent persistent links.
 ; http://php.net/mysql.allow-persistent
 mysql.allow_persistent = On
+
+; If mysqlnd is used: Number of cache slots for the internal result set cache
+; http://php.net/mysql.cache_size
+mysql.cache_size = 2000
 
 ; Maximum number of persistent links.  -1 means no limit.
 ; http://php.net/mysql.max-persistent
@@ -1184,9 +1202,25 @@ mysql.trace_mode = Off
 
 [MySQLi]
 
+; Maximum number of persistent links.  -1 means no limit.
+; http://php.net/mysqli.max-persistent
+mysqli.max_persistent = -1
+
+; Allow accessing, from PHP's perspective, local files with LOAD DATA statements
+; http://php.net/mysqli.allow_local_infile
+;mysqli.allow_local_infile = On
+
+; Allow or prevent persistent links.
+; http://php.net/mysqli.allow-persistent
+mysqli.allow_persistent = On
+
 ; Maximum number of links.  -1 means no limit.
 ; http://php.net/mysqli.max-links
 mysqli.max_links = -1
+
+; If mysqlnd is used: Number of cache slots for the internal result set cache
+; http://php.net/mysqli.cache_size
+mysqli.cache_size = 2000
 
 ; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
 ; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
@@ -1218,6 +1252,26 @@ mysqli.default_pw =
 
 ; Allow or prevent reconnect
 mysqli.reconnect = Off
+
+[mysqlnd]
+; Enable / Disable collection of general statstics by mysqlnd which can be
+; used to tune and monitor MySQL operations.
+; http://php.net/mysqlnd.collect_statistics
+mysqlnd.collect_statistics = On
+
+; Enable / Disable collection of memory usage statstics by mysqlnd which can be
+; used to tune and monitor MySQL operations.
+; http://php.net/mysqlnd.collect_memory_statistics
+mysqlnd.collect_memory_statistics = Off
+
+; Size of a pre-allocated buffer used when sending commands to MySQL in bytes.
+; http://php.net/mysqlnd.net_cmd_buffer_size
+;mysqlnd.net_cmd_buffer_size = 2048
+
+; Size of a pre-allocated buffer used for reading data sent by the server in
+; bytes.
+; http://php.net/mysqlnd.net_read_buffer_size
+;mysqlnd.net_read_buffer_size = 32768
 
 [OCI8]
 
@@ -1772,24 +1826,9 @@ soap.wsdl_cache_ttl=86400
 ;ibase.timestampformat=
 ;ibase.dateformat=
 ;ibase.timeformat=
-;mysqli.max_persistent=
-;mysqli.allow_persistent=
-;mysqli.allow_local_infile=
-;mysqli.cache_size=
 ;mbstring.script_encoding=
 ;mbstring.http_output_conv_mimetypes=
-;pdo_mysql.default_socket=
-;pdo_mysql.debug=
-;pdo_mysql.cache_size=
 ;com.code_page=
-;mysql.allow_local_infile=
-;mysql.cache_size=
-;mysqlnd.collect_statistics=
-;mysqlnd.collect_memory_statistics=
-;mysqlnd.debug=
-;mysqlnd.net_cmd_buffer_size=
-;mysqlnd.net_read_buffer_size=
-;mysqlnd.log_mask=
 ;odbc.default_cursortype=
 ;session.encode_sources=
 ;ldap.max_links=
