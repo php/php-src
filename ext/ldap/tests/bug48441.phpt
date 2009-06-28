@@ -38,8 +38,6 @@ include "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link);
 ?>
---XFAIL--
-This test may still fail in PHP 6 as ext/ldap is still not ready
 --EXPECTF--
 resource(%d) of type (ldap result)
 array(4) {
