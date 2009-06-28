@@ -1794,6 +1794,7 @@ ZEND_FUNCTION(create_function)
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_ASCII_STRINGL(function_name, function_name_length, 0);
 	} else {
+		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_FALSE;
 	}
 }
