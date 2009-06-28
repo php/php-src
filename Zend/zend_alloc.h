@@ -89,7 +89,7 @@ inline static void * __zend_malloc(size_t len)
 inline static void * __zend_calloc(size_t nmemb, size_t len)
 {
 	void *tmp = _safe_malloc(nmemb, len, 0);
-	memset(tmp, 0, len);
+	memset(tmp, 0, nmemb * len);
 	return tmp;
 }
 
