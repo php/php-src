@@ -224,15 +224,14 @@ static int metaphone(unsigned char *word, int word_len, long max_phonemes, char 
 			w_idx += 2;
 		}
 		break;
-		/* WH becomes H, 
+		/* WH becomes W, 
 		   WR becomes R 
 		   W if followed by a vowel */
 	case 'W':
-		if (Next_Letter == 'H' ||
-			Next_Letter == 'R') {
+		if (Next_Letter == 'R') {
 			Phonize(Next_Letter);
 			w_idx += 2;
-		} else if (isvowel(Next_Letter)) {
+		} else if (Next_Letter == 'H' || isvowel(Next_Letter)) {
 			Phonize('W');
 			w_idx += 2;
 		}
