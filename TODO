@@ -13,6 +13,7 @@ Zend
       interfaces difficult which pass const parameters to us.
     * Clean up object->string conversion behavior wherever possible (switch(),
       comparison, etc)
+    * Port safe-allocation functions from 5.3 (zend_alloc.[ch])
 
 
 global
