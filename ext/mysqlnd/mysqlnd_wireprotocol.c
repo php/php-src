@@ -25,6 +25,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_palloc.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd/mysqlnd_block_alloc.h"
 #include "ext/standard/sha1.h"
 #include "php_network.h"
 #include "zend_ini.h"
@@ -1473,7 +1474,7 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 	end_field = (current_field = start_field = fields) + field_count;
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
-		void *obj;
+		void *obj = NULL;
 		zend_bool allocated = TRUE;
 		zend_uchar *this_field_len_pos = p;
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
