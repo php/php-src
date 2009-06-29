@@ -36,14 +36,15 @@ class test extends bar {
 new test;
 
 ?>
---EXPECT--
-object(ReflectionProperty)#3 (2) {
+===DONE===
+--EXPECTF--
+object(ReflectionProperty)#%d (2) {
   [u"name"]=>
   unicode(4) "test"
   [u"class"]=>
   unicode(3) "foo"
 }
-object(ReflectionProperty)#5 (2) {
+object(ReflectionProperty)#%d (2) {
   [u"name"]=>
   unicode(1) "a"
   [u"class"]=>
@@ -56,17 +57,18 @@ bool(true)
 bool(false)
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#6 (2) {
+  &object(ReflectionProperty)#%d (2) {
     [u"name"]=>
     unicode(1) "b"
     [u"class"]=>
     unicode(4) "test"
   }
   [1]=>
-  &object(ReflectionProperty)#7 (2) {
+  &object(ReflectionProperty)#%d (2) {
     [u"name"]=>
     unicode(1) "a"
     [u"class"]=>
     unicode(4) "test"
   }
 }
+===DONE===
