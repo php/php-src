@@ -45,8 +45,9 @@ class bar extends test {
 new bar;
 
 ?>
+===DONE===
 --EXPECTF--
-object(ReflectionProperty)#2 (2) {
+object(ReflectionProperty)#%d (2) {
   ["name"]=>
   string(1) "z"
   ["class"]=>
@@ -63,7 +64,7 @@ array(1) {
 int(1000)
 ---------------------------
 string(30) "Property x::$zz does not exist"
-object(ReflectionProperty)#3 (2) {
+object(ReflectionProperty)#%d (2) {
   ["name"]=>
   string(3) "zzz"
   ["class"]=>
@@ -72,3 +73,4 @@ object(ReflectionProperty)#3 (2) {
 int(2)
 bool(false)
 bool(true)
+===DONE===
