@@ -114,7 +114,7 @@ PHP_FUNCTION(stream_socket_client)
 	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
-	if (zerrno)	{
+	if (zerrno) {
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
@@ -155,11 +155,11 @@ PHP_FUNCTION(stream_socket_client)
 		}
 		RETURN_FALSE;
 	}
-	
+
 	if (errstr) {
 		efree(errstr);
 	}
-	
+
 	php_stream_to_zval(stream, return_value);
 
 	if (zcontext) {
