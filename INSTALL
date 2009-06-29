@@ -198,13 +198,18 @@ Apache 1.3.x on Unix systems
 
 13. Setup your php.ini file:
 
-      cp php.ini-dist /usr/local/lib/php.ini
+    PHP will used the built-in default values if no php.ini file was
+    placed in the configuration directory. The default location is
+    /usr/local/lib, if you prefer your php.ini in another location, use 
+    --with-config-file-path=/some/path in step 10.
 
-    You may edit your .ini file to set PHP options.  If you prefer your
-    php.ini in another location, use --with-config-file-path=/some/path in
-    step 10.
+    The PHP distribution provides two sample php.ini files, you can use them
+    by
+      cp php.ini-development /usr/local/lib/php.ini
+    or
+      cp php.ini-production  /usr/local/lib/php.ini
 
-    If you instead choose php.ini-recommended, be certain to read the list
+    If you choose one of these php.ini files be certain to read the list
     of changes within, as they affect how PHP behaves.
 
 14. Edit your httpd.conf to load the PHP module.  The path on the right hand
