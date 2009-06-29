@@ -36,15 +36,14 @@ class test extends bar {
 new test;
 
 ?>
-===DONE===
---EXPECTF--
-object(ReflectionProperty)#%d (2) {
+--EXPECT--
+object(ReflectionProperty)#3 (2) {
   ["name"]=>
   string(4) "test"
   ["class"]=>
   string(3) "foo"
 }
-object(ReflectionProperty)#%d (2) {
+object(ReflectionProperty)#5 (2) {
   ["name"]=>
   string(1) "a"
   ["class"]=>
@@ -57,18 +56,17 @@ bool(true)
 bool(false)
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  &object(ReflectionProperty)#6 (2) {
     ["name"]=>
     string(1) "b"
     ["class"]=>
     string(4) "test"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  &object(ReflectionProperty)#7 (2) {
     ["name"]=>
     string(1) "a"
     ["class"]=>
     string(4) "test"
   }
 }
-===DONE===

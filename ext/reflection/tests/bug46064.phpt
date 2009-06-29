@@ -37,6 +37,10 @@ class bar extends test {
 		$this->foobar = 2;
 		$this->a = 200;
 		
+		$p = new reflectionproperty($this, 'a');
+		$p->setAccessible(true);
+		var_dump($p->getValue($this), $p->isDefault(), $p->isPublic());
+		
 		$p = new reflectionproperty($this, 'foobar');
 		var_dump($p->getValue($this), $p->isDefault(), $p->isPublic());
 	}
@@ -45,9 +49,8 @@ class bar extends test {
 new bar;
 
 ?>
-===DONE===
 --EXPECTF--
-object(ReflectionProperty)#%d (2) {
+object(ReflectionProperty)#2 (2) {
   ["name"]=>
   string(1) "z"
   ["class"]=>
@@ -64,13 +67,15 @@ array(1) {
 int(1000)
 ---------------------------
 string(30) "Property x::$zz does not exist"
-object(ReflectionProperty)#%d (2) {
+object(ReflectionProperty)#3 (2) {
   ["name"]=>
   string(3) "zzz"
   ["class"]=>
   string(1) "x"
 }
+int(200)
+bool(true)
+bool(false)
 int(2)
 bool(false)
 bool(true)
-===DONE===
