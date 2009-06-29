@@ -198,7 +198,7 @@ Apache 1.3.x on Unix systems
 
 13. Setup your php.ini file:
 
-    PHP will used the built-in default values if no php.ini file was
+    PHP will use the built-in default values if no php.ini file was
     placed in the configuration directory. The default location is
     /usr/local/lib, if you prefer your php.ini in another location, use 
     --with-config-file-path=/some/path in step 10.
