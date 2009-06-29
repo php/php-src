@@ -1,3 +1,27 @@
+2009-06-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_3)
+      zend_alloc.h:
+      - MF52: calloc must actually clear the requested size (Andrei)
+
+    * (PHP_5_2)
+      zend_alloc.h:
+      - calloc must actually clearing the requested size (Andrei)
+
+2009-06-28  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_2)
+      zend_builtin_functions.c
+      tests/bug48693.phpt:
+      - MFH: Fixed bug #48693 (Double declaration of __lambda_func when lambda
+      wrongly formatted)
+
+    * zend_builtin_functions.c
+      tests/bug48693.phpt
+      tests/bug48693.phpt:
+      - Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
+      formatted)
+
 2009-06-26  Johannes Schlüter  <johannes@schlueters.de>
 
     * (PHP_5_3)
