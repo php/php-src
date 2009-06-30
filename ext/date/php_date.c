@@ -2517,7 +2517,7 @@ static int date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int 
 	}
 	timelib_unixtime2local(now, (timelib_sll) time(NULL));
 
-	timelib_fill_holes(dateobj->time, now, 0);
+	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
 
 	dateobj->time->have_relative = 0;
