@@ -248,9 +248,8 @@ number, and remove the RC from there.
 
   II. For PHP5: Set $CURRENT_QA_RELEASE_5 to false
 
-
 Re-releasing the same version (or -pl)
-------------------------------------
+--------------------------------------
 
 1. Commit the new binaries to ``phpweb/distributions/``
 
@@ -281,4 +280,3 @@ to upgrade.
 5. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 the news entry.
-
