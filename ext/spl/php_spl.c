@@ -509,10 +509,10 @@ PHP_FUNCTION(spl_autoload_register)
 			alfi.closure = zcallable;
 			Z_ADDREF_P(zcallable);
 
-			lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zcallable->value.obj.handle));
-			memcpy(lc_name + func_name_len, &(zcallable->value.obj.handle),
-				sizeof(zcallable->value.obj.handle));
-			func_name_len += sizeof(zcallable->value.obj.handle);
+			lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zend_object_handle));
+			memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(zcallable),
+				sizeof(zend_object_handle));
+			func_name_len += sizeof(zend_object_handle);
 			lc_name[func_name_len] = '\0';
 		}
 
@@ -579,6 +579,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 {
 	char *func_name, *error = NULL;
 	int func_name_len;
+	char *lc_name = NULL;
 	zval *zcallable;
 	int success = FAILURE;
 	zend_function *spl_func_ptr;
@@ -604,10 +605,20 @@ PHP_FUNCTION(spl_autoload_unregister)
 		efree(error);
 	}
 
-	zend_str_tolower(func_name, func_name_len);
+	lc_name = safe_emalloc(func_name_len, 1, sizeof(long) + 1);
+	zend_str_tolower_copy(lc_name, func_name, func_name_len);
+	efree(func_name);
+
+	if (Z_TYPE_P(zcallable) == IS_OBJECT) {
+		lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zend_object_handle));
+		memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(zcallable),
+			sizeof(zend_object_handle));
+		func_name_len += sizeof(zend_object_handle);
+		lc_name[func_name_len] = '\0';
+	}
 
 	if (SPL_G(autoload_functions)) {
-		if (func_name_len == sizeof("spl_autoload_call")-1 && !strcmp(func_name, "spl_autoload_call")) {
+		if (func_name_len == sizeof("spl_autoload_call")-1 && !strcmp(lc_name, "spl_autoload_call")) {
 			/* remove all */
 			zend_hash_destroy(SPL_G(autoload_functions));
 			FREE_HASHTABLE(SPL_G(autoload_functions));
@@ -616,16 +627,16 @@ PHP_FUNCTION(spl_autoload_unregister)
 			success = SUCCESS;
 		} else {
 			/* remove specific */
-			success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
+			success = zend_hash_del(SPL_G(autoload_functions), lc_name, func_name_len+1);
 			if (success != SUCCESS && obj_ptr) {
-				func_name = erealloc(func_name, func_name_len + 1 + sizeof(zend_object_handle));
-				memcpy(func_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
+				lc_name = erealloc(lc_name, func_name_len + 2 + sizeof(zend_object_handle));
+				memcpy(lc_name + func_name_len, &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_object_handle));
 				func_name_len += sizeof(zend_object_handle);
-				func_name[func_name_len] = '\0';
-				success = zend_hash_del(SPL_G(autoload_functions), func_name, func_name_len+1);
+				lc_name[func_name_len] = '\0';
+				success = zend_hash_del(SPL_G(autoload_functions), lc_name, func_name_len+1);
 			}
 		}
-	} else if (func_name_len == sizeof("spl_autoload")-1 && !strcmp(func_name, "spl_autoload")) {
+	} else if (func_name_len == sizeof("spl_autoload")-1 && !strcmp(lc_name, "spl_autoload")) {
 		/* register single spl_autoload() */
 		zend_hash_find(EG(function_table), "spl_autoload", sizeof("spl_autoload"), (void **) &spl_func_ptr);
 
@@ -635,7 +646,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 	}
 
-	efree(func_name);
+	efree(lc_name);
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
@@ -663,7 +674,10 @@ PHP_FUNCTION(spl_autoload_functions)
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &alfi, &function_pos);
-			if (alfi->func_ptr->common.scope) {
+			if (alfi->closure) {
+				Z_ADDREF_P(alfi->closure);
+				add_next_index_zval(return_value, alfi->closure);
+			} else if (alfi->func_ptr->common.scope) {
 				zval *tmp;
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
