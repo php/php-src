@@ -641,7 +641,7 @@ html_errors = Off
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
 
-; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
+; Note - track_vars is ALWAYS enabled
 
 ; The separator used in PHP generated URLs to separate arguments.
 ; PHP's default setting is "&".
@@ -763,7 +763,7 @@ auto_prepend_file =
 ; http://php.net/auto-append-file
 auto_append_file =
 
-; As of 4.0b4, PHP always outputs a character encoding by default in
+; By default, PHP will output a character encoding using
 ; the Content-type: header.  To disable sending of the charset, simply
 ; set it to be empty.
 ;
@@ -958,7 +958,6 @@ default_socket_timeout = 60
 ;extension=php_interbase.dll
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
-;extension=php_mime_magic.dll
 ;extension=php_ming.dll
 ;extension=php_mssql.dll
 ;extension=php_mysql.dll
@@ -1449,7 +1448,7 @@ session.save_handler = files
 ; where data files are stored. Note: Windows users have to change this
 ; variable in order to use PHP's session functions.
 ;
-; As of PHP 4.0.1, you can define the path as:
+; The path can be defined as:
 ;
 ;     session.save_path = "N;/path"
 ;
@@ -1875,6 +1874,20 @@ soap.wsdl_cache_limit = 5
 [ldap]
 ; Sets the maximum number of open links or -1 for unlimited.
 ldap.max_links = -1
+
+[mcrypt]
+; For more information about mcrypt settings see http://php.net/mcrypt-module-open
+
+; Directory where to load mcrypt algorithms
+; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
+;mcrypt.algorithms_dir=
+
+; Directory where to load mcrypt modes
+; Default: Compiled in into libmcrypt (usually /usr/local/lib/libmcrypt)
+;mcrypt.modes_dir=
+
+[dba]
+;dba.default_handler=
 
 ; Local Variables:
 ; tab-width: 4
