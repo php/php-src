@@ -42,10 +42,10 @@ PHP_HASH_API void PHP_ADLER32Update(PHP_ADLER32_CTX *context, const unsigned cha
 
 PHP_HASH_API void PHP_ADLER32Final(unsigned char digest[4], PHP_ADLER32_CTX *context)
 {
-	digest[3] = (unsigned char) ((context->state >> 24) & 0xff);
-	digest[2] = (unsigned char) ((context->state >> 16) & 0xff);
-	digest[1] = (unsigned char) ((context->state >> 8) & 0xff);
-	digest[0] = (unsigned char) (context->state & 0xff);
+	digest[0] = (unsigned char) ((context->state >> 24) & 0xff);
+	digest[1] = (unsigned char) ((context->state >> 16) & 0xff);
+	digest[2] = (unsigned char) ((context->state >> 8) & 0xff);
+	digest[3] = (unsigned char) (context->state & 0xff);
 	context->state = 0;
 }
 
