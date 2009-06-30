@@ -210,6 +210,10 @@ f.e. ``ChangeLog-4.php`` from the NEWS file
 
   III. ``s/Fixed bug #\([0-9]\+\)/<?php bugfix(\1); ?>/``
 
+  IV. ``s/Fixed PECL bug #\([0-9]\+\)/<?php peclbugfix(\1); ?>/``
+
+  V. ``s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/``
+
 4. ``cp releases/4_4_0.php releases/4_4_1.php``
 
 5. ``cvs add releases/4_4_1.php``
