@@ -1,6 +1,9 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
+
+- Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
+  (Kalle, Rick Yorgason)
 
 
 30 Jun 2009, PHP 5.3.0
