@@ -411,7 +411,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 }
 /* }}} */
 
-PHPAPI void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(val))
 	{
@@ -467,7 +467,7 @@ PHPAPI void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /*
 }
 /* }}} */
 
-PHPAPI void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC) /* {{{ */
 {
 	int utf16_len;
 	zval *z;
