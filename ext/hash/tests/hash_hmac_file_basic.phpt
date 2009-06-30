@@ -70,7 +70,7 @@ unlink($file);
 ===Done===
 --EXPECTF--
 *** Testing hash_hmac_file() : basic functionality ***
-adler32: 9f037811
+adler32: 0f8c02f9
 crc32: f2a60b9c
 gost: 94c39a40d5db852a8dc3d24e37eebf2d53e3d711457c59cd02b614f792a9d918
 haval128,3: e8fcff647f1a675acb429130fb94a17e
@@ -88,7 +88,7 @@ sha512: d460aabdf0353655059ed0d408efa91f19c4cda46acc2a4e0adf4764b06951c899fbb2ed
 snefru: 7b79787e1c1d926b6cc98327f05c5d04ba6227ab51c1398661861196016ef34c
 tiger192,3: 5577f21e2af269fff41e023db30e2b01bfd8b8f669177929
 whirlpool: 37a0fbb90547690d5e5e11c046f6654ffdb7bab15e16d9d79c7d85765cc4bdcbfd9df8db7a3ce9558f3f244fead00ca29cf05297f75596555195a0683f15d69f
-adler32(raw): 9f037811
+adler32(raw): 0f8c02f9
 md5(raw): 8bddf39dd1c566c27acc7fa85ec36acf
 sha256(raw): 9135286ca4c84dec711e4b831f6cd39e672e5ff93d011321274eb76733cc1e40
 Error cases:
