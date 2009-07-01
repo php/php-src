@@ -1,0 +1,30 @@
+--TEST--
+Test png2wbmp() function : wrong origin filename param
+--CREDITS--
+Levi Fukumori <levi [at] fukumori [dot] com [dot] br>
+#testfest PHPSP on 2009-06-20
+--SKIPIF--
+<?php 
+if(!extension_loaded('gd')) {
+    die('skip gd extension is not loaded');
+}
+if(!function_exists('png2wbmp')) {
+    die('skip png2wbmp function is not available');
+}
+?>
+--FILE--
+<?php
+png2wbmp('', 'simpletext.wbmp', 20, 120, 8);
+png2wbmp(null, 'simpletext.wbmp', 20, 120, 8);
+png2wbmp(false, 'simpletext.wbmp', 20, 120, 8);
+?>
+--EXPECTF--
+Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
+
+Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
+
+Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
+--CLEAN--
+<?php
+unlink('simpletext.jpg');
+?>
