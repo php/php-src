@@ -3347,7 +3347,12 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}		
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+	if (!ZEND_FETCH_RESOURCE_NO_RETURN(im, gdImagePtr, &IM, -1, "Image", le_gd)) {
+		if (str_type == IS_UNICODE) {
+			efree(str.s);
+			RETURN_FALSE;
+		}
+	}
 
 	font = php_find_gd_font(size TSRMLS_CC);
 
