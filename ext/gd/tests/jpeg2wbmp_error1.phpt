@@ -19,14 +19,17 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
+$file = dirname(__FILE__) .'/simpletext.jpg';
+$file2 = dirname(__FILE__) .'/simpletext.wbmp';
+
 // Save the image as 'simpletext.jpg'
-imagejpeg($im, 'simpletext.jpg');
+imagejpeg($im, $file);
 
 // Free up memory
 imagedestroy($im);
 
-jpeg2wbmp('simpletext.jpg', 'simpletext.wbmp', 20, 120, 9);
-jpeg2wbmp('simpletext.jpg', 'simpletext.wbmp', 20, 120, -1);
+jpeg2wbmp($file, $file2, 20, 120, 9);
+jpeg2wbmp($file', $file2, 20, 120, -1);
 ?>
 --EXPECTF--
 Warning: jpeg2wbmp(): Invalid threshold value '9' in %s on line %d
@@ -34,5 +37,6 @@ Warning: jpeg2wbmp(): Invalid threshold value '9' in %s on line %d
 Warning: jpeg2wbmp(): Invalid threshold value '-1' in %s on line %d
 --CLEAN--
 <?php
-unlink('simpletext.jpg');
+unlink(dirname(__FILE__) .'/simpletext.jpg');
+unlink(dirname(__FILE__) .'/simpletext.wbmp');
 ?>
