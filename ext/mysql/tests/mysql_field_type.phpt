@@ -1,8 +1,8 @@
 --TEST--
 mysql_field_type()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -45,7 +45,7 @@ print "done!";
 Warning: mysql_field_type() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_type(): Field -1 is invalid for MySQL result index %d in %s on line %d
-unicode(3) "int"
+%unicode|string%(3) "int"
 
 Warning: mysql_field_type(): Field 2 is invalid for MySQL result index %d in %s on line %d
 

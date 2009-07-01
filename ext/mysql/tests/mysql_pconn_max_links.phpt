@@ -141,15 +141,15 @@ mysql.allow_persistent=1
 ?>
 --EXPECTF--
 array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 done!

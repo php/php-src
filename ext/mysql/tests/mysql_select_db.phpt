@@ -1,8 +1,8 @@
 --TEST--
 mysql_select_db()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -66,7 +66,7 @@ if (false !== ($tmp = mysql_select_db($db, $link)))
 print "done!\n";
 ?>
 --EXPECTF--
-unicode(%d) "%s"
+%unicode|string%(%d) "%s"
 bool(false)
 
 Warning: mysql_select_db(): %d is not a valid MySQL-Link resource in %s on line %d

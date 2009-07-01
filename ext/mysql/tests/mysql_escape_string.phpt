@@ -23,11 +23,11 @@ var_dump(mysql_escape_string("foo" . chr(0) . "bar"));
 print "done!";
 ?>
 --EXPECTF--
-unicode(31) "Am I a unicode string in PHP 6?"
-unicode(2) "\\"
-unicode(2) "\""
-unicode(2) "\'"
-unicode(2) "\n"
-unicode(2) "\r"
-unicode(8) "foo\0bar"
+%unicode|string%(31) "Am I a unicode string in PHP 6?"
+%unicode|string%(2) "\\"
+%unicode|string%(2) "\""
+%unicode|string%(2) "\'"
+%unicode|string%(2) "\n"
+%unicode|string%(2) "\r"
+%unicode|string%(8) "foo\0bar"
 done!

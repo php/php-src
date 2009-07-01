@@ -79,20 +79,20 @@ print "done!";
 ?>
 --EXPECTF--
 object(stdClass)#%d (2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 object(mysql_fetch_object_test)#%d (4) {
-  [u"a"]=>
+  [%u|b%"a"]=>
   NULL
-  [u"b"]=>
+  [%u|b%"b"]=>
   NULL
-  [u"ID"]=>
-  unicode(1) "2"
-  [u"label"]=>
-  unicode(1) "b"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "b"
 }
 
 Warning: Missing argument 1 for mysql_fetch_object_construct::__construct() in %s on line %d
@@ -103,38 +103,38 @@ Notice: Undefined variable: a in %s on line %d
 
 Notice: Undefined variable: b in %s on line %d
 object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
+  [%u|b%"a"]=>
   NULL
-  [u"b"]=>
+  [%u|b%"b"]=>
   NULL
-  [u"ID"]=>
-  unicode(1) "3"
-  [u"label"]=>
-  unicode(1) "c"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "c"
 }
 
 Warning: Missing argument 2 for mysql_fetch_object_construct::__construct() in %s on line %d
 
 Notice: Undefined variable: b in %s on line %d
 object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b"]=>
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
   NULL
-  [u"ID"]=>
-  unicode(1) "4"
-  [u"label"]=>
-  unicode(1) "d"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "4"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "d"
 }
 object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b"]=>
-  unicode(1) "b"
-  [u"ID"]=>
-  unicode(1) "5"
-  [u"label"]=>
-  unicode(1) "e"
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
+  %unicode|string%(1) "b"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "5"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "e"
 }
 bool(false)
 bool(false)

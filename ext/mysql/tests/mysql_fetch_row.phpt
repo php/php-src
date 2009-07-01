@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_row()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -40,9 +40,9 @@ print "done!";
 [004]
 array(2) {
   [0]=>
-  unicode(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  unicode(1) "a"
+  %unicode|string%(1) "a"
 }
 [005]
 bool(false)
