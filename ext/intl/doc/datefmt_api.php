@@ -434,6 +434,3 @@ class DateFormatter {
 	 * @return string Description of the last error.
 	 */
 	function datefmt_get_error_message($fmt) {}
-
-
-?>

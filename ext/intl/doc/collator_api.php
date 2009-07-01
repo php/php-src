@@ -395,4 +395,3 @@ function collator_get_error_code( $coll ) {}
  *                 Collator API function call.
  */
 function collator_get_error_message( $coll ) {}
-?>
