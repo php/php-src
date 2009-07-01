@@ -1,5 +1,8 @@
 --TEST--
 mysqli_get_connection_stats()
+--INI--
+mysqlnd.collect_statistics="1"
+mysqlnd.collect_memory_statistics="1"
 --SKIPIF--
 <?PHP
 require_once('skipif.inc');
@@ -39,7 +42,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	}
 
 	if ($info !== $info2) {
-		printf("[005] The hashes should be identical\n");
+		printf("[005] The hashes should be identical except of the memory related fields\n");
 		var_dump($info);
 		var_dump($info2);
 	}

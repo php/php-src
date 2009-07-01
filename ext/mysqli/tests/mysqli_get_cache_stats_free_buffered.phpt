@@ -1,5 +1,10 @@
 --TEST--
 mysqli_get_cache_stats() - freeing for buffered result sets
+--XFAIL--
+zval caching has been temporarily disabled for the 5.3.0 release
+--INI--
+mysqlnd.collect_statistics="1"
+mysqlnd.collect_memory_statistics="1"
 --SKIPIF--
 <?PHP
 require_once('skipif.inc');

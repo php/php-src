@@ -1,5 +1,8 @@
 --TEST--
 mysqli_get_client_stats() - skipped rows
+--INI--
+mysqlnd.collect_statistics="1"
+mysqlnd.collect_memory_statistics="1"
 --SKIPIF--
 <?PHP
 require_once('skipif.inc');
