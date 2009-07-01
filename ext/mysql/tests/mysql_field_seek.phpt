@@ -1,8 +1,8 @@
 --TEST--
 mysql_field_seek()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -43,89 +43,89 @@ print "done!";
 Warning: mysql_field_seek(): Field -1 is invalid for MySQL result index %d in %s on line %d
 bool(false)
 object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  [u"not_null"]=>
+  [%u|b%"not_null"]=>
   int(1)
-  [u"primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(1)
-  [u"multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  [u"unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  [u"numeric"]=>
+  [%u|b%"numeric"]=>
   int(1)
-  [u"blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  [u"type"]=>
-  unicode(3) "int"
-  [u"unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(3) "int"
+  [%u|b%"unsigned"]=>
   int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 bool(true)
 object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  [u"not_null"]=>
+  [%u|b%"not_null"]=>
   int(1)
-  [u"primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(1)
-  [u"multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  [u"unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  [u"numeric"]=>
+  [%u|b%"numeric"]=>
   int(1)
-  [u"blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  [u"type"]=>
-  unicode(3) "int"
-  [u"unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(3) "int"
+  [%u|b%"unsigned"]=>
   int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 bool(true)
 object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(5) "label"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(5) "label"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  [u"not_null"]=>
+  [%u|b%"not_null"]=>
   int(0)
-  [u"primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(0)
-  [u"multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  [u"unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  [u"numeric"]=>
+  [%u|b%"numeric"]=>
   int(0)
-  [u"blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  [u"type"]=>
-  unicode(6) "string"
-  [u"unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(6) "string"
+  [%u|b%"unsigned"]=>
   int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 

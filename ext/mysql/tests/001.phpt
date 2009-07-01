@@ -26,5 +26,5 @@ var_dump($test);
 print "done!";
 ?>
 --EXPECTF--
-unicode(2) "11"
+%unicode|string%(2) "11"
 done!

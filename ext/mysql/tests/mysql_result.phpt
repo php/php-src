@@ -73,12 +73,12 @@ bool(false)
 Warning: mysql_result(): Bad column offset specified in %s on line %d
 bool(false)
 valid fields
-unicode(1) "1"
-unicode(1) "a"
-unicode(1) "1"
-unicode(1) "1"
-unicode(1) "a"
-unicode(1) "a"
+%unicode|string%(1) "1"
+%unicode|string%(1) "a"
+%unicode|string%(1) "1"
+%unicode|string%(1) "1"
+%unicode|string%(1) "a"
+%unicode|string%(1) "a"
 some invalid fields
 
 Warning: mysql_result(): unknown not found in MySQL result index %d in %s on line %d
@@ -93,7 +93,7 @@ bool(false)
 Warning: mysql_result(): _test. not found in MySQL result index %d in %s on line %d
 bool(false)
 _id
-unicode(1) "1"
+%unicode|string%(1) "1"
 _label
 string(2) "aa"
 _foo
