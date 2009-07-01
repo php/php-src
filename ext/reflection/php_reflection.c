@@ -1717,7 +1717,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 }
 /* }}} */
 
-/* {{{ proto public mixed ReflectionFunction::invoke(mixed* args)
+/* {{{ proto public mixed ReflectionFunction::invoke([mixed* args])
    Invokes the function */
 ZEND_METHOD(reflection_function, invoke)
 {
@@ -1732,7 +1732,7 @@ ZEND_METHOD(reflection_function, invoke)
 	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &params, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
 		return;
 	}
 
@@ -5008,7 +5008,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_function___construct, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invoke, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_function_invoke, 0, 0, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
 
