@@ -1,5 +1,10 @@
 --TEST--
 mysqli_get_cache_stats()
+--XFAIL--
+zval caching has been temporarily disabled for the 5.3.0 release
+--INI--
+mysqlnd.collect_statistics="1"
+mysqlnd.collect_memory_statistics="1"
 --SKIPIF--
 <?PHP
 require_once('skipif.inc');
@@ -22,9 +27,9 @@ if (!function_exists('mysqli_get_cache_stats')) {
 
 	var_dump($info);
 
-	if ($info['size'] !== $info['free_items'])
+	if ($info["size"] !== $info['free_items'])
 		printf("[003] Unused cache should have size (%d) == free_items (%d)\n",
-			$info['size'], $info['free_items']);
+			$info["size"], $info['free_items']);
 
 	require_once('table.inc');
 
