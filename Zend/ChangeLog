@@ -1,3 +1,13 @@
+2009-06-30  Felipe Pena  <felipensp@gmail.com>
+
+    * (PHP_5_3)
+      tests/bug48693.phpt:
+      - New test
+
+    * (PHP_5_3)
+      zend_builtin_functions.c:
+      - MFH: Fixed bug #48709 (metaphone and 'wh')
+
 2009-06-28  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * (PHP_5_3)
