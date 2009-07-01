@@ -19,15 +19,17 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
+$file = dirname(__FILE__) .'/simpletext.jpg';
+
 // Save the image as 'simpletext.jpg'
-imagejpeg($im, 'simpletext.jpg');
+imagejpeg($im, $file);
 
 // Free up memory
 imagedestroy($im);
 
-jpeg2wbmp('simpletext.jpg', '', 20, 120, 8);
-jpeg2wbmp('simpletext.jpg', null, 20, 120, 8);
-jpeg2wbmp('simpletext.jpg', false, 20, 120, 8);
+jpeg2wbmp($file, '', 20, 120, 8);
+jpeg2wbmp($file, null, 20, 120, 8);
+jpeg2wbmp($file, false, 20, 120, 8);
 ?>
 --EXPECTF--
 Warning: jpeg2wbmp(): Unable to open '' for writing in %s on line %d
@@ -37,5 +39,5 @@ Warning: jpeg2wbmp(): Unable to open '' for writing in %s on line %d
 Warning: jpeg2wbmp(): Unable to open '' for writing in %s on line %d
 --CLEAN--
 <?php
-unlink('simpletext.jpg');
+unlink(dirname(__FILE__) .'/simpletext.jpg');
 ?>

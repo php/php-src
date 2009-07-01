@@ -14,9 +14,10 @@ if(!function_exists('png2wbmp')) {
 ?>
 --FILE--
 <?php
-png2wbmp('', 'simpletext.wbmp', 20, 120, 8);
-png2wbmp(null, 'simpletext.wbmp', 20, 120, 8);
-png2wbmp(false, 'simpletext.wbmp', 20, 120, 8);
+$file = dirname(__FILE__) .'/simpletext.wbmp';
+png2wbmp('', $file, 20, 120, 8);
+png2wbmp(null, $file, 20, 120, 8);
+png2wbmp(false, $file, 20, 120, 8);
 ?>
 --EXPECTF--
 Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
@@ -26,5 +27,5 @@ Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
 Warning: png2wbmp(): Unable to open '' for reading in %s on line %d
 --CLEAN--
 <?php
-unlink('simpletext.jpg');
+unlink(dirname(__FILE__) .'/simpletext.wbmp');
 ?>
