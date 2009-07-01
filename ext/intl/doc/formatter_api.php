@@ -498,5 +498,3 @@ function numfmt_get_error_code($formatter) {}
  * @return string Description of the last occured error.
  */
 function numfmt_get_error_message($formatter) {}
-
-?>
