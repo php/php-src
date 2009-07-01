@@ -54,5 +54,3 @@ function intl_is_failure($code) {}
  * @return string    Error code name.
  */
 function intl_error_name($code) {}
-
-?>
