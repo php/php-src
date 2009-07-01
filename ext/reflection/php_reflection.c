@@ -531,23 +531,25 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		string_init(&dyn);
 		count = 0;
 
-		zend_hash_internal_pointer_reset_ex(properties, &pos);
+		if (properties && zend_hash_num_elements(properties)) {
+			zend_hash_internal_pointer_reset_ex(properties, &pos);
 
-		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
-			zstr prop_name;
-			uint  prop_name_size;
-			zend_uchar prop_type;
-			ulong index;
+			while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
+				zstr prop_name;
+				uint  prop_name_size;
+				zend_uchar prop_type;
+				ulong index;
 
-			if ((prop_type = zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 0, &pos)) == HASH_KEY_IS_UNICODE) {
-				if (prop_name_size && prop_name.u[0]) { /* skip all private and protected properties */
-					if (!zend_u_hash_exists(&ce->properties_info, prop_type, prop_name, prop_name_size)) {
-						count++;
-						_property_string(&dyn, NULL, prop_name, sub_indent.string TSRMLS_CC);	
+				if ((prop_type = zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 0, &pos)) == HASH_KEY_IS_UNICODE) {
+					if (prop_name_size && prop_name.u[0]) { /* skip all private and protected properties */
+						if (!zend_u_hash_exists(&ce->properties_info, prop_type, prop_name, prop_name_size)) {
+							count++;
+							_property_string(&dyn, NULL, prop_name, sub_indent.string TSRMLS_CC);	
+						}
 					}
 				}
+				zend_hash_move_forward_ex(properties, &pos);
 			}
-			zend_hash_move_forward_ex(properties, &pos);
 		}
 
 		string_printf(str, "\n%s  - Dynamic properties [%d] {\n", indent, count);
