@@ -79,20 +79,20 @@ print "done!";
 ?>
 --EXPECTF--
 object(stdClass)#%d (2) {
-  ["ID"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 object(mysql_fetch_object_test)#%d (4) {
-  ["a"]=>
+  [%u|b%"a"]=>
   NULL
-  ["b"]=>
+  [%u|b%"b"]=>
   NULL
-  ["ID"]=>
-  string(1) "2"
-  ["label"]=>
-  string(1) "b"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "2"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "b"
 }
 
 Warning: Missing argument 1 for mysql_fetch_object_construct::__construct() in %s on line %d
@@ -103,107 +103,38 @@ Notice: Undefined variable: a in %s on line %d
 
 Notice: Undefined variable: b in %s on line %d
 object(mysql_fetch_object_construct)#%d (4) {
-  ["a"]=>
+  [%u|b%"a"]=>
   NULL
-  ["b"]=>
+  [%u|b%"b"]=>
   NULL
-  ["ID"]=>
-  string(1) "3"
-  ["label"]=>
-  string(1) "c"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "c"
 }
 
 Warning: Missing argument 2 for mysql_fetch_object_construct::__construct() in %s on line %d
 
 Notice: Undefined variable: b in %s on line %d
 object(mysql_fetch_object_construct)#%d (4) {
-  ["a"]=>
-  string(1) "a"
-  ["b"]=>
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
   NULL
-  ["ID"]=>
-  string(1) "4"
-  ["label"]=>
-  string(1) "d"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "4"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "d"
 }
 object(mysql_fetch_object_construct)#%d (4) {
-  ["a"]=>
-  string(1) "a"
-  ["b"]=>
-  string(1) "b"
-  ["ID"]=>
-  string(1) "5"
-  ["label"]=>
-  string(1) "e"
-}
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
-Warning: mysql_fetch_object(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-
-Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d
---UEXPECTF--
-object(stdClass)#%d (2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
-}
-object(mysql_fetch_object_test)#%d (4) {
-  [u"a"]=>
-  NULL
-  [u"b"]=>
-  NULL
-  [u"ID"]=>
-  unicode(1) "2"
-  [u"label"]=>
-  unicode(1) "b"
-}
-
-Warning: Missing argument 1 for mysql_fetch_object_construct::__construct() in %s on line %d
-
-Warning: Missing argument 2 for mysql_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: a in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
-object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
-  NULL
-  [u"b"]=>
-  NULL
-  [u"ID"]=>
-  unicode(1) "3"
-  [u"label"]=>
-  unicode(1) "c"
-}
-
-Warning: Missing argument 2 for mysql_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
-object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b"]=>
-  NULL
-  [u"ID"]=>
-  unicode(1) "4"
-  [u"label"]=>
-  unicode(1) "d"
-}
-object(mysql_fetch_object_construct)#%d (4) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b"]=>
-  unicode(1) "b"
-  [u"ID"]=>
-  unicode(1) "5"
-  [u"label"]=>
-  unicode(1) "e"
+  [%u|b%"a"]=>
+  %unicode|string%(1) "a"
+  [%u|b%"b"]=>
+  %unicode|string%(1) "b"
+  [%u|b%"ID"]=>
+  %unicode|string%(1) "5"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "e"
 }
 bool(false)
 bool(false)

@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_row()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -40,23 +40,9 @@ print "done!";
 [004]
 array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "a"
-}
-[005]
-bool(false)
-
-Warning: mysql_fetch_row(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
---UEXPECTF--
-[004]
-array(2) {
-  [0]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(1) "a"
+  %unicode|string%(1) "a"
 }
 [005]
 bool(false)

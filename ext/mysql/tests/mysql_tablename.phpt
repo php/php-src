@@ -1,8 +1,8 @@
 --TEST--
 mysql_tablename()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -45,18 +45,7 @@ print "done!";
 Warning: mysql_tablename() expects at least 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_tablename(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
-string(1) "1"
-
-Warning: mysql_tablename(): Unable to jump to row 2 on MySQL result index %d in %s on line %d
-
-Warning: mysql_tablename(): %d is not a valid MySQL result resource in %s on line %d
-bool(false)
-done!
---UEXPECTF--
-Warning: Wrong parameter count for mysql_tablename() in %s on line %d
-
-Warning: mysql_tablename(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
-unicode(1) "1"
+%unicode|string%(1) "1"
 
 Warning: mysql_tablename(): Unable to jump to row 2 on MySQL result index %d in %s on line %d
 

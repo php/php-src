@@ -39,13 +39,13 @@ require_once('skipifconnectfailure.inc');
 	if (!$res = mysql_query("SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1", $link)) {
 		printf("[005] [%d] %s\n", mysql_errno($link), mysql_error($link));
 	}
-	if (false !== ($tmp = mysql_fetch_field($res, PHP_INT_MAX * 2)))
-		printf("[006] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysql_fetch_field($res, PHP_INT_MAX - 1)))
+		printf("[006] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	mysql_free_result($res);
 
 	if (false !== ($tmp = mysql_fetch_field($res)))
-		printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[007] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	$types = array(
 		'BIT'               => array(1, 'int'),
@@ -135,178 +135,59 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
-  ["name"]=>
-  string(2) "ID"
-  ["table"]=>
-  string(4) "TEST"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "ID"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  ["not_null"]=>
+  [%u|b%"not_null"]=>
   int(1)
-  ["primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(1)
-  ["multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  ["unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  ["numeric"]=>
+  [%u|b%"numeric"]=>
   int(1)
-  ["blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  ["type"]=>
-  string(3) "int"
-  ["unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(3) "int"
+  [%u|b%"unsigned"]=>
   int(0)
-  ["zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 object(stdClass)#%d (13) {
-  ["name"]=>
-  string(5) "label"
-  ["table"]=>
-  string(4) "TEST"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(5) "label"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "TEST"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  ["not_null"]=>
+  [%u|b%"not_null"]=>
   int(0)
-  ["primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(0)
-  ["multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  ["unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  ["numeric"]=>
+  [%u|b%"numeric"]=>
   int(0)
-  ["blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  ["type"]=>
-  string(6) "string"
-  ["unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(6) "string"
+  [%u|b%"unsigned"]=>
   int(0)
-  ["zerofill"]=>
-  int(0)
-}
-bool(false)
-
-Warning: mysql_fetch_field(): Bad field offset in %s on line %d
-
-Warning: mysql_fetch_field(): %d is not a valid MySQL result resource in %s on line %d
-object(stdClass)#%d (13) {
-  ["name"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "test"
-  ["def"]=>
-  string(0) ""
-  ["max_length"]=>
-  int(1)
-  ["not_null"]=>
-  int(0)
-  ["primary_key"]=>
-  int(0)
-  ["multiple_key"]=>
-  int(0)
-  ["unique_key"]=>
-  int(0)
-  ["numeric"]=>
-  int(1)
-  ["blob"]=>
-  int(0)
-  ["type"]=>
-  string(3) "int"
-  ["unsigned"]=>
-  int(0)
-  ["zerofill"]=>
-  int(0)
-}
-object(stdClass)#%d (13) {
-  ["name"]=>
-  string(2) "id"
-  ["table"]=>
-  string(4) "test"
-  ["def"]=>
-  string(1) "1"
-  ["max_length"]=>
-  int(0)
-  ["not_null"]=>
-  int(0)
-  ["primary_key"]=>
-  int(0)
-  ["multiple_key"]=>
-  int(0)
-  ["unique_key"]=>
-  int(0)
-  ["numeric"]=>
-  int(1)
-  ["blob"]=>
-  int(0)
-  ["type"]=>
-  string(3) "int"
-  ["unsigned"]=>
-  int(0)
-  ["zerofill"]=>
-  int(0)
-}
-done!
---UEXPECTF--
-object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(2) "ID"
-  [u"table"]=>
-  unicode(4) "TEST"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(1)
-  [u"not_null"]=>
-  int(1)
-  [u"primary_key"]=>
-  int(1)
-  [u"multiple_key"]=>
-  int(0)
-  [u"unique_key"]=>
-  int(0)
-  [u"numeric"]=>
-  int(1)
-  [u"blob"]=>
-  int(0)
-  [u"type"]=>
-  unicode(3) "int"
-  [u"unsigned"]=>
-  int(0)
-  [u"zerofill"]=>
-  int(0)
-}
-object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(5) "label"
-  [u"table"]=>
-  unicode(4) "TEST"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
-  int(1)
-  [u"not_null"]=>
-  int(0)
-  [u"primary_key"]=>
-  int(0)
-  [u"multiple_key"]=>
-  int(0)
-  [u"unique_key"]=>
-  int(0)
-  [u"numeric"]=>
-  int(0)
-  [u"blob"]=>
-  int(0)
-  [u"type"]=>
-  unicode(6) "string"
-  [u"unsigned"]=>
-  int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 bool(false)
@@ -315,59 +196,59 @@ Warning: mysql_fetch_field(): Bad field offset in %s on line %d
 
 Warning: mysql_fetch_field(): %d is not a valid MySQL result resource in %s on line %d
 object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(0) ""
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(0) ""
+  [%u|b%"max_length"]=>
   int(1)
-  [u"not_null"]=>
+  [%u|b%"not_null"]=>
   int(0)
-  [u"primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(0)
-  [u"multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  [u"unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  [u"numeric"]=>
+  [%u|b%"numeric"]=>
   int(1)
-  [u"blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  [u"type"]=>
-  unicode(3) "int"
-  [u"unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(3) "int"
+  [%u|b%"unsigned"]=>
   int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 object(stdClass)#%d (13) {
-  [u"name"]=>
-  unicode(2) "id"
-  [u"table"]=>
-  unicode(4) "test"
-  [u"def"]=>
-  unicode(1) "1"
-  [u"max_length"]=>
+  [%u|b%"name"]=>
+  %unicode|string%(2) "id"
+  [%u|b%"table"]=>
+  %unicode|string%(4) "test"
+  [%u|b%"def"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"max_length"]=>
   int(0)
-  [u"not_null"]=>
+  [%u|b%"not_null"]=>
   int(0)
-  [u"primary_key"]=>
+  [%u|b%"primary_key"]=>
   int(0)
-  [u"multiple_key"]=>
+  [%u|b%"multiple_key"]=>
   int(0)
-  [u"unique_key"]=>
+  [%u|b%"unique_key"]=>
   int(0)
-  [u"numeric"]=>
+  [%u|b%"numeric"]=>
   int(1)
-  [u"blob"]=>
+  [%u|b%"blob"]=>
   int(0)
-  [u"type"]=>
-  unicode(3) "int"
-  [u"unsigned"]=>
+  [%u|b%"type"]=>
+  %unicode|string%(3) "int"
+  [%u|b%"unsigned"]=>
   int(0)
-  [u"zerofill"]=>
+  [%u|b%"zerofill"]=>
   int(0)
 }
 done!
