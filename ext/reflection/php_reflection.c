@@ -1800,7 +1800,9 @@ ZEND_METHOD(reflection_function, invoke)
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
-	efree(params);
+	if (num_args) {
+		efree(params);
+	}
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
