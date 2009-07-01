@@ -8,11 +8,11 @@
 	 *
 	*/
 	/** Extract the given number of whole grapheme clusters from the string: */
-	const GRAPHEME_EXTR_COUNT	= 0;
+	define('GRAPHEME_EXTR_COUNT', 0);
 	/** Extract as many whole grapheme clusters as will fit into the given number of bytes: */
-	const GRAPHEME_EXTR_MAXBYTES	= 1;
+	define('GRAPHEME_EXTR_MAXBYTES', 1);
 	/** Extract whole grapheme clusters up to a maximum number of UTF-8 characters: */
-	const GRAPHEME_EXTR_MAXCHARS	= 2;
+	define('GRAPHEME_EXTR_MAXCHARS', 2);
 
 
 #############################################################################
@@ -125,7 +125,7 @@
 	 * @return string	A string starting at offset $start containing no more than $size grapheme clusters 
 				and ending on a default grapheme cluster boundary.
 	*/
-	public function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0, &$next) {}
+	function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0, &$next) {}
 
 ?>
 

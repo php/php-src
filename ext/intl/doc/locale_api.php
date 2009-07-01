@@ -42,7 +42,7 @@ class Locale {
      	 * The following static members are used with the getLocale methods of
      	 * the various locale affected classes, such as numfmt.
      	 */
-  	const DEFAULT_LOCALE 			= default_locale;
+  	const DEFAULT_LOCALE 			= null;
 
    	/**
 	 * identifiers for the actual locale, valid locale
@@ -59,13 +59,13 @@ class Locale {
 	/** 
 	 * Valid locale tag and subtag values
 	 */
-	LANG_TAG 				= "language";
-	EXTLANG_TAG 				= "extlang";
-	SCRIPT_TAG 				= "script";
-	REGION_TAG 				= "region";
-	VARIANT_TAG 				= "variant";
-	GRANDFATHERED_LANG_TAG 			= "grandfathered";
-	PRIVATE_TAG 				= "private";
+	const LANG_TAG 				= "language";
+	const EXTLANG_TAG 			= "extlang";
+	const SCRIPT_TAG 			= "script";
+	const REGION_TAG 			= "region";
+	const VARIANT_TAG 			= "variant";
+	const GRANDFATHERED_LANG_TAG 		= "grandfathered";
+	const PRIVATE_TAG 			= "private";
 	
 
 #############################################################################
@@ -206,9 +206,10 @@ class Locale {
 	 *
      	 * @param 	string 		$langtag	the language tag to check
 	 * @param 	string 		$locale		the language range to check against
+	 * @param 	bool 		$canonicalize	Canonicalize parameters?
      	 * @return 	boolean 			'true' if $locale matches $langtag 'false' otherwise
 	 */
-    	public static function filterMatches($langtag, $locale) {}
+    	public static function filterMatches($langtag, $locale, $canonicalize) {}
 
 	/**
      	 * Searchs the items in $langtag for the best match to the language
@@ -263,7 +264,7 @@ class Locale {
 	 *
      	 * @return string the current runtime locale 
      	 */
-	public static function locale_get_default() {}
+	 function locale_get_default() {}
 
 	/**
      	 * sets the default runtime locale to $locale
@@ -273,7 +274,7 @@ class Locale {
      	 *					locale identifier. UAX #35 extensions are accepted.
      	 * @return	boolean 		'true' if okay, 'false' if an error
      	 */
-    	public static function locale_set_default($locale) {}
+    	 function locale_set_default($locale) {}
 
 
     	/**
@@ -283,7 +284,7 @@ class Locale {
      	 * @return 	string 			the language code associated with the language 
 	 *					or null in case of error. 
      	 */
-    	public static function locale_get_primary_language($locale) {}
+    	 function locale_get_primary_language($locale) {}
 
 
     	/**
@@ -292,7 +293,7 @@ class Locale {
      	 * @param 	string 	$locale 	the locale to extract the script code from
      	 * @return 	string 			the script subtag for the locale or null if not present
      	 */
-    	public static function locale_get_script($locale) {}
+    	 function locale_get_script($locale) {}
 
 
     	/**
@@ -301,7 +302,7 @@ class Locale {
      	 * @param 	string 	$locale 	the locale to extract the region code from
      	 * @return 	string 			the region subtag for the locale or null if not present
      	 */
-    	public static function locale_get_region($locale) {}
+    	 function locale_get_region($locale) {}
 
 
     	/**
@@ -311,7 +312,7 @@ class Locale {
      	 * @return 	array 			the array containing the list of all variants 
 	 *					subtag for the locale or null if not present
      	 */
-	public static function locale_get_all_variants($locale) {}
+	 function locale_get_all_variants($locale) {}
 
 
 	/**
@@ -320,7 +321,7 @@ class Locale {
      	 * @param 	string 	$locale 	the locale to extract the keywords from
      	 * @return 	array 			associative array containing the keyword-value pairs for this locale 
      	 */
-    	public static function locale_get_keywords($locale) {}
+    	 function locale_get_keywords($locale) {}
 
 
     	/**
@@ -332,7 +333,7 @@ class Locale {
 	 * @return 	string  			display name of the locale in the format
 	 * 						appropriate for $in_locale. 
      	 */
-    	public static function locale_get_display_name($locale, $in_locale = null) {}
+    	 function locale_get_display_name($locale, $in_locale = null) {}
 
 
     	/**
@@ -344,7 +345,7 @@ class Locale {
 	 * @return 	string  			display name of the language for the $locale in the format
 	 * 						appropriate for $in_locale. 
      	 */
-	public static function locale_get_display_language($lang, $in_locale = null) {}
+	 function locale_get_display_language($lang, $in_locale = null) {}
 
     	/**
 	 * Returns an appropriately localized display name for script of the input locale
@@ -355,7 +356,7 @@ class Locale {
 	 * @return 	string  			display name of the script for the $locale in the format
 	 * 						appropriate for $in_locale. 
      	 */
-	public static function locale_get_display_script($script, $in_locale = null) {}
+	 function locale_get_display_script($script, $in_locale = null) {}
 
 
     	/**
@@ -367,7 +368,7 @@ class Locale {
 	 * @return 	string  			display name of the region for the $locale in the format
 	 * 						appropriate for $in_locale. 
      	 */
-	public static function locale_get_display_region($region, $in_locale = null) {}
+	 function locale_get_display_region($region, $in_locale = null) {}
 
 
     	/**
@@ -379,7 +380,7 @@ class Locale {
 	 * @return 	string  			display name of the variant for the $locale in the format
 	 * 						appropriate for $in_locale. 
      	 */
-	public static function locale_get_display_variant($variant, $in_locale = null) {}
+	 function locale_get_display_variant($variant, $in_locale = null) {}
 
 
     	/**
@@ -388,9 +389,10 @@ class Locale {
 	 *
      	 * @param 	string 		$langtag	the language tag to check
 	 * @param 	string 		$locale		the language range to check against
+	 * @param 	bool 		$canonicalize	Canonicalize parameters?
      	 * @return 	boolean 			'true' if $locale matches $langtag 'false' otherwise
 	 */
-    	public static function locale_filter_matches($langtag, $locale) {}
+    	 function locale_filter_matches($langtag, $locale, $canonicalize) {}
 
 	/**
      	 * Searchs the items in $langtag for the best match to the language
@@ -403,7 +405,7 @@ class Locale {
 	 * @return 	string 				closest matching language tag, $default, 
 	 *						or empty string
 	 */
-    	public static function locale_lookup(array $langtag, $locale, $default = null) {}
+    	 function locale_lookup(array $langtag, $locale, $default = null) {}
 
 
 	/**
@@ -415,7 +417,7 @@ class Locale {
 	 *
 	 * @return 	string 				the corresponding locale identifier.
 	 */
-    	public static function locale_compose_locale(array $subtags) {}
+    	 function locale_compose_locale(array $subtags) {}
 
 
 	/**
@@ -427,6 +429,6 @@ class Locale {
 	 * 						the keys identify the particular locale ID subtags, 	
 	 *						and the values are the associated subtag values. 
 	 */
-    	public static function locale_parse_locale($locale) {}
+    	 function locale_parse_locale($locale) {}
 
 ?>
