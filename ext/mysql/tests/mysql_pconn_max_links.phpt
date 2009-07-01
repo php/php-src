@@ -49,7 +49,7 @@ mysql.allow_persistent=1
 	else if ($port)
 		$host = sprintf("%s:%s", $host, $port);
 
-	if (!$plink = mysql_pconnect($host, 'pcontest', 'pcontest'))
+	if (!$plink = mysql_pconnect($host, $user, $passwd))
 		printf("[001] Cannot connect using the second DB user created during SKIPIF, [%d] %s\n",
 			mysql_errno(), mysql_error());
 
@@ -141,29 +141,15 @@ mysql.allow_persistent=1
 ?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
-}
-done!
---UEXPECTF--
-array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
-}
-array(2) {
-  [u"id"]=>
-  unicode(1) "1"
-  [u"label"]=>
-  unicode(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 done!

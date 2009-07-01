@@ -52,7 +52,7 @@ if (file_exists('./simple.csv'))
 if (!$fp = fopen('./simple.csv', 'w'))
 	printf("[003] Cannot open CSV file\n");
 
-if (ini_get('unicode.semantics')) {
+if (version_compare(PHP_VERSION, '5.9.9', '>') >= 0) {
 	if (!fwrite($fp, (binary)"'97';'x';\n") ||
 		!fwrite($fp, (binary)"'98';'y';\n") ||
 		!fwrite($fp, (binary)"99;'z';\n")) {

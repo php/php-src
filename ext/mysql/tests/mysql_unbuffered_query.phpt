@@ -1,8 +1,8 @@
 --TEST--
 mysql_unbuffered_query()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -48,7 +48,7 @@ if (mysql_unbuffered_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[008] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if (ini_get('unicode.semantics') && !is_unicode($tmp['p_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['p_version'])) {
 			printf("[009] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}
@@ -65,7 +65,7 @@ if (mysql_unbuffered_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[011] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if (ini_get('unicode.semantics') && !is_unicode($tmp['f_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['f_version'])) {
 			printf("[012] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}
@@ -88,21 +88,8 @@ print "done!";
 ?>
 --EXPECTF--
 array(1) {
-  ["valid"]=>
-  string(30) "this is sql but with semicolon"
-}
-bool(true)
-resource(%d) of type (mysql result)
-int(0)
-
-Notice: mysql_close(): Function called without first fetching all rows from a previous unbuffered query in %s on line %d
-
-Warning: mysql_unbuffered_query(): %d is not a valid MySQL-Link resource in %s on line %d
-done!
---UEXPECTF--
-array(1) {
-  [u"valid"]=>
-  unicode(30) "this is sql but with semicolon"
+  [%u|b%"valid"]=>
+  %unicode|string%(30) "this is sql but with semicolon"
 }
 bool(true)
 resource(%d) of type (mysql result)
