@@ -25,7 +25,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_palloc.h"
 #include "mysqlnd_debug.h"
-#include "mysqlnd/mysqlnd_block_alloc.h"
+#include "mysqlnd_block_alloc.h"
 #include "ext/standard/sha1.h"
 #include "php_network.h"
 #include "zend_ini.h"
