@@ -22,7 +22,7 @@
 ; The syntax of the file is extremely simple.  Whitespace and Lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
 ; Section headers (e.g. [Foo]) are also silently ignored, even though
-; they might mean something in the future. 
+; they might mean something in the future.
 
 ; Directives following the section heading [PATH=/www/mysite] only
 ; apply to PHP files in the /www/mysite directory.  Directives
@@ -437,11 +437,11 @@ expose_php = On
 ; Maximum execution time of each script, in seconds
 ; http://php.net/max-execution-time
 ; Note: This directive is hardcoded to 0 for the CLI SAPI
-max_execution_time = 30     
+max_execution_time = 30
 
 ; Maximum amount of time each script may spend parsing request data. It's a good
 ; idea to limit this time on productions servers in order to eliminate unexpectedly
-; long running scripts. 
+; long running scripts.
 ; Note: This directive is hardcoded to -1 for the CLI SAPI
 ; Default Value: -1 (Unlimited)
 ; Development Value: 60 (60 seconds)
@@ -521,8 +521,8 @@ error_reporting = E_ALL & ~E_DEPRECATED
 ; It's recommended that errors be logged on production servers rather than
 ; having the errors sent to STDOUT.
 ; Possible Values:
-;   Off = Do not display any errors 
-;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)   
+;   Off = Do not display any errors
+;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)
 ;   On or stdout = Display errors to STDOUT
 ; Default Value: On
 ; Development Value: On
@@ -641,8 +641,6 @@ html_errors = Off
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
 
-; Note - track_vars is ALWAYS enabled
-
 ; The separator used in PHP generated URLs to separate arguments.
 ; PHP's default setting is "&".
 ; http://php.net/arg-separator.output
@@ -674,7 +672,7 @@ variables_order = "GPCS"
 ; be registered into the super global array REQUEST. If so, it also determines
 ; the order in which that data is registered. The values for this directive are
 ; specified in the same manner as the variables_order directive, EXCEPT one.
-; Leaving this value empty will cause PHP to use the value set in the 
+; Leaving this value empty will cause PHP to use the value set in the
 ; variables_order directive. It does not mean it will leave the super globals
 ; array REQUEST empty.
 ; Default Value: None
@@ -685,9 +683,7 @@ request_order = "GP"
 
 ; Whether or not to register the EGPCS variables as global variables.  You may
 ; want to turn this off if you don't want to clutter your scripts' global scope
-; with user data.  This makes most sense when coupled with track_vars - in which
-; case you can access all of the GPC variables through the $HTTP_*_VARS[],
-; variables.
+; with user data.
 ; You should do your best to write your scripts so that they do not require
 ; register_globals to be on;  Using form variables as globals can easily lead
 ; to possible security problems, if the code is not very well thought of.
@@ -944,7 +940,7 @@ default_socket_timeout = 60
 ; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5)
 ; extension folders as well as the separate PECL DLL download (PHP 5).
 ; Be sure to appropriately set the extension_dir directive.
-; 
+;
 ;extension=php_bz2.dll
 ;extension=php_curl.dll
 ;extension=php_dba.dll
@@ -1021,7 +1017,7 @@ default_socket_timeout = 60
 ;iconv.output_encoding = ISO-8859-1
 
 [intl]
-;intl.default_locale = 
+;intl.default_locale =
 
 [sqlite]
 ; http://php.net/sqlite.assoc-case
@@ -1035,9 +1031,9 @@ default_socket_timeout = 60
 ; http://php.net/pcre.backtrack-limit
 ;pcre.backtrack_limit=100000
 
-;PCRE library recursion limit. 
-;Please note that if you set this value to a high number you may consume all 
-;the available process stack and eventually crash PHP (due to reaching the 
+;PCRE library recursion limit.
+;Please note that if you set this value to a high number you may consume all
+;the available process stack and eventually crash PHP (due to reaching the
 ;stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
@@ -1115,7 +1111,7 @@ sql.safe_mode = Off
 ; http://php.net/odbc.default-pw
 ;odbc.default_pw    =  Not yet implemented
 
-; Controls the ODBC cursor model. 
+; Controls the ODBC cursor model.
 ; Default: SQL_CURSOR_STATIC (default).
 ;odbc.default_cursortype
 
@@ -1509,7 +1505,7 @@ session.cookie_domain =
 
 ; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
-session.cookie_httponly = 
+session.cookie_httponly =
 
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
@@ -1528,7 +1524,7 @@ session.serialize_handler = php
 session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
-; session initialization. The probability is calculated by using the following equation: 
+; session initialization. The probability is calculated by using the following equation:
 ; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
 ; session.gc_divisor is the denominator in the equation. Setting this value to 1
 ; when the session.gc_divisor value is 100 will give you approximately a 1% chance
@@ -1619,7 +1615,7 @@ session.cache_expire = 180
 session.use_trans_sid = 0
 
 ; Select a hash function for use in generating session ids.
-; Possible Values 
+; Possible Values
 ;   0  (MD5 128 bits)
 ;   1  (SHA-1 160 bits)
 ; http://php.net/session.hash-function
@@ -1695,7 +1691,7 @@ mssql.secure_connection = Off
 ; FreeTDS defaults to 4096
 ;mssql.max_procs = -1
 
-; Specify client character set. 
+; Specify client character set.
 ; If empty or not set the client charset from freetds.comf is used
 ; This is only used when compiled with FreeTDS
 ;mssql.charset = "ISO-8859-1"
@@ -1859,7 +1855,7 @@ soap.wsdl_cache_enabled=1
 ; http://php.net/soap.wsdl-cache-dir
 soap.wsdl_cache_dir="/tmp"
 
-; (time to live) Sets the number of second while cached file will be used 
+; (time to live) Sets the number of second while cached file will be used
 ; instead of original one.
 ; http://php.net/soap.wsdl-cache-ttl
 soap.wsdl_cache_ttl=86400
