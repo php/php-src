@@ -1,8 +1,8 @@
 --TEST--
 mysql_num_rows()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -56,6 +56,10 @@ if ($res = mysql_query('SELECT COUNT(id) AS num FROM test', $link)) {
 
 mysql_close($link);
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysql_num_rows() expects parameter 1 to be resource, boolean given in %s on line %d

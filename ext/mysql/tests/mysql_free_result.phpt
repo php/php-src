@@ -1,8 +1,8 @@
 --TEST--
 mysql_free_result()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -38,6 +38,10 @@ if ($tmp = sys_get_temp_dir()) {
 
 mysql_close($link);
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 bool(true)

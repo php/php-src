@@ -50,6 +50,10 @@ if ($link = @mysql_connect($host . '_unknown', $user . '_unknown', $passwd, true
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 int(0)
 int(%d)

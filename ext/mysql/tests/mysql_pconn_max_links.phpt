@@ -4,7 +4,7 @@ Persistent connections and mysql.max_persistent
 <?php
 	require_once('skipif.inc');
 	require_once('skipifconnectfailure.inc');
-	require_once('connect.inc');
+	require_once('table.inc');
 
 	if ($socket)
 		$host = sprintf("%s:%s", $host, $socket);
@@ -138,6 +138,20 @@ mysql.allow_persistent=1
 	mysql_query('DROP USER pcontest', $link);
 	mysql_close($link);
 	print "done!";
+?>
+--CLEAN--
+<?php
+// connect + select_db
+require_once("connect.inc");
+if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
+	printf("[c001] Cannot connect to the server using host=%s/%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+ 	  $host, $myhost, $user, $db, $port, $socket);
+}
+
+@mysql_query('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest', $link);
+@mysql_query('DROP USER pcontest', $link);
+
+mysql_close($link);
 ?>
 --EXPECTF--
 array(2) {
