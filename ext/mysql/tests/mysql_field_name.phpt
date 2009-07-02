@@ -41,6 +41,10 @@ var_dump(mysql_field_name($res, 0));
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysql_field_name() expects exactly 2 parameters, 1 given in %s on line %d
 

@@ -77,6 +77,10 @@ var_dump(mysql_fetch_object($res, 'this_class_does_not_exist'));
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 object(stdClass)#%d (2) {
   [%u|b%"ID"]=>

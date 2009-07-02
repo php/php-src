@@ -57,5 +57,9 @@ mysql_close($link);
 
 print "done!\n";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

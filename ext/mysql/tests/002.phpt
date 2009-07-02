@@ -32,6 +32,10 @@ mysql_close($link);
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 resource(%d) of type (mysql link)
 bool(true)

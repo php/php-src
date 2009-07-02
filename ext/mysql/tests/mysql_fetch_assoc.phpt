@@ -58,6 +58,10 @@ mysql_close($link);
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 [005]
 array(2) {

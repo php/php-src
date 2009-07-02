@@ -60,6 +60,10 @@ var_dump(mysql_result($res, 0));
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysql_result(): Unable to jump to row -1 on MySQL result index %d in %s on line %d
 bool(false)

@@ -1,8 +1,8 @@
 --TEST--
 mysql_get_host_info()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -35,6 +35,10 @@ if (!is_null($tmp = @mysql_get_host_info($link, "too many arguments"))) {
 }
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

@@ -1,7 +1,7 @@
 --TEST--
 mysql_pconnect() - killing persitent connection
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -24,7 +24,7 @@ mysql.max_persistent=2
 		printf("[001] Cannot connect to the server using host=%s/%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $myhost, $user, $db, $port, $socket);
 	mysql_select_db($db, $plink);
-			
+
 	$pthread_id = mysql_thread_id($plink);
 	$thread_id = mysql_thread_id($link);
 
@@ -40,8 +40,8 @@ mysql.max_persistent=2
 		printf("[003] Cannot find regular connection thread in process list, [%d] %s\n", mysql_errno($link), mysql_error($link));
 	if (!isset($processlist[$pthread_id]))
 		printf("[004] Cannot find persistent connection thread in process list, [%d] %s\n", mysql_errno($link), mysql_error($link));
-		
-	if (!mysql_query(sprintf("KILL %d", $pthread_id), $link)) 
+
+	if (!mysql_query(sprintf("KILL %d", $pthread_id), $link))
 		printf("[005] Cannot kill persistent connection thread, [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 	while (1) {
@@ -64,7 +64,7 @@ mysql.max_persistent=2
 
 	mysql_close($plink);
 
-	if (!($plink = mysql_pconnect($myhost, $user, $passwd))) 
+	if (!($plink = mysql_pconnect($myhost, $user, $passwd)))
 		printf("[009] Cannot create new persistent connection, [%d] %s\n", mysql_errno(), mysql_error());
 	mysql_select_db($db, $plink);
 
@@ -82,7 +82,7 @@ mysql.max_persistent=2
 		printf("[012] Cannot connect to the server using host=%s/%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $myhost, $user, $db, $port, $socket);
 	mysql_select_db($db, $link2);
-	if (!mysql_query(sprintf("KILL %d", $thread_id), $link2)) 
+	if (!mysql_query(sprintf("KILL %d", $thread_id), $link2))
 		printf("[013] Cannot kill regular connection thread, [%d] %s\n", mysql_errno($link2), mysql_error($link2));
 
 	if (!($link = mysql_connect($myhost, $user, $passwd, true)))
@@ -100,6 +100,10 @@ mysql.max_persistent=2
 	mysql_close($link);
 	mysql_close($link2);
 	print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 bool(true)

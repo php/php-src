@@ -52,6 +52,10 @@ mysql.max_links=2
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 [001] Can connect to the server.
 [002] Can fetch data using persistent connection! Data = '1'

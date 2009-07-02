@@ -1,8 +1,8 @@
 --TEST--
 mysql_fetch_lengths()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -33,6 +33,10 @@ var_dump(mysql_fetch_lengths($res));
 
 mysql_close($link);
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 array(2) {

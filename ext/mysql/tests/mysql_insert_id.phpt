@@ -1,8 +1,8 @@
 --TEST--
 mysql_insert_id()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -59,6 +59,10 @@ mysql_close($link);
 var_dump(mysql_insert_id($link));
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysql_insert_id(): %d is not a valid MySQL-Link resource in %s on line %d
