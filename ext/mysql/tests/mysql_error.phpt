@@ -57,6 +57,10 @@ if ('' == mysql_error())
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysql_error(): %d is not a valid MySQL-Link resource in %s on line %d
 bool(false)

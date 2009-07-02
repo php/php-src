@@ -4,15 +4,9 @@ mysql_[p]connect() - max_links/max_persistent
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once('table.inc');
 
-$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket);
-if (!$link)
-	die("skip Cannot connect to MySQL");
-
-mysql_close($link);
-
-mysqli_query('DROP USER pcontest', $link);
+mysql_query('DROP USER pcontest', $link);
 if (!mysql_query('CREATE USER pcontest IDENTIFIED BY "pcontest"', $link)) {
 	printf("skip Cannot create second DB user [%d] %s", mysql_errno($link), mysql_error($link));
 	mysql_close($link);
@@ -80,6 +74,20 @@ mysql_query('DROP USER pcontest', $links[0]);
 
 mysql_close($links[0]);
 print "done!\n";
+?>
+--CLEAN--
+<?php
+// connect + select_db
+require_once("connect.inc");
+if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
+	printf("[c001] Cannot connect to the server using host=%s/%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+ 	  $host, $myhost, $user, $db, $port, $socket);
+}
+
+@mysql_query('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest', $link);
+@mysql_query('DROP USER pcontest', $link);
+
+mysql_close($link);
 ?>
 --EXPECTF--
 Warning: mysql_pconnect(): Too many open persistent links (1) in %s on line %d

@@ -62,6 +62,10 @@ mysql_close($link);
 
 print "done!\n";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysql_data_seek(): Offset 4 is invalid for MySQL result index %d (or the query data is unbuffered) in %s on line %d
 

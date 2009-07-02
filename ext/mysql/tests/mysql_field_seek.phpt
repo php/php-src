@@ -39,6 +39,10 @@ var_dump(mysql_field_seek($res, 0));
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysql_field_seek(): Field -1 is invalid for MySQL result index %d in %s on line %d
 bool(false)

@@ -1,8 +1,8 @@
 --TEST--
 mysql_get_proto_info()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -25,6 +25,10 @@ if (NULL !== ($tmp = @mysql_get_proto_info('too many', 'arguments')))
 	printf("[005] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

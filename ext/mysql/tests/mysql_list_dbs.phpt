@@ -1,8 +1,8 @@
 --TEST--
 mysql_list_dbs()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -45,6 +45,10 @@ assert($row === $row2);
 mysql_close($link);
 
 print "done!\n";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

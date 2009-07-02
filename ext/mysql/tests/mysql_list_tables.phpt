@@ -1,8 +1,8 @@
 --TEST--
 mysql_list_tables()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -76,6 +76,10 @@ if (!in_array('test', $list1))
 mysql_close($link);
 
 print "done!\n";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!
