@@ -1436,7 +1436,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			error = CURLE_OK;
 			switch (option) {
 				case CURLOPT_FILE:
-					if (((php_stream *) what)->mode[0] != 'r') {
+					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						zend_list_addref(Z_LVAL_PP(zvalue));
 						ch->handlers->write->fp = fp;
 						ch->handlers->write->method = PHP_CURL_FILE;
@@ -1447,7 +1447,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					}
 					break;
 				case CURLOPT_WRITEHEADER:
-					if (((php_stream *) what)->mode[0] != 'r') {
+					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						zend_list_addref(Z_LVAL_PP(zvalue));
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
@@ -1463,7 +1463,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
 					break;
 				case CURLOPT_STDERR:
-					if (((php_stream *) what)->mode[0] != 'r') {
+					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
 						if (ch->handlers->std_err) {
 							zval_ptr_dtor(&ch->handlers->std_err);
 						}
