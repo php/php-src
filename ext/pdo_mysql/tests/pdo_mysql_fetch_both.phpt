@@ -49,7 +49,7 @@ $db = MySQLPDOTest::factory();
 
 	try {
 
-		fetch(2, &$db, 'SELECT 1', array(0 => '1', '1' => '1'));
+		fetch(2, $db, 'SELECT 1', array(0 => '1', '1' => '1'));
 
 	} catch (PDOException $e) {
 		printf("[001] %s [%s] %s\n",
