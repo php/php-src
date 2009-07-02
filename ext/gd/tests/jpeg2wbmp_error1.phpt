@@ -29,7 +29,7 @@ imagejpeg($im, $file);
 imagedestroy($im);
 
 jpeg2wbmp($file, $file2, 20, 120, 9);
-jpeg2wbmp($file', $file2, 20, 120, -1);
+jpeg2wbmp($file, $file2, 20, 120, -1);
 ?>
 --EXPECTF--
 Warning: jpeg2wbmp(): Invalid threshold value '9' in %s on line %d
