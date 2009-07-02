@@ -116,5 +116,9 @@ if (false !== ($tmp = @mysql_affected_rows($link)))
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

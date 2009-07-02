@@ -1,8 +1,8 @@
 --TEST--
 mysql_ping()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -36,6 +36,10 @@ if (false !== ($tmp = mysql_ping($link)))
 	printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 bool(true)

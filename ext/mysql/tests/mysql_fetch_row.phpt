@@ -36,6 +36,10 @@ var_dump(mysql_fetch_row($res));
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 [004]
 array(2) {

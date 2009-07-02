@@ -277,6 +277,10 @@ printf("[015] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 [005]
 array(4) {

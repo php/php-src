@@ -1,8 +1,8 @@
 --TEST--
 mysql_num_fields()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -46,6 +46,10 @@ func_test_mysql_num_fields($link, "SELECT id FROM test", 1, 20, true);
 mysql_close($link);
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysql_num_fields(): %d is not a valid MySQL result resource in %s on line %d

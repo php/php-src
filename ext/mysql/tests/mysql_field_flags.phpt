@@ -1,8 +1,8 @@
 --TEST--
 mysql_field_flags()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -134,6 +134,10 @@ var_dump(mysql_field_flags($res, 0));
 
 mysql_close($link);
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysql_field_flags() expects exactly 2 parameters, 1 given in %s on line %d

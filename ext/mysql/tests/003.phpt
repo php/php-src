@@ -52,6 +52,10 @@ mysql_free_result($res);
 mysql_close($link);
 print "done!";
 ?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
+?>
 --EXPECTF--
 ==stdClass==
 object(stdClass)#%d (1) {
