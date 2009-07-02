@@ -3,7 +3,7 @@ Bug #47566 (return value of pcntl_wexitstatus())
 --SKIPIF--
 <?php if (!extension_loaded("pcntl")) print "skip"; ?>
 --FILE--
-<?
+<?php
 $pid = pcntl_fork();
 if ($pid == -1) {
  echo "Unable to fork";
