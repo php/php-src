@@ -19,7 +19,7 @@ require_once('skipifconnectfailure.inc');
 	$foo = new foo;
 	$foo->bar = "фубар";
 
-	echo "Test 1: \n";
+	echo "Test 1:\n";
 	$stmt = $link->prepare("SELECT ? FOO");
 	var_dump($foo); // here you can see the bar member var beeing a string
 	$stmt->bind_param("s", $foo->bar);
@@ -30,11 +30,11 @@ require_once('skipifconnectfailure.inc');
 	$stmt->free_result();
 	echo("$one\n\n");
 
-	// it is getting worse. Binding the same var twice with different 
+	// it is getting worse. Binding the same var twice with different
 	// types you can get unexpected results (e.g. binary trash for the
 	// string and misc data for the integer. See next 2 tests.
 
-	echo "Test 2: \n";
+	echo "Test 2:\n";
 	$stmt = $link->prepare("SELECT ? FOO, ? BAR");
 	var_dump($foo);
 	$stmt->bind_param("si", $foo->bar, $foo->bar);
@@ -50,7 +50,7 @@ require_once('skipifconnectfailure.inc');
 	echo("$one - $two\n\n");
 
 
-	echo "Test 3: \n";
+	echo "Test 3:\n";
 	$stmt = $link->prepare("SELECT ? FOO, ? BAR");
 	var_dump($foo);
 	$stmt->bind_param("is", $foo->bar, $foo->bar);
@@ -60,88 +60,46 @@ require_once('skipifconnectfailure.inc');
 	$stmt->fetch();
 	$stmt->free_result();
 	echo("$one - $two\n\n");
-	echo "done!\n";
+	echo "done!";
 ?>
 --EXPECTF--
-Test 1: 
-object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
+Test 1:
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  %unicode|string%(%d) "фубар"
 }
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  &%unicode|string%(%d) "фубар"
 }
 фубар
 
-Test 2: 
-object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
+Test 2:
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  %unicode|string%(%d) "фубар"
 }
 ---
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  &%unicode|string%(%d) "фубар"
 }
 ---
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  &%unicode|string%(%d) "фубар"
 }
 ---
 фубар - 0
 
-Test 3: 
-object(foo)#3 (1) {
-  ["bar"]=>
-  string(10) "фубар"
+Test 3:
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  %unicode|string%(%d) "фубар"
 }
-object(foo)#3 (1) {
-  ["bar"]=>
-  &string(10) "фубар"
-}
-0 - фубар
-
-done!
---UEXPECTF--
-Test 1: 
-object(foo)#3 (1) {
-  [u"bar"]=>
-  unicode(5) "фубар"
-}
-object(foo)#3 (1) {
-  [u"bar"]=>
-  &unicode(5) "фубар"
-}
-фубар
-
-Test 2: 
-object(foo)#3 (1) {
-  [u"bar"]=>
-  unicode(5) "фубар"
-}
----
-object(foo)#3 (1) {
-  [u"bar"]=>
-  &unicode(5) "фубар"
-}
----
-object(foo)#3 (1) {
-  [u"bar"]=>
-  &unicode(5) "фубар"
-}
----
-фубар - 0
-
-Test 3: 
-object(foo)#3 (1) {
-  [u"bar"]=>
-  unicode(5) "фубар"
-}
-object(foo)#3 (1) {
-  [u"bar"]=>
-  &unicode(5) "фубар"
+object(foo)#%d (1) {
+  [%u|b%"bar"]=>
+  &%unicode|string%(%d) "фубар"
 }
 0 - фубар
 
