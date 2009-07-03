@@ -39,7 +39,7 @@ $tmp = mysql_error($link);
 if (!is_string($tmp) || !preg_match("/Table '\w*\.test' doesn't exist/su", $tmp))
 	printf("[006] Expecting string/[Table... doesn't exit], got %s/%s. [%d] %s\n", gettype($tmp), $tmp, mysql_errno($link), mysql_error($link));
 
-if (ini_get('unicode.semantics') && !is_unicode($tmp)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp)) {
 	printf("[007] Expecting Unicode error message!\n");
 	var_inspect($tmp);
 }

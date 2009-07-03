@@ -25,7 +25,7 @@ if ($def_info !== $info) {
 	var_dump($info);
 }
 
-if (ini_get('unicode.semantics') && !is_unicode($info)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($info)) {
 	printf("[005] Expecting Unicode error message!\n");
 	var_inspect($info);
 }

@@ -32,7 +32,7 @@ if (false !== ($tmp = mysql_field_flags($res, -1)))
 if (!is_string($tmp = mysql_field_flags($res, 0)) || empty($tmp))
 	printf("[006] Expecting non empty string, got %s/%s\n", gettype($tmp), $tmp);
 
-if (ini_get('unicode.semantics') && !is_unicode($tmp)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp)) {
 	printf("[007] Check the unicode support!\n");
 	var_inspect($tmp);
 }
