@@ -38,7 +38,7 @@ if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket))
 /* unicode mode should throw a warning */
 $tmp = mysql_set_charset('uFt8', $link);
 
-if (ini_get('unicode.semantics'))
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1))
 	$expect = false;
 else
 	$expect = true;

@@ -34,7 +34,7 @@ if (false !== ($tmp = mysql_db_name($res, $num + 1)))
 	printf("[006] Expecting boolean/false, got %s/%s. [%d] %s\n",
 		gettype($tmp), $tmp, mysql_errno($link), mysql_error($link));
 
-$unicode = (boolean)ini_get('unicode.semantics');
+$unicode = (boolean)(version_compare(PHP_VERSION, '5.9.9', '>') == 1);
 for ($i = 0; $i < $num; $i++) {
 	if ('' === ($dbname = mysql_db_name($res, $i)))
 		printf("[%03d] Got empty database name! [%d] %s\n",
