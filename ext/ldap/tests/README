@@ -1,0 +1,53 @@
+Most tests here relies on the availability of an LDAP server configured with TLS.
+
+Client/Server configuration:
+===========================================================
+OpenLDAP 2.3.43 has been used with the configuration below.
+
+Notes:
+1.  A self signed certificate can be generated using:
+    $ openssl req -newkey rsa:1024 -x509 -nodes -out server.pem -keyout server.pem -days 3650
+    It is used for testing ldap_start_tls(), which also requires "TLS_REQCERT never" in client configuration
+2.  An empty LDAP structure is required for the tests to be PASSed
+
+(/etc/openldap/)slapd.conf:
+-----------------------------------------------------------
+TLSCACertificateFile /etc/openldap/ssl/server.pem
+TLSCertificateFile /etc/openldap/ssl/server.pem
+TLSCertificateKeyFile /etc/openldap/ssl/server.pem
+TLSVerifyClient never
+
+# hdb is used instead of bdb as it enables the usage of referrals & aliases
+database        hdb
+suffix          "dc=my-domain,dc=com"
+checkpoint      32      30
+rootdn          "cn=Manager,dc=my-domain,dc=com"
+rootpw          secret
+directory       /var/lib/openldap-data
+index   objectClass     eq
+
+authz-regexp
+	uid=Manager,cn=digest-md5,cn=auth
+	cn=Manager,dc=my-domain,dc=com
+
+
+(/etc/openldap/)ldap.conf:
+-----------------------------------------------------------
+TLS_REQCERT never
+
+Tests configuration:
+===========================================================
+The following environment variables may be defined:
+LDAP_TEST_HOST (default: localhost)                        Host to connect to
+LDAP_TEST_PORT (default: 389)                              Port to connect to
+LDAP_TEST_USER (default: cn=Manager,dc=my-domain,dc=com)   DN used for binding
+LDAP_TEST_SASL_USER (default: Manager)                     SASL user used for SASL binding
+LDAP_TEST_PASSWD (default: secret)                         Password used for plain and SASL binding
+LDAP_TEST_OPT_PROTOCOL_VERSION (default: 3)                Version of LDAP protocol to use
+LDAP_TEST_SKIP_BIND_FAILURE (default: true)                Whether to fail the test or not in case binding fails
+
+Credits:
+===========================================================
+Davide Mendolia <idaf1er@gmail.com>
+Patrick Allaert <patrick.allaert@gmail.com>
+
