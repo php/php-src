@@ -1,5 +1,8 @@
 <?php
   switch($_GET['test']) {
+    case 'post':
+      var_dump($_POST);
+      break;
     case 'getpost':
       var_dump($_GET);
       var_dump($_POST);
