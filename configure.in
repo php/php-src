@@ -218,8 +218,6 @@ case $host_cpu in
   sparc*)
     if test "$SUNCC" = "yes"; then
       CFLAGS="$CFLAGS -xmemalign=8i"
-    else
-      CFLAGS=""
     fi
     ;;
 esac
