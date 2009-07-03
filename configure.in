@@ -219,6 +219,7 @@ case $host_cpu in
     if test "$SUNCC" = "yes"; then
       CFLAGS="$CFLAGS -xmemalign=8s"
     fi
+    ;;
 esac
 
 dnl activate some gcc specific optimizations for gcc >= 4
