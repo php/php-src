@@ -1,8 +1,8 @@
 --TEST--
 mysql_list_processes()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -24,7 +24,7 @@ if (!$num = mysql_num_rows($res))
 	printf("[003] Empty process list? [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 $row = mysql_fetch_array($res, MYSQL_NUM);
-if (ini_get('unicode.semantics') && !is_unicode($row[0])) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row[0])) {
 	printf("[004] Check for unicode support\n");
 	var_inspect($row);
 }
@@ -38,7 +38,7 @@ if (!$num = mysql_num_rows($res))
 	printf("[006] Empty process list? [%d] %s\n", mysql_errno(), mysql_error());
 
 $row = mysql_fetch_array($res, MYSQL_NUM);
-if (ini_get('unicode.semantics') && !is_unicode($row[0])) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row[0])) {
 	printf("[007] Check for unicode support\n");
 	var_inspect($row);
 }

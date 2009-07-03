@@ -1,8 +1,8 @@
 --TEST--
 mysql_stat()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -25,7 +25,7 @@ if ((!is_string($stat = mysql_stat($link))) || ('' === $stat))
 	printf("[003] Expecting non empty string, got %s/'%s', [%d] %s\n",
 		gettype($stat), $stat, mysql_errno($link), mysql_error($link));
 
-if (ini_get('unicode.semantics') && !is_unicode($stat)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($stat)) {
 	printf("[004] Expecting Unicode error message!\n");
 	var_inspect($stat);
 }
