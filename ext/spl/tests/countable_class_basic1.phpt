@@ -29,6 +29,9 @@ Interface [ <internal%s> interface Countable ] {
 
   - Methods [1] {
     Method [ <internal%s> abstract public method count ] {
+
+      - Parameters [0] {
+      }
     }
   }
 }
