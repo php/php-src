@@ -61,9 +61,12 @@ PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 PHPAPI zend_class_entry *spl_ce_Countable;
 PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 
+ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
+ZEND_END_ARG_INFO()
+
 const zend_function_entry spl_funcs_RecursiveIterator[] = {
-	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
-	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  NULL)
+	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  arginfo_recursive_it_void)
+	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  arginfo_recursive_it_void)
 	{NULL, NULL, NULL}
 };
 
@@ -860,23 +863,23 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, __construct,       arginfo_recursive_it___construct,    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, rewind,            NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, valid,             NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, key,               NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, current,           NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, next,              NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getDepth,          NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, rewind,            arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, valid,             arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, key,               arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, current,           arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, next,              arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getDepth,          arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getSubIterator,    arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginIteration,    NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endIteration,      NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL,                                ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginIteration,    arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endIteration,      arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callHasChildren,   arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callGetChildren,   arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginChildren,     arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endChildren,       arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, nextElement,       arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, setMaxDepth,       arginfo_recursive_it_setMaxDepth,    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getMaxDepth,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getMaxDepth,       arginfo_recursive_it_void,           ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1120,22 +1123,22 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	SPL_ME(RecursiveTreeIterator,     __construct,       arginfo_recursive_tree_it___construct,   ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, rewind,            NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, valid,             NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveTreeIterator,     key,               NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveTreeIterator,     current,           NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, next,              NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginIteration,    NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endIteration,      NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveTreeIterator,     getPrefix,         NULL,                                    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, rewind,            arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, valid,             arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     key,               arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     current,           arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, next,              arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginIteration,    arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endIteration,      arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callHasChildren,   arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callGetChildren,   arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginChildren,     arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endChildren,       arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, nextElement,       arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     getPrefix,         arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveTreeIterator,     setPrefixPart,     arginfo_recursive_tree_it_setPrefixPart, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveTreeIterator,     getEntry,          NULL,                                    ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveTreeIterator,     getPostfix,        NULL,                                    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     getEntry,          arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     getPostfix,        arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1978,13 +1981,13 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_FilterIterator[] = {
 	SPL_ME(FilterIterator,  __construct,      arginfo_filter_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(FilterIterator,  rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(FilterIterator,  next,             NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
-	SPL_ABSTRACT_ME(FilterIterator, accept, NULL)
+	SPL_ME(FilterIterator,  rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(FilterIterator,  next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ABSTRACT_ME(FilterIterator, accept,   arginfo_recursive_it_void)
 	{NULL, NULL, NULL}
 };
 
@@ -1994,14 +1997,14 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
 	SPL_ME(RecursiveFilterIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveFilterIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveFilterIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator,  hasChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator,  getChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 static const zend_function_entry spl_funcs_ParentIterator[] = {
 	SPL_ME(ParentIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
-	SPL_MA(ParentIterator,  accept,           RecursiveFilterIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(ParentIterator,  accept,           RecursiveFilterIterator, hasChildren, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2028,12 +2031,12 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RegexIterator[] = {
 	SPL_ME(RegexIterator,   __construct,      arginfo_regex_it___construct,    ZEND_ACC_PUBLIC)
-	SPL_ME(RegexIterator,   accept,           NULL,                            ZEND_ACC_PUBLIC)
-	SPL_ME(RegexIterator,   getMode,          NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   accept,           arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getMode,          arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   setMode,          arginfo_regex_it_set_mode,       ZEND_ACC_PUBLIC)
-	SPL_ME(RegexIterator,   getFlags,         NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getFlags,         arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   setFlags,         arginfo_regex_it_set_flags,      ZEND_ACC_PUBLIC)
-	SPL_ME(RegexIterator,   getPregFlags,     NULL,                            ZEND_ACC_PUBLIC)
+	SPL_ME(RegexIterator,   getPregFlags,     arginfo_recursive_it_void,       ZEND_ACC_PUBLIC)
 	SPL_ME(RegexIterator,   setPregFlags,     arginfo_regex_it_set_preg_flags, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -2048,8 +2051,8 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
 	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveFilterIterator, hasChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveRegexIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator, hasChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  getChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 #endif
@@ -2194,14 +2197,14 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_LimitIterator[] = {
 	SPL_ME(LimitIterator,   __construct,      arginfo_limit_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator,   rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator,   valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator,   next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator,   seek,             arginfo_limit_it_seek, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator,   getPosition,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator,   getPosition,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2591,22 +2594,22 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_CachingIterator[] = {
 	SPL_ME(CachingIterator, __construct,      arginfo_caching_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, next,             NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, hasNext,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, __toString,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, getFlags,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, rewind,           arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, valid,            arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         key,              arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         current,          arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, next,             arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, hasNext,          arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, __toString,       arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,         getInnerIterator, arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, getFlags,         arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, setFlags,         arginfo_caching_it_setFlags,    ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, offsetGet,        arginfo_caching_it_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, offsetSet,        arginfo_caching_it_offsetSet,   ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, offsetUnset,      arginfo_caching_it_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, offsetExists,     arginfo_caching_it_offsetGet,   ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, getCache,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, count,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, getCache,         arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, count,            arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2650,8 +2653,8 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveCachingIterator[] = {
 	SPL_ME(RecursiveCachingIterator, __construct,   arginfo_caching_rec_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveCachingIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveCachingIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveCachingIterator, hasChildren,   arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveCachingIterator, getChildren,   arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2668,12 +2671,12 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_IteratorIterator[] = {
 	SPL_ME(IteratorIterator, __construct,      arginfo_iterator_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          next,             NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          getInnerIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2758,12 +2761,12 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_NoRewindIterator[] = {
 	SPL_ME(NoRewindIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(NoRewindIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(NoRewindIterator, valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(NoRewindIterator, key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(NoRewindIterator, current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(NoRewindIterator, next,             NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          getInnerIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,          getInnerIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2795,7 +2798,7 @@ SPL_METHOD(InfiniteIterator, next)
 
 static const zend_function_entry spl_funcs_InfiniteIterator[] = {
 	SPL_ME(InfiniteIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(InfiniteIterator, next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(InfiniteIterator, next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2833,11 +2836,11 @@ SPL_METHOD(EmptyIterator, next)
 } /* }}} */
 
 static const zend_function_entry spl_funcs_EmptyIterator[] = {
-	SPL_ME(EmptyIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(EmptyIterator, valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(EmptyIterator, key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(EmptyIterator, current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(EmptyIterator, next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(EmptyIterator, next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2989,16 +2992,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0)
 ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_AppendIterator[] = {
-	SPL_ME(AppendIterator, __construct,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, __construct,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(AppendIterator, append,           arginfo_append_it_append, ZEND_ACC_PUBLIC)
-	SPL_ME(AppendIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(AppendIterator, valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(AppendIterator, next,             NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        getInnerIterator, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(AppendIterator, getIteratorIndex, NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(AppendIterator, getArrayIterator, NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, rewind,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, valid,            arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        key,              arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        current,          arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, next,             arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        getInnerIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, getIteratorIndex, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, getArrayIterator, arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -3186,12 +3189,12 @@ PHP_FUNCTION(iterator_apply)
 /* }}} */
 
 static const zend_function_entry spl_funcs_OuterIterator[] = {
-	SPL_ABSTRACT_ME(OuterIterator, getInnerIterator,   NULL)
+	SPL_ABSTRACT_ME(OuterIterator, getInnerIterator,   arginfo_recursive_it_void)
 	{NULL, NULL, NULL}
 };
 
 static const zend_function_entry spl_funcs_Countable[] = {
-	SPL_ABSTRACT_ME(Countable, count,   NULL)
+	SPL_ABSTRACT_ME(Countable, count,   arginfo_recursive_it_void)
 	{NULL, NULL, NULL}
 };
 
