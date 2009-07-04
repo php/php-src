@@ -1021,6 +1021,10 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_splfixedarray_construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, size)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
@@ -1039,22 +1043,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_fromArray, 0, 0, 1)
 	ZEND_ARG_INFO(0, save_indexes)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_splfixedarray_void, 0)
+ZEND_END_ARG_INFO()
+
 static zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
-	SPL_ME(SplFixedArray, __construct,     NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, count,           NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, toArray,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, __construct,     arginfo_splfixedarray_construct,ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, count,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, toArray,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, fromArray,       arginfo_fixedarray_fromArray,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	SPL_ME(SplFixedArray, getSize,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, getSize,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, setSize,         arginfo_fixedarray_setSize,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, offsetExists,    arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, offsetGet,       arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, offsetSet,       arginfo_fixedarray_offsetSet,   ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, offsetUnset,     arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, rewind,          NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, current,         NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, key,             NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, next,            NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, valid,           NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, rewind,          arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, current,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, key,             arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, next,            arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, valid,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */

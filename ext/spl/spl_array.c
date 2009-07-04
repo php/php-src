@@ -1810,6 +1810,9 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO(arginfo_array_unserialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_array_void, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 static const zend_function_entry spl_funcs_ArrayObject[] = { /* {{{ */
@@ -1819,23 +1822,23 @@ static const zend_function_entry spl_funcs_ArrayObject[] = { /* {{{ */
 	SPL_ME(Array, offsetSet,        arginfo_array_offsetSet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetUnset,      arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, append,           arginfo_array_append,           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getArrayCopy,     NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, count,            NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getFlags,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getArrayCopy,     arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,            arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getFlags,         arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
-	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, asort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, ksort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natsort,          arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natcasesort,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, unserialize,      arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
-	SPL_ME(Array, serialize,        NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, serialize,        arginfo_array_void,             ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
-	SPL_ME(Array, getIterator,      NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getIterator,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setIteratorClass, arginfo_array_setIteratorClass, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getIteratorClass, NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getIteratorClass, arginfo_array_void,             ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 }; /* }}} */
 
@@ -1846,31 +1849,31 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = { /* {{{ */
 	SPL_ME(Array, offsetSet,        arginfo_array_offsetSet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetUnset,      arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
 	SPL_ME(Array, append,           arginfo_array_append,           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getArrayCopy,     NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, count,            NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getFlags,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getArrayCopy,     arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,            arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getFlags,         arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
-	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, asort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, ksort,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natsort,          arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natcasesort,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, unserialize,     arginfo_array_unserialize,       ZEND_ACC_PUBLIC)
-	SPL_ME(Array, serialize,        NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, serialize,        arginfo_array_void,             ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
-	SPL_ME(Array, rewind,           NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, current,          NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, key,              NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, next,             NULL,                           ZEND_ACC_PUBLIC)
-	SPL_ME(Array, valid,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, rewind,           arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, current,          arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, key,              arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, next,             arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, valid,            arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, seek,             arginfo_array_seek,             ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 }; /* }}} */
 
 static const zend_function_entry spl_funcs_RecursiveArrayIterator[] = { /* {{{ */
-	SPL_ME(Array, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, hasChildren,   arginfo_array_void, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getChildren,   arginfo_array_void, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 }; /* }}} */
 
