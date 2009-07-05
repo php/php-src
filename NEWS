@@ -1,4 +1,4 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
 - Fixed regression in cURL extension that prevented flush of data to output
@@ -6,6 +6,8 @@
 
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
+- Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain
+  components). (Ilia)
 - Fixed bug #48709 (metaphone and 'wh'). (brettz9 at yahoo dot com, Felipe)
 - Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
   formatted). (peter at lvp-media dot com, Felipe)
