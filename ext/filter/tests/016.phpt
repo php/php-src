@@ -14,7 +14,8 @@ $values = Array(
 '@',	
 '[]()/@example.com',	
 'QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET',
-'e.x.a.m.p.l.e.@example.com'
+'e.x.a.m.p.l.e.@example.com',
+'firstname.lastname@employee.2something.com'
 );
 foreach ($values as $value) {
 	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
@@ -33,4 +34,5 @@ bool(false)
 bool(false)
 string(57) "QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET"
 string(26) "e.x.a.m.p.l.e.@example.com"
+string(42) "firstname.lastname@employee.2something.com"
 Done

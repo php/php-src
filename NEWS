@@ -8,6 +8,8 @@
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
+- Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain  
+  components). (Ilia)
 - Fixed bug #48681 (openssl signature verification for tar archives broken).
   (Greg)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
