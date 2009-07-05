@@ -17,8 +17,8 @@ foreach ($it as $e) {
 if ($count > 0) {
     echo "Found $count entries!\n";
 }
-echo "===DONE==="
 ?>
+===DONE===
 --EXPECTF--
 Found %i entries!
 ===DONE===
