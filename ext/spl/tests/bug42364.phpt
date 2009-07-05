@@ -12,7 +12,7 @@ foreach ($it as $e) {
     }
 }
 
-echo "===DONE==="
 ?>
+===DONE===
 --EXPECT--
 ===DONE===
