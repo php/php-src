@@ -5,6 +5,8 @@
 - Fixed spl_autoload_unregister/spl_autoad_functions wrt. Closures and
   Functors. (Christian Seiler)
 
+- Fixed bug #48771 (rename() between volumes fails and reports no error on 
+  Windows). (Pierre)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
@@ -15,7 +17,6 @@
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
-
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
