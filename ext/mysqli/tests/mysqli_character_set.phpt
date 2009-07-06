@@ -100,5 +100,9 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

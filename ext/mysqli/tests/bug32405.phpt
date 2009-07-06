@@ -1,8 +1,8 @@
 --TEST--
 Bug #32405 (mysqli->fetch() is returning bad data)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -13,7 +13,7 @@ require_once('skipifconnectfailure.inc');
 	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	mysqli_select_db($link, "test");
 	mysqli_query($link, "SET sql_mode=''");
-	
+
 	/* two fields are needed. the problem does not occur with 1 field only selected. */
 	$link->query("CREATE TABLE test_users(user_id int(10) unsigned NOT NULL auto_increment, login varchar(50) default '', PRIMARY KEY (user_id))");
 	$link->query('INSERT INTO test_users VALUES (NULL, "user1"), (NULL, "user2"), (NULL, "user3"), (NULL, "user4")');
@@ -30,6 +30,17 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_query($link,"DROP TABLE test_users");
 	mysqli_close($link);
+?>
+--CLEAN--
+<?php
+include "connect.inc";
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+   printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS test_users"))
+	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+mysqli_close($link);
 ?>
 --EXPECTF--
 int(1)

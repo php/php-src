@@ -82,6 +82,10 @@ mysqli autocommit/commit/rollback
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Num_of_rows=1
 array(2) {

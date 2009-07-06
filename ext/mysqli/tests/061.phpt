@@ -49,6 +49,17 @@ if (!function_exists('mysqli_set_local_infile_handler'))
 	unlink($filename);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+include "connect.inc";
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+   printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS t_061"))
+	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+mysqli_close($link);
+?>
 --EXPECT--
 foo-bar
 %unicode|string%-%unicode|string%

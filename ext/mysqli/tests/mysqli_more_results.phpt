@@ -1,9 +1,9 @@
 --TEST--
 mysqli_more_results()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -94,6 +94,10 @@ require_once('skipifconnectfailure.inc');
 	var_dump(mysqli_more_results($link));
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 [004]

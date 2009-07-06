@@ -164,6 +164,10 @@ mysqli.allow_local_infile=1
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Callback set to 'callback_simple'
 Callback: 0

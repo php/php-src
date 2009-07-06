@@ -91,5 +91,9 @@ if (stristr(mysqli_get_client_info(), 'mysqlnd'))
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

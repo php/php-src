@@ -1,9 +1,9 @@
 --TEST--
 mysqli_get_server_info()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -24,6 +24,10 @@ require_once('skipifconnectfailure.inc');
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

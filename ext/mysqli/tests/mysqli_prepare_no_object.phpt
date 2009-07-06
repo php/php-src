@@ -1,9 +1,9 @@
 --TEST--
 mysqli_prepare() - no object on failure
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -34,6 +34,10 @@ require_once('skipifconnectfailure.inc');
 	printf("c) [%d] %s\n", $mysqli->errno, $mysqli->error);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+require_once("clean_table.inc");
 ?>
 --EXPECTF--
 a) [1065] Query was empty

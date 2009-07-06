@@ -5,7 +5,7 @@ mysqli_stmt_get_result() - meta data, field_count()
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
-	
+
 	if (!function_exists('mysqli_stmt_get_result'))
 		die('skip mysqli_stmt_get_result not available');
 ?>
@@ -41,6 +41,10 @@ mysqli_stmt_get_result() - meta data, field_count()
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 2 2

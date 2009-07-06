@@ -25,6 +25,10 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump($res->fetch_assoc());
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 [003] [0%s
 

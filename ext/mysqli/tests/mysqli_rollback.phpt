@@ -80,6 +80,10 @@ mysqli_rollback()
 
 	print "done!\n";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_rollback(): Couldn't fetch mysqli in %s on line %d
 done!

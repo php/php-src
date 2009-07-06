@@ -328,6 +328,10 @@ if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Regular, procedural, using variables
 int(1)

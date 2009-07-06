@@ -1,9 +1,9 @@
 --TEST--
 mysqli_num_fields()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -47,6 +47,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_num_fields(): Couldn't fetch mysqli_result in %s on line %d

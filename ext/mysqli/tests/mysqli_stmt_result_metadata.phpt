@@ -93,6 +93,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt

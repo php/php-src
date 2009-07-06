@@ -40,5 +40,9 @@ mysqlnd.collect_memory_statistics=0
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

@@ -114,6 +114,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 
 Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d

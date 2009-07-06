@@ -93,6 +93,10 @@ sleep(5);
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Testing GET_LOCK()...
 ... lock 'phptest_%d' acquired by thread %d

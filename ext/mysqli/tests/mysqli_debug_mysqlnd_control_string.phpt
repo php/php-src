@@ -218,6 +218,10 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 		print "libmysql/DBUG package prints some debug info here.";
 	@unlink($trace_file);
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 [083][control string 'n:O,/tmp/mysqli_debug_phpt.trace'] Trace file has not been written.
 done%s
