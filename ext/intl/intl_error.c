@@ -103,6 +103,9 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_D
 	if( !msg )
 		return;
 
+	if(!err && INTL_G(error_level)) {
+		php_error_docref(NULL TSRMLS_CC, INTL_G(error_level), "%s", msg);		
+	}
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
 		return;
 
