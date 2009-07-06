@@ -7,7 +7,7 @@ require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
-if (ini_get('unicode.semantics')) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
 	die("skip Functionality not available in unicode mode");
 }
 ?>

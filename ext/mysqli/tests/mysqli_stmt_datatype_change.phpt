@@ -9,8 +9,6 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	include "connect.inc";
-	require('table.inc');
-
 	if (!$c1 = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -25,7 +23,7 @@ require_once('skipifconnectfailure.inc');
 	$c1->query("use $db");
 	$c2->query("use $db");
 	$c1->query("drop table if exists type_change");
-	$c1->query("create table type_change(a int, b char(10))");
+	$c1->query("create table type_change(a int, b char(10)) ENGINE = " . $engine);
 	$c1->query("insert into type_change values (1, 'one'), (2, 'two')");
 	$s1 = $c1->prepare("select a from type_change order by a");
 	var_dump($s1->execute(), $s1->bind_result($col1));
@@ -56,6 +54,18 @@ require_once('skipifconnectfailure.inc');
 
 	echo "done!";
 ?>
+--CLEAN--
+<?php
+include "connect.inc";
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+   printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS type_change"))
+	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+mysqli_close($link);
+?>
+
 --EXPECTF--
 bool(true)
 bool(true)

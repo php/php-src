@@ -225,5 +225,9 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

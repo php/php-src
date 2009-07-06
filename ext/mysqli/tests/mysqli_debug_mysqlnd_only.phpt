@@ -120,5 +120,9 @@ if (!$IS_MYSQLND)
 	@unlink($trace_file);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

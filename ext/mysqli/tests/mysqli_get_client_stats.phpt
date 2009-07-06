@@ -858,6 +858,32 @@ mysqlnd.collect_memory_statistics=1
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+include "connect.inc";
+if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+   printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
+	printf("[c002] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS non_result_set_queries_test"))
+	printf("[c003] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+if (!mysqli_query($link, "DROP TABLE IF EXISTS client_stats_test"))
+	printf("[c004] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+if (!mysqli_query($link, "DROP DATABASE IF EXISTS mysqli_get_client_stats_"))
+	printf("[c005] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+if (!mysqli_query($link, "DROP DATABASE IF EXISTS mysqli_get_client_stats"))
+	printf("[c006] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
+	printf("[c007] Cannot drop table, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+mysqli_close($link);
+?>
 --EXPECTF--
 array(119) {
   [%u|b%"bytes_sent"]=>

@@ -56,6 +56,10 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 object(stdClass)#%d (11) {
   [%u|b%"name"]=>

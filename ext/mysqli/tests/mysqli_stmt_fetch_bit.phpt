@@ -67,5 +67,9 @@ Fetching BIT column values using the PS API
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

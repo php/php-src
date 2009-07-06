@@ -1,9 +1,9 @@
 --TEST--
 mysqli_next_result()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -113,6 +113,10 @@ require_once('skipifconnectfailure.inc');
 	var_dump(mysqli_next_result($link));
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_next_result(): Couldn't fetch mysqli in %s on line %d

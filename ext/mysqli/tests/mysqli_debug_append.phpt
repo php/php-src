@@ -82,5 +82,9 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 	if ($IS_MYSQLND)
 		print "libmysql/DBUG package prints some debug info here."
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done%s

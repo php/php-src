@@ -96,5 +96,9 @@ Warning: mysqli_stmt_send_long_data(): There was an error while sending long dat
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

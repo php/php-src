@@ -51,5 +51,9 @@ if (!function_exists('mysqli_get_cache_stats')) {
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

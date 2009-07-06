@@ -81,6 +81,10 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_stmt_field_count(): invalid object or resource mysqli_stmt
  in %s on line %d

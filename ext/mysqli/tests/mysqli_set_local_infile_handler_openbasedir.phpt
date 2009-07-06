@@ -101,6 +101,10 @@ done!";
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: tempnam(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s) in %s on line %d
 [005 + 1] Cannot create CVS file ''

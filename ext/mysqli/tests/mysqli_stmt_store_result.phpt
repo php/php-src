@@ -82,5 +82,9 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link_buf);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

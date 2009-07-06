@@ -66,6 +66,10 @@ mysqli.allow_local_infile=1
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Callback set to 'callback_new_query'
 Callback: 0

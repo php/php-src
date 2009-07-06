@@ -1,9 +1,9 @@
 --TEST--
 mysqli_num_rows()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -72,6 +72,10 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
