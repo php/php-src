@@ -89,6 +89,10 @@ if (!$TEST_EXPERIMENTAL)
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 

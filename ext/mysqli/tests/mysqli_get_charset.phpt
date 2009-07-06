@@ -106,6 +106,10 @@ if (!function_exists('mysqli_get_charset'))
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_get_charset(): Couldn't fetch mysqli in %s on line %d
 done!

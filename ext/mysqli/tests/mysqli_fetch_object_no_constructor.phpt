@@ -44,6 +44,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 No exception with PHP:
 object(mysqli_fetch_object_test)#%d (%d) {

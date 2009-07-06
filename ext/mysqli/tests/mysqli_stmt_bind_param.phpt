@@ -370,7 +370,7 @@ require_once('skipifconnectfailure.inc');
 			printf("[2014] Cannot find row id = %d\n", $values['id']);
 		else if (isset($row['label']) && ($values['label'] != $row['label']))
 			printf("[2015] Expecting label = %s, got label = %s\n", $values['label'], $row['label']);
-			
+
 		mysqli_free_result($res);
 	}
 
@@ -382,6 +382,10 @@ require_once('skipifconnectfailure.inc');
 	if (!is_null($tmp = @mysqli_bind_param()))
 			printf("[021] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_stmt_bind_param(): Number of elements in type definition string doesn't match number of bind variables in %s on line %d

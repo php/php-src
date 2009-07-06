@@ -1,9 +1,9 @@
 --TEST--
 mysqli_commit()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
-require_once('skipifemb.inc'); 
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
@@ -78,6 +78,10 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

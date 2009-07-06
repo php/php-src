@@ -62,6 +62,10 @@ require_once('skipifconnectfailure.inc');
 	echo("$one - $two\n\n");
 	echo "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Test 1:
 object(foo)#%d (1) {

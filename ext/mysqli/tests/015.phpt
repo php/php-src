@@ -77,6 +77,10 @@ mysqli autocommit/commit/rollback with innodb
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 array(2) {
   [0]=>

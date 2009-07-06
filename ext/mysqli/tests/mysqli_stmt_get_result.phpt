@@ -155,6 +155,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
  in %s on line %d

@@ -1,9 +1,9 @@
 --TEST--
 mysqli_get_host_info()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
-require_once('skipifemb.inc'); 
+<?php
+require_once('skipif.inc');
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -21,6 +21,10 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] Expecting string/any_non_empty, got %s/%s\n", gettype($info), $info);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 done!

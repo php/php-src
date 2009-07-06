@@ -105,6 +105,10 @@ require_once('skipifconnectfailure.inc');
 	$mysqli->close();
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
 

@@ -33,5 +33,9 @@ if (!$TEST_EXPERIMENTAL)
 	$warning_clone = clone $warning;
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Fatal error: Trying to clone an uncloneable object of class mysqli_warning in %s on line %d

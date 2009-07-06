@@ -143,5 +143,9 @@ if (!stristr(mysqli_get_client_info(), "mysqlnd"))
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!
