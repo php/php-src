@@ -42,7 +42,7 @@ mysqli.allow_local_infile=1
 
 		printf("Callback: %d\n", $invocation++);
 
-		$num_chars = (ini_get('unicode.semantics')) ? (floor($buflen / 2) - 10) : ($buflen - 5);
+		$num_chars = (version_compare(PHP_VERSION, '5.9.9', '>') == 1) ? (floor($buflen / 2) - 10) : ($buflen - 5);
 		$part1 = floor($num_chars / 2);
 		$part2 = $num_chars - $part1;
 
