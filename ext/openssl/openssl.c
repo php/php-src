@@ -502,8 +502,13 @@ inline static int php_openssl_safe_mode_chk(char *filename TSRMLS_DC)
 static char default_ssl_conf_filename[MAXPATHLEN];
 
 struct php_x509_request { /* {{{ */
+#if OPENSSL_VERSION_NUMBER >= 0x10000002L
 	LHASH_OF(CONF_VALUE) * global_config;	/* Global SSL config */
 	LHASH_OF(CONF_VALUE) * req_config;		/* SSL config for this request */
+#else
+	LHASH * global_config;  /* Global SSL config */
+	LHASH * req_config;             /* SSL config for this request */
+#endif
 	const EVP_MD * md_alg;
 	const EVP_MD * digest;
 	char	* section_name,
@@ -680,7 +685,11 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename,	const char * section, LHASH_OF(CONF_VALUE) * config TSRMLS_DC) /* {{{ */
+#if OPENSSL_VERSION_NUMBER >= 0x10000002L
+static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH_OF(CONF_VALUE) * config TSRMLS_DC) /* {{{ */
+#else
+static inline int php_openssl_config_check_syntax(const char * section_label, const char * config_filename, const char * section, LHASH * config TSRMLS_DC) /* {{{ */
+#endif
 {
 	X509V3_CTX ctx;
 	
