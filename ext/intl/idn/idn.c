@@ -64,7 +64,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	UChar     converted[MAXPATHLEN];
 	int32_t   converted_ret_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", (char **)&domain, &domain_len, &option, &status) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", (char **)&domain, &domain_len, &option) == FAILURE) {
 		return;
 	}
 
