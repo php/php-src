@@ -41,12 +41,14 @@ $db = new hariCow;
 
 var_dump($db);
 ?>
+===DONE===
 --EXPECTF--
 Notice: Undefined variable: db in %sbug30162.php on line 35
 NULL
-object(hariCow)#1 (2) {
+object(hariCow)#%d (2) {
   [u"x"]=>
   unicode(1) "x"
   [u"y"]=>
   unicode(1) "y"
 }
+===DONE===
