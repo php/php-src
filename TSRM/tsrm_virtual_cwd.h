@@ -305,7 +305,7 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 /* rename on windows will fail if newname already exists.
    MoveFileEx has to be used */
 #if defined(TSRM_WIN32)
-# define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) == 0 ? -1 : 0)
+# define VCWD_RENAME(oldname, newname) (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0 ? -1 : 0)
 #else
 # define VCWD_RENAME(oldname, newname) rename(oldname, newname)
 #endif
