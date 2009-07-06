@@ -14,6 +14,7 @@
   components). (Ilia)
 - Fixed bug #48681 (openssl signature verification for tar archives broken).
   (Greg)
+- Fixed #48116 (Fixed build with Openssl 1.0). (Pierre)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
