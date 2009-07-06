@@ -359,8 +359,8 @@ var_dump($global_var);
 
 //Note: No error conditions relating to passing arugments can be tested
 // because these are not functions but statements, it will result in syntax error.
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--
 *** Testing unset(), empty() & isset() with scalar variables ***
 -- Iteration 1 --
@@ -1186,11 +1186,11 @@ bool(true)
 
 *** Testing unset(), emtpy() & isset() with resource variables ***
 -- Iteration 1 --
-resource(5) of type (stream)
+resource(%d) of type (stream)
 bool(true)
 bool(false)
 bool(true)
-resource(5) of type (stream)
+resource(%d) of type (stream)
 bool(false)
 bool(true)
 bool(false)
@@ -1199,11 +1199,11 @@ bool(false)
 Notice: Undefined variable: resource in %s on line %d
 NULL
 -- Iteration 2 --
-resource(6) of type (stream)
+resource(%d) of type (stream)
 bool(true)
 bool(false)
 bool(true)
-resource(6) of type (stream)
+resource(%d) of type (stream)
 bool(false)
 bool(true)
 bool(false)
@@ -1218,7 +1218,7 @@ bool(false)
 bool(true)
 
 *** Testing unset(), empty() & isset() with objects ***
-object(Point)#1 (3) {
+object(Point)#%d (3) {
   [u"x"]=>
   int(30)
   [u"y"]=>
@@ -1240,7 +1240,7 @@ bool(false)
 
 Notice: Undefined variable: lable in %s on line %d
 bool(true)
-object(Point)#1 (3) {
+object(Point)#%d (3) {
   [u"x"]=>
   int(30)
   [u"y"]=>
@@ -1248,7 +1248,7 @@ object(Point)#1 (3) {
   [u"lable"]=>
   unicode(6) "Point1"
 }
-object(Point)#1 (2) {
+object(Point)#%d (2) {
   [u"y"]=>
   int(40)
   [u"lable"]=>
@@ -1256,7 +1256,7 @@ object(Point)#1 (2) {
 }
 bool(false)
 bool(true)
-object(Point)#1 (0) {
+object(Point)#%d (0) {
 }
 bool(true)
 bool(false)
@@ -1277,7 +1277,7 @@ array(3) {
   [2]=>
   unicode(9) "testPoint"
 }
-object(Point)#1 (3) {
+object(Point)#%d (3) {
   [u"x"]=>
   int(5)
   [u"y"]=>
@@ -1330,4 +1330,4 @@ bool(false)
 bool(false)
 bool(true)
 int(10)
-Done
+===DONE===
