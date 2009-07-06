@@ -53,6 +53,9 @@
 #include "locale/locale.h"
 #include "locale/locale_class.h"
 #include "locale/locale_methods.h"
+
+#include "idn/idn.h"
+
 #include <unicode/uloc.h>
 #include "php_ini.h"
 
@@ -284,6 +287,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, mf)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_utf8, 0, 0, 1)
+	ZEND_ARG_INFO(0, domain)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ intl_functions[]
@@ -329,9 +344,9 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( normalizer_is_normalized, normalizer_args )
 
 	/* Locale functions */
-	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args)
+/*	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args)
 	PHP_NAMED_FE( locale_set_default, zif_locale_set_default, locale_1_arg )
-	PHP_FE( locale_get_primary_language, locale_1_arg )
+*/	PHP_FE( locale_get_primary_language, locale_1_arg )
 	PHP_FE( locale_get_script, locale_1_arg )
 	PHP_FE( locale_get_region, locale_1_arg )
 	PHP_FE( locale_get_keywords, locale_1_arg )
@@ -371,6 +386,11 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( grapheme_stristr, grapheme_strstr_args )
 	PHP_FE( grapheme_extract, grapheme_extract_args )
 
+	/* IDN functions */
+	PHP_FE(idn_to_ascii, arginfo_idn_to_ascii)
+	PHP_FALIAS(idn_to_utf8, idn_to_unicode, arginfo_idn_to_ascii)
+	PHP_FE(idn_to_unicode, arginfo_idn_to_ascii)
+
 	/* common functions */
 	PHP_FE( intl_get_error_code, intl_0_args )
 	PHP_FE( intl_get_error_message, intl_0_args )
@@ -384,7 +404,7 @@ zend_function_entry intl_functions[] = {
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
-
+    STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -460,6 +480,9 @@ PHP_MINIT_FUNCTION( intl )
 	msgformat_register_class(TSRMLS_C);
 
 	grapheme_register_constants( INIT_FUNC_ARGS_PASSTHRU );
+
+	/* Expose IDN constants to PHP scripts. */
+	idn_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Expose ICU error codes to PHP scripts. */
 	intl_expose_icu_error_codes( INIT_FUNC_ARGS_PASSTHRU );
