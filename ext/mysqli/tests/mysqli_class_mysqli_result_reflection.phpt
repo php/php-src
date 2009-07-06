@@ -17,8 +17,8 @@ Those tests go into the details and are aimed to be a development tool, no more.
 */
 if (!$IS_MYSQLND)
 	die("skip Test has been written for the latest version of mysqlnd only");
-if ($MYSQLND_VERSION < 576)
-	die("skip Test requires mysqlnd Revision 576 or newer");
+if ($MYSQLND_VERSION < 50004)
+	die("skip Test requires mysqlnd Revision 5.0.4 or newer");
 ?>
 --FILE--
 <?php
