@@ -15,8 +15,8 @@ Those tests go into the details and are aimed to be a development tool, no more.
 */
 if (!$IS_MYSQLND)
 	die("skip Test has been written for the latest version of mysqlnd only");
-if ($MYSQLND_VERSION < 576)
-	die("skip Test requires mysqlnd Revision 576 or newer");
+if ($MYSQLND_VERSION < 50004)
+	die("skip Test requires mysqlnd Revision 5.0.4 or newer");
 
 ?>
 --FILE--
@@ -423,6 +423,22 @@ Modifiers: 256
 Number of Parameters: 0
 Number of Required Parameters: 0
 
+Inspecting method 'poll'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 256
+Number of Parameters: 0
+Number of Required Parameters: 0
+
 Inspecting method 'prepare'
 isFinal: no
 isAbstract: no
@@ -488,6 +504,38 @@ Number of Parameters: 0
 Number of Required Parameters: 0
 
 Inspecting method 'real_query'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 256
+Number of Parameters: 0
+Number of Required Parameters: 0
+
+Inspecting method 'reap_async_query'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 256
+Number of Parameters: 0
+Number of Required Parameters: 0
+
+Inspecting method 'refresh'
 isFinal: no
 isAbstract: no
 isPublic: yes
@@ -800,4 +848,3 @@ Default property 'sqlstate'
 Default property 'thread_id'
 Default property 'warning_count'
 done!
-
