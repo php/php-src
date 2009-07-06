@@ -35,6 +35,10 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_thread_id(): Couldn't fetch mysqli in %s on line %d
 done!

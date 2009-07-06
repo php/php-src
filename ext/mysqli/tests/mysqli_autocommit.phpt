@@ -148,5 +148,9 @@ mysqli_autocommit()
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

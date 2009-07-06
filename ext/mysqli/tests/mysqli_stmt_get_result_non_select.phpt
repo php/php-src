@@ -88,5 +88,9 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 done!

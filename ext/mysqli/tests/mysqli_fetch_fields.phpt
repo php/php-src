@@ -37,6 +37,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 object(stdClass)#%d (11) {
   [%u|b%"name"]=>

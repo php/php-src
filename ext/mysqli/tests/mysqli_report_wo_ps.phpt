@@ -1,9 +1,9 @@
 --TEST--
 mysqli_report()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -91,6 +91,10 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d

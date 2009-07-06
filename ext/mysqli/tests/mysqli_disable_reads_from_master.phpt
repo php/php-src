@@ -38,6 +38,10 @@ if (!function_exists('mysqli_disable_reads_from_master')) {
 
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_disable_reads_from_master(): Couldn't fetch mysqli in %s on line %d
 done!

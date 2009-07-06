@@ -59,6 +59,10 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 Warning: mysqli_stmt_error(): Couldn't fetch mysqli_stmt in %s on line %d
 done!

@@ -39,6 +39,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 object(stdClass)#%d (11) {
   [%u|b%"name"]=>

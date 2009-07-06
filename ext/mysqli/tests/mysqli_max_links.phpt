@@ -36,6 +36,10 @@ mysqli.max_links=1
 	mysqli_close($link);
 	print "done!";
 ?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
+?>
 --EXPECTF--
 bool(true)
 int(1)
