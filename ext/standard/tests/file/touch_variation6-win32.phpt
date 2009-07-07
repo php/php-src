@@ -168,10 +168,10 @@ PASSED: .\touchVar5.tmp\aSubDirOrFile - created
 PASSED: touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
 --- testing touchVar5.tmp\..\BADDIR\aSubDirOrFile ---
 
-Warning: touch(): Unable to create file touchVar5.tmp\..\BADDIR\aSubDirOrFile because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file touchVar5.tmp\..\BADDIR\aSubDirOrFile because %s in %s on line %d
 --- testing BADDIR\aSubDirOrFile ---
 
-Warning: touch(): Unable to create file BADDIR\aSubDirOrFile because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file BADDIR\aSubDirOrFile because %s in %s on line %d
 --- testing %s\touchVar5.tmp\aSubDirOrFile ---
 PASSED: %s\touchVar5.tmp\aSubDirOrFile - created
 --- testing %s\.\touchVar5.tmp\aSubDirOrFile ---
@@ -180,7 +180,7 @@ PASSED: %s\.\touchVar5.tmp\aSubDirOrFile - created
 PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
 --- testing %s\BADDIR\aSubDirOrFile ---
 
-Warning: touch(): Unable to create file %s\BADDIR\aSubDirOrFile because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file %s\BADDIR\aSubDirOrFile because %s in %s on line %d
 --- testing touchVar5.tmp\aSubDirOrFile\ ---
 
 Warning: touch(): Unable to create file touchVar5.tmp\aSubDirOrFile\ because Invalid argument in %s on line %d
@@ -191,8 +191,8 @@ Warning: touch(): Unable to create file %s\touchVar5.tmp\aSubDirOrFile\ because 
 PASSED: touchVar5.tmp\\aSubDirOrFile - created
 --- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
 PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - created
---- testing %s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: %s/touchVar5.tmp/aSubDirOrFile - created
+--- testing /%s/touchVar5.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar5.tmp/aSubDirOrFile - created
 
 *** testing existing files ***
 --- testing touchVar5.tmp\aSubDirOrFile ---
@@ -211,8 +211,8 @@ PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - touched
 PASSED: touchVar5.tmp\\aSubDirOrFile - touched
 --- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
 PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
---- testing %s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: %s/touchVar5.tmp/aSubDirOrFile - touched
+--- testing /%s/touchVar5.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
 
 *** testing existing directories ***
 --- testing touchVar5.tmp\aSubDirOrFile ---
@@ -235,7 +235,7 @@ PASSED: %s\touchVar5.tmp\aSubDirOrFile\ - touched
 PASSED: touchVar5.tmp\\aSubDirOrFile - touched
 --- testing %s\\touchVar5.tmp\\aSubDirOrFile ---
 PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
---- testing %s/touchVar5.tmp/aSubDirOrFile ---
-PASSED: %s/touchVar5.tmp/aSubDirOrFile - touched
+--- testing /%s/touchVar5.tmp/aSubDirOrFile ---
+PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
 ===DONE===
 
