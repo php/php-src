@@ -1093,8 +1093,7 @@ void gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 	int w, wstart;
 	int thick = im->thick;
 
-	if (color == gdAntiAliased)
-	{
+	if (color == gdAntiAliased) {
 		/* 
 		   gdAntiAliased passed as color: use the much faster, much cheaper
 		   and equally attractive gdImageAALine implementation. That
@@ -1191,7 +1190,7 @@ TBB: but watch out for /0! */
 	} else {
 		/* More-or-less vertical. use wid for horizontal stroke */
 		/* 2.0.12: Michael Schwartz: divide rather than multiply;
-           TBB: but watch out for /0! */
+		   TBB: but watch out for /0! */
 		double as = sin (atan2 (dy, dx));
 		if (as != 0) {
 			wid = thick / as;
@@ -1681,27 +1680,26 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 
     if ((s % 360)  == (e % 360)) {
 		s = 0; e = 360;
-    } else {
-        if (s > 360) {
-            s = s % 360;
-        }
+	} else {
+		if (s > 360) {
+			s = s % 360;
+		}
 
-        if (e > 360) {
-            e = e % 360;
-        }
+		if (e > 360) {
+			e = e % 360;
+		}
 
-        while (s < 0) {
-            s += 360;
-        }
+		while (s < 0) {
+			s += 360;
+		}
 
-        while (e < s) {
-            e += 360;
-        }
-
-        if (s == e) {
+		while (e < s) {
+			e += 360;
+		}
+		if (s == e) {
 			s = 0; e = 360;
-        }
-    }
+		}
+	}
 
 	for (i = s; i <= e; i++) {
 		int x, y;
@@ -1987,7 +1985,7 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 
 	oc = gdImageGetPixel(im, x, y);
 
-/* required! */
+	/* required! */
 	FILL_PUSH(y,x,x,1);
 	/* seed segment (popped 1st) */
  	FILL_PUSH(y+1, x, x, -1);
@@ -2308,7 +2306,6 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 		for (x = srcX; (x < (srcX + w)); x++) {
 			int nc;
 			c = gdImageGetPixel (src, x, y);
-
 			/* Added 7/24/95: support transparent copies */
 			if (gdImageGetTransparent(src) == c) {
 				tox++;
