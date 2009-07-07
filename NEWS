@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
 - Fixed regression in cURL extension that prevented flush of data to output
@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Fixed bug #48276 (date("Y") on big endian machines produces the
   wrong result). (Scott)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
+- Fixed bug #45905 (imagefilledrectangle() clipping error).
+  (markril at hotmail dot com, Pierre)
 - Fixed bug #45280 (Reflection of instantiated COM classes causes PHP to crash) 
   (Paul Richards, Kalle)
 
