@@ -26,7 +26,9 @@ PHP                                                                        NEWS
 - Fixed bug #48450 (Compile failure under IRIX 6.5.30 building gd.c). (Kalle)
 - Fixed bug #48276 (date("Y") on big endian machines produces the
   wrong result). (Scott)
-- Fixed #48116 (Fixed build with Openssl 1.0). (Pierre, 
+- Fixed bug #48247 (Infinite loop and possible crash during startup with
+  errors when errors are logged). (Jani)
+- Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
   Al dot Smith at aeschi dot ch dot eu dot org)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
 - Fixed bug #45905 (imagefilledrectangle() clipping error).

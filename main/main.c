@@ -469,6 +469,20 @@ static int module_initialized = 0;
 static int module_startup = 1;
 static int module_shutdown = 0;
 
+/* {{{ php_during_module_startup */
+static int php_during_module_startup(void)
+{
+	return module_startup;
+}
+/* }}} */
+
+/* {{{ php_during_module_shutdown */
+static int php_during_module_shutdown(void)
+{
+	return module_shutdown;
+}
+/* }}} */
+
 /* {{{ php_log_err
  */
 PHPAPI void php_log_err(char *log_message TSRMLS_DC)
@@ -491,7 +505,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			char *error_time_str;
 
 			time(&error_time);
-			error_time_str = php_format_date("d-M-Y H:i:s", 11, error_time, 1 TSRMLS_CC);
+			error_time_str = php_format_date("d-M-Y H:i:s", 11, error_time, php_during_module_startup() TSRMLS_CC);
 			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
@@ -538,24 +552,6 @@ PHPAPI int php_printf(const char *format, ...)
 
 	return ret;
 }
-/* }}} */
-
-/* {{{ php_verror helpers */
-
-/* {{{ php_during_module_startup */
-static int php_during_module_startup(void)
-{
-	return module_startup;
-}
-/* }}} */
-
-/* {{{ php_during_module_shutdown */
-static int php_during_module_shutdown(void)
-{
-	return module_shutdown;
-}
-/* }}} */
-
 /* }}} */
 
 /* {{{ php_verror */
