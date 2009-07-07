@@ -1195,7 +1195,7 @@ TBB: but watch out for /0! */
 		if (as != 0) {
 			wid = thick / as;
 		} else {
-				wid = 1;
+			wid = 1;
 		}
 		if (wid == 0) {
 			wid = 1;
@@ -1679,7 +1679,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 
 
     if ((s % 360)  == (e % 360)) {
-		s = 0; e = 360;	
+		s = 0; e = 360;
 	} else {
 		if (s > 360) {
 			s = s % 360;
@@ -1697,7 +1697,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 			e += 360;
 		}
 		if (s == e) {
-			s = 0; e = 360;	
+			s = 0; e = 360;
 		}
 	}
 
@@ -1896,7 +1896,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		do {
 			c = gdImageGetPixel(im, ix, iy);
 			if (c != oc) {
-				goto done;	
+				goto done;
 			}
 			gdImageSetPixel(im, ix, iy, nc);
 		} while(ix++ < (im->sx -1));
@@ -1908,7 +1908,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 			}
 			gdImageSetPixel(im, ix, iy, nc);
 		} while(ix++ < (im->sx -1));
-		goto done;	
+		goto done;
 	}
 
 	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
@@ -2308,6 +2308,7 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				tox++;
 				continue;
 			}
+
 			/*
 			 * If it's the same image, mapping is NOT trivial since we
 			 * merge with greyscale target, but if pct is 100, the grey
@@ -2319,9 +2320,9 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				dc = gdImageGetPixel(dst, tox, toy);
 				g = (0.29900f * gdImageRed(dst, dc)) + (0.58700f * gdImageGreen(dst, dc)) + (0.11400f * gdImageBlue(dst, dc));
 
-                                ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
-                                ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
-                                ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+				ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
 
 				/* First look for an exact match */
 				nc = gdImageColorExact(dst, ncR, ncG, ncB);
