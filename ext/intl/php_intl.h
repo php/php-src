@@ -45,6 +45,7 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
 	intl_error g_error;
+	long error_level;
 ZEND_END_MODULE_GLOBALS(intl)
 
 /* Macro to access request-wide global variables. */
