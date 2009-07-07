@@ -35,18 +35,18 @@ if (!mysql_query('DROP TABLE IF EXISTS test', $link))
 if (!mysql_query('CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE = ' . $engine, $link))
 	printf("[007] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
-if (!mysql_query('INSERT INTO test(id, label) VALUES (1, "a")', $link))
+if (!mysql_query("INSERT INTO test(id, label) VALUES (1, 'a')", $link))
 	printf("[008] [%d] %s\n",  mysql_errno($link), mysql_error($link));
 
 if (1 !== ($tmp = mysql_affected_rows($link)))
 	printf("[010] Expecting int/1, got %s/%s\n", gettype($tmp), $tmp);
 
 // ignore INSERT error, NOTE: command line returns 0, affected_rows returns -1 as documented
-@mysql_query('INSERT INTO test(id, label) VALUES (1, "a")', $link);
+@mysql_query("INSERT INTO test(id, label) VALUES (1, 'a')", $link);
 if (-1 !== ($tmp = mysql_affected_rows($link)))
 	printf("[011] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-if (!mysql_query('INSERT INTO test(id, label) VALUES (1, "a") ON DUPLICATE KEY UPDATE id = 4', $link))
+if (!mysql_query("INSERT INTO test(id, label) VALUES (1, 'a') ON DUPLICATE KEY UPDATE id = 4", $link))
 	printf("[012] [%d] %s\n",  mysql_errno($link), mysql_error($link));
 
 if (2 !== ($tmp = mysql_affected_rows($link)))
