@@ -206,44 +206,24 @@ PASSED: %s//touchVar5.tmp//aSubDirOrFile - touched
 
 *** testing existing directories ***
 --- testing touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: touchVar5.tmp/aSubDirOrFile - touched
 --- testing ./touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: ./touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: ./touchVar5.tmp/aSubDirOrFile - touched
 --- testing touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile - touched
 --- testing %s/touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: %s/touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: %s/touchVar5.tmp/aSubDirOrFile - touched
 --- testing %s/./touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: %s/./touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: %s/./touchVar5.tmp/aSubDirOrFile - touched
 --- testing %s/touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: %s/touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile - access time not changed
+PASSED: %s/touchVar5.tmp/../touchVar5.tmp/aSubDirOrFile - touched
 --- testing touchVar5.tmp/aSubDirOrFile/ ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: touchVar5.tmp/aSubDirOrFile/ - access time not changed
+PASSED: touchVar5.tmp/aSubDirOrFile/ - touched
 --- testing %s/touchVar5.tmp/aSubDirOrFile/ ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: %s/touchVar5.tmp/aSubDirOrFile/ - access time not changed
+PASSED: %s/touchVar5.tmp/aSubDirOrFile/ - touched
 --- testing touchVar5.tmp//aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: touchVar5.tmp//aSubDirOrFile - access time not changed
+PASSED: touchVar5.tmp//aSubDirOrFile - touched
 --- testing %s//touchVar5.tmp//aSubDirOrFile ---
-
-Warning: touch(): Utime failed: Permission denied in %s on line %d
-FAILED: %s//touchVar5.tmp//aSubDirOrFile - access time not changed
+PASSED: %s//touchVar5.tmp//aSubDirOrFile - touched
 ===DONE===
 
