@@ -53,11 +53,11 @@ $tables = array(
 								'label' => array(($version < 500) ? 'multiple_key' : 'unique_key')
 								),
 	'labela INT, label2 CHAR(1), KEY keyname (labela, label2)'      =>  array(
-								array('labela, label2', '1, "a"'),
+								array('labela, label2', "1, 'a'"),
 								'labela' => array('multiple_key'),
 								),
 	'label1 BLOB'                                           =>  array(
-								array('label1', '"blob"'),
+								array('label1', "'blob'"),
 								'label1' => array('blob', 'binary'),
 								),
 	'label1 INT UNSIGNED'                                   =>  array(
@@ -70,15 +70,15 @@ $tables = array(
 										'unsigned'),
 								),
 	'label1 ENUM("a", "b")'                                 =>  array(
-								array('label1', '"a"'),
+								array('label1', "'a'"),
 								'label1' => array('enum'),
 								),
 	'label1 SET("a", "b")'                                  =>  array(
-								array('label1', '"a"'),
+								array('label1', "'a'"),
 								'label1' => array('set'),
 								),
 	'label1 TIMESTAMP'                                      =>  array(
-								array('label1', sprintf('"%s"', @date("Y-m-d H:i:s"))),
+								array('label1', sprintf("'%s'", @date("Y-m-d H:i:s"))),
 								'label1' => array(
 										'timestamp',
 										'unsigned',

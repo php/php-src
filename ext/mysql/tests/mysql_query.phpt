@@ -26,26 +26,26 @@ if (NULL !== ($tmp = @mysql_query("SELECT 1 AS a", $link, "foo")))
 if (false !== ($tmp = mysql_query('THIS IS NOT SQL', $link)))
 	printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (false !== ($tmp = mysql_query('SELECT "this is sql but with backslash g"\g', $link)))
+if (false !== ($tmp = mysql_query("SELECT 'this is sql but with backslash g'\g", $link)))
 	printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
 if ((0 === mysql_errno($link)) || ('' == mysql_error($link)))
 	printf("[006] mysql_errno()/mysql_error should return some error\n");
 
-if (!$res = mysql_query('SELECT "this is sql but with semicolon" AS valid ; ', $link))
+if (!$res = mysql_query("SELECT 'this is sql but with semicolon' AS valid ; ", $link))
 	printf("[007] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 var_dump(mysql_fetch_assoc($res));
 mysql_free_result($res);
 
-if (!$res = mysql_query('SELECT "a" AS ""', $link))
+if (!$res = mysql_query("SELECT 'a' AS ''", $link))
 	printf("[007a] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 var_dump($tmp = mysql_fetch_assoc($res));
 var_dump($tmp[""]);
 mysql_free_result($res);
 
-if (false !== ($res = mysql_query('SELECT "this is sql but with semicolon" AS valid ; SHOW VARIABLES', $link)))
+if (false !== ($res = mysql_query("SELECT 'this is sql but with semicolon' AS valid ; SHOW VARIABLES", $link)))
 	printf("[008] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (mysql_query('DROP PROCEDURE IF EXISTS p', $link)) {

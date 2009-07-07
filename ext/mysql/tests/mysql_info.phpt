@@ -16,13 +16,13 @@ if (NULL !== ($tmp = @mysql_info(NULL)))
 	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 require "table.inc";
-if (!$res = mysql_query('INSERT INTO test(id, label) VALUES (100, "a")', $link))
+if (!$res = mysql_query("INSERT INTO test(id, label) VALUES (100, 'a')", $link))
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (false !== ($tmp = mysql_info($link)))
 	printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-if (!$res = mysql_query('INSERT INTO test(id, label) VALUES (101, "a"), (102, "b")', $link))
+if (!$res = mysql_query("INSERT INTO test(id, label) VALUES (101, 'a'), (102, 'b')", $link))
 	printf("[005] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (!is_string($tmp = mysql_info($link)) || ('' == $tmp))
@@ -40,7 +40,7 @@ if (!$res = mysql_query('ALTER TABLE test MODIFY label CHAR(2)', $link))
 if (!is_string($tmp = mysql_info($link)) || ('' == $tmp))
 	printf("[010] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-if (!$res = mysql_query('UPDATE test SET label = "b" WHERE id >= 100', $link))
+if (!$res = mysql_query("UPDATE test SET label = 'b' WHERE id >= 100", $link))
 	printf("[011] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (!is_string($tmp = mysql_info($link)) || ('' == $tmp))
