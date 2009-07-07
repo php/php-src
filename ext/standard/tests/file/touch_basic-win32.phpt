@@ -2,7 +2,6 @@
 Test touch() function : basic functionality 
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
---XFAIL--
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
