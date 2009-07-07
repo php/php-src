@@ -564,13 +564,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef TSRM_WIN32
 	WIN32_FIND_DATA data;
 	HANDLE hFind;
+	TSRM_ALLOCA_FLAG(use_heap_large)
 #else
 	struct stat st;
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
 	TSRM_ALLOCA_FLAG(use_heap)
-	TSRM_ALLOCA_FLAG(use_heap_large)
 
 	while (1) {
 		if (len <= start) {
