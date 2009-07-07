@@ -1379,6 +1379,7 @@ TEST $file
 	$env['REQUEST_METHOD']  = '';
 	$env['CONTENT_TYPE']    = '';
 	$env['CONTENT_LENGTH']  = '';
+	$env['TZ']              = '';
 
 	if (!empty($section_text['ENV'])) {
 
