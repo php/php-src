@@ -2473,6 +2473,7 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	array_init_size(return_value, init_size);
 
 	for (i = 0; i < argc; i++) {
+		SEPARATE_ZVAL(args[i]);
 		if (!replace) {
 			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive TSRMLS_CC);
 		} else if (recursive && i > 0) { /* First array will be copied directly instead */
