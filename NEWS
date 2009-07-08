@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed spl_autoload_unregister/spl_autoad_functions wrt. Closures and
   Functors. (Christian Seiler)
 
+- Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
+  directories). (Ilia)
 - Fixed bug #48771 (rename() between volumes fails and reports no error on 
   Windows). (Pierre)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
