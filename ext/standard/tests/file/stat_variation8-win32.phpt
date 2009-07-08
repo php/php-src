@@ -52,7 +52,7 @@ var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 
 // compare the stat
-$affected_members = array(7, 8, 9, 'size', 'atime', 'mtime');
+$affected_members = array(7, 9, 'size', 'mtime');
 var_dump( compare_stats($old_stat, $new_stat, $affected_members, '!=') );
 
 // clear the stat
