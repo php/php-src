@@ -1,3 +1,14 @@
+2009-07-07  David Soria Parra  <dsoria@gmx.net>
+
+    * (PHP_5_3)
+      tests/024.phpt:
+      MFH: Adjust tests. The order in which notices appear is platform dependend
+      as the function call ordering in parameter lists is not defined in C.
+
+    * tests/024.phpt:
+      Adjust tests. The order in which notices appear is platform dependend as
+      the function call ordering in parameter lists is not defined in C.
+
 2009-07-06  andy wharmby  <wharmby@uk.ibm.com>
 
     * tests/019.phpt
