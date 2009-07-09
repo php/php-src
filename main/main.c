@@ -367,6 +367,26 @@ static PHP_INI_MH(OnUpdateErrorLog)
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnUpdateMailLog)
+{
+	/* Only do the safemode/open_basedir check at runtime */
+	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
+		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			return FAILURE;
+		}
+
+		if (PG(open_basedir) && php_check_open_basedir(new_value TSRMLS_CC)) {
+			return FAILURE;
+		}
+
+	}
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
 	/* Don't allow changing it in htaccess */
@@ -487,7 +507,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	STD_PHP_INI_BOOLEAN("mail.add_x_header",			"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			mail_x_header,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			mail_log,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
