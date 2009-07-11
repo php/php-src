@@ -795,7 +795,7 @@ Apache 2.0.x on Microsoft Windows
        http://snaps.php.net/php4-latest.tar.gz or download binaries for
        Windows http://snaps.php.net/win32/php4-win32-latest.zip.
      * a prerelease version downloadable from http://qa.php.net/.
-     * you have always the option to obtain PHP through anonymous CVS.
+     * you have always the option to obtain PHP through SVN
 
      These versions of PHP are compatible to Apache 2.0.40 and later.
 
@@ -1327,7 +1327,7 @@ Introduction to PECL Installations
 
    When building PHP modules, it's important to have the appropriate
    versions of the required tools (autoconf, automake, libtool, etc.) See
-   the Anonymous CVS Instructions for details on the required tools, and
+   the SVN Instructions for details on the required tools, and
    required versions.
      _________________________________________________________________
 
@@ -1342,13 +1342,11 @@ Downloading PECL extensions
      * pear download extname
        The pear command may also be used to download source files.
        Specific revisions may also be specified.
-     * CVS
-       All PECL files reside in CVS. A web-based view may be seen at
-       http://cvs.php.net/pecl/. To download straight from CVS, consider
-       the following where phpfi is the password for user cvsread:
-
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository login
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
+     * SVN
+       All PECL files reside in SVN. A web-based view may be seen at
+       http://svn.php.net/pecl/. To download straight from SVN, use:
+       
+$ svn  co http://svn.php.net/repository/pecl/<extname>/trunk
 
      * Windows downloads
        Windows users may find compiled PECL binaries by downloading the
@@ -1393,7 +1391,7 @@ Compiling shared PECL extensions with PEAR
 Compiling shared PECL extensions with phpize
 
    If using pear is not an option, like for building shared PECL
-   extensions from CVS, or for unreleased PECL packages, then creating a
+   extensions from SVN, or for unreleased PECL packages, then creating a
    shared extension may also be done by manually using the phpize
    command. The pear command essentially does this but it may also be
    done manually. Assuming the source file is named extname.tgz, and that
@@ -1511,7 +1509,7 @@ The configuration file
    PHP directives are documented in the manual though. For a completel
    list of directives available in your PHP version, please read your
    well commented php.ini file. Alternatively, you may find the the
-   latest php.ini from CVS helpful too.
+   latest php.ini from SVN helpful too.
 
    Example 5-1. php.ini example
 ; any text on a line after an unquoted semicolon (;) is ignored
