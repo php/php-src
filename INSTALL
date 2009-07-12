@@ -391,7 +391,7 @@ Apache 2.0 on Unix systems
        http://snaps.php.net/php5-latest.tar.gz or download binaries for
        Windows http://snaps.php.net/win32/php5-win32-latest.zip.
      * a prerelease version downloadable from http://qa.php.net/.
-     * you have always the option to obtain PHP through anonymous CVS.
+     * you have always the option to obtain PHP through SVN.
 
      These versions of PHP are compatible to Apache 2.0.40 and later.
 
