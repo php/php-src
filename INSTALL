@@ -386,7 +386,7 @@ Apache 2.0 on Unix systems
        http://snaps.php.net/php5-latest.tar.gz or download binaries for
        Windows http://snaps.php.net/win32/php5-win32-latest.zip.
      * a prerelease version downloadable from http://qa.php.net/.
-     * you have always the option to obtain PHP through anonymous CVS.
+     * you have always the option to obtain PHP through SVN.
 
      These versions of PHP are compatible to Apache 2.0.40 and later.
 
@@ -1303,8 +1303,8 @@ Introduction to PECL Installations
 
    When building PHP modules, it's important to have known-good versions
    of the required tools (autoconf, automake, libtool, etc.) See the
-   Anonymous CVS Instructions for details on the required tools, and
-   required versions.
+   SVN Instructions for details on the required tools, and required
+   versions.
      __________________________________________________________________
 
 Downloading PECL extensions
@@ -1320,14 +1320,11 @@ Downloading PECL extensions
        PECL extensions that have releases listed on the PECL web site are
        available for download and installation using the pecl command.
        Specific revisions may also be specified.
-     * CVS
-       Most PECL extensions also reside in CVS. A web-based view may be
-       seen at http://cvs.php.net/pecl/. To download straight from CVS,
-       the following sequence of commands may be used. Note that phpfi is
-       the password for user cvsread:
+     * SVN
+       All PECL files reside in SVN. A web-based view may be seen at
+       http://svn.php.net/pecl/. To download straight from SVN, use:
 
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository login
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
+$ svn co http://svn.php.net/repository/pecl/<extname>/trunk <extname>
 
      * Windows downloads
        Windows users may find compiled PECL binaries by downloading the
