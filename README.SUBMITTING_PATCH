@@ -8,11 +8,11 @@ part is making it acceptable for inclusion into our repository. :-)
 
 How to create patch?  
 -------------------- 
-We are working with CVS. You need to get CVS source to create a patch
-that we accept.  Visit http://www.php.net/anoncvs.php to get CVS
-source. You can check out older versions, but make sure you get
-the default branch (i.e. Do not use -r option when you check out the 
-CVS source)
+We use Subversion (SVN) for revision control.  You need to get the
+source from SVN in order to create a patch.  Read 
+http://www.php.net/svn.php for help on using SVN.  You can check out
+older branches, but make sure you get trunk as well and make your
+patch work there.
 
 Read CODING_STANDARDS file before you start working.
 
@@ -21,7 +21,7 @@ add a new feature to PHP. After you finished editing, please test your
 patch. Read README.TESTING for testing.
 
 After you finish testing your patch, take diff file using 
-"cvs diff > your.patch" command.
+"svn diff > your.patch" command.
 
 Read README.TESTING for submitting a test script for your patch. This is
 not strictly required, but it is preferred to submit a test script along
@@ -41,25 +41,8 @@ maintainer and/or internals@lists.php.net, or pear-dev@lists.php.net if
 you are patching PEAR. Official module maintainers can be found in
 EXTENSIONS file in PHP source.
 
-If you are new to CVS (Concurrent Versions System), visit 
-http://cvshome.org/ for details.
-
-
-Recommended CVS client settings for creating patch file
-------------------------------------------------------
-Recommended ~/.cvsrc file setting is:
-------
-cvs -z3
-update -d -P
-checkout -P
-diff -u
-
-------
-diff -u means:
- -u     Use the unified output format.
-
-With this CVS setting, you don't have to worry about adding/deleting
-newlines and spaces.
+If you are new to SVN (Subversion), visit
+http://svnbook.red-bean.com/ for details.
 
 
 Check list for submitting patch
@@ -70,10 +53,7 @@ Check list for submitting patch
    web server error logs when you test your patch?
  - Did you build PHP for multi-threaded web servers. (Optional)
  - Did you create test script for "make test"? (Recommended)
- - Did you check your patch is unified format and it does not 
-   contain white space changes? (If you are not using recommended 
-   cvs setting)
- - Did you update CVS source before you take final patch?
+ - Did you update SVN source before you take final patch?
  - Did you read the patch again?
 
 
@@ -118,7 +98,7 @@ these questions:
 
 What happens when your patch is applied?
 ---------------------------------------- 
-Your name will be included together with your email address in the CVS 
+Your name will be included together with your email address in the SVN
 commit log. If your patch affects end-users, a brief description
 and your name might be added to the NEWS file.
 

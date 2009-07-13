@@ -1308,8 +1308,8 @@ Introduction to PECL Installations
 
    When building PHP modules, it's important to have known-good versions
    of the required tools (autoconf, automake, libtool, etc.) See the
-   Anonymous CVS Instructions for details on the required tools, and
-   required versions.
+   SVN Instructions for details on the required tools, and required
+   versions.
      __________________________________________________________________
 
 Downloading PECL extensions
@@ -1325,14 +1325,11 @@ Downloading PECL extensions
        PECL extensions that have releases listed on the PECL web site are
        available for download and installation using the pecl command.
        Specific revisions may also be specified.
-     * CVS
-       Most PECL extensions also reside in CVS. A web-based view may be
-       seen at http://cvs.php.net/pecl/. To download straight from CVS,
-       the following sequence of commands may be used. Note that phpfi is
-       the password for user cvsread:
+     * SVN
+       All PECL files reside in SVN. A web-based view may be seen at
+       http://svn.php.net/pecl/. To download straight from SVN, use:
 
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository login
-$ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
+$ svn co http://svn.php.net/repository/pecl/<extname>/trunk <extname>
 
      * Windows downloads
        Windows users may find compiled PECL binaries by downloading the
@@ -1380,7 +1377,7 @@ Compiling shared PECL extensions with phpize
    Sometimes, using the pecl installer is not an option. This could be
    because you're behind a firewall, or it could be because the extension
    you want to install is not available as a PECL compatible package, such
-   as unreleased extensions from CVS. If you need to build such an
+   as unreleased extensions from SVN. If you need to build such an
    extension, you can use the lower-level build tools to perform the build
    manually.
 
@@ -1527,7 +1524,7 @@ The configuration file
    directives are documented in the manual though. For a complete list of
    directives available in your PHP version, please read your well
    commented php.ini file. Alternatively, you may find the the latest
-   php.ini from CVS helpful too.
+   php.ini from SVN helpful too.
 
    Example 6-1. php.ini example
 ; any text on a line after an unquoted semicolon (;) is ignored
