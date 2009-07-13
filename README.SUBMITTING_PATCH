@@ -8,10 +8,11 @@ part is making it acceptable for inclusion into our repository. :-)
 
 How to create patch?  
 -------------------- 
-We are working with SVN. You need to get SVN source to create a patch
-that we accept.  Read http://www.php.net/svn.php for help on using SVN.
-You can check out older branches, but make sure you get trunk as well
-and make your patch work there.
+We use Subversion (SVN) for revision control.  You need to get the
+source from SVN in order to create a patch.  Read 
+http://www.php.net/svn.php for help on using SVN.  You can check out
+older branches, but make sure you get trunk as well and make your
+patch work there.
 
 Read CODING_STANDARDS file before you start working.
 

@@ -1259,7 +1259,7 @@ Downloading PECL extensions
      * pear download extname
        The pear command may also be used to download source files.
        Specific revisions may also be specified.
-     *SVN 
+     * SVN 
        All PECL files reside in SVN. A web-based view may be seen at
        http://svn.php.net/pecl/. To download straight from SVN, use:
 
