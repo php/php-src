@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) 1997-2009 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -13,32 +13,39 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Wez Furlong <wez@thebrainroom.com>                           |
+  |         Pierre A. Joye <pierre@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
-/* $Id: cvsclean.js,v 1.5.2.1.2.1.2.1 2008-07-20 02:20:31 sfox Exp $ */
-// Cleans up files that do not belong in CVS
+/* $Id$ */
+// Cleans up files that do not belong in the repository
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
+var WshShell = WScript.CreateObject("WScript.Shell");
+var STDOUT = WScript.StdOut;
 
-function find_cvsignore(dirname)
+/* svn propget svn:ignore dirname */
+function find_ignore(dirname)
 {
-	if (!FSO.FolderExists(dirname))
+	dirname = "" + dirname;
+	dirname_len = dirname.length;
+
+	if (!FSO.FolderExists(dirname) || (dirname_len >= 4 && 
+	dirname.substring(dirname_len - 4) == ".svn")) {
 		return;
+	}
 
 	var f = FSO.GetFolder(dirname);
 	var fc = new Enumerator(f.SubFolders);
-	
+
 	for (; !fc.atEnd(); fc.moveNext()) {
-		find_cvsignore(fc.item());	
+		find_ignore(fc.item());
 	}
 
-	if (FSO.FileExists(dirname + "\\.cvsignore")) {
-		kill_from_cvsignore(dirname + "\\.cvsignore");
-	}
+	kill_from_ignore(dirname);
 }
 
-/* recursive remove using cvsignore style wildcard matching;
+/* recursive remove using ignore props style wildcard matching;
  * note that FSO.DeleteFolder and FSO.DeleteFile methods both
  * accept wildcards, but that they are dangerous to use eg:
  * "*.php" will match "*.phpt" */
@@ -66,7 +73,7 @@ function rm_r(filename)
 
 		if (foldername == "")
 			foldername = ".";
-		
+
 		var filename = FSO.GetFileName(filename);
 
 		var retext = filename.replace(/\./g, '\\.');
@@ -94,27 +101,20 @@ function rm_r(filename)
 	}
 }
 
-function kill_from_cvsignore(igfile)
+function kill_from_ignore(dirname)
 {
-	var dir = FSO.GetParentFolderName(igfile) + "\\";
-	var t = FSO.OpenTextFile(igfile, 1);
 	var l;
-	
-	if (dir == ".\\") {
-		dir = "";
-	}
-		
-	while (!t.atEndOfStream) {
-		l = t.ReadLine();
-		// don't kill their config.nice file(s)
-		if (l.match("config\.nice.*") ||
-			l.match("") || 
-			l.match("*"))
+	var e = WshShell.Exec("svn propget svn:ignore " + dirname);
+	var re = /^(config\.nice.*)|(\*)$/i;
+
+	while (!e.StdOut.atEndOfStream) {
+		l = e.StdOut.ReadLine();
+		if (l.length == 0 || re.test(l)) {
 			continue;
-		rm_r(dir + l);
+		}
+		rm_r(dirname + l);
 	}
 
 }
 
-find_cvsignore(".");
-
+find_ignore(".");
