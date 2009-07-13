@@ -251,7 +251,7 @@ foreach ($general_files as $src => $dest) {
 }
 
 /* include a snapshot identifier */
-$branch = "HEAD"; // TODO - determine this from CVS/Entries 
+$branch = "HEAD"; // TODO - determine this from SVN branche name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
 $version = phpversion();
@@ -342,7 +342,7 @@ function copy_dir($source, $dest)
 
 	$d = opendir($source);
 	while (($f = readdir($d)) !== false) {
-		if ($f == '.' || $f == '..' || $f == 'CVS' || $f == '.cvsignore') {
+		if ($f == '.' || $f == '..' || $f == '.svn') {
 			continue;
 		}
 		$fs = $source . '/' . $f;
@@ -380,7 +380,7 @@ function copy_test_dir($directory, $dest)
 
 	while (FALSE !== ($file = readdir($directory_list))) {
 		$full_path = $directory . '/' . $file;
-		if($file != '.' && $file != '..' && $file != 'CVS' && is_dir($full_path)) {
+		if($file != '.' && $file != '..' && $file != '.svn' && is_dir($full_path)) {
 			if ($file == 'tests') {
 				if (!is_dir($dest . '/' . $full_path)) {
 					mkdir($dest . '/' . $full_path , 0775, true);
