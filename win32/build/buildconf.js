@@ -175,13 +175,6 @@ function gen_modules()
 	return output;
 }
 
-if (FSO.FileExists("ZendEngine2\\OBJECTS2_HOWTO")) {
-	if (FSO.FolderExists("Zend")) {
-		FSO.MoveFolder("Zend", "ZendEngine1");
-	}
-	FSO.MoveFolder("ZendEngine2", "Zend");
-}
-
 // Process buildconf arguments
 function buildconf_process_args()
 {
