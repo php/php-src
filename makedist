@@ -1,24 +1,21 @@
 #!/bin/sh
 #
-# Distribution generator for CVS based packages.
+# Distribution generator for SVN based packages.
 # To work, this script needs a consistent tagging of all releases.
 # Each release of a package should have a tag of the form
 #
 #  <package>_<version>
 #
-# where <package> is the package name and the CVS module
+# where <package> is the package name and the SVN module
 # and <version> s the version number with underscores instead of dots.
 #
-# For example: cvs tag php_5_0_1
+# For example: svn cp $PHPROOT/php/php-src/trunk $PHPROOT/php/php-src/tags/php_5_0_1
 #
 # The distribution ends up in a .tar.gz file that contains the distribution
 # in a directory called <package>-<version>.  The distribution contains all
-# directories from the CVS module except the one called "nodist", but only
+# directories from the SVN module except the one called "nodist", but only
 # the files INSTALL, README and config* are included.
-#
-# Since you can no longer set the CVS password via an env variable, you
-# need to have previously done a cvs login for the server and user id
-# this script uses so it will have an entry in your ~/.cvspasswd file.
+# A .tar.bz2 file is also created.
 #
 # Usage: makedist <package> <version>
 #
@@ -44,8 +41,8 @@ if test "${1}" = "1" -a "${2}" -lt "28"; then
 fi
 IFS="$old_IFS"
 
-PHPROOT=:pserver:cvsread@cvs.php.net:/repository
-PHPMOD=php-src
+PHPROOT=http://svn.php.net/repository
+PHPMOD=php/php-src
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
 
 if echo '\c' | grep -s c >/dev/null 2>&1
@@ -62,7 +59,7 @@ MY_OLDPWD=`pwd`
 # the destination .tar.gz file
 ARCHIVE=$MY_OLDPWD/$PKG-$VER.tar
 
-# temporary directory used to check out files from CVS
+# temporary directory used to check out files from SVN
 DIR=$PKG-$VER
 DIRPATH=$MY_OLDPWD/$DIR
 
@@ -72,28 +69,28 @@ if test -d "$DIRPATH"; then
     exit 1
 fi
 
-# version part of the CVS release tag
-CVSVER=`echo $VER | sed -e 's/[\.\-]/_/g'`
+# version part of the SVN release tag
+SVNVER=`echo $VER | sed -e 's/[\.\-]/_/g'`
 
-# CVS release tag
-if test "$VER" != "HEAD"; then
-  CVSTAG=${PKG}_$CVSVER
+# SVN release tag
+if test "$VER" != "HEAD" -a "$VER" != "trunk"; then
+  SVNTAG=tags/${PKG}_$SVNVER
 else
-  CVSTAG=HEAD
+  SVNTAG=trunk
 fi
 
-if test ! -d $DIRPATH; then
-    mkdir -p $DIRPATH || exit 2
-fi
+#if test ! -d $DIRPATH; then
+#    mkdir -p $DIRPATH || exit 2
+#fi
 
 # Export PHP
-$ECHO_N "makedist: exporting tag '$CVSTAG' from '$PHPMOD'...$ECHO_C"
-cvs -z 9 -d $PHPROOT export -d $DIR -r $CVSTAG $PHPMOD || exit 4
+$ECHO_N "makedist: exporting tag '$SVNTAG' from '$PHPMOD'...$ECHO_C"
+svn export $PHPROOT/$PHPMOD/$SVNTAG $DIRPATH || exit 4
 echo ""
 
-# remove CVS stuff...
+# remove SVN stuff...
 cd $DIR || exit 5
-find . \( \( -name CVS -type d \) -o -name .cvsignore \) -exec rm -rf {} \;
+find . \( -name .svn -type d \) -exec rm -rf {} \;
 
 # The full ChangeLog is available separately from lxr.php.net
 rm -f ChangeLog*
