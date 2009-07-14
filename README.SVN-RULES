@@ -1,18 +1,18 @@
 ====================
-  CVS Commit Rules
+  SVN Commit Rules
 ====================
 
-This is the first file you should be reading after you get your CVS account.
-We'll assume you're basically familiar with CVS, but feel free to post
+This is the first file you should be reading after you get your SVN account.
+We'll assume you're basically familiar with SVN, but feel free to post
 your questions on the mailing list. Please have a look at
-http://cvsbook.red-bean.com/ for more detailed information on CVS.
+http://svnbook.red-bean.com/ for more detailed information on SVN.
 
 PHP is developed through the efforts of a large number of people.
-Collaboration is a Good Thing(tm), and CVS lets us do this. Thus, following
-some basic rules with regards to CVS usage will::
+Collaboration is a Good Thing(tm), and SVN lets us do this. Thus, following
+some basic rules with regards to SVN usage will::
 
    a. Make everybody happier, especially those responsible for maintaining
-      the CVS itself.
+      the SVN itself.
 
    b. Keep the changes consistently well documented and easily trackable.
 
@@ -43,21 +43,21 @@ Having said that, here are the organizational rules::
 
 Currently we have the following branches in use::
 
-  HEAD     Will become PHP 6.0. This CVS branch is for active development.
+  trunk             Will become PHP 6.0. This branch is for active development.
 
-  PHP_5_3  Is used to release the PHP 5.3.x series. It still allows for
-           larger enhancements.
+  branches/PHP_5_3  Is used to release the PHP 5.3.x series. It still allows for
+                    larger enhancements.
 
-  PHP_5_2  Is used to release the PHP 5.2.x series. Only bugfixes are permitted
-           on this branch (Consult the releasemaster prior to commit).
+  branches/PHP_5_2  Is used to release the PHP 5.2.x series. Only bugfixes are permitted
+                    on this branch (Consult the releasemaster prior to commit).
 
-  PHP_5_1  This branch is closed.
+  branches/PHP_5_1  This branch is closed.
 
-  PHP_4_4  This branch is closed.
+  branches/PHP_4_4  This branch is closed.
 
 The next few rules are more of a technical nature::
 
-   1. All changes should first go to HEAD and then get merged from HEAD
+   1. All changes should first go to trunk and then get merged from trunk
       (aka MFH'ed) to all other relevant branches.
 
    2. DO NOT TOUCH ChangeLog! It is automagically updated from the commit
@@ -122,7 +122,7 @@ get notified about your commit through the php-doc mailing list.
 
 If you fix some bugs, you should note the bug ID numbers in your
 commit message. Bug ID should be prefixed by "#" for easier access to
-bug report when developers are browsing CVS via LXR or Bonsai.
+bug report when developers are browsing SVN via LXR or Bonsai.
 
 Example::
 
@@ -132,11 +132,11 @@ If you don't see your messages in ChangeLog right away, don't worry!
 These files are updated once a day, so your stuff will not show up until
 somewhat later.
 
-When you change the NEWS file for a bug fix, then please keep the bugs 
+When you change the NEWS file for a bug fix, then please keep the bugs
 sorted in decreasing order under the fixed version.
 
 You can use LXR (http://lxr.php.net/) and Bonsai (http://bonsai.php.net/)
-to look at PHP CVS repository in various ways.
+to look at PHP SVN repository in various ways.
 
 To receive daily updates to ChangeLog and NEWS, send an empty message to
 php-cvs-daily-subscribe@lists.php.net.
