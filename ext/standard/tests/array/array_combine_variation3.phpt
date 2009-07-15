@@ -120,10 +120,8 @@ array(1) {
 array(6) {
   ["a"]=>
   string(3) "a"
-  ["aaaa
-"]=>
-  string(5) "aaaa
-"
+  ["aaaa"]=>
+  string(5) "aaaa"
   ["b"]=>
   string(1) "b"
   ["b	bbb"]=>
@@ -162,13 +160,11 @@ This is a double quoted string"]=>
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  ["hello
- world	
+  ["hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

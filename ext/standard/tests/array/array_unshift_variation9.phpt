@@ -201,8 +201,7 @@ This is a double quoted string"
 int(5)
 array(5) {
   [0]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -218,8 +217,7 @@ double quoted string. withdifferentwhitespaces"
 int(7)
 array(7) {
   [0]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

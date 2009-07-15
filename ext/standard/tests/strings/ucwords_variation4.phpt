@@ -92,8 +92,7 @@ string(24) "	Testing	Testing	Ucwords"
 -- Iteration 13 --
 string(26) "\ttesting\ttesting	Ucwords"
 -- Iteration 14 --
-string(31) "Testing
-Ucwords Testing Ucwords"
+string(31) "TestingUcwords Testing Ucwords"
 -- Iteration 15 --
 string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --

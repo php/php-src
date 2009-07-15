@@ -76,8 +76,7 @@ string(16) "Testing  Ucwords"
 -- Iteration 15 --
 string(16) "Testing\rucwords"
 -- Iteration 16 --
-string(15) "Testing
-Ucwords"
+string(15) "TestingUcwords"
 -- Iteration 17 --
 string(16) "Testing\fucwords"
 -- Iteration 18 --

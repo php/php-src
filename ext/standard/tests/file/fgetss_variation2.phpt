@@ -113,8 +113,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
@@ -174,8 +173,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
@@ -235,8 +233,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
@@ -296,8 +293,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
@@ -357,8 +353,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
@@ -418,8 +413,7 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing 
- character 
+string(41) "this is the text containing  character 
 "
 int(383)
 bool(false)
