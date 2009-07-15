@@ -2907,7 +2907,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		}
 	} else {
 get_function_via_handler:
-		if (fcc->object_ptr) {
+		if (fcc->object_ptr && fcc->calling_scope == ce_org) {
 			if (Z_OBJ_HT_P(fcc->object_ptr)->get_method) {
 				zstr method = mname;
 				int method_len = mlen;
