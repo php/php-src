@@ -149,16 +149,14 @@ array(1) {
 -- Iteration 8 --
 array(1) {
   ["h3"]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 array(1) {
   ["h3"]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

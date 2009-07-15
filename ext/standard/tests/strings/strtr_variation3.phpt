@@ -69,8 +69,7 @@ echo "*** Done ***";
 *** Testing strtr() : string containing escape sequences for 'str' arg ***
 -- Iteration 1 --
 string(9) "SesSTsttE"
-string(9) "	es	\stt
-"
+string(9) "	es	\stt"
 -- Iteration 2 --
 string(12) "TtestTTstrtr"
 string(12) "\test\\strtr"

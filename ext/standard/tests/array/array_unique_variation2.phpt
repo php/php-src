@@ -116,8 +116,7 @@ array(4) {
   [0]=>
   %unicode|string%(3) "a"
   [1]=>
-  %unicode|string%(5) "aaaa
-"
+  %unicode|string%(5) "aaaa"
   [2]=>
   %unicode|string%(1) "b"
   [4]=>
@@ -145,8 +144,7 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   [%b|u%"h3"]=>
-  %unicode|string%(88) "hello
- world	
+  %unicode|string%(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

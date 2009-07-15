@@ -165,13 +165,11 @@ array(2) {
 -- Iteration 6 --
 array(1) {
   [10]=>
-  string(5) "aaaa
-"
+  string(5) "aaaa"
 }
 array(1) {
   [10]=>
-  string(5) "aaaa
-"
+  string(5) "aaaa"
 }
 -- Iteration 7 --
 array(1) {
@@ -191,8 +189,7 @@ array(2) {
 2222 != 1111.	 0000 = 0000
 "
   [12]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -205,8 +202,7 @@ array(2) {
 2222 != 1111.	 0000 = 0000
 "
   [12]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

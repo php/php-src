@@ -80,10 +80,8 @@ array(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -112,10 +110,8 @@ array(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -144,10 +140,8 @@ array(12) {
   string(1) ""
   [""]=>
   string(1) ""
-  ["
-"]=>
-  string(1) "
-"
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>

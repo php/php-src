@@ -242,8 +242,7 @@ array(6) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa
-"
+  string(5) "aaaa"
   [2]=>
   string(5) "b	bbb"
   [3]=>
@@ -261,8 +260,7 @@ array(6) {
   [2]=>
   string(3) "a"
   [3]=>
-  string(5) "aaaa
-"
+  string(5) "aaaa"
   [4]=>
   string(5) "b	bbb"
   [5]=>
@@ -308,8 +306,7 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -338,8 +335,7 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello
- world	
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

@@ -80,15 +80,13 @@ string(52) "Testing Ucword() With
 Multiline String Using
 Heredoc"
 -- Iteration 4 --
-string(93) "Testing
-Ucword(str)	With
+string(93) "TestingUcword(str)	With
 Multiline   String		Using
 Heredoc
 String.withDifferentWhiteSpaces"
 -- Iteration 5 --
 string(53) "12sting 123string 4567
-String	123string
-12 Test
+String	123string12 Test
 5test"
 -- Iteration 6 --
 string(108) "It's Bright,but I Cann't See It.

@@ -56,13 +56,9 @@ Hello<br />
 World<br />
 "
 -- Iteration 3 --
-string(17) "Hello<br />
-World"
+string(17) "Hello<br />World"
 -- Iteration 4 --
-string(31) "<br />
-Hello<br />
-World<br />
-"
+string(31) "<br />Hello<br />World<br />"
 -- Iteration 5 --
 string(18) "Hello<br />
 World"

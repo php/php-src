@@ -150,8 +150,7 @@ array(4) {
   string(10) "it()
 Escap"
   [3]=>
-  string(7) "e
-chars"
+  string(7) "echars"
 }
 -- Iteration 8 --
 array(8) {
