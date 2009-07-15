@@ -588,8 +588,8 @@ static char const dpb_args[] = {
 	
 int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
 {
-	short i, dpb_len, buf_len = 256;
-	char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
+	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
+	char dpb_buffer[257] = { isc_dpb_version1, 0 }, *dpb;
 
 	dpb = dpb_buffer + 1;
 
