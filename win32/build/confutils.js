@@ -31,15 +31,15 @@ if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
 }
 
-if (!FSO.FileExists("README.CVS-RULES")) {
+if (!FSO.FileExists("README.SVN-RULES")) {
 	STDERR.WriteLine("Must be run from the root of the php source");
 	WScript.Quit(10);
 }
-	
+
 var CWD = WshShell.CurrentDirectory;
 
 if (typeof(CWD) == "undefined") {
-	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.CVS-RULES"));
+	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.SVN-RULES"));
 }
 
 /* defaults; we pick up the precise versions from configure.in */
