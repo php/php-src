@@ -39,26 +39,19 @@ echo "*** Done ***";
 ?>
 --EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
-unicode(33) "	 st
-
-ch
- using
+unicode(33) "	 stch using
 \escape \seque
 ce"
 unicode(9) "\seque
 ce"
-unicode(25) "
- using
+unicode(25) " using
 \escape \seque
 ce"
 unicode(9) "\seque
 ce"
 unicode(3) "
 ce"
-unicode(33) "	 st
-
-ch
- using
+unicode(33) "	 stch using
 \escape \seque
 ce"
 *** Done ***

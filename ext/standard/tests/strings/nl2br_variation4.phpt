@@ -34,10 +34,8 @@ unicode(29) "<html>Hello<br />world</html>"
 unicode(19) "<html><br /></html>"
 unicode(45) "<html><br />
 Hello<br />
-world<br />
-</html>"
+world<br /></html>"
 unicode(37) "<html><br />
  <br />
- <br />
-</html>"
+ <br /></html>"
 Done

@@ -150,8 +150,7 @@ array(4) {
   unicode(10) "it()
 Escap"
   [3]=>
-  unicode(7) "e
-chars"
+  unicode(7) "echars"
 }
 -- Iteration 8 --
 array(8) {

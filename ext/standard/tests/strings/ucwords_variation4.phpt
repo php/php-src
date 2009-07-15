@@ -92,8 +92,7 @@ unicode(24) "	Testing	Testing	Ucwords"
 -- Iteration 13 --
 unicode(26) "\ttesting\ttesting	Ucwords"
 -- Iteration 14 --
-unicode(31) "Testing
-Ucwords Testing Ucwords"
+unicode(31) "TestingUcwords Testing Ucwords"
 -- Iteration 15 --
 unicode(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --

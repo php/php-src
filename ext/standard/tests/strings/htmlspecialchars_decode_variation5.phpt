@@ -43,17 +43,13 @@ unicode(99) "Roy&#039s height > Sam&#039;s $height... 1111 &ap; 0000 = 0000... &
 unicode(84) "Roy&#039s height > Sam's $height... 1111 &ap; 0000 = 0000... " double quote string ""
 -- Iteration 2 --
 unicode(82) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
-
- " double quote string ""
+ " double quote string ""
 unicode(82) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
-
- " double quote string ""
+ " double quote string ""
 unicode(92) "Roy&#039;s height > Sam&#039;s height... 		 13 < 15...
-
- &quot; double quote string &quot;"
+ &quot; double quote string &quot;"
 unicode(72) "Roy's height > Sam's height... 		 13 < 15...
-
- " double quote string ""
+ " double quote string ""
 -- Iteration 3 --
 unicode(44) "
 Roy&#039;s height &gt	; Sam&#039;s height"
@@ -64,18 +60,10 @@ Roy&#039;s height &gt	; Sam&#039;s height"
 unicode(34) "
 Roy's height &gt	; Sam's height"
 -- Iteration 4 --
-unicode(44) "
-	Roy&#039;s height &gt
-; Sam	&#039;s height"
-unicode(44) "
-	Roy&#039;s height &gt
-; Sam	&#039;s height"
-unicode(44) "
-	Roy&#039;s height &gt
-; Sam	&#039;s height"
-unicode(34) "
-	Roy's height &gt
-; Sam	's height"
+unicode(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
+unicode(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
+unicode(44) "	Roy&#039;s height &gt; Sam	&#039;s height"
+unicode(34) "	Roy's height &gt; Sam	's height"
 -- Iteration 5 --
 unicode(30) "
  1	3 &	gt; 11 but 11 &	lt; 12"

@@ -38,29 +38,20 @@ echo "Done";
 *** Testing nl2br() : usage variations ***
 unicode(147) "<br />
 <br />
-
-<br />
-
-<br />
+<br />
+<br />
 <br />
 <br />
 nn<br />
 <br />
 <br />
 n<br />
-
-rr<br />
+rr<br /><br /><br />r<br />
 <br />
+<br />
+<br />
 <br />
-r<br />
-<br />
-
-<br />
-
-<br />
-<br />
-r<br />
-n"
+r<br />n"
 unicode(118) "Hello<br />
 World<br />
 This is 	es	 for <br />
@@ -68,8 +59,6 @@ This is 	es	 for <br />
 ew lines<br />
 like <br />
  <br />
- <br />
- <br />
-
- and etc"
+ <br /> <br />
+ and etc"
 Done

@@ -156,16 +156,14 @@ array(0) {
 -- Iteration 8 --
 array(1) {
   [u"h3"]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 array(1) {
   [u"h3"]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
