@@ -532,7 +532,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 		default:
 			strcpy(S->einfo.last_err_msg, "Unknown Attribute");
 			S->einfo.what = "setAttribute";
-			strcpy(S->einfo.last_state, "IM0001");
+			strcpy(S->einfo.last_state, "IM001");
 			return -1;
 	}
 }
@@ -560,7 +560,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 		default:
 			strcpy(S->einfo.last_err_msg, "Unknown Attribute");
 			S->einfo.what = "getAttribute";
-			strcpy(S->einfo.last_state, "IM0001");
+			strcpy(S->einfo.last_state, "IM001");
 			return -1;
 	}
 }
