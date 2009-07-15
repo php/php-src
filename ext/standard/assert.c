@@ -56,6 +56,7 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 	if (EG(in_execution)) {
 		if (ASSERTG(callback)) {
 			zval_ptr_dtor(&ASSERTG(callback));
+			ASSERTG(callback) = NULL;
 		}
 		if (new_value && (ASSERTG(callback) || new_value_length)) {
 			MAKE_STD_ZVAL(ASSERTG(callback));
