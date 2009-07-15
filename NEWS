@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
 
+- Fixed bug #48899 (is_callable returns true even if method does not exist in
+  parent class). (Felipe)
 - Fixed bug #48854 (array_merge_recursive modifies arrays after first one).
   (Felipe)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
