@@ -346,7 +346,7 @@ static int odbc_handle_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
-			strcpy(H->einfo.last_state, "IM0001");
+			strcpy(H->einfo.last_state, "IM001");
 			return -1;
 	}
 }
