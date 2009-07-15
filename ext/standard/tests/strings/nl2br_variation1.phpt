@@ -56,13 +56,9 @@ Hello<br />
 World<br />
 "
 -- Iteration 3 --
-unicode(17) "Hello<br />
-World"
+unicode(17) "Hello<br />World"
 -- Iteration 4 --
-unicode(31) "<br />
-Hello<br />
-World<br />
-"
+unicode(31) "<br />Hello<br />World<br />"
 -- Iteration 5 --
 unicode(18) "Hello<br />
 World"

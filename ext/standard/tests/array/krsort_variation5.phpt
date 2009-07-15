@@ -76,10 +76,8 @@ array(11) {
   unicode(3) "\cx"
   [u"\a"]=>
   unicode(2) "\a"
-  [u"
-"]=>
-  unicode(1) "
-"
+  [u""]=>
+  unicode(1) ""
   [u""]=>
   unicode(1) ""
   [u""]=>
@@ -106,10 +104,8 @@ array(11) {
   unicode(3) "\cx"
   [u"\a"]=>
   unicode(2) "\a"
-  [u"
-"]=>
-  unicode(1) "
-"
+  [u""]=>
+  unicode(1) ""
   [u""]=>
   unicode(1) ""
   [u""]=>
@@ -136,10 +132,8 @@ array(11) {
   unicode(3) "\cx"
   [u"\a"]=>
   unicode(2) "\a"
-  [u"
-"]=>
-  unicode(1) "
-"
+  [u""]=>
+  unicode(1) ""
   [u""]=>
   unicode(1) ""
   [u""]=>

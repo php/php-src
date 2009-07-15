@@ -41,8 +41,7 @@ echo "Done";
 -- Iteration 1 --
 unicode(50) "<html> $ -> This represents the dollar sign</html>"
 -- Iteration 2 --
-unicode(59) "<html>	
- The quick brown fox jumped over the lazy dog</p>"
+unicode(59) "<html>	 The quick brown fox jumped over the lazy dog</p>"
 -- Iteration 3 --
 unicode(31) "<a>This is a hyper text tag</a>"
 -- Iteration 4 --
@@ -50,7 +49,6 @@ unicode(0) ""
 -- Iteration 5 --
 unicode(26) "<p>This is a paragraph</p>"
 -- Iteration 6 --
-unicode(62) "<b>This is 	a text in bold letters
-\s\malong with slashes
+unicode(62) "<b>This is 	a text in bold letters\s\malong with slashes
 </b>"
 Done

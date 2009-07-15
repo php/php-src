@@ -154,13 +154,11 @@ array(1) {
 -- Iterator 6 --
 array(1) {
   [1]=>
-  unicode(5) "aaaa
-"
+  unicode(5) "aaaa"
 }
 array(1) {
   [1]=>
-  unicode(5) "aaaa
-"
+  unicode(5) "aaaa"
 }
 -- Iterator 7 --
 array(1) {
@@ -174,8 +172,7 @@ array(1) {
 -- Iterator 8 --
 array(2) {
   [2]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -188,8 +185,7 @@ double quoted string. withdifferentwhitespaces"
 }
 array(2) {
   [2]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

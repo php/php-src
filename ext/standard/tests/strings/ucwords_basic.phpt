@@ -75,8 +75,7 @@ unicode(16) "Testing  Ucwords"
 -- Iteration 15 --
 unicode(16) "Testing\rucwords"
 -- Iteration 16 --
-unicode(15) "Testing
-Ucwords"
+unicode(15) "TestingUcwords"
 -- Iteration 17 --
 unicode(16) "Testing\fucwords"
 -- Iteration 18 --

@@ -462,8 +462,7 @@ unicode(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
 -- Iteration 14 --
 unicode(22) "1234	
 5678
-	9100
-abcda"
+	9100abcda"
 
 *** Testing var_dump() on boolean variables ***
 -- Iteration 1 --
@@ -1303,8 +1302,7 @@ array(14) {
   [13]=>
   unicode(22) "1234	
 5678
-	9100
-abcda"
+	9100abcda"
 }
 array(15) {
   [0]=>
