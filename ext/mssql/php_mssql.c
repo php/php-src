@@ -406,8 +406,11 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 				convert_to_string_ex(yyhost);
 				host = Z_STRVAL_PP(yyhost);
+				if(strlen(host)>255) {
+					host[255] = '\0';
+				}
 				user=passwd=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "mssql_%s__", Z_STRVAL_PP(yyhost));
+				hashed_details_length = spprintf(&hashed_details, 0, "mssql_%s__", host);
 			}
 			break;
 		case 2: {
@@ -420,8 +423,14 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				convert_to_string_ex(yyuser);
 				host = Z_STRVAL_PP(yyhost);
 				user = Z_STRVAL_PP(yyuser);
+				if(strlen(host)>255) {
+					host[255] = '\0';
+				}
+				if(strlen(user)>255) {
+					user[255] = '\0';
+				}
 				passwd=NULL;
-				hashed_details_length = spprintf(&hashed_details, 0, "mssql_%s_%s_",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser));
+				hashed_details_length = spprintf(&hashed_details, 0, "mssql_%s_%s_", host, user);
 			}
 			break;
 		case 3: {
@@ -436,7 +445,16 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = Z_STRVAL_PP(yyhost);
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
-				hashed_details_length = spprintf(&hashed_details,0,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd));
+				if(strlen(host)>255) {
+					host[255] = '\0';
+				}
+				if(strlen(user)>255) {
+					user[255] = '\0';
+				}
+				if(strlen(passwd)>255) {
+					passwd[255] = '\0';
+				}
+				hashed_details_length = spprintf(&hashed_details,0,"mssql_%s_%s_%s", host, user, passwd);
 			}
 			break;
 		case 4: {
@@ -453,7 +471,16 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
 				new_link = Z_LVAL_PP(yynew_link);
-				hashed_details_length = spprintf(&hashed_details,0,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd));
+				if(strlen(host)>255) {
+					host[255] = '\0';
+				}
+				if(strlen(user)>255) {
+					user[255] = '\0';
+				}
+				if(strlen(passwd)>255) {
+					passwd[255] = '\0';
+				}
+				hashed_details_length = spprintf(&hashed_details,0,"mssql_%s_%s_%s", host, user, passwd);
 			}
 			break;
 		default:
