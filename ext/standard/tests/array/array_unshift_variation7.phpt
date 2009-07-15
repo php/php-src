@@ -91,8 +91,7 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  string(49) "	
- The quick brown fox jumped over the lazy dog"
+  string(49) "	 The quick brown fox jumped over the lazy dog"
   ["f"]=>
   string(5) "first"
   ["s"]=>
@@ -105,8 +104,7 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  string(49) "	
- The quick brown fox jumped over the lazy dog"
+  string(49) "	 The quick brown fox jumped over the lazy dog"
   [1]=>
   string(5) "hello"
   [2]=>
@@ -186,8 +184,7 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  string(70) "This is 	a text in bold letters
-\s\malong with slashes
+  string(70) "This is 	a text in bold letters\s\malong with slashes
  : HELLO WORLD	"
   ["f"]=>
   string(5) "first"
@@ -201,8 +198,7 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  string(70) "This is 	a text in bold letters
-\s\malong with slashes
+  string(70) "This is 	a text in bold letters\s\malong with slashes
  : HELLO WORLD	"
   [1]=>
   string(5) "hello"

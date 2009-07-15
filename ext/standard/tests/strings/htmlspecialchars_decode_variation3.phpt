@@ -83,8 +83,7 @@ string(103) "<html>Roy&#039;s height > Sam&#039;s height
 1111 & 0000 = 0000
 "This is a double quoted string""
 -- Iteration 4 --
-string(130) "<html>Roy&#039;s height
- > Sam	&#039;s height
+string(130) "<html>Roy&#039;s height > Sam	&#039;s height
 1111		 & 0000 = 0000
 " heredoc
 double quoted string. withdifferentwhitespaces""

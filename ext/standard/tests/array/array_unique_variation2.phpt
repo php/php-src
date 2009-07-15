@@ -116,8 +116,7 @@ array(4) {
   [0]=>
   string(3) "a"
   [1]=>
-  string(5) "aaaa
-"
+  string(5) "aaaa"
   [2]=>
   string(1) "b"
   [4]=>
@@ -145,8 +144,7 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(87) "hello
- world
+  string(87) "hello world
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
