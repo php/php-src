@@ -550,6 +550,17 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		return;
 	}
 
+	/* Limit strings to 255 chars to prevent overflow issues in underlying libraries */
+	if(host_len>255) {
+		host[255] = '\0';
+	}
+	if(user_len>255) {
+		user[255] = '\0';
+	}
+	if(passwd_len>255) {
+		passwd[255] = '\0';
+	}
+
 	switch(ZEND_NUM_ARGS())
 	{
 		case 0:
