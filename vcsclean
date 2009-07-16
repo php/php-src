@@ -1,0 +1,11 @@
+#! /bin/sh
+
+if test -d 'CVS'; then
+    ${MAKE:-make} -f build/build.mk cvsclean-work
+elif test -d '.svn'; then
+    ${MAKE:-make} -f build/build.mk svnclean-work
+elif test -d '.git'; then
+    ${MAKE:-make} -f build/build.mk gitclean-work
+else
+    echo "Can't figure out your VCS, not cleaning."
+fi
