@@ -211,14 +211,36 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
    Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode)
 {
-	char *str;
+	zstr str;
 	unsigned char *result;
 	int str_len, ret_length;
+	zend_uchar str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &str, &str_len, &str_type) == FAILURE) {
 		return;
 	}
-	result = php_base64_encode((unsigned char*)str, str_len, &ret_length);
+
+	if (str_type == IS_UNICODE) {
+		char *utf8_str = NULL;
+		int utf8_str_len;
+		UErrorCode status = U_ZERO_ERROR;
+
+		zend_unicode_to_string_ex(UG(utf8_conv), &utf8_str, &utf8_str_len, str.u, str_len, &status);
+		if (U_FAILURE(status)) {
+			if (utf8_str) {
+				efree(utf8_str);
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert argument to UTF-8");
+			RETURN_FALSE;
+		}
+
+		result = php_base64_encode((unsigned char*)utf8_str, utf8_str_len, &ret_length);
+		efree(utf8_str);
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "expecting binary parameter, received Unicode parameter was converted to UTF-8");
+	} else {
+		result = php_base64_encode((unsigned char*)str.s, str_len, &ret_length);
+	}
+
 	if (result != NULL) {
 		RETVAL_STRINGL((char*)result, ret_length, 0);
 	} else {

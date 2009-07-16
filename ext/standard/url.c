@@ -593,7 +593,7 @@ PHP_FUNCTION(urlencode)
 			if (utf8_str) {
 				efree(utf8_str);
 			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert argument to UTF-8");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert argument to UTF-8");
 			RETURN_FALSE;
 		}
 
@@ -715,7 +715,7 @@ PHP_FUNCTION(rawurlencode)
 			if (utf8_str) {
 				efree(utf8_str);
 			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert argument to UTF-8");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert argument to UTF-8");
 			RETURN_FALSE;
 		}
 
