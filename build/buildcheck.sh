@@ -48,9 +48,9 @@ fi
 
 if test "$1" = "2" && test "$2" -ge "50"; then
   echo "buildconf: Your version of autoconf likely contains buggy cache code."
-  echo "           Running svnclean for you."
+  echo "           Running vcsclean for you."
   echo "           To avoid this, install autoconf-2.13."
-  ./svnclean
+  ./vcsclean
   stamp=
 fi
 
