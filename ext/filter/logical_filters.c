@@ -533,7 +533,7 @@ static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
 	int compressed = 0;
 	int blocks = 8;
 	int n;
-	char *ipv4 = NULL;
+	char *ipv4;
 	char *end;
 	int ip4elm[4];
 	char *s = str;
@@ -559,24 +559,21 @@ static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
 		blocks = 6;
 	}
 
-	end = ipv4 ? ipv4 : str + str_len;
+	end = str + str_len;
 
 	while (str < end) {
 		if (*str == ':') {
 			if (--blocks == 0) {
-				if ((str+1) == end && ipv4) {
-					return 1;
-				}
 				return 0;
 			}			
 			if (++str >= end) {
-				return (ipv4 && ipv4 == str && blocks == 3) || 0;
+				return 0;
 			}
 			if (*str == ':') {
 				if (compressed || --blocks == 0) {
 					return 0;
 				}			
-				if (++str == end || (ipv4 && ipv4 == str)) {
+				if (++str == end) {
 					return 1;
 				}
 				compressed = 1;
