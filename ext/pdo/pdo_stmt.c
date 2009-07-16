@@ -317,7 +317,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && ! ZVAL_IS_NULL(param->parameter)) {
 		if (Z_TYPE_P(param->parameter) == IS_DOUBLE) {
 			char *p;
-			int len = spprintf(&p, 0, "%F", Z_DVAL_P(param->parameter));
+			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(param->parameter));
 			ZVAL_STRINGL(param->parameter, p, len, 0);
 		} else {
 			convert_to_string(param->parameter);
