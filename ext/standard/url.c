@@ -573,15 +573,36 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	char *in_str, *out_str;
+	zstr in_str;
+	char *out_str;
 	int in_str_len, out_str_len;
+	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
+							  &in_str_len, &in_str_type) == FAILURE) {
 		return;
 	}
 
-	out_str = php_url_encode(in_str, in_str_len, &out_str_len);
+	if (in_str_type == IS_UNICODE) {
+		char *utf8_str = NULL;
+		int utf8_str_len;
+		UErrorCode status = U_ZERO_ERROR;
+
+		zend_unicode_to_string_ex(UG(utf8_conv), &utf8_str, &utf8_str_len, in_str.u, in_str_len, &status);
+		if (U_FAILURE(status)) {
+			if (utf8_str) {
+				efree(utf8_str);
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not convert argument to UTF-8");
+			RETURN_FALSE;
+		}
+
+		out_str = php_url_encode(utf8_str, utf8_str_len, &out_str_len);
+		efree(utf8_str);
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "expecting binary parameter, received Unicode parameter was converted to UTF-8");
+	} else {
+		out_str = php_url_encode(in_str.s, in_str_len, &out_str_len);
+	}
 	RETURN_STRINGL(out_str, out_str_len, 0);
 }
 /* }}} */
