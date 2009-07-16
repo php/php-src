@@ -45,7 +45,7 @@ $(STAMP): build/buildcheck.sh
 snapshot:
 	distname='$(DISTNAME)'; \
 	if test -z "$$distname"; then \
-		distname='php5-snapshot'; \
+		distname='php6-snapshot'; \
 	fi; \
 	myname=`basename \`pwd\`` ; \
 	cd .. && cp -rp $$myname $$distname; \
@@ -71,8 +71,11 @@ cvsclean-work:
 	done
 
 svnclean-work:
-	for i in `find . -type d -and -not -path '*/.svn/*'`; do \
-		(cd `dirname $$i` 2>/dev/null && svn propget svn:ignore $i | xargs rm -rf && rm -rf *.o *.a .libs || true);	\
+	@for i in `find . -type d -and -not -path '*/.svn/*'`; do \
+		(cd `dirname $$i` 2>/dev/null && svn propget svn:ignore $$i | xargs rm -rf && rm -rf *.o *.a .libs || true);	\
 	done
+
+gitclean-work:
+	@echo "We don't know how to clean Git checkouts yet."
 
 .PHONY: $(ALWAYS) snapshot
