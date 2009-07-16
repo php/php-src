@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   (naf at altlinux dot ru, Felipe)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
+- Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
 - Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain
