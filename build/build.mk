@@ -71,8 +71,8 @@ cvsclean-work:
 	done
 
 svnclean-work:
-	@for i in `find . -type d -and -not -path '*/.svn/*'`; do \
-		(cd `dirname $$i` 2>/dev/null && svn propget svn:ignore $$i | xargs rm -rf && rm -rf *.o *.a .libs || true);	\
+	@for i in `find . -type d -not -path '*/.svn/*' | grep -v '.svn'`; do \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a .libs || true); \
 	done
 
 gitclean-work:
