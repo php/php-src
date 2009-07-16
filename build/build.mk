@@ -67,12 +67,15 @@ snapshot:
 
 cvsclean-work:
 	@for i in `find . -name .cvsignore`; do \
-		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[\r\n]/ /g'` *.o *.a .libs || true); \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[[:space:]]/ /g'` *.o *.a .libs || true); \
 	done
 
 svnclean-work:
-	for i in `find . -type d -and -not -path '*/.svn/*'`; do \
-		(cd `dirname $$i` 2>/dev/null && svn propget svn:ignore $i | xargs rm -rf && rm -rf *.o *.a .libs || true);     \
+	@for i in `find . -type d -and -not -path '*/.svn/*'`; do \
+		(cd `dirname $$i` 2>/dev/null && svn propget svn:ignore $$i | xargs rm -rf && rm -rf *.o *.a .libs || true);	\
 	done
+
+gitclean-work:
+	@echo "We don't know how to clean Git checkouts yet."
 
 .PHONY: $(ALWAYS) snapshot
