@@ -7,7 +7,7 @@ xmlwriter_write_dtd with missing param(s)
 $xmlwriter = xmlwriter_open_memory();
 var_dump(xmlwriter_write_dtd($xmlwriter));
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECTF--
 
