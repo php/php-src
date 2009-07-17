@@ -347,7 +347,6 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {
 }
 /* }}} */
 
-#define PS_ID_INITIAL_SIZE	100
 PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
 	PHP_MD5_CTX md5_context;
@@ -358,7 +357,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	unsigned char *digest;
 	int digest_len;
 	int j;
-	char *buf;
+	char *buf, *outid;
 	struct timeval tv;
 	zval **array;
 	zval **token;
@@ -406,6 +405,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 			efree(buf);
 			return NULL;
 	}
+	efree(buf);
 
 	if (PS(entropy_length) > 0) {
 		int fd;
@@ -461,20 +461,16 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-
-	if (PS_ID_INITIAL_SIZE < ((digest_len + 2) * (8 / PS(hash_bits_per_character))) ) {
-		/* 100 bytes is enough for most, but not all hash algos */
-		buf = erealloc(buf, (digest_len + 2) * (8 / PS(hash_bits_per_character)) );
-	}
-
-	j = (int) (bin_to_readable((char *)digest, digest_len, buf, PS(hash_bits_per_character)) - buf);
+	
+	outid = emalloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5));
+	j = (int) (bin_to_readable((char *)digest, digest_len, outid, PS(hash_bits_per_character)) - outid);
 	efree(digest);
 
 	if (newlen) {
 		*newlen = j;
 	}
 
-	return buf;
+	return outid;
 }
 /* }}} */
 
