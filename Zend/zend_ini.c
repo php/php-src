@@ -316,8 +316,11 @@ ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage) /* 
 	}
 
 	if (EG(modified_ini_directives)) {
-		zend_restore_ini_entry_cb(ini_entry, stage TSRMLS_CC);
-		zend_hash_del(EG(modified_ini_directives), name, name_length);
+		if(zend_restore_ini_entry_cb(ini_entry, stage TSRMLS_CC) == 0) {
+			zend_hash_del(EG(modified_ini_directives), name, name_length);
+		} else {
+			return FAILURE;
+		}
 	}
 
 	return SUCCESS;
