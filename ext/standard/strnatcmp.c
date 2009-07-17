@@ -101,7 +101,7 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
  */
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
 {
-	char ca, cb;
+	unsigned char ca, cb;
 	char const *ap, *bp;
 	char const *aend = a + a_len,
 			   *bend = b + b_len;
