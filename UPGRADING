@@ -381,12 +381,12 @@ ext/pfpro           not actively maintained
 ext/w32api          pecl/ffi
 ext/yp              not actively maintained
 sapi/activescript   http://pecl4win.php.net/ext.php/php5activescript.dll (PECL package)
-                    or pecl/activescript (CVS)
+                    or pecl/activescript (SVN)
 
 Modules in PECL that are not actively maintained (i.e. have not been supported
 for some time, have no active maintainer working on them currently, and do not
-have any PECL package releases), are still available in CVS at
-http://cvs.php.net/pecl/. However, unreleased PHP modules are by their nature
+have any PECL package releases), are still available in SVN at
+http://svn.php.net/pecl/. However, unreleased PHP modules are by their nature
 unsupported, and your mileage may vary when attempting to install or use them.
 
 9b. Class constants in new PHP 5.1 extensions
