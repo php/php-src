@@ -1,14 +1,10 @@
 --TEST--
-Test money_format() function : basic functionality using national currency symbols
+Test money_format() function : basic functionality
 --SKIPIF--
 <?php
-	if (!function_exists('money_format') || !function_exists('setlocale')) {
+	if (!function_exists('money_format')) {
 		die("SKIP money_format - not supported\n");
 	}
-	
-	if (setlocale(LC_MONETARY, 'en_US') == false) {
-		die("SKIP en_US locale not available\n");
-	}	
 ?>
 --FILE--
 <?php
@@ -17,9 +13,11 @@ Test money_format() function : basic functionality using national currency symbo
  * Source code: ext/standard/string.c
 */
 
-echo "*** Testing money_format() : basic functionality using national currency symbols***\n";
+// ===========================================================================================
+// = We do not test for exact return-values, as those might be different between OS-versions =
+// ===========================================================================================
 
-$original = setlocale(LC_MONETARY, 'en_US');
+echo "*** Testing money_format() : basic functionality***\n";
 
 $value = 1234.5678;
 $negative_value = -1234.5678;
@@ -28,60 +26,54 @@ $negative_value = -1234.5678;
 // left precision, 2 of right precision using national 
 // format for en_US
 echo "Format values with 14 positions, 8 digits to left, 2 to right using national format\n";
-var_dump( money_format('%14#8.2n', $value));
-var_dump( money_format('%14#8.2n', $negative_value));
+echo gettype(money_format('%14#8.2n', $value))."\n";
+echo gettype(money_format('%14#8.2n', $negative_value))."\n";
 
 // Same again but use '(' for negative values 
 echo "Format again but with ( for negative values\n";
-var_dump( money_format('%(14#8.2n', $value));
-var_dump( money_format('%(14#8.2n', $negative_value));
+echo gettype(money_format('%(14#8.2n', $value))."\n";
+echo gettype(money_format('%(14#8.2n', $negative_value))."\n";
 
 // Same again but use a '0' for padding character
 echo "Format with 0 for padding character\n";
-var_dump( money_format('%=014#8.2n', $value));
-var_dump( money_format('%=014#8.2n', $negative_value));
+echo gettype(money_format('%=014#8.2n', $value))."\n";
+echo gettype(money_format('%=014#8.2n', $negative_value))."\n";
 
 // Same again but use a '*' for padding character
 echo "Format again with * for padding character\n";
-var_dump( money_format('%=*14#8.2n', $value));
-var_dump( money_format('%=*14#8.2n', $negative_value));
+echo gettype(money_format('%=*14#8.2n', $value))."\n";
+echo gettype(money_format('%=*14#8.2n', $negative_value))."\n";
 
 // Same again but disable grouping character
 echo "Format again but disable grouping character\n"; 
-var_dump( money_format('%=*^14#8.2n', $value));
-var_dump( money_format('%=*^14#8.2n', $negative_value));
+echo gettype(money_format('%=*^14#8.2n', $value))."\n";
+echo gettype(money_format('%=*^14#8.2n', $negative_value))."\n";
 
 // Same again but suppress currency symbol
 echo "Format again suppress currency symbol\n"; 
-var_dump( money_format('%=*!14#8.2n', $value));
-var_dump( money_format('%=*!14#8.2n', $negative_value));
-
-setlocale(LC_MONETARY, $original);
+echo gettype(money_format('%=*!14#8.2n', $value))."\n";
+echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing money_format() : basic functionality using national currency symbols***
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+*** Testing money_format() : basic functionality***
 Format values with 14 positions, 8 digits to left, 2 to right using national format
-unicode(15) " $     1,234.57"
-unicode(15) "-$     1,234.57"
+unicode
+unicode
 Format again but with ( for negative values
-unicode(15) " $     1,234.57"
-unicode(16) "($     1,234.57)"
+unicode
+unicode
 Format with 0 for padding character
-unicode(15) " $000001,234.57"
-unicode(15) "-$000001,234.57"
+unicode
+unicode
 Format again with * for padding character
-unicode(15) " $*****1,234.57"
-unicode(15) "-$*****1,234.57"
+unicode
+unicode
 Format again but disable grouping character
-unicode(14) "  $****1234.57"
-unicode(14) " -$****1234.57"
+unicode
+unicode
 Format again suppress currency symbol
-unicode(14) " *****1,234.57"
-unicode(14) "-*****1,234.57"
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+unicode
+unicode
 ===DONE===
