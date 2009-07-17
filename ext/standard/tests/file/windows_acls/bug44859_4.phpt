@@ -1,6 +1,6 @@
 --TEST--
 bug #44859 (incorrect result with NTFS ACL permissions, is_readable)
---CREDIT--
+--CREDITS--
 Venkat Raman Don
 --SKIPIF--
 <?php 

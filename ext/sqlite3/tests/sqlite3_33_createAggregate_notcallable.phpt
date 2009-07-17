@@ -1,6 +1,6 @@
 --TEST--
 SQLite3::createAggregate() Test whether a supplied PHP function is valid when using in an aggregate function
---CREDIT--
+--CREDITS--
 James Cauwelier
 # Belgium PHP TestFest (2009)
 --SKIPIF--
