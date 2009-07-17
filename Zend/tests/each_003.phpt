@@ -22,16 +22,3 @@ array(4) {
   ["key"]=>
   int(0)
 }
---UEXPECTF--
-array(4) {
-  [1]=>
-  array(0) {
-  }
-  [u"value"]=>
-  array(0) {
-  }
-  [0]=>
-  int(0)
-  [u"key"]=>
-  int(0)
-}

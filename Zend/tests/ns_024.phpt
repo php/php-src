@@ -5,5 +5,3 @@
 var_dump(__NAMESPACE__);
 --EXPECT--
 string(0) ""
---UEXPECT--
-unicode(0) ""

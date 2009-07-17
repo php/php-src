@@ -26,6 +26,3 @@ $a->foo();
 --EXPECT--
 string(3) "bar"
 bool(false)
---UEXPECT--
-unicode(3) "bar"
-bool(false)
