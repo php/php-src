@@ -67,12 +67,12 @@ snapshot:
 
 cvsclean-work:
 	@for i in `find . -name .cvsignore`; do \
-		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[[:space:]]/ /g'` *.o *.a .libs || true); \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice | sed 's/[[:space:]]/ /g'` *.o *.a *.lo *.la *.gcno *.gcda .libs || true); \
 	done
 
 svnclean-work:
 	@for i in `find . -type d -not -path '*/.svn/*' | grep -v '.svn'`; do \
-		(cd `dirname $$i` 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a .libs || true); \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a *.lo *.la .libs || true); \
 	done
 
 gitclean-work:
