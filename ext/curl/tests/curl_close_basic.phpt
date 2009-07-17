@@ -12,5 +12,8 @@ if (!extension_loaded('curl')) print 'skip';
 $ch = curl_init();
 curl_close($ch);
 var_dump($ch);
---EXPECT--
-resource(4) of type (Unknown)
+?>
+===DONE===
+--EXPECTF--
+resource(%d) of type (Unknown)
+===DONE===
