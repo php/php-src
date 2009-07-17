@@ -1,6 +1,6 @@
 --TEST--
 SQLite3::createAggregate Test that an error is thrown when no parameters are present
---CREDIT--
+--CREDITS--
 James Cauwelier
 # Belgium PHP TestFest
 --SKIPIF--
