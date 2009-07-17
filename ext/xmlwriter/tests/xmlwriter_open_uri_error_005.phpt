@@ -6,7 +6,7 @@ xmlwriter_open_uri with file://localhost/
 <?php 
 var_dump(xmlwriter_open_uri('file://localhost/'));
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009

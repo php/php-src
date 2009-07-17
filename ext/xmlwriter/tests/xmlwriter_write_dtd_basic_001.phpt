@@ -14,7 +14,7 @@ var_dump(xmlwriter_write_dtd($xmlwriter, '', '', ''));
 $output = xmlwriter_flush($xmlwriter, true);
 print $output;
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECT--
 bool(true)

@@ -6,7 +6,7 @@ xmlwriter_open_uri without parameter
 <?php 
 var_dump(xmlwriter_open_uri());
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
