@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 5                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2007 The PHP Group                                |
+#  | Copyright (c) 1997-2006 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -72,7 +72,7 @@ cvsclean-work:
 
 svnclean-work:
 	@for i in `find . -type d -not -path '*/.svn/*' | grep -v '.svn'`; do \
-		(cd `dirname $$i` 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a *.lo *.la .libs || true); \
+		(cd `dirname $$i` 2>/dev/null && rm -rf `svn propget svn:ignore . | grep -v config.nice` *.o *.a *.lo *.la *.gcno *.gcda .libs || true); \
 	done
 
 gitclean-work:
