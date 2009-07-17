@@ -7,7 +7,7 @@ xmlwriter_open_uri with PHP_MAXPATHLEN + 1
 $path = str_repeat('a', PHP_MAXPATHLEN + 1);
 var_dump(xmlwriter_open_uri('file:///' . $path));
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009

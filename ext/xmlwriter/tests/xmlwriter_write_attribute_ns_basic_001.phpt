@@ -18,7 +18,7 @@ xmlwriter_end_document($xw);
 $output = xmlwriter_flush($xw, true);
 print $output;
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
