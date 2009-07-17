@@ -1,6 +1,6 @@
 --TEST--
 globals in global scope 
---INIT--
+--INI--
 variables_order="egpcs"
 --FILE--
 <?php
