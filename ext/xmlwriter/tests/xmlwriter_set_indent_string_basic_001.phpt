@@ -16,7 +16,7 @@ var_dump(xmlwriter_set_indent_string($resource, '  '));
 $temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
 unlink($temp_filename);
 ?>
---CREDIT--
+--CREDITS--
 Koen Kuipers koenk82@gmail.com
 Theo van der Zee
 #Test Fest Utrecht 09-05-2009
