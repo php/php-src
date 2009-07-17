@@ -13,6 +13,10 @@ Test money_format() function : error conditions
  * Source code: ext/standard/string.c
 */
 
+// ===========================================================================================
+// = We do not test for exact return-values, as those might be different between OS-versions =
+// ===========================================================================================
+
 $string = '%14#8.2n';
 $value = 1234.56;
 $extra_arg = 10;

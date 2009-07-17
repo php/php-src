@@ -2,13 +2,9 @@
 Test money_format() function :  usage variations - test values for $format argument
 --SKIPIF--
 <?php
-	if (!function_exists('money_format') || !function_exists('setlocale')) {
+	if (!function_exists('money_format')) {
 		die("SKIP money_format - not supported\n");
 	}
-	
-	if (setlocale(LC_MONETARY, 'de_DE') == false) {
-		die("SKIP de_DE locale not available\n");
-	}	
 ?>
 --FILE--
 <?php
@@ -17,8 +13,9 @@ Test money_format() function :  usage variations - test values for $format argum
  * Source code: ext/standard/string.c
 */
 
-$original = setlocale(LC_MONETARY, 'en_US');
-
+// ===========================================================================================
+// = We do not test for exact return-values, as those might be different between OS-versions =
+// ===========================================================================================
 
 echo "*** Testing money_format() function: with unexpected inputs for 'format' argument ***\n";
 
@@ -97,38 +94,35 @@ $value = 1234.56;
 
 foreach($formats as $format) {
   echo "-- Iteration $count --\n";
-  var_dump( money_format($format, $value) );
+  echo gettype(money_format($format, $value))."\n";
   $count ++;
 }
 
 // close the file handle
 fclose($file_handle);  
 
-// restore original locale
-setlocale(LC_MONETARY, $original);
-
 ?>
 ===Done===
 --EXPECTF--
 *** Testing money_format() function: with unexpected inputs for 'format' argument ***
 -- Iteration 1 --
-string(1) "0"
+string
 -- Iteration 2 --
-string(1) "1"
+string
 -- Iteration 3 --
-string(3) "255"
+string
 -- Iteration 4 --
-string(3) "256"
+string
 -- Iteration 5 --
-string(10) "2147483647"
+string
 -- Iteration 6 --
-string(11) "-2147483648"
+string
 -- Iteration 7 --
-string(4) "10.5"
+string
 -- Iteration 8 --
-string(5) "-20.5"
+string
 -- Iteration 9 --
-string(12) "101234567000"
+string
 -- Iteration 10 --
 
 Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
@@ -142,37 +136,37 @@ NULL
 Warning: money_format() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
-string(1) "1"
+string
 -- Iteration 14 --
-string(0) ""
+string
 -- Iteration 15 --
-string(1) "1"
+string
 -- Iteration 16 --
-string(0) ""
+string
 -- Iteration 17 --
-string(0) ""
+string
 -- Iteration 18 --
-string(0) ""
+string
 -- Iteration 19 --
-string(4) "abcd"
+string
 -- Iteration 20 --
-string(4) "abcd"
+string
 -- Iteration 21 --
-string(5) "0x12f"
+string
 -- Iteration 22 --
-string(18) " *****1,234.56abcd"
+string
 -- Iteration 23 --
 
 Warning: money_format() expects parameter 1 to be string, object given in %s on line %d
 NULL
 -- Iteration 24 --
-string(17) "  sample object  "
+string
 -- Iteration 25 --
 
 Warning: money_format() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 26 --
-string(0) ""
+string
 -- Iteration 27 --
-string(0) ""
+string
 ===Done===
