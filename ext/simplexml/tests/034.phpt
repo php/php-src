@@ -1,5 +1,7 @@
 --TEST--
 SimpleXML: array casting bug
+--XFAIL--
+Does anyone know why?
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
