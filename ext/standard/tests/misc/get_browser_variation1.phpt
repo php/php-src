@@ -1,7 +1,7 @@
 --TEST--
 Test get_browser() function : variation with extra browscap definitions
 --INI--
-browscap=ext/standard/tests/misc/browscap.ini
+browscap={PWD}/browscap.ini
 unicode.runtime_encoding = utf-8
 unicode.output_encoding = utf-8
 --SKIPIF--
