@@ -1,7 +1,5 @@
 --TEST--
 Two variables in POST data
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 a=Hello+World&b=Hello+Again+World
 --FILE--

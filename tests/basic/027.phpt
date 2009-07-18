@@ -7,8 +7,6 @@ display_errors=0
 max_input_nesting_level=10
 track_errors=1
 log_errors=0
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 a=1&b=ZYX&c[][][][][][][][][][][][][][][][][][][][][][]=123&d=123&e[][]][]=3
 --FILE--

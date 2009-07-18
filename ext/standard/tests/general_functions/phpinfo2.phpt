@@ -1,7 +1,5 @@
 --TEST--
 phpinfo() CGI
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 dummy=x
 --FILE--
