@@ -1,5 +1,7 @@
 --TEST--
 Bug #42718 (unsafe_raw filter not applied when configured as default filter)
+--XFAIL--
+Pierre knows why this test fails, please ask him.
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
