@@ -1,7 +1,5 @@
 --TEST--
 Bug #25145 (SEGV on recpt of form input with name like "123[]")
---SKIPIF--
-<?php if (php_sapi_name() == 'cli') echo 'skip'; ?>
 --GET--
 123[]=SEGV
 --FILE--

@@ -1,7 +1,5 @@
 --TEST--
 Testing magic_quotes_gpc
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --INI--
 magic_quotes_gpc=1
 --GET--
