@@ -4,8 +4,6 @@ rfc1867 file_upload disabled
 file_uploads=0
 error_reporting=E_ALL&~E_NOTICE
 comment=debug builds show some additional E_NOTICE errors
---SKIPIF--
-<?php if (php_sapi_name()=='cli') die('skip'); ?>
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737

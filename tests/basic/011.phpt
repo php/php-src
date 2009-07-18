@@ -1,7 +1,5 @@
 --TEST--
 Testing $argc and $argv handling (GET)
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --INI--
 register_argc_argv=1
 --GET--
