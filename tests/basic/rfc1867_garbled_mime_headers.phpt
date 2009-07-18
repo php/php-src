@@ -5,8 +5,6 @@ file_uploads=1
 error_reporting=E_ALL&~E_NOTICE
 comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
---SKIPIF--
-<?php if (php_sapi_name()=='cli') die('skip'); ?>
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737

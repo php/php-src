@@ -1,7 +1,5 @@
 --TEST--
 POST Method test and arrays - 7 
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 a[]=1&a[]]=3&a[[]=4
 --FILE--
