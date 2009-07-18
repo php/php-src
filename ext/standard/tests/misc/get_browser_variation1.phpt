@@ -1,7 +1,7 @@
 --TEST--
 Test get_browser() function : variation functionality: extra browser names
 --INI--
-browscap=ext/standard/tests/misc/browscap.ini
+browscap={PWD}/browscap.ini
 --SKIPIF--
 <?php
 	/**
