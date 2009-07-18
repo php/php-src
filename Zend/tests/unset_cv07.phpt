@@ -1,7 +1,5 @@
 --TEST--
 unset() CV 7 (indirect unset() of global variable in import_request_variables())
---SKIPIF--
-<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --GET--
 x=2
 --FILE--
