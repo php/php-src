@@ -69,11 +69,11 @@ zip_open(const char *fn, int flags, int *zep)
     if (flags & ZIP_OVERWRITE) {
 	return _zip_allocate_new(fn, zep);
     }
-    
+
     switch (_zip_file_exists(fn, flags, zep)) {
     case -1:
 			if (!(flags & ZIP_OVERWRITE)) {
-	return NULL;
+				return NULL;
 			}
 			
     case 0:
