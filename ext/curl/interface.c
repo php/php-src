@@ -1803,14 +1803,11 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 						char *type;
 						++postval;
 
-						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + strlen(postval)))) {
+						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*type = '\0';
 						}
 						/* safe_mode / open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
-							if (type) {
-								*type = ';';
-							}
 							RETVAL_FALSE;
 							return 1;
 						}
