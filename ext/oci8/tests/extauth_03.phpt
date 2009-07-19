@@ -141,56 +141,56 @@ Test 7
 
 Warning: oci_pconnect(): ORA-12154: TNS:could not resolve the connect identifier specified in %s on line %d
 array(4) {
-  [u"code"]=>
+  [%u|b%"code"]=>
   int(12154)
-  [u"message"]=>
-  unicode(65) "ORA-12154: %s"
-  [u"offset"]=>
+  [%u|b%"message"]=>
+  %unicode|string%(65) "ORA-12154: %s"
+  [%u|b%"offset"]=>
   int(0)
-  [u"sqltext"]=>
-  unicode(0) ""
+  [%u|b%"sqltext"]=>
+  %unicode|string%(0) ""
 }
 bool(false)
 Test 8
 
 Warning: oci_pconnect(): ORA-12154: TNS:could not resolve the connect identifier specified in %s on line %d
 array(4) {
-  [u"code"]=>
+  [%u|b%"code"]=>
   int(12154)
-  [u"message"]=>
-  unicode(65) "ORA-12154: %s"
-  [u"offset"]=>
+  [%u|b%"message"]=>
+  %unicode|string%(65) "ORA-12154: %s"
+  [%u|b%"offset"]=>
   int(0)
-  [u"sqltext"]=>
-  unicode(0) ""
+  [%u|b%"sqltext"]=>
+  %unicode|string%(0) ""
 }
 bool(false)
 Test 9
 
-Warning: oci_pconnect(): ORA-12154: TNS:could not resolve the connect identifier specified in %s on line %d
+Warning: oci_pconnect(): ORA-%d: TNS:%s in %s on line %d
 array(4) {
-  [u"code"]=>
-  int(12154)
-  [u"message"]=>
-  unicode(65) "ORA-12154: %s"
-  [u"offset"]=>
+  [%u|b%"code"]=>
+  int(%d)
+  [%u|b%"message"]=>
+  %unicode|string%(%d) "ORA-%d: %s"
+  [%u|b%"offset"]=>
   int(0)
-  [u"sqltext"]=>
-  unicode(0) ""
+  [%u|b%"sqltext"]=>
+  %unicode|string%(0) ""
 }
 bool(false)
 Test 10
 
-Warning: oci_pconnect(): ORA-12154: TNS:could not resolve the connect identifier specified in %s on line %d
+Warning: oci_pconnect(): ORA-%d: TNS:%s in %s on line %d
 array(4) {
-  [u"code"]=>
-  int(12154)
-  [u"message"]=>
-  unicode(65) "ORA-12154: %s"
-  [u"offset"]=>
+  [%u|b%"code"]=>
+  int(%d)
+  [%u|b%"message"]=>
+  %unicode|string%(%d) "ORA-%d: %s"
+  [%u|b%"offset"]=>
   int(0)
-  [u"sqltext"]=>
-  unicode(0) ""
+  [%u|b%"sqltext"]=>
+  %unicode|string%(0) ""
 }
 bool(false)
 ===DONE===
