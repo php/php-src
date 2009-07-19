@@ -20,7 +20,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -39,11 +39,11 @@
 
 #ifdef PHP_WIN32
 #	include "zip_win32.h"
-# ifdef PHP_ZIP_EXPORTS
+#	ifdef PHP_ZIP_EXPORTS
 #		define ZIP_EXTERN(rt) __declspec(dllexport)rt _stdcall
-# else
+#	else
 #		define ZIP_EXTERN(rt) rt
-# endif
+#	endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define ZIP_EXTERN(rt) __attribute__ ((visibility("default"))) rt
 #else
@@ -217,7 +217,7 @@ ZIP_EXTERN(struct zip_source *)zip_source_filep(struct zip *, FILE *,
 					       off_t, off_t);
 ZIP_EXTERN(void) zip_source_free(struct zip_source *);
 ZIP_EXTERN(struct zip_source *)zip_source_function(struct zip *,
-				       zip_source_callback, void *);
+						  zip_source_callback, void *);
 ZIP_EXTERN(struct zip_source *)zip_source_zip(struct zip *, struct zip *,
 					     int, int, off_t, off_t);
 ZIP_EXTERN(int) zip_stat(struct zip *, const char *, int, struct zip_stat *);
