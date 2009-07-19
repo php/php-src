@@ -48,5 +48,8 @@ struct php_process_handle {
 	char *command;
 	int is_persistent;
 	php_process_env_t env;
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	char **argv;
+#endif
 };
 
