@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - Improved ext/dba:
   . Added support for Tokyo Cabinet. (Michael)
 
+- Added DTrace support. (David Soria Parra)
 - Added runtime JIT auto-globals fetching and caching. (Dmitry, Sara)
 - Added E_STRICT to E_ALL. (Dmitry)
 - Added "context" and "binary_pipes" params in "other_options" for proc_open().

@@ -37,6 +37,7 @@
 #include "zend_closures.h"
 #include "zend_vm.h"
 #include "zend_unicode.h"
+#include "zend_dtrace.h"
 
 /* Virtual current working directory support */
 #include "tsrm_virtual_cwd.h"

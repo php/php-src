@@ -1190,6 +1190,15 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
 	ce = Z_OBJCE_P(EG(exception));
+
+	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
+		char *s_classname;
+		int s_classname_len;
+		zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, ce->name.u, u_strlen(ce->name.u) TSRMLS_CC);
+		DTRACE_EXCEPTION_CAUGHT(s_classname);
+		efree(s_classname);
+	}
+
 	if (ce != EX_T(opline->op1.u.var).class_entry) {
 		if (!instanceof_function(ce, EX_T(opline->op1.u.var).class_entry TSRMLS_CC)) {
 			if (opline->op1.u.EA.type) {
