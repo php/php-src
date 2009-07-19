@@ -89,7 +89,7 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		int name_len, s_classname_len;
 
 		classname = NULL_ZSTR;
-		zend_get_object_classname(exception, &classname, &name_len);
+		zend_get_object_classname(exception, &classname, &name_len TSRMLS_CC);
 		zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, classname.u, u_strlen(classname.u) TSRMLS_CC);
 
 		DTRACE_EXCEPTION_THROWN(s_classname);
