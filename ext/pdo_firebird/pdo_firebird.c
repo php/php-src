@@ -35,8 +35,23 @@ const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
 };
 /* }}} */
 
+/* {{{ pdo_firebird_deps
+ */
+#if ZEND_MODULE_API_NO >= 20050922
+static const zend_module_dep pdo_firebird_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+#endif
+/* }}} */
+
 zend_module_entry pdo_firebird_module_entry = { /* {{{ */
+#if ZEND_MODULE_API_NO >= 20050922
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_firebird_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"PDO_Firebird",
 	pdo_firebird_functions,
 	PHP_MINIT(pdo_firebird),
