@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   Functors. (Christian Seiler)
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
+- Added support for proc_open()'s bypass_shell feature for Unix systems
+  (Gwynne, Nuno)
 
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
   parent class). (Felipe)

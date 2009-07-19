@@ -71,6 +71,56 @@
 
 static int le_proc_open;
 
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+/* {{{ _php_array_to_argv */
+static char **_php_array_to_argv(zval *arg_array, int is_persistent)
+{
+	zval **element, temp;
+	char **c_argv, **ap;
+	HashTable *target_hash;
+	HashPosition pos;
+
+	target_hash = Z_ARRVAL_P(arg_array);
+	ap = c_argv = (char **)pecalloc(zend_hash_num_elements(target_hash) + 1, sizeof(char *), is_persistent);
+	
+	/* skip first element */
+	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+	zend_hash_move_forward_ex(target_hash, &pos);
+	for (	;
+			zend_hash_get_current_data_ex(target_hash, (void **) &element, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(target_hash, &pos)) {
+
+		temp = **element;
+		if (Z_TYPE_PP(element) != IS_STRING) {
+			zval_copy_ctor(&temp);
+			convert_to_string(&temp);
+		}
+		*ap++ = pestrndup(Z_STRVAL(temp), Z_STRLEN(temp), is_persistent);
+		if (Z_TYPE_PP(element) != IS_STRING) {
+			zval_dtor(&temp);
+		}
+	}
+
+	return c_argv;
+}
+/* }}} */
+
+/* {{{ _php_free_argv */
+static void _php_free_argv(char **argv, int is_persistent)
+{
+	if (argv) {
+		char **ap = NULL;
+
+		for (ap = argv; *ap; ap++) {
+			pefree(*ap, is_persistent);
+		}
+		pefree(argv, is_persistent);
+	}
+}
+/* }}} */
+
+#endif
+
 /* {{{ _php_array_to_envp */
 static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent TSRMLS_DC)
 {
@@ -177,8 +227,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	}	
 
 	assert(p - env.envp <= sizeenv);
-	
-	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
 	return env;
 }
@@ -243,6 +291,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	FG(pclose_ret) = -1;
 #endif
 	_php_free_envp(proc->env, proc->is_persistent);
+	_php_free_argv(proc->argv, proc->is_persistent);
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 	
@@ -465,6 +514,7 @@ struct php_proc_open_descriptor_item {
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
+	zval *command_with_args = NULL;
 	char *command, *cwd=NULL;
 	int command_len, cwd_len = 0;
 	zval *descriptorspec;
@@ -477,6 +527,7 @@ PHP_FUNCTION(proc_open)
 	zval **descitem = NULL;
 	HashPosition pos;
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	char** child_argv = NULL;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
@@ -488,7 +539,6 @@ PHP_FUNCTION(proc_open)
 	UINT old_error_mode;
 #endif
 #ifdef NETWARE
-	char** child_argv = NULL;
 	char* command_dup = NULL;
 	char* orig_cwd = NULL;
 	int command_num_args = 0;
@@ -499,43 +549,85 @@ PHP_FUNCTION(proc_open)
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 #ifdef PHP_WIN32
 	int suppress_errors = 0;
-	int bypass_shell = 0;
 #endif
+	int bypass_shell = 0;
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
-				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zaz|s!a!a!", &command_with_args,
+				&descriptorspec, &pipes, &cwd, &cwd_len, &environment,
 				&other_options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == php_make_safe_mode_command(command, &command, is_persistent TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-#ifdef PHP_WIN32
 	if (other_options) {
 		zval **item;
+#ifdef PHP_WIN32
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
 			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
 			    Z_LVAL_PP(item)) {
 				suppress_errors = 1;
 			}
-		}	
+		}
+#endif
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"), (void**)&item)) {
 			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
 			    Z_LVAL_PP(item)) {
 				bypass_shell = 1;
 			}
-		}	
+		}
+	}
+
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	if (bypass_shell) {
+		zval **item;
+		
+		if (Z_TYPE_P(command_with_args) != IS_ARRAY) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter must be array when bypass_shell is on");
+			RETURN_FALSE;
+		}
+		if (zend_hash_num_elements(Z_ARRVAL_P(command_with_args)) < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "arguments array must have at least one element");
+			RETURN_FALSE;
+		}
+		
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(command_with_args), &pos);
+		if (zend_hash_get_current_data_ex(Z_ARRVAL_P(command_with_args), (void **)&item, &pos) == SUCCESS) {
+			if (Z_TYPE_PP(item) == IS_STRING && Z_STRLEN_PP(item) > 0) {
+				command = Z_STRVAL_PP(item);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "first argument must be a nonempty string");
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "first argument must be at index 0");
+			RETURN_FALSE;
+		}
+	} else {
+#endif
+		if (Z_TYPE_P(command_with_args) != IS_STRING) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s() expects parameter 1 to be string, %s given", get_active_function_name(TSRMLS_C),
+				zend_zval_type_name(command_with_args));
+			RETURN_FALSE;
+		}
+		command = Z_STRVAL_P(command_with_args);
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	}
+#endif
+
+	if (FAILURE == php_make_safe_mode_command(command, &command, is_persistent TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+	command_len = strlen(command);
+
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	if (bypass_shell) {
+		child_argv = _php_array_to_argv(command_with_args, is_persistent);
 	}
 #endif
 	
-	command_len = strlen(command);
-
 	if (environment) {
 		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
 	} else {
@@ -885,7 +977,11 @@ PHP_FUNCTION(proc_open)
 			chdir(cwd);
 		}
 		
-		if (env.envarray) {
+		if (bypass_shell && env.envarray) {
+			execve(command, child_argv, env.envarray);
+		} else if (bypass_shell) {
+			execv(command, child_argv);
+		} else if (env.envarray) {
 			execle("/bin/sh", "sh", "-c", command, NULL, env.envarray);
 		} else {
 			execl("/bin/sh", "sh", "-c", command, NULL);
@@ -921,6 +1017,9 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	proc->argv = child_argv;
+#endif
 
 	if (pipes != NULL) {
 		zval_dtor(pipes);
@@ -995,6 +1094,9 @@ PHP_FUNCTION(proc_open)
 	return;
 
 exit_fail:
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	_php_free_argv(child_argv, is_persistent);
+#endif
 	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
 #if PHP_CAN_DO_PTS
