@@ -1866,14 +1866,11 @@ type_conflict:
 						char *type;
 						++postval;
 
-						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + strlen(postval)))) {
+						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*type = '\0';
 						}
 						/* open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC)) {
-							if (type) {
-								*type = ';';
-							}
 							RETVAL_FALSE;
 							return 1;
 						}
