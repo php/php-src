@@ -75,9 +75,10 @@ zip_open(const char *fn, int flags, int *zep)
 			if (!(flags & ZIP_OVERWRITE)) {
 				return NULL;
 			}
-			
+
     case 0:
 	return _zip_allocate_new(fn, zep);
+
     default:
 	break;
     }

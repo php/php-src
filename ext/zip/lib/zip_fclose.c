@@ -49,13 +49,13 @@ zip_fclose(struct zip_file *zf)
     free(zf->buffer);
     free(zf->zstr);
 	if (zf->za) {
-    for (i=0; i<zf->za->nfile; i++) {
-	if (zf->za->file[i] == zf) {
-	    zf->za->file[i] = zf->za->file[zf->za->nfile-1];
-	    zf->za->nfile--;
-	    break;
-	}
-    }
+		for (i=0; i<zf->za->nfile; i++) {
+			if (zf->za->file[i] == zf) {
+				zf->za->file[i] = zf->za->file[zf->za->nfile-1];
+				zf->za->nfile--;
+				break;
+			}
+		}
 	}
 
     ret = 0;

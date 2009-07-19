@@ -41,7 +41,7 @@ ZIP_EXTERN(ssize_t)
 zip_fread(struct zip_file *zf, void *outbuf, size_t toread)
 {
     int ret;
-    size_t out_before, len;
+	size_t out_before, len;
     int i;
 
     if (!zf)
