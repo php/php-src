@@ -27,6 +27,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
 zend_class_entry *default_exception_ce;
 zend_class_entry *error_exception_ce;
@@ -82,6 +83,21 @@ void zend_exception_restore(TSRMLS_D) /* {{{ */
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
+	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
+		zstr classname;
+		char *s_classname;
+		int name_len, s_classname_len;
+
+		classname = NULL_ZSTR;
+		zend_get_object_classname(exception, &classname, &name_len);
+		zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, classname.u, u_strlen(classname.u) TSRMLS_CC);
+
+		DTRACE_EXCEPTION_THROWN(s_classname);
+
+		efree(classname.v);
+		efree(s_classname);
+	}
+
 	if (exception != NULL) {
 		zval *previous = EG(exception);
 		zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
