@@ -1,6 +1,10 @@
 <?php
 
-include "details.inc";
+if (file_exists("details_local.inc")) {
+	include("details_local.inc"); // this file is not part of the source distribution; make it your own local variant of details.inc
+} else {
+	include "details.inc";
+}
 
 if (!empty($dbase)) {
 	$c = @oci_connect($user, $password, $dbase);
