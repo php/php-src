@@ -775,8 +775,8 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, long attr, zval *value TSRMLS_D
 			}
 			if (Z_TYPE_P(value) != IS_ARRAY
 				|| zend_hash_index_find(Z_ARRVAL_P(value), 0, (void**)&item) == FAILURE
-				|| Z_TYPE_PP(item) != IS_STRING
-				|| zend_lookup_class(Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
+				|| !PDO_ZVAL_PP_IS_TEXT(item)
+				|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 			) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
