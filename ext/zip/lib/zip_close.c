@@ -175,6 +175,7 @@ zip_close(struct zip *za)
 		    de.filename = strdup("-");
 		    de.filename_len = 1;
 		    cd->entry[j].filename = "-";
+		    cd->entry[j].filename_len = 1;
 		}
 		else {
 		    de.filename = strdup(za->cdir->entry[i].filename);
@@ -195,13 +196,15 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
+ 	    memcpy(cd->entry+j, za->cdir->entry+i, sizeof(cd->entry[j]));
+
 	    if (de.bitflags & ZIP_GPBF_DATA_DESCRIPTOR) {
 		de.crc = za->cdir->entry[i].crc;
 		de.comp_size = za->cdir->entry[i].comp_size;
 		de.uncomp_size = za->cdir->entry[i].uncomp_size;
 		de.bitflags &= ~ZIP_GPBF_DATA_DESCRIPTOR;
+	    cd->entry[j].bitflags &= ~ZIP_GPBF_DATA_DESCRIPTOR;
 		}
-	    memcpy(cd->entry+j, za->cdir->entry+i, sizeof(cd->entry[j]));
 	}
 
 	if (za->entry[i].ch_filename) {
