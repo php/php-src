@@ -185,7 +185,7 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}
-	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+	if (!zend_hash_exists(&module_registry, "PDO", sizeof("PDO"))) {
 		zend_error(E_ERROR, "You MUST load PDO before loading any PDO drivers");
 		return FAILURE;	/* NOTREACHED */
 	}
@@ -196,7 +196,7 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 
 PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 {
-	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+	if (!zend_hash_exists(&module_registry, "PDO", sizeof("PDO"))) {
 		return;
 	}
 
