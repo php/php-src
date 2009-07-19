@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   directories). (Ilia)
 - Fixed bug #48771 (rename() between volumes fails and reports no error on 
   Windows). (Pierre)
+- Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
+  gmail dot com, Pierre)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
