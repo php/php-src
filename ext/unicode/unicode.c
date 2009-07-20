@@ -57,7 +57,7 @@ static PHP_FUNCTION(unicode_decode)
 		RETURN_FALSE;
 	}
 
-	zend_set_converter_error_mode(conv, ZEND_TO_UNICODE, flags);
+	zend_set_converter_error_mode(conv, ZEND_TO_UNICODE, (uint16_t) flags);
 
 	status = U_ZERO_ERROR;
 	num_conv = zend_string_to_unicode_ex(conv, &dest, &dest_len, str, str_len, &status);
@@ -107,7 +107,7 @@ static PHP_FUNCTION(unicode_encode)
 		RETURN_FALSE;
 	}
 
-	zend_set_converter_error_mode(conv, ZEND_FROM_UNICODE, flags);
+	zend_set_converter_error_mode(conv, ZEND_FROM_UNICODE, (uint16_t) flags);
 	zend_set_converter_subst_char(conv, UG(from_subst_char));
 
 	status = U_ZERO_ERROR;
@@ -148,9 +148,9 @@ PHP_FUNCTION(unicode_set_error_mode)
 	}
 
 	if (direction == ZEND_FROM_UNICODE) {
-		UG(from_error_mode) = mode;
+		UG(from_error_mode) = (uint16_t) mode;
 	} else {
-		UG(to_error_mode)   = mode;
+		UG(to_error_mode)   = (uint16_t) mode;
 	}
 
 	zend_update_converters_error_behavior(TSRMLS_C);
