@@ -2375,7 +2375,7 @@ SPL_METHOD(SplFileObject, func_name) \
 }
 /* }}} */
 
-/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure]]) U
+/* {{{ proto array SplFileObject::fgetcsv([string delimiter [, string enclosure [, escape = '\\']]]) U
    Return current line as csv */
 SPL_METHOD(SplFileObject, fgetcsv)
 {
