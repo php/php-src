@@ -391,7 +391,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				}
 			}
 			smart_str_0(&tmpstr);
-			tmp = tmpstr.c;
+			/* Remove newlines and spaces from start and end. there's at least one extra \r\n at the end that needs to go. */
+			tmp = php_trim(tmpstr.c, strlen(tmpstr.c), NULL, 0, NULL, 3 TSRMLS_CC);
 		}
 		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval)) {
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
