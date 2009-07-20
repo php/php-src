@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */ 
+/* $Id$ */
 
 #include "php_unicode.h"
 
@@ -425,9 +425,9 @@ PHP_FUNCTION(char_get_type)
    Determines if the the code point is valid character, according to Unicode */
 PHP_FUNCTION(char_is_valid)
 {
-	UChar	   *str;
-	int			str_len;
-	int			offset = 0;
+	UChar			*str;
+	int				str_len;
+	int				offset = 0;
 	UChar32		ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u", &str, &str_len) == FAILURE) {
@@ -449,7 +449,7 @@ PHP_FUNCTION(char_from_digit)
 {
 	long		digit;
 	long		radix = 10;
-	UChar32		ch;
+	UChar32	ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &digit, &radix) == FAILURE) {
 		return;
@@ -462,7 +462,7 @@ PHP_FUNCTION(char_from_digit)
 		}
 	}
 	ch = u_forDigit(digit, (int8_t) radix);
-	
+
 	if (ch == (UChar32)0) {
 		RETURN_FALSE;
 	}
@@ -475,13 +475,13 @@ PHP_FUNCTION(char_from_digit)
    Translate a human readable character name into a codepoint */
 PHP_FUNCTION(char_from_name)
 {
-	void	   *name;
+	void		*name;
 	int			name_len;
 	zend_uchar	name_type;
 	UChar32		ch;
 	UCharNameChoice choice = U_UNICODE_CHAR_NAME;
 	zend_bool	extended = FALSE;
-	char	   *buf;
+	char	*buf;
 	UErrorCode	status = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &name, &name_len, &name_type, &extended) == FAILURE) {
@@ -520,10 +520,10 @@ PHP_FUNCTION(char_from_name)
    Get the human readable name associated with the character */
 PHP_FUNCTION(char_get_name)
 {
-	UChar	   *str;
+	UChar		*str;
 	int			str_len;
 	int			offset = 0;
-	UChar32		ch;
+	UChar32	ch;
 	zend_bool	extended = FALSE;
 	UCharNameChoice choice = U_UNICODE_CHAR_NAME;
 	char	   *buf;
@@ -568,12 +568,12 @@ PHP_FUNCTION(char_get_name)
 PHP_FUNCTION(char_has_binary_property)
 {
 	UChar 		*str = NULL;
-	int    		 str_len;
-	long   		 prop;
-	UProperty	 uprop; 
-	int			 offset = 0;
-	zend_bool	 result = 1;
-	UChar32		 ch;
+	int				str_len;
+	long			prop;
+	UProperty	uprop;
+	int				offset = 0;
+	zend_bool	result = 1;
+	UChar32		ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ul", &str, &str_len, &prop) == FAILURE) {
 		return;
@@ -598,10 +598,10 @@ PHP_FUNCTION(char_has_binary_property)
    Get the value of a property associated with the character */
 PHP_FUNCTION(char_get_property_value)
 {
-	UChar	   *str;
+	UChar		*str;
 	int			str_len;
 	int			offset = 0;
-	UChar32		ch;
+	UChar32	ch;
 	long		prop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ul", &str, &str_len, &prop) == FAILURE) {
@@ -631,7 +631,7 @@ PHP_FUNCTION(char_get_property_min_value)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(u_getIntPropertyMinValue((UProperty)prop));
 }
 /* }}} */
@@ -645,7 +645,7 @@ PHP_FUNCTION(char_get_property_max_value)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(u_getIntPropertyMaxValue((UProperty)prop));
 }
 /* }}} */
@@ -654,8 +654,8 @@ PHP_FUNCTION(char_get_property_max_value)
    Get the Unicode name for the given property */
 PHP_FUNCTION(char_get_property_name)
 {
-	long 		 prop;
-	long		 name_choice = U_LONG_PROPERTY_NAME;
+	long 		prop;
+	long		name_choice = U_LONG_PROPERTY_NAME;
 	const char	*name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &prop, &name_choice) == FAILURE) {
@@ -679,10 +679,10 @@ PHP_FUNCTION(char_get_property_name)
    Get the property ID for the given property name */
 PHP_FUNCTION(char_get_property_from_name)
 {
-	void	   *name;
-	int			name_len;
+	void	*name;
+	int		sname_len;
+	char	*buf;
 	zend_uchar	name_type;
-	char	   *buf;
 	UProperty	prop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &name, &name_len, &name_type) == FAILURE) {
@@ -712,9 +712,9 @@ PHP_FUNCTION(char_get_property_from_name)
    Get the Unicode name for the givenproperty value */
 PHP_FUNCTION(char_get_property_value_name)
 {
-	long 		 prop;
-	long		 value;
-	long		 name_choice = U_LONG_PROPERTY_NAME;
+	long prop;
+	long value;
+	long name_choice = U_LONG_PROPERTY_NAME;
 	const char	*name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l", &prop, &value, &name_choice) == FAILURE) {
@@ -738,12 +738,12 @@ PHP_FUNCTION(char_get_property_value_name)
    Get the value ID for the given property value name */
 PHP_FUNCTION(char_get_property_value_from_name)
 {
-	long		prop;
-	void	   *name;
-	int			name_len;
+	long prop;
+	void *name;
+	int name_len;
 	zend_uchar	name_type;
-	char	   *buf;
-	long		value;
+	char *buf;
+	long value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lt", &prop, &name, &name_len, &name_type) == FAILURE) {
 		return;
@@ -778,40 +778,40 @@ static UBool php_enum_char_names(const void *context,
 								 const char *name,
 								 int32_t length)
 {
-    char_enum_context_t	   *ctx = (char_enum_context_t *)context;
-    zval				   *retval_ptr = NULL;
-    int						status;
-    UBool					result = FALSE;
-    TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
+		char_enum_context_t	   *ctx = (char_enum_context_t *)context;
+		zval *retval_ptr = NULL;
+		int status;
+		UBool result = FALSE;
+		TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
 
-    convert_to_long_ex(ctx->args[0]);
-    convert_to_unicode_ex(ctx->args[1]);
-    convert_to_boolean_ex(ctx->args[2]);
+		convert_to_long_ex(ctx->args[0]);
+		convert_to_unicode_ex(ctx->args[1]);
+		convert_to_boolean_ex(ctx->args[2]);
 
-    ZVAL_LONG(*ctx->args[0], code);
+		ZVAL_LONG(*ctx->args[0], code);
 	if (Z_USTRVAL_PP(ctx->args[1])) {
 		efree(Z_USTRVAL_PP(ctx->args[1]));
 	}
-    ZVAL_ASCII_STRINGL(*ctx->args[1], (char *)name, length, ZSTR_DUPLICATE);
-    ZVAL_BOOL(*ctx->args[2], nameChoice == U_EXTENDED_CHAR_NAME);
+		ZVAL_ASCII_STRINGL(*ctx->args[1], (char *)name, length, ZSTR_DUPLICATE);
+		ZVAL_BOOL(*ctx->args[2], nameChoice == U_EXTENDED_CHAR_NAME);
 
-    ctx->fci.retval_ptr_ptr = &retval_ptr;
+		ctx->fci.retval_ptr_ptr = &retval_ptr;
 
-    status = zend_call_function(&ctx->fci, &ctx->fci_cache TSRMLS_CC);
+		status = zend_call_function(&ctx->fci, &ctx->fci_cache TSRMLS_CC);
 
-    if (status == SUCCESS && retval_ptr && !EG(exception)) {
-        convert_to_boolean(retval_ptr);
-        result = (UBool)Z_BVAL_P(retval_ptr);
-    } else {
-        if (!EG(exception)) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Enumeration callback encountered an error");
-        }
-        result = FALSE;
-    }
-    if (retval_ptr) {
-        zval_ptr_dtor(&retval_ptr);
-    }
-    return result;
+		if (status == SUCCESS && retval_ptr && !EG(exception)) {
+				convert_to_boolean(retval_ptr);
+				result = (UBool)Z_BVAL_P(retval_ptr);
+		} else {
+				if (!EG(exception)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Enumeration callback encountered an error");
+				}
+				result = FALSE;
+		}
+		if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+		}
+		return result;
 }
 
 static UBool php_enum_char_type_range(const void *context,
@@ -819,55 +819,55 @@ static UBool php_enum_char_type_range(const void *context,
 									  UChar32 limit,
 									  UCharCategory type)
 {
-    char_enum_context_t	   *ctx = (char_enum_context_t *)context;
-    zval				   *retval_ptr = NULL;
-    int						status;
-    UBool					result = FALSE;
-    TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
+	char_enum_context_t	   *ctx = (char_enum_context_t *)context;
+	zval *retval_ptr = NULL;
+	int status;
+	UBool result = FALSE;
+	TSRMLS_FETCH_FROM_CTX(ctx->thread_ctx);
 
-    convert_to_long_ex(ctx->args[0]);
-    convert_to_long_ex(ctx->args[1]);
-    convert_to_long_ex(ctx->args[2]);
+	convert_to_long_ex(ctx->args[0]);
+	convert_to_long_ex(ctx->args[1]);
+	convert_to_long_ex(ctx->args[2]);
 
-    ZVAL_LONG(*ctx->args[0], start);
-    ZVAL_LONG(*ctx->args[1], limit);
-    ZVAL_LONG(*ctx->args[2], type);
+	ZVAL_LONG(*ctx->args[0], start);
+	ZVAL_LONG(*ctx->args[1], limit);
+	ZVAL_LONG(*ctx->args[2], type);
 
-    ctx->fci.retval_ptr_ptr = &retval_ptr;
+	ctx->fci.retval_ptr_ptr = &retval_ptr;
 
-    status = zend_call_function(&ctx->fci, &ctx->fci_cache TSRMLS_CC);
+	status = zend_call_function(&ctx->fci, &ctx->fci_cache TSRMLS_CC);
 
-    if (status == SUCCESS && retval_ptr && !EG(exception)) {
-        convert_to_boolean(retval_ptr);
-        result = (UBool)Z_BVAL_P(retval_ptr);
-    } else {
-        if (!EG(exception)) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Enumeration callback encountered an error");
-        }
-        result = FALSE;
-    }
-    if (retval_ptr) {
-        zval_ptr_dtor(&retval_ptr);
-    }
-    return result;
+	if (status == SUCCESS && retval_ptr && !EG(exception)) {
+		convert_to_boolean(retval_ptr);
+		result = (UBool)Z_BVAL_P(retval_ptr);
+	} else {
+		if (!EG(exception)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Enumeration callback encountered an error");
+		}
+		result = FALSE;
+	}
+	if (retval_ptr) {
+		zval_ptr_dtor(&retval_ptr);
+	}
+	return result;
 }
 
 /* {{{ proto bool char_enum_names(callback Callback, int start, int limit[, bool extended = false]) U
    Enumerate all assigned Unicode characters between the start and limit code points (start inclusive, limit exclusive) and call a function for each, passing the code point value and the character name. */
 PHP_FUNCTION(char_enum_names)
 {
-	zval			   *callback;
-	long				start, limit;
-	zend_bool			extended = FALSE;
-	zval			   *zcode, *zname, *zextended;
+	zval *callback;
+	long start, limit;
+	zend_bool extended = FALSE;
+	zval *zcode, *zname, *zextended;
 	char_enum_context_t ectx;
 	UCharNameChoice		choice = U_UNICODE_CHAR_NAME;
-	UErrorCode 			status = U_ZERO_ERROR;
-    
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "zll|b", &callback, &start, &limit, &extended)) {
-        return;               
-    }   
-    
+	UErrorCode status = U_ZERO_ERROR;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "zll|b", &callback, &start, &limit, &extended)) {
+			return;
+	}
+
 	if (!zend_is_callable(callback, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid enumeration callback");
 		return;
@@ -875,37 +875,37 @@ PHP_FUNCTION(char_enum_names)
 
 	if (extended) {
 		choice = U_EXTENDED_CHAR_NAME;
-	}  
+	}
 
-    /* Do all the heavy lifing once, instead of in the callback */
-    MAKE_STD_ZVAL(zcode);
-    MAKE_STD_ZVAL(zextended);
-    MAKE_STD_ZVAL(zname);
+	/* Do all the heavy lifing once, instead of in the callback */
+	MAKE_STD_ZVAL(zcode);
+	MAKE_STD_ZVAL(zextended);
+	MAKE_STD_ZVAL(zname);
 
-    ZVAL_LONG(zcode, 0);
-    ZVAL_BOOL(zextended, 0);
-    Z_TYPE_P(zname) = IS_UNICODE;
+	ZVAL_LONG(zcode, 0);
+	ZVAL_BOOL(zextended, 0);
+	Z_TYPE_P(zname) = IS_UNICODE;
 	Z_USTRVAL_P(zname) = NULL;
 
-    memset(&ectx, 0, sizeof(char_enum_context_t));
-    ectx.fci.size = sizeof(ectx.fci);
-    ectx.fci.function_table = EG(function_table);
-    ectx.fci.function_name = callback;
-    ectx.fci.no_separation = 1;
-    ectx.fci_cache = empty_fcall_info_cache;
-    ectx.args[0] = &zcode;
-    ectx.args[1] = &zname;
-    ectx.args[2] = &zextended;
-    ectx.fci.param_count = 3;
-    ectx.fci.params = ectx.args;
-    TSRMLS_SET_CTX(ectx.thread_ctx);
+	memset(&ectx, 0, sizeof(char_enum_context_t));
+	ectx.fci.size = sizeof(ectx.fci);
+	ectx.fci.function_table = EG(function_table);
+	ectx.fci.function_name = callback;
+	ectx.fci.no_separation = 1;
+	ectx.fci_cache = empty_fcall_info_cache;
+	ectx.args[0] = &zcode;
+	ectx.args[1] = &zname;
+	ectx.args[2] = &zextended;
+	ectx.fci.param_count = 3;
+	ectx.fci.params = ectx.args;
+	TSRMLS_SET_CTX(ectx.thread_ctx);
 
 	u_enumCharNames(start, limit, (UEnumCharNamesFn *)php_enum_char_names,
-					(void *)&ectx, choice, &status);
+				(void *)&ectx, choice, &status);
 
-    zval_ptr_dtor(&zcode);
-    zval_ptr_dtor(&zextended);
-    zval_ptr_dtor(&zname);
+	zval_ptr_dtor(&zcode);
+	zval_ptr_dtor(&zextended);
+	zval_ptr_dtor(&zname);
 
 	if (U_SUCCESS(status)) {
 		RETURN_TRUE;
@@ -919,46 +919,46 @@ PHP_FUNCTION(char_enum_names)
    Enumerate all code points with their general categories invoking a callback for each category */
 PHP_FUNCTION(char_enum_types)
 {
-    zval			   *callback;
-    zval			   *zstart, *zlimit, *ztype;
-    char_enum_context_t ectx;
-    
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "z", &callback)) {
-        return;               
-    }   
-    
+	zval *callback;
+	zval *zstart, *zlimit, *ztype;
+	char_enum_context_t ectx;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "z", &callback)) {
+			return;
+	}
+
 	if (!zend_is_callable(callback, 0, NULL TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid enumeration callback");
 		return;
 	}
 
-    /* Do all the heavy lifing once, instead of in the callback */
-    MAKE_STD_ZVAL(zstart);
-    MAKE_STD_ZVAL(zlimit);
-    MAKE_STD_ZVAL(ztype);
+	/* Do all the heavy lifing once, instead of in the callback */
+	MAKE_STD_ZVAL(zstart);
+	MAKE_STD_ZVAL(zlimit);
+	MAKE_STD_ZVAL(ztype);
 
-    ZVAL_LONG(zstart, 0);
+	ZVAL_LONG(zstart, 0);
 	ZVAL_LONG(zlimit, 0);
 	ZVAL_LONG(ztype,  0);
 
-    memset(&ectx, 0, sizeof(char_enum_context_t));
-    ectx.fci.size = sizeof(ectx.fci);
-    ectx.fci.function_table = EG(function_table);
-    ectx.fci.function_name = callback;
-    ectx.fci.no_separation = 1;
-    ectx.fci_cache = empty_fcall_info_cache;
-    ectx.args[0] = &zstart;
-    ectx.args[1] = &zlimit;
-    ectx.args[2] = &ztype;
-    ectx.fci.param_count = 3;
-    ectx.fci.params = ectx.args;
-    TSRMLS_SET_CTX(ectx.thread_ctx);
+	memset(&ectx, 0, sizeof(char_enum_context_t));
+	ectx.fci.size = sizeof(ectx.fci);
+	ectx.fci.function_table = EG(function_table);
+	ectx.fci.function_name = callback;
+	ectx.fci.no_separation = 1;
+	ectx.fci_cache = empty_fcall_info_cache;
+	ectx.args[0] = &zstart;
+	ectx.args[1] = &zlimit;
+	ectx.args[2] = &ztype;
+	ectx.fci.param_count = 3;
+	ectx.fci.params = ectx.args;
+	TSRMLS_SET_CTX(ectx.thread_ctx);
 
 	u_enumCharTypes((UCharEnumTypeRange *)php_enum_char_type_range, (void *)&ectx);
 
-    zval_ptr_dtor(&zstart);
-    zval_ptr_dtor(&zlimit);
-    zval_ptr_dtor(&ztype);
+	zval_ptr_dtor(&zstart);
+	zval_ptr_dtor(&zlimit);
+	zval_ptr_dtor(&ztype);
 
 	RETURN_TRUE;
 }
