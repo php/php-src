@@ -321,7 +321,7 @@ PHP_FUNCTION(char_get_digit_value)
 			php_error(E_WARNING, "Radix has to be in 2-36 range");
 			return;
 		}
-		RETURN_LONG(u_digit(ch, radix));
+		RETURN_LONG(u_digit(ch, (int8_t) radix));
 	} else {
 		RETURN_LONG(u_charDigitValue(ch));
 	}
@@ -461,7 +461,7 @@ PHP_FUNCTION(char_from_digit)
 			return;
 		}
 	}
-	ch = u_forDigit(digit, radix);
+	ch = u_forDigit(digit, (int8_t) radix);
 	
 	if (ch == (UChar32)0) {
 		RETURN_FALSE;
