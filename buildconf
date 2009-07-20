@@ -36,7 +36,7 @@ fi
 rm -f generated_lists
 
 if test "$debug" = "yes"; then
-  ${MAKE:-make} -s -f build/build.mk ZENDDIR="Zend/" SUPPRESS_WARNINGS=""
+  ${MAKE:-make} -s -f build/build.mk SUPPRESS_WARNINGS=""
 else
-  ${MAKE:-make} -s -f build/build.mk ZENDDIR="Zend/"
+  ${MAKE:-make} -s -f build/build.mk
 fi
