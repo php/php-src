@@ -680,7 +680,7 @@ PHP_FUNCTION(char_get_property_name)
 PHP_FUNCTION(char_get_property_from_name)
 {
 	void	*name;
-	int		sname_len;
+	int		name_len;
 	char	*buf;
 	zend_uchar	name_type;
 	UProperty	prop;
