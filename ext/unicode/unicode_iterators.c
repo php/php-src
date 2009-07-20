@@ -171,7 +171,7 @@ static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 			object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
 		}
 	} else {
-		U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
+		U16_FWD_1(object->text, object->u.cp.offset, (int32_t) object->text_len);
 		if ((uint32_t) object->u.cp.offset <= object->text_len) {
 			object->u.cp.cp_offset++;
 		} else {
