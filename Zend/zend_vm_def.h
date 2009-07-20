@@ -2627,6 +2627,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, CV)
 	}
 	ce = Z_OBJCE_P(EG(exception));
 
+#ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
 		char *s_classname;
 		int s_classname_len;
@@ -2634,6 +2635,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, CV)
 		DTRACE_EXCEPTION_CAUGHT(s_classname);
 		efree(s_classname);
 	}
+#endif /* HAVE_DTRACE */
 
 	if (ce != EX_T(opline->op1.u.var).class_entry) {
 		if (!instanceof_function(ce, EX_T(opline->op1.u.var).class_entry TSRMLS_CC)) {

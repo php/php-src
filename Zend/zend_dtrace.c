@@ -22,7 +22,7 @@
 #include "zend_API.h"
 #include "zend_dtrace.h"
 
-#ifdef HAVE_SYS_SDT_H
+#ifdef HAVE_DTRACE
 /* PHP DTrace probes {{{ */
 static inline char *dtrace_get_executed_filename(TSRMLS_D)
 {
@@ -118,5 +118,5 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, int r
 }
 
 /* }}} */
-#endif
+#endif /* HAVE_DTRACE */
 

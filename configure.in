@@ -907,7 +907,8 @@ if test "$PHP_DTRACE" = "yes"; then
     [PHP_ADD_DTRACE([Zend/zend_dtrace.d], [main/main.c, Zend/zend_API.c \
        Zend/zend_execute.c Zend/zend_exceptions.c \
        Zend/zend_dtrace.c Zend/zend.c])
-     PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h])],
+     PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h])
+     AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])],
     [])
 fi
 
