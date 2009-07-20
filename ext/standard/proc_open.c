@@ -279,9 +279,9 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		wait_pid = waitpid(proc->child, &wstatus, 0);
 	} while (wait_pid == -1 && errno == EINTR);
 	
-	if (wait_pid == -1)
+	if (wait_pid == -1) {
 		FG(pclose_ret) = -1;
-	else {
+	} else {
 		if (WIFEXITED(wstatus))
 			wstatus = WEXITSTATUS(wstatus);
 		FG(pclose_ret) = wstatus;
@@ -291,7 +291,9 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	FG(pclose_ret) = -1;
 #endif
 	_php_free_envp(proc->env, proc->is_persistent);
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 	_php_free_argv(proc->argv, proc->is_persistent);
+#endif
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 	
