@@ -15,10 +15,15 @@
    | Authors: David Soria Parra <david.soriaparra@sun.com>                |
    +----------------------------------------------------------------------+
 */
+
+/* $Id: $ */
+
 #ifndef	_ZEND_DTRACE_H
 #define	_ZEND_DTRACE_H
 
-#include <unistd.h>
+#ifndef ZEND_WIN32
+# include <unistd.h>
+#endif
 
 #ifdef	__cplusplus
 extern "C" {
