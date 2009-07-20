@@ -1546,7 +1546,6 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zval *orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
-	char dtrace_error_buffer[1024];
 	TSRMLS_FETCH();
 
 	/* Obtain relevant filename and lineno */
@@ -1592,9 +1591,11 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	va_start(args, format);
 
 	if(DTRACE_ERROR_ENABLED()) {
-		vsprintf(dtrace_error_buffer, format, args);
+		char *dtrace_error_buffer;
+		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
+		DTRACE_ERROR(dtrace_error_buffer, error_filename, error_lineno);
+		efree(dtrace_error_buffer);
 	}
-	DTRACE_ERROR(dtrace_error_buffer, error_filename, error_lineno);
 
 
 	/* if we don't have a user defined error handler */
