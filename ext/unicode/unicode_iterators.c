@@ -130,8 +130,8 @@ static void text_iter_cp_current(text_iter_obj* object, long flags TSRMLS_DC)
 			buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 		}
 	} else {
-		if (object->u.cp.offset != UBRK_DONE && object->u.cp.offset < object->text_len) {
-			U16_NEXT(object->text, tmp, object->text_len, cp);
+		if (object->u.cp.offset != UBRK_DONE && ((uint32_t)object->u.cp.offset) < object->text_len) {
+			U16_NEXT(object->text, tmp, (int32_t)object->text_len, cp);
 			buf_len = zend_codepoint_to_uchar(cp, Z_USTRVAL_P(object->current));
 		}
 	}
@@ -165,14 +165,14 @@ static void text_iter_cp_next(text_iter_obj* object, long flags TSRMLS_DC)
 
 	if (flags & ITER_REVERSE) {
 		U16_BACK_1(object->text, 0, object->u.cp.offset);
-		if (object->u.cp.offset <= object->text_len) {
+		if ((uint32_t)object->u.cp.offset <= object->text_len) {
 			object->u.cp.cp_offset--;
 		} else {
 			object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
 		}
 	} else {
-		U16_FWD_1(object->text, object->u.cp.offset, object->text_len);
-		if (object->u.cp.offset <= object->text_len) {
+		U16_FWD_1(object->text, (uint32_t) object->u.cp.offset, object->text_len);
+		if ((uint32_t) object->u.cp.offset <= object->text_len) {
 			object->u.cp.cp_offset++;
 		} else {
 			object->u.cp.offset = object->u.cp.cp_offset = UBRK_DONE;
@@ -216,7 +216,7 @@ static void text_iter_cp_following(text_iter_obj *object, int32_t offset, long f
 	 */
 	k = object->u.cp.offset;
 	if (offset > object->u.cp.cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cp.cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.cp.cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.cp.cp_offset - offset);
 	}
@@ -238,7 +238,7 @@ static void text_iter_cp_following(text_iter_obj *object, int32_t offset, long f
 			object->u.cp.offset = UBRK_DONE;
 			return;
 		} else {
-			U16_FWD_1(object->text, k, object->text_len);
+			U16_FWD_1(object->text, k, (int32_t) object->text_len);
 		}
 	}
 
@@ -292,7 +292,7 @@ static zend_bool text_iter_cp_isBoundary(text_iter_obj *object, int32_t offset, 
 	 */
 	k = object->u.cp.offset;
 	if (offset > object->u.cp.cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cp.cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.cp.cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.cp.cp_offset - offset);
 	}
@@ -419,7 +419,7 @@ static void text_iter_cs_current(text_iter_obj* object, long flags TSRMLS_DC)
 	}
    
 	if (length != 0) {
-		if (length+1 > object->current_alloc) {
+		if (length+1 > (int32_t) object->current_alloc) {
 			object->current_alloc = length+1;
 			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 		}
@@ -497,7 +497,7 @@ static void text_iter_cs_following(text_iter_obj *object, int32_t offset, long f
 	 */
 	k = object->u.cs.start;
 	if (offset > object->u.cs.start_cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cs.start_cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.cs.start_cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.cs.start_cp_offset - offset);
 	}
@@ -552,7 +552,7 @@ static zend_bool text_iter_cs_isBoundary(text_iter_obj *object, int32_t offset, 
 	 */
 	k = object->u.cs.start;
 	if (offset > object->u.cs.start_cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.cs.start_cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.cs.start_cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.cs.start_cp_offset - offset);
 	}
@@ -564,7 +564,7 @@ static zend_bool text_iter_cs_isBoundary(text_iter_obj *object, int32_t offset, 
 	} else {
 	/* if the next codepoint is a base character, it's a boundary */
 		tmp = k;
-		U16_NEXT(object->text, tmp, object->text_len, cp);
+		U16_NEXT(object->text, tmp, (int32_t) object->text_len, cp);
 		result = (u_getCombiningClass(cp) == 0);
 	}
 
@@ -634,7 +634,7 @@ static void text_iter_brk_current(text_iter_obj* object, long flags TSRMLS_DC)
 	}
 
 	if (length != 0) {
-		if (length+1 > object->current_alloc) {
+		if (length+1 > (int32_t) object->current_alloc) {
 			object->current_alloc = length+1;
 			Z_USTRVAL_P(object->current) = eurealloc(Z_USTRVAL_P(object->current), object->current_alloc);
 		}
@@ -731,7 +731,7 @@ static void text_iter_brk_following(text_iter_obj *object, int32_t offset, long 
 	 */
 	k = tmp = object->u.brk.bound;
 	if (offset > object->u.brk.cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.brk.cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.brk.cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.brk.cp_offset - offset);
 	}
@@ -800,7 +800,7 @@ static zend_bool text_iter_brk_isBoundary(text_iter_obj *object, int32_t offset,
 	 */
 	k = tmp = object->u.brk.bound;
 	if (offset > object->u.brk.cp_offset) {
-		U16_FWD_N(object->text, k, object->text_len, offset - object->u.brk.cp_offset);
+		U16_FWD_N(object->text, k, (int32_t) object->text_len, offset - object->u.brk.cp_offset);
 	} else {
 		U16_BACK_N(object->text, 0, k, object->u.brk.cp_offset - offset);
 	}
