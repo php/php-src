@@ -1,6 +1,5 @@
 --TEST--
 Test stripcslashes() function : usage variations  - non-string type argument 
---INI--
 --FILE--
 <?php
 /* Prototype  : string stripcslashes  ( string $str  )

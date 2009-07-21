@@ -1,6 +1,5 @@
 --TEST--
 Test addslashes() function : basic functionality 
---INI--
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )

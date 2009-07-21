@@ -1,6 +1,5 @@
 --TEST--
 Test function_exists() function : error conditions 
---INI--
 --FILE--
 <?php
 /* 

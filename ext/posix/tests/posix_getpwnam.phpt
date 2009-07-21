@@ -1,6 +1,6 @@
 --TEST--
 posix_getpwnam(): Basic tests
---SKIP--
+--SKIPIF--
 <?php
 if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
 if (!function_exists('posix_getpwnam')) die('skip posix_getpwnam() not found');

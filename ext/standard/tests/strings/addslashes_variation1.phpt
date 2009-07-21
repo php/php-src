@@ -1,6 +1,5 @@
 --TEST--
 Test addslashes() function : usage variations  - non-string type argument 
---INI--
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )

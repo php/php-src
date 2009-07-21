@@ -1,6 +1,5 @@
 --TEST--
 Test wordwrap() function : usage variations  - unexptected values for break argument
---INI--
 --FILE--
 <?php
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
