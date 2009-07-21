@@ -1131,6 +1131,7 @@ PHP_FUNCTION(curl_init)
 {
 	php_curl	*ch;
 	zval		**url;
+	zval		*clone;
 	CURL		*cp;
 	int			argc = ZEND_NUM_ARGS();
 
@@ -1196,7 +1197,6 @@ PHP_FUNCTION(curl_init)
 PHP_FUNCTION(curl_copy_handle)
 {
 	CURL		*cp;
- 	zval		*clone;
 	zval		**zid;
 	php_curl	*ch, *dupch;
 
