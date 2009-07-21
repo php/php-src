@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   defined as a file handle. (Ilia)
 
 - Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
+- Fixed bug #48962 (cURL does not upload files with specified filename).
+  (Ilia)
 - Fixed bug #48929 (Double \r\n after HTTP headers when "header" context
   option is an array). (David Zülke)
 - Fixed bug #48913 (Too long error code strings in pdo_odbc driver).
