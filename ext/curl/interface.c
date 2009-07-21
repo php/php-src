@@ -1800,32 +1800,32 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
 					if (*postval == '@') {
-						char *type;
+						char *type, *filename;
 						++postval;
 
 						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*type = '\0';
+						}
+						if ((filename = php_memnstr(postval, ";filename=", sizeof(";filename=") - 1, postval + Z_STRLEN_PP(current)))) {
+							*filename = '\0';
 						}
 						/* safe_mode / open_basedir check */
 						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 							RETVAL_FALSE;
 							return 1;
 						}
+						error = curl_formadd(&first, &last,
+										CURLFORM_COPYNAME, string_key,
+										CURLFORM_NAMELENGTH, (long)string_key_len - 1,
+										CURLFORM_FILENAME, filename ? filename : postval,
+										CURLFORM_CONTENTTYPE, type ? type + sizeof(";type=") - 1 : "application/octet-stream",
+										CURLFORM_FILE, postval,
+										CURLFORM_END);
 						if (type) {
-							error = curl_formadd(&first, &last,
-											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-											 CURLFORM_FILE, postval,
-											 CURLFORM_CONTENTTYPE, type + sizeof(";type=") - 1,
-											 CURLFORM_END);
 							*type = ';';
-						} else {
-							error = curl_formadd(&first, &last,
-											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-											 CURLFORM_FILE, postval,
-											 CURLFORM_END);
-
+						}
+						if (filename) {
+							*filename = ';';
 						}
 					} else {
 						error = curl_formadd(&first, &last,
