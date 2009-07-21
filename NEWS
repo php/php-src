@@ -41,6 +41,8 @@ PHP                                                                        NEWS
   (markril at hotmail dot com, Pierre)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
+- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
+  (Sriram Natarajan)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)

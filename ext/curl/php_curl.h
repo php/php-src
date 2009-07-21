@@ -139,6 +139,7 @@ typedef struct {
 	long                     id;
 	unsigned int             uses;
 	zend_bool                in_callback;
+	zval                     *clone;
 } php_curl;
 
 typedef struct {
