@@ -1160,6 +1160,9 @@ PHP_FUNCTION(curl_init)
 
 	ch->uses = 0;
 
+	MAKE_STD_ZVAL(clone);
+	ch->clone = clone;
+
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1);
 	curl_easy_setopt(ch->cp, CURLOPT_VERBOSE,           0);
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
@@ -1193,6 +1196,7 @@ PHP_FUNCTION(curl_init)
 PHP_FUNCTION(curl_copy_handle)
 {
 	CURL		*cp;
+ 	zval		*clone;
 	zval		**zid;
 	php_curl	*ch, *dupch;
 
@@ -1254,6 +1258,10 @@ PHP_FUNCTION(curl_copy_handle)
 #endif
 	zend_llist_copy(&dupch->to_free.slist, &ch->to_free.slist);
 	zend_llist_copy(&dupch->to_free.post, &ch->to_free.post);
+
+	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
+	Z_ADDREF_P(ch->clone);
+	dupch->clone = ch->clone;
 
 	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
 	dupch->id = Z_LVAL_P(return_value);
@@ -2073,8 +2081,19 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 #if LIBCURL_VERSION_NUM < 0x071101
 	zend_llist_clean(&ch->to_free.str);
 #endif
-	zend_llist_clean(&ch->to_free.slist);
-	zend_llist_clean(&ch->to_free.post);
+
+	/* cURL destructors should be invoked only by last curl handle */
+	if (Z_REFCOUNT_P(ch->clone) <= 1) {
+		zend_llist_clean(&ch->to_free.slist);
+		zend_llist_clean(&ch->to_free.post);
+		zval_ptr_dtor(&ch->clone);
+	} else {
+		Z_DELREF_P(ch->clone);
+		ch->to_free.slist.dtor = NULL;
+		ch->to_free.post.dtor = NULL;
+		zend_llist_clean(&ch->to_free.slist);
+		zend_llist_clean(&ch->to_free.post);
+	}
 
 	if (ch->handlers->write->buf.len > 0) {
 		smart_str_free(&ch->handlers->write->buf);
