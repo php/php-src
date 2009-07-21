@@ -1260,7 +1260,7 @@ PHP_FUNCTION(curl_copy_handle)
 	zend_llist_copy(&dupch->to_free.post, &ch->to_free.post);
 
 	/* Keep track of cloned copies to avoid invoking curl destructors for every clone */
-	Z_ADDREF_P(ch->clone);
+	ch->clone->refcount++;
 	dupch->clone = ch->clone;
 
 	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
@@ -2083,12 +2083,12 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 #endif
 
 	/* cURL destructors should be invoked only by last curl handle */
-	if (Z_REFCOUNT_P(ch->clone) <= 1) {
+	if (ch->clone->refcount <= 1) {
 		zend_llist_clean(&ch->to_free.slist);
 		zend_llist_clean(&ch->to_free.post);
 		zval_ptr_dtor(&ch->clone);
 	} else {
-		Z_DELREF_P(ch->clone);
+		ch->clone->refcount--;
 		ch->to_free.slist.dtor = NULL;
 		ch->to_free.post.dtor = NULL;
 		zend_llist_clean(&ch->to_free.slist);
