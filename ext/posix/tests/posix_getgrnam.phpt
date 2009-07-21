@@ -1,6 +1,6 @@
 --TEST--
 posix_getgrnam(): Basic tests
---SKIP--
+--SKIPIF--
 <?php
 if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
 if (!function_exists('posix_getgrnam')) die('skip posix_getgrnam() not found');
