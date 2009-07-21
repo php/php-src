@@ -48,3 +48,4 @@ PHP                                                                        NEWS
 
 - Fixed bug #46647 (SplFileObject::fgetcsv segfaults). (Etienne)
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)
+- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()). (Sriram Natarajan)
