@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
 
+- Fixed bug #48962 (cURL does not upload files with specified filename).
+  (Ilia)
 - Fixed bug #48929 (Double \r\n after HTTP headers when "header" context
   option is an array). (David Zülke)
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
