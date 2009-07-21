@@ -1,6 +1,5 @@
 --TEST--
 Bug #40709 (array_reduce() behaves strange with one item stored arrays)
---SKIPIF--
 --FILE--
 <?php
 function CommaSeperatedList($a, $b) {

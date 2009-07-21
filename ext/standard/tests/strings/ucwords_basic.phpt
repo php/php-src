@@ -1,6 +1,5 @@
 --TEST--
 Test ucwords() function : basic functionality 
---INI--
 --FILE--
 <?php
 /* Prototype  : string ucwords ( string $str )

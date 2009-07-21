@@ -1,6 +1,5 @@
 --TEST--
 Test addslashes() function : usage variations - with magic_quotes_sybase directive ON
---INI--
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )

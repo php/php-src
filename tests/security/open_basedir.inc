@@ -90,6 +90,7 @@ function test_open_basedir_before($function, $change = TRUE) {
     global $savedDirectory;
     echo "*** Testing open_basedir configuration [$function] ***\n";
     $directory = getcwd();
+    var_dump($directory);
     $savedDirectory = $directory;
     var_dump(chdir($directory));
     create_directories();

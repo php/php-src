@@ -1,6 +1,5 @@
 --TEST--
 Test preg_split() function : basic functionality 
---INI--
 --FILE--
 <?php
 /*

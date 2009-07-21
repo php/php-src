@@ -1,6 +1,5 @@
 --TEST--
 Test addslashes() function : usage variations - strings with characters to be backslashed
---INI--
 --FILE--
 <?php
 /* Prototype  : string addslashes ( string $str )
