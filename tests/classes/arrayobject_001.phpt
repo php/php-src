@@ -1,6 +1,5 @@
 --TEST--
 Ensure that ArrayObject acts like an array
---SKIPIF--
 --FILE--
 <?php
 
