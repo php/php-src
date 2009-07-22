@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
 
+- Fixed bug #49020 (phar misinterprets ustar long filename standard).
+  (Greg)
 - Fixed bug #49018 (phar tar stores long filenames wit prefix/name reversed).
   (Greg)
 - Fixed bug #48962 (cURL does not upload files with specified filename).

@@ -22,8 +22,8 @@ $p1 = new PharData($fname);
 foreach ($p1 as $file) {
 	echo $file->getFileName(), "\n";
 }
-echo $p1[str_repeat('a', 101)]->getContent() . "\n";
-echo $p1[str_repeat('a', 255)]->getContent() . "\n";
+echo $p1['a/' . str_repeat('a', 100)]->getContent() . "\n";
+echo $p1[str_repeat('a', 155) . '/' . str_repeat('a', 100)]->getContent() . "\n";
 
 ?>
 ===DONE===
@@ -33,8 +33,8 @@ unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
 ?>
 --EXPECT--
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+a
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 hi
 hi2
 ===DONE===
