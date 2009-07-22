@@ -809,6 +809,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #else
 		php_info_print_table_row(2, "IPv6 Support", "disabled" );
 #endif
+#if HAVE_DTRACE
+		php_info_print_table_row(2, "DTrace Support", "enabled" );
+#else
+		php_info_print_table_row(2, "DTrace Support", "disabled" );
+#endif
 		
 		php_info_print_stream_hash("PHP Streams",  php_stream_get_url_stream_wrappers_hash() TSRMLS_CC);
 		php_info_print_stream_hash("Stream Socket Transports", php_stream_xport_get_hash() TSRMLS_CC);
