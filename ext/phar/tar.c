@@ -283,7 +283,8 @@ bail:
 #else
 # define PHAR_GET_32(buffer) (php_uint32) *(buffer)
 #endif
-			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, PHAR_GET_32(buf), buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
+			myphar->sig_flags = PHAR_GET_32(buf);
+			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
 				if (error) {
 					char *save = *error;
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be verified: %s", fname, save);
