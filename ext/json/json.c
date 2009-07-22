@@ -93,6 +93,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_ERROR_STATE_MISMATCH", PHP_JSON_ERROR_STATE_MISMATCH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -311,6 +312,7 @@ static void json_escape_string(smart_str *buf, zstr s, int len, zend_uchar type,
 				efree(utf16);
 			}
 			if (len < 0) {
+				JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 				if (!PG(display_errors)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 				}
@@ -538,6 +540,7 @@ static PHP_FUNCTION(json_decode)
 			if (utf16) {
 				efree(utf16);
 			}
+			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 			RETURN_NULL();
 		}
 	}
