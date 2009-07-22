@@ -341,6 +341,7 @@ bail:
 					break;
 				}
 			}
+			name[i++] = '/';
 			for (j = 0; j < 100; j++) {
 				name[i+j] = hdr->name[j];
 				if (name[i+j] == '\0') {
@@ -641,14 +642,25 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 	memset((char *) &header, 0, sizeof(header));
 
 	if (entry->filename_len > 100) {
-		if (entry->filename_len > 255) {
+		char *boundary;
+		if (entry->filename_len > 256) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, filename \"%s\" is too long for tar file format", entry->phar->fname, entry->filename);
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
-		memcpy(header.prefix, entry->filename, entry->filename_len - 100);
-		memcpy(header.name, entry->filename + (entry->filename_len - 100), 100);
+		boundary = entry->filename + entry->filename_len - 101;
+		while (*boundary && *boundary != '/') {
+			++boundary;
+		}
+		if (!*boundary || ((boundary - entry->filename) > 155)) {
+			if (fp->error) {
+				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, filename \"%s\" is too long for tar file format", entry->phar->fname, entry->filename);
+			}
+			return ZEND_HASH_APPLY_STOP;
+		}
+		memcpy(header.prefix, entry->filename, boundary - entry->filename);
+		memcpy(header.name, boundary + 1, entry->filename_len - (boundary + 1 - entry->filename));
 	} else {
 		memcpy(header.name, entry->filename, entry->filename_len);
 	}
