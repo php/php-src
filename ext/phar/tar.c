@@ -343,6 +343,9 @@ bail:
 			}
 			for (j = 0; j < 100; j++) {
 				name[i+j] = hdr->name[j];
+				if (name[i+j] == '\0') {
+					break;
+				}
 			}
 
 			entry.filename_len = i+j;
@@ -644,8 +647,8 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
-		memcpy(header.prefix, entry->filename+100, entry->filename_len - 100);
-		memcpy(header.name, entry->filename, 100);
+		memcpy(header.prefix, entry->filename, entry->filename_len - 100);
+		memcpy(header.name, entry->filename + (entry->filename_len - 100), 100);
 	} else {
 		memcpy(header.name, entry->filename, entry->filename_len);
 	}

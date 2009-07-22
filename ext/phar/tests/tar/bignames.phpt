@@ -11,11 +11,11 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.tar';
 $pname = 'phar://' . $fname;
 
 $p1 = new PharData($fname);
-$p1[str_repeat('a', 101)] = 'hi';
+$p1[str_repeat('a', 100) . 'b'] = 'hi';
 $p1[str_repeat('a', 255)] = 'hi2';
 copy($fname, $fname2);
 $p2 = new PharData($fname2);
-echo $p2[str_repeat('a', 101)]->getContent() . "\n";
+echo $p2[str_repeat('a', 100) . 'b']->getContent() . "\n";
 echo $p2[str_repeat('a', 255)]->getContent() . "\n";
 
 try {
