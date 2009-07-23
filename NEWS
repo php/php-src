@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
 
+- Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
+  (Jani)
 - Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
 - Fixed bug #48962 (cURL does not upload files with specified filename).
   (Ilia)
