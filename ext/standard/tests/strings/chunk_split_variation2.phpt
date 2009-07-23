@@ -35,10 +35,10 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.1234567e10,
-  10.7654321E-10,
+  (float) PHP_INT_MAX + 1,
+  (float) -PHP_INT_MAX - 1,
   .5,
-
+ 
   // array data
   array(),
   array(0),
