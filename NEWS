@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   option is an array). (David Zülke)
 - Fixed bug #48913 (Too long error code strings in pdo_odbc driver).
   (naf at altlinux dot ru, Felipe)
+- Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
