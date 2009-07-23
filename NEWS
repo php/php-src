@@ -43,6 +43,8 @@ PHP                                                                        NEWS
   components). (Ilia)
 - Fixed bug #48681 (openssl signature verification for tar archives broken).
   (Greg)
+- Fixed bug #48377 (error message unclear on converting phar with existing file).
+  (Greg)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
   errors when errors are logged). (Jani)
 - Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
