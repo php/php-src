@@ -146,8 +146,7 @@ plit
 ()
 E
 scap
-e
-ch
+ech
 ars
 "
 -- Iteration 8 --
