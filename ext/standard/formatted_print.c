@@ -1299,7 +1299,7 @@ PHP_FUNCTION(vsprintf)
    Output a formatted string */
 PHP_FUNCTION(user_printf)
 {
-	int len;
+	int len, rlen;
 	zstr result;
 
 	result = php_u_formatted_print(ht, &len, 0, 0, PHP_OUTPUT TSRMLS_CC);
@@ -1307,9 +1307,9 @@ PHP_FUNCTION(user_printf)
 		RETURN_FALSE;
 	}
 	
-	PHPWRITE(result.s, len);
+	rlen = PHPWRITE(result.s, len);
 	efree(result.v);
-	RETURN_LONG(len);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
@@ -1317,7 +1317,7 @@ PHP_FUNCTION(user_printf)
    Output a formatted string */
 PHP_FUNCTION(vprintf)
 {
-	int len;
+	int len, rlen;
 	zstr result;
 
 	result = php_u_formatted_print(ht, &len, 1, 0, PHP_OUTPUT TSRMLS_CC);
@@ -1325,9 +1325,9 @@ PHP_FUNCTION(vprintf)
 		RETURN_FALSE;
 	}
 
-	PHPWRITE(result.s, len);
+	rlen = PHPWRITE(result.s, len);
 	efree(result.v);
-	RETURN_LONG(len);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
