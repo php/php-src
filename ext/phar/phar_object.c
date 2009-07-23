@@ -2037,6 +2037,7 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	int ext_len = ext ? strlen(ext) : 0;
 	int oldname_len;
 	phar_archive_data **pphar = NULL;
+	php_stream_statbuf ssb;
 
 	if (!ext) {
 		if (phar->is_zip) {
@@ -2107,6 +2108,8 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
 	efree(basename);
 
+	
+
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
 	phar->fname_len = spprintf(&newpath, 0, "%s%s", basepath, newname);
 	phar->fname = newpath;
@@ -2142,6 +2145,11 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 		return NULL;
 	}
 its_ok:
+	if (SUCCESS == php_stream_stat_path(newpath, &ssb)) {
+		efree(oldpath);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "phar \"%s\" exists and must be unlinked prior to conversion", newpath);
+		return NULL;
+	}
 	if (!phar->is_data) {
 		if (SUCCESS != phar_detect_phar_fname_ext(newpath, phar->fname_len, (const char **) &(phar->ext), &(phar->ext_len), 1, 1, 1 TSRMLS_CC)) {
 			efree(oldpath);
