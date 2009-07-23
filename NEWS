@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
   gmail dot com, Pierre)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
+- Fixed bug #48740 (PHAR install fails when INSTALL_ROOT is not the final install
+  location). (james dot cohen at digitalwindow dot com, Greg)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
 - Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain  
