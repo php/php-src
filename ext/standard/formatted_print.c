@@ -697,14 +697,14 @@ PHP_FUNCTION(vsprintf)
 PHP_FUNCTION(user_printf)
 {
 	char *result;
-	int len;
+	int len, rlen;
 	
 	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	PHPWRITE(result, len);
+	rlen = PHPWRITE(result, len);
 	efree(result);
-	RETURN_LONG(len);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
@@ -713,14 +713,14 @@ PHP_FUNCTION(user_printf)
 PHP_FUNCTION(vprintf)
 {
 	char *result;
-	int len;
+	int len, rlen;
 	
 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	PHPWRITE(result, len);
+	rlen = PHPWRITE(result, len);
 	efree(result);
-	RETURN_LONG(len);
+	RETURN_LONG(rlen);
 }
 /* }}} */
 
