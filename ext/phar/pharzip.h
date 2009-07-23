@@ -37,6 +37,7 @@ typedef struct _phar_zip_file_header {
 
 /* unused in this release */
 typedef struct _phar_zip_file_datadesc {
+	char signature[4];  /* signature (optional)            4 bytes */
 	char crc32[4];      /* crc-32                          4 bytes */
 	char compsize[4];   /* compressed size                 4 bytes */
 	char uncompsize[4]; /* uncompressed size               4 bytes */
