@@ -2407,6 +2407,7 @@ int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error
 	if (entry->is_zip && process_zip > 0) {
 		/* verify local file header */
 		phar_zip_file_header local;
+		phar_zip_data_desc desc;
 
 		if (SUCCESS != phar_open_archive_fp(idata->phar TSRMLS_CC)) {
 			spprintf(error, 0, "phar error: unable to open zip-based phar archive \"%s\" to verify local file header for file \"%s\"", idata->phar->fname, entry->filename);
@@ -2420,6 +2421,25 @@ int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error
 			return FAILURE;
 		}
 
+		/* check for data descriptor */
+		if (((PHAR_ZIP_16(local.flags)) & 0x8) == 0x8) {
+			php_stream_seek(phar_get_entrypfp(idata->internal_file TSRMLS_CC),
+					entry->header_offset + sizeof(local) +
+					PHAR_ZIP_16(local.filename_len) +
+					PHAR_ZIP_16(local.extra_len) +
+					entry->compressed_filesize, SEEK_SET);
+			if (sizeof(desc) != php_stream_read(phar_get_entrypfp(idata->internal_file TSRMLS_CC),
+							    (char *) &desc, sizeof(desc))) {
+				spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (cannot read local data descriptor for file \"%s\")", idata->phar->fname, entry->filename);
+				return FAILURE;
+			}
+			if (desc.signature[0] == 'P' && desc.signature[1] == 'K') {
+				memcpy(&(local.crc32), &(desc.crc32), 12);
+			} else {
+				/* old data descriptors have no signature */
+				memcpy(&(local.crc32), &desc, 12);
+			}
+		}
 		/* verify local header */
 		if (entry->filename_len != PHAR_ZIP_16(local.filename_len) || entry->crc32 != PHAR_ZIP_32(local.crc32) || entry->uncompressed_filesize != PHAR_ZIP_32(local.uncompsize) || entry->compressed_filesize != PHAR_ZIP_32(local.compsize)) {
 			spprintf(error, 0, "phar error: internal corruption of zip-based phar \"%s\" (local header of file \"%s\" does not match central directory)", idata->phar->fname, entry->filename);
