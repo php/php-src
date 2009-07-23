@@ -298,7 +298,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 		remaining -= ret;
 	}
 
-	return str_length;
+	return (ptr - str);
 }
 /* }}} */
 
