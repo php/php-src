@@ -32,9 +32,9 @@ $values = array (
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
-  2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
-  -2147483648,  //min negative integer
+  PHP_INT_MAX,      // max positive integer number
+  PHP_INT_MAX * 3,  // integer overflow
+  -PHP_INT_MAX - 1, // min negative integer
 
 );
 

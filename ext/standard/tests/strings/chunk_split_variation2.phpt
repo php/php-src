@@ -35,10 +35,10 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.1234567e10,
-  10.7654321E-10,
+  (float) PHP_INT_MAX + 1,
+  (float) -PHP_INT_MAX - 1,
   .5,
-
+ 
   // array data
   array(),
   array(0),
@@ -95,23 +95,23 @@ fclose($fp);
 string(28) "This is ch*uklen vari*ation*"
 -- Iteration 2 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 7 --
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
@@ -123,52 +123,52 @@ string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 11 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 13 --
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 14 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 15 --
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 16 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 18 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 21 --
 
-Notice: Object of class MyClass could not be converted to int in %s on line %d
+Notice: Object of class MyClass could not be converted to int in %schunk_split_variation2.php on line %d
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 22 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 23 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
+Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 24 --
-string(%d) "%s"
+string(30) "This *is ch*uklen* vari*ation*"
 Done
