@@ -2183,7 +2183,7 @@ PHP_FUNCTION(chunk_split)
 	char *result;
 	char *end    = "\r\n";
 	int endlen   = 2;
-	int chunklen = 76;
+	long chunklen = 76;
 	int result_len;
 	int argc = ZEND_NUM_ARGS();
 
