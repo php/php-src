@@ -2088,6 +2088,7 @@ static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
 						memmove(out, p, end - p);
 					}
 					data->chunk_size -= end - p;
+					data->state=CHUNK_BODY;
 					out_len += end - p;
 					return out_len;
 				}
