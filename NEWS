@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
+- Fixed bug #48783 (make install will fail saying phar file exists). (Greg)
 - Fixed bug #48771 (rename() between volumes fails and reports no error on 
   Windows). (Pierre)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
