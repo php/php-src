@@ -9,7 +9,7 @@ var_dump($_COOKIE);
 --EXPECTF--
 array(10) {
   [u"cookie1"]=>
-  unicode(0) ""
+  unicode(6) "val1  "
   [u"cookie2"]=>
   unicode(5) "val2 "
   [u"cookie3"]=>
