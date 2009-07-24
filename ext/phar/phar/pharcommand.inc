@@ -217,7 +217,7 @@ class PharCommand extends CLICommand
 			$pear = false;
 			foreach ($path as $component) {
 				if (file_exists($component . DIRECTORY_SEPARATOR . 'pear')
-					&& is_executable($component . DIRECTORY_SEPARATOR . 'pear'))) {
+					&& is_executable($component . DIRECTORY_SEPARATOR . 'pear')) {
 					$pear = true;
 					break;
 				}
