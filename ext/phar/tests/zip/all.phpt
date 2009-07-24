@@ -46,6 +46,7 @@ var_dump($phar['a']->getMetadata());
 ?>
 ===DONE===
 --CLEAN--
+<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
 --EXPECT--
 bool(false)
