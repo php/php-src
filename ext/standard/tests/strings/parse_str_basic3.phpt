@@ -1,5 +1,5 @@
 --TEST--
-Test parse_str() function : ??
+Test parse_str() function : basic functionality
 --INI--
 magic_quotes_gpc = on
 --FILE--
