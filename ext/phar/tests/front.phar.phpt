@@ -13,7 +13,7 @@ Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/blog.phar
 --EXPECTF--
-string(%d) "<xml version="1.0" encoding="UTF-8">
+%string|unicode%(%d) "<xml version="1.0" encoding="UTF-8">
 <config>
  <database>
   <host>localhost</name>

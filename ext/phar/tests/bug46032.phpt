@@ -24,8 +24,8 @@ new phardata('0000000000000000000');
 ?>
 ===DONE===
 --EXPECTF--
-string(%d) "%smytest"
-string(%d) "%smytest"
+%unicode|string%(%d) "%smytest"
+%unicode|string%(%d) "%smytest"
 
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Cannot create phar '0000000000000000000', file extension (or combination) not recognised' in %sbug46032.php:%d
 Stack trace:

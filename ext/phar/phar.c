@@ -1972,11 +1972,13 @@ woohoo:
 
 				if (keylen > (uint) filename_len) {
 					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
+					PHAR_STR_FREE(str_key);
 					continue;
 				}
 
 				if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
+					PHAR_STR_FREE(str_key);
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;
 					}
@@ -1984,6 +1986,7 @@ woohoo:
 					goto woohoo;
 				}
 
+				PHAR_STR_FREE(str_key);
 				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 			}
 
@@ -1999,17 +2002,20 @@ woohoo:
 
 					if (keylen > (uint) filename_len) {
 						zend_hash_move_forward(&cached_phars);
+						PHAR_STR_FREE(str_key);
 						continue;
 					}
 
 					if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 						|| filename[keylen] == '/' || filename[keylen] == '\0')) {
+						PHAR_STR_FREE(str_key);
 						if (FAILURE == zend_hash_get_current_data(&cached_phars, (void **) &pphar)) {
 							break;
 						}
 						*ext_str = filename + (keylen - (*pphar)->ext_len);
 						goto woohoo;
 					}
+					PHAR_STR_FREE(str_key);
 					zend_hash_move_forward(&cached_phars);
 				}
 			}

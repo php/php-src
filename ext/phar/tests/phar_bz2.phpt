@@ -3,7 +3,6 @@ Phar: bzipped phar
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
 if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("bz2")) die("skip bz2 not available");
 ?>
@@ -56,8 +55,8 @@ echo $e->getMessage(),"\n";
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
-string(9) "it worked"
-string(%d) "phar://%sphar_bz2.phar/tar_004.php"
+%unicode|string%(9) "it worked"
+%unicode|string%(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 
