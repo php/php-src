@@ -635,6 +635,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 			PHAR_STR(key, str_key);
 			if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
 				zend_hash_move_forward_ex(&phar->mounted_dirs, &pos);
+				PHAR_STR_FREE(str_key);
 				continue;
 			} else {
 				char *test;
@@ -642,8 +643,10 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
 				php_stream_statbuf ssbi;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
+					PHAR_STR_FREE(str_key);
 					goto free_resource;
 				}
+				PHAR_STR_FREE(str_key);
 				if (!entry->tmp || !entry->is_mounted) {
 					goto free_resource;
 				}
@@ -939,6 +942,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 				zend_hash_update_current_key_ex(&phar->manifest, key_type, new_key, new_key_len, 0, HASH_UPDATE_KEY_ANYWAY, NULL);
 #endif
 			}
+			PHAR_STR_FREE(str_key);
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
@@ -965,6 +969,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 #endif
 				efree(new_str_key);
 			}
+			PHAR_STR_FREE(str_key);
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->mounted_dirs);
@@ -992,6 +997,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 #endif
 				efree(new_str_key);
 			}
+			PHAR_STR_FREE(str_key);
 		}
 	}
 

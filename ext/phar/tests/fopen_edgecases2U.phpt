@@ -1,8 +1,8 @@
 --TEST--
-Phar: test edge cases of fopen() function interception #2
+Phar: test edge cases of fopen() function interception #2 (PHP 6)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(php_version(), '6.0', '>=')) die('skip parameter parsing changed in 6.0'); ?>
+<?php if (version_compare(PHP_VERSION, "6.0.0-dev", "<")) die("skip Unicode support required"); ?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -36,9 +36,11 @@ include $pname . '/foo/hi';
 <?php rmdir(dirname(__FILE__) . '/poo'); ?>
 <?php unlink(dirname(__FILE__) . '/foob'); ?>
 --EXPECTF--
-Warning: fopen() expects parameter 1 to be string, array given in %sfopen_edgecases2.php on line %d
+Notice: Array to string conversion in %sfopen_edgecases2U.php on line 6
+
+Warning: fopen(Array): failed to open stream: No such file or directory in %sfopen_edgecases2U.php on line 6
 blah
 test
 
-Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d
+Warning: fopen(phar://%sfopen_edgecases2U.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2U.phar.php/foo/hi on line 6
 ===DONE===
