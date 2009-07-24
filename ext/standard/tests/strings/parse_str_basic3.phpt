@@ -1,11 +1,14 @@
 --TEST--
 Test parse_str() function : basic functionality
+--INI--
+magic_quotes_gpc = on
 --FILE--
 <?php
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
  * Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
+
 echo "*** Testing parse_str() : basic functionality ***\n";
 
 echo "\nTest string with array values\n";
@@ -88,6 +91,7 @@ var_dump($res);
 ?>
 ===DONE===
 --EXPECTF--
+PHP Warning:  Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing parse_str() : basic functionality ***
 
 Test string with array values
