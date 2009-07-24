@@ -350,6 +350,7 @@ foundit:
 	/* add each central directory item to the manifest */
 	for (i = 0; i < PHAR_GET_16(locator.count); ++i) {
 		phar_zip_central_dir_file zipentry;
+		off_t beforeus = php_stream_tell(fp);
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
 			PHAR_ZIP_FAIL("unable to read central directory entry, truncated");
@@ -404,24 +405,34 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			size_t read;
 			php_stream *sigfile;
+			off_t now;
+			char *sig;
 
+			now = php_stream_tell(fp);
 			pefree(entry.filename, entry.is_persistent);
 			sigfile = php_stream_fopen_tmpfile();
 
 			php_stream_seek(fp, 0, SEEK_SET);
 			/* copy file contents + local headers and zip comment, if any, to be hashed for signature */
 			phar_stream_copy_to_stream(fp, sigfile, entry.header_offset, NULL);
+			/* seek to central directory */
+			php_stream_seek(fp, PHAR_GET_32(locator.cdir_offset), SEEK_SET);
+			/* copy central directory header */
+			phar_stream_copy_to_stream(fp, sigfile, beforeus - PHAR_GET_32(locator.cdir_offset), NULL);
 			if (metadata) {
 				php_stream_write(sigfile, metadata, PHAR_GET_16(locator.comment_len));
 			}
 			php_stream_seek(fp, sizeof(phar_zip_file_header) + entry.header_offset + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
-			read = php_stream_read(fp, buf, entry.uncompressed_filesize);
+			sig = (char *) emalloc(entry.uncompressed_filesize);
+			read = php_stream_read(fp, sig, entry.uncompressed_filesize);
 			if (read != entry.uncompressed_filesize) {
 				php_stream_close(sigfile);
+				efree(sig);
 				PHAR_ZIP_FAIL("signature cannot be read");
 			}
-			mydata->sig_flags = PHAR_GET_32(buf);
-			if (FAILURE == phar_verify_signature(sigfile, php_stream_tell(sigfile), mydata->sig_flags, buf + 8, entry.uncompressed_filesize - 8, fname, &mydata->signature, &mydata->sig_len, error TSRMLS_CC)) {
+			mydata->sig_flags = PHAR_GET_32(sig);
+			if (FAILURE == phar_verify_signature(sigfile, php_stream_tell(sigfile), mydata->sig_flags, sig + 8, entry.uncompressed_filesize - 8, fname, &mydata->signature, &mydata->sig_len, error TSRMLS_CC)) {
+				efree(sig);
 				if (error) {
 					char *save;
 					php_stream_close(sigfile);
@@ -434,14 +445,9 @@ foundit:
 				}
 			}
 			php_stream_close(sigfile);
+			efree(sig);
 			/* signature checked out, let's ensure this is the last file in the phar */
-			read = php_stream_read(fp, buf, 4);
-
-			if (read != 4) {
-				PHAR_ZIP_FAIL("corrupted zip file (truncated)");
-			}
-
-			if (!memcmp(buf, "PK\5\6", 4)) {
+			if (i != PHAR_GET_16(locator.count) - 1) {
 				PHAR_ZIP_FAIL("entries exist after signature, invalid phar");
 			}
 
@@ -1083,15 +1089,18 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;
-		off_t tell;
+		off_t tell, st;
 
 		newfile = php_stream_fopen_tmpfile();
-		tell = php_stream_tell(pass->filefp);
-		/* copy the local files and the zip comment to generate the hash */
+		st = tell = php_stream_tell(pass->filefp);
+		/* copy the local files, central directory, and the zip comment to generate the hash */
 		php_stream_seek(pass->filefp, 0, SEEK_SET);
 		phar_stream_copy_to_stream(pass->filefp, newfile, tell, NULL);
+		tell = php_stream_tell(pass->centralfp);
+		php_stream_seek(pass->centralfp, 0, SEEK_SET);
+		phar_stream_copy_to_stream(pass->centralfp, newfile, tell, NULL);
 		if (metadata->c) {
-			php_stream_write(pass->filefp, metadata->c, metadata->len);
+			php_stream_write(newfile, metadata->c, metadata->len);
 		}
 
 		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, pass->error TSRMLS_CC)) {
@@ -1355,6 +1364,9 @@ fperror:
 	memset(&eocd, 0, sizeof(eocd));
 
 	strncpy(eocd.signature, "PK\5\6", 4);
+	if (!phar->is_data && !phar->sig_flags) {
+		phar->sig_flags = PHAR_SIG_SHA1;
+	}
 	if (phar->sig_flags) {
 		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest) + 1);
 		PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest) + 1);
