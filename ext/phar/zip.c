@@ -310,6 +310,9 @@ foundit:
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
 			} \
+			if (mydata->signature) { \
+				efree(mydata->signature); \
+			} \
 			if (error) { \
 				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
 			} \
@@ -330,6 +333,9 @@ foundit:
 			php_stream_close(fp); \
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
+			} \
+			if (mydata->signature) { \
+				efree(mydata->signature); \
 			} \
 			if (error) { \
 				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
@@ -766,7 +772,6 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	php_uint32 newcrc32;
 	off_t offset;
 	int not_really_modified = 0;
-
 	entry = (phar_entry_info *)data;
 	p = (struct _phar_zip_pass*) arg;
 
