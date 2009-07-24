@@ -544,12 +544,15 @@ typedef zstr phar_zstr;
 	spprintf(&b, 0, "%s", a.s);
 #define PHAR_ZSTR(a, b)	\
 	b = ZSTR(a);
+#define PHAR_STR_FREE(a) \
+	efree(a);
 #else
 typedef char *phar_zstr;
 #define PHAR_STR(a, b)	\
 	b = a;
 #define PHAR_ZSTR(a, b)	\
 	b = a;
+#define PHAR_STR_FREE(a)
 #endif
 
 BEGIN_EXTERN_C()

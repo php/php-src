@@ -40,8 +40,8 @@ include $pname . '/b.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 brand new!
-string(40) "%s"
-string(40) "%s"
+%unicode|string%(40) "%s"
+%unicode|string%(40) "%s"
 bool(true)
 modified!
 another!

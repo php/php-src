@@ -1482,6 +1482,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 					spprintf(&str_key, 0, "%s", key);
 #else
 					spprintf(&str_key, 0, "%v", key);
+					ezfree(key);
 #endif
 				} else {
 					PHAR_STR(key, str_key);
@@ -1614,6 +1615,7 @@ phar_spl_fileinfo:
 				spprintf(&str_key, 0, "%s", key);
 #else
 				spprintf(&str_key, 0, "%v", key);
+				ezfree(key);
 #endif
 			} else {
 				PHAR_STR(key, str_key);
@@ -4774,7 +4776,11 @@ PHP_METHOD(PharFileInfo, getContent)
 
 	phar_seek_efp(link, 0, SEEK_SET, 0, 0 TSRMLS_CC);
 	Z_TYPE_P(return_value) = IS_STRING;
+#if PHP_MAJOR_VERSION >= 6
+	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, (void **) &(Z_STRVAL_P(return_value)), link->uncompressed_filesize, 0);
+#else
 	Z_STRLEN_P(return_value) = php_stream_copy_to_mem(fp, &(Z_STRVAL_P(return_value)), link->uncompressed_filesize, 0);
+#endif
 
 	if (!Z_STRVAL_P(return_value)) {
 		Z_STRVAL_P(return_value) = estrndup("", 0);
