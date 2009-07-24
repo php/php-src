@@ -30,7 +30,7 @@ static zend_class_entry *phar_ce_PharException;
 static zend_class_entry *phar_ce_entry;
 #endif
 
-#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION >= 3)
+#if PHP_MAJOR_VERSION > 5 || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION >= 3))
 # define PHAR_ARG_INFO
 #else
 # define PHAR_ARG_INFO static
