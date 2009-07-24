@@ -172,6 +172,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
 	char *p = buf, *ext, *actual_alias = NULL;
+	char *metadata = NULL;
 
 	size = php_stream_tell(fp);
 
@@ -222,7 +223,6 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 
 			/* read in archive comment, if any */
 			if (PHAR_GET_16(locator.comment_len)) {
-				char *metadata;
 
 				metadata = p + sizeof(locator);
 
@@ -299,6 +299,27 @@ foundit:
 	entry.is_zip = 1;
 	entry.fp_type = PHAR_FP;
 	entry.is_persistent = mydata->is_persistent;
+#define PHAR_ZIP_FAIL_FREE(errmsg, save) \
+			zend_hash_destroy(&mydata->manifest); \
+			mydata->manifest.arBuckets = 0; \
+			zend_hash_destroy(&mydata->mounted_dirs); \
+			mydata->mounted_dirs.arBuckets = 0; \
+			zend_hash_destroy(&mydata->virtual_dirs); \
+			mydata->virtual_dirs.arBuckets = 0; \
+			php_stream_close(fp); \
+			if (mydata->metadata) { \
+				zval_dtor(mydata->metadata); \
+			} \
+			if (error) { \
+				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
+			} \
+			pefree(mydata->fname, mydata->is_persistent); \
+			if (mydata->alias) { \
+				pefree(mydata->alias, mydata->is_persistent); \
+			} \
+			pefree(mydata, mydata->is_persistent); \
+			efree(save); \
+			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
 			mydata->manifest.arBuckets = 0; \
@@ -372,6 +393,53 @@ foundit:
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		} else {
 			entry.is_dir = 0;
+		}
+
+		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+			size_t read;
+			php_stream *sigfile;
+
+			pefree(entry.filename, entry.is_persistent);
+			sigfile = php_stream_fopen_tmpfile();
+
+			php_stream_seek(fp, 0, SEEK_SET);
+			/* copy file contents + local headers and zip comment, if any, to be hashed for signature */
+			phar_stream_copy_to_stream(fp, sigfile, entry.header_offset, NULL);
+			if (metadata) {
+				php_stream_write(sigfile, metadata, PHAR_GET_16(locator.comment_len));
+			}
+			php_stream_seek(fp, sizeof(phar_zip_file_header) + entry.header_offset + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
+			read = php_stream_read(fp, buf, entry.uncompressed_filesize);
+			if (read != entry.uncompressed_filesize) {
+				php_stream_close(sigfile);
+				PHAR_ZIP_FAIL("signature cannot be read");
+			}
+			mydata->sig_flags = PHAR_GET_32(buf);
+			if (FAILURE == phar_verify_signature(sigfile, php_stream_tell(sigfile), mydata->sig_flags, buf + 8, entry.uncompressed_filesize - 8, fname, &mydata->signature, &mydata->sig_len, error TSRMLS_CC)) {
+				if (error) {
+					char *save;
+					php_stream_close(sigfile);
+					spprintf(&save, 4096, "signature cannot be verified: %s", *error);
+					efree(*error);
+					PHAR_ZIP_FAIL_FREE(save, save);
+				} else {
+					php_stream_close(sigfile);
+					PHAR_ZIP_FAIL("signature cannot be verified");
+				}
+			}
+			php_stream_close(sigfile);
+			/* signature checked out, let's ensure this is the last file in the phar */
+			read = php_stream_read(fp, buf, 4);
+
+			if (read != 4) {
+				PHAR_ZIP_FAIL("corrupted zip file (truncated)");
+			}
+
+			if (!memcmp(buf, "PK\5\6", 4)) {
+				PHAR_ZIP_FAIL("entries exist after signature, invalid phar");
+			}
+
+			continue;
 		}
 
 		phar_add_virtual_dirs(mydata, entry.filename, entry.filename_len TSRMLS_CC);
@@ -1001,6 +1069,73 @@ continue_dir:
 }
 /* }}} */
 
+static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pass *pass,
+				   smart_str *metadata TSRMLS_DC) /* {{{ */
+{
+	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
+	if (!phar->is_data || phar->sig_flags) {
+		int signature_length;
+		char *signature, sigbuf[8];
+		phar_entry_info entry = {0};
+		php_stream *newfile;
+		off_t tell;
+
+		newfile = php_stream_fopen_tmpfile();
+		tell = php_stream_tell(pass->filefp);
+		/* copy the local files and the zip comment to generate the hash */
+		php_stream_seek(pass->filefp, 0, SEEK_SET);
+		phar_stream_copy_to_stream(pass->filefp, newfile, tell, NULL);
+		if (metadata->c) {
+			php_stream_write(pass->filefp, metadata->c, metadata->len);
+		}
+
+		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, pass->error TSRMLS_CC)) {
+			if (pass->error) {
+				char *save = *(pass->error);
+				spprintf(pass->error, 0, "phar error: unable to write signature to zip-based phar: %s", save);
+				efree(save);
+			}
+
+			php_stream_close(newfile);
+			return FAILURE;
+		}
+
+		entry.filename = ".phar/signature.bin";
+		entry.filename_len = sizeof(".phar/signature.bin")-1;
+		entry.fp = php_stream_fopen_tmpfile();
+		entry.fp_type = PHAR_MOD;
+		entry.is_modified = 1;
+
+		PHAR_SET_32(sigbuf, phar->sig_flags);
+		PHAR_SET_32(sigbuf + 4, signature_length);
+
+		if (8 != (int)php_stream_write(entry.fp, sigbuf, 8) || signature_length != (int)php_stream_write(entry.fp, signature, signature_length)) {
+			efree(signature);
+			if (pass->error) {
+				spprintf(pass->error, 0, "phar error: unable to write signature to zip-based phar %s", phar->fname);
+			}
+
+			php_stream_close(newfile);
+			return FAILURE;
+		}
+
+		efree(signature);
+		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
+		entry.phar = phar;
+		/* throw out return value and write the signature */
+		phar_zip_changed_apply((void *)&entry, (void *)pass TSRMLS_CC);
+		php_stream_close(newfile);
+
+		if (pass->error && *(pass->error)) {
+			/* error is set by writeheaders */
+			php_stream_close(newfile);
+			return FAILURE;
+		}
+	} /* signature */
+	return SUCCESS;
+}
+/* }}} */
+
 int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	char *pos;
@@ -1215,10 +1350,21 @@ fperror:
 	memset(&eocd, 0, sizeof(eocd));
 
 	strncpy(eocd.signature, "PK\5\6", 4);
-	PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest));
-	PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest));
+	if (phar->sig_flags) {
+		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest) + 1);
+		PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest) + 1);
+	} else {
+		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest));
+		PHAR_SET_16(eocd.count, zend_hash_num_elements(&phar->manifest));
+	}
 	zend_hash_apply_with_argument(&phar->manifest, phar_zip_changed_apply, (void *) &pass TSRMLS_CC);
 
+	if (phar->metadata) {
+		/* set phar metadata */
+		PHP_VAR_SERIALIZE_INIT(metadata_hash);
+		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash TSRMLS_CC);
+		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
+	}
 	if (temperr) {
 		if (error) {
 			spprintf(error, 4096, "phar zip flush of \"%s\" failed: %s", phar->fname, temperr);
@@ -1227,11 +1373,18 @@ fperror:
 temperror:
 		php_stream_close(pass.centralfp);
 nocentralerror:
+		if (phar->metadata) {
+			smart_str_free(&main_metadata_str);
+		}
 		php_stream_close(pass.filefp);
 		if (closeoldfile) {
 			php_stream_close(oldfile);
 		}
 		return EOF;
+	}
+
+	if (FAILURE == phar_zip_applysignature(phar, &pass, &main_metadata_str TSRMLS_CC)) {
+		goto temperror;
 	}
 
 	/* save zip */
@@ -1256,9 +1409,6 @@ nocentralerror:
 
 	if (phar->metadata) {
 		/* set phar metadata */
-		PHP_VAR_SERIALIZE_INIT(metadata_hash);
-		php_var_serialize(&main_metadata_str, &phar->metadata, &metadata_hash TSRMLS_CC);
-		PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 		PHAR_SET_16(eocd.comment_len, main_metadata_str.len);
 
 		if (sizeof(eocd) != php_stream_write(pass.filefp, (char *)&eocd, sizeof(eocd))) {

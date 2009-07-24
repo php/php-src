@@ -3012,12 +3012,6 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 		return;
 	}
 
-	if (phar_obj->arc.archive->is_zip) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC,
-			"Cannot set signature algorithm, not possible with zip-based phar archives");
-		return;
-	}
-
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &algo, &key, &key_len) != SUCCESS) {
 		return;
 	}
