@@ -310,6 +310,9 @@ foundit:
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
 			} \
+			if (mydata->signature) { \
+				efree(mydata->signature); \
+			} \
 			if (error) { \
 				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
 			} \
@@ -330,6 +333,9 @@ foundit:
 			php_stream_close(fp); \
 			if (mydata->metadata) { \
 				zval_dtor(mydata->metadata); \
+			} \
+			if (mydata->signature) { \
+				efree(mydata->signature); \
 			} \
 			if (error) { \
 				spprintf(error, 4096, "phar error: %s in zip-based phar \"%s\"", errmsg, mydata->fname); \
