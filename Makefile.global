@@ -89,14 +89,14 @@ test: all
 	elif test ! -z "$(SAPI_CLI_PATH)" && test -x "$(SAPI_CLI_PATH)"; then \
 		INI_FILE=`$(top_builddir)/$(SAPI_CLI_PATH) -d 'display_errors=stderr' -r 'echo php_ini_loaded_file();' 2> /dev/null`; \
 		if test "$$INI_FILE"; then \
-			$(EGREP) -v '^(zend_)?extension(_debug)?(_ts)?[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
+			$(EGREP) -v '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*=' "$$INI_FILE" > $(top_builddir)/tmp-php.ini; \
 		else \
 			echo > $(top_builddir)/tmp-php.ini; \
 		fi; \
 		INI_SCANNED_PATH=`$(top_builddir)/$(SAPI_CLI_PATH) -d 'display_errors=stderr' -r '$$a = explode(",\n", trim(php_ini_scanned_files())); echo $$a[0];' 2> /dev/null`; \
 		if test "$$INI_SCANNED_PATH"; then \
 			INI_SCANNED_PATH=`$(top_srcdir)/build/shtool path -d $$INI_SCANNED_PATH`; \
-			$(EGREP) -h -v '^(zend_)?extension(_debug)?(_ts)?[\t\ ]*=' "$$INI_SCANNED_PATH"/*.ini >> $(top_builddir)/tmp-php.ini; \
+			$(EGREP) -h -v '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*=' "$$INI_SCANNED_PATH"/*.ini >> $(top_builddir)/tmp-php.ini; \
 		fi; \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
@@ -115,7 +115,7 @@ clean:
 	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
 
 distclean: clean
-	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php5.spec sapi/apache/libphp$(PHP_MAJOR_VERSION).module buildmk.stamp
+	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h sapi/apache/libphp$(PHP_MAJOR_VERSION).module buildmk.stamp
 	$(EGREP) define'.*include/php' $(top_srcdir)/configure | $(SED) 's/.*>//'|xargs rm -f
 
 .PHONY: all clean install distclean test
