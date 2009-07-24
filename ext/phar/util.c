@@ -1665,6 +1665,11 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		zval_dtor(zdata);
 		zval_dtor(zsig);
 		zval_dtor(zkey);
+		zval_dtor(openssl);
+		efree(openssl);
+		efree(zdata);
+		efree(zkey);
+		efree(zsig);
 		return FAILURE;
 	}
 
@@ -1678,6 +1683,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		zval_dtor(zkey);
 		zval_dtor(openssl);
 		efree(openssl);
+		efree(zdata);
+		efree(zkey);
+		efree(zsig);
 		return FAILURE;
 	}
 
@@ -1797,6 +1805,9 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			efree(pfile);
 
 			if (!pfp || !(pubkey_len = php_stream_copy_to_mem(pfp, &pubkey, PHP_STREAM_COPY_ALL, 0)) || !pubkey) {
+				if (pfp) {
+					php_stream_close(pfp);
+				}
 				if (error) {
 					spprintf(error, 0, "openssl public key could not be read");
 				}

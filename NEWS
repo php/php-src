@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   Functors. (Christian Seiler)
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
+- Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
   (Jani)
