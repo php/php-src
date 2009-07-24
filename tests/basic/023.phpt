@@ -9,7 +9,7 @@ var_dump($_COOKIE);
 --EXPECT--
 array(3) {
   [u"c_o_o_k_i_e"]=>
-  unicode(1) "v"
+  unicode(5) "value"
   [u"name"]=>
   unicode(24) ""value","value",UEhQIQ=="
   [u"UEhQIQ"]=>
