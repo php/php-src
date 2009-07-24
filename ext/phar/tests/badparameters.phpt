@@ -76,11 +76,6 @@ $a->setSignatureAlgorithm(Phar::MD5);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
-try {
-$c->setSignatureAlgorithm(Phar::MD5);
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
 $a->compress(array());
 try {
 $a->compress(1);
@@ -160,7 +155,6 @@ A Phar stub cannot be set in a plain tar archive
 Warning: Phar::setDefaultStub() expects parameter 1 to be %string, array given in %sbadparameters.php on line %d
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
-Cannot set signature algorithm, not possible with zip-based phar archives
 
 Warning: Phar::compress() expects parameter 1 to be long, array given in %sbadparameters.php on line %d
 Cannot compress phar archive, phar is read-only
