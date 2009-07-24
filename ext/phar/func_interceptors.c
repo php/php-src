@@ -71,8 +71,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			} else {
 				spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			}
-			efree(entry);
 			efree(arch);
+			efree(entry);
 			if (zcontext) {
 				context = php_stream_context_from_zval(zcontext, 0);
 			}
