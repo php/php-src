@@ -62,11 +62,6 @@ $data->setAlias('hi');
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
 }
-try {
-$data->setSignatureAlgorithm(Phar::MD5);
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
 $tar = $phar->convertToExecutable(Phar::TAR);
 echo $tar->getPath() . "\n";
 $data = $tar->convertToData();
@@ -188,7 +183,6 @@ hi
 A Phar stub cannot be set in a plain zip archive
 A Phar stub cannot be set in a plain zip archive
 A Phar alias cannot be set in a plain zip archive
-Cannot set signature algorithm, not possible with zip-based phar archives
 %sphar_convert_again2.phar.tar
 %sphar_convert_again2.tar
 %sphar_convert_again2.phar.tar.gz
