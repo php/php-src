@@ -7,7 +7,7 @@ PHP_ARG_WITH(curl, for cURL support,
 
 dnl Temporary option while we develop this aspect of the extension
 PHP_ARG_WITH(curlwrappers, if we should use cURL for url streams,
-[  --with-curlwrappers     Use cURL for url streams], no, no)
+[  --with-curlwrappers     EXPERIMENTAL: Use cURL for url streams], no, no)
 
 if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then
