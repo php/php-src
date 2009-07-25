@@ -2,6 +2,8 @@
 syntax check
 --SKIPIF--
 <?php include "skipif.inc"; ?>
+--INI--
+display_errors=stdout
 --FILE--
 <?php
 include "include.inc";
@@ -42,7 +44,7 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l "$filename"`);
+var_dump(`"$php" -n -l "$filename" 2>/dev/null`);
 
 @unlink($filename);
 
