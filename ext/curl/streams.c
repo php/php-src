@@ -474,8 +474,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 #else 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error mcode=%d", m);
 #endif
-			php_stream_close(stream);
-			return NULL;
+			goto exit_fail;
 		}
 		
 		/* we have only one curl handle here, even though we use multi syntax, 
@@ -493,14 +492,23 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 			}
 		}
 		if (msg_found) {
-			php_stream_close(stream);
-			return NULL;
+			goto exit_fail;
 		}
 	}
+
+	/* context headers are not needed anymore */
 	if (slist) {
+		curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, NULL);
 		curl_slist_free_all(slist);
 	}
 	return stream;
+
+exit_fail:
+	php_stream_close(stream);
+	if (slist) {
+		curl_slist_free_all(slist);
+	}
+	return NULL;
 }
 
 static php_stream_wrapper_ops php_curl_wrapper_ops = {
