@@ -14,10 +14,11 @@ Mark van der Velden
  */
 
 // Figure out what handler to use
-if(!empty($_ENV['PHP_CURL_HTTP_REMOTE_SERVER'])) {
+$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+if(!empty($host)) {
 
     // Use the set Environment variable
-    $url = $_ENV['PHP_CURL_HTTP_REMOTE_SERVER'];
+    $url = "$host/get.php";
 
 } else {
 
@@ -42,4 +43,5 @@ isset($tempname) and is_file($tempname) and @unlink($tempname);
 ?>
 --EXPECTF--
 Warning: curl_setopt(): the provided file handle is not writable in %s on line %d
-%S
+Hello World!
+Hello World!
