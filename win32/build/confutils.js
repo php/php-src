@@ -1150,12 +1150,12 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	 * as either a child or a sibling */
 	if (obj_dir == null) {
 		var build_dir = dir.replace(new RegExp("^..\\\\"), "");
-		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.-]", "g"), "_");
 		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 	}
 	else {
 		var build_dir = obj_dir.replace(new RegExp("^..\\\\"), "");
-		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+		var mangle_dir = build_dir.replace(new RegExp("[\\\\/.-]", "g"), "_");
 		var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 	}
 	
