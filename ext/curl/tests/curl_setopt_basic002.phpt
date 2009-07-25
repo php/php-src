@@ -46,6 +46,6 @@ curl_close($ch);
 ?>
 --EXPECTF--
 *** Testing curl_setopt with CURLOPT_STDERR
-string(%d) "%S"
+string(%d) "%s"
 string(%d) "%S"
 string(%d) "%S"
