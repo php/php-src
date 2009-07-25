@@ -818,13 +818,24 @@ PHP_MINIT_FUNCTION(curl)
 		char **p = (char **)info->protocols;
 
 		while (*p != NULL) {
-			php_register_url_stream_wrapper(*p++, &php_curl_wrapper TSRMLS_CC);
+			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
+			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
+				php_unregister_url_stream_wrapper(*p);
+				php_register_url_stream_wrapper(*p, &php_curl_wrapper TSRMLS_CC);
+			}
+			(void) *p++;
 		}
 	}
 # else
+	php_unregister_url_stream_wrapper("http");
 	php_register_url_stream_wrapper("http", &php_curl_wrapper TSRMLS_CC);
+	php_unregister_url_stream_wrapper("https");
 	php_register_url_stream_wrapper("https", &php_curl_wrapper TSRMLS_CC);
+	php_unregister_url_stream_wrapper("ftp");
 	php_register_url_stream_wrapper("ftp", &php_curl_wrapper TSRMLS_CC);
+	php_unregister_url_stream_wrapper("ftps");
+	php_register_url_stream_wrapper("ftps", &php_curl_wrapper TSRMLS_CC);
+	php_unregister_url_stream_wrapper("ldap");
 	php_register_url_stream_wrapper("ldap", &php_curl_wrapper TSRMLS_CC);
 # endif
 #endif
