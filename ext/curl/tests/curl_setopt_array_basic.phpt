@@ -15,9 +15,9 @@ Mattijs Hoitink mattijshoitink@gmail.com
  */
 
 // Figure out what handler to use
-if(!empty($_ENV['PHP_CURL_HTTP_REMOTE_SERVER'])) {
+$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+if (!empty($host)) {
     // Use the set Environment variable
-    $host = $_ENV['PHP_CURL_HTTP_REMOTE_SERVER'];
     $url = "{$host}/get.php?test=get";
 } else {
     // Create a temporary file for the test
