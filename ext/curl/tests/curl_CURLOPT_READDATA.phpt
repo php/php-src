@@ -33,7 +33,7 @@ if (false === $response = curl_exec($ch)) {
 curl_close($ch);
 
 // Clean the temporary file
-unset($tempname);
+@unlink($tempname);
 
 --EXPECT--
 array(2) {
