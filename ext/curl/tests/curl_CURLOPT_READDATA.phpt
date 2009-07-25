@@ -4,16 +4,16 @@ Test CURLOPT_READDATA without a callback function
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl") || empty($_ENV['PHP_CURL_HTTP_REMOTE_SERVER'])) print "skip"; ?>
+<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'])) print "skip"; ?>
 --FILE--
 <?php
 
 // The URL to POST to
-$url = $_ENV['PHP_CURL_HTTP_REMOTE_SERVER'] . '/get.php?test=post';
+$url = getenv('PHP_CURL_HTTP_REMOTE_SERVER') . '/get.php?test=post';
 
 // Create a temporary file to read the data from
 $tempname = tempnam(sys_get_temp_dir(), 'CURL_DATA');
-file_put_contents($tempname, "hello=world&smurf=blue");
+$datalen = file_put_contents($tempname, "hello=world&smurf=blue");
 
 ob_start();
 
@@ -22,7 +22,7 @@ curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_READDATA, fopen($tempname, 'rb'));
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('Transfer-Encoding: chunked'));
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:', "Content-Length: {$datalen}"));
 
 if (false === $response = curl_exec($ch)) {
     echo 'Error #' . curl_errno($ch) . ': ' . curl_error($ch);
