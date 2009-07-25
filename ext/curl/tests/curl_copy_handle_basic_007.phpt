@@ -15,6 +15,7 @@ Test curl_copy_handle() with simple POST
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_POST, 1);
   curl_setopt($ch, CURLOPT_POSTFIELDS, array("Hello" => "World", "Foo" => "Bar", "Person" => "John Doe"));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:')); // Disable Expect: header (lighttpd does not support it :)
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
   
   $copy = curl_copy_handle($ch);
