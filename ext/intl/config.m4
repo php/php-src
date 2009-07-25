@@ -55,4 +55,5 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR([$ext_builddir/locale])
   PHP_ADD_BUILD_DIR([$ext_builddir/msgformat])
   PHP_ADD_BUILD_DIR([$ext_builddir/grapheme])
+  PHP_ADD_BUILD_DIR([$ext_builddir/idn])
 fi
