@@ -2377,7 +2377,7 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	if (Z_REFCOUNT_P(ch->clone) <= 1) {
 		zend_llist_clean(&ch->to_free.slist);
 		zend_llist_clean(&ch->to_free.post);
-		zval_ptr_dtor(&ch->clone);
+		FREE_ZVAL(ch->clone);
 	} else {
 		Z_DELREF_P(ch->clone);
 		ch->to_free.slist.dtor = NULL;
