@@ -21,15 +21,17 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
   
   $copy = curl_copy_handle($ch);
-  curl_close($ch);
- 
-  $curl_content = curl_exec($copy);
+
+  var_dump( curl_exec($ch) );
+  var_dump( curl_exec($copy) );
+
+  curl_close($ch); // can not close original handle before curl_exec($copy) since it causes char * inputs to be invalid (see also: http://curl.haxx.se/libcurl/c/curl_easy_duphandle.html)
   curl_close($copy);
 
-  var_dump( $curl_content );
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing curl copy handle with User Agent ***
+string(9) "cURL phpt"
 string(9) "cURL phpt"
 ===DONE===  
