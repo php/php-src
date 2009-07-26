@@ -152,10 +152,10 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-#define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s), (long) v);
-#define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s), (double) v);
+#define CAAL(s, v) add_ascii_assoc_long_ex(return_value, s, sizeof(s), (long) v);
+#define CAAD(s, v) add_ascii_assoc_double_ex(return_value, s, sizeof(s), (double) v);
 #define CAAS(s, v) add_ascii_assoc_string(return_value, s, (v ? v : ""), 1);
-#define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
+#define CAAZ(s, v) add_ascii_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
 # define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
