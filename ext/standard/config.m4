@@ -509,7 +509,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
                             microtime.c pack.c pageinfo.c quot_print.c rand.c \
                             reg.c soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
-                            url_scanner.c var.c versioning.c assert.c strnatcmp.c levenshtein.c \
+                            var.c versioning.c assert.c strnatcmp.c levenshtein.c \
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \

@@ -32,7 +32,6 @@
 
 #include "zend_highlight.h"
 
-#include "url_scanner.h"
 #include "url_scanner_ex.h"
 
 extern zend_module_entry basic_functions_module;
@@ -199,8 +198,6 @@ typedef struct _php_basic_globals {
 	/* var.c */
 	zend_class_entry *incomplete_class;
 
-	/* url_scanner.c */
-	url_adapt_state_t url_adapt_state;
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;
 
