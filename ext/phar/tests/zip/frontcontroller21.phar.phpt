@@ -15,7 +15,7 @@ files/frontcontroller12.phar.zip
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
-string(10) "/index.php"
+%unicode|string%(10) "/index.php"
 string(10) "/index.php"
 string(%d) "phar://%sfrontcontroller21.phar.php/index.php"
 string(18) "/index.php?test=hi"
