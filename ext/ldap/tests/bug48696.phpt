@@ -1,5 +1,10 @@
 --TEST--
 Bug #48696 (ldap_read() segfaults with invalid parameters)
+--SKIPIF--
+<?php
+require_once('skipif.inc');
+require_once('skipifbindfailure.inc');
+?>
 --FILE--
 <?php
 
