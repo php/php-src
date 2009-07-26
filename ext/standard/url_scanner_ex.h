@@ -27,13 +27,9 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 
-char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
-
-int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC);
-int php_url_scanner_reset_vars(TSRMLS_D);
-
-int php_url_scanner_ex_activate(TSRMLS_D);
-int php_url_scanner_ex_deactivate(TSRMLS_D);
+PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
+PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC);
+PHPAPI int php_url_scanner_reset_vars(TSRMLS_D);
 
 #include "php_smart_str_public.h"
 
@@ -58,10 +54,5 @@ typedef struct {
 	/* Everything above is zeroed in RINIT */
 	HashTable *tags;
 } url_adapt_state_ex_t;
-
-typedef struct {
-	smart_str var;
-	smart_str val;
-} url_adapt_var_t;
 
 #endif
