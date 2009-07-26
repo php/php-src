@@ -5,10 +5,10 @@ Bug #43941 (json_encode() invalid UTF-8)
 --FILE--
 <?php
 
-var_dump(json_encode("abc"));
-var_dump(json_encode("ab\xE0"));
-var_dump(json_encode("ab\xE0c"));
-var_dump(json_encode(array("ab\xE0", "ab\xE0c", "abc")));
+var_dump(json_encode(b"abc"));
+var_dump(json_encode(b"ab\xE0"));
+var_dump(json_encode(b"ab\xE0c"));
+var_dump(json_encode(array(b"ab\xE0", b"ab\xE0c", b"abc")));
 
 echo "Done\n";
 ?>
