@@ -820,7 +820,7 @@ PHP_MINIT_FUNCTION(curl)
 		while (*p != NULL) {
 			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
 			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
-				php_unregister_url_stream_wrapper(*p);
+				php_unregister_url_stream_wrapper(*p TSRMLS_CC);
 				php_register_url_stream_wrapper(*p, &php_curl_wrapper TSRMLS_CC);
 			}
 			(void) *p++;
