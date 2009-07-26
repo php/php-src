@@ -941,7 +941,7 @@ PHP_METHOD(Phar, webPhar)
 			++ext;
 
 #if PHP_MAJOR_VERSION >= 6
-			if (phar_find_key(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
+			if (phar_find_key(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val TSRMLS_CC)) {
 #else
 			if (SUCCESS == zend_hash_find(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
 #endif
