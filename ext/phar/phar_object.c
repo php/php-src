@@ -941,19 +941,7 @@ PHP_METHOD(Phar, webPhar)
 			++ext;
 
 #if PHP_MAJOR_VERSION >= 6
-			if (FAILURE == zend_hash_find(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
-				/* try unicode extension */
-				zstr zext;
-				zspprintf(IS_UNICODE, &zext, 0, "%s", ext);
-				if (SUCCESS == zend_u_hash_find(Z_ARRVAL_P(mimeoverride), IS_UNICODE, zext, strlen(ext)+1, (void **) &val)) {
-					ezfree(zext);
-					goto unicode_found;
-				}
-				ezfree(zext);
-				goto notfound;
-			}
-unicode_found:
-			{ /* this prevents parse error */
+			if (phar_find_key(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
 #else
 			if (SUCCESS == zend_hash_find(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
 #endif
@@ -990,9 +978,6 @@ unicode_found:
 		}
 	}
 
-#if PHP_MAJOR_VERSION >= 6
-notfound:
-#endif
 	if (!mime_type) {
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type TSRMLS_CC);
 	}
