@@ -19,15 +19,15 @@ PHP Testfest Berlin 2009-05-10
 ===DONE===
 --EXPECTF--
 array(5) {
-  ["sysname"]=>
+  [u"sysname"]=>
   string(%d) "%s"
-  ["nodename"]=>
+  [u"nodename"]=>
   string(%d) "%s"
-  ["release"]=>
+  [u"release"]=>
   string(%d) "%s"
-  ["version"]=>
+  [u"version"]=>
   string(%d) "%s"
-  ["machine"]=>
+  [u"machine"]=>
   string(%d) "%s"
 }
 ===DONE===

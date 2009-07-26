@@ -23,15 +23,15 @@ Test posix_times() function : basic functionality
 --EXPECTF--
 Basic test of POSIX times function
 array(5) {
-  ["ticks"]=>
+  [u"ticks"]=>
   int(%d)
-  ["utime"]=>
+  [u"utime"]=>
   int(%d)
-  ["stime"]=>
+  [u"stime"]=>
   int(%d)
-  ["cutime"]=>
+  [u"cutime"]=>
   int(%d)
-  ["cstime"]=>
+  [u"cstime"]=>
   int(%d)
 }
 ===DONE====

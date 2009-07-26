@@ -12,19 +12,19 @@ if (!extension_loaded('posix')) {
 --FILE--
 <?php
 $grp = posix_getgrgid(0);
-if (!isset($grp[b'name'])) {
+if (!isset($grp['name'])) {
     die('Array index "name" does not exist.');
 }
-if (!isset($grp[b'passwd'])) {
+if (!isset($grp['passwd'])) {
     die('Array index "passwd" does not exist.');
 }
-if (!isset($grp[b'members'])) {
+if (!isset($grp['members'])) {
     die('Array index "members" does not exist.');
-} elseif (!is_array($grp[b'members'])) {
+} elseif (!is_array($grp['members'])) {
     die('Array index "members" must be an array.');
 } else {
-    if (count($grp[b'members']) > 0) {
-        foreach ($grp[b'members'] as $idx => $username) {
+    if (count($grp['members']) > 0) {
+        foreach ($grp['members'] as $idx => $username) {
             if (!is_int($idx)) {
                 die('Index in members Array is not an int.');
             }
@@ -34,10 +34,10 @@ if (!isset($grp[b'members'])) {
         }
     }
 }
-if (!isset($grp[b'gid'])) {
+if (!isset($grp['gid'])) {
     die('Array index "gid" does not exist.');
 }
-var_dump($grp[b'gid']);
+var_dump($grp['gid']);
 ?>
 ===DONE===
 --EXPECT--
