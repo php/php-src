@@ -649,7 +649,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, zval 
 
 static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC) /* {{{ */
 {
-	if (Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) != IS_STRING) {
+	if (Z_TYPE_P(T->str_offset.str) == IS_STRING && Z_TYPE_P(value) == IS_UNICODE) {
 		convert_to_unicode(T->str_offset.str);
 	}
 
