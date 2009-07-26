@@ -2,7 +2,7 @@
 Basic XMLType test
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
-<?php if (!extension_loaded("simplexml")) die("skip no simplexml extension"; ?>
+<?php if (!extension_loaded("simplexml")) die("skip no simplexml extension"); ?>
 --FILE--
 <?php
 
