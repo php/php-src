@@ -555,10 +555,6 @@ SOURCE=..\ext\standard\url.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\url_scanner.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\url_scanner_ex.c
 # ADD CPP /W2
 # End Source File
@@ -714,10 +710,6 @@ SOURCE=..\ext\standard\uniqid.h
 # Begin Source File
 
 SOURCE=..\ext\standard\url.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner.h
 # End Source File
 # Begin Source File
 
