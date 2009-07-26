@@ -326,6 +326,7 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{
 {
 	unsigned int len;
 	char   *docroot = "";
+	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
 
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
@@ -335,23 +336,23 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{
 	/* Build the special-case PHP_SELF variable for the CLI version */
 	len = strlen(php_self);
 	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, len, &len TSRMLS_CC)) {
-		php_register_variable("PHP_SELF", php_self, track_vars_array TSRMLS_CC);
+		php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), php_self, len, track_vars_array, 0 TSRMLS_CC);
 	}
 	if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &php_self, len, &len TSRMLS_CC)) {
-		php_register_variable("SCRIPT_NAME", php_self, track_vars_array TSRMLS_CC);
+		php_register_variable_with_conv(conv, ZEND_STRL("SCRIPT_NAME"), php_self, len, track_vars_array, 0 TSRMLS_CC);
 	}
 	/* filenames are empty for stdin */
 	len = strlen(script_filename);
 	if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &script_filename, len, &len TSRMLS_CC)) {
-		php_register_variable("SCRIPT_FILENAME", script_filename, track_vars_array TSRMLS_CC);
+		php_register_variable_with_conv(conv, ZEND_STRL("SCRIPT_FILENAME"), script_filename, len, track_vars_array, 0 TSRMLS_CC);
 	}
 	if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &script_filename, len, &len TSRMLS_CC)) {
-		php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array TSRMLS_CC);
+		php_register_variable_with_conv(conv, ZEND_STRL("PATH_TRANSLATED"), script_filename, len, track_vars_array, 0 TSRMLS_CC);
 	}
 	/* just make it available */
 	len = 0U;
 	if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
-		php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array TSRMLS_CC);
+		php_register_variable_with_conv(conv, ZEND_STRL("DOCUMENT_ROOT"), docroot, len, track_vars_array, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
