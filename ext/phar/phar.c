@@ -2647,7 +2647,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				len = -len;
 			}
 			user_stub = 0;
+#if PHP_MAJOR_VERSION >= 6
+			if (!(len = php_stream_copy_to_mem(stubfile, (void **) &user_stub, len, 0)) || !user_stub) {
+#else
 			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
+#endif
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
