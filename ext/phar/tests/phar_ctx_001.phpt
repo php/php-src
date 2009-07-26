@@ -28,7 +28,7 @@ var_dump($phar['b']->isCompressed());
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
 
-$context = stream_context_create(array('phar'=> array('compress'=>Phar::GZ, 'metadata' => array(2, 'hi' => 3))));
+$context = stream_context_create(array('phar'=> array('compress'=>Phar::GZ, 'metadata' => array(2, b'hi' => 3))));
 $context2 = stream_context_create(array('phar' => array('metadata' => array(4))));
 
 file_put_contents($pname . '/a', b'new a', 0); // no compression

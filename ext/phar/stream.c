@@ -207,18 +207,30 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *pat
 		fpf = php_stream_alloc(&phar_ops, idata, NULL, mode);
 		php_url_free(resource);
 		efree(internal_file);
+#if PHP_MAJOR_VERSION >= 6
+		if (context && context->options && phar_find_key(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption TSRMLS_CC)) {
+#else
 		if (context && context->options && zend_hash_find(HASH_OF(context->options), "phar", sizeof("phar"), (void**)&pzoption) == SUCCESS) {
+#endif
 			pharcontext = HASH_OF(*pzoption);
 			if (idata->internal_file->uncompressed_filesize == 0
 				&& idata->internal_file->compressed_filesize == 0
+#if PHP_MAJOR_VERSION >= 6
+				&& phar_find_key(pharcontext, "compress", sizeof("compress"), (void**)&pzoption TSRMLS_CC)
+#else
 				&& zend_hash_find(pharcontext, "compress", sizeof("compress"), (void**)&pzoption) == SUCCESS
+#endif
 				&& Z_TYPE_PP(pzoption) == IS_LONG
 				&& (Z_LVAL_PP(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
 			) {
 				idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 				idata->internal_file->flags |= Z_LVAL_PP(pzoption);
 			}
+#if PHP_MAJOR_VERSION >= 6
+			if (phar_find_key(pharcontext, "metadata", sizeof("metadata"), (void**)&pzoption TSRMLS_CC)) {
+#else
 			if (zend_hash_find(pharcontext, "metadata", sizeof("metadata"), (void**)&pzoption) == SUCCESS) {
+#endif
 				if (idata->internal_file->metadata) {
 					zval_ptr_dtor(&idata->internal_file->metadata);
 					idata->internal_file->metadata = NULL;
