@@ -13,7 +13,7 @@ Writes the value 'test' to a temporary file. Use curl to access this file and st
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');
-fwrite($fp, "test");
+fwrite($fp, b"test");
 fclose($fp);
 
 $ch = curl_init();

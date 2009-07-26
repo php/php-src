@@ -19,7 +19,7 @@ function curl_callback($curl_handle, $received_data)
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');
-fwrite($fp, "test");
+fwrite($fp, b"test");
 fclose($fp);
 
 $ch = curl_init();
