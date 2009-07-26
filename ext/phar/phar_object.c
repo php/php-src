@@ -1669,7 +1669,21 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
 #if PHP_VERSION_ID >= 60000
-						fname = expand_filepath(intern->file_name.s, NULL TSRMLS_CC);
+						if (intern->file_name_type == IS_UNICODE) {
+							zval zv;
+
+							INIT_ZVAL(zv);
+							Z_UNIVAL(zv) = intern->file_name;
+							Z_UNILEN(zv) = intern->file_name_len;
+							Z_TYPE(zv) = IS_UNICODE;
+
+							zval_copy_ctor(&zv);
+							zval_unicode_to_string(&zv TSRMLS_CC);
+							fname = expand_filepath(Z_STRVAL(zv), NULL TSRMLS_CC);
+							ezfree(Z_UNIVAL(zv));
+						} else {
+							fname = expand_filepath(intern->file_name.s, NULL TSRMLS_CC);
+						}
 #else
 						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
 #endif
