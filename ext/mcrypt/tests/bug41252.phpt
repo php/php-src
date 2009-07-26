@@ -5,7 +5,7 @@ Bug #41252 (Calling mcrypt_generic without first calling mcrypt_generic_init cra
 --FILE--
 <?php
 $td = mcrypt_module_open(MCRYPT_DES, '', MCRYPT_MODE_ECB, '');
-echo mcrypt_generic($td,'aaaaaaaa');
+echo mcrypt_generic($td,b'aaaaaaaa');
 print "I'm alive!\n";
 ?>
 --EXPECTF--
