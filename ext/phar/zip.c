@@ -600,7 +600,11 @@ foundit:
 
 				php_stream_filter_append(&fp->readfilters, filter);
 
+#if PHP_MAJOR_VERSION >= 6
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, (void **) &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#else
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#endif
 					pefree(entry.filename, entry.is_persistent);
 #if PHP_VERSION_ID < 50207
 					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
@@ -621,7 +625,11 @@ foundit:
 
 				php_stream_filter_append(&fp->readfilters, filter);
 
+#if PHP_MAJOR_VERSION >= 6
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, (void **) &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#else
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#endif
 					pefree(entry.filename, entry.is_persistent);
 #if PHP_VERSION_ID < 50207
 					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
@@ -632,7 +640,11 @@ foundit:
 				php_stream_filter_flush(filter, 1);
 				php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			} else {
+#if PHP_MAJOR_VERSION >= 6
+				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, (void **) &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#else
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
+#endif
 					pefree(entry.filename, entry.is_persistent);
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
@@ -1234,7 +1246,11 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 
 			user_stub = 0;
 
+#if PHP_MAJOR_VERSION >= 6
+			if (!(len = php_stream_copy_to_mem(stubfile, (void **) &user_stub, len, 0)) || !user_stub) {
+#else
 			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
+#endif
 				if (error) {
 					spprintf(error, 0, "unable to read resource to copy stub to new zip-based phar \"%s\"", phar->fname);
 				}
