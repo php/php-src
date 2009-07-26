@@ -8,19 +8,19 @@ var_dump(mcrypt_list_modes());
 --EXPECT--
 array(8) {
   [0]=>
-  string(3) "cbc"
+  unicode(3) "cbc"
   [1]=>
-  string(3) "cfb"
+  unicode(3) "cfb"
   [2]=>
-  string(3) "ctr"
+  unicode(3) "ctr"
   [3]=>
-  string(3) "ecb"
+  unicode(3) "ecb"
   [4]=>
-  string(4) "ncfb"
+  unicode(4) "ncfb"
   [5]=>
-  string(4) "nofb"
+  unicode(4) "nofb"
   [6]=>
-  string(3) "ofb"
+  unicode(3) "ofb"
   [7]=>
-  string(6) "stream"
+  unicode(6) "stream"
 }
