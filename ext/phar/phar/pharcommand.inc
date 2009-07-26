@@ -57,18 +57,18 @@ class PharCommand extends CLICommand
 	static function phar_args($which, $phartype)
 	{
 		$phar_args = array(
-			'a' => array(
+			b'a' => array(
 				'typ' => 'alias',
 				'val' => NULL,
 				'inf' => '<alias>  Provide an alias name for the phar file.'
 			),
-			'b' => array(
+			b'b' => array(
 				'typ' => 'any',
 				'val' => NULL,
 				'inf' => '<bang>   Hash-bang line to start the archive (e.g. #!/usr/bin/php). The hash '
 						 .'         mark itself \'#!\' and the newline character are optional.'
 			),
-			'c' => array(
+			b'c' => array(
 				'typ' => 'compalg',
 				'val' => NULL,
 				'inf' => '<algo>   Compression algorithm.',
@@ -78,43 +78,43 @@ class PharCommand extends CLICommand
 					'auto' => 'Automatically select compression algorithm'
 				)
 			),
-			'e' => array(
+			b'e' => array(
 				'typ' => 'entry',
 				'val' => NULL,
 				'inf' => '<entry>  Name of entry to work on (must include PHAR internal directory name if any).'
 			),
-			'f' => array(
+			b'f' => array(
 				'typ' => $phartype,
 				'val' => NULL,
 				'inf' => '<file>   Specifies the phar file to work on.'
 			),
-			'h' => array(
+			b'h' => array(
 				'typ' => 'select',
 				'val' => NULL,
 				'inf' => '<method> Selects the hash algorithmn.',
 				'select' => array('md5' => 'MD5','sha1' => 'SHA1')
 			),
-			'i' => array(
+			b'i' => array(
 				'typ' => 'regex',
 				'val' => NULL,
 				'inf' => '<regex>  Specifies a regular expression for input files.'
 			),
-			'k' => array(
+			b'k' => array(
 				'typ' => 'any',
 				'val' => NULL,
 				'inf' => '<index>  Subscription index to work on.',
 			),
-			'l' => array(
+			b'l' => array(
 				'typ' => 'int',
 				'val' => 0,
 				'inf' => '<level>  Number of preceeding subdirectories to strip from file entries',
 			),
-			'm' => array(
+			b'm' => array(
 				'typ' => 'any',
 				'val' => NULL,
 				'inf' => '<meta>   Meta data to store with entry (serialized php data).'
 			),
-			'p' => array(
+			b'p' => array(
 				'typ' => 'loader',
 				'val' => NULL,
 				'inf' => '<loader> Location of PHP_Archive class file (pear list-files PHP_Archive).'
@@ -126,17 +126,17 @@ class PharCommand extends CLICommand
 						 .'this package and load it to ensure class Phar is present.'
 						 ,
 			),
-			's' => array(
+			b's' => array(
 				'typ' => 'file',
 				'val' => NULL,
 				'inf' => '<stub>   Select the stub file.'
 			),
-			'x' => array(
+			b'x' => array(
 				'typ' => 'regex',
 				'val' => NULL,
 				'inf' => '<regex>  Regular expression for input files to exclude.'
 			),
-			'y' => array(
+			b'y' => array(
 				'typ' => 'privkey',
 				'val' => NULL,
 				'inf' => '<key>    Private key for OpenSSL signing.',
@@ -144,33 +144,34 @@ class PharCommand extends CLICommand
 		);
 
 		if (extension_loaded('zlib')) {
-			$phar_args['c']['select']['gz']    = 'GZip compression';
-			$phar_args['c']['select']['gzip']  = 'GZip compression';
+			$phar_args[b'c']['select']['gz']    = 'GZip compression';
+			$phar_args[b'c']['select']['gzip']  = 'GZip compression';
 		}
 
 		if (extension_loaded('bz2')) {
-			$phar_args['c']['select']['bz2']   = 'BZip2 compression';
-			$phar_args['c']['select']['bzip2'] = 'BZip2 compression';
+			$phar_args[b'c']['select']['bz2']   = 'BZip2 compression';
+			$phar_args[b'c']['select']['bzip2'] = 'BZip2 compression';
 		}
 
 		$hash_avail = Phar::getSupportedSignatures();
-		$hash_optional = array('SHA-256' => 'SHA256',
-							   'SHA-512' => 'SHA512',
-							   'OpenSSL' => 'OpenSSL');
-		if (!in_array('OpenSSL', $hash_avail)) {
-			unset($phar_args['y']);
+		$hash_optional = array(b'SHA-256' => b'SHA256',
+							   b'SHA-512' => b'SHA512',
+							   b'OpenSSL' => b'OpenSSL');
+		if (!in_array(b'OpenSSL', $hash_avail)) {
+			unset($phar_args[b'y']);
 		}
 
 		foreach($hash_optional as $key => $name) {
 			if (in_array($key, $hash_avail)) {
-				$phar_args['h']['select'][strtolower($name)] = $name;
+				$phar_args[b'h']['select'][strtolower($name)] = $name;
 			}
 		}
 
 		$args = array();
 
+		$which = (binary)$which;
 		foreach($phar_args as $lkey => $cfg) {
-			$ukey     = strtoupper($lkey);
+			$ukey     = (binary) strtoupper($lkey);
 			$required = strpos($which, $ukey) !== false;
 			$optional = strpos($which, $lkey) !== false;
 
@@ -400,9 +401,9 @@ class PharCommand extends CLICommand
 		$arg = self::cli_arg_typ_string($arg, $cfg, $key);
 
 		$hash_avail = Phar::getSupportedSignatures();
-		if ($arg && !in_array('OpenSSL', $hash_avail))
+		if ($arg && !in_array(b'OpenSSL', $hash_avail))
 		{
-			self::error("Cannot specifiy private key without OpenSSL support.\n");
+			self::error("Cannot specify private key without OpenSSL support.\n");
 		}
 		return $arg;
 	}
@@ -457,7 +458,7 @@ class PharCommand extends CLICommand
 	{
 		$args = self::phar_args('abcFhilpsxy', 'pharnew');
 
-		$args[''] = array(
+		$args[b''] = array(
 			'typ'     => 'any',
 			'val'      => NULL,
 			'required' => 1,
@@ -559,17 +560,17 @@ class PharCommand extends CLICommand
 			self::error("Creating phar files is disabled, Phar::canWrite() returned false.\n");
 		}
 
-		$alias    = $this->args['a']['val'];
-		$hashbang = $this->args['b']['val'];
-		$archive  = $this->args['f']['val'];
-		$hash     = $this->args['h']['val'];
-		$privkey  = $this->args['y']['val'];
-		$regex    = $this->args['i']['val'];
-		$level    = $this->args['l']['val'];
-		$loader   = $this->args['p']['val'];
-		$stub     = $this->args['s']['val'];
-		$invregex = $this->args['x']['val'];
-		$input    = $this->args['']['val'];
+		$alias    = $this->args[b'a']['val'];
+		$hashbang = $this->args[b'b']['val'];
+		$archive  = $this->args[b'f']['val'];
+		$hash     = $this->args[b'h']['val'];
+		$privkey  = $this->args[b'y']['val'];
+		$regex    = $this->args[b'i']['val'];
+		$level    = $this->args[b'l']['val'];
+		$loader   = $this->args[b'p']['val'];
+		$stub     = $this->args[b's']['val'];
+		$invregex = $this->args[b'x']['val'];
+		$input    = $this->args[b'']['val'];
 
 		$hash = self::phar_check_hash($hash, $privkey);
 
@@ -589,7 +590,7 @@ class PharCommand extends CLICommand
 
 		$this->phar_set_stub_end($phar, $stub, $loader);
 
-		switch($this->args['c']['val']) {
+		switch($this->args[b'c']['val']) {
 			case 'gz':
 			case 'gzip':
 				$phar->compressFiles(Phar::GZ);
@@ -673,9 +674,9 @@ class PharCommand extends CLICommand
 			$entry = substr($entry, $p+1);
 		}
 
-	if ($noloader && $entry == 'phar.inc') {
-		return;
-	}
+		if ($noloader && $entry == 'phar.inc') {
+			return;
+		}
 
 		echo "$entry\n";
 
@@ -721,8 +722,8 @@ class PharCommand extends CLICommand
 	 */
 	public function phar_dir_operation(RecursiveIteratorIterator $dir, $func, array $args = array())
 	{
-		$regex   = $this->args['i']['val'];
-		$invregex= $this->args['x']['val'];
+		$regex   = $this->args[b'i']['val'];
+		$invregex= $this->args[b'x']['val'];
 
 		if (isset($regex)) {
 			$dir = new RegexIterator($dir, $regex);
@@ -771,7 +772,7 @@ class PharCommand extends CLICommand
 	{
 		$this->phar_dir_operation(
 			new DirectoryTreeIterator(
-				$this->args['f']['val']),
+				$this->args[b'f']['val']),
 				array($this, 'phar_dir_echo')
 			);
 	}
@@ -812,7 +813,7 @@ class PharCommand extends CLICommand
 	{
 		$a = $this->phar_dir_operation(
 			new DirectoryGraphIterator(
-				$this->args['f']['val']),
+				$this->args[b'f']['val']),
 				array($this, 'phar_dir_echo')
 			);
 		if (!$a) {
@@ -843,7 +844,7 @@ class PharCommand extends CLICommand
 	{
 		$args = self::phar_args('Fix', 'phar');
 
-		$args[''] = array(
+		$args[b''] = array(
 			'type' => 'dir',
 			'val' => '.',
 			'inf' => '         Directory to extract to (defaults to \'.\').',
@@ -862,7 +863,7 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_extract()
 	{
-		$dir = $this->args['']['val'];
+		$dir = $this->args[b'']['val'];
 
 		if (is_array($dir)) {
 			if (count($dir) != 1) {
@@ -872,7 +873,7 @@ class PharCommand extends CLICommand
 			}
 		}
 
-		$phar = $this->args['f']['val'];
+		$phar = $this->args[b'f']['val'];
 		$base = $phar->getPathname();
 		$bend = strpos($base, '.phar');
 		$bend = strpos($base, '/', $bend);
@@ -951,8 +952,8 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_delete()
 	{
-		$phar  = $this->args['f']['val'];
-		$entry = $this->args['e']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$entry = $this->args[b'e']['val'];
 
 		$phar->startBuffering();
 		unset($phar[$entry]);
@@ -977,7 +978,7 @@ class PharCommand extends CLICommand
 	static function cli_cmd_arg_add()
 	{
 		$args = self::phar_args('acFilx', 'phar');
-		$args[''] = array(
+		$args[b''] = array(
 			'type'     => 'any',
 			'val'      => NULL,
 			'required' => 1,
@@ -995,12 +996,12 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_add()
 	{
-		$compress= $this->args['c']['val'];
-		$phar    = $this->args['f']['val'];
-		$regex   = $this->args['i']['val'];
-		$level   = $this->args['l']['val'];
-		$invregex= $this->args['x']['val'];
-		$input   = $this->args['']['val'];
+		$compress= $this->args[b'c']['val'];
+		$phar    = $this->args[b'f']['val'];
+		$regex   = $this->args[b'i']['val'];
+		$level   = $this->args[b'l']['val'];
+		$invregex= $this->args[b'x']['val'];
+		$input   = $this->args[b'']['val'];
 
 		$phar->startBuffering();
 
@@ -1036,7 +1037,7 @@ class PharCommand extends CLICommand
 	public function cli_cmd_arg_stub_set()
 	{
 		$args = self::phar_args('bFps', 'phar');
-		$args['s']['val'] = 'php://stdin';
+		$args[b's']['val'] = 'php://stdin';
 		return $args;
 	}
 	// }}}
@@ -1048,10 +1049,10 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_stub_set()
 	{
-		$hashbang = $this->args['b']['val'];
-		$phar     = $this->args['f']['val'];
-		$stub     = $this->args['s']['val'];
-		$loader   = $this->args['p']['val'];
+		$hashbang = $this->args[b'b']['val'];
+		$phar     = $this->args[b'f']['val'];
+		$stub     = $this->args[b's']['val'];
+		$loader   = $this->args[b'p']['val'];
 
 		$this->phar_set_stub_begin($phar, $stub, $loader, $hashbang);
 		$this->phar_set_stub_end($phar, $stub, $loader);
@@ -1078,7 +1079,7 @@ class PharCommand extends CLICommand
 	public function cli_cmd_arg_stub_get()
 	{
 		$args = self::phar_args('Fs', 'phar');
-		$args['s']['val'] = 'php://stdin';
+		$args[b's']['val'] = 'php://stdin';
 		return $args;
 	}
 	// }}}
@@ -1093,8 +1094,8 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_stub_get($args)
 	{
-		$phar = $this->args['f']['val'];
-		$stub = $this->args['s']['val'];
+		$phar = $this->args[b'f']['val'];
+		$stub = $this->args[b's']['val'];
 
 		file_put_contents($stub, $phar->getStub());
 	}
@@ -1131,10 +1132,10 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_compress()
 	{
-		$phar  = $this->args['f']['val'];
-		$entry = $this->args['e']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$entry = $this->args[b'e']['val'];
 
-		switch($this->args['c']['val']) {
+		switch($this->args[b'c']['val']) {
 			case 'gz':
 			case 'gzip':
 				if (isset($entry)) {
@@ -1191,9 +1192,9 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_sign()
 	{
-		$phar     = $this->args['f']['val'];
-		$hash     = $this->args['h']['val'];
-		$privkey  = $this->args['y']['val'];
+		$phar     = $this->args[b'f']['val'];
+		$hash     = $this->args[b'h']['val'];
+		$privkey  = $this->args[b'y']['val'];
 
 		$hash = self::phar_check_hash($hash, $privkey);
 
@@ -1238,10 +1239,10 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_meta_set()
 	{
-		$phar  = $this->args['f']['val'];
-		$entry = $this->args['e']['val'];
-		$index = $this->args['k']['val'];
-		$meta  = $this->args['m']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$entry = $this->args[b'e']['val'];
+		$index = $this->args[b'k']['val'];
+		$meta  = $this->args[b'm']['val'];
 
 		$phar->startBuffering();
 
@@ -1315,9 +1316,9 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_meta_get()
 	{
-		$phar  = $this->args['f']['val'];
-		$entry = $this->args['e']['val'];
-		$index = $this->args['k']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$entry = $this->args[b'e']['val'];
+		$index = $this->args[b'k']['val'];
 
 		if (isset($entry)) {
 			if (!$phar[$entry]->hasMetadata()) {
@@ -1382,9 +1383,9 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_meta_del()
 	{
-		$phar  = $this->args['f']['val'];
-		$entry = $this->args['e']['val'];
-		$index = $this->args['k']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$entry = $this->args[b'e']['val'];
+		$index = $this->args[b'k']['val'];
 
 		if (isset($entry)) {
 			if (isset($index)) {
@@ -1455,8 +1456,8 @@ class PharCommand extends CLICommand
 	 */
 	public function cli_cmd_run_info()
 	{
-		$phar  = $this->args['f']['val'];
-		$index = $this->args['k']['val'];
+		$phar  = $this->args[b'f']['val'];
+		$index = $this->args[b'k']['val'];
 
 		$hash  = $phar->getSignature();
 		$infos = array();

@@ -990,7 +990,9 @@ unicode_found:
 		}
 	}
 
+#if PHP_MAJOR_VERSION >= 6
 notfound:
+#endif
 	if (!mime_type) {
 		code = phar_file_type(&PHAR_G(mime_types), entry, &mime_type TSRMLS_CC);
 	}
