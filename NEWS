@@ -1,4 +1,4 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
@@ -7,6 +7,8 @@
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 
+- Fixed bug #49064 (--enable-session=shared does not work: undefined symbol:
+  php_url_scanner_reset_vars). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using
   --with-curlwrappers). (Jani)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
