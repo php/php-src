@@ -15,43 +15,43 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 array(20) {
   [%u|b%"url"]=>
   string(0) ""
-  ["content_type"]=>
+  [u"content_type"]=>
   NULL
-  ["http_code"]=>
+  [u"http_code"]=>
   int(0)
-  ["header_size"]=>
+  [u"header_size"]=>
   int(0)
-  ["request_size"]=>
+  [u"request_size"]=>
   int(0)
-  ["filetime"]=>
+  [u"filetime"]=>
   int(0)
-  ["ssl_verify_result"]=>
+  [u"ssl_verify_result"]=>
   int(0)
-  ["redirect_count"]=>
+  [u"redirect_count"]=>
   int(0)
-  ["total_time"]=>
+  [u"total_time"]=>
   float(0)
-  ["namelookup_time"]=>
+  [u"namelookup_time"]=>
   float(0)
-  ["connect_time"]=>
+  [u"connect_time"]=>
   float(0)
-  ["pretransfer_time"]=>
+  [u"pretransfer_time"]=>
   float(0)
-  ["size_upload"]=>
+  [u"size_upload"]=>
   float(0)
-  ["size_download"]=>
+  [u"size_download"]=>
   float(0)
-  ["speed_download"]=>
+  [u"speed_download"]=>
   float(0)
-  ["speed_upload"]=>
+  [u"speed_upload"]=>
   float(0)
-  ["download_content_length"]=>
+  [u"download_content_length"]=>
   float(0)
-  ["upload_content_length"]=>
+  [u"upload_content_length"]=>
   float(%f)
-  ["starttransfer_time"]=>
+  [u"starttransfer_time"]=>
   float(%f)
-  ["redirect_time"]=>
+  [u"redirect_time"]=>
   float(0)
 }
 ===DONE===
