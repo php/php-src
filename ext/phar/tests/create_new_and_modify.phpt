@@ -27,9 +27,9 @@ file_put_contents($pname .'/b.php', "another!\n");
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
 
-var_dump($sig1['hash']);
-var_dump($sig2['hash']);
-var_dump($sig1['hash'] != $sig2['hash']);
+var_dump($sig1[b'hash']);
+var_dump($sig2[b'hash']);
+var_dump($sig1[b'hash'] != $sig2[b'hash']);
 
 include $pname . '/a.php';
 include $pname . '/b.php';
@@ -40,8 +40,8 @@ include $pname . '/b.php';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 brand new!
-%unicode|string%(40) "%s"
-%unicode|string%(40) "%s"
+string(40) "%s"
+string(40) "%s"
 bool(true)
 modified!
 another!
