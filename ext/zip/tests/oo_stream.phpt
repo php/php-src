@@ -42,7 +42,7 @@ fclose($fp);
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
-unicode(5) "foo
+string(5) "foo
 
 "
 string(5) "foo
