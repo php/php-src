@@ -30,6 +30,7 @@
 #include "php_string.h"
 #include "safe_mode.h"
 #include "ext/standard/head.h"
+#include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "exec.h"
 #include "php_globals.h"
@@ -152,6 +153,34 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				if (string_length == 0) {
 					continue;
 				}
+				if (PG(safe_mode)) {
+					/* Check the protected list */
+					if (zend_hash_exists(&BG(sm_protected_env_vars), string_key, string_length - 1)) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot override protected environment variable '%s'", string_key);
+						return env;
+					}
+					/* Check the allowed list */
+					if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
+						char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
+						char *strtok_buf = NULL;
+						char *allowed_prefix = php_strtok_r(allowed_env_vars, ", ", &strtok_buf);
+						zend_bool allowed = 0;
+
+						while (allowed_prefix) {
+							if (!strncmp(allowed_prefix, string_key, strlen(allowed_prefix))) {
+								allowed = 1;
+								break;
+							}
+							allowed_prefix = php_strtok_r(NULL, ", ", &strtok_buf);
+						}
+						efree(allowed_env_vars);
+						if (!allowed) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode warning: Cannot set environment variable '%s' - it's not in the allowed list", string_key);
+							return env;
+						}
+					}
+				}
+
 				l = string_length + el_len + 1;
 				memcpy(p, string_key, string_length);
 				strcat(p, "=");

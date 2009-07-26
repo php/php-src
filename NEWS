@@ -11,6 +11,8 @@
   --with-curlwrappers). (Jani)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
   (Jani)
+- Fixed bug #49026 (proc_open() can bypass safe_mode_protected_env_vars
+  restrictions). (Ilia)
 - Fixed bug #49012 (phar tar signature algorithm reports as Unknown (0) in
   getSignature() call). (Greg)
 - Fixed bug #49020 (phar misinterprets ustar long filename standard).
