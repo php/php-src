@@ -3893,7 +3893,7 @@ PHP_FUNCTION(exif_read_data)
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str = NULL, *p_sections_needed = NULL, *s;
 	char *filename;
-	int filename_len, sections_str_len = 0;
+	int filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sbb", &p_name, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
 		return;
