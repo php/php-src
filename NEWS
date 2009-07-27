@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Fixed bug #48913 (Too long error code strings in pdo_odbc driver).
   (naf at altlinux dot ru, Felipe)
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
+- Fixed bug #48801 (Problem with imagettfbbox). (Takeshi Abe)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
@@ -25,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
+- Fixed bug #48732 (TTF Bounding box wrong for letters below baseline).
+  (Takeshi Abe)
 - Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain
   components). (Ilia)
 - Fixed bug #48709 (metaphone and 'wh'). (brettz9 at yahoo dot com, Felipe)

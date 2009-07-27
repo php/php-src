@@ -785,6 +785,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	int len, i = 0, ch;
 	int x1 = 0, y1 = 0;
 	int xb = x, yb = y;
+	int yd = 0;
 	font_t *font;
 	fontkey_t fontkey;
 	char *next;
@@ -919,6 +920,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	}
 #endif
 
+	i = 0;
 	while (*next) {
 		ch = *next;
 
@@ -934,6 +936,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		}
 		/* newlines */
 		if (ch == '\n') {
+			if (!*(++next)) break;
 			/* 2.0.13: reset penf.x. Christopher J. Grayce */
 			penf.x = 0;
 			  penf.y -= (long)(face->size->metrics.height * linespace);
@@ -942,9 +945,9 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			  y1 = (int)(- penf.y * cos_a + 32) / 64;
 			  xb = x + x1;
 			  yb = y + y1;
+			  yd = 0;
 			  pen.x = pen.y = 0;
 			  previous = 0;		/* clear kerning flag */
-			  next++;
 			  continue;
 		}
 
@@ -1058,11 +1061,17 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 				glyph_bbox.xMax += slot->metrics.horiAdvance;
 			}
 			if (!i) { /* if first character, init BB corner values */
+				yd = slot->metrics.height - slot->metrics.horiBearingY;
 				bbox.xMin = glyph_bbox.xMin;
 				bbox.yMin = glyph_bbox.yMin;
 				bbox.xMax = glyph_bbox.xMax;
 				bbox.yMax = glyph_bbox.yMax;
 			} else {
+				FT_Pos desc;
+
+				if ( (desc = (slot->metrics.height - slot->metrics.horiBearingY)) > yd) {
+					yd = desc;
+				}
 				if (bbox.xMin > glyph_bbox.xMin) {
 					bbox.xMin = glyph_bbox.xMin;
 				}
@@ -1119,15 +1128,18 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		normbox.xMax = bbox.xMax - bbox.xMin;
 		normbox.yMax = bbox.yMax - bbox.yMin;
 
+		brect[0] = brect[2] = brect[4] = brect[6] = (int)  (yd * sin_a);
+		brect[1] = brect[3] = brect[5] = brect[7] = (int)(- yd * cos_a);
+
 		/* rotate bounding rectangle */
-		brect[0] = (int) (normbox.xMin * cos_a - normbox.yMin * sin_a);
-		brect[1] = (int) (normbox.xMin * sin_a + normbox.yMin * cos_a);
-		brect[2] = (int) (normbox.xMax * cos_a - normbox.yMin * sin_a);
-		brect[3] = (int) (normbox.xMax * sin_a + normbox.yMin * cos_a);
-		brect[4] = (int) (normbox.xMax * cos_a - normbox.yMax * sin_a);
-		brect[5] = (int) (normbox.xMax * sin_a + normbox.yMax * cos_a);
-		brect[6] = (int) (normbox.xMin * cos_a - normbox.yMax * sin_a);
-		brect[7] = (int) (normbox.xMin * sin_a + normbox.yMax * cos_a);
+		brect[0] += (int) (normbox.xMin * cos_a - normbox.yMin * sin_a);
+		brect[1] += (int) (normbox.xMin * sin_a + normbox.yMin * cos_a);
+		brect[2] += (int) (normbox.xMax * cos_a - normbox.yMin * sin_a);
+		brect[3] += (int) (normbox.xMax * sin_a + normbox.yMin * cos_a);
+		brect[4] += (int) (normbox.xMax * cos_a - normbox.yMax * sin_a);
+		brect[5] += (int) (normbox.xMax * sin_a + normbox.yMax * cos_a);
+		brect[6] += (int) (normbox.xMin * cos_a - normbox.yMax * sin_a);
+		brect[7] += (int) (normbox.xMin * sin_a + normbox.yMax * cos_a);
 
 		/* scale, round and offset brect */
 		brect[0] = xb + gdroundupdown(brect[0], d2 > 0);
