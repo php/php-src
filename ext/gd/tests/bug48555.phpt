@@ -15,5 +15,5 @@ $box = ImageFTBBox(13, 0, $font, "Text with\nline-break\none more");
 echo 'Top with line-break: ' . $box[7] . "\n";
 ?>
 --EXPECTF--
-Top without line-break: -15
-Top with line-break: -15
+Top without line-break: -14
+Top with line-break: -14
