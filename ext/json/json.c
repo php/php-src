@@ -301,6 +301,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 			efree(utf16);
 		}
 		if (len < 0) {
+			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 			if (!PG(display_errors)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 			}
@@ -413,6 +414,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 
 PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
 {
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 	switch (Z_TYPE_P(val))
 	{
 		case IS_NULL:

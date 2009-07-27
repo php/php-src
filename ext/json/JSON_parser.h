@@ -24,6 +24,7 @@ enum error_codes {
     PHP_JSON_ERROR_STATE_MISMATCH,  
     PHP_JSON_ERROR_CTRL_CHAR,   
     PHP_JSON_ERROR_SYNTAX,
+    PHP_JSON_ERROR_UTF8
 };
 
 extern JSON_parser new_JSON_parser(int depth);
