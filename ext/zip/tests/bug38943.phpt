@@ -3,8 +3,9 @@
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
-if (!defined('PHP_VERSION_MAJOR')) die('skip');
+if (!extension_loaded('zip')) die('skip');
+if (!defined('PHP_MAJOR_VERSION')) die('skip');
+if (PHP_MAJOR_VERSION==5 && PHP_MINOR_VERSION>2) die('skip');
 ?>
 --FILE--
 <?php
