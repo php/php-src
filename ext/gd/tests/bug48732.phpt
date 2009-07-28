@@ -16,5 +16,7 @@ $bbox  = imagettftext($g, 12, 0, 0, 20, $black, $font, "ABCEDFGHIJKLMN\nopqrstu\
 imagepng($g, "$cwd/bug48732.png");
 echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 ?>
+--CLEAN--
+<?php @unlink(dirname(__FILE__) . '/bug48732.png'); ?>
 --EXPECTF--
 Left Bottom: (0, 47)
