@@ -24,9 +24,6 @@ static zend_uchar zend_user_opcodes[256] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,1
 
 static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op);
 
-#ifdef PHP_WIN32
-#pragma warning (disable:4101)
-#endif
 
 #define ZEND_VM_CONTINUE()   return 0
 #define ZEND_VM_RETURN()     return 1
@@ -653,12 +650,12 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	for (i=0; i<EX(op_array)->last_brk_cont; i++) {
 		if (EX(op_array)->brk_cont_array[i].start < 0) {
 			continue;
-		} else if ((zend_uint)EX(op_array)->brk_cont_array[i].start > op_num) {
+		} else if (EX(op_array)->brk_cont_array[i].start > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		} else if (op_num < (zend_uint)EX(op_array)->brk_cont_array[i].brk) {
+		} else if (op_num < EX(op_array)->brk_cont_array[i].brk) {
 			if (!catched ||
-			    catch_op_num >= (zend_uint)EX(op_array)->brk_cont_array[i].brk) {
+			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
 				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];
 
 				switch (brk_opline->opcode) {
@@ -8573,7 +8570,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		zval *valptr;
 
-		if (!(opline->extended_value & ZEND_ARG_SEND_SILENT)) {
+		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
+			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
+			!ARG_MAY_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		ALLOC_ZVAL(valptr);
@@ -23106,7 +23105,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	} else {
 		zval *valptr;
 
-		if (!(opline->extended_value & ZEND_ARG_SEND_SILENT)) {
+		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
+			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
+			!ARG_MAY_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		ALLOC_ZVAL(valptr);
@@ -31297,7 +31298,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV_CV_HANDLER(ZEND_OP
 static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", EX(opline)->opcode, EX(opline)->op1.op_type, EX(opline)->op2.op_type);
-	return 0;
 }
 
 
