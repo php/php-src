@@ -1358,7 +1358,7 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 		x = x1 << 16;
 		y = y1 << 16;
 		inc = (dy * 65536) / dx;
-		while ((x >> 16) < x2) {
+		while ((x >> 16) <= x2) {
 			gdImageSetAAPixelColor(im, x >> 16, y >> 16, col, (y >> 8) & 0xFF);
 			if ((y >> 16) + 1 < im->sy) {
 				gdImageSetAAPixelColor(im, x >> 16, (y >> 16) + 1,col, (~y >> 8) & 0xFF);
@@ -1380,7 +1380,7 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 		x = x1 << 16;
 		y = y1 << 16;
 		inc = (dx * 65536) / dy;
-		while ((y>>16) < y2) {
+		while ((y>>16) <= y2) {
 			gdImageSetAAPixelColor(im, x >> 16, y >> 16, col, (x >> 8) & 0xFF);
 			if ((x >> 16) + 1 < im->sx) {
 				gdImageSetAAPixelColor(im, (x >> 16) + 1, (y >> 16),col, (~x >> 8) & 0xFF);
