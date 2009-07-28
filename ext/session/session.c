@@ -2352,8 +2352,16 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 } /* }}} */
 
+static const zend_module_dep session_deps[] = { /* {{{ */
+	ZEND_MOD_OPTIONAL("hash")
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 zend_module_entry session_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	session_deps,
 	"session",
 	session_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
