@@ -75,6 +75,8 @@
   (Sriram Natarajan)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
+- Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
+  com, Kalle)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
