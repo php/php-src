@@ -625,7 +625,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length, port = MYSQL_PORT;
 	long client_flags = 0;
 	php_mysql_conn *mysql=NULL;
-#if !defined(MYSQL_USE_MYSQLND) && !defined(MYSQL_HASH_SET_CHARSET)
+#if !defined(MYSQL_USE_MYSQLND) && !defined(MYSQL_HAS_SET_CHARSET)
 	char *encoding;
 #endif
 #if MYSQL_VERSION_ID <= 32230
