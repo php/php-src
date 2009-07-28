@@ -65,6 +65,8 @@ PHP                                                                        NEWS
   (Paul Richards, Kalle)
 - Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
   (Sriram Natarajan)
+- Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
+  (Sriram Natarajan)
 
 17 Jun 2009, PHP 5.2.10
 - Updated timezone database to version 2009.9 (2009i) (Derick)

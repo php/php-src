@@ -685,7 +685,11 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					 * we notice that the connect has actually been established */
 					php_stream_socket_ops.set_option(stream, option, value, ptrparam TSRMLS_CC);
 
-					if (xparam->outputs.returncode == 0 && sslsock->enable_on_connect) {
+					if ((sslsock->enable_on_connect) &&
+						((xparam->outputs.returncode == 0) ||
+						(xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC && 
+						xparam->outputs.returncode == 1 && xparam->outputs.error_code == EINPROGRESS)))
+					{
 						if (php_stream_xport_crypto_setup(stream, sslsock->method, NULL TSRMLS_CC) < 0 ||
 								php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to enable crypto");
