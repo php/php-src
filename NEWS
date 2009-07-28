@@ -27,6 +27,8 @@
   (Ilia)
 - Fixed bug #48929 (Double \r\n after HTTP headers when "header" context
   option is an array). (David Zülke)
+- Fixed bug #48912 (Namespace causes unexpected strict behaviour with
+  extract()). (Dmitry)
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
   parent class). (Felipe)
 - Fixed bug #48893 (Problems compiling with Curl). (Felipe)
