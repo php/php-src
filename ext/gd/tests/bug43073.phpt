@@ -27,6 +27,8 @@ for ($angle = 0.0; $angle < 360.0; $angle += $delta_t) {
 }
 imagepng($g, "$cwd/bug43073.png");
 ?>
+--CLEAN--
+<?php @unlink(dirname(__FILE__) . '/bug43073.png'); ?>
 --EXPECTF--
 (500, 402), (610, 402), (610, 376), (500, 376)
 (492, 363), (591, 322), (580, 295), (480, 336)
