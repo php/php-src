@@ -1491,6 +1491,9 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_DIM_TMP_VAR, VAR|CV|CONST|TMP, CONST)
 	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+	}
 	container = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {

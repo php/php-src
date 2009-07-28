@@ -2680,6 +2680,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	if (IS_CONST == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (IS_CONST == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
+	}
 	container = &opline->op1.u.constant;
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		if (!RETURN_VALUE_UNUSED(&opline->result)) {
@@ -6116,6 +6119,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 
 	if (IS_TMP_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (IS_TMP_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	container = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	if (Z_TYPE_P(container) != IS_ARRAY) {
@@ -10578,6 +10584,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 
 	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (IS_VAR == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	container = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	if (Z_TYPE_P(container) != IS_ARRAY) {
@@ -24940,6 +24949,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 
 	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr == NULL) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (IS_CV == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr) {
+		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	container = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	if (Z_TYPE_P(container) != IS_ARRAY) {
