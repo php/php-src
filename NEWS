@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
 - Fixed regression in cURL extension that prevented flush of data to output
@@ -67,6 +67,8 @@ PHP                                                                        NEWS
   (Sriram Natarajan)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
+- Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
+  com, Kalle)
 
 17 Jun 2009, PHP 5.2.10
 - Updated timezone database to version 2009.9 (2009i) (Derick)
