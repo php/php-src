@@ -107,7 +107,7 @@ static int php_embed_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-sapi_module_struct php_embed_module = {
+extern SAPI_API sapi_module_struct php_embed_module = {
 	"embed",                       /* name */
 	"PHP Embedded Library",        /* pretty name */
 	
@@ -139,7 +139,7 @@ sapi_module_struct php_embed_module = {
 };
 /* }}} */
 
-int php_embed_init(int argc, char **argv PTSRMLS_DC)
+SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
 #ifdef ZTS
@@ -202,7 +202,7 @@ int php_embed_init(int argc, char **argv PTSRMLS_DC)
   return SUCCESS;
 }
 
-void php_embed_shutdown(TSRMLS_D)
+SAPI_API void php_embed_shutdown(TSRMLS_D)
 {
 	php_request_shutdown((void *) 0);
 	php_module_shutdown(TSRMLS_C);
