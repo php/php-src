@@ -7,6 +7,8 @@
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 
+- Fixed bug #49065 ("disable_functions" php.ini option does not work on 
+  Zend extensions). (Stas)
 - Fixed bug #49064 (--enable-session=shared does not work: undefined symbol:
   php_url_scanner_reset_vars). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using
