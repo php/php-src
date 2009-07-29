@@ -1465,6 +1465,7 @@ PHP_FUNCTION(stream_is_local)
 	} else {
 		convert_to_string_ex(&zstream);
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0 TSRMLS_CC);
+		zval_ptr_dtor(&zstream);
 	}
 
 	if(!wrapper) {
