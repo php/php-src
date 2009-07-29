@@ -483,13 +483,13 @@ ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, int type
 ZEND_API int zend_class_serialize_deny(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%v' is not allowed", ce->name);
 	return FAILURE;
 } /* }}} */
 
 ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
-	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%s' is not allowed", ce->name);
+	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%v' is not allowed", ce->name);
 	return FAILURE;
 } /* }}} */
 
