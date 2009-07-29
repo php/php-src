@@ -2006,10 +2006,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_ini_register_extensions(TSRMLS_C);
 	zend_startup_modules(TSRMLS_C);
 
-	/* disable certain classes and functions as requested by php.ini */
-	php_disable_functions(TSRMLS_C);
-	php_disable_classes(TSRMLS_C);
-
 	/* start Zend extensions */
 	zend_startup_extensions();
 
@@ -2022,11 +2018,16 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		}
 	}
 	
+	/* disable certain classes and functions as requested by php.ini */
+	php_disable_functions(TSRMLS_C);
+	php_disable_classes(TSRMLS_C);
+
 	/* make core report what it should */
 	if (zend_hash_find(&module_registry, "core", sizeof("core"), (void**)&module)==SUCCESS) {
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
+
 
 #ifdef PHP_WIN32
 	/* Disable incompatible functions for the running platform */
