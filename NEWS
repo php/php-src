@@ -80,6 +80,7 @@
   (Sriram Natarajan)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
+- Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
   com, Kalle)
 
