@@ -1140,6 +1140,7 @@ function run_test($php, $file, $env)
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
 	global $valgrind_version;
+
 	$temp_filenames = null;
 	$org_file = $file;
 
