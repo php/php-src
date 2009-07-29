@@ -73,6 +73,7 @@
   (Pierre)
 - Fixed bug #45905 (imagefilledrectangle() clipping error).
   (markril at hotmail dot com, Pierre)
+- Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
 - Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
