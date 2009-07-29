@@ -1023,7 +1023,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 {
 	global $leak_check, $cwd;
 
-	$data = '';
+	$data = b'';
 
 	$bin_env = array();
 	foreach((array)$env as $key => $value) {
@@ -1059,23 +1059,23 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 			break;
 		} else if ($n === 0) {
 			/* timed out */
-			$data .= "\n ** ERROR: process timed out **\n";
+			$data .= b"\n ** ERROR: process timed out **\n";
 			proc_terminate($proc);
 			return $data;
 		} else if ($n > 0) {
-			$line = fread($pipes[1], 8192);
+			$line = (binary) fread($pipes[1], 8192);
 			if (strlen($line) == 0) {
 				/* EOF */
 				break;
 			}
-			$data .= (binary) $line;
+			$data .= $line;
 		}
 	}
 
 	$stat = proc_get_status($proc);
 
 	if ($stat['signaled']) {
-		$data .= "\nTermsig=" . $stat['stopsig'];
+		$data .= b"\nTermsig=" . $stat['stopsig'];
 	}
 
 	$code = proc_close($proc);
@@ -1649,7 +1649,7 @@ HTTP_COOKIE     = " . $env['HTTP_COOKIE'] . "
 COMMAND $cmd
 ";
 
-	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
+	$out = (binary) system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null);
 
 	if (array_key_exists('CLEAN', $section_text) && (!$no_clean || $cfg['keep']['clean'])) {
 
@@ -1686,19 +1686,19 @@ COMMAND $cmd
 	}
 
 	// Does the output match what is expected?
-	$output = preg_replace("/\r\n/", "\n", trim($out));
+	$output = preg_replace(b"/\r\n/", b"\n", trim($out));
 
 	/* when using CGI, strip the headers from the output */
-	$headers = "";
+	$headers = b"";
 
-	if (isset($old_php) && preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
+	if (isset($old_php) && preg_match(b"/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
 		$output = trim($match[2]);
-		$rh = preg_split("/[\n\r]+/", $match[1]);
+		$rh = preg_split(b"/[\n\r]+/", $match[1]);
 		$headers = array();
 
 		foreach ($rh as $line) {
-			if (strpos($line, ':') !== false) {
-				$line = explode(':', $line, 2);
+			if (strpos($line, b':') !== false) {
+				$line = explode(b':', $line, 2);
 				$headers[trim($line[0])] = trim($line[1]);
 			}
 		}
@@ -1709,13 +1709,13 @@ COMMAND $cmd
 	if (isset($section_text['EXPECTHEADERS'])) {
 		$want = array();
 		$wanted_headers = array();
-		$lines = preg_split("/[\n\r]+/", $section_text['EXPECTHEADERS']);
+		$lines = preg_split(b"/[\n\r]+/", (binary) $section_text['EXPECTHEADERS']);
 
 		foreach($lines as $line) {
-			if (strpos($line, ':') !== false) {
-				$line = explode(':', $line, 2);
+			if (strpos($line, b':') !== false) {
+				$line = explode(b':', $line, 2);
 				$want[trim($line[0])] = trim($line[1]);
-				$wanted_headers[] = trim($line[0]) . ': ' . trim($line[1]);
+				$wanted_headers[] = trim($line[0]) . b': ' . trim($line[1]);
 			}
 		}
 
@@ -1727,7 +1727,7 @@ COMMAND $cmd
 
 			if (isset($org_headers[$k])) {
 				$headers = $org_headers[$k];
-				$output_headers[] = $k . ': ' . $org_headers[$k];
+				$output_headers[] = $k . b': ' . $org_headers[$k];
 			}
 
 			if (!isset($org_headers[$k]) || $org_headers[$k] != $v) {
@@ -1736,9 +1736,9 @@ COMMAND $cmd
 		}
 
 		ksort($wanted_headers);
-		$wanted_headers = join("\n", $wanted_headers);
+		$wanted_headers = join(b"\n", $wanted_headers);
 		ksort($output_headers);
-		$output_headers = join("\n", $output_headers);
+		$output_headers = join(b"\n", $output_headers);
 	}
 
 	show_file_block('out', $output);
@@ -1752,13 +1752,13 @@ COMMAND $cmd
 		}
 
 		show_file_block('exp', $wanted);
-		$wanted_re = preg_replace('/\r\n/', "\n", $wanted);
+		$wanted_re = preg_replace(b'/\r\n/', b"\n", $wanted);
 
 		if (isset($section_text['EXPECTF'])) {
 
 			// do preg_quote, but miss out any %r delimited sections
-			$temp = "";
-			$r = "%r";
+			$temp = b"";
+			$r = b"%r";
 			$startOffset = 0;
 			$length = strlen($wanted_re);
 			while($startOffset < $length) {
@@ -1775,45 +1775,45 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  b'/');
 				// add the re unquoted.
-				$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+				$temp = $temp . b'(' . substr($wanted_re, $start+2, ($end - $start-2)). b')';
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
 		
 			$wanted_re = str_replace(
-				array('%binary_string_optional%'),
-				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'binary string',
+				array(b'%binary_string_optional%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'binary string',
 				$wanted_re
 			);
 			$wanted_re = str_replace(
-				array('%unicode_string_optional%'),
-				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'Unicode string',
+				array(b'%unicode_string_optional%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'Unicode string',
 				$wanted_re
 			);
 			$wanted_re = str_replace(
-				array('%unicode\|string%', '%string\|unicode%'),
-				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? 'string' : 'unicode',
+				array(b'%unicode\|string%', b'%string\|unicode%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'string' : b'unicode',
 				$wanted_re
 			);
 			$wanted_re = str_replace(
-				array('%u\|b%', '%b\|u%'),
-				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? '' : 'u',
+				array(b'%u\|b%', b'%b\|u%'),
+				version_compare(PHP_VERSION, '6.0.0-dev') == -1 ? b'' : b'u',
 				$wanted_re
 			);
 			// Stick to basics
-			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
-			$wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
-			$wanted_re = str_replace('%a', '.+', $wanted_re);
-			$wanted_re = str_replace('%A', '.*', $wanted_re);
-			$wanted_re = str_replace('%w', '\s*', $wanted_re);
-			$wanted_re = str_replace('%i', '[+-]?\d+', $wanted_re);
-			$wanted_re = str_replace('%d', '\d+', $wanted_re);
-			$wanted_re = str_replace('%x', '[0-9a-fA-F]+', $wanted_re);
-			$wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
-			$wanted_re = str_replace('%c', '.', $wanted_re);
+			$wanted_re = str_replace(b'%e', b'\\' . DIRECTORY_SEPARATOR, $wanted_re);
+			$wanted_re = str_replace(b'%s', b'[^\r\n]+', $wanted_re);
+			$wanted_re = str_replace(b'%S', b'[^\r\n]*', $wanted_re);
+			$wanted_re = str_replace(b'%a', b'.+', $wanted_re);
+			$wanted_re = str_replace(b'%A', b'.*', $wanted_re);
+			$wanted_re = str_replace(b'%w', b'\s*', $wanted_re);
+			$wanted_re = str_replace(b'%i', b'[+-]?\d+', $wanted_re);
+			$wanted_re = str_replace(b'%d', b'\d+', $wanted_re);
+			$wanted_re = str_replace(b'%x', b'[0-9a-fA-F]+', $wanted_re);
+			$wanted_re = str_replace(b'%f', b'[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
+			$wanted_re = str_replace(b'%c', b'.', $wanted_re);
 			// %f allows two points "-.0.0" but that is the best *simple* expression
 		}
 /* DEBUG YOUR REGEX HERE
@@ -1821,7 +1821,7 @@ COMMAND $cmd
 		print(str_repeat('=', 80) . "\n");
 		var_dump($output);
 */
-		if (preg_match((binary) "/^$wanted_re\$/s", $output)) {
+		if (preg_match(b"/^$wanted_re\$/s", $output)) {
 			$passed = true;
 			if (!$cfg['keep']['php']) {
 				@unlink($test_file);
@@ -1843,8 +1843,8 @@ COMMAND $cmd
 
 	} else {
 
-		$wanted = trim($section_text['EXPECT']);
-		$wanted = preg_replace('/\r\n/',"\n", $wanted);
+		$wanted = (binary) trim($section_text['EXPECT']);
+		$wanted = preg_replace(b'/\r\n/',b"\n", $wanted);
 		show_file_block('exp', $wanted);
 
 		// compare and leave on success
@@ -1876,8 +1876,8 @@ COMMAND $cmd
 	// Test failed so we need to report details.
 	if ($failed_headers) {
 		$passed = false;
-		$wanted = $wanted_headers . "\n--HEADERS--\n" . $wanted;
-		$output = $output_headers . "\n--HEADERS--\n" . $output;
+		$wanted = (binary) $wanted_headers . b"\n--HEADERS--\n" . (binary) $wanted;
+		$output = (binary) $output_headers . b"\n--HEADERS--\n" . (binary) $output;
 
 		if (isset($wanted_re)) {
 			$wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
