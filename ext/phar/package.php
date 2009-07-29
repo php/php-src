@@ -43,6 +43,29 @@ Security addition
  * aliases are validated so that they contain no directory separators as intended
  * on conversion to other formats, user-supplied aliases are validated
 
+Changes since 2.0.0RC2:
+ fixed PHP Bug #49021: phar tar signature algorithm reports as Unknown (0) in
+ getSignature() call
+ fixed PHP Bug #49020: phar misinterprets ustar long filename standard
+ fixed PHP Bug #49018: phar tar stores long filenames with prefix/name reversed
+ fixed PHP Bug #48791: open office files always reported as corrupted
+ fixed PHP Bug #48783: make install will fail saying phar file exists
+ fixed PHP Bug #48740: PHAR install fails when INSTALL_ROOT is not the final install location
+ fixed PHP Bug #48681: openssl signature verification for tar archives broken
+ fixed PHP Bug #48377: error message unclear on converting phar with existing file
+ fixed isset() on sub-directories (isset("blah") if file "blah/foo.php" exists)
+
+ make phar work in PHP 6
+Changes since 2.0.0RC1:
+ security vulnerability in handling of long tar filenames fixed
+ fixed PECL Bug #14646: phar error message unclear with php stream wrappers
+ fixed PECL Bug #16338: php_stream_copy_to_stream{,_ex}()
+ fixed PHP Bug #48257: PharData throws an exception with non-phar tar
+ fixed PHP Bug #47085: rename() returns true even if the file in PHAR does not exist
+ fixed PHP Bug #46032: PharData::__construct() - wrong memory read
+ fixed PHP Bug #46060: Phar::addEmptyDir() breaks
+ fixed PHP Bug #45907: undefined reference to \'PHP_SHA512Init\'
+ fixed PHP Bug #45726: PHP_Archive / Archive.php missing
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
  conversion API refactored
 Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
@@ -61,7 +84,7 @@ require_once 'PEAR/PackageFileManager2.php';
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
 $options = array(
-	'filelistgenerator' => 'CVS',
+	'filelistgenerator' => 'svn',
 	'changelogoldtonew' => false,
 	'simpleoutput'      => true,
 	'baseinstalldir'    => '/',
