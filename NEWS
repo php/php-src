@@ -69,6 +69,7 @@ PHP                                                                        NEWS
   (Sriram Natarajan)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
+- Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
 - Fixed bug #44144 (spl_autoload_functions() should return object instance
   when appropriate). (Hannes, Etienne)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
