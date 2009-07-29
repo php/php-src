@@ -186,18 +186,58 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 		}
 	} else {
 		if (c == ';') {
-			buffer[filter->status] = 0;
 			if (buffer[1]=='#') {
-				/* numeric entity */
-				for (pos=2; pos<filter->status; pos++) {
-					ent = ent*10 + (buffer[pos] - '0');
+				if (filter->status > 2 && (buffer[2] == 'x' || buffer[2] == 'X')) {
+					if (filter->status > 3) {
+						/* numeric entity */
+						for (pos=3; pos<filter->status; pos++) {
+							int v =  buffer[pos];
+							if (v >= '0' && v <= '9') {
+								v = v - '0';
+							} else if (v >= 'A' && v <= 'F') {
+								v = v - 'A' + 10;
+							} else if (v >= 'a' && v <= 'f') {
+								v = v - 'a' + 10;
+							} else {
+								ent = -1;
+								break;
+							}
+							ent = ent * 16 + v;
+						}
+					} else {
+						ent = -1;
+					}
+				} else {
+					/* numeric entity */
+					if (filter->status > 2) {
+						for (pos=2; pos<filter->status; pos++) {
+							int v = buffer[pos];
+							if (v >= '0' && v <= '9') {
+								v = v - '0';
+							} else {
+								ent = -1;
+								break;
+							}
+							ent = ent*10 + v;
+						}
+					} else {
+						ent = -1;
+					}
 				}
-				CK((*filter->output_function)(ent, filter->data));
+				if (ent >= 0 && ent < 0x110000) {
+					CK((*filter->output_function)(ent, filter->data));
+				} else {
+					for (pos = 0; pos < filter->status; pos++) {
+						CK((*filter->output_function)(buffer[pos], filter->data));
+					}
+					CK((*filter->output_function)(c, filter->data));
+				}
 				filter->status = 0;
 				/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
-			        entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
+				buffer[filter->status] = 0;
+				entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
 				while (entity->name) {
 					if (!strcmp(buffer+1, entity->name))	{
 						ent = entity->code;
