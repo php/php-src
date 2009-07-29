@@ -49,8 +49,8 @@ a 6x speedup measured running phpMyAdmin as a phar archive.</description>
   <api>1.1.1</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
