@@ -1132,7 +1132,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	UChar *target;
 	int ret, link_len, target_len;
-	char *link, buff[MAXPATHLEN];
+	char *link = NULL, buff[MAXPATHLEN];
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
@@ -1144,11 +1144,14 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	}
 
 #ifdef HAVE_SYMLINK
-	ret = readlink(intern->file_name.s, buff, MAXPATHLEN-1);
+	ret = link ? readlink(link, buff, MAXPATHLEN-1) : -1;
 #else
 	ret = -1; /* always fail if not implemented */
 #endif
 
+	if (link && intern->file_name_type == IS_UNICODE) {
+		efree(link);
+	}
 	if (ret == -1) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Unable to read link %R, error: %s", intern->file_name_type, intern->file_name, strerror(errno));
 		RETVAL_FALSE;
