@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.8.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>phar</name>
  <channel>pecl.php.net</channel>
  <summary>allows running of complete applications out of .phar files (like Java .jar files)</summary>
@@ -42,10 +42,10 @@ a 6x speedup measured running phpMyAdmin as a phar archive.</description>
   <email>sfox@php.net</email>
   <active>yes</active>
  </developer>
- <date>2008-08-31</date>
- <time>15:34:02</time>
+ <date>2009-07-26</date>
+ <time>15:41:33</time>
  <version>
-  <release>2.0.0RC1</release>
+  <release>2.0.0</release>
   <api>1.1.1</api>
  </version>
  <stability>
@@ -54,7 +54,6 @@ a 6x speedup measured running phpMyAdmin as a phar archive.</description>
  </stability>
  <license uri="http://www.php.net/license">PHP License</license>
  <notes>
-
 BC BREAKING RELEASE
  BC breaks:
  * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
@@ -97,13 +96,35 @@ Security addition
  * aliases are validated so that they contain no directory separators as intended
  * on conversion to other formats, user-supplied aliases are validated
 
+Changes since 2.0.0RC2:
+ fixed PHP Bug #49021: phar tar signature algorithm reports as Unknown (0) in
+ getSignature() call
+ fixed PHP Bug #49020: phar misinterprets ustar long filename standard
+ fixed PHP Bug #49018: phar tar stores long filenames with prefix/name reversed
+ fixed PHP Bug #48791: open office files always reported as corrupted
+ fixed PHP Bug #48783: make install will fail saying phar file exists
+ fixed PHP Bug #48740: PHAR install fails when INSTALL_ROOT is not the final install location
+ fixed PHP Bug #48681: openssl signature verification for tar archives broken
+ fixed PHP Bug #48377: error message unclear on converting phar with existing file
+ fixed isset() on sub-directories (isset(&quot;blah&quot;) if file &quot;blah/foo.php&quot; exists)
+
+ make phar work in PHP 6
+Changes since 2.0.0RC1:
+ security vulnerability in handling of long tar filenames fixed
+ fixed PECL Bug #14646: phar error message unclear with php stream wrappers
+ fixed PECL Bug #16338: php_stream_copy_to_stream{,_ex}()
+ fixed PHP Bug #48257: PharData throws an exception with non-phar tar
+ fixed PHP Bug #47085: rename() returns true even if the file in PHAR does not exist
+ fixed PHP Bug #46032: PharData::__construct() - wrong memory read
+ fixed PHP Bug #46060: Phar::addEmptyDir() breaks
+ fixed PHP Bug #45907: undefined reference to &apos;PHP_SHA512Init&apos;
+ fixed PHP Bug #45726: PHP_Archive / Archive.php missing
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
  conversion API refactored
 Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
  implement OpenSSL asynchronous true package signing
  add support for package signing to tar-based archives
  require PHP 5.2.1+
-
  </notes>
  <contents>
   <dir baseinstalldir="/" name="/">
@@ -119,6 +140,10 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
    <dir name="tests">
     <dir name="cache_list">
      <dir name="files">
+      <file name="blog.phar" role="test" />
+      <file name="blog.phar.inc" role="test" />
+      <file name="config.xml" role="test" />
+      <file name="extracted.inc" role="test" />
       <file name="frontcontroller.phar" role="test" />
       <file name="frontcontroller.phar.inc" role="test" />
       <file name="frontcontroller2.phar" role="test" />
@@ -155,7 +180,95 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
       <file name="frontcontroller18.phar.inc" role="test" />
       <file name="frontcontroller19.phar" role="test" />
       <file name="frontcontroller19.phar.inc" role="test" />
+      <file name="md5.phar" role="test" />
+      <file name="nophar.phar" role="test" />
+      <file name="nophar.phar.inc" role="test" />
+      <file name="openssl.phar" role="test" />
+      <file name="openssl.phar.pubkey" role="test" />
+      <file name="phar_oo_test.inc" role="test" />
+      <file name="phar_test.inc" role="test" />
+      <file name="private.pem" role="test" />
+      <file name="sha1.phar" role="test" />
+      <file name="sha256.phar" role="test" />
+      <file name="sha512.phar" role="test" />
+      <file name="write.phar" role="test" />
+      <file name="write.phar.inc" role="test" />
+      <file name="write2.phar" role="test" />
+      <file name="write2.phar.inc" role="test" />
+      <file name="write3.phar" role="test" />
+      <file name="write3.phar.inc" role="test" />
+      <file name="write4.phar" role="test" />
+      <file name="write4.phar.inc" role="test" />
+      <file name="write5.phar" role="test" />
+      <file name="write5.phar.inc" role="test" />
+      <file name="write6.phar" role="test" />
+      <file name="write6.phar.inc" role="test" />
+      <file name="write7.phar" role="test" />
+      <file name="write7.phar.inc" role="test" />
+      <file name="write8.phar" role="test" />
+      <file name="write8.phar.inc" role="test" />
+      <file name="write9.phar" role="test" />
+      <file name="write9.phar.inc" role="test" />
+      <file name="write10.phar" role="test" />
+      <file name="write10.phar.inc" role="test" />
+      <file name="write11.phar" role="test" />
+      <file name="write11.phar.inc" role="test" />
+      <file name="write12.phar" role="test" />
+      <file name="write12.phar.inc" role="test" />
+      <file name="write13.phar" role="test" />
+      <file name="write13.phar.inc" role="test" />
+      <file name="write14.phar" role="test" />
+      <file name="write14.phar.inc" role="test" />
+      <file name="write15.phar" role="test" />
+      <file name="write15.phar.inc" role="test" />
+      <file name="write16.phar" role="test" />
+      <file name="write16.phar.inc" role="test" />
+      <file name="write17.phar" role="test" />
+      <file name="write17.phar.inc" role="test" />
+      <file name="write18.phar" role="test" />
+      <file name="write18.phar.inc" role="test" />
+      <file name="write19.phar" role="test" />
+      <file name="write19.phar.inc" role="test" />
+      <file name="write20.phar" role="test" />
+      <file name="write20.phar.inc" role="test" />
+      <file name="write21.phar" role="test" />
+      <file name="write21.phar.inc" role="test" />
+      <file name="write22.phar" role="test" />
+      <file name="write22.phar.inc" role="test" />
+      <file name="write23.phar" role="test" />
+      <file name="write23.phar.inc" role="test" />
+      <file name="write24.phar" role="test" />
+      <file name="write24.phar.inc" role="test" />
+      <file name="write25.phar" role="test" />
+      <file name="write25.phar.inc" role="test" />
+      <file name="zfapp.tgz" role="test" />
      </dir> <!-- /tests/cache_list/files -->
+     <file name="copyonwrite1.phar.phpt" role="test" />
+     <file name="copyonwrite2.phar.phpt" role="test" />
+     <file name="copyonwrite3.phar.phpt" role="test" />
+     <file name="copyonwrite4.phar.phpt" role="test" />
+     <file name="copyonwrite4a.phpt" role="test" />
+     <file name="copyonwrite5.phar.phpt" role="test" />
+     <file name="copyonwrite6.phar.phpt" role="test" />
+     <file name="copyonwrite7.phar.phpt" role="test" />
+     <file name="copyonwrite8.phar.phpt" role="test" />
+     <file name="copyonwrite9.phar.phpt" role="test" />
+     <file name="copyonwrite10.phar.phpt" role="test" />
+     <file name="copyonwrite11.phar.phpt" role="test" />
+     <file name="copyonwrite12.phar.phpt" role="test" />
+     <file name="copyonwrite13.phar.phpt" role="test" />
+     <file name="copyonwrite14.phar.phpt" role="test" />
+     <file name="copyonwrite15.phar.phpt" role="test" />
+     <file name="copyonwrite16.phar.phpt" role="test" />
+     <file name="copyonwrite17.phar.phpt" role="test" />
+     <file name="copyonwrite18.phar.phpt" role="test" />
+     <file name="copyonwrite19.phar.phpt" role="test" />
+     <file name="copyonwrite20.phar.phpt" role="test" />
+     <file name="copyonwrite21.phar.phpt" role="test" />
+     <file name="copyonwrite22.phar.phpt" role="test" />
+     <file name="copyonwrite23.phar.phpt" role="test" />
+     <file name="copyonwrite24.phar.phpt" role="test" />
+     <file name="copyonwrite25.phar.phpt" role="test" />
      <file name="frontcontroller1.phpt" role="test" />
      <file name="frontcontroller2.phpt" role="test" />
      <file name="frontcontroller3.phpt" role="test" />
@@ -232,6 +345,9 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="frontcontroller18.phar.inc" role="test" />
      <file name="frontcontroller19.phar" role="test" />
      <file name="frontcontroller19.phar.inc" role="test" />
+     <file name="include_path.phar" role="test" />
+     <file name="include_path.phar.inc" role="test" />
+     <file name="include_path2.phar" role="test" />
      <file name="md5.phar" role="test" />
      <file name="nophar.phar" role="test" />
      <file name="nophar.phar.inc" role="test" />
@@ -279,8 +395,13 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
       <file name="frontcontroller11.phar.tar" role="test" />
       <file name="frontcontroller12.phar.inc" role="test" />
       <file name="frontcontroller12.phar.tar" role="test" />
+      <file name="links.phar.tar" role="test" />
       <file name="links.tar" role="test" />
+      <file name="make.dangerous.tar.php.inc" role="test" />
       <file name="make_invalid_tar.php.inc" role="test" />
+      <file name="Net_URL-1.0.15.tgz" role="test" />
+      <file name="P1-1.0.0.tgz" role="test" />
+      <file name="P1-1.0.0.tgz.pubkey" role="test" />
       <file name="subdirlink.tar" role="test" />
       <file name="tarmaker.php.inc" role="test" />
       <file name="tinylink.tar" role="test" />
@@ -294,6 +415,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="badalias.phpt" role="test" />
      <file name="badchecksum.phpt" role="test" />
      <file name="bignames.phpt" role="test" />
+     <file name="bignames_overflow.phpt" role="test" />
      <file name="create_new_and_modify.phpt" role="test" />
      <file name="create_new_phar_b.phpt" role="test" />
      <file name="delete.phpt" role="test" />
@@ -328,6 +450,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="links3.phpt" role="test" />
      <file name="links4.phpt" role="test" />
      <file name="links5.phpt" role="test" />
+     <file name="links6.phpt" role="test" />
      <file name="open_for_write_existing.phpt" role="test" />
      <file name="open_for_write_existing_b.phpt" role="test" />
      <file name="open_for_write_existing_b_5_2.phpt" role="test" />
@@ -350,6 +473,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="phar_convert_phar.phpt" role="test" />
      <file name="phar_convert_phar2.phpt" role="test" />
      <file name="phar_convert_phar3.phpt" role="test" />
+     <file name="phar_convert_phar4.phpt" role="test" />
      <file name="phar_copy.phpt" role="test" />
      <file name="phar_magic.phpt" role="test" />
      <file name="phar_setalias.phpt" role="test" />
@@ -375,7 +499,9 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="tar_gzipU.phpt" role="test" />
      <file name="tar_makebz2.phpt" role="test" />
      <file name="tar_makegz.phpt" role="test" />
+     <file name="tar_nohash.phpt" role="test" />
      <file name="tar_nostub.phpt" role="test" />
+     <file name="tar_openssl_hash.phpt" role="test" />
      <file name="truncated.phpt" role="test" />
     </dir> <!-- /tests/tar -->
     <dir name="zip">
@@ -385,6 +511,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
       <file name="badalias3.phar.zip" role="test" />
       <file name="badalias4.phar.zip" role="test" />
       <file name="badalias5.phar.zip" role="test" />
+      <file name="bz2_alias.phar.zip" role="test" />
       <file name="bzip2.zip" role="test" />
       <file name="cdir_offset.zip" role="test" />
       <file name="compress_unsup1.zip" role="test" />
@@ -442,9 +569,11 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
       <file name="nozipend.zip" role="test" />
       <file name="odt.odt" role="test" />
       <file name="stdin.zip" role="test" />
+      <file name="test.odt" role="test" />
       <file name="truncfilename.zip" role="test" />
       <file name="zip.zip" role="test" />
       <file name="zipmaker.php.inc" role="test" />
+      <file name="zlib_alias.phar.zip" role="test" />
      </dir> <!-- /tests/zip/files -->
      <file name="033.phpt" role="test" />
      <file name="033a.phpt" role="test" />
@@ -452,6 +581,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="all.phpt" role="test" />
      <file name="allU.phpt" role="test" />
      <file name="badalias.phpt" role="test" />
+     <file name="bug48791.phpt" role="test" />
      <file name="bzip2.phpt" role="test" />
      <file name="corrupt_001.phpt" role="test" />
      <file name="corrupt_002.phpt" role="test" />
@@ -526,6 +656,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="phar_setalias.phpt" role="test" />
      <file name="phar_setalias2.phpt" role="test" />
      <file name="phar_setdefaultstub.phpt" role="test" />
+     <file name="phar_setsignaturealgo2.phpt" role="test" />
      <file name="phar_stub.phpt" role="test" />
      <file name="phar_stub_error.phpt" role="test" />
      <file name="refcount1.phpt" role="test" />
@@ -534,6 +665,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
      <file name="rename_dir.phpt" role="test" />
      <file name="rmdir.phpt" role="test" />
      <file name="unixzip.phpt" role="test" />
+     <file name="zlib.phpt" role="test" />
     </dir> <!-- /tests/zip -->
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -586,6 +718,12 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="bug13786.phpt" role="test" />
     <file name="bug45218_SLOWTEST.phpt" role="test" />
     <file name="bug45218_SLOWTESTU.phpt" role="test" />
+    <file name="bug46032.phpt" role="test" />
+    <file name="bug46060.phpt" role="test" />
+    <file name="bug46178.phpt" role="test" />
+    <file name="bug47085.phpt" role="test" />
+    <file name="bug48377.2.phpt" role="test" />
+    <file name="bug48377.phpt" role="test" />
     <file name="cached_manifest_1.phpt" role="test" />
     <file name="cached_manifest_1U.phpt" role="test" />
     <file name="create_new_and_modify.phpt" role="test" />
@@ -604,6 +742,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="fopen5.2.phpt" role="test" />
     <file name="fopen_edgecases.phpt" role="test" />
     <file name="fopen_edgecases2.phpt" role="test" />
+    <file name="fopen_edgecases2U.phpt" role="test" />
     <file name="front.phar.phpt" role="test" />
     <file name="frontcontroller1.phpt" role="test" />
     <file name="frontcontroller2.phpt" role="test" />
@@ -640,8 +779,8 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="frontcontroller33.phpt" role="test" />
     <file name="frontcontroller34.phpt" role="test" />
     <file name="include_path.phpt" role="test" />
+    <file name="include_path_advanced.phpt" role="test" />
     <file name="ini_set.phpt" role="test" />
-    <file name="ini_setU.phpt" role="test" />
     <file name="ini_set_off.phpt" role="test" />
     <file name="ini_set_offU.phpt" role="test" />
     <file name="invalid_alias.phpt" role="test" />
@@ -693,10 +832,9 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="phar_buildfromiterator8.phpt" role="test" />
     <file name="phar_buildfromiterator9.phpt" role="test" />
     <file name="phar_buildfromiterator10.phpt" role="test" />
-    <file name="phar_buildfromiterator10U.phpt" role="test" />
     <file name="phar_bz2.phpt" role="test" />
-    <file name="phar_bz2U.phpt" role="test" />
     <file name="phar_commitwrite.phpt" role="test" />
+    <file name="phar_construct_invalidurl.phpt" role="test" />
     <file name="phar_convert_again.phpt" role="test" />
     <file name="phar_convert_repeated.phpt" role="test" />
     <file name="phar_convert_repeated_b.phpt" role="test" />
@@ -783,6 +921,7 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="phpinfo_004.phpt" role="test" />
     <file name="readfile.phpt" role="test" />
     <file name="readfile_edgecases.phpt" role="test" />
+    <file name="readfile_edgecasesU.phpt" role="test" />
     <file name="refcount1.phpt" role="test" />
     <file name="refcount1_5_2.phpt" role="test" />
     <file name="rename.phpt" role="test" />
@@ -815,7 +954,6 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
    <file name="Makefile.frag" role="src" />
    <file name="makestub.php" role="php" />
    <file name="phar.c" role="src" />
-   <file name="phar.phar" role="script" />
    <file name="pharzip.h" role="src" />
    <file name="phar_internal.h" role="src" />
    <file name="phar_object.c" role="src" />
@@ -866,6 +1004,163 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
  <changelog>
   <release>
    <version>
+    <release>2.0.0</release>
+    <api>1.1.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2009-07-26</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
+
+Major feature functionality release
+ * phar.cache_list allows web-based phar applications to run at equal or faster than
+   their on-disk equivalent [Greg]
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
+ * add support for tar-based and zip-based phar archives [Greg]
+ * add support for OpenSSL-based true signatures [Greg]
+ * add support for signatures to tar-based phar archives [Greg]
+ * add Phar::isFileFormat() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
+ * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
+ * add Phar::webPhar() for running a web-based application unmodified
+   directly from a phar archive [Greg]
+ * file functions (fopen-based and stat-based) can be instructed to only look for
+   relative paths within a phar via Phar::interceptFileFuncs()
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
+ * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
+ * add option to compress the entire phar file for phar/tar file format [Greg]
+ * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
+ * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
+ * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
+ * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
+
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0RC2:
+ fixed PHP Bug #49021: phar tar signature algorithm reports as Unknown (0) in
+ getSignature() call
+ fixed PHP Bug #49020: phar misinterprets ustar long filename standard
+ fixed PHP Bug #49018: phar tar stores long filenames with prefix/name reversed
+ fixed PHP Bug #48791: open office files always reported as corrupted
+ fixed PHP Bug #48783: make install will fail saying phar file exists
+ fixed PHP Bug #48740: PHAR install fails when INSTALL_ROOT is not the final install location
+ fixed PHP Bug #48681: openssl signature verification for tar archives broken
+ fixed PHP Bug #48377: error message unclear on converting phar with existing file
+ fixed isset() on sub-directories (isset(&quot;blah&quot;) if file &quot;blah/foo.php&quot; exists)
+
+ make phar work in PHP 6
+Changes since 2.0.0RC1:
+ security vulnerability in handling of long tar filenames fixed
+ fixed PECL Bug #14646: phar error message unclear with php stream wrappers
+ fixed PECL Bug #16338: php_stream_copy_to_stream{,_ex}()
+ fixed PHP Bug #48257: PharData throws an exception with non-phar tar
+ fixed PHP Bug #47085: rename() returns true even if the file in PHAR does not exist
+ fixed PHP Bug #46032: PharData::__construct() - wrong memory read
+ fixed PHP Bug #46060: Phar::addEmptyDir() breaks
+ fixed PHP Bug #45907: undefined reference to &apos;PHP_SHA512Init&apos;
+ fixed PHP Bug #45726: PHP_Archive / Archive.php missing
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
+Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
+ implement OpenSSL asynchronous true package signing
+ add support for package signing to tar-based archives
+ require PHP 5.2.1+
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>2.0.0RC2</release>
+    <api>1.1.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2009-06-04</date>
+   <license uri="http://www.php.net/license">PHP License</license>
+   <notes>
+BC BREAKING RELEASE
+ BC breaks:
+ * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
+   Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
+ * phar.extract_list and Phar::getExtractList() are removed
+
+Major feature functionality release
+ * phar.cache_list allows web-based phar applications to run at equal or faster than
+   their on-disk equivalent [Greg]
+ * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
+ * add support for tar-based and zip-based phar archives [Greg]
+ * add support for OpenSSL-based true signatures [Greg]
+ * add support for signatures to tar-based phar archives [Greg]
+ * add Phar::isFileFormat() [Greg]
+ * add Phar::convertToExecutable(), Phar::convertToData() [Greg]
+ * add Phar::compress() [Greg]
+ * rename Phar::compressAllFiles() to compressFiles(), uncompressAllFiles() to
+   decompressFiles() [Greg]
+ * conversion to compressed or to other file formats automatically copies the archive
+   to a new extension (i.e. &quot;.phar&quot; to &quot;.phar.tar&quot; or &quot;.tar&quot; to &quot;.tar.gz&quot;) [Steph]
+ * add Phar::webPhar() for running a web-based application unmodified
+   directly from a phar archive [Greg]
+ * file functions (fopen-based and stat-based) can be instructed to only look for
+   relative paths within a phar via Phar::interceptFileFuncs()
+ * add PharData class to allow manipulation/creation of non-executable tar and zip archives. [Steph]
+   non-executable tar/zip manipulation is allowed even when phar.readonly=1 [Greg]
+ * paths with . and .. work (phar://blah.phar/a/../b.php =&gt; phar://blah.phar/b.php) [Greg]
+ * add support for mkdir()/rmdir() and support for empty directories to phar file format [Greg]
+ * add option to compress the entire phar file for phar/tar file format [Greg]
+ * implement Phar::isCompressed() returning 0, Phar::GZ or Phar::BZ2 [Greg]
+ * implement Phar::copy(string $from, string $to) [Greg]
+ * implement Phar::running(), returns path or URL to currently executed phar
+ * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
+ * implement Phar::buildFromDirectory(string $base_directory[, string $regex]) [Steph]
+ * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
+ * add Phar::delete() [Greg]
+ * implement Phar::unlinkArchive() [Greg]
+
+Security addition
+ * aliases are validated so that they contain no directory separators as intended
+ * on conversion to other formats, user-supplied aliases are validated
+
+Changes since 2.0.0RC1:
+ security vulnerability in handling of long tar filenames fixed
+ fixed PECL Bug #14646: phar error message unclear with php stream wrappers
+ fixed PECL Bug #16338: php_stream_copy_to_stream{,_ex}()
+ fixed PHP Bug #48257: PharData throws an exception with non-phar tar
+ fixed PHP Bug #47085: rename() returns true even if the file in PHAR does not exist
+ fixed PHP Bug #46032: PharData::__construct() - wrong memory read
+ fixed PHP Bug #46060: Phar::addEmptyDir() breaks
+ fixed PHP Bug #45907: undefined reference to &apos;PHP_SHA512Init&apos;
+ fixed PHP Bug #45726: PHP_Archive / Archive.php missing
+Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
+ conversion API refactored
+Changes since 2.0.0b1: addition of phar.cache_list, many performance improvements and bugfixes
+ implement OpenSSL asynchronous true package signing
+ add support for package signing to tar-based archives
+ require PHP 5.2.1+
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>2.0.0RC1</release>
     <api>1.1.1</api>
    </version>
@@ -876,7 +1171,6 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
    <date>2008-08-31</date>
    <license uri="http://www.php.net/license">PHP License</license>
    <notes>
-
 BC BREAKING RELEASE
  BC breaks:
  * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
@@ -925,7 +1219,6 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
  implement OpenSSL asynchronous true package signing
  add support for package signing to tar-based archives
  require PHP 5.2.1+
-
    </notes>
   </release>
   <release>
@@ -939,7 +1232,8 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
    </stability>
    <date>2008-05-12</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>BC BREAKING RELEASE
+   <notes>
+BC BREAKING RELEASE
  BC breaks:
  * Phar object Compression API is rewritten.  Use Phar::compress() and decompress(),
    Phar::compressFiles()/decompressFiles() and PharFileInfo-&gt;compress()/decompress().
@@ -978,7 +1272,8 @@ Security addition
  * on conversion to other formats, user-supplied aliases are validated
 
 Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression API refactored,
- conversion API refactored</notes>
+ conversion API refactored
+   </notes>
   </release>
   <release>
    <version>
@@ -991,7 +1286,8 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
    </stability>
    <date>2008-03-27</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>Major feature functionality release
+   <notes>
+Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
@@ -1014,7 +1310,8 @@ Changes since 2.0.0a2: many bugfixes, removal of phar.extract_list, compression 
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
  * add Phar::delete() [Greg]
 
-Changes since 2.0.0a1: fix build in PHP 5.2</notes>
+Changes since 2.0.0a1: fix build in PHP 5.2
+   </notes>
   </release>
   <release>
    <version>
@@ -1027,7 +1324,8 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2008-03-26</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>Major feature functionality release
+   <notes>
+Major feature functionality release
  * new default stub allows running of phar-based phars without phar extension [Greg/Steph]
  * add support for tar-based and zip-based phar archives [Greg]
  * add Phar::isTar(), Phar::isZip(), and Phar::isPhar() [Greg]
@@ -1048,7 +1346,8 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
  * implement Phar::copy(string $from, string $to) [Greg]
  * implement Phar::buildFromIterator(Iterator $it[, string $base_directory]) [Greg]
  * implement Phar::mount() for mounting external paths or files to locations inside a phar [Greg]
- * add Phar::delete() [Greg]</notes>
+ * add Phar::delete() [Greg]
+   </notes>
   </release>
   <release>
    <version>
@@ -1061,7 +1360,8 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2007-08-24</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>* add Phar::setAlias() [Greg]
+   <notes>
+* add Phar::setAlias() [Greg]
 * fix too many open file handles issue [Greg]
 * fix rename [Greg]
 * add Phar::getAlias() [Marcus]
@@ -1072,7 +1372,8 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
 * Made Phar::loadPhar() and Phar::mapPhar() ignore extracted archives [Marcus]
 * Fix issue with compressed entries and uncompressing entries [Marcus]
 * Verify stubs before writing [Marcus]
-* Always use longest stub end to avoid issues with length field [Marcus]</notes>
+* Always use longest stub end to avoid issues with length field [Marcus]
+   </notes>
   </release>
   <release>
    <version>
@@ -1085,13 +1386,15 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2007-05-18</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>* add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
+   <notes>
+* add PharFileInfo::hasMetadata(), PharFileInfo::delMetadata() [Marcus]
 * add Phar::hasMetadata(), Phar::delMetadata() [Marcus]
 * fix Phar::CanWrite() [Marcus]
 * add preliminary phar command (phar.php) [Marcus] 
 * add phar command (phar.phar) [Marcus]
 * list all available compression methods using Phar::getSupportedCompression() [Marcus]
-* remove RINIT [Marcus]</notes>
+* remove RINIT [Marcus]
+   </notes>
   </release>
   <release>
    <version>
@@ -1104,13 +1407,15 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2007-04-12</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>* implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
+   <notes>
+* implement ability connect a phar file &apos;phar://whatever&apos; to a directory. That way all
   access to that phar archive are directed to the extracted directory. This
   allows to have the installed files and the archive keep the same includes.
   [Marcus]
 * implement SHA-2 (256, 512) support [Marcus]
 * implement setSignatureAlgorithm() and Phar::MD5 Phar::SHA1 Phar::SHA256 Phar::SHA512 Phar::PGP to
-  choose the kind of signature to use (PGP falls back to SHA1) [Greg]</notes>
+  choose the kind of signature to use (PGP falls back to SHA1) [Greg]
+   </notes>
   </release>
   <release>
    <version>
@@ -1123,7 +1428,9 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2007-03-28</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>* Fix return value of unlink() and rename() when used for phar archievs. [Marcus]</notes>
+   <notes>
+* Fix return value of unlink() and rename() when used for phar archievs. [Marcus]
+   </notes>
   </release>
   <release>
    <version>
@@ -1136,9 +1443,11 @@ Changes since 2.0.0a1: fix build in PHP 5.2</notes>
    </stability>
    <date>2007-03-26</date>
    <license uri="http://www.php.net/license">PHP License</license>
-   <notes>*BACKWARDS COMPATIBILITY BREAK*
+   <notes>
+*BACKWARDS COMPATIBILITY BREAK*
 Rename Phar-&gt;begin/isFlushingToPhar/commit to startBuffering/isBuffering/stopBuffering
-Note that isBuffering() returns the opposite value to isFlushingToPhar()</notes>
+Note that isBuffering() returns the opposite value to isFlushingToPhar()
+   </notes>
   </release>
  </changelog>
 </package>

@@ -21,6 +21,9 @@ $p->setStub('<?php
 var_dump(__FILE__);
 var_dump(substr(__FILE__, 0, 4) != "phar");
 set_include_path("phar://" . __FILE__);
+if (version_compare(PHP_VERSION, "5.3", "<")) {
+Phar::interceptFileFuncs();
+}
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $pname;
