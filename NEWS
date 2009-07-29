@@ -55,6 +55,8 @@
   components). (Ilia)
 - Fixed bug #48681 (openssl signature verification for tar archives broken).
   (Greg)
+- Fixed bug #48645 (mb_convert_encoding() doesn't understand hexadecimal
+  html-entities). (Moriyoshi)
 - Fixed bug #48637 ("file" fopen wrapper is overwritten when using
   --with-curlwrappers). (Jani)
 - Fixed bug #48377 (error message unclear on converting phar with existing file).
