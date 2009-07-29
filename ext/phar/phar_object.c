@@ -1027,6 +1027,7 @@ PHP_METHOD(Phar, mungServer)
 			MAKE_STD_ZVAL(unicopy);
 			*unicopy = **data;
 			zval_copy_ctor(unicopy);
+			INIT_PZVAL(unicopy);
 			zval_unicode_to_string(unicopy TSRMLS_CC);
 			data = &unicopy;
 		}
