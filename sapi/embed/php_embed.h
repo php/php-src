@@ -58,10 +58,16 @@
   php_embed_shutdown(TSRMLS_C); \
 }
 
+#ifndef PHP_WIN32
+    #define EMBED_SAPI_API SAPI_API
+#else
+    #define EMBED_SAPI_API 
+#endif 
+
 BEGIN_EXTERN_C() 
-SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC);
-SAPI_API void php_embed_shutdown(TSRMLS_D);
-extern SAPI_API sapi_module_struct php_embed_module;
+EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC);
+EMBED_SAPI_API void php_embed_shutdown(TSRMLS_D);
+extern EMBED_SAPI_API sapi_module_struct php_embed_module;
 END_EXTERN_C()
 
 
