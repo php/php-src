@@ -556,7 +556,9 @@ PHP_FUNCTION(scandir)
 		RETURN_FALSE;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext, 0);
+	}
 
 	if (!flags) {
 		n = php_stream_scandir(dirn, &namelist, context, (void *) php_stream_dirent_alphasort);
