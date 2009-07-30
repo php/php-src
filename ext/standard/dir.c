@@ -586,7 +586,10 @@ PHP_FUNCTION(scandir)
 		return;
 	}
 
-	context = php_stream_context_from_zval(zcontext, 0);
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext, 0);
+	}
+
 	if (FAILURE == php_stream_path_param_encode(ppdirn, &dirn, &dirn_len, REPORT_ERRORS, context)) {
 		RETURN_FALSE;
 	}
