@@ -26,6 +26,8 @@
   (Greg)
 - Fixed bug #49014 (dechunked filter broken when serving more than 8192 bytes in
   a chunk). (andreas dot streichardt at globalpark dot com, Ilia)
+- Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes 
+  when including files from function). (Stas)
 - Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
 - Fixed bug #48962 (cURL does not upload files with specified filename).
   (Ilia)
