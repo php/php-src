@@ -239,6 +239,7 @@ define ____printzv_contents
 	if $type == 10
 		printf "(%d): [%p]: \"", $zvalue->value.str.len, $zvalue->value.str.val
 		printu $zvalue->value.ustr.val $zvalue->value.str.len
+		printf "\""
 	end
 	if $type > 10
 	end
@@ -448,6 +449,9 @@ define printzn
 	if $znode->op_type == 8
 		set $optype = "IS_UNUSED"
 	end
+	if $znode->op_type == 16
+		set $optype = "IS_CV"
+	end
 
 	printf "[0x%08x] %s", $znode, $optype
 
@@ -466,6 +470,9 @@ define printzn
 		____printzv *$tvar->var.ptr_ptr 0
 	end
 	if $znode->op_type == 8
+		printf "\n"
+	end
+	if $znode->op_type == 16
 		printf "\n"
 	end
 end
