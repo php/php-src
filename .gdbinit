@@ -158,8 +158,9 @@ define ____printzv_contents
 	printf ") "
 	if $type == 0
 		printf "NULL"
+	else
+		____printz_type $type
 	end
-	____printz_type $type
 	if $type == 1
 		printf ": %ld", $zvalue->value.lval
 	end
