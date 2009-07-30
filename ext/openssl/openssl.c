@@ -870,7 +870,11 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 		if (in == NULL) {
 			return NULL;
 		}
+#ifdef TYPEDEF_D2I_OF
 		cert = (X509 *) PEM_ASN1_read_bio((d2i_of_void *)d2i_X509, PEM_STRING_X509, in, NULL, NULL, NULL);
+#else
+		cert = (X509 *) PEM_ASN1_read_bio((char *(*)())d2i_X509, PEM_STRING_X509, in, NULL, NULL, NULL);
+#endif
 		BIO_free(in);
 	}
 
