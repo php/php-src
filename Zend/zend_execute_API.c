@@ -1241,6 +1241,7 @@ ZEND_API int zend_u_eval_stringl(zend_uchar type, zstr string, int str_len, zval
 		zval *local_retval_ptr=NULL;
 		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 		zend_op **original_opline_ptr = EG(opline_ptr);
+		int orig_interactive = CG(interactive);
 
 		EG(return_value_ptr_ptr) = &local_retval_ptr;
 		EG(active_op_array) = new_op_array;
@@ -1248,9 +1249,11 @@ ZEND_API int zend_u_eval_stringl(zend_uchar type, zstr string, int str_len, zval
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
+		CG(interactive) = 0;
 
 		zend_execute(new_op_array TSRMLS_CC);
 
+		CG(interactive) = orig_interactive;
 		if (local_retval_ptr) {
 			if (retval_ptr) {
 				COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
@@ -1333,6 +1336,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 {
 	zend_op *opline, *end;
 	zend_op *ret_opline;
+	int orig_interactive;
 
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
 		|| CG(active_op_array)->backpatch_count>0
@@ -1388,7 +1392,10 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 
 	EG(return_value_ptr_ptr) = NULL;
 	EG(active_op_array) = CG(active_op_array);
+	orig_interactive = CG(interactive);
+	CG(interactive) = 0;
 	zend_execute(CG(active_op_array) TSRMLS_CC);
+	CG(interactive) = orig_interactive;
 
 	if (EG(exception)) {
 		zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
