@@ -321,7 +321,7 @@ define ____print_ht
 				end
 			else
 				printf "\""
-				printt $unicode $p->key.arKey.u $p->nKeyLength
+				printt $p->key.type $p->key.arKey.s $p->nKeyLength
 				printf "\" => "
 			end
 		else
@@ -346,7 +346,7 @@ end
 define print_ht
 	set $ind = 1
 	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
-	____print_ht $arg0 0 1
+	____print_ht $arg0 1
 	printf "}\n"
 end
 
@@ -357,7 +357,7 @@ end
 define print_htptr
 	set $ind = 1
 	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
-	____print_ht $arg0 0 0
+	____print_ht $arg0 0
 	printf "}\n"
 end
 
@@ -368,7 +368,7 @@ end
 define print_htstr
 	set $ind = 1
 	printf "[0x%08x] (%d) {\n", $arg0, $arg0->nNumOfElements
-	____print_ht $arg0 0 2
+	____print_ht $arg0 2
 	printf "}\n"
 end
 
@@ -390,9 +390,13 @@ define ____print_ft
 			set $i = $i - 1
 		end
 
-		if $p->nKeyLength > 0 
+		if $p->nKeyLength > 0
 			printf "\""
-			printt $unicode $p->key.arKey.u $p->nKeyLength
+			if ($p->key.arKey.u.s[1] == '\0') {
+				printu $p->key.arKey.u $p->nKeyLength
+			} else {
+				printt $unicode $p->key.arKey.u $p->nKeyLength
+			}
 			printf "\" => "
 		else
 			printf "%d => ", $p->h
