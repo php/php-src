@@ -6,6 +6,7 @@
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
+- Fixed memory leak in stream_is_local(). (Felipe)
 
 - Fixed bug #49065 ("disable_functions" php.ini option does not work on 
   Zend extensions). (Stas)
@@ -25,10 +26,13 @@
   (Greg)
 - Fixed bug #49014 (dechunked filter broken when serving more than 8192 bytes in
   a chunk). (andreas dot streichardt at globalpark dot com, Ilia)
+- Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
 - Fixed bug #48962 (cURL does not upload files with specified filename).
   (Ilia)
 - Fixed bug #48929 (Double \r\n after HTTP headers when "header" context
   option is an array). (David Zülke)
+- Fixed bug #48913 (Too long error code strings in pdo_odbc driver).
+  (naf at altlinux dot ru, Felipe)
 - Fixed bug #48912 (Namespace causes unexpected strict behaviour with
   extract()). (Dmitry)
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
@@ -46,6 +50,7 @@
   Windows). (Pierre)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
   gmail dot com, Pierre)
+- Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
 - Fixed bug #48740 (PHAR install fails when INSTALL_ROOT is not the final install
   location). (james dot cohen at digitalwindow dot com, Greg)
@@ -66,6 +71,8 @@
 - Fixed bug #48189 (ibase_execute error in return param). (Kalle)
 - Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
   Al dot Smith at aeschi dot ch dot eu dot org)
+- Fixed bug #48057 (Only the date fields of the first row are fetched,
+  others are empty). (info at programmiernutte dot net)
 - Fixed bug #47481 (natcasesort() does not sort extended ASCII characters
   correctly). (Herman Radtke)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
