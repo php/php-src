@@ -60,7 +60,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS t_061"))
 
 mysqli_close($link);
 ?>
---EXPECT--
+--EXPECTF--
 foo-bar
 %unicode|string%-%unicode|string%
 rab-oof
