@@ -108,7 +108,7 @@ static int php_embed_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-extern SAPI_API sapi_module_struct php_embed_module = {
+extern EMBED_SAPI_API sapi_module_struct php_embed_module = {
 	"embed",                       /* name */
 	"PHP Embedded Library",        /* pretty name */
 	
@@ -152,7 +152,7 @@ static const zend_function_entry additional_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
+EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
 {
 	zend_llist global_vars;
 #ifdef ZTS
@@ -217,7 +217,7 @@ SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
   return SUCCESS;
 }
 
-SAPI_API void php_embed_shutdown(TSRMLS_D)
+EMBED_SAPI_API void php_embed_shutdown(TSRMLS_D)
 {
 	php_request_shutdown((void *) 0);
 	php_module_shutdown(TSRMLS_C);
