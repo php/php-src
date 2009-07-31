@@ -93,7 +93,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	p = (char **) (base + (size_t) mh_arg1);
 
-	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN) {
+	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
 		*p = new_value;
 		return SUCCESS;
