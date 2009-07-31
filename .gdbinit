@@ -393,11 +393,11 @@ define ____print_ft
 
 		if $p->nKeyLength > 0
 			printf "\""
-			if ($p->key.arKey.u.s[1] == '\0') {
+			if $p->key.arKey.u.s[1] == '\0'
 				printu $p->key.arKey.u $p->nKeyLength
-			} else {
+			else
 				printt $unicode $p->key.arKey.u $p->nKeyLength
-			}
+			end
 			printf "\" => "
 		else
 			printf "%d => ", $p->h
