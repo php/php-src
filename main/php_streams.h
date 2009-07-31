@@ -422,6 +422,7 @@ static inline int _php_stream_path_param_encode(zval **ppzval, char **ppath, int
 		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, Z_USTRVAL_PP(ppzval), Z_USTRLEN_PP(ppzval), options, context)) {
 			return FAILURE;
 		}
+		Z_ADDREF_PP(ppzval); /* the conversion removes a refcount */
 		MAKE_STD_ZVAL(zpath);
 		ZVAL_STRINGL(zpath, path, path_len, 0);
 		Z_UNSET_ISREF_P(zpath);
