@@ -109,13 +109,12 @@ Array
 (
     [statPubC] => stat pubC in B
     [statProtC] => stat protC in B
-    [statPrivC] => stat privC in A
+    [statPrivC] => stat privC in B
     [statPubB] => stat pubB in B
     [statProtB] => stat protB in B
     [statPrivB] => stat privB in B
     [statPubA] => stat pubA in A
     [statProtA] => stat protA in A
-    [statPrivA] => stat privA in A
 )
 
 
@@ -146,13 +145,11 @@ Array
 (
     [statPubC] => stat pubC in C
     [statProtC] => stat protC in C
-    [statPrivC] => stat privC in A
+    [statPrivC] => stat privC in C
     [statPubB] => stat pubB in B
     [statProtB] => stat protB in B
-    [statPrivB] => stat privB in B
     [statPubA] => stat pubA in A
     [statProtA] => stat protA in A
-    [statPrivA] => stat privA in A
 )
 
 
@@ -195,4 +192,3 @@ Array
     [protC] => protC in X
     [privC] => privC in X
 )
-
