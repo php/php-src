@@ -684,7 +684,7 @@ PHP_FUNCTION(posix_times)
 
 	PHP_POSIX_NO_ARGS;
 
-	if((ticks = times(&t)) < 0) {
+	if ((ticks = times(&t)) == -1) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
