@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 - Fixed memory leak in stream_is_local(). (Felipe)
 
+- Fixed bug #49092 (ReflectionFunction fails to work with functions in fully
+  qualified namespaces). (Kalle, Jani)
 - Fixed bug #49074 (private class static fields can be modified by using
   reflection). (Jani)
 - Fixed bug #49108 (2nd scan_dir produces seg fault). (Felipe)
