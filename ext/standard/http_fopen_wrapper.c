@@ -326,7 +326,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
 	}
 
-
 	/* send it */
 	php_stream_write(stream, scratch, strlen(scratch));
 
@@ -772,6 +771,7 @@ out:
 			stream->wrapperdata = response_header;
 		}
 		php_stream_notify_progress_init(context, 0, file_size);
+		
 		/* Restore original chunk size now that we're done with headers */
 		if (options & STREAM_WILL_CAST)
 			php_stream_set_chunk_size(stream, chunk_size);
@@ -782,6 +782,9 @@ out:
 		/* as far as streams are concerned, we are now at the start of
 		 * the stream */
 		stream->position = 0;
+
+		/* restore mode */
+		strlcpy(stream->mode, mode, sizeof(stream->mode));
 
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
