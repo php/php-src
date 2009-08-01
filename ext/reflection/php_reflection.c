@@ -3181,6 +3181,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+	
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
@@ -3196,13 +3197,18 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 		if (zend_hash_get_current_key_ex(CE_STATIC_MEMBERS(ce), &key, &key_len, &num_index, 0, &pos) != FAILURE) {
 			zstr prop_name, class_name;
 			int prop_name_len;
+			zval *prop_copy;
 
 			zend_u_unmangle_property_name(IS_UNICODE, key, key_len-1, &class_name, &prop_name);
 			prop_name_len = u_strlen(prop_name.u);
 
-			zval_add_ref(value);
+			/* copy: enforce read only access */
+			ALLOC_ZVAL(prop_copy);
+			*prop_copy = **value;
+			zval_copy_ctor(prop_copy);
+			INIT_PZVAL(prop_copy);
 
-			zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, prop_name, prop_name_len+1, value, sizeof(zval *), NULL);
+			add_u_assoc_zval(return_value, IS_UNICODE, prop_name, prop_copy);
 		}
 		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
 	}
