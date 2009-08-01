@@ -325,7 +325,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
 	}
 
-
 	/* send it */
 	php_stream_write(stream, scratch, strlen(scratch));
 
@@ -756,6 +755,8 @@ out:
 		 * the stream */
 		stream->position = 0;
 
+		/* restore mode */
+		strlcpy(stream->mode, mode, sizeof(stream->mode));
 	}
 
 	return stream;
