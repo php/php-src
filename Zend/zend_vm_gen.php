@@ -695,6 +695,7 @@ function gen_null_handler($f) {
 		out($f,"static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 		out($f,"{\n");
 		out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", EX(opline)->opcode, EX(opline)->op1.op_type, EX(opline)->op2.op_type);\n");
+		out($f,"\treturn 0;\n");
 		out($f,"}\n\n");
 	}
 }
