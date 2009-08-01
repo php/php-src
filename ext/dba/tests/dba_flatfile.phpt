@@ -3,13 +3,13 @@ DBA FlatFile handler test
 --SKIPIF--
 <?php 
 	$handler = 'flatfile';
-	require_once('skipif.inc');
+	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'flatfile';
-	require_once('test.inc');
-	require_once('dba_handler.inc');
+	require_once dirname(__FILE__) .'/test.inc';
+	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
 --EXPECT--
