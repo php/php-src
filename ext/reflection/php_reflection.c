@@ -1516,8 +1516,18 @@ ZEND_METHOD(reflection_function, __construct)
 		fptr = (zend_function*)zend_get_closure_method_def(closure TSRMLS_CC);
 		Z_ADDREF_P(closure);
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == SUCCESS) {
+		char *nsname;
+
 		lcname = zend_str_tolower_dup(name_str, name_len);
-		if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
+
+		/* Ignore leading "\" */
+		nsname = lcname;
+		if (lcname[0] == '\\') {
+			nsname = &lcname[1];
+			name_len--;
+		}
+		
+		if (zend_hash_find(EG(function_table), nsname, name_len + 1, (void **)&fptr) == FAILURE) {
 			efree(lcname);
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Function %s() does not exist", name_str);
