@@ -449,8 +449,7 @@ PHP_FUNCTION(glob)
 	int pattern_len;
 	long flags = 0;
 	glob_t globbuf;
-	unsigned int n;
-	int ret;
+	int ret, n;
 	zend_bool basedir_limit = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &pppattern, &flags) == FAILURE ||

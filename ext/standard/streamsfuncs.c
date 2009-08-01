@@ -116,10 +116,10 @@ PHP_FUNCTION(stream_socket_client)
 	
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-	tv.tv_sec = conv / 1000000;
+	tv.tv_sec = (long) (conv / 1000000);
 	tv.tv_usec = conv % 1000000;
 
-	if (zerrno)	{
+	if (zerrno) {
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
@@ -260,7 +260,7 @@ PHP_FUNCTION(stream_socket_accept)
 	
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-	tv.tv_sec = conv / 1000000;
+	tv.tv_sec = (long) (conv / 1000000);
 	tv.tv_usec = conv % 1000000;
 
 	if (zpeername) {

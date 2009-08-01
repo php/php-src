@@ -255,7 +255,7 @@ PHP_FUNCTION(pack)
 
 			case 'i': 
 			case 'I':
-				INC_OUTPUTPOS(arg,sizeof(int))
+				INC_OUTPUTPOS((unsigned int) arg, sizeof(int))
 				break;
 
 			case 'l': 
@@ -266,11 +266,11 @@ PHP_FUNCTION(pack)
 				break;
 
 			case 'f':
-				INC_OUTPUTPOS(arg,sizeof(float))
+				INC_OUTPUTPOS((unsigned int) arg, sizeof(float))
 				break;
 
 			case 'd':
-				INC_OUTPUTPOS(arg,sizeof(double))
+				INC_OUTPUTPOS((unsigned int) arg, sizeof(double))
 				break;
 
 			case 'X':

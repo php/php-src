@@ -3956,10 +3956,10 @@ PHP_FUNCTION(imagepstext)
 	bg_al = gdImageAlpha(bg_img, _bg);
 
 	for (i = 0; i < aa_steps; i++) {
-		rd = bg_rd + (double) (fg_rd - bg_rd) / aa_steps * (i + 1);
-		gr = bg_gr + (double) (fg_gr - bg_gr) / aa_steps * (i + 1);
-		bl = bg_bl + (double) (fg_bl - bg_bl) / aa_steps * (i + 1);
-		al = bg_al + (double) (fg_al - bg_al) / aa_steps * (i + 1);
+		rd = bg_rd + (int) (fg_rd - bg_rd) / aa_steps * (i + 1);
+		gr = bg_gr + (int) (fg_gr - bg_gr) / aa_steps * (i + 1);
+		bl = bg_bl + (int) (fg_bl - bg_bl) / aa_steps * (i + 1);
+		al = bg_al + (int) (fg_al - bg_al) / aa_steps * (i + 1);
 		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
 	}
 
@@ -3997,7 +3997,7 @@ PHP_FUNCTION(imagepstext)
 		for (i = 1; i < str_len; i++) {
 			amount_kern = (int) T1_GetKerning(*f_ind, str[i - 1], str[i]);
 			amount_kern += str[i - 1] == ' ' ? space : 0;
-			add_width = (int) (amount_kern + width) / extend;
+			add_width = (int) ((amount_kern + width) / extend);
 
 			char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, (float) size, transform);
 			str_path = T1_ConcatOutlines(str_path, char_path);
@@ -4699,7 +4699,7 @@ PHP_FUNCTION(imageconvolution)
 					zval copyval = **var2;
 					zval_copy_ctor(&copyval);
 					convert_to_double(&copyval);
-					matrix[i][j] = Z_DVAL_PP(var2);
+					matrix[i][j] = (float) Z_DVAL_PP(var2);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have a 3x3 matrix");
 					RETURN_FALSE;
@@ -4707,7 +4707,7 @@ PHP_FUNCTION(imageconvolution)
 			}
 		}
 	}
-	RETURN_BOOL(gdImageConvolution(im_src, matrix, div, offset));
+	RETURN_BOOL(gdImageConvolution(im_src, matrix, (float) div, (float) offset));
 }
 /* }}} */
 /* End section: Filters */

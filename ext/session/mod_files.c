@@ -132,7 +132,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 		if (status != U_ZERO_ERROR) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failure converting savepath to local filesystem encoding, attempting to use utf8");
 		} else {
-			if (newlen >= buflen) {
+			if ((unsigned int)newlen >= buflen) {
 				newlen = buflen - 1;
 				newbuf[newlen] = 0;
 			}

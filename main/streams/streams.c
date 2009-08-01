@@ -514,7 +514,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 						/* grow buffer to hold this bucket
 						 * TODO: this can fail for persistent streams */
-						if (stream->readbuflen - stream->writepos < bucket->buflen) {
+						if (stream->readbuflen - stream->writepos < (unsigned int)bucket->buflen) {
 							stream->readbuflen += bucket->buflen;
 							stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readbuflen), stream->is_persistent);
 						}
