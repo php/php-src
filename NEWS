@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
+- Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
 - Fixed bug #49074 (private class static fields can be modified by using
   reflection). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using

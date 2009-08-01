@@ -175,7 +175,15 @@ DBA_EXISTS_FUNC(db4)
 	DB4_GKEY;
 	
 	memset(&gval, 0, sizeof(gval));
+	
+	if (info->flags & DBA_PERSISTENT) {
+		gval.flags |= DB_DBT_MALLOC;
+	}
+
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
+		if (info->flags & DBA_PERSISTENT) {
+			free(gval.data);
+		}
 		return SUCCESS;
 	}
 	return FAILURE;
