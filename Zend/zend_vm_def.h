@@ -944,7 +944,7 @@ ZEND_VM_HANDLER(41, ZEND_PRINT, CONST|TMP|VAR|CV, ANY)
 ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
+	zend_free_op free_op1 = {0};
 	zval *varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	zval **retval;
 	zval tmp_varname;
