@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   defined as a file handle. (Ilia)
 - Fixed memory leak in stream_is_local(). (Felipe)
 
+- Fixed bug #49132 (posix_times returns false without error).
+  (phpbugs at gunnu dot us)
 - Fixed bug #49074 (private class static fields can be modified by using
   reflection). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using
