@@ -1523,8 +1523,22 @@ ZEND_METHOD(reflection_function, __construct)
 		fptr = (zend_function*)zend_get_closure_method_def(closure TSRMLS_CC);
 		Z_ADDREF_P(closure);
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &name_str, &name_len, &type) == SUCCESS) {
+		zstr nsname;
+
 		lcname = zend_u_str_case_fold(type, name_str, name_len, 1, &lcname_len);
-		if (zend_u_hash_find(EG(function_table), type, lcname, lcname_len + 1, (void **)&fptr) == FAILURE) {
+
+		/* Ignore leading "\" */
+		nsname = lcname;
+		if (lcname.s[0] == '\\') {
+			if (type == IS_UNICODE) {
+				nsname.u = &lcname.u[1];
+			} else {
+				nsname.s = &lcname.s[1];
+			}
+			lcname_len--;
+		}
+
+		if (zend_u_hash_find(EG(function_table), type, nsname, lcname_len + 1, (void **)&fptr) == FAILURE) {
 			efree(lcname.v);
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Function %R() does not exist", type, name_str);
