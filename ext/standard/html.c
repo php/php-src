@@ -1397,7 +1397,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 			if (!memcmp(p, basic_entities_dec[j].entity, basic_entities_dec[j].entitylen)) {
 				int e_len = basic_entities_dec[j].entitylen - 1;
 		
-				*p++ = basic_entities_dec[j].charcode;
+				*p++ = (char)basic_entities_dec[j].charcode;
 				memmove(p, p + e_len, (e - p - e_len));
 				e -= e_len;
 				goto done;

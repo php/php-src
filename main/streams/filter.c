@@ -428,7 +428,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 			php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
 			status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
 
-			if (stream->readpos + consumed > stream->writepos || consumed < 0) {
+			if ((int) (stream->readpos + consumed) > stream->writepos || consumed < 0) {
 				/* No behaving filter should cause this. */
 				status = PSFS_ERR_FATAL;
 			}
@@ -484,9 +484,8 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 						php_stream_bucket_convert_notranscode(bucket, stream->readbuf_type);
 					}
 
-					/* Grow buffer to hold this bucket if need be.
-					   TODO: See warning in main/stream/streams.c::php_stream_fill_read_buffer */
-					if (stream->readbuflen - stream->writepos < bucket->buflen) {
+					/* Grow buffer to hold this bucket if need be */
+					if (stream->readbuflen - stream->writepos < (unsigned int)bucket->buflen) {
 						stream->readbuflen += bucket->buflen;
 						stream->readbuf.v = perealloc(stream->readbuf.v, PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readbuflen), stream->is_persistent);
 					}
@@ -660,7 +659,7 @@ PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS
 
 	if (chain == &(stream->readfilters)) {
 		/* Dump any newly flushed data to the read buffer */
-		if (stream->readpos > stream->chunk_size) {
+		if ((unsigned int)stream->readpos > stream->chunk_size) {
 			/* Back the buffer up */
 			memcpy(stream->readbuf.s, stream->readbuf.s + PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->readpos), PS_ULEN(stream->readbuf_type == IS_UNICODE, stream->writepos - stream->readpos));
 			stream->writepos -= stream->readpos;
