@@ -23,13 +23,9 @@ $m['data4'] = 400;
 var_dump($r->getStaticProperties());
 ?>
 --EXPECT--
-array(4) {
+array(2) {
   [u"data2"]=>
   int(2)
   [u"data3"]=>
   int(3)
-  [u"data1"]=>
-  int(1)
-  [u"data4"]=>
-  int(4)
 }

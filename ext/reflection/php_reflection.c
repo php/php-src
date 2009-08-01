@@ -3216,13 +3216,16 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 			zend_u_unmangle_property_name(IS_UNICODE, key, key_len-1, &class_name, &prop_name);
 			prop_name_len = u_strlen(prop_name.u);
 
-			/* copy: enforce read only access */
-			ALLOC_ZVAL(prop_copy);
-			*prop_copy = **value;
-			zval_copy_ctor(prop_copy);
-			INIT_PZVAL(prop_copy);
+			/* filter privates from base classes */
+			if (!(class_name.s && class_name.s[0] != '*' && u_strcmp(class_name.u, ce->name.u))) {				
+				/* copy: enforce read only access */
+				ALLOC_ZVAL(prop_copy);
+				*prop_copy = **value;
+				zval_copy_ctor(prop_copy);
+				INIT_PZVAL(prop_copy);
 
-			add_u_assoc_zval(return_value, IS_UNICODE, prop_name, prop_copy);
+				add_u_assoc_zval(return_value, IS_UNICODE, prop_name, prop_copy);
+			}
 		}
 		zend_hash_move_forward_ex(CE_STATIC_MEMBERS(ce), &pos);
 	}

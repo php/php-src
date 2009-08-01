@@ -67,7 +67,7 @@ Array
 )
 Array
 (
-    [privateOverridden] => new value 4
+    [privateOverridden] => new value 5
     [protectedOverridden] => new value 6
     [publicOverridden] => new value 7
 )
