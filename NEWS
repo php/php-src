@@ -1,4 +1,4 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
@@ -8,7 +8,8 @@
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 - Fixed memory leak in stream_is_local(). (Felipe)
 
-- Fixed bug #48880 (Random Appearing open_basedir problem). (Rasmus+Gwynne)
+- Fixed bug #49074 (private class static fields can be modified by using
+  reflection). (Jani)
 - Fixed bug #49108 (2nd scan_dir produces seg fault). (Felipe)
 - Fixed bug #49065 ("disable_functions" php.ini option does not work on 
   Zend extensions). (Stas)
@@ -46,6 +47,7 @@
 - Fixed bug #48854 (array_merge_recursive modifies arrays after first one).
   (Felipe)
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
+- Fixed bug #48880 (Random Appearing open_basedir problem). (Rasmus, Gwynne)
 - Fixed bug #48791 (open office files always reported as corrupted). (Greg)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
