@@ -3,14 +3,14 @@ DBA QDBM handler test
 --SKIPIF--
 <?php
 	$handler = 'qdbm';
-	require_once('skipif.inc');
+	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'qdbm';
-	require_once('test.inc');
+	require_once dirname(__FILE__) .'/test.inc';
 	$lock_flag = ''; // lock in library
-	require_once('dba_handler.inc');
+	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
 --EXPECTF--
