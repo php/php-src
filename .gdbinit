@@ -15,6 +15,25 @@ document ____executor_globals
 	ZTS detection is automatically based on ext/standard module struct
 end
 
+define print_cvs
+	____executor_globals
+	set $p = $eg.current_execute_data.CVs
+	set $c = $eg.current_execute_data.op_array.last_var
+	set $v = $eg.current_execute_data.op_array.vars
+	set $i = 0
+
+	printf "Compiled variables count: %d\n", $c
+	while $i < $c
+		printf "%d = %s\n", $i, $v[$i].name
+		if $p[$i] != 0
+			printzv *$p[$i]
+		else
+			printf "*uninitialized*\n"
+		end
+		set $i = $i + 1
+	end
+end
+
 define dump_bt
 	set $t = $arg0
 	while $t
