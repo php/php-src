@@ -3,13 +3,13 @@ Bug #36436 (DBA problem with Berkeley DB4)
 --SKIPIF--
 <?php 
 	$handler = 'db4';
-	require_once('skipif.inc');
+	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
 --FILE--
 <?php
 
 $handler = 'db4';
-require_once('test.inc');
+require_once dirname(__FILE__) .'/test.inc';
 
 $db = dba_popen($db_filename, 'c', 'db4');
 

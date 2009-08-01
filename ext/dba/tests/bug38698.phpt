@@ -3,12 +3,12 @@ Bug #38698 (Bug #38698 for some keys cdbmake creates corrupted db and cdb can't 
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';
-	require_once('skipif.inc');
+	require_once dirname(__FILE__) .'/skipif.inc';
 ?>
 --FILE--
 <?php
 
-$db_file = '129php.cdb';
+$db_file = dirname(__FILE__) .'/129php.cdb';
 
 if (($db_make=dba_open($db_file, "n", 'cdb_make'))!==FALSE) {
 	dba_insert(pack('i',129), "Booo!", $db_make);
