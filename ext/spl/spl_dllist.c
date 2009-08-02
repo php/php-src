@@ -383,6 +383,7 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 			intern->llist = (spl_ptr_llist *)spl_ptr_llist_init(other->llist->ctor, other->llist->dtor);
 			spl_ptr_llist_copy(other->llist, intern->llist TSRMLS_CC);
 			intern->traverse_pointer  = intern->llist->head;
+			SPL_LLIST_CHECK_ADDREF(intern->traverse_pointer);
 		} else {
 			intern->llist = other->llist;
 			intern->traverse_pointer  = intern->llist->head;
