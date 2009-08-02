@@ -7,9 +7,11 @@ PEAR_INSTALL_FLAGS = -n -dshort_open_tag=0 -dsafe_mode=0 -dopen_basedir= -derror
 
 WGET = `which wget 2>/dev/null`
 FETCH = `which fetch 2>/dev/null`
+PEAR_PREFIX = -dp a${program_prefix}
+PEAR_SUFFIX = -ds a$(program_suffix)
 
 install-pear-installer: $(SAPI_CLI_PATH)
-	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(builddir)/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)"
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) pear/install-pear-nozlib.phar -d "$(peardir)" -b "$(bindir)" ${PEAR_PREFIX} ${PEAR_SUFFIX}
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
