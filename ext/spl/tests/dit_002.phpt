@@ -44,12 +44,12 @@ foreach ($classes as $class => $flags) {
 }
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 ===DirectoryIterator===
 DirectoryIterator
 ===FilesystemIterator===
 SplFileInfo
-int(0)
+int(%d)
 int(0)
 SplFileInfo
 int(16)
