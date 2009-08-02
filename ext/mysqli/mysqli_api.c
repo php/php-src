@@ -1497,7 +1497,7 @@ PHP_FUNCTION(mysqli_stmt_more_results)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(mysqlnd_stmt_more_results(stmt->stmt));
+	RETURN_BOOL(mysql_stmt_more_results(stmt->stmt));
 }
 /* }}} */
 
@@ -1513,13 +1513,13 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt", MYSQLI_STATUS_VALID);
 
-	if (!mysqlnd_stmt_more_results(stmt->stmt)) {
+	if (!mysql_stmt_more_results(stmt->stmt)) {
 		php_error_docref(NULL TSRMLS_CC, E_STRICT, "There is no next result set. "
 						"Please, call mysqli_stmt_more_results()/mysqli_stmt::more_results() to check "
 						"whether to call this function/method");
 	}
 
-	RETURN_BOOL(!mysqlnd_stmt_next_result(stmt->stmt));
+	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
 }
 /* }}} */
 #endif

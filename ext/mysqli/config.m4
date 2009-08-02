@@ -62,7 +62,7 @@ elif test "$PHP_MYSQLI" != "no"; then
     $MYSQLI_LIBLINE
   ])
   dnl
-  dnl Check the library for mysql_stmt_store_result
+  dnl Check the library for mysql_stmt_next_result
   dnl
   PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_stmt_next_result,
   [
