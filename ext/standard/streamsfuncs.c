@@ -565,7 +565,7 @@ PHP_FUNCTION(stream_get_wrappers)
 
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 		array_init(return_value);
-		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
+		for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
 			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(url_stream_wrappers_hash)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
@@ -1390,9 +1390,9 @@ PHP_FUNCTION(stream_is_local)
 		RETURN_FALSE;
 	}
 
-	if(Z_TYPE_PP(zstream) == IS_RESOURCE) {
+	if (Z_TYPE_PP(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
-		if(stream == NULL) {
+		if (stream == NULL) {
 			RETURN_FALSE;
 		}
 		wrapper = stream->wrapper;
@@ -1402,7 +1402,7 @@ PHP_FUNCTION(stream_is_local)
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_PP(zstream), NULL, 0 TSRMLS_CC);
 	}
 
-	if(!wrapper) {
+	if (!wrapper) {
 		RETURN_FALSE;
 	}
 
