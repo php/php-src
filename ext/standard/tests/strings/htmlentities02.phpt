@@ -6,7 +6,6 @@ $result = (bool)setlocale(LC_CTYPE, "fr_FR.ISO-8859-15", "fr_FR.ISO8859-15", 'fr
 if (!$result) {
 	die("skip setlocale() failed\n");
 }
-echo "warn possibly braindead libc\n";
 ?>
 --INI--
 output_handler=
