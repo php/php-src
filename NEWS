@@ -6,7 +6,7 @@ PHP                                                                        NEWS
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
-- Fixed memory leak in stream_is_local(). (Felipe)
+- Fixed memory leak in stream_is_local(). (Felipe, Tony)
 
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)

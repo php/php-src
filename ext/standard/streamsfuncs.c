@@ -1448,32 +1448,24 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 */
 PHP_FUNCTION(stream_is_local)
 {
-	zval *zstream;
+	zval **zstream;
 	php_stream *stream = NULL;
 	php_stream_wrapper *wrapper = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zstream) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &zstream) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if(Z_TYPE_P(zstream) == IS_RESOURCE) {
-		php_stream_from_zval(stream, &zstream);
+	if(Z_TYPE_PP(zstream) == IS_RESOURCE) {
+		php_stream_from_zval(stream, zstream);
 		if(stream == NULL) {
 			RETURN_FALSE;
 		}
 		wrapper = stream->wrapper;
 	} else {
-		zval *copy_tmp;
+		convert_to_string_ex(zstream);
 		
-		ALLOC_ZVAL(copy_tmp);
-		*copy_tmp = *zstream;
-		zval_copy_ctor(copy_tmp);
-		INIT_PZVAL(copy_tmp);
-		convert_to_string(copy_tmp);
-		
-		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(copy_tmp), NULL, 0 TSRMLS_CC);
-		
-		zval_ptr_dtor(&copy_tmp);
+		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_PP(zstream), NULL, 0 TSRMLS_CC);
 	}
 
 	if(!wrapper) {
