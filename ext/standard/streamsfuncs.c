@@ -1750,8 +1750,17 @@ PHP_FUNCTION(stream_is_local)
 		}
 		wrapper = stream->wrapper;
 	} else {
-		convert_to_string_ex(&zstream);
-		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0 TSRMLS_CC);
+		zval *copy_tmp;
+		
+		ALLOC_ZVAL(copy_tmp);
+		*copy_tmp = *zstream;
+		zval_copy_ctor(copy_tmp);
+		INIT_PZVAL(copy_tmp);
+		convert_to_string(copy_tmp);
+		
+		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(copy_tmp), NULL, 0 TSRMLS_CC);
+		
+		zval_ptr_dtor(&copy_tmp);
 	}
 
 	if(!wrapper) {
