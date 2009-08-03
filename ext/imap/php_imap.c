@@ -221,7 +221,10 @@ static void mail_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
 
-	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
+	/* Do not try to close prototype streams */
+	if (!(imap_le_struct->flags & OP_PROTOTYPE)) {
+		mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
+	}
 
 	if (IMAPG(imap_user)) {
 		efree(IMAPG(imap_user));
@@ -782,6 +785,9 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (flags & PHP_EXPUNGE) {
 			cl_flags = CL_EXPUNGE;
 			flags ^= PHP_EXPUNGE;
+		}
+		if (flags & OP_PROTOTYPE) {
+			cl_flags |= OP_PROTOTYPE;
 		}
 	}
 
