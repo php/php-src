@@ -7,8 +7,6 @@ PHP                                                                        NEWS
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 
-- Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
-  (Uwe Schindler)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
@@ -60,6 +58,8 @@ PHP                                                                        NEWS
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
 - Fixed bug #48783 (make install will fail saying phar file exists). (Greg)
+- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
+  (Sriram Natarajan)
 - Fixed bug #48771 (rename() between volumes fails and reports no error on 
   Windows). (Pierre)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
@@ -78,11 +78,15 @@ PHP                                                                        NEWS
   html-entities). (Moriyoshi)
 - Fixed bug #48637 ("file" fopen wrapper is overwritten when using
   --with-curlwrappers). (Jani)
+- Fixed bug #48400 (imap crashes when closing stream opened with
+  OP_PROTOTYPE flag). (Jani)
 - Fixed bug #48377 (error message unclear on converting phar with existing file).
   (Greg)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
   errors when errors are logged). (Jani)
 - Fixed bug #48189 (ibase_execute error in return param). (Kalle)
+- Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
+  (Sriram Natarajan)
 - Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
   Al dot Smith at aeschi dot ch dot eu dot org)
 - Fixed bug #48057 (Only the date fields of the first row are fetched,
@@ -95,17 +99,15 @@ PHP                                                                        NEWS
 - Fixed bug #45905 (imagefilledrectangle() clipping error).
   (markril at hotmail dot com, Pierre)
 - Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
-- Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
-  (Kalle, Rick Yorgason)
-- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
-  (Sriram Natarajan)
-- Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
-  (Sriram Natarajan)
+- Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
+  (Uwe Schindler)
 - Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
 - Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
   in fopen). (Jani)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
   com, Kalle)
+- Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
+  (Kalle, Rick Yorgason)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
