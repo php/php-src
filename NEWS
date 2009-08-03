@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
 
+- Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
+  (Uwe Schindler)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)

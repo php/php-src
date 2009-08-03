@@ -57,6 +57,13 @@
 #endif
 
 /*
+ * The manual define of HPUX is to fix bug #46020, nsapi.h needs this to detect HPUX
+ */
+#ifdef __hpux
+#define HPUX
+#endif
+ 
+/*
  * NSAPI includes
  */
 #include "nsapi.h"
