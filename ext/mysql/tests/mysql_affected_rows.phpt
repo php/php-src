@@ -12,8 +12,8 @@ include_once("connect.inc");
 $tmp    = NULL;
 $link   = NULL;
 
-if (false !== ($tmp = @mysql_affected_rows()))
-	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (0 !== ($tmp = @mysql_affected_rows()))
+	printf("[001] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
 if (null !== ($tmp = @mysql_affected_rows($link)))
 	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
