@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
 - Fixed bug #49122 (undefined reference to mysqlnd_stmt_next_result on compile with
   --with-mysqli and MySQL 6.0). (Jani)
+- Fixed bug #49095 (proc_get_status['exitcode'] fails on win32). (Felipe)
 - Fixed bug #49092 (ReflectionFunction fails to work with functions in fully
   qualified namespaces). (Kalle, Jani)
 - Fixed bug #49074 (private class static fields can be modified by using
