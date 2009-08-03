@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.11
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
-- Fixed memory leak in stream_is_local(). (Felipe)
+- Fixed memory leak in stream_is_local(). (Felipe, Tony)
 
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
