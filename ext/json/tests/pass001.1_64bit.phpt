@@ -220,8 +220,7 @@ array(14) {
     unicode(1) "\"
     [u"controls"]=>
     unicode(5) "
-
-	"
+	"
     [u"slash"]=>
     unicode(5) "/ & /"
     [u"alpha"]=>
@@ -334,8 +333,7 @@ array(14) {
     [u"quotes"]=>
     unicode(27) "&#34; " %22 0x22 034 &#x22;"
     [u"/\"쫾몾ꮘﳞ볚
-
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     unicode(23) "A key can be any string"
   }
   [9]=>
@@ -401,8 +399,7 @@ array(14) {
     unicode(1) "\"
     [u"controls"]=>
     unicode(5) "
-
-	"
+	"
     [u"slash"]=>
     unicode(5) "/ & /"
     [u"alpha"]=>
@@ -515,8 +512,7 @@ array(14) {
     [u"quotes"]=>
     unicode(27) "&#34; " %22 0x22 034 &#x22;"
     [u"/\"쫾몾ꮘﳞ볚
-
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     unicode(23) "A key can be any string"
   }
   [9]=>
@@ -586,8 +582,7 @@ array(14) {
     unicode(1) "\"
     [u"controls"]=>
     unicode(5) "
-
-	"
+	"
     [u"slash"]=>
     unicode(5) "/ & /"
     [u"alpha"]=>
@@ -700,8 +695,7 @@ array(14) {
     [u"quotes"]=>
     unicode(27) "&#34; " %22 0x22 034 &#x22;"
     [u"/\"쫾몾ꮘﳞ볚
-
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     unicode(23) "A key can be any string"
   }
   [9]=>
@@ -767,8 +761,7 @@ array(14) {
     unicode(1) "\"
     [u"controls"]=>
     unicode(5) "
-
-	"
+	"
     [u"slash"]=>
     unicode(5) "/ & /"
     [u"alpha"]=>
@@ -881,8 +874,7 @@ array(14) {
     [u"quotes"]=>
     unicode(27) "&#34; " %22 0x22 034 &#x22;"
     [u"/\"쫾몾ꮘﳞ볚
-
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     unicode(23) "A key can be any string"
   }
   [9]=>
