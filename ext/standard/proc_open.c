@@ -394,7 +394,7 @@ PHP_FUNCTION(proc_get_status)
 	GetExitCodeProcess(proc->childHandle, &wstatus);
 
 	running = wstatus == STILL_ACTIVE;
-	exitcode == STILL_ACTIVE ? -1 : wstatus;
+	exitcode = running ? -1 : wstatus;
 	
 #elif HAVE_SYS_WAIT_H
 	
