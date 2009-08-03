@@ -1,5 +1,7 @@
 --TEST--
 Bug #46048 (SimpleXML top-level @attributes not part of iterator)
+--SKIPIF--
+<?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
 $xml = '
@@ -9,8 +11,8 @@ $xml = '
 ';
 $obj = simplexml_load_string($xml);
 print_r(get_object_vars($obj));
-echo "Done\n";
 ?>
+===DONE===
 --EXPECT--	
 Array
 (
@@ -21,4 +23,4 @@ Array
 
     [key] => value
 )
-Done
+===DONE===
