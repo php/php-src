@@ -55,14 +55,6 @@ typedef struct _php_zlib_context {
 	php_zlib_buffer buffer;
 } php_zlib_context;
 
-int php_zlib_output_encoding(TSRMLS_D);
-int php_zlib_encode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, int level TSRMLS_DC);
-int php_zlib_decode(const char *in_buf, size_t in_len, char **out_buf, size_t *out_len, int encoding, size_t max_len TSRMLS_DC);
-php_output_handler *php_zlib_output_handler_init(zval *handler_name, size_t chunk_size, int flags TSRMLS_DC);
-int php_zlib_output_handler(void **handler_context, php_output_context *output_context);
-void php_zlib_output_handler_dtor(void *opaq TSRMLS_DC);
-int php_zlib_output_conflict_check(zval *handler_name TSRMLS_DC);
-
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 extern php_stream_ops php_stream_gzio_ops;
 extern php_stream_wrapper php_stream_gzip_wrapper;
@@ -70,28 +62,6 @@ extern php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
 #define phpext_zlib_ptr zlib_module_ptr
-
-PHP_MINIT_FUNCTION(zlib);
-PHP_MSHUTDOWN_FUNCTION(zlib);
-PHP_RINIT_FUNCTION(zlib);
-PHP_MINFO_FUNCTION(zlib);
-
-PHP_FUNCTION(gzfile);
-PHP_FUNCTION(gzopen);
-PHP_FUNCTION(readgzfile);
-
-PHP_FUNCTION(gzcompress);
-PHP_FUNCTION(gzuncompress);
-PHP_FUNCTION(gzdeflate);
-PHP_FUNCTION(gzinflate);
-PHP_FUNCTION(gzencode);
-PHP_FUNCTION(gzdecode);
-
-PHP_FUNCTION(zlib_encode);
-PHP_FUNCTION(zlib_decode);
-
-PHP_FUNCTION(zlib_get_coding_type);
-
 
 #ifdef ZTS
 #	define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
