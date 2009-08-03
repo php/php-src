@@ -19,14 +19,13 @@ $xml = simplexml_load_string ($xml_str) ;
 $val = 1;
 
 var_dump($val);
-$obj->pos["act_idx"] = $val;
+$xml->pos["act_idx"] = $val;
 var_dump($val) ;
 
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--	
 int(1)
-
-Strict Standards: Creating default object from empty value in %s on line %d
 int(1)
-Done
+===DONE===
+	
