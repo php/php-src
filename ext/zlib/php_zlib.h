@@ -35,6 +35,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	char *output_handler;
 ZEND_END_MODULE_GLOBALS(zlib)
 
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(zlib)
+
 extern php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
