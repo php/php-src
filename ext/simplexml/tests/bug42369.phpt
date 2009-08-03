@@ -1,7 +1,7 @@
 --TEST--
 Bug #42369 (Implicit conversion to string leaks memory)
 --SKIPIF--
-<?php if (!extension_loaded('simplexml')) echo 'skip simplexml extension is not loaded'; >
+<?php if (!extension_loaded('simplexml')) echo 'skip simplexml extension is not loaded'; ?>
 --FILE--
 <?php
     $xml = '<?xml version="1.0" encoding="utf-8"?>';
@@ -17,9 +17,9 @@ Bug #42369 (Implicit conversion to string leaks memory)
         md5($x->x);
     }
 
-    echo 'done' . PHP_EOL;
 ?>
+===DONE===
 --EXPECT--
 explicit conversion
 no conversion
-done
+===DONE===

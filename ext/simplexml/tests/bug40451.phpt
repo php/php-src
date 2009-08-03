@@ -1,5 +1,7 @@
 --TEST--
 Bug #40451 (addAttribute() may crash when used with non-existent child node)
+--SKIPIF--
+<?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -14,9 +16,8 @@ $xml = simplexml_load_string($string);
 
 $add = $xml->addChild('Host');
 $add->Host->addAttribute('enable', 'true');
-
-echo "Done\n";
 ?>
+===DONE===
 --EXPECTF--	
 Warning: SimpleXMLElement::addAttribute(): Unable to locate parent Element in %s on line %d
-Done
+===DONE===

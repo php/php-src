@@ -19,12 +19,12 @@ $xml = simplexml_load_string ($xml_str) ;
 $val = 1;
 
 var_dump($val);
-$obj->pos["act_idx"] = $val;
+$xml->pos["act_idx"] = $val;
 var_dump($val) ;
 
-echo "Done\n";
 ?>
+===DONE===
 --EXPECT--	
 int(1)
 int(1)
-Done
+===DONE===
