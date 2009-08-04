@@ -68,6 +68,7 @@ PHP                                                                        NEWS
   (Sriram Natarajan)
 - Fixed bug #48771 (rename() between volumes fails and reports no error on 
   Windows). (Pierre)
+- Fixed bug #48768 (parse_ini_*() crash with INI_SCANNER_RAW). (Jani)
 - Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
   gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
