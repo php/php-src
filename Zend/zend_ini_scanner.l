@@ -298,7 +298,6 @@ restart:
 			goto restart;
 		}
 	}
-
 /*!re2c
 re2c:yyfill:check = 0;
 LNUM [0-9]+
@@ -309,7 +308,7 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z][a-zA-Z0-9_]*
-LABEL [a-zA-Z0-9*._-]*
+LABEL [^=\n\r\t ;|&$~(){}!"\[]+
 TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@{}]
 OPERATORS [&|~()!]
 DOLLAR_CURLY "${"
@@ -318,13 +317,12 @@ SECTION_RAW_CHARS [^\]\n\r]
 SINGLE_QUOTED_CHARS [^']
 RAW_VALUE_CHARS [^=\n\r;]
 
-/* Allow using ${foobar} in sections, quoted strings and values */
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 
-+<!*> := yyleng = YYCURSOR - SCNG(yy_text);
+<!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
 <INITIAL>"[" { /* Section start */
 	/* Enter section data lookup state */
@@ -489,7 +487,14 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 	return END_OF_LINE;
 }
 
-<ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL) */
+<INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
+	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(TSRMLS_C), SCNG(lineno));
+	BEGIN(INITIAL);
+	SCNG(lineno)++;
+	return END_OF_LINE;
+}
+
+<ST_VALUE,ST_RAW>[^] { /* End of option value (if EOF is reached before EOL */
 	BEGIN(INITIAL);
 	return END_OF_LINE;
 }
