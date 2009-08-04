@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   Zend extensions). (Stas)
 - Fixed bug #49064 (--enable-session=shared does not work: undefined symbol:
   php_url_scanner_reset_vars). (Jani)
+- Fixed bug #49056 (parse_ini_file() regression in 5.3.0 when using non-ASCII
+  strings as option keys). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using
   --with-curlwrappers). (Jani)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
