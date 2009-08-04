@@ -1,5 +1,5 @@
 --TEST--
-Bug #47859	parse_ini_file() does not like asterisk (*) in key in the beginning
+Bug #47859 (parse_ini_file() does not like asterisk (*) in key in the beginning)
 --FILE--
 <?php
 var_dump(parse_ini_string('*key = "*value"'));
