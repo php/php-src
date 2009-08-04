@@ -85,6 +85,8 @@ PHP                                                                        NEWS
   html-entities). (Moriyoshi)
 - Fixed bug #48637 ("file" fopen wrapper is overwritten when using
   --with-curlwrappers). (Jani)
+- Fixed bug #48608 (Invalid libreadline version not detected during configure).
+  (Jani)
 - Fixed bug #48400 (imap crashes when closing stream opened with
   OP_PROTOTYPE flag). (Jani)
 - Fixed bug #48377 (error message unclear on converting phar with existing file).
