@@ -1,5 +1,5 @@
 --TEST--
-Bug #: duplicate \r\n sent after last header line
+Bug #48929 (duplicate \r\n sent after last header line)
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --FILE--
