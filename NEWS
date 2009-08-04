@@ -54,6 +54,8 @@ PHP                                                                        NEWS
 - Fixed bug #48629 (get_defined_constants() ignores categorize parameter).
   (Felipe)
 - Fixed bug #48619 (imap_search ALL segfaults). (Pierre)
+- Fixed bug #48608 (Invalid libreadline version not detected during configure).
+  (Jani)
 - Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
   with new lines) (Takeshi Abe)
 - Fixed bug #48539 (pdo_dblib fails to connect, throws empty PDOException
