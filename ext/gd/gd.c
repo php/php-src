@@ -3956,10 +3956,10 @@ PHP_FUNCTION(imagepstext)
 	bg_al = gdImageAlpha(bg_img, _bg);
 
 	for (i = 0; i < aa_steps; i++) {
-		rd = bg_rd + (int) (fg_rd - bg_rd) / aa_steps * (i + 1);
-		gr = bg_gr + (int) (fg_gr - bg_gr) / aa_steps * (i + 1);
-		bl = bg_bl + (int) (fg_bl - bg_bl) / aa_steps * (i + 1);
-		al = bg_al + (int) (fg_al - bg_al) / aa_steps * (i + 1);
+		rd = (int) (bg_rd + (double) (fg_rd - bg_rd) / aa_steps * (i + 1));
+		gr = (int) (bg_gr + (double) (fg_gr - bg_gr) / aa_steps * (i + 1));
+		bl = (int) (bg_bl + (double) (fg_bl - bg_bl) / aa_steps * (i + 1));
+		al = (int) (bg_al + (double) (fg_al - bg_al) / aa_steps * (i + 1));
 		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
 	}
 
