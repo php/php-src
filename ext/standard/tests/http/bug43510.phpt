@@ -1,5 +1,5 @@
 --TEST--
-Bug #43510: stream_get_meta_data() does not return same mode as used in fopen
+Bug #43510 (stream_get_meta_data() does not return same mode as used in fopen)
 --SKIPIF--
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --FILE--
