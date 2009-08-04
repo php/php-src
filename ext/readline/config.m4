@@ -46,6 +46,13 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  PHP_CHECK_LIBRARY(readline, rl_pending_input,
+  [], [
+    AC_MSG_ERROR([invalid readline installation detected. Try --with-libedit instead.])
+  ], [
+    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
+  ])
+
   PHP_CHECK_LIBRARY(readline, rl_callback_read_char,
   [
     AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
