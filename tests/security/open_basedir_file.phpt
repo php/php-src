@@ -70,19 +70,19 @@ Warning: file(%s/test/bad/../bad/bad.txt): failed to open stream: %s in %s on li
 bool(false)
 array(1) {
   [0]=>
-  string(12) "Hello World!"
+  unicode(12) "Hello World!"
 }
 array(1) {
   [0]=>
-  string(12) "Hello World!"
+  unicode(12) "Hello World!"
 }
 array(1) {
   [0]=>
-  string(12) "Hello World!"
+  unicode(12) "Hello World!"
 }
 array(1) {
   [0]=>
-  string(12) "Hello World!"
+  unicode(12) "Hello World!"
 }
 *** Finished testing open_basedir configuration [file] ***
 
