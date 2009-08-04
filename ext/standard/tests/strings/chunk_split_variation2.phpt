@@ -83,12 +83,11 @@ for($count = 0; $count < count($values); $count++) {
   var_dump( chunk_split($str, $values[$count], $ending) );
 }
 
-echo "Done";
-
 //closing resource
 fclose($fp);
 
 ?>
+===DONE===
 --EXPECTF--
 *** Testing chunk_split() : with unexpected values for 'chunklen' argument ***
 -- Iteration 1 --
@@ -170,5 +169,5 @@ bool(false)
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 24 --
-string(30) "This *is ch*uklen* vari*ation*"
-Done
+string(%d) "%s"
+===DONE===
