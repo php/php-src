@@ -1409,6 +1409,9 @@ PHP_FUNCTION(getimagesize)
 		case IMAGE_FILETYPE_XBM:
 			result = php_handle_xbm(stream TSRMLS_CC);
 			break;
+		case IMAGE_FILETYPE_ICO:
+			result = php_handle_ico(stream TSRMLS_CC);
+			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
