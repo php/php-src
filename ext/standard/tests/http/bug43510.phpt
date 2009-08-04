@@ -24,5 +24,5 @@ http_server_kill($pid);
 
 ?>
 --EXPECT--
-string(1) "r"
-string(2) "rb"
+unicode(1) "r"
+unicode(2) "rb"
