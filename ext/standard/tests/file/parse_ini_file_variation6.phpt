@@ -1,7 +1,5 @@
 --TEST--
 Test parse_ini_file() function : variation - various absolute and relative paths
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -45,7 +43,7 @@ $filename = 'ParseIniFileVar6.ini';
 $content="a=test";
 $absFile = $absSubDir.'/'.$filename;
 $h = fopen($absFile,"w");
-fwrite($h, $content);
+fwrite($h, (binary) $content);
 fclose($h);
 
 for($i = 0; $i<count($allDirs); $i++) {
