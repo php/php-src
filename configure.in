@@ -423,10 +423,11 @@ sys/time.h \
 netinet/in.h \
 alloca.h \
 arpa/inet.h \
-arpa/nameser.h \
 arpa/nameser_compat.h \
+arpa/nameser.h \
 assert.h \
 crypt.h \
+dns.h \
 fcntl.h \
 grp.h \
 ieeefp.h \

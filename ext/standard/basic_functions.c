@@ -32,7 +32,7 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
-#include "ext/standard/dns.h"
+#include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "safe_mode.h"
 
