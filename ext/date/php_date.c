@@ -3270,7 +3270,7 @@ PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, *element;
 	php_timezone_obj    *tzobj;
-	int                  i, begin = 0, found;
+	unsigned int         i, begin = 0, found;
 	long                 timestamp_begin = LONG_MIN, timestamp_end = LONG_MAX;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
