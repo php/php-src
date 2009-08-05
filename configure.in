@@ -424,6 +424,7 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
+arpa/nameser_compat.h \
 assert.h \
 crypt.h \
 fcntl.h \
@@ -599,7 +600,6 @@ putenv \
 realpath \
 random \
 rand_r \
-res_search \
 scandir \
 setitimer \
 setlocale \
