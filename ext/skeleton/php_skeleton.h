@@ -3,6 +3,8 @@
 #ifndef PHP_EXTNAME_H
 #define PHP_EXTNAME_H
 
+#define PHP_EXTNAME_VERSION "0.1.0" /* Replace with version number for your extension */
+
 extern zend_module_entry extname_module_entry;
 #define phpext_extname_ptr &extname_module_entry
 
