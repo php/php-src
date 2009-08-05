@@ -20,8 +20,8 @@
 
 /* $Id$ */
 
-#ifndef DNS_H
-#define DNS_H
+#ifndef PHP_DNS_H
+#define PHP_DNS_H
 
 #if HAVE_RES_MKQUERY && !defined(HAVE_RES_NMKQUERY) && HAVE_RES_SEND && !defined(HAVE_RES_NSEND)
 #define HAVE_DEPRECATED_DNS_FUNCS 1
@@ -68,4 +68,4 @@ PHP_MINIT_FUNCTION(dns);
 #define INT32SZ		4
 #endif
 
-#endif /* DNS_H */
+#endif /* PHP_DNS_H */
