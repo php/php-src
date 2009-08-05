@@ -22,7 +22,7 @@
 #include <Winbase.h >
 #include <Windns.h>
 
-#include "dns.h"
+#include "php_dns.h"
 
 #define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
 
