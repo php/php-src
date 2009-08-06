@@ -992,22 +992,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
+# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 1, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(1, authns) /* ARRAY_INFO(1, authns, 1) */
 	ZEND_ARG_INFO(1, addtl)  /* ARRAY_INFO(1, addtl, 1) */
 ZEND_END_ARG_INFO()
-# endif
 
-# if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(1, mxhosts) /* ARRAY_INFO(1, mxhosts, 1) */
@@ -1015,7 +1013,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
 /* }}} */
 /* {{{ exec.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exec, 0, 0, 1)
@@ -3023,17 +3021,14 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
 
-# if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
+# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	PHP_FE(dns_get_mx,														arginfo_dns_get_mx)
 	PHP_FALIAS(getmxrr,				dns_get_mx,					arginfo_dns_get_mx)
-# endif
-
-# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
 	PHP_FE(dns_get_record,													arginfo_dns_get_record)
 # endif
 #endif
@@ -3632,8 +3627,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC);
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
-# if defined(PHP_WIN32) || HAVE_DNS_FUNCS
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	PHP_MINIT(dns)(INIT_FUNC_ARGS_PASSTHRU);
 # endif
 #endif
