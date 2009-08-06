@@ -809,10 +809,14 @@ PHP_FUNCTION(dns_get_record)
 
 			n = php_dns_search(handle, hostname, C_IN, type_to_fetch, answer.qb2, sizeof answer);
 
-			if (n < 0 ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "res_nsearch() failed");
-				zval_dtor(return_value);
+			if (n < 0) {
+				if (php_dns_errno(handle) == NO_DATA) {
+					php_dns_free_handle(handle);
+					continue;
+				}
+
 				php_dns_free_handle(handle);
+				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 
@@ -845,33 +849,33 @@ PHP_FUNCTION(dns_get_record)
 					add_next_index_zval(return_value, retval);
 				}
 			}
+
+			if (authns || addtl) {
+				/* List of Authoritative Name Servers
+				 * Process when only requesting addtl so that we can skip through the section
+				 */
+				while (ns-- > 0 && cp && cp < end) {
+					zval *retval = NULL;
+
+					cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval TSRMLS_CC);
+					if (retval != NULL) {
+						add_next_index_zval(authns, retval);
+					}
+				}
+			}
+
+			if (addtl) {
+				/* Additional records associated with authoritative name servers */
+				while (ar-- > 0 && cp && cp < end) {
+					zval *retval = NULL;
+
+					cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval TSRMLS_CC);
+					if (retval != NULL) {
+						add_next_index_zval(addtl, retval);
+					}
+				}
+			}
 			php_dns_free_handle(handle);
-		}
-	}
-
-	if (authns || addtl) {
-		/* List of Authoritative Name Servers
-		 * Process when only requesting addtl so that we can skip through the section
-		 */
-		while (ns-- > 0 && cp && cp < end) {
-			zval *retval = NULL;
-
-			cp = php_parserr(cp, &answer, DNS_T_ANY, authns != NULL, &retval TSRMLS_CC);
-			if (retval != NULL) {
-				add_next_index_zval(authns, retval);
-			}
-		}
-	}
-
-	if (addtl) {
-		/* Additional records associated with authoritative name servers */
-		while (ar-- > 0 && cp && cp < end) {
-			zval *retval = NULL;
-
-			cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval TSRMLS_CC);
-			if (retval != NULL) {
-				add_next_index_zval(addtl, retval);
-			}
 		}
 	}
 }
