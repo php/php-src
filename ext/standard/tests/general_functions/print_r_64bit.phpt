@@ -627,16 +627,13 @@ abcd efgh ijkl mnop 0qrst uvwx 0yz
 -- Iteration 14 --
 1234	
 5678
-	9100
-abcda
+	9100abcda
 1234	
 5678
-	9100
-abcda
+	9100abcda
 1234	
 5678
-	9100
-abcda
+	9100abcda
 *** Testing print_r() on boolean variables ***
 
 -- Iteration 1 --
