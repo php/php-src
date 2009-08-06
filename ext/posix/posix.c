@@ -1361,7 +1361,9 @@ PHP_FUNCTION(posix_initgroups)
 		RETURN_FALSE;
 	}
 
-	if(strlen(name)==0) RETURN_FALSE;
+	if (name_len == 0) {
+		RETURN_FALSE;
+	}
 
 	RETURN_BOOL(!initgroups((const char *)name, basegid));
 }
