@@ -747,7 +747,7 @@ ZEND_FUNCTION(get_class)
 	zend_uint name_len = 0;
 	int dup;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o", &obj) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o!", &obj) == FAILURE) {
 		RETURN_FALSE;
 	}
 
