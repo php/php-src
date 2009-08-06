@@ -26,5 +26,5 @@ curl_exec($ch);
 curl_close($ch);
 
 ?>
---EXPECT--
-HTTP/1.1 200 OK
+--EXPECTF--
+HTTP/1.1 %d %s
