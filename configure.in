@@ -485,16 +485,6 @@ assert.h
 #endif
 ])
 
-dnl Don't use mach-o/dyld.h on Darwin 8+, dl* is recommended by Apple from there on
-dnl See http://developer.apple.com/documentation/DeveloperTools/Conceptual/MachOTopics/Articles/loading_code.html
-case $host_alias in
-  *darwin[[89]]*)
-    ;;
-  *)
-    AC_CHECK_HEADERS([mach-o/dyld.h],[],[],[])
-    ;;
-esac
-
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
 PHP_BROKEN_GLIBC_FOPEN_APPEND
