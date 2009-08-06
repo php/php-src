@@ -23,7 +23,7 @@
 #include "php_string.h"
 #include "base64.h"
 #include "php_dir.h"
-#include "dns.h"
+#include "php_dns.h"
 #include "reg.h"
 #include "php_mail.h"
 #include "md5.h"

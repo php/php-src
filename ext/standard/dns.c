@@ -68,7 +68,7 @@
 #define AF_INET 2   /* internetwork: UDP, TCP, etc. */
 #endif
 
-#include "dns.h"
+#include "php_dns.h"
 
 /* type compat */
 #ifndef DNS_T_A
