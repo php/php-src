@@ -2114,7 +2114,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		zend_unregister_functions(module->functions, -1, NULL TSRMLS_CC);
 	}
 
-#if HAVE_LIBDL || defined(HAVE_MACH_O_DYLD_H)
+#if HAVE_LIBDL
 #if !(defined(NETWARE) && defined(APACHE_1_BUILD))
 	if (module->handle) {
 		DL_UNLOAD(module->handle);

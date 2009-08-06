@@ -79,18 +79,7 @@
 # include <dlfcn.h>
 #endif
 
-#if HAVE_MACH_O_DYLD_H
-#include <mach-o/dyld.h>
-
-/* MH_BUNDLE loading functions for Mac OS X / Darwin */
-void *zend_mh_bundle_load (char* bundle_path);
-int zend_mh_bundle_unload (void *bundle_handle);
-void *zend_mh_bundle_symbol(void *bundle_handle, const char *symbol_name);
-const char *zend_mh_bundle_error(void);
-
-#endif /* HAVE_MACH_O_DYLD_H */
-
-#if defined(HAVE_LIBDL) && !defined(HAVE_MACH_O_DYLD_H) && !defined(ZEND_WIN32)
+#if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
 # ifndef RTLD_LAZY
 #  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
@@ -114,13 +103,6 @@ const char *zend_mh_bundle_error(void);
 #  define DL_FETCH_SYMBOL			dlsym
 # endif
 # define DL_ERROR					dlerror
-# define DL_HANDLE					void *
-# define ZEND_EXTENSIONS_SUPPORT	1
-#elif defined(HAVE_MACH_O_DYLD_H)
-# define DL_LOAD(libname)			zend_mh_bundle_load(libname)
-# define DL_UNLOAD			zend_mh_bundle_unload
-# define DL_FETCH_SYMBOL(h,s)		zend_mh_bundle_symbol(h,s)
-# define DL_ERROR					zend_mh_bundle_error
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1
 #elif defined(ZEND_WIN32)
