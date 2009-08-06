@@ -254,7 +254,6 @@ case $host_alias in
         CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
       fi
     fi
-    AC_DEFINE(BIND_8_COMPAT, 1, [Enabling BIND8 compatibility for Panther])
     php_multiple_shlib_versions_ok=yes
     ;;
   *beos*)
