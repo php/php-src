@@ -29,7 +29,7 @@
 
 #include "SAPI.h"
 
-#if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
+#if defined(HAVE_LIBDL)
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef HAVE_STRING_H
@@ -48,7 +48,7 @@
 #include <sys/param.h>
 #define GET_DL_ERROR()	DL_ERROR()
 #endif
-#endif /* defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H */
+#endif /* defined(HAVE_LIBDL) */
 
 /* {{{ proto int dl(string extension_filename) U
    Load a PHP extension at runtime */
@@ -85,7 +85,7 @@ PHPAPI PHP_FUNCTION(dl)
 }
 /* }}} */
 
-#if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
+#if defined(HAVE_LIBDL)
 
 #ifdef ZTS
 #define USING_ZTS 1
