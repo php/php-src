@@ -27,32 +27,32 @@ var_dump(parse_ini_file($ini_location, true, INI_SCANNER_NORMAL));
 <?php @unlink(dirname(__FILE__) . '/bug48660.tmp'); ?>
 --EXPECTF--
 array(1) {
-  ["cases"]=>
+  [u"cases"]=>
   array(5) {
-    ["Case.a"]=>
-    string(6) "avalue"
-    ["Case.b"]=>
-    string(12) "$dollar_sign"
-    ["Case.c"]=>
-    string(12) "dollar_sign$"
-    ["Case.d"]=>
-    string(13) "$dollar_sign$"
-    ["Case.e"]=>
-    string(2) "10"
+    [u"Case.a"]=>
+    unicode(6) "avalue"
+    [u"Case.b"]=>
+    unicode(12) "$dollar_sign"
+    [u"Case.c"]=>
+    unicode(12) "dollar_sign$"
+    [u"Case.d"]=>
+    unicode(13) "$dollar_sign$"
+    [u"Case.e"]=>
+    unicode(2) "10"
   }
 }
 array(1) {
-  ["cases"]=>
+  [u"cases"]=>
   array(5) {
-    ["Case.a"]=>
-    string(6) "avalue"
-    ["Case.b"]=>
-    string(12) "$dollar_sign"
-    ["Case.c"]=>
-    string(12) "dollar_sign$"
-    ["Case.d"]=>
-    string(13) "$dollar_sign$"
-    ["Case.e"]=>
-    string(2) "10"
+    [u"Case.a"]=>
+    unicode(6) "avalue"
+    [u"Case.b"]=>
+    unicode(12) "$dollar_sign"
+    [u"Case.c"]=>
+    unicode(12) "dollar_sign$"
+    [u"Case.d"]=>
+    unicode(13) "$dollar_sign$"
+    [u"Case.e"]=>
+    unicode(2) "10"
   }
 }
