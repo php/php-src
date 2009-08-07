@@ -158,12 +158,28 @@ static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 
 /* {{{ init_ini_scanner()
 */
-static void init_ini_scanner(TSRMLS_D)
+static int init_ini_scanner(int scanner_mode, zend_file_handle *fh TSRMLS_DC)
 {
+	/* Sanity check */
+	if (scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW) {
+		zend_error(E_WARNING, "Invalid scanner mode");
+		return FAILURE;
+	}
+
 	SCNG(lineno) = 1;
-	SCNG(scanner_mode) = ZEND_INI_SCANNER_NORMAL;
+	SCNG(scanner_mode) = scanner_mode;
+	SCNG(yy_in) = fh;
+
+	if (fh != NULL) {
+		ini_filename = zend_strndup(fh->filename, strlen(fh->filename));
+	} else {
+		ini_filename = NULL;
+	}
+
 	zend_stack_init(&SCNG(state_stack));
 	BEGIN(INITIAL);
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -201,15 +217,14 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRML
 	char *buf;
 	size_t size;
 
-	if (zend_stream_fixup(fh, &buf, &size TSRMLS_CC) == FAILURE) {
+	if (zend_stream_fixup(fh, &buf, &size TSRMLS_CC) == FAILURE ||
+		init_ini_scanner(scanner_mode, fh TSRMLS_CC) == FAILURE
+	) {
 		return FAILURE;
 	}
 
-	init_ini_scanner(TSRMLS_C);
-	SCNG(scanner_mode) = scanner_mode;
-	SCNG(yy_in) = fh;
 	yy_scan_buffer(buf, size TSRMLS_CC);
-	ini_filename = zend_strndup(fh->filename, strlen(fh->filename));
+
 	return SUCCESS;
 }
 /* }}} */
@@ -220,11 +235,12 @@ int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC)
 {
 	int len = strlen(str);
 
-	init_ini_scanner(TSRMLS_C);
-	SCNG(scanner_mode) = scanner_mode;
-	SCNG(yy_in) = NULL;
+	if (init_ini_scanner(scanner_mode, NULL TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+
 	yy_scan_buffer(str, len TSRMLS_CC);
-	ini_filename = NULL;
+
 	return SUCCESS;
 }
 /* }}} */
