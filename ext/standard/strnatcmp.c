@@ -105,18 +105,22 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 {
 	unsigned char ca, cb;
 	unsigned int ai, bi;
-	int fractional, result;
+	int fractional, result, leading = true;
 
 	ai = bi = 0;
 	while (1) {
 		ca = a[ai]; cb = b[bi];
 
 		/* skip over leading spaces or zeros */
-		while (isspace((int)(unsigned char)ca) || ((ca == '0' && (ai+1 < a_len)) && !ispunct(a[ai+1])))
+		while (leading && (isspace((int)(unsigned char)ca) || ((ca == '0' && (ai+1 < a_len)) && !ispunct(a[ai+1])))) {
 			ca = a[++ai];
+		}
 
-		while (isspace((int)(unsigned char)cb) || ((cb == '0' && bi+1 < b_len) && !ispunct(b[bi+1])))
+		while (leading && (isspace((int)(unsigned char)cb) || ((cb == '0' && bi+1 < b_len) && !ispunct(b[bi+1])))) {
 			cb = b[++bi];
+		}
+
+		leading = false;
 
 		/* process run of digits */
 		if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
