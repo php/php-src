@@ -12,8 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
-- Fixed bug #49122 (undefined reference to mysqlnd_stmt_next_result on compile with
-  --with-mysqli and MySQL 6.0). (Jani)
+- Fixed bug #49122 (undefined reference to mysqlnd_stmt_next_result on compile
+  with --with-mysqli and MySQL 6.0). (Jani)
 - Fixed bug #49095 (proc_get_status['exitcode'] fails on win32). (Felipe)
 - Fixed bug #49092 (ReflectionFunction fails to work with functions in fully
   qualified namespaces). (Kalle, Jani)
@@ -38,8 +38,8 @@ PHP                                                                        NEWS
   (Greg)
 - Fixed bug #49018 (phar tar stores long filenames wit prefix/name reversed).
   (Greg)
-- Fixed bug #49014 (dechunked filter broken when serving more than 8192 bytes in
-  a chunk). (andreas dot streichardt at globalpark dot com, Ilia)
+- Fixed bug #49014 (dechunked filter broken when serving more than 8192 bytes
+  in a chunk). (andreas dot streichardt at globalpark dot com, Ilia)
 - Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes 
   when including files from function). (Stas)
 - Fixed bug #48994 (zlib.output_compression does not ouput HTTP headers when
@@ -74,14 +74,16 @@ PHP                                                                        NEWS
   gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
-- Fixed bug #48740 (PHAR install fails when INSTALL_ROOT is not the final install
-  location). (james dot cohen at digitalwindow dot com, Greg)
+- Fixed bug #48740 (PHAR install fails when INSTALL_ROOT is not the final
+  install location). (james dot cohen at digitalwindow dot com, Greg)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
 - Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain  
   components). (Ilia)
 - Fixed bug #48681 (openssl signature verification for tar archives broken).
   (Greg)
+- Fixed bug #48660 (parse_ini_*(): dollar sign as last character of value
+  fails). (Jani)
 - Fixed bug #48645 (mb_convert_encoding() doesn't understand hexadecimal
   html-entities). (Moriyoshi)
 - Fixed bug #48637 ("file" fopen wrapper is overwritten when using
@@ -90,8 +92,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #48400 (imap crashes when closing stream opened with
   OP_PROTOTYPE flag). (Jani)
-- Fixed bug #48377 (error message unclear on converting phar with existing file).
-  (Greg)
+- Fixed bug #48377 (error message unclear on converting phar with existing
+  file). (Greg)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
   errors when errors are logged). (Jani)
 - Fixed bug #48189 (ibase_execute error in return param). (Kalle)

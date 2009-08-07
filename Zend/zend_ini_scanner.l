@@ -54,7 +54,9 @@
 #define YYSTATE      YYGETCONDITION()
 #define yytext       ((char*)SCNG(yy_text))
 #define yyleng       SCNG(yy_leng)
-#define yyless(x)    YYCURSOR = yytext + x
+#define yyless(x)    do {	YYCURSOR = (unsigned char*)yytext + x; \
+							yyleng   = (unsigned int)x; } while(0)
+
 /* #define yymore()     goto yymore_restart */
 
 /* perform sanity check. If this message is triggered you should
@@ -320,7 +322,6 @@ RAW_VALUE_CHARS [^\n\r;]
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
-DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
@@ -453,18 +454,45 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 	return '"';
 }
 
-<ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+("\\"["])? { /* Escape double quoted string contents */
-	if(yyleng > 1 && yytext[yyleng-1] == '"' && yytext[yyleng-2] == '\\') {
-		yyless(yyleng-1);
-		yyleng--;
-	}
-	zend_ini_escape_string(ini_lval, yytext, yyleng, '"' TSRMLS_CC);
-	return TC_QUOTED_STRING;
-}
-
 <ST_DOUBLE_QUOTES>["]{TABS_AND_SPACES}* { /* Double quoted '"' string ends */
 	yy_pop_state(TSRMLS_C);
 	return '"';
+}
+
+<ST_DOUBLE_QUOTES>[^] { /* Escape double quoted string contents */
+	if (YYCURSOR > YYLIMIT) {
+		return 0;
+	}
+	
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '"':
+				if (YYCURSOR < YYLIMIT && YYCURSOR[-2] == '\\' && *YYCURSOR != '\r' && *YYCURSOR != '\n') {
+					continue;
+				}
+				break;
+			case '$':
+				if (*YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '\\':
+				if (YYCURSOR < YYLIMIT && *YYCURSOR != '"') {
+					YYCURSOR++;
+				}
+				/* fall through */
+			default:
+				continue;
+		}
+		
+		YYCURSOR--;
+		break;
+	}
+
+	yyleng = YYCURSOR - SCNG(yy_text);
+	
+	zend_ini_escape_string(ini_lval, yytext, yyleng, '"' TSRMLS_CC);
+	return TC_QUOTED_STRING;
 }
 
 <ST_SECTION_VALUE,ST_VALUE,ST_OFFSET>{WHITESPACE} {
