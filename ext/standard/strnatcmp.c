@@ -105,7 +105,7 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	char const *ap, *bp;
 	char const *aend = a + a_len,
 			   *bend = b + b_len;
-	int fractional, result;
+	int fractional, result, leading = true;
 
 	if (a_len == 0 || b_len == 0)
 		return a_len - b_len;
@@ -116,11 +116,15 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		ca = *ap; cb = *bp;
 
 		/* skip over leading spaces or zeros */
-		while (isspace((int)(unsigned char)ca) || (ca == '0' && (ap+1 < aend) && !ispunct(*(ap+1))))
+		while (leading && (isspace((int)(unsigned char)ca) || (ca == '0' && (ap+1 < aend) && !ispunct(*(ap+1))))) {
 			ca = *++ap;
+		}
 
-		while (isspace((int)(unsigned char)cb) || (cb == '0' && (bp+1 < bend) && !ispunct(*(bp+1))))
+		while (leading && (isspace((int)(unsigned char)cb) || (cb == '0' && (bp+1 < bend) && !ispunct(*(bp+1))))) {
 			cb = *++bp;
+		}
+
+		leading = false;
 
 		/* process run of digits */
 		if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
