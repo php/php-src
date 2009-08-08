@@ -36,7 +36,6 @@ function str_dump($a, $b) {
 
 echo "*** Testing strnatcasecmp() : variation ***\n";
 
-str_dump(chr(128), chr(255));
 str_dump('0', false);
 str_dump('fooBar', '');
 str_dump('', -1);
@@ -48,7 +47,6 @@ str_dump($a, $b);
 ===DONE===
 --EXPECT--
 *** Testing strnatcasecmp() : variation ***
-int(-1)
 int(1)
 int(6)
 int(-2)
