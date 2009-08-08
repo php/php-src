@@ -269,7 +269,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 
 		case DNS_TYPE_NAPTR:
 			{
+#if _MSC_VER >= 1500
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
+
 				add_ascii_assoc_rt_string(*subarray, "type", "NAPTR", ZSTR_DUPLICATE);
 				add_ascii_assoc_long(*subarray, "order", data_naptr->wOrder);
 				add_ascii_assoc_long(*subarray, "pref", data_naptr->wPreference);
@@ -277,6 +279,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 				add_ascii_assoc_rt_string(*subarray, "services", data_naptr->pService, ZSTR_DUPLICATE);
 				add_ascii_assoc_rt_string(*subarray, "regex", data_naptr->pRegularExpression, ZSTR_DUPLICATE);
 				add_ascii_assoc_rt_string(*subarray, "replacement", data_naptr->pReplacement, ZSTR_DUPLICATE);
+#endif
 			}
 			break;
 
