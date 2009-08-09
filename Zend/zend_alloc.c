@@ -709,12 +709,14 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 	unsigned int n;
 	unsigned int index = 0;
 
-	do {
-		n = offset[_size & 15];
+	n = offset[_size & 15];
+	while (n == 4) {
 		_size >>= 4;
 		index += n;
-	} while (n == 4);
-	return index;
+		n = offset[_size & 15];
+	}
+
+	return index + n;
 #endif
 }
 
