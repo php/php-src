@@ -10,7 +10,7 @@
 
 
 const char * gdPngGetVersionString();
-int gdJpegGetVersionString();
+const char * gdJpegGetVersionString();
 int gdJpegGetVersionInt();
 int overflow2(int a, int b);
 
