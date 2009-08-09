@@ -14,7 +14,7 @@ int gdJpegGetVersionInt()
 	return JPEG_LIB_VERSION;
 }
 
-int gdJpegGetVersionString()
+const char * gdJpegGetVersionString()
 {
 	switch(JPEG_LIB_VERSION) {
 		case 62:
