@@ -302,7 +302,7 @@ You can customize the conversion error behavior to:
 
   - stop the conversion and return an empty string
   - skip any invalid characters
-  - substibute invalid characters with a custom substitution character
+  - substitute invalid characters with a custom substitution character
   - escape the invalid character in various formats
 
 To control the global conversion error settings, use the functions:
