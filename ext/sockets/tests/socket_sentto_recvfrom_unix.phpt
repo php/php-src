@@ -49,9 +49,9 @@ if (!extension_loaded('sockets')) {
 	@unlink($address);
 ?>
 --EXPECTF--
-Warning: socket_create(): Unable to create socket [93]: Protocol not supported in %s on line %d
+Warning: socket_create(): Unable to create socket [%d]: Protocol not supported in %s on line %d
 
-Warning: socket_recvfrom(): unable to recvfrom [11]: Resource temporarily unavailable in %s on line %d
+Warning: socket_recvfrom(): unable to recvfrom [%d]: Resource temporarily unavailable in %s on line %d
 
 Warning: socket_sendto() expects at least 5 parameters, 4 given in %s on line %d
 bool(false)
