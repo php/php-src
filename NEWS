@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 
+- Fixed bug #49193 (gdJpegGetVersionString() inside gd_compact identifies
+  wrong type in declaration). (Ilia)
 - Fixed bug #49183 (dns_get_record does not return NAPTR records). (Pierre)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
