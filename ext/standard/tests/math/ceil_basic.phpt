@@ -49,7 +49,7 @@ for ($i = 0; $i < count($values); $i++) {
 float(0)
 float(0)
 float(1)
-float(0)
+float(-0)
 float(1)
 float(-1)
 float(2)
