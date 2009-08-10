@@ -178,7 +178,7 @@ Warning: unlink(/%s/BADDIR/file.tmp): No such file or directory in %s on line %d
 Warning: unlink(unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
 -- unlinking soft link unlinkVar8.tmp/file.tmp/ --
 
-Warning: unlink(unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
+Warning: unlink(unlinkVar8.tmp/file.tmp/): %s directory in %s on line %d
 -- unlinking hard link unlinkVar8.tmp/file.tmp/ --
 
 Warning: unlink(unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
@@ -187,7 +187,7 @@ Warning: unlink(unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
 Warning: unlink(/%s/unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
 -- unlinking soft link /%s/unlinkVar8.tmp/file.tmp/ --
 
-Warning: unlink(/%s/unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
+Warning: unlink(/%s/unlinkVar8.tmp/file.tmp/): %s directory in %s on line %d
 -- unlinking hard link /%s/unlinkVar8.tmp/file.tmp/ --
 
 Warning: unlink(/%s/unlinkVar8.tmp/file.tmp/): Not a directory in %s on line %d
