@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
+- Improve dns_get_record AAAA support on windows. Always available when IPv6 is
+  support is installed, format is now the same than on unix. (Pierre)
+
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
   Functors. (Christian Seiler)
 - Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,

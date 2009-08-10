@@ -132,7 +132,6 @@ PHP_FUNCTION(dns_check_record)
 }
 /* }}} */
 
-#if 1
 /* {{{ php_parserr */
 static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **subarray)
 {
@@ -237,20 +236,51 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 			}
 			break;
 
-
 		case DNS_TYPE_AAAA:
-#if _WIN32_WINNT >= 0x0600
 			{
-				LPSTR str[MAXHOSTNAMELEN];
 				DNS_AAAA_DATA *data_aaaa = &pRec->Data.AAAA;
+				char buf[sizeof("AAAA:AAAA:AAAA:AAAA:AAAA:AAAA:AAAA:AAAA")];
+				char *tp = buf;
+				int i;
+				unsigned short out[8];
+				int have_v6_break = 0, in_v6_break = 0;
+
+				for (i = 0; i < 4; ++i) {
+					DWORD chunk = data_aaaa->Ip6Address.IP6Dword[i];
+					out[i * 2]     = htons(LOWORD(chunk));
+					out[i * 2 + 1] = htons(HIWORD(chunk));
+				}
+
+				for(i=0; i < 8; i++) {
+					if (out[i] != 0) {
+						if (tp > (u_char *)buf) {
+							in_v6_break = 0;
+							tp[0] = ':';
+							tp++;
+						}
+						tp += sprintf((char*)tp,"%x", out[i]);
+					} else {
+						if (!have_v6_break) {
+							have_v6_break = 1;
+							in_v6_break = 1;
+							tp[0] = ':';
+							tp++;
+						} else if (!in_v6_break) {
+							tp[0] = ':';
+							tp++;
+							tp[0] = '0';
+							tp++;
+						}
+					}
+				}
+
 				add_assoc_string(*subarray, "type", "AAAA", 1);
-				add_assoc_string(*subarray, "ipv6", RtlIpv6AddressToString(data_aaaa->Ip6Address, str), 1);
+				add_assoc_string(*subarray, "ipv6", buf, 1);
 			}
-#endif
 			break;
 
 #if 0
-		/* Not supported yet */
+		/* Won't be implemented. A6 is deprecated. (Pierre) */
 		case DNS_TYPE_A6:
 			break;
 #endif
@@ -291,7 +321,6 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, zval **s
 	add_assoc_long(*subarray, "ttl", ttl);
 }
 /* }}} */
-#endif
 
 /* {{{ proto array|false dns_get_record(string hostname [, int type[, array authns, array addtl]])
    Get any Resource Record corresponding to a given Internet host name */
