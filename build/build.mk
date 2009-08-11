@@ -73,6 +73,9 @@ svnclean-work:
 	done
 
 gitclean-work:
-	@echo "We don't know how to clean Git checkouts yet."
+	@if (test ! -f '.git/info/exclude' || grep -s "git-ls-files" .git/info/exclude); then \
+		(echo "Rebuild .git/info/exclude" && echo '*.o' > .git/info/exclude && git svn propget svn:ignore | grep -v config.nice >> .git/info/exclude); \
+	fi; \
+	git clean -X -f -d;
 
 .PHONY: $(ALWAYS) snapshot
