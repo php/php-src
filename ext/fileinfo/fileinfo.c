@@ -414,7 +414,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				RETURN_FALSE;
 		}
 
-		magic = magic_open(MAGIC_MIME);
+		magic = magic_open(MAGIC_MIME_TYPE);
 		if (magic_load(magic, NULL) == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database.");
 			goto common;

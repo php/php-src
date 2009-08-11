@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
+- Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
 - Fixed bug #49193 (gdJpegGetVersionString() inside gd_compact identifies
   wrong type in declaration). (Ilia)
