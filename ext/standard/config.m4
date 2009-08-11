@@ -247,21 +247,18 @@ fi
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
-dnl ext/standard/php_dns.h will collect these in a single define: HAVE_DNS_FUNCS
+dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
 dnl
-PHP_CHECK_FUNC(res_nmkquery, resolv, bind, socket)
-PHP_CHECK_FUNC(res_nsend, resolv, bind, socket)
-PHP_CHECK_FUNC(res_search, resolv, bind, socket)
+PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
+PHP_CHECK_FUNC(dns_search, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
 
 dnl
-dnl These are old deprecated functions, a single define of HAVE_DEPRECATED_DNS_FUNCS
-dnl will be set in ext/standard/php_dns.h
+dnl These are old deprecated functions
 dnl
 
-PHP_CHECK_FUNC(res_mkquery, resolv, bind, socket)
-PHP_CHECK_FUNC(res_send, resolv, bind, socket)
+PHP_CHECK_FUNC(res_search, resolv, bind, socket)
 
 dnl
 dnl Check if atof() accepts NAN

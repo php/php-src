@@ -23,20 +23,38 @@
 #ifndef PHP_DNS_H
 #define PHP_DNS_H
 
-#if HAVE_RES_MKQUERY && !defined(HAVE_RES_NMKQUERY) && HAVE_RES_SEND && !defined(HAVE_RES_NSEND)
-#define HAVE_DEPRECATED_DNS_FUNCS 1
+#if defined(HAVE_DNS_SEARCH)
+#define php_dns_search(res, dname, class, type, answer, anslen) \
+    	((int)dns_search(res, dname, class, type, answer, anslen, (struct sockaddr *)&from, &fromsize))
+#define php_dns_free_handle(res) \
+		dns_free(res)
+#define php_dns_errno(_res) \
+			(NO_DATA)
+
+#elif defined(HAVE_RES_NSEARCH)
+#define php_dns_search(res, dname, class, type, answer, anslen) \
+			res_nsearch(res, dname, class, type, answer, anslen);
+#define php_dns_free_handle(res) \
+			res_nclose(res); \
+			php_dns_free_res(*res)
+#define php_dns_errno(res) \
+			(res->res_h_errno)
+
+#elif defined(HAVE_RES_SEARCH)
+#define php_dns_search(res, dname, class, type, answer, anslen) \
+			res_search(dname, class, type, answer, anslen)
+#define php_dns_free_handle(res) /* noop */
+#define php_dns_errno(res) \
+			(_res.res_h_errno)
+
 #endif
 
-#if HAVE_DEPRECATED_DNS_FUNCS
-#define res_nmkquery(res, op, dname, class, type, data, datalen, newrr, buf, buflen) \
-	res_mkquery(op, dname, class, type, data, datalen, newrr, buf, buflen)
-#define res_nsend(res, msg, msglen, answer, anslen) \
-	res_send(msg, msglen, answer, anslen);
-#define res_nclose(res) /* noop */
+#if defined(HAVE_DNS_SEARCH) || defined(HAVE_RES_NSEARCH) || defined(HAVE_RES_SEARCH)
+#define HAVE_DNS_SEARCH_FUNC 1
 #endif
 
-#if ((HAVE_RES_NMKQUERY && HAVE_RES_NSEND) || HAVE_DEPRECATED_DNS_FUNCS) && HAVE_DN_EXPAND && HAVE_DN_SKIPNAME
-#define HAVE_DNS_FUNCS 1
+#if HAVE_DNS_SEARCH_FUNC && HAVE_DN_EXPAND && HAVE_DN_SKIPNAME
+#define HAVE_FULL_DNS_FUNCS 1
 #endif
 
 PHP_FUNCTION(gethostbyaddr);
@@ -47,18 +65,16 @@ PHP_FUNCTION(gethostbynamel);
 PHP_FUNCTION(gethostname);
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
 PHP_FUNCTION(dns_check_record);
-# if defined(PHP_WIN32) || (HAVE_DN_SKIPNAME && HAVE_DN_EXPAND)
-PHP_FUNCTION(dns_get_mx);
-# endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_FUNCS
+# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+PHP_FUNCTION(dns_get_mx);
 PHP_FUNCTION(dns_get_record);
 PHP_MINIT_FUNCTION(dns);
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
 
 #ifndef INT16SZ
 #define INT16SZ		2
