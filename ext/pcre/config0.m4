@@ -11,7 +11,7 @@ PHP_ARG_WITH(pcre-regex,,
 
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
     AC_MSG_CHECKING([for PCRE headers location])
-    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/local/include $PHP_PCRE_REGEX/include/pcre; do
+    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre $PHP_PCRE_REGEX/local/include; do
       test -f $i/pcre.h && PCRE_INCDIR=$i
     done
 
