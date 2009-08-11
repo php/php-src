@@ -2780,7 +2780,7 @@ AC_DEFUN([PHP_DETECT_SUNCC],[
     AC_MSG_RESULT([no]),
     SUNCC="yes"
     GCC="no"
-    test -n "$auto_cflags" && CFLAGS="-fsimple=2 -xnorunpath -xO4 -xalias_level=basic -xipo=1 -xlibmopt -xprefetch_level=1 -xprefetch=auto -xstrconst -xtarget=native -zlazyload"
+    test -n "$auto_cflags" && CFLAGS="-O -xs -xstrconst -zlazyload"
     GCC=""
     AC_MSG_RESULT([yes])
   )
