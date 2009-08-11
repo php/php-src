@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed bug #49095 (proc_get_status['exitcode'] fails on win32). (Felipe)
 - Fixed bug #49074 (private class static fields can be modified by using
   reflection). (Jani)
+- Fixed bug #49072 (feof never returns true for damaged file in zip). (Pierre)
 - Fixed bug #49052 (context option headers freed too early when using
   --with-curlwrappers). (Jani)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
