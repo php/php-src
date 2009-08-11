@@ -1,8 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
+- Upgraded bundled sqlite to version 3.6.17. (Scott)
+
 - Improve dns_get_record AAAA support on windows. Always available when IPv6 is
   support is installed, format is now the same than on unix. (Pierre)
+- Improve the DNS functions on OSX to use newer APIs, also use Bind 9 API
+  where available on other platforms. (Scott)
+- Improve shared extension loading on OSX to use the standard Unix dlopen() API.
+  (Scott)
+
+- Added error constant when json_encode() detects an invalid UTF-8 sequence.
+  (Scott)
 
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
   Functors. (Christian Seiler)
