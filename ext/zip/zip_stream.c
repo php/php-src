@@ -7,7 +7,6 @@
 #ifdef ZEND_ENGINE_2
 
 #include "lib/zip.h"
-#include "lib/zip.h"
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
