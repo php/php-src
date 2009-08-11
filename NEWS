@@ -18,7 +18,7 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #49026 (proc_open() can bypass safe_mode_protected_env_vars
   restrictions). (Ilia)
-- Fixed bug #48994 (zlib.output_compression does not ouput HTTP headers when
+- Fixed bug #48994 (zlib.output_compression does not output HTTP headers when
   set to a string value). (Jani)
 - Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
 - Fixed bug #48962 (cURL does not upload files with specified filename).
