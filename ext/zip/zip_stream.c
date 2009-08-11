@@ -35,8 +35,14 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 
 	if (self->za && self->zf) {
 		n = (size_t)zip_fread(self->zf, buf, (int)count);
-
-		if (n == 0) {
+		if (n < 0) {
+			int ze, se;
+			zip_file_error_get(self->zf, &ze, &se);
+			stream->eof = 1;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
+			return 0;
+		}
+		if (n == 0 || n < count) {
 			stream->eof = 1;
 		} else {
 			self->cursor += n;
