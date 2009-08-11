@@ -16,7 +16,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   else
-    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre; do
+    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/local/include $PHP_PCRE_REGEX/include/pcre; do
       test -f $i/pcre.h && PCRE_INCDIR=$i
     done
 
