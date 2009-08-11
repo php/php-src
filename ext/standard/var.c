@@ -860,11 +860,11 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							} else {
 								php_var_serialize_string(buf, priv_name.s, prop_name_length);
 							}
-							efree(priv_name.v);
+							pefree(priv_name.v, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 							break;
 						}
-						efree(priv_name.v);
+						pefree(priv_name.v, ce->type & ZEND_INTERNAL_CLASS);
 						zend_u_mangle_property_name(&prot_name, &prop_name_length, Z_TYPE_PP(name), star, 1, Z_UNIVAL_PP(name), Z_UNILEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), prot_name, prop_name_length+1, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
@@ -872,11 +872,11 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							} else {
 								php_var_serialize_string(buf, prot_name.s, prop_name_length);
 							}
-							efree(prot_name.v);
+							pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 							break;
 						}
-						efree(prot_name.v);
+						pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
 						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%R\" returned as member variable from __sleep() but does not exist", Z_TYPE_PP(name), Z_UNIVAL_PP(name));
 						if (Z_TYPE_PP(name) == IS_UNICODE) {
 							php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
