@@ -44,7 +44,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n"
 ===Done===
 --EXPECTF--
 *** Testing hash_hmac() : basic functionality ***
-adler32: 9e033311
+adler32: 12c803f7
 crc32: 96859101
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
 haval128,3: 82cd0f4bd36729b5c80c33efa8c13ac5
@@ -62,7 +62,7 @@ sha512: 7de05636b18e2b0ca3427e03f53074af3a48a7b9df226daba4f22324c570638e7d7b2643
 snefru: 67af483046f9cf16fe19f9087929ccfc6ad176ade3290b4d33f43e0ddb07e711
 tiger192,3: 82779797cdc439e886884953ba21fa38e35679041e95ee27
 whirlpool: 4a0f1582b21b7aff59bfba7f9c29131c69741b2ce80acdc7d314040f3b768cf5a17e30b74cceb86fbc6b34b1692e0addd5bfd7cfc043d40c0621f1b97e26fa49
-adler32(raw): 9e033311
+adler32(raw): 12c803f7
 md5(raw): 2a632783e2812cf23de100d7d6a463ae
 sha256(raw): 49bde3496b9510a17d0edd8a4b0ac70148e32a1d51e881ec76faa96534125838
 ===Done===
