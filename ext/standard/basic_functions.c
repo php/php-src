@@ -3678,7 +3678,9 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	PHP_MSHUTDOWN(localeconv)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
+#if HAVE_CRYPT
 	PHP_MSHUTDOWN(crypt)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+#endif
 
 	return SUCCESS;
 }
