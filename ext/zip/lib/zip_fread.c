@@ -95,7 +95,7 @@ zip_fread(struct zip_file *zf, void *outbuf, size_t toread)
 	    if (len >= zf->bytes_left || len >= toread) {
 		    if (zf->flags & ZIP_ZF_CRC) {
 			    zf->crc = crc32(zf->crc, (Bytef *)outbuf, len);
-			    if (zf->flags & ZIP_ZF_EOF == 1) {
+			    if ((zf->flags & ZIP_ZF_EOF) == 1) {
 				    if (zf->crc != zf->crc_orig) {
 					    _zip_error_set(&zf->error, ZIP_ER_CRC, 0);
 					    return -1;
