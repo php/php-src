@@ -66,6 +66,7 @@ PHP                                                                        NEWS
 - Fixed bug #48450 (Compile failure under IRIX 6.5.30 building gd.c). (Kalle)
 - Fixed bug #48400 (imap crashes when closing stream opened with
   OP_PROTOTYPE flag). (Jani)
+- Fixed bug #48284 (hash "adler32" byte order is reversed). (Scott)
 - Fixed bug #48276 (date("Y") on big endian machines produces the
   wrong result). (Scott)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
