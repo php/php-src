@@ -1577,7 +1577,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 
 /* {{{ php_needle_char
  */
-static int php_needle_char(zval *needle, char *target)
+static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 {
 	switch (Z_TYPE_P(needle)) {
 		case IS_LONG:
@@ -1639,7 +1639,7 @@ PHP_FUNCTION(stristr)
 		found = php_stristr(haystack_dup, orig_needle,	haystack_len, Z_STRLEN_P(needle));
 		efree(orig_needle);
 	} else {
-		if(php_needle_char(needle, needle_char) != SUCCESS) {
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			efree(haystack_dup);
 			RETURN_FALSE;
 		}
@@ -1687,7 +1687,7 @@ PHP_FUNCTION(strstr)
 
 		found = php_memnstr(haystack, Z_STRVAL_P(needle), Z_STRLEN_P(needle), haystack + haystack_len);
 	} else {
-		if(php_needle_char(needle, needle_char) != SUCCESS) {
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		needle_char[1] = 0;
@@ -1742,7 +1742,7 @@ PHP_FUNCTION(strpos)
 			                Z_STRLEN_P(needle),
 			                haystack + haystack_len);
 	} else {
-		if(php_needle_char(needle, needle_char) != SUCCESS) {
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		needle_char[1] = 0;
@@ -1799,7 +1799,7 @@ PHP_FUNCTION(stripos)
 		php_strtolower(needle_dup, Z_STRLEN_P(needle));
 		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack_len);
 	} else {
-		if(php_needle_char(needle, needle_char) != SUCCESS) {
+		if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
 			efree(haystack_dup);
 			RETURN_FALSE;
 		}
@@ -1842,7 +1842,7 @@ PHP_FUNCTION(strrpos)
 		needle = Z_STRVAL_P(zneedle);
 		needle_len = Z_STRLEN_P(zneedle);
 	} else {
-		if(php_needle_char(zneedle, ord_needle) != SUCCESS) {
+		if (php_needle_char(zneedle, ord_needle TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		ord_needle[1] = '\0';
@@ -1916,7 +1916,7 @@ PHP_FUNCTION(strripos)
 		needle = Z_STRVAL_P(zneedle);
 		needle_len = Z_STRLEN_P(zneedle);
 	} else {
-		if(php_needle_char(zneedle, ord_needle) != SUCCESS) {
+		if (php_needle_char(zneedle, ord_needle TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		ord_needle[1] = '\0';
@@ -2019,7 +2019,7 @@ PHP_FUNCTION(strrchr)
 		found = zend_memrchr(haystack, *Z_STRVAL_P(needle), haystack_len);
 	} else {
 		char needle_chr;
-		if(php_needle_char(needle, &needle_chr) != SUCCESS) {
+		if (php_needle_char(needle, &needle_chr TSRMLS_CC) != SUCCESS) {
 			RETURN_FALSE;
 		}
 
