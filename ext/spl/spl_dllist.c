@@ -94,6 +94,7 @@ struct _spl_dllist_object {
 	zend_function         *fptr_offset_del;
 	zend_function         *fptr_count;
 	zend_class_entry      *ce_get_iterator;
+	HashTable             *debug_info;
 };
 
 /* define an overloaded iterator structure */
@@ -353,6 +354,11 @@ static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 	zval_ptr_dtor(&intern->retval);
 
+	if (intern->debug_info != NULL) {
+		zend_hash_destroy(intern->debug_info);
+		efree(intern->debug_info);
+	}
+
 	efree(object);
 }
 /* }}} */
@@ -374,6 +380,7 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 
 	intern->flags = 0;
 	intern->traverse_position = 0;
+	intern->debug_info = NULL;
 
 	if (orig) {
 		spl_dllist_object *other = (spl_dllist_object*)zend_object_store_get_object(orig TSRMLS_CC);
@@ -498,44 +505,47 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 {
 	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
-	HashTable *rv;
 	zval *tmp, zrv, *dllist_array;
 	zstr pnstr;
 	int  pnlen;
 	int  i = 0;;
 
-	*is_temp = 1;
+	*is_temp = 0;
 
-	ALLOC_HASHTABLE(rv);
-	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
-
-	INIT_PZVAL(&zrv);
-	Z_ARRVAL(zrv) = rv;
-
-	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-
-	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
-	efree(pnstr.v);
-
-	ALLOC_INIT_ZVAL(dllist_array);
-	array_init(dllist_array);
-
-	while (current) {
-		next = current->next;
-
-		add_index_zval(dllist_array, i, (zval *)current->data);
-		Z_ADDREF_P(current->data);
-		i++;
-
-		current = next;
+	if (intern->debug_info == NULL) {
+		ALLOC_HASHTABLE(intern->debug_info);
+		ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
 	}
 
-	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, dllist_array);
-	efree(pnstr.v);
+	if (intern->debug_info->nApplyCount == 0) {
+		INIT_PZVAL(&zrv);
+		Z_ARRVAL(zrv) = intern->debug_info;
 
-	return rv;
+		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
+		efree(pnstr.v);
+
+		ALLOC_INIT_ZVAL(dllist_array);
+		array_init(dllist_array);
+
+		while (current) {
+			next = current->next;
+
+			add_index_zval(dllist_array, i, (zval *)current->data);
+			Z_ADDREF_P(current->data);
+			i++;
+
+			current = next;
+		}
+
+		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, dllist_array);
+		efree(pnstr.v);
+	}
+
+	return intern->debug_info;
 }
 /* }}}} */
 
