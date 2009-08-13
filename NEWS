@@ -1,7 +1,5 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.2.11RC2
-
 13 Aug 2009, PHP 5.2.11RC1
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
