@@ -133,25 +133,16 @@ array(1) {
 }
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
-}
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
-}
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
-}
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 array(2) {
   [0]=>
@@ -188,10 +179,9 @@ array(1) {
   string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 20 --
-array(1) {
-  [0]=>
-  string(%d) "%s"
-}
+
+Warning: explode() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 -- Iteration 21 --
 
 Warning: explode(): Empty delimiter in %s on line %d

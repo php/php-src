@@ -131,25 +131,16 @@ array(1) {
 }
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(5) "Array"
-}
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(5) "Array"
-}
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  string(5) "Array"
-}
+Warning: explode() expects parameter 2 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 array(1) {
   [0]=>
@@ -188,14 +179,9 @@ array(2) {
   string(6) "object"
 }
 -- Iteration 20 --
-array(3) {
-  [0]=>
-  string(8) "Resource"
-  [1]=>
-  string(2) "id"
-  [2]=>
-  string(%d) "#%d"
-}
+
+Warning: explode() expects parameter 2 to be string, resource given in %s on line %d
+NULL
 -- Iteration 21 --
 array(1) {
   [0]=>

@@ -97,10 +97,16 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 10 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 11 --
 bool(false)
@@ -119,7 +125,9 @@ bool(false)
 Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 18 --
-%s
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
+bool(false)
 -- Iteration 19 --
 bool(false)
 -- Iteration 20 --
