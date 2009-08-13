@@ -170,10 +170,10 @@ Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
+Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 
-Warning: stripos(): needle is not a string or an integer in %s on line %d
+Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 20 --
 bool(false)

@@ -113,24 +113,24 @@ string(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-
 string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-string(52) "ThisArray is ArraysimpArrayle sArraytrinArrayg.Array"
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-string(52) "ThisArray is ArraysimpArrayle sArraytrinArrayg.Array"
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-string(52) "ThisArray is ArraysimpArrayle sArraytrinArrayg.Array"
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-string(52) "ThisArray is ArraysimpArrayle sArraytrinArrayg.Array"
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-string(52) "ThisArray is ArraysimpArrayle sArraytrinArrayg.Array"
+Warning: chunk_split() expects parameter 3 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 string(22) "This is simple string."
 -- Iteration 16 --
@@ -154,5 +154,7 @@ string(22) "This is simple string."
 -- Iteration 25 --
 string(22) "This is simple string."
 -- Iteration 26 --
-string(%d) "ThisResource id #%d is Resource id #%dsimpResource id #%dle sResource id #%dtrinResource id #%dg.Resource id #%d"
+
+Warning: chunk_split() expects parameter 3 to be string, resource given in %s on line %d
+NULL
 Done

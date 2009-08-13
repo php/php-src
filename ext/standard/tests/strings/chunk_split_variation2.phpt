@@ -110,16 +110,24 @@ Warning: chunk_split(): Chunk length should be greater than zero in %schunk_spli
 bool(false)
 -- Iteration 6 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, array given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 7 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be long, array given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 8 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be long, array given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 9 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be long, array given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 10 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be long, array given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 11 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
@@ -142,24 +150,24 @@ Warning: chunk_split(): Chunk length should be greater than zero in %schunk_spli
 bool(false)
 -- Iteration 17 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 18 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 19 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 20 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 21 --
 
-Notice: Object of class MyClass could not be converted to int in %schunk_split_variation2.php on line %d
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+Warning: chunk_split() expects parameter 2 to be long, object given in %schunk_split_variation2.php on line %d
+NULL
 -- Iteration 22 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
@@ -169,5 +177,7 @@ bool(false)
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 24 --
-string(%d) "%s"
+
+Warning: chunk_split() expects parameter 2 to be long, resource given in %schunk_split_variation2.php on line %d
+NULL
 ===DONE===

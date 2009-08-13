@@ -112,14 +112,24 @@ bool(false)
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 11 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 12 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 13 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 14 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 15 --
 bool(false)
@@ -142,7 +152,9 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-%s
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
+bool(false)
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

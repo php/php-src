@@ -98,16 +98,16 @@ bool(false)
 bool(false)
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d2
-bool(false)
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+NULL
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d2
-bool(false)
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+NULL
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d2
-bool(false)
+Warning: stristr() expects parameter 1 to be string, array given in %s on line %d2
+NULL
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -123,7 +123,9 @@ bool(false)
 -- Iteration 17 --
 string(7) " object"
 -- Iteration 18 --
-string(%d) " id #%d"
+
+Warning: stristr() expects parameter 1 to be string, resource given in %s on line %d2
+NULL
 -- Iteration 19 --
 bool(false)
 -- Iteration 20 --
