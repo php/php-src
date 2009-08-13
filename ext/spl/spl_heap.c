@@ -76,6 +76,7 @@ struct _spl_heap_object {
 	zend_class_entry   *ce_get_iterator;
 	zend_function      *fptr_cmp;
 	zend_function      *fptr_count;
+	HashTable          *debug_info;
 };
 
 /* define an overloaded iterator structure */
@@ -370,6 +371,12 @@ static void spl_heap_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	spl_ptr_heap_destroy(intern->heap TSRMLS_CC);
 
 	zval_ptr_dtor(&intern->retval);
+
+	if(intern->debug_info != NULL) {
+		zend_hash_destroy(intern->debug_info);
+		efree(intern->debug_info);
+	}
+
 	efree(object);
 }
 /* }}} */
@@ -389,8 +396,9 @@ static zend_object_value spl_heap_object_new_ex(zend_class_entry *class_type, sp
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	intern->flags    = 0;
-	intern->fptr_cmp = NULL;
+	intern->flags      = 0;
+	intern->fptr_cmp   = NULL;
+	intern->debug_info = NULL;
 
 	if (orig) {
 		spl_heap_object *other = (spl_heap_object*)zend_object_store_get_object(orig TSRMLS_CC);
@@ -514,43 +522,46 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 
 static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp TSRMLS_DC) { /* {{{ */
 	spl_heap_object *intern  = (spl_heap_object*)zend_object_store_get_object(obj TSRMLS_CC);
-	HashTable *rv;
 	zval *tmp, zrv, *heap_array;
 	zstr pnstr;
 	int  pnlen;
 	int  i;
 
-	*is_temp = 1;
+	*is_temp = 0;
 
-	ALLOC_HASHTABLE(rv);
-	ZEND_INIT_SYMTABLE_EX(rv, zend_hash_num_elements(intern->std.properties) + 1, 0);
-
-	INIT_PZVAL(&zrv);
-	Z_ARRVAL(zrv) = rv;
-
-	zend_hash_copy(rv, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-
-	pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
-	efree(pnstr.v);
-
-	pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_bool_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->heap->flags&SPL_HEAP_CORRUPTED);
-	efree(pnstr.v);
-
-	ALLOC_INIT_ZVAL(heap_array);
-	array_init(heap_array);
-
-	for (i = 0; i < intern->heap->count; ++i) {
-		add_index_zval(heap_array, i, (zval *)intern->heap->elements[i]);
-		Z_ADDREF_P(intern->heap->elements[i]);
+	if (intern->debug_info == NULL) {
+		ALLOC_HASHTABLE(intern->debug_info);
+		ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
 	}
 
-	pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1, &pnlen TSRMLS_CC);
-	add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, heap_array);
-	efree(pnstr.v);
+	if (intern->debug_info->nApplyCount == 0) {
+		INIT_PZVAL(&zrv);
+		Z_ARRVAL(zrv) = intern->debug_info;
 
-	return rv;
+		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
+		efree(pnstr.v);
+
+		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_bool_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->heap->flags&SPL_HEAP_CORRUPTED);
+		efree(pnstr.v);
+
+		ALLOC_INIT_ZVAL(heap_array);
+		array_init(heap_array);
+
+		for (i = 0; i < intern->heap->count; ++i) {
+			add_index_zval(heap_array, i, (zval *)intern->heap->elements[i]);
+			Z_ADDREF_P(intern->heap->elements[i]);
+		}
+
+		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1, &pnlen TSRMLS_CC);
+		add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, heap_array);
+		efree(pnstr.v);
+	}
+
+	return intern->debug_info;
 }
 /* }}} */
 
