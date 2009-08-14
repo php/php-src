@@ -657,6 +657,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 PHP_FUNCTION(usort)
 {
 	zval **array;
+	int refcount;
 	HashTable *target_hash;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -678,12 +679,31 @@ PHP_FUNCTION(usort)
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 	BG(user_compare_fci_cache).initialized = 0;
 	
+	/* Clear the is_ref flag, so the attemts to modify the array in user
+	 * comaprison function will create a copy of array and won't affect the
+	 * original array. The fact of modification is detected using refcount
+	 * comparison. The result of sorting in such case is undefined and the
+	 * function returns FALSE.
+	 */
+	(*array)->is_ref = 0;
+	refcount = (*array)->refcount;
+
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		RETURN_FALSE;
+		RETVAL_FALSE;
+	} else {
+		if (refcount > (*array)->refcount) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array was modified by the user comparison function");
+			RETVAL_FALSE;
+		} else {
+			RETVAL_TRUE;
+		}
 	}
+
+	if ((*array)->refcount > 1) {
+		(*array)->is_ref = 1;
+	}
+	
 	PHP_ARRAY_CMP_FUNC_RESTORE();
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -692,6 +712,7 @@ PHP_FUNCTION(usort)
 PHP_FUNCTION(uasort)
 {
 	zval **array;
+	int refcount;
 	HashTable *target_hash;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -711,13 +732,31 @@ PHP_FUNCTION(uasort)
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 	BG(user_compare_fci_cache).initialized = 0;
 
-	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
-		PHP_ARRAY_CMP_FUNC_RESTORE();
-		RETURN_FALSE;
-	}
-	PHP_ARRAY_CMP_FUNC_RESTORE();
+	/* Clear the is_ref flag, so the attemts to modify the array in user
+	 * comaprison function will create a copy of array and won't affect the
+	 * original array. The fact of modification is detected using refcount
+	 * comparison. The result of sorting in such case is undefined and the
+	 * function returns FALSE.
+	 */
+	(*array)->is_ref = 0;
+	refcount = (*array)->refcount;
 
-	RETURN_TRUE;
+	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+	} else {
+		if (refcount > (*array)->refcount) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array was modified by the user comparison function");
+			RETVAL_FALSE;
+		} else {
+			RETVAL_TRUE;
+		}
+	}
+
+	if ((*array)->refcount > 1) {
+		(*array)->is_ref = 1;
+	}
+
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 }
 /* }}} */
 
