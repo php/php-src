@@ -82,7 +82,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -130,7 +130,11 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 16 --
+
+Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(14)

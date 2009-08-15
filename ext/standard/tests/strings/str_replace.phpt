@@ -616,133 +616,133 @@ int(0)
 --- Iteration 0 ---
 -- String after replacing the search value is => --
 unicode(177) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!FOUND 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!FOUND 
 	    ?FOUND chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '2' times
 
 --- Iteration 1 ---
 -- String after replacing the search value is => --
 unicode(177) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!FOUND 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!FOUND 
 	    ?FOUND chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '2' times
 
 --- Iteration 2 ---
 -- String after replacing the search value is => --
 unicode(182) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: FOUND 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: FOUND 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 3 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 4 ---
 -- String after replacing the search value is => --
 unicode(182) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $FOUND: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $FOUND: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 5 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 6 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 7 ---
 -- String after replacing the search value is => --
 unicode(189) "Hello, world,0120333.3445FOUND67          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 8 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 9 ---
 -- String after replacing the search value is => --
 unicode(193) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD FOUND \xXYZ	FOUND $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD FOUND \xXYZ	FOUND $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '2' times
 
 --- Iteration 10 ---
 -- String after replacing the search value is => --
 unicode(193) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xFOUND	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xFOUND	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 11 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 12 ---
 -- String after replacing the search value is => --
 unicode(192) "Hello, world,0120333.3445-1.234567          FOUND TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 13 ---
 -- String after replacing the search value is => --
 unicode(207) "Hello, world,FOUND12FOUND333.3445-1.234567          NULL TRUE FALSE 
- 	     FOUND«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     FOUNDÂ«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(FOUND).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '4' times
 
 --- Iteration 14 ---
 -- String after replacing the search value is => --
 unicode(207) "Hello, world,FOUND12FOUND333.3445-1.234567          NULL TRUE FALSE 
- 	     FOUND«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     FOUNDÂ«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(FOUND).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '4' times
 
 --- Iteration 15 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 16 ---
 -- String after replacing the search value is => --
 unicode(307) "Hello,FOUNDworld,0120333.3445-1.234567FOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDNULLFOUNDTRUEFOUNDFALSE 
-FOUND	FOUNDFOUNDFOUNDFOUND 0«CD abcdFOUND\xXYZ	abcdFOUND$$@#%^&*!~,.:;?:FOUND!!Hello,FOUNDWorldFOUND
+FOUND	FOUNDFOUNDFOUNDFOUND 0Â«CD abcdFOUND\xXYZ	abcdFOUND$$@#%^&*!~,.:;?:FOUND!!Hello,FOUNDWorldFOUND
 	FOUNDFOUNDFOUNDFOUND?Hello,FOUNDWorldFOUNDchr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '29' times
 
 --- Iteration 17 ---
 -- String after replacing the search value is => --
 unicode(203) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSEFOUND
- 	    FOUND0«CDFOUNDabcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	    FOUND0Â«CDFOUNDabcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '3' times
 
 --- Iteration 18 ---
 -- String after replacing the search value is => --
 unicode(194) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	    FOUND«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	    FOUNDÂ«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
@@ -756,98 +756,98 @@ unicode(194) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
 --- Iteration 20 ---
 -- String after replacing the search value is => --
 unicode(194) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	    FOUND«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	    FOUNDÂ«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 21 ---
 -- String after replacing the search value is => --
 unicode(194) "Hello, world,0120333FOUND445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 22 ---
 -- String after replacing the search value is => --
 unicode(203) "Hello, world,0FOUND20333.3445-FOUND.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(FOUND28).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '3' times
 
 --- Iteration 23 ---
 -- String after replacing the search value is => --
 unicode(192) "Hello, world,0120333.3445-1.234567          NULL FOUND FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 24 ---
 -- String after replacing the search value is => --
 unicode(203) "Hello, world,0FOUND20333.3445-FOUND.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(FOUND28).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '3' times
 
 --- Iteration 25 ---
 -- String after replacing the search value is => --
 unicode(203) "Hello, world,0FOUND20333.3445-FOUND.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(FOUND28).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '3' times
 
 --- Iteration 26 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 27 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FOUND 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 28 ---
 -- String after replacing the search value is => --
 unicode(307) "Hello,FOUNDworld,0120333.3445-1.234567FOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDFOUNDNULLFOUNDTRUEFOUNDFALSE 
-FOUND	FOUNDFOUNDFOUNDFOUND 0«CD abcdFOUND\xXYZ	abcdFOUND$$@#%^&*!~,.:;?:FOUND!!Hello,FOUNDWorldFOUND
+FOUND	FOUNDFOUNDFOUNDFOUND 0Â«CD abcdFOUND\xXYZ	abcdFOUND$$@#%^&*!~,.:;?:FOUND!!Hello,FOUNDWorldFOUND
 	FOUNDFOUNDFOUNDFOUND?Hello,FOUNDWorldFOUNDchr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '29' times
 
 --- Iteration 29 ---
 -- String after replacing the search value is => --
 unicode(186) "Hello, world,0120333.3445-1.234567FOUNDNULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '1' times
 
 --- Iteration 30 ---
 -- String after replacing the search value is => --
 unicode(199) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD aFOUNDcd \xXYZ	aFOUNDcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD aFOUNDcd \xXYZ	aFOUNDcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '2' times
 
 --- Iteration 31 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 
 --- Iteration 32 ---
 -- String after replacing the search value is => --
 unicode(203) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- FOUND     0«CD abcd \xXYZFOUNDabcd $$@#%^&*!~,.:;?: !!Hello, World 
+ FOUND     0Â«CD abcd \xXYZFOUNDabcd $$@#%^&*!~,.:;?: !!Hello, World 
 FOUND    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '3' times
 
 --- Iteration 33 ---
 -- String after replacing the search value is => --
 unicode(191) "Hello, world,0120333.3445-1.234567          NULL TRUE FALSE 
- 	     0«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
+ 	     0Â«CD abcd \xXYZ	abcd $$@#%^&*!~,.:;?: !!Hello, World 
 	    ?Hello, World chr(0).chr(128).chr(234).chr(65).chr(255).chr(256)"
 -- search string has found '0' times
 

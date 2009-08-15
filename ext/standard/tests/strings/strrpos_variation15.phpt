@@ -120,24 +120,24 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 15 --
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
@@ -153,23 +153,23 @@ bool(false)
 -- Iteration 19 --
 
 Warning: strrpos() expects parameter 3 to be long, object given in %s on line %d
-bool(false)
+NULL
 -- Iteration 20 --
 
 Warning: strrpos() expects parameter 3 to be long, Unicode string given in %s on line %d
-bool(false)
+NULL
 -- Iteration 21 --
 
 Warning: strrpos() expects parameter 3 to be long, Unicode string given in %s on line %d
-bool(false)
+NULL
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
 
-Warning: strrpos() expects parameter 3 to be long, resource given in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

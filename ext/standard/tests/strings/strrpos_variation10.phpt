@@ -118,14 +118,24 @@ bool(false)
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 11 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 12 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 13 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 14 --
+
+Warning: strrpos(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 15 --
 bool(false)
@@ -140,8 +150,12 @@ bool(false)
 Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 20 --
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 21 --
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)

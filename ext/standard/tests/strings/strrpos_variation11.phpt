@@ -135,39 +135,39 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 
-Notice: Array to string conversion in %s on line %d
-bool(false)
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 15 --
 bool(false)
 
@@ -192,10 +192,18 @@ bool(false)
 Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 -- Iteration 20 --
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 21 --
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)
@@ -204,8 +212,12 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 24 --
-bool(false)
-bool(false)
+
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
+
+Warning: strrpos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 -- Iteration 25 --
 bool(false)
 bool(false)

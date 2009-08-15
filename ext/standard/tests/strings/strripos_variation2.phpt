@@ -75,7 +75,7 @@ foreach ($needles as $needle) {
 }
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing strripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(32)
@@ -153,9 +153,17 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 16 --
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(53)

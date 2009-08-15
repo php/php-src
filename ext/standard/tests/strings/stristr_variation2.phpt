@@ -105,10 +105,16 @@ bool(false)
 Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 9 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 10 --
+
+Warning: stristr(): needle is not a string or an integer in %s on line %d
 bool(false)
 -- Iteration 11 --
 bool(false)

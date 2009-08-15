@@ -26,12 +26,14 @@ var_dump( strrpos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(44)
 int(44)
 int(44)
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 int(55)
 *** Done ***

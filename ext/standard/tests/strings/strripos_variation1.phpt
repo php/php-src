@@ -152,9 +152,17 @@ int(8)
 bool(false)
 int(8)
 -- Iteration 16 --
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strripos(): Empty delimiter in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(43)
