@@ -585,59 +585,36 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
  */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	zval **link, **base_dn, **filter, **attrs, **attr, **attrsonly, **sizelimit, **timelimit, **deref;
-	char *ldap_base_dn = NULL;
-	char *ldap_filter = NULL;
-	char **ldap_attrs = NULL; 
+	zval *link, *base_dn, **filter, *attrs, **attr;
+	long attrsonly, sizelimit, timelimit, deref;
+	char *ldap_base_dn = NULL, *ldap_filter = NULL, **ldap_attrs = NULL; 
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
-	int ldap_attrsonly = 0;
-	int ldap_sizelimit = -1; 
-	int ldap_timelimit = -1; 
-	int ldap_deref = -1;	 
-	int old_ldap_sizelimit = -1; 
-	int old_ldap_timelimit = -1; 
-	int old_ldap_deref = -1;	 
-	int num_attribs = 0;
-	int i, errno;
-	int myargcount = ZEND_NUM_ARGS();
-	int ret = 1;
+	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;	 
+	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;	 
+	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(myargcount TSRMLS_CC, "ZZZ|ZZZZZ", &link, &base_dn, &filter, &attrs, &attrsonly, 
+	if (zend_parse_parameters(argcount TSRMLS_CC, "zzZ|allll", &link, &base_dn, &filter, &attrs, &attrsonly,
 		&sizelimit, &timelimit, &deref) == FAILURE) {
 		return;
 	}
 
 	/* Reverse -> fall through */
-	switch (myargcount) {
-		case 8 :
-			convert_to_long_ex(deref);
-			ldap_deref = Z_LVAL_PP(deref);
-
-		case 7 :
-			convert_to_long_ex(timelimit);
-			ldap_timelimit = Z_LVAL_PP(timelimit);
-
-		case 6 :
-			convert_to_long_ex(sizelimit);
-			ldap_sizelimit = Z_LVAL_PP(sizelimit);
-
-		case 5 :
-			convert_to_long_ex(attrsonly);
-			ldap_attrsonly = Z_LVAL_PP(attrsonly);
-
-		case 4 : 
-			if (Z_TYPE_PP(attrs) != IS_ARRAY) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected Array as last element");
-				ret = 0;
-				goto cleanup;
-			}
-
-			num_attribs = zend_hash_num_elements(Z_ARRVAL_PP(attrs));
+	switch (argcount) {
+		case 8:
+			ldap_deref = deref;
+		case 7:
+			ldap_timelimit = timelimit;
+		case 6:
+			ldap_sizelimit = sizelimit;
+		case 5:
+			ldap_attrsonly = attrsonly;
+		case 4:
+			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
 
 			for (i = 0; i<num_attribs; i++) {
-				if (zend_hash_index_find(Z_ARRVAL_PP(attrs), i, (void **) &attr) != SUCCESS) {
+				if (zend_hash_index_find(Z_ARRVAL_P(attrs), i, (void **) &attr) != SUCCESS) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array initialization wrong");
 					ret = 0;
 					goto cleanup;
@@ -648,42 +625,36 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ldap_attrs[i] = Z_STRVAL_PP(attr);
 			}
 			ldap_attrs[num_attribs] = NULL;
-		
-		case 3 :
-		
-		break;
-
 		default:
-			WRONG_PARAM_COUNT;
-		break;
+			break;
 	}
 
 	/* parallel search? */
-	if (Z_TYPE_PP(link) == IS_ARRAY) {
+	if (Z_TYPE_P(link) == IS_ARRAY) {
 		int i, nlinks, nbases, nfilters, *rcs;
 		ldap_linkdata **lds;
 		zval **entry, *resource;
 		
-		nlinks = zend_hash_num_elements(Z_ARRVAL_PP(link));
+		nlinks = zend_hash_num_elements(Z_ARRVAL_P(link));
 		if (nlinks == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No links in link array");
 			ret = 0;
 			goto cleanup;
 		}
 
-		if (Z_TYPE_PP(base_dn) == IS_ARRAY) {
-			nbases = zend_hash_num_elements(Z_ARRVAL_PP(base_dn));
+		if (Z_TYPE_P(base_dn) == IS_ARRAY) {
+			nbases = zend_hash_num_elements(Z_ARRVAL_P(base_dn));
 			if (nbases != nlinks) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Base must either be a string, or an array with the same number of elements as the links array");
 				ret = 0;
 				goto cleanup;
 			}
-			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(base_dn));
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(base_dn));
 		} else {
 			nbases = 0; /* this means string, not array */
 			/* If anything else than string is passed, ldap_base_dn = NULL */
-			if (Z_TYPE_PP(base_dn) == IS_STRING) {
-				ldap_base_dn = Z_STRVAL_PP(base_dn);
+			if (Z_TYPE_P(base_dn) == IS_STRING) {
+				ldap_base_dn = Z_STRVAL_P(base_dn);
 			} else {
 				ldap_base_dn = NULL;
 			}
@@ -706,9 +677,9 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		lds = safe_emalloc(nlinks, sizeof(ldap_linkdata), 0);
 		rcs = safe_emalloc(nlinks, sizeof(*rcs), 0);
 		
-		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(link));
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(link));
 		for (i=0; i<nlinks; i++) {
-			zend_hash_get_current_data(Z_ARRVAL_PP(link), (void **)&entry);
+			zend_hash_get_current_data(Z_ARRVAL_P(link), (void **)&entry);
 
 			ld = (ldap_linkdata *) zend_fetch_resource(entry TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
 			if (ld == NULL) {
@@ -716,8 +687,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				goto cleanup_parallel;
 			}
 			if (nbases != 0) { /* base_dn an array? */
-				zend_hash_get_current_data(Z_ARRVAL_PP(base_dn), (void **)&entry);
-				zend_hash_move_forward(Z_ARRVAL_PP(base_dn));
+				zend_hash_get_current_data(Z_ARRVAL_P(base_dn), (void **)&entry);
+				zend_hash_move_forward(Z_ARRVAL_P(base_dn));
 
 				/* If anything else than string is passed, ldap_base_dn = NULL */
 				if (Z_TYPE_PP(entry) == IS_STRING) {
@@ -738,7 +709,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			/* Run the actual search */	
 			rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly);
 			lds[i] = ld;
-			zend_hash_move_forward(Z_ARRVAL_PP(link));
+			zend_hash_move_forward(Z_ARRVAL_P(link));
 		}
 		
 		array_init(return_value);
@@ -765,11 +736,11 @@ cleanup_parallel:
 		ldap_filter = Z_STRVAL_PP(filter);
 
 		/* If anything else than string is passed, ldap_base_dn = NULL */
-		if (Z_TYPE_PP(base_dn) == IS_STRING) {
-			ldap_base_dn = Z_STRVAL_PP(base_dn);
+		if (Z_TYPE_P(base_dn) == IS_STRING) {
+			ldap_base_dn = Z_STRVAL_P(base_dn);
 		}
 
-		ld = (ldap_linkdata *) zend_fetch_resource(link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
+		ld = (ldap_linkdata *) zend_fetch_resource(&link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
 		if (ld == NULL) {
 			ret = 0;
 			goto cleanup;
@@ -819,7 +790,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto resource ldap_read(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_read(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
@@ -827,7 +798,7 @@ PHP_FUNCTION(ldap_read)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_list(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_list(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
@@ -835,7 +806,7 @@ PHP_FUNCTION(ldap_list)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_search(resource link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
+/* {{{ proto resource ldap_search(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref]]]]])
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
