@@ -103,23 +103,23 @@ int(6)
 -- Iteration 6 --
 
 Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 7 --
 
 Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 8 --
 
 Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 9 --
 
 Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 10 --
 
 Warning: strrpos() expects parameter 3 to be long, array given in %s on line %d
-bool(false)
+NULL
 -- Iteration 11 --
 int(6)
 -- Iteration 12 --
@@ -131,15 +131,15 @@ int(6)
 -- Iteration 15 --
 
 Warning: strrpos() expects parameter 3 to be long, object given in %s on line %d
-bool(false)
+NULL
 -- Iteration 16 --
 
 Warning: strrpos() expects parameter 3 to be long, Unicode string given in %s on line %d
-bool(false)
+NULL
 -- Iteration 17 --
 
 Warning: strrpos() expects parameter 3 to be long, Unicode string given in %s on line %d
-bool(false)
+NULL
 -- Iteration 18 --
 int(6)
 -- Iteration 19 --
@@ -147,7 +147,7 @@ int(6)
 -- Iteration 20 --
 
 Warning: strrpos() expects parameter 3 to be long, resource given in %s on line %d
-bool(false)
+NULL
 -- Iteration 21 --
 int(6)
 -- Iteration 22 --

@@ -127,18 +127,28 @@ bool(false)
 bool(false)
 
 -- Iteration 10 --
+
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 11 --
+
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 12 --
+
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 13 --
+
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 14 --
+
+Warning: stripos(): needle is not a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 15 --
@@ -159,9 +169,13 @@ Notice: Object of class sample could not be converted to int in %s on line %d
 bool(false)
 
 -- Iteration 20 --
+
+Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 21 --
+
+Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 
 -- Iteration 22 --

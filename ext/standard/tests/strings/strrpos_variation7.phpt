@@ -22,10 +22,14 @@ var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
+
+Warning: strrpos(): Empty delimiter in %s on line %d
 bool(false)
 bool(false)
 bool(false)

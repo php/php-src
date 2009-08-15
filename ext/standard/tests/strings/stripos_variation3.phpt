@@ -24,12 +24,14 @@ var_dump( stripos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(14)
 int(23)
 int(23)
+
+Warning: stripos(): Empty delimiter in %s on line %d
 bool(false)
 int(7)
 *** Done ***

@@ -151,24 +151,24 @@ unicode(7) "1.06E-9"
 unicode(2) ".5"
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(2) "ay"
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(2) "ay"
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(3) "ray"
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(1) "y"
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-unicode(2) "ay"
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+NULL
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -188,7 +188,9 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-unicode(%d) "Resource id #5"
+
+Warning: strrchr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+NULL
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
