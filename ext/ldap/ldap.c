@@ -802,7 +802,7 @@ cleanup:
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
 	}
-	if (Z_TYPE_P(base_dn) == IS_UNICODE) {
+	if (Z_TYPE_P(base_dn) == IS_UNICODE && ldap_base_dn) {
 		efree(ldap_base_dn);
 	}
 	if (!ret) {
