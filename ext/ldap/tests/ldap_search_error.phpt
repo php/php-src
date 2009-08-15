@@ -45,8 +45,8 @@ NULL
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
 
-Warning: ldap_search(): Expected Array as last element in %s on line %d
-bool(false)
+Warning: ldap_search() expects parameter 4 to be array, null given in %s on line %d
+NULL
 
 Warning: ldap_search(): Array initialization wrong in %s on line %d
 bool(false)
