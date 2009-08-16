@@ -3216,7 +3216,7 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, size_t 
 {
 	/* Check the APP1 for Exif Identifier Code */
 	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
-	if (memcmp(CharBuf+2, ExifHeader, 6)) {
+	if (length <= 8 || memcmp(CharBuf+2, ExifHeader, 6)) {
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Incorrect APP1 Exif Identifier Code");
 		return;
 	}
@@ -3299,8 +3299,14 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 		}
 
 		/* Read the length of the section. */
-		lh = php_stream_getc(ImageInfo->infile);
-		ll = php_stream_getc(ImageInfo->infile);
+		if ((lh = php_stream_getc(ImageInfo->infile)) == EOF) {
+			EXIF_ERRLOG_CORRUPT(ImageInfo)
+			return FALSE;
+		}
+		if ((ll = php_stream_getc(ImageInfo->infile)) == EOF) {
+			EXIF_ERRLOG_CORRUPT(ImageInfo)
+			return FALSE;
+		}
 
 		itemlen = (lh << 8) | ll;
 
@@ -3500,6 +3506,10 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 	int entry_tag , entry_type;
 	tag_table_type tag_table = exif_get_tag_table(section_index);
 
+	if (ImageInfo->ifd_nesting_level > MAX_IFD_NESTING_LEVEL) {
+                return FALSE;
+        }
+
 	if (ImageInfo->FileSize >= dir_offset+2) {
 		sn = exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL);
 #ifdef EXIF_DEBUG
@@ -3643,6 +3653,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 #ifdef EXIF_DEBUG
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 #endif
+						ImageInfo->ifd_nesting_level++;
 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index TSRMLS_CC);
 						if (section_index!=SECTION_THUMBNAIL && entry_tag==TAG_SUB_IFD) {
 							if (ImageInfo->Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN
@@ -3682,6 +3693,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) at x%04X", next_offset);
 #endif
+					ImageInfo->ifd_nesting_level++;
 					exif_process_IFD_in_TIFF(ImageInfo, next_offset, SECTION_THUMBNAIL TSRMLS_CC);
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
@@ -3754,9 +3766,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 				} else {
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid TIFF file");
 				}
-			}
-			else
-			if (!memcmp(file_header, "MM\x00\x2a", 4)) {
+			} else if (!memcmp(file_header, "MM\x00\x2a", 4)) {
 				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
 				ImageInfo->motorola_intel = 1;
 #ifdef EXIF_DEBUG
