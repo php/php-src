@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
+- Added missing sanity checks around exif processing. (Ilia)
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
 
 - Improved dns_get_record AAAA support on windows. Always available when IPv6 is
