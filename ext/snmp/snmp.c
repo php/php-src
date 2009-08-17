@@ -775,22 +775,21 @@ retry:
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version) 
 {
-	char *a1, **a2, **a3;
+	char *a1, *a2, *a3;
 	int a1_len, a2_len, a3_len;
-	zval **a4 = NULL, **a5 = NULL;
-	long a6 = 0, a7 = 0;
 	struct snmp_session session;
 	long timeout = SNMP_DEFAULT_TIMEOUT;
 	long retries = SNMP_DEFAULT_RETRIES;
 	char type = (char) 0;
-	char *value = (char *) 0;
+	char *value = (char *) 0, *stype = "";
+	int value_len, stype_len;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
 	char *pptr;
 	int argc = ZEND_NUM_ARGS();
 
 	if (st == SNMP_CMD_SET) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "sssZZ|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &a4, &a5, &a6, &a7) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "sssss|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &stype, &stype_len, &value, &value_len, &timeout, &retries) == FAILURE) {
 			return;
 		}
 	} else {
@@ -799,36 +798,14 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 		 * SNMP_CMD_WALK
 		 * SNMP_CMD_REALWALK
 		 */
-		if (zend_parse_parameters(argc TSRMLS_CC, "sss|ZZ", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &a4, &a5) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "sss|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len, &timeout, &retries) == FAILURE) {
 			return;
 		}
 	}
 	
 	if (st == SNMP_CMD_SET) {
-		convert_to_string_ex(a4);
-		convert_to_string_ex(a5);
-
-		if (argc > 5) {
-			timeout = a6;
-		}
-
-		if (argc > 6) {
-			retries = a7;
-		}
-
-		type = Z_STRVAL_PP(a4)[0];
-		value = Z_STRVAL_PP(a5);
-	} else {
-		if (argc > 3) {
-			convert_to_long_ex(a4);
-			timeout = Z_LVAL_PP(a4);
-		}
-
-		if (argc > 4) {
-			convert_to_long_ex(a5);
-			retries = Z_LVAL_PP(a5);
-		}
-	}
+		type = stype[0];
+	} 
 
 	snmp_sess_init(&session);
 	strlcpy(hostname, a1, sizeof(hostname));
@@ -1201,23 +1178,22 @@ PHP_FUNCTION(snmp2_set)
 */
 static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 {
-	zval **a9 = NULL, **a10 = NULL;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
 	int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len, a8_len;
-	long a11 = 0, a12 = 0;
 	struct snmp_session session;
 	long timeout = SNMP_DEFAULT_TIMEOUT;
 	long retries = SNMP_DEFAULT_RETRIES;
 	char type = (char) 0;
-	char *value = (char *) 0;
+	char *value = (char *) 0, *stype = "";
+	int stype_len, value_len;	
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
 	char *pptr;
 	int argc = ZEND_NUM_ARGS();
 	
 	if (st == SNMP_CMD_SET) {	
-		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssssZZ|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
-			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &a9, &a10, &a11, &a12) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssssss|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
+			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &stype, &stype_len, &value, &value_len, &timeout, &retries) == FAILURE) {
 			return;
 		}
 	} else {
@@ -1226,8 +1202,8 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 		 * SNMP_CMD_WALK
 		 * SNMP_CMD_REALWALK
 		 */
-		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssss|ZZ", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
-			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &a9, &a10) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ssssssss|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
+			&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &a8, &a8_len, &timeout, &retries) == FAILURE) {
 			return;
 		}
 	}
@@ -1281,25 +1257,7 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 	}
 
 	if (st == SNMP_CMD_SET) {
-		if (argc > 10) {
-			timeout = a11;
-		}
-		if (argc > 11) {
-			retries = a12;
-		}
-		convert_to_string_ex(a9);
-		convert_to_string_ex(a10);
-		type = Z_STRVAL_PP(a9)[0];
-		value = Z_STRVAL_PP(a10);
-	} else {
-		if (argc > 8) {
-			convert_to_long_ex(a9);
-			timeout = Z_LVAL_PP(a9);
-		}
-		if (argc > 9) {
-			convert_to_long_ex(a10);
-			retries = Z_LVAL_PP(a10);
-		}
+		type = stype[0];
 	}
 
 	session.retries = retries;
