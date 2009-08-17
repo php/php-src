@@ -2,9 +2,10 @@
 Test wrong number of arguments for asinh()
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN" )
-        die ("skip - function not supported on Windows");
-?>
+if (!function_exists("asinh")) {
+	die("SKIP asinh - not supported\n");
+}
+?> 
 --FILE--
 <?php
 /* 

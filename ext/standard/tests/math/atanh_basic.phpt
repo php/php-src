@@ -2,9 +2,10 @@
 Test return type and value for expected input atanh()
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN" )
-	die ("skip - function not supported on Windows");
-?>
+if (!function_exists("atanh")) {
+	die("SKIP atanh - not supported\n");
+}
+?> 
 --INI--
 precision = 14
 --FILE--

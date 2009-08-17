@@ -2,7 +2,8 @@
 Test acosh function : 64bit long tests
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (PHP_INT_SIZE != 8) die("SKIP this test is for 64bit platform only");
+if (!function_exists("acosh")) die("SKIP acosh - not supported\n");
 ?>
 --FILE--
 <?php

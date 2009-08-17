@@ -3,6 +3,7 @@ Test asinh function : 64bit long tests
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
+if (!function_exists("asinh")) die("SKIP asinh - not supported\n");
 ?>
 --FILE--
 <?php
