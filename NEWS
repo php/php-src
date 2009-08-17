@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
+- Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
+  foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49193 (gdJpegGetVersionString() inside gd_compact identifies
   wrong type in declaration). (Ilia)
 - Fixed bug #49183 (dns_get_record does not return NAPTR records). (Pierre)
