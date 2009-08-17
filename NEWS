@@ -1,10 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
+- Added missing sanity checks around exif processing (Ilia)
+
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
-
-- Added missing sanity checks around exif processing (Ilia)
+- Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
 
 13 Aug 2009, PHP 5.2.11RC1
 - Fixed regression in cURL extension that prevented flush of data to output
