@@ -6,8 +6,9 @@ PHP                                                                        NEWS
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
-- Fixed bug #49144 	(import of schema from different host transmits original
+- Fixed bug #49144 (Import of schema from different host transmits original
   authentication details). (Dmitry)
+
 
 13 Aug 2009, PHP 5.2.11RC1
 - Fixed regression in cURL extension that prevented flush of data to output
