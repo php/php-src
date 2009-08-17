@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
+- Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
 - Fixed bug #49193 (gdJpegGetVersionString() inside gd_compact identifies
   wrong type in declaration). (Ilia)
 - Fixed bug #49183 (dns_get_record does not return NAPTR records). (Pierre)
