@@ -76,6 +76,8 @@ typedef struct sdlCtx {
 
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
+	php_stream_context *context;
+	zval               *old_header;
 } sdlCtx;
 
 struct _sdlBinding {
@@ -263,5 +265,8 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
 void delete_sdl(void *handle);
 void delete_sdl_impl(void *handle);
+
+void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC);
+void sdl_restore_uri_credentials(sdlCtx *ctx TSRMLS_DC);
 
 #endif
