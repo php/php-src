@@ -2230,15 +2230,22 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					array_ptr->refcount--;
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				array_ptr->refcount++;
 			}
 		} else {
-			if ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
+			if (IS_CONST == IS_CONST ||
+			    ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
 			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
+			    array_ptr->refcount > 1)) {
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -2251,7 +2258,7 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (IS_CONST != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -4805,15 +4812,22 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					array_ptr->refcount--;
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				array_ptr->refcount++;
 			}
 		} else {
-			if ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
+			if (IS_TMP_VAR == IS_CONST ||
+			    ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
 			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
+			    array_ptr->refcount > 1)) {
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -4826,7 +4840,7 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (IS_TMP_VAR != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -7954,15 +7968,22 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					array_ptr->refcount--;
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				array_ptr->refcount++;
 			}
 		} else {
-			if ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
+			if (IS_VAR == IS_CONST ||
+			    ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
 			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
+			    array_ptr->refcount > 1)) {
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -7975,7 +7996,7 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (IS_VAR != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -20364,15 +20385,22 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					array_ptr->refcount--;
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				array_ptr->refcount++;
 			}
 		} else {
-			if ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
+			if (IS_CV == IS_CONST ||
+			    ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
 			    !array_ptr->is_ref &&
-			    array_ptr->refcount > 1) {
+			    array_ptr->refcount > 1)) {
 				zval *tmp;
 
 				ALLOC_ZVAL(tmp);
@@ -20385,7 +20413,7 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (IS_CV != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {

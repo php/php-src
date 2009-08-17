@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.2.11
+- Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
+  foreach declaration). (Etienne, Dmitry)
+
 - Added missing sanity checks around exif processing (Ilia)
 
 13 Aug 2009, PHP 5.2.11RC1
