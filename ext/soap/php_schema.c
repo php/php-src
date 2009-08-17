@@ -102,7 +102,10 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
 
+		sdl_set_uri_credentials(ctx, (char*)location TSRMLS_CC);
 		doc = soap_xmlParseFile((char*)location TSRMLS_CC);
+		sdl_restore_uri_credentials(ctx TSRMLS_CC);
+
 		if (doc == NULL) {
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}

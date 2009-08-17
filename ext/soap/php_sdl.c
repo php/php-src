@@ -226,6 +226,64 @@ static int is_wsdl_element(xmlNodePtr node)
 	return 1;
 }
 
+void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
+{
+	char *s;
+	int l1, l2;
+	zval *context = NULL;
+	zval **header = NULL;
+
+	/* check if we load xsd from the same server */
+	s = strstr(ctx->sdl->source, "://");
+	if (!s) return;
+	s = strchr(s+3, '/');
+	l1 = s - ctx->sdl->source;
+	s = strstr((char*)uri, "://");
+	if (!s) return;
+	s = strchr(s+3, '/');
+	l2 = s - (char*)uri;
+	if (l1 != l2 || memcmp(ctx->sdl->source, uri, l1) != 0) {
+		/* another server. clear authentication credentals */
+		context = php_libxml_switch_context(NULL TSRMLS_CC);
+		php_libxml_switch_context(context TSRMLS_CC);
+		if (context) {
+			ctx->context = php_stream_context_from_zval(context, 1);
+
+			if (ctx->context &&
+			    php_stream_context_get_option(ctx->context, "http", "header", &header) == SUCCESS) {
+				s = strstr(Z_STRVAL_PP(header), "Authorization: Basic");
+				if (s && (s == Z_STRVAL_PP(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
+					char *rest = strstr(s, "\r\n");
+					if (rest) {
+						zval new_header;
+				    	
+						rest += 2;
+						Z_TYPE(new_header) = IS_STRING;
+						Z_STRLEN(new_header) = Z_STRLEN_PP(header) - (rest - s);
+						Z_STRVAL(new_header) = emalloc(Z_STRLEN_PP(header) + 1);
+						memcpy(Z_STRVAL(new_header), Z_STRVAL_PP(header), s - Z_STRVAL_PP(header));
+						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_PP(header)), rest, Z_STRLEN_PP(header) - (rest - Z_STRVAL_PP(header)) + 1);
+						ctx->old_header = *header;
+						Z_ADDREF_P(ctx->old_header);
+						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
+						zval_dtor(&new_header);
+					}
+				}
+			}
+		}
+	}
+}
+
+void sdl_restore_uri_credentials(sdlCtx *ctx TSRMLS_DC)
+{
+	if (ctx->old_header) {
+	    php_stream_context_set_option(ctx->context, "http", "header", ctx->old_header);
+	    zval_ptr_dtor(&ctx->old_header);
+		ctx->old_header = NULL;
+	}
+	ctx->context = NULL;
+}
+
 static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include TSRMLS_DC)
 {
 	sdlPtr tmpsdl = ctx->sdl;
@@ -237,7 +295,9 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 		return;
 	}
 	
+	sdl_set_uri_credentials(ctx, struri TSRMLS_CC);
 	wsdl = soap_xmlParseFile(struri TSRMLS_CC);
+	sdl_restore_uri_credentials(ctx TSRMLS_CC);
 	
 	if (!wsdl) {
 		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
