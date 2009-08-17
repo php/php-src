@@ -32,9 +32,6 @@
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
-#if HAVE_ZLIB
-#include "ext/zlib/php_zlib.h"
-#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -789,36 +786,6 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
 	}
-
-#if HAVE_ZLIB
-	/* Add output compression headers at this late stage in order to make
-	   it possible to switch it off inside the script. */
-
-	if (ZLIBG(output_compression)) {
-		zval nm_zlib_get_coding_type;
-		zval *uf_result = NULL;
-
-		ZVAL_STRINGL(&nm_zlib_get_coding_type, "zlib_get_coding_type", sizeof("zlib_get_coding_type") - 1, 0);
-
-		if (call_user_function_ex(CG(function_table), NULL, &nm_zlib_get_coding_type, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE && uf_result != NULL && Z_TYPE_P(uf_result) == IS_STRING) {
-			char buf[128];
-			int len;
-
-			assert(Z_STRVAL_P(uf_result) != NULL);
-
-			len = slprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
-			if (len <= 0 || sapi_add_header(buf, len, 1) == FAILURE) {
-				return FAILURE;
-			}
-			if (sapi_add_header_ex("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1, 0 TSRMLS_CC) == FAILURE) {
-				return FAILURE;			
-			}
-		}
-		if (uf_result != NULL) {
-			zval_ptr_dtor(&uf_result);
-		}
-	}
-#endif
 
 	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
