@@ -637,11 +637,12 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					ptr++;
 					len--;
 				}
-#if HAVE_ZLIB
-				if(!strncmp(ptr, "image/", sizeof("image/")-1)) {
+
+				/* Disable possible output compression for images */
+				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
 					zend_alter_ini_entry("zlib.output_compression", sizeof("zlib.output_compression"), "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				}
-#endif
+
 				mimetype = estrdup(ptr);
 				newlen = sapi_apply_default_charset(&mimetype, len TSRMLS_CC);
 				if (!SG(sapi_headers).mimetype){
