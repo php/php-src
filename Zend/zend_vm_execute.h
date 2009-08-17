@@ -2108,28 +2108,33 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					Z_DELREF_P(array_ptr);
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				Z_ADDREF_P(array_ptr);
 			}
-		} else {
-			if ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
-			    !Z_ISREF_P(array_ptr) &&
-			    Z_REFCOUNT_P(array_ptr) > 1) {
-				zval *tmp;
+		} else if (IS_CONST == IS_CONST ||
+		           ((IS_CONST == IS_CV || IS_CONST == IS_VAR) &&
+		            !Z_ISREF_P(array_ptr) &&
+		            Z_REFCOUNT_P(array_ptr) > 1)) {
+			zval *tmp;
 
-				ALLOC_ZVAL(tmp);
-				INIT_PZVAL_COPY(tmp, array_ptr);
-				zval_copy_ctor(tmp);
-				array_ptr = tmp;
-			} else {
-				Z_ADDREF_P(array_ptr);
-			}
+			ALLOC_ZVAL(tmp);
+			INIT_PZVAL_COPY(tmp, array_ptr);
+			zval_copy_ctor(tmp);
+			array_ptr = tmp;
+		} else {
+			Z_ADDREF_P(array_ptr);
 		}
 	}
 
-	if (IS_CONST != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -5370,28 +5375,33 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					Z_DELREF_P(array_ptr);
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				Z_ADDREF_P(array_ptr);
 			}
-		} else {
-			if ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
-			    !Z_ISREF_P(array_ptr) &&
-			    Z_REFCOUNT_P(array_ptr) > 1) {
-				zval *tmp;
+		} else if (IS_TMP_VAR == IS_CONST ||
+		           ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) &&
+		            !Z_ISREF_P(array_ptr) &&
+		            Z_REFCOUNT_P(array_ptr) > 1)) {
+			zval *tmp;
 
-				ALLOC_ZVAL(tmp);
-				INIT_PZVAL_COPY(tmp, array_ptr);
-				zval_copy_ctor(tmp);
-				array_ptr = tmp;
-			} else {
-				Z_ADDREF_P(array_ptr);
-			}
+			ALLOC_ZVAL(tmp);
+			INIT_PZVAL_COPY(tmp, array_ptr);
+			zval_copy_ctor(tmp);
+			array_ptr = tmp;
+		} else {
+			Z_ADDREF_P(array_ptr);
 		}
 	}
 
-	if (IS_TMP_VAR != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -8717,28 +8727,33 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					Z_DELREF_P(array_ptr);
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				Z_ADDREF_P(array_ptr);
 			}
-		} else {
-			if ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
-			    !Z_ISREF_P(array_ptr) &&
-			    Z_REFCOUNT_P(array_ptr) > 1) {
-				zval *tmp;
+		} else if (IS_VAR == IS_CONST ||
+		           ((IS_VAR == IS_CV || IS_VAR == IS_VAR) &&
+		            !Z_ISREF_P(array_ptr) &&
+		            Z_REFCOUNT_P(array_ptr) > 1)) {
+			zval *tmp;
 
-				ALLOC_ZVAL(tmp);
-				INIT_PZVAL_COPY(tmp, array_ptr);
-				zval_copy_ctor(tmp);
-				array_ptr = tmp;
-			} else {
-				Z_ADDREF_P(array_ptr);
-			}
+			ALLOC_ZVAL(tmp);
+			INIT_PZVAL_COPY(tmp, array_ptr);
+			zval_copy_ctor(tmp);
+			array_ptr = tmp;
+		} else {
+			Z_ADDREF_P(array_ptr);
 		}
 	}
 
-	if (IS_VAR != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
@@ -22559,28 +22574,33 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			ALLOC_ZVAL(tmp);
 			INIT_PZVAL_COPY(tmp, array_ptr);
 			array_ptr = tmp;
+			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+				ce = Z_OBJCE_P(array_ptr);
+				if (ce && ce->get_iterator) {
+					Z_DELREF_P(array_ptr);
+				}
+			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				Z_ADDREF_P(array_ptr);
 			}
-		} else {
-			if ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
-			    !Z_ISREF_P(array_ptr) &&
-			    Z_REFCOUNT_P(array_ptr) > 1) {
-				zval *tmp;
+		} else if (IS_CV == IS_CONST ||
+		           ((IS_CV == IS_CV || IS_CV == IS_VAR) &&
+		            !Z_ISREF_P(array_ptr) &&
+		            Z_REFCOUNT_P(array_ptr) > 1)) {
+			zval *tmp;
 
-				ALLOC_ZVAL(tmp);
-				INIT_PZVAL_COPY(tmp, array_ptr);
-				zval_copy_ctor(tmp);
-				array_ptr = tmp;
-			} else {
-				Z_ADDREF_P(array_ptr);
-			}
+			ALLOC_ZVAL(tmp);
+			INIT_PZVAL_COPY(tmp, array_ptr);
+			zval_copy_ctor(tmp);
+			array_ptr = tmp;
+		} else {
+			Z_ADDREF_P(array_ptr);
 		}
 	}
 
-	if (IS_CV != IS_TMP_VAR && ce && ce->get_iterator) {
+	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr, opline->extended_value & ZEND_FE_RESET_REFERENCE TSRMLS_CC);
 
 		if (iter && !EG(exception)) {
