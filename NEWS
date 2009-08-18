@@ -2,8 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
 
-- Fix for bug #49223 Inconsistency using get_defined_constants (Garrett)
-
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
 
 - Added missing sanity checks around exif processing. (Ilia)
@@ -28,6 +26,7 @@ PHP                                                                        NEWS
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
+- Fixed bug #49223 (Inconsistency using get_defined_constants). (Garrett)
 - Fixed bug #49193 (gdJpegGetVersionString() inside gd_compact identifies
   wrong type in declaration). (Ilia)
 - Fixed bug #49183 (dns_get_record does not return NAPTR records). (Pierre)
