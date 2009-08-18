@@ -38,19 +38,8 @@ string(160) "<?xml version="1.0" encoding="iso-8859-1"?>
 </methodCall>
 "
 
-Notice: Array to string conversion in %s on line %d
-string(177) "<?xml version="1.0" encoding="iso-8859-1"?>
-<methodCall>
-<methodName>Array</methodName>
-<params>
- <param>
-  <value>
-   <int>1</int>
-  </value>
- </param>
-</params>
-</methodCall>
-"
+Warning: xmlrpc_encode_request() expects parameter 1 to be string, array given in %s on line %d
+NULL
 string(175) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodCall>
 <methodName>3.4</methodName>

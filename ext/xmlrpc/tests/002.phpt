@@ -47,10 +47,7 @@ array(1) {
 }
 string(2) "-1"
 
-Notice: Array to string conversion in %s on line %d
-array(1) {
-  [0]=>
-  int(1)
-}
-string(5) "Array"
+Warning: xmlrpc_encode_request() expects parameter 1 to be string, array given in %s on line %d
+NULL
+string(2) "-1"
 Done
