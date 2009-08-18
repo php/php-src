@@ -682,10 +682,12 @@ PHP_FUNCTION(xmlrpc_encode_request)
 {
 	XMLRPC_REQUEST xRequest = NULL;
 	char *outBuf;
-	zval **method, **vals, *out_opts = NULL;
+	zval *vals, *out_opts = NULL;
+	char *method = NULL;
+	int method_len;
 	php_output_options out;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ|a", &method, &vals, &out_opts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
 		return;
 	}
 
@@ -696,15 +698,14 @@ PHP_FUNCTION(xmlrpc_encode_request)
 
 		if (xRequest) {
 			XMLRPC_RequestSetOutputOptions(xRequest, &out.xmlrpc_out);
-			if (Z_TYPE_PP(method) == IS_NULL) {
+			if (method == NULL) {
 				XMLRPC_RequestSetRequestType(xRequest, xmlrpc_request_response);
 			} else {
-				convert_to_string_ex(method);
-				XMLRPC_RequestSetMethodName(xRequest, Z_STRVAL_PP(method));
+				XMLRPC_RequestSetMethodName(xRequest, method);
 				XMLRPC_RequestSetRequestType(xRequest, xmlrpc_request_call);
 			}
-			if (Z_TYPE_PP(vals) != IS_NULL) {
-				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(*vals TSRMLS_CC));
+			if (Z_TYPE_P(vals) != IS_NULL) {
+				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(vals TSRMLS_CC));
 			}
 
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
@@ -794,7 +795,6 @@ PHP_FUNCTION(xmlrpc_decode_request)
 		return;
 	}
 
-	convert_to_string_ex(method);
 
 	if (return_value_used) {
 		zval* retval = decode_request_worker(xml, xml_len, encoding_len ? encoding : NULL, *method);
@@ -1055,20 +1055,20 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	XMLRPC_REQUEST xRequest;
 	STRUCT_XMLRPC_REQUEST_INPUT_OPTIONS input_opts;
 	xmlrpc_server_data* server;
-	zval **caller_params, *handle, **output_opts = NULL;
+	zval **caller_params, *handle, *output_opts = NULL;
 	char *rawxml;
 	int rawxml_len, type;
 	php_output_options out;
 	int argc =ZEND_NUM_ARGS();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZ|Z", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZ|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
 	/* user output options */
 	if (argc == 3) {
 		set_output_options(&out, NULL);
 	} else {
-		set_output_options(&out, *output_opts);
+		set_output_options(&out, output_opts);
 	}
 
 	server = zend_list_find(Z_LVAL_P(handle), &type);
