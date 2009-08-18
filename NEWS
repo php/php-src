@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
+
+- Fix for bug #49223 Inconsistency using get_defined_constants (Garrett)
+
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
 
 - Added missing sanity checks around exif processing. (Ilia)
