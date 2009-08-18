@@ -2328,16 +2328,12 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
 		}
 
-#ifndef ZEND_VM_EXPORT
 		if (zend_execute == execute && !EG(exception)) {
 			EX(call_opline) = opline;
 			ZEND_VM_ENTER();
 		} else {
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 		}
-#else
-		zend_execute(EG(active_op_array) TSRMLS_CC);
-#endif
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
@@ -4358,6 +4354,10 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+		case ZEND_USER_OPCODE_ENTER:
+			ZEND_VM_ENTER();
+		case ZEND_USER_OPCODE_LEAVE:
+			ZEND_VM_LEAVE();
 		case ZEND_USER_OPCODE_DISPATCH:
 			ZEND_VM_DISPATCH(EX(opline)->opcode, EX(opline));
 		default:

@@ -351,6 +351,8 @@ ZEND_API zval** zend_get_compiled_variable_value(const zend_execute_data *execut
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
 #define ZEND_USER_OPCODE_RETURN     1 /* exit from executor (return from function) */
 #define ZEND_USER_OPCODE_DISPATCH   2 /* call original opcode handler */
+#define ZEND_USER_OPCODE_ENTER      3 /* enter into new op_array without recursion */
+#define ZEND_USER_OPCODE_LEAVE      4 /* return to calling op_array within the same executor */
 
 #define ZEND_USER_OPCODE_DISPATCH_TO 0x100 /* call original handler of returned opcode */
 
