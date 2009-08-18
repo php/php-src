@@ -421,7 +421,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	}
 
 	SMTP_SKIP_SPACE(RPath);
-	snprintf(Buffer, MAIL_BUFFER_SIZE, "MAIL FROM:<%s>\r\n", RPath);
+	FormatEmailAddress(Buffer, RPath, "MAIL FROM:<%s>\r\n");
 	if ((res = Post(Buffer)) != SUCCESS) {
 		return (res);
 	}
@@ -436,7 +436,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	while (token != NULL)
 	{
 		SMTP_SKIP_SPACE(token);
-		snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+		FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
 		if ((res = Post(Buffer)) != SUCCESS) {
 			efree(tempMailTo);
 			return (res);
@@ -457,7 +457,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
 			if ((res = Post(Buffer)) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
@@ -487,7 +487,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
 			if ((res = Post(Buffer)) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
@@ -512,7 +512,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
 			if ((res = Post(Buffer)) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
@@ -545,7 +545,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			while (token != NULL)
 			{
 				SMTP_SKIP_SPACE(token);
-				snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+				FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
 				if ((res = Post(Buffer)) != SUCCESS) {
 					efree(tempMailTo);
 					return (res);
@@ -922,3 +922,30 @@ static unsigned long GetAddr(LPSTR szHost)
 	}
 	return (lAddr);
 } /* end GetAddr() */
+
+
+/*********************************************************************
+// Name:  int FormatEmailAddress
+// Input: 
+// Output:
+// Description: Formats the email address to remove any content ouside
+//   of the angle brackets < > as per RFC 2821.
+//
+//   Returns the invalidly formatted mail address if the < > are 
+//   unbalanced (the SMTP server should reject it if it's out of spec.)
+//  
+// Author/Date:  garretts 08/18/2009
+// History:
+//********************************************************************/
+int FormatEmailAddress(char* Buffer, char* EmailAddress, char* FormatString )  {
+	char *tmpAddress1, *tmpAddress2;
+	int result;
+
+	if( (tmpAddress1 = strchr(EmailAddress, '<')) && (tmpAddress2 = strchr(tmpAddress1, '>'))  ) {
+		*tmpAddress2 = 0; // terminate the string temporarily.
+		result = snprintf(Buffer, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
+		*tmpAddress2 = '>'; // put it back the way it was.
+		return result;
+	} 
+	return snprintf(Buffer, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
+} /* end FormatEmailAddress() */
