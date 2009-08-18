@@ -146,6 +146,7 @@ PHP                                                                        NEWS
   com, Kalle)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
+- Fixed bug #28038  (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
