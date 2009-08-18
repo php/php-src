@@ -921,6 +921,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
+		if(EX(function_state).function->type == ZEND_INTERNAL_FUNCTION
+			&& !ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)
+			&& PZVAL_IS_REF(*fci->params[i])) {
+			SEPARATE_ZVAL(fci->params[i]);
+		}
+
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i+1)
 			&& !PZVAL_IS_REF(*fci->params[i])) {
 			if ((*fci->params[i])->refcount>1) {
