@@ -311,7 +311,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
 	DWORD dwCreateFlags = 0;
-	char *cmd;
 	process_pair *proc;
 	TSRMLS_FETCH();
 
@@ -348,12 +347,9 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		dwCreateFlags |= CREATE_NO_WINDOW;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
+	if (!CreateProcess(NULL, command, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
 		return NULL;
 	}
-	free(cmd);
 
 	CloseHandle(process.hThread);
 	proc = process_get(NULL TSRMLS_CC);
