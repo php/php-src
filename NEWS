@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1
-
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
 
 - Added missing sanity checks around exif processing. (Ilia)
@@ -17,12 +16,14 @@ PHP                                                                        NEWS
 
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
   Functors. (Christian Seiler)
-- Fixed open_basedir circumvention for mail.log. (Maksymilian Arciemowicz,
-  Stas)
+- Fixed open_basedir circumvention for "mail.log" ini directive.
+  (Maksymilian Arciemowicz, Stas)
 - Fixed signature generation/validation for zip archives in ext/phar. (Greg)
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
+- Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
+  (Jani)
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
