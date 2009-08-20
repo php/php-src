@@ -91,13 +91,14 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 				stream->eof = 1;
 				read_bytes = 0;
 			}
+			/* Increment SG(read_post_bytes) only when something was actually read. */
+			SG(read_post_bytes) += read_bytes;
 		} else {
 			stream->eof = 1;
 		}
 	}
 
 	*position += read_bytes;
-	SG(read_post_bytes) += read_bytes;
 
 	return read_bytes;
 }
