@@ -26,6 +26,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
   (Jani)
+- Fixed bug #49286 (php://input (php_stream_input_read) is broken). (Jani)
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
