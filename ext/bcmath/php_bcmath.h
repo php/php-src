@@ -21,8 +21,6 @@
 #ifndef PHP_BCMATH_H
 #define PHP_BCMATH_H
 
-#if HAVE_BCMATH
-
 #include "libbcmath/src/bcmath.h"
 
 extern zend_module_entry bcmath_module_entry;
@@ -50,18 +48,12 @@ ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 	long bc_precision;
 ZEND_END_MODULE_GLOBALS(bcmath)
 	
-#if ZTS
-#define BCG(v) TSRMG(bcmath_globals_id, zend_bcmath_globals *, v)
+#ifdef ZTS
+# define BCG(v) TSRMG(bcmath_globals_id, zend_bcmath_globals *, v)
 #else
-#define BCG(v) (bcmath_globals.v)
+# define BCG(v) (bcmath_globals.v)
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(bcmath)
-
-#else
-
-#define phpext_bcmath_ptr NULL
-
-#endif
 
 #endif /* PHP_BCMATH_H */
