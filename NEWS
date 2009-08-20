@@ -142,8 +142,6 @@ PHP                                                                        NEWS
 - Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
 - Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
   in fopen). (Jani)
-- Fixed #43327, wrong return value from mail(), if sendmail_path is wrong.
-  (Garrett)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot
   com, Kalle)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
