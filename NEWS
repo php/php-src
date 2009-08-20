@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.11
 - Added missing sanity checks around exif processing (Ilia)
 
+- Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
+  (Jani)
 - Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
   foreach declaration). (Etienne, Dmitry)
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
