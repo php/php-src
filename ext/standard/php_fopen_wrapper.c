@@ -31,22 +31,25 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	PHPWRITE(buf, count);
 	return count;
 }
+/* }}} */
 
-static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	stream->eof = 1;
 	return 0;
 }
+/* }}} */
 
-static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	return 0;
 }
+/* }}} */
 
 php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
@@ -60,30 +63,31 @@ php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
-static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return -1;
 }
+/* }}} */
 
-static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	off_t *position = (off_t*)stream->abstract;
 	size_t read_bytes = 0;
 
-	if(!stream->eof) {
-		if(SG(request_info).raw_post_data) { /* data has already been read by a post handler */
+	if (!stream->eof) {
+		if (SG(request_info).raw_post_data) { /* data has already been read by a post handler */
 			read_bytes = SG(request_info).raw_post_data_length - *position;
-			if(read_bytes <= count) {
+			if (read_bytes <= count) {
 				stream->eof = 1;
 			} else {
 				read_bytes = count;
 			}
-			if(read_bytes) {
+			if (read_bytes) {
 				memcpy(buf, SG(request_info).raw_post_data + *position, read_bytes);
 			}
-		} else if(sapi_module.read_post) {
+		} else if (sapi_module.read_post) {
 			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
-			if(read_bytes <= 0){
+			if (read_bytes <= 0) {
 				stream->eof = 1;
 				read_bytes = 0;
 			}
@@ -94,20 +98,24 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 
 	*position += read_bytes;
 	SG(read_post_bytes) += read_bytes;
-    return read_bytes;
-}
 
-static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC)
+	return read_bytes;
+}
+/* }}} */
+
+static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
 	efree(stream->abstract);
 
 	return 0;
 }
+/* }}} */
 
-static int php_stream_input_flush(php_stream *stream TSRMLS_DC)
+static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	return -1;
 }
+/* }}} */
 
 php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
@@ -121,7 +129,8 @@ php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
-static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain TSRMLS_DC) {
+static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain TSRMLS_DC) /* {{{ */
+{
 	char *p, *token;
 	php_stream_filter *temp_filter;
 
@@ -144,9 +153,9 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 		p = php_strtok_r(NULL, "|", &token);
 	}
 }
+/* }}} */
 
-
-php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -158,7 +167,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
 	}
-	
+
 	if (!strncasecmp(path, "temp", 4)) {
 		path += 4;
 		max_memory = PHP_STREAM_MAX_MEM;
@@ -175,9 +184,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		} else {
 			mode_rw = TEMP_STREAM_READONLY;
 		}
-		return php_stream_temp_create(mode_rw, max_memory);		
+		return php_stream_temp_create(mode_rw, max_memory);
 	}
-	
+
 	if (!strcasecmp(path, "memory")) {
 		if (strpbrk(mode, "wa+")) {
 			mode_rw = TEMP_STREAM_DEFAULT;
@@ -186,11 +195,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		}
 		return php_stream_memory_create(mode_rw);
 	}
-	
+
 	if (!strcasecmp(path, "output")) {
 		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
 	}
-	
+
 	if (!strcasecmp(path, "input")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
@@ -200,7 +209,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		}
 		return php_stream_alloc(&php_stream_input_ops, ecalloc(1, sizeof(off_t)), 0, "rb");
 	}
-	
+
 	if (!strcasecmp(path, "stdin")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
@@ -282,12 +291,12 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		efree(pathdup);
 
 		return stream;
- 	} else {
+	} else {
 		/* invalid php://thingy */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid php:// URL specified");
 		return NULL;
 	}
-	
+
 	/* must be stdin, stderr or stdout */
 	if (fd == -1)	{
 		/* failed to dup */
@@ -316,9 +325,10 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			close(fd);
 		}
 	}
- 
+
 	return stream;
 }
+/* }}} */
 
 static php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
