@@ -74,20 +74,20 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 	off_t *position = (off_t*)stream->abstract;
 	size_t read_bytes = 0;
 
-	if(!stream->eof) {
-		if(SG(request_info).raw_post_data) { /* data has already been read by a post handler */
+	if (!stream->eof) {
+		if (SG(request_info).raw_post_data) { /* data has already been read by a post handler */
 			read_bytes = SG(request_info).raw_post_data_length - *position;
-			if(read_bytes <= count) {
+			if (read_bytes <= count) {
 				stream->eof = 1;
 			} else {
 				read_bytes = count;
 			}
-			if(read_bytes) {
+			if (read_bytes) {
 				memcpy(buf, SG(request_info).raw_post_data + *position, read_bytes);
 			}
-		} else if(sapi_module.read_post) {
+		} else if (sapi_module.read_post) {
 			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
-			if(read_bytes <= 0){
+			if (read_bytes <= 0) {
 				stream->eof = 1;
 				read_bytes = 0;
 			}
@@ -98,7 +98,8 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 
 	*position += read_bytes;
 	SG(read_post_bytes) += read_bytes;
-    return read_bytes;
+
+	return read_bytes;
 }
 /* }}} */
 
@@ -167,7 +168,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	if (!strncasecmp(path, "php://", 6)) {
 		path += 6;
 	}
-	
+
 	if (!strncasecmp(path, "temp", 4)) {
 		path += 4;
 		max_memory = PHP_STREAM_MAX_MEM;
@@ -184,9 +185,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		} else {
 			mode_rw = TEMP_STREAM_READONLY;
 		}
-		return php_stream_temp_create(mode_rw, max_memory);		
+		return php_stream_temp_create(mode_rw, max_memory);
 	}
-	
+
 	if (!strcasecmp(path, "memory")) {
 		if (strpbrk(mode, "wa+")) {
 			mode_rw = TEMP_STREAM_DEFAULT;
@@ -195,7 +196,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		}
 		return php_stream_memory_create(mode_rw);
 	}
-	
+
 	if (!strcasecmp(path, "output")) {
 		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
 	}
@@ -209,8 +210,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			return NULL;
 		}
 		return php_stream_alloc(&php_stream_input_ops, ecalloc(1, sizeof(off_t)), 0, "rb");
-	}  
-	
+	}
+
 	if (!strcasecmp(path, "stdin")) {
 		/* Override default behavior for php://stdin when used as an include and allow_url_include is being used in BC (off) mode */
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include_list) ) {
@@ -293,12 +294,12 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		efree(pathdup);
 
 		return stream;
- 	} else {
+	} else {
 		/* invalid php://thingy */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid php:// URL specified");
 		return NULL;
 	}
-	
+
 	/* must be stdin, stderr or stdout */
 	if (fd == -1)	{
 		/* failed to dup */
@@ -327,7 +328,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			close(fd);
 		}
 	}
- 
+
 	return stream;
 }
 /* }}} */
