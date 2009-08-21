@@ -552,10 +552,12 @@ static struct pdo_dbh_methods mysql_methods = {
 };
 /* }}} */
 
-#ifdef PHP_WIN32
-# define MYSQL_UNIX_ADDR	"MySQL"
-#else
-# define MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
+#ifdef PDO_USE_MYSQLND
+# ifdef PHP_WIN32
+#  define MYSQL_UNIX_ADDR	"MySQL"
+# else
+#  define MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
+# endif
 #endif
 
 /* {{{ pdo_mysql_handle_factory */
