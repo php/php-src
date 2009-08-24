@@ -17,8 +17,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 $workDir = "touchVar5.tmp";
 $subDirOrFile = "aSubDirOrFile";
-mkdir($workDir);
-$cwd = getcwd();
+$cwd = __DIR__;
+chdir($cwd);
+if (!mkdir($cwd . '/' . $workDir)) die("cannot create directory $workDir");
 
 $paths = array(
 			 // relative
