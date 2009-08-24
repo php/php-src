@@ -82,6 +82,7 @@ if (VCVERS > 1200) {
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
 if (PHP_OBJECT_OUT_DIR.length) {
+	PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
 	if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
 		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
 	}
