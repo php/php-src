@@ -18,6 +18,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 $workDir = "touchVar5.tmp";
 $subDirOrFile = "aSubDirOrFile";
+chdir(__DIR__);
 mkdir($workDir);
 $cwd = getcwd();
 
