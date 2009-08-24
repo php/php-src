@@ -738,7 +738,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			}
-			directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 
 			if(link_is_dir) {
 				*link_is_dir = directory;
@@ -1194,7 +1193,7 @@ static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 }
 /* }}} */
 
-static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
 	HANDLE hFile; 
