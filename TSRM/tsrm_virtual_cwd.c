@@ -1192,7 +1192,7 @@ static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 }
 /* }}} */
 
-TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+static int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
 	HANDLE hFile; 
