@@ -108,13 +108,13 @@ Warning: filectime(): stat failed for | in %s on line %d
 
 
 *** testing touch ***
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file  because No such file or directory in %s on line %d
+Warning: touch(): Unable to create file  because %s in %s on line %d
 bool(false)
 
 Warning: touch(): Unable to create file   because %s in %s on line %d
