@@ -686,15 +686,15 @@ PHP_FUNCTION(unpack)
 						buf = emalloc(len + 1);
 
 						for (ipos = opos = 0; opos < len; opos++) {
-							char c = (input[inputpos + ipos] >> nibbleshift) & 0xf;
+							char cc = (input[inputpos + ipos] >> nibbleshift) & 0xf;
 
-							if (c < 10) {
-								c += '0';
+							if (cc < 10) {
+								cc += '0';
 							} else {
-								c += 'a' - 10;
+								cc += 'a' - 10;
 							}
 
-							buf[opos] = c;
+							buf[opos] = cc;
 							nibbleshift = (nibbleshift + 4) & 7;
 
 							if (first-- == 0) {
