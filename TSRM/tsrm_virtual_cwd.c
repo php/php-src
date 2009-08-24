@@ -271,9 +271,6 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
 	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
-	if (buf->st_mtime != buf->st_atime) {
-		buf->st_atime = buf->st_mtime;
-	}
 	return 0;
 }
 /* }}} */
