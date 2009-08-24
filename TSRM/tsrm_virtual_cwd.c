@@ -271,9 +271,6 @@ CWD_API int php_sys_stat(const char *path, struct stat *buf) /* {{{ */
 	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
 	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
-	if (buf->st_mtime != buf->st_atime) {
-		buf->st_atime = buf->st_mtime;
-	}
 	return 0;
 }
 /* }}} */
@@ -741,6 +738,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			}
+			directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 
 			if(link_is_dir) {
 				*link_is_dir = directory;
@@ -988,6 +986,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
+
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
 	
 	if (path_length < 0) {
