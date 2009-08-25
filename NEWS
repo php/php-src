@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - Improved shared extension loading on OSX to use the standard Unix dlopen()
   API. (Scott)
 
+- Fixed possilbe bad caching of symlinked directories in the realpath cache
+  on Windows. (Pierre)
+- Fixed atime and mtime in stat related functions on Windows. (Pierre)
 - Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
   Functors. (Christian Seiler)
 - Fixed open_basedir circumvention for "mail.log" ini directive.
@@ -56,6 +59,8 @@ PHP                                                                        NEWS
   strings as option keys). (Jani)
 - Fixed bug #49052 (context option headers freed too early when using
   --with-curlwrappers). (Jani)
+- Fixed bug #49047 (The function touch() fails on directories on Windows).
+  (Pierre)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
   (Jani)
 - Fixed bug #49026 (proc_open() can bypass safe_mode_protected_env_vars
