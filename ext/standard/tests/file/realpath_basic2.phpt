@@ -3,9 +3,9 @@ realpath() with relative directory
 --FILE--
 <?php
 
-var_dump(realpath('.') == getcwd());
+var_dump(realpath('.') == realpath(getcwd()));
 chdir('..');
-var_dump(realpath('.') == getcwd());
+var_dump(realpath('.') == realpath(getcwd()));
 
 ?>
 --EXPECT--
