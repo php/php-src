@@ -171,7 +171,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 				fAccess = bucket->is_readable;
 				goto Finished;
 			}
-			desired_access = FILE_GENERIC_READ;
+			desired_access = FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS;
  		} else { // if(mode <= 6)
 			if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
 				fAccess = bucket->is_readable & bucket->is_writable;
