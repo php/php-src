@@ -216,7 +216,7 @@ typedef unsigned long long uint64_t;
   #if SIZEOF_LONG == 8
     #define MYSQLND_LLU_SPEC "%lu"
   #elif SIZEOF_LONG == 4
-    #define MYSQLND_LL_SPEC "%llu"
+    #define MYSQLND_LLU_SPEC "%llu"
    #endif
 #endif /* MYSQLND_LLU_SPEC*/
 
