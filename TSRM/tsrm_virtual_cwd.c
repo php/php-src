@@ -738,6 +738,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				}
 			}
+			directory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 
 			if(link_is_dir) {
 				*link_is_dir = directory;
