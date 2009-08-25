@@ -205,16 +205,20 @@ typedef unsigned long long uint64_t;
 #endif
 
 #ifndef MYSQLND_LL_SPEC
-#if SIZEOF_LONG == 8
-#define MYSQLND_LL_SPEC	"%li"
-#endif
+  #if SIZEOF_LONG == 8
+    #define MYSQLND_LL_SPEC "%li"
+  #elif SIZEOF_LONG == 4
+    #define MYSQLND_LL_SPEC "%lli"
+  #endif
 #endif
 
 #ifndef MYSQLND_LLU_SPEC
-#if SIZEOF_LONG == 8
-#define MYSQLND_LLU_SPEC	"%li"
-#endif
-#endif
+  #if SIZEOF_LONG == 8
+    #define MYSQLND_LLU_SPEC "%lu"
+  #elif SIZEOF_LONG == 4
+    #define MYSQLND_LL_SPEC "%llu"
+   #endif
+#endif /* MYSQLND_LLU_SPEC*/
 
 
 #define MYSQLND_SZ_T_SPEC "%zd"
