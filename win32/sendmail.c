@@ -975,15 +975,15 @@ static unsigned long GetAddr(LPSTR szHost)
 // Author/Date:  garretts 08/18/2009
 // History:
 //********************************************************************/
-int FormatEmailAddress(char* Buffer, char* EmailAddress, char* FormatString )  {
+int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString )  {
 	char *tmpAddress1, *tmpAddress2;
 	int result;
 
 	if( (tmpAddress1 = strchr(EmailAddress, '<')) && (tmpAddress2 = strchr(tmpAddress1, '>'))  ) {
 		*tmpAddress2 = 0; // terminate the string temporarily.
-		result = snprintf(Buffer, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
+		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
 		*tmpAddress2 = '>'; // put it back the way it was.
 		return result;
 	} 
-	return snprintf(Buffer, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
+	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */
