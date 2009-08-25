@@ -126,6 +126,8 @@ PHP                                                                        NEWS
   file). (Greg)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
   errors when errors are logged). (Jani)
+- Fixed bug #48198 error: 'MYSQLND_LLU_SPEC' undeclared. Cause for #48780 and
+  #46952 - both fixed too. (Andrey)
 - Fixed bug #48189 (ibase_execute error in return param). (Kalle)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
