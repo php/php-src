@@ -20,8 +20,9 @@ echo "*** Testing unlink() : variation ***\n";
 
 $workDir = "unlinkVar9.tmp";
 $tmpFile = "file.tmp";
+chdir(__DIR__);
 mkdir($workDir);
-$cwd = getcwd();
+$cwd = __DIR__;
 $unixifiedFile = '/'.substr(str_replace('\\','/',$cwd).'/'.$workDir.'/'.$tmpFile, 3);
 
 $files = array(
@@ -57,12 +58,8 @@ $files = array(
              
 
 foreach($files as $fileToUnlink) {
-   test_realfile($workDir.'/'.$tmpFile, $fileToUnlink);
-}
-
-rmdir($workDir);
-
-function test_realfile($file, $tounlink) {
+	$file = $workDir.'/'.$tmpFile;
+	$tounlink = $fileToUnlink;
    touch($file);
    echo "-- removing $tounlink --\n";           
    $res = unlink($tounlink);
@@ -79,7 +76,7 @@ function test_realfile($file, $tounlink) {
    }
 }
 
-
+rmdir($workDir);
 ?>
 ===DONE===
 --EXPECTF--
