@@ -328,8 +328,13 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 #define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path TSRMLS_CC)
 
 #if HAVE_UTIME
-#define VCWD_UTIME(path, time) utime(path, time)
+# ifdef TSRM_WIN32
+#  define VCWD_UTIME(path, time) win32_utime(path, time)
+# else
+#  define VCWD_UTIME(path, time) utime(path, time)
+# endif
 #endif
+
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
