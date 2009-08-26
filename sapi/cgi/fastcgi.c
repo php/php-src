@@ -403,8 +403,8 @@ int fcgi_listen(const char *path, int backlog)
 		HANDLE namedPipe;
 
 		memset(&sa, 0, sizeof(saw));
-		sa.nLength = sizeof(saw);
-		sa.bInheritHandle = FALSE;
+		saw.nLength = sizeof(saw);
+		saw.bInheritHandle = FALSE;
 		acl = prepare_named_pipe_acl(&sd, &saw);
 
 		namedPipe = CreateNamedPipe(path,
