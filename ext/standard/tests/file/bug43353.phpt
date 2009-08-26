@@ -1,5 +1,10 @@
 --TEST--
 Bug #43353 wrong detection of 'data' wrapper
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip on Windows");
+?>
 --FILE--
 <?php
 
