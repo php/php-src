@@ -975,7 +975,7 @@ static unsigned long GetAddr(LPSTR szHost)
 // Author/Date:  garretts 08/18/2009
 // History:
 //********************************************************************/
-int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString )  {
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
 	char *tmpAddress1, *tmpAddress2;
 	int result;
 

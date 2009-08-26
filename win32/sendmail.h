@@ -47,4 +47,5 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 static int Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 #endif							/* sendmail_h */
