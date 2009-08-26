@@ -110,6 +110,8 @@ PHP                                                                        NEWS
   gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
+- Fuxed bug #48746 (Unable to browse directories within Junction Points).
+  (Pierre, Kanwaljeet Singla)
 - Fixed bug #48740 (PHAR install fails when INSTALL_ROOT is not the final
   install location). (james dot cohen at digitalwindow dot com, Greg)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
