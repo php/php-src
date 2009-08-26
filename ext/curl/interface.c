@@ -183,7 +183,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* 
 			return 0;
 		}
 
-		if (!strncasecmp("file", uri->scheme, sizeof("file"))) {
+		if (uri->scheme && !strncasecmp("file", uri->scheme, sizeof("file"))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol 'file' disabled in cURL");
 			php_url_free(uri);
 			return 0;
