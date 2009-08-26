@@ -20,8 +20,9 @@ echo "*** Testing unlink() : variation ***\n";
 
 $workDir = "unlinkVar8.tmp";
 $tmpFile = "file.tmp";
+chdir(__DIR__);
 mkdir($workDir);
-$cwd = getcwd();
+$cwd = __DIR__;
 
 $files = array(
              // relative
