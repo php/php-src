@@ -146,6 +146,7 @@ PHP                                                                        NEWS
 - Fixed bug #47481 (natcasesort() does not sort extended ASCII characters
   correctly). (Herman Radtke)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
+- Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
 - Fixed bug #46682 (touch() afield returns different values on windows).
   (Pierre)
 - Fixed bug #45905 (imagefilledrectangle() clipping error).
