@@ -3,7 +3,7 @@ Bug #44607 (stream_get_line unable to correctly identify the "ending" in the str
 --FILE--
 <?php
 $eol = '<EOL>';
-$tempnam = tempnam(sys_get_temp_dir(), 'php');
+$tempnam = __DIR__ . '/' . 'tmpbug44607.txt';
 $data = str_repeat('.', 14000);
 $data .= $eol;
 $data .= $data;
@@ -14,6 +14,7 @@ var_dump(strlen(stream_get_line($fd, 15000, $eol)));
 fseek($fd, 1, SEEK_SET);
 var_dump(strlen(stream_get_line($fd, 15000, $eol)));
 var_dump(strlen(stream_get_line($fd, 15000, $eol)));
+fclose($fd);
 unlink($tempnam);
 ?>
 --EXPECT--
