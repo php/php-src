@@ -397,21 +397,21 @@ int fcgi_listen(const char *path, int backlog)
 		}
 	} else {
 #ifdef _WIN32
-	    SECURITY_DESCRIPTOR  sd;
-    	SECURITY_ATTRIBUTES  sa;
-	    PACL                 acl;
+		SECURITY_DESCRIPTOR  sd;
+		SECURITY_ATTRIBUTES  saw;
+		PACL                 acl;
 		HANDLE namedPipe;
 
-		memset(&sa, 0, sizeof(sa));
-		sa.nLength = sizeof(sa);
+		memset(&sa, 0, sizeof(saw));
+		sa.nLength = sizeof(saw);
 		sa.bInheritHandle = FALSE;
-		acl = prepare_named_pipe_acl(&sd, &sa);
+		acl = prepare_named_pipe_acl(&sd, &saw);
 
 		namedPipe = CreateNamedPipe(path,
 			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 			PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_READMODE_BYTE,
 			PIPE_UNLIMITED_INSTANCES,
-			8192, 8192, 0, &sa);
+			8192, 8192, 0, &saw);
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
 		}		
