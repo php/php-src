@@ -155,6 +155,7 @@ PHP                                                                        NEWS
 - Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
   (Uwe Schindler)
 - Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
+- Fixed bug #44683 (popen crashes when an invalid mode is passed). (Pierre)
 - Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
   in fopen). (Jani)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot
