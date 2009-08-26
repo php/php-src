@@ -102,6 +102,7 @@ PHP                                                                        NEWS
 - Fixed bug #45280 (Reflection of instantiated COM classes causes PHP to crash) 
   (Paul Richards, Kalle)
 - Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
+- Fixed bug #44683 (popen crashes when an invalid mode is passed). (Pierre)
 - Fixed bug #44144 (spl_autoload_functions() should return object instance
   when appropriate). (Hannes, Etienne)
 - Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
