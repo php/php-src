@@ -692,18 +692,37 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
 				rname_len = pbuffer->SymbolicLinkReparseBuffer.PrintNameLength/2;
 				rname_off = pbuffer->SymbolicLinkReparseBuffer.PrintNameOffset/2;
+				if(rname_len <= 0) {
+					rname_len = pbuffer->SymbolicLinkReparseBuffer.SubstituteNameLength/2;
+					rname_off = pbuffer->SymbolicLinkReparseBuffer.SubstituteNameOffset/2;
+				}
+
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
 			}
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
 				rname_len = pbuffer->MountPointReparseBuffer.PrintNameLength/2;
 				rname_off = pbuffer->MountPointReparseBuffer.PrintNameOffset/2;
+				if(rname_len <= 0) {
+					rname_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength/2;
+					rname_off = pbuffer->MountPointReparseBuffer.SubstituteNameOffset/2;
+				}
+
 				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
 				isabsolute = 1;
 			}
 			else {
 				tsrm_free_alloca(pbuffer, use_heap_large);
 				return -1;
+			}
+
+			if(isabsolute && rname_len > 4) {
+				/* Skip first 4 characters if they are "\\?\" */
+				if(reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'\\' &&
+					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\') {
+					rname_off += 4;
+					rname_len -= 4;
+				}
 			}
 
 			/* Convert wide string to narrow string */
