@@ -151,7 +151,9 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ STR_W_LEN("proto_binary_fetched_enum") },
 	{ STR_W_LEN("proto_binary_fetched_set") },
 	{ STR_W_LEN("proto_binary_fetched_geometry") },
-	{ STR_W_LEN("proto_binary_fetched_other") }	
+	{ STR_W_LEN("proto_binary_fetched_other") },
+	{ STR_W_LEN("init_command_executed_count") },
+	{ STR_W_LEN("init_command_failed_count") }	
 };
 /* }}} */
 

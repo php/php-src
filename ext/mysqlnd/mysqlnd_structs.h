@@ -281,6 +281,7 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*set_server_option)(MYSQLND * const conn, enum_mysqlnd_server_option option TSRMLS_DC);
 	enum_func_status	(*set_client_option)(MYSQLND * const conn, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
 	void				(*free_contents)(MYSQLND *conn TSRMLS_DC);	/* private */
+	void				(*free_options)(MYSQLND * conn TSRMLS_DC);	/* private */
 	enum_func_status	(*close)(MYSQLND *conn, enum_connection_close_type close_type TSRMLS_DC);
 	void				(*dtor)(MYSQLND *conn TSRMLS_DC);	/* private */
 
