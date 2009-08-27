@@ -152,12 +152,14 @@ PHP                                                                        NEWS
 - Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
 - Fixed bug #46682 (touch() afield returns different values on windows).
   (Pierre)
-- Fixed bug #45905 (imagefilledrectangle() clipping error).
-  (markril at hotmail dot com, Pierre)
-- Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
+- Fiexs bug #46614 (Extended MySQLi class gives incorrect empty() result).
+  (Andrey)
 - Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
   (Uwe Schindler)
+- Fixed bug #45905 (imagefilledrectangle() clipping error).
+  (markril at hotmail dot com, Pierre)
 - Fixed bug #45554 (Inconsistent behavior of the u format char). (Derick)
+- Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
 - Fixed bug #44683 (popen crashes when an invalid mode is passed). (Pierre)
 - Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
   in fopen). (Jani)
