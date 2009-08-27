@@ -723,6 +723,11 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					rname_off += 4;
 					rname_len -= 4;
 				}
+				if(reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'?' &&
+					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\') {
+					rname_off += 4;
+					rname_len -= 4;
+				}
 			}
 
 			/* Convert wide string to narrow string */
