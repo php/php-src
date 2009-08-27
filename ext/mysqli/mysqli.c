@@ -337,7 +337,6 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zval *retval;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd;
-	zend_object_handlers *std_hnd;
 	int ret;
 
 	ret = FAILURE;
@@ -363,7 +362,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 			retval = EG(uninitialized_zval_ptr);
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
+		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
 	}
 
@@ -403,7 +402,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 			zval_ptr_dtor(&value);
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
+		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value TSRMLS_CC);
 	}
 
@@ -460,6 +459,9 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for has_set_exists");	
 		}
+	} else {
+		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+		ret = std_hnd->has_property(object, member, has_set_exists TSRMLS_CC);
 	}
 	return ret;
 } /* }}} */
