@@ -425,6 +425,8 @@ typedef enum mysqlnd_collected_stats
 	STAT_BINARY_TYPE_FETCHED_SET,
 	STAT_BINARY_TYPE_FETCHED_GEOMETRY,
 	STAT_BINARY_TYPE_FETCHED_OTHER,
+	STAT_INIT_COMMAND_EXECUTED_COUNT,
+	STAT_INIT_COMMAND_FAILED_COUNT,
 	STAT_LAST /* Should be always the last */
 } enum_mysqlnd_collected_stats;
 
