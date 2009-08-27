@@ -559,7 +559,7 @@ PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_
 {
 	int pos = len;
 	char *newbuf = emalloc(len + 1);
-	unsigned short c;
+	unsigned int c;
 	char (*decoder)(unsigned short) = NULL;
 	xml_encoding *enc = xml_get_encoding(encoding);
 
