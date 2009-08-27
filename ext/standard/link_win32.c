@@ -55,6 +55,10 @@ TODO:
 #define VOLUME_NAME_NT 0x2
 #endif
 
+#ifndef VOLUME_NAME_DOS
+#define VOLUME_NAME_DOS 0x0
+#endif
+
 /* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
@@ -120,7 +124,7 @@ PHP_FUNCTION(readlink)
 
 	if(dwRet > 4) {
 		/* Skip first 4 characters if they are "\??\" */
-		if(Path[0] == '\\' && Path[0] == '\\' && Path[1] == '?' && Path[2] == '?' && Path[3] ==  '\\') {
+		if(Path[0] == '\\' && Path[1] == '\\' && Path[2] == '?' && Path[3] ==  '\\') {
 			RETURN_STRING(Path + 4, 1);
 		}
 	} else {
