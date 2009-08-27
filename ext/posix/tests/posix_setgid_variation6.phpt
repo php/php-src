@@ -1,5 +1,9 @@
 --TEST--
 Test function posix_setgid() by substituting argument 1 with object values.
+--SKIPIF--
+<?php 
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+?>
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com
 Francesco Fullone ff@ideato.it
@@ -43,9 +47,12 @@ foreach ( $variation_array as $var ) {
   var_dump(posix_setgid( $var  ) );
 }
 ?>
+===DONE===
 --EXPECTF--
 *** Test substituting argument 1 with object values ***
 Error: 2 - posix_setgid() expects parameter 1 to be long, object given, %s
 bool(false)
 Error: 2 - posix_setgid() expects parameter 1 to be long, object given, %s
 bool(false)
+===DONE===
+	
