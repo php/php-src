@@ -166,6 +166,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			DBG_RETURN(FAIL);
 		}
 		if (field_packet.stupid_list_fields_eof == TRUE) {
+			meta->field_count = i + 1;
 			break;
 		}
 

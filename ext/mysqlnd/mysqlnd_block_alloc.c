@@ -35,7 +35,7 @@ mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 	DBG_ENTER("mysqlnd_mempool_dtor");
 	for (i = 0; i < pool->free_chunk_list_elements; i++) {
 		MYSQLND_MEMORY_POOL_CHUNK * chunk = pool->free_chunk_list[i];
-		mysqlnd_mempool_free_chunk(chunk, FALSE TSRMLS_CC);
+		chunk->free_chunk(chunk, FALSE TSRMLS_CC);
 	}
 	
 	DBG_VOID_RETURN;
@@ -44,14 +44,11 @@ mysqlnd_mempool_free_contents(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 
 
 /* {{{ mysqlnd_mempool_free_chunk */
-void
+static void
 mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC)
 {
 	MYSQLND_MEMORY_POOL * pool = chunk->pool;
 	DBG_ENTER("mysqlnd_mempool_free_chunk");
-	if (!chunk) {
-		DBG_VOID_RETURN;
-	}
 	if (chunk->from_pool) {
 		/* Try to back-off and guess if this is the last block allocated */
 		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
@@ -78,7 +75,7 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it
 
 
 /* {{{ mysqlnd_mempool_resize_chunk */
-void
+static void
 mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
@@ -138,6 +135,8 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 		chunk = mnd_malloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
 	}
 
+	chunk->free_chunk = mysqlnd_mempool_free_chunk;
+	chunk->resize_chunk = mysqlnd_mempool_resize_chunk;
 	chunk->size = size;
 	/*
 	  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
@@ -184,12 +183,10 @@ void
 mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_mempool_destroy");
-	if (pool) {
-		/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
-		mysqlnd_mempool_free_contents(pool TSRMLS_CC);
-		mnd_free(pool->arena);
-		mnd_free(pool);
-	}
+	/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
+	mysqlnd_mempool_free_contents(pool TSRMLS_CC);
+	mnd_free(pool->arena);
+	mnd_free(pool);
 	DBG_VOID_RETURN;
 }
 /* }}} */
