@@ -4,6 +4,7 @@ mysql_insert_id()
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+require_once('skipifdefaultconnectfailure.inc');
 ?>
 --FILE--
 <?php
@@ -12,8 +13,8 @@ include "connect.inc";
 $tmp    = NULL;
 $link   = NULL;
 
-if (false !== ($tmp = @mysql_insert_id()))
-	printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+if (0 !== ($tmp = @mysql_insert_id()))
+	printf("[001] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
 if (NULL !== ($tmp = @mysql_insert_id($link)))
 	printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
