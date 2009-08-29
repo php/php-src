@@ -7,11 +7,10 @@ PHP                                                                        NEWS
 - Added error constant when json_encode() detects an invalid UTF-8 sequence.
   (Scott)
 
-
 - Improved readlink on Windows, supress \??\ and use the drive syntax only.
- (Pierre)
-- Improved dns_get_record AAAA support on windows. Always available when IPv6
-  is support is installed, format is now the same than on unix. (Pierre)
+  (Pierre)
+- Improved dns_get_record() AAAA support on windows. Always available when
+  IPv6 is support is installed, format is now the same than on unix. (Pierre)
 - Improved the DNS functions on OSX to use newer APIs, also use Bind 9 API
   where available on other platforms. (Scott)
 - Improved shared extension loading on OSX to use the standard Unix dlopen()
@@ -147,15 +146,15 @@ PHP                                                                        NEWS
   (Sriram Natarajan)
 - Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
   Al dot Smith at aeschi dot ch dot eu dot org)
-- Fixed bug #48057 (Only the date fields of the first row are fetched,
-  others are empty). (info at programmiernutte dot net)
+- Fixed bug #48057 (Only the date fields of the first row are fetched, others
+  are empty). (info at programmiernutte dot net)
 - Fixed bug #47481 (natcasesort() does not sort extended ASCII characters
   correctly). (Herman Radtke)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
 - Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
 - Fixed bug #46682 (touch() afield returns different values on windows).
   (Pierre)
-- Fiexs bug #46614 (Extended MySQLi class gives incorrect empty() result).
+- Fixed bug #46614 (Extended MySQLi class gives incorrect empty() result).
   (Andrey)
 - Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
   (Uwe Schindler)
