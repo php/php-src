@@ -670,6 +670,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			unsigned int retlength = 0, rname_off = 0;
 			int bufindex = 0, rname_len = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
+			WCHAR szVolumePathNames[MAX_PATH];
 
 			if(++(*ll) > LINK_MAX) {
 				return -1;
@@ -717,13 +718,21 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 
 			if(isabsolute && rname_len > 4) {
-				/* Skip first 4 characters if they are "\\?\" */
-				if(reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'\\' &&
-					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\') {
-					rname_off += 4;
-					rname_len -= 4;
-				}
-				if(reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'?' &&
+				/* Skip first 4 characters if they are "\\?\" and fetch the drive name */
+				if ((reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'\\' &&
+					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\')) {
+					BOOL res;
+
+					res = GetVolumePathNameW(reparsetarget, szVolumePathNames, MAX_PATH);
+					if (!res) {
+						return -1;
+					}
+					reparsetarget = szVolumePathNames;
+					rname_off = 0;
+					rname_len = wcslen(szVolumePathNames);
+				} else
+				/* Skip first 4 characters if they are "\??\"*/
+				if (reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'?' &&
 					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\') {
 					rname_off += 4;
 					rname_len -= 4;
@@ -740,11 +749,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			j = bufindex;
 
 			if(isabsolute == 1) {
-				/* use_realpath is 0 in the call below coz path is absolute*/
-				j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory TSRMLS_CC);
-				if(j < 0) {
-					tsrm_free_alloca(tmp, use_heap);
-					return -1;
+				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
+					/* use_realpath is 0 in the call below coz path is absolute*/
+					j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory TSRMLS_CC);
+					if(j < 0) {
+						tsrm_free_alloca(tmp, use_heap);
+						return -1;
+					}
 				}
 			}
 			else {
@@ -1010,7 +1021,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
-
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL TSRMLS_CC);
 	
 	if (path_length < 0) {
