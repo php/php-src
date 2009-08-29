@@ -4,6 +4,7 @@ mysql_affected_rows()
 <?php
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
+require_once('skipifdefaultconnectfailure.inc');
 ?>
 --FILE--
 <?php
