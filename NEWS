@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
+- Fixed bug #49391 (ldap.c utilizing deprecated ldap_modify_s). (Ilia)
 - Fixed bug #49372 (segfault in php_curl_option_curl). (Pierre)
 - Fixed bug #49306 (inside pdo_mysql default socket settings are ignored).
   (Ilia)
