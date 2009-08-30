@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.11
 - Added missing sanity checks around exif processing (Ilia)
 
+- Fixed leak on error in popen/exec (and related functions on Windows. (Pierre)
+
 - Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
   (Jani)
 - Fixed bug #49286 (php://input (php_stream_input_read) is broken). (Jani)
