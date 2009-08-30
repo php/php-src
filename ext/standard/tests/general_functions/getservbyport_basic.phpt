@@ -13,10 +13,14 @@ Simone Gentili (sensorario@gmail.com)
 	else die(PHP_OS. " unsupported");
 
 	if(file_exists($file)){
-		var_dump(getservbyport( 80, "tcp" ) === "www");
+		$services = file_get_contents($file);
+                $service = getservbyport( 80, "tcp" );
+                if(preg_match("/$service\s+80\/tcp/", $services)) {
+			echo "PASS\n";
+		}
 	}else{
-		var_dump(getservbyport(80, "tcp") === false);	
+		echo "Services file not found in expected location\n";
 	}
 ?>
---EXPECTF--
-bool(true)
+--EXPECT--
+PASS
