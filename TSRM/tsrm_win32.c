@@ -373,6 +373,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 
 	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
+		free(cmd);
 		return NULL;
 	}
 	free(cmd);
