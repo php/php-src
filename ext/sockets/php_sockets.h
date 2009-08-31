@@ -91,6 +91,8 @@ struct	sockaddr_un {
 };
 #endif
 
+PHPAPI int php_sockets_le_socket(void);
+
 /* Prototypes */
 #ifdef ilia_0 /* not needed, only causes a compiler warning */
 static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
