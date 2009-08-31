@@ -1212,13 +1212,16 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 		zval *local_retval_ptr=NULL;
 		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 		zend_op **original_opline_ptr = EG(opline_ptr);
+		int orig_interactive = CG(interactive);
 
 		EG(return_value_ptr_ptr) = &local_retval_ptr;
 		EG(active_op_array) = new_op_array;
 		EG(no_extensions)=1;
+		CG(interactive) = 0;
 
 		zend_execute(new_op_array TSRMLS_CC);
 
+		CG(interactive) = orig_interactive;
 		if (local_retval_ptr) {
 			if (retval_ptr) {
 				COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
@@ -1265,6 +1268,7 @@ void execute_new_code(TSRMLS_D)
 	zend_op *opline, *end;
 	zend_op *ret_opline;
 	zval *local_retval=NULL;
+	int orig_interactive;
 
 	if (!(CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE)
 		|| CG(active_op_array)->backpatch_count>0
@@ -1314,7 +1318,10 @@ void execute_new_code(TSRMLS_D)
 
 	EG(return_value_ptr_ptr) = &local_retval;
 	EG(active_op_array) = CG(active_op_array);
+	orig_interactive = CG(interactive);
+	CG(interactive) = 0;
 	zend_execute(CG(active_op_array) TSRMLS_CC);
+	CG(interactive) = orig_interactive;
 	if (local_retval) {
 		zval_ptr_dtor(&local_retval);
 	}

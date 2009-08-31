@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
 - Fixed bug #49144 (Import of schema from different host transmits original
   authentication details). (Dmitry)
+- Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes when including
+  files from function). (Stas)
 - Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
 - Fixed bug #28038  (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 
