@@ -836,7 +836,7 @@ PHP_FUNCTION(wordwrap)
 		laststart = lastspace = 0;
 		for (current = 0; current < textlen; current++) {
 			if (text[current] == breakchar[0]) {
-				laststart = lastspace = current;
+				laststart = lastspace = current + 1;
 			} else if (text[current] == ' ') {
 				if (current - laststart >= linelength) {
 					newtext[current] = breakchar[0];
