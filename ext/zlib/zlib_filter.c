@@ -352,7 +352,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 
 		if (filterparams) {
-			zval **tmpzval;
+			zval **tmpzval, tmp;
 
 			/* filterparams can either be a scalar value to indicate compression level (shortcut method)
                Or can be a hash containing one or more of 'window', 'memory', and/or 'level' members. */
@@ -361,8 +361,6 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_ARRAY:
 				case IS_OBJECT:
 					if (zend_hash_find(HASH_OF(filterparams), "memory", sizeof("memory"), (void**) &tmpzval) == SUCCESS) {
-						zval tmp;
-		
 						tmp = **tmpzval;
 						zval_copy_ctor(&tmp);
 						convert_to_long(&tmp);
@@ -376,8 +374,6 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					}
 
 					if (zend_hash_find(HASH_OF(filterparams), "window", sizeof("window"), (void**) &tmpzval) == SUCCESS) {
-						zval tmp;
-		
 						tmp = **tmpzval;
 						zval_copy_ctor(&tmp);
 						convert_to_long(&tmp);
@@ -391,6 +387,8 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					}
 
 					if (zend_hash_find(HASH_OF(filterparams), "level", sizeof("level"), (void**) &tmpzval) == SUCCESS) {
+						tmp = **tmpzval;
+
 						/* Psuedo pass through to catch level validating code */
 						goto factory_setlevel;
 					}
@@ -398,19 +396,16 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_STRING:
 				case IS_DOUBLE:
 				case IS_LONG:
-					{
-						zval tmp;
-		
-						tmp = *filterparams;
-						zval_copy_ctor(&tmp);
-						convert_to_long(&tmp);
+					tmp = *filterparams;
 factory_setlevel:
-						/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
-						if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%ld)", Z_LVAL(tmp));
-						} else {
-							level = Z_LVAL(tmp);
-						}
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+
+					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
+					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%ld)", Z_LVAL(tmp));
+					} else {
+						level = Z_LVAL(tmp);
 					}
 					break;
 				default:

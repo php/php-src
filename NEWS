@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Improved shared extension loading on OSX to use the standard Unix dlopen()
   API. (Scott)
 
+- Fixed zlib.deflate compress filter to actually accpet level parameter. (Jani)
 - Fixed leak on error in popen/exec (and related functions) on Windows.
   (Pierre)
 - Fixed possible bad caching of symlinked directories in the realpath cache
