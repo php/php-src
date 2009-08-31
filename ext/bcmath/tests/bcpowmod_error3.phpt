@@ -3,6 +3,8 @@ bcpowmod — Raise an arbitrary precision number to another, reduced by a specif
 --CREDITS--
 Antoni Torrents
 antoni@solucionsinternet.com
+--SKIPIF--
+<?php if(!extension_loaded("bcmath")) print "skip"; ?>
 --FILE--
 <?php
 echo bcpowmod('1', '2', '3', '4', '5');
