@@ -323,6 +323,12 @@ ZEND_GET_MODULE(sockets)
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
 
+PHPAPI int php_sockets_le_socket(void) /* {{{ */
+{
+	return le_socket;
+}
+/* }}} */
+
 static void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 {
 	php_socket *php_sock = (php_socket *) rsrc->ptr;
