@@ -671,6 +671,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			int bufindex = 0, rname_len = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			WCHAR szVolumePathNames[MAX_PATH];
+			BOOL isVolume = FALSE;
 
 			if(++(*ll) > LINK_MAX) {
 				return -1;
@@ -718,35 +719,36 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 
 			if(isabsolute && rname_len > 4) {
-				/* Skip first 4 characters if they are "\\?\" and fetch the drive name */
-				if ((reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'\\' &&
-					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\')) {
-					BOOL res;
-
-					res = GetVolumePathNameW(reparsetarget, szVolumePathNames, MAX_PATH);
-					if (!res) {
-						return -1;
-					}
-					reparsetarget = szVolumePathNames;
-					rname_off = 0;
-					rname_len = wcslen(szVolumePathNames);
+				/* Do not resolve volumes (for now). A mounted point can 
+				   target a volume without a drive, it is not certain that
+				   all IO functions we use in php and its deps support 
+				   path with volume GUID instead of the DOS way, like:
+				   d:\test\mnt\foo
+				   \\?\Volume{62d1c3f8-83b9-11de-b108-806e6f6e6963}\foo
+				*/
+				if (wcsncmp(reparsetarget,  L"\\??\\Volume{",11) == 0 
+					|| wcsncmp(reparsetarget,  L"\\\\?\\Volume{",11) == 0) {
+					isVolume = TRUE;					
 				} else
-				/* Skip first 4 characters if they are "\??\"*/
-				if (reparsetarget[rname_off] == L'\\' && reparsetarget[rname_off + 1] == L'?' &&
-					reparsetarget[rname_off + 2] == L'?' && reparsetarget[rname_off + 3] == L'\\') {
+					/* do not use the \??\ and \\?\ prefix*/
+					if (wcsncmp(reparsetarget,  L"\\??\\", 4) == 0 
+						|| wcsncmp(reparsetarget,  L"\\\\?\\", 4) == 0) {
 					rname_off += 4;
 					rname_len -= 4;
 				}
 			}
+			if (!isVolume) {
+				/* Convert wide string to narrow string */
+				for(bufindex = 0; bufindex < rname_len; bufindex++) {
+					*(path + bufindex) = (char)(reparsetarget[rname_off + bufindex]);
+				}
 
-			/* Convert wide string to narrow string */
-			for(bufindex = 0; bufindex < rname_len; bufindex++) {
-				*(path + bufindex) = (char)(reparsetarget[rname_off + bufindex]);
+				*(path + bufindex) = 0;
+				j = bufindex;
+			} else {
+				j = rname_len + 1;
 			}
-
-			*(path + bufindex) = 0;
 			tsrm_free_alloca(pbuffer, use_heap_large);
-			j = bufindex;
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
