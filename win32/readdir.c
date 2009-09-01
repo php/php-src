@@ -25,14 +25,19 @@ DIR *opendir(const char *dir)
 	char *filespec;
 	HANDLE handle;
 	int index;
+	char resolved_path_buff[MAXPATHLEN];
 
-	filespec = (char *)malloc(strlen(dir) + 2 + 1);
-	strcpy(filespec, dir);
+	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
+		return NULL;
+	}
+
+	filespec = (char *)malloc(strlen(resolved_path_buff) + 2 + 1);
+	strcpy(filespec, resolved_path_buff);
 	index = strlen(filespec) - 1;
 	if (index >= 0 && (filespec[index] == '/' || 
 	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
-	strcat(filespec, "/*");
+	strcat(filespec, "\\*");
 
 	dp = (DIR *) malloc(sizeof(DIR));
 	dp->offset = 0;
@@ -40,7 +45,7 @@ DIR *opendir(const char *dir)
 
 	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
 		DWORD err = GetLastError();
-		if (err == ERROR_NO_MORE_FILES) {
+		if (err == ERROR_NO_MORE_FILES || err == ERROR_FILE_NOT_FOUND) {
 			dp->finished = 1;
 		} else {
 			free(dp);
@@ -48,7 +53,7 @@ DIR *opendir(const char *dir)
 			return NULL;
 		}
 	}
-	dp->dir = strdup(dir);
+	dp->dir = strdup(resolved_path_buff);
 	dp->handle = handle;
 	free(filespec);
 
@@ -108,7 +113,11 @@ int closedir(DIR *dp)
 {
 	if (!dp)
 		return 0;
-	FindClose(dp->handle);
+	/* It is valid to scan an empty directory but we have an invalid
+	   handle in this case (no first file found). */
+	if (dp->handle != INVALID_HANDLE_VALUE) {
+		FindClose(dp->handle);
+	}
 	if (dp->dir)
 		free(dp->dir);
 	if (dp)
