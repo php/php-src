@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Improved shared extension loading on OSX to use the standard Unix dlopen()
   API. (Scott)
 
+- Fixed scandir/readdir when used mounted points on Windows. (Pierre)
 - Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
 - Fixed leak on error in popen/exec (and related functions) on Windows.
   (Pierre)
