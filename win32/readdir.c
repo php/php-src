@@ -4,7 +4,7 @@
 
 #include "php.h"
 #include "readdir.h"
-
+#include "TSRM.h"
 /**********************************************************************
  * Implement dirent-style opendir/readdir/rewinddir/closedir on Win32
  *
@@ -26,6 +26,7 @@ DIR *opendir(const char *dir)
 	HANDLE handle;
 	int index;
 	char resolved_path_buff[MAXPATHLEN];
+	TSRMLS_FETCH();
 
 	if (!VCWD_REALPATH(dir, resolved_path_buff)) {
 		return NULL;
