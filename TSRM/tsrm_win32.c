@@ -312,6 +312,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
 	DWORD dwCreateFlags = 0;
+	BOOL res;
 	process_pair *proc;
 	char *cmd;
 	int i;
@@ -353,7 +354,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	read = (type[0] == 'r') ? TRUE : FALSE;
 	mode = ((type_len == 2) && (type[1] == 'b')) ? O_BINARY : O_TEXT;
 
-
 	if (read) {
 		in = dupHandle(in, FALSE);
 		startup.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
@@ -372,11 +372,16 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process)) {
-		free(cmd);
-		return NULL;
+	if(TWG(impersonation_token) == NULL) {
+		res = CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+	} else {
+		res = CreateProcessAsUser(TWG(impersonation_token), NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
 	}
 	free(cmd);
+
+	if (!res) {
+		return NULL;
+	}
 
 	CloseHandle(process.hThread);
 	proc = process_get(NULL TSRMLS_CC);
