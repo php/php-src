@@ -687,7 +687,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	char *ldap_base_dn = NULL;
 	char *ldap_filter = NULL;
 	char **ldap_attrs = NULL; 
-	ldap_linkdata *ld;
+	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
 	int ldap_attrsonly = 0;
 	int ldap_sizelimit = -1; 
@@ -903,8 +903,10 @@ cleanup_parallel:
 	}
 
 cleanup:
-	// Restoring previous options
-	php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
+	if (ld) {
+		/* Restoring previous options */	
+		php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
+	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
 	}
