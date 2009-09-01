@@ -1479,15 +1479,15 @@ static PHP_FUNCTION(tidy_get_config)
 		opt_value = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
 		switch (optt) {
 			case TidyString:
-				add_assoc_ascii_string(return_value, opt_name, (char*)opt_value, 0);
+				add_ascii_assoc_string(return_value, opt_name, (char*)opt_value, 1);
 				break;
 
 			case TidyInteger:
-				add_assoc_long(return_value, opt_name, (long)opt_value);
+				add_ascii_assoc_long(return_value, opt_name, (long)opt_value);
 				break;
 
 			case TidyBoolean:
-				add_assoc_bool(return_value, opt_name, (long)opt_value);
+				add_ascii_assoc_bool(return_value, opt_name, (long)opt_value);
 				break;
 		}
 	}
