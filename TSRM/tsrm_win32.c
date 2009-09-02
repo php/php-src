@@ -317,6 +317,8 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	char *cmd;
 	int i;
 	char *ptype = (char *)type;
+	HANDLE thread_token = NULL;
+	HANDLE token_user = NULL;
 	TSRMLS_FETCH();
 
 	if (!type) {
@@ -369,14 +371,16 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		dwCreateFlags |= CREATE_NO_WINDOW;
 	}
 
+	/* Get a token with the impersonated user. */
+	if(OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
+		DuplicateTokenEx(thread_token, MAXIMUM_ALLOWED, &security, SecurityImpersonation, TokenPrimary, &token_user);
+	}
+
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
 	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 
-	if(TWG(impersonation_token) == NULL) {
-		res = CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
-	} else {
-		res = CreateProcessAsUser(TWG(impersonation_token), NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
-	}
+	res = CreateProcessAsUser(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+	CloseHandle(token_user);
 	free(cmd);
 
 	if (!res) {
