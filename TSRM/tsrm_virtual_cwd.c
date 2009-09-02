@@ -746,7 +746,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				*(path + bufindex) = 0;
 				j = bufindex;
 			} else {
-				j = rname_len + 1;
+				j = len;
 			}
 			tsrm_free_alloca(pbuffer, use_heap_large);
 
