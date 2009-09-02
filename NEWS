@@ -7,7 +7,7 @@ PHP                                                                        NEWS
 - Added error constant when json_encode() detects an invalid UTF-8 sequence.
   (Scott)
 
-- Improved readlink on Windows, supress \??\ and use the drive syntax only.
+- Improved readlink on Windows, suppress \??\ and use the drive syntax only.
   (Pierre)
 - Improved dns_get_record() AAAA support on windows. Always available when
   IPv6 is support is installed, format is now the same than on unix. (Pierre)
