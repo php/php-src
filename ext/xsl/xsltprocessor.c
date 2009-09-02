@@ -666,7 +666,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	ret = -1;
 	if (newdocp) {
 		ret = xsltSaveResultToString(&doc_txt_ptr, &doc_txt_len, newdocp, sheetp);
-		if (doc_txt_ptr) {
+		if (doc_txt_ptr && doc_txt_len) {
 			RETVAL_STRINGL(doc_txt_ptr, doc_txt_len, 1);
 			xmlFree(doc_txt_ptr);
 		}
