@@ -672,10 +672,12 @@ int main(int argc, char *argv[])
 #if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
 	{
 		int tmp_flag;
-		
+		_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+		_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
 		_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-
+		_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+		_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 		tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 		tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
 		tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
