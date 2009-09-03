@@ -2809,11 +2809,11 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	{
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-				"Trying to invoke abstract method %v::%v", 
+				"Trying to invoke abstract method %v::%v()", 
 				mptr->common.scope->name, mptr->common.function_name);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-				"Trying to invoke %s method %v::%v from scope %v", 
+				"Trying to invoke %s method %v::%v() from scope %v", 
 				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
 				mptr->common.scope->name, mptr->common.function_name,
 				Z_OBJCE_P(getThis())->name);
@@ -2840,7 +2840,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		if (!object) {
 			efree(params);
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-				"Trying to invoke non static method %v::%v without an object", 
+				"Trying to invoke non static method %v::%v() without an object", 
 				mptr->common.scope->name, mptr->common.function_name);
 			return;
 		}
