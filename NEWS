@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 0? Sep 2009, PHP 5.2.11
+- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
 
 
 03 Sep 2009, PHP 5.2.11RC2
