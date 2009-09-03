@@ -1,9 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ???? 2009, PHP 5.2.11
+0? Sep 2009, PHP 5.2.11
+
 
 03 Sep 2009, PHP 5.2.11RC2
-- Added missing sanity checks around exif processing (Ilia)
+- Added missing sanity checks around exif processing. (Ilia)
 
 - Fixed sanity check for the color index in imagecolortransparent. (Pierre)
 - Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
