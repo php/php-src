@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.11
 - Added missing sanity checks around exif processing (Ilia)
 
+- Fixed sanity check for the color index in imagecolortransparent. (Pierre)
 - Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
 - Fixed leak on error in popen/exec (and related functions on Windows. (Pierre)
 
