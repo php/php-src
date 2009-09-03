@@ -8,7 +8,8 @@ PHP                                                                        NEWS
 
 - Fixed sanity check for the color index in imagecolortransparent. (Pierre)
 - Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
-- Fixed leak on error in popen/exec (and related functions on Windows. (Pierre)
+- Fixed leak on error in popen/exec (and related functions) on Windows.
+  (Pierre)
 
 - Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries). 
   (Ilia, code-it at mail dot ru)
