@@ -109,9 +109,9 @@ NULL
 NULL
 
 Private method:
-unicode(84) "Trying to invoke private method TestClass::privateMethod from scope ReflectionMethod"
+unicode(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
 
 Abstract method:
-unicode(51) "Trying to invoke abstract method AbstractClass::foo"
+unicode(53) "Trying to invoke abstract method AbstractClass::foo()"
 
 Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %sReflectionMethod_invokeArgs_error3.php on line %d
