@@ -111,9 +111,9 @@ NULL
 NULL
 
 Private method:
-string(84) "Trying to invoke private method TestClass::privateMethod from scope ReflectionMethod"
+string(86) "Trying to invoke private method TestClass::privateMethod() from scope ReflectionMethod"
 
 Abstract method:
-string(51) "Trying to invoke abstract method AbstractClass::foo"
+string(53) "Trying to invoke abstract method AbstractClass::foo()"
 
 Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %s on line %d
