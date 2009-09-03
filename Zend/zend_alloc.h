@@ -27,6 +27,20 @@
 #include "../TSRM/TSRM.h"
 #include "zend.h"
 
+#ifndef ZEND_MM_ALIGNMENT
+# define ZEND_MM_ALIGNMENT 8
+# define ZEND_MM_ALIGNMENT_LOG2 3
+#elif ZEND_MM_ALIGNMENT < 4
+# undef ZEND_MM_ALIGNMENT
+# undef ZEND_MM_ALIGNMENT_LOG2
+# define ZEND_MM_ALIGNMENT 4
+# define ZEND_MM_ALIGNMENT_LOG2 2
+#endif
+
+#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
+
+#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
+
 typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;

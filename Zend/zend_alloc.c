@@ -512,20 +512,7 @@ static unsigned int _zend_mm_cookie = 0;
 /* optimized access */
 #define ZEND_MM_FREE_BLOCK_SIZE(b)		(b)->info._size
 
-#ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT 8
-# define ZEND_MM_ALIGNMENT_LOG2 3
-#elif ZEND_MM_ALIGNMENT < 4
-# undef ZEND_MM_ALIGNMENT
-# undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT 4
-# define ZEND_MM_ALIGNMENT_LOG2 2
-#endif
-
-#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
-
 /* Aligned header size */
-#define ZEND_MM_ALIGNED_SIZE(size)			((size + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 #define ZEND_MM_ALIGNED_HEADER_SIZE			ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_block))
 #define ZEND_MM_ALIGNED_FREE_HEADER_SIZE	ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_small_free_block))
 #define ZEND_MM_MIN_ALLOC_BLOCK_SIZE		ZEND_MM_ALIGNED_SIZE(ZEND_MM_ALIGNED_HEADER_SIZE + END_MAGIC_SIZE)
