@@ -279,7 +279,7 @@ ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D) /* {{{ */
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (op_array->T)++ * sizeof(temp_variable);
+	return (op_array->T)++ * ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable));
 }
 /* }}} */
 
