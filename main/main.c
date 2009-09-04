@@ -1473,7 +1473,7 @@ int php_request_startup(TSRMLS_D)
 			zend_set_timeout(PG(max_input_time), 1);
 		}
 
-		/* Disable realpath cache if safe_mode or open_basedir are set */
+		/* Disable realpath cache if open_basedir is set */
 		if (PG(open_basedir) && *PG(open_basedir)) {
 			CWDG(realpath_cache_size_limit) = 0;
 		}
@@ -2040,7 +2040,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
-	/* Check for deprecated directives */
+	/* Check for removed directives */
 	{
 		static const char *directives[] = {
 			"define_syslog_variables", 
@@ -2051,13 +2051,14 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 			"magic_quotes_runtime",
 			"magic_quotes_sybase",
 			"zend.ze1_compatibility_mode",
-			NULL};
+			NULL
+		};
 		const char **p = directives;
 		long val;
 
 		while (*p) {
 			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_WARNING, "Directive '%s' is no longer supported in PHP 6 and greater", *p);
+				zend_error(E_ERROR, "Directive '%s' no longer exist in PHP 6 and greater", *p);
 			}
 			++p;
 		}
