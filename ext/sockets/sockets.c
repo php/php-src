@@ -323,7 +323,8 @@ ZEND_GET_MODULE(sockets)
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
 
-PHPAPI int php_sockets_le_socket(void) /* {{{ */
+
+PHP_SOCKETS_API int php_sockets_le_socket(void) /* {{{ */
 {
 	return le_socket;
 }
