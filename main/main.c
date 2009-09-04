@@ -1927,33 +1927,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
-	/* Check for deprecated directives */
-	{
-		static const char *directives[] = {
-			"define_syslog_variables", 
-			"register_globals", 
-			"register_long_arrays", 
-			"safe_mode", 
-			"magic_quotes_gpc", 
-			"magic_quotes_runtime", 
-			"magic_quotes_sybase", 
-			NULL};
-		const char **p = directives;
-		long val;
-
-		while (*p) {
-			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_WARNING, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
-			}
-			++p;
-		}
-
-		/* This is not too nice, but since its the only one theres no need for extra stuff here */
-		if (cfg_get_long("zend.ze1_compatibility_mode", &val) == SUCCESS && val) {
-			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
-		}
-	}
-
 	/* Register PHP core ini entries */
 	REGISTER_INI_ENTRIES();
 
@@ -2046,6 +2019,34 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_startup = 0;
 
 	shutdown_memory_manager(1, 0 TSRMLS_CC);
+
+	/* Check for deprecated directives */
+	{
+		static const char *directives[] = {
+			"define_syslog_variables", 
+			"register_globals", 
+			"register_long_arrays", 
+			"safe_mode", 
+			"magic_quotes_gpc", 
+			"magic_quotes_runtime", 
+			"magic_quotes_sybase", 
+			NULL
+		};
+		const char **p = directives;
+		long val;
+
+		while (*p) {
+			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
+				zend_error(E_WARNING, "Directive '%s' is deprecated in PHP 5.3 and greater", *p);
+			}
+			++p;
+		}
+
+		/* This is not too nice, but since its the only one theres no need for extra stuff here */
+		if (cfg_get_long("zend.ze1_compatibility_mode", &val) == SUCCESS && val) {
+			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
+		}
+	}
 
 	/* we're done */
 	return SUCCESS;
