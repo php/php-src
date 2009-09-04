@@ -2,8 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 0? Sep 2009, PHP 5.2.11
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
-- Fixed bug #49447 (php engine need to correctly check for socket API 
-  return status on windows). (Sriram Natarajan)
+- Fixed bug #49447 (php engine needs to correctly check for socket API return
+  status on windows). (Sriram Natarajan)
 
 
 03 Sep 2009, PHP 5.2.11RC2
@@ -28,7 +28,7 @@ PHP                                                                        NEWS
   files from function). (Stas)
 - Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
 - Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
-- Fixed bug #28038  (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
+- Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 
 
 13 Aug 2009, PHP 5.2.11RC1
