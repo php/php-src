@@ -259,6 +259,10 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			SSL_CTX_free(sslsock->ctx);
 			sslsock->ctx = NULL;
 		}
+#ifdef PHP_WIN32
+		if (sslsock->s.socket == -1)
+			sslsock->s.socket = SOCK_ERR;
+#endif
 		if (sslsock->s.socket != SOCK_ERR) {
 #ifdef PHP_WIN32
 			/* prevent more data from coming in */
