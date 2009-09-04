@@ -370,14 +370,14 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSR
 
 	sock->type = PF_INET;
 
-	if (bind(sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) < 0) {
+	if (bind(sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to bind to given address", errno);
 		close(sock->bsd_socket);
 		efree(sock);
 		return 0;
 	}
 
-	if (listen(sock->bsd_socket, backlog) < 0) {
+	if (listen(sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(sock, "unable to listen on socket", errno);
 		close(sock->bsd_socket);
 		efree(sock);

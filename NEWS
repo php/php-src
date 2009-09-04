@@ -182,6 +182,8 @@ PHP                                                                        NEWS
 - Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 - Fixed bug #27051 (Impersonation with FastCGI does not exec process as 
   impersonated user). (Pierre)
+- Fixed bug #49447 (php engine need to correctly check for socket API 
+  return status on windows). (Sriram Natarajan)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
