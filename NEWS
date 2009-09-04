@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 0? Sep 2009, PHP 5.2.11
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
+- Fixed bug #49447 (php engine need to correctly check for socket API 
+  return status on windows). (Sriram Natarajan)
 
 
 03 Sep 2009, PHP 5.2.11RC2

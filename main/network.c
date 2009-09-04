@@ -308,7 +308,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 
 	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
 	
-	if ((n = connect(sockfd, addr, addrlen)) < 0) {
+	if ((n = connect(sockfd, addr, addrlen)) != 0) {
 		error = php_socket_errno();
 
 		if (error_code) {
@@ -342,7 +342,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		   BSD-derived systems set errno correctly
 		   Solaris returns -1 from getsockopt in case of error
 		   */
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) < 0) {
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
 			ret = -1;
 		}
 	} else {
@@ -369,7 +369,7 @@ ok:
 	if (asynchronous) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Asynchronous connect() not supported on this platform");
 	}
-	return connect(sockfd, addr, addrlen);
+	return (connect(sockfd, addr, addrlen) == 0) ? 0 : -1;
 #endif
 }
 /* }}} */
@@ -709,7 +709,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 
 		clisock = accept(srvsock, (struct sockaddr*)&sa, &sl);
 
-		if (clisock >= 0) {
+		if (clisock != SOCK_ERR) {
 			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr, textaddrlen,
 					addr, addrlen
@@ -861,7 +861,7 @@ skip_bind:
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
 
-			if (n != SOCK_CONN_ERR) {
+			if (n != -1) {
 				goto connected;
 			}
 
