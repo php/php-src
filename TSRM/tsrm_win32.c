@@ -319,7 +319,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
-	BOOL asuser = FALSE;
+	BOOL asuser = TRUE;
 
 	TSRMLS_FETCH();
 
