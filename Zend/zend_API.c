@@ -1038,13 +1038,13 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 					Z_SET_ISREF_PP(q);
 					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)q, sizeof(zval*), NULL);
 				} else {
-					zval *q;
+					zval *r;
 
-					ALLOC_ZVAL(q);
-					*q = **p;
-					INIT_PZVAL(q);
-					zval_copy_ctor(q);
-					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)&q, sizeof(zval*), NULL);
+					ALLOC_ZVAL(r);
+					*r = **p;
+					INIT_PZVAL(r);
+					zval_copy_ctor(r);
+					zend_hash_add(CE_STATIC_MEMBERS(class_type), str_index, str_length, (void**)&r, sizeof(zval*), NULL);
 				}
 				zend_hash_move_forward_ex(&class_type->default_static_members, &pos);
 			}
