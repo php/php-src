@@ -24,10 +24,6 @@
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
 
-#if PHP_MAJOR_VERSION <= 6
-#define zend_ascii_hash_find(hash, name, sizeof_name, val) zend_hash_find(hash, name, sizeof_name, val)
-#endif
-
 #include "zend_multiply.h"
 
 #if HAVE_ARPA_INET_H
