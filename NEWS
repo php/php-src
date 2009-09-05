@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.2
 
+?? ??? 2009, PHP 5.3.1RC?
+- Restored shebang line check to CGI sapi (not checked by scanner anymore).
+  (Jani)
+
 ?? ??? 2009, PHP 5.3.1
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
 
