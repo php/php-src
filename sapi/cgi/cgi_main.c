@@ -159,6 +159,7 @@ static const opt_struct OPTIONS[] = {
 typedef struct _php_cgi_globals_struct {
 	zend_bool rfc2616_headers;
 	zend_bool nph;
+	zend_bool check_shebang_line;
 	zend_bool fix_pathinfo;
 	zend_bool force_redirect;
 	zend_bool discard_path;
@@ -1369,6 +1370,7 @@ void fastcgi_cleanup(int signal)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
@@ -1385,6 +1387,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 {
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
+	php_cgi_globals->check_shebang_line = 1;
 	php_cgi_globals->force_redirect = 1;
 	php_cgi_globals->redirect_status_env = NULL;
 	php_cgi_globals->fix_pathinfo = 1;
@@ -1451,6 +1454,7 @@ int main(int argc, char *argv[])
 	int exit_status = SUCCESS;
 	int cgi = 0, c, i, len;
 	zend_file_handle file_handle;
+	int retval = FAILURE;
 	char *s;
 
 	/* temporary locals */
@@ -2055,6 +2059,26 @@ consult the installation file that came with this distribution, or visit \n\
 					tsrm_shutdown();
 #endif
 					return FAILURE;
+				}
+			}
+
+			if (CGIG(check_shebang_line) && file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
+				/* #!php support */
+				c = fgetc(file_handle.handle.fp);
+				if (c == '#') {
+					while (c != '\n' && c != '\r' && c != EOF) {
+						c = fgetc(file_handle.handle.fp);	/* skip to end of line */
+					}
+					/* handle situations where line is terminated by \r\n */
+					if (c == '\r') {
+						if (fgetc(file_handle.handle.fp) != '\n') {
+							long pos = ftell(file_handle.handle.fp);
+							fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+						}
+					}
+					CG(start_lineno) = 2;
+				} else {
+					rewind(file_handle.handle.fp);
 				}
 			}
 
