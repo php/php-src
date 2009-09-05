@@ -485,11 +485,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 			INIT_PZVAL(tmp_new_var);
  			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
 		}
-#if PHP_VERSION_ID<60000
-		else if (PG(magic_quotes_gpc)) {
-			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
-		}
-#endif
 		else {
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 		}
@@ -554,11 +549,7 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
-	zend_bool jit_initialization = (PG(auto_globals_jit)
-#if PHP_VERSION_ID<60000
-	 && !PG(register_globals) && !PG(register_long_arrays)
-#endif
-	 );
+	zend_bool jit_initialization = (PG(auto_globals_jit));
 
 	switch (arg) {
 		case PARSE_GET:
