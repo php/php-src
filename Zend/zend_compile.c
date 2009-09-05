@@ -5480,28 +5480,28 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	if (CG(current_namespace)) {
 		/* Prefix import name with current namespace name to avoid conflicts with classes */
 		uint ns_name_len;
-		zstr ns_name = zend_u_str_case_fold(Z_TYPE_P(CG(current_namespace)), Z_UNIVAL_P(CG(current_namespace)), Z_UNILEN_P(CG(current_namespace)), 0, &ns_name_len);
+		zstr c_ns_name = zend_u_str_case_fold(Z_TYPE_P(CG(current_namespace)), Z_UNIVAL_P(CG(current_namespace)), Z_UNILEN_P(CG(current_namespace)), 0, &ns_name_len);
 
 		if (Z_TYPE_P(CG(current_namespace)) == IS_UNICODE) {
-			ns_name.u = eurealloc(ns_name.u, ns_name_len + 1 + lcname_len + 1);
-			ns_name.u[ns_name_len] = '\\';
-			memcpy(ns_name.u + ns_name_len + 1, lcname.u, UBYTES(lcname_len + 1));
+			c_ns_name.u = eurealloc(c_ns_name.u, ns_name_len + 1 + lcname_len + 1);
+			c_ns_name.u[ns_name_len] = '\\';
+			memcpy(c_ns_name.u + ns_name_len + 1, lcname.u, UBYTES(lcname_len + 1));
 		} else {
-			ns_name.s = erealloc(ns_name.s, ns_name_len + 1 + lcname_len + 1);
-			ns_name.s[ns_name_len] = '\\';
-			memcpy(ns_name.s + ns_name_len + 1, lcname.s, lcname_len + 1);
+			c_ns_name.s = erealloc(c_ns_name.s, ns_name_len + 1 + lcname_len + 1);
+			c_ns_name.s[ns_name_len] = '\\';
+			memcpy(c_ns_name.s + ns_name_len + 1, lcname.s, lcname_len + 1);
 		}
-		if (zend_u_hash_exists(CG(class_table), Z_TYPE_P(CG(current_namespace)), ns_name, ns_name_len + 1 + lcname_len + 1)) {
+		if (zend_u_hash_exists(CG(class_table), Z_TYPE_P(CG(current_namespace)), c_ns_name, ns_name_len + 1 + lcname_len + 1)) {
 			unsigned int tmp_len;		
 			zstr tmp = zend_u_str_case_fold(Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_UNILEN_P(ns), 0, &tmp_len);
 
 			if (tmp_len != ns_name_len + 1 + lcname_len ||
-				memcmp(tmp.v, ns_name.v, UBYTES(tmp_len))) {
+				memcmp(tmp.v, c_ns_name.v, UBYTES(tmp_len))) {
 				zend_error(E_COMPILE_ERROR, "Cannot use %R as %R because the name is already in use", Z_TYPE_P(ns), Z_UNIVAL_P(ns), Z_TYPE_P(name), Z_UNIVAL_P(name));
 			}
 			efree(tmp.v);
 		}
-		efree(ns_name.v);
+		efree(c_ns_name.v);
 	} else if (zend_u_hash_find(CG(class_table), Z_TYPE_P(name), lcname, lcname_len+1, (void**)&pce) == SUCCESS &&
 	           (*pce)->type == ZEND_USER_CLASS &&
 	           (*pce)->filename == CG(compiled_filename)) {
