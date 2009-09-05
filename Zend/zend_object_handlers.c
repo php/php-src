@@ -569,7 +569,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
-/* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
+			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member));
 			new_zval->refcount++;
 			zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
 		} else {
