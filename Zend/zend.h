@@ -196,8 +196,8 @@ char *alloca ();
 #else
 # define ALLOCA_FLAG(name)
 # define SET_ALLOCA_FLAG(name)
-# define do_alloca(p, use_heap)		emalloc(p)
-# define free_alloca(p, use_heap)	efree(p)
+# define do_alloca(p, use_heap)		emalloc(p), use_heap = 1
+# define free_alloca(p, use_heap)	efree(p), use_heap = 1
 #endif
 
 #if ZEND_DEBUG
