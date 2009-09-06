@@ -200,8 +200,8 @@ char *alloca ();
 # define do_alloca(p)		emalloc(p)
 # define free_alloca(p)	efree(p)
 # define ALLOCA_FLAG(name)
-# define do_alloca_with_limit(p, use_heap)		emalloc(p), use_heap = 1
-# define free_alloca_with_limit(p, use_heap)	efree(p), use_heap = 1
+# define do_alloca_with_limit(p, use_heap)		emalloc(p)
+# define free_alloca_with_limit(p, use_heap)	efree(p)
 #endif
 
 #if ZEND_DEBUG
