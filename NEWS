@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.3.1RC?
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
+  (Ilia)
 
 ?? ??? 2009, PHP 5.3.1
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
