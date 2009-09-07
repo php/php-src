@@ -1,10 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 0? Sep 2009, PHP 5.2.11
-- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
 - Fixed bug #49447 (php engine needs to correctly check for socket API return
   status on windows). (Sriram Natarajan)
-
+- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
 
 03 Sep 2009, PHP 5.2.11RC2
 - Added missing sanity checks around exif processing. (Ilia)
