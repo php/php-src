@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 0? Sep 2009, PHP 5.2.11
+- Updated timezone database to version 2009.13 (2009m) (Derick)
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
 - Fixed bug #49447 (php engine needs to correctly check for socket API return
   status on windows). (Sriram Natarajan)
