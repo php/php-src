@@ -264,7 +264,13 @@ typedef uint64_t  uintmax_t;
 #define INTMAX_C   INT64_C
 #define UINTMAX_C  UINT64_C
 
-static __inline int64_t llabs( int64_t i ) { return i >= 0? i: -i; }
+// In VC10+, llabs is an intrinsic function, so don't define it
+#if _MSC_VER < 1600
+static __inline int64_t llabs( int64_t i )
+{
+	return i >= 0 ? i : -i;
+}
+#endif
 
 #endif // __STDC_CONSTANT_MACROS ]
 

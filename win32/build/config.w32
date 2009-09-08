@@ -15,8 +15,10 @@ if (!CL) {
 // 1310 is vs.net 2003
 // 1400 is vs.net 2005
 // 1500 is vs.net 2008
+// 1600 is vs.net 2010
 // Which version of the compiler do we have?
 VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
+STDOUT.WriteLine(VCVERS);
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
 AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
 DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
@@ -147,7 +149,7 @@ if (VCVERS >= 1400) {
 	}
 }
 
-ARG_WITH('mp', 'Tell VC9 use up to [n,auto,disable] processes for compilation', 'auto');
+ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');

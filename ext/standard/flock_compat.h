@@ -42,9 +42,11 @@ PHPAPI int flock(int fd, int operation);
 #define PHP_LOCK_NB 4
 
 #ifdef PHP_WIN32
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#	define fsync _commit
-#	define ftruncate(a, b) chsize(a, b)
+# ifndef EWOULDBLOCK
+#  define EWOULDBLOCK WSAEWOULDBLOCK
+# endif
+# define fsync _commit
+# define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
 
 #if !HAVE_INET_ATON
