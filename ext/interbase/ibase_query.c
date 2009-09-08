@@ -121,9 +121,11 @@ static void _php_ibase_free_xsqlda(XSQLDA *sqlda) /* {{{ */
 static void _php_ibase_free_stmt_handle(ibase_db_link *link, isc_stmt_handle stmt TSRMLS_DC) /* {{{ */
 {
 	if (stmt) {
-		IBDEBUG("Dropping statement handle (free_stmt_handle)...");
 		/* Only free statement if db-connection is still open */
 		char db_items[] = {isc_info_page_size}, res_buf[40];
+
+		IBDEBUG("Dropping statement handle (free_stmt_handle)...");
+
 		if (SUCCESS == isc_database_info(IB_STATUS, &link->handle, 
 							sizeof(db_items), db_items, sizeof(res_buf), res_buf)) {
 			if (isc_dsql_free_statement(IB_STATUS, &stmt, DSQL_drop)) {
