@@ -18,7 +18,6 @@ if (!CL) {
 // 1600 is vs.net 2010
 // Which version of the compiler do we have?
 VCVERS = probe_binary(CL).substr(0, 5).replace('.', '');
-STDOUT.WriteLine(VCVERS);
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
 AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
 DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
