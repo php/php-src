@@ -34,10 +34,14 @@
 #endif
 
 #ifdef PHP_WIN32
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#define EINPROGRESS	WSAEWOULDBLOCK
-#	define fsync _commit
-#	define ftruncate(a, b) chsize(a, b)
+# ifndef EWOULDBLOCK
+#  define EWOULDBLOCK 	WSAEWOULDBLOCK
+# endif
+# ifndef EINPROGRESS
+#  define EINPROGRESS	WSAEWOULDBLOCK
+#endif
+# define fsync _commit
+# define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
 
 #ifndef EWOULDBLOCK
