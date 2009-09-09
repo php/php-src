@@ -165,8 +165,15 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			PACKET_FREE_ALLOCA(field_packet);
 			DBG_RETURN(FAIL);
 		}
+		if (field_packet.error_info.error_no) {
+			conn->error_info = field_packet.error_info;
+			/* Return back from CONN_QUERY_SENT */
+			PACKET_FREE_ALLOCA(field_packet);
+			DBG_RETURN(FAIL);
+		}
+		
 		if (field_packet.stupid_list_fields_eof == TRUE) {
-			meta->field_count = i + 1;
+			meta->field_count = i;
 			break;
 		}
 
