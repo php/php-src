@@ -124,9 +124,16 @@ require_once('skipifconnectfailure.inc');
 		printf("[017] [%d] %s\n", mysql_errno($link), mysql_error($link));
 	}
 	$res = mysql_list_fields($db, 'test');
-	while ($tmp = mysql_fetch_field($res))
-		if ($tmp->name == 'id')
+	$found = false;
+	while ($tmp = mysql_fetch_field($res)) {
+		if ($tmp->name == 'id') {
+			printf("Fetch field from mysql_list_fields result set.\n");
+			$found = true;
 			var_dump($tmp);
+		}
+	}
+	if (!$found)
+		printf("[018] mysqli_list_fields result set processing has failed.\n");
 
 	mysql_free_result($res);
 
@@ -227,6 +234,7 @@ object(stdClass)#%d (13) {
   [%u|b%"zerofill"]=>
   int(0)
 }
+Fetch field from mysql_list_fields result set.
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"

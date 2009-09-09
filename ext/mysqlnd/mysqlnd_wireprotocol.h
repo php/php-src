@@ -242,6 +242,8 @@ typedef struct st_php_mysql_packet_res_field {
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
 	zend_bool				stupid_list_fields_eof;
+
+	mysqlnd_error_info		error_info;
 } php_mysql_packet_res_field;
 
 
