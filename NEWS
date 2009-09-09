@@ -1,11 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-0? Sep 2009, PHP 5.2.11
+?? Sep 2009, PHP 5.2.11
 - Updated timezone database to version 2009.13 (2009m) (Derick)
+
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
 - Fixed bug #49447 (php engine needs to correctly check for socket API return
   status on windows). (Sriram Natarajan)
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
+
 
 03 Sep 2009, PHP 5.2.11RC2
 - Added missing sanity checks around exif processing. (Ilia)
@@ -421,6 +423,9 @@ PHP                                                                        NEWS
   either disable or change the compile time ini scan directory (FR #45114).
   (Jani)
 
+- Reverted fix for bug #44197 due to behaviour change in minor version.
+  (Felipe)
+
 - Fixed missing initialization of BG(page_uid) and BG(page_gid), 
   reported by Maksymilian Arciemowicz. (Stas)
 - Fixed memory leak inside sqlite_create_aggregate(). (Felipe)
@@ -466,8 +471,6 @@ PHP                                                                        NEWS
   attribute.(Scott)
 - Fixed a crash on invalid method in ReflectionParameter constructor.
   (Christian Seiler)
-- Reverted fix for bug #44197 due to behaviour change in minor version.
-  (Felipe)
 
 - Fixed bug #46732 (mktime.year description is wrong). (Derick)
 - Fixed bug #46696 (cURL fails in upload files with specified content-type).
@@ -715,6 +718,8 @@ PHP                                                                        NEWS
 
 
 01 May 2008, PHP 5.2.6
+- Upgraded PCRE to version 7.6 (Nuno)
+
 - Fixed two possible crashes inside posix extension (Tony)
 - Fixed incorrect heredoc handling when label is used within the block. 
   (Matt)
@@ -734,7 +739,6 @@ PHP                                                                        NEWS
 - Fixed segfault in filter extension when using callbacks. (Arnar Mar Sig,
   Felipe)
 - Fixed faulty fix for bug #40189 (endless loop in zlib.inflate stream filter). (Greg)
-- Upgraded PCRE to version 7.6 (Nuno)
 
 - Fixed bug #44742 (timezone_offset_get() causes segmentation faults). (Derick)
 - Fixed bug #44720 (Prevent crash within session_register()). (Scott)
