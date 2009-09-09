@@ -1126,7 +1126,16 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (packet->skip_parsing) {
 		DBG_RETURN(PASS);
 	}
-	if (*p == 0xFE && packet->header.size < 8) {
+	if (*p == 0xFF) {
+		/* Error */
+		p++;
+		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
+										 packet->error_info.error, sizeof(packet->error_info.error),
+										 &packet->error_info.error_no, packet->error_info.sqlstate
+										 TSRMLS_CC);
+		DBG_ERR_FMT("Server error : (%d) %s", packet->error_info.error_no, packet->error_info.error);
+		DBG_RETURN(PASS);
+	} else if (*p == 0xFE && packet->header.size < 8) {
 		/* Premature EOF. That should be COM_FIELD_LIST */
 		DBG_INF("Premature EOF. That should be COM_FIELD_LIST");
 		packet->stupid_list_fields_eof = TRUE;

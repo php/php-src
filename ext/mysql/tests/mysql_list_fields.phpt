@@ -12,29 +12,36 @@ require_once 'connect.inc';
 $tmp    = NULL;
 $link   = NULL;
 
-// This will implicitly try to connect, and we don't want it
-//if (false !== ($tmp = mysql_list_fields($link, $link)))
-//	printf("[002] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
 require 'table.inc';
 
 if (!$res = mysql_list_fields($db, 'test', $link))
 	printf("[003] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 if (2 !== ($num = mysql_num_fields($res)))
-	printf("[004] Expecting two fields, got %d. [%d] %s\n", $num, mysql_errno($link), mysql_error($link));
+	printf("[004] Expecting two fields from 'test', got %d. [%d] %s\n", $num, mysql_errno($link), mysql_error($link));
 
 mysql_free_result($res);
 
-if (!mysql_query("DROP TABLE IF EXISTS test2", $link) ||
-	!mysql_query("CREATE TABLE test2(id INT)", $link))
+if (!mysql_query("DROP TABLE IF EXISTS test2", $link))
 	printf("[005] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
-if (!$res = mysql_list_fields($db, 'test', $link))
+if (!$res = @mysql_list_fields($db, 'test2', $link))
 	printf("[006] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
+if (!$res = mysql_list_fields($db, 'test', $link))
+	printf("[007] [%d] %s\n", mysql_errno($link), mysql_error($link));
+
 if (2 !== ($num = mysql_num_fields($res)))
-	printf("[007] Expecting 3 fields from test and test2, got %d. [%d] %s\n", $num, mysql_errno($link), mysql_error($link));
+	printf("[008] Expecting 2 fields from 'test', got %d. [%d] %s\n", $num, mysql_errno($link), mysql_error($link));
+
+var_dump(mysql_fetch_assoc($res));
+for ($field_offset = 0; $field_offset < mysql_num_fields($res); $field_offset++) {
+	printf("Field Offset %d\n", $field_offset);
+	printf("mysql_field_flags(): %s\n", mysql_field_flags($res, $field_offset));
+	printf("mysql_field_len(): %s\n", mysql_field_len($res, $field_offset));
+	printf("mysql_field_name(): %s\n", mysql_field_name($res, $field_offset));
+	printf("mysql_field_type(): %s\n", mysql_field_type($res, $field_offset));
+}
 
 mysql_free_result($res);
 mysql_close($link);
@@ -57,4 +64,16 @@ if (!mysql_query("DROP TABLE IF EXISTS test2", $link))
 mysql_close($link);
 ?>
 --EXPECTF--
+[006] [%d] %s
+bool(false)
+Field Offset 0
+mysql_field_flags()%s
+mysql_field_len(): 11
+mysql_field_name(): id
+mysql_field_type(): int
+Field Offset 1
+mysql_field_flags()%s
+mysql_field_len(): 1
+mysql_field_name(): label
+mysql_field_type(): string
 done!
