@@ -485,6 +485,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 	file_handle->opened_path = expand_filepath(filename, NULL TSRMLS_CC);
 
+	STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 	SG(request_info).path_translated = filename;
 
 	file_handle->filename = SG(request_info).path_translated;
