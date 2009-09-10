@@ -72,10 +72,10 @@ PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
 
 #ifdef PHP_WIN32
-typedef int PHP_SOCKET;
+typedef SOCKET PHP_SOCKET;
 # define PHP_SOCKETS_API __declspec(dllexport)
 #else
-typedef SOCKET PHP_SOCKET;
+typedef int PHP_SOCKET;
 # define PHP_SOCKETS_API PHPAPI
 #endif
 
