@@ -6,13 +6,13 @@ Venkat Raman Don (don.raman@microsoft.com)
 
 --SKIPIF--
 <?php
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+    die('skip windows only test');
+}
 $cmd = "mklink.exe /?";
 $ret = @exec($cmd, $output, $return_val);
 if (count($output) == 0) {
     die("mklink.exe not found in PATH");
-}
-if(substr(PHP_OS, 0, 3) != 'WIN' ) {
-    die('skip windows only test');
 }
 ?>
 --FILE--
