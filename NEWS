@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   (Sara)
 - Added stream_resolve_include_path() function which checks which file fopen()
   with a relative path will open. (Sara)
+- Added ReflectionMethod::setAccessible() for invoking non-public methods
+  through the Reflection API. (Sebastian)
 
 - Fixed bug #46647 (SplFileObject::fgetcsv segfaults). (Etienne)
 - Fixed bug #40325 (Vary: header missing in gzip output handlers). (Mike)

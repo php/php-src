@@ -171,7 +171,6 @@ static void string_free(string *str)
 typedef struct _property_reference {
 	zend_class_entry *ce;
 	zend_property_info prop;
-	unsigned int ignore_visibility:1;
 } property_reference;
 
 /* Struct for parameters */
@@ -196,6 +195,7 @@ typedef struct {
 	reflection_type_t ref_type;
 	zval *obj;
 	zend_class_entry *ce;
+	unsigned int ignore_visibility:1;
 } reflection_object;
 
 static zend_object_handlers reflection_object_handlers;
@@ -1293,10 +1293,10 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
 	reference->prop = *prop;
-	reference->ignore_visibility = 0;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
+	intern->ignore_visibility = 0;
 	zend_ascii_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	zend_ascii_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
@@ -2701,8 +2701,9 @@ ZEND_METHOD(reflection_method, invoke)
 	
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		|| (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
+	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
+		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
+		 && intern->ignore_visibility == 0)
 	{
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2804,8 +2805,9 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		return;
 	}
 
-	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
-		|| (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
+	if ((!(mptr->common.fn_flags & ZEND_ACC_PUBLIC)
+		 || (mptr->common.fn_flags & ZEND_ACC_ABSTRACT))
+		 && intern->ignore_visibility == 0)
 	{
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -3106,6 +3108,28 @@ ZEND_METHOD(reflection_method, getPrototype)
 	}
 
 	reflection_method_factory(mptr->common.prototype->common.scope, mptr->common.prototype, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionMethod::setAccessible()
+   Sets whether non-public methods can be invoked */
+ZEND_METHOD(reflection_method, setAccessible)
+{
+	reflection_object *intern;
+	zend_bool visible;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+		return;
+	}
+
+	intern = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(intern TSRMLS_CC);
+
+	if (intern == NULL) {
+		return;
+	}
+
+	intern->ignore_visibility = visible;
 }
 /* }}} */
 
@@ -4580,10 +4604,10 @@ ZEND_METHOD(reflection_property, __construct)
 		reference->prop = *property_info;
 	}
 	reference->ce = ce;
-	reference->ignore_visibility = 0;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
+	intern->ignore_visibility = 0;
 }
 /* }}} */
 
@@ -4730,7 +4754,7 @@ ZEND_METHOD(reflection_property, getValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && ref->ignore_visibility == 0) {
+	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
@@ -4785,7 +4809,7 @@ ZEND_METHOD(reflection_property, setValue)
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && ref->ignore_visibility == 0) {
+	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
 		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Cannot access non-public member %v::%v", intern->ce->name, Z_UNIVAL(name));
@@ -4904,14 +4928,20 @@ ZEND_METHOD(reflection_property, getDocComment)
 ZEND_METHOD(reflection_property, setAccessible)
 {
 	reflection_object *intern;
-	property_reference *ref;
 	zend_bool visible;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
 		return;
 	}
-	GET_REFLECTION_OBJECT_PTR(ref);
-	ref->ignore_visibility = visible;
+
+	intern = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(intern TSRMLS_CC);
+
+	if (intern == NULL) {
+		return;
+	}
+
+	intern->ignore_visibility = visible;
 }
 /* }}} */
 
@@ -5342,6 +5372,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_invokeArgs, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_setAccessible, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, export, arginfo_reflection_method_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_method, __construct, arginfo_reflection_method___construct, 0)
@@ -5360,6 +5394,7 @@ static const zend_function_entry reflection_method_functions[] = {
 	ZEND_ME(reflection_method, invokeArgs, arginfo_reflection_method_invokeArgs, 0)
 	ZEND_ME(reflection_method, getDeclaringClass, NULL, 0)
 	ZEND_ME(reflection_method, getPrototype, NULL, 0)
+	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_method_setAccessible, 0)
 	{NULL, NULL, NULL}
 };
 
