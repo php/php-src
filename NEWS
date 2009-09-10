@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Sep 2009, PHP 5.2.11
+10 Sep 2009, PHP 5.2.11RC3
 - Updated timezone database to version 2009.13 (2009m) (Derick)
 
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
