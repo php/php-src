@@ -230,11 +230,11 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
-#if PHP_DBLIB_IS_MSSQL
-	if (DBSETOPT(H->link, DBTEXTLIMIT, "2147483647") == FAIL) {
-		goto cleanup;
-	}
-#endif
+	/* dblib do not return more than this length from text/image */
+	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
+	
+	/* limit text/image from network */
+	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
 
 	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
 		goto cleanup;
