@@ -8,6 +8,5 @@ Testfest 2009 Munich
 <?php
 var_dump(php_ini_loaded_file());
 ?>
---EXPECT--
-bool(false)
-
+--EXPECTF--
+string(%d) "%s/tmp-php.ini"
