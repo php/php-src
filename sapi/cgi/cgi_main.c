@@ -1277,9 +1277,6 @@ static void init_request_info(TSRMLS_D)
 				if (pt) {
 					efree(pt);
 				}
-				if (is_valid_path(script_path_translated)) {
-					SG(request_info).path_translated = estrdup(script_path_translated);
-				}
 			} else {
 				/* make sure path_info/translated are empty */
 				if (!orig_script_filename ||
@@ -1308,9 +1305,6 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				if (is_valid_path(script_path_translated)) {
-					SG(request_info).path_translated = estrdup(script_path_translated);
-				}
 				free(real_path);
 			}
 		} else {
@@ -1323,9 +1317,10 @@ static void init_request_info(TSRMLS_D)
 			if (!CGIG(discard_path) && env_path_translated) {
 				script_path_translated = env_path_translated;
 			}
-			if (is_valid_path(script_path_translated)) {
-				SG(request_info).path_translated = estrdup(script_path_translated);
-			}
+		}
+
+		if (is_valid_path(script_path_translated)) {
+			SG(request_info).path_translated = estrdup(script_path_translated);
 		}
 
 		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", sizeof("REQUEST_METHOD")-1 TSRMLS_CC);
@@ -2125,26 +2120,14 @@ consult the installation file that came with this distribution, or visit \n\
 
 fastcgi_request_done:
 			{
-				char *path_translated;
-
-				/* Go through this trouble so that the memory manager doesn't warn
-				 * about SG(request_info).path_translated leaking
-				 */
-				if (SG(request_info).path_translated) {
-					path_translated = strdup(SG(request_info).path_translated);
-					STR_FREE(SG(request_info).path_translated);
-					SG(request_info).path_translated = path_translated;
-				}
+				STR_FREE(SG(request_info).path_translated);
 
 				php_request_shutdown((void *) 0);
+
 				if (exit_status == 0) {
 					exit_status = EG(exit_status);
 				}
 
-				if (SG(request_info).path_translated) {
-					free(SG(request_info).path_translated);
-					SG(request_info).path_translated = NULL;
-				}
 				if (free_query_string && SG(request_info).query_string) {
 					free(SG(request_info).query_string);
 					SG(request_info).query_string = NULL;
