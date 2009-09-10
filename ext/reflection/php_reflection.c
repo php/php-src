@@ -3122,8 +3122,7 @@ ZEND_METHOD(reflection_method, setAccessible)
 		return;
 	}
 
-	intern = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(intern TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern == NULL) {
 		return;
@@ -4934,8 +4933,7 @@ ZEND_METHOD(reflection_property, setAccessible)
 		return;
 	}
 
-	intern = getThis();
-	intern = (reflection_object *) zend_object_store_get_object(intern TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern == NULL) {
 		return;
