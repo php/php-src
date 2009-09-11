@@ -3,6 +3,8 @@ DOMCharacterData::appendData basic functionality test
 --CREDITS--
 Mike Sullivan <mike@regexia.com>
 #TestFest 2008 (London)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
@@ -26,6 +28,7 @@ echo "CDATA Content: " . $cdatanode->data . "\n";
 echo "\n" . $document->saveXML();
 
 ?>
+===DONE===
 --EXPECT--
 CDATA Length (one append): 4
 CDATA Length (two appends): 8
@@ -33,3 +36,5 @@ CDATA Content: data><&"
 
 <?xml version="1.0"?>
 <root><cdata><![CDATA[data><&"]]></cdata></root>
+===DONE===
+	
