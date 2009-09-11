@@ -127,7 +127,7 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 	int n, endian;
 
 	endian = filter->status & 0xff00;
-	switch (filter->status & 0xff) {
+	switch (filter->status & 0x0f) {
 	case 0:
 		if (endian) {
 			n = c & 0xff;
@@ -144,15 +144,8 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 			n = c & 0xff;
 		}
 		n |= filter->cache & 0xffff;
-		filter->status &= ~0xff;
-		if (n == 0xfffe) {
-			if (endian) {
-				filter->status = 0;		/* big-endian */
-			} else {
-				filter->status = 0x100;		/* little-endian */
-			}
-			CK((*filter->output_function)(0xfeff, filter->data));
-		} else if (n >= 0xd800 && n < 0xdc00) {
+		filter->status &= ~0x0f;
+		if (n >= 0xd800 && n < 0xdc00) {
 			filter->cache = ((n & 0x3ff) << 16) + 0x400000;
 		} else if (n >= 0xdc00 && n < 0xe000) {
 			n &= 0x3ff;
@@ -166,7 +159,21 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(n, filter->data));
 			}
 		} else {
+			int is_first = filter->status & 0x10;
 			filter->cache = 0;
+			filter->status |= 0x10;
+			if (!is_first) {
+				if (n == 0xfffe) {
+					if (endian) {
+						filter->status &= ~0x100;		/* big-endian */
+					} else {
+						filter->status |= 0x100;		/* little-endian */
+					}
+					break;
+				} else if (n == 0xfeff) {
+					break;
+				}
+			}
 			CK((*filter->output_function)(n, filter->data));
 		}
 		break;
