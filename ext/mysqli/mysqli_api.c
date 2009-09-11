@@ -370,6 +370,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 			case MYSQL_TYPE_LONG_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
 			case MYSQL_TYPE_DECIMAL:
+			case MYSQL_TYPE_GEOMETRY:
 #ifdef FIELD_TYPE_NEWDECIMAL
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
@@ -2346,7 +2347,8 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 		for (i = mysql_stmt_field_count(stmt->stmt) - 1; i >=0; --i) {
 			if (stmt->stmt->fields && (stmt->stmt->fields[i].type == MYSQL_TYPE_BLOB ||
 				stmt->stmt->fields[i].type == MYSQL_TYPE_MEDIUM_BLOB ||
-				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB))
+				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB ||
+				stmt->stmt->fields[i].type == MYSQL_TYPE_GEOMETRY))
 			{
 				my_bool	tmp=1;
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);

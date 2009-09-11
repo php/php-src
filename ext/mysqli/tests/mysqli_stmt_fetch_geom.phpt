@@ -45,7 +45,7 @@ mysqli_stmt_fetch - geometry / spatial types
 			return false;
 		}
 
-		if (!mysqli_stmt_execute($stmt)) {
+		if (!mysqli_stmt_execute($stmt) || !mysqli_stmt_store_result($stmt)) {
 			printf("[%04d] [%d] %s\n", $offset + 8, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 			mysqli_stmt_close($stmt);
 			return false;
@@ -65,7 +65,7 @@ mysqli_stmt_fetch - geometry / spatial types
 
 		$num = 0;
 		$rows = array();
-		while (true === mysqli_stmt_fetch($stmt)) {
+		while (true === @mysqli_stmt_fetch($stmt)) {
 			$rows[] = array('id' => $id, 'label' => $bind_res);
 			$num++;
 		}
