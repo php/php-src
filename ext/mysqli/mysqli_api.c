@@ -409,7 +409,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
-				bind[ofs].length = &stmt->result.buf[ofs].buflen;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 			}
 			default:
@@ -916,7 +916,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							{
 #endif
 								ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val,
-											 stmt->result.buf[i].buflen, 1);
+											 stmt->result.buf[i].output_len, 1);
 							}
 						}
 						break;

@@ -73,8 +73,9 @@ enum mysqli_status {
 };
 
 typedef struct {
-	ulong		buflen;
 	char		*val;
+	ulong		buflen;
+	ulong		output_len;
 	ulong		type;
 } VAR_BUFFER;
 
