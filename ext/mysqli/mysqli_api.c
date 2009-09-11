@@ -409,7 +409,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
-				bind[ofs].length = &stmt->result.buf[ofs].buflen;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 			}
 			default:
@@ -955,7 +955,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							} else
 #endif
 							{
-								copy_len = stmt->result.buf[i].buflen;
+								copy_len = stmt->result.buf[i].output_len;
 							}
 							if (!IS_BINARY_DATA(fields[i])) {
 								ZVAL_UTF8_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val,
