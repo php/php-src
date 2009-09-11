@@ -220,7 +220,7 @@ static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter)
 	if (c < 0x80) {
 		if (c < 0) { 
 			filter->flag = 1;	/* bad */
-		} else if (c != 0 && filter->status) {
+		} else if (filter->status) {
 			filter->flag = 1;	/* bad */
 		}
 		filter->status = 0;
