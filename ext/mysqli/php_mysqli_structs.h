@@ -82,10 +82,10 @@ typedef struct {
 	UErrorCode		status;		/* error code */
 } MYSQLI_STRING;
 
-
 typedef struct {
-	ulong		buflen;
 	char		*val;
+	ulong		buflen;
+	ulong		output_len;
 	ulong		type;
 } VAR_BUFFER;
 

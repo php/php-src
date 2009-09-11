@@ -32,6 +32,9 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump($test);
 
+	/* this will crash with libmysql from PHP 5.0.6 (or earlier) to 5.3.0 */
+	mysqli_fetch($stmt);
+
 	mysqli_stmt_close($stmt);
 	mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch");
 	mysqli_close($link);
