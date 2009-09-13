@@ -79,7 +79,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
       - Parameters [5] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
-        Parameter #2 [ <optional> $subject ]
+        Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> $limit ]
         Parameter #4 [ <optional> &$count ]
       }
@@ -99,7 +99,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
       - Parameters [5] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
-        Parameter #2 [ <optional> $subject ]
+        Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> $limit ]
         Parameter #4 [ <optional> &$count ]
       }
