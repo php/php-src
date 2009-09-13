@@ -228,7 +228,7 @@ static inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 		int extra = (ZEND_MM_ALIGNMENT - ((zend_uintptr_t)EG(argument_stack)->top & (ZEND_MM_ALIGNMENT - 1))) / sizeof(void*);
 
 		if (UNEXPECTED(size + extra + ZEND_MM_ALIGNED_SIZE(sizeof(void*)) / sizeof(void*) >
-		    EG(argument_stack)->end - EG(argument_stack)->top)) {
+		    (zend_uintptr_t)EG(argument_stack)->end - (zend_uintptr_t)EG(argument_stack)->top)) {
 			zend_vm_stack_extend(size TSRMLS_CC);
 		} else {
 			void **old_top = EG(argument_stack)->top;
