@@ -1,13 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2009, PHP 5.2.11
-- Fixed certificate validation inside php_openssl_apply_verification_policy
+- Fixed certificate validation inside php_openssl_apply_verification_policy.
   (Ryan Sleevi, Ilia)
+
 
 10 Sep 2009, PHP 5.2.11RC3
 - Updated timezone database to version 2009.13 (2009m) (Derick)
 
-- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters). (Ilia)
 - Fixed bug #49447 (php engine needs to correctly check for socket API return
   status on windows). (Sriram Natarajan)
 - Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
