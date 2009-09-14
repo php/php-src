@@ -364,7 +364,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
-				bind[ofs].length = &stmt->result.buf[ofs].buflen;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 			}
 			default:
@@ -735,7 +735,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 #else
 							{
 #endif
-								ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, 1);
+								ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].output_len, 1);
 							}
 						}
 						break;
