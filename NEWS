@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Sep 2009, PHP 5.2.11
+- Fixed certificate validation inside php_openssl_apply_verification_policy
+  (Ryan Sleevi, Ilia)
 
 10 Sep 2009, PHP 5.2.11RC3
 - Updated timezone database to version 2009.13 (2009m) (Derick)
