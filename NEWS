@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.3.2
 
 ?? ??? 2009, PHP 5.3.1RC?
+- Fixed certificate validation inside php_openssl_apply_verification_policy
+  (Ryan Sleevi, Ilia)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
