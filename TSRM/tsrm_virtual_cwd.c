@@ -905,6 +905,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	time_t t;
 	int ret;
 	int add_slash;
+	void *tmp;
 	TSRMLS_FETCH();
 
 	if (path_length == 0 || path_length >= MAXPATHLEN-1) {
@@ -1049,7 +1050,16 @@ verify:
 
 		CWD_STATE_COPY(&old_state, state);
 		state->cwd_length = path_length;
-		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1);
+
+		tmp = realloc(state->cwd, state->cwd_length+1);
+		if (tmp == NULL) {
+#if VIRTUAL_CWD_DEBUG
+			fprintf (stderr, "Out of memory\n");
+#endif
+			return 1;
+		}
+		state->cwd = (char *) tmp;
+
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
 		if (verify_path(state)) {
 			CWD_STATE_FREE(state);
@@ -1061,7 +1071,15 @@ verify:
 		}
 	} else {
 		state->cwd_length = path_length;
-		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1);
+		tmp = realloc(state->cwd, state->cwd_length+1);
+		if (tmp == NULL) {
+#if VIRTUAL_CWD_DEBUG
+			fprintf (stderr, "Out of memory\n");
+#endif
+			return 1;
+		}
+		state->cwd = (char *) tmp;
+
 		memcpy(state->cwd, resolved_path, state->cwd_length+1);
 		ret = 0;
 	}
