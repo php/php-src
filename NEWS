@@ -80,6 +80,8 @@ PHP                                                                        NEWS
 - Fixed bug #48718 (FILTER_VALIDATE_EMAIL does not allow numbers in domain
   components). (Ilia)
 - Fixed bug #48709 (metaphone and 'wh'). (brettz9 at yahoo dot com, Felipe)
+- Fixed bug #48697 (mb_internal_encoding() value gets reset by parse_str()).
+  (Moriyoshi)
 - Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
   formatted). (peter at lvp-media dot com, Felipe)
 - Fixed bug #48661 (phpize is broken with non-bash shells). (Jani)
