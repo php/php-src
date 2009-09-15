@@ -5,7 +5,7 @@ Ivan Rosolen <contato [at] ivanrosolen [dot] com>
 #testfest PHPSP on 2009-06-30
 --SKIPIF-- 
 <?php  
-if ( ! extension_loaded('gd') ) die( 'GD not present; skipping test' ); 
+if ( ! extension_loaded('gd') ) die( 'skip GD not present; skipping test' ); 
 ?> 
 --FILE--
 <?php
