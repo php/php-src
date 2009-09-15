@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   (Linus Nielsen Feltzing <linus@haxx.se>)
 
 ?? ??? 2009, PHP 5.3.1RC?
+- Upgraded bundled sqlite to version 3.6.18. (Ilia)
 - Fixed certificate validation inside php_openssl_apply_verification_policy
   (Ryan Sleevi, Ilia)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
