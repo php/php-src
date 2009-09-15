@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.2
+- Implement FR #49253 (add support for libcurl's CERTINFO option).
+  (Linus Nielsen Feltzing <linus@haxx.se>)
 
 ?? ??? 2009, PHP 5.3.1RC?
 - Fixed certificate validation inside php_openssl_apply_verification_policy
