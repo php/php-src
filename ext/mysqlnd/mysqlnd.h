@@ -374,6 +374,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 #ifdef MYSQLND_THREADED
 	THREAD_T		thread_id;
 #endif
+	long			net_read_timeout;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);

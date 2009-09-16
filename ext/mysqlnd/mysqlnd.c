@@ -627,6 +627,10 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		mnd_efree(hashed_details);
 	}
 
+	if (!conn->options.timeout_read) {
+		/* should always happen because read_timeout cannot be set via API */
+		conn->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
+	}
 	if (conn->options.timeout_read)
 	{
 		tv.tv_sec = conn->options.timeout_read;
