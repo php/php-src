@@ -1347,7 +1347,6 @@ static void alloc_curl_handle(php_curl **ch)
  */
 static void split_certinfo(char *string, zval *hash)
 {
-	int i;
 	char *org = estrdup(string);
 	char *s = org;
 	char *split;
@@ -1377,13 +1376,12 @@ static void split_certinfo(char *string, zval *hash)
 
 /* {{{ create_certinfo
  */
-static void create_certinfo(struct curl_certinfo *ci, zval *listcode)
+static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 {
 	int i;
 			
 	if(ci) {
 		zval *certhash = NULL;
-		char *tmp;
 		
 		for(i=0; i<ci->num_of_certs; i++) {
 			struct curl_slist *slist;
@@ -2271,7 +2269,7 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
 			MAKE_STD_ZVAL(listcode);
 			array_init(listcode);
-			create_certinfo(ci, listcode);
+			create_certinfo(ci, listcode TSRMLS_CC);
 			CAAZ("certinfo", listcode);
 		}
 #endif
@@ -2341,7 +2339,7 @@ PHP_FUNCTION(curl_getinfo)
 				array_init(return_value);
 				
 				if (curl_easy_getinfo(ch->cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
-					create_certinfo(ci, return_value);
+					create_certinfo(ci, return_value TSRMLS_CC);
 				} else {
 					RETURN_FALSE;
 				}
