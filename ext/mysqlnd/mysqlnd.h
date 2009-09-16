@@ -26,7 +26,7 @@
 #define MYSQLND_VERSION_ID 50005
 
 /* This forces inlining of some accessor functions */
-#define MYSQLND_USE_OPTIMISATIONS 1
+#define MYSQLND_USE_OPTIMISATIONS 0
 
 #define MYSQLND_STRING_TO_INT_CONVERSION
 /*
