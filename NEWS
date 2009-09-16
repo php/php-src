@@ -1,17 +1,20 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.2
-- Implement FR #49253 (add support for libcurl's CERTINFO option).
+- Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
 
-?? ??? 2009, PHP 5.3.1RC?
+
+?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
 - Upgraded bundled sqlite to version 3.6.18. (Ilia)
-- Fixed certificate validation inside php_openssl_apply_verification_policy
-  (Ryan Sleevi, Ilia)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
+
+- Fixed certificate validation inside php_openssl_apply_verification_policy
+  (Ryan Sleevi, Ilia)
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
   (Ilia)
+
 
 ?? ??? 2009, PHP 5.3.1
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
@@ -195,6 +198,7 @@ PHP                                                                        NEWS
   impersonated user). (Pierre)
 - Fixed bug #49447 (php engine need to correctly check for socket API 
   return status on windows). (Sriram Natarajan)
+
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
