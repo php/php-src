@@ -5,78 +5,61 @@ PHP                                                                        NEWS
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.
   (Ryan Sleevi, Ilia)
-
-
-10 Sep 2009, PHP 5.2.11RC3
 - Updated timezone database to version 2009.13 (2009m) (Derick)
-
-- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters). (Ilia)
-- Fixed bug #49447 (php engine needs to correctly check for socket API return
-  status on windows). (Sriram Natarajan)
-- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
-
-
-03 Sep 2009, PHP 5.2.11RC2
 - Added missing sanity checks around exif processing. (Ilia)
-
 - Fixed sanity check for the color index in imagecolortransparent. (Pierre)
 - Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
 - Fixed leak on error in popen/exec (and related functions) on Windows.
   (Pierre)
-
-- Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries). 
-  (Ilia, code-it at mail dot ru)
-- Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
-  (Jani)
-- Fixed bug #49286 (php://input (php_stream_input_read) is broken). (Jani)
-- Fixed bug #49269 (Ternary operator fails on Iterator object when used inside
-  foreach declaration). (Etienne, Dmitry)
-- Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
-- Fixed bug #49144 (Import of schema from different host transmits original
-  authentication details). (Dmitry)
-- Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes when including
-  files from function). (Stas)
-- Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
-- Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
-- Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
-
-
-13 Aug 2009, PHP 5.2.11RC1
 - Fixed regression in cURL extension that prevented flush of data to output
   defined as a file handle. (Ilia)
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters). (Ilia)
+- Fixed bug #49447 (php engine needs to correctly check for socket API return
+  status on windows). (Sriram Natarajan)
 - Fixed bug #49372 (segfault in php_curl_option_curl). (Pierre)
+- Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries).
+  (Ilia, code-it at mail dot ru)
+- Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
+  (Jani)
+- Fixed bug #49286 (php://input (php_stream_input_read) is broken). (Jani)
+- Fixed bug #49269 (Ternary operator fails on Iterator object when used
+  inside foreach declaration). (Etienne, Dmitry)
+- Fixed bug #49236 (Missing PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)). (Jani)
+- Fixed bug #49144 (Import of schema from different host transmits original
+  authentication details). (Dmitry)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
 - Fixed bug #49095 (proc_get_status['exitcode'] fails on win32). (Felipe)
 - Fixed bug #49074 (private class static fields can be modified by using
   reflection). (Jani)
-- Fixed bug #49072 (feof never returns true for damaged file in zip). (Pierre)
+- Fixed bug #49072 (feof never returns true for damaged file in zip).
+  (Pierre)
 - Fixed bug #49052 (context option headers freed too early when using
   --with-curlwrappers). (Jani)
 - Fixed bug #49032 (SplFileObject::fscanf() variables passed by reference).
   (Jani)
 - Fixed bug #49026 (proc_open() can bypass safe_mode_protected_env_vars
   restrictions). (Ilia)
-- Fixed bug #48994 (zlib.output_compression does not output HTTP headers when
-  set to a string value). (Jani)
+- Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes when
+  including files from function). (Stas)
+- Fixed bug #48994 (zlib.output_compression does not output HTTP headers
+  when set to a string value). (Jani)
 - Fixed bug #48980 (Crash when compiling with pdo_firebird). (Felipe)
-- Fixed bug #48962 (cURL does not upload files with specified filename).
-  (Ilia)
+- Fixed bug #48962 (cURL does not upload files with specified filename). (Ilia)
 - Fixed bug #48929 (Double \r\n after HTTP headers when "header" context
   option is an array). (David Zülke)
 - Fixed bug #48913 (Too long error code strings in pdo_odbc driver).
   (naf at altlinux dot ru, Felipe)
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
 - Fixed bug #48801 (Problem with imagettfbbox). (Takeshi Abe)
-- Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
-  directories). (Ilia)
-- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()).
-  (Sriram Natarajan)
-- Fixed bug #48763 (ZipArchive produces corrupt archive). (dani dot church at 
-  gmail dot com, Pierre)
+- Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into
+  symlinked directories). (Ilia)
+- Fixed bug #48774 (SIGSEGVs when using curl_copy_handle()). (Sriram Natarajan)
+- Fixed bug #48763 (ZipArchive produces corrupt archive).
+  (dani dot church at gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48733 (CURLOPT_WRITEHEADER|CURLOPT_FILE|CURLOPT_STDERR warns on
   files that have been opened with r+). (Ilia)
@@ -87,6 +70,7 @@ PHP                                                                        NEWS
 - Fixed bug #48709 (metaphone and 'wh'). (brettz9 at yahoo dot com, Felipe)
 - Fixed bug #48697 (mb_internal_encoding() value gets reset by parse_str()).
   (Moriyoshi)
+- Fixed bug #48696 (ldap_read() segfaults with invalid parameters). (Felipe)
 - Fixed bug #48693 (Double declaration of __lambda_func when lambda wrongly
   formatted). (peter at lvp-media dot com, Felipe)
 - Fixed bug #48661 (phpize is broken with non-bash shells). (Jani)
@@ -94,54 +78,55 @@ PHP                                                                        NEWS
   html-entities). (Moriyoshi)
 - Fixed bug #48637 ("file" fopen wrapper is overwritten when using
   --with-curlwrappers). (Jani)
-- Fixed bug #48636 (Error compiling of ext/date on netware). (guenter at
-  php.net, Ilia)
+- Fixed bug #48636 (Error compiling of ext/date on netware).
+  (guenter at php.net, Ilia)
 - Fixed bug #48629 (get_defined_constants() ignores categorize parameter).
   (Felipe)
 - Fixed bug #48619 (imap_search ALL segfaults). (Pierre)
-- Fixed bug #48608 (Invalid libreadline version not detected during configure).
-  (Jani)
-- Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts
-  with new lines) (Takeshi Abe)
+- Fixed bug #48608 (Invalid libreadline version not detected during
+  configure). (Jani)
+- Fixed bug #48555 (ImageFTBBox() differs from previous versions for texts with
+  new lines) (Takeshi Abe)
 - Fixed bug #48539 (pdo_dblib fails to connect, throws empty PDOException
   "SQLSTATE[] (null)"). (Felipe)
-- Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using
-  TMPDIR). (Ilia)
+- Fixed bug #48465 (sys_get_temp_dir() possibly inconsistent when using TMPDIR).
+  (Ilia)
 - Fixed bug #48450 (Compile failure under IRIX 6.5.30 building gd.c). (Kalle)
-- Fixed bug #48400 (imap crashes when closing stream opened with
-  OP_PROTOTYPE flag). (Jani)
+- Fixed bug #48400 (imap crashes when closing stream opened with OP_PROTOTYPE
+  flag). (Jani)
 - Fixed bug #48284 (hash "adler32" byte order is reversed). (Scott)
-- Fixed bug #48276 (date("Y") on big endian machines produces the
-  wrong result). (Scott)
+- Fixed bug #48276 (date("Y") on big endian machines produces the wrong
+  result). (Scott)
 - Fixed bug #48247 (Infinite loop and possible crash during startup with
   errors when errors are logged). (Jani)
-- Fixed bug #48116 (Fixed build with Openssl 1.0). (Pierre, 
-  Al dot Smith at aeschi dot ch dot eu dot org)
 - Fixed bug #48182 (ssl handshake fails during asynchronous socket connection).
   (Sriram Natarajan)
+- Fixed bug #48116 (Fixed build with Openssl 1.0).
+  (Pierre, Al dot Smith at aeschi dot ch dot eu dot org)
+- Fixed bug #48060 (pdo_pgsql - large objects are returned as empty). (Matteo)
 - Fixed bug #48057 (Only the date fields of the first row are fetched,
   others are empty). (info at programmiernutte dot net)
 - Fixed bug #47481 (natcasesort() does not sort extended ASCII characters
   correctly). (Herman Radtke)
 - Fixed bug #47351 (Memory leak in DateTime). (Derick, Tobias John)
+- Fixed bug #47273 (Encoding bug in SoapServer->fault). (Dmitry)
 - Fixed bug #46020 (with Sun Java System Web Server 7.0 on HPUX, #define HPUX).
   (Uwe Schindler)
 - Fixed bug #45905 (imagefilledrectangle() clipping error).
   (markril at hotmail dot com, Pierre)
-- Fixed bug #45280 (Reflection of instantiated COM classes causes PHP to crash) 
-  (Paul Richards, Kalle)
+- Fixed bug #45280 (Reflection of instantiated COM classes causes PHP to
+  crash). (Paul Richards, Kalle)
 - Fixed bug #45141 (setcookie will output expires years of >4 digits). (Ilia)
 - Fixed bug #44683 (popen crashes when an invalid mode is passed). (Pierre)
 - Fixed bug #44144 (spl_autoload_functions() should return object instance
   when appropriate). (Hannes, Etienne)
-- Fixed bug #43510 (stream_get_meta_data() does not return same mode as used
-  in fopen). (Jani)
-- Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot 
-  com, Kalle)
+- Fixed bug #43510 (stream_get_meta_data() does not return same mode as used in
+  fopen). (Jani)
+- Fixed bug #42434 (ImageLine w/ antialias = 1px shorter).
+  (wojjie at gmail dot com, Kalle)
+- Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 
 17 Jun 2009, PHP 5.2.10
-- Updated timezone database to version 2009.9 (2009i) (Derick)
-
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
 - Added new CURL options CURLOPT_REDIR_PROTOCOLS, CURLOPT_PROTOCOLS,
   and CURLPROTO_* for redirect fixes in CURL 7.19.4. (Yoram Bar Haim, Stas)
