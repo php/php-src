@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   (Ryan Sleevi, Ilia)
 - Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
   (Ilia)
+- Fixed bug #49572 (use of C++ style comments causes build failure).
+  (Sriram Natarajan)
 
 
 ?? ??? 2009, PHP 5.3.1
