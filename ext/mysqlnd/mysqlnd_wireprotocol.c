@@ -1047,7 +1047,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			p+=2;
 			/* Check for additional textual data */
 			if (packet->header.size  > (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
-				packet->info_or_local_file = mnd_pemalloc(len + 1, conn->persistent);
+				packet->info_or_local_file = mnd_emalloc(len + 1);
 				memcpy(packet->info_or_local_file, p, len);
 				packet->info_or_local_file[len] = '\0';
 				packet->info_or_local_file_len = len;
