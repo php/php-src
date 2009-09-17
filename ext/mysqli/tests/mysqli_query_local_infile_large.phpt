@@ -5,6 +5,8 @@ mysql_query(LOAD DATA LOCAL INFILE) with large data set (10MB)
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	// Create a large CVS file
@@ -40,18 +42,22 @@ require_once('skipifconnectfailure.inc');
 	if (!mysqli_query($link, sprintf("LOAD DATA LOCAL INFILE '%s' INTO TABLE test FIELDS TERMINATED BY ';'", mysqli_real_escape_string($link, $file))))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
+	if ((!is_string(mysqli_info($link))) || ('' == mysqli_info($link))) {
+		printf("[005] [%d] %s, mysqli_info not set \n", mysqli_errno($link), mysqli_error($link));
+	}
+
 	if (!($res = mysqli_query($link, "SELECT COUNT(*) AS _num FROM test")))
-		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$row = mysqli_fetch_assoc($res);
 	if (($row["_num"] != $rowno))
-		printf("[006] Expecting %d rows, found %d\n", $rowno, $row["_num"]);
+		printf("[007] Expecting %d rows, found %d\n", $rowno, $row["_num"]);
 
 	mysqli_free_result($res);
 
 	$random = mt_rand(1, $rowno);
 	if (!$res = mysqli_query($link, "SELECT id, col1, col2 FROM test WHERE id = " . $random))
-			printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	$row = mysqli_fetch_assoc($res);
 	var_dump($row);
