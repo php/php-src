@@ -125,6 +125,8 @@ PHP                                                                        NEWS
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter).
   (wojjie at gmail dot com, Kalle)
 - Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
+- Fixed bug #49572 (use of C++ style comments causes build failure).
+  (Sriram Natarajan)
 
 17 Jun 2009, PHP 5.2.10
 - Added "ignore_errors" option to http fopen wrapper. (David Zulke, Sara)
