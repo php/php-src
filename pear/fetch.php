@@ -61,7 +61,12 @@ if (!isset($_ENV['http_proxy'])) {
     );
 }
 
-$ctx = stream_context_create($copt, array("notification" => "stream_notification_callback"));
+if ($copt) {
+	$ctx = stream_context_create($copt);
+} else {
+	$ctx = stream_context_create();
+}
+stream_context_set_params($ctx, array("notification" => "stream_notification_callback"));
 
 $fp = fopen($argv[1], "r", false, $ctx);
 if (is_resource($fp) && file_put_contents($argv[2], $fp)) {
