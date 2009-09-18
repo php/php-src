@@ -139,6 +139,8 @@ PHP                                                                        NEWS
   gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
+- Fixed bug #48754 (mysql_close() crash php when no handle specified).
+  (Johannes, Andrey)
 - Fixed bug #48746 (Unable to browse directories within Junction Points).
   (Pierre, Kanwaljeet Singla)
 - Fixed bug #48745 (mysqlnd: mysql_num_fields returns wrong column count for
