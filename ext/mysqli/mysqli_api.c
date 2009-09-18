@@ -735,7 +735,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		for (i = 0; i < stmt->param.var_cnt; i++) {
 			for (j = i + 1; j < stmt->param.var_cnt; j++) {
 				/* Oops, someone binding the same variable - clone */
-				if (stmt->param.vars[j] == stmt->param.vars[i]) {
+				if (stmt->param.vars[j] == stmt->param.vars[i] && stmt->param.vars[i]) {
 					php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
 					break;
 				}
