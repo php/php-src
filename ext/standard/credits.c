@@ -120,7 +120,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 	}
 
 	if (flag & PHP_CREDITS_WEB) {
-		/* Websites and infrastrucutre */
+		/* Websites and infrastructure */
 
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Websites and Infrastructure team");
