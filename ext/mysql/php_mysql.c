@@ -1001,6 +1001,7 @@ PHP_FUNCTION(mysql_pconnect)
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
 {
+	int resource_id;
 	zval *mysql_link=NULL;
 	php_mysql_conn *mysql;
 
@@ -1014,16 +1015,25 @@ PHP_FUNCTION(mysql_close)
 		ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, NULL, MySG(default_link), "MySQL-Link", le_link, le_plink);
 	}
 
-	if (mysql_link) { /* explicit resource number */
-		PHPMY_UNBUFFERED_QUERY_CHECK();
-		zend_list_delete(Z_RESVAL_P(mysql_link));
+	resource_id = mysql_link ? Z_RESVAL_P(mysql_link) : MySG(default_link);
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+#ifdef MYSQL_USE_MYSQLND
+	{
+		int tmp;
+		if ((mysql = zend_list_find(resource_id, &tmp)) && tmp == le_plink) {
+			mysqlnd_end_psession(mysql->conn);
+		}
 	}
+#endif
+	zend_list_delete(resource_id);
 
 	if (!mysql_link 
 		|| (mysql_link && Z_RESVAL_P(mysql_link)==MySG(default_link))) {
-		PHPMY_UNBUFFERED_QUERY_CHECK();
-		zend_list_delete(MySG(default_link));
 		MySG(default_link) = -1;
+		if (mysql_link) {
+			/* on an explicit close of the default connection it had a refcount of 2 so we need one more call */
+			zend_list_delete(resource_id);
+		}
 	}
 
 	RETURN_TRUE;
