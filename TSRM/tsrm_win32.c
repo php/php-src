@@ -200,7 +200,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 		/* Keep the result in realpath_cache */
 		if(bucket != NULL) {
-			if(desired_access == FILE_GENERIC_READ) {
+			if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
 				bucket->is_rvalid = 1;
 				bucket->is_readable = fAccess;
 			}
