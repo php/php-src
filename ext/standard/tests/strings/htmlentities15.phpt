@@ -3,7 +3,7 @@ htmlentities() test 15 (setlocale / KOI8-R)
 --INI--
 output_handler=
 default_charset=
-mbstring.internal_encoding=none
+mbstring.internal_encoding=pass
 unicode.script_encoding=KOI-8
 unicode.output_encoding=KOI-8
 --SKIPIF--
