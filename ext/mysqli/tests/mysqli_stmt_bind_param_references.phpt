@@ -151,12 +151,13 @@ require_once('skipifconnectfailure.inc');
 		printf("[025] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 	findRow(26, $link, $id_ref_ref, $label_ref_ref);
 
+	unset($id);
+	unset($label);
 	$id = 102;
 	$label = new stdClass();
 	$label->label = 'y';
 	$id_ref = &$GLOBALS['id'];
 	$label_ref = &$label->label;
-
 	if (true !== ($tmp = mysqli_stmt_bind_param($stmt, "is", $id_ref, $label_ref)))
 		printf("[027] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 	if (true !== @mysqli_stmt_execute($stmt))
