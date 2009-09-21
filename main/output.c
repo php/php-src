@@ -227,8 +227,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 
 		ALLOC_INIT_ZVAL(orig_buffer);
 		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
-		Z_SET_REFCOUNT_P(orig_buffer, 2);	/* don't let call_user_function() destroy our buffer */
-		Z_SET_ISREF_P(orig_buffer);
 
 		ALLOC_INIT_ZVAL(z_status);
 		ZVAL_LONG(z_status, status);
@@ -248,11 +246,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		if (!just_flush) {
 			zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
 		}
-		Z_SET_REFCOUNT_P(orig_buffer, Z_REFCOUNT_P(orig_buffer) - 2);
-		if (Z_REFCOUNT_P(orig_buffer) <= 0) { /* free the zval */
-			zval_dtor(orig_buffer);
-			FREE_ZVAL(orig_buffer);
-		}
+		zval_ptr_dtor(&orig_buffer);
 		zval_ptr_dtor(&z_status);
 	}
 
