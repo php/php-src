@@ -964,6 +964,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 		retval = CG(auto_globals_cache)[opline->op2.u.var];
 	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
 		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
+		FREE_OP1();
 	} else {
 		zend_auto_global *auto_global = NULL;
 
