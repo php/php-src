@@ -14,10 +14,11 @@ PHP                                                                        NEWS
 
 - Fixed certificate validation inside php_openssl_apply_verification_policy
   (Ryan Sleevi, Ilia)
-- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
-  (Ilia)
+
 - Fixed bug #49572 (use of C++ style comments causes build failure).
   (Sriram Natarajan)
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
+  (Ilia)
 
 
 ?? ??? 2009, PHP 5.3.1
@@ -52,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
+- Fixed bug #49447 (php engine need to correctly check for socket API 
+  return status on windows). (Sriram Natarajan)
 - Fixed bug #49391 (ldap.c utilizing deprecated ldap_modify_s). (Ilia)
 - Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries).
   (Ilia, code-it at mail dot ru)
@@ -203,8 +206,6 @@ PHP                                                                        NEWS
 - Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 - Fixed bug #27051 (Impersonation with FastCGI does not exec process as 
   impersonated user). (Pierre)
-- Fixed bug #49447 (php engine need to correctly check for socket API 
-  return status on windows). (Sriram Natarajan)
 
 
 30 Jun 2009, PHP 5.3.0
