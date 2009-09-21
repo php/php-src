@@ -840,6 +840,8 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, (string)($info['buffered_sets'] + 1), $test_counter, 'mysqli_use_result()');
 	$info = $new_info;
 
+	mysqli_close($link);
+
 
 	/*
 	no_index_used
@@ -885,7 +887,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(119) {
+array(121) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1123,6 +1125,10 @@ array(119) {
   [%u|b%"proto_binary_fetched_geometry"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_binary_fetched_other"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"init_command_executed_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"init_command_failed_count"]=>
   %unicode|string%(1) "0"
 }
 Testing buffered normal...
