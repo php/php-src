@@ -43,7 +43,7 @@ already through other measures.
 		$valid_options[] = constant('MYSQLI_OPT_INT_AND_FLOAT_NATIVE');
 	if (defined('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'))
 		$valid_options[] = constant('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE');
-	
+
 	$tmp    = NULL;
 	$link   = NULL;
 
@@ -85,11 +85,14 @@ already through other measures.
 		!($tmp = mysqli_options($link, constant('MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE'), true)))
 		printf("[006] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 
-	for ($flag = -10000; $flag < 10000; $flag++) {
-		if (in_array($flag, $valid_options))
-			continue;
-		if (FALSE !== ($tmp = mysqli_options($link, $flag, 'definetely not an mysqli_option'))) {
-			var_dump("SOME_FLAG", $flag, $tmp);
+	if ($IS_MYSQLND) {
+		/* Don't do this with libmysql. You may hit options not exported to PHP and cause false positives */
+		for ($flag = -10000; $flag < 10000; $flag++) {
+			if (in_array($flag, $valid_options))
+				continue;
+			if (FALSE !== ($tmp = mysqli_options($link, $flag, 'definetely not an mysqli_option'))) {
+				var_dump(array("SOME_FLAG" => $flag, "ret" => $tmp));
+			}
 		}
 	}
 
@@ -97,7 +100,6 @@ already through other measures.
 
 	echo "Link closed";
 	var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1'));
-	var_dump("SOME_RANDOM_FLAG", mysqli_options($link, $flag, 'definetly not an mysqli_option'));
 	print "done!";
 ?>
 --EXPECTF--
@@ -126,9 +128,5 @@ bool(false)
 Link closed
 Warning: mysqli_options(): Couldn't fetch mysqli in %s line %d
 %s(19) "MYSQLI_INIT_COMMAND"
-NULL
-
-Warning: mysqli_options(): Couldn't fetch mysqli in %s line %d
-%s(16) "SOME_RANDOM_FLAG"
 NULL
 done!
