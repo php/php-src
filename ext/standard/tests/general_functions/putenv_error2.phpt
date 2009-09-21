@@ -12,7 +12,7 @@ putenv('BAZ=bop');
 ?>
 ==DONE==
 --EXPECTF--
-PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Warning: putenv(): Safe Mode warning: Cannot override protected environment variable 'FOO' in %s on line %d
 

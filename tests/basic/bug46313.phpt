@@ -6,6 +6,7 @@ Bug #46313 (Magic quotes broke $_FILES)
 magic_quotes_gpc=1
 file_uploads=1
 register_globals=1
+display_errors=0
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737

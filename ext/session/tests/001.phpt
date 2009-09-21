@@ -31,7 +31,7 @@ print session_encode()."\n";
 
 session_destroy();
 --EXPECTF--
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Deprecated: Function session_register() is deprecated in %s on line %d
 

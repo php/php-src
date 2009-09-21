@@ -14,7 +14,7 @@ var_dump(get_cfg_var( 'register_globals' ) );
 
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in %s on line 0
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in %s on line 0
 *** Test by calling method or function with deprecated option ***
 string(1) "1"
 

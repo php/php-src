@@ -2015,10 +2015,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 	module_initialized = 1;
-	sapi_deactivate(TSRMLS_C);
-	module_startup = 0;
-
-	shutdown_memory_manager(1, 0 TSRMLS_CC);
 
 	/* Check for deprecated directives */
 	{
@@ -2047,6 +2043,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 			zend_error(E_ERROR, "zend.ze1_compatibility_mode is no longer supported in PHP 5.3 and greater");
 		}
 	}
+	
+	sapi_deactivate(TSRMLS_C);
+	module_startup = 0;
+
+	shutdown_memory_manager(1, 0 TSRMLS_CC);
 
 	/* we're done */
 	return SUCCESS;

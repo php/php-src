@@ -45,7 +45,7 @@ echo "values after session:\n";
 var_dump($a,$b);
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 original values:
 object(a)#%d (1) {
   ["test"]=>
