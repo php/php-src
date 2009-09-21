@@ -27,7 +27,7 @@ curl_close($ch);
 var_dump( $curl_content );
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 *** Testing curl_setopt with CURLOPT_FOLLOWLOCATION in safemode
 
 Warning: curl_setopt(): CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set in %s on line %d

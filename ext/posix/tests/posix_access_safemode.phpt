@@ -19,6 +19,6 @@ var_dump(posix_access('/tmp', POSIX_W_OK));
 ?>
 ===DONE===
 --EXPECTF--
-PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
 bool(false)
 ===DONE===

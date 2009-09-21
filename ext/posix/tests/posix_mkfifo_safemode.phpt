@@ -36,7 +36,7 @@ unlink($dir . '/bar');
 rmdir($dir);
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in %s on line %d
 
 Warning: posix_mkfifo(): SAFE MODE Restriction in effect.  The script whose uid is %d is not allowed to access /tmp owned by uid %d in %s on line %d
 bool(false)

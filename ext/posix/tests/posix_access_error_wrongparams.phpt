@@ -28,7 +28,7 @@ var_dump(posix_access('./foobar'));
 ?>
 ===DONE===
 --EXPECTF--
-PHP Warning:  Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Warning: posix_access() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)

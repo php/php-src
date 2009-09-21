@@ -33,7 +33,7 @@ ini_set("session.use_trans_sid","1");
 session_destroy();
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 <a href="/link?PHPSESSID=abtest">
 
 Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d

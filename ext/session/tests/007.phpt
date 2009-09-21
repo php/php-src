@@ -50,8 +50,9 @@ var_dump($HTTP_SESSION_VARS);
 session_destroy();
 ?>
 --EXPECTF--
-PHP Warning:  Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
-PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+
+Warning: Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
 
 Deprecated: Function session_register() is deprecated in %s on line %d
 float(3.14)

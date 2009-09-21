@@ -43,7 +43,7 @@ var_dump($HTTP_SESSION_VARS);
 session_destroy();
 ?>
 --EXPECT--
-PHP Warning:  Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
+Warning: Directive 'register_long_arrays' is deprecated in PHP 5.3 and greater in Unknown on line 0
 array(0) {
 }
 array(1) {
