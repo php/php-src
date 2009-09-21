@@ -1,24 +1,39 @@
 --TEST--
 Bug #48909 (Segmentation fault in mysqli_stmt_execute)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 	include "connect.inc";
 
-	include "table.inc";
-	
-	$stmt = $link->prepare("insert into test values (?,?)");
-	var_dump($stmt->bind_param("bb",$bvar,$bvar));
-	var_dump($stmt->execute());
+	if (!($link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
+		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+
+	if (!$link->query("DROP TABLE IF EXISTS test") ||
+		!$link->query(sprintf("CREATE TABLE test(id INT, label varchar(255)) ENGINE = %s", $engine)))
+		printf("[002] [%d] %s\n", $link->errno, $link->error);
+
+	if (!$stmt = $link->prepare("INSERT INTO test(id, label) VALUES  (?, ?)"))
+		printf("[003] [%d] %s\n", $link->errno, $link->error);
+
+	if (!$stmt->bind_param("bb",$bvar, $bvar))
+		printf("[004] [%d] %s\n", $stmt->errno, $stmt->error);
+
+	if (!$stmt->execute())
+		printf("[005] [%d] %s\n", $stmt->errno, $stmt->error);
+
 	$stmt->close();
 	$link->close();
-	echo "done";	
+
+	echo "done";
+?>
+--CLEAN--
+<?php
+	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-bool(true)
-bool(true)
 done
