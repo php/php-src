@@ -6,8 +6,6 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
-if (MySQLPDOTest::isPDOMySQLnd())
-	die("skip PDO::MYSQL_ATTR_MAX_INIT_COMMAND not supported with mysqlnd");
 ?>
 --INI--
 error_reporting=E_ALL
@@ -27,7 +25,8 @@ error_reporting=E_ALL
 	var_dump($create);
 	$db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => $create));
 
-	var_dump($db->errorInfo());
+	$info = $db->errorInfo();
+	var_dump($info[0]);
 
 	$db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));
 	$stmt = $db->query(sprintf('SELECT id FROM %s', $table));
@@ -35,22 +34,14 @@ error_reporting=E_ALL
 
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 	print "done!\n";
-?>
 --EXPECTF--
-string(58) "CREATE TABLE test_%s(id INT)"
-array(3) {
-  [0]=>
-  string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
+%unicode|string%(58) "CREATE TABLE test_%s(id INT)"
+%unicode|string%(5) "00000"
 array(1) {
   [0]=>
   array(1) {
-    ["id"]=>
-    string(1) "1"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
   }
 }
 done!
