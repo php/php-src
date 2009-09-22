@@ -28,12 +28,12 @@ function ssl_server($port) {
 	$r = array($link);
 	$w = array();
 	$e = array();
-	if (stream_select($r, $w, $e, 0, 1000) != 0)
+	if (stream_select($r, $w, $e, 1, 0) != 0)
 		$data .= fread($link, 8192);
 
 	$r = array();
 	$w = array($link);
-	if (stream_select($r, $w, $e, 0, 1000) != 0)
+	if (stream_select($r, $w, $e, 1, 0) != 0)
 		$wrote = fwrite($link, $data, strlen($data));
 
 	// close stuff
@@ -59,7 +59,7 @@ function ssl_async_client($port) {
 	$r = array($socket);
 	$w = array();
 	$e = array();
-	if (stream_select($r, $w, $e, 0, 10) != 0) 
+	if (stream_select($r, $w, $e, 1, 0) != 0) 
 	{
 		$data .= fread($socket, 1024);
 	}
