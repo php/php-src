@@ -32,6 +32,7 @@
 #include "ext/standard/php_string.h"
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
+#include "ext/mysqlnd/mysqlnd_portability.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static PHP_GINIT_FUNCTION(mysqli);
@@ -1201,12 +1202,37 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 			MAKE_STD_ZVAL(res);
 
-			/* check if we need magic quotes */
-			if (PG(magic_quotes_runtime)) {
-				Z_TYPE_P(res) = IS_STRING;
-				Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRLEN_P(res), 0 TSRMLS_CC);
-			} else {
-				ZVAL_STRINGL(res, row[i], field_len[i], 1);	
+#if MYSQL_VERSION_ID > 50002
+			if (mysql_fetch_field_direct(result, i)->type == MYSQL_TYPE_BIT) {
+				my_ulonglong llval;
+				char tmp[22];
+				switch (field_len[i]) {
+					case 8:llval = (my_ulonglong)  bit_uint8korr(row[i]);break;
+					case 7:llval = (my_ulonglong)  bit_uint7korr(row[i]);break;
+					case 6:llval = (my_ulonglong)  bit_uint6korr(row[i]);break;
+					case 5:llval = (my_ulonglong)  bit_uint5korr(row[i]);break;
+					case 4:llval = (my_ulonglong)  bit_uint4korr(row[i]);break;
+					case 3:llval = (my_ulonglong)  bit_uint3korr(row[i]);break;
+					case 2:llval = (my_ulonglong)  bit_uint2korr(row[i]);break;
+					case 1:llval = (my_ulonglong)  uint1korr(row[i]);break;
+				}
+				/* even though lval is declared as unsigned, the value
+				 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+				 * use MYSQLI_LL_SPEC.
+				 */
+				snprintf(tmp, sizeof(tmp), (mysql_fetch_field_direct(result, i)->flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
+				ZVAL_STRING(res, tmp, 1);
+			} else 
+#endif
+			{
+
+				/* check if we need magic quotes */
+				if (PG(magic_quotes_runtime)) {
+					Z_TYPE_P(res) = IS_STRING;
+					Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRLEN_P(res), 0 TSRMLS_CC);
+				} else {
+					ZVAL_STRINGL(res, row[i], field_len[i], 1);	
+				}
 			}
 
 			if (fetchtype & MYSQLI_NUM) {
