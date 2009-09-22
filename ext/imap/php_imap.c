@@ -487,6 +487,7 @@ const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_delete,								arginfo_imap_delete)
 	PHP_FE(imap_undelete,							arginfo_imap_undelete)
 	PHP_FE(imap_check,								arginfo_imap_check)
+	PHP_FE(imap_listscan,							arginfo_imap_listscan)
 	PHP_FE(imap_mail_copy,							arginfo_imap_mail_copy)
 	PHP_FE(imap_mail_move,							arginfo_imap_mail_move)
 	PHP_FE(imap_mail_compose,						arginfo_imap_mail_compose)
