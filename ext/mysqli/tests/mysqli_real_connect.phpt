@@ -161,12 +161,13 @@ require_once('skipifconnectfailure.inc');
 			printf("[025] Usage of mysqli.default_host=p: did not fail\n") ;
 			mysqli_close($link);
 		}
+		@mysqli_close($link);
 	}
 
 	@var_dump($link);
 
-	if (NULL === ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
-		printf("[026] Expecting not NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (NULL !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
+		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -180,17 +181,17 @@ object(mysqli)#%d (%d) {
   [%u|b%"affected_rows"]=>
   NULL
   [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
+  %s
   [%u|b%"client_version"]=>
   int(%d)
   [%u|b%"connect_errno"]=>
   int(%d)
   [%u|b%"connect_error"]=>
-  %unicode|string%(%d) "%s"
+  %unicode|string%(%d) "%s
   [%u|b%"errno"]=>
-  int(%d)
+  %s
   [%u|b%"error"]=>
-  %unicode|string%(%d) "%s"
+  %s
   [%u|b%"field_count"]=>
   NULL
   [%u|b%"host_info"]=>
@@ -212,4 +213,6 @@ object(mysqli)#%d (%d) {
   [%u|b%"warning_count"]=>
   NULL
 }
+
+Warning: mysqli_real_connect(): Couldn't fetch mysqli in %s on line %d
 done!
