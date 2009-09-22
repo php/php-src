@@ -700,6 +700,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 		}
 
 		if (intern->debug_info->nApplyCount == 0) {
+			zend_hash_clean(intern->debug_info);
 			zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			storage = intern->array;
