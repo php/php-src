@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   through the Reflection API. (Sebastian)
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
+  
+- Fixed bug #49630 (imap_listscan function missing). (Felipe)
 
 
 ?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
