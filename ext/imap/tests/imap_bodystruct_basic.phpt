@@ -77,7 +77,7 @@ require_once('clean.inc');
 *** Testing string imap_bodystruct : basic functionality ***
 Create a new mailbox for test and add a multipart msgs
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 Get and validate structure of body part 1
 ifsubtype is 0 or 1
