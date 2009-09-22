@@ -629,7 +629,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_COUNT);
 	REGISTER_CURL_CONSTANT(CURLINFO_HEADER_OUT);
 	REGISTER_CURL_CONSTANT(CURLINFO_PRIVATE);
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM >  0x071301
 	REGISTER_CURL_CONSTANT(CURLINFO_CERTINFO);
 #endif
 
@@ -747,7 +747,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLFTPSSL_CONTROL);
 	REGISTER_CURL_CONSTANT(CURLFTPSSL_ALL);
 #endif
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM > 0x071301
 	REGISTER_CURL_CONSTANT(CURLOPT_CERTINFO);
 #endif
 
@@ -1345,7 +1345,7 @@ static void alloc_curl_handle(php_curl **ch)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM > 0x071301
 /* {{{ split_certinfo
  */
 static void split_certinfo(char *string, zval *hash)
@@ -1660,7 +1660,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if LIBCURL_VERSION_NUM >= 0x070f01
 		case CURLOPT_FTP_FILEMETHOD:
 #endif
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM >  0x071301
 		case CURLOPT_CERTINFO:
 #endif
 			convert_to_long_ex(zvalue);
@@ -2331,7 +2331,7 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_REDIRECT_TIME, &d_code) == CURLE_OK) {
 			CAAD("redirect_time", d_code);
 		}
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM > 0x071301
 		if (curl_easy_getinfo(ch->cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
 			MAKE_STD_ZVAL(listcode);
 			array_init(listcode);
@@ -2398,7 +2398,7 @@ PHP_FUNCTION(curl_getinfo)
 				} else {
 					RETURN_FALSE;
 				}
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM > 0x071301
 			case CURLINFO_CERTINFO: {
 				struct curl_certinfo *ci = NULL;
 
