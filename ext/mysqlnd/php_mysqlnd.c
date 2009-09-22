@@ -107,6 +107,8 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	php_info_print_table_row(2, "Command buffer size", buf);
 	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_read_buffer_size));
 	php_info_print_table_row(2, "Read buffer size", buf);
+	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_read_timeout));
+	php_info_print_table_row(2, "Read timeout", buf);
 	php_info_print_table_row(2, "Collecting statistics", MYSQLND_G(collect_statistics)? "Yes":"No");
 	php_info_print_table_row(2, "Collecting memory statistics", MYSQLND_G(collect_memory_statistics)? "Yes":"No");
 	php_info_print_table_end();
@@ -150,7 +152,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.debug",					NULL, 	PHP_INI_SYSTEM, OnUpdateString,	debug, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_cmd_buffer_size",	"2048",	PHP_INI_ALL,	OnUpdateLong,	net_cmd_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_buffer_size",	"32768",PHP_INI_ALL,	OnUpdateLong,	net_read_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
-	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",		"31536000", PHP_INI_SYSTEM, OnUpdateLong, net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 PHP_INI_END()
 /* }}} */
