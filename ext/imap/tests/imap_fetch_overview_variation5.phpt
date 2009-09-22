@@ -67,7 +67,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 --EXPECTF--
 *** Testing imap_fetch_overview() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 -- $msg_no is 0 --
 Sequence out of range

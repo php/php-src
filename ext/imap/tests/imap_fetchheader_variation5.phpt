@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 --EXPECTF--
 *** Testing imap_fetchheader() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 -- $msg_no is 0 --
 
@@ -64,7 +64,7 @@ bool(false)
 Notice: A non well formed numeric value encountered in %s on line %d
 %unicode|string%(%d) "From: foo@anywhere.com
 Subject: Test msg 1
-To: webmaster@something.com
+To: %s
 MIME-Version: 1.0
 Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 
@@ -75,7 +75,7 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 Notice: A non well formed numeric value encountered in %s on line %d
 %unicode|string%(%d) "From: foo@anywhere.com
 Subject: Test msg 1
-To: webmaster@something.com
+To: %s
 MIME-Version: 1.0
 Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 

@@ -56,7 +56,7 @@ require_once('clean.inc');
 *** Testing imap_clearflag_full() : basic functionality ***
 Create a new mailbox for test
 Create a temporary mailbox and add 10 msgs
-.. mailbox '{localhost/norsh}INBOX.%s' created
+.. mailbox '{%s}%s' created
 Initial msg count in new_mailbox : 10
 Set some flags
 bool(true)
