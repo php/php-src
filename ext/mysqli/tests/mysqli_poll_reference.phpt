@@ -13,10 +13,9 @@ if (!$IS_MYSQLND)
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die("skip cannot connect");
 
-if (mysqli_server_version($link) < 50012))
+if (mysqli_server_version($link) < 50012)
 	die("skip Test needs SQL function SLEEP() available as of MySQL 5.0.12");
 
-mysqli_close($link);
 ?>
 --FILE--
 <?php
