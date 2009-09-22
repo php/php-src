@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 
 -- Testing imap_fetchbody() function with more than expected no. of arguments --
 Create a temporary mailbox and add 1 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 Warning: imap_fetchbody() expects at most 4 parameters, 5 given in %s on line %d
 NULL

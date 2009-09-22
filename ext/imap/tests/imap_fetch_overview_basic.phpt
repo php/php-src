@@ -77,7 +77,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 --EXPECTF--
 *** Testing imap_fetch_overview() : basic functionality ***
 Create a temporary mailbox and add 2 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 -- All possible arguments --
 
