@@ -115,6 +115,7 @@ zend_function_entry imap_functions[] = {
 	PHP_FE(imap_delete,								NULL)
 	PHP_FE(imap_undelete,							NULL)
 	PHP_FE(imap_check,								NULL)
+	PHP_FE(imap_listscan,							NULL)
 	PHP_FE(imap_mail_copy,							NULL)
 	PHP_FE(imap_mail_move,							NULL)
 	PHP_FE(imap_mail_compose,						NULL)
