@@ -2,8 +2,16 @@
 xmlwriter_open_uri with PHP_MAXPATHLEN + 1
 --SKIPIF--
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if (!defined('PHP_MAXPATHLEN') && !substr(PHP_OS, 0, 3) == "WIN" && !stristr(PHP_OS, 'linux')) print "skip unknown PHP_MAXPATHLEN"; ?>
 --FILE--
 <?php 
+if (!defined('PHP_MAXPATHLEN')) {
+	if (substr(PHP_OS, 0, 3) == "WIN") {
+		define('PHP_MAXPATHLEN', 260);
+	} else if (stristr(PHP_OS, 'linux')) {
+		define('PHP_MAXPATHLEN', 4096);
+	}
+}
 $path = str_repeat('a', PHP_MAXPATHLEN + 1);
 var_dump(xmlwriter_open_uri('file:///' . $path));
 ?>
