@@ -31,6 +31,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "ext/mysqlnd/mysqlnd_portability.h"
 
 /* {{{ proto mixed mysqli_affected_rows(object link)
    Get number of affected rows in previous MySQL operation */
@@ -356,6 +357,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				bind[ofs].is_unsigned = (stmt->stmt->fields[ofs].flags & UNSIGNED_FLAG) ? 1 : 0;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 
 			case MYSQL_TYPE_DATE:
@@ -880,9 +882,29 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						ZVAL_DOUBLE(stmt->result.vars[i], *(double *)stmt->result.buf[i].val);
 						break;
 					case IS_STRING:
-						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
+						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
+#if MYSQL_VERSION_ID > 50002
+						 || stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT
+#endif
+						 ) {
 							my_bool uns= (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
-							llval= *(my_ulonglong *) stmt->result.buf[i].val;
+#if MYSQL_VERSION_ID > 50002
+							if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
+								switch (stmt->result.buf[i].output_len) {
+									case 8:llval = (my_ulonglong)  bit_uint8korr(stmt->result.buf[i].val);break;
+									case 7:llval = (my_ulonglong)  bit_uint7korr(stmt->result.buf[i].val);break;
+									case 6:llval = (my_ulonglong)  bit_uint6korr(stmt->result.buf[i].val);break;
+									case 5:llval = (my_ulonglong)  bit_uint5korr(stmt->result.buf[i].val);break;
+									case 4:llval = (my_ulonglong)  bit_uint4korr(stmt->result.buf[i].val);break;
+									case 3:llval = (my_ulonglong)  bit_uint3korr(stmt->result.buf[i].val);break;
+									case 2:llval = (my_ulonglong)  bit_uint2korr(stmt->result.buf[i].val);break;
+									case 1:llval = (my_ulonglong)  uint1korr(stmt->result.buf[i].val);break;
+								}
+							} else
+#endif
+							{
+								llval= *(my_ulonglong *) stmt->result.buf[i].val;
+							}
 #if SIZEOF_LONG==8
 							if (uns && llval > 9223372036854775807L) {
 #elif SIZEOF_LONG==4
@@ -901,14 +923,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
-						}
-#if MYSQL_VERSION_ID > 50002
-						else if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
-							llval = *(my_ulonglong *)stmt->result.buf[i].val;
-							ZVAL_LONG(stmt->result.vars[i], llval);
-						}
-#endif
-						else {
+						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
