@@ -18,26 +18,35 @@ Persistent connections and mysql.max_persistent
 	if (!mysql_select_db($db, $link))
 		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
 
+	if (!$res = mysql_query("SELECT CURRENT_USER() AS _user", $link))
+		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
+
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	$host = substr($row['_user'], strrpos($row['_user'], "@") + 1, strlen($row['_user']));
+
 	mysql_query('DROP USER pcontest', $link);
-	if (!mysql_query('CREATE USER pcontest IDENTIFIED BY "pcontest"', $link)) {
+	mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+	if (!mysql_query(sprintf('CREATE USER pcontest@"%s" IDENTIFIED BY "pcontest"', mysql_real_escape_string($host, $link)), $link)) {
 		printf("skip Cannot create second DB user [%d] %s", mysql_errno($link), mysql_error($link));
 		mysql_close($link);
 		die();
 	}
 
 	// we might be able to specify the host using CURRENT_USER(), but...
-	if (!mysql_query(sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db), $link)) {
+	if (!mysql_query(sprintf('GRANT SELECT ON TABLE %s.test TO pcontest@"%s"', $db, mysql_real_escape_string($host, $link)), $link)) {
 		printf("skip Cannot GRANT SELECT to second DB user [%d] %s", mysql_errno($link), mysql_error($link));
-		mysql_query('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest', $link);
-		mysql_query('DROP USER pcontest', $link);
+		mysql_query(sprintf('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+		mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
 		mysql_close($link);
 		die();
 	}
+
 	mysql_close($link);
 ?>
 --INI--
-mysql.max_links=2
-mysql.max_persistent=1
+mysql.max_links=3
+mysql.max_persistent=2
 mysql.allow_persistent=1
 --FILE--
 <?php
@@ -76,18 +85,26 @@ mysql.allow_persistent=1
 	var_dump($row);
 
 	// change the password for the second DB user and kill the persistent connection
-	if (!mysql_query('SET PASSWORD FOR pcontest = PASSWORD("newpass")', $link))
-		printf("[006] Cannot change PW of second DB user, [%d] %s\n", mysql_errno($link), mysql_error($link));
+	if (!$res = mysql_query("SELECT CURRENT_USER() AS _user", $link))
+		printf("[006] [%d] %s", mysql_errno($link), mysql_error($link));
+
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	$host = substr($row['_user'], strrpos($row['_user'], "@") + 1, strlen($row['_user']));
+
+	$sql = sprintf('SET PASSWORD FOR pcontest@"%s" = PASSWORD("newpass")', mysql_real_escape_string($host, $link));
+	if (!mysql_query($sql, $link))
+		printf("[007] Cannot change PW of second DB user, [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 	// persistent connections cannot be closed but only be killed
 	$pthread_id = mysql_thread_id($plink);
 	if (!mysql_query(sprintf('KILL %d', $pthread_id), $link))
-		printf("[007] Cannot KILL persistent connection of second DB user, [%d] %s\n", mysql_errno($link), mysql_error($link));
+		printf("[008] Cannot KILL persistent connection of second DB user, [%d] %s\n", mysql_errno($link), mysql_error($link));
 	// give the server a second to really kill the thread
 	sleep(1);
 
 	if (!$res = mysql_query("SHOW FULL PROCESSLIST", $link))
-		printf("[008] [%d] %s\n", mysql_errno($link), mysql_error($link));
+		printf("[009] [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 	$running_threads = array();
 	while ($row = mysql_fetch_assoc($res))
@@ -95,11 +112,11 @@ mysql.allow_persistent=1
 	mysql_free_result($res);
 
 	if (isset($running_threads[$pthread_id]))
-		printf("[009] Persistent connection has not been killed");
+		printf("[010] Persistent connection has not been killed\n");
 
 	// we might get the old handle
 	if ($plink = @mysql_pconnect($host, 'pcontest', 'pcontest'))
-		printf("[010] Can connect using the old password, [%d] %s\n",
+		printf("[011] Can connect using the old password, [%d] %s\n",
 			mysql_errno(), mysql_error());
 
 	ob_start();
@@ -108,34 +125,34 @@ mysql.allow_persistent=1
 	ob_end_clean();
 	$phpinfo = substr($phpinfo, strpos($phpinfo, 'MySQL Support => enabled'), 500);
 	if (!preg_match('@Active Persistent Links\s+=>\s+(\d+)@ismU', $phpinfo, $matches))
-		printf("[011] Cannot get # active persistent links from phpinfo()");
+		printf("[012] Cannot get # active persistent links from phpinfo()\n");
 
 	$num_plinks_kill = $matches[1];
-	if ($num_plinks_kill >= $num_plinks)
-		printf("[012] Statistics seems to be wrong, got %d active persistent links, expecting < %d links",
+	if ($num_plinks_kill > $num_plinks)
+		printf("[013] Statistics seems to be wrong, got %d active persistent links, expecting < %d links\n",
 			$num_plinks_kill, $num_plinks);
 
 	// The first connection has been closed, the last pconnect() was unable to connect -> no connection open
 	// We must be able to connect because max_persistent limit has not been reached
 	if (!$plink = mysql_pconnect($host, 'pcontest', 'newpass'))
-		printf("[013] Cannot connect using the second DB, [%d] %s\n",
-			mysql_errno(), mysql_error());
+		die(sprintf("[014] Cannot connect using the second DB, [%d] %s\n",
+			mysql_errno(), mysql_error()));
 
 	if (!mysql_select_db($db, $plink))
-		printf("[014] [%d] %s\n", mysql_errno($plink), mysql_error($plink));
+		printf("[015] [%d] %s\n", mysql_errno($plink), mysql_error($plink));
 
 	if (!$res = mysql_query('SELECT id, label FROM test WHERE id = 1', $plink))
-		printf("[015] Cannot run query on persistent connection of second DB user, [%d] %s\n",
+		printf("[016] Cannot run query on persistent connection of second DB user, [%d] %s\n",
 			mysql_errno($plink), mysql_error($plink));
 
 	if (!$row = mysql_fetch_assoc($res))
-		printf("[016] Cannot run fetch result, [%d] %s\n",
+		printf("[017] Cannot run fetch result, [%d] %s\n",
 			mysql_errno($plink), mysql_error($plink));
 	mysql_free_result($res);
 	var_dump($row);
 
-	mysql_query('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest', $link);
-	mysql_query('DROP USER pcontest', $link);
+	mysql_query(sprintf('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+	mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
 	mysql_close($link);
 	print "done!";
 ?>
@@ -148,8 +165,15 @@ if (!$link = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)) {
  	  $host, $myhost, $user, $db, $port, $socket);
 }
 
-@mysql_query('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest', $link);
-@mysql_query('DROP USER pcontest', $link);
+if (!$res = mysql_query("SELECT CURRENT_USER() AS _user", $link))
+	printf("[c002] [%d] %s", mysql_errno($link), mysql_error($link));
+
+$row = mysql_fetch_assoc($res);
+mysql_free_result($res);
+$host = substr($row['_user'], strrpos($row['_user'], "@") + 1, strlen($row['_user']));
+
+@mysql_query(sprintf('REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
+@mysql_query(sprintf('DROP USER pcontest@"%s"', mysql_real_escape_string($host, $link)), $link);
 
 mysql_close($link);
 ?>
