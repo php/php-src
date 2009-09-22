@@ -18,6 +18,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* setlocale() to set all available locales in the system and check the success count */
 echo "*** Testing setlocale() : usage variations ***\n";
 
+function good_locale($locale) {
+	return $locale !== 'tt_RU@iqtelif.UTF-8';
+}
+
 /* Prototype  : array list_system_locales( void )
  * Description: To get the currently installed locle in this platform 
  * Arguments  : Nil
@@ -38,8 +42,8 @@ function list_system_locales() {
 
   $system_locales = explode("\n", $all_locales);
 
-  // return all the locale found in the system
-  return $system_locales;
+  // return all the locale found in the system, except for broken one
+  return array_filter($system_locales, 'good_locale');
 }
 
 // gather all the locales installed in the system
