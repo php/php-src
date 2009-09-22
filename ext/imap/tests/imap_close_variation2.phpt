@@ -118,7 +118,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 --EXPECTF--
 *** Testing imap_close() : usage variations ***
 Create a temporary mailbox and add 3 msgs
-.. mailbox '{localhost/norsh}INBOX.phpttest' created
+.. mailbox '{%s}%s' created
 
 -- Iteration 1 --
 bool(true)
