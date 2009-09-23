@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   (Linus Nielsen Feltzing <linus@haxx.se>)
   
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
+- Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
+  cannot be set"). (Felipe)
 
 
 ?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
