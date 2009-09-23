@@ -121,10 +121,8 @@ array(1) {
 array(6) {
   [u"a"]=>
   unicode(3) "a"
-  [u"aaaa
-"]=>
-  unicode(5) "aaaa
-"
+  [u"aaaa"]=>
+  unicode(5) "aaaa"
   [u"b"]=>
   unicode(1) "b"
   [u"b	bbb"]=>
@@ -163,13 +161,11 @@ This is a double quoted string"]=>
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"hello
- world	
+  [u"hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"

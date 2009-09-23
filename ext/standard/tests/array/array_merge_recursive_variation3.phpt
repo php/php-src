@@ -242,8 +242,7 @@ array(4) {
   [0]=>
   unicode(3) "a"
   [1]=>
-  unicode(5) "aaaa
-"
+  unicode(5) "aaaa"
   [2]=>
   unicode(1) "b"
   [3]=>
@@ -254,8 +253,7 @@ array(8) {
   [0]=>
   unicode(3) "a"
   [1]=>
-  unicode(5) "aaaa
-"
+  unicode(5) "aaaa"
   [2]=>
   unicode(1) "b"
   [3]=>
@@ -326,8 +324,7 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   [u"h3"]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -343,8 +340,7 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   [u"h3"]=>
-  unicode(88) "hello
- world	
+  unicode(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
