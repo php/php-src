@@ -2191,7 +2191,7 @@ PHP_FUNCTION(curl_getinfo)
 		char   *s_code;
 		long    l_code;
 		double  d_code;
-#if LIBCURL_VERSION_NUM >  0x071202
+#if LIBCURL_VERSION_NUM >  0x071301
 		struct curl_certinfo *ci = NULL;
 		zval *listcode;
 #endif
