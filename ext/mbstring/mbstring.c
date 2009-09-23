@@ -2665,10 +2665,6 @@ PHP_FUNCTION(mb_strcut)
 		RETURN_FALSE;
 	}
 
-	if (((unsigned int)from + (unsigned int)len) > string.len) {
-		len = string.len - from;
-	}
-
 	ret = mbfl_strcut(&string, &result, from, len);
 	if (ret == NULL) {
 		RETURN_FALSE;
