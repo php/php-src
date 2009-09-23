@@ -380,7 +380,6 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	zval tmp_member;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd;
-	zend_object_handlers *std_hnd;
 	int ret;
 
 	if (member->type != IS_STRING) {
