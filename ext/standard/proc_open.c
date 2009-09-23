@@ -477,7 +477,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	zval **ppcommand, **ppcwd = NULL;
-	zval *command_with_args;
+	zval **command_with_args;
 	char *command, *cwd=NULL;
 	int command_len, cwd_len = 0;
 	zval *descriptorspec;
@@ -521,7 +521,7 @@ PHP_FUNCTION(proc_open)
 	php_stream_context *context = FG(default_context);
 	zend_uchar binary_pipes = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zaz|Z!a!a!", &command_with_args, &descriptorspec, &pipes, &ppcwd, &environment, &other_options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zaz|Z!a!a!", &command_with_args, &descriptorspec, &pipes, &ppcwd, &environment, &other_options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -562,17 +562,17 @@ PHP_FUNCTION(proc_open)
 	if (bypass_shell) {
 		zval **item;
 		
-		if (Z_TYPE_P(command_with_args) != IS_ARRAY) {
+		if (Z_TYPE_PP(command_with_args) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter must be array when bypass_shell is on");
 			RETURN_FALSE;
 		}
-		if (zend_hash_num_elements(Z_ARRVAL_P(command_with_args)) < 1) {
+		if (zend_hash_num_elements(Z_ARRVAL_PP(command_with_args)) < 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "arguments array must have at least one element");
 			RETURN_FALSE;
 		}
 		
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(command_with_args), &pos);
-		if (zend_hash_get_current_data_ex(Z_ARRVAL_P(command_with_args), (void **)&item, &pos) == SUCCESS) {
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(command_with_args), &pos);
+		if (zend_hash_get_current_data_ex(Z_ARRVAL_PP(command_with_args), (void **)&item, &pos) == SUCCESS) {
 			if (Z_TYPE_PP(item) == IS_STRING || Z_TYPE_PP(item) == IS_UNICODE) {
 				ppcommand = item;
 			} else {
@@ -585,12 +585,12 @@ PHP_FUNCTION(proc_open)
 		}
 	} else {
 #endif
-		if (Z_TYPE_P(command_with_args) != IS_STRING && Z_TYPE_P(command_with_args) != IS_UNICODE) {
+		if (Z_TYPE_PP(command_with_args) != IS_STRING && Z_TYPE_PP(command_with_args) != IS_UNICODE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s() expects parameter 1 to be string, %s given", get_active_function_name(TSRMLS_C),
-				zend_zval_type_name(command_with_args));
+				zend_zval_type_name(*command_with_args));
 			RETURN_FALSE;
 		}
-		ppcommand = &command_with_args;
+		ppcommand = command_with_args;
 		/* command_len will be set below */
 #if !defined(PHP_WIN32) && !defined(NETWARE)
 	}
@@ -602,7 +602,7 @@ PHP_FUNCTION(proc_open)
 
 #if !defined(PHP_WIN32) && !defined(NETWARE)
 	if (bypass_shell) {
-		child_argv = _php_array_to_argv(command_with_args, is_persistent);
+		child_argv = _php_array_to_argv(*command_with_args, is_persistent);
 	}
 #endif
 
