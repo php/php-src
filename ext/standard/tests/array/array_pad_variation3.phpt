@@ -718,22 +718,18 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(25) "Hello	 world!! 
-string
+  unicode(25) "Hello	 world!! string
 "
   [3]=>
-  unicode(25) "Hello	 world!! 
-string
+  unicode(25) "Hello	 world!! string
 "
 }
 array(4) {
   [0]=>
-  unicode(25) "Hello	 world!! 
-string
+  unicode(25) "Hello	 world!! string
 "
   [1]=>
-  unicode(25) "Hello	 world!! 
-string
+  unicode(25) "Hello	 world!! string
 "
   [2]=>
   int(1)

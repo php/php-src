@@ -75,8 +75,7 @@ array(12) {
   [5]=>
   unicode(1) ""
   [6]=>
-  unicode(1) "
-"
+  unicode(1) ""
   [7]=>
   unicode(2) "\a"
   [8]=>
@@ -105,8 +104,7 @@ array(12) {
   [5]=>
   unicode(1) ""
   [6]=>
-  unicode(1) "
-"
+  unicode(1) ""
   [7]=>
   unicode(2) "\a"
   [8]=>
@@ -135,8 +133,7 @@ array(12) {
   [5]=>
   unicode(1) ""
   [6]=>
-  unicode(1) "
-"
+  unicode(1) ""
   [7]=>
   unicode(2) "\a"
   [8]=>
