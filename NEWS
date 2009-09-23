@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 5.2.12
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
 - Fixed bug #49578 (make install-pear fails). (Hannes)
+- Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
+  cannot be set"). (Felipe)
 
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.

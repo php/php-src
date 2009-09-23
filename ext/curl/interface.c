@@ -1361,7 +1361,8 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 			convert_to_long_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
-			if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
+				((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when in safe_mode or an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
