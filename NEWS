@@ -3,8 +3,12 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 5.2.12
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
 - Fixed bug #49578 (make install-pear fails). (Hannes)
+- Fixed bug #49536 (mb_detect_encoding() returns incorrect results when
+  mbstring.strict_mode is turned on). (Moriyoshi)
 - Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
   cannot be set"). (Felipe)
+- Fixed bug #49528 (UTF-16 strings prefixed by BOMs wrondly converted).
+  (Moriyoshi)
 
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.
