@@ -2375,7 +2375,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	struct zip *intern;
 
 	zval *this = getThis();
-	zval *zval_files = NULL;
+	zval **zval_files = NULL;
 	zval **zval_file = NULL;
 	php_stream_statbuf ssb;
 	zval **pathto_zval;
@@ -2391,7 +2391,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|z", &pathto_zval, &zval_files) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|Z", &pathto_zval, &zval_files) == FAILURE) {
 		return;
 	}
 
@@ -2411,16 +2411,16 @@ static ZIPARCHIVE_METHOD(extractTo)
 	}
 
 	ZIP_FROM_OBJECT(intern, this);
-	if (zval_files && (Z_TYPE_P(zval_files) != IS_NULL)) {
-		switch (Z_TYPE_P(zval_files)) {
+	if (zval_files && (Z_TYPE_PP(zval_files) != IS_NULL)) {
+		switch (Z_TYPE_PP(zval_files)) {
 			case IS_UNICODE:
-				if (FAILURE == php_stream_path_param_encode(&zval_files, &file, &file_len, REPORT_ERRORS, FG(default_context))) {
+				if (FAILURE == php_stream_path_param_encode(zval_files, &file, &file_len, REPORT_ERRORS, FG(default_context))) {
 					RETURN_FALSE;
 				}
 			case IS_STRING:
-				if (Z_TYPE_P(zval_files) != IS_UNICODE) {
-					file_len = Z_STRLEN_P(zval_files);
-					file = Z_STRVAL_P(zval_files);
+				if (Z_TYPE_PP(zval_files) != IS_UNICODE) {
+					file_len = Z_STRLEN_PP(zval_files);
+					file = Z_STRVAL_PP(zval_files);
 				}
 				if (file_len < 1) {
 					efree(file);
@@ -2428,19 +2428,19 @@ static ZIPARCHIVE_METHOD(extractTo)
 					RETURN_FALSE;
 				}
 
-				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_files), Z_STRLEN_P(zval_files) TSRMLS_CC)) {
+				if (!php_zip_extract_file(intern, pathto, Z_STRVAL_PP(zval_files), Z_STRLEN_PP(zval_files) TSRMLS_CC)) {
 					efree(file);
 					RETURN_FALSE;
 				}
 				break;
 
 			case IS_ARRAY:
-				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
+				nelems = zend_hash_num_elements(Z_ARRVAL_PP(zval_files));
 				if (nelems == 0 ) {
 					RETURN_FALSE;
 				}
 				for (i = 0; i < nelems; i++) {
-					if (zend_hash_index_find(Z_ARRVAL_P(zval_files), i, (void **) &zval_file) == SUCCESS) {
+					if (zend_hash_index_find(Z_ARRVAL_PP(zval_files), i, (void **) &zval_file) == SUCCESS) {
 						switch (Z_TYPE_PP(zval_file)) {
 							case IS_LONG:
 								break;
@@ -2449,7 +2449,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 									RETURN_FALSE;
 								}
 							case IS_STRING:
-								if (Z_TYPE_P(zval_files) != IS_UNICODE) {
+								if (Z_TYPE_PP(zval_files) != IS_UNICODE) {
 									file_len = Z_STRLEN_PP(zval_file);
 									file = Z_STRVAL_PP(zval_file);
 								}

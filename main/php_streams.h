@@ -414,7 +414,6 @@ END_EXTERN_C()
 static inline int _php_stream_path_param_encode(zval **ppzval, char **ppath, int *ppath_len, int options, php_stream_context *context TSRMLS_DC)
 {
 	if (Z_TYPE_PP(ppzval) == IS_UNICODE) {
-		zval *zpath;
 		char *path;
 		int path_len;
 
@@ -422,35 +421,16 @@ static inline int _php_stream_path_param_encode(zval **ppzval, char **ppath, int
 		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, Z_USTRVAL_PP(ppzval), Z_USTRLEN_PP(ppzval), options, context)) {
 			return FAILURE;
 		}
-		Z_ADDREF_PP(ppzval); /* the conversion removes a refcount */
-		MAKE_STD_ZVAL(zpath);
-		ZVAL_STRINGL(zpath, path, path_len, 0);
-		Z_UNSET_ISREF_P(zpath);
-		Z_SET_REFCOUNT_P(zpath, 1);
-
-		/* Replace the param stack with the new zval */
-		zval_ptr_dtor(ppzval);
-		*ppzval = zpath;
-	} else if (Z_TYPE_PP(ppzval) != IS_STRING) {
-		if (Z_ISREF_PP(ppzval) ||
-			Z_REFCOUNT_PP(ppzval) > 1) {
-			zval *zpath;
-
-			/* Produce a new zval of type string */
-			MAKE_STD_ZVAL(zpath);
-			*zpath = **ppzval;
-			zval_copy_ctor(zpath);
-			convert_to_string(zpath);
-			Z_UNSET_ISREF_P(zpath);
-			Z_SET_REFCOUNT_P(zpath, 1);
-
-			/* Replace the param stack with it */
-			zval_ptr_dtor(ppzval);
-			*ppzval = zpath;
+		if (Z_ISREF_PP(ppzval) || Z_REFCOUNT_PP(ppzval) == 1) {
+			zval_dtor(*ppzval);
+			ZVAL_STRINGL(*ppzval, path, path_len, 0);
 		} else {
-			/* Convert the value on the param stack directly */
-			convert_to_string(*ppzval);
+			zval_ptr_dtor(ppzval);
+			MAKE_STD_ZVAL(*ppzval);
+			ZVAL_STRINGL(*ppzval, path, path_len, 0);
 		}
+	} else if (Z_TYPE_PP(ppzval) != IS_STRING) {
+		convert_to_string_ex(ppzval);
 	}
 
 	/* Populate convenience params if requested */
