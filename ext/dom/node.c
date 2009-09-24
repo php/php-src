@@ -1730,7 +1730,7 @@ PHP_FUNCTION(dom_node_get_feature)
 }
 /* }}} end dom_node_get_feature */
 
-/* {{{ proto DomUserData dom_node_set_user_data(string key, DomUserData data, userdatahandler handler);
+/* {{{ proto mixed dom_node_set_user_data(string key, mixed data, userdatahandler handler);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
 Since: DOM Level 3
 */
@@ -1740,7 +1740,7 @@ PHP_FUNCTION(dom_node_set_user_data)
 }
 /* }}} end dom_node_set_user_data */
 
-/* {{{ proto DomUserData dom_node_get_user_data(string key);
+/* {{{ proto mixed dom_node_get_user_data(string key);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
 Since: DOM Level 3
 */
