@@ -860,6 +860,7 @@ PHP_FUNCTION(tempnam)
 		RETVAL_STRING(opened_path, 0);
 	}
 	efree(p);
+	RETURN_FALSE;
 }
 /* }}} */
 
