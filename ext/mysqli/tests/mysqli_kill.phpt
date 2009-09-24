@@ -52,7 +52,7 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[009] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_kill($link, -1);
@@ -64,7 +64,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 	mysqli_close($link);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[011] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	mysqli_change_user($link, "This might work if you accept anonymous users in your setup", "password", $db);      mysqli_kill($link, -1);

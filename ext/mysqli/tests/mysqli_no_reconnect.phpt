@@ -13,7 +13,7 @@ mysqli.reconnect=0
 	require_once("connect.inc");
 	require_once("table.inc");
 
-	if (!$link2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot create second database connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 
@@ -73,7 +73,7 @@ mysqli.reconnect=0
 		printf("[011] Executing a query should not be possible, connection should be closed, [%d] %s\n",
 			mysqli_errno($link), mysqli_error($link));
 
-	if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[012] Cannot create database connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 

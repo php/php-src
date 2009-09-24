@@ -7,7 +7,7 @@ mysqli->autocommit()
 	require_once('skipifconnectfailure.inc');
 	require_once('connect.inc');
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 		exit(1);
@@ -31,7 +31,7 @@ mysqli->autocommit()
 <?php
 	include "connect.inc";
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}

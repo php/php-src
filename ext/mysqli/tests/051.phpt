@@ -1,8 +1,8 @@
 --TEST--
 free statement after close
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -12,7 +12,7 @@ require_once('skipifconnectfailure.inc');
 	/************************
 	 * free statement after close
 	 ************************/
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$stmt1 = mysqli_prepare($link, "SELECT CURRENT_USER()");
 	mysqli_execute($stmt1);

@@ -2,7 +2,7 @@
 mysqli_change_user()
 --SKIPIF--
 <?php
-require_once('skipif.inc'); 
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -28,7 +28,7 @@ require_once('skipifconnectfailure.inc');
 	if (!is_null($tmp = @mysqli_change_user($link, $link, $link, $link, $link)))
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

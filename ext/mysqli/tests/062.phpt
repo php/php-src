@@ -9,7 +9,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$mysql->real_query("SELECT 'foo' FROM DUAL");
 

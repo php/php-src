@@ -15,7 +15,7 @@ if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1)) {
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	$cs = array();
 	$cs[] = $mysql->set_charset("latin1");

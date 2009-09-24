@@ -15,7 +15,7 @@ mysqli.reconnect=1
 	require_once("connect.inc");
 	require_once("table.inc");
 
-	if (!$link2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot create second database connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 

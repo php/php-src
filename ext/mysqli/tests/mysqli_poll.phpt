@@ -17,7 +17,7 @@ if (!$IS_MYSQLND)
 	function get_connection() {
 		global $host, $user, $passwd, $db, $port, $socket;
 
-		if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		return $link;
 	}

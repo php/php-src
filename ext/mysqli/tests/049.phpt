@@ -11,7 +11,7 @@ require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$mysql = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$mysql = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$mysql->select_db($db);
 	$result = $mysql->query("SELECT DATABASE()");
@@ -19,6 +19,8 @@ require_once('skipifconnectfailure.inc');
 	$result->close();
 
 	var_dump($row);
+	if ($row[0] != $db)
+		printf("[001] Expecting '%s' got '%s'\n", $db, $row[0]);
 
 	$mysql->close();
 	print "done!";

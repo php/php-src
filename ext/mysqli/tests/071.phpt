@@ -1,8 +1,8 @@
 --TEST--
 mysqli thread_id & kill
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	var_dump($mysql->ping());
 
@@ -20,7 +20,7 @@ require_once('skipifconnectfailure.inc');
 
 	$mysql->close();
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	var_dump(mysqli_ping($mysql));
 
