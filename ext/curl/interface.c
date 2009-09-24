@@ -767,6 +767,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_SSH);
 #endif
 
+#if LIBCURL_VERSION_NUM > 0x071301
+	REGISTER_CURL_CONSTANT(CURLOPT_POSTREDIR);
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x071304
 	REGISTER_CURL_CONSTANT(CURLOPT_REDIR_PROTOCOLS);
 	REGISTER_CURL_CONSTANT(CURLOPT_PROTOCOLS);
@@ -1685,6 +1689,12 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			}
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
+#if LIBCURL_VERSION_NUM > 0x071301
+		case CURLOPT_POSTREDIR:
+			convert_to_long_ex(zvalue);
+			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_PP(zvalue) & CURL_REDIR_POST_ALL);
+			break;
+#endif
 		case CURLOPT_PRIVATE:
 		case CURLOPT_URL:
 		case CURLOPT_PROXY:
