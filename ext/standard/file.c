@@ -977,6 +977,7 @@ PHP_FUNCTION(tempnam)
 		efree(opened_path);
 	}
 	efree(p);
+	RETURN_FALSE;
 }
 /* }}} */
 
