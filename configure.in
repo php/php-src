@@ -994,6 +994,7 @@ case $php_build_target in
 esac
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
+EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 
 dnl this has to be here to prevent the openssl crypt() from
 dnl overriding the system provided crypt().
