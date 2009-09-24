@@ -11,11 +11,11 @@ require_once('skipifconnectfailure.inc');
 	require('connect.inc');
 	require('table.inc');
 
-	$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysqli_result = $mysqli->query('SELECT * FROM test');
 	$row = $mysqli_result->fetch_row();
 
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	$res = mysqli_query($link, 'SELECT * FROM test');
 	assert(mysqli_fetch_row($res) === $row);
 

@@ -69,7 +69,7 @@ require_once('skipifconnectfailure.inc');
 
 	try {
 
-		if ($link = mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+		if ($link = my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
 			printf("[010] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
 				$host, $user . 'unknown_really', $db, $port, $socket);
 		mysqli_close($link);
@@ -82,7 +82,7 @@ require_once('skipifconnectfailure.inc');
 		if (!$link = mysqli_init())
 			printf("[012] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-		if ($link = mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+		if ($link = my_mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
 			printf("[013] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
 				$host, $user . 'unknown_really', $db, $port, $socket);
 		mysqli_close($link);

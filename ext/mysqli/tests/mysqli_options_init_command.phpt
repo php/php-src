@@ -12,7 +12,7 @@ require_once('skipifconnectfailure.inc');
 	/* see mysqli.c for details */
 	include "connect.inc";
 
-	if (!($link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
+	if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -37,7 +37,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== mysqli_options($link, MYSQLI_INIT_COMMAND, "INSERT INTO test(id) VALUES (2)"))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
 		printf("[005] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -62,7 +62,7 @@ require_once('skipifconnectfailure.inc');
 	if (true !== mysqli_options($link, MYSQLI_INIT_COMMAND, "INSERT INTO test(i_do_no_exist) VALUES (2)"))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
 		printf("[010] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

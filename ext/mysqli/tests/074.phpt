@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 
 	include "connect.inc";
 
-	$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 	var_dump($mysqli->autocommit(false));
 	$result = $mysqli->query("SELECT @@autocommit");

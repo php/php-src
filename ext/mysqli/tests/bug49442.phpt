@@ -14,7 +14,7 @@ mysqli.max_persistent=1
 	include ("connect.inc");
 
 	$link = mysqli_init();
-	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 
@@ -63,7 +63,7 @@ mysqli.max_persistent=1
 			pconnect or mysql_init() - so we should test pconnect as well..
 		*/
 		$host = 'p:' . $host;
-		if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+		if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 			printf("[007] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		}
 

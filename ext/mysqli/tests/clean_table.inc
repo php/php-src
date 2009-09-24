@@ -1,7 +1,7 @@
 <?PHP
 require_once('connect.inc');
 
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket);
 }
