@@ -1018,6 +1018,7 @@ PHP_FUNCTION(popen)
 	}
 
 	efree(p);
+	RETURN_FALSE;
 }
 /* }}} */
 
