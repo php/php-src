@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	$errno = mysqli_errno($link);
 	var_dump($errno);
 

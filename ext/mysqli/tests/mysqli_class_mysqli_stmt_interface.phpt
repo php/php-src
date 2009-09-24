@@ -11,7 +11,7 @@ Interface of the class mysqli_stmt
 	require('connect.inc');
 	require('table.inc');
 
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	$stmt = new mysqli_stmt($link);
 
 	printf("Parent class:\n");

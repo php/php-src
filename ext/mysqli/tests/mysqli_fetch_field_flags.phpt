@@ -7,7 +7,7 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50041)
@@ -101,7 +101,7 @@ mysqli_close($link);
 		return array($expected_flags, $unexpected_flags, $found_flags);
 	}
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	foreach ($columns as $column_def => $expected_flags) {

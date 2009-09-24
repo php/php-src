@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die(sprintf("skip [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
@@ -25,7 +25,7 @@ if ($version[0] <= 4 && $version[1] < 1)
 <?php
 	require_once('connect.inc');
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'latin%'"))

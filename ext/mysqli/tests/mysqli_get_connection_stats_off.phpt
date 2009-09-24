@@ -17,7 +17,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	// connect and table inc connect to mysql and create tables
 	require_once('connect.inc');
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}
@@ -28,7 +28,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	}
 
 	mysqli_close($link);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}

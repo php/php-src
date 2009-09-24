@@ -85,7 +85,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 
 	/* mysqli_stmt_execute() = mysql_stmt_execute cannot be tested from PHP */
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[008] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	$stmt = mysqli_stmt_init($link);
 	mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
@@ -105,7 +105,7 @@ require_once('skipifconnectfailure.inc');
 	// Check
 	mysqli_report(MYSQLI_REPORT_OFF);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[010] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	$stmt = mysqli_stmt_init($link);
 	mysqli_stmt_prepare($stmt, "FOO");
@@ -118,7 +118,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[011] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	$stmt = mysqli_stmt_init($link);
 	mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
@@ -139,8 +139,8 @@ require_once('skipifconnectfailure.inc');
 			already tested
 
 	php_mysqli_throw_sql_exception() ->
-		mysqli_real_connect()
-		mysqli_connect()
+		my_mysqli_real_connect()
+		my_mysqli_connect()
 
 	can't be tested: mysqli_query() via mysql_use_result()/mysql_store_result()
 	*/
@@ -149,7 +149,7 @@ require_once('skipifconnectfailure.inc');
 
 	try {
 
-		if ($link = mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+		if ($link = my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
 			printf("[012] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
 				$host, $user . 'unknown_really', $db, $port, $socket);
 		mysqli_close($link);
@@ -162,7 +162,7 @@ require_once('skipifconnectfailure.inc');
 		if (!$link = mysqli_init())
 			printf("[014] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-		if ($link = mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
+		if ($link = my_mysqli_real_connect($link, $host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket))
 			printf("[015] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",
 				$host, $user . 'unknown_really', $db, $port, $socket);
 		mysqli_close($link);
@@ -191,7 +191,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_report(MYSQLI_REPORT_OFF);
 	mysqli_report(MYSQLI_REPORT_INDEX);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[017] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	// this might cause a warning - no index used
@@ -235,7 +235,7 @@ require_once('skipifconnectfailure.inc');
 	// mysqli_use_result(), mysqli_thread_safe(), mysqli_thread_id()
 	mysqli_report(MYSQLI_REPORT_OFF);
 	mysqli_close($link);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[024] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!$stmt = mysqli_stmt_init($link))

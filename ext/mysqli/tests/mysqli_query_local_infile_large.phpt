@@ -32,7 +32,7 @@ mysqli.allow_local_infile=1
 	printf("Filesize in bytes: %d\nRows: %d\n", $bytes, $rowno);
 
 	include "connect.inc";
- 	if (!($link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
+ 	if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 		printf("[002] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
@@ -73,7 +73,7 @@ if (file_exists($file))
 	unlink($file);
 
 include "connect.inc";
-if (!($link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
+if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 	printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))

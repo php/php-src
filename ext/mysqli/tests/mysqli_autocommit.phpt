@@ -7,7 +7,7 @@ mysqli_autocommit()
 	require_once('connect.inc');
 	require_once('skipifconnectfailure.inc');
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		die(sprintf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket));
 	}
@@ -40,7 +40,7 @@ mysqli_autocommit()
 	if (!is_null($tmp = @mysqli_autocommit($link, $link, $link)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}

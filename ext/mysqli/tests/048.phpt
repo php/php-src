@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$mysql = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$mysql = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$mysql->select_db($db);
 	$mysql->query("DROP TABLE IF EXISTS test_fetch_null");
@@ -43,7 +43,7 @@ require_once('skipifconnectfailure.inc');
 --CLEAN--
 <?php
 include "connect.inc";
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test_fetch_null"))

@@ -16,6 +16,7 @@
 	$engine    = getenv("MYSQL_TEST_ENGINE")   ? getenv("MYSQL_TEST_ENGINE") : "MyISAM";
 	$socket    = getenv("MYSQL_TEST_SOCKET")   ? getenv("MYSQL_TEST_SOCKET") : null;
 	$skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ? getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") : true;
+	$test_compress = getenv("MYSQL_TEST_COMPRESS") ? (boolean)getenv("MYSQL_TEST_COMPRESS") : false;
 
 	/* Development setting: test experimal features and/or feature requests that never worked before? */
 	$TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
@@ -69,6 +70,57 @@
 				return $temp_dir;
 			}
 			return FALSE;
+		}
+	}
+
+	/**
+	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+	*
+	* @param compress mixed: -1 => use global default, false -> no compression, true -> compression
+	*/
+	function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $compress = -1) {
+		global $test_compress;
+
+		if (-1 == $compress)
+			$compress = $test_compress;
+
+		if ($compress) {
+			$link = mysqli_init();
+			mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, 0 & MYSQLI_CLIENT_COMPRESS);
+		} else {
+			$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+		}
+
+		return $link;
+	}
+
+	/**
+	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+	*
+	* @param compress mixed: -1 => use global default, false -> no compression, true -> compression
+	*/
+	function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $compress = -1) {
+		global $test_compress;
+
+		if (-1 == $compress)
+			$compress = $test_compress;
+
+		return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags & MYSQLI_CLIENT_COMPRESS);
+	}
+
+	class my_mysqli extends mysqli {
+		public function __construct($host, $user, $passwd, $db, $port, $socket, $compress = -1) {
+			global $test_compress;
+
+			if (-1 == $compress)
+				$compress = $test_compress;
+
+			if ($compress) {
+				parent::init();
+				$this->real_connect($host, $user, $passwd, $db, $port, $socket, 0 & MYSQLI_CLIENT_COMPRESS);
+			} else {
+				parent::__construct($host, $user, $passwd, $db, $port, $socket);
+			}
 		}
 	}
 ?>

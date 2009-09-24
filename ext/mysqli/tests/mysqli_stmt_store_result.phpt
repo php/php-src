@@ -42,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 		!mysqli_stmt_execute($stmt))
 		printf("[008] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-	if (!$link_buf = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link_buf = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[009] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!$stmt_buf = mysqli_stmt_init($link_buf))

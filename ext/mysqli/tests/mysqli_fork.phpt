@@ -13,7 +13,7 @@ if (!function_exists('posix_getpid'))
 	die("skip POSIX functions not available");
 
 require_once('connect.inc');
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf("skip Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket));
 }
@@ -68,7 +68,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 			gettype($errno), $errno, gettype($error), $error);
 
 	mysqli_close($link);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[005] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -97,7 +97,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 
 		case 0:
 			/* child */
-			if (!($plink = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) || !mysqli_autocommit($plink, true))
+			if (!($plink = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) || !mysqli_autocommit($plink, true))
 				exit(mysqli_errno($plink));
 
 			$sql = sprintf("INSERT INTO messages(pid, sender, msg) VALUES (%d, 'child', '%%s')", posix_getpid());
@@ -141,7 +141,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 
 		default:
 			/* parent */
-			if (!$plink = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+			if (!$plink = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 					printf("[010] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 					$host, $user, $db, $port, $socket);
 
@@ -221,7 +221,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 	mysqli_free_result($res);
 	mysqli_close($link);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[018] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -237,7 +237,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 --CLEAN--
 <?php
 include "connect.inc";
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))

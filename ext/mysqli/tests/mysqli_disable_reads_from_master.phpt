@@ -23,7 +23,7 @@ if (!function_exists('mysqli_disable_reads_from_master')) {
 	if (NULL !== ($tmp = @mysqli_disable_reads_from_master($link)))
 		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}

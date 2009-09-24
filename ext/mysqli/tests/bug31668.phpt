@@ -11,7 +11,7 @@ error_reporting = E_ALL & ~E_STRICT
 <?php
 	include "connect.inc";
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->multi_query('SELECT 1;SELECT 2');
 	do {
 		$res = $mysql->store_result();
@@ -25,7 +25,7 @@ error_reporting = E_ALL & ~E_STRICT
 	var_dump($mysql->error, __LINE__);
 	$mysql->close();
 
-	$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->multi_query('SELECT 1;SELECT 2');
 	do {
 		$res = $mysql->store_result();
