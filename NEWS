@@ -12,8 +12,6 @@ PHP                                                                        NEWS
   of a multibyte character). (Moriyoshi)
 - Fixed bug #49528 (UTF-16 strings prefixed by BOMs wrondly converted).
   (Moriyoshi)
-- Fixed bug #49571 (CURLOPT_POSTREDIR not implemented).
-  (Sriram Natarajan)
 
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.
