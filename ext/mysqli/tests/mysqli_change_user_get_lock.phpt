@@ -70,7 +70,7 @@ sleep(5);
 
 	/* Ok, let's try a NEW connection and a NEW lock! */
 	mysqli_close($link);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[010] Cannot open new connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 

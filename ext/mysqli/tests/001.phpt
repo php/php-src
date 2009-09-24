@@ -1,8 +1,8 @@
 --TEST--
 mysqli connect
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -13,25 +13,25 @@ require_once('skipifconnectfailure.inc');
 	$test = "";
 
 	/*** test mysqli_connect localhost:port ***/
-	$link = mysqli_connect($host, $user, $passwd, "", $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, "", $port, $socket);
 	$test .= ($link) ? "1" : "0";
 	mysqli_close($link);
 
 	/*** test mysqli_real_connect ***/
 	$link = mysqli_init();
-	$test.= (mysqli_real_connect($link, $host, $user, $passwd, "", $port, $socket) )
+	$test.= (my_mysqli_real_connect($link, $host, $user, $passwd, "", $port, $socket) )
 		? "1" : "0";
 	mysqli_close($link);
 
 	/*** test mysqli_real_connect with db ***/
 	$link = mysqli_init();
-	$test .= (mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+	$test .= (my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
 		? "1" : "0";
 	mysqli_close($link);
 
 	/*** test mysqli_real_connect with port ***/
 	$link = mysqli_init();
-	$test .= (mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+	$test .= (my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
 		? "1":"0";
 	mysqli_close($link);
 
@@ -40,7 +40,7 @@ require_once('skipifconnectfailure.inc');
 		if (!$link = mysqli_init())
 			printf("[001 + %d] mysqli_init() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
 
-		if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
+		if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket))
 			printf("[002 + %d] mysqli_real_connect() failed, [%d] %s\n", $i, mysqli_connect_errno(), mysqli_connect_error());
 
 		mysqli_close($link);
@@ -49,7 +49,7 @@ require_once('skipifconnectfailure.inc');
 	/*** test mysqli_real_connect compressed ***/
 	/*
 	$link = mysqli_init();
-	$test .= (mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_COMPRESS))
+	$test .= (my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, MYSQLI_CLIENT_COMPRESS))
 		? "1" : "0";
 	mysqli_close($link);
   */

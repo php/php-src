@@ -5,7 +5,7 @@ mysqli autocommit/commit/rollback
 	require_once('skipif.inc');
 	require_once('skipifconnectfailure.inc');
 	include "connect.inc";
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	if (!$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'")) {
 		die("skip Cannot check for required InnoDB suppot");
 	}
@@ -22,7 +22,7 @@ mysqli autocommit/commit/rollback
 --FILE--
 <?php
 	include "connect.inc";
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	if (!mysqli_autocommit($link, TRUE))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

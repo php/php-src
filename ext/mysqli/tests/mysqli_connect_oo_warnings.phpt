@@ -28,12 +28,12 @@ new mysqli()
 	var_dump(mysqli_connect_errno());
 
 	print "3) bail\n";
-	if (false !== ($link = mysqli_connect($myhost))) {
+	if (false !== ($link = my_mysqli_connect($myhost))) {
 		printf("[003] Expecting boolean/false, got %s/%s\n", gettype($link), $link);
 	}
 
 	print "4) be quiet\n";
-	if (false !== ($link = @mysqli_connect($myhost))) {
+	if (false !== ($link = @my_mysqli_connect($myhost))) {
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($link), $link);
 	}
 	var_dump(mysqli_connect_error());
@@ -50,7 +50,7 @@ Warning: mysqli::mysqli(): (HY000/200%d): %s
 int(200%d)
 3) bail
 
-Warning: mysqli_connect(): (HY000/200%d): %s
+Warning: my_mysqli_connect(): (HY000/200%d): %s
 4) be quiet
 %s(%d) "%s"
 int(200%d)

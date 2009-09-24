@@ -14,7 +14,7 @@ mysqlnd.net_read_timeout=0
 <?php
 	include ("connect.inc");
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 

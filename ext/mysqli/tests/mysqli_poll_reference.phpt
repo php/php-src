@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 if (!$IS_MYSQLND)
 	die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
 
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die("skip cannot connect");
 
 if (mysqli_server_version($link) < 50012)
@@ -24,7 +24,7 @@ if (mysqli_server_version($link) < 50012)
 	function get_connection() {
 		global $host, $user, $passwd, $db, $port, $socket;
 
-		if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		return $link;
 	}

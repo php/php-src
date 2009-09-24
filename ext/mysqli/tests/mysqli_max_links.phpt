@@ -20,7 +20,7 @@ mysqli.max_links=1
 
 	$links = array();
 	for ($i = 1; $i <= 5; $i++)
-		if ($links[$i] = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		if ($links[$i] = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[%03d] One link is already open, it should not be possible to open more, [%d] %s, [%d] %s\n",
 				$i, mysqli_connect_errno(), mysqli_connect_error(),
 				mysqli_errno($links[$i]), mysqli_error($links[$i]));

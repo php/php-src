@@ -1,8 +1,8 @@
 --TEST--
 mysqli_enable_reads_from_master()
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
@@ -23,7 +23,7 @@ if (!function_exists('mysqli_enable_reads_from_master')) {
 	if (NULL !== ($tmp = @mysqli_enable_reads_from_master($link)))
 		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}

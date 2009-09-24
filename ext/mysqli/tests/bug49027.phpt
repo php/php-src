@@ -14,7 +14,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[001] Cannot set INIT_COMMAND\n");
 	}
 
-	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
 		printf("[002] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 
@@ -32,7 +32,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[004] Cannot set INIT_COMMAND\n");
 	}
 
-	if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
 		printf("[005] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 

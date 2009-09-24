@@ -1,8 +1,8 @@
 --TEST--
 mysqli fetch system variables
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	if (!mysqli_query($link, "SET AUTOCOMMIT=0"))
 		printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

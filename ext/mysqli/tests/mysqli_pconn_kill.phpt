@@ -18,7 +18,7 @@ mysqli.max_persistent=2
 	require_once("table.inc");
 
 	$host = 'p:' . $host;
-	if (!$plink = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$plink = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -66,7 +66,7 @@ mysqli.max_persistent=2
 	// On PHP side this should do nothing. PHP should not try to close the connection or something.
 	@mysqli_close($plink);
 
-	if (!$plink = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$plink = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[011] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	if (!$res3 = @mysqli_query($plink, 'SELECT id FROM test ORDER BY id LIMIT 1')) {
@@ -79,7 +79,7 @@ mysqli.max_persistent=2
 
 	// remove the "p:<host>" from the host variable
 	$host = substr($host, 2);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[013] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	if (!$res4 = mysqli_query($link, 'SELECT id FROM test ORDER BY id LIMIT 1'))

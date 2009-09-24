@@ -25,7 +25,7 @@ if (!$TEST_EXPERIMENTAL)
 	if (!is_null($tmp = @mysqli_get_warnings('')))
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 	}
 
@@ -84,7 +84,7 @@ if (!$TEST_EXPERIMENTAL)
 	mysqli_close($link);
 
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[021] Cannot create mysqli object: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!$mysqli->query("DROP TABLE IF EXISTS t1"))
@@ -103,7 +103,7 @@ if (!$TEST_EXPERIMENTAL)
 		printf("[026] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	/* Yes, I really want to check if the object property is empty */
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[027] Cannot create mysqli object: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	$warning = new mysqli_warning($mysqli);
@@ -113,7 +113,7 @@ if (!$TEST_EXPERIMENTAL)
 	if ('' != ($tmp = $warning->message))
 		printf("[029] Expecting string/empty, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[030] Cannot create mysqli object: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!$mysqli->query("DROP TABLE IF EXISTS t1"))
@@ -145,7 +145,7 @@ if (!$TEST_EXPERIMENTAL)
 ?>
 <?php
 include "connect.inc";
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))

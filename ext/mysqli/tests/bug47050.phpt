@@ -12,7 +12,7 @@ if (!defined("MYSQLI_ASYNC")) {
 <?php
 	include ("connect.inc");
 
-	$link1 = mysqli_connect($host, $user, $passwd, null, $port, $socket);
+	$link1 = my_mysqli_connect($host, $user, $passwd, null, $port, $socket);
 	mysqli_select_db($link1, $db);
 
 	$link1->query("SELECT 'test'", MYSQLI_ASYNC);

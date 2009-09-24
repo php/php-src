@@ -12,14 +12,14 @@ class DbConnection {
 	public function connect() {
 		include "connect.inc";
 
-		$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+		$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 		var_dump($link);
 
 		$link = mysqli_init();
 		/* @ is to supress 'Property access is not allowed yet' */
 		@var_dump($link);
 
-		$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
+		$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 		$mysql->query("DROP TABLE IF EXISTS test_warnings");
 		$mysql->query("CREATE TABLE test_warnings (a int not null)");
 		$mysql->query("SET sql_mode=''");
@@ -36,7 +36,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 include "connect.inc";
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test_warnings"))
