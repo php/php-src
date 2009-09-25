@@ -21,7 +21,11 @@ require_once('skipifconnectfailure.inc');
 		$sql = substr($sql, 0, -2);
 		assert(strlen($sql) < $package_size);
 
-		if (!mysqli_query($link, $sql)) {
+		if (!@mysqli_query($link, $sql)) {
+			if (1153 == mysqli_errno($link) || stristr(mysqli_error($link), 'max_allowed_packet'))
+				/* [1153] Got a packet bigger than 'max_allowed_packet' bytes */
+				return false;
+
 			printf("[%03d + 1] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
@@ -72,6 +76,25 @@ require_once('skipifconnectfailure.inc');
 		return true;
 	}
 
+	function parse_memory_limit($limit) {
+
+		$val = trim($limit);
+		$last = strtolower($val[strlen($val)-1]);
+
+		switch($last) {
+				// The 'G' modifier is available since PHP 5.1.0
+				case 'g':
+					$val *= 1024;
+				case 'm':
+					$val *= 1024;
+				case 'k':
+					$val *= 1024;
+				default:
+					break;
+    	}
+			return $val;
+	}
+
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -82,11 +105,38 @@ require_once('skipifconnectfailure.inc');
 			!mysqli_query($link, sprintf("CREATE TABLE test(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, label VARCHAR(255)) ENGINE = %s", $engine)))
 		printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$package_size = 32768;
+	$package_size = 524288;
 	$offset = 3;
-	$limit = (0 < ini_get('memory_limit')) ? pow(2, 32) : ini_get('memory_limit');
-	while (($package_size < $limit) && mysqli_fetch_array_large($offset++, $link, $package_size))
+	$limit = (ini_get('memory_limit') > 0) ? parse_memory_limit(ini_get('memory_limit')) : pow(2, 32);
+
+	/* try to respect php.ini but make run time a soft limit */
+	$max_runtime = (ini_get('max_execution_time') > 0) ? ini_get('max_execution_time') : 30;
+	set_time_limit(0);
+
+	do {
+		if ($package_size > $limit) {
+			printf("stop: memory limit - %s vs. %s\n", $package_size, $limit);
+			break;
+		}
+
+		$start = microtime(true);
+		if (!mysqli_fetch_array_large($offset++, $link, $package_size)) {
+			printf("stop: packet size - %d\n", $package_size);
+			break;
+		}
+
+		$duration = microtime(true) - $start;
+		$max_runtime -= $duration;
+		if ($max_runtime < ($duration * 3)) {
+			/* likely the next iteration will not be within max_execution_time */
+			printf("stop: time limit - %2.2fs\n", $max_runtime);
+			break;
+		}
+
 		$package_size += $package_size;
+
+	} while (true);
+
 
 	mysqli_close($link);
 	print "done!";
@@ -96,5 +146,5 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-[%d + 1] [1153] Got a packet bigger than 'max_allowed_packet' bytes
+stop: %s
 done!
