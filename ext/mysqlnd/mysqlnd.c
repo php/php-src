@@ -508,8 +508,8 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
 
-	DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
 	if (conn && CONN_GET_STATE(conn) > CONN_ALLOCED && CONN_GET_STATE(conn) ) {
+		DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
 		DBG_INF("Connecting on a connected handle.");
 
 		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
