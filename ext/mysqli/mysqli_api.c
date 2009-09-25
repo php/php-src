@@ -2177,7 +2177,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	long	mode_in;
 	ulong	mode;
 	ulong	attr;
-	int		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode_in) == FAILURE) {
 		return;
