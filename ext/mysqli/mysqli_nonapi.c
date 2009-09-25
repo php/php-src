@@ -216,7 +216,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 								MyG(num_active_persistent) + MyG(num_inactive_persistent));
 		goto err;
 	}
-	if (!is_real_connect && !mysql->mysql) {
+	if (!mysql->mysql) {
 #if !defined(MYSQLI_USE_MYSQLND)
 		if (!(mysql->mysql = mysql_init(NULL))) {
 #else
