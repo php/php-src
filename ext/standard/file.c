@@ -964,6 +964,8 @@ PHP_FUNCTION(tempnam)
 	if (p_len > 64) {
 		p[63] = '\0';
 	}
+	
+	RETVAL_FALSE;
 
 	if ((fd = php_open_temporary_fd(dir, p, &opened_path TSRMLS_CC)) >= 0) {
 		UChar *utmpnam;
@@ -977,7 +979,6 @@ PHP_FUNCTION(tempnam)
 		efree(opened_path);
 	}
 	efree(p);
-	RETURN_FALSE;
 }
 /* }}} */
 
