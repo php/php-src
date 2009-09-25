@@ -12,7 +12,7 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 ?>
 ===DONE===
 --EXPECTF--
-array(20) {
+array(2%d) {
   [%u|b%"url"]=>
   string(0) ""
   [u"content_type"]=>
@@ -53,5 +53,6 @@ array(20) {
   float(%f)
   [u"redirect_time"]=>
   float(0)
+%A
 }
 ===DONE===
