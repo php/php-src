@@ -29,7 +29,7 @@ require_once('skipifconnectfailure.inc');
 	$link = @my_mysqli_connect($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket);
 	if (false !== $link)
 		printf("[004] Connect to the server should fail using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s, expecting boolean/false, got %s/%s\n",
-			$host, $user . 'unknown_really', $db, $port, $socket, gettype($link), $link);
+			$host, $user . 'unknown_really', $db, $port, $socket, gettype($link), var_export($link, true));
 
 	if (0 === ($tmp = mysqli_connect_errno()))
 		printf("[005] Expecting integer/any non-zero, got %s/%s\n", gettype($tmp), $tmp);
