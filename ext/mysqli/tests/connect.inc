@@ -16,7 +16,7 @@
 	$engine    = getenv("MYSQL_TEST_ENGINE")   ? getenv("MYSQL_TEST_ENGINE") : "MyISAM";
 	$socket    = getenv("MYSQL_TEST_SOCKET")   ? getenv("MYSQL_TEST_SOCKET") : null;
 	$skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ? getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") : true;
-	$test_compress = getenv("MYSQL_TEST_COMPRESS") ? (boolean)getenv("MYSQL_TEST_COMPRESS") : false;
+	$connect_flags = getenv("MYSQL_TEST_CONNECT_FLAGS") ? (int)getenv("MYSQL_TEST_CONNECT_FLAGS") : 0;
 
 	/* Development setting: test experimal features and/or feature requests that never worked before? */
 	$TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
@@ -51,6 +51,7 @@
 			/* unknown */
 			$MYSQLND_VERSION = -1;
 		}
+
 	}
 
 	if (!function_exists('sys_get_temp_dir')) {
@@ -76,17 +77,17 @@
 	/**
 	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
 	*
-	* @param compress mixed: -1 => use global default, false -> no compression, true -> compression
+	* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)?
 	*/
-	function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $compress = -1) {
-		global $test_compress;
+	function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+		global $connect_flags;
 
-		if (-1 == $compress)
-			$compress = $test_compress;
+		$flags = ($enable_env_flags) ? $connect_flags : false;
 
-		if ($compress) {
+		if ($flags !== false) {
 			$link = mysqli_init();
-			mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, 0 & MYSQLI_CLIENT_COMPRESS);
+			if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
+				$link = false;
 		} else {
 			$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 		}
@@ -97,27 +98,26 @@
 	/**
 	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
 	*
-	* @param compress mixed: -1 => use global default, false -> no compression, true -> compression
+	* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
 	*/
-	function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $compress = -1) {
-		global $test_compress;
+	function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
+		global $connect_flags;
 
-		if (-1 == $compress)
-			$compress = $test_compress;
+		if ($enable_env_flags)
+			$flags & $connect_flags;
 
-		return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags & MYSQLI_CLIENT_COMPRESS);
+		return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
 	}
 
 	class my_mysqli extends mysqli {
-		public function __construct($host, $user, $passwd, $db, $port, $socket, $compress = -1) {
-			global $test_compress;
+		public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+			global $connect_flags;
 
-			if (-1 == $compress)
-				$compress = $test_compress;
+			$flags = ($enable_env_flags) ? $connect_flags : false;
 
-			if ($compress) {
+			if ($flags !== false) {
 				parent::init();
-				$this->real_connect($host, $user, $passwd, $db, $port, $socket, 0 & MYSQLI_CLIENT_COMPRESS);
+				$this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
 			} else {
 				parent::__construct($host, $user, $passwd, $db, $port, $socket);
 			}
