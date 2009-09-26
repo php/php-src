@@ -4,7 +4,8 @@ ldap_bind() - Basic anonymous binding
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require_once dirname(__FILE__) .'/skipifbindfailure.inc'; ?>
 --FILE--
 <?php
 require "connect.inc";
