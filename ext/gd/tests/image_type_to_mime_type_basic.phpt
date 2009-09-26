@@ -2,8 +2,7 @@
 image_type_to_mime_type()
 --SKIPIF--
 <?php 
-	if (!function_exists('image_type_to_mime_type')) die('skip image_type_to_mime_type() not available'); 
-	require_once('skipif_imagetype.inc');
+	if (!function_exists('image_type_to_mime_type')) die('skip image_type_to_mime_type() not available');
 ?>
 --FILE--
 <?php
