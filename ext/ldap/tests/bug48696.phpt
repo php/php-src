@@ -1,5 +1,9 @@
 --TEST--
 Bug #48696 (ldap_read() segfaults with invalid parameters)
+--SKIPIF--
+<?php
+require_once dirname(__FILE__) .'/skipif.inc';
+?>
 --FILE--
 <?php
 
