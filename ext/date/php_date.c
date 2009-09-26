@@ -4049,7 +4049,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	}
 
 	timelib_unixtime2local(t, time);
-	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, altitude, calc_sunset?0:1, &h_rise, &h_set, &rise, &set, &transit);
+	rs = timelib_astro_rise_set_altitude(t, longitude, latitude, altitude, 1, &h_rise, &h_set, &rise, &set, &transit);
 	timelib_time_dtor(t);
 	
 	if (rs != 0) {
