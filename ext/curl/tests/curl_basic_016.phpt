@@ -53,6 +53,5 @@ array(2%d) {
   float(0)
   ["redirect_time"]=>
   float(0)
-%A
 }
 ===DONE===
