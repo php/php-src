@@ -20,14 +20,17 @@ if (!function_exists('sys_get_temp_dir')) {
 }
 
 /* wrapper to simplify test porting */
-function my_mysql_connect($host, $user, $passwd, $db, $port, $socket) {
+function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL) {
+	global $connect_flags;
+
+	$flags = ($flags === NULL) ? $connect_flags : $flags;
 
 	if ($socket)
 		$host = sprintf("%s:%s", $host, $socket);
 	else if ($port)
 		$host = sprintf("%s:%s", $host, $port);
 
-	if (!$link = mysql_connect($host, $user, $passwd, true)) {
+	if (!$link = mysql_connect($host, $user, $passwd, true, $flags)) {
 		printf("[000-a] Cannot connect using host '%s', user '%s', password '****', [%d] %s\n",
 			$host, $user, $passwd,
 			mysql_errno(), mysql_error());
@@ -55,6 +58,7 @@ $db			= getenv("MYSQL_TEST_DB")	? getenv("MYSQL_TEST_DB")	: "test";
 $engine	= getenv("MYSQL_TEST_ENGINE")	? getenv("MYSQL_TEST_ENGINE")	: "MyISAM";
 $socket	= getenv("MYSQL_TEST_SOCKET")	? getenv("MYSQL_TEST_SOCKET")	: null;
 $skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ? getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") : true;
+$connect_flags = getenv("MYSQL_TEST_CONNECT_FLAGS") ? (int)getenv("MYSQL_TEST_CONNECT_FLAGS") : 0;
 
 /* Development setting: test experimal features and/or feature requests that never worked before? */
 $TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
