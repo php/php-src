@@ -1,0 +1,24 @@
+--TEST--
+Bug #49692: parse_ini_file() throws errors when key contains '/' (forward slash)
+--CREDITS--
+Rafael Dohms <rdohms [at] gmail [dot] com>
+--SKIPIF--
+<?php 
+	if (!extension_loaded("gd")) die("skip GD not present");
+?>
+--FILE--
+<?php
+
+var_dump(parse_ini_file('bug49692.ini', true));
+
+?>
+--EXPECTF--
+array(1) {
+  ["sitemap"]=>
+  array(2) {
+    ["/home"]=>
+    string(13) "default:index"
+    ["/info"]=>
+    string(12) "default:info"
+  }
+}
