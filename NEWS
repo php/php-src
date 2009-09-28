@@ -1,6 +1,7 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.12
+- Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
 - Fixed bug #49578 (make install-pear fails). (Hannes)
