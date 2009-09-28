@@ -6,7 +6,7 @@ if ($skip_on_connect_failure) {
 	else if ($port)
 		$myhost = sprintf("%s:%s", $host, $port);
 
-	if (!$link = @mysql_connect($myhost, $user, $passwd, true))
+	if (!$link = @mysql_connect($myhost, $user, $passwd, true, $connect_flags))
 		die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysql_errno(), mysql_error()));
 
 	if (!@mysql_select_db($db, $link))
