@@ -838,7 +838,7 @@ PHP_FUNCTION(tempnam)
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
 
-	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 		RETURN_FALSE;
 	}
 
