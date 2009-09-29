@@ -8,6 +8,10 @@
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
   
+- Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
+  (Rasmus)
+- Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
+  Stachowiak.  (Rasmus)
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
