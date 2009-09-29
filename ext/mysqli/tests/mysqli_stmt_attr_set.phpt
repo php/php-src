@@ -50,17 +50,19 @@ require_once('skipifconnectfailure.inc');
 		if (in_array($i, $valid_attr))
 			continue;
 		$invalid_attr = $i;
-		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0)))
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
 			printf("[006a] Expecting boolean/false for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+		}
 	}
 
 	for ($i = 0; $i < 10; $i++) {
 		do {
-			$invalid_attr = mt_rand(-1 * PHP_INT_MAX + 1, PHP_INT_MAX);
+			$invalid_attr = mt_rand(-1 * (min(4294967296, PHP_INT_MAX) + 1), min(4294967296, PHP_INT_MAX));
 		} while (in_array($invalid_attr, $valid_attr));
-		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0)))
+		if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, $invalid_attr, 0))) {
 			/* Although it may be desired to get false neither the MySQL Client Library nor mysqlnd are supposed to detect invalid codes */
 			printf("[006b] Expecting boolean/true for attribute %d, got %s/%s\n", $invalid_attr, gettype($tmp), $tmp);
+		}
 	}
 	$stmt->close();
 
