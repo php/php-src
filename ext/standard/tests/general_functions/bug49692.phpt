@@ -2,10 +2,6 @@
 Bug #49692: parse_ini_file() throws errors when key contains '/' (forward slash)
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
---SKIPIF--
-<?php 
-	if (!extension_loaded("gd")) die("skip GD not present");
-?>
 --FILE--
 <?php
 
