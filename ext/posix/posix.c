@@ -840,7 +840,8 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
 		RETURN_FALSE;
 	}
 
