@@ -873,6 +873,10 @@ PHP_FUNCTION(posix_mkfifo)
 		RETURN_FALSE;
 	}
 
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	result = mkfifo(path, mode);
 	if (result < 0) {
 		POSIX_G(last_error) = errno;
