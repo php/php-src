@@ -727,18 +727,21 @@ PHP_FUNCTION(pcntl_exec)
 			if (return_val == HASH_KEY_IS_LONG) efree(key);
 		}
 		*(pair) = NULL;
-	}
-	
-	if (execve(path, argv, envp) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
-	}
-	
-	/* Cleanup */
-	if (envp != NULL) {
+
+		if (execve(path, argv, envp) == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
+		}
+
+		/* Cleanup */
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
 		efree(envp);
-	}
+	} else {
 
+		if (execv(path, argv) == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
+		}
+	}
+	
 	efree(argv);
 	
 	RETURN_FALSE;
