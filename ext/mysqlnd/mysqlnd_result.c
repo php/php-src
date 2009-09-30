@@ -1882,9 +1882,9 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES *result TSRMLS_DC)
 
 	if (result->m.fetch_row) {
 		if (result->m.fetch_row == result->m.fetch_row_normal_buffered) {
-			return mysqlnd_fetch_row_buffered_c(result TSRMLS_CC);
+			DBG_RETURN(mysqlnd_fetch_row_buffered_c(result TSRMLS_CC));
 		} else if (result->m.fetch_row == result->m.fetch_row_normal_unbuffered) {
-			return mysqlnd_fetch_row_unbuffered_c(result TSRMLS_CC);
+			DBG_RETURN(mysqlnd_fetch_row_unbuffered_c(result TSRMLS_CC));
 		} else {
 			*((int*)NULL) = 1;
 		}
