@@ -228,8 +228,8 @@ PHPAPI unsigned int	mysqlnd_get_client_version();
 /*****************************************************************************************************/
 
 
-PHPAPI void mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
-PHPAPI void mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
+PHPAPI void mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind TSRMLS_DC);
+PHPAPI void mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind TSRMLS_DC);
 
 
 PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
