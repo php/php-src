@@ -1229,19 +1229,19 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->cp = cp;
 	dupch->uses = 0;
 	if (ch->handlers->write->stream) {
-		Z_ADDREF_P(dupch->handlers->write->stream);
+		zval_add_ref(dupch->handlers->write->stream);
 		dupch->handlers->write->stream = ch->handlers->write->stream;
 	}
 	dupch->handlers->write->method = ch->handlers->write->method;
 	dupch->handlers->write->type   = ch->handlers->write->type;
 	if (ch->handlers->read->stream) {
-		Z_ADDREF_P(ch->handlers->read->stream);
+		zval_add_ref(ch->handlers->read->stream);
 	}
 	dupch->handlers->read->stream  = ch->handlers->read->stream;
 	dupch->handlers->read->method  = ch->handlers->read->method;
 	dupch->handlers->write_header->method = ch->handlers->write_header->method;
 	if (ch->handlers->write_header->stream) {
-		Z_ADDREF_P(ch->handlers->write_header->stream);
+		zval_add_ref(ch->handlers->write_header->stream);
 	}
 	dupch->handlers->write_header->stream = ch->handlers->write_header->stream;
 
@@ -1469,7 +1469,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			switch (option) {
 				case CURLOPT_FILE:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
-						Z_ADDREF_PP(zvalue);
+						zval_add_ref(zvalue);
 						ch->handlers->write->fp = fp;
 						ch->handlers->write->method = PHP_CURL_FILE;
 						ch->handlers->write->stream = *zvalue;
@@ -1481,7 +1481,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					break;
 				case CURLOPT_WRITEHEADER:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
-						Z_ADDREF_PP(zvalue);
+						zval_add_ref(zvalue);
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
 						ch->handlers->write_header->stream = *zvalue;
@@ -1492,7 +1492,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					}
 					break;
 				case CURLOPT_INFILE:
-					Z_ADDREF_PP(zvalue);
+					zval_add_ref(zvalue);
 					ch->handlers->read->fp = fp;
 					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
 					ch->handlers->read->stream = *zvalue;
