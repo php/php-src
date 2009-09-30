@@ -1329,7 +1329,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const stmt,
 		SET_STMT_ERROR(stmt, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
 		DBG_ERR("not prepared");
 		if (param_bind && stmt->param_bind_dtor) {
-			stmt->param_bind_dtor(param_bind);
+			stmt->param_bind_dtor(param_bind TSRMLS_CC);
 		}
 		DBG_RETURN(FAIL);
 	}
@@ -1362,7 +1362,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const stmt,
 				}
 			}
 			if (stmt->param_bind != param_bind && stmt->param_bind_dtor) {
-				stmt->param_bind_dtor(stmt->param_bind);
+				stmt->param_bind_dtor(stmt->param_bind TSRMLS_CC);
 			}
 		}
 
@@ -1465,7 +1465,7 @@ MYSQLND_METHOD(mysqlnd_stmt, refresh_bind_param)(MYSQLND_STMT * const stmt TSRML
 /* {{{ mysqlnd_stmt::set_bind_param_dtor */
 static void
 MYSQLND_METHOD(mysqlnd_stmt, set_param_bind_dtor)(MYSQLND_STMT * const stmt,
-												  void (*param_bind_dtor)(MYSQLND_PARAM_BIND *dtor) TSRMLS_DC)
+												  void (*param_bind_dtor)(MYSQLND_PARAM_BIND * dtor TSRMLS_DC) TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt::set_bind_param_dtor");
 	DBG_INF_FMT("stmt=%p", param_bind_dtor);
@@ -1487,7 +1487,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 	if (stmt->state < MYSQLND_STMT_PREPARED) {
 		SET_STMT_ERROR(stmt, CR_NO_PREPARE_STMT, UNKNOWN_SQLSTATE, mysqlnd_stmt_not_prepared);
 		if (result_bind && stmt->result_bind_dtor) {
-			stmt->result_bind_dtor(result_bind);
+			stmt->result_bind_dtor(result_bind TSRMLS_CC);
 		}
 		DBG_ERR("not prepared");
 		DBG_RETURN(FAIL);
@@ -1519,7 +1519,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const stmt,
 			stmt->result_bind[i].bound = TRUE;
 		}
 	} else if (result_bind && stmt->result_bind_dtor) {
-		stmt->result_bind_dtor(result_bind);
+		stmt->result_bind_dtor(result_bind TSRMLS_CC);
 	}
 	DBG_INF("PASS");
 	DBG_RETURN(PASS);
@@ -1574,7 +1574,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, unsigne
 /* {{{ mysqlnd_stmt::set_bind_result_dtor */
 static void
 MYSQLND_METHOD(mysqlnd_stmt, set_result_bind_dtor)(MYSQLND_STMT * const stmt,
-												   void (*result_bind_dtor)(MYSQLND_RESULT_BIND *dtor) TSRMLS_DC)
+												   void (*result_bind_dtor)(MYSQLND_RESULT_BIND * dtor TSRMLS_DC) TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt::set_bind_param_dtor");
 	DBG_INF_FMT("stmt=%p", result_bind_dtor);
@@ -1898,7 +1898,7 @@ void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC)
 		}
 	}
 	if (stmt->result_bind_dtor) {
-		stmt->result_bind_dtor(stmt->result_bind);
+		stmt->result_bind_dtor(stmt->result_bind TSRMLS_CC);
 	}
 	stmt->result_bind = NULL;
 
@@ -1979,7 +1979,7 @@ void mysqlnd_internal_free_stmt_content(MYSQLND_STMT * const stmt TSRMLS_DC)
 			}
 		}
 		if (stmt->param_bind_dtor) {
-			stmt->param_bind_dtor(stmt->param_bind);
+			stmt->param_bind_dtor(stmt->param_bind TSRMLS_CC);
 		}
 		stmt->param_bind = NULL;
 	}
@@ -2177,7 +2177,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 
 /* {{{ mysqlnd_efree_param_bind_dtor */
 PHPAPI void
-mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind)
+mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind TSRMLS_DC)
 {
 	mnd_efree(param_bind);
 }
@@ -2186,7 +2186,7 @@ mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind)
 
 /* {{{ mysqlnd_efree_result_bind_dtor */
 PHPAPI void
-mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind)
+mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind TSRMLS_DC)
 {
 	mnd_efree(result_bind);
 }
