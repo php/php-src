@@ -56,7 +56,7 @@ exit(1);
 do {
 	$illegal_mode = mt_rand(0, 10000);
 } while (in_array($illegal_mode, array(MYSQL_ASSOC, MYSQL_NUM, MYSQL_BOTH)));
-$tmp = @mysql_fetch_array($res, $illegal_mode);
+$tmp = mysql_fetch_array($res, $illegal_mode);
 if (!is_array($tmp))
 	printf("[013] Expecting array, got %s/%s. [%d] %s\n",
 		gettype($tmp), $tmp, mysql_errno($link), mysql_error($link));
@@ -354,6 +354,8 @@ array(11) {
   [%u|b%"e"]=>
   %unicode|string%(1) "1"
 }
+
+Warning: mysql_fetch_array(): The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH in %s on line %d
 
 Warning: mysql_fetch_array(): %d is not a valid MySQL result resource in %s on line %d
 done!
