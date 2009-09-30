@@ -73,6 +73,7 @@
 #define CLIENT_SECURE_CONNECTION	32768	/* New 4.1 authentication */
 #define CLIENT_MULTI_STATEMENTS		(1UL << 16) /* Enable/disable multi-stmt support */
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
+#define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
 
 typedef enum mysqlnd_extension
 {
