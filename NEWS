@@ -13,6 +13,8 @@
   mbstring.strict_mode is turned on). (Moriyoshi)
 - Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
   cannot be set"). (Felipe)
+- Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
+  fclose). (Ilia)
 - Fixed bug #49354 (mb_strcut() cuts wrong length when offset is in the middle
   of a multibyte character). (Moriyoshi)
 - Fixed bug #49528 (UTF-16 strings prefixed by BOMs wrondly converted).

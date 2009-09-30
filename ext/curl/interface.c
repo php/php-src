@@ -1228,10 +1228,22 @@ PHP_FUNCTION(curl_copy_handle)
 
 	dupch->cp = cp;
 	dupch->uses = 0;
+	if (ch->handlers->write->stream) {
+		Z_ADDREF_P(dupch->handlers->write->stream);
+		dupch->handlers->write->stream = ch->handlers->write->stream;
+	}
 	dupch->handlers->write->method = ch->handlers->write->method;
 	dupch->handlers->write->type   = ch->handlers->write->type;
+	if (ch->handlers->read->stream) {
+		Z_ADDREF_P(ch->handlers->read->stream);
+	}
+	dupch->handlers->read->stream  = ch->handlers->read->stream;
 	dupch->handlers->read->method  = ch->handlers->read->method;
 	dupch->handlers->write_header->method = ch->handlers->write_header->method;
+	if (ch->handlers->write_header->stream) {
+		Z_ADDREF_P(ch->handlers->write_header->stream);
+	}
+	dupch->handlers->write_header->stream = ch->handlers->write_header->stream;
 
 	dupch->handlers->write->fp = ch->handlers->write->fp;
 	dupch->handlers->write_header->fp = ch->handlers->write_header->fp;
@@ -1457,9 +1469,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			switch (option) {
 				case CURLOPT_FILE:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
-						zend_list_addref(Z_LVAL_PP(zvalue));
+						Z_ADDREF_PP(zvalue);
 						ch->handlers->write->fp = fp;
 						ch->handlers->write->method = PHP_CURL_FILE;
+						ch->handlers->write->stream = *zvalue;
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
 						RETVAL_FALSE;
@@ -1468,9 +1481,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					break;
 				case CURLOPT_WRITEHEADER:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
-						zend_list_addref(Z_LVAL_PP(zvalue));
+						Z_ADDREF_PP(zvalue);
 						ch->handlers->write_header->fp = fp;
 						ch->handlers->write_header->method = PHP_CURL_FILE;
+						ch->handlers->write_header->stream = *zvalue;
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "the provided file handle is not writable");
 						RETVAL_FALSE;
@@ -1478,9 +1492,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					}
 					break;
 				case CURLOPT_INFILE:
-					zend_list_addref(Z_LVAL_PP(zvalue));
+					Z_ADDREF_PP(zvalue);
 					ch->handlers->read->fp = fp;
 					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+					ch->handlers->read->stream = *zvalue;
 					break;
 				case CURLOPT_STDERR:
 					if (((php_stream *) what)->mode[0] != 'r' || ((php_stream *) what)->mode[1] == '+') {
@@ -2127,6 +2142,16 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	}
 	if (ch->header.str_len > 0) {
 		efree(ch->header.str);
+	}
+
+	if (ch->handlers->write_header->stream) {
+		zval_ptr_dtor(&ch->handlers->write_header->stream);
+	}
+	if (ch->handlers->write->stream) {
+		zval_ptr_dtor(&ch->handlers->write->stream);
+	}
+	if (ch->handlers->read->stream) {
+		zval_ptr_dtor(&ch->handlers->read->stream);
 	}
 
 	efree(ch->handlers->write);
