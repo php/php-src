@@ -17,7 +17,8 @@
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
 - Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
   cannot be set"). (Felipe)
-
+- Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
+  fclose). (Ilia)
 
 ?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
 - Upgraded bundled sqlite to version 3.6.18. (Ilia)
