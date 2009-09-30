@@ -19,6 +19,7 @@
   cannot be set"). (Felipe)
 - Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
   fclose). (Ilia)
+- Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 
 ?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
 - Upgraded bundled sqlite to version 3.6.18. (Ilia)
