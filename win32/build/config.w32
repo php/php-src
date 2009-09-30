@@ -119,7 +119,7 @@ DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 
 // General CFLAGS for building objects
 DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
-/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
+/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
 
 if (VCVERS < 1400) {
 	// Enable automatic precompiled headers
@@ -177,7 +177,7 @@ DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_3
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
-	ADD_FLAG("CFLAGS", "/LDd /MDd /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+	ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
 		(X64?"/Zi":"/ZI"));
 	ADD_FLAG("LDFLAGS", "/debug");
 	// Avoid problems when linking to release libraries that use the release
