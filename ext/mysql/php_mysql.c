@@ -1972,7 +1972,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		}
 	}
 
-	if ((result_type & MYSQL_BOTH) == 0) {
+	if (result_type & ~MYSQL_BOTH) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
 		result_type = MYSQL_BOTH;
 	}
@@ -2148,6 +2148,11 @@ PHP_FUNCTION(mysql_fetch_array)
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, -1, "MySQL result", le_result);
+
+	if (mode & ~MYSQL_BOTH) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
+                mode = MYSQL_BOTH;
+        }
 
 	mysqlnd_fetch_into(result, mode, return_value, MYSQLND_MYSQL);
 #endif
