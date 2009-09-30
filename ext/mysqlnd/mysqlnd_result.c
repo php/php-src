@@ -901,13 +901,8 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 					lengths[i] = len;
 				}
 
-				/* Forbid ZE to free it, we will clean it */
-				Z_ADDREF_P(data);
-
-				if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-					Z_ADDREF_P(data);
-				}
 				if (flags & MYSQLND_FETCH_NUM) {
+					Z_ADDREF_P(data);
 					zend_hash_next_index_insert(row_ht, &data, sizeof(zval *), NULL);
 				}
 				if (flags & MYSQLND_FETCH_ASSOC) {
@@ -918,6 +913,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 					  the index is a numeric and convert it to it. This however means constant
 					  hashing of the column name, which is not needed as it can be precomputed.
 					*/
+					Z_ADDREF_P(data);
 					if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
 						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
@@ -1128,16 +1124,8 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 		for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
 			zval *data = current_row[i];
 
-			/*
-			  Let us later know what to do with this zval. If ref_count > 1, we will just
-			  decrease it, otherwise free it. zval_ptr_dtor() make this very easy job.
-			*/
-			Z_ADDREF_P(data);
-			
-			if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-				Z_ADDREF_P(data);
-			}
 			if (flags & MYSQLND_FETCH_NUM) {
+				Z_ADDREF_P(data);
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), &data, sizeof(zval *), NULL);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
@@ -1148,6 +1136,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 				  the index is a numeric and convert it to it. This however means constant
 				  hashing of the column name, which is not needed as it can be precomputed.
 				*/
+				Z_ADDREF_P(data);
 				if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
 					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
