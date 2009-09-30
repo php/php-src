@@ -1411,7 +1411,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const stmt, unsi
 
 	if (stmt->param_count) {
 		if (!stmt->param_bind) {
-			stmt->param_bind = ecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND));
+			stmt->param_bind = mnd_ecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND));
 		}
 		
 		/* Prevent from freeing */
@@ -1553,9 +1553,9 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const stmt, unsigne
 		mysqlnd_stmt_separate_one_result_bind(stmt, param_no TSRMLS_CC);
 		/* Guaranteed is that stmt->result_bind is NULL */
 		if (!stmt->result_bind) {
-			stmt->result_bind = ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
 		} else {
-			stmt->result_bind = erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
 		}
 		ALLOC_INIT_ZVAL(stmt->result_bind[param_no].zv);
 		/*
@@ -2179,7 +2179,7 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 PHPAPI void
 mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind)
 {
-	efree(param_bind);
+	mnd_efree(param_bind);
 }
 /* }}} */
 
@@ -2188,7 +2188,7 @@ mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind)
 PHPAPI void
 mysqlnd_efree_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind)
 {
-	efree(result_bind);
+	mnd_efree(result_bind);
 }
 /* }}} */
 

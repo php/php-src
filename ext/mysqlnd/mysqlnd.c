@@ -96,7 +96,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_options)(MYSQLND *conn TSRMLS_DC)
 		unsigned int i;
 		for (i = 0; i < conn->options.num_commands; i++) {
 			/* allocated with pestrdup */
-			pefree(conn->options.init_commands[i], pers);
+			mnd_pefree(conn->options.init_commands[i], pers);
 		}
 		mnd_pefree(conn->options.init_commands, pers);
 		conn->options.init_commands = NULL;
@@ -669,7 +669,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	/* we allow load data local infile by default */
-	mysql_flags  |= CLIENT_LOCAL_FILES;
+	mysql_flags  |= CLIENT_LOCAL_FILES | CLIENT_PS_MULTI_RESULTS;
+#ifndef MYSQLND_COMPRESSION_ENABLED
+	if (mysql_flags & CLIENT_COMPRESS) {
+		mysql_flags &= ~CLIENT_COMPRESS;
+	}
+#endif
 
 	auth_packet->user		= user;
 	auth_packet->password	= passwd;
