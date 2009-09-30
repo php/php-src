@@ -42,7 +42,7 @@ char * mysqlnd_palloc_get_zval_name = "mysqlnd_palloc_get_zval";
 /* {{{ _mysqlnd_palloc_init_cache */
 PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size TSRMLS_DC)
 {
-	MYSQLND_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_ZVAL_PCACHE));
+	MYSQLND_ZVAL_PCACHE *ret = mnd_calloc(1, sizeof(MYSQLND_ZVAL_PCACHE));
 	unsigned int i;
 
 	DBG_ENTER("_mysqlnd_palloc_init_cache");
@@ -58,13 +58,13 @@ PHPAPI MYSQLND_ZVAL_PCACHE* _mysqlnd_palloc_init_cache(unsigned int cache_size T
 
 	/* 1. First initialize the free list part of the structure */
 	/* One more for empty position of last_added - always 0x0, bounds checking */
-	ret->free_list.ptr_line = calloc(ret->max_items + 1, sizeof(mysqlnd_zval *));
+	ret->free_list.ptr_line = mnd_calloc(ret->max_items + 1, sizeof(mysqlnd_zval *));
 	ret->free_list.last_added = ret->free_list.ptr_line + ret->max_items;
 	ret->free_list.canary1 = (void*)0xBEEF;
 	ret->free_list.canary2 = (void*)0xAFFE;
 
 	/* 3. Allocate and initialize our zvals and initialize the free list */
-	ret->block = calloc(ret->max_items, sizeof(mysqlnd_zval));
+	ret->block = mnd_calloc(ret->max_items, sizeof(mysqlnd_zval));
 	ret->last_in_block = &(ret->block[ret->max_items]);
 	for (i = 0; i < ret->max_items; i++) {
 		/* 1. Initialize */
@@ -124,7 +124,7 @@ void _mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache TSRMLS_DC)
 /* {{{ _mysqlnd_palloc_init_thd_cache */
 PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC)
 {
-	MYSQLND_THD_ZVAL_PCACHE *ret = calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
+	MYSQLND_THD_ZVAL_PCACHE *ret = mnd_calloc(1, sizeof(MYSQLND_THD_ZVAL_PCACHE));
 	DBG_ENTER("_mysqlnd_palloc_init_thd_cache");
 	DBG_INF_FMT("ret = %p", ret);
 	
@@ -146,7 +146,7 @@ PHPAPI MYSQLND_THD_ZVAL_PCACHE* _mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCAC
 	ret->references = 1;
 
 	/* 1. Initialize the GC list */
-	ret->gc_list.ptr_line = calloc(cache->max_items, sizeof(mysqlnd_zval *));
+	ret->gc_list.ptr_line = mnd_calloc(cache->max_items, sizeof(mysqlnd_zval *));
 	/* Backward and forward looping is possible */
 	ret->gc_list.last_added = ret->gc_list.ptr_line;
 	ret->gc_list.canary1 = (void*)0xCAFE;

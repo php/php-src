@@ -583,7 +583,7 @@ static void
 mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current)
 {
 	if (!*copies) {
-		*copies = ecalloc(param_count, sizeof(zval *));					
+		*copies = mnd_ecalloc(param_count, sizeof(zval *));					
 	}
 	MAKE_STD_ZVAL((*copies)[current]);
 	*(*copies)[current] = *original;
@@ -777,7 +777,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 				zval_ptr_dtor(&copies[i]);
 			}
 		}
-		efree(copies);	
+		mnd_efree(copies);	
 	}
 }
 /* }}} */

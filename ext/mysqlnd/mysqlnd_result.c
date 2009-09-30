@@ -171,7 +171,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 											STAT_COPY_ON_WRITE_PERFORMED, 0);
 		
 		/* Free last row's zvals */
-		efree(unbuf->last_row_data);
+		mnd_efree(unbuf->last_row_data);
 		unbuf->last_row_data = NULL;
 	}
 	if (unbuf->last_row_buffer) {
@@ -223,11 +223,11 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 	DBG_INF("Freeing data & row_buffer");
 	if (set->data) {
-		pefree(set->data, set->persistent);
+		mnd_pefree(set->data, set->persistent);
 		set->data = NULL;
 	}
 	if (set->row_buffers) {
-		pefree(set->row_buffers, set->persistent);
+		mnd_pefree(set->row_buffers, set->persistent);
 		set->row_buffers	= NULL;
 	}
 	set->data_cursor = NULL;
@@ -237,7 +237,7 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 
 	DBG_INF("Freeing set");
-	pefree(set, set->persistent);
+	mnd_pefree(set, set->persistent);
 
 	DBG_INF_FMT("after: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_VOID_RETURN;
@@ -295,13 +295,13 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 #if MYSQLND_DEBUG_MEMORY
 			DBG_INF("Freeing current_row & current_buffer");
 #endif
-			pefree(current_row, set->persistent);
+			mnd_pefree(current_row, set->persistent);
 		}
 		current_buffer->free_chunk(current_buffer, TRUE TSRMLS_CC);
 	}
 	DBG_INF("Freeing data & row_buffer");
-	pefree(set->data, set->persistent);
-	pefree(set->row_buffers, set->persistent);
+	mnd_pefree(set->data, set->persistent);
+	mnd_pefree(set->row_buffers, set->persistent);
 	set->data			= NULL;
 	set->row_buffers	= NULL;
 	set->data_cursor	= NULL;
@@ -315,7 +315,7 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 
 	DBG_INF("Freeing set");
-	pefree(set, set->persistent);
+	mnd_pefree(set, set->persistent);
 
 	DBG_INF_FMT("after: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_VOID_RETURN;
@@ -333,7 +333,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 
 	if (result->unbuf) {
 		mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
-		efree(result->unbuf);
+		mnd_efree(result->unbuf);
 		result->unbuf = NULL;
 	} else if (result->stored_data) {
 		mysqlnd_free_buffered_data(result TSRMLS_CC);
@@ -347,7 +347,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 #endif
 
 	if (result->lengths) {
-		efree(result->lengths);
+		mnd_efree(result->lengths);
 		result->lengths = NULL;
 	}
 
@@ -398,7 +398,7 @@ void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
 		result->conn = NULL;
 	}
 
-	efree(result);
+	mnd_efree(result);
 
 	DBG_VOID_RETURN;
 }
@@ -575,7 +575,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn TSRMLS_CC))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt) {
-						efree(conn->current_result);
+						mnd_efree(conn->current_result);
 						conn->current_result = NULL;
 					}
 					DBG_ERR("Error ocurred while reading metadata");
@@ -587,7 +587,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				if (FAIL == (ret = PACKET_READ_ALLOCA(fields_eof, conn))) {
 					DBG_ERR("Error ocurred while reading the EOF packet");
 					result->m.free_result_contents(result TSRMLS_CC);
-					efree(result);
+					mnd_efree(result);
 					if (!stmt) {
 						conn->current_result = NULL;
 					} else {
