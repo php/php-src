@@ -1584,7 +1584,7 @@ PHP_FUNCTION(oci_pconnect)
    Return the last error of stmt|connection|global. If no error happened returns false. */
 PHP_FUNCTION(oci_error)
 {
-	zval *arg;
+	zval *arg = NULL;
 	php_oci_statement *statement;
 	php_oci_connection *connection;
 	text *errbuf;
@@ -1721,7 +1721,7 @@ PHP_FUNCTION(oci_set_prefetch)
 PHP_FUNCTION(oci_password_change)
 {
 	zval *z_connection;
-	text *user, *pass_old, *pass_new, *dbname;
+	char *user, *pass_old, *pass_new, *dbname;
 	int user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
 
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(oci_password_change)
 			RETURN_FALSE;
 		}
 
-		if (php_oci_password_change(connection, (char *)user, user_len, (char *)pass_old, pass_old_len, (char *)pass_new, pass_new_len TSRMLS_CC)) {
+		if (php_oci_password_change(connection, user, user_len, pass_old, pass_old_len, pass_new, pass_new_len TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -1766,7 +1766,7 @@ PHP_FUNCTION(oci_password_change)
 			RETURN_FALSE;
 		}
 
-		connection = php_oci_do_connect_ex((char *)user, user_len, (char *)pass_old, pass_old_len, (char *)pass_new, pass_new_len, (char *)dbname, dbname_len, NULL, OCI_DEFAULT, 0, 0 TSRMLS_CC);
+		connection = php_oci_do_connect_ex(user, user_len, pass_old, pass_old_len, pass_new, pass_new_len, dbname, dbname_len, NULL, OCI_DEFAULT, 0, 0 TSRMLS_CC);
 		if (!connection) {
 			RETURN_FALSE;
 		}
