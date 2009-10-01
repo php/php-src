@@ -1,4 +1,4 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
@@ -23,10 +23,11 @@
 - Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
   fclose). (Ilia)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
-- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised). (Chris Jones)
+- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
+  (Chris Jones)
 
 
-?? ??? 2009, PHP 5.3.1RC? < WILL BE MERGED LATER
+?? ??? 2009, PHP 5.3.1RC?
 - Upgraded bundled sqlite to version 3.6.18. (Ilia)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
