@@ -23,6 +23,7 @@
 - Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
   fclose). (Ilia)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
+- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised). (Chris Jones)
 
 
 ?? ??? 2009, PHP 5.3.1RC? < WILL BE MERGED LATER
