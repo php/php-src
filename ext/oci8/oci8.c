@@ -1529,6 +1529,12 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 			break;
 		case OCI_NO_DATA:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_NO_DATA");
+			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
+			if (errbuf) {
+				efree(errbuf);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_NO_DATA: failed to fetch error message");
+			}
 			break;
 		case OCI_ERROR:
 			errcode = php_oci_fetch_errmsg(err_p, &errbuf TSRMLS_CC);
