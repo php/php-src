@@ -1033,9 +1033,9 @@ array(121) {
   [%u|b%"mem_malloc_ammount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_calloc_count"]=>
-  %unicode|string%(1) "0"
+  %unicode|string%(%d) "%d"
   [%u|b%"mem_calloc_ammount"]=>
-  %unicode|string%(1) "0"
+  %unicode|string%(%d) "%d"
   [%u|b%"mem_realloc_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_realloc_ammount"]=>
