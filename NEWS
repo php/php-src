@@ -12,6 +12,9 @@
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
+
+- Fixed bug #49732 (crashes when using fileinfo when timestamp conversion
+  fails). (Pierre)
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
@@ -21,7 +24,8 @@
   fclose). (Ilia)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 
-?? ??? 2009, PHP 5.3.1RC? <- WHY IS THIS HERE? Gonna be released after 5.3.1 or what??
+
+?? ??? 2009, PHP 5.3.1RC? < WILL BE MERGED LATER
 - Upgraded bundled sqlite to version 3.6.18. (Ilia)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
