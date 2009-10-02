@@ -5,24 +5,36 @@ oci_define_by_name()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_table.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (string) VALUES ('some')";
+// Initialize
 
-if (!($s = oci_parse($c, $insert_sql))) {
-        die("oci_parse(insert) failed!\n");
+$stmtarray = array(
+    "drop table define1_tab",
+    "create table define1_tab (string varchar(10))",
+    "insert into define1_tab (string) values ('some')",
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+				942 // table or view does not exist
+				))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
+	}
 }
 
-if (!oci_execute($s)) {
-        die("oci_execute(insert) failed!\n");
-}
+// Run test
 
-$stmt = oci_parse($c, "SELECT string FROM ".$table_name."");
+$stmt = oci_parse($c, "select string from define1_tab");
 
 /* the define MUST be done BEFORE ociexecute! */
 
-$strong = '';
+$string = '';
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
 var_dump(oci_define_by_name($stmt, "STRING", $string, 20));
 var_dump(oci_define_by_name($stmt, "", $string, 20));
@@ -34,7 +46,16 @@ while (oci_fetch($stmt)) {
 	var_dump($string);
 }
 
-require dirname(__FILE__)."/drop_table.inc";
+// Cleanup
+
+$stmtarray = array(
+    "drop table define1_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
 
 echo "Done\n";
 
@@ -48,5 +69,5 @@ bool(false)
 
 Warning: oci_define_by_name() expects at least 3 parameters, 2 given in %s on line %d
 NULL
-string(4) "some"
+%unicode|string%(4) "some"
 Done

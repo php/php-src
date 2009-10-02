@@ -5,28 +5,39 @@ oci_fetch_row()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
+// Initialize
 
-if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
-}
+$stmtarray = array(
+    "drop table fetch_row_tab",
+    "create table fetch_row_tab (id number, value number)",
+    "insert into fetch_row_tab (id, value) values (1,1)",
+    "insert into fetch_row_tab (id, value) values (1,1)",
+    "insert into fetch_row_tab (id, value) values (1,1)",
+);
 
-for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+                    942 // table or view does not exist
+                ))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
 	}
 }
 
-if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
 }
 
-$select_sql = "SELECT * FROM ".$schema."".$table_name."";
+// Run Test
 
-if (!($s = oci_parse($c, $select_sql))) {
+if (!($s = oci_parse($c, "select * from fetch_row_tab"))) {
 	die("oci_parse(select) failed!\n");
 }
 
@@ -37,46 +48,37 @@ while ($row = oci_fetch_row($s)) {
 	var_dump($row);
 }
 
-require dirname(__FILE__).'/drop_table.inc';
+// Cleanup
+
+$stmtarray = array(
+    "drop table fetch_row_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
 
 echo "Done\n";
 
 ?>
---EXPECT--
-array(5) {
+--EXPECTF--
+array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
+  %unicode|string%(1) "1"
 }
-array(5) {
+array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
+  %unicode|string%(1) "1"
 }
-array(5) {
+array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
+  %unicode|string%(1) "1"
 }
 Done

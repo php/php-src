@@ -5,28 +5,39 @@ oci_field_*() family
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
+// Initialize
 
-if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
-}
+$stmtarray = array(
+    "drop table field_funcs1_tab",
+    "create table field_funcs1_tab (id number, value number)",
+    "insert into field_funcs1_tab (id, value) values (1,1)",
+    "insert into field_funcs1_tab (id, value) values (1,1)",
+    "insert into field_funcs1_tab (id, value) values (1,1)",
+);
 
-for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+                        942 // table or view does not exist
+                ))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
 	}
 }
 
-if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
 }
 
-$select_sql = "SELECT * FROM ".$schema."".$table_name."";
+// Run Test
 
-if (!($s = oci_parse($c, $select_sql))) {
+if (!($s = oci_parse($c, "select * from field_funcs1_tab"))) {
 	die("oci_parse(select) failed!\n");
 }
 
@@ -71,23 +82,27 @@ var_dump(oci_field_size($s, array()));
 
 var_dump(oci_field_size($s));
 
-require dirname(__FILE__).'/drop_table.inc';
+
+// Cleanup
+
+$stmtarray = array(
+    "drop table field_funcs1_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
 
 echo "Done\n";
 
 ?>
 --EXPECTF--
-array(5) {
+array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
-  [2]=>
-  NULL
-  [3]=>
-  NULL
-  [4]=>
-  NULL
+  %unicode|string%(1) "1"
 }
 
 Warning: oci_field_is_null(): Invalid column index "-1" in %s on line %d
