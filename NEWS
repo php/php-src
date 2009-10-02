@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 - Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
   (Chris Jones)
+- Fixed bug #49738 (calling mcrypt after mcrypt_generic_deinit crashes).
+  (Sriram Natarajan)
 
 
 ?? ??? 2009, PHP 5.3.1RC?
