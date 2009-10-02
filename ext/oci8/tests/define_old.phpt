@@ -5,24 +5,36 @@ ocidefinebyname()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_table.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (string) VALUES ('some')";
+// Initialize
 
-if (!($s = ociparse($c, $insert_sql))) {
-        die("oci_parse(insert) failed!\n");
+$stmtarray = array(
+    "drop table define_old_tab",
+    "create table define_old_tab (string varchar(10))",
+    "insert into define_old_tab (string) values ('some')",
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+                    942 // table or view does not exist
+				))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
+	}
 }
 
-if (!ociexecute($s)) {
-        die("oci_execute(insert) failed!\n");
-}
+// Run test
 
-$stmt = ociparse($c, "SELECT string FROM ".$table_name."");
+$stmt = ociparse($c, "select string from define_old_tab");
 
 /* the define MUST be done BEFORE ociexecute! */
 
-$strong = '';
+$string = '';
 ocidefinebyname($stmt, "STRING", $string, 20);
 
 ociexecute($stmt);
@@ -31,11 +43,21 @@ while (ocifetch($stmt)) {
 	var_dump($string);
 }
 
-require dirname(__FILE__)."/drop_table.inc";
+// Cleanup
+
+$stmtarray = array(
+    "drop table define_old_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
+
 
 echo "Done\n";
 
 ?>
---EXPECT--
-string(4) "some"
+--EXPECTF--
+%unicode|string%(4) "some"
 Done

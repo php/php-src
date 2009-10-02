@@ -5,19 +5,34 @@ oci_define_by_name() for statement re-execution
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_table.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, string) VALUES (1, 'some')";
-$s = oci_parse($c, $insert_sql);
-var_dump(oci_execute($s));
+// Initialize
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, string) VALUES (2, 'thing')";
-$s = oci_parse($c, $insert_sql);
-var_dump(oci_execute($s));
+$stmtarray = array(
+    "drop table define5_tab",
+    "create table define5_tab (id number, string varchar(10))",
+    "insert into define5_tab (id, string) values (1, 'some')",
+    "insert into define5_tab (id, string) values (2, 'thing')",
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+                    942 // table or view does not exist
+				))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
+	}
+}
+
+// Run test
 
 echo "Test 1 - must do define before execute\n";
-$stmt = oci_parse($c, "SELECT string FROM ".$table_name." where id = 1");
+$stmt = oci_parse($c, "select string from define5_tab where id = 1");
 oci_execute($stmt);
 var_dump(oci_define_by_name($stmt, "STRING", $string));
 while (oci_fetch($stmt)) {
@@ -26,7 +41,7 @@ while (oci_fetch($stmt)) {
 }
 
 echo "Test 2 - normal define order\n";
-$stmt = oci_parse($c, "SELECT string FROM ".$table_name." where id = 1");
+$stmt = oci_parse($c, "select string from define5_tab where id = 1");
 var_dump(oci_define_by_name($stmt, "STRING", $string));
 oci_execute($stmt);
 
@@ -35,30 +50,37 @@ while (oci_fetch($stmt)) {
 }
 
 echo "Test 3 - no new define done\n";
-$stmt = oci_parse($c, "SELECT string FROM ".$table_name." where id = 2");
+$stmt = oci_parse($c, "select string from define5_tab where id = 2");
 oci_execute($stmt);
 while (oci_fetch($stmt)) {
 	var_dump($string); // not updated with new value
 	var_dump(oci_result($stmt, 'STRING'));
 }
 
-require dirname(__FILE__)."/drop_table.inc";
+// Cleanup
+
+$stmtarray = array(
+    "drop table define5_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
 
 echo "Done\n";
 
 ?>
---EXPECT--
-bool(true)
-bool(true)
+--EXPECTF--
 Test 1 - must do define before execute
 bool(true)
 NULL
-string(4) "some"
+%unicode|string%(4) "some"
 Test 2 - normal define order
 bool(true)
-string(4) "some"
+%unicode|string%(4) "some"
 Test 3 - no new define done
-string(4) "some"
-string(5) "thing"
+%unicode|string%(4) "some"
+%unicode|string%(5) "thing"
 Done
 

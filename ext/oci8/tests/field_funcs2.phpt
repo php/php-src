@@ -5,10 +5,9 @@ Bug #41917 (invalid scale and precision)
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
+require(dirname(__FILE__)."/connect.inc");
 
-$s = oci_parse($c, 'drop table b41917t');
+$s = oci_parse($c, 'drop table field_funcs2_tab');
 @oci_execute($s);
 
 $t = array("C01" => "NUMBER",
@@ -29,7 +28,7 @@ $t = array("C01" => "NUMBER",
 		   "C16" => "REAL",
 		   );
 
-$stmt = "create table b41917t (\n";
+$stmt = "create table field_funcs2_tab (\n";
 foreach ($t as $colname => $type) {
 	$stmt .= "$colname $type,\n";
 }
@@ -38,7 +37,7 @@ $stmt[strlen($stmt)-2] = ")";
 $s = oci_parse($c, $stmt);
 oci_execute($s);
 
-$s = oci_parse($c, "select * from b41917t");
+$s = oci_parse($c, "select * from field_funcs2_tab");
 oci_execute($s);
 
 for ($i = 1; $i <= oci_num_fields($s); $i++) {

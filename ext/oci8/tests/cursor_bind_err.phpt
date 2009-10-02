@@ -5,26 +5,39 @@ binding a cursor (with errors)
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_table.inc";
+require(dirname(__FILE__)."/connect.inc");
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
+// Initialize
 
-if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
-}
+$stmtarray = array(
+    "drop table cursor_bind_err_tab",
+    "create table cursor_bind_err_tab (id number, value number)",
+    "insert into cursor_bind_err_tab (id, value) values (1,1)",
+    "insert into cursor_bind_err_tab (id, value) values (1,1)",
+    "insert into cursor_bind_err_tab (id, value) values (1,1)",
+);
 
-for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	$r = @oci_execute($s);
+	if (!$r) {
+		$m = oci_error($s);
+		if (!in_array($m['code'], array(   // ignore expected errors
+                    942 // table or view does not exist
+                ))) {
+			echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+		}
 	}
 }
 
-if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
 }
 
-$sql = "select CURSOR(select * from ".$schema.$table_name.") into :cursor from dual";
+// Run Test
+
+$sql = "select cursor(select * from cursor_bind_err_tab) into :cursor from dual";
 $stmt = oci_parse($c, $sql);
 
 $cursor = oci_new_cursor($c);
@@ -35,14 +48,23 @@ oci_execute($stmt);
 oci_execute($cursor);
 var_dump(oci_fetch_assoc($cursor));
 
-require dirname(__FILE__)."/drop_table.inc";
+// Cleanup
+
+$stmtarray = array(
+    "drop table cursor_bind_err_tab"
+);
+
+foreach ($stmtarray as $stmt) {
+	$s = oci_parse($c, $stmt);
+	oci_execute($s);
+}
 
 echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: oci_bind_by_name(): ORA-01036: illegal variable name/number in %s on line %d
+Warning: oci_bind_by_name(): ORA-01036: %s in %s on line %d
 
-Warning: oci_fetch_assoc(): ORA-24338: statement handle not executed in %s on line %d
+Warning: oci_fetch_assoc(): ORA-24338: %s in %s on line %d
 bool(false)
 Done
