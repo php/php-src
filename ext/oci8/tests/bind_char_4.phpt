@@ -5,9 +5,9 @@ PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to VARCHAR2 parameter
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/11.1/', $sv, $matches);
+$sv = preg_match('/Release 1[12]\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 11g database");
+	die ("skip expected output only valid when using Oracle 11g+ database");
 }
 ?>
 --FILE--
