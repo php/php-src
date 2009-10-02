@@ -20,6 +20,8 @@
 - Fixed bug #49528 (UTF-16 strings prefixed by BOMs wrongly converted).
   (Moriyoshi)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
+- Fixed bug #49738 (calling mcrypt after mcrypt_generic_deinit crashes).
+  (Sriram Natarajan)
 
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.
