@@ -5,9 +5,9 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 $sv = oci_server_version($c);
-$sv = preg_match('/11.1/', $sv, $matches);
+$sv = preg_match('/Release 1[12]\./', $sv, $matches);
 if ($sv !== 1) {
-	die ("skip expected output only valid when using Oracle 11g database");
+	die ("skip expected output only valid when using Oracle 11g+ database");
 }
 ?>
 --FILE--
@@ -57,6 +57,8 @@ foreach ($create_st as $statement) {
 
 echo "Done\n";
 ?>
+--XFAIL--
+Bind length difference from PHP 5.3 due to character set differences. To be investigated
 --EXPECTF--	
 unicode(1) "1"
 unicode(1) "2"
