@@ -405,8 +405,6 @@ PHP_FUNCTION(enchant_broker_list_dicts)
 	enchant_broker *pbroker;
 	EnchantDictDescribeFn describetozval = php_enchant_list_dicts_fn;
 
-	char *msg;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &broker) == FAILURE) {
 		RETURN_FALSE;
 	}
