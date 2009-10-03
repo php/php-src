@@ -36,6 +36,9 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Methods [43] {
     Method [ <internal:Reflection> final private method __clone ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection, ctor> public method __construct ] {
@@ -46,33 +49,63 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method __toString ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getName ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isInternal ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isUserDefined ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isInstantiable ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getFileName ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getStartLine ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getEndLine ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getDocComment ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getConstructor ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method hasMethod ] {
@@ -125,6 +158,9 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getConstants ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getConstant ] {
@@ -135,21 +171,39 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getInterfaces ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getInterfaceNames ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isInterface ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isAbstract ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isFinal ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getModifiers ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isInstance ] {
@@ -174,6 +228,9 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getParentClass ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isSubclassOf ] {
@@ -184,6 +241,9 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getStaticProperties ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getStaticPropertyValue ] {
@@ -203,9 +263,15 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getDefaultProperties ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method isIterateable ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method implementsInterface ] {
@@ -216,18 +282,33 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getExtension ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getExtensionName ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method inNamespace ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getNamespaceName ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Reflection> public method getShortName ] {
+
+      - Parameters [0] {
+      }
     }
   }
 }

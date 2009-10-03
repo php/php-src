@@ -150,19 +150,21 @@ unicode(%d) "Method [ <user> abstract public method int ] {
 Reflecting on method ReflectionProperty::__construct()
 
 __toString():
-unicode(137) "Method [ <internal:Reflection, ctor> public method __construct ] {
+unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
-  - Parameters [1] {
-    Parameter #0 [ <required> $argument ]
+  - Parameters [2] {
+    Parameter #0 [ <optional> $class ]
+    Parameter #1 [ <optional> $name ]
   }
 }
 "
 
 export():
-unicode(137) "Method [ <internal:Reflection, ctor> public method __construct ] {
+unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
-  - Parameters [1] {
-    Parameter #0 [ <required> $argument ]
+  - Parameters [2] {
+    Parameter #0 [ <optional> $class ]
+    Parameter #1 [ <optional> $name ]
   }
 }
 "
