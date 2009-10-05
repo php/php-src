@@ -156,6 +156,7 @@ struct _php_core_globals {
 	char *mail_log;
 
 	zend_bool request_decoding_error;
+	zend_bool in_error_log;
 };
 
 
