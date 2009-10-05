@@ -168,6 +168,8 @@ struct _php_core_globals {
 
 	zend_bool mail_x_header;
 	char *mail_log;
+
+	zend_bool in_error_log;
 };
 
 
