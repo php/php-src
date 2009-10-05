@@ -489,11 +489,18 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	int fd = -1;
 	time_t error_time;
 
+	if (PG(in_error_log)) {
+		/* prevent recursive invocation */
+		return;
+	}
+	PG(in_error_log) = 1;
+
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
 			php_syslog(LOG_NOTICE, "%.500s", log_message);
+			PG(in_error_log) = 0;
 			return;
 		}
 #endif
@@ -504,7 +511,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			char *error_time_str;
 
 			time(&error_time);
-			error_time_str = php_format_date("d-M-Y H:i:s", 11, error_time, php_during_module_startup() TSRMLS_CC);
+			error_time_str = php_format_date("d-M-Y H:i:s", 11, error_time, 1 TSRMLS_CC);
 			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
@@ -513,6 +520,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			efree(tmp);
 			efree(error_time_str);
 			close(fd);
+			PG(in_error_log) = 0;
 			return;
 		}
 	}
@@ -522,6 +530,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	if (sapi_module.log_message) {
 		sapi_module.log_message(log_message);
 	}
+	PG(in_error_log) = 0;
 }
 /* }}} */
 
@@ -1255,6 +1264,7 @@ int php_request_startup(TSRMLS_D)
 #endif
 
 	zend_try {
+		PG(in_error_log) = 0;
 		PG(during_request_startup) = 1;
 
 		php_output_activate(TSRMLS_C);

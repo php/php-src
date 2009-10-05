@@ -161,6 +161,7 @@ struct _php_core_globals {
 #endif
 	long max_input_nesting_level;
 	zend_bool in_user_include;
+	zend_bool in_error_log;
 };
 
 

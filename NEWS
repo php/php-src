@@ -8,6 +8,8 @@
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
+- Fixed bug #49627 (error_log to specified file does not log time according
+  to date.timezone). (Dmitry)
 - Fixed bug #49578 (make install-pear fails). (Hannes)
 - Fixed bug #49536 (mb_detect_encoding() returns incorrect results when
   mbstring.strict_mode is turned on). (Moriyoshi)
