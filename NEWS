@@ -5,6 +5,8 @@
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
+- Fixed bug #49757 (long2ip() can return wrong value in a multi-threaded
+  applications). (Ilia, Florian Anderiasch)
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
