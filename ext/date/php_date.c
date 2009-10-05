@@ -845,7 +845,17 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 		return DATEG(timezone);
 	}
 	/* Check config setting for default timezone */
-	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
+	if (!DATEG(default_timezone)) {
+		/* Special case: ext/date wasn't initialized yet */
+		zval ztz;
+		
+		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz) &&
+		    Z_TYPE(ztz) == IS_STRING &&
+		    Z_STRLEN(ztz) > 0 &&
+		    timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
+			return Z_STRVAL(ztz);
+		}
+	} else if (*DATEG(default_timezone) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
 		return DATEG(default_timezone);
 	}
 #if HAVE_TM_ZONE
