@@ -1,12 +1,15 @@
-﻿PHP                                                                        NEWS
+PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.2.12
 - Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
+
 - Fixed bug #49757 (long2ip() can return wrong value in a multi-threaded
   applications). (Ilia, Florian Anderiasch)
+- Fixed bug #49738 (calling mcrypt after mcrypt_generic_deinit crashes).
+  (Sriram Natarajan)
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan function missing). (Felipe)
@@ -24,8 +27,7 @@
 - Fixed bug #49528 (UTF-16 strings prefixed by BOMs wrongly converted).
   (Moriyoshi)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
-- Fixed bug #49738 (calling mcrypt after mcrypt_generic_deinit crashes).
-  (Sriram Natarajan)
+
 
 17 Sep 2009, PHP 5.2.11
 - Fixed certificate validation inside php_openssl_apply_verification_policy.
