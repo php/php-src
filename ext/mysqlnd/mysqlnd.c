@@ -399,10 +399,6 @@ mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 	SET_ERROR_AFF_ROWS(conn);
 	SET_EMPTY_ERROR(conn->error_info);
 
-	if (command == COM_QUERY) {
-		++conn->query_counter;
-	}
-
 	PACKET_INIT_ALLOCA(cmd_packet, PROT_CMD_PACKET);
 	cmd_packet.command = command;
 	if (arg && arg_len) {
