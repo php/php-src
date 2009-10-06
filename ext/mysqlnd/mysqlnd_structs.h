@@ -425,7 +425,6 @@ struct st_mysqlnd_connection
 	*/
 	enum mysqlnd_connection_state	state;
 	enum_mysqlnd_query_type			last_query_type;
-	uint32_t						query_counter;
 	/* Temporary storage between query and (use|store)_result() call */
 	MYSQLND_RES						*current_result;
 
