@@ -622,7 +622,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pcount);
-	if (!php_var_unserialize(&pcount, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
+	if (!php_var_unserialize(&pcount, &p, s + buf_len, NULL TSRMLS_CC) || Z_TYPE_P(pcount) != IS_LONG) {
 		zval_ptr_dtor(&pcount);
 		goto outexcept;
 	}
