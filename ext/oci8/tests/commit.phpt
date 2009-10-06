@@ -1,17 +1,24 @@
 --TEST--
-oci_commit()/oci_rollback()
+Test OCI_NO_AUTO_COMMIT constant
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
+require(dirname(__FILE__)."/connect.inc");
+require(dirname(__FILE__).'/create_table.inc');
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
+$insert_sql = "insert into ".$schema.$table_name." (id, value) values (1,1)";
 
 if (!($s = oci_parse($c, $insert_sql))) {
 	die("oci_parse(insert) failed!\n");
+}
+
+/* check with OCI_NO_AUTO_COMMIT mode  */
+for ($i = 0; $i<3; $i++) {
+	if (!oci_execute($s, OCI_NO_AUTO_COMMIT)) {
+		die("oci_execute(insert) failed!\n");
+	}
 }
 
 for ($i = 0; $i<3; $i++) {
@@ -20,9 +27,10 @@ for ($i = 0; $i<3; $i++) {
 	}
 }
 
+
 var_dump(oci_rollback($c));
 
-$select_sql = "SELECT * FROM ".$schema.$table_name."";
+$select_sql = "select * from ".$schema.$table_name."";
 
 if (!($select = oci_parse($c, $select_sql))) {
 	die("oci_parse(select) failed!\n");
@@ -40,7 +48,7 @@ if (!oci_execute($s)) {
 	die("oci_execute(select) failed!\n");
 }
 
-$insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
+$insert_sql = "insert into ".$schema.$table_name." (id, value) values (1,1)";
 
 if (!($s = oci_parse($c, $insert_sql))) {
     die("oci_parse(insert) failed!\n");
@@ -62,67 +70,56 @@ var_dump(oci_fetch_all($select, $all));
 var_dump($all);
 
 
-require dirname(__FILE__).'/drop_table.inc';
+require(dirname(__FILE__).'/drop_table.inc');
 	
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 int(0)
 array(5) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(0) {
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(0) {
   }
-  ["BLOB"]=>
+  [%u|b%"BLOB"]=>
   array(0) {
   }
-  ["CLOB"]=>
+  [%u|b%"CLOB"]=>
   array(0) {
   }
-  ["STRING"]=>
+  [%u|b%"STRING"]=>
   array(0) {
   }
 }
 bool(true)
 int(4)
 array(5) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [1]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [2]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [3]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [1]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [2]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [3]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
   }
-  ["BLOB"]=>
-  array(4) {
-    [0]=>
-    NULL
-    [1]=>
-    NULL
-    [2]=>
-    NULL
-    [3]=>
-    NULL
-  }
-  ["CLOB"]=>
+  [%u|b%"BLOB"]=>
   array(4) {
     [0]=>
     NULL
@@ -133,7 +130,18 @@ array(5) {
     [3]=>
     NULL
   }
-  ["STRING"]=>
+  [%u|b%"CLOB"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+  [%u|b%"STRING"]=>
   array(4) {
     [0]=>
     NULL

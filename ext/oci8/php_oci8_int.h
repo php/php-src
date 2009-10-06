@@ -101,6 +101,12 @@ extern zend_class_entry *oci_coll_class_entry_ptr;
 #error Invalid value for PHP_OCI_CRED_EXT
 #endif
 
+/*
+ * Name passed to Oracle for tracing.  Note some DB views only show
+ * the first nine characters of the driver name.
+ */
+#define PHP_OCI8_DRIVER_NAME "PHP OCI8 " PHP_OCI8_VERSION
+
 /* }}} */
 
 typedef struct { /* php_oci_spool {{{ */
@@ -200,6 +206,7 @@ typedef struct { /* php_oci_bind {{{ */
 	dvoid				*descriptor;			/* used for binding of LOBS etc */
 	OCIStmt				*statement;				/* used for binding REFCURSORs */
 	php_oci_statement	*parent_statement;		/* pointer to the parent statement */
+	ub2 type;						/* bind type */
 	struct {
 		void	*elements;
 		sb2		*indicators;
@@ -439,7 +446,7 @@ php_oci_out_column * php_oci_statement_get_column (php_oci_statement *, long, ch
 int php_oci_statement_execute (php_oci_statement *, ub4 TSRMLS_DC);
 int php_oci_statement_cancel (php_oci_statement * TSRMLS_DC);
 void php_oci_statement_free (php_oci_statement * TSRMLS_DC);
-int php_oci_bind_pre_exec(void *data TSRMLS_DC);
+int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC);
 int php_oci_bind_post_exec(void *data TSRMLS_DC);
 int php_oci_bind_by_name(php_oci_statement *, char *, int, zval*, long, ub2 TSRMLS_DC);
 sb4 php_oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
@@ -480,6 +487,7 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ */
 	zend_bool	 in_call;
 	char		*connection_class;
 	zend_bool	 events;
+	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
 
 #ifdef ZTS
