@@ -14,7 +14,7 @@ Installing OCI8
 -----------
 
 The OCI8 extension allows you to access Oracle databases.  It can be
-built using Oracle 9.2, 10.2 or 11.1 client libraries, and allows
+built using Oracle 9.2, 10.2, 11.1 or 11.2 client libraries, and allows
 Oracle's standard cross-version connectivity.  This release can be
 used with PHP 6.
 
@@ -450,5 +450,5 @@ system.
 The bug is specific to Oracle 11.1.0.6 with DRCP connections.  The
 issues it fixes do not affect connections using Oracle's dedicated
 (the default connection mode) or shared servers.  They do not affect
-earlier versions of Oracle.  The bug is intended to be fixed in Oracle
-Database 11.1.0.7 (as yet unreleased).
+earlier versions of Oracle.  The bug is fixed in Oracle Database
+11.1.0.7.
