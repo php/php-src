@@ -5,7 +5,6 @@ PHP                                                                        NEWS
 
 - Changed "allow_url_fopen" and "allow_url_include" php.ini directives to allow
   per-wrapper enable/disable and runtime tightening. (Sara)
-
 - Changed --with-config-file-scan-dir / PHP_INI_SCAN_DIR to allow multiple
   paths. (Mikko)
 
