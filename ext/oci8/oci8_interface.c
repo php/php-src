@@ -1716,6 +1716,156 @@ PHP_FUNCTION(oci_set_prefetch)
 }
 /* }}} */
 
+/* {{{ proto bool oci_set_client_identifier(resource connection, string value)
+  Sets the client identifier attribute on the connection */
+PHP_FUNCTION(oci_set_client_identifier)
+{
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *client_id;
+	long client_id_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_id, &client_id_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool oci_set_edition(string value)
+  Sets the edition attribute for all subsequent connections created */
+PHP_FUNCTION(oci_set_edition)
+{
+#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
+	char *edition;
+	long edition_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &edition, &edition_len) == FAILURE) {
+		return;
+	}
+
+	if (OCI_G(edition)) {
+		efree(OCI_G(edition));
+		OCI_G(edition) = NULL;
+	}
+
+	if (edition) {
+		OCI_G(edition) = (char *)safe_emalloc(edition_len+1, sizeof(text), 0);
+		memcpy(OCI_G(edition), edition, edition_len);
+		OCI_G(edition)[edition_len] = '\0';
+	}
+
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto bool oci_set_module_name(resource connection, string value)
+  Sets the module attribute on the connection */
+PHP_FUNCTION(oci_set_module_name)
+{
+#if (OCI_MAJOR_VERSION >= 10)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *module;
+	long module_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &module, &module_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto bool oci_set_action(resource connection, string value)
+  Sets the action attribute on the connection */
+PHP_FUNCTION(oci_set_action)
+{
+#if (OCI_MAJOR_VERSION >= 10)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *action;
+	long action_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &action, &action_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto bool oci_set_client_info(resource connection, string value)
+  Sets the client info attribute on the connection */
+PHP_FUNCTION(oci_set_client_info)
+{
+#if (OCI_MAJOR_VERSION >= 10)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *client_info;
+	long client_info_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_info, &client_info_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */
 PHP_FUNCTION(oci_password_change)

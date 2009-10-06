@@ -121,6 +121,11 @@ reflection::export(new reflectionfunction('ocicollassignelem'));
 reflection::export(new reflectionfunction('ocicollsize'));
 reflection::export(new reflectionfunction('ocicollmax'));
 reflection::export(new reflectionfunction('ocicolltrim'));
+reflection::export(new reflectionfunction('oci_set_edition'));
+reflection::export(new reflectionfunction('oci_set_module_name'));
+reflection::export(new reflectionfunction('oci_set_action'));
+reflection::export(new reflectionfunction('oci_set_client_info'));
+reflection::export(new reflectionfunction('oci_set_client_identifier'));
 
 ?>
 ===DONE===
@@ -1046,6 +1051,45 @@ Function [ <internal%s> function ocicolltrim ] {
   - Parameters [2] {
     Parameter #0 [ <required> $collection ]
     Parameter #1 [ <required> $number ]
+  }
+}
+
+Function [ <internal%s> function oci_set_edition ] {
+
+  - Parameters [1] {
+    Parameter #0 [ <required> $edition_name ]
+  }
+}
+
+Function [ <internal%s> function oci_set_module_name ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $connection_resource ]
+    Parameter #1 [ <required> $module_name ]
+  }
+}
+
+Function [ <internal%s> function oci_set_action ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $connection_resource ]
+    Parameter #1 [ <required> $action ]
+  }
+}
+
+Function [ <internal%s> function oci_set_client_info ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $connection_resource ]
+    Parameter #1 [ <required> $client_information ]
+  }
+}
+
+Function [ <internal%s> function oci_set_client_identifier ] {
+
+  - Parameters [2] {
+    Parameter #0 [ <required> $connection_resource ]
+    Parameter #1 [ <required> $client_identifier ]
   }
 }
 
