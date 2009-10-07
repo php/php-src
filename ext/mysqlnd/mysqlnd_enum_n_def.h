@@ -28,6 +28,10 @@
 #define MYSQLND_SQLSTATE_LENGTH		5
 #define MYSQLND_SQLSTATE_NULL		"00000"
 
+
+#define MYSQLND_NET_CMD_BUFFER_MIN_SIZE			4096
+#define MYSQLND_NET_CMD_BUFFER_MIN_SIZE_STR		"4096"
+
 #define SERVER_STATUS_IN_TRANS					1	/* Transaction has started */
 #define SERVER_STATUS_AUTOCOMMIT				2	/* Server in auto_commit mode */
 #define SERVER_MORE_RESULTS_EXISTS				8	/* Multi query - next query exists */
