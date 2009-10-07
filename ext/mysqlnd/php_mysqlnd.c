@@ -26,7 +26,6 @@
 #include "mysqlnd_debug.h"
 #include "ext/standard/info.h"
 
-
 /* {{{ mysqlnd_functions[]
  *
  * Every user visible function must have an entry in mysqlnd_functions[].
@@ -136,7 +135,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->collect_memory_statistics = FALSE;
 	mysqlnd_globals->debug = NULL;	/* The actual string */
 	mysqlnd_globals->dbg = NULL;	/* The DBG object*/
-	mysqlnd_globals->net_cmd_buffer_size = 2048;
+	mysqlnd_globals->net_cmd_buffer_size = MYSQLND_NET_CMD_BUFFER_MIN_SIZE;
 	mysqlnd_globals->net_read_buffer_size = 32768;
 	mysqlnd_globals->net_read_timeout = 31536000;
 	mysqlnd_globals->log_mask = 0;
@@ -144,13 +143,24 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* }}} */
 
 
+static PHP_INI_MH(OnUpdateNetCmdBufferSize)
+{
+	long long_value = atol(new_value);
+	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
+		return FAILURE;
+	}
+	MYSQLND_G(net_cmd_buffer_size) = long_value;
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_statistics",	"1", 	PHP_INI_ALL, OnUpdateBool,	collect_statistics, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_BOOLEAN("mysqlnd.collect_memory_statistics",	"0", 	PHP_INI_SYSTEM, OnUpdateBool,	collect_memory_statistics, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.debug",					NULL, 	PHP_INI_SYSTEM, OnUpdateString,	debug, zend_mysqlnd_globals, mysqlnd_globals)
-	STD_PHP_INI_ENTRY("mysqlnd.net_cmd_buffer_size",	"2048",	PHP_INI_ALL,	OnUpdateLong,	net_cmd_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.net_cmd_buffer_size",	MYSQLND_NET_CMD_BUFFER_MIN_SIZE_STR,	PHP_INI_ALL,	OnUpdateNetCmdBufferSize,	net_cmd_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_buffer_size",	"32768",PHP_INI_ALL,	OnUpdateLong,	net_read_buffer_size,	zend_mysqlnd_globals,		mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)

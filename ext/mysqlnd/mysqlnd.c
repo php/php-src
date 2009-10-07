@@ -1948,6 +1948,9 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			break;
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
+				DBG_RETURN(FAIL);
+			}
 			conn->net.cmd_buffer.length = *(unsigned int*) value;
 			if (!conn->net.cmd_buffer.buffer) {
 				conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
