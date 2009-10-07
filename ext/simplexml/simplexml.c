@@ -2531,7 +2531,8 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
-
+	sxe_class_entry->serialize = zend_class_serialize_deny;
+	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
 	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
 
