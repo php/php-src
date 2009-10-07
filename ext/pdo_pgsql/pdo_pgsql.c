@@ -85,8 +85,8 @@ ZEND_GET_MODULE(pdo_pgsql)
  */
 PHP_MINIT_FUNCTION(pdo_pgsql)
 {
-	php_pdo_register_driver(&pdo_pgsql_driver);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT", PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
+	php_pdo_register_driver(&pdo_pgsql_driver);
 	return SUCCESS;
 }
 /* }}} */
