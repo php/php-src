@@ -402,6 +402,8 @@ dnl Check for inet_aton and dn_skipname
 dnl in -lc, -lbind and -lresolv
 PHP_CHECK_FUNC(inet_aton, resolv, bind)
 
+dnl Some systems (like OpenSolaris) do not have nanosleep in libc
+PHP_CHECK_FUNC(nanosleep, rt)
 
 dnl Then headers.
 dnl -------------------------------------------------------------------------
@@ -621,7 +623,6 @@ tzset \
 unlockpt \
 unsetenv \
 usleep \
-nanosleep \
 utime \
 vsnprintf \
 vasprintf \
