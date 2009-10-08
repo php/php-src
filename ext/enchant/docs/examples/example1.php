@@ -19,7 +19,5 @@ if (enchant_broker_dict_exists($r,$tag)) {
 		print_r($suggs);
 	}
 	enchant_broker_free_dict($d);
-} else {
 }
 enchant_broker_free($r);
-?>
