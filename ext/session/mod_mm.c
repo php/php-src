@@ -219,9 +219,6 @@ static int ps_mm_initialize(ps_mm *data, const char *path)
 	data->owner = getpid();
 	data->mm = mm_create(0, path);
 	if (!data->mm) {
-		TSRMLS_FETCH();
-
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mm_create(0, %s) failed, err %s", path, mm_error());
 		return FAILURE;
 	}
 
