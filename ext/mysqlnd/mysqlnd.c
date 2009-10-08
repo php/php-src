@@ -757,8 +757,6 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		SET_EMPTY_ERROR(conn->error_info);
 
 		conn->zval_cache = mysqlnd_palloc_get_thd_cache_reference(zval_cache);
-		conn->net.cmd_buffer.length = 128L*1024L;
-		conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
 
 		mysqlnd_local_infile_default(conn);
 		{
