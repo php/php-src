@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
 
+- Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
   (Ilia, wmeler at wp-sa dot pl)
 - Fixed bug #49757 (long2ip() can return wrong value in a multi-threaded
