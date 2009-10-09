@@ -846,6 +846,10 @@ PHP_FUNCTION(tempnam)
 		return;
 	}
 
+	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
