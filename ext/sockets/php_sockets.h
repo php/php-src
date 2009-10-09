@@ -73,7 +73,9 @@ PHP_FUNCTION(socket_clear_error);
 
 #ifndef PHP_WIN32
 typedef int PHP_SOCKET;
+# define PHP_SOCKETS_API PHPAPI
 #else
+# define PHP_SOCKETS_API __declspec(dllexport)
 typedef SOCKET PHP_SOCKET;
 #endif
 
@@ -91,7 +93,7 @@ struct	sockaddr_un {
 };
 #endif
 
-PHPAPI int php_sockets_le_socket(void);
+PHP_SOCKETS_API int php_sockets_le_socket(void);
 
 /* Prototypes */
 #ifdef ilia_0 /* not needed, only causes a compiler warning */
