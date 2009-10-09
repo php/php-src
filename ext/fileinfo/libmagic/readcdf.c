@@ -125,7 +125,10 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 						return -1;
 				} else {
 					char *c, *ec;
-					cdf_timestamp_to_timespec(&ts, tp);
+
+					if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
+						return -1;
+					}
 					c = ctime(&ts.tv_sec);
 					if ((ec = strchr(c, '\n')) != NULL)
 						*ec = '\0';
