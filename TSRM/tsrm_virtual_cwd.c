@@ -667,11 +667,14 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
-			unsigned int retlength = 0, rname_off = 0;
-			int bufindex = 0, rname_len = 0, isabsolute = 0;
+			unsigned int retlength = 0;
+			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
-			WCHAR szVolumePathNames[MAX_PATH];
 			BOOL isVolume = FALSE;
+			char printname[MAX_PATH];
+			char substitutename[MAX_PATH];
+			int printname_len, substitutename_len;
+			int substitutename_off = 0;
 
 			if(++(*ll) > LINK_MAX) {
 				return -1;
@@ -692,33 +695,61 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			CloseHandle(hLink);
 
 			if(pbuffer->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
-				rname_len = pbuffer->SymbolicLinkReparseBuffer.PrintNameLength/2;
-				rname_off = pbuffer->SymbolicLinkReparseBuffer.PrintNameOffset/2;
-				if(rname_len <= 0) {
-					rname_len = pbuffer->SymbolicLinkReparseBuffer.SubstituteNameLength/2;
-					rname_off = pbuffer->SymbolicLinkReparseBuffer.SubstituteNameOffset/2;
-				}
-
 				reparsetarget = pbuffer->SymbolicLinkReparseBuffer.ReparseTarget;
+				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
 				isabsolute = (pbuffer->SymbolicLinkReparseBuffer.Flags == 0) ? 1 : 0;
+				if (!WideCharToMultiByte(CP_THREAD_ACP, 0, 
+					reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR),
+					printname_len + 1,
+					printname, MAX_PATH, NULL, NULL
+				)) {
+					tsrm_free_alloca(pbuffer, use_heap_large);
+					return -1;
+				};
+				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
+				printname[printname_len] = 0;
+
+				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+				if (!WideCharToMultiByte(CP_THREAD_ACP, 0, 
+					reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
+					substitutename_len + 1,
+					substitutename, MAX_PATH, NULL, NULL
+				)) {
+					tsrm_free_alloca(pbuffer, use_heap_large);
+					return -1;
+				};
+				substitutename[substitutename_len] = 0;
 			}
 			else if(pbuffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
-				rname_len = pbuffer->MountPointReparseBuffer.PrintNameLength/2;
-				rname_off = pbuffer->MountPointReparseBuffer.PrintNameOffset/2;
-				if(rname_len <= 0) {
-					rname_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength/2;
-					rname_off = pbuffer->MountPointReparseBuffer.SubstituteNameOffset/2;
-				}
-
-				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
 				isabsolute = 1;
-			}
-			else {
+				reparsetarget = pbuffer->MountPointReparseBuffer.ReparseTarget;
+				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
+				if (!WideCharToMultiByte(CP_THREAD_ACP, 0, 
+					reparsetarget + pbuffer->MountPointReparseBuffer.PrintNameOffset  / sizeof(WCHAR),
+					printname_len + 1,
+					printname, MAX_PATH, NULL, NULL
+				)) {
+					tsrm_free_alloca(pbuffer, use_heap_large);
+					return -1;
+				};
+				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
+
+				substitutename_len = pbuffer->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+				if (!WideCharToMultiByte(CP_THREAD_ACP, 0, 
+					reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR),
+					substitutename_len + 1,
+					substitutename, MAX_PATH, NULL, NULL
+				)) {
+					tsrm_free_alloca(pbuffer, use_heap_large);
+					return -1;
+				};
+				substitutename[substitutename_len] = 0;
+			} else {
 				tsrm_free_alloca(pbuffer, use_heap_large);
 				return -1;
 			}
 
-			if(isabsolute && rname_len > 4) {
+			if(isabsolute && substitutename_len > 4) {
 				/* Do not resolve volumes (for now). A mounted point can 
 				   target a volume without a drive, it is not certain that
 				   all IO functions we use in php and its deps support 
@@ -726,21 +757,22 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				   d:\test\mnt\foo
 				   \\?\Volume{62d1c3f8-83b9-11de-b108-806e6f6e6963}\foo
 				*/
-				if (wcsncmp(reparsetarget,  L"\\??\\Volume{",11) == 0 
-					|| wcsncmp(reparsetarget,  L"\\\\?\\Volume{",11) == 0) {
+				if (strncmp(substitutename, "\\??\\Volume{",11) == 0 
+					|| strncmp(substitutename, "\\\\?\\Volume{",11) == 0) {
 					isVolume = TRUE;					
+					substitutename_off = 0;
 				} else
 					/* do not use the \??\ and \\?\ prefix*/
-					if (wcsncmp(reparsetarget,  L"\\??\\", 4) == 0 
-						|| wcsncmp(reparsetarget,  L"\\\\?\\", 4) == 0) {
-					rname_off += 4;
-					rname_len -= 4;
+					if (strncmp(substitutename, "\\??\\", 4) == 0 
+						|| strncmp(substitutename, "\\\\?\\", 4) == 0) {
+					substitutename_off = 4;
 				}
 			}
+
 			if (!isVolume) {
-				/* Convert wide string to narrow string */
-				for(bufindex = 0; bufindex < rname_len; bufindex++) {
-					*(path + bufindex) = (char)(reparsetarget[rname_off + bufindex]);
+				char * tmp = substitutename + substitutename_off;
+				for(bufindex = 0; bufindex < (substitutename_len - substitutename_off); bufindex++) {
+					*(path + bufindex) = *(tmp + bufindex);
 				}
 
 				*(path + bufindex) = 0;
@@ -748,6 +780,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			} else {
 				j = len;
 			}
+
+
+#if VIRTUAL_CWD_DEBUG
+			fprintf(stderr, "reparse: print: %s ", printname);
+			fprintf(stderr, "sub: %s ", substitutename);
+			fprintf(stderr, "resolved: %s ", path);
+#endif
 			tsrm_free_alloca(pbuffer, use_heap_large);
 
 			if(isabsolute == 1) {
