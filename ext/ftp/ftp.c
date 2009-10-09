@@ -147,7 +147,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
-	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) == -1) {
+	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "getsockname failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}

@@ -181,6 +181,10 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 	if (close_handle) {
 
+#ifdef PHP_WIN32
+		if (sock->socket == -1)
+			sock->socket = SOCK_ERR;
+#endif
 		if (sock->socket != SOCK_ERR) {
 #ifdef PHP_WIN32
 			/* prevent more data from coming in */
@@ -226,10 +230,12 @@ static inline int sock_sendto(php_netstream_data_t *sock, char *buf, size_t bufl
 		struct sockaddr *addr, socklen_t addrlen
 		TSRMLS_DC)
 {
+	int ret;
 	if (addr) {
-		return sendto(sock->socket, buf, buflen, flags, addr, addrlen);
+		ret = sendto(sock->socket, buf, buflen, flags, addr, addrlen);
+		return (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
-	return send(sock->socket, buf, buflen, flags);
+	return ((ret = send(sock->socket, buf, buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
 }
 
 static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
@@ -244,10 +250,12 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 
 	if (want_addr) {
 		ret = recvfrom(sock->socket, buf, buflen, flags, (struct sockaddr*)&sa, &sl);
+		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 			textaddr, textaddrlen, addr, addrlen TSRMLS_CC);
 	} else {
 		ret = recv(sock->socket, buf, buflen, flags);
+		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
 
 	return ret;
@@ -312,7 +320,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 			switch (xparam->op) {
 				case STREAM_XPORT_OP_LISTEN:
-					xparam->outputs.returncode = listen(sock->socket, 5);
+					xparam->outputs.returncode = (listen(sock->socket, 5) == 0) ?  0: -1;
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case STREAM_XPORT_OP_GET_NAME:
