@@ -116,12 +116,12 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 	while (1) {
 		ca = *ap; cb = *bp;
 
-		/* skip over leading zeros unless they are followed by punctuation */
-		while (leading && ca == '0' && (ap+1 < aend) && !ispunct(*(ap+1))) {
+		/* skip over leading zeros */
+		while (leading && ca == '0' && (ap+1 < aend) && isdigit(*(ap+1))) {
 			ca = *++ap;
 		}
 
-		while (leading && cb == '0' && (bp+1 < bend) && !ispunct(*(bp+1))) {
+		while (leading && cb == '0' && (bp+1 < bend) && isdigit(*(bp+1))) {
 			cb = *++bp;
 		}
 
