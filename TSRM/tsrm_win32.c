@@ -200,7 +200,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 		/* Keep the result in realpath_cache */
 		if(bucket != NULL) {
-			if(desired_access == FILE_GENERIC_READ) {
+			if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
 				bucket->is_rvalid = 1;
 				bucket->is_readable = fAccess;
 			}
@@ -318,7 +318,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
-	BOOL asuser = FALSE;
+	BOOL asuser = TRUE;
 
 	TSRMLS_FETCH();
 
