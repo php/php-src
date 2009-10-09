@@ -288,7 +288,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					is_special_section = 1;
 					has_per_dir_config = 1;
 #ifdef PHP_WIN32
-					// make the path lowercase on Windows, for case insensitivty.
+					/* make the path lowercase on Windows, for case insensitivty. */
 					strlwr(key);
 
 					TRANSLATE_SLASHES(key);
@@ -301,7 +301,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
 					is_special_section = 1;
 					has_per_host_config = 1;
-					strlwr(key); // host names are case-insensitive.
+					zend_str_tolower(key, key_len); /* host names are case-insensitive. */
 
 				} else {
 					is_special_section = 0;
