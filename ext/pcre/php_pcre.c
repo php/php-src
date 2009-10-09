@@ -1836,7 +1836,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 3)
     ZEND_ARG_INFO(0, regex)
     ZEND_ARG_INFO(0, replace)
     ZEND_ARG_INFO(0, subject)
