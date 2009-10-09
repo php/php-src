@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
+  insensitive (garretts)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
 
