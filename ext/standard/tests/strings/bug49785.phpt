@@ -6,6 +6,22 @@ function _bin2hex($val) {
     return is_string($val) ? bin2hex($val): $val;
 }
 
+// UTF-8: basic tests
+var_dump(bin2hex(htmlentities("\xc1\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xc2\x80", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xce\x91", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xce\xb1", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xdf\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xe0\xa0\x80", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xe0\x9f\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xe2\x99\xa5", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xef\xbf\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xf0\x8f\xbf\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xf0\x90\x80\x80", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xf7\xbf\xbf\xbf", ENT_QUOTES, "UTF-8")));
+var_dump(bin2hex(htmlentities("\xf8\x88\x80\x80\x80", ENT_QUOTES, "UTF-8")));
+
+echo "--\n";
 // UTF-8: alternative (invalid) UTF-8 sequence
 var_dump(_bin2hex(htmlspecialchars("\xc0\xa6", ENT_QUOTES, 'UTF-8')));
 var_dump(_bin2hex(htmlspecialchars("\xe0\x80\xa6", ENT_QUOTES, 'UTF-8')));
@@ -97,6 +113,20 @@ foreach (array_map('chr', range(0x81, 0xfe)) as $c) {
 }
 ?>
 --EXPECT--
+string(0) ""
+string(4) "c280"
+string(14) "26416c7068613b"
+string(14) "26616c7068613b"
+string(4) "dfbf"
+string(6) "e0a080"
+string(0) ""
+string(16) "266865617274733b"
+string(6) "efbfbf"
+string(0) ""
+string(8) "f0908080"
+string(8) "f7bfbfbf"
+string(0) ""
+--
 string(0) ""
 string(0) ""
 string(0) ""
