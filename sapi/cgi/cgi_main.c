@@ -159,6 +159,7 @@ static const opt_struct OPTIONS[] = {
 typedef struct _php_cgi_globals_struct {
 	zend_bool rfc2616_headers;
 	zend_bool nph;
+	zend_bool check_shebang_line;
 	zend_bool fix_pathinfo;
 	zend_bool force_redirect;
 	zend_bool discard_path;
@@ -1279,9 +1280,6 @@ static void init_request_info(TSRMLS_D)
 				if (pt) {
 					efree(pt);
 				}
-				if (is_valid_path(script_path_translated)) {
-					SG(request_info).path_translated = estrdup(script_path_translated);
-				}
 			} else {
 				/* make sure path_info/translated are empty */
 				if (!orig_script_filename ||
@@ -1310,9 +1308,6 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				if (is_valid_path(script_path_translated)) {
-					SG(request_info).path_translated = estrdup(script_path_translated);
-				}
 				free(real_path);
 			}
 		} else {
@@ -1325,9 +1320,10 @@ static void init_request_info(TSRMLS_D)
 			if (!CGIG(discard_path) && env_path_translated) {
 				script_path_translated = env_path_translated;
 			}
-			if (is_valid_path(script_path_translated)) {
-				SG(request_info).path_translated = estrdup(script_path_translated);
-			}
+		}
+
+		if (is_valid_path(script_path_translated)) {
+			SG(request_info).path_translated = estrdup(script_path_translated);
 		}
 
 		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD", sizeof("REQUEST_METHOD")-1 TSRMLS_CC);
@@ -1369,6 +1365,7 @@ void fastcgi_cleanup(int signal)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("cgi.rfc2616_headers",     "0",  PHP_INI_ALL,    OnUpdateBool,   rfc2616_headers, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.nph",                 "0",  PHP_INI_ALL,    OnUpdateBool,   nph, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_ENTRY("cgi.check_shebang_line",  "1",  PHP_INI_SYSTEM, OnUpdateBool,   check_shebang_line, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.force_redirect",      "1",  PHP_INI_SYSTEM, OnUpdateBool,   force_redirect, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.redirect_status_env", NULL, PHP_INI_SYSTEM, OnUpdateString, redirect_status_env, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
@@ -1385,6 +1382,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 {
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
+	php_cgi_globals->check_shebang_line = 1;
 	php_cgi_globals->force_redirect = 1;
 	php_cgi_globals->redirect_status_env = NULL;
 	php_cgi_globals->fix_pathinfo = 1;
@@ -2058,6 +2056,26 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 			}
 
+			if (CGIG(check_shebang_line) && file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
+				/* #!php support */
+				c = fgetc(file_handle.handle.fp);
+				if (c == '#') {
+					while (c != '\n' && c != '\r' && c != EOF) {
+						c = fgetc(file_handle.handle.fp);	/* skip to end of line */
+					}
+					/* handle situations where line is terminated by \r\n */
+					if (c == '\r') {
+						if (fgetc(file_handle.handle.fp) != '\n') {
+							long pos = ftell(file_handle.handle.fp);
+							fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+						}
+					}
+					CG(start_lineno) = 2;
+				} else {
+					rewind(file_handle.handle.fp);
+				}
+			}
+
 			switch (behavior) {
 				case PHP_MODE_STANDARD:
 					php_execute_script(&file_handle TSRMLS_CC);
@@ -2108,26 +2126,14 @@ consult the installation file that came with this distribution, or visit \n\
 
 fastcgi_request_done:
 			{
-				char *path_translated;
-
-				/* Go through this trouble so that the memory manager doesn't warn
-				 * about SG(request_info).path_translated leaking
-				 */
-				if (SG(request_info).path_translated) {
-					path_translated = strdup(SG(request_info).path_translated);
-					STR_FREE(SG(request_info).path_translated);
-					SG(request_info).path_translated = path_translated;
-				}
+				STR_FREE(SG(request_info).path_translated);
 
 				php_request_shutdown((void *) 0);
+
 				if (exit_status == 0) {
 					exit_status = EG(exit_status);
 				}
 
-				if (SG(request_info).path_translated) {
-					free(SG(request_info).path_translated);
-					SG(request_info).path_translated = NULL;
-				}
 				if (free_query_string && SG(request_info).query_string) {
 					free(SG(request_info).query_string);
 					SG(request_info).query_string = NULL;

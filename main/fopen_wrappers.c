@@ -382,9 +382,12 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, c
  */
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 {
+	FILE *fp;
+#ifndef PHP_WIN32
+	struct stat st;
+#endif
 	char *path_info, *filename;
 	int length;
-	zend_bool orig_display_errors;
 
 	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
@@ -451,7 +454,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		}
 	} /* if doc_root && path_info */
 
-	if(filename) {
+	if (filename) {
 		filename = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
 	}
 
@@ -463,20 +466,32 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		STR_FREE(SG(request_info).path_translated);
 		SG(request_info).path_translated = NULL;
 		return FAILURE;
-	} else {
-		STR_FREE(SG(request_info).path_translated);
-		SG(request_info).path_translated = filename;
 	}
+	fp = VCWD_FOPEN(filename, "rb");
 
-	orig_display_errors = PG(display_errors);
-	PG(display_errors) = 0;
-	if (zend_stream_open(filename, file_handle TSRMLS_CC) == FAILURE) {
-		PG(display_errors) = orig_display_errors;
+#ifndef PHP_WIN32
+	/* refuse to open anything that is not a regular file */
+	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
+		fclose(fp);
+		fp = NULL;
+	}
+#endif
+
+	if (!fp) {
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		SG(request_info).path_translated = NULL;
 		return FAILURE;
 	}
-	PG(display_errors) = orig_display_errors;
+
+	file_handle->opened_path = expand_filepath(filename, NULL TSRMLS_CC);
+
+	STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+	SG(request_info).path_translated = filename;
+
+	file_handle->filename = SG(request_info).path_translated;
+	file_handle->free_filename = 0;
+	file_handle->handle.fp = fp;
+	file_handle->type = ZEND_HANDLE_FP;
 
 	return SUCCESS;
 }
