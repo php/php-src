@@ -791,8 +791,8 @@ static int sapi_cgi_activate(TSRMLS_D)
 		/* SERVER_NAME should also be defined at this stage..but better check it anyway */
 		if (server_name) {
 			server_name_len = strlen(server_name);
-			server_name = estrndup(server_name, strlen(server_name) );
-			strlwr(server_name);
+			server_name = estrndup(server_name, server_name_len);
+			zend_str_tolower(server_name, server_name_len);
 			php_ini_activate_per_host_config(server_name, server_name_len + 1 TSRMLS_CC);
 			efree(server_name);
 		}
@@ -816,7 +816,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 		}
 		path[path_len] = 0;
 #ifdef PHP_WIN32
-		// paths on windows should be case-insensitive
+		/* paths on windows should be case-insensitive */
 		strlwr(path);
 #endif
 
@@ -833,7 +833,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 					--doc_root_len;
 				}
 #ifdef PHP_WIN32
-				// paths on windows should be case-insensitive
+				/* paths on windows should be case-insensitive */
 				doc_root = estrndup(doc_root, doc_root_len);
 				strlwr(doc_root);
 #endif
