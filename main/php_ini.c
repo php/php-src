@@ -41,6 +41,20 @@
 #define S_ISREG(mode)   (((mode) & S_IFMT) == S_IFREG)
 #endif
 
+#ifdef PHP_WIN32
+#define TRANSLATE_SLASHES(path) \
+	{ \
+		char *tmp = path; \
+		while (*tmp) { \
+			if (*tmp == '\\') *tmp = '/'; \
+			tmp++; \
+		} \
+	}
+#else
+#define TRANSLATE_SLASHES(path)
+#endif
+
+
 typedef struct _php_extension_lists {
 	zend_llist engine;
 	zend_llist functions;
@@ -273,6 +287,12 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
 					is_special_section = 1;
 					has_per_dir_config = 1;
+#ifdef PHP_WIN32
+					// make the path lowercase on Windows, for case insensitivty.
+					strlwr(key);
+
+					TRANSLATE_SLASHES(key);
+#endif
 
 				/* HOST sections */
 				} else if (!strncasecmp(Z_STRVAL_P(arg1), "HOST", sizeof("HOST") - 1)) {
@@ -281,6 +301,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
 					is_special_section = 1;
 					has_per_host_config = 1;
+					strlwr(key); // host names are case-insensitive.
 
 				} else {
 					is_special_section = 0;

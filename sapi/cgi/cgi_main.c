@@ -751,7 +751,11 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		  if it is inside the docroot, we scan the tree up to the docroot 
 			to find more user.ini, if not we only scan the current path.
 		  */
+#ifdef PHP_WIN32
+		if (strnicmp(s1, s2, s_len) == 0) {
+#else 
 		if (strncmp(s1, s2, s_len) == 0) {
+#endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
@@ -774,7 +778,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 static int sapi_cgi_activate(TSRMLS_D)
 {
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len;
+	uint path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -786,7 +790,11 @@ static int sapi_cgi_activate(TSRMLS_D)
 		server_name = sapi_cgibin_getenv("SERVER_NAME", sizeof("SERVER_NAME") - 1 TSRMLS_CC);
 		/* SERVER_NAME should also be defined at this stage..but better check it anyway */
 		if (server_name) {
-			php_ini_activate_per_host_config(server_name, strlen(server_name) + 1 TSRMLS_CC);
+			server_name_len = strlen(server_name);
+			server_name = estrndup(server_name, strlen(server_name) );
+			strlwr(server_name);
+			php_ini_activate_per_host_config(server_name, server_name_len + 1 TSRMLS_CC);
+			efree(server_name);
 		}
 	}
 
@@ -807,6 +815,10 @@ static int sapi_cgi_activate(TSRMLS_D)
 			path_len = zend_dirname(path, path_len);
 		}
 		path[path_len] = 0;
+#ifdef PHP_WIN32
+		// paths on windows should be case-insensitive
+		strlwr(path);
+#endif
 
 		/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
 		php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
@@ -820,10 +832,18 @@ static int sapi_cgi_activate(TSRMLS_D)
 				if (IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
+#ifdef PHP_WIN32
+				// paths on windows should be case-insensitive
+				doc_root = estrndup(doc_root, doc_root_len);
+				strlwr(doc_root);
+#endif
 				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1 TSRMLS_CC);
 			}
 		}
 
+#ifdef PHP_WIN32
+		efree(doc_root);
+#endif
 		efree(path);
 	}
 
