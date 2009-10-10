@@ -32,7 +32,7 @@ $tests = array(
 );
 
 foreach ($tests as $test) {
-	putenv("TZ={$test[0]}");
+	date_default_timezone_set($test[0]);
 	print "{$test[0]}\n";
 	array_shift($test);
 	$timestamp = call_user_func_array('mktime', $test);

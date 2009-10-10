@@ -24,7 +24,7 @@ $timestrings = array (
 );
 
 foreach ($timezones as $timezone) {
-	putenv("TZ=$timezone");
+	date_default_timezone_set($timezone);
 	echo $timezone, "\n";
 
 	foreach ($timestrings as $timestring) {

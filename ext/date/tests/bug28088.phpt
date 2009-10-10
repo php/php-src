@@ -2,7 +2,7 @@
 Bug #28088 (strtotime() cannot convert 00 hours")
 --FILE--
 <?php
-putenv("TZ=GMT");
+date_default_timezone_set('GMT');
 
 echo "The following line rightly shows the correct date time:\n";
 echo gmdate("m/d/y Hi", strtotime("04/04/04 2345")), "\n";

@@ -2,7 +2,7 @@
 Bug #35425 (idate() function ignores timezone settings)
 --FILE--
 <?php
-putenv('TZ=America/Montreal');
+date_default_timezone_set('America/Montreal');
 
 $time = mktime(1,1,1,1,1,2005);
 foreach (array('B','d','h','H','i','I','L','m','s','t','U','w','W','y','Y','z','Z') as $v) {

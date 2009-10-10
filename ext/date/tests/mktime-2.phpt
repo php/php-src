@@ -11,7 +11,7 @@ $timezones = array(
 
 foreach($timezones as $timezone)
 {
-    putenv('TZ='.$timezone);
+    date_default_timezone_set($timezone);
 
     /* status of daylight saving time unknown */
     var_dump(mktime(0, 0, 0, 1, 1, 2002));

@@ -111,98 +111,98 @@ fclose( $file_handle );
 *** Testing DateTime::format() : usage variation -  unexpected values to first argument $format***
 
 -- int 0 --
-string(1) "0"
+unicode(1) "0"
 
 -- int 1 --
-string(1) "1"
+unicode(1) "1"
 
 -- int 12345 --
-string(5) "12345"
+unicode(5) "12345"
 
 -- int -12345 --
-string(6) "-12345"
+unicode(6) "-12345"
 
 -- float 10.5 --
-string(4) "10.5"
+unicode(4) "10.5"
 
 -- float -10.5 --
-string(5) "-10.5"
+unicode(5) "-10.5"
 
 -- float .5 --
-string(3) "0.5"
+unicode(3) "0.5"
 
 -- empty array --
 
-Warning: DateTime::format() expects parameter 1 to be string, array given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::format() expects parameter 1 to be string, array given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::format() expects parameter 1 to be string, array given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::format() expects parameter 1 to be string, array given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
-string(0) ""
+unicode(0) ""
 
 -- lowercase null --
-string(0) ""
+unicode(0) ""
 
 -- lowercase true --
-string(1) "1"
+unicode(1) "1"
 
 -- lowercase false --
-string(0) ""
+unicode(0) ""
 
 -- uppercase TRUE --
-string(1) "1"
+unicode(1) "1"
 
 -- uppercase FALSE --
-string(0) ""
+unicode(0) ""
 
 -- empty string DQ --
-string(0) ""
+unicode(0) ""
 
 -- empty string SQ --
-string(0) ""
+unicode(0) ""
 
 -- string DQ --
-string(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
+unicode(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
 
 -- string SQ --
-string(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
+unicode(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
 
 -- mixed case string --
-string(40) "41BSTThu, 14 Jul 2005 22:30:41 +01001722"
+unicode(40) "41BSTThu, 14 Jul 2005 22:30:41 +01001722"
 
 -- heredoc --
-string(82) "10Europe/LondonThursdayThursday2005 42005Thu, 14 Jul 2005 22:30:41 +0100Thursday14"
+unicode(82) "10Europe/LondonThursdayThursday2005 42005Thu, 14 Jul 2005 22:30:41 +0100Thursday14"
 
 -- instance of classWithToString --
-string(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
+unicode(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::format() expects parameter 1 to be string, object given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
-string(0) ""
+unicode(0) ""
 
 -- unset var --
-string(0) ""
+unicode(0) ""
 
 -- resource --
 
-Warning: DateTime::format() expects parameter 1 to be string, resource given in %s on line %d
+Warning: DateTime::format() expects parameter 1 to be binary string, resource given in %s on line %d
 bool(false)
 ===DONE===
