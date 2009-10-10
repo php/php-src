@@ -2,7 +2,7 @@
 Bug #30532 (strtotime - crossing daylight savings time)
 --FILE--
 <?php
-putenv("TZ=America/New_York");
+date_default_timezone_set('America/New_York');
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +1 hour'))."\n";
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +2 hours'))."\n";
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +3 hours'))."\n";

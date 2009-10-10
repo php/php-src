@@ -2,7 +2,7 @@
 Bug #21966 (date() or mktime() returning bad value for mktime month param of '2')
 --FILE--
 <?php
-putenv("TZ=Europe/London");
+date_default_timezone_set('Europe/London');
 
 echo '27/3/04 = ' . strval(mktime(0,0,0,3,27,2004)) . "\n";   // 1080345600
 echo '28/3/04 = ' . strval(mktime(0,0,0,3,28,2004)) . "\n";   // -3662  - should be 108043200

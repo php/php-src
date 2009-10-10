@@ -2,7 +2,7 @@
 Bug #32555 (strtotime("tomorrow") can return false)
 --FILE--
 <?php
-putenv("TZ=US/Eastern");
+date_default_timezone_set('US/Eastern');
 
 $stamp = 1112427000;
 print strftime('%c %Z',strtotime('now',$stamp)) ."\n";

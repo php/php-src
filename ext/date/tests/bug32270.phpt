@@ -2,7 +2,7 @@
 Bug #32270 (strtotime/date behavior)
 --FILE--
 <?php
-putenv("TZ=America/Los_Angeles");
+date_default_timezone_set('America/Los_Angeles');
 
 echo date("m/d/Y H:i:s T", -2145888000)."\n";
 

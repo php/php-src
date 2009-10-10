@@ -14,6 +14,6 @@ $var = ini_get('error_reporting');
 var_dump($var);
 ?>
 --EXPECT--
-string(1) "1"
-string(1) "0"
+unicode(1) "1"
+unicode(1) "0"
 
