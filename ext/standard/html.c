@@ -484,6 +484,11 @@ struct basic_entities_dec {
 			}                        \
 			mbseq[mbpos++] = (mbchar); }
 
+#define MB_FAILURE(pos) do { \
+	*status = FAILURE; \
+	return 0; \
+} while (0)
+
 #define CHECK_LEN(pos, chars_need)			\
 	if((str_len - (pos)) < chars_need) {	\
 		*status = FAILURE;					\
@@ -526,10 +531,12 @@ inline static unsigned int get_next_char(enum entity_charset charset,
                     this_char = c;
 					pos++;
 				} else if (c < 0xc0) {
-					*status = FAILURE;
-					return 0;
+					MB_FAILURE(pos);
 				} else if (c < 0xe0) {
 					CHECK_LEN(pos, 2);
+					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
 					this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
 					if (this_char < 0x80) {
 						*status = FAILURE;
@@ -540,10 +547,15 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 					pos += 2;
 				} else if (c < 0xf0) {
 					CHECK_LEN(pos, 3);
+					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
+					if (str[pos + 2] < 0x80 || str[pos + 2] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
 					this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
 					if (this_char < 0x800) {
-						*status = FAILURE;
-						return 0;
+                        MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
@@ -551,10 +563,18 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 					pos += 3;
 				} else if (c < 0xf8) {
 					CHECK_LEN(pos, 4);
+					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
+					if (str[pos + 2] < 0x80 || str[pos + 2] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
+					if (str[pos + 3] < 0x80 || str[pos + 3] > 0xbf) {
+                        MB_FAILURE(pos);
+					}
 					this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
 					if (this_char < 0x10000) {
-						*status = FAILURE;
-						return 0;
+                        MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
@@ -562,8 +582,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 					MB_WRITE((unsigned char)str[pos + 3]);
 					pos += 4;
 				} else {
-					*status = FAILURE;
-					return 0;
+                    MB_FAILURE(pos);
 				}
 			}
 			break;
@@ -585,8 +604,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(next_char);
 						this_char = (this_char << 8) | next_char;
 					} else {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 				} else {
 					MB_WRITE(this_char);
@@ -611,8 +629,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(next_char);
 						this_char = (this_char << 8) | next_char;
 					} else {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 				} else {
 					MB_WRITE(this_char);
@@ -634,8 +651,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(next_char);
 						this_char = (this_char << 8) | next_char;
 					} else {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 				} else if (this_char == 0x8e) {
 					/* peek at the next char */
@@ -647,8 +663,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(next_char);
 						this_char = (this_char << 8) | next_char;
 					} else {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 				} else if (this_char == 0x8f) {
 					/* peek at the next two char */
@@ -665,8 +680,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(next2_char);
 						this_char = (this_char << 16) | (next_char << 8) | next_char;
 					} else {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 				} else {
 					MB_WRITE(this_char);
