@@ -36,9 +36,6 @@ extern zend_module_entry enchant_module_entry;
 #include "TSRM.h"
 #endif
 
-static void php_enchant_broker_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-static void php_enchant_dict_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-
 PHP_MINIT_FUNCTION(enchant);
 PHP_MSHUTDOWN_FUNCTION(enchant);
 PHP_MINFO_FUNCTION(enchant);
