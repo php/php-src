@@ -42,16 +42,17 @@
 #endif
 
 #ifdef PHP_WIN32
-#define TRANSLATE_SLASHES(path) \
+#define TRANSLATE_SLASHES_LOWER(path) \
 	{ \
 		char *tmp = path; \
 		while (*tmp) { \
 			if (*tmp == '\\') *tmp = '/'; \
-			tmp++; \
+			else *tmp = (__isascii(*tmp)) ? _tolower(*tmp) : tolower(*tmp); \
+				tmp++; \
 		} \
 	}
 #else
-#define TRANSLATE_SLASHES(path)
+#define TRANSLATE_SLASHES_LOWER(path)
 #endif
 
 
@@ -287,12 +288,9 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
 					is_special_section = 1;
 					has_per_dir_config = 1;
-#ifdef PHP_WIN32
-					/* make the path lowercase on Windows, for case insensitivty. */
-					strlwr(key);
 
-					TRANSLATE_SLASHES(key);
-#endif
+					/* make the path lowercase on Windows, for case insensitivty. Does nothign for other platforms */
+					TRANSLATE_SLASHES_LOWER(key);
 
 				/* HOST sections */
 				} else if (!strncasecmp(Z_STRVAL_P(arg1), "HOST", sizeof("HOST") - 1)) {
