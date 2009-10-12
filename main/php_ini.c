@@ -507,33 +507,18 @@ int php_init_config(TSRMLS_D)
 			}
 			strlcat(php_ini_search_path, default_location, search_path_size);
 		}
+
+		/* For people running under terminal services, GetWindowsDirectory will
+		 * return their personal Windows directory, so lets add the system
+		 * windows directory too */
+		if (0 < GetSystemWindowsDirectory(default_location, MAXPATHLEN)) {
+			if (*php_ini_search_path) {
+				strlcat(php_ini_search_path, paths_separator, search_path_size);
+			}
+			strlcat(php_ini_search_path, default_location, search_path_size);
+		}
 		efree(default_location);
 
-		{
-			/* For people running under terminal services, GetWindowsDirectory will
-			 * return their personal Windows directory, so lets add the system
-			 * windows directory too */
-			typedef UINT (WINAPI *get_system_windows_directory_func)(char *buffer, UINT size);
-			static get_system_windows_directory_func get_system_windows_directory = NULL;
-			HMODULE kern;
-
-			if (get_system_windows_directory == NULL) {
-				kern = LoadLibrary("kernel32.dll");
-				if (kern) {
-					get_system_windows_directory = (get_system_windows_directory_func)GetProcAddress(kern, "GetSystemWindowsDirectoryA");
-				}
-			}
-			if (get_system_windows_directory != NULL) {
-				default_location = (char *) emalloc(MAXPATHLEN + 1);
-				if (0 < get_system_windows_directory(default_location, MAXPATHLEN)) {
-					if (*php_ini_search_path) {
-						strlcat(php_ini_search_path, paths_separator, search_path_size);
-					}
-					strlcat(php_ini_search_path, default_location, search_path_size);
-				}
-				efree(default_location);
-			}
-		}
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
 		if (*php_ini_search_path) {
