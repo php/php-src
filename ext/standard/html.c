@@ -688,7 +688,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 						MB_WRITE(this_char);
 						MB_WRITE(next_char);
 						MB_WRITE(next2_char);
-						this_char = (this_char << 16) | (next_char << 8) | next_char;
+						this_char = (this_char << 16) | (next_char << 8) | next2_char;
 					} else {
 						MB_FAILURE(pos);
 					}
