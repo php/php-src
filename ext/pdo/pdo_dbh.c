@@ -110,7 +110,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	char *message = NULL;
 	zval *info = NULL;
 
-	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh == NULL || dbh->error_mode == PDO_ERRMODE_SILENT) {
 		return;
 	}
 	
