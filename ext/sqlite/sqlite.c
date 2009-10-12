@@ -129,7 +129,7 @@ PHP_INI_END()
 #define RES_FROM_OBJECT(res, object) RES_FROM_OBJECT_RESTORE_ERH(res, object, NULL)
 
 #define PHP_SQLITE_EMPTY_QUERY \
-	if (!sql_len) { \
+	if (!sql_len || !*sql) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute empty query."); \
 		RETURN_FALSE; \
 	}
