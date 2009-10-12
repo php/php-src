@@ -13,7 +13,7 @@ if (enchant_broker_dict_exists($r,$tag)) {
 	$spellerrors = enchant_dict_check($d, "soong");
 	print_r($dprovides);
 	echo "found $spellerrors spell errors\n";
-	if ($spellerrors) {
+	if (spellerrors) {
 		$suggs = enchant_dict_suggest($d, "soong");
 		echo "Suggestions for 'soong':";
 		print_r($suggs);
