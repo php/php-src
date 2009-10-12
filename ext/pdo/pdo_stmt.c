@@ -2796,7 +2796,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	int namelen = sizeof("__construct");
 
 	ctor.type = ZEND_INTERNAL_FUNCTION;
-	ctor.function_name.u = malloc(UBYTES(namelen));
+	ctor.function_name.u = emalloc(UBYTES(namelen));
 	u_charsToUChars("__construct", ctor.function_name.u, namelen);	
 
 	ctor.scope = pdo_row_ce;
@@ -2815,8 +2815,10 @@ static int row_get_classname(const zval *object,  zstr *class_name, zend_uint *c
 	if (parent) {
 		return FAILURE;
 	} else {
-		*class_name = ezstrndup(IS_UNICODE, ZSTR("PDORow"), sizeof("PDORow") - 1);
-		*class_name_len = sizeof("PDORow")-1;
+		int namelen = sizeof("PDORow");
+		
+		(*class_name).u = emalloc(UBYTES(namelen));
+		u_charsToUChars("PDORow", (*class_name).u, namelen);
 		return SUCCESS;
 	}
 }
