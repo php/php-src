@@ -5,6 +5,10 @@ PHP                                                                        NEWS
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
+- Fixed crash in SQLiteDatabase::ArrayQuery() and SQLiteDatabase::SingleQuery()
+  when calling using Reflection. (Felipe)
+- Fixed crash when instantiating PDORow and PDOStatement through Reflection.
+  (Felipe)
 
 - Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)
 - Fixed Bug #49785 (insufficient input string validation of htmlspecialchars()).
