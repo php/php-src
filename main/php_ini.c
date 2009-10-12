@@ -47,7 +47,7 @@
 		char *tmp = path; \
 		while (*tmp) { \
 			if (*tmp == '\\') *tmp = '/'; \
-			else *tmp = (__isascii(*tmp)) ? _tolower(*tmp) : tolower(*tmp); \
+			else *tmp = tolower(*tmp); \
 				tmp++; \
 		} \
 	}

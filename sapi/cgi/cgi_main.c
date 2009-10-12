@@ -820,7 +820,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 		path[path_len] = 0;
 #ifdef PHP_WIN32
 		/* paths on windows should be case-insensitive */
-		strlwr(path);
+		zend_str_tolower(path, path_len);
 #endif
 
 		/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
@@ -838,7 +838,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 #ifdef PHP_WIN32
 				/* paths on windows should be case-insensitive */
 				doc_root = estrndup(doc_root, doc_root_len);
-				strlwr(doc_root);
+				zend_str_tolower(doc_root, doc_root_len);
 #endif
 				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1 TSRMLS_CC);
 			}
