@@ -484,15 +484,26 @@ struct basic_entities_dec {
 			}                        \
 			mbseq[mbpos++] = (mbchar); }
 
+/* skip one byte and return */
 #define MB_FAILURE(pos) do { \
+	*newpos = pos + 1; \
 	*status = FAILURE; \
 	return 0; \
 } while (0)
 
 #define CHECK_LEN(pos, chars_need)			\
-	if((str_len - (pos)) < chars_need) {	\
-		*status = FAILURE;					\
-		return 0;							\
+	if (chars_need < 1) {						\
+		if((str_len - (pos)) < chars_need) {	\
+			*newpos = pos;						\
+			*status = FAILURE;					\
+			return 0;							\
+		}										\
+	} else {									\
+		if((str_len - (pos)) < chars_need) {	\
+			*newpos = pos + 1;					\
+			*status = FAILURE;					\
+			return 0;							\
+		}										\
 	}
 
 /* {{{ get_next_char
