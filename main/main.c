@@ -2283,7 +2283,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		char realfile[MAXPATHLEN];
 
 #ifdef PHP_WIN32
-		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		if(primary_file->filename) {
+			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		}
 #endif
 
 		PG(during_request_startup) = 0;
@@ -2372,7 +2374,9 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 
 	zend_try {
 #ifdef PHP_WIN32
-		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		if(primary_file->filename) {
+			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		}
 #endif
 
 		PG(during_request_startup) = 0;
