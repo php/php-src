@@ -168,6 +168,10 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 	int path_len;
 	HashTable **pht;
 
+	if(!path) {
+		return;
+	}
+
 	if (!PW32G(registry_directories)) {
 		PW32G(registry_directories) = (HashTable*)malloc(sizeof(HashTable));
 		zend_hash_init(PW32G(registry_directories), 0, NULL, delete_internal_hashtable, 1);
