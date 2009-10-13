@@ -539,19 +539,18 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 				c = str[pos];
 				if (c < 0x80) {
 					MB_WRITE(c);
-                    this_char = c;
+					this_char = c;
 					pos++;
 				} else if (c < 0xc0) {
 					MB_FAILURE(pos);
 				} else if (c < 0xe0) {
 					CHECK_LEN(pos, 2);
 					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					this_char = ((c & 0x1f) << 6) | (str[pos + 1] & 0x3f);
 					if (this_char < 0x80) {
-						*status = FAILURE;
-						return 0;
+						MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
@@ -559,14 +558,14 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 				} else if (c < 0xf0) {
 					CHECK_LEN(pos, 3);
 					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					if (str[pos + 2] < 0x80 || str[pos + 2] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
 					if (this_char < 0x800) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
@@ -575,17 +574,17 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 				} else if (c < 0xf8) {
 					CHECK_LEN(pos, 4);
 					if (str[pos + 1] < 0x80 || str[pos + 1] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					if (str[pos + 2] < 0x80 || str[pos + 2] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					if (str[pos + 3] < 0x80 || str[pos + 3] > 0xbf) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
 					if (this_char < 0x10000) {
-                        MB_FAILURE(pos);
+						MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
@@ -593,7 +592,7 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 					MB_WRITE((unsigned char)str[pos + 3]);
 					pos += 4;
 				} else {
-                    MB_FAILURE(pos);
+					MB_FAILURE(pos);
 				}
 			}
 			break;
