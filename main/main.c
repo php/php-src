@@ -649,6 +649,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *message;
 	int is_function = 0;
 
+	if(!ZEND_CAN_REPORT(type)) {
+		return;
+	}
+
 	/* get error text into buffer and escape for html if necessary */
 	buffer_len = vspprintf(&buffer, 0, format, args);
 	if (PG(html_errors)) {
@@ -836,6 +840,9 @@ PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, 
 	char *params;
 	va_list args;
 
+	if(!ZEND_CAN_REPORT(type)) {
+		return;
+	}
 	spprintf(&params, 0, "%s,%s", param1, param2);
 	va_start(args, format);
 	php_verror(docref, params ? params : "...", type, format, args TSRMLS_CC);
@@ -2164,7 +2171,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		char realfile[MAXPATHLEN];
 
 #ifdef PHP_WIN32
-		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		if(primary_file->filename) {
+			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		}
 #endif
 
 		PG(during_request_startup) = 0;
@@ -2254,7 +2263,9 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 
 	zend_try {
 #ifdef PHP_WIN32
-		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		if(primary_file->filename) {
+			UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+		}
 #endif
 
 		PG(during_request_startup) = 0;
