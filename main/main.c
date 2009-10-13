@@ -649,10 +649,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *message;
 	int is_function = 0;
 
-	if(!ZEND_CAN_REPORT(type)) {
-		return;
-	}
-
 	/* get error text into buffer and escape for html if necessary */
 	buffer_len = vspprintf(&buffer, 0, format, args);
 	if (PG(html_errors)) {
@@ -840,9 +836,6 @@ PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, 
 	char *params;
 	va_list args;
 
-	if(!ZEND_CAN_REPORT(type)) {
-		return;
-	}
 	spprintf(&params, 0, "%s,%s", param1, param2);
 	va_start(args, format);
 	php_verror(docref, params ? params : "...", type, format, args TSRMLS_CC);
