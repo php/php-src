@@ -130,12 +130,15 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 		}
 		if (bufl) {
 			/* strip trailing whitespaces if we have not done so already */
-			if (type != 2) {
+			if ((type == 2 && bufl && !l) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
+				}
+				if (type == 2) {
+					add_next_index_stringl(array, buf, bufl, 1);
 				}
 			}
 
