@@ -2107,7 +2107,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 }
 /* }}} */
 
-static const zend_module_dep session_deps[] = { /* {{{ */
+static zend_module_dep session_deps[] = { /* {{{ */
 	ZEND_MOD_OPTIONAL("hash")
 	{NULL, NULL, NULL}
 };
