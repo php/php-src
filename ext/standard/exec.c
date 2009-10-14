@@ -62,7 +62,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
-	int l, pclose_return;
+	int l = 0, pclose_return;
 	char *cmd_p, *b, *c, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
@@ -154,12 +154,15 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 		}
 		if (bufl) {
 			/* strip trailing whitespaces if we have not done so already */	
-			if (type != 2) {
+			if ((type == 2 && bufl && !l) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (int)(bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
+				}
+				if (type == 2) {
+					add_next_index_stringl(array, buf, bufl, 1);
 				}
 			}
 
