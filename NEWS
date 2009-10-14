@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed crash when instantiating PDORow and PDOStatement through Reflection.
   (Felipe)
 
+- Fixed bug #49847 (exec() fails to return data inside 2nd parameter, given
+  output lines >4095 bytes). (Ilia)
 - Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
   (Ilia, wmeler at wp-sa dot pl)
