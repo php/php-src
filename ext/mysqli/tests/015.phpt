@@ -5,7 +5,7 @@ mysqli autocommit/commit/rollback with innodb
 	require_once('skipif.inc');
 	require_once('skipifconnectfailure.inc');
 	include "connect.inc";
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
 	$row = mysqli_fetch_row($result);
 	mysqli_free_result($result);
@@ -19,7 +19,7 @@ mysqli autocommit/commit/rollback with innodb
 <?php
 	include "connect.inc";
 
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	if (!$link)
 		printf("[001] Cannot connect, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

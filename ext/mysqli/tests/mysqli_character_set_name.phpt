@@ -1,8 +1,8 @@
 --TEST--
 mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
@@ -23,7 +23,7 @@ require_once('skipifconnectfailure.inc');
 	if (!is_null($tmp = @mysqli_character_set_name($link, $link, $link)))
 		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[005] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

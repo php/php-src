@@ -31,6 +31,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
+#include "ext/mysqlnd/mysqlnd_portability.h"
 
 /* {{{ proto mixed mysqli_affected_rows(object link)
    Get number of affected rows in previous MySQL operation */
@@ -356,6 +357,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				bind[ofs].is_unsigned = (stmt->stmt->fields[ofs].flags & UNSIGNED_FLAG) ? 1 : 0;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 
 			case MYSQL_TYPE_DATE:
@@ -370,6 +372,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 			case MYSQL_TYPE_LONG_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
 			case MYSQL_TYPE_DECIMAL:
+			case MYSQL_TYPE_GEOMETRY:
 #ifdef FIELD_TYPE_NEWDECIMAL
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
@@ -395,7 +398,9 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 					  different lengths and you will see that we get different lengths in stmt->stmt->fields[ofs].length
 					  The just take 256 and saves us from realloc-ing.
 					*/
-					stmt->result.buf[ofs].buflen = 256;
+					stmt->result.buf[ofs].buflen =
+						(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
+
 				} else {
 					/*
 						the user has called store_result(). if he does not there is no way to determine the
@@ -409,7 +414,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
-				bind[ofs].length = &stmt->result.buf[ofs].buflen;
+				bind[ofs].length = &stmt->result.buf[ofs].output_len;
 				break;
 			}
 			default:
@@ -732,7 +737,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		for (i = 0; i < stmt->param.var_cnt; i++) {
 			for (j = i + 1; j < stmt->param.var_cnt; j++) {
 				/* Oops, someone binding the same variable - clone */
-				if (stmt->param.vars[j] == stmt->param.vars[i]) {
+				if (stmt->param.vars[j] == stmt->param.vars[i] && stmt->param.vars[i]) {
 					php_mysqli_stmt_copy_it(&copies, stmt->param.vars[i], stmt->param.var_cnt, i);
 					break;
 				}
@@ -877,9 +882,29 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						ZVAL_DOUBLE(stmt->result.vars[i], *(double *)stmt->result.buf[i].val);
 						break;
 					case IS_STRING:
-						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
+						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
+#if MYSQL_VERSION_ID > 50002
+						 || stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT
+#endif
+						 ) {
 							my_bool uns= (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
-							llval= *(my_ulonglong *) stmt->result.buf[i].val;
+#if MYSQL_VERSION_ID > 50002
+							if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
+								switch (stmt->result.buf[i].output_len) {
+									case 8:llval = (my_ulonglong)  bit_uint8korr(stmt->result.buf[i].val);break;
+									case 7:llval = (my_ulonglong)  bit_uint7korr(stmt->result.buf[i].val);break;
+									case 6:llval = (my_ulonglong)  bit_uint6korr(stmt->result.buf[i].val);break;
+									case 5:llval = (my_ulonglong)  bit_uint5korr(stmt->result.buf[i].val);break;
+									case 4:llval = (my_ulonglong)  bit_uint4korr(stmt->result.buf[i].val);break;
+									case 3:llval = (my_ulonglong)  bit_uint3korr(stmt->result.buf[i].val);break;
+									case 2:llval = (my_ulonglong)  bit_uint2korr(stmt->result.buf[i].val);break;
+									case 1:llval = (my_ulonglong)  uint1korr(stmt->result.buf[i].val);break;
+								}
+							} else
+#endif
+							{
+								llval= *(my_ulonglong *) stmt->result.buf[i].val;
+							}
 #if SIZEOF_LONG==8
 							if (uns && llval > 9223372036854775807L) {
 #elif SIZEOF_LONG==4
@@ -898,14 +923,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							} else {
 								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
-						}
-#if MYSQL_VERSION_ID > 50002
-						else if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
-							llval = *(my_ulonglong *)stmt->result.buf[i].val;
-							ZVAL_LONG(stmt->result.vars[i], llval);
-						}
-#endif
-						else {
+						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
@@ -916,7 +934,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							{
 #endif
 								ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val,
-											 stmt->result.buf[i].buflen, 1);
+											 stmt->result.buf[i].output_len, 1);
 							}
 						}
 						break;
@@ -2097,7 +2115,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	long	mode_in;
 	ulong	mode;
 	ulong	attr;
-	int		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode_in) == FAILURE) {
 		return;
@@ -2110,7 +2127,11 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	}
 
 	mode = mode_in;
-	if ((rc = mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode))) {
+#if !defined(MYSQLI_USE_MYSQLND)
+	if (FALSE == mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+#else
+	if (FAIL == mysql_stmt_attr_set(stmt->stmt, attr, (void *)&mode)) {
+#endif
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2281,7 +2302,8 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 		for (i = mysql_stmt_field_count(stmt->stmt) - 1; i >=0; --i) {
 			if (stmt->stmt->fields && (stmt->stmt->fields[i].type == MYSQL_TYPE_BLOB ||
 				stmt->stmt->fields[i].type == MYSQL_TYPE_MEDIUM_BLOB ||
-				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB))
+				stmt->stmt->fields[i].type == MYSQL_TYPE_LONG_BLOB ||
+				stmt->stmt->fields[i].type == MYSQL_TYPE_GEOMETRY))
 			{
 				my_bool	tmp=1;
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);

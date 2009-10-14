@@ -12,7 +12,7 @@ if (!defined("MYSQLI_ASYNC")) {
 <?php
 class MySQL_Ext extends mysqli{
 	protected $fooData = array();
-	
+
 	public function isEmpty()
 	{
 		$this->extData[] = 'Bar';
@@ -20,13 +20,11 @@ class MySQL_Ext extends mysqli{
 	}
 }
 
+include ("connect.inc");
+$MySQL_Ext = new MySQL_Ext($host, $user, $passwd, $db, $port, $socket);
 
-
-	include ("connect.inc");
-	$MySQL_Ext = new MySQL_Ext($host, $user, $passwd, $db);
-
-	$isEmpty = $MySQL_Ext->isEmpty();
-	var_dump($isEmpty);
+$isEmpty = $MySQL_Ext->isEmpty();
+var_dump($isEmpty);
 ?>
 --EXPECT--
 bool(false)

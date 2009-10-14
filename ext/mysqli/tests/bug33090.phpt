@@ -1,8 +1,8 @@
 --TEST--
 Bug #33090 (mysql_prepare doesn't return an error)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -10,13 +10,13 @@ require_once('skipifconnectfailure.inc');
 	include ("connect.inc");
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd, null, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, null, $port, $socket);
 	mysqli_select_db($link, $db);
 
 	if (!($link->prepare("this makes no sense"))) {
 		printf("%d\n", $link->errno);
 		printf("%s\n", $link->sqlstate);
-	}	
+	}
 	$link->close();
 ?>
 --EXPECT--

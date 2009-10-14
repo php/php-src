@@ -11,7 +11,7 @@ require_once('skipifconnectfailure.inc');
 	require('connect.inc');
 
 	$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	printf("Parent class:\n");
 	var_dump(get_parent_class($mysqli));
@@ -194,7 +194,7 @@ require_once('skipifconnectfailure.inc');
 	@$mysqli->unknown = $unknown;
 	printf("setting mysqli->unknown, mysqli_unknown = '%s'\n", @$mysqli->unknown);
 
-	$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
+	$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	printf("\nAccess hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):\n");
 	assert(mysqli_connect_error() === $mysqli->connect_error);
 	printf("mysqli->connect_error = '%s'/%s ('%s'/%s)\n",

@@ -20,7 +20,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

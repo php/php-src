@@ -1,18 +1,18 @@
 --TEST--
-free nothing 
+free nothing
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
 	include "connect.inc";
-	
+
 	/************************
-	 * don't free anything 
+	 * don't free anything
 	 ************************/
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$result2 = mysqli_query($link, "SELECT CURRENT_USER()");
 	$stmt2 = mysqli_prepare($link, "SELECT CURRENT_USER()");

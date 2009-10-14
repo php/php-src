@@ -6,7 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
-$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 $result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
 $row = mysqli_fetch_row($result);
 mysqli_free_result($result);

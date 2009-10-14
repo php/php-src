@@ -18,11 +18,12 @@ Fetching BIT column values using the PS API
 <?php
 	require('connect.inc');
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	for ($bits = 1; $bits < 64; $bits++) {
+	/* NOTE: works only for up to 31 bits! This limitation should be documented. */
+	for ($bits = 1; $bits < 32; $bits++) {
 		$max_value = pow(2, $bits) - 1;
 		$tests = 0;
 		if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||

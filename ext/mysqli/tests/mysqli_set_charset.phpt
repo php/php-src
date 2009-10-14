@@ -14,7 +14,7 @@ if (!function_exists('mysqli_set_charset'))
  	die("skip Function not available");
 
 require_once('connect.inc');
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!($res = mysqli_query($link, 'SELECT version() AS server_version')) ||
@@ -84,7 +84,7 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 		printf("[011] Expecting boolean/false because of invalid character set, got %s/%s\n", gettype($ret), $ret);
 
 	mysqli_close($link);
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[012] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

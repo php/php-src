@@ -171,7 +171,7 @@ void mysqlnd_unbuffered_free_last_data(MYSQLND_RES *result TSRMLS_DC)
 											STAT_COPY_ON_WRITE_PERFORMED, 0);
 		
 		/* Free last row's zvals */
-		efree(unbuf->last_row_data);
+		mnd_efree(unbuf->last_row_data);
 		unbuf->last_row_data = NULL;
 	}
 	if (unbuf->last_row_buffer) {
@@ -223,11 +223,11 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 	DBG_INF("Freeing data & row_buffer");
 	if (set->data) {
-		pefree(set->data, set->persistent);
+		mnd_pefree(set->data, set->persistent);
 		set->data = NULL;
 	}
 	if (set->row_buffers) {
-		pefree(set->row_buffers, set->persistent);
+		mnd_pefree(set->row_buffers, set->persistent);
 		set->row_buffers	= NULL;
 	}
 	set->data_cursor = NULL;
@@ -237,7 +237,7 @@ void mysqlnd_free_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 
 	DBG_INF("Freeing set");
-	pefree(set, set->persistent);
+	mnd_pefree(set, set->persistent);
 
 	DBG_INF_FMT("after: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_VOID_RETURN;
@@ -295,13 +295,13 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 #if MYSQLND_DEBUG_MEMORY
 			DBG_INF("Freeing current_row & current_buffer");
 #endif
-			pefree(current_row, set->persistent);
+			mnd_pefree(current_row, set->persistent);
 		}
 		current_buffer->free_chunk(current_buffer, TRUE TSRMLS_CC);
 	}
 	DBG_INF("Freeing data & row_buffer");
-	pefree(set->data, set->persistent);
-	pefree(set->row_buffers, set->persistent);
+	mnd_pefree(set->data, set->persistent);
+	mnd_pefree(set->row_buffers, set->persistent);
 	set->data			= NULL;
 	set->row_buffers	= NULL;
 	set->data_cursor	= NULL;
@@ -315,7 +315,7 @@ void mysqlnd_free_background_buffered_data(MYSQLND_RES *result TSRMLS_DC)
 	}
 
 	DBG_INF("Freeing set");
-	pefree(set, set->persistent);
+	mnd_pefree(set, set->persistent);
 
 	DBG_INF_FMT("after: real_usage=%lu  usage=%lu", zend_memory_usage(TRUE TSRMLS_CC), zend_memory_usage(FALSE TSRMLS_CC));
 	DBG_VOID_RETURN;
@@ -333,7 +333,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 
 	if (result->unbuf) {
 		mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
-		efree(result->unbuf);
+		mnd_efree(result->unbuf);
 		result->unbuf = NULL;
 	} else if (result->stored_data) {
 		mysqlnd_free_buffered_data(result TSRMLS_CC);
@@ -347,7 +347,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES *result TSRMLS_DC)
 #endif
 
 	if (result->lengths) {
-		efree(result->lengths);
+		mnd_efree(result->lengths);
 		result->lengths = NULL;
 	}
 
@@ -398,7 +398,7 @@ void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
 		result->conn = NULL;
 	}
 
-	efree(result);
+	mnd_efree(result);
 
 	DBG_VOID_RETURN;
 }
@@ -575,7 +575,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				if (FAIL == (ret = result->m.read_result_metadata(result, conn TSRMLS_CC))) {
 					/* For PS, we leave them in Prepared state */
 					if (!stmt) {
-						efree(conn->current_result);
+						mnd_efree(conn->current_result);
 						conn->current_result = NULL;
 					}
 					DBG_ERR("Error ocurred while reading metadata");
@@ -587,7 +587,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				if (FAIL == (ret = PACKET_READ_ALLOCA(fields_eof, conn))) {
 					DBG_ERR("Error ocurred while reading the EOF packet");
 					result->m.free_result_contents(result TSRMLS_CC);
-					efree(result);
+					mnd_efree(result);
 					if (!stmt) {
 						conn->current_result = NULL;
 					} else {
@@ -901,13 +901,8 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 					lengths[i] = len;
 				}
 
-				/* Forbid ZE to free it, we will clean it */
-				Z_ADDREF_P(data);
-
-				if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-					Z_ADDREF_P(data);
-				}
 				if (flags & MYSQLND_FETCH_NUM) {
+					Z_ADDREF_P(data);
 					zend_hash_next_index_insert(row_ht, &data, sizeof(zval *), NULL);
 				}
 				if (flags & MYSQLND_FETCH_ASSOC) {
@@ -918,6 +913,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 					  the index is a numeric and convert it to it. This however means constant
 					  hashing of the column name, which is not needed as it can be precomputed.
 					*/
+					Z_ADDREF_P(data);
 					if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
 						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
@@ -1128,16 +1124,8 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 		for (i = 0; i < result->field_count; i++, field++, zend_hash_key++) {
 			zval *data = current_row[i];
 
-			/*
-			  Let us later know what to do with this zval. If ref_count > 1, we will just
-			  decrease it, otherwise free it. zval_ptr_dtor() make this very easy job.
-			*/
-			Z_ADDREF_P(data);
-			
-			if ((flags & MYSQLND_FETCH_BOTH) == MYSQLND_FETCH_BOTH) {
-				Z_ADDREF_P(data);
-			}
 			if (flags & MYSQLND_FETCH_NUM) {
+				Z_ADDREF_P(data);
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), &data, sizeof(zval *), NULL);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
@@ -1148,6 +1136,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 				  the index is a numeric and convert it to it. This however means constant
 				  hashing of the column name, which is not needed as it can be precomputed.
 				*/
+				Z_ADDREF_P(data);
 				if (zend_hash_key->is_numeric == FALSE) {
 #if PHP_MAJOR_VERSION >= 6
 					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
@@ -1893,9 +1882,9 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES *result TSRMLS_DC)
 
 	if (result->m.fetch_row) {
 		if (result->m.fetch_row == result->m.fetch_row_normal_buffered) {
-			return mysqlnd_fetch_row_buffered_c(result TSRMLS_CC);
+			DBG_RETURN(mysqlnd_fetch_row_buffered_c(result TSRMLS_CC));
 		} else if (result->m.fetch_row == result->m.fetch_row_normal_unbuffered) {
-			return mysqlnd_fetch_row_unbuffered_c(result TSRMLS_CC);
+			DBG_RETURN(mysqlnd_fetch_row_unbuffered_c(result TSRMLS_CC));
 		} else {
 			*((int*)NULL) = 1;
 		}

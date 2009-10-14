@@ -580,10 +580,10 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 /* {{{ mysqlnd_stmt_copy_it */
 static void
-mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current)
+mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current TSRMLS_DC)
 {
 	if (!*copies) {
-		*copies = ecalloc(param_count, sizeof(zval *));					
+		*copies = mnd_ecalloc(param_count, sizeof(zval *));					
 	}
 	MAKE_STD_ZVAL((*copies)[current]);
 	*(*copies)[current] = *original;
@@ -643,7 +643,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 		for (j = i + 1; j < stmt->param_count; j++) {
 			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
-				mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
+				mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
 				break; 
 			}
 		}
@@ -653,7 +653,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 				data_size += 8;
 				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
 					}
 				}
 				break;
@@ -668,7 +668,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 #endif
 				if (Z_TYPE_P(the_var) != IS_LONG) {
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
 					}
 				}
 				break;
@@ -691,7 +691,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 #endif
 				{
 					if (!copies || !copies[i]) {
-						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i);
+						mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC);
 					}
 					the_var = copies[i];
 #if PHP_MAJOR_VERSION >= 6
@@ -777,7 +777,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 				zval_ptr_dtor(&copies[i]);
 			}
 		}
-		efree(copies);	
+		mnd_efree(copies);	
 	}
 }
 /* }}} */

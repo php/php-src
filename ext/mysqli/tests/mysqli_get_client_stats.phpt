@@ -91,7 +91,7 @@ mysqlnd.collect_memory_statistics=1
 
 	var_dump($info);
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 		exit(1);
@@ -840,6 +840,8 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, (string)($info['buffered_sets'] + 1), $test_counter, 'mysqli_use_result()');
 	$info = $new_info;
 
+	mysqli_close($link);
+
 
 	/*
 	no_index_used
@@ -861,7 +863,7 @@ mysqlnd.collect_memory_statistics=1
 --CLEAN--
 <?php
 include "connect.inc";
-if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
@@ -885,7 +887,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(119) {
+array(121) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1031,9 +1033,9 @@ array(119) {
   [%u|b%"mem_malloc_ammount"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_calloc_count"]=>
-  %unicode|string%(1) "0"
+  %unicode|string%(%d) "%d"
   [%u|b%"mem_calloc_ammount"]=>
-  %unicode|string%(1) "0"
+  %unicode|string%(%d) "%d"
   [%u|b%"mem_realloc_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"mem_realloc_ammount"]=>
@@ -1123,6 +1125,10 @@ array(119) {
   [%u|b%"proto_binary_fetched_geometry"]=>
   %unicode|string%(1) "0"
   [%u|b%"proto_binary_fetched_other"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"init_command_executed_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"init_command_failed_count"]=>
   %unicode|string%(1) "0"
 }
 Testing buffered normal...

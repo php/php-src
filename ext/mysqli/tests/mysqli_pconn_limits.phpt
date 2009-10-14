@@ -28,7 +28,7 @@ mysqli.max_links=-1
 	mysqli_free_result($res);
 	printf("Regular connection 1 - '%s'\n", $row['_desc']);
 
-	if (!$link2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot open second regular connection, [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 
@@ -41,7 +41,7 @@ mysqli.max_links=-1
 	printf("Regular connection 2 - '%s'\n", $row['_desc']);
 
 	$host = 'p:' . $host;
-	if (!$plink = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$plink = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[004] Cannot create persistent connection using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());
@@ -54,7 +54,7 @@ mysqli.max_links=-1
 	mysqli_free_result($res);
 	printf("Persistent connection 1 - '%s'\n", $row['_desc']);
 
-	if (!$plink2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$plink2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[006] Cannot create persistent connection using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());
@@ -68,7 +68,7 @@ mysqli.max_links=-1
 	printf("Persistent connection 2 - '%s'\n", $row['_desc']);
 
 	$plink3 = mysqli_init();
-	if (!mysqli_real_connect($plink3, $host, $user, $passwd, $db, $port, $socket))
+	if (!my_mysqli_real_connect($plink3, $host, $user, $passwd, $db, $port, $socket))
 		printf("[008] Cannot create persistent connection using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket,
 			mysqli_connect_errno(), mysqli_connect_error());

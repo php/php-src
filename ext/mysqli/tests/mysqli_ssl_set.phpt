@@ -1,9 +1,9 @@
 --TEST--
 mysqli_ssl_set() - test is a stub!
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_ssl_set'))
 	die("skip function not available");
@@ -47,12 +47,12 @@ if (!function_exists('mysqli_ssl_set'))
 		printf("[007] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
 
-	If SSL setup is incorrect mysqli_real_connect()
+	If SSL setup is incorrect my_mysqli_real_connect()
 	will return an error when you attempt to connect.
 
 	... and the above SSL setup should be always incorrect.
 
-	if (false !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
+	if (false !== ($tmp = my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
 		printf("[008] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 	*/
 	print "done!\n";

@@ -813,7 +813,7 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	/* There is a message */
 	if (packet->header.size > p - buf && (i = php_mysqlnd_net_field_length(&p))) {
-		packet->message = pestrndup((char *)p, MIN(i, sizeof(buf) - (p - buf)), conn->persistent);
+		packet->message = estrndup((char *)p, MIN(i, sizeof(buf) - (p - buf)));
 		packet->message_len = i;
 	} else {
 		packet->message = NULL;
@@ -1032,7 +1032,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			  Thus, the name is size - 1. And we add 1 for a trailing \0.
 			*/
 			len = packet->header.size - 1;
-			packet->info_or_local_file = mnd_pemalloc(len + 1, conn->persistent);
+			packet->info_or_local_file = mnd_emalloc(len + 1);
 			memcpy(packet->info_or_local_file, p, len);
 			packet->info_or_local_file[len] = '\0';
 			packet->info_or_local_file_len = len;
@@ -1047,7 +1047,7 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 			p+=2;
 			/* Check for additional textual data */
 			if (packet->header.size  > (p - buf) && (len = php_mysqlnd_net_field_length(&p))) {
-				packet->info_or_local_file = mnd_pemalloc(len + 1, conn->persistent);
+				packet->info_or_local_file = mnd_emalloc(len + 1);
 				memcpy(packet->info_or_local_file, p, len);
 				packet->info_or_local_file[len] = '\0';
 				packet->info_or_local_file_len = len;
@@ -1126,7 +1126,16 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (packet->skip_parsing) {
 		DBG_RETURN(PASS);
 	}
-	if (*p == 0xFE && packet->header.size < 8) {
+	if (*p == 0xFF) {
+		/* Error */
+		p++;
+		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
+										 packet->error_info.error, sizeof(packet->error_info.error),
+										 &packet->error_info.error_no, packet->error_info.sqlstate
+										 TSRMLS_CC);
+		DBG_ERR_FMT("Server error : (%d) %s", packet->error_info.error_no, packet->error_info.error);
+		DBG_RETURN(PASS);
+	} else if (*p == 0xFE && packet->header.size < 8) {
 		/* Premature EOF. That should be COM_FIELD_LIST */
 		DBG_INF("Premature EOF. That should be COM_FIELD_LIST");
 		packet->stupid_list_fields_eof = TRUE;
@@ -1364,8 +1373,10 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	zend_uchar *null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
 	zend_bool as_unicode = conn->options.numeric_and_datetime_as_unicode;
+#ifdef USE_ZVAL_CACHE
 	zend_bool allocated;
 	void *obj;
+#endif
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
@@ -1858,7 +1869,7 @@ php_mysqlnd_stats_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "statistics", PROT_STATS_PACKET);
 
-	packet->message = mnd_pemalloc(packet->header.size + 1, conn->persistent);
+	packet->message = mnd_emalloc(packet->header.size + 1);
 	memcpy(packet->message, buf, packet->header.size);
 	packet->message[packet->header.size] = '\0';
 	packet->message_len = packet->header.size;

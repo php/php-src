@@ -96,7 +96,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_options)(MYSQLND *conn TSRMLS_DC)
 		unsigned int i;
 		for (i = 0; i < conn->options.num_commands; i++) {
 			/* allocated with pestrdup */
-			pefree(conn->options.init_commands[i], pers);
+			mnd_pefree(conn->options.init_commands[i], pers);
 		}
 		mnd_pefree(conn->options.init_commands, pers);
 		conn->options.init_commands = NULL;
@@ -508,8 +508,8 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
 
-	DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
 	if (conn && CONN_GET_STATE(conn) > CONN_ALLOCED && CONN_GET_STATE(conn) ) {
+		DBG_INF_FMT("state=%d", CONN_GET_STATE(conn));
 		DBG_INF("Connecting on a connected handle.");
 
 		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
@@ -627,6 +627,10 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		mnd_efree(hashed_details);
 	}
 
+	if (!conn->options.timeout_read) {
+		/* should always happen because read_timeout cannot be set via API */
+		conn->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
+	}
 	if (conn->options.timeout_read)
 	{
 		tv.tv_sec = conn->options.timeout_read;
@@ -665,7 +669,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	/* we allow load data local infile by default */
-	mysql_flags  |= CLIENT_LOCAL_FILES;
+	mysql_flags  |= CLIENT_LOCAL_FILES | CLIENT_PS_MULTI_RESULTS;
+#ifndef MYSQLND_COMPRESSION_ENABLED
+	if (mysql_flags & CLIENT_COMPRESS) {
+		mysql_flags &= ~CLIENT_COMPRESS;
+	}
+#endif
 
 	auth_packet->user		= user;
 	auth_packet->password	= passwd;
@@ -748,8 +757,6 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		SET_EMPTY_ERROR(conn->error_info);
 
 		conn->zval_cache = mysqlnd_palloc_get_thd_cache_reference(zval_cache);
-		conn->net.cmd_buffer.length = 128L*1024L;
-		conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
 
 		mysqlnd_local_infile_default(conn);
 		{
@@ -763,13 +770,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 								   		(char *)&buf_size TSRMLS_CC);			
 		}
 
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_SUCCESS);
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
 		if (reconnect) {
 			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);	
 		}
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
-			MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
+			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
 		}
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
@@ -1939,6 +1945,9 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			break;
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
+				DBG_RETURN(FAIL);
+			}
 			conn->net.cmd_buffer.length = *(unsigned int*) value;
 			if (!conn->net.cmd_buffer.buffer) {
 				conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);

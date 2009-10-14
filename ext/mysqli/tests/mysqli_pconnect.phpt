@@ -14,7 +14,7 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 	include "connect.inc";
 
 	$host = 'p:' . $host;
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
@@ -23,7 +23,7 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 	$num = 20;
 	$connections = array();
 	for ($i = 0; $i < $num; $i++) {
-		if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[003] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		$connections[] = $link;
 	}
@@ -39,7 +39,7 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 	$connections = array();
 	$num = 20;
 	for ($i = 0; $i < $num; $i++) {
-		if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+		if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 			printf("[004] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		$connections[] = $link;
 	}
@@ -55,7 +55,7 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 			unset($connections[$index]);
 		} else {
 			$left--;
-			if (!$connections[$index] = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+			if (!$connections[$index] = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 				printf("[004] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 		}
 		flush();

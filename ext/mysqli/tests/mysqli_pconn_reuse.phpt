@@ -20,7 +20,7 @@ mysqli.max_links=2
 	include "connect.inc";
 
 	$host = 'p:' . $host;
-	if (!$link1 = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link1 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 	}
@@ -28,7 +28,7 @@ mysqli.max_links=2
 		printf("[002] Cannot set user variable to check if we got the same persistent connection, [%d] %s\n",
 			mysqli_errno($link1), mysqli_error($link1));
 
-	if (!$link2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 	}
@@ -63,7 +63,7 @@ mysqli.max_links=2
 	mysqli_close($link2);
 
 	/* reuse of existing persistent connection expected! */
-	if (!$link2 = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[008] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s, [%d] %s\n",
 			$host, $user, $db, $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 	}

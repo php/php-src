@@ -971,6 +971,7 @@ PHP_FUNCTION(mysql_pconnect)
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
 {
+	int resource_id;
 	zval *mysql_link=NULL;
 	php_mysql_conn *mysql;
 
@@ -984,24 +985,25 @@ PHP_FUNCTION(mysql_close)
 		ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, NULL, MySG(default_link), "MySQL-Link", le_link, le_plink);
 	}
 
+	resource_id = mysql_link ? Z_RESVAL_P(mysql_link) : MySG(default_link);
+	PHPMY_UNBUFFERED_QUERY_CHECK();
 #ifdef MYSQL_USE_MYSQLND
 	{
 		int tmp;
-		if ((mysql = zend_list_find(Z_RESVAL_P(mysql_link), &tmp)) && tmp == le_plink) {
+		if ((mysql = zend_list_find(resource_id, &tmp)) && tmp == le_plink) {
 			mysqlnd_end_psession(mysql->conn);
 		}
 	}
 #endif
-	if (mysql_link) { /* explicit resource number */
-		PHPMY_UNBUFFERED_QUERY_CHECK();
-		zend_list_delete(Z_RESVAL_P(mysql_link));
-	}
+	zend_list_delete(resource_id);
 
 	if (!mysql_link 
 		|| (mysql_link && Z_RESVAL_P(mysql_link)==MySG(default_link))) {
-		PHPMY_UNBUFFERED_QUERY_CHECK();
-		zend_list_delete(MySG(default_link));
 		MySG(default_link) = -1;
+		if (mysql_link) {
+			/* on an explicit close of the default connection it had a refcount of 2 so we need one more call */
+			zend_list_delete(resource_id);
+		}
 	}
 
 	RETURN_TRUE;
@@ -1970,7 +1972,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		}
 	}
 
-	if ((result_type & MYSQL_BOTH) == 0) {
+	if (result_type & ~MYSQL_BOTH) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
 		result_type = MYSQL_BOTH;
 	}
@@ -2146,6 +2148,11 @@ PHP_FUNCTION(mysql_fetch_array)
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, -1, "MySQL result", le_result);
+
+	if (mode & ~MYSQL_BOTH) {
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH");
+                mode = MYSQL_BOTH;
+        }
 
 	mysqlnd_fetch_into(result, mode, return_value, MYSQLND_MYSQL);
 #endif

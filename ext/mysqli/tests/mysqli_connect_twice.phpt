@@ -10,14 +10,14 @@ require_once('skipifconnectfailure.inc');
 <?php
 	include "connect.inc";
 
-	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
 	if (!$thread_id = mysqli_thread_id($link))
 		printf("[002] Cannot determine thread id, test will fail, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (true !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
+	if (true !== ($tmp = my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
 		printf("[003] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!is_int($new_thread_id = mysqli_thread_id($link)) || ($new_thread_id < 0))
@@ -35,7 +35,7 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (!$link = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$link = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[007] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 

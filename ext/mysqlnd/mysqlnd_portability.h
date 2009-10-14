@@ -9,6 +9,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
   were added to improve the header file, to get it more consistent.
 */
 
+#ifndef MYSQLND_PORTABILITY_H
+#define MYSQLND_PORTABILITY_H
+
 /* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
 #define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
 
@@ -30,9 +33,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif /* __CYGWIN__ */
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(WIN32)
-#  include <ext/mysqlnd/config-win.h>
+#  include "ext/mysqlnd/config-win.h"
 #else 
-#  include "ext/mysqlnd/php_mysqlnd_config.h"
+#  include <ext/mysqlnd/php_mysqlnd_config.h>
 #endif /* _WIN32... */
 
 #ifdef HAVE_SYS_TYPES_H
@@ -497,6 +500,7 @@ typedef union {
 
 #endif /* WORDS_BIGENDIAN */
 
+#endif /* MYSQLND_PORTABILITY_H */
 
 
 /*

@@ -2,7 +2,6 @@ dnl
 dnl $Id$
 dnl config.m4 for mysqlnd driver
 
-
 PHP_ARG_ENABLE(mysqlnd_threading, whether to enable threaded fetch in mysqlnd,
 [  --enable-mysqlnd-threading
                             EXPERIMENTAL: Enable mysqlnd threaded fetch.
@@ -18,18 +17,20 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
 
   PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, no)
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
-  PHP_INSTALL_HEADERS([ext/mysqlnd])
-  PHP_INSTALL_HEADERS([$ext_builddir/php_mysqlnd_config.h])
 
   dnl Windows uses config.w32 thus this code is safe for now
   if test "$PHP_MYSQLND_THREADING" = "yes"; then
     PHP_BUILD_THREAD_SAFE
     AC_DEFINE([MYSQLND_THREADED], 1, [Use mysqlnd internal threading])
   fi
+fi
+
+if test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
+  PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
 
   dnl This creates a file so it has to be after above macros
   PHP_CHECK_TYPES([int8 uint8 int16 uint16 int32 uint32 uchar ulong int8_t uint8_t int16_t uint16_t int32_t uint32_t int64_t uint64_t], [
-    $ext_builddir/php_mysqlnd_config.h
+    ext/mysqlnd/php_mysqlnd_config.h
   ],[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

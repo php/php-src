@@ -360,10 +360,10 @@ struct st_mysqlnd_stmt_methods
 	enum_func_status	(*bind_parameters)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * const param_bind TSRMLS_DC);
 	enum_func_status	(*bind_one_parameter)(MYSQLND_STMT * const stmt, unsigned int param_no, zval * const zv, zend_uchar	type TSRMLS_DC);
 	enum_func_status	(*refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC);
-	void				(*set_param_bind_dtor)(MYSQLND_STMT * const stmt, void (*param_bind_dtor)(MYSQLND_PARAM_BIND *)  TSRMLS_DC);
+	void				(*set_param_bind_dtor)(MYSQLND_STMT * const stmt, void (*param_bind_dtor)(MYSQLND_PARAM_BIND * TSRMLS_DC) TSRMLS_DC);
 	enum_func_status	(*bind_result)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * const result_bind TSRMLS_DC);
 	enum_func_status	(*bind_one_result)(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
-	void				(*set_result_bind_dtor)(MYSQLND_STMT * const stmt, void (*result_bind_dtor)(MYSQLND_RESULT_BIND *) TSRMLS_DC);
+	void				(*set_result_bind_dtor)(MYSQLND_STMT * const stmt, void (*result_bind_dtor)(MYSQLND_RESULT_BIND * TSRMLS_DC) TSRMLS_DC);
 	enum_func_status	(*send_long_data)(MYSQLND_STMT * const stmt, unsigned int param_num,
 										  const char * const data, unsigned long length TSRMLS_DC);
 	MYSQLND_RES *		(*get_parameter_metadata)(MYSQLND_STMT * const stmt);
@@ -625,8 +625,8 @@ struct st_mysqlnd_stmt
 	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */
 
-	void 						(*param_bind_dtor)(MYSQLND_PARAM_BIND *);
-	void 						(*result_bind_dtor)(MYSQLND_RESULT_BIND *);
+	void 						(*param_bind_dtor)(MYSQLND_PARAM_BIND * TSRMLS_DC);
+	void 						(*result_bind_dtor)(MYSQLND_RESULT_BIND * TSRMLS_DC);
 
 	struct st_mysqlnd_stmt_methods	*m;
 };

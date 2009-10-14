@@ -33,10 +33,15 @@ if (!function_exists('mysqli_get_cache_stats')) {
 		;
 
 	$after = mysqli_get_cache_stats();
-	if ($before !== $after) {
-		printf("[004] Statistics have changed\n");
-		var_dump($before);
-		var_dump($after);
+	/* references has to be maintained - it is used for memory management */
+	$ignore = array('references' => true);
+	foreach ($before as $k => $v) {
+		if (isset($ignore[$k]))
+			continue;
+
+		if ($before[$k] != $after[$k])
+			printf("[004] Statistics have changed - %s: %s => %s\n", $
+				$k, $before[$k], $after[$k]);
 	}
 
 	$ignore = array("size" => true, "free_items" => true, "references" => true);

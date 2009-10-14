@@ -1,8 +1,8 @@
 --TEST--
 non freed statement test
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -12,7 +12,7 @@ require_once('skipifconnectfailure.inc');
 	/************************
 	 * non freed stamement
 	 ************************/
-	$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 	$stmt = mysqli_prepare($link, "SELECT CURRENT_USER()");
 	mysqli_execute($stmt);

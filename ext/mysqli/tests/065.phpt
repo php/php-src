@@ -16,7 +16,7 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 <?php
 	include "connect.inc";
 
-	if (!$mysql = new mysqli($host, $user, $passwd, $db, $port, $socket))
+	if (!$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
 	if (!mysqli_query($mysql, "SET sql_mode=''"))
