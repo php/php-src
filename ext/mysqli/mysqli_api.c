@@ -557,6 +557,32 @@ PHP_FUNCTION(mysqli_character_set_name)
 }
 /* }}} */
 
+/* {{{ php_mysqli_close */
+void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC)
+{
+        if (!mysql->persistent) {
+                mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
+        } else {
+                zend_rsrc_list_entry *le;
+                if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
+                        if (Z_TYPE_P(le) == php_le_pmysqli()) {
+                                mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
+                                zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+
+                                MyG(num_links)--;
+                                MyG(num_active_persistent)--;
+                                MyG(num_inactive_persistent)++;
+                        }
+                }
+		mysql->persistent = FALSE;
+        }
+	mysql->mysql = NULL;
+
+        php_clear_mysql(mysql);
+}
+/* }}} */
+
+
 /* {{{ proto bool mysqli_close(object link) U
    Close connection */
 PHP_FUNCTION(mysqli_close)
@@ -570,24 +596,7 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link", MYSQLI_STATUS_INITIALIZED);
 
-	if (!mysql->persistent) {
-		mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
-		mysql->mysql = NULL;
-	} else {
-		zend_rsrc_list_entry *le;
-		if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
-			if (Z_TYPE_P(le) == php_le_pmysqli()) {
-				mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
-
-				MyG(num_links)--;
-				MyG(num_active_persistent)--;
-				MyG(num_inactive_persistent)++;
-			}
-		}
-	}
-
-	php_clear_mysql(mysql);
+	php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT TSRMLS_CC);
 
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);
 	efree(mysql);
