@@ -664,8 +664,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 	conn->thread_id			= greet_packet.thread_id;
 	conn->protocol_version	= greet_packet.protocol_version;
-	conn->server_version	= greet_packet.server_version;
-	greet_packet.server_version = NULL; /* The string will be freed otherwise */
+	conn->server_version	= pestrdup(greet_packet.server_version, conn->persistent);
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	/* we allow load data local infile by default */
@@ -1945,10 +1944,12 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			break;
 #endif
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
 			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 				DBG_RETURN(FAIL);
 			}
 			conn->net.cmd_buffer.length = *(unsigned int*) value;
+			DBG_INF_FMT("new_length=%u", conn->net.cmd_buffer.length);
 			if (!conn->net.cmd_buffer.buffer) {
 				conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
 			} else {
@@ -1958,25 +1959,32 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			}
 			break;
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
 			conn->options.net_read_buffer_size = *(unsigned int*) value;
+			DBG_INF_FMT("new_length=%u", conn->options.net_read_buffer_size);
 			break;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
+			DBG_INF("MYSQLND_OPT_INT_AND_FLOAT_NATIVE");
 			conn->options.int_and_float_native = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_CONNECT_TIMEOUT:
+			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
 			conn->options.timeout_connect = *(unsigned int*) value;
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_READ_TIMEOUT:
+			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
 			conn->options.timeout_read = *(unsigned int*) value;
 			break;
 		case MYSQL_OPT_WRITE_TIMEOUT:
+			DBG_INF("MYSQL_OPT_WRITE_TIMEOUT");
 			conn->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
+			DBG_INF("MYSQL_OPT_LOCAL_INFILE");
 			if (!value || (*(unsigned int*) value) ? 1 : 0) {
 				conn->options.flags |= CLIENT_LOCAL_FILES;
 			} else {
@@ -1984,6 +1992,8 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			}
 			break;
 		case MYSQL_INIT_COMMAND:
+			DBG_INF("MYSQL_INIT_COMMAND");
+			DBG_INF_FMT("command=%s", value);
 			/* when num_commands is 0, then realloc will be effectively a malloc call, internally */
 			conn->options.init_commands = mnd_perealloc(conn->options.init_commands, sizeof(char *) * (conn->options.num_commands + 1),
 														conn->persistent);
@@ -2003,7 +2013,9 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			/* currently not supported. Todo!! */
 			break;
 		case MYSQL_SET_CHARSET_NAME:
+			DBG_INF("MYSQL_SET_CHARSET_NAME");
 			conn->options.charset_name = pestrdup(value, conn->persistent);
+			DBG_INF_FMT("charset=%s", conn->options.charset_name);
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SET_CHARSET_DIR:
