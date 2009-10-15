@@ -793,10 +793,18 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 	zval *tmp;
 	char *ptr;
 
+#if PHP_WIN32
+	char path_bak[MAXPATHLEN];
+	memcpy(path_bak, path, path_len);
+	path_bak[path_len] = 0;
+	TRANSLATE_SLASHES_LOWER(path_bak);
+	path = path_bak;
+#endif
+
 	/* Walk through each directory in path and apply any found per-dir-system-configuration from configuration_hash */
 	if (has_per_dir_config && path && path_len) {
 		ptr = path + 1;
-		while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
+		while ((ptr = strchr(ptr, '/')) != NULL) {
 			*ptr = 0;
 			/* Search for source array matching the path from configuration_hash */
 			if (zend_hash_find(&configuration_hash, path, path_len, (void **) &tmp) == SUCCESS) {
