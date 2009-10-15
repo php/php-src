@@ -96,7 +96,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND *conn,
 						  MYSQLND_THD_ZVAL_PCACHE *zval_cache
 						  TSRMLS_DC);
 
-#define mysqlnd_change_user(conn, user, passwd, db)		(conn)->m->change_user((conn), (user), (passwd), (db) TSRMLS_CC)
+#define mysqlnd_change_user(conn, user, passwd, db, silent)		(conn)->m->change_user((conn), (user), (passwd), (db), (silent) TSRMLS_CC)
 
 #define mysqlnd_debug(x)								_mysqlnd_debug((x) TSRMLS_CC)
 PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
