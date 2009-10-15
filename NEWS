@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Fixed crash when instantiating PDORow and PDOStatement through Reflection.
   (Felipe)
 
+- Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia, 
+  sjoerd at php dot net)
 - Fixed bug #49847 (exec() fails to return data inside 2nd parameter, given 
   output lines >4095 bytes). (Ilia)
 - Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)

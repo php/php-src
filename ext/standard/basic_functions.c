@@ -6392,6 +6392,7 @@ PHP_FUNCTION(import_request_variables)
 	char *types, *prefix;
 	uint prefix_len;
 	char *p;
+	zend_bool ok = 0;
 
 	switch (ZEND_NUM_ARGS()) {
 
@@ -6429,20 +6430,24 @@ PHP_FUNCTION(import_request_variables)
 			case 'g':
 			case 'G':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				ok = 1;
 				break;
 	
 			case 'p':
 			case 'P':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				ok = 1;
 				break;
 
 			case 'c':
 			case 'C':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (apply_func_args_t) copy_request_variable, 2, prefix, prefix_len);
+				ok = 1;
 				break;
 		}
 	}
+	RETURN_BOOL(ok);
 }
 /* }}} */
 
