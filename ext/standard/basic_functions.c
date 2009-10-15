@@ -6048,6 +6048,7 @@ PHP_FUNCTION(import_request_variables)
 	int types_len;
 	zval *prefix = NULL;
 	char *p;
+	zend_bool ok = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &types, &types_len, &prefix) == FAILURE) {
 		return;
@@ -6070,17 +6071,20 @@ PHP_FUNCTION(import_request_variables)
 			case 'g':
 			case 'G':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
+				ok = 1;
 				break;
 
 			case 'p':
 			case 'P':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_FILES]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
+				ok = 1;
 				break;
 
 			case 'c':
 			case 'C':
 				zend_hash_apply_with_arguments(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC, (apply_func_args_t) copy_request_variable, 1, prefix);
+				ok = 1;
 				break;
 		}
 	}
@@ -6088,6 +6092,7 @@ PHP_FUNCTION(import_request_variables)
 	if (ZEND_NUM_ARGS() < 2) {
 		zval_ptr_dtor(&prefix);
 	}
+	RETURN_BOOL(ok);
 }
 /* }}} */
 
