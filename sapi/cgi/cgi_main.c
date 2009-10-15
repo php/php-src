@@ -815,10 +815,6 @@ static int sapi_cgi_activate(TSRMLS_D)
 			path_len = zend_dirname(path, path_len);
 		}
 		path[path_len] = 0;
-#ifdef PHP_WIN32
-		/* paths on windows should be case-insensitive */
-		zend_str_tolower(path, path_len);
-#endif
 
 		/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
 		php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
