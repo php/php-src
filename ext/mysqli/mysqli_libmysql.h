@@ -34,3 +34,5 @@
 #define mysqli_close(c, is_forced)			mysql_close((c))
 #define mysqli_stmt_close(c, implicit)		mysql_stmt_close((c))
 #define mysqli_free_result(r, is_forced)	mysql_free_result((r))
+#define mysqli_change_user_silent(c, u, p, d)   mysql_change_user((c), (u), (p), (d))
+

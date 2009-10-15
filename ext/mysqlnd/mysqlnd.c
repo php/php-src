@@ -1825,7 +1825,8 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 										  const char *user,
 										  const char *passwd,
-										  const char *db TSRMLS_DC)
+										  const char *db,
+										  zend_bool silent TSRMLS_DC)
 {
 	/*
 	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
@@ -1839,8 +1840,8 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	char *p = buffer;
 
 	DBG_ENTER("mysqlnd_conn::change_user");
-	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s",
-				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"");
+	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%d",
+				conn->thread_id, user?user:"", passwd?"***":"null", db?db:"", (silent == TRUE)?1:0 );
 
 	if (!user) {
 		user = "";
@@ -1877,7 +1878,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 
 	if (PASS != mysqlnd_simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
 									   PROT_LAST /* we will handle the OK packet*/,
-									   FALSE, TRUE TSRMLS_CC)) {
+									   silent, TRUE TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
 	}
 

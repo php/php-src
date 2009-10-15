@@ -41,7 +41,7 @@
 /* functions */
 #define mysql_affected_rows(r)			mysqlnd_affected_rows((r))
 #define mysql_autocommit(r,m)			mysqlnd_autocommit((r),(m))
-#define mysql_change_user(r,a,b,c)		mysqlnd_change_user((r), (a), (b), (c))
+#define mysql_change_user(r,a,b,c)		mysqlnd_change_user((r), (a), (b), (c), FALSE)
 #define mysql_character_set_name(c)		mysqlnd_character_set_name((c))
 #define mysql_close(r)					mysqlnd_close((r), MYSQLND_CLOSE_EXPLICIT)
 #define mysql_commit(r)					mysqlnd_commit((r))
