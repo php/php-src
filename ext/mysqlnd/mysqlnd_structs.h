@@ -254,7 +254,7 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*kill_connection)(MYSQLND *conn, unsigned int pid TSRMLS_DC);
 	enum_func_status	(*select_db)(MYSQLND * const conn, const char * const db, unsigned int db_len TSRMLS_DC);
 	enum_func_status	(*server_dump_debug_information)(MYSQLND * const conn TSRMLS_DC);
-	enum_func_status	(*change_user)(MYSQLND * const conn, const char * user, const char * passwd, const char * db TSRMLS_DC);
+	enum_func_status	(*change_user)(MYSQLND * const conn, const char * user, const char * passwd, const char * db, zend_bool silent TSRMLS_DC);
 
 	unsigned int		(*get_error_no)(const MYSQLND * const conn);
 	const char *		(*get_error_str)(const MYSQLND * const conn);

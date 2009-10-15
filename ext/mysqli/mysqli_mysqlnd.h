@@ -39,6 +39,7 @@
 #define mysqli_free_result(r, implicit)	mysqlnd_free_result((r), (implicit))
 #define mysqli_bg_store_result(r)		mysqlnd_bg_store_result((r))
 #define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
+#define mysqli_change_user_silent(c, u, p, d)   mysqlnd_change_user((c), (u), (p), (d), TRUE)
 
 #define HAVE_STMT_NEXT_RESULT
 
