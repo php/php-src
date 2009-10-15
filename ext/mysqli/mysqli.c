@@ -228,22 +228,7 @@ static void mysqli_link_free_storage(void *object TSRMLS_DC)
 	if (my_res && my_res->ptr) {
 		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
 		if (mysql->mysql) {
-			if (!mysql->persistent) {
-				mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
-			} else {
-				zend_rsrc_list_entry *le;
-				if (zend_hash_find(&EG(persistent_list), mysql->hash_key, strlen(mysql->hash_key) + 1, (void **)&le) == SUCCESS) {
-					if (Z_TYPE_P(le) == php_le_pmysqli()) {
-						mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-					
-						zend_ptr_stack_push(&plist->free_links, mysql->mysql);
-
-						MyG(num_links)--;
-						MyG(num_active_persistent)--;
-						MyG(num_inactive_persistent)++;
-					}
-				}
-			}
+			php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT TSRMLS_CC);
 		}
 		php_clear_mysql(mysql);
 		efree(mysql);

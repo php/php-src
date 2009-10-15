@@ -589,7 +589,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		DBG_RETURN(PASS);
 	}
 
-	packet->server_version = pestrdup((char *)p, conn->persistent);
+	packet->server_version = estrdup((char *)p);
 	p+= strlen(packet->server_version) + 1; /* eat the '\0' */
 
 	packet->thread_id = uint4korr(p);

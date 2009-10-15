@@ -89,14 +89,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {
 			mysqli_resource = ((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr;
 			if (mysqli_resource && mysqli_resource->ptr) {
-				mysql = (MY_MYSQL*) mysqli_resource->ptr;			
-				if (mysqli_resource->status > MYSQLI_STATUS_INITIALIZED) {
-					php_clear_mysql(mysql);
-					if (mysql->mysql) {
-						mysqli_close(mysql->mysql, MYSQLI_CLOSE_EXPLICIT);
-						mysql->mysql = NULL;
-					}
-				}
+				mysql = (MY_MYSQL*) mysqli_resource->ptr;
 			}
 		}
 		if (!mysql) {
@@ -122,7 +115,10 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 			flags &= ~CLIENT_LOCAL_FILES;
 		}
 	}
-
+	if (mysql->mysql && mysqli_resource && mysqli_resource->status > MYSQLI_STATUS_INITIALIZED) {
+		/* already connected, we should close the connection */
+		php_mysqli_close(mysql, MYSQLI_CLOSE_IMPLICIT TSRMLS_CC);
+	}
 
 	if (!socket_len || !socket) {
 		socket = MyG(default_socket);
@@ -161,15 +157,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 					do {
 						if (zend_ptr_stack_num_elements(&plist->free_links)) {
-							if (is_real_connect) {
-								/*
-								  Gotcha! If there are some options set on the handle with mysqli_options()
-								  they will be lost. We will fetch other handle with other options. This could
-								  be a source of bug reports of people complaining but...nothing else could be
-								  done, if they want PCONN!
-								*/
-								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
-							}
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
@@ -298,6 +285,7 @@ err:
 	if (mysql->hash_key) {
 		efree(mysql->hash_key);
 		mysql->hash_key = NULL;
+		mysql->persistent = FALSE;
 	}
 	if (!is_real_connect) {
 		efree(mysql);
