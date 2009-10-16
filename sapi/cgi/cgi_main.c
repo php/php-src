@@ -2031,7 +2031,7 @@ consult the installation file that came with this distribution, or visit \n\
 				1. we are running from shell and got filename was there
 				2. we are running as cgi or fastcgi
 			*/
-			if (cgi || SG(request_info).path_translated) {
+			if (cgi || fastcgi || SG(request_info).path_translated) {
 				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
 					if (errno == EACCES) {
 						SG(sapi_headers).http_response_code = 403;
