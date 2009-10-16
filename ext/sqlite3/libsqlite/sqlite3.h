@@ -119,9 +119,9 @@ extern "C" {
 **
 ** Requirements: [H10011] [H10014]
 */
-#define SQLITE_VERSION        "3.6.18"
-#define SQLITE_VERSION_NUMBER 3006018
-#define SQLITE_SOURCE_ID      "2009-09-11 14:05:07 b084828a771ec40be85f07c590ca99de4f6c24ee"
+#define SQLITE_VERSION        "3.6.19"
+#define SQLITE_VERSION_NUMBER 3006019
+#define SQLITE_SOURCE_ID      "2009-10-14 11:33:55 c1d499afc50d54b376945b4efb65c56c787a073d"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers {H10020} <S60100>
@@ -1316,8 +1316,9 @@ SQLITE_API sqlite3_int64 sqlite3_last_insert_rowid(sqlite3*);
 ** on the [database connection] specified by the first parameter.
 ** Only changes that are directly specified by the [INSERT], [UPDATE],
 ** or [DELETE] statement are counted.  Auxiliary changes caused by
-** triggers are not counted. Use the [sqlite3_total_changes()] function
-** to find the total number of changes including changes caused by triggers.
+** triggers or [foreign key actions] are not counted. Use the
+** [sqlite3_total_changes()] function to find the total number of changes
+** including changes caused by triggers and foreign key actions.
 **
 ** Changes to a view that are simulated by an [INSTEAD OF trigger]
 ** are not counted.  Only real table changes are counted.
@@ -1369,8 +1370,8 @@ SQLITE_API int sqlite3_changes(sqlite3*);
 **
 ** This function returns the number of row changes caused by [INSERT],
 ** [UPDATE] or [DELETE] statements since the [database connection] was opened.
-** The count includes all changes from all 
-** [CREATE TRIGGER | trigger] contexts.  However,
+** The count includes all changes from all [CREATE TRIGGER | trigger] 
+** contexts and changes made by [foreign key actions]. However,
 ** the count does not include changes used to implement [REPLACE] constraints,
 ** do rollbacks or ABORT processing, or [DROP TABLE] processing.  The
 ** count does not include rows of views that fire an [INSTEAD OF trigger],
@@ -4511,6 +4512,9 @@ typedef struct sqlite3_blob sqlite3_blob;
 **
 ** If the flags parameter is non-zero, then the BLOB is opened for read
 ** and write access. If it is zero, the BLOB is opened for read access.
+** It is not possible to open a column that is part of an index or primary 
+** key for writing. ^If [foreign key constraints] are enabled, it is 
+** not possible to open a column that is part of a [child key] for writing.
 **
 ** Note that the database name is not the filename that contains
 ** the database but rather the symbolic name of the database that

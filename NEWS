@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- Upgraded bundled sqlite to version 3.6.19. (Scott)
 - Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
   insensitive (Garretts)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
