@@ -406,6 +406,8 @@ mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 		cmd_packet.arg_len  = arg_len;
 	}
 
+	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_COM_QUIT + command - 1 /* because of COM_SLEEP */ );
+
 	if (! PACKET_WRITE_ALLOCA(cmd_packet, conn)) {
 		if (!silent) {
 			DBG_ERR_FMT("Error while sending %s packet", mysqlnd_command_to_text[command]);

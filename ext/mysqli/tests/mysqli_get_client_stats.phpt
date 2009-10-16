@@ -887,7 +887,7 @@ if (!mysqli_query($link, "DROP SERVER IF EXISTS myself"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-array(121) {
+array(150) {
   [%u|b%"bytes_sent"]=>
   %unicode|string%(1) "0"
   [%u|b%"bytes_received"]=>
@@ -1129,6 +1129,64 @@ array(121) {
   [%u|b%"init_command_executed_count"]=>
   %unicode|string%(1) "0"
   [%u|b%"init_command_failed_count"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_quit"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_init_db"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_query"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_field_list"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_create_db"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_drop_db"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_refresh"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_shutdown"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_statistics"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_process_info"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_connect"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_process_kill"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_debug"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_ping"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_time"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_delayed_insert"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_change_user"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_binlog_dump"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_table_dump"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_connect_out"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_register_slave"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_prepare"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_execute"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_send_long_data"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_close"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_reset"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_set_option"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_stmt_fetch"]=>
+  %unicode|string%(1) "0"
+  [%u|b%"com_deamon"]=>
   %unicode|string%(1) "0"
 }
 Testing buffered normal...
