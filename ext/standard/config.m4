@@ -315,6 +315,18 @@ PHP_CHECK_FUNC(res_nmkquery, resolv, bind, socket)
 PHP_CHECK_FUNC(res_nsend, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 
+dnl OSX has the dns functions in libc but remaps them in resolv.h for bind so linking fails
+case $host_alias in
+  *darwin*)
+    macosx_major=`sw_vers -productVersion | cut -d . -f 1`
+    macosx_minor=`sw_vers -productVersion | cut -d . -f 2`
+
+    if test "$macosx_major" -ge "10" && test "$macosx_minor" -ge "6" ; then
+      LIBS="$LIBS -lresolv"
+    fi
+  ;;
+esac
+
 dnl
 dnl Check if atof() accepts NAN
 dnl

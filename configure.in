@@ -211,7 +211,14 @@ case $host_alias in
         CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
       fi
     fi
-    AC_DEFINE(BIND_8_COMPAT, 1, [Enabling BIND8 compatibility for Panther])
+
+    macosx_major=`sw_vers -productVersion | cut -d . -f 1`
+    macosx_minor=`sw_vers -productVersion | cut -d . -f 2`
+
+    if test "$macosx_major" -ge "10" && test "$macosx_minor" -lt "6" ; then
+      AC_DEFINE(BIND_8_COMPAT, 1, [Enabling BIND8 compatibility for Panther])
+    fi
+
     php_multiple_shlib_versions_ok=yes
     ;;
   *beos*)
@@ -388,6 +395,7 @@ sys/time.h \
 netinet/in.h \
 alloca.h \
 arpa/inet.h \
+arpa/nameser_compat.h \
 arpa/nameser.h \
 assert.h \
 crypt.h \

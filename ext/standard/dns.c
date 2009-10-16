@@ -55,6 +55,9 @@
 #undef STATUS
 #undef T_UNSPEC
 #endif
+#if HAVE_ARPA_NAMESER_COMPAT_H
+#include <arpa/nameser_compat.h>
+#endif
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
