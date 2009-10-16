@@ -810,14 +810,8 @@ PHP_FUNCTION(dns_get_record)
 			n = php_dns_search(handle, hostname, C_IN, type_to_fetch, answer.qb2, sizeof answer);
 
 			if (n < 0) {
-				if (php_dns_errno(handle) == NO_DATA) {
-					php_dns_free_handle(handle);
-					continue;
-				}
-
 				php_dns_free_handle(handle);
-				zval_dtor(return_value);
-				RETURN_FALSE;
+				continue;
 			}
 
 			cp = answer.qb2 + HFIXEDSZ;
