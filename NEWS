@@ -1,6 +1,51 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.3.1
+?? ??? 2009, PHP 5.3.1 RC2
+- Upgraded bundled sqlite to version 3.6.19. (Scott)
+
+- Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
+  (Rasmus)
+- Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
+  Stachowiak.  (Rasmus)
+- Fixed certificate validation inside php_openssl_apply_verification_policy
+  (Ryan Sleevi, Ilia)
+
+- Fixed crash in SQLiteDatabase::ArrayQuery() and SQLiteDatabase::SingleQuery()
+  when calling using Reflection. (Felipe)
+- Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
+  insensitive (garretts)
+- Restored shebang line check to CGI sapi (not checked by scanner anymore).
+  (Jani)
+
+- Fixed bug #49847 (exec() fails to return data inside 2nd parameter, given
+  output lines >4095 bytes). (Ilia)
+- Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)
+- Fixed bug #49757 (long2ip() can return wrong value in a multi-threaded
+  applications). (Ilia, Florian Anderiasch)
+- Fixed bug #49738 (calling mcrypt after mcrypt_generic_deinit crashes).
+  (Sriram Natarajan)
+- Fixed bug #49732 (crashes when using fileinfo when timestamp conversion
+  fails). (Pierre)
+- Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
+- Fixed bug #49630 (imap_listscan function missing). (Felipe)
+- Fixed bug #49572 (use of C++ style comments causes build failure).
+  (Sriram Natarajan)
+- Fixed bug #49531 (CURLOPT_INFILESIZE sometimes causes warning "CURLPROTO_FILE
+  cannot be set"). (Felipe)
+- Fixed bug #49517 (cURL's CURLOPT_FILE prevents file from being deleted after
+  fclose). (Ilia)
+- Fixed bug #49470 (FILTER_SANITIZE_EMAIL allows disallowed characters).
+  (Ilia)
+- Fixed bug #49447 (php engine need to correctly check for socket API 
+  return status on windows). (Sriram Natarajan)
+- Fixed bug #48909 (Segmentation fault in mysqli_stmt_execute()). (Andrey)
+- Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
+- Fixed bug #48754 (mysql_close() crash php when no handle specified).
+  (Johannes, Andrey)
+- Fixed bug #40013 (php_uname() does not return nodename on Netware (Guenter
+  Knauf)
+- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
+  (Chris Jones)
 
 03 Sep 2009, PHP 5.3.1 RC1
 - Upgraded bundled sqlite to version 3.6.17. (Scott)
