@@ -64,6 +64,7 @@ typedef struct {
 	int				shm_size;
 	char			*comspec;
 	HANDLE impersonation_token;
+	PSID			impersonation_token_sid;
 } tsrm_win32_globals;
 
 #ifdef ZTS
@@ -89,6 +90,7 @@ typedef struct {
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
+char * tsrm_win32_get_path_sid_key(const char *pathname  TSRMLS_DC);
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
