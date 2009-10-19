@@ -38,7 +38,7 @@ zend_function_entry pdo_firebird_functions[] = { /* {{{ */
 /* {{{ pdo_firebird_deps
  */
 #if ZEND_MODULE_API_NO >= 20050922
-static const zend_module_dep pdo_firebird_deps[] = {
+static zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
 };
