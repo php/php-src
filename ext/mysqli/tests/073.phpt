@@ -4,7 +4,7 @@ mysqli_driver properties
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	var_dump($driver->embedded);
 	var_dump($driver->client_version);

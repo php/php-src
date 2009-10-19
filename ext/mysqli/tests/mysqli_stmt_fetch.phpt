@@ -13,7 +13,7 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_bind_result.phpt already. Restrict
 	this test case to the basics.
 	*/
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

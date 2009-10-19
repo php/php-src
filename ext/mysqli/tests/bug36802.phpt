@@ -10,7 +10,7 @@ Bug #36802 (crashes with with mysqli_set_charset())
 		}
 	}
 
-	include "connect.inc";
+	require_once("connect.inc");
 	$mysql = mysqli_init();
 
 	/* following operations should not work */

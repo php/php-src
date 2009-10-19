@@ -8,7 +8,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	if (!is_null($tmp = @mysqli_get_server_info()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

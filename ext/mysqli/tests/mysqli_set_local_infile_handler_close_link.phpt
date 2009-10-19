@@ -33,8 +33,7 @@ if ('ON' != $row['Value'])
 mysqli.allow_local_infile=1
 --FILE--
 <?php
-	include "connect.inc";
-	include("table.inc");
+	require("table.inc");
 	require_once('local_infile_tools.inc');
 
 	function callback_close_link($fp, &$buffer, $buflen, &$error) {

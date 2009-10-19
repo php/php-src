@@ -14,8 +14,7 @@ if (!stristr(mysqli_get_client_info(), "mysqlnd"))
 ?>
 --FILE--
 <?php
-	include "connect.inc";
-	include "table.inc";
+	require_once("table.inc");
 
 	if (true !== ($tmp = mysqli_set_opt($link, MYSQLI_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, 1)))
 		printf("[001] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);

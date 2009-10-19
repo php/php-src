@@ -14,7 +14,7 @@ if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	if (!$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());

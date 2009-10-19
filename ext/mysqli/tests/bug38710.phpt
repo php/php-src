@@ -7,7 +7,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-include "connect.inc";
+require_once("connect.inc");
 
 $db = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 $qry=$db->stmt_init();
