@@ -18,6 +18,11 @@ PHP                                                                        NEWS
   insensitive (garretts)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
+- Added support for ACL on Windows for thread safe SAPI (Apache2 for example)
+  and fix its support on NTS. (Pierre)
+- Improve symbolic, mounted volume and junctions support for realpath on 
+  Windows. (Pierre)
+
 
 - Fixed bug #49847 (exec() fails to return data inside 2nd parameter, given
   output lines >4095 bytes). (Ilia)
