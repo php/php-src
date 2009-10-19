@@ -2,11 +2,12 @@
 /* piece together a windows binary distro */
 
 $build_dir = $argv[1];
-$phpdll = $argv[2];
-$sapi_targets = explode(" ", $argv[3]);
-$ext_targets = explode(" ", $argv[4]);
-$pecl_targets = explode(" ", $argv[5]);
-$snapshot_template = $argv[6];
+$php_build_dir = $argv[2];
+$phpdll = $argv[3];
+$sapi_targets = explode(" ", $argv[4]);
+$ext_targets = explode(" ", $argv[5]);
+$pecl_targets = explode(" ", $argv[6]);
+$snapshot_template = $argv[7];
 
 $is_debug = preg_match("/^debug/i", $build_dir);
 
@@ -59,7 +60,7 @@ function get_depends($module)
 		 * but the debug version (msvcrtd.dll) and those from visual studio.net
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
-
+		'wldap32.dll'
 		);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
@@ -295,7 +296,7 @@ foreach ($extra_dll_deps as $dll) {
 		/* try template dir */
 		$tdll = $snapshot_template . "/dlls/" . basename($dll);
 		if (!file_exists($tdll)) {
-			$tdll = '../deps/bin/' . basename($dll);
+			$tdll = $php_build_dir . '/bin/' . basename($dll);
 			if (!file_exists($tdll)) {
 				echo "WARNING: distro depends on $dll, but could not find it on your system\n";
 				continue;
@@ -309,10 +310,22 @@ foreach ($extra_dll_deps as $dll) {
 /* TODO:
 add sanity check and test if all required DLLs are present, per version 
 This version works at least for 3.6, 3.8 and 4.0 (5.3-vc6, 5.3-vc9 and HEAD).
+Add ADD_DLLS to add extra DLLs like dynamic dependencies for standard 
+deps. For example, libenchant.dll loads libenchant_myspell.dll or
+libenchant_ispell.dll
 */
-$ICU_DLLS = '../deps/bin/' . 'icu*.dll';
+$ICU_DLLS = $php_build_dir . '/icu*.dll';
 foreach (glob($ICU_DLLS) as $filename) {
 	copy($filename, "$dist_dir/" . basename($filename));
+}
+$ENCHANT_DLLS = array(
+	'glib-2.dll',
+	'gmodule-2.dll',
+	'libenchant_myspell.dll',
+	'libenchant_ispell.dll',
+);
+foreach ($ENCHANT_DLLS as $filename) {
+	copy($php_build_dir . '/bin/' . $filename, "$dist_dir/" . basename($filename));
 }
 
 /* and those for pecl */
