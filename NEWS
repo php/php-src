@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.2.12
-- Updated timezone database to version 2009.14 (2009n) (Derick)
+?? ??? 2009, PHP 5.2.12
+- Updated timezone database to version 2009.14 (2009n). (Derick)
+
 - Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
