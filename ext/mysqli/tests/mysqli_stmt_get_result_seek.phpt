@@ -11,7 +11,6 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))

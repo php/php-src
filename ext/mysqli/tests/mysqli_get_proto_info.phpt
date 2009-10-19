@@ -1,14 +1,14 @@
 --TEST--
 mysqli_get_proto_info()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	if (!is_null($tmp = @mysqli_get_proto_info()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

@@ -74,53 +74,58 @@
 		}
 	}
 
-	/**
-	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-	*
-	* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)?
-	*/
-	function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-		global $connect_flags;
+	if (!function_exists('my_mysqli_connect')) {
 
-		$flags = ($enable_env_flags) ? $connect_flags : false;
-
-		if ($flags !== false) {
-			$link = mysqli_init();
-			if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
-				$link = false;
-		} else {
-			$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-		}
-
-		return $link;
-	}
-
-	/**
-	* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-	*
-	* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
-	*/
-	function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
-		global $connect_flags;
-
-		if ($enable_env_flags)
-			$flags & $connect_flags;
-
-		return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
-	}
-
-	class my_mysqli extends mysqli {
-		public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+		/**
+		* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+		*
+		* @param enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
+		*/
+		function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
 			global $connect_flags;
 
 			$flags = ($enable_env_flags) ? $connect_flags : false;
 
 			if ($flags !== false) {
-				parent::init();
-				$this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
+				$link = mysqli_init();
+				if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
+					$link = false;
 			} else {
-				parent::__construct($host, $user, $passwd, $db, $port, $socket);
+				$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+			}
+
+			return $link;
+		}
+
+		/**
+		* Whenever possible, please use this wrapper to make testing ot MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+		*
+		* @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
+		*/
+		function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
+			global $connect_flags;
+
+			if ($enable_env_flags)
+				$flags & $connect_flags;
+
+			return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
+		}
+
+		class my_mysqli extends mysqli {
+			public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+				global $connect_flags;
+
+				$flags = ($enable_env_flags) ? $connect_flags : false;
+
+				if ($flags !== false) {
+					parent::init();
+					$this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
+				} else {
+					parent::__construct($host, $user, $passwd, $db, $port, $socket);
+				}
 			}
 		}
+	} else {
+		printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
 	}
 ?>

@@ -1,13 +1,13 @@
 --TEST--
 Bug #39457 (Multiple invoked OO connections never close)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$mysql = mysqli_init();
 	$mysql->connect($host, $user, $passwd, $db, $port, $socket);

@@ -21,8 +21,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	if (!is_null($tmp = @mysqli_get_connection_stats($link)))
 		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	include "connect.inc";
-	include "table.inc";
+	require("table.inc");
 
 	if (!is_array($info = mysqli_get_connection_stats($link)) || empty($info))
 		printf("[003] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);
@@ -63,7 +62,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	}
 
 	mysqli_close($link);
-	include "table.inc";
+	require("table.inc");
 
 	if (!is_array($info = mysqli_get_connection_stats($link)) || empty($info))
 		printf("[008] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);

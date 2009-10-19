@@ -17,7 +17,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 /* TODO: mysqli.c needs to export a few more constants - see all the defined() calls! */
 

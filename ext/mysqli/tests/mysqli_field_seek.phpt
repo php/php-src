@@ -54,7 +54,7 @@ require_once('skipifconnectfailure.inc');
 		return $ret;
 	}
 
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

@@ -8,8 +8,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
-	include "table.inc";
+	require("table.inc");
 
 	if (!is_object($driver = new mysqli_driver()))
 		printf("[001] Failed to create mysqli_driver object\n");

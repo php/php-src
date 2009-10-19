@@ -1,14 +1,14 @@
 --TEST--
 Bug #30967 (problems with properties declared in the class extending the class extending MySQLi)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
-	
+	require_once("connect.inc");
+
 	class mysql1 extends mysqli {
 	}
 

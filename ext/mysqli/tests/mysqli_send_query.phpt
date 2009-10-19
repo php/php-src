@@ -15,7 +15,7 @@ if (!$TEST_EXPERIMENTAL)
 --FILE--
 <?php
 	/* NOTE: tests is a stub, but function is deprecated, as long as it does not crash when invoking it... */
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

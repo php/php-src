@@ -8,7 +8,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect\n");
