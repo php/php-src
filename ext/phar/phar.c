@@ -3706,7 +3706,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 
 /* {{{ phar_module_entry
  */
-static zend_module_dep phar_deps[] = {
+static const zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("apc")
 	ZEND_MOD_OPTIONAL("bz2")
 	ZEND_MOD_OPTIONAL("openssl")
