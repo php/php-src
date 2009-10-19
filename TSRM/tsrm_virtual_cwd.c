@@ -428,6 +428,31 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+static inline unsigned long realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
+{
+	register unsigned long h;
+	char *bucket_key = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
+	char *bucket_key_start = (char *)bucket_key;
+	const char *e = bucket_key + strlen(bucket_key);
+
+	if (!bucket_key) {
+		return 0;
+	}
+
+	for (h = 2166136261U; bucket_key < e;) {
+		h *= 16777619;
+		h ^= *bucket_key++;
+	}
+	/* if no SID were present the path is returned. Otherwise a Heap 
+	   allocated string is returned. */
+	if (bucket_key_start != path) {
+		LocalFree(bucket_key_start);
+	}
+	return h;
+}
+/* }}} */
+#else
 static inline unsigned long realpath_cache_key(const char *path, int path_len) /* {{{ */
 {
 	register unsigned long h;
@@ -441,6 +466,7 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len) /
 	return h;
 }
 /* }}} */
+#endif /* defined(PHP_WIN32) */
 
 CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 {
@@ -461,7 +487,11 @@ CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
+#ifdef PHP_WIN32
+	unsigned long key = realpath_cache_key(path, path_len TSRMLS_CC);
+#else
 	unsigned long key = realpath_cache_key(path, path_len);
+#endif
 	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
@@ -494,8 +524,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
 		realpath_cache_bucket *bucket = malloc(size);
 		unsigned long n;
-	
+
+#ifdef PHP_WIN32
+		bucket->key = realpath_cache_key(path, path_len TSRMLS_CC);
+#else
 		bucket->key = realpath_cache_key(path, path_len);
+#endif
 		bucket->path = (char*)bucket + sizeof(realpath_cache_bucket);
 		memcpy(bucket->path, path, path_len+1);
 		bucket->path_len = path_len;
@@ -524,7 +558,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 
 static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
+#ifdef PHP_WIN32
+	unsigned long key = realpath_cache_key(path, path_len TSRMLS_CC);
+#else
 	unsigned long key = realpath_cache_key(path, path_len);
+#endif
+
 	unsigned long n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
@@ -670,7 +709,6 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			unsigned int retlength = 0, rname_off = 0;
 			int bufindex = 0, rname_len = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
-			WCHAR szVolumePathNames[MAX_PATH];
 			BOOL isVolume = FALSE;
 
 			if(++(*ll) > LINK_MAX) {
