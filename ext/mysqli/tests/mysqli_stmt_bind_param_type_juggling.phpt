@@ -8,7 +8,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	function bind_twice($link, $engine, $sql_type1, $sql_type2, $bind_type1, $bind_type2, $bind_value1, $bind_value2, $offset) {

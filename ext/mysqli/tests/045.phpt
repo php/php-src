@@ -6,7 +6,7 @@ mysqli_bind_result (SHOW)
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
 
-	include "connect.inc";
+	require_once("connect.inc");
 	$link = my_mysqli_connect($host, $user, $passwd);
 
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
@@ -20,7 +20,7 @@ mysqli_bind_result (SHOW)
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);

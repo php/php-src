@@ -12,7 +12,7 @@ $drop = <<<EOSQL
 DROP TABLE test_bint;
 DROP TABLE test_buint;
 EOSQL;
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->query("DROP TABLE IF EXISTS test_bint");
@@ -53,7 +53,7 @@ EOSQL;
 ?>
 --CLEAN--
 <?php
-include "connect.inc";
+require_once("connect.inc");
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

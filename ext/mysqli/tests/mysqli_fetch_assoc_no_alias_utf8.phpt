@@ -5,7 +5,7 @@ mysqli_fetch_assoc() - utf8
 	require_once('skipif.inc');
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
-	require('connect.inc');
+	require_once("connect.inc");
 
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		die("skip Cannot connect to server to check charsets");
@@ -35,7 +35,6 @@ mysqli_fetch_assoc() - utf8
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	/* some cyrillic (utf8) comes here */

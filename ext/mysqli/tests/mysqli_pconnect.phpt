@@ -11,7 +11,7 @@ if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$host = 'p:' . $host;
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))

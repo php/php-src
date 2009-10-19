@@ -15,7 +15,7 @@ mysqli.max_persistent=-1
 mysqli.max_links=-1
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$phost = 'p:' . $host;
 

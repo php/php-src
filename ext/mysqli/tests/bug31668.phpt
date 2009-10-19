@@ -9,7 +9,7 @@ require_once('skipifconnectfailure.inc');
 error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 	$mysql->multi_query('SELECT 1;SELECT 2');

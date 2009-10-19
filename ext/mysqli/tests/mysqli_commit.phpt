@@ -25,7 +25,7 @@ if ($row[1] == "DISABLED" || $row[1] == "NO") {
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

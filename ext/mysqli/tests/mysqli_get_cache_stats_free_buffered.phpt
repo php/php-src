@@ -16,7 +16,6 @@ if (!function_exists('mysqli_get_cache_stats')) {
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require_once('table.inc');
 
 	if (!is_array($info = mysqli_get_cache_stats()) || empty($info))

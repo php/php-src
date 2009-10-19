@@ -11,7 +11,7 @@ if (!function_exists('mysqli_fetch_all'))
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

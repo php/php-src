@@ -17,7 +17,7 @@ require_once('skipifconnectfailure.inc');
 	in this file and we test mysqli_stmt_bind_result() in the other
 	test -- therefore the "duplicate" makes some sense to me.
 	*/
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

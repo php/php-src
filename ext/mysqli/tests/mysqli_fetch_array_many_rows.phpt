@@ -8,7 +8,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require("table.inc");
 
 	// do as much as we can do in 5 seconds

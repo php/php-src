@@ -9,7 +9,7 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	/* NOTE: http://bugs.mysql.com/bug.php?id=7923 makes this test fail very likely on all 4.1.x - 5.0.x! */
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

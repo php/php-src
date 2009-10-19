@@ -8,7 +8,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	function mysqli_field_datatypes($link, $sql_type, $php_value, $php_type, $datatypes) {

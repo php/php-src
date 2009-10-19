@@ -11,7 +11,6 @@ mysqli_stmt_get_result() - meta data, field_count()
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))

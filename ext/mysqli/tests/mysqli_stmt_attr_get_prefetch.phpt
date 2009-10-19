@@ -9,7 +9,6 @@ die("SKIP: prefetch isn't supported at the moment");
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);

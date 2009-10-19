@@ -84,7 +84,7 @@ mysqlnd.collect_memory_statistics=1
 	if (!is_null($tmp = @mysqli_get_client_stats($link)))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	include "connect.inc";
+	require_once("connect.inc");
 
 	if (!is_array($info = mysqli_get_client_stats()) || empty($info))
 		printf("[002] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);
@@ -862,7 +862,7 @@ mysqlnd.collect_memory_statistics=1
 ?>
 --CLEAN--
 <?php
-include "connect.inc";
+require_once("connect.inc");
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
