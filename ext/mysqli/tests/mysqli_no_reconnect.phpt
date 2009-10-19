@@ -78,8 +78,19 @@ mysqli.reconnect=0
 			mysqli_connect_errno(), mysqli_connect_error());
 
 	$thread_id_timeout = mysqli_thread_id($link);
-	if (!mysqli_query($link, sprintf('KILL %d', $thread_id_timeout)))
-		printf("[013] Cannot KILL timeout connection, [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
+	if ($IS_MYSQLND) {
+		/* 
+		mysqlnd is a bit more verbose than libmysql. mysqlnd should print:
+		Warning: mysqli_query(): MySQL server has gone away in %s on line %d
+
+		Warning: mysqli_query(): Error reading result set's header in %d on line %d
+		*/
+		if (!@mysqli_query($link, sprintf('KILL %d', $thread_id_timeout)))
+			printf("[013] Cannot KILL timeout connection, [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
+	} else {
+		if (!mysqli_query($link, sprintf('KILL %d', $thread_id_timeout)))
+			printf("[013] Cannot KILL timeout connection, [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
+	}
 	// Give the server a second to really kill the other thread...
 	sleep(1);
 
