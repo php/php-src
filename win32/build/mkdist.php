@@ -60,6 +60,7 @@ function get_depends($module)
 		 * but the debug version (msvcrtd.dll) and those from visual studio.net
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
+		'msvcr90.dll',
 		'wldap32.dll'
 		);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
