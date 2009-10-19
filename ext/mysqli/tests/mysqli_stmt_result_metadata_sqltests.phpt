@@ -10,7 +10,6 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	function testStatement($offset, $link, $sql, $expected_lib, $expected_mysqlnd, $check_mysqlnd, $compare) {

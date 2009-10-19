@@ -8,7 +8,7 @@ mysqli->affected_rows
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$mysqli = new mysqli();
 	if (NULL !== ($tmp = @$mysqli->affected_rows))

@@ -8,8 +8,8 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
-	require('table.inc');
+	require_once("connect.inc");
+	require_once('table.inc');
 
 	$bind_res = $id = null;
 	if (!($stmt = mysqli_stmt_init($link)) ||

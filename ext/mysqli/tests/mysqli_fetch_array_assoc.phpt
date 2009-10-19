@@ -8,7 +8,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
 	require('table.inc');
 
 	if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 5")) {

@@ -8,7 +8,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	// Note: No SQL tests here! We can expand one of the *fetch()
 	// tests to a generic SQL test, if we ever need that.

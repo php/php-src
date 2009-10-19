@@ -10,7 +10,7 @@ if (!function_exists('mysqli_get_charset'))
 ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

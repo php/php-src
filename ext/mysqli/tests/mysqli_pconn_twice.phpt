@@ -15,7 +15,7 @@ mysqli.max_persistent=-1
 mysqli.max_links=-1
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$host = 'p:' . $host;
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
@@ -26,7 +26,7 @@ mysqli.max_links=-1
 		printf("[003] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 
 	/* it is undefined which pooled connection we get - thread ids may differ */
-	
+
 	if (!($res = mysqli_query($link, "SELECT 'ok' AS it_works")) ||
 		!($row = mysqli_fetch_assoc($res)))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -40,7 +40,7 @@ mysqli.max_links=-1
 		printf("[007] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	
+
 	if (true !== ($tmp = $link->real_connect($host, $user, $passwd, $db, $port, $socket)))
 		printf("[009] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 

@@ -5,7 +5,7 @@ mysqli_connect()
 <?php require_once('skipifemb.inc'); ?>
 --FILE--
 <?php
-	include "connect.inc";
+	require_once("connect.inc");
 
 	$tmp    = NULL;
 	$link   = NULL;

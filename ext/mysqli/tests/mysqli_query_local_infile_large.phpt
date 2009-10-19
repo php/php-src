@@ -31,7 +31,7 @@ mysqli.allow_local_infile=1
 	fclose($fp);
 	printf("Filesize in bytes: %d\nRows: %d\n", $bytes, $rowno);
 
-	include "connect.inc";
+	require_once("connect.inc");
  	if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 		printf("[002] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
@@ -72,7 +72,7 @@ $file = tempnam(sys_get_temp_dir(), 'mysqli_test.cvs');
 if (file_exists($file))
 	unlink($file);
 
-include "connect.inc";
+require_once("connect.inc");
 if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 	printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
