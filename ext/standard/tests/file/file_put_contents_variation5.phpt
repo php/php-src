@@ -24,7 +24,7 @@ runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
 
-chdir(dirname('__FILE__'));
+chdir(dirname(__FILE__));
 rmdir($thisTestDir);
 
 
