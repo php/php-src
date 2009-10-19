@@ -251,6 +251,7 @@ if (PHP_PHP_BUILD == 'no') {
 			}
 		}
 	}
+	PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
 }
 DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
