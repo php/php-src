@@ -144,7 +144,7 @@ mysqli_close($link);
 			case 'TIMESTAMP NOT NULL':
 				// http://bugs.mysql.com/bug.php?id=30081 - new flag introduced in 5.1.24/6.0.4
 				$version = mysqli_get_server_version($link);
-				if ((($version >  50122) && ($version < 60000)) ||
+				if ((($version >  50122) && ($version < 60000) && ($version != 50200)) ||
 						($version >= 60004)) {
 					// new flag ON_UPDATE_NOW_FLAG (8192)
 					$expected_flags .= ' ON_UPDATE_NOW';
@@ -165,7 +165,7 @@ mysqli_close($link);
 
 			case 'BIT':
 				$version = mysqli_get_server_version($link);
-				if ($version <= 50105) {
+				if (($version <= 50114 && $version > 50100) || ($version == 50200)) {
 					// TODO - check exact version!
 					$expected_flags = trim(str_replace('UNSIGNED', '', $expected_flags));
 				}
@@ -176,8 +176,8 @@ mysqli_close($link);
 
 		list($missing_flags, $unexpected_flags, $flags_found) = checkFlags($field->flags, $expected_flags, $flags);
 		if ($unexpected_flags) {
-			printf("[006] Found unexpected flags '%s' for %s, found '%s'\n",
-				$unexpected_flags, $column_def, $flags_found);
+			printf("[006] Found unexpected flags '%s' for %s, found '%s' with MySQL %s'\n",
+				$unexpected_flags, $column_def, $flags_found, mysqli_get_server_version($link));
 		}
 		if ($missing_flags) {
 			printf("[007] The flags '%s' have not been reported for %s, found '%s'\n",
