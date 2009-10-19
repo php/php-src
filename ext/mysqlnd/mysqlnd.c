@@ -728,11 +728,12 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		conn->user				= pestrdup(user, conn->persistent);
 		conn->passwd			= pestrndup(passwd, passwd_len, conn->persistent);
 		conn->port				= port;
-		if (host && !socket) {
+
+		if (!unix_socket) {
 			char *p;
 
 			conn->host = pestrdup(host, conn->persistent);
-			spprintf(&p, 0, "MySQL host info: %s via TCP/IP", conn->host);
+			spprintf(&p, 0, "%s via TCP/IP", conn->host);
 			if (conn->persistent) {
 				conn->host_info = pestrdup(p, 1);
 				mnd_efree(p);
@@ -741,7 +742,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			}
 		} else {
 			conn->unix_socket	= pestrdup(socket, conn->persistent);
-			conn->host_info		= pestrdup("MySQL host info: Localhost via UNIX socket", conn->persistent);
+			conn->host_info		= pestrdup("Localhost via UNIX socket", conn->persistent);
 		}
 		conn->client_flag		= auth_packet->client_flags;
 		conn->max_packet_size	= auth_packet->max_packet_size;
