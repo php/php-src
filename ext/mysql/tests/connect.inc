@@ -19,30 +19,34 @@ if (!function_exists('sys_get_temp_dir')) {
 	}
 }
 
-/* wrapper to simplify test porting */
-function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL) {
-	global $connect_flags;
+if (!function_exists('my_mysql_connect')) {
+	/* wrapper to simplify test porting */
+	function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL) {
+		global $connect_flags;
 
-	$flags = ($flags === NULL) ? $connect_flags : $flags;
+		$flags = ($flags === NULL) ? $connect_flags : $flags;
 
-	if ($socket)
-		$host = sprintf("%s:%s", $host, $socket);
-	else if ($port)
-		$host = sprintf("%s:%s", $host, $port);
+		if ($socket)
+			$host = sprintf("%s:%s", $host, $socket);
+		else if ($port)
+			$host = sprintf("%s:%s", $host, $port);
 
-	if (!$link = mysql_connect($host, $user, $passwd, true, $flags)) {
-		printf("[000-a] Cannot connect using host '%s', user '%s', password '****', [%d] %s\n",
-			$host, $user, $passwd,
-			mysql_errno(), mysql_error());
-		return false;
+		if (!$link = mysql_connect($host, $user, $passwd, true, $flags)) {
+			printf("[000-a] Cannot connect using host '%s', user '%s', password '****', [%d] %s\n",
+				$host, $user, $passwd,
+				mysql_errno(), mysql_error());
+			return false;
+		}
+
+		if (!mysql_select_db($db, $link)) {
+			printf("[000-b] [%d] %s\n", mysql_errno($link), mysql_error($link));
+			return false;
+		}
+
+		return $link;
 	}
-
-	if (!mysql_select_db($db, $link)) {
-		printf("[000-b] [%d] %s\n", mysql_errno($link), mysql_error($link));
-		return false;
-	}
-
-	return $link;
+} else {
+	printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
 }
 
 /*
