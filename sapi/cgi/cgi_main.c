@@ -828,7 +828,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);
-				if (IS_SLASH(doc_root[doc_root_len - 1])) {
+				if (doc_root_len > 0 && IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
 #ifdef PHP_WIN32
