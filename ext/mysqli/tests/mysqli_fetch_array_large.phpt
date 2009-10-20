@@ -19,53 +19,57 @@ require_once('skipifconnectfailure.inc');
 			$sql .= sprintf("('%s'), ", $random_char);
 
 		$sql = substr($sql, 0, -2);
-		assert(strlen($sql) < $package_size);
+		$len = strlen($sql);
+		assert($len < $package_size);
 
-		if (!@mysqli_query($link, $sql)) {
-			if (1153 == mysqli_errno($link) || stristr(mysqli_error($link), 'max_allowed_packet'))
-				/* [1153] Got a packet bigger than 'max_allowed_packet' bytes */
+		if (!mysqli_query($link, $sql)) {
+			if (1153 == mysqli_errno($link) || 2006 == mysqli_errno($link) || stristr(mysqli_error($link), 'max_allowed_packet'))
+				/* 
+					myslqnd - [1153] Got a packet bigger than 'max_allowed_packet' bytes 
+					libmysql -[2006] MySQL server has gone away 
+				*/
 				return false;
 
-			printf("[%03d + 1] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
+			printf("[%03d + 1] len = %d, [%d] %s\n", $offset, $len, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
 		/* buffered result set - let's hope we do not run into PHP memory limit... */
 		if (!$res = mysqli_query($link, "SELECT id, label FROM test")) {
-			printf("[%03d + 2] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
+			printf("[%03d + 2] len = %d, [%d] %s\n", $offset, $len, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
 		while ($row = mysqli_fetch_assoc($res)) {
 			if ($row['label'] != $random_char) {
-				printf("[%03d + 3] Wrong results - expecting '%s' got '%s', [%d] %s\n",
-					$offset, $random_char, $row['label'], mysqli_errno($link), mysqli_error($link));
+				printf("[%03d + 3] Wrong results - expecting '%s' got '%s', len = %d, [%d] %s\n",
+					$offset, $random_char, $row['label'], $len, mysqli_errno($link), mysqli_error($link));
 				return false;
 			}
 		}
 		mysqli_free_result($res);
 
 		if (!$stmt = mysqli_prepare($link, "SELECT id, label FROM test")) {
-			printf("[%03d + 4] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
+			printf("[%03d + 4] len = %d, [%d] %s\n", $offset, $len, mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
 		/* unbuffered result set */
 		if (!mysqli_stmt_execute($stmt)) {
-			printf("[%03d + 5] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+			printf("[%03d + 5] len = %d, [%d] %s, [%d] %s\n", $offset, $len, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt), mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
 		$id = $label = NULL;
 		if (!mysqli_stmt_bind_result($stmt, $id, $label)) {
-			printf("[%03d + 6] [%d] %s\n", $offset, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+			printf("[%03d + 6] len = %d, [%d] %s, [%d] %s\n", $offset, $len, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt), mysqli_errno($link), mysqli_error($link));
 			return false;
 		}
 
 		while (mysqli_stmt_fetch($stmt)) {
 			if ($label != $random_char) {
-				printf("[%03d + 7] Wrong results - expecting '%s' got '%s', [%d] %s\n",
-					$offset, $random_char, $label, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+				printf("[%03d + 7] Wrong results - expecting '%s' got '%s', len = %d, [%d] %s\n",
+					$offset, $random_char, $label, $len, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 				return false;
 			}
 		}
