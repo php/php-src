@@ -35,19 +35,23 @@ printf("[005] Expecting boolean/false, got %s/%s\n", gettype($link), $link);
 
 // Run the following tests without an anoynmous MySQL user and use a password for the test user!
 ini_set('mysql.default_socket', $socket);
-if (!is_resource($link = mysql_connect($host, $user, $passwd, true))) {
-	printf("[006] Usage of mysql.default_socket failed\n");
-} else {
-	mysql_close($link);
+if (!is_null($socket)) {	
+	if (!is_resource($link = mysql_connect($host, $user, $passwd, true))) {
+		printf("[006] Usage of mysql.default_socket failed\n");
+	} else {
+		mysql_close($link);
+	}
 }
 
 if (!ini_get('sql.safe_mode')) {
 
 	ini_set('mysql.default_port', $port);
-	if (!is_resource($link = mysql_connect($host, $user, $passwd, true))) {
-		printf("[007] Usage of mysql.default_port failed\n");
-	} else {
-		mysql_close($link);
+	if (!is_null($port)) {
+		if (!is_resource($link = mysql_connect($host, $user, $passwd, true))) {
+			printf("[007] Usage of mysql.default_port failed\n");
+		} else {
+			mysql_close($link);
+		}
 	}
 
 	ini_set('mysql.default_password', $passwd);
