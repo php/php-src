@@ -11,8 +11,9 @@ mysqli autocommit/commit/rollback with innodb
 	mysqli_free_result($result);
 	mysqli_close($link);
 
-	if ($row[1] == "NO") {
-		printf ("skip innodb support not installed.");
+	if ($row[1] == "DISABLED" || $row[1] == "NO") {
+		printf ("skip innodb support is not installed or enabled.");
+		exit;
 	}
 ?>
 --FILE--
