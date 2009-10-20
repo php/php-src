@@ -13,6 +13,14 @@ if (!$fp = fopen('./simple.csv', 'w'))
 
 fclose($fp);
 @unlink('./simple.csv');
+
+require_once("connect.inc");
+if ($socket == "" && $host != NULL && $host != 'localhost' && $host != '.') {
+	/* could be a remote TCP/IP connection. LOCAL INFILE may not work */
+	if (gethostbyaddr($host) != gethostname()) {
+		die("skip LOAD DATA LOCAL INFILE will fail if connecting to remote MySQL");
+	}
+}
 ?>
 --INI--
 safe_mode=0
