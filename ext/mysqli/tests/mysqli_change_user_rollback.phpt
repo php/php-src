@@ -12,8 +12,9 @@ $row = mysqli_fetch_row($result);
 mysqli_free_result($result);
 mysqli_close($link);
 
-if ($row[1] == 'NO') {
-	printf ("skip ROLLBACK requires transactional engine InnoDB");
+if ($row[1] == "DISABLED" || $row[1] == "NO") {
+	printf ("skip innodb support is not installed or enabled.");
+	exit;
 }
 ?>
 --FILE--
