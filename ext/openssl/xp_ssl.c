@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "ext/standard/file.h"
+#include "ext/standard/url.h"
 #include "streams/php_streams_int.h"
 #include "ext/standard/php_smart_str.h"
 #include "php_network.h"
@@ -54,6 +55,7 @@ typedef struct _php_openssl_netstream_data_t {
 	int is_client;
 	int ssl_active;
 	php_stream_xport_crypt_method_t method;
+	char *sni;
 	unsigned state_set:1;
 	unsigned _spare:31;
 } php_openssl_netstream_data_t;
@@ -283,6 +285,9 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 		}
 	}
 
+	if (sslsock->sni) {
+		pefree(sslsock->sni, php_stream_is_persistent(stream));
+	}
 	pefree(sslsock, php_stream_is_persistent(stream));
 	
 	return 0;
@@ -392,6 +397,12 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		float timeout = sslsock->connect_timeout.tv_sec + sslsock->connect_timeout.tv_usec / 1000000;
 		int blocked = sslsock->s.is_blocked;
+
+#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
+		if (sslsock->is_client && sslsock->sni) {
+			SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->sni);
+		}
+#endif
 
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
@@ -758,6 +769,52 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
+static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent) {
+
+	php_url *url;
+
+	if (ctx) {
+		zval **val = NULL;
+
+		if (php_stream_context_get_option(ctx, "ssl", "SNI_enabled", &val) == SUCCESS && !zend_is_true(*val)) {
+			return NULL;
+		}
+		if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {
+			convert_to_string_with_converter_ex(val, UG(utf8_conv));
+			return pestrdup(Z_STRVAL_PP(val), is_persistent);
+		}
+	}
+
+	if (!resourcename) {
+		return NULL;
+	}
+
+	url = php_url_parse_ex(resourcename, resourcenamelen);
+	if (!url) {
+		return NULL;
+	}
+
+	if (url->host) {
+		const char * host = url->host;
+		char * sni = NULL;
+		size_t len = strlen(host);
+
+		/* skip trailing dots */
+		while (len && host[len-1] == '.') {
+			--len;
+		}
+
+		if (len) {
+			sni = pestrndup(host, len, is_persistent);
+		}
+
+		php_url_free(url);
+		return sni;
+	}
+
+	php_url_free(url);
+	return NULL;
+}
 
 php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 		char *resourcename, long resourcenamelen,
@@ -794,6 +851,8 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 		return NULL;
 	}
 
+	sslsock->sni = get_sni(context, resourcename, resourcenamelen, !!persistent_id);
+	
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
