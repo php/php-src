@@ -22,11 +22,11 @@ require_once('skipifconnectfailure.inc');
 		$len = strlen($sql);
 		assert($len < $package_size);
 
-		if (!mysqli_query($link, $sql)) {
+		if (!@mysqli_query($link, $sql)) {
 			if (1153 == mysqli_errno($link) || 2006 == mysqli_errno($link) || stristr(mysqli_error($link), 'max_allowed_packet'))
-				/* 
-					myslqnd - [1153] Got a packet bigger than 'max_allowed_packet' bytes 
-					libmysql -[2006] MySQL server has gone away 
+				/*
+					myslqnd - [1153] Got a packet bigger than 'max_allowed_packet' bytes
+					libmysql -[2006] MySQL server has gone away
 				*/
 				return false;
 
