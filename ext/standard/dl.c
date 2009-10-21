@@ -146,8 +146,18 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 	/* load dynamic symbol */
 	handle = DL_LOAD(libpath);
 	if (!handle) {
+#if PHP_WIN32
+		char *err = GET_DL_ERROR();
+		if (err) {
+			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, err);
+			LocalFree(err);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, "Unknown reason");
+		}
+#else
 		php_error_docref(NULL TSRMLS_CC, error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
 		GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
 		efree(libpath);
 		return FAILURE;
 	}
