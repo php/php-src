@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
   
+- Fixed memory leak in extension loading when an error occurs on Windows.
+  (Pierre)
+
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia,
   sjoerd at php dot net)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
