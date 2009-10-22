@@ -701,7 +701,12 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	}
 	stmt->execute_count++;
 
-	DBG_RETURN(mysqlnd_stmt_execute_parse_response(stmt TSRMLS_CC));
+	ret = mysqlnd_stmt_execute_parse_response(stmt TSRMLS_CC);
+
+	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status.affected_rows) {
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status.affected_rows);
+	}
+	DBG_RETURN(ret);
 }
 /* }}} */
 

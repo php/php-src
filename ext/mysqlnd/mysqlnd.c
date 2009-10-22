@@ -885,6 +885,10 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 	  information from the ok packet. We will fetch it ourselves.
 	*/
 	ret = mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC);
+	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && conn->upsert_status.affected_rows) {
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
+	}
+
 	DBG_RETURN(ret);
 }
 /* }}} */
