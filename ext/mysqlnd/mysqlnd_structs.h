@@ -393,17 +393,23 @@ struct st_mysqlnd_connection
 
 /* Information related */
 	char			*host;
+	unsigned int	host_len;
 	char			*unix_socket;
+	unsigned int	unix_socket_len;
 	char			*user;
+	unsigned int	user_len;
 	char			*passwd;
-	unsigned int	*passwd_len;
+	unsigned int	passwd_len;
 	char			*scheme;
+	unsigned int	scheme_len;
 	uint64_t		thread_id;
 	char			*server_version;
 	char			*host_info;
 	unsigned char	*scramble;
 	const MYSQLND_CHARSET *charset;
 	const MYSQLND_CHARSET *greet_charset;
+	char 			*connect_or_select_db;
+	unsigned int	connect_or_select_db_len;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
 	unsigned long	max_packet_size;
