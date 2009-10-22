@@ -769,10 +769,9 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent) {
+static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent TSRMLS_DC) {
 
 	php_url *url;
-	TSRMLS_FETCH();
 
 	if (ctx) {
 		zval **val = NULL;
@@ -852,7 +851,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 		return NULL;
 	}
 
-	sslsock->sni = get_sni(context, resourcename, resourcenamelen, !!persistent_id);
+	sslsock->sni = get_sni(context, resourcename, resourcenamelen, !!persistent_id TSRMLS_CC);
 	
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
