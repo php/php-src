@@ -1299,6 +1299,7 @@ MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn,
 			pefree(conn->connect_or_select_db, conn->persistent);
 		}
 		conn->connect_or_select_db = pestrndup(db, db_len, conn->persistent);
+		conn->connect_or_select_db_len = db_len;
 	}
 	DBG_RETURN(ret);
 }
