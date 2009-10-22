@@ -772,6 +772,7 @@ php_stream_ops php_openssl_socket_ops = {
 static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent) {
 
 	php_url *url;
+	TSRMLS_FETCH();
 
 	if (ctx) {
 		zval **val = NULL;
