@@ -30,24 +30,24 @@ echo "Done\n";
 --EXPECTF--	
 Warning: import_request_variables() expects at least 1 parameter, 0 given in %s on line %d
 NULL
-NULL
+bool(false)
 
 Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
-NULL
+bool(false)
 
 Notice: import_request_variables(): No prefix specified - possible security hazard in %s on line %d
 
 Warning: import_request_variables(): Attempted GLOBALS variable overwrite in %s on line %d
 
 Warning: import_request_variables(): Numeric key detected - possible security hazard in %s on line %d
-NULL
+bool(true)
 
 Notice: Undefined variable: ap in %s on line %d
 string(1) "1"
 string(3) "heh"
 string(1) "3"
 NULL
-NULL
+bool(true)
 
 Notice: Undefined variable: g_ap in %s on line %d
 string(1) "1"
@@ -55,7 +55,7 @@ string(3) "heh"
 string(1) "3"
 NULL
 string(2) "hm"
-NULL
+bool(true)
 string(1) "1"
 string(3) "heh"
 string(1) "3"
@@ -66,7 +66,7 @@ array(1) {
   [0]=>
   string(2) "ar"
 }
-NULL
+bool(true)
 
 Notice: Undefined variable: r_ap in %s on line %d
 string(1) "1"
