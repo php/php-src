@@ -174,6 +174,11 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->passwd, pers);
 		conn->passwd = NULL;
 	}
+	if (conn->connect_or_select_db) {
+		DBG_INF("Freeing connect_or_select_db");
+		mnd_pefree(conn->connect_or_select_db, pers);
+		conn->connect_or_select_db = NULL;
+	}
 	if (conn->unix_socket) {
 		DBG_INF("Freeing unix_socket");
 		mnd_pefree(conn->unix_socket, pers);
@@ -588,6 +593,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	} else {
 		conn->scheme = transport;
 	}
+	conn->scheme_len = strlen(conn->scheme);
 	DBG_INF(conn->scheme);
 	conn->net.stream = php_stream_xport_create(conn->scheme, transport_len, streams_options, streams_flags,
 											   hashed_details, 
@@ -726,13 +732,18 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		CONN_SET_STATE(conn, CONN_READY);
 
 		conn->user				= pestrdup(user, conn->persistent);
+		conn->user_len			= strlen(conn->user);
 		conn->passwd			= pestrndup(passwd, passwd_len, conn->persistent);
+		conn->passwd_len		= passwd_len;
 		conn->port				= port;
+		conn->connect_or_select_db = pestrndup(db, db_len, conn->persistent);
+		conn->connect_or_select_db_len = db_len;
 
 		if (!unix_socket) {
 			char *p;
 
 			conn->host = pestrdup(host, conn->persistent);
+			conn->host_len = strlen(conn->host);
 			spprintf(&p, 0, "%s via TCP/IP", conn->host);
 			if (conn->persistent) {
 				conn->host_info = pestrdup(p, 1);
@@ -742,6 +753,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			}
 		} else {
 			conn->unix_socket	= pestrdup(socket, conn->persistent);
+			conn->unix_socket_len = strlen(conn->unix_socket);
 			conn->host_info		= pestrdup("Localhost via UNIX socket", conn->persistent);
 		}
 		conn->client_flag		= auth_packet->client_flags;
@@ -1282,7 +1294,12 @@ MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn,
 	  a protocol of giving back -1. Thus we have to follow it :(
 	*/
 	SET_ERROR_AFF_ROWS(conn);
-
+	if (ret == PASS) {
+		if (conn->connect_or_select_db) {
+			pefree(conn->connect_or_select_db, conn->persistent);
+		}
+		conn->connect_or_select_db = pestrndup(db, db_len, conn->persistent);
+	}
 	DBG_RETURN(ret);
 }
 /* }}} */
