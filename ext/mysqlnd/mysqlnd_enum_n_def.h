@@ -22,6 +22,15 @@
 #ifndef MYSQLND_ENUM_N_DEF_H
 #define MYSQLND_ENUM_N_DEF_H
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+
 #define MYSQLND_MAX_PACKET_SIZE (256L*256L*256L-1)
 
 #define MYSQLND_ERRMSG_SIZE			512
