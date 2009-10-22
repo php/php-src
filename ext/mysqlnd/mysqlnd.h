@@ -22,8 +22,8 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.5-dev - 081106 - $Revision$"
-#define MYSQLND_VERSION_ID 50005
+#define MYSQLND_VERSION "mysqlnd 5.0.6-dev - 091022 - $Revision$"
+#define MYSQLND_VERSION_ID 50006
 
 /* This forces inlining of some accessor functions */
 #define MYSQLND_USE_OPTIMISATIONS 0
