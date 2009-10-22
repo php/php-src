@@ -79,7 +79,6 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 	{ STR_W_LEN("rows_affected_normal") },
 	{ STR_W_LEN("rows_affected_ps") },
 	{ STR_W_LEN("rows_skipped_normal") },
-	{ STR_W_LEN("rows_skipped_normal") },
 	{ STR_W_LEN("rows_skipped_ps") },
 	{ STR_W_LEN("copy_on_write_saved") },
 	{ STR_W_LEN("copy_on_write_performed") },
