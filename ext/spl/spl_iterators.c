@@ -1166,7 +1166,7 @@ static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *met
 	intern = (spl_dual_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
 
 	function_handler = std_object_handlers.get_method(object_ptr, method, method_len TSRMLS_CC);
-	if (!function_handler) {
+	if (!function_handler && intern->inner.ce) {
 		if (zend_hash_find(&intern->inner.ce->function_table, method, method_len+1, (void **) &function_handler) == FAILURE) {
 			if (Z_OBJ_HT_P(intern->inner.zobject)->get_method) {
 				*object_ptr = intern->inner.zobject;
