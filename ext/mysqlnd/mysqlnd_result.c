@@ -621,8 +621,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						php_log_err(backtrace TSRMLS_CC);
 						efree(backtrace);
 #endif
-						MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
 					}
+					MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
 				}
 
 				PACKET_FREE_ALLOCA(fields_eof);
