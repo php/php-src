@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1 RC3
+- #49986 (Missing ICU DLLs on windows package). (Pierre)
 
 20 Oct 2009, PHP 5.3.1 RC2
 - Upgraded bundled sqlite to version 3.6.19. (Scott)
