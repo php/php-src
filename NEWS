@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Fixed crash when instantiating PDORow and PDOStatement through Reflection.
   (Felipe)
 
+- Fixed bug #49990 (SNMP3 warning message about security level printed twice).
+  (Jani)
 - Fixed bug #49972 (AppendIterator undefined function crash). (Johannes)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia, 
   sjoerd at php dot net)
