@@ -92,10 +92,5 @@ MySQLPDOTest::skip();
 	}
 
 	print "done!";
---XFAIL--
-Expected to fail in debug mode as PDO doesn't properly clean persistent connections
 --EXPECTF--
-Warning: PDO::exec(): MySQL server has gone away in %s on line %d
-
-Warning: PDO::exec(): Error while reading SET_OPTION's EOF packet. PID=%d in %s on line %d
 done!
