@@ -489,6 +489,45 @@ PHP_FUNCTION( collator_asort )
 }
 /* }}} */
 
+/* {{{ proto bool Collator::getSortKey( Collator $coll, string $str )
+ * Get a sort key for a string from a Collator. }}} */
+/* {{{ proto bool collator_get_sort_key( Collator $coll, string $str )
+ * Get a sort key for a string from a Collator. }}} */
+PHP_FUNCTION( collator_get_sort_key )
+{
+	UChar*           ustr     = NULL;
+	int              ustr_len = 0;
+	uint8_t*         key     = NULL;
+	int              key_len = 0;
+
+	COLLATOR_METHOD_INIT_VARS
+
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
+		&object, Collator_ce_ptr, &ustr, &ustr_len ) == FAILURE )
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			 "collator_get_sort_key: unable to parse input params", 0 TSRMLS_CC );
+
+		RETURN_FALSE;
+	}
+
+	/* Fetch the object. */
+	COLLATOR_METHOD_FETCH_OBJECT;
+
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
+	if(!key_len) {
+		RETURN_FALSE;
+	}
+	key = emalloc(key_len);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, key_len);
+	if(!key_len) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL((char *)key, key_len, 0);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
