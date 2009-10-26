@@ -2011,7 +2011,7 @@ type_conflict:
 						error = curl_formadd(&first, &last,
 										CURLFORM_COPYNAME, string_key,
 										CURLFORM_NAMELENGTH, (long)string_key_len - 1,
-										CURLFORM_FILENAME, filename ? filename : postval,
+										CURLFORM_FILENAME, filename ? filename + sizeof(";filename=") - 1 : postval,
 										CURLFORM_CONTENTTYPE, type ? type + sizeof(";type=") - 1 : "application/octet-stream",
 										CURLFORM_FILE, postval,
 										CURLFORM_END);
