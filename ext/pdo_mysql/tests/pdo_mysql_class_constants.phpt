@@ -12,16 +12,16 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		'MYSQL_ATTR_USE_BUFFERED_QUERY'		=> true,
 		'MYSQL_ATTR_LOCAL_INFILE'					=> true,
 		'MYSQL_ATTR_DIRECT_QUERY'					=> true,
-		'MYSQL_ATTR_FOUND_ROWS'							=> true,
+		'MYSQL_ATTR_FOUND_ROWS'						=> true,
 		'MYSQL_ATTR_IGNORE_SPACE'					=> true,
+		'MYSQL_ATTR_INIT_COMMAND'					=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {
 		$expected['MYSQL_ATTR_MAX_BUFFER_SIZE'] 		= true;
-		$expected['MYSQL_ATTR_INIT_COMMAND'] 				= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_FILE'] 	= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP'] 	= true;
-		$expected['MYSQL_ATTR_COMPRESS']			= true;
+		$expected['MYSQL_ATTR_COMPRESS']						= true;
 	}
 
 	/*
