@@ -523,6 +523,69 @@ PHP_FUNCTION( collator_asort )
 }
 /* }}} */
 
+/* {{{ proto bool Collator::getSortKey( Collator $coll, string $str )
+ * Get a sort key for a string from a Collator. }}} */
+/* {{{ proto bool collator_get_sort_key( Collator $coll, string $str )
+ * Get a sort key for a string from a Collator. }}} */
+PHP_FUNCTION( collator_get_sort_key )
+{
+	char*            str      = NULL;
+	int              str_len  = 0;
+	UChar*           ustr     = NULL;
+	int              ustr_len = 0;
+	uint8_t*         key     = NULL;
+	int              key_len = 0;
+
+	COLLATOR_METHOD_INIT_VARS
+
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
+	{
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			 "collator_get_sort_key: unable to parse input params", 0 TSRMLS_CC );
+
+		RETURN_FALSE;
+	}
+
+	/* Fetch the object. */
+	COLLATOR_METHOD_FETCH_OBJECT;
+
+
+	/*
+	 * Compare given strings (converting them to UTF-16 first).
+	 */
+
+	/* First convert the strings to UTF-16. */
+	intl_convert_utf8_to_utf16(
+		&ustr, &ustr_len, str, str_len, COLLATOR_ERROR_CODE_P( co ) );
+	if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
+	{
+		/* Set global error code. */
+		intl_error_set_code( NULL, COLLATOR_ERROR_CODE( co ) TSRMLS_CC );
+
+		/* Set error messages. */
+		intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
+			"Error converting first argument to UTF-16", 0 TSRMLS_CC );
+		efree( ustr );
+		RETURN_FALSE;
+	}
+
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
+	if(!key_len) {
+		efree( ustr );
+		RETURN_FALSE;
+	}
+	key = emalloc(key_len);
+	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, key_len);
+	efree( ustr );
+	if(!key_len) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL((char *)key, key_len, 0);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

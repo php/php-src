@@ -59,6 +59,10 @@ function ut_coll_sort_with_sort_keys( $coll, &$arr )
 {
     return $GLOBALS['oo-mode'] ? $coll->sortWithSortKeys( $arr ) : collator_sort_with_sort_keys( $coll, $arr );
 }
+function ut_coll_get_sort_key( $coll, $str )
+{
+    return $GLOBALS['oo-mode'] ? $coll->getSortKey( $str ) : collator_get_sort_key( $coll, $str );
+}
 function ut_coll_asort( $coll, &$arr, $sort_flag = Collator::SORT_REGULAR )
 {
     return $GLOBALS['oo-mode'] ? $coll->asort( $arr, $sort_flag ) : collator_asort( $coll, $arr, $sort_flag );
