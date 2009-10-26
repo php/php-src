@@ -134,6 +134,14 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		/* using a prepared statement */
 
 		if (!S->is_prepared) {
+			/* don't break the whole current transaction when the first
+			 * prepare tentative fails (happens when the prepared statement
+			 * already exists). ignore those SAVEPOINT queries results because 
+			 * we don't care (may be outside transaction?).
+			 */
+			char buf[100]; /* stmt_name == "pdo_pgsql_cursor_%08x" */
+			snprintf(buf, sizeof(buf), "SAVEPOINT %s", S->stmt_name);
+			PQexec(H->server, buf);
 stmt_retry:
 			/* we deferred the prepare until now, because we didn't
 			 * know anything about the parameter types; now we do */
@@ -153,12 +161,14 @@ stmt_retry:
 					/* 42P05 means that the prepared statement already existed. this can happen if you use 
 					 * a connection pooling software line pgpool which doesn't close the db-connection once 
 					 * php disconnects. if php dies (no chance to run RSHUTDOWN) during execution it has no 
-					 * chance to DEALLOCATE the prepared statements it has created. so, if we hit a 42P05 we 
-					 * deallocate it and retry ONCE (thies 2005.12.15)
+					 * chance to DEALLOCATE the prepared statements it has created. Also happens if we tried
+					 * to DEALLOCATE the same statement name in an aborted transaction. so, if we hit a 42P05
+					 * we deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (!strcmp(sqlstate, "42P05")) {
-						char buf[100]; /* stmt_name == "pdo_pgsql_cursor_%08x" */
 						PGresult *res;
+						snprintf(buf, sizeof(buf), "ROLLBACK TO SAVEPOINT %s", S->stmt_name);
+						PQexec(H->server, buf);
 						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
 						res = PQexec(H->server, buf);
 						if (res) {
@@ -166,11 +176,15 @@ stmt_retry:
 						}
 						goto stmt_retry;
 					} else {
+						snprintf(buf, sizeof(buf), "RELEASE SAVEPOINT %s", S->stmt_name);
+						PQexec(H->server, buf);
 						pdo_pgsql_error_stmt(stmt, status, sqlstate);
 						return 0;
 					}
 				}
 			}
+			snprintf(buf, sizeof(buf), "RELEASE SAVEPOINT %s", S->stmt_name);
+			PQexec(H->server, buf);
 		}
 		S->result = PQexecPrepared(H->server, S->stmt_name,
 				stmt->bound_params ?
