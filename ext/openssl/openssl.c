@@ -2796,6 +2796,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		if (Z_TYPE_PP(val) == IS_UNICODE && !filename) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary string expected, Unicode string received");
+			if (free_phrase) {
+				efree(passphrase);
+			}
 			return NULL;
 		}
 
@@ -4737,14 +4740,12 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 
 static void openssl_add_method_or_alias(const OBJ_NAME *name, void *arg) /* {{{ */
 {
-	TSRMLS_FETCH();
 	add_next_index_ascii_string((zval*)arg, (char*)name->name, 1);
 }
 /* }}} */
 
 static void openssl_add_method(const OBJ_NAME *name, void *arg) /* {{{ */
 {
-	TSRMLS_FETCH();
 	if (name->alias == 0) {
 		add_next_index_ascii_string((zval*)arg, (char*)name->name, 1);
 	}
