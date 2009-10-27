@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1 RC3
+- Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
+
 - Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
 - Fixed bug #48752 (Crash during date parsing with invalid date). (Pierre)
 
