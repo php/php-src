@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2009, PHP 5.2.12
 - Updated timezone database to version 2009.14 (2009n). (Derick)
 
-- Introduced a max_file_uploads INI setting, which is set to limit the
+- Added "max_file_uploads" INI directive, which can be set to limit the
   number of file uploads per-request to 100 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 
