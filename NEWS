@@ -7,11 +7,12 @@ PHP                                                                        NEWS
   number of file uploads per-request to 100 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 
-- Fixed crash in com_print_typeinfo when an invalid typelib is given
+- Fixed crash in com_print_typeinfo when an invalid typelib is given.
+  (Pierre)
 - Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
-  Stachowiak.  (Rasmus)
+  Stachowiak. (Rasmus)
 - Fixed crash in SQLiteDatabase::ArrayQuery() and SQLiteDatabase::SingleQuery()
   when calling using Reflection. (Felipe)
 - Fixed crash when instantiating PDORow and PDOStatement through Reflection.
