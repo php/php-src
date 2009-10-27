@@ -622,6 +622,7 @@ PHP_RINIT_FUNCTION(date)
 	}
 	DATEG(timezone) = NULL;
 	DATEG(tzcache) = NULL;
+	DATEG(last_errors) = NULL;
 
 	return SUCCESS;
 }
@@ -639,6 +640,11 @@ PHP_RSHUTDOWN_FUNCTION(date)
 		FREE_HASHTABLE(DATEG(tzcache));
 		DATEG(tzcache) = NULL;
 	}
+	if (DATEG(last_errors)) {
+		timelib_error_container_dtor(DATEG(last_errors));
+		DATEG(last_errors) = NULL;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
