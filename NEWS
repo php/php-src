@@ -1,17 +1,16 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- Added "max_file_uploads" INI directive, which can be set to limit the
+  number of file uploads per-request to 100 by default, to prevent possible
+  DOS via temporary file exhaustion. (Ilia)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
-
+  
 - Implemented FR #49571 (CURLOPT_POSTREDIR not implemented). (Sriram Natarajan)
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
 
-- Introduced a max_file_uploads INI setting, which is set to limit the
-  number of file uploads per-request to 100 by default, to prevent possible
-  DOS via temporary file exhaustion. (Ilia)
-  
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
