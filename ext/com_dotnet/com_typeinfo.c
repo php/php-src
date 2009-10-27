@@ -309,7 +309,7 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 		}
 	} else if (typelibname) {
 		/* Fetch the typelibrary and use that to look things up */
-		typelib = php_com_load_typelib(typelibname, obj->code_page TSRMLS_CC);
+		typelib = php_com_load_typelib(typelibname, CP_THREAD_ACP TSRMLS_CC);
 	} 
 
 	if (!gotguid && dispname && typelib) {
