@@ -795,6 +795,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_llist header;
 	void *event_extra_data = NULL;
 	int llen = 0;
+	char *max_uploads = INI_STR("max_file_uploads");
+	int upload_cnt = 0;
+
+	if (max_uploads && *max_uploads) {
+		upload_cnt = atoi(max_uploads);
+	}
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -973,6 +979,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			/* If file_uploads=off, skip the file part */
 			if (!PG(file_uploads)) {
 				skip_upload = 1;
+			} else if (upload_cnt <= 0) {
+				skip_upload = 1;
+				sapi_module.sapi_error(E_WARNING, "Maximum number of allowable file uploads has been exceeded");
 			}
 
 			/* Return with an error if the posted data is garbled */
@@ -1017,6 +1026,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			if (!skip_upload) {
 				/* Handle file */
 				fd = php_open_temporary_fd_ex(PG(upload_tmp_dir), "php", &temp_filename, 1 TSRMLS_CC);
+				upload_cnt--;
 				if (fd==-1) {
 					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
 					cancel_upload = UPLOAD_ERROR_E;
