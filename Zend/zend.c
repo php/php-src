@@ -1067,9 +1067,15 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			if (!EG(active_symbol_table)) {
 				zend_rebuild_symbol_table(TSRMLS_C);
 			}
-			Z_ARRVAL_P(z_context) = EG(active_symbol_table);
-			Z_TYPE_P(z_context) = IS_ARRAY;
-			zval_copy_ctor(z_context);
+
+			/* during shutdown the symbol table table can be still null */
+			if (!EG(active_symbol_table)) {
+				Z_TYPE_P(z_context) = IS_NULL;
+			} else {
+				Z_ARRVAL_P(z_context) = EG(active_symbol_table);
+				Z_TYPE_P(z_context) = IS_ARRAY;
+				zval_copy_ctor(z_context);
+			}
 
 			params = (zval ***) emalloc(sizeof(zval **)*5);
 			params[0] = &z_error_type;

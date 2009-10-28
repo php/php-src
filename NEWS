@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
 
+- Fixed bug #49142 (crash when exception thrown from __tostring()).
+  (David Soria Parra)
 - Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
 - Fixed bug #48752 (Crash during date parsing with invalid date). (Pierre)
 
