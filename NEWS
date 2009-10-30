@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   DOS via temporary file exhaustion. (Ilia)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
+- Added Collator::getSortKey for intl extension. (Stas)
   
 - Implemented FR #49571 (CURLOPT_POSTREDIR not implemented). (Sriram Natarajan)
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
