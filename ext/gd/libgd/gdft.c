@@ -1090,6 +1090,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 
 		if (render) {
 			if (image->format != ft_glyph_format_bitmap && FT_Glyph_To_Bitmap(&image, ft_render_mode_normal, 0, 1)) {
+				FT_Done_Glyph(image);
 				if (tmpstr) {
 					gdFree(tmpstr);
 				}
