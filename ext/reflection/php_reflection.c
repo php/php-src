@@ -3673,6 +3673,7 @@ ZEND_METHOD(reflection_class, getMethods)
 ZEND_METHOD(reflection_class, hasProperty)
 {
 	reflection_object *intern;
+	zend_property_info *property_info;
 	zend_class_entry *ce;
 	zstr name; 
 	int name_len;
@@ -3685,7 +3686,10 @@ ZEND_METHOD(reflection_class, hasProperty)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_u_hash_exists(&ce->properties_info, name_type, name, name_len + 1)) {
+	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len+1, (void **) &property_info) == SUCCESS) {
+		if (property_info->flags & ZEND_ACC_SHADOW) {
+			RETURN_FALSE;
+		}
 		RETURN_TRUE;
 	} else {
 		if (intern->obj && Z_OBJ_HANDLER_P(intern->obj, has_property))
