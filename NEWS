@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Fixed bug #48752 (Crash during date parsing with invalid date). (Pierre)
 - Fixed bug #49738 (calling mcrypt() after mcrypt_generic_deinit() crashes).
   (Sriram Natarajan)
+- Fixed bug #49719 (ReflectionClass::hasProperty returns true for a private 
+  property in base class). (Felipe)
 - Fixed bug #49698 (Unexpected change in strnatcasecmp()). (Rasmus)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49630 (imap_listscan() function missing). (Felipe)
