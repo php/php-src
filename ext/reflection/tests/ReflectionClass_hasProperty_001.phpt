@@ -69,7 +69,7 @@ Reflecting on class privf:
   --> Check for doesntExist: bool(false)
 Reflecting on class subprivf: 
   --> Check for s: bool(true)
-  --> Check for a: bool(true)
+  --> Check for a: bool(false)
   --> Check for A: bool(false)
   --> Check for doesntExist: bool(false)
 
