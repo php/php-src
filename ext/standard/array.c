@@ -762,17 +762,17 @@ PHP_FUNCTION(uasort)
 
 static int array_user_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
+	zend_fcall_info fci;
 	Bucket *f;
 	Bucket *s;
 	zval *key1, *key2;
-	zval *args[2];
-	zval retval;
-	int status;
+	zval **args[2];
+	zval *retval_ptr = NULL;
 
 	ALLOC_INIT_ZVAL(key1);
 	ALLOC_INIT_ZVAL(key2);
-	args[0] = key1;
-	args[1] = key2;
+	args[0] = &key1;
+	args[1] = &key2;
 	
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -793,16 +793,30 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 		Z_LVAL_P(key2) = s->h;
 		Z_TYPE_P(key2) = IS_LONG;
 	}
+	
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.function_name = *BG(user_compare_func_name);
+	fci.symbol_table = NULL;
+	fci.object_pp = NULL;
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = 2;
+	fci.params = args;
+	fci.no_separation = 0;
 
-	status = call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args TSRMLS_CC);
-	
-	zval_ptr_dtor(&key1);
-	zval_ptr_dtor(&key2);
-	
-	if (status == SUCCESS) {
-		convert_to_long(&retval);
-		return Z_LVAL(retval);
+	if (zend_call_function(&fci, &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
+		&& retval_ptr) {
+		long retval;
+
+		convert_to_long_ex(&retval_ptr);
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+		zval_ptr_dtor(&key1);
+		zval_ptr_dtor(&key2);
+		return retval;
 	} else {
+		zval_ptr_dtor(&key1);
+		zval_ptr_dtor(&key2);
 		return 0;
 	}
 }

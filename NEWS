@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed memory leak in openssl_pkcs12_export_to_file(). (Felipe)
 
+- Fixed bug #50006 (Segfault caused by uksort()). (Felipe)
 - Fixed bug #49990 (SNMP3 warning message about security level printed twice).
   (Jani)
 - Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted
