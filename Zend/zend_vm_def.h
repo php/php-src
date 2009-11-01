@@ -4245,11 +4245,12 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 	zend_class_entry *ce = EX_T(opline->op1.u.var).class_entry;
 	zend_class_entry *iface = zend_fetch_class(Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant), opline->extended_value TSRMLS_CC);
 
-	if (!(iface->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+	if (iface) {
+		if (!(iface->ce_flags & ZEND_ACC_INTERFACE)) {
+			zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+		}
+		zend_do_implement_interface(ce, iface TSRMLS_CC);
 	}
-
-	zend_do_implement_interface(ce, iface TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }
