@@ -819,7 +819,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 		if (PGG(log_notices)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
 		}
-		zend_hash_index_update(&PGG(notices), (int)resource_id, (void **)&notice, sizeof(php_pgsql_notice *), NULL);
+		zend_hash_index_update(&PGG(notices), (ulong)resource_id, (void **)&notice, sizeof(php_pgsql_notice *), NULL);
 	}
 }
 /* }}} */
@@ -1217,13 +1217,14 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 */
 		if (!(connect_type & PGSQL_CONNECT_FORCE_NEW)
 			&& zend_hash_find(&EG(regular_list),str.c,str.len+1,(void **) &index_ptr)==SUCCESS) {
-			int type,link;
+			int type;
+			ulong link;
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			link = (int) index_ptr->ptr;
+			link = (uintptr_t) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				Z_LVAL_P(return_value) = link;
@@ -2166,14 +2167,15 @@ PHP_FUNCTION(pg_field_table)
 
 
 	if (return_oid) {
+#if UINT_MAX > LONG_MAX /* Oid is unsigned int, we don't need this code, where LONG is wider */
 		if (oid > LONG_MAX) {
 			smart_str oidstr = {0};
 			smart_str_append_unsigned(&oidstr, oid);
 			smart_str_0(&oidstr);
 			RETURN_STRINGL(oidstr.c, oidstr.len, 0);
-		} else {
+		} else
+#endif
 			RETURN_LONG((long)oid);
-		}
 	}
 
 	/* try to lookup the table name in the resource list */
@@ -2271,7 +2273,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 		case PHP_PG_FIELD_TYPE_OID:
 			
 			oid = PQftype(pgsql_result, field);
-
+#if UINT_MAX > LONG_MAX
 			if (oid > LONG_MAX) {
 				smart_str s = {0};
 				smart_str_append_unsigned(&s, oid);
@@ -2279,7 +2281,9 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 				Z_STRVAL_P(return_value) = s.c;
 				Z_STRLEN_P(return_value) = s.len;
 				Z_TYPE_P(return_value) = IS_STRING;
-			} else {
+			} else
+#endif
+			{
 				Z_LVAL_P(return_value) = (long)oid;
 				Z_TYPE_P(return_value) = IS_LONG;
 			}
