@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
   (Ilia, wmeler at wp-sa dot pl)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
+- Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
 
