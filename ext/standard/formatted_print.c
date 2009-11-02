@@ -365,14 +365,14 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	if (zend_isnan(number)) {
 		is_negative = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "NaN", 3, 0, padding,
-								 alignment, precision, is_negative, 0, always_sign);
+								 alignment, 3, is_negative, 0, always_sign);
 		return;
 	}
 
 	if (zend_isinf(number)) {
 		is_negative = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "INF", 3, 0, padding,
-								 alignment, precision, is_negative, 0, always_sign);
+								 alignment, 3, is_negative, 0, always_sign);
 		return;
 	}
 
@@ -455,7 +455,7 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 		UChar *nan = USTR_MAKE("NaN");
 		is_negative = (number<0);
 		php_u_sprintf_appendstring(buffer, pos, size, nan, 3, 0, padding,
-								 alignment, precision, is_negative, 0, always_sign);
+								 alignment, 3, is_negative, 0, always_sign);
 		efree(nan);
 		return;
 	}
@@ -464,7 +464,7 @@ php_u_sprintf_appenddouble(UChar **buffer, int *pos,
 		UChar *inf = USTR_MAKE("INF");
 		is_negative = (number<0);
 		php_u_sprintf_appendstring(buffer, pos, size, inf, 3, 0, padding,
-								 alignment, precision, is_negative, 0, always_sign);
+								 alignment, 3, is_negative, 0, always_sign);
 		efree(inf);
 		return;
 	}
