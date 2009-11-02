@@ -208,6 +208,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	if (strncpy_s(passwd + MD5_MAGIC_LEN, MD5_HASH_MAX_LEN - MD5_MAGIC_LEN, sp, sl + 1) != 0) {
 		goto _destroyCtx1;
 	}
+	passwd[MD5_MAGIC_LEN + sl] = '\0';
 	strcat_s(passwd, MD5_HASH_MAX_LEN, "$");
 #else
 	/* VC6 version doesn't have strcat_s or strncpy_s */
