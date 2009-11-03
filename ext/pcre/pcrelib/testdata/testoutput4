@@ -1,9 +1,6 @@
-/-- Do not use the \x{} construct except with patterns that have the --/
-/-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
-No match
-/-- that option is set. However, the latest Perls recognize them always. --/
-No match
-
+/-- This set of tests if for UTF-8 support, excluding Unicode properties. It is
+    compatible with all versions of Perl 5. --/
+   
 /a.b/8
     acb
  0: acb
@@ -1089,4 +1086,37 @@ No match
 
 /(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8
 
-/ End of testinput4 /
+/^[a\x{c0}]b/8
+    \x{c0}b
+ 0: \x{c0}b
+    
+/^([a\x{c0}]*?)aa/8
+    a\x{c0}aaaa/ 
+ 0: a\x{c0}aa
+ 1: a\x{c0}
+
+/^([a\x{c0}]*?)aa/8
+    a\x{c0}aaaa/ 
+ 0: a\x{c0}aa
+ 1: a\x{c0}
+    a\x{c0}a\x{c0}aaa/ 
+ 0: a\x{c0}a\x{c0}aa
+ 1: a\x{c0}a\x{c0}
+
+/^([a\x{c0}]*)aa/8
+    a\x{c0}aaaa/ 
+ 0: a\x{c0}aaaa
+ 1: a\x{c0}aa
+    a\x{c0}a\x{c0}aaa/ 
+ 0: a\x{c0}a\x{c0}aaa
+ 1: a\x{c0}a\x{c0}a
+
+/^([a\x{c0}]*)a\x{c0}/8
+    a\x{c0}aaaa/ 
+ 0: a\x{c0}
+ 1: 
+    a\x{c0}a\x{c0}aaa/ 
+ 0: a\x{c0}a\x{c0}
+ 1: a\x{c0}
+
+/-- End of testinput4 --/

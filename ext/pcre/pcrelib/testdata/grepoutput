@@ -423,3 +423,27 @@ This time it [1;31mjumps[00m and [1;31mjumps[00m and [1;31mjumps[00m.
 Here is the [1;31mpattern[00m again.
 That time it was on a [1;31mline by itself[00m.
 This line contains [1;31mpattern[00m not on a [1;31mline by itself[00m.
+---------------------------- Test 55 -----------------------------
+./testdata/grepinput:456
+./testdata/grepinput8:0
+./testdata/grepinputv:1
+./testdata/grepinputx:0
+---------------------------- Test 56 -----------------------------
+./testdata/grepinput:456
+./testdata/grepinputv:1
+---------------------------- Test 57 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 58 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 59 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
+---------------------------- Test 60 -----------------------------
+PATTERN at the start of a line.
+In the middle of a line, PATTERN appears.
+Check up on PATTERN near the end.
