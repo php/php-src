@@ -246,7 +246,12 @@ for(;;)
     fprintf(f, "%s", OP_names[*code]);
     break;
 
+    case OP_CLOSE:
+    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
+    break;
+
     case OP_CREF:
+    case OP_NCREF:
     fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
     break;
 
@@ -256,6 +261,14 @@ for(;;)
       fprintf(f, "    Cond recurse any");
     else
       fprintf(f, "    Cond recurse %d", c);
+    break;
+
+    case OP_NRREF:
+    c = GET2(code, 1);
+    if (c == RREF_ANY)
+      fprintf(f, "    Cond nrecurse any");
+    else
+      fprintf(f, "    Cond nrecurse %d", c);
     break;
 
     case OP_DEF:

@@ -50,17 +50,18 @@ POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-/* Options, mostly defined by POSIX, but with a couple of extras. */
+/* Options, mostly defined by POSIX, but with some extras. */
 
-#define REG_ICASE     0x0001
-#define REG_NEWLINE   0x0002
-#define REG_NOTBOL    0x0004
-#define REG_NOTEOL    0x0008
-#define REG_DOTALL    0x0010   /* NOT defined by POSIX. */
-#define REG_NOSUB     0x0020
-#define REG_UTF8      0x0040   /* NOT defined by POSIX. */
+#define REG_ICASE     0x0001   /* Maps to PCRE_CASELESS */
+#define REG_NEWLINE   0x0002   /* Maps to PCRE_MULTILINE */
+#define REG_NOTBOL    0x0004   /* Maps to PCRE_NOTBOL */
+#define REG_NOTEOL    0x0008   /* Maps to PCRE_NOTEOL */
+#define REG_DOTALL    0x0010   /* NOT defined by POSIX; maps to PCRE_DOTALL */
+#define REG_NOSUB     0x0020   /* Maps to PCRE_NO_AUTO_CAPTURE */
+#define REG_UTF8      0x0040   /* NOT defined by POSIX; maps to PCRE_UTF8 */
 #define REG_STARTEND  0x0080   /* BSD feature: pass subject string by so,eo */
-#define REG_NOTEMPTY  0x0100   /* NOT defined by POSIX. */
+#define REG_NOTEMPTY  0x0100   /* NOT defined by POSIX; maps to PCRE_NOTEMPTY */
+#define REG_UNGREEDY  0x0200   /* NOT defined by POSIX; maps to PCRE_UNGREEDY */
 
 /* This is not used by PCRE, but by defining it we make it easier
 to slot PCRE into existing programs that make POSIX calls. */

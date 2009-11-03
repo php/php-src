@@ -1,3 +1,6 @@
+/-- This set of tests is for features that are compatible with all versions of
+    Perl 5, in non-UTF-8 mode. --/
+
 /the quick brown fox/
     the quick brown fox
     The quick brown FOX
@@ -4064,4 +4067,4 @@
 /^%((?(?=[a])[^%])|b)*%$/
     %ab%
 
-/ End of testinput1 /
+/-- End of testinput1 --/
