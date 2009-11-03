@@ -84,7 +84,12 @@ recurse('pcrelib');
 
 $dirorig = scandir('pcrelib/testdata');
 $k = array_search('CVS', $dirorig);
-unset($dirorig[$k]);
+if ($k !== false)
+	unset($dirorig[$k]);
+
+$k = array_search('.svn', $dirorig);
+if ($k !== false)
+	unset($dirorig[$k]);
 
 $dirnew = scandir("$newpcre/testdata");
 $diff   = array_diff($dirorig, $dirnew);
