@@ -834,32 +834,19 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 		tm.tm_sec += stamp - mktime(gmt);
 		tm.tm_isdst = gmt->tm_isdst;
 
-#ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = mktime(&tm);
-#else
 		ssb->sb.st_mtime = mktime(&tm);
-#endif
 	} else {
 		/* error or unsupported command */
 mdtm_error:
-#ifdef NETWARE
-		ssb->sb.st_mtime.tv_sec = -1;
-#else
 		ssb->sb.st_mtime = -1;
-#endif
 	}
 
 	ssb->sb.st_ino = 0;						/* Unknown values */
 	ssb->sb.st_dev = 0;
 	ssb->sb.st_uid = 0;
 	ssb->sb.st_gid = 0;
-#ifdef NETWARE
-	ssb->sb.st_atime.tv_sec = -1;
-	ssb->sb.st_ctime.tv_sec = -1;
-#else
 	ssb->sb.st_atime = -1;
 	ssb->sb.st_ctime = -1;
-#endif
 
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
