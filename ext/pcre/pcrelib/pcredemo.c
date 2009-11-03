@@ -223,12 +223,12 @@ if (namecount <= 0) printf("No named substrings\n"); else
 *                                                                        *
 * If the previous match WAS for an empty string, we can't do that, as it *
 * would lead to an infinite loop. Instead, a special call of pcre_exec() *
-* is made with the PCRE_NOTEMPTY and PCRE_ANCHORED flags set. The first  *
-* of these tells PCRE that an empty string is not a valid match; other   *
-* possibilities must be tried. The second flag restricts PCRE to one     *
-* match attempt at the initial string position. If this match succeeds,  *
-* an alternative to the empty string match has been found, and we can    *
-* proceed round the loop.                                                *
+* is made with the PCRE_NOTEMPTY_ATSTART and PCRE_ANCHORED flags set.    *
+* The first of these tells PCRE that an empty string at the start of the *
+* subject is not a valid match; other possibilities must be tried. The   *
+* second flag restricts PCRE to one match attempt at the initial string  *
+* position. If this match succeeds, an alternative to the empty string   *
+* match has been found, and we can proceed round the loop.               *
 *************************************************************************/
 
 if (!find_all)
@@ -251,7 +251,7 @@ for (;;)
   if (ovector[0] == ovector[1])
     {
     if (ovector[0] == subject_length) break;
-    options = PCRE_NOTEMPTY | PCRE_ANCHORED;
+    options = PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED;
     }
 
   /* Run the next matching operation */

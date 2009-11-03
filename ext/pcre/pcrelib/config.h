@@ -196,6 +196,12 @@ them both to 0; an emulation function will be used. */
 #define LINK_SIZE 2
 #endif
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#ifndef LT_OBJDIR
+#define LT_OBJDIR ".libs/"
+#endif
+
 /* The value of MATCH_LIMIT determines the default number of times the
    internal match() function can be called during a single execution of
    pcre_exec(). There is a runtime interface for setting a different limit.
@@ -262,13 +268,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 7.9"
+#define PACKAGE_STRING "PCRE 8.00"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.9"
+#define PACKAGE_VERSION "8.00"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -324,7 +330,7 @@ them both to 0; an emulation function will be used. */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "7.9"
+#define VERSION "8.00"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
