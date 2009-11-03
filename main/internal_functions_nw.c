@@ -38,7 +38,7 @@
 #include "ext/standard/head.h"
 #include "ext/standard/pack.h"
 #include "ext/standard/php_browscap.h"
-/*#include "ext/standard/php_crypt.h"*/
+#include "ext/standard/php_crypt.h"
 #include "ext/standard/php_dir.h"
 #include "ext/standard/php_filestat.h"
 #include "ext/standard/php_mail.h"
@@ -48,16 +48,25 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
 #include "ext/calendar/php_calendar.h"
+#include "ext/date/php_date.h"
 /*#include "ext/com/php_COM.h"
 #include "ext/com/php_VARIANT.h"*/
 #include "ext/ftp/php_ftp.h"
 #include "ext/standard/reg.h"
+#include "ext/netware/php_netware.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/reflection/php_reflection.h"
 /*#include "ext/odbc/php_odbc.h"*/	/* Commented out for now */
 #include "ext/session/php_session.h"
 /*#include "ext/xml/php_xml.h"
 #include "ext/wddx/php_wddx.h"
 #include "ext/mysql/php_mysql.h"*/	/* Commented out for now */
+#if HAVE_OPENSSL_EXT
+#include "ext/openssl/php_openssl.h"
+#endif
+#if HAVE_ZLIB
+#include "ext/zlib/php_zlib.h"
+#endif
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
@@ -68,17 +77,26 @@ static zend_module_entry *php_builtin_extensions[] = {
 	phpext_bcmath_ptr,
 #endif
 	phpext_calendar_ptr,
+	phpext_date_ptr,
 /*	COM_module_ptr,*/
 	phpext_ftp_ptr,
 #if defined(MBSTR_ENC_TRANS)
 	phpext_mbstring_ptr,
 #endif
 /*	phpext_mysql_ptr,*/	/* Commented out for now */
+#if HAVE_OPENSSL_EXT
+	phpext_openssl_ptr,
+#endif
 /*	phpext_odbc_ptr, */	/* Commented out for now */
 	phpext_pcre_ptr,
+	phpext_reflection_ptr,
 	phpext_session_ptr,
 /*	phpext_xml_ptr,
 	phpext_wddx_ptr */	/* Commented out for now */
+#if HAVE_ZLIB
+	phpext_zlib_ptr,
+#endif
+	phpext_netware_ptr
 };
 /* }}} */
 
