@@ -244,11 +244,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 
 				/* check whether its last access was more than maxlifet ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 &&
-#ifdef NETWARE
-						(now - sbuf.st_mtime.tv_sec) > maxlifetime) {
-#else
 						(now - sbuf.st_mtime) > maxlifetime) {
-#endif
 					VCWD_UNLINK(buf);
 					nrdels++;
 				}
