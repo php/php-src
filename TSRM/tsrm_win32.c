@@ -111,7 +111,7 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 	char *bucket_key = NULL;
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname));
+		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + 1);
 		if (!bucket_key) {
 			return NULL;
 		}
@@ -123,14 +123,14 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 		return NULL;
 	}
 
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + strlen(ptcSid));
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + strlen(ptcSid) + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
 		return NULL;
 	}
 
 	memcpy(bucket_key, ptcSid, strlen(ptcSid));
-	memcpy(bucket_key + strlen(ptcSid), pathname, strlen(pathname));
+	memcpy(bucket_key + strlen(ptcSid), pathname, strlen(pathname) + 1);
 
 	LocalFree(ptcSid);
 	return bucket_key;
