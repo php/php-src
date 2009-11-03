@@ -166,6 +166,8 @@
 
 #ifdef PHP_WIN32
 #define PHP_MIME_MAGIC_FILE_PATH PHP_PREFIX "\\magic.mime"
+#elif NETWARE
+#define PHP_MIME_MAGIC_FILE_PATH PHP_PREFIX "/magic.mime"
 #endif
 
 #define BYTE	1
