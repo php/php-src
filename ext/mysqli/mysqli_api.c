@@ -1642,6 +1642,65 @@ PHP_FUNCTION(mysqli_num_rows)
 }
 /* }}} */
 
+/* {{{ mysqli_options_get_option_zval_type */
+static int mysqli_options_get_option_zval_type(int option)
+{
+	switch (option) {
+#ifdef MYSQLI_USE_MYSQLND
+#if PHP_MAJOR_VERSION >= 6
+		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
+#endif
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+#ifdef MYSQLND_STRING_TO_INT_CONVERSION
+		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
+#endif
+#endif /* MYSQLI_USE_MYSQLND */
+		case MYSQL_OPT_CONNECT_TIMEOUT:
+                case MYSQL_REPORT_DATA_TRUNCATION:
+                case MYSQL_OPT_LOCAL_INFILE:
+                case MYSQL_OPT_NAMED_PIPE:
+#ifdef MYSQL_OPT_PROTOCOL
+                case MYSQL_OPT_PROTOCOL:
+#endif /* MySQL 4.1.0 */
+#ifdef MYSQL_OPT_READ_TIMEOUT
+		case MYSQL_OPT_READ_TIMEOUT:
+		case MYSQL_OPT_WRITE_TIMEOUT:
+		case MYSQL_OPT_GUESS_CONNECTION:
+		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
+		case MYSQL_OPT_USE_REMOTE_CONNECTION:
+		case MYSQL_SECURE_AUTH:
+#endif /* MySQL 4.1.1 */
+#ifdef MYSQL_OPT_RECONNECT
+		case MYSQL_OPT_RECONNECT:
+#endif /* MySQL 5.0.13 */
+#ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+                case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
+#endif /* MySQL 5.0.23 */
+#ifdef MYSQL_OPT_COMPRESS
+		case MYSQL_OPT_COMPRESS:
+#endif /* mysqlnd @ PHP 5.3.2 */
+			return IS_LONG;
+
+#ifdef MYSQL_SHARED_MEMORY_BASE_NAME
+                case MYSQL_SHARED_MEMORY_BASE_NAME:
+#endif /* MySQL 4.1.0 */
+#ifdef MYSQL_SET_CLIENT_IP
+		case MYSQL_SET_CLIENT_IP:
+#endif /* MySQL 4.1.1 */
+		case MYSQL_READ_DEFAULT_FILE:
+		case MYSQL_READ_DEFAULT_GROUP:
+		case MYSQL_INIT_COMMAND:
+		case MYSQL_SET_CHARSET_NAME:
+		case MYSQL_SET_CHARSET_DIR:
+			return IS_STRING;
+
+		default:
+			return IS_NULL;
+	}
+}
+/* }}} */
+
 /* {{{ proto bool mysqli_options(object link, int flags, mixed values) U
    Set options */
 PHP_FUNCTION(mysqli_options)
@@ -1652,6 +1711,7 @@ PHP_FUNCTION(mysqli_options)
 	long			mysql_option;
 	unsigned int	l_value;
 	long			ret;
+	int				expected_type;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olz", &mysql_link, mysqli_link_class_entry, &mysql_option, &mysql_value) == FAILURE) {
 		return;
@@ -1664,16 +1724,30 @@ PHP_FUNCTION(mysqli_options)
 		}
 	}
 
-	switch (Z_TYPE_PP(&mysql_value)) {
-		case IS_UNICODE:
-			zval_unicode_to_string(mysql_value TSRMLS_CC);
+	expected_type = mysqli_options_get_option_zval_type(mysql_option);
+	if (expected_type != Z_TYPE_P(mysql_value)) {
+		switch (expected_type) {
+			case IS_STRING:
+				convert_to_string_ex(&mysql_value);
+				break;
+			case IS_LONG:
+				convert_to_long_ex(&mysql_value);
+				break;
+			default:
+				break;
+		}
+	}
+
+	switch (expected_type) {
 		case IS_STRING:
 			ret = mysql_options(mysql->mysql, mysql_option, Z_STRVAL_PP(&mysql_value));
 			break;
-		default:
-			convert_to_long_ex(&mysql_value);
+		case IS_LONG:
 			l_value = Z_LVAL_PP(&mysql_value);
 			ret = mysql_options(mysql->mysql, mysql_option, (char *)&l_value);
+			break;
+		default:
+			ret = 1;
 			break;
 	}
 
