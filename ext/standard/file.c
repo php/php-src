@@ -48,16 +48,6 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
-#elif defined(NETWARE)
-#include <sys/param.h>
-#include <sys/select.h>
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#endif
 #else
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
