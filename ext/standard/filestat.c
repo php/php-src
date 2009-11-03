@@ -386,7 +386,7 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-#if !defined(WINDOWS)
+#if !defined(WINDOWS) && !defined(NETWARE)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	zval **filename, **group;
@@ -871,23 +871,11 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_GROUP:
 		RETURN_LONG((long)ssb.sb.st_gid);
 	case FS_ATIME:
-#ifdef NETWARE
-		RETURN_LONG((long)ssb.sb.st_atime.tv_sec);
-#else
 		RETURN_LONG((long)ssb.sb.st_atime);
-#endif
 	case FS_MTIME:
-#ifdef NETWARE
-		RETURN_LONG((long)ssb.sb.st_mtime.tv_sec);
-#else
 		RETURN_LONG((long)ssb.sb.st_mtime);
-#endif
 	case FS_CTIME:
-#ifdef NETWARE
-		RETURN_LONG((long)ssb.sb.st_ctime.tv_sec);
-#else
 		RETURN_LONG((long)ssb.sb.st_ctime);
-#endif
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link", 1);
@@ -935,15 +923,9 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
-#ifdef NETWARE
-		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
-#else
 		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
 		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
 		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
-#endif
 #ifdef HAVE_ST_BLKSIZE
 		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize); 
 #else
