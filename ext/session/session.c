@@ -66,12 +66,6 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
    * Helpers *
    *********** */
 
-#ifdef NETWARE
-# define SESS_SB_MTIME(sb)	((sb).st_mtime.tv_sec)
-#else
-# define SESS_SB_MTIME(sb)	((sb).st_mtime)
-#endif
-
 #define IF_SESSION_VARS() \
 	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY)
 
@@ -1016,7 +1010,7 @@ static inline void last_modified(TSRMLS_D) /* {{{ */
 
 #define LAST_MODIFIED "Last-Modified: "
 		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
-		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &SESS_SB_MTIME(sb));
+		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
 		ADD_HEADER(buf);
 	}
 }
