@@ -48,6 +48,10 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 
+#ifdef NETWARE
+#define timezone _timezone	/* timezone is called _timezone in LibC */
+#endif
+
 #define DEFAULT_KEY_LENGTH	512
 #define MIN_KEY_LENGTH		384
 
