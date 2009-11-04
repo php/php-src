@@ -24,8 +24,12 @@ $db = MySQLPDOTest::factory();
 	$stmt->execute(array(1, 1));
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Warning: PDO::prepare(): SQLSTATE[HY093]: Invalid parameter number: mixed named and positional parameters in %s on line %d

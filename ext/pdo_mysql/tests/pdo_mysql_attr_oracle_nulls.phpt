@@ -80,41 +80,42 @@ MySQLPDOTest::skip();
 		@$db->exec('DROP PROCEDURE IF EXISTS p');
 
 	print "done!";
+?>
 --EXPECTF--
 [002] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...
 [003] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...
 array(1) {
   [0]=>
   array(6) {
-    ["z"]=>
+    [%u|b%"z"]=>
     NULL
-    ["a"]=>
+    [%u|b%"a"]=>
     NULL
-    ["b"]=>
-    string(1) " "
-    ["c"]=>
+    [%u|b%"b"]=>
+    %unicode|string%(1) " "
+    [%u|b%"c"]=>
     NULL
-    ["d"]=>
-    string(2) " d"
-    ["e"]=>
-    string(3) "%se"
+    [%u|b%"d"]=>
+    %unicode|string%(2) " d"
+    [%u|b%"e"]=>
+    %unicode|string%(3) "%se"
   }
 }
 array(1) {
   [0]=>
   array(6) {
-    ["z"]=>
+    [%u|b%"z"]=>
     NULL
-    ["a"]=>
-    string(0) ""
-    ["b"]=>
-    string(1) " "
-    ["c"]=>
-    string(0) ""
-    ["d"]=>
-    string(2) " d"
-    ["e"]=>
-    string(3) "%se"
+    [%u|b%"a"]=>
+    %unicode|string%(0) ""
+    [%u|b%"b"]=>
+    %unicode|string%(1) " "
+    [%u|b%"c"]=>
+    %unicode|string%(0) ""
+    [%u|b%"d"]=>
+    %unicode|string%(2) " d"
+    [%u|b%"e"]=>
+    %unicode|string%(3) "%se"
   }
 }
 done!

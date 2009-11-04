@@ -32,5 +32,6 @@ $db = MySQLPDOTest::factory();
 		printf("[005] Connection status should not have changed\n");
 
 	print "done!";
+?>
 --EXPECTF--
 done!

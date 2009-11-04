@@ -63,8 +63,12 @@ try {
 		$e->getMessage(), $db->errorInfo(), implode(' ', $db->errorInfo()));
 }
 
-$db->exec('DROP TABLE IF EXISTS test');
 print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 myclass::__set(id, -'1'-) 1
@@ -83,13 +87,13 @@ myclass::__set(null, -NULL-) 3
 myclass::__set(, -''-) 4
 myclass::__construct(2, 3): 12 / 4
 object(myclass)#%d (4) {
-  ["set_calls":"myclass":private]=>
+  [%u|b%"set_calls":"myclass":private]=>
   int(4)
-  ["grp":protected]=>
+  [%u|b%"grp":protected]=>
   NULL
-  ["id"]=>
-  string(1) "3"
-  ["null"]=>
+  [%u|b%"id"]=>
+  %unicode|string%(1) "3"
+  [%u|b%"null"]=>
   NULL
 }
 done!

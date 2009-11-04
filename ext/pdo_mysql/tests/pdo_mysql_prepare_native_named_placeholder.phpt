@@ -64,8 +64,13 @@ $db = MySQLPDOTest::factory();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 [003] Execute has failed, 'HY093' array (

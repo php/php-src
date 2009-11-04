@@ -25,6 +25,7 @@ $db = MySQLPDOTest::factory();
 		printf("[002] Did we change it from '%s' to '%s'?\n", $name, $new_name);
 
 	print "done!";
+?>
 --EXPECTF--
-string(5) "mysql"
+%unicode|string%(5) "mysql"
 done!

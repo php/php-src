@@ -66,8 +66,13 @@ $db = MySQLPDOTest::factory();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'unknown_column' in 'field list' in %s on line %d

@@ -40,8 +40,6 @@ $db = MySQLPDOTest::factory();
 		$stmt->execute();
 		var_dump($stmt->errorCode());
 
-
-
 	} catch (PDOException $e) {
 		printf("[003] %s [%s] %s\n",
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));

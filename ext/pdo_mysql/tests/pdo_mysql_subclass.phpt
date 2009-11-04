@@ -74,6 +74,12 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!\n";
 ?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+?>
 --EXPECTF--
 __construct('%S', '%S', '%S')
 exec('DROP TABLE IF EXISTS test')
@@ -83,13 +89,13 @@ query('SELECT * FROM test ORDER BY id ASC')
 array(2) {
   [0]=>
   array(1) {
-    ["id"]=>
-    string(1) "1"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
   }
   [1]=>
   array(1) {
-    ["id"]=>
-    string(1) "2"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "2"
   }
 }
 bool(false)

@@ -26,17 +26,24 @@ $info = $logstmt->errorInfo();
 unset($info[2]);
 var_dump($info);
 ?>
---EXPECT--
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test2');
+?>
+--EXPECTF--
 array(2) {
   [0]=>
-  string(7) "testing"
+  %unicode|string%(7) "testing"
   [1]=>
-  string(7) "testing"
+  %unicode|string%(7) "testing"
 }
 bool(true)
 array(2) {
   [0]=>
-  string(5) "00000"
+  %unicode|string%(5) "00000"
   [1]=>
   NULL
 }

@@ -106,10 +106,11 @@ $db = MySQLPDOTest::factory();
 	$stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC LIMIT 1');
 
 	print "done!";
+?>
 --EXPECTF--
 array(1) {
   [0]=>
-  string(12) "PDOStatement"
+  %unicode|string%(12) "PDOStatement"
 }
 
 Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s on line %d
@@ -125,29 +126,29 @@ Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error: user-supplied stat
 Warning: PDO::setAttribute(): SQLSTATE[HY000]: General error in %s on line %d
 array(2) {
   [0]=>
-  string(12) "mystatement4"
+  %unicode|string%(12) "mystatement4"
   [1]=>
   array(1) {
     [0]=>
-    string(6) "param1"
+    %unicode|string%(6) "param1"
   }
 }
 mystatement4
-string(6) "param1"
+%unicode|string%(6) "param1"
 mystatement5
-string(12) "mystatement5"
-string(10) "no data :)"
+%unicode|string%(12) "mystatement5"
+%unicode|string%(10) "no data :)"
 array(1) {
   [0]=>
   array(4) {
-    ["id"]=>
-    string(1) "1"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
     [0]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
     [1]=>
-    string(1) "a"
+    %unicode|string%(1) "a"
   }
 }
 

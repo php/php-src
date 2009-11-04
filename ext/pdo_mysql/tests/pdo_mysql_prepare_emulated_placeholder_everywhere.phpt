@@ -52,8 +52,13 @@ MySQLPDOTest::skip();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d

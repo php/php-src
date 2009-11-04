@@ -60,5 +60,6 @@ $db = MySQLPDOTest::factory();
 		printf("[010] Did we change it from '%s' to '%s'?\n", $version, $new_version);
 
 	print "done!";
+?>
 --EXPECTF--
 done!

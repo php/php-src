@@ -180,8 +180,12 @@ MySQLPDOTest::skip();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!\n";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 done!
