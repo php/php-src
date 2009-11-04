@@ -34,10 +34,15 @@ else
 
 print_r($tmp);
 ?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  ["queryString"]=>
-  string(18) "SELECT * from test"
+  [%u|b%"queryString"]=>
+  %unicode|string%(18) "SELECT * from test"
 }
 Array
 (

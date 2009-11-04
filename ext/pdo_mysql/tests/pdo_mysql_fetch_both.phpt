@@ -56,33 +56,33 @@ $db = MySQLPDOTest::factory();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
+?>
 --EXPECTF--
 [002] Suspicious FETCH_BOTH result, dumping
 array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
 }
 array(2) {
   [1]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [2]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
 }
 [002] Expected differes from returned data, dumping
 array(2) {
   [0]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [1]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
 }
 array(2) {
   [1]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
   [2]=>
-  string(1) "1"
+  %unicode|string%(1) "1"
 }
 done!

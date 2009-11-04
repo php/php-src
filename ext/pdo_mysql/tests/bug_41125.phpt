@@ -22,6 +22,7 @@ if ($version < 40100)
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
+$db->exec("DROP TABLE IF EXISTS test");
 
 // And now allow the evil to do his work
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
@@ -36,6 +37,12 @@ do {
 } while ($stmt->nextRowset());
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP TABLE IF EXISTS test");
 ?>
 --EXPECTF--
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error in %s on line %d

@@ -15,7 +15,6 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $db->setAttribute(PDO :: ATTR_EMULATE_PREPARES, true);
 $stmt = $db->prepare("SELECT 1");
 $stmt->bindParam(':a', 'b');
-
 ?>
 --EXPECTF--
 Fatal error: Cannot pass parameter 2 by reference in %sbug_37445.php on line %d

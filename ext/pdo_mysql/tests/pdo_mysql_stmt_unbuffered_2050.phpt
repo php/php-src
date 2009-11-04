@@ -108,8 +108,12 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Native PS...
@@ -117,19 +121,19 @@ Buffered...
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 Unbuffered...
@@ -144,37 +148,37 @@ array(0) {
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 done!

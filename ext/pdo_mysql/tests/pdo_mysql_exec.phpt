@@ -170,8 +170,14 @@ MySQLPDOTest::skip();
 	}
 	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 
-	@$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+@$db->exec('DROP TABLE IF EXISTS test');
+?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d
 [016] [42000] 42000 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line %d

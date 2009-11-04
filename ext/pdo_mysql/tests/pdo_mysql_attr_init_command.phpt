@@ -33,7 +33,8 @@ error_reporting=E_ALL
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
-	print "done!\n";
+	print "done!";
+?>
 --EXPECTF--
 %unicode|string%(58) "CREATE TABLE test_%s(id INT)"
 %unicode|string%(5) "00000"

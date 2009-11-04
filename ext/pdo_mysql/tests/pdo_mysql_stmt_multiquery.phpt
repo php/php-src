@@ -49,14 +49,18 @@ MySQLPDOTest::skip();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Emulated Prepared Statements...
 array(3) {
   [0]=>
-  string(5) "00000"
+  %unicode|string%(5) "00000"
   [1]=>
   NULL
   [2]=>
@@ -65,13 +69,13 @@ array(3) {
 array(1) {
   [0]=>
   array(1) {
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(3) {
   [0]=>
-  string(5) "00000"
+  %unicode|string%(5) "00000"
   [1]=>
   NULL
   [2]=>
@@ -80,15 +84,15 @@ array(3) {
 array(1) {
   [0]=>
   array(1) {
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    ["label"]=>
-    string(1) "a"
+    [%u|b%"label"]=>
+    %unicode|string%(1) "a"
   }
 }
 Native Prepared Statements...

@@ -29,8 +29,6 @@ $db = MySQLPDOTest::factory();
 				printf("[%03d] Driver-specific error message.not set\n", $offset);
 		}
 
-		
-
 	}
 
 	function pdo_mysql_errorinfo($db, $offset) {
@@ -96,8 +94,12 @@ $db = MySQLPDOTest::factory();
 	printf("Native Prepared Statements...\n");
 	pdo_mysql_errorinfo($db, 20);
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Emulated Prepared Statements...

@@ -285,6 +285,7 @@ MySQLPDOTest::skip();
 	}
 
 	print "done!";
+?>
 --EXPECTF--
 [002] invalid data source name, [n/a] n/a
 [003] invalid data source name, [n/a] n/a

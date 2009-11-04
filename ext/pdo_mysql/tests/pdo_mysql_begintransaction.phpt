@@ -120,7 +120,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 	$tmp = $stmt->fetch(PDO::FETCH_ASSOC);
 	if ($tmp['auto_commit'] != 0)
 		printf("[026] Autocommit mode of the MySQL Server should be off, got '%s', [%d] %s\n",
-			$tmp['auto_commit'], $stmt->errorCode(), implode(' ', $stmt->errorInfo()));
+			$tmp['auto_commit'], $stmt->errorCode(), trim(implode(' ', $stmt->errorInfo())));
 
 	$db->commit();
 	// Now we should be back to autocommit - we've issues a commit
@@ -179,23 +179,28 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 	if (1 != $db->exec('DELETE FROM test'))
 		printf("[038] No rows deleted, can't be true.\n");
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "a"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "a"
 }
 bool(false)
 array(2) {
-  ["id"]=>
-  string(1) "1"
-  ["label"]=>
-  string(1) "z"
+  [%u|b%"id"]=>
+  %unicode|string%(1) "1"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "z"
 }
-[026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000  
+[026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000
 [028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?
-string(5) "00000"
+%unicode|string%(5) "00000"
 done!

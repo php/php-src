@@ -48,40 +48,45 @@ $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 bug_pecl_7976($db);
 
-$db->exec('DROP PROCEDURE IF EXISTS p');
 print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP PROCEDURE IF EXISTS p');
 ?>
 --XFAIL--
 Works with mysqlnd. It is not supported by libmysql. For libmysql is good enough to see no crash.
---EXPECT--
+--EXPECTF--
 Emulated...
 array(1) {
   [0]=>
   array(1) {
-    ["_one"]=>
-    string(1) "1"
+    [%u|b%"_one"]=>
+    %unicode|string%(1) "1"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    ["_one"]=>
-    string(1) "1"
+    [%u|b%"_one"]=>
+    %unicode|string%(1) "1"
   }
 }
 Native...
 array(1) {
   [0]=>
   array(1) {
-    ["_one"]=>
-    string(1) "1"
+    [%u|b%"_one"]=>
+    %unicode|string%(1) "1"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    ["_one"]=>
-    string(1) "1"
+    [%u|b%"_one"]=>
+    %unicode|string%(1) "1"
   }
 }
 done!
