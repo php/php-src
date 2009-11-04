@@ -232,7 +232,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		if (S->cursor_name) {
 			efree(S->cursor_name);
 		}
-		spprintf(&S->cursor_name, 0, "pdo_crsr_%016lx", (unsigned long) stmt);
+		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 #if HAVE_PQPREPARE
 		emulate = 1;
 #endif
@@ -262,7 +262,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			return 0;
 		}
 
-		spprintf(&S->stmt_name, 0, "pdo_stmt_%016lx", (unsigned long)stmt);
+		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
 		/* that's all for now; we'll defer the actual prepare until the first execute call */
 	
 		if (nsql) {
