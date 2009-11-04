@@ -18,6 +18,19 @@ Persistent connections and mysql.max_persistent
 	if (!mysql_select_db($db, $link))
 		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
 
+	if (!$res = mysql_query('SHOW VARIABLES LIKE "old_passwords"', $link)) {
+		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
+	}
+
+	if (mysql_num_rows($res) != 1) {
+		die(sprintf("skip Can't check if old_passwords = ON"));
+	}
+
+	$row = mysql_fetch_assoc($res);
+	mysql_free_result($res);
+	if ($row['Value'] == "ON")
+		die(sprintf("skip Test will fail because old_passwords = ON. Hint: old passwords are insecure!"));
+
 	if (!$res = mysql_query("SELECT CURRENT_USER() AS _user", $link))
 		die(sprintf("skip [%d] %s", mysql_errno($link), mysql_error($link)));
 
