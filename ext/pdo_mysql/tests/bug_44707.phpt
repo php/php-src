@@ -73,7 +73,7 @@ bug_44707($db);
 
 print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 Native Prepared Statements
 bool(false)
 bool(false)
@@ -83,10 +83,10 @@ array(0) {
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["mybool"]=>
-    string(1) "0"
+    [%u|b%"id"]=>
+    %unicode|string%(1) "1"
+    [%u|b%"mybool"]=>
+    %unicode|string%(1) "0"
   }
 }
 done!

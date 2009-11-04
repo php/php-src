@@ -46,6 +46,8 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 			PDO::MYSQL_ATTR_USE_BUFFERED_QUERY		=> 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY',
 			PDO::MYSQL_ATTR_LOCAL_INFILE					=> 'PDO::MYSQL_ATTR_LOCAL_INFILE',
 			PDO::MYSQL_ATTR_DIRECT_QUERY					=> 'PDO::MYSQL_ATTR_DIRECT_QUERY',
+
+			PDO::MYSQL_ATTR_INIT_COMMAND					=> 'PDO::MYSQL_ATTR_INIT_COMMAND',
 		);
 
 		$defaults = array(
@@ -59,6 +61,7 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 			PDO::MYSQL_ATTR_LOCAL_INFILE					=> false,
 			/* TODO getAttribute() does not handle it */
 			PDO::MYSQL_ATTR_DIRECT_QUERY					=> 1,
+			PDO::MYSQL_ATTR_INIT_COMMAND					=> '',
 		);
 
 		if (NULL !== ($db = @new PDO($dsn, $user, $pass, 'wrong type')))
@@ -140,6 +143,10 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		set_option_and_check(21, PDO::MYSQL_ATTR_LOCAL_INFILE, true, 'PDO::MYSQL_ATTR_LOCAL_INFILE');
 		set_option_and_check(22, PDO::MYSQL_ATTR_LOCAL_INFILE, false, 'PDO::MYSQL_ATTR_LOCAL_INFILE');
 
+		set_option_and_check(23, PDO::MYSQL_ATTR_INIT_COMMAND, 'SET @a=1', 'PDO::MYSQL_ATTR_INIT_COMMAND');
+		set_option_and_check(24, PDO::MYSQL_ATTR_INIT_COMMAND, '', 'PDO::MYSQL_ATTR_INIT_COMMAND');
+		set_option_and_check(25, PDO::MYSQL_ATTR_INIT_COMMAND, 'INSERT INTO nonexistent(invalid) VALUES (1)', 'PDO::MYSQL_ATTR_INIT_COMMAND');
+
 		set_option_and_check(33, PDO::MYSQL_ATTR_DIRECT_QUERY, 1, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
 		set_option_and_check(34, PDO::MYSQL_ATTR_DIRECT_QUERY, 0, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
 
@@ -151,9 +158,11 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 	}
 
 	print "done!";
+?>
 --EXPECTF--
 [003] [TODO][CHANGEREQUEST] Please, lets not ignore invalid options and bail out!
 [003a] Expecting default value for 'PDO::ATTR_EMULATE_PREPARES' of '1'/integer, getAttribute() reports setting ''/boolean
+[003a] Expecting default value for 'PDO::MYSQL_ATTR_INIT_COMMAND' of ''/string, getAttribute() reports setting ''/boolean
 
 Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
 [010] [TODO][CHANGEREQUEST] ATTR_EMULATE_PREPARES should be on

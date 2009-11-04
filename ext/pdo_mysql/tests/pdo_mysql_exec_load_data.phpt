@@ -96,7 +96,13 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+?>
 --EXPECTF--
 done!

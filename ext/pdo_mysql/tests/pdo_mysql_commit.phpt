@@ -78,7 +78,13 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 			$db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test_commit'));
 	print "done!";
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_commit');
+MySQLPDOTest::dropTestTable($db);
+?>
 --EXPECT--
 done!

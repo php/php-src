@@ -62,6 +62,13 @@ if (MySQLPDOTest::isPDOMySQLnd())
 	try_buffer_size(4, 2000);
 
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+?>
 --EXPECTF--
 [001] id = 1, val = 0123456789... (length: %d)
 [002] id = 1, val = 0123456789... (length: 1000)

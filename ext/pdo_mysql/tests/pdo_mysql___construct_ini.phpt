@@ -8,7 +8,6 @@ MySQLPDOTest::skip();
 /* TODO - fix this limitation */
 if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysql.sock")
 	die("skip Fix test to run in other environments as well!");
-
 ?>
 --INI--
 pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
@@ -51,6 +50,7 @@ pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
 	}
 
 	print "done!";
+?>
 --EXPECTF--
 pdo.dsn.mysql cannot be accessed through ini_get_all()/ini_get()
 done!

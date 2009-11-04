@@ -70,13 +70,6 @@ MySQLPDOTest::skip();
 		11.1.17. DROP TABLESPACE Syntax
 		*/
 
-		// clean up
-		@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl');
-		@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl2');
-		@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
-		@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
-
-
 	} catch (PDOException $e) {
 		printf("[001] %s, [%s] %s\n",
 			$e->getMessage(),
@@ -84,5 +77,16 @@ MySQLPDOTest::skip();
 	}
 
 	print "done!";
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+MySQLPDOTest::dropTestTable($db);
+// clean up
+@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl');
+@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl2');
+@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
+@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
+?>
 --EXPECTF--
 done!

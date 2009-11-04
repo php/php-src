@@ -57,8 +57,13 @@ $db = MySQLPDOTest::factory();
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 array(1) {
@@ -75,11 +80,11 @@ array(1) {
   [0]=>
   array(3) {
     ["?"]=>
-    unicode(2) "id"
+    string(2) "id"
     ["id"]=>
     int(1)
     ["label"]=>
-    unicode(4) "row1"
+    string(4) "row1"
   }
 }
 done!

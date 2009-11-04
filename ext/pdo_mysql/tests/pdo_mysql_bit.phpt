@@ -35,7 +35,6 @@ if (MySQLPDOTest::isPDOMySQLnd())
 		var_dump($row);
 		var_dump($value);
 
-
 		return true;
 	}
 
@@ -48,12 +47,18 @@ if (MySQLPDOTest::isPDOMySQLnd())
 
 	echo "done!\n";
 ?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+?>
 --EXPECTF--
 array(2) {
-  ["id"]=>
-  string(2) "20"
-  ["label"]=>
-  string(1) "1"
+  [%u|b%"id"]=>
+  %unicode|string%(2) "20"
+  [%u|b%"label"]=>
+  %unicode|string%(1) "1"
 }
 int(1)
 done!
