@@ -50,32 +50,35 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 	var_dump($stmt->fetch());
 	var_dump($stmt->fetch());
 	var_dump($stmt->fetchAll());
-	
-	$pdoDb->query('DROP TABLE IF EXISTS testz');
-	
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS testz');
 ?>
 --EXPECTF--
 bool(true)
 myclass::__construct()
 object(myclass)#%d (1) {
-  ["value"]=>
-  string(1) "1"
+  [%u|b%"value"]=>
+  %unicode|string%(1) "1"
 }
 myclass::__construct()
 object(myclass2)#%d (1) {
-  ["value"]=>
-  string(1) "2"
+  [%u|b%"value"]=>
+  %unicode|string%(1) "2"
 }
 myclass::__construct()
 array(2) {
   [0]=>
   object(myclass)#%d (1) {
-    ["value"]=>
+    [%u|b%"value"]=>
     NULL
   }
   [1]=>
   object(stdClass)#%d (1) {
-    ["value"]=>
+    [%u|b%"value"]=>
     NULL
   }
 }

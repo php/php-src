@@ -100,9 +100,14 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 			implode(' ', $db->errorInfo()),
 			(isset($stmt)) ? implode(' ', $stmt->errorInfo()) : 'N/A');
 	}
-
-	// $db->exec('DROP TABLE IF EXISTS test');
+	
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY000]: General error: %s in %s on line %d
 [004] [0] array (

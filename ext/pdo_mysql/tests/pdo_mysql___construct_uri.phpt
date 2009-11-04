@@ -22,7 +22,7 @@ MySQLPDOTest::skip();
 
 			if ($fp = @fopen($file, 'w')) {
 				// ok, great we can create a file with a DSN in it
-				@fwrite($fp, $dsn);
+				fwrite($fp, $dsn);
 				fclose($fp);
 				clearstatcache();
 				assert(file_exists($file));
@@ -38,7 +38,7 @@ MySQLPDOTest::skip();
 			}
 
 			if ($fp = @fopen($file, 'w')) {
-				@fwrite($fp, sprintf('mysql:dbname=letshopeinvalid;%s%s',
+				fwrite($fp, sprintf('mysql:dbname=letshopeinvalid;%s%s',
 					chr(0), $dsn));
 				fclose($fp);
 				clearstatcache();
@@ -66,6 +66,7 @@ MySQLPDOTest::skip();
 	}
 
 	print "done!";
+?>
 --EXPECTF--
 Warning: PDO::__construct(%s
 [002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI

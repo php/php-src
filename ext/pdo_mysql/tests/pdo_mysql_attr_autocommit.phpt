@@ -87,7 +87,12 @@ $db = MySQLPDOTest::factory();
 
 	}
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 done!

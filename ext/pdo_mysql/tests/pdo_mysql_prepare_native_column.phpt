@@ -26,8 +26,13 @@ $db = MySQLPDOTest::factory();
 
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 array(1) {

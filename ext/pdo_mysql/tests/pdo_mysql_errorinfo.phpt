@@ -14,13 +14,9 @@ $db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db);
 
 	function check_error($offset, &$obj, $expected = '00000') {
-
 		$info = $obj->errorInfo();
-		if (count($info) != 3)
-			printf("[%03d] Info should have three fields, got %s\n",
-				$offset, var_export($info, true));
-
 		$code = $info[0];
+
 		if (($code != $expected) && (($expected != '00000') && ($code != ''))) {
 			printf("[%03d] Expecting error code '%s' got code '%s'\n",
 				$offset, $expected, $code);
@@ -98,76 +94,18 @@ $db = MySQLPDOTest::factory();
 	printf("Native Prepared Statements...\n");
 	pdo_mysql_errorinfo($db, 20);
 
-	$db->exec('DROP TABLE IF EXISTS test');
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 Emulated Prepared Statements...
-[002] Info should have three fields, got array (
-  0 => '00000',
-)
-[003] Info should have three fields, got array (
-  0 => '00000',
-)
-[004] Info should have three fields, got array (
-  0 => '00000',
-)
-[005] Info should have three fields, got array (
-  0 => '00000',
-)
-[009] Info should have three fields, got array (
-  0 => '00000',
-)
-[010] Info should have three fields, got array (
-  0 => '00000',
-)
-[013] Info should have three fields, got array (
-  0 => '00000',
-)
-[014] Info should have three fields, got array (
-  0 => '00000',
-)
-[015] Info should have three fields, got array (
-  0 => 'IM001',
-)
 [015] Driver-specific error code not set
 [015] Driver-specific error message.not set
-[016] Info should have three fields, got array (
-  0 => 'IM001',
-)
 [016] Driver-specific error code not set
 [016] Driver-specific error message.not set
-[017] Info should have three fields, got array (
-  0 => '00000',
-)
-[018] Info should have three fields, got array (
-  0 => '00000',
-)
 Native Prepared Statements...
-[022] Info should have three fields, got array (
-  0 => '00000',
-)
-[023] Info should have three fields, got array (
-  0 => '00000',
-)
-[024] Info should have three fields, got array (
-  0 => '00000',
-)
-[025] Info should have three fields, got array (
-  0 => '00000',
-)
-[030] Info should have three fields, got array (
-  0 => '00000',
-)
-[033] Info should have three fields, got array (
-  0 => '00000',
-)
-[034] Info should have three fields, got array (
-  0 => '00000',
-)
-[037] Info should have three fields, got array (
-  0 => '00000',
-)
-[038] Info should have three fields, got array (
-  0 => '00000',
-)
 done!

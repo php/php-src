@@ -62,35 +62,41 @@ bug_39858($db);
 
 print "done!";
 ?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP PROCEDURE IF EXISTS p");
+?>
 --EXPECTF--
 Emulated Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    ["2 * 2"]=>
-    string(1) "4"
+    [%u|b%"2 * 2"]=>
+    %unicode|string%(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    ["2 * 2"]=>
-    string(1) "4"
+    [%u|b%"2 * 2"]=>
+    %unicode|string%(1) "4"
   }
 }
 Native Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    ["2 * 2"]=>
-    string(1) "4"
+    [%u|b%"2 * 2"]=>
+    %unicode|string%(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    ["2 * 2"]=>
-    string(1) "4"
+    [%u|b%"2 * 2"]=>
+    %unicode|string%(1) "4"
   }
 }
 done!

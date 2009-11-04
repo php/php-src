@@ -94,8 +94,13 @@ PDO::ATTR_CONNECTION_STATUS
 PDO::ATTR_SERVER_INFO
 */
 
-	$db->exec(sprintf('DROP TABLE IF EXISTS test'));
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECTF--
 [001] Call to PDO::setAttribute(int attribute, mixed value) has changed the type of value from integer to boolean, test will not work properly
 done!

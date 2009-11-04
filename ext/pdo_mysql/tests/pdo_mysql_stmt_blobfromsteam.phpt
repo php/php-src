@@ -132,10 +132,15 @@ unlink($file);
 		printf("[001] %s [%s] %s\n",
 			$e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
 	}
-
-	@unlink($file);
-	$db->exec('DROP TABLE IF EXISTS test');
+	
 	print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+@unlink(MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR . 'pdoblob.tst');
 ?>
 --EXPECTF--
 Emulated PS...

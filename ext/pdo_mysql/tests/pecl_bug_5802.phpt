@@ -32,21 +32,30 @@ $stmt = $db->prepare('select * from test') or var_dump($db->errorInfo());
 if($stmt) $stmt->execute();
 if($stmt) var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
---EXPECT--
+print "done!";
+?>
+--CLEAN--
+<?php
+require dirname(__FILE__) . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test');
+?>
+--EXPECTF--
 array(3) {
   [0]=>
   array(1) {
-    ["bar"]=>
-    string(3) "foo"
+    [%u|b%"bar"]=>
+    %unicode|string%(3) "foo"
   }
   [1]=>
   array(1) {
-    ["bar"]=>
+    [%u|b%"bar"]=>
     NULL
   }
   [2]=>
   array(1) {
-    ["bar"]=>
-    string(3) "qaz"
+    [%u|b%"bar"]=>
+    %unicode|string%(3) "qaz"
   }
 }
+done!
