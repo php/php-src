@@ -233,7 +233,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			efree(S->cursor_name);
 		}
 		/* TODO: check how scrollable cursors related to prepared statements */
-		spprintf(&S->cursor_name, 0, "pdo_pgsql_cursor_%08x", (unsigned int) stmt);
+		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 	}
 
 #if HAVE_PQPREPARE
@@ -261,7 +261,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			return 0;
 		}
 
-		spprintf(&S->stmt_name, 0, "pdo_pgsql_stmt_%08x", (unsigned int)stmt);
+		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
 		/* that's all for now; we'll defer the actual prepare until the first execute call */
 	
 		if (nsql) {

@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 - Fixed bug #49990 (SNMP3 warning message about security level printed twice).
   (Jani)
 - Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted
-  transaction). (ben dot pineau at gmail dot com, Ilia)  
+  transaction). (ben dot pineau at gmail dot com, Ilia, Matteo)  
 - Fixed bug #49921 (Curl post upload functions changed). (Ilia)
 - Fixed bug #49972 (AppendIterator undefined function crash). (Johannes)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia, 
