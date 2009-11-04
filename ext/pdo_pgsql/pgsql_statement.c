@@ -185,7 +185,7 @@ stmt_retry:
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (!strcmp(sqlstate, "42P05")) {
-						char buf[100]; /* stmt_name == "pdo_crsr_%016lx" */
+						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
 						PGresult *res;
 						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
 						res = PQexec(H->server, buf);

@@ -50,6 +50,7 @@ typedef struct {
 	int		emulate_prepares;
 	int		disable_native_prepares;
 #endif
+	unsigned int stmt_counter;
 } pdo_pgsql_db_handle;
 
 typedef struct {
