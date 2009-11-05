@@ -1,106 +1,119 @@
 Submitting Patch for PHP
 ========================
 
-This document describes how to submit a patch for PHP. Since you are
-reading this document, you are willing to submit a patch for PHP.
-Please keep reading! Submitting a patch for PHP is easy. The hard
-part is making it acceptable for inclusion into our repository. :-)
-
-How to create patch?  
--------------------- 
-We use Subversion (SVN) for revision control.  You need to get the
-source from SVN in order to create a patch.  Read 
-http://www.php.net/svn.php for help on using SVN.  You can check out
-older branches, but make sure you get trunk as well and make your
-patch work there.
-
-Read CODING_STANDARDS file before you start working.
-
-Now you are ready to create a patch. Modify source to fix a bug in PHP or
-add a new feature to PHP. After you finished editing, please test your
-patch. Read README.TESTING for testing.
-
-After you finish testing your patch, take diff file using 
-"svn diff > your.patch" command.
-
-Read README.TESTING for submitting a test script for your patch. This is
-not strictly required, but it is preferred to submit a test script along
-with your patch. Making new test script is very easy. It also helps us
-to understand what you have been fixed or added to PHP.
+This document describes how to submit a patch for PHP. Creating a
+patch for PHP is easy!
 
 
-Tips for creating patch 
------------------------ 
-If you would like to fix multiple bugs. It is easier for us if you
-could create 1 patch for 1 bug, but this is not strictly required.
-Note though that you might get little response, if your patch is
-too hard to review.
+Prework
+-------
+If you are fixing broken functionality then create a bug or identify
+an existing bug at http://bugs.php.net/. This can be used to track
+the patch progress and prevent your changes getting lost in the PHP
+mail archives.
 
-If you would like change/add many lines, it is better to ask module
-maintainer and/or internals@lists.php.net, or pear-dev@lists.php.net if
-you are patching PEAR. Official module maintainers can be found in
-EXTENSIONS file in PHP source.
+If your code change is large then discuss it with the extension
+maintainer and/or internals@lists.php.net (or pear-dev@lists.php.net
+if you are patching PEAR) before starting work. Maintainers can be
+found in the EXTENSIONS file in the PHP source. Mail list subscription
+is explained on http://www.php.net/mailing-lists.php
 
-If you are new to SVN (Subversion), visit
-http://svnbook.red-bean.com/ for details.
-
-
-Check list for submitting patch
--------------------------------
- - Did you run "make test" to check if your patch didn't break
-   other features?
- - Did you compile PHP with --enable-debug and check the PHP and
-   web server error logs when you test your patch?
- - Did you build PHP for multi-threaded web servers. (Optional)
- - Did you create test script for "make test"? (Recommended)
- - Did you update SVN source before you take final patch?
- - Did you read the patch again?
+If your patch affects user-functionality or makes significant internal
+changes to PHP then create a simple RFC on http://wiki.php.net/rfc.
+This RFC can be used for initial discussion and later for
+documentation. Wiki accounts can be requested on
+http://wiki.php.net/start?do=register
 
 
-Where to send your patch?
--------------------------
-If you are patching C source, send the patch to internals@lists.php.net. 
-If you are patching a module, you should also send the patch to the 
-maintainer. Official module maintainers are listed in EXTENSION file 
-in source.
+How to create your patch
+------------------------
+PHP uses Subversion (SVN) for revision control. Read
+http://www.php.net/svn.php for help on using SVN to get and build PHP
+source code. We recommend using a Sparse Directory checkout described
+in http://wiki.php.net/vcs/svnfaq. If you are new to SVN, read
+http://svnbook.red-bean.com.
 
-If you are patching PEAR, send the patch to pear-dev@lists.php.net.
+Generally we ask that patches work on the current stable PHP
+development branch and on "trunk".
 
-Please add the prefix "[PATCH]" to your email subject and make sure
-to include the patch as a MIME attachment even if it is short. 
+Read CODING_STANDARDS before you start working.
 
-NOTE: only MIME attachments of type 'text/*' are accepted. The
-      easiest way to accomplish this, is to make the extension
-      '.txt'.
+After modifying the source see README.TESTING and
+http://qa.php.net/write-test.php for how to test your
+change. Submitting test scripts helps us to understand what
+functionality has changed. It is important for the stability and
+maintainability of PHP that tests are comprehensive.
 
-Test scripts should be included in the same email.
-Explain what has been fixed/added/changed by your patch.
+After testing is finished, create a diff file using the command:
 
-Finally, add the bug Id(s) which can be closed by your patch, if any.
+  svn diff > your_patch.txt
+
+For ease of review and later troubleshooting, submit individual
+patches for each bug or feature.
+
+
+Checklist for submitting your patch
+-----------------------------------
+ - Update SVN source just before creating your final 'diff' and
+   running tests.
+ - Run "make test" to check your patch doesn't break other features.
+ - Rebuild PHP with --enable-debug (which will show some kinds of
+   memory errors) and check the PHP and web server error logs after
+   running the PHP tests.
+ - Rebuild PHP with --enable-maintainer-zts to check your patch compiles
+   on multi-threaded web servers.
+ - Create test scripts for use with "make test".
+ - Add in-line comments and/or have external documentation ready.
+ - Review the patch once more just before submitting it.
+
+
+Where to send your patch
+------------------------
+If you are patching C source then email the patch to
+internals@lists.php.net and/or to the extension maintainer (see
+EXTENSIONS).
+
+If you are patching PEAR then send the patch to pear-dev@lists.php.net.
+
+Please make the subject prefix "[PATCH]".  
+
+Include the patch as a attachment. Note: only MIME attachments of type
+'text/*' are accepted. The easiest way to accomplish this is to make
+the file extension '.txt'.
+
+Explain what has been fixed/added/changed by your patch. Test scripts
+should be included in the email.
+
+Include the bug id(s) which can be closed by your patch.
+
+Finally, if there is a bug open, add a link in the bug report to the
+source of your patch.
 
 
 What happens after you submit your patch
----------------------------------------- 
-If your patch is easy to review and has obviously no side-effects,
-it might take up to a few hours until someone commits it.
+----------------------------------------
+If your patch is easy to review and obviously has no side-effects,
+it might be committed relatively quickly.
 
-Because this is a volunteer-driven effort, more complex patches will
-require more patience on your side. 
-
-If you did not receive any feedback in a few days, please consider
-resubmitting the description of your patch, along-side with
+Because PHP is a volunteer-driven effort more complex patches will
+require patience on your side. If you do not receive feedback in a few
+days, consider resubmitting the patch. Before doing this think about
 these questions:
 
-- Is my patch too hard to review? Because of which factors?
-- Should I split it up in multiple parts?
-- Are there any unwanted whitespace changes?
+ - Did I review the mail list archives to see if these kind of
+   changes had been discussed before?
+ - Did I explain my patch clearly?
+ - Is my patch too hard to review? Because of which factors?
+ - Are there any unwanted white space changes?
 
 
-What happens when your patch is applied?
----------------------------------------- 
+What happens when your patch is applied
+---------------------------------------
 Your name will be included together with your email address in the SVN
-commit log. If your patch affects end-users, a brief description
+commit log. If your patch affects end users, a brief description
 and your name might be added to the NEWS file.
 
+Commit privileges are often granted to people who have had several
+patches accepted.
 
-Thank you for submitting patch for PHP!
+Thank you for patching PHP!
