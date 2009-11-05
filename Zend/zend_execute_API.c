@@ -1511,7 +1511,7 @@ void zend_unset_timeout(TSRMLS_D)
 	}
 #else
 #	ifdef HAVE_SETITIMER
-	{
+	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
 
 		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
