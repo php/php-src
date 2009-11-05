@@ -21,7 +21,7 @@ if (!function_exists('sys_get_temp_dir')) {
 
 if (!function_exists('my_mysql_connect')) {
 	/* wrapper to simplify test porting */
-	function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL) {
+	function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL, $persistent = false) {
 		global $connect_flags;
 
 		$flags = ($flags === NULL) ? $connect_flags : $flags;
@@ -31,9 +31,15 @@ if (!function_exists('my_mysql_connect')) {
 		else if ($port)
 			$host = sprintf("%s:%s", $host, $port);
 
-		if (!$link = mysql_connect($host, $user, $passwd, true, $flags)) {
-			printf("[000-a] Cannot connect using host '%s', user '%s', password '****', [%d] %s\n",
-				$host, $user, $passwd,
+		if ($persistent) {
+			$link = mysql_pconnect($host, $user, $passwd, $flags);
+		} else {
+			 $link = mysql_connect($host, $user, $passwd, true, $flags);
+		}
+
+		if (!$link) {
+			printf("[000-a] Cannot connect using host '%s', user '%s', password '****', persistent = %d, [%d] %s\n",
+				$host, $user, ($persistent) ? 1 : 0,
 				mysql_errno(), mysql_error());
 			return false;
 		}
