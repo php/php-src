@@ -13,19 +13,11 @@ mysql.max_links=2
 <?php
 	require_once("connect.inc");
 	require_once("table.inc");
-	// assert(ini_get('mysql.allow_persistent') == false);
 
-	if ($socket)
-		$myhost = sprintf("%s:%s", $host, $socket);
-	else if ($port)
-		$myhost = sprintf("%s:%s", $host, $port);
-	else
-	$myhost = $host;
-
-	if (($plink = mysql_pconnect($myhost, $user, $passwd)))
+	if (($plink = my_mysql_connect($host, $user, $passwd, $db, $port, $socket, NULL, true)))
 		printf("[001] Can connect to the server.\n");
 
-	if (($res = @mysql_query('SELECT id FROM test ORDER BY id ASC', $plink)) &&
+	if (($res = mysql_query('SELECT id FROM test ORDER BY id ASC', $plink)) &&
 			($row = mysql_fetch_assoc($res)) &&
 			(mysql_free_result($res))) {
 		printf("[002] Can fetch data using persistent connection! Data = '%s'\n",
@@ -35,7 +27,7 @@ mysql.max_links=2
 	$thread_id = mysql_thread_id($plink);
 	mysql_close($plink);
 
-	if (!($plink = mysql_pconnect($myhost, $user, $passwd)))
+	if (!($plink = my_mysql_connect($host, $user, $passwd, $db, $port, $socket, NULL, true)))
 		printf("[003] Cannot connect, [%d] %s\n", mysql_errno(), mysql_error());
 
 	if (mysql_thread_id($plink) != $thread_id)
@@ -44,7 +36,7 @@ mysql.max_links=2
 	$thread_id = mysql_thread_id($plink);
 	mysql_close($plink);
 
-	if (!($plink = mysql_connect($myhost, $user, $passwd, true)))
+	if (!($plink = my_mysql_connect($host, $user, $passwd, $db, $port, $socket)))
 		printf("[005] Cannot connect, [%d] %s\n", mysql_errno(), mysql_error());
 
 	if (mysql_thread_id($plink) == $thread_id)
