@@ -204,12 +204,13 @@ static void php_disable_classes(TSRMLS_D)
  */
 static PHP_INI_MH(OnUpdateTimeout)
 {
-	EG(timeout_seconds) = atoi(new_value);
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
+		EG(timeout_seconds) = atoi(new_value);
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
+	EG(timeout_seconds) = atoi(new_value);
 	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
