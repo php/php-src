@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Updated timezone database to version 2009.17 (2009q). (Derick)
 
 - Added "max_file_uploads" INI directive, which can be set to limit the
-  number of file uploads per-request to 100 by default, to prevent possible
+  number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 
 - Fixed unnecessary invokation of setitimer when timeouts have been disabled.
