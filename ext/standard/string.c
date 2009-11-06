@@ -3918,7 +3918,7 @@ PHP_FUNCTION(nl2br)
 	tmp = str;
 	end = str + str_len;
 	
-	/* it is really faster to scan twice and allocate mem once insted scanning once
+	/* it is really faster to scan twice and allocate mem once instead of scanning once
 	   and constantly reallocing */
 	while (tmp < end) {
 		if (*tmp == '\r') {
