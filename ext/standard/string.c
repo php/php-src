@@ -5830,7 +5830,7 @@ PHP_FUNCTION(nl2br)
 
 	p = str;
 
-	/* it is really faster to scan twice and allocate mem once insted scanning once
+	/* it is really faster to scan twice and allocate mem once instead of scanning once
 	   and constantly reallocing */
 	if (str_type == IS_UNICODE) {
 		end.u = p.u + str_len;
