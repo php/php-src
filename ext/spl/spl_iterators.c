@@ -1382,7 +1382,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 						return NULL;
 					}
 					if (!retval || Z_TYPE_P(retval) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(retval), zend_ce_traversable TSRMLS_CC)) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "%v::getIterator() must return an object that implememnts Traversable", ce->name);
+						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "%v::getIterator() must return an object that implements Traversable", ce->name);
 						zend_restore_error_handling(&error_handling TSRMLS_CC);
 						return NULL;
 					}
