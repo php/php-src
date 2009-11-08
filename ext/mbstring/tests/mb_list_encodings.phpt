@@ -1,5 +1,7 @@
 --TEST--
 mb_list_encodings
+--SKIPIF--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 var_dump(in_array("7bit", mb_list_encodings()));
