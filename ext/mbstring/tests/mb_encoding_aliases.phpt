@@ -1,5 +1,7 @@
 --TEST--
 mb_encoding_aliases()
+--SKIPIF--
+<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 mb_encoding_aliases();
