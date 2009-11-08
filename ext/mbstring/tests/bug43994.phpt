@@ -38,7 +38,7 @@ foreach($inputs as $input) {
 };
 ?>
 
---EXPECTF---- 
+--EXPECTF-- 
 
 -- Iteration 1 --
 Without $regs arg:
