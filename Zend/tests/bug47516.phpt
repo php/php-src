@@ -30,7 +30,7 @@ ppp
 
 echo "$htm\n";
 ?>
---EXPECT---
+--EXPECT--
 abc
 abc
 abc
