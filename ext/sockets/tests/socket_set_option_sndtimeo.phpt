@@ -1,6 +1,6 @@
 --TEST--
 Test if socket_set_option() works, option:SO_SNDTIMEO
---DESCRIPTION---
+--DESCRIPTION--
 -wrong params 
 -set/get params comparison 
 --SKIPIF--
