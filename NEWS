@@ -7,7 +7,7 @@ PHP                                                                        NEWS
   number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 
-- Fixed unnecessary invokation of setitimer when timeouts have been disabled.
+- Fixed unnecessary invocation of setitimer when timeouts have been disabled.
   (Arvind Srinivasan)
 - Fixed crash in com_print_typeinfo when an invalid typelib is given.
   (Pierre)
