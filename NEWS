@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- Upgraded bundled sqlite to version 3.6.20. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
 - Added "max_file_uploads" INI directive, which can be set to limit the
