@@ -1,6 +1,6 @@
 --TEST--
 Test if socket_set_option() works, option:SO_SEOLINGER
---DESCRIPTION---
+--DESCRIPTION--
 -wrong params 
 -set/get params comparison 
 -l_linger not given

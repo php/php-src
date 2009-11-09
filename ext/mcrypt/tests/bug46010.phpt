@@ -1,4 +1,4 @@
---TEST---
+--TEST--
 Bug #46010 (warnings incorrectly generated for iv in ecb mode)
 --FILE--
 <?php
