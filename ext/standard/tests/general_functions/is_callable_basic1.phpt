@@ -64,7 +64,7 @@ check_iscallable($defined_functions);
 
 ?>
 ===DONE===
---EXPECT---
+--EXPECT--
 *** Testing is_callable() on defined functions ***
 -- Iteration  1 --
 bool(true)
