@@ -71,7 +71,7 @@ $c->id = 'changedIDagain';
 var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
 checkAndClean();
 ?>
---EXPECTF---
+--EXPECTF--
  ---> Test arrays: 
 
 Notice: ob_start(): failed to create buffer in %s on line 44

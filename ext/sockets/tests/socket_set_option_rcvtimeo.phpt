@@ -1,6 +1,6 @@
 --TEST--
 Test if socket_set_option() works, option:SO_RCVTIMEO
---DESCRIPTION---
+--DESCRIPTION--
 -wrong params 
 -set/get params comparison 
 --SKIPIF--
