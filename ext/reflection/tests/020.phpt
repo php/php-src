@@ -24,5 +24,4 @@ var_dump($obj->hasProperty("p4"));
 bool(true)
 bool(true)
 bool(true)
-string(2) "p4"
 bool(false)
