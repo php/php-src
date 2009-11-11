@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #50073 (parse_url() incorrect when ? in fragment). (Ilia)
 - Fixed bug #50023 (pdo_mysql doesn't use PHP_MYSQL_UNIX_SOCK_ADDR). (Ilia)
+- Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
+  tar support). (Greg)
 - Fixed bug #49908 (throwing exception in __autoload crashes when interface
   is not defined). (Felipe)
 - Fixed bug #49719 (ReflectionClass::hasProperty returns true for a private 
