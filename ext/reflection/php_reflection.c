@@ -3533,7 +3533,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 		if (intern->obj && Z_OBJ_HANDLER_P(intern->obj, has_property)) {
 			MAKE_STD_ZVAL(property);
 			ZVAL_STRINGL(property, name, name_len, 1);
-			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 0 TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 2 TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
