@@ -198,7 +198,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 	ulong h;
 
 	if ((Z_TYPE_P(member) == IS_UNICODE && Z_USTRVAL_P(member)[0] == 0) ||
-	    Z_STRVAL_P(member)[0] == '\0') {
+	    (Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] == '\0')) {
 		if (!silent) {
 			if (Z_UNILEN_P(member) == 0) {
 				zend_error(E_ERROR, "Cannot access empty property");
