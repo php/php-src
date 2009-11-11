@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #50152 (ReflectionClass::hasProperty hehaves like isset() not
   property_exists). (Felipe)
+- Fixed bug #50146 (property_exists: Closure object cannot have properties).
+  (Felipe)
 - Fixed bug #50073 (parse_url() incorrect when ? in fragment). (Ilia)
 - Fixed bug #50023 (pdo_mysql doesn't use PHP_MYSQL_UNIX_SOCK_ADDR). (Ilia)
 - Fixed bug #49908 (throwing exception in __autoload crashes when interface
