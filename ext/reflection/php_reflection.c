@@ -3700,7 +3700,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 			} else {
 				ZVAL_UNICODEL(property, name.u, name_len, 1);
 			}
-			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 0 TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 2 TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
