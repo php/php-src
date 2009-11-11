@@ -161,7 +161,9 @@ static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member TSRML
 
 static int zend_closure_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC) /* {{{ */
 {
-	ZEND_CLOSURE_PROPERTY_ERROR();
+	if (has_set_exists != 2) {
+		ZEND_CLOSURE_PROPERTY_ERROR();
+	}
 	return 0;
 }
 /* }}} */
