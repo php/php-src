@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2009, PHP 5.3.1 RC4
-
+- Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
+  elmerot dot se)
 
 03 Nov 2009, PHP 5.3.1 RC3
 - Added "max_file_uploads" INI directive, which can be set to limit the
@@ -10,7 +11,7 @@ PHP                                                                        NEWS
 
 - Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
 
-- Fuxed bug #50052 (Different Hashes on Windows and Linux on wrong Salt size).
+- Fixed bug #50052 (Different Hashes on Windows and Linux on wrong Salt size).
   (Pierre)
 - Fixed bug #49908 (throwing exception in __autoload crashes when interface
   is not defined). (Felipe)
