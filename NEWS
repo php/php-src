@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
   elmerot dot se)
+- Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
+  tar support). (Greg)
 
 03 Nov 2009, PHP 5.3.1 RC3
 - Added "max_file_uploads" INI directive, which can be set to limit the
