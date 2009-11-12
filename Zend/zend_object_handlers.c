@@ -1253,7 +1253,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					zend_error(E_ERROR, "Method %v::__toString() must not throw an exception", ce->name);
                 	return FAILURE;
                 }
-				if (Z_TYPE_P(retval) == IS_UNICODE) {
+				if (Z_TYPE_P(retval) == IS_UNICODE || Z_TYPE_P(retval) == IS_STRING) {
 					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
 						zval_dtor(readobj);
