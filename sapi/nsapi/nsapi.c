@@ -131,14 +131,6 @@ static size_t nsapi_client_size = sizeof(nsapi_client)/sizeof(nsapi_client[0]);
 /* this parameters to "Service"/"Error" are NSAPI ones which should not be php.ini keys and are excluded */
 static char *nsapi_exclude_from_ini_entries[] = { "fn", "type", "method", "directive", "code", "reason", "script", "bucket", NULL };
 
-static char *nsapi_strdup(char *str)
-{
-	if (str != NULL) {
-		return STRDUP(str);
-	}
-	return NULL;
-}
-
 static void nsapi_free(void *addr)
 {
 	if (addr != NULL) {
@@ -500,7 +492,7 @@ static int php_nsapi_remove_header(sapi_header_struct *sapi_header TSRMLS_DC)
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	
 	/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
-	header_name = nsapi_strdup(sapi_header->header);
+	header_name = pool_strdup(rc->sn->pool, sapi_header->header);
 
 	/* extract name, this works, if only the header without ':' is given, too */
 	if (p = strchr(header_name, ':')) {
@@ -514,7 +506,7 @@ static int php_nsapi_remove_header(sapi_header_struct *sapi_header TSRMLS_DC)
 	
 	/* remove the header */
 	param_free(pblock_remove(header_name, rc->rq->srvhdrs));
-	nsapi_free(header_name);
+	pool_free(rc->sn->pool, header_name);
 	
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -538,7 +530,7 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 		case SAPI_HEADER_ADD:
 		case SAPI_HEADER_REPLACE:
 			/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
-			header_name = nsapi_strdup(sapi_header->header);
+			header_name = pool_strdup(rc->sn->pool, sapi_header->header);
 
 			/* split header and align pointer for content */
 			header_content = strchr(header_name, ':');
@@ -561,7 +553,7 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 				pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
 			}
 			
-			nsapi_free(header_name);
+			pool_free(rc->sn->pool, header_name);
 			return SAPI_HEADER_ADD;
 			
 		default:
@@ -750,6 +742,8 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 	/* Create full Request-URI & Script-Name */
 	if (SG(request_info).request_uri) {
+		pos = strlen(SG(request_info).request_uri);
+		
 		if (SG(request_info).query_string) {
 			spprintf(&value, 0, "%s?%s", SG(request_info).request_uri, SG(request_info).query_string);
 			if (value) {
@@ -757,21 +751,16 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 				efree(value);
 			}
 		} else {
-			php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
+			php_register_variable_safe("REQUEST_URI", SG(request_info).request_uri, pos, track_vars_array TSRMLS_CC);
 		}
 
-		if (value = nsapi_strdup(SG(request_info).request_uri)) {
-			if (rc->path_info) {
-				pos = strlen(SG(request_info).request_uri) - strlen(rc->path_info);
-				if (pos>=0) {
-					value[pos] = '\0';
-				} else {
-					value[0]='\0';
-				}
+		if (rc->path_info) {
+			pos -= strlen(rc->path_info);
+			if (pos<0) {
+				pos = 0;
 			}
-			php_register_variable("SCRIPT_NAME", value, track_vars_array TSRMLS_CC);
-			nsapi_free(value);
 		}
+		php_register_variable_safe("SCRIPT_NAME", SG(request_info).request_uri, pos, track_vars_array TSRMLS_CC);
 	}
 	php_register_variable("SCRIPT_FILENAME", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
@@ -1014,21 +1003,25 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 		}
 	}
 
-	request_context = (nsapi_request_context *)MALLOC(sizeof(nsapi_request_context));
+	request_context = (nsapi_request_context *)pool_malloc(sn->pool, sizeof(nsapi_request_context));
+	if (!request_context) {
+		log_error(LOG_CATASTROPHE, pblock_findval("fn", pb), sn, rq, "Insufficient memory to process PHP request!");
+		return REQ_ABORTED;
+	}
 	request_context->pb = pb;
 	request_context->sn = sn;
 	request_context->rq = rq;
 	request_context->read_post_bytes = 0;
 	request_context->fixed_script = fixed_script;
 	request_context->http_error = (error_directive) ? rq->status_num : 0;
-	request_context->path_info = nsapi_strdup(path_info);
+	request_context->path_info = path_info;
 
 	SG(server_context) = request_context;
-	SG(request_info).query_string = nsapi_strdup(query_string);
-	SG(request_info).request_uri = nsapi_strdup(uri);
-	SG(request_info).request_method = nsapi_strdup(request_method);
-	SG(request_info).path_translated = nsapi_strdup(path_translated);
-	SG(request_info).content_type = nsapi_strdup(content_type);
+	SG(request_info).query_string = query_string;
+	SG(request_info).request_uri = uri;
+	SG(request_info).request_method = request_method;
+	SG(request_info).path_translated = path_translated;
+	SG(request_info).content_type = content_type;
 	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
 	SG(sapi_headers).http_response_code = (error_directive) ? rq->status_num : 200;
 	
@@ -1068,14 +1061,7 @@ int NSAPI_PUBLIC php5_execute(pblock *pb, Session *sn, Request *rq)
 		}
 	}
 
-	nsapi_free(request_context->path_info);
-	nsapi_free(SG(request_info).query_string);
-	nsapi_free(SG(request_info).request_uri);
-	nsapi_free((void*)(SG(request_info).request_method));
-	nsapi_free(SG(request_info).path_translated);
-	nsapi_free((void*)(SG(request_info).content_type));
-
-	FREE(request_context);
+	pool_free(sn->pool, request_context);
 	SG(server_context) = NULL;
 
 	return retval;
