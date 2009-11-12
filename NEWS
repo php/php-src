@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2009, PHP 5.3.1 RC4
+12 Nov 2009, PHP 5.3.1 RC4
 - Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
   elmerot dot se)
 
