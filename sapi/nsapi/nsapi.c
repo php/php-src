@@ -726,8 +726,8 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 	/* DOCUMENT_ROOT */
 	if (value = request_translate_uri("/", rc->sn)) {
-	  	value[strlen(value) - 1] = '\0';
-		php_register_variable("DOCUMENT_ROOT", value, track_vars_array TSRMLS_CC);
+		pos = strlen(value);
+		php_register_variable_safe("DOCUMENT_ROOT", value, pos-1, track_vars_array TSRMLS_CC);
 		nsapi_free(value);
 	}
 
