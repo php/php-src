@@ -63,6 +63,7 @@ PHP                                                                        NEWS
   (Moriyoshi)
 - Fixed bug #49332 (Build error with Snow Leopard). (Scott)
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
+- Fixed bug #49098 (mysqli segfault on error) (Rasmus)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 - Fixed bug #48764 (PDO_pgsql::query() always uses implicit prepared statements
   if v3 proto available). (Matteo, Mark Kirkwood)
