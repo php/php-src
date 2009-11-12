@@ -200,6 +200,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 	tar_header *hdr;
 	php_uint32 sum1, sum2, size, old;
 	phar_archive_data *myphar, **actual;
+	int last_was_longlink = 0;
 
 	if (error) {
 		*error = NULL;
@@ -332,7 +333,52 @@ bail:
 			goto bail;
 		}
 
-		if (!old && hdr->prefix[0] != 0) {
+		if (!last_was_longlink && hdr->typeflag == 'L') {
+			last_was_longlink = 1;
+			/* support the ././@LongLink system for storing long filenames */
+			entry.filename_len = entry.uncompressed_filesize;
+			entry.filename = pemalloc(entry.filename_len+1, myphar->is_persistent);
+
+			read = php_stream_read(fp, entry.filename, entry.filename_len);
+			if (read != entry.filename_len) {
+				efree(entry.filename);
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				php_stream_close(fp);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
+				return FAILURE;
+			}
+			entry.filename[entry.filename_len] = '\0';
+
+			/* skip blank stuff */
+			size = ((size+511)&~511) - size;
+
+			/* this is not good enough - seek succeeds even on truncated tars */
+			php_stream_seek(fp, size, SEEK_CUR);
+			if ((uint)php_stream_tell(fp) > totalsize) {
+				efree(entry.filename);
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				php_stream_close(fp);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
+				return FAILURE;
+			}
+
+			read = php_stream_read(fp, buf, sizeof(buf));
+	
+			if (read != sizeof(buf)) {
+				efree(entry.filename);
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
+				}
+				php_stream_close(fp);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
+				return FAILURE;
+			}
+			continue;
+		} else if (!last_was_longlink && !old && hdr->prefix[0] != 0) {
 			char name[256];
 			int i, j;
 
@@ -357,7 +403,7 @@ bail:
 				entry.filename_len--;
 			}
 			entry.filename = pestrndup(name, entry.filename_len, myphar->is_persistent);
-		} else {
+		} else if (!last_was_longlink) {
 			int i;
 
 			/* calculate strlen, which can be no longer than 100 */
@@ -375,6 +421,7 @@ bail:
 				entry.filename_len--;
 			}
 		}
+		last_was_longlink = 0;
 
 		phar_add_virtual_dirs(myphar, entry.filename, entry.filename_len TSRMLS_CC);
 
