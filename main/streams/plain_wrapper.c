@@ -988,6 +988,10 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 		return NULL;
 	}
 
+	if ((php_check_safe_mode_include_dir(path TSRMLS_CC)) == 0) {
+		return php_stream_fopen_rel(path, mode, opened_path, options);
+	}
+
 	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
 		return NULL;
 
