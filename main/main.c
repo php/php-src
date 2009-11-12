@@ -984,6 +984,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (PG(last_error_file)) {
 			free(PG(last_error_file));
 		}
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
 		PG(last_error_type) = type;
 		PG(last_error_message) = strdup(buffer);
 		PG(last_error_file) = strdup(error_filename);
