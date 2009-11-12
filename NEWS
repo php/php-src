@@ -49,6 +49,7 @@ PHP                                                                        NEWS
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
+- Fixed bug #49098 (mysqli segfault on error) (Rasmus)
 
 ?? ??? 2009, PHP 5.3.1
 # Will be merged in from branches/PHP_5_3_1 once released
