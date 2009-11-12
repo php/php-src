@@ -27,8 +27,8 @@ PHP                                                                        NEWS
   makes segmentation fault). (Felipe)
 - Fixed bug #49990 (SNMP3 warning message about security level printed twice).
   (Jani)
-- Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted
-  transaction). (ben dot pineau at gmail dot com, Ilia, Matteo)  
+- Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted transaction).
+  (ben dot pineau at gmail dot com, Ilia, Matteo)  
 - Fixed bug #49921 (Curl post upload functions changed). (Ilia)
 - Fixed bug #49972 (AppendIterator undefined function crash). (Johannes)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia, 
@@ -63,7 +63,7 @@ PHP                                                                        NEWS
   (Moriyoshi)
 - Fixed bug #49332 (Build error with Snow Leopard). (Scott)
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
-- Fixed bug #49098 (mysqli segfault on error) (Rasmus)
+- Fixed bug #49098 (mysqli segfault on error). (Rasmus)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 - Fixed bug #48764 (PDO_pgsql::query() always uses implicit prepared statements
   if v3 proto available). (Matteo, Mark Kirkwood)
