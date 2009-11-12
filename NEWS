@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 
 03 Nov 2009, PHP 5.3.1 RC3
 - Added "max_file_uploads" INI directive, which can be set to limit the
-  number of file uploads per-request to 100 by default, to prevent possible
+  number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 
 - Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
