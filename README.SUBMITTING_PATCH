@@ -4,6 +4,9 @@ Submitting Patches to PHP
 This document describes how to submit a patch for PHP. Creating a
 patch for PHP is easy!
 
+An excellent article to read first is:
+http://phpadvent.org/2008/less-whining-more-coding-by-elizabeth-smith
+
 
 Prework
 -------
@@ -26,6 +29,10 @@ internal changes then create a simple RFC on http://wiki.php.net/rfc
 before starting discussion. This RFC can be used for initial
 discussion and later for documentation. Wiki accounts can be requested
 on http://wiki.php.net/start?do=register
+
+There are several IRC channels where PHP developers are often
+available to discuss questions.  They include #php.pecl on the EFNet
+network and #php-dev-win on FreeNode.
 
 
 How to create your patch
