@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #50073 (parse_url() incorrect when ? in fragment). (Ilia)
 - Fixed bug #50006 (Segfault caused by uksort()). (Felipe)
+- Fixed bug #50005 (Throwing through Reflection modified Exception object
+  makes segmentation fault). (Felipe)
 - Fixed bug #49990 (SNMP3 warning message about security level printed twice).
   (Jani)
 - Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted
