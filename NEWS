@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 12 Nov 2009, PHP 5.3.1 RC4
+- Updated timezone database to version 2009.17 (2009q). (Derick)
+
 - Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
   elmerot dot se)
 
