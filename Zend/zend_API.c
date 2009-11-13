@@ -204,9 +204,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_DOUBLE:
 			return "double";
 		case IS_STRING:
-		{
 			return "binary string";
-		}
 		case IS_OBJECT:
 			return "object";
 		case IS_RESOURCE:
