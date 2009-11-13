@@ -2945,7 +2945,7 @@ PHP_METHOD(Phar, isBuffering)
 {
 	PHAR_ARCHIVE_OBJECT();
 
-	RETURN_BOOL(!phar_obj->arc.archive->donotflush);
+	RETURN_BOOL(phar_obj->arc.archive->donotflush);
 }
 /* }}} */
 
