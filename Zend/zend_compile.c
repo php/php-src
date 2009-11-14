@@ -3803,6 +3803,12 @@ void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_D
 		zend_error(E_COMPILE_ERROR, "Cannot redefine class constant %v::%R", CG(active_class_entry)->name, Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant));
 	}
 	FREE_PNODE(var_name);
+	
+	if (CG(doc_comment).v) {
+		efree(CG(doc_comment).v);
+		CG(doc_comment) = NULL_ZSTR;
+		CG(doc_comment_len) = 0;
+	}
 }
 /* }}} */
 
