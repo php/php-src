@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2009, PHP 5.2.12RC2
+- Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 
 12 Nov 2009, PHP 5.2.12RC1
 - Updated timezone database to version 2009.18 (2009r). (Derick)
