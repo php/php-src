@@ -773,7 +773,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
-					http_status_line.header_len = sprintf(buf, "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
+					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);
 				}
 				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}
