@@ -34,7 +34,7 @@ class TestDerived extends TestBase
 
 	public function __construct(&$row)
 	{
-		echo __METHOD__ . "($row,{$this->id})\n";
+		echo __METHOD__ . "($row)\n";
 		$this->row = $row++;
 	}
 }
@@ -108,9 +108,9 @@ array(3) {
     string(2) "CC"
   }
 }
-TestDerived::__construct(0,1)
-TestDerived::__construct(1,2)
-TestDerived::__construct(2,3)
+TestDerived::__construct(0)
+TestDerived::__construct(1)
+TestDerived::__construct(2)
 array(3) {
   [0]=>
   object(TestDerived)#%d (5) {
