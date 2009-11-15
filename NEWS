@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - Fixed bug #49985 (pdo_pgsql prepare() re-use previous aborted
   transaction). (ben dot pineau at gmail dot com, Ilia, Matteo)  
 - Fixed bug #49938 (Phar::isBuffering() returns inverted value). (Greg)
+- Fixed bug #49936 (crash with ftp stream in php_stream_context_get_option()).
+  (Pierrick)
 - Fixed bug #49921 (Curl post upload functions changed). (Ilia)
 - Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
   tar support). (Greg)
