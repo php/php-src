@@ -1106,6 +1106,32 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			}
 		}
 
+		switch (how) {
+			case PDO_FETCH_CLASS:
+				if (ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
+					stmt->fetch.cls.fci.object_ptr = return_value;
+					stmt->fetch.cls.fcc.object_ptr = return_value;
+					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor" TSRMLS_CC);
+						return 0;
+					} else {
+						if (stmt->fetch.cls.retval_ptr) {
+							zval_ptr_dtor(&stmt->fetch.cls.retval_ptr);
+						}
+					}
+				}
+				if (flags & PDO_FETCH_CLASSTYPE) {
+					do_fetch_opt_finish(stmt, 0 TSRMLS_CC);
+					stmt->fetch.cls.ce = old_ce;
+					stmt->fetch.cls.ctor_args = old_ctor_args;
+					stmt->fetch.cls.fci.param_count = old_arg_count;
+				}
+				break;
+			
+			default:
+				break;
+		}
+
 		for (idx = 0; i < stmt->column_count; i++, idx++) {
 			zval *val;
 			MAKE_STD_ZVAL(val);
@@ -1239,27 +1265,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		}
 		
 		switch (how) {
-			case PDO_FETCH_CLASS:
-				if (ce->constructor && !(flags & (PDO_FETCH_PROPS_LATE | PDO_FETCH_SERIALIZE))) {
-					stmt->fetch.cls.fci.object_ptr = return_value;
-					stmt->fetch.cls.fcc.object_ptr = return_value;
-					if (zend_call_function(&stmt->fetch.cls.fci, &stmt->fetch.cls.fcc TSRMLS_CC) == FAILURE) {
-						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not call class constructor" TSRMLS_CC);
-						return 0;
-					} else {
-						if (stmt->fetch.cls.retval_ptr) {
-							zval_ptr_dtor(&stmt->fetch.cls.retval_ptr);
-						}
-					}
-				}
-				if (flags & PDO_FETCH_CLASSTYPE) {
-					do_fetch_opt_finish(stmt, 0 TSRMLS_CC);
-					stmt->fetch.cls.ce = old_ce;
-					stmt->fetch.cls.ctor_args = old_ctor_args;
-					stmt->fetch.cls.fci.param_count = old_arg_count;
-				}
-				break;
-
 			case PDO_FETCH_FUNC:
 				stmt->fetch.func.fci.param_count = idx;
 				stmt->fetch.func.fci.retval_ptr_ptr = &retval;
