@@ -1046,16 +1046,23 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 		do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
 		do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
 
-		if (do_start && !SG(headers_sent) && !SG(request_info).no_headers) {
-			switch (ZLIBG(compression_coding)) {
-				case CODING_GZIP:
-					sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
-					break;
-				case CODING_DEFLATE:
-					sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
-					break;
+		if (do_start) {
+			if (!SG(headers_sent) && !SG(request_info).no_headers) {
+				switch (ZLIBG(compression_coding)) {
+					case CODING_GZIP:
+						sapi_add_header_ex(ZEND_STRL("Content-Encoding: gzip"), 1, 1 TSRMLS_CC);
+						break;
+					case CODING_DEFLATE:
+						sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
+						break;
+				}
+				sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+			} else {
+				/* Disable compression if headers can not be set (Fix for bug #49816) */
+				ZLIBG(output_compression) = 0;
+				*handled_output = NULL;
+				return;
 			}
-			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
 		}
 
 		if (php_deflate_string(output, output_len, handled_output, handled_output_len, do_start, do_end TSRMLS_CC) != SUCCESS) {
