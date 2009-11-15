@@ -245,7 +245,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	eol_detect = stream->flags & (PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
 	stream->flags &= ~(PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
 
-	php_stream_context_set(stream, context);
+	php_stream_context_set(stream, context TSRMLS_CC);
 
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
