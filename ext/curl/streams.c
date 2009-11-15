@@ -270,7 +270,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	memset(curlstream, 0, sizeof(php_curl_stream));
 
 	stream = php_stream_alloc(&php_curl_stream_ops, curlstream, 0, mode);
-	php_stream_context_set(stream, context);
+	php_stream_context_set(stream, context TSRMLS_CC);
 
 	curlstream->curl = curl_easy_init();
 	curlstream->multi = curl_multi_init();

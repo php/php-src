@@ -134,7 +134,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 			context STREAMS_REL_CC TSRMLS_CC);
 
 	if (stream) {
-		stream->context = context;
+		php_stream_context_set(stream, context TSRMLS_CC);
 
 		if ((flags & STREAM_XPORT_SERVER) == 0) {
 			/* client */
