@@ -37,6 +37,7 @@ ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data_pt
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+ZEND_API char *dtrace_get_executed_filename(TSRMLS_D);
 #include <zend_dtrace_gen.h>
 
 #endif /* HAVE_DTRACE */
