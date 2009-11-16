@@ -30,6 +30,8 @@ provider php {
 	probe execute__return(char* request_file, int lineno);
 	probe function__entry(char* function_name, char* request_file, int lineno, char* classname, char* scope);
 	probe function__return(char* function_name, char* request_file, int lineno, char* classname, char* scope);
+  	probe object__create(char *classname, char* request_file, int lineno);
+  	probe object__destroy(char *classname, char* request_file, int lineno);
 };
 
 #pragma D attributes Evolving/Evolving/Common provider php provider

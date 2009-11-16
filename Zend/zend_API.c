@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_dtrace.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -1350,6 +1351,23 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 		char *what = class_type->ce_flags & ZEND_ACC_INTERFACE ? "interface" : "abstract class";
 		zend_error(E_ERROR, "Cannot instantiate %s %v", what, class_type->name);
 	}
+
+#ifdef HAVE_DTRACE
+	if (DTRACE_OBJECT_CREATE_ENABLED()) {
+		char *s_classname, *filename;
+		int s_classname_len, lineno;
+
+		filename = dtrace_get_executed_filename(TSRMLS_C);
+		lineno = zend_get_executed_lineno(TSRMLS_C);
+		if (u_strlen(class_type->name.u) > 0) {
+			zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, class_type->name.u, u_strlen(class_type->name.u) TSRMLS_CC);
+		}
+		DTRACE_OBJECT_CREATE(s_classname, filename, lineno);
+		if (s_classname != NULL) {
+			efree(s_classname);
+		}
+	}
+#endif /* HAVE_DTRACE */
 
 	zend_update_class_constants(class_type TSRMLS_CC);
 

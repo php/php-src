@@ -24,7 +24,7 @@
 
 #ifdef HAVE_DTRACE
 /* PHP DTrace probes {{{ */
-static inline char *dtrace_get_executed_filename(TSRMLS_D)
+ZEND_API char *dtrace_get_executed_filename(TSRMLS_D)
 {
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		return EG(current_execute_data)->op_array->filename;

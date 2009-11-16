@@ -25,6 +25,7 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_dtrace.h"
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
@@ -53,6 +54,22 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 {
 	zend_function *destructor = object ? object->ce->destructor : NULL;
 
+#ifdef HAVE_DTRACE
+	if (DTRACE_OBJECT_DESTROY_ENABLED()) {
+		char *s_classname, *filename;
+		int s_classname_len, lineno;
+
+		filename = dtrace_get_executed_filename(TSRMLS_C);
+		lineno = zend_get_executed_lineno(TSRMLS_C);
+		if (u_strlen(object->ce->name.u) > 0) {
+			zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, object->ce->name.u, u_strlen(object->ce->name.u) TSRMLS_CC);
+		}
+		DTRACE_OBJECT_DESTROY(s_classname, filename, lineno);
+		if (s_classname != NULL) {
+			efree(s_classname);
+		}
+	}
+#endif /* HAVE_DTRACE */
 	if (destructor) {
 		zval *obj;
 		zend_object_store_bucket *obj_bucket;
