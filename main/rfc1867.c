@@ -594,12 +594,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_llist header;
 	void *event_extra_data = NULL;
 	int llen = 0;
-	char *max_uploads = INI_STR("max_file_uploads");
-	int upload_cnt = 0;
-
-	if (max_uploads && *max_uploads) {
-		upload_cnt = atoi(max_uploads);
-	}
+	int upload_cnt = INI_INT("max_file_uploads");
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
