@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50140 (With default compilation option, php symbols are
+  unresolved for nsapi). (Uwe Schindler)
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
