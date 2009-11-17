@@ -683,12 +683,12 @@ ZEND_API int zend_multibyte_read_script(unsigned char *buf, size_t n TSRMLS_DC)
 {
 	if (SCNG(script_org)) {
 		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
 	}
-	SCNG(script_org_size) = n;
-	SCNG(script_org) = (unsigned char*)erealloc(SCNG(script_org), SCNG(script_org_size));
-	memcpy(SCNG(script_org) + SCNG(script_org_size) - n, buf, n);
+	SCNG(script_org_size) = n;	
 	
-	SCNG(script_org) = (unsigned char*)erealloc(SCNG(script_org), SCNG(script_org_size) + 1);
+	SCNG(script_org) = (unsigned char*)emalloc(SCNG(script_org_size) + 1);
+	memcpy(SCNG(script_org), buf, n);
 	*(SCNG(script_org)+SCNG(script_org_size)) = '\0';
 
 	return 0;
