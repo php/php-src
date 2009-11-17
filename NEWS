@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Nov 2009, PHP 5.2.12RC2
+- Updated timezone database to version 2009.19 (2009s). (Derick)
+
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
