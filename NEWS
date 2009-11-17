@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
+- Fixed bug #50145 (crash while running bug35634.phpt). (Felipe)
 - Fixed bug #50087 (NSAPI performance improvements). (Uwe Schindler)
 - Fixed bug #50152 (ReflectionClass::hasProperty behaves like isset() not
   property_exists). (Felipe)
