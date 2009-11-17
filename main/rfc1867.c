@@ -596,7 +596,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
 
-	if (SG(request_info).content_length > SG(post_max_size)) {
+	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
