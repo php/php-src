@@ -68,6 +68,12 @@
  */
 #include "nsapi.h"
 
+/* fix for gcc4 visibility issue */
+#ifndef PHP_WIN32
+# undef NSAPI_PUBLIC
+# define NSAPI_PUBLIC PHPAPI
+#endif
+
 #define NSLS_D		struct nsapi_request_context *request_context
 #define NSLS_DC		, NSLS_D
 #define NSLS_C		request_context
