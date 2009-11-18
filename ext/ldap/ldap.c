@@ -936,21 +936,21 @@ PHP_FUNCTION(ldap_get_entries)
 	ldap = ld->link;
 	num_entries = ldap_count_entries(ldap, ldap_result);
 
-	if (num_entries == 0) {
-		RETURN_NULL();
-	}
-	num_entries = 0;
-	
-	ldap_result_entry = ldap_first_entry(ldap, ldap_result);
-	if (ldap_result_entry == NULL) {
-		RETURN_FALSE;
-	}
-
 	array_init(return_value);
 	add_assoc_long(return_value, "count", num_entries);
 
-	while (ldap_result_entry != NULL) {
+	if (num_entries == 0) {
+		return;
+	}
+	
+	ldap_result_entry = ldap_first_entry(ldap, ldap_result);
+	if (ldap_result_entry == NULL) {
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}
 
+	num_entries = 0;
+	while (ldap_result_entry != NULL) {
 		MAKE_STD_ZVAL(tmp1);
 		array_init(tmp1);
 
