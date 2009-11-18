@@ -171,7 +171,7 @@ PHPAPI int php_idate(char format, time_t ts, int localtime);
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
+PHPAPI UChar *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
