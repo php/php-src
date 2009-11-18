@@ -1,54 +1,70 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-12 Nov 2009, PHP 5.3.1 RC4
-- Updated timezone database to version 2009.17 (2009q). (Derick)
+19 Nov 2009, PHP 5.3.1
 
-- Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
-  elmerot dot se)
-- Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
-  tar support). (Greg)
-- Fixed bug #49098 (mysqli segfault on error) (Rasmus)
-
-03 Nov 2009, PHP 5.3.1 RC3
 - Added "max_file_uploads" INI directive, which can be set to limit the
   number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
+- Added missing sanity checks around exif processing. (Ilia)
+- Added error constant when json_encode() detects an invalid UTF-8 sequence.
+  (Scott)
+- Added support for ACL on Windows for thread safe SAPI (Apache2 for example)
+  and fix its support on NTS. (Pierre)
+
+- Upgraded bundled sqlite to version 3.6.19. (Scott)
+- Updated timezone database to version 2009.17 (2009q). (Derick)
 
 - Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
-
-- Fixed bug #50052 (Different Hashes on Windows and Linux on wrong Salt size).
-  (Pierre)
-- Fixed bug #49908 (throwing exception in __autoload crashes when interface
-  is not defined). (Felipe)
-- Fixed bug #49142 (crash when exception thrown from __tostring()).
-  (David Soria Parra)
-- Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
-- Fixed bug #48752 (Crash during date parsing with invalid date). (Pierre)
-
-20 Oct 2009, PHP 5.3.1 RC2
-- Upgraded bundled sqlite to version 3.6.19. (Scott)
-
 - Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
   (Rasmus)
 - Fixed a open_basedir bypass in posix_mkfifo() identified by Grzegorz 
   Stachowiak.  (Rasmus)
 - Fixed certificate validation inside php_openssl_apply_verification_policy
   (Ryan Sleevi, Ilia)
-
 - Fixed crash in SQLiteDatabase::ArrayQuery() and SQLiteDatabase::SingleQuery()
   when calling using Reflection. (Felipe)
 - Fixed crash when instantiating PDORow and PDOStatement through Reflection.
   (Felipe)
+- Fixed sanity check for the color index in imagecolortransparent. (Pierre)
+- Fixed scandir/readdir when used mounted points on Windows. (Pierre)
+- Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
+- Fixed leak on error in popen/exec (and related functions) on Windows.
+  (Pierre)
+- Fixed possible bad caching of symlinked directories in the realpath cache
+  on Windows. (Pierre)
+- Fixed atime and mtime in stat related functions on Windows. (Pierre)
+- Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
+  Functors. (Christian Seiler)
+- Fixed open_basedir circumvention for "mail.log" ini directive.
+  (Maksymilian Arciemowicz, Stas)
+- Fixed signature generation/validation for zip archives in ext/phar. (Greg)
+- Fixed memory leak in stream_is_local(). (Felipe, Tony)
+- Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
+
 - Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
   insensitive (garretts)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
-- Added support for ACL on Windows for thread safe SAPI (Apache2 for example)
-  and fix its support on NTS. (Pierre)
+
 - Improve symbolic, mounted volume and junctions support for realpath on 
   Windows. (Pierre)
+- Improved readlink on Windows, suppress \??\ and use the drive syntax only.
+  (Pierre)
+- Improved dns_get_record() AAAA support on windows. Always available when
+  IPv6 is support is installed, format is now the same than on unix. (Pierre)
+- Improved the DNS functions on OSX to use newer APIs, also use Bind 9 API
+  where available on other platforms. (Scott)
+- Improved shared extension loading on OSX to use the standard Unix dlopen()
+  API. (Scott)
 
-
+- Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
+  elmerot dot se)
+- Fixed bug #50052 (Different Hashes on Windows and Linux on wrong Salt size).
+  (Pierre)
+- Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
+  tar support). (Greg)
+- Fixed bug #49908 (throwing exception in __autoload crashes when interface
+  is not defined). (Felipe)
 - Fixed bug #49847 (exec() fails to return data inside 2nd parameter, given
   output lines >4095 bytes). (Ilia)
 - Fixed bug #49809 (time_sleep_until() is not available on OpenSolaris). (Jani)
@@ -70,47 +86,6 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #49447 (php engine need to correctly check for socket API 
   return status on windows). (Sriram Natarajan)
-- Fixed bug #48909 (Segmentation fault in mysqli_stmt_execute()). (Andrey)
-- Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
-- Fixed bug #48754 (mysql_close() crash php when no handle specified).
-  (Johannes, Andrey)
-- Fixed bug #40013 (php_uname() does not return nodename on Netware (Guenter
-  Knauf)
-- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
-  (Chris Jones)
-
-03 Sep 2009, PHP 5.3.1 RC1
-- Upgraded bundled sqlite to version 3.6.17. (Scott)
-
-- Added missing sanity checks around exif processing. (Ilia)
-- Added error constant when json_encode() detects an invalid UTF-8 sequence.
-  (Scott)
-
-- Improved readlink on Windows, suppress \??\ and use the drive syntax only.
-  (Pierre)
-- Improved dns_get_record() AAAA support on windows. Always available when
-  IPv6 is support is installed, format is now the same than on unix. (Pierre)
-- Improved the DNS functions on OSX to use newer APIs, also use Bind 9 API
-  where available on other platforms. (Scott)
-- Improved shared extension loading on OSX to use the standard Unix dlopen()
-  API. (Scott)
-
-- Fixed sanity check for the color index in imagecolortransparent. (Pierre)
-- Fixed scandir/readdir when used mounted points on Windows. (Pierre)
-- Fixed zlib.deflate compress filter to actually accept level parameter. (Jani)
-- Fixed leak on error in popen/exec (and related functions) on Windows.
-  (Pierre)
-- Fixed possible bad caching of symlinked directories in the realpath cache
-  on Windows. (Pierre)
-- Fixed atime and mtime in stat related functions on Windows. (Pierre)
-- Fixed spl_autoload_unregister/spl_autoload_functions wrt. Closures and
-  Functors. (Christian Seiler)
-- Fixed open_basedir circumvention for "mail.log" ini directive.
-  (Maksymilian Arciemowicz, Stas)
-- Fixed signature generation/validation for zip archives in ext/phar. (Greg)
-- Fixed memory leak in stream_is_local(). (Felipe, Tony)
-- Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
-
 - Fixed bug #49391 (ldap.c utilizing deprecated ldap_modify_s). (Ilia)
 - Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries).
   (Ilia, code-it at mail dot ru)
@@ -129,12 +104,16 @@ PHP                                                                        NEWS
 - Fixed bug #49183 (dns_get_record does not return NAPTR records). (Pierre)
 - Fixed bug #49144 (Import of schema from different host transmits original
   authentication details). (Dmitry)
+- Fixed bug #49142 (crash when exception thrown from __tostring()).
+  (David Soria Parra)
+- Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
 - Fixed bug #49122 (undefined reference to mysqlnd_stmt_next_result on compile
   with --with-mysqli and MySQL 6.0). (Jani)
 - Fixed bug #49108 (2nd scan_dir produces segfault). (Felipe)
+- Fixed bug #49098 (mysqli segfault on error). (Rasmus)
 - Fixed bug #49095 (proc_get_status['exitcode'] fails on win32). (Felipe)
 - Fixed bug #49092 (ReflectionFunction fails to work with functions in fully
   qualified namespaces). (Kalle, Jani)
@@ -177,12 +156,14 @@ PHP                                                                        NEWS
   (naf at altlinux dot ru, Felipe)
 - Fixed bug #48912 (Namespace causes unexpected strict behaviour with
   extract()). (Dmitry)
+- Fixed bug #48909 (Segmentation fault in mysqli_stmt_execute()). (Andrey)
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
   parent class). (Felipe)
 - Fixed bug #48893 (Problems compiling with Curl). (Felipe)
 - Fixed bug #48872 (string.c: errors: duplicate case values). (Kalle)
 - Fixed bug #48854 (array_merge_recursive modifies arrays after first one).
   (Felipe)
+- Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
 - Fixed bug #48880 (Random Appearing open_basedir problem). (Rasmus, Gwynne)
 - Fixed bug #48791 (open office files always reported as corrupted). (Greg)
@@ -198,6 +179,9 @@ PHP                                                                        NEWS
   gmail dot com, Pierre)
 - Fixed bug #48762 (IPv6 address filter still rejects valid address). (Felipe)
 - Fixed bug #48757 (ReflectionFunction::invoke() parameter issues). (Kalle)
+- Fixed bug #48754 (mysql_close() crash php when no handle specified).
+  (Johannes, Andrey)
+- Fixed bug #48752 (Crash during date parsing with invalid date). (Pierre)
 - Fixed bug #48746 (Unable to browse directories within Junction Points).
   (Pierre, Kanwaljeet Singla)
 - Fixed bug #48745 (mysqlnd: mysql_num_fields returns wrong column count for
@@ -254,11 +238,15 @@ PHP                                                                        NEWS
   in fopen). (Jani)
 - Fixed bug #42434 (ImageLine w/ antialias = 1px shorter). (wojjie at gmail dot
   com, Kalle)
+- Fixed bug #40013 (php_uname() does not return nodename on Netware (Guenter
+  Knauf)
 - Fixed bug #38091 (Mail() does not use FQDN when sending SMTP helo). 
   (Kalle, Rick Yorgason)
 - Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 - Fixed bug #27051 (Impersonation with FastCGI does not exec process as 
   impersonated user). (Pierre)
+- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
+  (Chris Jones)
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
