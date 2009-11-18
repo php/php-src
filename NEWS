@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? Nov 2009, PHP 5.2.12RC2
 - Updated timezone database to version 2009.19 (2009s). (Derick)
 
-- Made it possible to disable post_max_size (Rasmus)
+- Changed "post_max_size" php.ini directive to allow unlimited post size by
+  setting it to 0. (Rasmus)
 
 - Fixed bug #50185 (ldap_get_entries() return false instead of an empty array
   when there is no error). (Jani)
