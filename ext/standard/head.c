@@ -79,7 +79,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
-	char *dt;
+	UChar *dt;
 	sapi_header_line ctr = {0};
 	int result;
 	
@@ -120,24 +120,25 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 */
 		time_t t = time(NULL) - 31536001;
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s", name, dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%v", name, dt);
 		efree(dt);
 	} else {
+		/* check to make sure that the year does not exceed 4 digits in length */
+		if (expires >= 253402300800) {
+			efree(cookie);
+			efree(encoded_value);
+			zend_error(E_WARNING, "Expiry date cannot have a year greater then 9999");
+			return FAILURE;
+		}
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			char *p;
-			strlcat(cookie, "; expires=", len + 100);
+			p = emalloc(48);
+
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
-			/* check to make sure that the year does not exceed 4 digits in length */
-			p = zend_memrchr(dt, '-', strlen(dt));
-			if (*(p + 5) != ' ') {
-				efree(dt);
-				efree(cookie);
-				efree(encoded_value);
-				zend_error(E_WARNING, "Expiry date cannot have a year greater then 9999");
-				return FAILURE;
-			}
-			strlcat(cookie, dt, len + 100);
+			snprintf(p, 48, "; expires=%v", dt );
+			strlcat(cookie, p, len + 100);
+			efree(p);
 			efree(dt);
 		}
 	}
