@@ -1095,7 +1095,7 @@ static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *f
 #define am_pm_lower_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_lower_names[s]
 #define am_pm_upper_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_upper_names[s]
 
-static char *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized TSRMLS_DC)
+static UChar *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, no_free, length;
@@ -1107,7 +1107,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 
 	if (!format_len) {
 		*return_len = 0;
-		return (char*)eustrdup(EMPTY_STR);
+		return eustrdup(EMPTY_STR);
 	}
 
 	loc_dat = date_get_locale_data(UG(default_locale));
@@ -1257,7 +1257,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 	}
 
 	*return_len = string.len / 2;
-	return string.c;
+	return (UChar*) string.c;
 }
 
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
@@ -1265,7 +1265,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	char   *format;
 	int     format_len;
 	long    ts;
-	char   *string;
+	UChar  *string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
@@ -1276,15 +1276,15 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 
 	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
 
-	RETVAL_UNICODE((UChar*)string, 0);
+	RETVAL_UNICODE(string, 0);
 }
 /* }}} */
 
-PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
+PHPAPI UChar *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	char           *string;
+	UChar          *string;
 	int             return_len;
 
 	t = timelib_time_ctor();
@@ -2181,7 +2181,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	HashTable    *props;
 	zval         *zv;
 	php_date_obj *dateobj;
-	char         *str;
+	UChar        *str;
 	int           return_len;
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
@@ -2195,7 +2195,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	/* first we add the date and time in ISO format */
 	str = date_format("Y-m-d H:i:s", 12, &return_len, dateobj->time, 1, 0 TSRMLS_CC);
 	MAKE_STD_ZVAL(zv);
-	ZVAL_UNICODEL(zv, (UChar*) str, return_len - 1, 0);
+	ZVAL_UNICODEL(zv, str, return_len - 1, 0);
 	zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
 
 	/* then we add the timezone name (or similar) */
@@ -2841,7 +2841,8 @@ PHP_FUNCTION(date_format)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	char         *format, *str;
+	char         *format;
+	UChar        *str;
 	int           format_len, length;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
@@ -2850,7 +2851,7 @@ PHP_FUNCTION(date_format)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0 TSRMLS_CC);
-	RETURN_UNICODEL((UChar*) str, length, 0);
+	RETURN_UNICODEL(str, length, 0);
 }
 /* }}} */
 
@@ -2860,7 +2861,8 @@ PHP_FUNCTION(date_format_locale)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	char         *format, *str;
+	char         *format;
+	UChar        *str;
 	int           format_len, length;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
@@ -2869,7 +2871,7 @@ PHP_FUNCTION(date_format_locale)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
 	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1 TSRMLS_CC);
-	RETURN_UNICODEL((UChar*)str, length, 0);
+	RETURN_UNICODEL(str, length, 0);
 }
 /* }}} */
 
@@ -2883,6 +2885,7 @@ PHP_FUNCTION(date_modify)
 	char         *modify;
 	int           modify_len;
 	timelib_time *tmp_time;
+	struct timelib_error_container *error;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
@@ -2890,7 +2893,17 @@ PHP_FUNCTION(date_modify)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
-	tmp_time = timelib_strtotime(modify, modify_len, NULL, DATE_TIMEZONEDB);
+	tmp_time = timelib_strtotime(modify, modify_len, &error, DATE_TIMEZONEDB);
+
+	/* update last errors and warnings, and display the first one */
+	update_errors_warnings(error TSRMLS_CC);
+	if (error && error->error_count > 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
+			error->error_messages[0].position, error->error_messages[0].character, error->error_messages[0].message);
+		timelib_time_dtor(tmp_time);
+		RETURN_FALSE;
+	}
+
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->sse_uptodate = 0;
