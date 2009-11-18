@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Made it possible to disable post_max_size (Rasmus)
 
+- Fixed bug #50185 (ldap_get_entries() return false instead of an empty array
+  when there is no error). (Jani)
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
