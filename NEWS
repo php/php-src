@@ -4,14 +4,16 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.20. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
+- Changed "post_max_size" php.ini directive to allow unlimited post size by
+  setting it to 0. (Rasmus)
+
 - Added "max_file_uploads" INI directive, which can be set to limit the
   number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
 - Added Collator::getSortKey for intl extension. (Stas)
-- Made it possible to disable post_max_size (Rasmus)
-  
+
 - Implemented FR #49571 (CURLOPT_POSTREDIR not implemented). (Sriram Natarajan)
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
