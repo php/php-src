@@ -1619,14 +1619,17 @@ PHP_FUNCTION(ldap_get_option)
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
 		{
-			struct timeval *timeout;
+			struct timeval *timeout = NULL;
 
 			if (ldap_get_option(ld->link, LDAP_OPT_NETWORK_TIMEOUT, (void *) &timeout)) {
 				if (timeout) {
 					ldap_memfree(timeout);
 				}
 				RETURN_FALSE;
-			}		       
+			}		    
+			if (!timeout) {
+				RETURN_FALSE;
+			}
 			zval_dtor(retval);
 			ZVAL_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
