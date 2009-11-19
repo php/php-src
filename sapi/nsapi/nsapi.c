@@ -729,7 +729,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	/* DOCUMENT_ROOT */
 	if (value = request_translate_uri("/", rc->sn)) {
 		pos = strlen(value);
-		php_register_variable_safe("DOCUMENT_ROOT", value, pos-1, track_vars_array TSRMLS_CC);
+		php_register_variable_safe(IS_STRING, ZSTR("DOCUMENT_ROOT"), ZSTR(value), pos-1, track_vars_array TSRMLS_CC);
 		nsapi_free(value);
 	}
 
@@ -753,7 +753,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 				efree(value);
 			}
 		} else {
-			php_register_variable_safe("REQUEST_URI", SG(request_info).request_uri, pos, track_vars_array TSRMLS_CC);
+			php_register_variable_safe(IS_STRING, ZSTR("REQUEST_URI"), ZSTR(SG(request_info).request_uri), pos, track_vars_array TSRMLS_CC);
 		}
 
 		if (rc->path_info) {
@@ -762,7 +762,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 				pos = 0;
 			}
 		}
-		php_register_variable_safe("SCRIPT_NAME", SG(request_info).request_uri, pos, track_vars_array TSRMLS_CC);
+		php_register_variable_safe(IS_STRING, ZSTR("SCRIPT_NAME"), ZSTR(SG(request_info).request_uri), pos, track_vars_array TSRMLS_CC);
 	}
 	php_register_variable("SCRIPT_FILENAME", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
