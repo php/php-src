@@ -1227,6 +1227,12 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	if (result==op1) {	/* special case, perform operations on result */
 		uint res_len = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
+		if (Z_STRLEN_P(result) < 0) {
+			efree(Z_STRVAL_P(result));
+			ZVAL_EMPTY_STRING(result);
+			zend_error(E_ERROR, "String size overflow");
+		}
+
 		Z_STRVAL_P(result) = erealloc(Z_STRVAL_P(result), res_len+1);
 
 		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(result), Z_STRVAL_P(op2), Z_STRLEN_P(op2));

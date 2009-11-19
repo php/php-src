@@ -23,8 +23,11 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+
 - Fixed bug #50212 (crash by ldap_get_option() with LDAP_OPT_NETWORK_TIMEOUT).
   (Ilia, shigeru_kitazaki at cybozu dot co dot jp)
+- Fixed bug #50207 (segmentation fault when concatenating very large strings on
+  64bit linux). (Ilia)
 - Fixed bug #50185 (ldap_get_entries() return false instead of an empty array
   when there is no error). (Jani)
 - Fixed bug #50140 (With default compilation option, php symbols are
