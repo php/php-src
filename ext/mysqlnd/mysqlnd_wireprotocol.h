@@ -24,6 +24,7 @@
 #define MYSQLND_WIREPROTOCOL_H
 
 #define MYSQLND_HEADER_SIZE 4
+#define COMPRESSED_HEADER_SIZE 3
 
 #define MYSQLND_NULL_LENGTH	(unsigned long) ~0
 
@@ -261,6 +262,7 @@ struct st_php_mysql_packet_row {
 	uint16_t	server_status;
 
 	struct st_mysqlnd_memory_pool_chunk	*row_buffer;
+	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
 	zend_bool		skip_extraction;
 	zend_bool		binary_protocol;
@@ -303,7 +305,7 @@ typedef struct st_php_mysql_packet_prepare_response {
 typedef struct st_php_mysql_packet_chg_user_resp {
 	mysqlnd_packet_header	header;
 	uint32_t			field_count;
-	
+
 	/* message_len is not part of the packet*/
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
@@ -311,8 +313,8 @@ typedef struct st_php_mysql_packet_chg_user_resp {
 } php_mysql_packet_chg_user_resp;
 
 
-size_t mysqlnd_stream_write(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
 size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
+size_t mysqlnd_stream_write(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_server_command cmd TSRMLS_DC);
@@ -327,10 +329,22 @@ extern char * const mysqlnd_empty_string;
 
 
 void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										   unsigned int field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
+										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
+										 zend_bool persistent,
+										 zend_bool as_unicode, zend_bool as_int_or_float,
+										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
+										 MYSQLND_STATS * stats TSRMLS_DC);
+
 
 void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
+										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
+										 zend_bool persistent,
+										 zend_bool as_unicode, zend_bool as_int_or_float,
+										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
+										 MYSQLND_STATS * stats TSRMLS_DC);
+
+enum_func_status mysqlnd_read_from_stream(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
+
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

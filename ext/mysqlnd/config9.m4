@@ -2,10 +2,20 @@ dnl
 dnl $Id$
 dnl config.m4 for mysqlnd driver
 
+
 PHP_ARG_ENABLE(mysqlnd_threading, whether to enable threaded fetch in mysqlnd,
 [  --enable-mysqlnd-threading
                             EXPERIMENTAL: Enable mysqlnd threaded fetch.
                             Note: This forces ZTS on!], no, no)
+
+PHP_ARG_ENABLE(disable_mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
+[  --disable-mysqlnd-compression-support
+                            Enable support for the MySQL compressed protocol in mysqlnd], yes)
+
+if test -z "$PHP_ZLIB_DIR"; then
+  PHP_ARG_WITH(zlib-dir, for the location of libz,
+  [  --with-zlib-dir[=DIR]       mysqlnd: Set the path to libz install prefix], no, no)
+fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND_ENABLED" = "yes"; then
@@ -22,6 +32,17 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   if test "$PHP_MYSQLND_THREADING" = "yes"; then
     PHP_BUILD_THREAD_SAFE
     AC_DEFINE([MYSQLND_THREADED], 1, [Use mysqlnd internal threading])
+  fi
+
+  if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
+    AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], 1, [Enable compressed protocol support])
+    if test "$PHP_ZLIB_DIR" != "no"; then
+      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, MYSQLND_SHARED_LIBADD)
+      MYSQLND_LIBS="$MYSQLND_LIBS -L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
+    else
+      PHP_ADD_LIBRARY(z,, MYSQLND_SHARED_LIBADD)
+      MYSQLND_LIBS="$MYSQLND_LIBS -lz"
+    fi
   fi
 fi
 

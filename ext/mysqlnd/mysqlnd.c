@@ -27,9 +27,8 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-#include "mysqlnd_block_alloc.h"
 /* for php_get_current_user() */
-#include "ext/standard/basic_functions.h" 
+#include "ext/standard/basic_functions.h"
 
 /* the server doesn't support 4byte utf8, but let's make it forward compatible */
 #define MYSQLND_MAX_ALLOWED_USER_LEN	256  /* 64 char * 4byte */
@@ -64,7 +63,6 @@ const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run th
 
 MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
-
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 
@@ -153,10 +151,15 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 			php_stream_free(conn->net.stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
 		} else {
 			php_stream_free(conn->net.stream, PHP_STREAM_FREE_CLOSE);
-		
+
 		}
 		conn->net.stream = NULL;
 	}
+#ifdef MYSQLND_COMPRESSION_ENABLED
+	if (conn->net.uncompressed_data) {
+		conn->net.uncompressed_data->free(&conn->net.uncompressed_data TSRMLS_CC);
+	}
+#endif
 
 	DBG_INF("Freeing memory of members");
 	if (conn->host) {
@@ -212,10 +215,6 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		DBG_INF("Freeing zval cache reference");
 		mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
 		conn->zval_cache = NULL;
-	}
-	if (conn->result_set_memory_pool) {
-		mysqlnd_mempool_destroy(conn->result_set_memory_pool TSRMLS_CC);
-		conn->result_set_memory_pool = NULL;
 	}
 	if (conn->qcache) {
 		DBG_INF("Freeing qcache reference");
@@ -296,7 +295,7 @@ mysqlnd_simple_command_handle_response(MYSQLND *conn, enum php_mysql_packet_type
 				if (0xFF == ok_response.field_count) {
 					/* The server signalled error. Set the error */
 					SET_CLIENT_ERROR(conn->error_info, ok_response.error_no,
-									 ok_response.sqlstate, ok_response.error); 
+									 ok_response.sqlstate, ok_response.error);
 					ret = FAIL;
 					/*
 					  Cover a protocol design error: error packet does not
@@ -374,7 +373,7 @@ mysqlnd_simple_command_handle_response(MYSQLND *conn, enum php_mysql_packet_type
 enum_func_status
 mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 					   const char * const arg, size_t arg_len,
-					   enum php_mysql_packet_type ok_packet, zend_bool silent, 
+					   enum php_mysql_packet_type ok_packet, zend_bool silent,
 					   zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
@@ -454,7 +453,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 
 
 /* {{{ _mysqlnd_restart_psession */
-PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC) 
+PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_restart_psession");
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
@@ -484,8 +483,9 @@ PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_connect */
-PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
+/* {{{ mysqlnd_conn::connect */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 						 const char *host, const char *user,
 						 const char *passwd, unsigned int passwd_len,
 						 const char *db, unsigned int db_len,
@@ -505,12 +505,14 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	zend_bool unix_socket = FALSE;
 	const MYSQLND_CHARSET * charset;
 	zend_bool reconnect = FALSE;
+	zend_bool saved_compression = FALSE;
 
 	php_mysql_packet_greet greet_packet;
 	php_mysql_packet_auth *auth_packet;
 	php_mysql_packet_ok ok_packet;
 
-	DBG_ENTER("mysqlnd_connect");
+	DBG_ENTER("mysqlnd_conn::connect");
+
 	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d persistent=%d state=%d",
 				host?host:"", user?user:"", db?db:"", port, mysql_flags,
 				conn? conn->persistent:0, conn? CONN_GET_STATE(conn):-1);
@@ -531,6 +533,15 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 			MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 		/* Now reconnect using the same handle */
+		if (conn->net.compressed) {
+			/*
+			  we need to save the state. As we will re-connect, net.compressed should be off, or
+			  we will look for a compression header as part of the greet message, but there will
+			  be none.
+			*/
+			saved_compression = TRUE;
+			conn->net.compressed = FALSE;
+		}
 	}
 
 	if (!host || !host[0]) {
@@ -558,30 +569,25 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		}
 		transport_len = spprintf(&transport, 0, "unix://%s", socket);
 		unix_socket = TRUE;
-	} else 
+	} else
 #endif
 	{
 		transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
 	}
-	DBG_INF_FMT("transport=%p", transport);
+	DBG_INF_FMT("transport=%s", transport);
 
 
 	PACKET_INIT_ALLOCA(greet_packet, PROT_GREET_PACKET);
 	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *, FALSE);
 	PACKET_INIT_ALLOCA(ok_packet, PROT_OK_PACKET);
 
-	if (!conn) {
-		conn = mysqlnd_init(FALSE);
-		self_alloced = TRUE;
-	}
-
 	if (conn->persistent) {
 		hashed_details_len = spprintf(&hashed_details, 0, "%p", conn);
 		DBG_INF_FMT("hashed_details=%s", hashed_details);
-	} 
+	}
 
 	CONN_SET_STATE(conn, CONN_ALLOCED);
-	conn->net.packet_no = 0;
+	conn->net.packet_no = conn->net.compressed_envelope_packet_no = 0;
 
 	if (conn->options.timeout_connect) {
 		tv.tv_sec = conn->options.timeout_connect;
@@ -596,7 +602,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	conn->scheme_len = strlen(conn->scheme);
 	DBG_INF(conn->scheme);
 	conn->net.stream = php_stream_xport_create(conn->scheme, transport_len, streams_options, streams_flags,
-											   hashed_details, 
+											   hashed_details,
 											   (conn->options.timeout_connect) ? &tv : NULL,
 											    NULL /*ctx*/, &errstr, &errcode);
 	DBG_INF_FMT("stream=%p", conn->net.stream);
@@ -651,6 +657,13 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		mysqlnd_set_sock_no_delay(conn->net.stream);
 	}
 
+	{
+		unsigned int buf_size;
+		buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
+		conn->m->set_client_option(conn, MYSQLND_OPT_NET_READ_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
+	}
+
+
 	if (FAIL == PACKET_READ_ALLOCA(greet_packet, conn)) {
 		DBG_ERR("Error while reading greeting packet");
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
@@ -659,7 +672,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		DBG_ERR_FMT("errorno=%d error=%s", greet_packet.error_no, greet_packet.error);
 		SET_CLIENT_ERROR(conn->error_info, greet_packet.error_no,
 						 greet_packet.sqlstate, greet_packet.error);
-		goto err;	
+		goto err;
 	} else if (greet_packet.pre41) {
 		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s",
 					greet_packet.server_version);
@@ -707,7 +720,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 	if (!PACKET_WRITE(auth_packet, conn)) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-		goto err;	
+		goto err;
 	}
 
 	if (FAIL == PACKET_READ_ALLOCA(ok_packet, conn) || ok_packet.field_count >= 0xFE) {
@@ -730,6 +743,15 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		}
 	} else {
 		CONN_SET_STATE(conn, CONN_READY);
+		if (!self_alloced && saved_compression) {
+			conn->net.compressed = TRUE;
+		}
+		/*
+		  If a connect on a existing handle is performed and mysql_flags is
+		  passed which doesn't CLIENT_COMPRESS, then we need to overwrite the value
+		  which we set based on saved_compression.
+		*/
+		conn->net.compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 		conn->user				= pestrdup(user, conn->persistent);
 		conn->user_len			= strlen(conn->user);
@@ -781,19 +803,18 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 
 			buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
 			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE,
-								   		(char *)&buf_size TSRMLS_CC);			
+								   		(char *)&buf_size TSRMLS_CC);
 		}
 
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
 		if (reconnect) {
-			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);	
+			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);
 		}
 		if (conn->persistent) {
 			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
 		}
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
-		conn->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
 #if PHP_MAJOR_VERSION >= 6
 		{
 			unsigned int as_unicode = 1;
@@ -838,7 +859,7 @@ PHPAPI MYSQLND *mysqlnd_connect(MYSQLND *conn,
 		PACKET_FREE(auth_packet);
 		PACKET_FREE_ALLOCA(ok_packet);
 
-		DBG_RETURN(conn);
+		DBG_RETURN(PASS);
 	}
 err:
 	PACKET_FREE_ALLOCA(greet_packet);
@@ -858,24 +879,56 @@ err:
 		conn->scheme = NULL;
 	}
 
-	if (self_alloced) {
-		/*
-		  We have alloced, thus there are no references to this
-		  object - we are free to kill it!
-		*/
-		conn->m->dtor(conn TSRMLS_CC);
-	} else {
-		/* This will also close conn->net.stream if it has been opened */
-		conn->m->free_contents(conn TSRMLS_CC);
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_FAILURE);
+	/* This will also close conn->net.stream if it has been opened */
+	conn->m->free_contents(conn TSRMLS_CC);
+	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_FAILURE);
+
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_connect */
+PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
+						 const char *host, const char *user,
+						 const char *passwd, unsigned int passwd_len,
+						 const char *db, unsigned int db_len,
+						 unsigned int port,
+						 const char *socket,
+						 unsigned int mysql_flags,
+						 MYSQLND_THD_ZVAL_PCACHE *zval_cache
+						 TSRMLS_DC)
+{
+	enum_func_status ret;
+	zend_bool self_alloced = FALSE;
+
+	DBG_ENTER("mysqlnd_connect");
+	DBG_INF_FMT("host=%s user=%s db=%s port=%d flags=%d", host?host:"", user?user:"", db?db:"", port, mysql_flags);
+
+	if (!conn) {
+		conn = mysqlnd_init(FALSE);
+		self_alloced = TRUE;
 	}
-	DBG_RETURN(NULL);
+
+	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket, mysql_flags, zval_cache TSRMLS_CC);
+
+	if (ret == FAIL) {
+		if (self_alloced) {
+			/*
+			  We have alloced, thus there are no references to this
+			  object - we are free to kill it!
+			*/
+			conn->m->dtor(conn TSRMLS_CC);
+		}
+		DBG_RETURN(NULL);
+	}
+	DBG_RETURN(conn);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_conn::query */
-/* 
+/*
   If conn->error_info.error_no is not zero, then we had an error.
   Still the result from the query is PASS
 */
@@ -896,7 +949,7 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 	  Here read the result set. We don't do it in simple_command because it need
 	  information from the ok packet. We will fetch it ourselves.
 	*/
-	ret = mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC);
+	ret = conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC);
 	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && conn->upsert_status.affected_rows) {
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
 	}
@@ -932,9 +985,9 @@ MYSQLND_METHOD(mysqlnd_conn, reap_query)(MYSQLND * conn TSRMLS_DC)
 
 	if (state <= CONN_READY || state == CONN_QUIT_SENT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connection not opened, clear or has been closed");
-		DBG_RETURN(FAIL);	
+		DBG_RETURN(FAIL);
 	}
-	DBG_RETURN(mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC));
+	DBG_RETURN(conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC));
 }
 /* }}} */
 
@@ -967,7 +1020,7 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS
 			}
 			p++;
 		}
-		*ret_p = NULL; 
+		*ret_p = NULL;
 	}
 	return ret;
 }
@@ -988,7 +1041,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND **conn_array, fd_set *fds, php
 		 * */
 		if (SUCCESS == php_stream_cast((*p)->net.stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
-			
+
 			PHP_SAFE_FD_SET(this_fd, fds);
 
 			if (this_fd > *max_fd) {
@@ -1027,7 +1080,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND **conn_array, fd_set *fds TS
 		fwd++;
 	}
 	*bckwd = NULL;/* NULL-terminate the list */
-	
+
 	return ret;
 }
 
@@ -1088,14 +1141,14 @@ _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long s
 	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 	if (usec > 999999) {
 		tv.tv_sec = sec + (usec / 1000000);
-		tv.tv_usec = usec % 1000000;			
+		tv.tv_usec = usec % 1000000;
 	} else {
 		tv.tv_sec = sec;
 		tv.tv_usec = usec;
 	}
 
 	tv_p = &tv;
-	
+
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
@@ -1145,7 +1198,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND *conn, const char *table, cons
 
 	if (achtung_wild && (wild_len = strlen(achtung_wild))) {
 		memcpy(p, achtung_wild, MIN(wild_len, MYSQLND_MAX_ALLOWED_DB_LEN * 4));
-		p += wild_len;	
+		p += wild_len;
 		*p++ = '\0';
 	}
 
@@ -1193,14 +1246,14 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND *conn, const char *query,
 		if (achtung_wild) {
 			show_query_len = spprintf(&show_query, 0, query, par1, achtung_wild);
 		} else {
-			show_query_len = spprintf(&show_query, 0, query, par1);	
+			show_query_len = spprintf(&show_query, 0, query, par1);
 		}
 	} else {
 		if (achtung_wild) {
 			show_query_len = spprintf(&show_query, 0, query, achtung_wild);
 		} else {
-			show_query_len = strlen(show_query = (char *)query);	
-		}	
+			show_query_len = strlen(show_query = (char *)query);
+		}
 	}
 
 	if (PASS == conn->m->query(conn, show_query, show_query_len TSRMLS_CC)) {
@@ -1739,7 +1792,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_server_version)(const MYSQLND * const conn)
 	minor = strtol(p, &p, 10);
 	p += 1; /* consume the dot */
 	patch = strtol(p, &p, 10);
-	
+
 	return (unsigned long)(major * 10000L + (unsigned long)(minor * 100L + patch));
 }
 /* }}} */
@@ -1775,7 +1828,7 @@ MYSQLND_METHOD(mysqlnd_conn, next_result)(MYSQLND * const conn TSRMLS_DC)
 	  We are sure that there is a result set, since conn->state is set accordingly
 	  in mysqlnd_store_result() or mysqlnd_fetch_row_unbuffered()
 	*/
-	if (FAIL == (ret = mysqlnd_query_read_result_set_header(conn, NULL TSRMLS_CC))) {
+	if (FAIL == (ret = conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC))) {
 		/*
 		  There can be an error in the middle of a multi-statement, which will cancel the multi-statement.
 		  So there are no more results and we should just return FALSE, error_no has been set
@@ -2192,6 +2245,8 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
+	MYSQLND_METHOD(mysqlnd_conn, connect),
+
 	MYSQLND_METHOD(mysqlnd_conn, escape_string),
 	MYSQLND_METHOD(mysqlnd_conn, set_charset),
 	MYSQLND_METHOD(mysqlnd_conn, query),
@@ -2244,6 +2299,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor),
 
+	mysqlnd_query_read_result_set_header,
+
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state),
@@ -2254,7 +2311,8 @@ MYSQLND_CLASS_METHODS_END;
 /* {{{ mysqlnd_init */
 PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
-	MYSQLND *ret = mnd_pecalloc(1, sizeof(MYSQLND), persistent);
+	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND *ret = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_init");
 	DBG_INF_FMT("persistent=%d", persistent);
@@ -2264,6 +2322,9 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 
 	ret->m = mysqlnd_conn_methods;
 	ret->m->get_reference(ret TSRMLS_CC);
+
+	ret->net.stream_read = mysqlnd_read_from_stream;
+	ret->net.stream_write = mysqlnd_stream_write;
 
 #ifdef MYSQLND_THREADED
 	ret->LOCK_state = tsrm_mutex_alloc();
@@ -2302,6 +2363,37 @@ PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods()
 PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods)
 {
 	mysqlnd_conn_methods = methods;
+}
+/* }}} */
+
+
+static unsigned int mysqlnd_plugins_counter = 0;
+
+/* {{{ mysqlnd_plugin_register */
+PHPAPI unsigned int mysqlnd_plugin_register()
+{
+	return mysqlnd_plugins_counter++;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_plugin_count */
+unsigned int mysqlnd_plugin_count()
+{
+	return mysqlnd_plugins_counter;
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_connection_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_connection_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!conn || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)conn + sizeof(MYSQLND) + plugin_id * sizeof(void *));
 }
 /* }}} */
 

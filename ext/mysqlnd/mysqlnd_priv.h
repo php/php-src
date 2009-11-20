@@ -42,8 +42,7 @@
 #endif
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
-#define MYSQLND_CLASS_METHODS_START(class) static \
-									 struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
+#define MYSQLND_CLASS_METHODS_START(class) struct st_##class##_methods MYSQLND_CLASS_METHOD_TABLE_NAME(class) = {
 #define MYSQLND_CLASS_METHODS_END  				}							 
 
 #if PHP_MAJOR_VERSION < 6
