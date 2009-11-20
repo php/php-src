@@ -1145,8 +1145,7 @@ static PHP_METHOD(PDO, quote)
 	char *qstr;
 	int qlen;
 
-	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s|l", &str, &str_len,
-			&paramtype)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &paramtype)) {
 		RETURN_FALSE;
 	}
 	
