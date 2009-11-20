@@ -4,6 +4,11 @@ Submitting Patches to PHP
 This document describes how to submit a patch for PHP. Creating a
 patch for PHP is easy!
 
+You don't need any login accounts or special access to download,
+build, debug and begin submitting PHP code, tests or documentation for
+inclusion in PHP. Once you've followed this README and had several
+patches accepted, PHP commit privileges are often quickly granted.
+
 An excellent article to read first is:
 http://phpadvent.org/2008/less-whining-more-coding-by-elizabeth-smith
 
@@ -127,8 +132,5 @@ What happens when your patch is applied
 Your name will be included together with your email address in the SVN
 commit log. If your patch affects end users, a brief description
 and your name might be added to the NEWS file.
-
-Commit privileges are often granted to people who have had several
-patches accepted.
 
 Thank you for patching PHP!
