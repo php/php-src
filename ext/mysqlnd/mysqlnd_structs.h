@@ -48,7 +48,7 @@ struct st_mysqlnd_memory_pool_chunk
 	uint64_t			app;
 	MYSQLND_MEMORY_POOL *pool;
 	zend_uchar			*ptr;
-	unsigned int				size;
+	unsigned int		size;
 	void				(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
 	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, zend_bool cache_it TSRMLS_DC);
 	zend_bool			from_pool;
@@ -217,23 +217,44 @@ typedef struct st_mysqlnd_stats
 } MYSQLND_STATS;
 
 
+typedef struct st_mysqlnd_read_buffer {
+	zend_uchar 	* data;
+	size_t 		offset;
+	size_t 		size;
+	size_t		len;
+	zend_bool	(*is_empty)(struct st_mysqlnd_read_buffer *);
+	void		(*read)(struct st_mysqlnd_read_buffer *, size_t count, zend_uchar * dest);
+	size_t		(*bytes_left)(struct st_mysqlnd_read_buffer *);
+	void		(*free)(struct st_mysqlnd_read_buffer ** TSRMLS_DC);
+} MYSQLND_READ_BUFFER;
+
+
 typedef struct st_mysqlnd_net
 {
-	php_stream		*stream;
+	php_stream			*stream;
+	enum_func_status	(*stream_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
+	size_t 				(*stream_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
+
 	/* sequence for simple checking of correct packets */
-	zend_uchar		packet_no;
-
-#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	zend_uchar		last_command;
+	zend_uchar			packet_no;
+	zend_bool			compressed;
+	zend_uchar			compressed_envelope_packet_no;
+#ifdef MYSQLND_COMPRESSION_ENABLED
+	MYSQLND_READ_BUFFER	* uncompressed_data;
 #endif
-
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
+	zend_uchar			last_command;
+#endif
 	/* cmd buffer */
 	MYSQLND_CMD_BUFFER	cmd_buffer;
 } MYSQLND_NET;
 
 
+
+
 struct st_mysqlnd_conn_methods
 {
+	enum_func_status	(*connect)(MYSQLND *conn, const char *host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket, unsigned int mysql_flags, MYSQLND_THD_ZVAL_PCACHE * zval_cache TSRMLS_DC);
 	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 	enum_func_status	(*set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
 	enum_func_status	(*query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
@@ -285,6 +306,8 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*close)(MYSQLND *conn, enum_connection_close_type close_type TSRMLS_DC);
 	void				(*dtor)(MYSQLND *conn TSRMLS_DC);	/* private */
 
+	enum_func_status	(*query_read_result_set_header)(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC);
+
 	MYSQLND *			(*get_reference)(MYSQLND * const conn TSRMLS_DC);
 	enum_func_status	(*free_reference)(MYSQLND * const conn TSRMLS_DC);
 	enum mysqlnd_connection_state (*get_state)(MYSQLND * const conn TSRMLS_DC);
@@ -317,13 +340,25 @@ struct st_mysqlnd_res_methods
 
 	enum_func_status	(*read_result_metadata)(MYSQLND_RES *result, MYSQLND *conn TSRMLS_DC);
 	unsigned long *		(*fetch_lengths)(MYSQLND_RES * const result);
+	enum_func_status	(*store_result_fetch_data)(MYSQLND * const conn, MYSQLND_RES *result, MYSQLND_RES_METADATA *meta, zend_bool binary_protocol, zend_bool to_cache TSRMLS_DC);
+	void 				(*initialize_result_set_rest)(MYSQLND_RES * const result TSRMLS_DC);
+
 	void				(*free_result_buffers)(MYSQLND_RES * result TSRMLS_DC);	/* private */
 	enum_func_status	(*free_result)(MYSQLND_RES * result, zend_bool implicit TSRMLS_DC);
-	void 				(*free_result_internal)(MYSQLND_RES *result TSRMLS_DC);
-	void 				(*free_result_contents)(MYSQLND_RES *result TSRMLS_DC);
+	void				(*free_result_internal)(MYSQLND_RES *result TSRMLS_DC);
+	void				(*free_result_contents)(MYSQLND_RES *result TSRMLS_DC);
+	void				(*free_buffered_data)(MYSQLND_RES *result TSRMLS_DC);
+	void				(*unbuffered_free_last_data)(MYSQLND_RES *result TSRMLS_DC);
 
-	/* for decoding - binary or text protocol */	
-	void 				(*row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields, unsigned int field_count, MYSQLND_FIELD *fields_metadata, MYSQLND *conn TSRMLS_DC);
+	/* for decoding - binary or text protocol */
+	void				(*row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
+									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
+									zend_bool persistent,
+									zend_bool as_unicode, zend_bool as_int_or_float,
+									MYSQLND_THD_ZVAL_PCACHE * zval_cache,
+									MYSQLND_STATS * stats TSRMLS_DC);
+
+
 };
 
 
@@ -445,7 +480,7 @@ struct st_mysqlnd_connection
 
 	/* Temporal storage for mysql_query */
 	unsigned int	field_count;
-	
+
 	/* persistent connection */
 	zend_bool		persistent;
 
@@ -457,8 +492,6 @@ struct st_mysqlnd_connection
 
 	/* qcache */
 	MYSQLND_QCACHE	*qcache;
-
-	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
 	/* stats */
 	MYSQLND_STATS	stats;
@@ -490,7 +523,7 @@ struct mysqlnd_field_hash_key
 #if PHP_MAJOR_VERSION >= 6
 	zstr			ustr;
 	unsigned int	ulen;
-#endif	
+#endif
 };
 
 
@@ -578,7 +611,7 @@ struct st_mysqlnd_res
 
 	/*
 	  Column lengths of current row - both buffered and unbuffered.
-	  For buffered results it duplicates the data found in **data 
+	  For buffered results it duplicates the data found in **data
 	*/
 	unsigned long			*lengths;
 
@@ -586,6 +619,8 @@ struct st_mysqlnd_res
 
 	/* zval cache */
 	MYSQLND_THD_ZVAL_PCACHE	*zval_cache;
+
+	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 };
 
 

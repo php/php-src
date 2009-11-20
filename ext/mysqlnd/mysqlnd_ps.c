@@ -110,10 +110,9 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 		result->zval_cache = mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache);
 	}
 
-	/* Create room for 'next_extend' rows */
+	result->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
 
-	ret = mysqlnd_store_result_fetch_data(conn, result, result->meta,
-										  TRUE, to_cache TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE, to_cache TSRMLS_CC);
 
 	if (PASS == ret) {
 		/* libmysql API docs say it should be so for SELECT statements */
@@ -187,8 +186,7 @@ MYSQLND_METHOD(mysqlnd_stmt, background_store_result)(MYSQLND_STMT * const stmt 
 		result->conn = NULL;	/* store result does not reference  the connection */
 	}
 
-	ret = mysqlnd_store_result_fetch_data(conn, result, result->meta,
-										  TRUE, to_cache TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE, to_cache TSRMLS_CC);
 
 	if (PASS == ret) {
 		/* libmysql API docs say it should be so for SELECT statements */
@@ -740,7 +738,11 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 									  current_row,
 									  meta->field_count,
 									  meta->fields,
-									  result->conn TSRMLS_CC);
+									  result->stored_data->persistent,
+									  result->conn->options.numeric_and_datetime_as_unicode,
+									  result->conn->options.int_and_float_native,
+									  result->conn->zval_cache,
+									  &result->conn->stats TSRMLS_CC);
 				if (stmt->update_max_length) {
 					for (i = 0; i < result->field_count; i++) {
 						/*
@@ -832,7 +834,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 
 	/*
 	  If we skip rows (stmt == NULL || stmt->result_bind == NULL) we have to
-	  mysqlnd_unbuffered_free_last_data() before it. The function returns always true.
+	  result->m.unbuffered_free_last_data() before it. The function returns always true.
 	*/
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
@@ -840,7 +842,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		*fetched_anything = TRUE;
 
 		if (!row_packet->skip_extraction) {
-			mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
+			result->m.unbuffered_free_last_data(result TSRMLS_CC);
 
 			DBG_INF("extracting data");
 			result->unbuf->last_row_data = row_packet->fields;
@@ -852,14 +854,18 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 								  result->unbuf->last_row_data,
 								  row_packet->field_count,
 								  row_packet->fields_metadata,
-								  result->conn TSRMLS_CC);
+								  FALSE,
+								  result->conn->options.numeric_and_datetime_as_unicode,
+								  result->conn->options.int_and_float_native,
+								  result->conn->zval_cache,
+								  &result->conn->stats TSRMLS_CC);
 
 			for (i = 0; i < field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval *data = result->unbuf->last_row_data[i];
 					/*
 					  stmt->result_bind[i].zv has been already destructed
-					  in mysqlnd_unbuffered_free_last_data()
+					  in result->m.unbuffered_free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_dtor(stmt->result_bind[i].zv);
@@ -885,7 +891,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		} else {
 			DBG_INF("skipping extraction");
 			/*
-			  Data has been allocated and usually mysqlnd_unbuffered_free_last_data()
+			  Data has been allocated and usually result->m.unbuffered_free_last_data()
 			  frees it but we can't call this function as it will cause problems with
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
@@ -1014,7 +1020,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 		DBG_INF_FMT("skip_extraction=%d", row_packet->skip_extraction); 
 		if (!row_packet->skip_extraction) {
-			mysqlnd_unbuffered_free_last_data(result TSRMLS_CC);
+			result->m.unbuffered_free_last_data(result TSRMLS_CC);
 
 			DBG_INF("extracting data");
 			result->unbuf->last_row_data = row_packet->fields;
@@ -1026,7 +1032,11 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 								  result->unbuf->last_row_data,
 								  row_packet->field_count,
 								  row_packet->fields_metadata,
-								  result->conn TSRMLS_CC);
+								  FALSE,
+								  result->conn->options.numeric_and_datetime_as_unicode,
+								  result->conn->options.int_and_float_native,
+								  result->conn->zval_cache,
+								  &result->conn->stats TSRMLS_CC);
 
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
@@ -1034,7 +1044,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 					zval *data = result->unbuf->last_row_data[i];
 					/*
 					  stmt->result_bind[i].zv has been already destructed
-					  in mysqlnd_unbuffered_free_last_data()
+					  in result->m.unbuffered_free_last_data()
 					*/
 #ifndef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 					zval_dtor(stmt->result_bind[i].zv);
@@ -1060,7 +1070,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 		} else {
 			DBG_INF("skipping extraction");
 			/*
-			  Data has been allocated and usually mysqlnd_unbuffered_free_last_data()
+			  Data has been allocated and usually result->m.unbuffered_free_last_data()
 			  frees it but we can't call this function as it will cause problems with
 			  the bound variables. Thus we need to do part of what it does or Zend will
 			  report leaks.
@@ -1708,7 +1718,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const stmt TSRMLS_D
 
 	if (stmt->update_max_length && stmt->result->stored_data) {
 		/* stored result, we have to update the max_length before we clone the meta data :( */
-		mysqlnd_res_initialize_result_set_rest(stmt->result TSRMLS_CC);
+		stmt->result->m.initialize_result_set_rest(stmt->result TSRMLS_CC);
 	}
 	/*
 	  TODO: This implementation is kind of a hack,
