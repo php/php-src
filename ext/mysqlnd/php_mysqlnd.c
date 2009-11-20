@@ -102,6 +102,12 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "mysqlnd", "enabled");
 	php_info_print_table_row(2, "Version", mysqlnd_get_client_info());
+	php_info_print_table_row(2, "Compression",
+#ifdef MYSQLND_COMPRESSION_ENABLED
+								"supported");
+#else
+								"not supported");
+#endif
 	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_cmd_buffer_size));
 	php_info_print_table_row(2, "Command buffer size", buf);
 	snprintf(buf, sizeof(buf), "%ld", MYSQLND_G(net_read_buffer_size));
@@ -234,10 +240,18 @@ static PHP_RSHUTDOWN_FUNCTION(mysqlnd)
 #endif
 
 
+
+static const zend_module_dep mysqlnd_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	{NULL, NULL, NULL}
+};
+
 /* {{{ mysqlnd_module_entry
  */
 zend_module_entry mysqlnd_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	mysqlnd_deps,
 	"mysqlnd",
 	mysqlnd_functions,
 	PHP_MINIT(mysqlnd),

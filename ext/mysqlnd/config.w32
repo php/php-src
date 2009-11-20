@@ -21,5 +21,10 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_wireprotocol.c " +
 			"php_mysqlnd.c";
 		EXTENSION("mysqlnd", mysqlnd_source, false);
+		if (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "mysqlnd", PHP_MYSQLND))) || 
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "mysqlnd", PHP_MYSQLND)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
+		{
+			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Compression support");
+		}
 	}
 }
