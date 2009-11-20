@@ -171,7 +171,7 @@ static unsigned int check_mb_eucjpms(const char *start, const char *end)
 	if (valid_eucjpms_ss2(start[0]) && (end - start) > 1 && valid_eucjpms_kata(start[1])) {
 		return 2;
 	}
-	if (valid_eucjpms_ss3(start[0]) && (end - start) > 2 && valid_eucjpms(start[1]) && 
+	if (valid_eucjpms_ss3(start[0]) && (end - start) > 2 && valid_eucjpms(start[1]) &&
 		valid_eucjpms(start[2])) {
 		return 2;
 	}
@@ -199,7 +199,7 @@ static unsigned int mysqlnd_mbcharlen_eucjpms(unsigned int jpms)
 
 static unsigned int check_mb_gb2312(const char *start, const char *end)
 {
-	return (valid_gb2312_head((unsigned int)start[0]) && end - start > 1 && 
+	return (valid_gb2312_head((unsigned int)start[0]) && end - start > 1 &&
 			valid_gb2312_tail((unsigned int)start[1])) ? 2 : 0;
 }
 
@@ -311,7 +311,7 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  19, "euckr", "euckr_korean_ci", 1, 2, "", mysqlnd_mbcharlen_euckr, check_mb_euckr},
 	{  22, "koi8u", "koi8u_general_ci", 1, 1, "", NULL, NULL},
 	{  24, "gb2312", "gb2312_chinese_ci", 1, 2, "", mysqlnd_mbcharlen_gb2312, check_mb_gb2312},
-	{  25, "greek", "greek_general_ci", 1, 1, "", NULL, NULL},	
+	{  25, "greek", "greek_general_ci", 1, 1, "", NULL, NULL},
 	{  26, "cp1250", "cp1250_general_ci", 1, 1, "", NULL, NULL},
 	{  28, "gbk", "gbk_chinese_ci", 1, 2, "", mysqlnd_mbcharlen_gbk, check_mb_gbk},
 	{  30, "latin5", "latin5_turkish_ci", 1, 1, "", NULL, NULL},
@@ -449,7 +449,7 @@ const MYSQLND_CHARSET mysqlnd_charsets60[] =
 	{  19, "euckr", "euckr_korean_ci", 1, 2, "", mysqlnd_mbcharlen_euckr, check_mb_euckr},
 	{  22, "koi8u", "koi8u_general_ci", 1, 1, "", NULL, NULL},
 	{  24, "gb2312", "gb2312_chinese_ci", 1, 2, "", mysqlnd_mbcharlen_gb2312, check_mb_gb2312},
-	{  25, "greek", "greek_general_ci", 1, 1, "", NULL, NULL},	
+	{  25, "greek", "greek_general_ci", 1, 1, "", NULL, NULL},
 	{  26, "cp1250", "cp1250_general_ci", 1, 1, "", NULL, NULL},
 	{  28, "gbk", "gbk_chinese_ci", 1, 2, "", mysqlnd_mbcharlen_gbk, check_mb_gbk},
 	{  30, "latin5", "latin5_turkish_ci", 1, 1, "", NULL, NULL},
@@ -635,7 +635,7 @@ PHPAPI ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char
 	for (;escapestr < end; escapestr++) {
 		unsigned int len = 0;
 		/* check unicode characters */
-		
+
 		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
 
 			/* check possible overflow */
@@ -685,7 +685,8 @@ PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, cha
 	zend_bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_slashes");
-	
+	DBG_INF_FMT("charset=%s", cset->name);
+
 	for (;escapestr < end; escapestr++) {
 		char esc = '\0';
 		unsigned int len = 0;

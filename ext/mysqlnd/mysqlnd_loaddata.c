@@ -75,7 +75,7 @@ int mysqlnd_local_infile_init(void **ptr, char *filename, void **userdata TSRMLS
 
 	if (info->fd == NULL) {
 		snprintf((char *)info->error_msg, sizeof(info->error_msg), "Can't find file '%-.64s'.", filename);
-		info->error_no = MYSQLND_EE_FILENOTFOUND; 
+		info->error_no = MYSQLND_EE_FILENOTFOUND;
 		DBG_RETURN(1);
 	}
 
@@ -196,7 +196,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	infile = conn->infile;
 	/* allocate buffer for reading data */
 	buf = (char *)mnd_ecalloc(1, buflen);
-	
+
 	*is_warning = FALSE;
 
 	/* init handler: allocate read buffer and open file */
