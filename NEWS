@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   (Pierre)
 
 
+- Fixed bug #50219 (soap call Segmentation fault on a redirected url).
+  (Pierrick)
 - Fixed bug #50212 (crash by ldap_get_option() with LDAP_OPT_NETWORK_TIMEOUT).
   (Ilia, shigeru_kitazaki at cybozu dot co dot jp)
 - Fixed bug #50207 (segmentation fault when concatenating very large strings on
