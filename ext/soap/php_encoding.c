@@ -375,7 +375,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		char *stype_str = NULL, *ns_str = NULL;
 
 		if (zend_hash_find(ht, "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
-			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' propery");
+			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' property");
 		}
 
 		if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
