@@ -15,7 +15,7 @@ foreach(range(1, 4) as $i) {
 
 try {
 	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory.phar');
-	var_dump($phar->buildFromDirectory(dirname(__FILE__) . '/testdir', '/\.php/'));
+	var_dump($phar->buildFromDirectory(dirname(__FILE__) . '/testdir', '/\.php$/'));
 } catch (Exception $e) {
 	var_dump(get_class($e));
 	echo $e->getMessage() . "\n";
