@@ -931,12 +931,20 @@ try_again:
 					new_url->host = phpurl->host ? estrdup(phpurl->host) : NULL;
 					new_url->port = phpurl->port;
 					if (new_url->path && new_url->path[0] != '/') {
-						char *t = phpurl->path;
-						char *p = strrchr(t, '/');
-						if (p) {
-							char *s = emalloc((p - t) + strlen(new_url->path) + 2);
-							strncpy(s, t, (p - t) + 1);
-							s[(p - t) + 1] = 0;
+						if (phpurl->path) {
+							char *t = phpurl->path;
+							char *p = strrchr(t, '/');
+							if (p) {
+								char *s = emalloc((p - t) + strlen(new_url->path) + 2);
+								strncpy(s, t, (p - t) + 1);
+								s[(p - t) + 1] = 0;
+								strcat(s, new_url->path);
+								efree(new_url->path);
+								new_url->path = s;
+							} 
+						} else {
+							char *s = emalloc(strlen(new_url->path) + 2);
+							s[0] = '/'; s[1] = 0;
 							strcat(s, new_url->path);
 							efree(new_url->path);
 							new_url->path = s;
