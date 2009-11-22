@@ -4652,7 +4652,7 @@ PHP_FUNCTION(error_log)
 		opt_err = erropt;
 	}
 
-	if (_php_error_log(opt_err, message, opt, headers TSRMLS_CC) == FAILURE) {
+	if (_php_error_log_ex(opt_err, message, message_len, opt, headers TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4660,17 +4660,22 @@ PHP_FUNCTION(error_log)
 }
 /* }}} */
 
+/* For BC (not binary-safe!) */
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC) /* {{{ */
+{
+	return _php_error_log_ex(opt_err, message, (opt_err == 3) ? strlen(message) : 0, opt, headers TSRMLS_CC);
+}
+/* }}} */
+
+PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *opt, char *headers TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 
-	switch (opt_err) {
-
+	switch (opt_err)
+	{
 		case 1:		/*send an email */
-			{
-				if (!php_mail(opt, "PHP error_log message", message, headers, NULL TSRMLS_CC)) {
-					return FAILURE;
-				}
+			if (!php_mail(opt, "PHP error_log message", message, headers, NULL TSRMLS_CC)) {
+				return FAILURE;
 			}
 			break;
 
@@ -4681,11 +4686,13 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 
 		case 3:		/*save to a file */
 			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL_WIN | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
-			if (!stream)
+			if (!stream) {
 				return FAILURE;
-			php_stream_write(stream, message, strlen(message));
+			}
+			php_stream_write(stream, message, message_len);
 			php_stream_close(stream);
 			break;
+
 		case 4: /* send to SAPI */
 			if (sapi_module.log_message) {
 				sapi_module.log_message(message);
@@ -4693,6 +4700,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 				return FAILURE;
 			}
 			break;
+
 		default:
 			php_log_err(message TSRMLS_CC);
 			break;

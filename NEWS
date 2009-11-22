@@ -18,11 +18,11 @@ PHP                                                                        NEWS
 - Implemented FR #49253 (added support for libcurl's CERTINFO option).
   (Linus Nielsen Feltzing <linus@haxx.se>)
 
+- Fixed error_log() to be binary safe when using message_type 3. (Jani)
 - Fixed unnecessary invocation of setitimer when timeouts have been disabled.
   (Arvind Srinivasan)
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
-
 
 - Fixed bug #50219 (soap call Segmentation fault on a redirected url).
   (Pierrick)
