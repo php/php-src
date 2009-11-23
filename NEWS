@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50240 (pdo_mysql.default_socket in php.ini shouldn't used
+  if it is empty). (foutrelis at gmail dot com, Ilia)
 - Fixed bug #50219 (soap call Segmentation fault on a redirected url).
   (Pierrick)
 - Fixed bug #50212 (crash by ldap_get_option() with LDAP_OPT_NETWORK_TIMEOUT).
