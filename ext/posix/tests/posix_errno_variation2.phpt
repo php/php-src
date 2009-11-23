@@ -7,6 +7,7 @@ Francesco Fullone ff@ideato.it
 --SKIPIF--
 <?php 
         if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+        if(!extension_loaded("pcntl")) print "skip - PCNTL extension required";
 ?>
 --FILE--
 <?php
