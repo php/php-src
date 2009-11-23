@@ -863,11 +863,12 @@ EOF
       fi
 
       if test -z "$output_obj"; then
+	$run $rm "$lobj"
 	# Place PIC objects in $objdir
 	command="$command -o $lobj"
+      else
+	$run $rm "$lobj" "$output_obj"
       fi
-
-      $run $rm "$lobj" "$output_obj"
 
       $show "$command"
       if $run eval "$command"; then :
