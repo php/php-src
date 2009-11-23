@@ -52,7 +52,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql);
 */
 PHP_INI_BEGIN()
 #ifndef PHP_WIN32
-	STD_PHP_INI_ENTRY("pdo_mysql.default_socket", PDO_MYSQL_UNIX_ADDR, PHP_INI_SYSTEM, OnUpdateString, default_socket, zend_pdo_mysql_globals, pdo_mysql_globals)
+	STD_PHP_INI_ENTRY("pdo_mysql.default_socket", PDO_MYSQL_UNIX_ADDR, PHP_INI_SYSTEM, OnUpdateStringUnempty, default_socket, zend_pdo_mysql_globals, pdo_mysql_globals)
 #endif
 #if PDO_DBG_ENABLED
 	STD_PHP_INI_ENTRY("pdo_mysql.debug",	NULL, PHP_INI_SYSTEM, OnUpdateString, debug, zend_pdo_mysql_globals, pdo_mysql_globals)
