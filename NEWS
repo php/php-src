@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 
+- Implement feature request #50283 (allow base in gmp_strval to use full
+  range: 2 to 62, and -2 to -36). (David Soria Parra)
 - Fixed bug #50282 (xmlrpc_encode_request() changes object into array in 
   calling function). (Felipe)
 - Fixed bug #50219 (soap call Segmentation fault on a redirected url).
