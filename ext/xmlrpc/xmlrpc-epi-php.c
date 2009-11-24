@@ -499,6 +499,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					zval** pIter;
 					char* my_key;
 					HashTable *ht = NULL;
+					zval *val_arr;
 
 					ht = HASH_OF(val);
 					if (ht && ht->nApplyCount > 1) {
@@ -506,12 +507,16 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						return NULL;
 					}
 
-					convert_to_array(val);
-					xReturn = XMLRPC_CreateVector(key, determine_vector_type(Z_ARRVAL_P(val)));
+					MAKE_STD_ZVAL(val_arr);
+					*val_arr = *val;
+					zval_copy_ctor(val_arr);
+					INIT_PZVAL(val_arr);
+					convert_to_array(val_arr);
+					xReturn = XMLRPC_CreateVector(key, determine_vector_type(Z_ARRVAL_P(val_arr)));
 
-					zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
-					while(zend_hash_get_current_data(Z_ARRVAL_P(val), (void**)&pIter) == SUCCESS) {
-						int res = my_zend_hash_get_current_key(Z_ARRVAL_P(val), &my_key, &num_index);
+					zend_hash_internal_pointer_reset(Z_ARRVAL_P(val_arr));
+					while(zend_hash_get_current_data(Z_ARRVAL_P(val_arr), (void**)&pIter) == SUCCESS) {
+						int res = my_zend_hash_get_current_key(Z_ARRVAL_P(val_arr), &my_key, &num_index);
                     
 						switch (res) {
 							case HASH_KEY_NON_EXISTANT:
@@ -532,8 +537,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 								}
 								break;
 						}
-						zend_hash_move_forward(Z_ARRVAL_P(val));
+						zend_hash_move_forward(Z_ARRVAL_P(val_arr));
 					}
+					zval_ptr_dtor(&val_arr);
 				}
 				break;
 			default:
