@@ -3457,7 +3457,7 @@ PHP_FUNCTION(quotemeta)
 
 	if (type == IS_UNICODE) {
 		old_end.u = old.u + old_len;
-		str.u = safe_emalloc(2, UBYTES(old_len), 1);
+		str.u = safe_emalloc(2, UBYTES(old_len), UBYTES(1));
 
 		for (p.u = old.u, q.u = str.u; p.u != old_end.u; p.u++) {
 			cp = *p.u;
