@@ -3,13 +3,13 @@ PHP                                                                        NEWS
 ?? Nov 2009, PHP 5.2.12RC2
 - Updated timezone database to version 2009.19 (2009s). (Derick)
 
+- Changed gmp_strval() to use full range from 2 to 62, and -2 to -36. FR #50283
+  (David Soria Parra)
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 
-- Implement feature request #50283 (allow base in gmp_strval to use full
-  range: 2 to 62, and -2 to -36). (David Soria Parra)
 - Fixed bug #50282 (xmlrpc_encode_request() changes object into array in 
   calling function). (Felipe)
 - Fixed bug #50219 (soap call Segmentation fault on a redirected url).
