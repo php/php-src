@@ -206,7 +206,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_pgsql
-PRIMARY MAINTAINER:  Unknown
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
