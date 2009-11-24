@@ -1699,7 +1699,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	char			arg[11];
 
 	if (ftp == NULL) {
-		goto bail;
+		return PHP_FTP_FAILED;
 	}
 
 	if (!ftp_type(ftp, type)) {
