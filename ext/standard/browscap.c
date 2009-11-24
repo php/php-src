@@ -328,7 +328,7 @@ PHP_FUNCTION(get_browser)
 	char *agent_name = NULL;
 	int agent_name_len = 0;
 	zend_bool return_array = 0;
-	zval **agent, **z_agent_name;
+	zval **agent, **z_agent_name, **http_user_agent;
 	zval *found_browser_entry, *tmp_copy;
 	char *lookup_browser_name;
 	char *browscap = INI_STR("browscap");
@@ -344,11 +344,14 @@ PHP_FUNCTION(get_browser)
 
 	if (agent_name == NULL) {
 		zend_is_auto_global("_SERVER", sizeof("_SERVER") - 1 TSRMLS_CC);
-		if (!PG(http_globals)[TRACK_VARS_SERVER]
-			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name) == FAILURE) {
+		if (!PG(http_globals)[TRACK_VARS_SERVER] ||
+			zend_hash_find(HASH_OF(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &http_user_agent) == FAILURE
+		) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 			RETURN_FALSE;
 		}
+		agent_name = Z_STRVAL_PP(http_user_agent);
+		agent_name_len = Z_STRLEN_PP(http_user_agent);
 	}
 
 	lookup_browser_name = estrndup(agent_name, agent_name_len);
