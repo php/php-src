@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.20. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
+- Changed gmp_strval() to use full range from 2 to 62, and -2 to -36. FR #50283
+  (David Soria Parra)
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
