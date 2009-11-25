@@ -1,6 +1,6 @@
 dnl $Id$ -*- autoconf -*-
 
-divert(3)dnl
+divert(1003)dnl
 
 dnl
 dnl Check if flush should be called explicitly after buffered io
@@ -205,7 +205,7 @@ dnl
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan)
 AC_FUNC_FNMATCH	
 
-divert(5)dnl
+divert(1005)dnl
 
 dnl
 dnl Check for regex library type
