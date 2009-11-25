@@ -12,7 +12,8 @@ printf("Decimal: %s, 1-based: %s\n", gmp_strval($a), gmp_strval($a,1));
 printf("Decimal: %s, -37-based: %s\n", gmp_strval($a), gmp_strval($a,-37));
 printf("Decimal: %s, 37-based: %s\n", gmp_strval($a), gmp_strval($a,37));
 printf("Decimal: %s, 62-based: %s\n", gmp_strval($a), gmp_strval($a,62));
-printf("Decimal: %s, 63-based: %s\n", gmp_strval($a), gmp_strval($a,63));
+printf("Decimal: %s, 63-based: %s\n\n", gmp_strval($a), gmp_strval($a,63));
+printf("Base 32 and 62-based: %s\n", gmp_strval(gmp_init("gh82179fbf5", 32), 62));
 ?>
 --EXPECTF--
 Decimal: 71915494046709, -36-based: PHPISCOOL
@@ -31,3 +32,5 @@ Decimal: 71915494046709, 62-based: KQ6yq741
 
 Warning: gmp_strval(): Bad base for conversion: 63 in %s on line 10
 Decimal: 71915494046709, 63-based: 
+
+Base 32 and 62-based: 1NHkAcdIiD
