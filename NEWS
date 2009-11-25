@@ -87,8 +87,8 @@ PHP                                                                        NEWS
   (David Soria Parra)
 - Fixed bug #49098 (mysqli segfault on error). (Rasmus)
 
-19 Nov 2009, PHP 5.3.1
 
+19 Nov 2009, PHP 5.3.1
 - Added "max_file_uploads" INI directive, which can be set to limit the
   number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
@@ -129,11 +129,11 @@ PHP                                                                        NEWS
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
 - Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
-  insensitive (garretts)
+  insensitive. (garretts)
 - Restored shebang line check to CGI sapi (not checked by scanner anymore).
   (Jani)
 
-- Improve symbolic, mounted volume and junctions support for realpath on 
+- Improved symbolic, mounted volume and junctions support for realpath on 
   Windows. (Pierre)
 - Improved readlink on Windows, suppress \??\ and use the drive syntax only.
   (Pierre)
