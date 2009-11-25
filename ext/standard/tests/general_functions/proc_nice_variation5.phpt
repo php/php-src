@@ -5,6 +5,10 @@ Italian PHP TestFest 2009 Cesena 19-20-21 june
 Fabio Fabbrucci (fabbrucci@grupporetina.com)
 Michele Orselli (mo@ideato.it)
 Simone Gentili (sensorario@gmail.com)
+--SKIPIF--
+<?php
+        if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
+?>
 --FILE--
 <?php
 
