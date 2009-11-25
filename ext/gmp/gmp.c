@@ -746,7 +746,7 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-	if (base && (base < 2 || base > 36)) {
+	if (base && (base < 2 || base > 62)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and 36)", base);
 		RETURN_FALSE;
 	}
