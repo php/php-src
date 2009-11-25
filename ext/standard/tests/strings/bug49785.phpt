@@ -36,12 +36,6 @@ var_dump(_bin2hex(htmlentities("\xf7\xbf\xbf\xff", ENT_QUOTES, "UTF-8")));
 var_dump(_bin2hex(htmlentities("\xf8\x88\x80\x80\x80", ENT_QUOTES, "UTF-8")));
 
 echo "--\n";
-// UTF-8: with ENT_IGNORE
-var_dump(_bin2hex(htmlentities("\xc0\xa0\xc2\x80", ENT_QUOTES | ENT_IGNORE, "UTF-8")));
-var_dump(_bin2hex(htmlentities("\xe0\x80\x80\xe0\xa0\x80", ENT_QUOTES | ENT_IGNORE, "UTF-8")));
-var_dump(_bin2hex(htmlentities("\xf0\x80\x80\x80\xf0\x90\x80\x80", ENT_QUOTES | ENT_IGNORE, "UTF-8")));
-
-echo "--\n";
 // UTF-8: alternative (invalid) UTF-8 sequence
 var_dump(_bin2hex(htmlspecialchars("\xc0\xa6", ENT_QUOTES, 'UTF-8')));
 var_dump(_bin2hex(htmlspecialchars("\xe0\x80\xa6", ENT_QUOTES, 'UTF-8')));
@@ -160,10 +154,6 @@ string(0) ""
 string(0) ""
 string(0) ""
 string(0) ""
---
-string(4) "c280"
-string(6) "e0a080"
-string(8) "f0908080"
 --
 string(0) ""
 string(0) ""
