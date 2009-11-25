@@ -74,7 +74,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
         AC_DEFINE([USE_COMBINATION_EXPLOSION_CHECK],1,[whether to check multibyte regex backtrack])
       fi
 
-      AC_CACHE_CHECK(for variable length prototypes and stdarg.h, cv_php_mbstring_stdarg, [
+      AC_CACHE_CHECK(for variable length prototypes and stdarg.h, php_cv_mbstring_stdarg, [
         AC_TRY_RUN([
 #include <stdarg.h>
 int foo(int x, ...) {
@@ -86,14 +86,14 @@ int foo(int x, ...) {
 	return 0;
 }
 int main() { return foo(10, "", 3.14); }
-        ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no], [
+        ], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
           dnl cross-compile needs something here
           case $host_alias in
           *netware*)
-          cv_php_mbstring_stdarg=yes
+          php_cv_mbstring_stdarg=yes
           ;;
           *)
-          cv_php_mbstring_stdarg=no
+          php_cv_mbstring_stdarg=no
           ;;
           esac
         ])
