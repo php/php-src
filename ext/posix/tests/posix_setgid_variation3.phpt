@@ -7,6 +7,7 @@ Francesco Fullone ff@ideato.it
 --SKIPIF--
 <?php
         if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
+        if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
 --FILE--
 <?php
