@@ -77,6 +77,8 @@ PHP                                                                        NEWS
   (Ilia, wmeler at wp-sa dot pl)
 - Fixed bug #49719 (ReflectionClass::hasProperty returns true for a private
   property in base class). (Felipe)
+- Fixed bug #49677 (ini parser crashes with apache2 and using ${something}
+  ini variables). (Jani)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
