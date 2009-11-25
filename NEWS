@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
+- Fixed bug #49677 (ini parser crashes with apache2 and using ${something}
+  ini variables). (Jani)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
 
