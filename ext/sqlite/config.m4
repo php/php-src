@@ -48,9 +48,9 @@ AC_DEFUN([PHP_PROG_LEMON],[
 if test "$PHP_SQLITE" != "no"; then
   if test "$PHP_PDO" != "no"; then
     PHP_CHECK_PDO_INCLUDES([], [AC_MSG_WARN([Cannot find php_pdo_driver.h.])])
-    if test -n "$pdo_inc_path"; then
+    if test -n "$pdo_cv_inc_path"; then
       AC_DEFINE([PHP_SQLITE2_HAVE_PDO], [1], [Have PDO])
-      pdo_inc_path="-I$pdo_inc_path"
+      pdo_cv_inc_path="-I$pdo_cv_inc_path"
     fi
   fi  
 
@@ -83,13 +83,13 @@ if test "$PHP_SQLITE" != "no"; then
       -L$SQLITE_DIR/$PHP_LIBDIR -lm
     ])
     SQLITE_MODULE_TYPE=external
-    PHP_SQLITE_CFLAGS=$pdo_inc_path
+    PHP_SQLITE_CFLAGS=$pdo_cv_inc_path
     sqlite_extra_sources="libsqlite/src/encode.c"
   else
     # use bundled library
     PHP_PROG_LEMON
     SQLITE_MODULE_TYPE=builtin
-    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src -I@ext_builddir@/libsqlite/src $pdo_inc_path"
+    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src -I@ext_builddir@/libsqlite/src $pdo_cv_inc_path"
     sqlite_extra_sources="libsqlite/src/opcodes.c \
         libsqlite/src/parse.c libsqlite/src/encode.c \
         libsqlite/src/auth.c libsqlite/src/btree.c libsqlite/src/build.c \
