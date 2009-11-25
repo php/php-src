@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   (Arvind Srinivasan)
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
+- Fixed the m4 scripts to support autoconf-2.64+. (Rasmus)
 
 - Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
   (Felipe)
