@@ -1688,7 +1688,7 @@ dnl PHP_BROKEN_GLIBC_FOPEN_APPEND
 dnl
 AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND], [
   AC_MSG_CHECKING([for broken libc stdio])
-  AC_CACHE_VAL(have_broken_glibc_fopen_append,[
+  AC_CACHE_VAL(_cv_have_broken_glibc_fopen_append,[
   AC_TRY_RUN([
 #include <stdio.h>
 int main(int argc, char *argv[])
@@ -1714,8 +1714,8 @@ int main(int argc, char *argv[])
   return 0;
 }
 ],
-[have_broken_glibc_fopen_append=no],
-[have_broken_glibc_fopen_append=yes ],
+[_cv_have_broken_glibc_fopen_append=no],
+[_cv_have_broken_glibc_fopen_append=yes ],
 AC_TRY_COMPILE([
 #include <features.h>
 ],[
@@ -1723,11 +1723,11 @@ AC_TRY_COMPILE([
 choke me
 #endif
 ],
-[have_broken_glibc_fopen_append=yes],
-[have_broken_glibc_fopen_append=no ])
+[_cv_have_broken_glibc_fopen_append=yes],
+[_cv_have_broken_glibc_fopen_append=no ])
 )])
 
-  if test "$have_broken_glibc_fopen_append" = "yes"; then
+  if test "$_cv_have_broken_glibc_fopen_append" = "yes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
   else
@@ -2736,17 +2736,17 @@ dnl
 dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
-  AC_CACHE_CHECK([for PDO includes], pdo_inc_path, [
+  AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$abs_srcdir/ext
+      pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$abs_srcdir/ext
+      pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$prefix/include/php/ext
+      pdo_cv_inc_path=$prefix/include/php/ext
     fi
   ])
-  if test -n "$pdo_inc_path"; then
+  if test -n "$pdo_cv_inc_path"; then
 ifelse([$1],[],:,[$1])
   else
 ifelse([$2],[],[AC_MSG_ERROR([Cannot find php_pdo_driver.h.])],[$2])
