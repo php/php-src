@@ -428,7 +428,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 {
 	int bArray = 0, bStruct = 0, bMixed = 0;
-	unsigned long num_index;
+	unsigned long num_index, last_num = 0;
 	char* my_key;
 
 	zend_hash_internal_pointer_reset(ht);
@@ -438,8 +438,12 @@ static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 			if(bStruct) {
 				bMixed = 1;
 				break;
+			} else if (last_num > 0 && last_num != num_index-1) {
+				bStruct = 1;
+				break;
 			}
 			bArray = 1;
+			last_num = num_index;
 		}
 		else if(res == HASH_KEY_NON_EXISTANT) {
 			break;
@@ -500,6 +504,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					char* my_key;
 					HashTable *ht = NULL;
 					zval *val_arr;
+					XMLRPC_VECTOR_TYPE vtype;
 
 					ht = HASH_OF(val);
 					if (ht && ht->nApplyCount > 1) {
@@ -512,7 +517,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					zval_copy_ctor(val_arr);
 					INIT_PZVAL(val_arr);
 					convert_to_array(val_arr);
-					xReturn = XMLRPC_CreateVector(key, determine_vector_type(Z_ARRVAL_P(val_arr)));
+					
+					vtype = determine_vector_type(Z_ARRVAL_P(val_arr));
+					xReturn = XMLRPC_CreateVector(key, vtype);
 
 					zend_hash_internal_pointer_reset(Z_ARRVAL_P(val_arr));
 					while(zend_hash_get_current_data(Z_ARRVAL_P(val_arr), (void**)&pIter) == SUCCESS) {
@@ -528,7 +535,15 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 									ht->nApplyCount++;
 								}
 								if (res == HASH_KEY_IS_LONG) {
-									XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(0, *pIter, depth++ TSRMLS_CC));
+									char *num_str = NULL;
+									
+									if (vtype != xmlrpc_vector_array) {
+										spprintf(&num_str, 0, "%ld", num_index);
+									}
+									XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, *pIter, depth++ TSRMLS_CC));
+									if (num_str) {
+										efree(num_str);
+									}
 								} else {
 									XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key, *pIter, depth++ TSRMLS_CC));
 								}

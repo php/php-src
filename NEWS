@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 
+- Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
+  (Felipe)
 - Fixed bug #50282 (xmlrpc_encode_request() changes object into array in 
   calling function). (Felipe)
 - Fixed bug #50255 (isset() and empty() silently casts array to object).
