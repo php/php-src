@@ -78,8 +78,5 @@ if (MySQLPDOTest::isPDOMySQLnd())
 ?>
 --EXPECTF--
 [001] Expecting default value for 'PDO::MYSQL_ATTR_INIT_COMMAND' of ''/string, getAttribute() reports setting ''/boolean
-[023] Execting 'SET @a=1'/string got ''/boolean' for options 'PDO::MYSQL_ATTR_INIT_COMMAND'
-[024] SQLSTATE[42000] [1065] Query was empty
-[025] SQLSTATE[42S02] [1146] Table '%snonexistent' doesn't exist
 [026] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE'
 done!
