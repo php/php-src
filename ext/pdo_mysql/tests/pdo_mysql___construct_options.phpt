@@ -176,4 +176,7 @@ Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this func
 Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
 [018] PDO::MYSQL_ATTR_DIRECT_QUERY should be off
 [021] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_LOCAL_INFILE'
+[023] Execting 'SET @a=1'/string got ''/boolean' for options 'PDO::MYSQL_ATTR_INIT_COMMAND'
+[024] SQLSTATE[42000] [1065] Query was empty
+[025] SQLSTATE[42S02] [1146] Table 'test.nonexistent' doesn't exist
 done!
