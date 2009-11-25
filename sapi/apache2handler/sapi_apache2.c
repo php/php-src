@@ -99,7 +99,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 	ptr = val;
 
 	*val = '\0';
-	
+
 	do {
 		val++;
 	} while (*val == ' ');
@@ -115,7 +115,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_stru
 		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
 	}
 	*ptr = ':';
-	
+
 	return SAPI_HEADER_ADD;
 }
 
@@ -136,8 +136,8 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 			apr_table_set(ctx->r->subprocess_env, "force-response-1.0", "true");
 		}
 	}
-	
-	/*	call ap_set_content_type only once, else each time we call it, 
+
+	/*	call ap_set_content_type only once, else each time we call it,
 		configured output filters for that content type will be added */
 	if (!ctx->content_type) {
 		ctx->content_type = sapi_get_default_content_type(TSRMLS_C);
@@ -177,7 +177,7 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 		buf += len;
 		len = count_bytes - tlen;
 	}
-	
+
 	return tlen;
 }
 
@@ -223,7 +223,7 @@ php_apache_sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
 	php_struct *ctx = SG(server_context);
 	const char *env_var;
-	
+
 	env_var = apr_table_get(ctx->r->subprocess_env, name);
 
 	return (char *) env_var;
@@ -301,7 +301,8 @@ static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
 	}
 }
 
-static time_t php_apache_sapi_get_request_time(TSRMLS_D) {
+static time_t php_apache_sapi_get_request_time(TSRMLS_D)
+{
 	php_struct *ctx = SG(server_context);
 	return apr_time_sec(ctx->r->request_time);
 }
@@ -380,7 +381,7 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	int threaded_mpm;
 
 	ap_mpm_query(AP_MPMQ_IS_THREADED, &threaded_mpm);
-	if(threaded_mpm) {
+	if (threaded_mpm) {
 		ap_log_error(APLOG_MARK, APLOG_CRIT, 0, 0, "Apache is running a threaded MPM, but your PHP Module is not compiled to be threadsafe.  You need to recompile PHP.");
 		return DONE;
 	}
@@ -484,12 +485,12 @@ typedef struct {
 		uint str_len;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
 
-		for (zend_hash_internal_pointer_reset(&c->config); 
-				zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0,  NULL) == HASH_KEY_IS_STRING;
-				zend_hash_move_forward(&c->config)
+		for (zend_hash_internal_pointer_reset(&c->config);
+			zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_move_forward(&c->config)
 		) {
 			zend_restore_ini_entry(str, str_len, ZEND_INI_STAGE_SHUTDOWN);
-		}	
+		}
 	}
 	if (p) {
 		((php_struct *)SG(server_context))->r = p;
@@ -539,7 +540,7 @@ normal:
 	}
 
 	/* Give a 404 if PATH_INFO is used but is explicitly disabled in
-	 * the configuration; default behaviour is to accept. */ 
+	 * the configuration; default behaviour is to accept. */
 	if (r->used_path_info == AP_REQ_REJECT_PATH_INFO
 		&& r->path_info && r->path_info[0]) {
 		PHPAP_INI_OFF;
@@ -587,17 +588,17 @@ zend_first_try {
 		if (!parent_req) {
 			parent_req = ctx->r;
 		}
-		if (parent_req && parent_req->handler && 
-				strcmp(parent_req->handler, PHP_MAGIC_TYPE) && 
-				strcmp(parent_req->handler, PHP_SOURCE_MAGIC_TYPE) && 
+		if (parent_req && parent_req->handler &&
+				strcmp(parent_req->handler, PHP_MAGIC_TYPE) &&
+				strcmp(parent_req->handler, PHP_SOURCE_MAGIC_TYPE) &&
 				strcmp(parent_req->handler, PHP_SCRIPT)) {
 			if (php_apache_request_ctor(r, ctx TSRMLS_CC)!=SUCCESS) {
 				zend_bailout();
 			}
 		}
-		
-		/* 
-		 * check if comming due to ErrorDocument 
+
+		/*
+		 * check if comming due to ErrorDocument
 		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
 		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
 		 * PHP instance to handle the request rather then creating a new one.
