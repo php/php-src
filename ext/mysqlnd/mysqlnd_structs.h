@@ -225,7 +225,7 @@ typedef struct st_mysqlnd_read_buffer {
 	zend_bool	(*is_empty)(struct st_mysqlnd_read_buffer *);
 	void		(*read)(struct st_mysqlnd_read_buffer *, size_t count, zend_uchar * dest);
 	size_t		(*bytes_left)(struct st_mysqlnd_read_buffer *);
-	void		(*free)(struct st_mysqlnd_read_buffer ** TSRMLS_DC);
+	void		(*free_buffer)(struct st_mysqlnd_read_buffer ** TSRMLS_DC);
 } MYSQLND_READ_BUFFER;
 
 
