@@ -157,7 +157,7 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 	}
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	if (conn->net.uncompressed_data) {
-		conn->net.uncompressed_data->free(&conn->net.uncompressed_data TSRMLS_CC);
+		conn->net.uncompressed_data->free_buffer(&conn->net.uncompressed_data TSRMLS_CC);
 	}
 #endif
 
