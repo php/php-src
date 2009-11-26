@@ -270,7 +270,7 @@ mysqlnd_create_read_buffer(size_t count TSRMLS_DC)
 	ret->is_empty = php_mysqlnd_read_buffer_is_empty;
 	ret->read = php_mysqlnd_read_buffer_read;
 	ret->bytes_left = php_mysqlnd_read_buffer_bytes_left;
-	ret->free = php_mysqlnd_read_buffer_free;
+	ret->free_buffer = php_mysqlnd_read_buffer_free;
 	ret->data = mnd_emalloc(count);
 	ret->size = ret->len = count;
 	ret->offset = 0;
@@ -680,7 +680,7 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 			DBG_INF_FMT("left %u to read", to_read);
 			if (TRUE == net->uncompressed_data->is_empty(net->uncompressed_data)) {
 				/* Everything was consumed. This should never happen here, but for security */
-				net->uncompressed_data->free(&net->uncompressed_data TSRMLS_CC);
+				net->uncompressed_data->free_buffer(&net->uncompressed_data TSRMLS_CC);
 			}
 		}
 		if (to_read) {
