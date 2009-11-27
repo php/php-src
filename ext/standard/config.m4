@@ -226,15 +226,15 @@ dnl
 dnl Check if there is a support means of creating a new process
 dnl and defining which handles it receives
 dnl
-AC_CACHE_VAL(php_cv_can_support_proc_open,[
 AC_CHECK_FUNCS(fork CreateProcess, [
-  php_cv_can_support_proc_open=yes
+  php_can_support_proc_open=yes
   break
 ],[
-  php_cv_can_support_proc_open=no
-])])
+  php_can_support_proc_open=no
+])
+
 AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
-if test "$php_cv_can_support_proc_open" = "yes"; then
+if test "$php_can_support_proc_open" = "yes"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(PHP_CAN_SUPPORT_PROC_OPEN,1, [Define if your system has fork/vfork/CreateProcess])
 else
