@@ -746,7 +746,11 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
+#if __GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2
 	if (base && (base < 2 || base > 62)) {
+#else
+	if (base && (base < 2 || base > 36)) {
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld (should be between 2 and 36)", base);
 		RETURN_FALSE;
 	}
@@ -796,7 +800,11 @@ ZEND_FUNCTION(gmp_strval)
 		return;
 	}
 
+#if __GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2
 	if ((base < 2 && base > -2) || base > 62 || base < -36) {
+#else
+	if (base < 2 || base > 36) {
+#endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %ld", base);
 		RETURN_FALSE;
 	}
