@@ -9,9 +9,6 @@ PHP                                                                        NEWS
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
-- Added "max_file_uploads" INI directive, which can be set to limit the
-  number of file uploads per-request to 20 by default, to prevent possible
-  DOS via temporary file exhaustion. (Ilia)
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
 - Added Collator::getSortKey for intl extension. (Stas)
@@ -45,17 +42,17 @@ PHP                                                                        NEWS
 - Fixed bug #50195 (pg_copy_to() fails when table name contains schema. (Ilia)
 - Fixed bug #50185 (ldap_get_entries() return false instead of an empty array
   when there is no error). (Jani)
-- Fixed bug #50140 (With default compilation option, php symbols are
-  unresolved for nsapi). (Uwe Schindler)
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
-- Fixed bug #50145 (crash while running bug35634.phpt). (Felipe)
-- Fixed bug #50087 (NSAPI performance improvements). (Uwe Schindler)
 - Fixed bug #50152 (ReflectionClass::hasProperty behaves like isset() not
   property_exists). (Felipe)
 - Fixed bug #50146 (property_exists: Closure object cannot have properties).
   (Felipe)
+- Fixed bug #50145 (crash while running bug35634.phpt). (Felipe)
+- Fixed bug #50140 (With default compilation option, php symbols are unresolved
+  for nsapi). (Uwe Schindler)
+- Fixed bug #50087 (NSAPI performance improvements). (Uwe Schindler)
 - Fixed bug #50073 (parse_url() incorrect when ? in fragment). (Ilia)
 - Fixed bug #50023 (pdo_mysql doesn't use PHP_MYSQL_UNIX_SOCK_ADDR). (Ilia)
 - Fixed bug #50005 (Throwing through Reflection modified Exception object
@@ -68,10 +65,6 @@ PHP                                                                        NEWS
 - Fixed bug #49936 (crash with ftp stream in php_stream_context_get_option()).
   (Pierrick)
 - Fixed bug #49921 (Curl post upload functions changed). (Ilia)
-- Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
-  tar support). (Greg)
-- Fixed bug #49908 (throwing exceptions in __autoload crashes when interface
-  is not defined). (Felipe)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia,
   sjoerd at php dot net)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
@@ -86,12 +79,18 @@ PHP                                                                        NEWS
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
-- Fixed bug #49142 (crash when exception thrown from __tostring()).
-  (David Soria Parra)
-- Fixed bug #49098 (mysqli segfault on error). (Rasmus)
 
 
 19 Nov 2009, PHP 5.3.1
+- Upgraded bundled sqlite to version 3.6.19. (Scott)
+- Updated timezone database to version 2009.17 (2009q). (Derick)
+
+- Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
+  insensitive. (garretts)
+
+- Restored shebang line check to CGI sapi (not checked by scanner anymore).
+  (Jani)
+
 - Added "max_file_uploads" INI directive, which can be set to limit the
   number of file uploads per-request to 20 by default, to prevent possible
   DOS via temporary file exhaustion. (Ilia)
@@ -101,8 +100,16 @@ PHP                                                                        NEWS
 - Added support for ACL on Windows for thread safe SAPI (Apache2 for example)
   and fix its support on NTS. (Pierre)
 
-- Upgraded bundled sqlite to version 3.6.19. (Scott)
-- Updated timezone database to version 2009.17 (2009q). (Derick)
+- Improved symbolic, mounted volume and junctions support for realpath on 
+  Windows. (Pierre)
+- Improved readlink on Windows, suppress \??\ and use the drive syntax only.
+  (Pierre)
+- Improved dns_get_record() AAAA support on windows. Always available when
+  IPv6 is support is installed, format is now the same than on unix. (Pierre)
+- Improved the DNS functions on OSX to use newer APIs, also use Bind 9 API
+  where available on other platforms. (Scott)
+- Improved shared extension loading on OSX to use the standard Unix dlopen()
+  API. (Scott)
 
 - Fixed crash in com_print_typeinfo when an invalid typelib is given. (Pierre)
 - Fixed a safe_mode bypass in tempnam() identified by Grzegorz Stachowiak.  
@@ -131,26 +138,14 @@ PHP                                                                        NEWS
 - Fixed memory leak in stream_is_local(). (Felipe, Tony)
 - Fixed BC break in mime_content_type(), removes the content encoding. (Scott) 
 
-- Changed ini file directives [PATH=](on Win32) and [HOST=](on all) to be case 
-  insensitive. (garretts)
-- Restored shebang line check to CGI sapi (not checked by scanner anymore).
-  (Jani)
-
-- Improved symbolic, mounted volume and junctions support for realpath on 
-  Windows. (Pierre)
-- Improved readlink on Windows, suppress \??\ and use the drive syntax only.
-  (Pierre)
-- Improved dns_get_record() AAAA support on windows. Always available when
-  IPv6 is support is installed, format is now the same than on unix. (Pierre)
-- Improved the DNS functions on OSX to use newer APIs, also use Bind 9 API
-  where available on other platforms. (Scott)
-- Improved shared extension loading on OSX to use the standard Unix dlopen()
-  API. (Scott)
+- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
+  (Chris Jones)
 
 - Fixed bug #50063 (safe_mode_include_dir fails). (Johannes, christian at
   elmerot dot se)
 - Fixed bug #50052 (Different Hashes on Windows and Linux on wrong Salt size).
   (Pierre)
+- Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
 - Fixed bug #49910 (no support for ././@LongLink for long filenames in phar
   tar support). (Greg)
 - Fixed bug #49908 (throwing exception in __autoload crashes when interface
@@ -177,9 +172,9 @@ PHP                                                                        NEWS
 - Fixed bug #49447 (php engine need to correctly check for socket API 
   return status on windows). (Sriram Natarajan)
 - Fixed bug #49391 (ldap.c utilizing deprecated ldap_modify_s). (Ilia)
+- Fixed bug #49372 (segfault in php_curl_option_curl). (Pierre)
 - Fixed bug #49361 (wordwrap() wraps incorrectly on end of line boundaries).
   (Ilia, code-it at mail dot ru)
-- Fixed bug #49372 (segfault in php_curl_option_curl). (Pierre)
 - Fixed bug #49306 (inside pdo_mysql default socket settings are ignored).
   (Ilia)
 - Fixed bug #49289 (bcmath module doesn't compile with phpize configure).
@@ -196,7 +191,6 @@ PHP                                                                        NEWS
   authentication details). (Dmitry)
 - Fixed bug #49142 (crash when exception thrown from __tostring()).
   (David Soria Parra)
-- Fixed bug #49986 (Missing ICU DLLs on windows package). (Pierre)
 - Fixed bug #49132 (posix_times returns false without error).
   (phpbugs at gunnu dot us)
 - Fixed bug #49125 (Error in dba_exists C code). (jdornan at stanford dot edu)
@@ -225,14 +219,14 @@ PHP                                                                        NEWS
 - Fixed bug #49027 (mysqli_options() doesn't work when using mysqlnd). (Andrey)
 - Fixed bug #49026 (proc_open() can bypass safe_mode_protected_env_vars
   restrictions). (Ilia)
-- Fixed bug #49012 (phar tar signature algorithm reports as Unknown (0) in
-  getSignature() call). (Greg)
 - Fixed bug #49020 (phar misinterprets ustar long filename standard).
   (Greg)
 - Fixed bug #49018 (phar tar stores long filenames wit prefix/name reversed).
   (Greg)
 - Fixed bug #49014 (dechunked filter broken when serving more than 8192 bytes
   in a chunk). (andreas dot streichardt at globalpark dot com, Ilia)
+- Fixed bug #49012 (phar tar signature algorithm reports as Unknown (0) in
+  getSignature() call). (Greg)
 - Fixed bug #49000 (PHP CLI in Interactive mode (php -a) crashes 
   when including files from function). (Stas)
 - Fixed bug #48994 (zlib.output_compression does not output HTTP headers when
@@ -250,12 +244,12 @@ PHP                                                                        NEWS
 - Fixed bug #48899 (is_callable returns true even if method does not exist in
   parent class). (Felipe)
 - Fixed bug #48893 (Problems compiling with Curl). (Felipe)
+- Fixed bug #48880 (Random Appearing open_basedir problem). (Rasmus, Gwynne)
 - Fixed bug #48872 (string.c: errors: duplicate case values). (Kalle)
 - Fixed bug #48854 (array_merge_recursive modifies arrays after first one).
   (Felipe)
 - Fixed bug #48805 (IPv6 socket transport is not working). (Ilia)
 - Fixed bug #48802 (printf() returns incorrect outputted length). (Jani)
-- Fixed bug #48880 (Random Appearing open_basedir problem). (Rasmus, Gwynne)
 - Fixed bug #48791 (open office files always reported as corrupted). (Greg)
 - Fixed bug #48788 (RecursiveDirectoryIterator doesn't descend into symlinked
   directories). (Ilia)
@@ -335,8 +329,7 @@ PHP                                                                        NEWS
 - Fixed bug #28038 (Sent incorrect RCPT TO commands to SMTP server) (Garrett)
 - Fixed bug #27051 (Impersonation with FastCGI does not exec process as 
   impersonated user). (Pierre)
-- Fixed PECL bug #16842 (oci_error return false when NO_DATA_FOUND is raised).
-  (Chris Jones)
+
 
 30 Jun 2009, PHP 5.3.0
 - Upgraded bundled PCRE to version 7.9. (Nuno)
