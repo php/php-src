@@ -2032,6 +2032,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	module_initialized = 1;
 
 	/* Check for deprecated directives */
+	/* NOTE: If you add anything here, remember to add it also in Makefile.global! */
 	{
 		static const char *directives[] = {
 			"define_syslog_variables", 
