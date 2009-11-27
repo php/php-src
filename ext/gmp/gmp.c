@@ -753,9 +753,9 @@ ZEND_FUNCTION(gmp_init)
 	}
 
 	if (argc == 2) {
-		convert_to_long_ex(base_arg);
-		base = Z_LVAL_PP(base_arg);
-		if (base < 2 || base > 62) {
+			convert_to_long_ex(base_arg);
+			base = Z_LVAL_PP(base_arg);
+		if (base < 2 || base > 36) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %d (should be between 2 and 36)", base);
 			RETURN_FALSE;
 		}
@@ -817,12 +817,12 @@ ZEND_FUNCTION(gmp_strval)
 			break;
 	}
 
-	if ((base < 2 && base > -2) || base > 62 || base < -36) {
+	if (base < 2 || base > 36) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %d", base);
 		RETURN_FALSE;
 	}
 
-	num_len = mpz_sizeinbase(*gmpnum, abs(base));
+	num_len = mpz_sizeinbase(*gmpnum, base);
 	out_string = emalloc(num_len+2);
 	if (mpz_sgn(*gmpnum) < 0) {
 		num_len++;
