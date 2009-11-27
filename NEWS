@@ -8,7 +8,6 @@ PHP                                                                        NEWS
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
-- Fixed the m4 scripts to support autoconf-2.64+. (Rasmus)
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 
 - Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
