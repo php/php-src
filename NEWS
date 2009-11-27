@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Dec 2009, PHP 5.2.12RC3
+27 Nov 2009, PHP 5.2.12RC3
+- Fixed break in the build chain introduced in 5.2.12RC2 (Jani)
 
 26 Nov 2009, PHP 5.2.12RC2
 - Updated timezone database to version 2009.19 (2009s). (Derick)
