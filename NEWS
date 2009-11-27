@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Nov 2009, PHP 5.2.12RC2
+26 Nov 2009, PHP 5.2.12RC2
 - Updated timezone database to version 2009.19 (2009s). (Derick)
 
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
