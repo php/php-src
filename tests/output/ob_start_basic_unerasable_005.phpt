@@ -1,5 +1,5 @@
 --TEST--
-ob_start(): Ensure unerasable buffer cannot be flushed by ob_flush().
+ob_start(): Ensure unerasable buffer cannot be flushed by ob_flush()
 --FILE--
 <?php
 function callback($string) {
