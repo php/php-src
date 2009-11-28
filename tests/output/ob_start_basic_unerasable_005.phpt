@@ -1,5 +1,5 @@
 --TEST--
-ob_start(): Ensure unerasable buffer cannot be flushed by ob_flush().
+ob_start(): Ensure unerasable buffer cannot be flushed by ob_flush()
 --XFAIL--
 On PHP5, ob_flush() DOES clear the buffer. See bug: 46897
 --FILE--
