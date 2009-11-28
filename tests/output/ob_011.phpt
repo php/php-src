@@ -1,8 +1,7 @@
 --TEST--
 output buffering - fatalism
 --XFAIL--
-This test will fail until the fix in version 1.178 of ext/main/output.c
-is backported from php 6
+This test will fail until the fix in revision r214155 is backported from php 6
 --FILE--
 <?php
 function obh($s)
