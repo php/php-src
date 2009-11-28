@@ -29,6 +29,10 @@ AC_DEFUN([PHP_CONFIGURE_PART],[
   AC_MSG_RESULT([${T_MD}$1${T_ME}])
 ])
 
+AC_DEFUN([PHP_DIVERT],[
+   ifdef('AC_PRESERVE_HELP_ORDER', [], [ divert($1) ] )
+])
+
 dnl -------------------------------------------------------------------------
 dnl Build system helper macros
 dnl -------------------------------------------------------------------------

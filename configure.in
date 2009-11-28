@@ -1,6 +1,9 @@
 ## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
+dnl AC 2.13 Compatibility
+PHP_DIVERT(1)
+
 dnl include Zend specific macro definitions first
 dnl -------------------------------------------------------------------------
 sinclude(Zend/acinclude.m4)
@@ -8,9 +11,11 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ(2.60)
+AC_PREREQ(2.13)
 AC_INIT(README.SVN-RULES)
-AC_PRESERVE_HELP_ORDER
+dnl For autoconf 2.60+ we use AC_PRESERVE_HELP_ORDER 
+dnl instead of 2.13-style diversions
+ifdef('AC_PRESERVE_HELP_ORDER', [AC_PRESERVE_HELP_ORDER], [])
 
 PHP_CONFIG_NICE(config.nice)
 
@@ -268,6 +273,9 @@ sinclude(Zend/Zend.m4)
 sinclude(TSRM/threads.m4)
 sinclude(TSRM/tsrm.m4)
 
+dnl AC 2.13 Compatibility
+PHP_DIVERT(2)
+
 dnl -------------------------------------------------------------------------
 
 PTHREADS_CHECK
@@ -297,6 +305,9 @@ if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
 fi
+
+dnl AC 2.13 Compatibility
+PHP_DIVERT(3)
 
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
@@ -638,7 +649,8 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-dnl ## In diversion 4 we check user-configurable general settings.
+dnl AC 2.13 Compatibility
+PHP_DIVERT(4)
 
 dnl General settings.
 dnl -------------------------------------------------------------------------
@@ -877,8 +889,8 @@ else
   AC_MSG_RESULT([using system default])
 fi
 
-dnl ## In diversion 5 we check which extensions should be compiled.
-dnl ## All of these are normally in the extension directories.
+dnl AC 2.13 Compatibility
+PHP_DIVERT(5)
 
 dnl Extension configuration.
 dnl -------------------------------------------------------------------------
