@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Fixed bug #50282 (xmlrpc_encode_request() changes object into array in 
   calling function). (Felipe)
 - Fixed bug #50267 (get_browser(null) does not use HTTP_USER_AGENT). (Jani)
+- Fixed bug #50266 (conflicting types for llabs). (Jani)
 - Fixed bug #50255 (isset() and empty() silently casts array to object).
   (Felipe)
 - Fixed bug #50240 (pdo_mysql.default_socket in php.ini shouldn't used
