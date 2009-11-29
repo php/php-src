@@ -53,23 +53,22 @@ if test -z "$PHP_ZLIB_DIR"; then
   [  --with-zlib-dir[=DIR]     MySQL: Set the path to libz install prefix], no, no)
 fi
 
-AC_MSG_CHECKING([for MySQL UNIX socket location])
-if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
-  MYSQL_SOCK=$PHP_MYSQL_SOCK
-  AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
-  AC_MSG_RESULT([$MYSQL_SOCK])
-elif test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL_SOCK" = "yes"; then
-  PHP_MYSQL_SOCKET_SEARCH
-else
-  AC_MSG_RESULT([no])
-fi
-
- 
 if test "$PHP_MYSQL" = "mysqlnd"; then
   dnl enables build of mysqnd library
   PHP_MYSQLND_ENABLED=yes
 
 elif test "$PHP_MYSQL" != "no"; then
+
+  AC_MSG_CHECKING([for MySQL UNIX socket location])
+  if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
+    MYSQL_SOCK=$PHP_MYSQL_SOCK
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_MSG_RESULT([$MYSQL_SOCK])
+  elif test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL_SOCK" = "yes"; then
+    PHP_MYSQL_SOCKET_SEARCH
+  else
+    AC_MSG_RESULT([no])
+  fi
 
   MYSQL_DIR=
   MYSQL_INC_DIR=
