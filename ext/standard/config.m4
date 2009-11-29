@@ -1,7 +1,6 @@
 dnl $Id$ -*- autoconf -*-
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(3)
+divert(3)dnl
 
 dnl
 dnl Check if flush should be called explicitly after buffered io
@@ -221,8 +220,7 @@ dnl
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan)
 AC_FUNC_FNMATCH	
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(5)
+divert(5)dnl
 
 dnl
 dnl Check if there is a support means of creating a new process
@@ -234,7 +232,6 @@ AC_CHECK_FUNCS(fork CreateProcess, [
 ],[
   php_can_support_proc_open=no
 ])
-
 AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
 if test "$php_can_support_proc_open" = "yes"; then
   AC_MSG_RESULT(yes)
