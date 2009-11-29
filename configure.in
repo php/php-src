@@ -15,7 +15,7 @@ AC_PREREQ(2.13)
 AC_INIT(README.SVN-RULES)
 dnl For autoconf 2.60+ we use AC_PRESERVE_HELP_ORDER 
 dnl instead of 2.13-style diversions
-ifdef('AC_PRESERVE_HELP_ORDER', [AC_PRESERVE_HELP_ORDER], [])
+ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
 PHP_CONFIG_NICE(config.nice)
 

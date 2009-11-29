@@ -30,7 +30,7 @@ AC_DEFUN([PHP_CONFIGURE_PART],[
 ])
 
 AC_DEFUN([PHP_DIVERT],[
-   ifdef('AC_PRESERVE_HELP_ORDER', [], [ divert($1) ] )
+   ifdef([AC_PRESERVE_HELP_ORDER], [], [ divert($1) ] )
 ])
 
 dnl -------------------------------------------------------------------------
