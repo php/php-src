@@ -1,8 +1,27 @@
 ## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(1)
+divert(1)
+
+dnl ## Diversion 1 is the autoconf + automake setup phase. We also
+dnl ## set the PHP version, deal with platform-specific compile
+dnl ## options and check for the basic compile tools.
+
+dnl ## Diversion 2 is the initial checking of OS features, programs,
+dnl ## libraries and so on.
+
+dnl ## In diversion 3 we check for compile-time options to the PHP
+dnl ## core and how to deal with different system dependencies. 
+dnl ## This includes whether debugging or short tags are enabled
+dnl ## and the default behaviour of php.ini options.
+dnl ## This is also where an SAPI interface is selected (choosing between
+dnl ## Apache module, CGI etc.)
+
+dnl ## In diversion 4 we check user-configurable general settings.
+
+dnl ## In diversion 5 we check which extensions should be compiled.
+dnl ## All of these are normally in the extension directories.
+dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 
 dnl include Zend specific macro definitions first
 dnl -------------------------------------------------------------------------
@@ -13,9 +32,6 @@ dnl -------------------------------------------------------------------------
 
 AC_PREREQ(2.13)
 AC_INIT(README.SVN-RULES)
-dnl For autoconf 2.60+ we use AC_PRESERVE_HELP_ORDER 
-dnl instead of 2.13-style diversions
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
 PHP_CONFIG_NICE(config.nice)
 
@@ -105,6 +121,21 @@ dnl or the contents of libs.
 
 $php_shtool mkdir -p libs
 rm -f libs/*
+
+dnl Darwin 9 hack
+dnl Because the default debugging format used by Apple's GCC on Mac OS 10.5
+dnl causes errors in all current and past versions of Autoconf, we do a little
+dnl messing with the CFLAGS here to trick it.
+php_did_darwin9_cheat=0
+case $host_alias in
+*darwin9*)
+  hasg=`echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)'`
+  if test x"$hasg" = "x"; then
+    php_did_darwin9_cheat=1
+    CFLAGS="$CFLAGS -gstabs"
+  fi
+  ;;
+esac
 
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
@@ -273,9 +304,16 @@ sinclude(Zend/Zend.m4)
 sinclude(TSRM/threads.m4)
 sinclude(TSRM/tsrm.m4)
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(2)
 
+divert(2)
+
+dnl ## Diversion 2 is where we set PHP-specific options and come up
+dnl ## with reasonable default values for them. We check for pthreads here
+dnl ## because the information is needed by the SAPI configuration.
+dnl ## This is also where an SAPI interface is selected (choosing between
+dnl ## Apache module, CGI etc.)
+
+dnl .
 dnl -------------------------------------------------------------------------
 
 PTHREADS_CHECK
@@ -306,8 +344,12 @@ if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_FLAGS
 fi
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(3)
+divert(3)
+
+dnl ## In diversion 3 we check for compile-time options to the PHP
+dnl ## core and how to deal with different system dependencies. 
+dnl ## This includes whether debugging or short tags are enabled
+dnl ## and the default behaviour of php.ini options.
 
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
@@ -649,8 +691,9 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(4)
+divert(4)
+
+dnl ## In diversion 4 we check user-configurable general settings.
 
 dnl General settings.
 dnl -------------------------------------------------------------------------
@@ -889,8 +932,10 @@ else
   AC_MSG_RESULT([using system default])
 fi
 
-dnl AC 2.13 Compatibility
-PHP_DIVERT(5)
+divert(5)
+
+dnl ## In diversion 5 we check which extensions should be compiled.
+dnl ## All of these are normally in the extension directories.
 
 dnl Extension configuration.
 dnl -------------------------------------------------------------------------
@@ -958,7 +1003,7 @@ if test "$ac_cv_lib_crypt_crypt" = "yes"; then
   EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
 fi
 
-#unset LIBS LDFLAGS
+unset LIBS LDFLAGS
 
 dnl PEAR
 dnl -------------------------------------------------------------------------
@@ -1041,7 +1086,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
 fi
 
 ZEND_EXTRA_LIBS="$LIBS"
-#unset LIBS LDFLAGS
+unset LIBS LDFLAGS
 
 PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
@@ -1053,7 +1098,7 @@ fi
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-#unset LIBS LDFLAGS
+unset LIBS LDFLAGS
 
 test "$prefix" = "NONE" && prefix=/usr/local
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
@@ -1316,6 +1361,15 @@ test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_C
 SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
+
+dnl Finish the Darwin hack
+if test "$php_did_darwin9_cheat" -eq 1; then
+  if test "$PHP_DEBUG" = "1"; then
+    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs/-g/g'`
+  else
+    CFLAGS=`echo "-O2 $CFLAGS" | $SED -e 's/-gstabs//g'`
+  fi
+fi
 
 PHP_CONFIGURE_PART(Generating files)
 
