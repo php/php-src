@@ -1,7 +1,8 @@
 ## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
-divert(1001)
+dnl No longer needed after dropping support for autoconf 2.13
+dnl divert(1)
 
 dnl ## Diversion 1 is the autoconf + automake setup phase. We also
 dnl ## set the PHP version, deal with platform-specific compile
@@ -30,8 +31,9 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ(2.13)
+AC_PREREQ(2.60)
 AC_INIT(README.SVN-RULES)
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
@@ -305,7 +307,8 @@ sinclude(TSRM/threads.m4)
 sinclude(TSRM/tsrm.m4)
 
 
-divert(1002)
+dnl No longer needed after dropping support for autoconf 2.13
+dnl divert(2)
 
 dnl ## Diversion 2 is where we set PHP-specific options and come up
 dnl ## with reasonable default values for them. We check for pthreads here
@@ -344,7 +347,8 @@ if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_FLAGS
 fi
 
-divert(1003)
+dnl No longer needed after dropping support for autoconf 2.13
+dnl divert(3)
 
 dnl ## In diversion 3 we check for compile-time options to the PHP
 dnl ## core and how to deal with different system dependencies. 
@@ -691,7 +695,8 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-divert(1004)
+dnl No longer needed after dropping support for autoconf 2.13
+dnl divert(4)
 
 dnl ## In diversion 4 we check user-configurable general settings.
 
@@ -921,7 +926,8 @@ fi
 dnl ## check for ICU library location and version
 PHP_SETUP_ICU
 
-divert(1005)
+dnl No longer needed after dropping support for autoconf 2.13
+dnl divert(5)
 
 dnl ## In diversion 5 we check which extensions should be compiled.
 dnl ## All of these are normally in the extension directories.
