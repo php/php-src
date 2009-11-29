@@ -832,10 +832,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), (void **) &name, &pos);
 
 			if (Z_TYPE_PP(name) != IS_UNICODE) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
 				/* we should still add element even if it's not OK,
 				 * since we already wrote the length of the array before */
 				smart_str_appendl(buf,"N;", 2);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize");
 				continue;
 			}
 			if (zend_u_hash_find(Z_OBJPROP_P(struc), Z_TYPE_PP(name), Z_UNIVAL_PP(name), Z_UNILEN_PP(name) + 1, (void *) &d) == SUCCESS) {
@@ -877,13 +877,13 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 							break;
 						}
 						pefree(prot_name.v, ce->type & ZEND_INTERNAL_CLASS);
-						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%R\" returned as member variable from __sleep() but does not exist", Z_TYPE_PP(name), Z_UNIVAL_PP(name));
 						if (Z_TYPE_PP(name) == IS_UNICODE) {
 							php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
 						} else {
 							php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 						}
 						php_var_serialize_intern(buf, nvalp, var_hash TSRMLS_CC);
+						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%R\" returned as member variable from __sleep() but does not exist", Z_TYPE_PP(name), Z_UNIVAL_PP(name));
 					} while (0);
 				} else {
 					if (Z_TYPE_PP(name) == IS_UNICODE) {
