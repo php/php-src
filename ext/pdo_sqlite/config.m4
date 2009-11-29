@@ -17,15 +17,15 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   ],[
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+      pdo_inc_path=$prefix/include/php/ext
     else
       AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
+    AC_MSG_RESULT($pdo_inc_path)
   ])
 
   php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
@@ -68,7 +68,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     ])
 
     PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_cv_inc_path)
+    PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_inc_path)
   else
     # use bundled libs
     pdo_sqlite_sources="sqlite/src/attach.c sqlite/src/auth.c sqlite/src/btree.c \
@@ -91,7 +91,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I$ext_srcdir/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR $threadsafe_flag -I$pdo_cv_inc_path)
+        $ext_shared,,-I$ext_srcdir/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR $threadsafe_flag -I$pdo_inc_path)
 
       PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
