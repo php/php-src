@@ -1041,6 +1041,11 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
+	/* SNI support included in OpenSSL >= 0.9.8j */
+	REGISTER_LONG_CONSTANT("OPENSSL_TLSEXT_SERVER_NAME", 1, CONST_CS|CONST_PERSISTENT);
+#endif
+
 	/* Determine default SSL configuration file */
 	config_filename = getenv("OPENSSL_CONF");
 	if (config_filename == NULL) {
