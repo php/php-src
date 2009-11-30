@@ -1,10 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2009, PHP 5.2.12RC4
+- Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
+
 - Fixed bug #50266 (conflicting types for llabs). (Jani)
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
   non-existant file). (Dmitry)
-
 
 27 Nov 2009, PHP 5.2.12RC3
 - Fixed break in the build chain introduced in 5.2.12RC2 (Jani)
