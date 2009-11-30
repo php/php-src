@@ -386,16 +386,16 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 #ifndef PHP_WIN32
 	struct stat st;
 #endif
-	char *path_info, *filename;
+	char *path_info;
+	char *filename = NULL;
+	char *resolved_path = NULL;
 	int length;
 
-	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
 		char *s = strchr(path_info + 2, '/');
 
-		filename = NULL;	/* discard the original filename, it must not be used */
 		if (s) {			/* if there is no path name after the file, do not bother */
 			char user[32];			/* to try open the directory */
 			struct passwd *pw;
@@ -426,39 +426,41 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 #endif
 			if (pw && pw->pw_dir) {
 				spprintf(&filename, 0, "%s%c%s%c%s", pw->pw_dir, PHP_DIR_SEPARATOR, PG(user_dir), PHP_DIR_SEPARATOR, s + 1); /* Safe */
-				STR_FREE(SG(request_info).path_translated);
-				SG(request_info).path_translated = filename;
-			}
+			} else {
+				filename = SG(request_info).path_translated;
+			} 
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
 			efree(pwbuf);
 #endif
 		}
 	} else
 #endif
-	if (PG(doc_root) && path_info) {
-		length = strlen(PG(doc_root));
-		if (IS_ABSOLUTE_PATH(PG(doc_root), length)) {
-			filename = emalloc(length + strlen(path_info) + 2);
-			if (filename) {
-				memcpy(filename, PG(doc_root), length);
-				if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
-					filename[length++] = PHP_DIR_SEPARATOR;
-				}
-				if (IS_SLASH(path_info[0])) {
-					length--;
-				}
-				strcpy(filename + length, path_info);
-				STR_FREE(SG(request_info).path_translated);
-				SG(request_info).path_translated = filename;
+	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root)) &&
+		IS_ABSOLUTE_PATH(PG(doc_root), length))) {
+		filename = emalloc(length + strlen(path_info) + 2);
+		if (filename) {
+			memcpy(filename, PG(doc_root), length);
+			if (!IS_SLASH(filename[length - 1])) {	/* length is never 0 */
+				filename[length++] = PHP_DIR_SEPARATOR;
 			}
+			if (IS_SLASH(path_info[0])) {
+				length--;
+			}
+			strcpy(filename + length, path_info);
 		}
-	} /* if doc_root && path_info */
-
-	if (filename) {
-		filename = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
+	} else {
+		filename = SG(request_info).path_translated;
 	}
 
-	if (!filename) {
+
+	if (filename) {
+		resolved_path = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
+	}
+
+	if (!resolved_path) {
+		if (SG(request_info).path_translated != filename) {
+			STR_FREE(filename);
+		}
 		/* we have to free SG(request_info).path_translated here because
 		 * php_destroy_request_info assumes that it will get
 		 * freed when the include_names hash is emptied, but
@@ -467,7 +469,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		SG(request_info).path_translated = NULL;
 		return FAILURE;
 	}
-	fp = VCWD_FOPEN(filename, "rb");
+	fp = VCWD_FOPEN(resolved_path, "rb");
 
 #ifndef PHP_WIN32
 	/* refuse to open anything that is not a regular file */
@@ -478,15 +480,20 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 #endif
 
 	if (!fp) {
+		if (SG(request_info).path_translated != filename) {
+			STR_FREE(filename);
+		}
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		SG(request_info).path_translated = NULL;
 		return FAILURE;
 	}
 
-	file_handle->opened_path = expand_filepath(filename, NULL TSRMLS_CC);
+	file_handle->opened_path = resolved_path;
 
-	STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-	SG(request_info).path_translated = filename;
+	if (SG(request_info).path_translated != filename) {
+		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+		SG(request_info).path_translated = filename;
+	}
 
 	file_handle->filename = SG(request_info).path_translated;
 	file_handle->free_filename = 0;
