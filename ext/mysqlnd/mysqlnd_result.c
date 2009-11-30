@@ -2073,7 +2073,7 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result
 	if (!result || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)result + sizeof(MYSQLND_RES) + plugin_id * sizeof(void *));
+	DBG_RETURN((void *)(result + sizeof(MYSQLND_RES) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
