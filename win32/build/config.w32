@@ -120,7 +120,7 @@ DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 
 // General CFLAGS for building objects
 DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
-/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
+/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
 
 if (VCVERS < 1400) {
 	// Enable automatic precompiled headers
