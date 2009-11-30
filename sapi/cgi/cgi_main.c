@@ -1634,8 +1634,9 @@ int main(int argc, char *argv[])
 			 * in case some server does something different than above */
 			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
 		) {
-			SG(sapi_headers).http_response_code = 400;
-			PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
+			zend_try {
+				SG(sapi_headers).http_response_code = 400;
+				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
@@ -1644,7 +1645,8 @@ manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
-
+			} zend_catch {
+			} zend_end_try();
 #if defined(ZTS) && !defined(PHP_DEBUG)
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
@@ -2040,13 +2042,16 @@ consult the installation file that came with this distribution, or visit \n\
 			*/
 			if (cgi || fastcgi || SG(request_info).path_translated) {
 				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
-					if (errno == EACCES) {
-						SG(sapi_headers).http_response_code = 403;
-						PUTS("Access denied.\n");
-					} else {
-						SG(sapi_headers).http_response_code = 404;
-						PUTS("No input file specified.\n");
-					}
+					zend_try {
+						if (errno == EACCES) {
+							SG(sapi_headers).http_response_code = 403;
+							PUTS("Access denied.\n");
+						} else {
+							SG(sapi_headers).http_response_code = 404;
+							PUTS("No input file specified.\n");
+						}
+					} zend_catch {
+					} zend_end_try();
 					/* we want to serve more requests if this is fastcgi
 					 * so cleanup and continue, request shutdown is
 					 * handled later */
