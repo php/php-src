@@ -192,6 +192,7 @@ case $host_cpu in
     if test "$SUNCC" = "yes"; then
       CFLAGS="$CFLAGS -xmemalign=8s"
     fi
+    ;;
 esac
 
 case $host_alias in
@@ -745,15 +746,6 @@ if test "$PHP_GCOV" = "yes"; then
   dnl Add the special gcc flags
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
   CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
-  if test "$SUNCC" = "yes"; then
-    if test -n "$auto_cflags"; then
-      CFLAGS="-g"
-      CXXFLAGS="-g"
-    else
-      CFLAGS="$CFLAGS -g"
-      CXXFLAGS="$CFLAGS -g"
-    fi
-  fi
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
@@ -768,8 +760,17 @@ if test "$PHP_DEBUG" = "yes"; then
   changequote([,])
   dnl add -O0 only if GCC or ICC is used
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
-    CFLAGS="$CFLAGS -O0"
-    CXXFLAGS="$CXXFLAGS -O0"
+    CFLAGS="$CFLAGS -g -O0"
+    CXXFLAGS="$CXXFLAGS -g -O0"
+  fi
+  if test "$SUNCC" = "yes"; then
+    if test -n "$auto_cflags"; then
+      CFLAGS="-g"
+      CXXFLAGS="-g"
+    else
+      CFLAGS="$CFLAGS -g"
+      CXXFLAGS="$CFLAGS -g"
+    fi
   fi
 else
   PHP_DEBUG=0
