@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2009, PHP 5.2.12RC4
 - Fixed bug #50266 (conflicting types for llabs). (Jani)
+- Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
+  non-existant file). (Dmitry)
 
 
 27 Nov 2009, PHP 5.2.12RC3
