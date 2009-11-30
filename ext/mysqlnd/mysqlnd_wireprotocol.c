@@ -1307,8 +1307,8 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 static
 void php_mysqlnd_rset_header_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 {
-	DBG_ENTER("php_mysqlnd_rset_header_free_mem");
 	php_mysql_packet_rset_header *p= (php_mysql_packet_rset_header *) _packet;
+	DBG_ENTER("php_mysqlnd_rset_header_free_mem");
 	if (p->info_or_local_file) {
 		mnd_efree(p->info_or_local_file);
 		p->info_or_local_file = NULL;
