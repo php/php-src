@@ -12,12 +12,10 @@ PHP                                                                        NEWS
 - Added ReflectionMethod::setAccessible() for invoking non-public methods
   through the Reflection API. (Sebastian)
 - Added Collator::getSortKey for intl extension. (Stas)
-
-- Implemented FR #49571 (CURLOPT_POSTREDIR not implemented). (Sriram Natarajan)
-- Implemented FR #49253 (added support for libcurl's CERTINFO option).
+- Added support for CURLOPT_POSTREDIR. FR #49571. (Sriram Natarajan)
+- Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
 
-- Fixed the m4 scripts to support autoconf-2.64+. (Rasmus)
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 - Fixed unnecessary invocation of setitimer when timeouts have been disabled.
   (Arvind Srinivasan)
@@ -36,6 +34,8 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #50240 (pdo_mysql.default_socket in php.ini shouldn't used
   if it is empty). (foutrelis at gmail dot com, Ilia)
+- Fixed bug #50231 (Socket path passed using --with-mysql-sock is ignored when
+  mysqlnd is enabled). (Jani)
 - Fixed bug #50219 (soap call Segmentation fault on a redirected url).
   (Pierrick)
 - Fixed bug #50212 (crash by ldap_get_option() with LDAP_OPT_NETWORK_TIMEOUT).

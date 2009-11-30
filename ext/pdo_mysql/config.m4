@@ -28,46 +28,42 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     done
   ])
 
+  if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
+    PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
+  elif test "$PHP_PDO_MYSQL" != "yes"; then
+    if test -d "$PHP_PDO_MYSQL" ; then
+      if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
+        PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
+      else
+        PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+      fi
+    fi
+  else
+    for i in /usr/local /usr ; do
+      if test -x "$i/bin/mysql_config" ; then
+        PDO_MYSQL_CONFIG="$i/bin/mysql_config"
+        break;
+      fi
+      if test -r $i/include/mysql/mysql.h || test -r $i/include/mysql.h ; then
+        PDO_MYSQL_DIR="$i"
+        break;
+      fi
+    done
+  fi
+
   if test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
   else
     AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+
     AC_MSG_CHECKING([for mysql_config])
-
-    if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
-      PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
-    elif test "$PHP_PDO_MYSQL" != "yes"; then
-      if test -d "$PHP_PDO_MYSQL" ; then
-        if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
-          PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
-        else
-          PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
-        fi
-      else
-        AC_MSG_RESULT([$PHP_PDO_MYSQL is not a directory])
-        AC_MSG_ERROR([can not find mysql under the "$PHP_PDO_MYSQL" that you specified])
-      fi
-    else
-      for i in /usr/local /usr ; do
-        if test -x "$i/bin/mysql_config" ; then
-          PDO_MYSQL_CONFIG="$i/bin/mysql_config"
-          break;
-        fi
-        if test -r $i/include/mysql/mysql.h || test -r $i/include/mysql.h ; then
-          PDO_MYSQL_DIR="$i"
-          break;
-        fi
-      done
-    fi
-
-    if test -n "$PDO_MYSQL_CONFIG" && test -x "$PDO_MYSQL_CONFIG" ; then
+    if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT($PDO_MYSQL_CONFIG)
       if test "x$SED" = "x"; then
         AC_PATH_PROG(SED, sed)
       fi
-
       if test "$enable_maintainer_zts" = "yes"; then
         PDO_MYSQL_LIBNAME=mysqlclient_r
         PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs_r | $SED -e "s/'//g"`
@@ -76,11 +72,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
       fi
       PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
-      PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket` 
-    elif test -z "$PDO_MYSQL_DIR"; then
-      AC_MSG_RESULT([not found])
-      AC_MSG_ERROR([Cannot find MySQL header files under $PDO_MYSQL_DIR])
-    else
+    elif test -n "$PDO_MYSQL_DIR"; then
       AC_MSG_RESULT([not found])
       AC_MSG_CHECKING([for mysql install under $PDO_MYSQL_DIR])
       if test -r $PDO_MYSQL_DIR/include/mysql; then
@@ -103,9 +95,10 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
       PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
       PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
+    else
+      AC_MSG_RESULT([not found])
+      AC_MSG_ERROR([Unable to find your mysql installation])
     fi
-
-    AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
 
     PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query,
     [
@@ -159,6 +152,10 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_RESULT($pdo_inc_path)
   ])
 
+  if test -n "$PDO_MYSQL_CONFIG"; then
+    PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket`
+    AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
+  fi
 
   dnl fix after renaming to pdo_mysql
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path -I)
