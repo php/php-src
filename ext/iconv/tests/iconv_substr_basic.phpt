@@ -5,6 +5,10 @@ Test iconv_substr() function : basic functionality
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_substr') or die("skip iconv_substr() is not available in this build");
 ?>
+--INI--
+iconv.input_encoding=ISO-8859-1
+iconv.internal_encoding=ISO-8859-1
+iconv.output_encoding=ISO-8859-1
 --FILE--
 <?php
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
@@ -36,8 +40,8 @@ echo "\n-- Multibyte string 2 --\n";
 $result_2 = iconv_substr($string_mb, 2, 7, 'utf-8');
 var_dump(bin2hex($result_2));
 
+echo "Done";
 ?>
-===DONE===
 --EXPECT--
 *** Testing iconv_substr() : basic functionality ***
 
@@ -52,4 +56,4 @@ unicode(14) "a5e69cace8aa9e"
 
 -- Multibyte string 2 --
 unicode(42) "e8aa9ee38386e382ade382b9e38388e381a7e38199"
-===DONE===
+Done
