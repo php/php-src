@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Added support for CURLOPT_POSTREDIR. FR #49571. (Sriram Natarajan)
 - Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
+- Added client-side server name indication support in openssl. (Arnaud)
 
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
 - Fixed unnecessary invocation of setitimer when timeouts have been disabled.
