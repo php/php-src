@@ -105,6 +105,17 @@ ZEND_API ts_rsrc_id ini_scanner_globals_id;
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif
 
+/* Eat leading whitespace */
+#define EAT_LEADING_WHITESPACE()                     \
+	while (yytext[0]) {                              \
+		if (yytext[0] == ' ' || yytext[0] == '\t') { \
+			SCNG(yy_text)++;                         \
+			yyleng--;                                \
+		} else {                                     \
+			break;                                   \
+		}                                            \
+	}
+
 /* Eat trailing whitespace + extra char */
 #define EAT_TRAILING_WHITESPACE_EX(ch)              \
 	while (yyleng > 0 && (                          \
@@ -326,7 +337,7 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z][a-zA-Z0-9_]*
-LABEL [^=\n\r\t ;|&$~(){}!"\[]+
+LABEL [^=\n\r\t;|&$~(){}!"\[]+
 TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@{}]
 OPERATORS [&|~()!]
 DOLLAR_CURLY "${"
@@ -367,6 +378,9 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 }
 
 <INITIAL>{LABEL}"["{TABS_AND_SPACES}* { /* Start of option with offset */
+	/* Eat leading whitespace */
+	EAT_LEADING_WHITESPACE();
+	
 	/* Eat trailing whitespace and [ */
 	EAT_TRAILING_WHITESPACE_EX('[');
 
@@ -387,6 +401,12 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 }
 
 <ST_VARNAME>{LABEL} { /* Variable name */
+	/* Eat leading whitespace */
+	EAT_LEADING_WHITESPACE();
+
+	/* Eat trailing whitespace */
+	EAT_TRAILING_WHITESPACE();
+
 	RETURN_TOKEN(TC_VARNAME, yytext, yyleng);
 }
 
@@ -404,6 +424,12 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 }
 
 <INITIAL>{LABEL} { /* Get option name */
+	/* Eat leading whitespace */
+	EAT_LEADING_WHITESPACE();
+
+	/* Eat trailing whitespace */
+	EAT_TRAILING_WHITESPACE();
+
 	RETURN_TOKEN(TC_LABEL, yytext, yyleng);
 }
 
