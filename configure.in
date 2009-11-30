@@ -124,21 +124,6 @@ dnl or the contents of libs.
 $php_shtool mkdir -p libs
 rm -f libs/*
 
-dnl Darwin 9 hack
-dnl Because the default debugging format used by Apple's GCC on Mac OS 10.5
-dnl causes errors in all current and past versions of Autoconf, we do a little
-dnl messing with the CFLAGS here to trick it.
-php_did_darwin9_cheat=0
-case $host_alias in
-*darwin9*)
-  hasg=`echo $CFLAGS | grep -E '(^-g)|([[:space:]]-g)'`
-  if test x"$hasg" = "x"; then
-    php_did_darwin9_cheat=1
-    CFLAGS="$CFLAGS -gstabs"
-  fi
-  ;;
-esac
-
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
@@ -1277,6 +1262,14 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 
+dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
+dnl This hack works around it. Ugly.
+case $host_alias in
+*darwin9*|*darwin10*)
+	ac_cv_exeext=
+	;;
+esac
+
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
 dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.
 AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
@@ -1299,15 +1292,6 @@ test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_C
 SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
-
-dnl Finish the Darwin hack
-if test "$php_did_darwin9_cheat" -eq 1; then
-  if test "$PHP_DEBUG" = "1"; then
-    CFLAGS=`echo "$CFLAGS" | $SED -e 's/-gstabs/-g/g'`
-  else
-    CFLAGS=`echo "-O2 $CFLAGS" | $SED -e 's/-gstabs//g'`
-  fi
-fi
 
 PHP_CONFIGURE_PART(Generating files)
 
