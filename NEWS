@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
+  single text node when using libxml2.7.3+. (Kalle)
+  
 - Upgraded bundled sqlite to version 3.6.20. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
@@ -81,6 +84,7 @@ PHP                                                                        NEWS
   property in base class). (Felipe)
 - Fixed bug #49677 (ini parser crashes with apache2 and using ${something}
   ini variables). (Jani)
+- Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
