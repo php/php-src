@@ -146,6 +146,9 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
+#if LIBXML_VERSION >= 20703
+		ctxt->options |= XML_PARSE_HUGE;
+#endif
 		xmlParseDocument(ctxt);
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
