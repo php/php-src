@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #50266 (conflicting types for llabs). (Jani)
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
-  non-existant file). (Dmitry)
+  non-existent file). (Dmitry)
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 
 27 Nov 2009, PHP 5.2.12RC3
