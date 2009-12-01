@@ -1604,7 +1604,9 @@ static int mysqli_options_get_option_zval_type(int option)
 #endif
 #endif /* MYSQLI_USE_MYSQLND */
 		case MYSQL_OPT_CONNECT_TIMEOUT:
+#ifdef MYSQL_REPORT_DATA_TRUNCATION
                 case MYSQL_REPORT_DATA_TRUNCATION:
+#endif
                 case MYSQL_OPT_LOCAL_INFILE:
                 case MYSQL_OPT_NAMED_PIPE:
 #ifdef MYSQL_OPT_PROTOCOL
