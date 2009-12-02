@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
+  (Jani)
 - Fixed bug #50340 (php.ini parser does not allow spaces in ini keys). (Jani)
 - Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
   (Felipe)
