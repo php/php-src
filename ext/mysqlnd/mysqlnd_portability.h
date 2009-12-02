@@ -247,10 +247,10 @@ typedef unsigned long long uint64_t;
 									(((uint32_t) (((zend_uchar*) (A))[0])) << 24)))
 
 #define bit_uint5korr(A)  ((uint64_t)(((uint32_t) ((zend_uchar) (A)[4])) +\
-                                  (((uint32_t) ((zend_uchar) (A)[3])) << 8) +\
-                                  (((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
-                                  (((uint32_t) ((zend_uchar) (A)[1])) << 24)) +\
-                               (((uint64_t) ((zend_uchar) (A)[0])) << 32))
+                                  (((uint32_t) ((zend_uchar*) (A)[3])) << 8) +\
+                                  (((uint32_t) ((zend_uchar*) (A)[2])) << 16) +\
+                                  (((uint32_t) ((zend_uchar*) (A)[1])) << 24)) +\
+                               (((uint64_t) ((zend_uchar*) (A)[0])) << 32))
 
 #define bit_uint6korr(A)	((uint64_t)(((uint32_t) (((zend_uchar*) (A))[5])) +\
 									(((uint32_t) (((zend_uchar*) (A))[4])) << 8) +\
