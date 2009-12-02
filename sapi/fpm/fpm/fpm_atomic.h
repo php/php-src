@@ -19,15 +19,16 @@ typedef uint32_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
 
-static inline atomic_int_t atomic_fetch_add(atomic_t *value, atomic_int_t add)
+static inline atomic_int_t atomic_fetch_add(atomic_t *value, atomic_int_t add) /* {{{ */
 {
 	__asm__ volatile ( "lock;" "xaddl %0, %1;" :
 		"+r" (add) : "m" (*value) : "memory");
 
 	return add;
 }
+/* }}} */
 
-static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */
 {
 	unsigned char res;
 
@@ -36,6 +37,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
     return res;
 }
+/* }}} */
 
 #elif ( __amd64__ || __amd64 || __x86_64__ )
 
@@ -43,15 +45,16 @@ typedef int64_t                     atomic_int_t;
 typedef uint64_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
-static inline atomic_int_t atomic_fetch_add(atomic_t *value, atomic_int_t add)
+static inline atomic_int_t atomic_fetch_add(atomic_t *value, atomic_int_t add) /* {{{ */
 {
 	__asm__ volatile ( "lock;" "xaddq %0, %1;" :
 		"+r" (add) : "m" (*value) : "memory");
 
 	return add;
 }
+/* }}} */
 
-static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */
 {
 	unsigned char res;
 
@@ -60,6 +63,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
 	return res;
 }
+/* }}} */
 
 #if (__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))
 
@@ -83,32 +87,36 @@ typedef uint32_t                    atomic_uint_t;
 typedef uint64_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
-static inline int atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new)
+static inline int atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
 {
 	__asm__ __volatile__("casx [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
 
 	return new;
 }
+/* }}} */
 
-static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */
 {
 	return (atomic_cas_64(lock, old, set)==old);
 }
+/* }}} */
 #else
 typedef uint32_t                    atomic_uint_t;
 typedef volatile atomic_uint_t      atomic_t;
 
-static inline int atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new)
+static inline int atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new) /* {{{ */
 {
 	__asm__ __volatile__("cas [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
 
 	return new;
 }
+/* }}} */
 
-static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set) /* {{{ */
 {
 	return (atomic_cas_32(lock, old, set)==old);
 }
+/* }}} */
 #endif
 
 #else
@@ -117,7 +125,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
 #endif
 
-static inline int fpm_spinlock(atomic_t *lock, int try_once)
+static inline int fpm_spinlock(atomic_t *lock, int try_once) /* {{{ */
 {
 	if (try_once) {
 		return atomic_cmp_set(lock, 0, 1) ? 0 : -1;
@@ -134,6 +142,7 @@ static inline int fpm_spinlock(atomic_t *lock, int try_once)
 
 	return 0;
 }
+/* }}} */
 
 #endif
 

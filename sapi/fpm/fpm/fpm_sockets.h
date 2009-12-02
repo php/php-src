@@ -14,19 +14,22 @@ enum fpm_address_domain fpm_sockets_domain_from_address(char *addr);
 int fpm_sockets_init_main();
 
 
-static inline int fd_set_blocked(int fd, int blocked)
+static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
 {
 	int flags = fcntl(fd, F_GETFL);
 
-	if (flags < 0) return -1;
+	if (flags < 0) {
+		return -1;
+	}
 
-	if (blocked)
+	if (blocked) {
 		flags &= ~O_NONBLOCK;
-	else
+	} else {
 		flags |= O_NONBLOCK;
-
+	}
 	return fcntl(fd, F_SETFL, flags);
 }
+/* }}} */
 
 #define IPQUAD(sin_addr) \
 			(unsigned int) ((unsigned char *) &(sin_addr)->s_addr)[0], \

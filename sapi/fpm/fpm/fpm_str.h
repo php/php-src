@@ -5,11 +5,13 @@
 #ifndef FPM_STR_H
 #define FPM_STR_H 1
 
-static inline char *cpystrn(char *dst, const char *src, size_t dst_size)
+static inline char *cpystrn(char *dst, const char *src, size_t dst_size) /* {{{ */
 {
 	char *d, *end;
 	
-	if (!dst_size) return dst;
+	if (!dst_size) {
+		return dst;
+	}
 	
 	d = dst;
 	end = dst + dst_size - 1;
@@ -24,8 +26,9 @@ static inline char *cpystrn(char *dst, const char *src, size_t dst_size)
 
 	return d;
 }
+/* }}} */
 
-static inline char *str_purify_filename(char *dst, char *src, size_t size)
+static inline char *str_purify_filename(char *dst, char *src, size_t size) /* {{{ */
 {
 	char *d, *end;
 
@@ -35,8 +38,7 @@ static inline char *str_purify_filename(char *dst, char *src, size_t size)
 	for (; d < end && *src; ++d, ++src) {
 		if (* (unsigned char *) src < ' ' || * (unsigned char *) src > '\x7f') {
 			*d = '.';
-		}
-		else {
+		} else {
 			*d = *src;
 		}
 	}
@@ -45,5 +47,6 @@ static inline char *str_purify_filename(char *dst, char *src, size_t size)
 
 	return d;
 }
+/* }}} */
 
 #endif
