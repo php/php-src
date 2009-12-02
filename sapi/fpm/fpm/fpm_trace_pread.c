@@ -11,7 +11,11 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# include <stdint.h>
+#endif
 
 #include "fpm_trace.h"
 #include "fpm_process_ctl.h"

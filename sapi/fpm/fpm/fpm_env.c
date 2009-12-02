@@ -15,6 +15,24 @@
 #include "zlog.h"
 
 #ifndef HAVE_SETENV
+# ifdef (__sparc__ || __sparc)
+int setenv(char *name, char *value, int clobber)
+{
+	char   *malloc();
+	char   *getenv();
+	char   *cp;
+
+	if (clobber == 0 && getenv(name) != 0) {
+		return 0;
+	}
+	
+	if ((cp = malloc(strlen(name) + strlen(value) + 2)) == 0) {
+		return 1;
+	}
+	sprintf(cp, "%s=%s", name, value);
+	return putenv(cp);
+}
+# else
 int setenv(char *name, char *value, int overwrite)
 {
 	int name_len = strlen(name);
@@ -31,6 +49,7 @@ int setenv(char *name, char *value, int overwrite)
 
 	return putenv(var);
 }
+# endif
 #endif
 
 #ifndef HAVE_CLEARENV
@@ -55,6 +74,36 @@ void clearenv()
 }
 #endif
 
+#ifndef HAVE_UNSETENV
+void unsetenv(const char *name)
+{
+	if(getenv(name) != NULL) {
+		int ct = 0;
+		int del = 0;
+
+		while(environ[ct] != NULL) {
+			if (nvmatch(name, environ[ct]) != 0) del=ct; /* <--- WTF?! */
+			{ ct++; } /* <--- WTF?! */
+		}
+		/* isn't needed free here?? */
+		environ[del] = environ[ct-1];
+		environ[ct-1] = NULL;
+	}
+}
+static char * nvmatch(char *s1, char *s2)
+{
+	while(*s1 == *s2++)
+	{
+		if(*s1++ == '=') { 
+			return s2;
+		}
+	}
+	if(*s1 == '\0' && *(s2-1) == '=') { 
+		return s2;
+	}
+	return(NULL);
+}
+#endif
 
 int fpm_env_init_child(struct fpm_worker_pool_s *wp)
 {

@@ -5,7 +5,11 @@
 #ifndef FPM_ATOMIC_H
 #define FPM_ATOMIC_H 1
 
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <stdint.h>
+#else
+# include <stdint.h>
+#endif
 #include <sched.h>
 
 #if ( __i386__ || __i386 )
@@ -56,6 +60,56 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
 	return res;
 }
+
+#if (__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))
+
+#elif ( __arm__ || __arm ) /* W-Mark Kubacki */
+
+#if (__arch64__ || __arch64)
+typedef int64_t                     atomic_int_t;
+typedef uint64_t                    atomic_uint_t;
+#else
+typedef int32_t                     atomic_int_t;
+typedef uint32_t                    atomic_uint_t;
+#endif
+
+#define atomic_cmp_set(a,b,c) __sync_bool_compare_and_swap(a,b,c)
+
+#endif /* defined (__GNUC__) &&... */
+
+#elif ( __sparc__ || __sparc ) /* Marcin Ochab */
+
+#if (__arch64__ || __arch64)
+typedef uint64_t                    atomic_uint_t;
+typedef volatile atomic_uint_t      atomic_t;
+
+static inline int atomic_cas_64(atomic_t *lock, atomic_uint_t old, atomic_uint_t new)
+{
+	__asm__ __volatile__("casx [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
+
+	return new;
+}
+
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+{
+	return (atomic_cas_64(lock, old, set)==old);
+}
+#else
+typedef uint32_t                    atomic_uint_t;
+typedef volatile atomic_uint_t      atomic_t;
+
+static inline int atomic_cas_32(atomic_t *lock, atomic_uint_t old, atomic_uint_t new)
+{
+	__asm__ __volatile__("cas [%2], %3, %0 " : "=&r"(new)  : "0"(new), "r"(lock), "r"(old): "memory");
+
+	return new;
+}
+
+static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, atomic_uint_t set)
+{
+	return (atomic_cas_32(lock, old, set)==old);
+}
+#endif
 
 #else
 

@@ -5,7 +5,11 @@
 #ifndef XML_CONFIG_H
 #define XML_CONFIG_H 1
 
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# include <stdint.h>
+#endif
 
 struct xml_value_parser;
 

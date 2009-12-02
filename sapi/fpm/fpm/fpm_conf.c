@@ -10,7 +10,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# include <stdint.h>
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 

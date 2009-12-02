@@ -11,7 +11,11 @@
 
 #include <stdio.h>
 #include <stddef.h>
-#include <stdint.h>
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# include <stdint.h>
+#endif
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/types.h>
