@@ -34,30 +34,34 @@ static int fault;
 
 static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop);
 
-static void fpm_children_cleanup(int which, void *arg)
+static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 {
 	free(last_faults);
 }
+/* }}} */
 
-static struct fpm_child_s *fpm_child_alloc()
+static struct fpm_child_s *fpm_child_alloc() /* {{{ */
 {
 	struct fpm_child_s *ret;
 
 	ret = malloc(sizeof(struct fpm_child_s));
 
-	if (!ret) return 0;
+	if (!ret) {
+		return 0;
+	}
 
 	memset(ret, 0, sizeof(*ret));
-
 	return ret;
 }
+/* }}} */
 
-static void fpm_child_free(struct fpm_child_s *child)
+static void fpm_child_free(struct fpm_child_s *child) /* {{{ */
 {
 	free(child);
 }
+/* }}} */
 
-static void fpm_child_close(struct fpm_child_s *child, int in_event_loop)
+static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{ */
 {
 	if (child->fd_stdout != -1) {
 		if (in_event_loop) {
@@ -79,8 +83,9 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop)
 
 	fpm_child_free(child);
 }
+/* }}} */
 
-static void fpm_child_link(struct fpm_child_s *child)
+static void fpm_child_link(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp = child->wp;
 
@@ -88,23 +93,32 @@ static void fpm_child_link(struct fpm_child_s *child)
 	++fpm_globals.running_children;
 
 	child->next = wp->children;
-	if (child->next) child->next->prev = child;
+	if (child->next) {
+		child->next->prev = child;
+	}
 	child->prev = 0;
 	wp->children = child;
 }
+/* }}} */
 
-static void fpm_child_unlink(struct fpm_child_s *child)
+static void fpm_child_unlink(struct fpm_child_s *child) /* {{{ */
 {
 	--child->wp->running_children;
 	--fpm_globals.running_children;
 
-	if (child->prev) child->prev->next = child->next;
-	else child->wp->children = child->next;
-	if (child->next) child->next->prev = child->prev;
+	if (child->prev) {
+		child->prev->next = child->next;
+	} else {
+		child->wp->children = child->next;
+	}
 
+	if (child->next) {
+		child->next->prev = child->prev;
+	}
 }
+/* }}} */
 
-static struct fpm_child_s *fpm_child_find(pid_t pid)
+static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	struct fpm_child_s *child = 0;
@@ -126,8 +140,9 @@ static struct fpm_child_s *fpm_child_find(pid_t pid)
 
 	return child;
 }
+/* }}} */
 
-static void fpm_child_init(struct fpm_worker_pool_s *wp)
+static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->max_requests;
 
@@ -141,8 +156,9 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp)
 		exit(255);
 	}
 }
+/* }}} */
 
-int fpm_children_free(struct fpm_child_s *child)
+int fpm_children_free(struct fpm_child_s *child) /* {{{ */
 {
 	struct fpm_child_s *next;
 
@@ -153,8 +169,9 @@ int fpm_children_free(struct fpm_child_s *child)
 
 	return 0;
 }
+/* }}} */
 
-void fpm_children_bury()
+void fpm_children_bury() /* {{{ */
 {
 	int status;
 	pid_t pid;
@@ -174,8 +191,7 @@ void fpm_children_bury()
 				severity = ZLOG_WARNING;
 			}
 
-		}
-		else if (WIFSIGNALED(status)) {
+		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
 			const char *have_core = WCOREDUMP(status) ? " (core dumped)" : "";
 
@@ -188,8 +204,7 @@ void fpm_children_bury()
 			if (WTERMSIG(status) != SIGQUIT) { /* possible request loss */
 				severity = ZLOG_WARNING;
 			}
-		}
-		else if (WIFSTOPPED(status)) {
+		} else if (WIFSTOPPED(status)) {
 
 			zlog(ZLOG_STUFF, ZLOG_NOTICE, "child %d stopped for tracing", (int) pid);
 
@@ -251,15 +266,14 @@ void fpm_children_bury()
 			if (fpm_globals.is_child) {
 				break;
 			}
-		}
-		else {
+		} else {
 			zlog(ZLOG_STUFF, ZLOG_ALERT, "oops, unknown child exited %s", buf);
 		}
 	}
-
 }
+/* }}} */
 
-static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp)
+static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_child_s *c;
 
@@ -286,29 +300,33 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp)
 
 	return c;
 }
+/* }}} */
 
-static void fpm_resources_discard(struct fpm_child_s *child)
+static void fpm_resources_discard(struct fpm_child_s *child) /* {{{ */
 {
 	fpm_shm_slots_discard_slot(child);
 	fpm_stdio_discard_pipes(child);
 	fpm_child_free(child);
 }
+/* }}} */
 
-static void fpm_child_resources_use(struct fpm_child_s *child)
+static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 {
 	fpm_shm_slots_child_use_slot(child);
 	fpm_stdio_child_use_pipes(child);
 	fpm_child_free(child);
 }
+/* }}} */
 
-static void fpm_parent_resources_use(struct fpm_child_s *child)
+static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 {
 	fpm_shm_slots_parent_use_slot(child);
 	fpm_stdio_parent_use_pipes(child);
 	fpm_child_link(child);
 }
+/* }}} */
 
-static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop)
+static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop) /* {{{ */
 {
 	int enough = 0;
 	pid_t pid;
@@ -356,13 +374,15 @@ static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop)
 
 	return 1; /* we are done */
 }
+/* }}} */
 
-int fpm_children_create_initial(struct fpm_worker_pool_s *wp)
+int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	return fpm_children_make(wp, 0 /* not in event loop yet */);
 }
+/* }}} */
 
-int fpm_children_init_main()
+int fpm_children_init_main() /* {{{ */
 {
 	if (fpm_global_config.emergency_restart_threshold &&
 		fpm_global_config.emergency_restart_interval) {
@@ -382,4 +402,5 @@ int fpm_children_init_main()
 
 	return 0;
 }
+/* }}} */
 

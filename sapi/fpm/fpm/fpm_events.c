@@ -20,18 +20,18 @@
 #include "fpm_children.h"
 #include "zlog.h"
 
-static void fpm_event_cleanup(int which, void *arg)
+static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
 	event_base_free(0);
 }
+/* }}} */
 
-static void fpm_got_signal(int fd, short ev, void *arg)
+static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 {
 	char c;
 	int res;
 
 	do {
-
 		do {
 			res = read(fd, &c, 1);
 		} while (res == -1 && errno == EINTR);
@@ -75,13 +75,12 @@ static void fpm_got_signal(int fd, short ev, void *arg)
 		if (fpm_globals.is_child) {
 			break;
 		}
-
 	} while (1);
-
 	return;
 }
+/* }}} */
 
-int fpm_event_init_main()
+int fpm_event_init_main() /* {{{ */
 {
 	event_init();
 
@@ -90,46 +89,45 @@ int fpm_event_init_main()
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, 0)) {
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_event_loop()
+int fpm_event_loop() /* {{{ */
 {
 	static struct event signal_fd_event;
 
 	event_set(&signal_fd_event, fpm_signals_get_fd(), EV_PERSIST | EV_READ, &fpm_got_signal, 0);
-
 	event_add(&signal_fd_event, 0);
-
 	fpm_pctl_heartbeat(-1, 0, 0);
-
 	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: entering main loop");
-
 	event_loop(0);
-
 	return 0;
 }
+/* }}} */
 
-int fpm_event_add(int fd, struct event *ev, void (*callback)(int, short, void *), void *arg)
+int fpm_event_add(int fd, struct event *ev, void (*callback)(int, short, void *), void *arg) /* {{{ */
 {
 	event_set(ev, fd, EV_PERSIST | EV_READ, callback, arg);
-
 	return event_add(ev, 0);
 }
+/* }}} */
 
-int fpm_event_del(struct event *ev)
+int fpm_event_del(struct event *ev) /* {{{ */
 {
 	return event_del(ev);
 }
+/* }}} */
 
-void fpm_event_exit_loop()
+void fpm_event_exit_loop() /* {{{ */
 {
 	event_loopbreak();
 }
+/* }}} */
 
-void fpm_event_fire(struct event *ev)
+void fpm_event_fire(struct event *ev) /* {{{ */
 {
 	(*ev->ev_callback)( (int) ev->ev_fd, (short) ev->ev_res, ev->ev_arg);	
 }
+/* }}} */
 

@@ -27,35 +27,36 @@ static const char *level_names[] = {
 	[ZLOG_ALERT]		= "ALERT",
 };
 
-size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len)
+size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /* {{{ */
 {
 	struct tm t;
 	size_t len;
 
 	len = strftime(timebuf, timebuf_len, "%b %d %H:%M:%S", localtime_r((const time_t *) &tv->tv_sec, &t));
 	len += snprintf(timebuf + len, timebuf_len - len, ".%06d", (int) tv->tv_usec);
-
 	return len;
 }
+/* }}} */
 
-int zlog_set_fd(int new_fd)
+int zlog_set_fd(int new_fd) /* {{{ */
 {
 	int old_fd = zlog_fd;
-	zlog_fd = new_fd;
 
+	zlog_fd = new_fd;
 	return old_fd;
 }
+/* }}} */
 
-int zlog_set_level(int new_value)
+int zlog_set_level(int new_value) /* {{{ */
 {
 	int old_value = zlog_level;
 
 	zlog_level = new_value;
-
 	return old_value;
 }
+/* }}} */
 
-void zlog(const char *function, int line, int flags, const char *fmt, ...)
+void zlog(const char *function, int line, int flags, const char *fmt, ...) /* {{{ */
 {
 	struct timeval tv;
 	char buf[MAX_LINE_LENGTH];
@@ -70,11 +71,8 @@ void zlog(const char *function, int line, int flags, const char *fmt, ...)
 	}
 
 	saved_errno = errno;
-
 	gettimeofday(&tv, 0);
-
 	len = zlog_print_time(&tv, buf, buf_size);
-
 	len += snprintf(buf + len, buf_size - len, " [%s] %s(), line %d: ", level_names[flags & ZLOG_LEVEL_MASK], function, line);
 
 	if (len > buf_size - 1) {
@@ -83,11 +81,8 @@ void zlog(const char *function, int line, int flags, const char *fmt, ...)
 
 	if (!truncated) {
 		va_start(args, fmt);
-
 		len += vsnprintf(buf + len, buf_size - len, fmt, args);
-
 		va_end(args);
-
 		if (len >= buf_size) {
 			truncated = 1;
 		}
@@ -108,6 +103,7 @@ void zlog(const char *function, int line, int flags, const char *fmt, ...)
 	}
 
 	buf[len++] = '\n';
-
 	write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 }
+/* }}} */
+

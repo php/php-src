@@ -139,20 +139,19 @@ const char *fpm_signal_names[NSIG + 1] = {
 #endif
 };
 
-static void sig_soft_quit(int signo)
+static void sig_soft_quit(int signo) /* {{{ */
 {
 	int saved_errno = errno;
 
 	/* closing fastcgi listening socket will force fcgi_accept() exit immediately */
 	close(0);
 	socket(AF_UNIX, SOCK_STREAM, 0);
-
 	fpm_php_soft_quit();
-
 	errno = saved_errno;
 }
+/* }}} */
 
-static void sig_handler(int signo)
+static void sig_handler(int signo) /* {{{ */
 {
 	static const char sig_chars[NSIG + 1] = {
 		[SIGTERM] = 'T',
@@ -172,15 +171,13 @@ static void sig_handler(int signo)
 	}
 
 	saved_errno = errno;
-
 	s = sig_chars[signo];
-
 	write(sp[1], &s, sizeof(s));
-
 	errno = saved_errno;
 }
+/* }}} */
 
-int fpm_signals_init_main()
+int fpm_signals_init_main() /* {{{ */
 {
 	struct sigaction act;
 
@@ -213,11 +210,11 @@ int fpm_signals_init_main()
 		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "sigaction() failed");
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_signals_init_child()
+int fpm_signals_init_child() /* {{{ */
 {
 	struct sigaction act, act_dfl;
 
@@ -242,11 +239,13 @@ int fpm_signals_init_child()
 		zlog(ZLOG_STUFF, ZLOG_SYSERROR, "sigaction() failed");
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_signals_get_fd()
+int fpm_signals_get_fd() /* {{{ */
 {
 	return sp[0];
 }
+/* }}} */
+

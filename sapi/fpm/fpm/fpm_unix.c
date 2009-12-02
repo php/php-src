@@ -27,7 +27,7 @@
 
 size_t fpm_pagesize;
 
-int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp)
+int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct fpm_listen_options_s *lo = wp->config->listen_options;
 
@@ -36,13 +36,14 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp)
 	wp->socket_gid = -1;
 	wp->socket_mode = 0666;
 
-	if (!lo) return 0;
+	if (!lo) {
+		return 0;
+	}
 
 	if (lo->owner && *lo->owner) {
 		struct passwd *pwd;
 
 		pwd = getpwnam(lo->owner);
-
 		if (!pwd) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "cannot get uid for user '%s', pool '%s'", lo->owner, wp->config->name);
 			return -1;
@@ -56,37 +57,32 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp)
 		struct group *grp;
 
 		grp = getgrnam(lo->group);
-
 		if (!grp) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "cannot get gid for group '%s', pool '%s'", lo->group, wp->config->name);
 			return -1;
 		}
-
 		wp->socket_gid = grp->gr_gid;
 	}
 
 	if (lo->mode && *lo->mode) {
 		wp->socket_mode = strtoul(lo->mode, 0, 8);
 	}
-
 	return 0;
 }
+/* }}} */
 
-static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp)
+static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	int is_root = !geteuid();
 
 	if (is_root) {
 		if (wp->config->user && *wp->config->user) {
-
 			if (strlen(wp->config->user) == strspn(wp->config->user, "0123456789")) {
 				wp->set_uid = strtoul(wp->config->user, 0, 10);
-			}
-			else {
+			} else {
 				struct passwd *pwd;
 
 				pwd = getpwnam(wp->config->user);
-
 				if (!pwd) {
 					zlog(ZLOG_STUFF, ZLOG_ERROR, "cannot get uid for user '%s', pool '%s'", wp->config->user, wp->config->name);
 					return -1;
@@ -101,20 +97,16 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp)
 		}
 
 		if (wp->config->group && *wp->config->group) {
-
 			if (strlen(wp->config->group) == strspn(wp->config->group, "0123456789")) {
 				wp->set_gid = strtoul(wp->config->group, 0, 10);
-			}
-			else {
+			} else {
 				struct group *grp;
 
 				grp = getgrnam(wp->config->group);
-
 				if (!grp) {
 					zlog(ZLOG_STUFF, ZLOG_ERROR, "cannot get gid for group '%s', pool '%s'", wp->config->group, wp->config->name);
 					return -1;
 				}
-
 				wp->set_gid = grp->gr_gid;
 			}
 		}
@@ -125,8 +117,7 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp)
 			return -1;
 		}
 #endif
-	}
-	else { /* not root */
+	} else { /* not root */
 		if (wp->config->user && *wp->config->user) {
 			zlog(ZLOG_STUFF, ZLOG_WARNING, "'user' directive is ignored, pool '%s'", wp->config->name);
 		}
@@ -141,18 +132,17 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp)
 			struct passwd *pwd;
 
 			pwd = getpwuid(getuid());
-
 			if (pwd) {
 				wp->user = strdup(pwd->pw_name);
 				wp->home = strdup(pwd->pw_dir);
 			}
 		}
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
+int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	int is_root = !geteuid();
 	int made_chroot = 0;
@@ -161,9 +151,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
 		struct rlimit r;
 
 		getrlimit(RLIMIT_NOFILE, &r);
-
 		r.rlim_cur = (rlim_t) wp->config->rlimit_files;
-
 		if (0 > setrlimit(RLIMIT_NOFILE, &r)) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "setrlimit(RLIMIT_NOFILE) failed");
 		}
@@ -173,9 +161,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
 		struct rlimit r;
 
 		getrlimit(RLIMIT_CORE, &r);
-
 		r.rlim_cur = wp->config->rlimit_core == -1 ? (rlim_t) RLIM_INFINITY : (rlim_t) wp->config->rlimit_core;
-
 		if (0 > setrlimit(RLIMIT_CORE, &r)) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "setrlimit(RLIMIT_CORE) failed");
 		}
@@ -194,8 +180,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "chdir(%s) failed", wp->config->chdir);
 			return -1;
 		}
-	}
-	else if (made_chroot) {
+	} else if (made_chroot) {
 		chdir("/");
 	}
 
@@ -227,52 +212,38 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp)
 	if (0 > fpm_clock_init()) {
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_unix_init_main()
+int fpm_unix_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
 	fpm_pagesize = getpagesize();
-
 	if (fpm_global_config.daemonize) {
-
 		switch (fork()) {
-
 			case -1 :
-
 				zlog(ZLOG_STUFF, ZLOG_SYSERROR, "fork() failed");
 				return -1;
-
 			case 0 :
-
 				break;
-
 			default :
-
 				fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
 				exit(0);
-
 		}
-
 	}
 
 	setsid();
-
 	if (0 > fpm_clock_init()) {
 		return -1;
 	}
 
 	fpm_globals.parent_pid = getpid();
-
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
-
 		if (0 > fpm_unix_conf_wp(wp)) {
 			return -1;
 		}
-
 	}
 
 	fpm_stdio_init_final();
@@ -284,6 +255,7 @@ int fpm_unix_init_main()
 		zlog(ZLOG_STUFF, ZLOG_NOTICE, "getrlimit(nofile): max:%lld, cur:%lld",
 			(long long) r.rlim_max, (long long) r.rlim_cur);
 	}
-
 	return 0;
 }
+/* }}} */
+

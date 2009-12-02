@@ -17,7 +17,7 @@
 
 static int monotonic_works;
 
-int fpm_clock_init()
+int fpm_clock_init() /* {{{ */
 {
 	struct timespec ts;
 
@@ -29,8 +29,9 @@ int fpm_clock_init()
 
 	return 0;
 }
+/* }}} */
 
-int fpm_clock_get(struct timeval *tv)
+int fpm_clock_get(struct timeval *tv) /* {{{ */
 {
 	if (monotonic_works) {
 		struct timespec ts;
@@ -47,6 +48,7 @@ int fpm_clock_get(struct timeval *tv)
 
 	return gettimeofday(tv, 0);
 }
+/* }}} */
 
 /* macosx clock */
 #elif defined(HAVE_CLOCK_GET_TIME)
@@ -59,7 +61,7 @@ static clock_serv_t mach_clock;
 
 /* this code borrowed from here: http://lists.apple.com/archives/Darwin-development/2002/Mar/msg00746.html */
 /* mach_clock also should be re-initialized in child process after fork */
-int fpm_clock_init()
+int fpm_clock_init() /* {{{ */
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -81,8 +83,9 @@ int fpm_clock_init()
 
 	return 0;
 }
+/* }}} */
 
-int fpm_clock_get(struct timeval *tv)
+int fpm_clock_get(struct timeval *tv) /* {{{ */
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -99,17 +102,20 @@ int fpm_clock_get(struct timeval *tv)
 
 	return 0;
 }
+/* }}} */
 
 #else /* no clock */
 
-int fpm_clock_init()
+int fpm_clock_init() /* {{{ */
 {
 	return 0;
 }
+/* }}} */
 
-int fpm_clock_get(struct timeval *tv)
+int fpm_clock_get(struct timeval *tv) /* {{{ */
 {
 	return gettimeofday(tv, 0);
 }
+/* }}} */
 
 #endif

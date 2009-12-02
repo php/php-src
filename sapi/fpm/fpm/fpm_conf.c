@@ -32,36 +32,33 @@
 
 struct fpm_global_config_s fpm_global_config;
 
-static void *fpm_global_config_ptr()
+static void *fpm_global_config_ptr() /* {{{ */
 {
 	return &fpm_global_config;
 }
+/* }}} */
 
-static char *fpm_conf_set_log_level(void **conf, char *name, void *vv, intptr_t offset)
+static char *fpm_conf_set_log_level(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	char *value = vv;
 
 	if (!strcmp(value, "debug")) {
 		fpm_globals.log_level = ZLOG_DEBUG;
-	}
-	else if (!strcmp(value, "notice")) {
+	} else if (!strcmp(value, "notice")) {
 		fpm_globals.log_level = ZLOG_NOTICE;
-	}
-	else if (!strcmp(value, "warn")) {
+	} else if (!strcmp(value, "warn")) {
 		fpm_globals.log_level = ZLOG_WARNING;
-	}
-	else if (!strcmp(value, "error")) {
+	} else if (!strcmp(value, "error")) {
 		fpm_globals.log_level = ZLOG_ERROR;
-	}
-	else if (!strcmp(value, "alert")) {
+	} else if (!strcmp(value, "alert")) {
 		fpm_globals.log_level = ZLOG_ALERT;
-	}
-	else {
+	} else {
 		return "invalid value for 'log_level'";
 	}
 
 	return NULL;
 }
+/* }}} */
 
 static struct xml_conf_section xml_section_fpm_global_options = {
 	.conf = &fpm_global_config_ptr,
@@ -78,50 +75,53 @@ static struct xml_conf_section xml_section_fpm_global_options = {
 	}
 };
 
-static char *fpm_conf_set_pm_style(void **conf, char *name, void *vv, intptr_t offset)
+static char *fpm_conf_set_pm_style(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	char *value = vv;
 	struct fpm_pm_s *c = *conf;
 
 	if (!strcmp(value, "static")) {
 		c->style = PM_STYLE_STATIC;
-	}
-	else if (!strcmp(value, "apache-like")) {
+	} else if (!strcmp(value, "apache-like")) {
 		c->style = PM_STYLE_APACHE_LIKE;
-	}
-	else {
+	} else {
 		return "invalid value for 'style'";
 	}
 
 	return NULL;
 }
+/* }}} */
 
-static char *fpm_conf_set_rlimit_core(void **conf, char *name, void *vv, intptr_t offset)
+static char *fpm_conf_set_rlimit_core(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	char *value = vv;
 	struct fpm_worker_pool_config_s *c = *conf;
 
 	if (!strcmp(value, "unlimited")) {
 		c->rlimit_core = -1;
-	}
-	else {
+	} else {
 		int int_value;
 		void *subconf = &int_value;
 		char *error;
 
 		error = xml_conf_set_slot_integer(&subconf, name, vv, 0);
 
-		if (error) return error;
+		if (error) { 
+			return error;
+		}
 
-		if (int_value < 0) return "invalid value for 'rlimit_core'";
+		if (int_value < 0) {
+			return "invalid value for 'rlimit_core'";
+		}
 
 		c->rlimit_core = int_value;
 	}
 
 	return NULL;
 }
+/* }}} */
 
-static char *fpm_conf_set_catch_workers_output(void **conf, char *name, void *vv, intptr_t offset)
+static char *fpm_conf_set_catch_workers_output(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	struct fpm_worker_pool_config_s *c = *conf;
 	int int_value;
@@ -130,12 +130,14 @@ static char *fpm_conf_set_catch_workers_output(void **conf, char *name, void *vv
 
 	error = xml_conf_set_slot_boolean(&subconf, name, vv, 0);
 
-	if (error) return error;
+	if (error) {
+		return error;
+	}
 
 	c->catch_workers_output = int_value;
-
 	return NULL;
 }
+/* }}} */
 
 static struct xml_conf_section fpm_conf_set_apache_like_subsection_conf = {
 	.path = "apache_like somewhere", /* fixme */
@@ -147,10 +149,11 @@ static struct xml_conf_section fpm_conf_set_apache_like_subsection_conf = {
 	}
 };
 
-static char *fpm_conf_set_apache_like_subsection(void **conf, char *name, void *xml_node, intptr_t offset)
+static char *fpm_conf_set_apache_like_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
 	return xml_conf_parse_section(conf, &fpm_conf_set_apache_like_subsection_conf, xml_node);
 }
+/* }}} */
 
 static struct xml_conf_section fpm_conf_set_listen_options_subsection_conf = {
 	.path = "listen options somewhere", /* fixme */
@@ -163,7 +166,7 @@ static struct xml_conf_section fpm_conf_set_listen_options_subsection_conf = {
 	}
 };
 
-static char *fpm_conf_set_listen_options_subsection(void **conf, char *name, void *xml_node, intptr_t offset)
+static char *fpm_conf_set_listen_options_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
 	void *subconf = (char *) *conf + offset;
 	struct fpm_listen_options_s *lo;
@@ -175,15 +178,13 @@ static char *fpm_conf_set_listen_options_subsection(void **conf, char *name, voi
 	}
 
 	memset(lo, 0, sizeof(*lo));
-
 	lo->backlog = -1;
-
 	* (struct fpm_listen_options_s **) subconf = lo;
-
 	subconf = lo;
 
 	return xml_conf_parse_section(&subconf, &fpm_conf_set_listen_options_subsection_conf, xml_node);
 }
+/* }}} */
 
 static struct xml_conf_section fpm_conf_set_pm_subsection_conf = {
 	.path = "pm settings somewhere", /* fixme */
@@ -195,7 +196,7 @@ static struct xml_conf_section fpm_conf_set_pm_subsection_conf = {
 	}
 };
 
-static char *fpm_conf_set_pm_subsection(void **conf, char *name, void *xml_node, intptr_t offset)
+static char *fpm_conf_set_pm_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
 	void *subconf = (char *) *conf + offset;
 	struct fpm_pm_s *pm;
@@ -207,15 +208,13 @@ static char *fpm_conf_set_pm_subsection(void **conf, char *name, void *xml_node,
 	}
 
 	memset(pm, 0, sizeof(*pm));
-
-	* (struct fpm_pm_s **) subconf = pm;
-
+	*(struct fpm_pm_s **) subconf = pm;
 	subconf = pm;
-
 	return xml_conf_parse_section(&subconf, &fpm_conf_set_pm_subsection_conf, xml_node);
 }
+/* }}} */
 
-static char *xml_conf_set_slot_key_value_pair(void **conf, char *name, void *vv, intptr_t offset)
+static char *xml_conf_set_slot_key_value_pair(void **conf, char *name, void *vv, intptr_t offset) /* {{{ */
 {
 	char *value = vv;
 	struct key_value_s *kv;
@@ -228,7 +227,6 @@ static char *xml_conf_set_slot_key_value_pair(void **conf, char *name, void *vv,
 	}
 
 	memset(kv, 0, sizeof(*kv));
-
 	kv->key = strdup(name);
 	kv->value = strdup(value);
 
@@ -237,11 +235,10 @@ static char *xml_conf_set_slot_key_value_pair(void **conf, char *name, void *vv,
 	}
 
 	**parent = kv;
-
 	*parent = &kv->next;
-
 	return NULL;
 }
+/* }}} */
 
 static struct xml_conf_section fpm_conf_set_key_value_pairs_subsection_conf = {
 	.path = "key_value_pairs somewhere", /* fixme */
@@ -251,36 +248,42 @@ static struct xml_conf_section fpm_conf_set_key_value_pairs_subsection_conf = {
 	}
 };
 
-static char *fpm_conf_set_key_value_pairs_subsection(void **conf, char *name, void *xml_node, intptr_t offset)
+static char *fpm_conf_set_key_value_pairs_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
 	void *next_kv = (char *) *conf + offset;
-
 	return xml_conf_parse_section(&next_kv, &fpm_conf_set_key_value_pairs_subsection_conf, xml_node);
 }
+/* }}} */
 
-static void *fpm_worker_pool_config_alloc()
+static void *fpm_worker_pool_config_alloc() /* {{{ */
 {
 	static struct fpm_worker_pool_s *current_wp = 0;
 	struct fpm_worker_pool_s *wp;
 
 	wp = fpm_worker_pool_alloc();
 
-	if (!wp) return 0;
+	if (!wp) {
+		return 0;
+	}
 
 	wp->config = malloc(sizeof(struct fpm_worker_pool_config_s));
 
-	if (!wp->config) return 0;
+	if (!wp->config) { 
+		return 0;
+	}
 
 	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
 
-	if (current_wp) current_wp->next = wp;
+	if (current_wp) { 
+		current_wp->next = wp;
+	}
 
 	current_wp = wp;
-
 	return wp->config;
 }
+/* }}} */
 
-int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc)
+int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 {
 	struct key_value_s *kv, *kv_next;
 
@@ -314,6 +317,7 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc)
 
 	return 0;
 }
+/* }}} */
 
 static struct xml_conf_section xml_section_fpm_worker_pool_config = {
 	.conf = &fpm_worker_pool_config_alloc,
@@ -347,26 +351,27 @@ static struct xml_conf_section *fpm_conf_all_sections[] = {
 	0
 };
 
-static int fpm_evaluate_full_path(char **path)
+static int fpm_evaluate_full_path(char **path) /* {{{ */
 {
 	if (**path != '/') {
 		char *full_path;
 
 		full_path = malloc(sizeof(PHP_PREFIX) + strlen(*path) + 1);
 
-		if (!full_path) return -1;
+		if (!full_path) { 
+			return -1;
+		}
 
 		sprintf(full_path, "%s/%s", PHP_PREFIX, *path);
-
 		free(*path);
-
 		*path = full_path;
 	}
 
 	return 0;
 }
+/* }}} */
 
-static int fpm_conf_process_all_pools()
+static int fpm_conf_process_all_pools() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -378,18 +383,13 @@ static int fpm_conf_process_all_pools()
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 
 		if (wp->config->listen_address && *wp->config->listen_address) {
-
 			wp->listen_address_domain = fpm_sockets_domain_from_address(wp->config->listen_address);
 
 			if (wp->listen_address_domain == FPM_AF_UNIX && *wp->config->listen_address != '/') {
 				fpm_evaluate_full_path(&wp->config->listen_address);
 			}
-
-		}
-		else {
-
+		} else {
 			wp->is_template = 1;
-
 		}
 
 		if (wp->config->request_slowlog_timeout) {
@@ -428,25 +428,23 @@ static int fpm_conf_process_all_pools()
 			}
 		}
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_conf_unlink_pid()
+int fpm_conf_unlink_pid() /* {{{ */
 {
 	if (fpm_global_config.pid_file) {
-
 		if (0 > unlink(fpm_global_config.pid_file)) {
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "unlink(\"%s\") failed", fpm_global_config.pid_file);
 			return -1;
 		}
-
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_conf_write_pid()
+int fpm_conf_write_pid() /* {{{ */
 {
 	int fd;
 
@@ -455,7 +453,6 @@ int fpm_conf_write_pid()
 		int len;
 
 		unlink(fpm_global_config.pid_file);
-
 		fd = creat(fpm_global_config.pid_file, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 		if (fd < 0) {
@@ -469,14 +466,13 @@ int fpm_conf_write_pid()
 			zlog(ZLOG_STUFF, ZLOG_SYSERROR, "write() failed");
 			return -1;
 		}
-
 		close(fd);
 	}
-
 	return 0;
 }
+/* }}} */
 
-static int fpm_conf_post_process()
+static int fpm_conf_post_process() /* {{{ */
 {
 	if (fpm_global_config.pid_file) {
 		fpm_evaluate_full_path(&fpm_global_config.pid_file);
@@ -494,16 +490,18 @@ static int fpm_conf_post_process()
 
 	return fpm_conf_process_all_pools();
 }
+/* }}} */
 
-static void fpm_conf_cleanup(int which, void *arg)
+static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 {
 	free(fpm_global_config.pid_file);
 	free(fpm_global_config.error_log);
 	fpm_global_config.pid_file = 0;
 	fpm_global_config.error_log = 0;
 }
+/* }}} */
 
-int fpm_conf_init_main()
+int fpm_conf_init_main() /* {{{ */
 {
 	char *filename = fpm_globals.config;
 	char *err;
@@ -535,3 +533,4 @@ int fpm_conf_init_main()
 
 	return 0;
 }
+/* }}} */

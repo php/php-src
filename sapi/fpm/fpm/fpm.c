@@ -23,7 +23,7 @@
 
 struct fpm_globals_s fpm_globals;
 
-int fpm_init(int argc, char **argv, char *config)
+int fpm_init(int argc, char **argv, char *config) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -51,10 +51,11 @@ int fpm_init(int argc, char **argv, char *config)
 
 	return 0;
 }
+/* }}} */
 
 /*	children: return listening socket
 	parent: never return */
-int fpm_run(int *max_requests)
+int fpm_run(int *max_requests) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -79,4 +80,5 @@ run_child: /* only workers reach this point */
 	*max_requests = fpm_globals.max_requests;
 	return fpm_globals.listening_socket;
 }
+/* }}} */
 

@@ -12,13 +12,12 @@
 #include "zlog.h"
 
 
-/* MAP_ANON is depricated, but not in macosx */
+/* MAP_ANON is deprecated, but not in macosx */
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 #define MAP_ANONYMOUS MAP_ANON
 #endif
 
-
-struct fpm_shm_s *fpm_shm_alloc(size_t sz)
+struct fpm_shm_s *fpm_shm_alloc(size_t sz) /* {{{ */
 {
 	struct fpm_shm_s *shm;
 
@@ -38,31 +37,31 @@ struct fpm_shm_s *fpm_shm_alloc(size_t sz)
 
 	shm->used = 0;
 	shm->sz = sz;
-
 	return shm;
 }
+/* }}} */
 
-static void fpm_shm_free(struct fpm_shm_s *shm, int do_unmap)
+static void fpm_shm_free(struct fpm_shm_s *shm, int do_unmap) /* {{{ */
 {
 	if (do_unmap) {
 		munmap(shm->mem, shm->sz);
 	}
-
 	free(shm);	
 }
+/* }}} */
 
-void fpm_shm_free_list(struct fpm_shm_s *shm, void *mem)
+void fpm_shm_free_list(struct fpm_shm_s *shm, void *mem) /* {{{ */
 {
 	struct fpm_shm_s *next;
 
 	for (; shm; shm = next) {
 		next = shm->next;
-
 		fpm_shm_free(shm, mem != shm->mem);
 	}
 }
+/* }}} */
 
-void *fpm_shm_alloc_chunk(struct fpm_shm_s **head, size_t sz, void **mem)
+void *fpm_shm_alloc_chunk(struct fpm_shm_s **head, size_t sz, void **mem) /* {{{ */
 {
 	size_t pagesize = getpagesize();
 	static const size_t cache_line_size = 16;
@@ -71,14 +70,12 @@ void *fpm_shm_alloc_chunk(struct fpm_shm_s **head, size_t sz, void **mem)
 	void *ret;
 
 	sz = (sz + cache_line_size - 1) & -cache_line_size;
-
 	shm = *head;
 
 	if (0 == shm || shm->sz - shm->used < sz) {
 		/* allocate one more shm segment */
 
 		aligned_sz = (sz + pagesize - 1) & -pagesize;
-
 		shm = fpm_shm_alloc(aligned_sz);
 
 		if (!shm) {
@@ -86,7 +83,11 @@ void *fpm_shm_alloc_chunk(struct fpm_shm_s **head, size_t sz, void **mem)
 		}
 
 		shm->next = *head;
-		if (shm->next) shm->next->prev = shm;
+
+		if (shm->next) {
+			shm->next->prev = shm;
+		}
+
 		shm->prev = 0;
 		*head = shm;
 	}
@@ -94,7 +95,7 @@ void *fpm_shm_alloc_chunk(struct fpm_shm_s **head, size_t sz, void **mem)
 	*mem = shm->mem;
 	ret = (char *) shm->mem + shm->used;
 	shm->used += sz;
-
 	return ret;
 }
+/* }}} */
 

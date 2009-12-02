@@ -39,7 +39,7 @@
 #endif
 
 
-static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC)
+static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC) /* {{{ */
 {
 	int callers_limit = 20;
 	pid_t pid = child->pid;
@@ -85,8 +85,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 			}
 
 			fprintf(slowlog, "%s()", buf);
-		}
-		else {
+		} else {
 			fprintf(slowlog, "???");
 		}
 
@@ -131,11 +130,11 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 			break;
 		}
 	}
-
 	return 0;
 }
+/* }}} */
 
-void fpm_php_trace(struct fpm_child_s *child)
+void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 {
 	TSRMLS_FETCH();
 	FILE *slowlog;
@@ -170,6 +169,7 @@ done0:
 
 	zlog(ZLOG_STUFF, ZLOG_NOTICE, "finished trace of %d", (int) child->pid);
 }
+/* }}} */
 
 #endif
 

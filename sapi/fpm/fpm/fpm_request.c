@@ -17,37 +17,33 @@
 
 #include "zlog.h"
 
-void fpm_request_accepting()
+void fpm_request_accepting() /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
 
 	slot = fpm_shm_slots_acquire(0, 0);
-
 	slot->request_stage = FPM_REQUEST_ACCEPTING;
-
 	fpm_clock_get(&slot->tv);
 	memset(slot->request_method, 0, sizeof(slot->request_method));
 	slot->content_length = 0;
 	memset(slot->script_filename, 0, sizeof(slot->script_filename));
-
 	fpm_shm_slots_release(slot);
 }
+/* }}} */
 
-void fpm_request_reading_headers()
+void fpm_request_reading_headers() /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
 
 	slot = fpm_shm_slots_acquire(0, 0);
-
 	slot->request_stage = FPM_REQUEST_READING_HEADERS;
-
 	fpm_clock_get(&slot->tv);
 	slot->accepted = slot->tv;
-
 	fpm_shm_slots_release(slot);
 }
+/* }}} */
 
-void fpm_request_info()
+void fpm_request_info() /* {{{ */
 {
 	TSRMLS_FETCH();
 	struct fpm_shm_slot_s *slot;
@@ -55,9 +51,7 @@ void fpm_request_info()
 	char *script_filename = fpm_php_script_filename(TSRMLS_C);
 
 	slot = fpm_shm_slots_acquire(0, 0);
-
 	slot->request_stage = FPM_REQUEST_INFO;
-
 	fpm_clock_get(&slot->tv);
 
 	if (request_method) {
@@ -74,47 +68,42 @@ void fpm_request_info()
 
 	fpm_shm_slots_release(slot);
 }
+/* }}} */
 
-void fpm_request_executing()
+void fpm_request_executing() /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
 
 	slot = fpm_shm_slots_acquire(0, 0);
-
 	slot->request_stage = FPM_REQUEST_EXECUTING;
-
 	fpm_clock_get(&slot->tv);
-
 	fpm_shm_slots_release(slot);
 }
+/* }}} */
 
-void fpm_request_finished()
+void fpm_request_finished() /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
 
 	slot = fpm_shm_slots_acquire(0, 0);
-
 	slot->request_stage = FPM_REQUEST_FINISHED;
-
 	fpm_clock_get(&slot->tv);
 	memset(&slot->accepted, 0, sizeof(slot->accepted));
-
 	fpm_shm_slots_release(slot);
 }
+/* }}} */
 
-void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout)
+void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout) /* {{{ */
 {
 	struct fpm_shm_slot_s *slot;
 	struct fpm_shm_slot_s slot_c;
 
 	slot = fpm_shm_slot(child);
-
 	if (!fpm_shm_slots_acquire(slot, 1)) {
 		return;
 	}
 
 	slot_c = *slot;
-
 	fpm_shm_slots_release(slot);
 
 #if HAVE_FPM_TRACE
@@ -146,19 +135,16 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 			zlog(ZLOG_STUFF, ZLOG_WARNING, "child %d, script '%s' (pool %s) executing too slow (%d.%06d sec), logging",
 				(int) child->pid, purified_script_filename, child->wp->config->name, (int) tv.tv_sec, (int) tv.tv_usec);
 		}
-
 		else
 #endif
 		if (terminate_timeout && tv.tv_sec >= terminate_timeout) {
-
 			str_purify_filename(purified_script_filename, slot_c.script_filename, sizeof(slot_c.script_filename));
-
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
 			zlog(ZLOG_STUFF, ZLOG_WARNING, "child %d, script '%s' (pool %s) execution timed out (%d.%06d sec), terminating",
 				(int) child->pid, purified_script_filename, child->wp->config->name, (int) tv.tv_sec, (int) tv.tv_usec);
 		}
 	}
-
 }
+/* }}} */
 

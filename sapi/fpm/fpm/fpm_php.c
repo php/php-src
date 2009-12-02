@@ -20,7 +20,7 @@
 #include "fpm_cleanup.h"
 #include "fpm_worker_pool.h"
 
-static int zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int stage TSRMLS_DC)
+static int zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int stage TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
@@ -42,8 +42,9 @@ static int zend_ini_alter_master(char *name, int name_length, char *new_value, i
 
 	return SUCCESS;
 }
+/* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS_DC) TSRMLS_DC)
+static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
 	char *s = 0, *e = value;
 
@@ -70,8 +71,9 @@ static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS
 		zend_disable(s, e - s TSRMLS_CC);
 	}
 }
+/* }}} */
 
-static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp)
+static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	TSRMLS_FETCH();
 	struct key_value_s *kv;
@@ -119,17 +121,18 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp)
 
 	return 0;
 }
+/* }}} */
 
-static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp)
+static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (wp->listen_address_domain == FPM_AF_INET) {
 		fcgi_set_allowed_clients(wp->config->allowed_clients);
 	}
-
 	return 0;
 }
+/* }}} */
 
-static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp)
+static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	char max_workers[10 + 1]; /* 4294967295 */
 	int len;
@@ -138,52 +141,58 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp)
 
 	fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, max_workers, len);
 	fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  max_workers, len);
-
 	return 0;
 }
+/* }}} */
 
-char *fpm_php_script_filename(TSRMLS_D)
+char *fpm_php_script_filename(TSRMLS_D) /* {{{ */
 {
 	return SG(request_info).path_translated;
 }
+/* }}} */
 
-char *fpm_php_request_method(TSRMLS_D)
+char *fpm_php_request_method(TSRMLS_D) /* {{{ */
 {
 	return (char *) SG(request_info).request_method;
 }
+/* }}} */
 
-size_t fpm_php_content_length(TSRMLS_D)
+size_t fpm_php_content_length(TSRMLS_D) /* {{{ */
 {
 	return SG(request_info).content_length;
 }
+/* }}} */
 
-static void fpm_php_cleanup(int which, void *arg)
+static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 {
 	TSRMLS_FETCH();
 	php_module_shutdown(TSRMLS_C);
 	sapi_shutdown();
 }
+/* }}} */
 
-void fpm_php_soft_quit()
+void fpm_php_soft_quit() /* {{{ */
 {
 	fcgi_set_in_shutdown(1);
 }
+/* }}} */
 
-int fpm_php_init_main()
+int fpm_php_init_main() /* {{{ */
 {
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
 
-int fpm_php_init_child(struct fpm_worker_pool_s *wp)
+int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (0 > fpm_php_apply_defines(wp) ||
 		0 > fpm_php_set_allowed_clients(wp)) {
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
+

@@ -18,7 +18,7 @@ struct cleanup_s {
 
 static struct fpm_array_s cleanups = { .sz = sizeof(struct cleanup_s) };
 
-int fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *arg)
+int fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *arg) /* {{{ */
 {
 	struct cleanup_s *c;
 
@@ -34,8 +34,9 @@ int fpm_cleanup_add(int type, void (*cleanup)(int, void *), void *arg)
 
 	return 0;
 }
+/* }}} */
 
-void fpm_cleanups_run(int type)
+void fpm_cleanups_run(int type) /* {{{ */
 {
 	struct cleanup_s *c = fpm_array_item_last(&cleanups);
 	int cl = cleanups.used;
@@ -48,4 +49,5 @@ void fpm_cleanups_run(int type)
 
 	fpm_array_free(&cleanups);
 }
+/* }}} */
 

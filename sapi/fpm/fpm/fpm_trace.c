@@ -8,7 +8,7 @@
 
 #include "fpm_trace.h"
 
-int fpm_trace_get_strz(char *buf, size_t sz, long addr)
+int fpm_trace_get_strz(char *buf, size_t sz, long addr) /* {{{ */
 {
 	int i;
 	long l;
@@ -19,28 +19,23 @@ int fpm_trace_get_strz(char *buf, size_t sz, long addr)
 	}
 
 	i = l % SIZEOF_LONG;
-
 	l -= i;
-
 	for (addr = l; ; addr += SIZEOF_LONG) {
-
 		if (0 > fpm_trace_get_long(addr, &l)) {
 			return -1;
 		}
-
 		for ( ; i < SIZEOF_LONG; i++) {
 			--sz;
-
 			if (sz && lc[i]) {
 				*buf++ = lc[i];
 				continue;
 			}
-
 			*buf = '\0';
 			return 0;
 		}
-
 		i = 0;
 	}
 }
+/* }}} */
+
 

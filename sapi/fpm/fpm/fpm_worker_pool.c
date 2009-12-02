@@ -17,7 +17,7 @@
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
 
-static void fpm_worker_pool_cleanup(int which, void *arg)
+static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp, *wp_next;
 
@@ -33,37 +33,35 @@ static void fpm_worker_pool_cleanup(int which, void *arg)
 		free(wp->home);
 		free(wp);
 	}
-
 	fpm_worker_all_pools = 0;
 }
+/* }}} */
 
-struct fpm_worker_pool_s *fpm_worker_pool_alloc()
+struct fpm_worker_pool_s *fpm_worker_pool_alloc() /* {{{ */
 {
 	struct fpm_worker_pool_s *ret;
 
 	ret = malloc(sizeof(struct fpm_worker_pool_s));
-
 	if (!ret) {
 		return 0;
 	}
 
 	memset(ret, 0, sizeof(struct fpm_worker_pool_s));
-
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = ret;
 	}
 
 	fpm_array_init(&ret->slots_used, sizeof(struct fpm_shm_slot_ptr_s), 50);
 	fpm_array_init(&ret->slots_free, sizeof(struct fpm_shm_slot_ptr_s), 50);
-
 	return ret;
 }
+/* }}} */
 
-int fpm_worker_pool_init_main()
+int fpm_worker_pool_init_main() /* {{{ */
 {
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_worker_pool_cleanup, 0)) {
 		return -1;
 	}
-
 	return 0;
 }
+/* }}} */
