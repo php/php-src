@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
+- Fixed incorrect decoding of 5-byte BIT sequences in mysqlnd. (Andrey)
 - Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
   single text node when using libxml2.7.3+. (Kalle)
   
