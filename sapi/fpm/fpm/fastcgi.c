@@ -249,6 +249,11 @@ int fcgi_is_fastcgi(void)
 	}
 }
 
+void fcgi_set_is_fastcgi(int new_value)
+{
+	    is_fastcgi = new_value;
+}
+
 void fcgi_set_in_shutdown(int new_value)
 {
 	in_shutdown = new_value;
@@ -875,7 +880,7 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 	return n;
 }
 
-static inline void fcgi_close(fcgi_request *req, int force, int destroy)
+void fcgi_close(fcgi_request *req, int force, int destroy)
 {
 	if (destroy && req->env) {
 		zend_hash_destroy(req->env);
