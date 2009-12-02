@@ -6,7 +6,7 @@
 #define FPM_ATOMIC_H 1
 
 #if HAVE_INTTYPES_H
-# include <stdint.h>
+# include <inttypes.h>
 #else
 # include <stdint.h>
 #endif
