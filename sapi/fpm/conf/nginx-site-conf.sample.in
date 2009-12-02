@@ -1,0 +1,46 @@
+# @php_fpm_bin@ - PHP FastCGI Process Manager 'PHP-FPM'
+# 
+# nginx-site-conf.sample:
+# Php Site configuration for nginx webserver
+# 
+# 1. set $site_root /path/to/your/website;
+# 2. Rename this file. Copy it to /etc/nginx/sites-available, /etc/nginx/sites-enabled
+# 3. Restart nginx webserver, and @php_fpm_bin@ service.
+# 
+
+server {
+
+	set $site_root  /var/www/nginx-site;
+	server_name     localhost;
+	listen          80;
+
+	access_log  /var/log/nginx/localhost.access.log;
+
+	location / {
+		root   $site_root;
+		index  index.html index.htm;
+	}
+
+	#error_page  404  /404.html;
+
+	# redirect server error pages to the static page /50x.html
+	#
+	error_page   500 502 503 504  /50x.html;
+	location = /50x.html {
+		root   /var/www/nginx-default;
+	}
+
+	# pass the *.php scripts to @php_fpm_bin@ listening on port 9000
+	#
+	location ~ \.php$ {
+
+		root $site_root;
+		fastcgi_pass   127.0.0.1:9000;
+		fastcgi_index  index.php;
+
+		include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SERVER_NAME $http_host;
+        fastcgi_ignore_client_abort on;
+	}
+}
