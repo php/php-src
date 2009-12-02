@@ -359,9 +359,6 @@ dnl in -lc, -lbind and -lresolv
 PHP_CHECK_FUNC(inet_aton, resolv, bind)
 PHP_CHECK_FUNC(dn_skipname, resolv, bind)
 
-dnl Some systems (like OpenSolaris) do not have nanosleep in libc
-PHP_CHECK_FUNC(nanosleep, rt)
-
 dnl Then headers.
 dnl -------------------------------------------------------------------------
 
@@ -593,6 +590,9 @@ usleep \
 utime \
 vsnprintf \
 )
+
+dnl Some systems (like OpenSolaris) do not have nanosleep in libc
+AC_CACHE_CHECK([for nanosleep], ac_cv_func_nanosleep, [PHP_CHECK_FUNC_LIB(nanosleep, rt)])
 
 dnl Check for getaddrinfo, should be a better way, but...
 dnl Also check for working getaddrinfo
