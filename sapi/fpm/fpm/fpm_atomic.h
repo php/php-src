@@ -37,7 +37,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
     return res;
 }
 
-#elif ( __amd64__ || __amd64 )
+#elif ( __amd64__ || __amd64 || __x86_64__ )
 
 typedef int64_t                     atomic_int_t;
 typedef uint64_t                    atomic_uint_t;
