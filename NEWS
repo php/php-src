@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 - Fixed bug #49472 (Constants defined in Interfaces can be overridden).
   (Felipe)
+- Fixed bug #47848 (importNode doesn't preserve attribute namespaces). (Rob)
 - Fixed bug #45120 (PDOStatement->execute() returns true then false for same
   statement). (Pierrick)
 
