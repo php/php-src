@@ -97,6 +97,8 @@ PHP                                                                        NEWS
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
+- Fixed bug #45120 (PDOStatement->execute() returns true then false for same
+  statement). (Pierrick)
 
 
 19 Nov 2009, PHP 5.3.1

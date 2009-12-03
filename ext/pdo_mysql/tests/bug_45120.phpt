@@ -42,8 +42,6 @@ bug_45120($db);
 
 print "done!";
 ?>
---XFAIL--
-This is an open PDO bug. It is not a PDO_MYSQL bug
 --EXPECT--
 Emulated Prepared Statements
 Native Prepared Statements
