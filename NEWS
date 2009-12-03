@@ -14,7 +14,8 @@ PHP                                                                        NEWS
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 - Fixed bug #49472 (Constants defined in Interfaces can be overridden).
   (Felipe)
-
+- Fixed bug #45120 (PDOStatement->execute() returns true then false for same
+  statement). (Pierrick)
 
 27 Nov 2009, PHP 5.2.12RC3
 - Fixed break in the build chain introduced in 5.2.12RC2 (Jani)

@@ -509,6 +509,7 @@ static PHP_METHOD(PDOStatement, execute)
 			/* no changes were made */
 			stmt->active_query_string = stmt->query_string;
 			stmt->active_query_stringlen = stmt->query_stringlen;
+			ret = 1;
 		} else if (ret == -1) {
 			/* something broke */
 			PDO_HANDLE_STMT_ERR();
