@@ -41,6 +41,12 @@
 # include "php_sockets.h"
 # include "win32/sockets.h"
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
+# ifdef EPROTONOSUPPORT
+#  undef EPROTONOSUPPORT
+# endif
+# ifdef ECONNRESET
+#  undef ECONNRESET
+# endif
 # define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
 # define ECONNRESET		WSAECONNRESET
 # ifdef errno
