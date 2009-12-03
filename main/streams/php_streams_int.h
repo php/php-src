@@ -48,8 +48,11 @@
 
 #define CHUNK_SIZE	8192
 
-#if defined(PHP_WIN32) && !defined(EWOULDBLOCK)
-#define EWOULDBLOCK WSAEWOULDBLOCK
+#ifdef PHP_WIN32
+# ifdef EWOULDBLOCK
+#  undef EWOULDBLOCK
+# endif
+# define EWOULDBLOCK WSAEWOULDBLOCK
 #endif
 
 #ifndef S_ISREG
