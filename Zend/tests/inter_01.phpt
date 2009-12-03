@@ -15,4 +15,4 @@ class foobar implements foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot inherit previously-inherited constant foo from interface foo in %s on line %d
+Fatal error: Cannot inherit previously-inherited or override constant foo from interface foo in %s on line %d

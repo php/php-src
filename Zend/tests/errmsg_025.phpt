@@ -17,4 +17,4 @@ class test implements test1, test2 {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Cannot inherit previously-inherited constant FOO from interface test2 in %s on line %d
+Fatal error: Cannot inherit previously-inherited or override constant FOO from interface test2 in %s on line %d
