@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
   non-existent file). (Dmitry)
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
+- Fixed bug #49472 (Constants defined in Interfaces can be overridden).
+  (Felipe)
 
 
 27 Nov 2009, PHP 5.2.12RC3

@@ -2333,20 +2333,28 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	}
 }
 
-
 static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval **parent_constant, zend_hash_key *hash_key, zend_class_entry *iface)
 {
 	zval **old_constant;
 
 	if (zend_hash_quick_find(child_constants_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**)&old_constant) == SUCCESS) {
-	  if (*old_constant != *parent_constant) {
-			zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited constant %s from interface %s", hash_key->arKey, iface->name);
+		if (*old_constant != *parent_constant) {
+			zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->arKey, iface->name);
 		}
 		return 0;
 	}
 	return 1;
 }
 
+static int do_interface_constant_check(zval **val, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	zend_class_entry **iface = va_arg(args, zend_class_entry**);
+
+	do_inherit_constant_check(&(*iface)->constants_table, val, key, *iface);
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
@@ -2366,7 +2374,10 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			}
 		}
 	}
-	if (!ignore) {
+	if (ignore) {
+		/* Check for attempt to redeclare interface constants */
+		zend_hash_apply_with_arguments(&ce->constants_table, (apply_func_args_t) do_interface_constant_check, 1, &iface);
+	} else {
 		if (ce->num_interfaces >= current_iface_num) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (++current_iface_num));
