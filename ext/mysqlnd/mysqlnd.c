@@ -2393,7 +2393,9 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, 
 	if (!conn || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
+#if 0
 	DBG_RETURN((void *)conn + sizeof(MYSQLND) + plugin_id * sizeof(void *));
+#endif
 }
 /* }}} */
 
