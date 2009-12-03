@@ -92,6 +92,8 @@ PHP                                                                        NEWS
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
+- Fixed bug #49472 (Constants defined in Interfaces can be overridden).
+  (Felipe)
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
