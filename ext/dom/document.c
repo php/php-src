@@ -1205,7 +1205,18 @@ PHP_FUNCTION(dom_document_import_node)
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
-		
+
+		if ((retnodep->type == XML_ATTRIBUTE_NODE) && (nodep->ns != NULL)) {
+			xmlNsPtr nsptr = NULL;
+			xmlNodePtr root = xmlDocGetRootElement(docp);
+
+			nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
+			if (nsptr == NULL) {
+				int errorcode;
+				nsptr = dom_get_ns(root, nodep->ns->href, &errorcode, nodep->ns->prefix);
+			}
+			xmlSetNs(retnodep, nsptr);
+		}
 	}
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) retnodep, &ret, intern);
