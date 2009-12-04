@@ -569,7 +569,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 			p = new_value;
 		}
 
-		if (php_check_open_basedir(p TSRMLS_CC)) {
+		if (*p && php_check_open_basedir(p TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
@@ -1817,7 +1817,10 @@ static PHP_FUNCTION(session_unset)
 	}
 
 	IF_SESSION_VARS() {
-		HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
+		HashTable *ht;
+
+		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
+		ht = Z_ARRVAL_P(PS(http_session_vars));
 
 		/* Clean $_SESSION. */
 		zend_hash_clean(ht);
