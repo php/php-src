@@ -3,7 +3,9 @@ PHP                                                                        NEWS
 ?? Dec 2009, PHP 5.2.12RC4
 - Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
   single text node when using libxml2.7.3+. (Kalle)
-
+  
+- Protect http_session_vars from interrupt corruption and improve save_path
+  check. (Stas)
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
