@@ -17,4 +17,4 @@ echo "Done\n";
 ?>
 --EXPECTF--
 
-Fatal error: Cannot inherit previously-inherited constant FOO from interface I2 in %s on line 10
+Fatal error: Cannot inherit previously-inherited or override constant FOO from interface I2 in %s on line 10
