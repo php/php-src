@@ -1965,7 +1965,7 @@ static PHP_FUNCTION(session_unregister)
 
 	IF_SESSION_VARS() {
 		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
-		PS_DEL_VARL(Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name));
+		PS_DEL_VARL(p_name, p_name_len);
 	}
 
 	RETURN_TRUE;
