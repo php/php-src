@@ -509,9 +509,6 @@ dnl }}}
 dnl configure options {{{
 AC_DEFUN([AC_FPM_ARGS],
 [
-  PHP_ARG_WITH(fpm-bin,,
-  [  --with-fpm-bin[=PATH]   Set the path for php-fpm binary. (default: \$bindir/php-fpm)], yes, no)
-
   PHP_ARG_WITH(fpm-conf,,
   [  --with-fpm-conf[=PATH]  Set the path for php-fpm configuration file. (default: \$sysconfdir/php-fpm.conf)], yes, no)
 
@@ -531,28 +528,23 @@ AC_DEFUN([AC_FPM_ARGS],
 
 AC_DEFUN([AC_FPM_VARS],
 [
-  if test -z "$PHP_FPM_BIN" -o "$PHP_FPM_BIN" = "yes" -o "$PHP_FPM_BIN" = "no"; then
-    php_fpm_bin_path="$bindir/php-fpm"
-  else
-    php_fpm_bin_path="$PHP_FPM_BIN"
-  fi
-  php_fpm_bin_dir=`dirname $php_fpm_bin_path`
-  php_fpm_bin=`basename $php_fpm_bin_path`
-
- if test -z "$PHP_FPM_CONF" -o "$PHP_FPM_CONF" = "yes"; then
-    php_fpm_conf_path="$sysconfdir/php-fpm.conf"
-  elif test "$PHP_FPM_CONF" = "no"; then
+  if test -z "$PHP_FPM_CONF" -o "$PHP_FPM_CONF" = "yes" -o "$PHP_FPM_CONF" = "no"; then
     php_fpm_conf_path=""
   else
     php_fpm_conf_path="$PHP_FPM_CONF"
   fi
 
   if test -z "$php_fpm_conf_path"; then
-    php_fpm_conf=""
-    php_fpm_conf_dir=""
+    php_fpm_conf_path=`eval echo "$sysconfdir"`
+    php_fpm_conf_path="$php_fpm_conf_path/php-fpm.conf"
+  fi
+
+  if test -d "$php_fpm_conf_path"; then 
+    php_fpm_conf_dir="$php_fpm_conf"
+    php_fpm_conf="$php_fpm_conf/php-fpm.conf"
   else
-    php_fpm_conf=`basename $php_fpm_conf_path`
     php_fpm_conf_dir=`dirname $php_fpm_conf_path`
+    php_fpm_conf=`basename $php_fpm_conf_path`
   fi
 
   if test -z "$PHP_FPM_LOG" -o "$PHP_FPM_LOG" = "yes" -o "$PHP_FPM_LOG" = "no"; then
@@ -583,24 +575,17 @@ AC_DEFUN([AC_FPM_VARS],
 
 
   PHP_SUBST_OLD(fpm_version)
-  PHP_SUBST_OLD(php_fpm_bin)
-  PHP_SUBST_OLD(php_fpm_bin_path)
-  PHP_SUBST_OLD(php_fpm_conf)
-  PHP_SUBST_OLD(php_fpm_conf_path)
+  PHP_SUBST_OLD(php_fpm_conf_dir)
   PHP_SUBST_OLD(php_fpm_log_path)
   PHP_SUBST_OLD(php_fpm_pid_path)
-  PHP_SUBST_OLD(php_fpm_bin_dir)
-  PHP_SUBST_OLD(php_fpm_conf_dir)
   PHP_SUBST_OLD(php_fpm_log_dir)
   PHP_SUBST_OLD(php_fpm_pid_dir)
   PHP_SUBST_OLD(php_fpm_user)
   PHP_SUBST_OLD(php_fpm_group)
 
-
-  AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
-  AC_DEFINE_UNQUOTED(PHP_FPM_BIN, "$php_fpm_bin", [fpm binary executable])
-  AC_DEFINE_UNQUOTED(PHP_FPM_BIN_PATH, "$php_fpm_bin_path", [fpm bin file path])
+  AC_DEFINE_UNQUOTED(PHP_FPM_CONF_DIR, "$php_fpm_conf_dir", [fpm conf file dir])
   AC_DEFINE_UNQUOTED(PHP_FPM_CONF_PATH, "$php_fpm_conf_path", [fpm conf file path])
+  AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
   AC_DEFINE_UNQUOTED(PHP_FPM_LOG_PATH, "$php_fpm_log_path", [fpm log file path])
   AC_DEFINE_UNQUOTED(PHP_FPM_PID_PATH, "$php_fpm_pid_path", [fpm pid file path])
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
@@ -611,10 +596,10 @@ AC_DEFUN([AC_FPM_VARS],
 
 AC_DEFUN([AC_FPM_OUTPUT],
 [
-  PHP_OUTPUT(sapi/fpm/conf/$php_fpm_conf:sapi/fpm/conf/php-fpm.conf.in)
-  PHP_OUTPUT(sapi/fpm/conf/init.d.$php_fpm_bin:sapi/fpm/conf/init.d.php-fpm.in)
+  PHP_OUTPUT(sapi/fpm/conf/php-fpm.conf:sapi/fpm/conf/php-fpm.conf.in)
+  PHP_OUTPUT(sapi/fpm/conf/init.d.php-fpm:sapi/fpm/conf/init.d.php-fpm.in)
   PHP_OUTPUT(sapi/fpm/conf/nginx-site-conf.sample:sapi/fpm/conf/nginx-site-conf.sample.in)
-  PHP_OUTPUT(sapi/fpm/$php_fpm_bin.1:sapi/fpm/man/php-fpm.1.in)
+  PHP_OUTPUT(sapi/fpm/php-fpm.1:sapi/fpm/man/php-fpm.1.in)
 ])
 
 
@@ -653,7 +638,7 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/fpm/Makefile.frag)
 
-  SAPI_FPM_PATH=sapi/fpm/$php_fpm_bin
+  SAPI_FPM_PATH=sapi/fpm/php-fpm
   PHP_SUBST(SAPI_FPM_PATH)
   
   mkdir -p sapi/fpm/fpm
