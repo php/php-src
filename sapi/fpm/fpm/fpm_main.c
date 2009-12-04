@@ -1774,6 +1774,15 @@ consult the installation file that came with this distribution, or visit \n\
 
 			fpm_request_info();
 
+			/* request startup only after we've done all we can to
+			 *            get path_translated */
+			if (php_request_startup(TSRMLS_C) == FAILURE) {
+				fcgi_finish_request(&request, 1);
+				SG(server_context) = NULL;
+				php_module_shutdown(TSRMLS_C);
+				return FAILURE;
+			}
+
 			if (SG(request_info).path_translated) {
 				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
 					zend_try {
