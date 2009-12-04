@@ -1817,7 +1817,10 @@ static PHP_FUNCTION(session_unset)
 	}
 
 	IF_SESSION_VARS() {
-		HashTable *ht = Z_ARRVAL_P(PS(http_session_vars));
+		HashTable *ht;
+
+		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
+		ht = Z_ARRVAL_P(PS(http_session_vars));
 
 		if (PG(register_globals)) {
 			uint str_len;
@@ -1899,7 +1902,10 @@ static PHP_FUNCTION(session_unregister)
 	}
 	convert_to_string_ex(p_name);
 
-	PS_DEL_VARL(Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name));
+	IF_SESSION_VARS() {
+		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
+		PS_DEL_VARL(Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name));
+	}
 
 	RETURN_TRUE;
 }
