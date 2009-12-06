@@ -33,7 +33,8 @@ PHP                                                                        NEWS
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Jani)
 - Fixed bug #50340 (php.ini parser does not allow spaces in ini keys). (Jani)
-- Fixed bug #50323 (Allow use of ; in values via ;; in PDO DSN). (Ilia)
+- Fixed bug #50323 (Allow use of ; in values via ;; in PDO DSN).
+  (Ilia, Pierrick)
 - Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
   (Felipe)
 - Fixed bug #50282 (xmlrpc_encode_request() changes object into array in 
