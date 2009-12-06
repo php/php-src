@@ -245,7 +245,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 				semi = i++;
 				break;
 			}
-			if (data_source[i] == ';') {
+			if (data_source[i] == ';' && ((i + 1 >= data_source_len) || data_source[i+1] != ';')) {
 				semi = i++;
 				break;
 			}
