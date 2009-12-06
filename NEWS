@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 - Fixed bug #50174 (Incorrectly matched docComment). (Felipe)
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
   non-existant file). (Dmitry)
+- Fixed bug #50162 (Memory leak when fetching timestamp column from Oracle
+  database). (Felipe)
 - Fixed bug #50159 (wrong working directory in symlinked files). (Dmitry)
 - Fixed bug #50158 (FILTER_VALIDATE_EMAIL fails with valid addresses
   containing = or ?). (Pierrick)
@@ -102,7 +104,8 @@ PHP                                                                        NEWS
 - Fixed bug #47848 (importNode doesn't preserve attribute namespaces). (Rob)
 - Fixed bug #45120 (PDOStatement->execute() returns true then false for same
   statement). (Pierrick)
-
+- Fixed bug #34852 (Failure in odbc_exec() using oracle-supplied odbc
+  driver). (tim dot tassonis at trivadis dot com)
 
 19 Nov 2009, PHP 5.3.1
 - Upgraded bundled sqlite to version 3.6.19. (Scott)
