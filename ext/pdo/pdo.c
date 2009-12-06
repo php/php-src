@@ -222,6 +222,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 	int optstart = 0;
 	int nlen;
 	int n_matches = 0;
+	int n_semicolumns = 0;
 
 	i = 0;
 	while (i < data_source_len) {
@@ -240,14 +241,21 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 
 		/* now we're looking for VALUE; or just VALUE<NUL> */
 		semi = -1;
+		n_semicolumns = 0;
 		while (i < data_source_len) {
 			if (data_source[i] == '\0') {
 				semi = i++;
 				break;
 			}
-			if (data_source[i] == ';' && ((i + 1 >= data_source_len) || data_source[i+1] != ';')) {
-				semi = i++;
-				break;
+			if (data_source[i] == ';') {
+				if ((i + 1 >= data_source_len) || data_source[i+1] != ';') {
+					semi = i++;
+					break;
+				} else {
+					n_semicolumns++; 
+					i += 2;
+					continue;
+				}
 			}
 			++i;
 		}
@@ -264,7 +272,31 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 				if (parsed[j].freeme) {
 					efree(parsed[j].optval);
 				}
-				parsed[j].optval = estrndup(data_source + valstart, semi - valstart);
+
+				if (n_semicolumns == 0) {
+					parsed[j].optval = estrndup(data_source + valstart, semi - valstart - n_semicolumns);
+				} else {
+					int vlen = semi - valstart;
+					char *orig_val = data_source + valstart;
+					char *new_val  = (char *) emalloc(vlen - n_semicolumns + 1);
+				
+					parsed[j].optval = new_val;
+
+					while (vlen && *orig_val) {
+						*new_val = *orig_val;
+						new_val++;
+
+						if (*orig_val == ';') {
+							orig_val+=2; 
+							vlen-=2;
+						} else {
+							orig_val++;
+							vlen--;
+						}
+					}
+					*new_val = '\0';
+				}
+
 				parsed[j].freeme = 1;
 				++n_matches;
 				break;
