@@ -981,6 +981,10 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 									NULL, 0, NULL, &displaysize);
 				displaysize = displaysize <= result->longreadlen ? displaysize : 
 								result->longreadlen;
+				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
+				if (result->values[i].coltype == SQL_TIMESTAMP) {
+					displaysize += 3;
+				}
 				result->values[i].value = (char *)emalloc(displaysize + 1);
 				rc = SQLBindCol(result->stmt, (SQLUSMALLINT)(i+1), SQL_C_CHAR, result->values[i].value,
 							displaysize + 1, &result->values[i].vallen);
@@ -1176,13 +1180,7 @@ PHP_FUNCTION(odbc_prepare)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			*/
-			int cursortype = ODBCG(default_cursortype);
-			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, cursortype) == SQL_ERROR) {
-				odbc_sql_error(conn, result->stmt, " SQLSetStmtOption");
-				SQLFreeStmt(result->stmt, SQL_DROP);
-				efree(result);
-				RETURN_FALSE;
-			}
+			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
 		}
 	} else {
 		result->fetch_abs = 0;
@@ -1565,13 +1563,7 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
-			int cursortype = ODBCG(default_cursortype);
-			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, cursortype) == SQL_ERROR) {
-				odbc_sql_error(conn, result->stmt, " SQLSetStmtOption");
-				SQLFreeStmt(result->stmt, SQL_DROP);
-				efree(result);
-				RETURN_FALSE;
-			}
+			SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, ODBCG(default_cursortype));
 		}
 	} else {
 		result->fetch_abs = 0;
