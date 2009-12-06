@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
 
+- Protect http_session_vars from interrupt corruption and improve save_path
+  check. (Stas)
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
 - Fixed incorrect decoding of 5-byte BIT sequences in mysqlnd. (Andrey)
