@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Jani)
+- Fixed bug #50323 (Allow use of ; in values via ;; in PDO DSN). (Ilia)
 - Fixed bug #50266 (conflicting types for llabs). (Jani)
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
   non-existent file). (Dmitry)
