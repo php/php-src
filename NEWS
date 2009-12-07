@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50351 (performance regression handling objects, ten times slower
+  in 5.3 than in 5.2). (Dmitry)
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Jani)
 - Fixed bug #50340 (php.ini parser does not allow spaces in ini keys). (Jani)
