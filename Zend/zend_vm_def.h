@@ -1100,7 +1100,7 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	FREE_OP1_VAR_PTR();
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);

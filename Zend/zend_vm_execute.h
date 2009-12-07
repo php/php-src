@@ -9864,7 +9864,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -11667,7 +11667,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -13416,7 +13416,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -14756,7 +14756,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -15807,7 +15807,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -23567,7 +23567,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	}
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -25204,7 +25204,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	}
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -26844,7 +26844,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	}
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -28074,7 +28074,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 	}
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
@@ -29026,7 +29026,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	}
 
 	/* We are going to assign the result by reference */
-	if (opline->extended_value) {
+	if (opline->extended_value && EX_T(opline->result.u.var).var.ptr_ptr) {
 		Z_DELREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(EX_T(opline->result.u.var).var.ptr_ptr);
 		Z_ADDREF_PP(EX_T(opline->result.u.var).var.ptr_ptr);
