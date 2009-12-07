@@ -123,6 +123,7 @@ static void php_filter_strip(zval *value, long flags)
 	for (i = 0; i < Z_STRLEN_P(value); i++) {
 		if ((str[i] > 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
+		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
 		} else {
 			buf[c] = str[i];
 			++c;
