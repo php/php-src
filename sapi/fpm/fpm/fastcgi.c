@@ -922,6 +922,7 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 		close(req->fd);
 #endif
 		req->fd = -1;
+		fpm_request_finished();
 	}
 }
 
@@ -968,6 +969,8 @@ int fcgi_accept_request(fcgi_request *req)
 					sa_t sa;
 					socklen_t len = sizeof(sa);
 
+					fpm_request_accepting();
+
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);
 					FCGI_UNLOCK(req->listen_socket);
@@ -1007,6 +1010,8 @@ int fcgi_accept_request(fcgi_request *req)
 					struct pollfd fds;
 					int ret;
 
+					fpm_request_reading_headers();
+
 					fds.fd = req->fd;
 					fds.events = POLLIN;
 					fds.revents = 0;
@@ -1019,6 +1024,8 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
+					fpm_request_reading_headers();
+
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};
 						fd_set set;
