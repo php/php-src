@@ -566,6 +566,8 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 					this_char = ((c & 0x0f) << 12) | ((str[pos + 1] & 0x3f) << 6) | (str[pos + 2] & 0x3f);
 					if (this_char < 0x800) {
 						MB_FAILURE(pos);
+					} else if (this_char >= 0xd800 && this_char <= 0xdfff) {
+						MB_FAILURE(pos);
 					}
 					MB_WRITE((unsigned char)c);
 					MB_WRITE((unsigned char)str[pos + 1]);
