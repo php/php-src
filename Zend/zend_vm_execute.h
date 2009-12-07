@@ -8851,8 +8851,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-	zval *array = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+
+	zval *array = EX_T(opline->op1.u.var).var.ptr;
 	zval **value;
 	char *str_key;
 	uint str_key_len;
@@ -8861,8 +8861,6 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zend_object_iterator *iter = NULL;
 	int key_type = 0;
 	zend_bool use_key = (zend_bool)(opline->extended_value & ZEND_FE_FETCH_WITH_KEY);
-
-	PZVAL_LOCK(array);
 
 	switch (zend_iterator_unwrap(array, &iter TSRMLS_CC)) {
 		default:
