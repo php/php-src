@@ -42,10 +42,14 @@ var_dump(_bin2hex(htmlentities("\xe0\x80\x80\xe0\xa0\x80", ENT_QUOTES | ENT_IGNO
 var_dump(_bin2hex(htmlentities("\xf0\x80\x80\x80\xf0\x90\x80\x80", ENT_QUOTES | ENT_IGNORE, "UTF-8")));
 
 echo "--\n";
-// UTF-8: alternative (invalid) UTF-8 sequence
+// UTF-8: alternative (invalid) UTF-8 sequence / surrogate pairs
 var_dump(_bin2hex(htmlspecialchars("\xc0\xa6", ENT_QUOTES, 'UTF-8')));
 var_dump(_bin2hex(htmlspecialchars("\xe0\x80\xa6", ENT_QUOTES, 'UTF-8')));
 var_dump(_bin2hex(htmlspecialchars("\xf0\x80\x80\xa6", ENT_QUOTES, 'UTF-8')));
+var_dump(_bin2hex(htmlspecialchars("\xec\xbf\xbf", ENT_QUOTES, 'UTF-8')));
+var_dump(_bin2hex(htmlspecialchars("\xed\xa0\x80", ENT_QUOTES, 'UTF-8')));
+var_dump(_bin2hex(htmlspecialchars("\xed\xbf\xbf", ENT_QUOTES, 'UTF-8')));
+var_dump(_bin2hex(htmlspecialchars("\xee\x80\x80", ENT_QUOTES, 'UTF-8')));
 
 // Shift_JIS: non-lead byte >= 0x80
 var_dump(_bin2hex(htmlspecialchars("\x80", ENT_QUOTES, 'Shift_JIS')));
@@ -168,6 +172,10 @@ string(8) "f0908080"
 string(0) ""
 string(0) ""
 string(0) ""
+string(6) "ecbfbf"
+string(0) ""
+string(0) ""
+string(6) "ee8080"
 string(2) "80"
 string(2) "a0"
 string(2) "a1"
