@@ -88,6 +88,7 @@ PHP                                                                        NEWS
 - Fixed bug #49936 (crash with ftp stream in php_stream_context_get_option()).
   (Pierrick)
 - Fixed bug #49921 (Curl post upload functions changed). (Ilia)
+- Fixed bug #49866 (Making reference on string offsets crashes PHP). (Dmitry)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia,
   sjoerd at php dot net)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
