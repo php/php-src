@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
+- Added realpath_cache_size() and realpath_cache_get() functions. (Stas)
 - Added FILTER_FLAG_STRIP_BACKTICK option to the filter extension. (Ilia)
 - Added protection for $_SESSION from interrupt corruption and improved
   "session.save_path" check. (Stas)
@@ -21,7 +22,6 @@ PHP                                                                        NEWS
 - Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
-- Added realpath_cache_size() and realpath_cache_get(). (Stas)
 
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
