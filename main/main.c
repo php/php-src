@@ -883,8 +883,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	if (docref_buf) {
 		efree(docref_buf);
 	}
-	php_error(type, "%s", message);
-	efree(message);
 
 	if (PG(track_errors) && module_initialized && 
 			(!EG(user_error_handler) || !(EG(user_error_handler_error_reporting) & type))) {
@@ -899,6 +897,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		}
 	}
 	efree(buffer);
+
+	php_error(type, "%s", message);
+	efree(message);
 }
 /* }}} */
 
