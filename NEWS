@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.2
-- Upgraded bundled sqlite to version 3.6.20. (Ilia)
+- Upgraded bundled sqlite to version 3.6.21. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
 - Changed gmp_strval() to use full range from 2 to 62, and -2 to -36. FR #50283

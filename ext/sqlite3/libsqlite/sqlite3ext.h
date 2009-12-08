@@ -14,8 +14,6 @@
 ** an SQLite instance.  Shared libraries that intend to be loaded
 ** as extensions by SQLite should #include this file instead of 
 ** sqlite3.h.
-**
-** @(#) $Id$
 */
 #ifndef _SQLITE3EXT_H_
 #define _SQLITE3EXT_H_
