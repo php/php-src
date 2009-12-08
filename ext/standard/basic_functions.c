@@ -1297,6 +1297,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_clearstatcache, 0, 0, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_realpath_cache_size, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_realpath_cache_get, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_fileperms, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -3226,6 +3232,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(disk_total_space,												arginfo_disk_total_space)
 	PHP_FE(disk_free_space,													arginfo_disk_free_space)
 	PHP_FALIAS(diskfreespace,		disk_free_space,						arginfo_disk_free_space)
+	PHP_FE(realpath_cache_size,												arginfo_realpath_cache_size)
+	PHP_FE(realpath_cache_get,												arginfo_realpath_cache_get)
 
 	/* functions from mail.c */
 	PHP_FE(mail,															arginfo_mail)

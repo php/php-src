@@ -590,6 +590,22 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 }
 /* }}} */
 
+CWD_API int realpath_cache_size() 
+{
+	return CWDG(realpath_cache_size);
+}
+
+CWD_API int realpath_cache_max_buckets() 
+{
+	return (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+}
+
+CWD_API realpath_cache_bucket** realpath_cache_get_buckets() 
+{
+	return CWDG(realpath_cache);
+}
+
+
 #undef LINK_MAX
 #define LINK_MAX 32
 
