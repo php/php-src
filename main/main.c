@@ -284,17 +284,17 @@ static ZEND_INI_MH(OnUpdateOutputEncoding)
 /* }}} */
 
 #define PHP_INI_OPTION_HEADERS_SENT(option_name)                                                                                                                \
-		if (SG(headers_sent)) {                                                                                                                                 \
-			char *output_start_filename = php_output_get_start_filename(TSRMLS_C);                                                                              \
-			int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);                                                                                    \
-			if (output_start_filename) {                                                                                                                        \
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent (output started at %s:%d)", \
-																					output_start_filename, output_start_lineno);                                \
-			} else {                                                                                                                                            \
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent");                          \
-			}                                                                                                                                                   \
-			return FAILURE;                                                                                                                                     \
-		}
+	if (SG(headers_sent)) {                                                                                                                                 \
+		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);                                                                              \
+		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);                                                                                    \
+		if (output_start_filename) {                                                                                                                        \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent (output started at %s:%d)", \
+																				output_start_filename, output_start_lineno);                                \
+		} else {                                                                                                                                            \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent");                          \
+		}                                                                                                                                                   \
+		return FAILURE;                                                                                                                                     \
+	}
 
 /* {{{ PHP_INI_MH
  */
@@ -570,7 +570,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("default_charset",		SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct,sapi_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateDefaultMimetype,			default_mimetype,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateDefaultMimetype,		default_mimetype,		sapi_globals_struct,sapi_globals)
 	ZEND_INI_ENTRY("unicode.output_encoding",  NULL, ZEND_INI_ALL, OnUpdateOutputEncoding)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
