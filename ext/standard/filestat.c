@@ -1208,6 +1208,9 @@ FileFunction(php_if_stat, FS_STAT)
    Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_size)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	RETURN_LONG(realpath_cache_size());
 }
 
@@ -1216,6 +1219,10 @@ PHP_FUNCTION(realpath_cache_size)
 PHP_FUNCTION(realpath_cache_get)
 {
 	realpath_cache_bucket **buckets = realpath_cache_get_buckets(), **end = buckets + realpath_cache_max_buckets();
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	array_init(return_value);
 	while(buckets < end) {
