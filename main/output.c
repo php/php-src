@@ -22,10 +22,10 @@
 /* $Id$ */
 
 #ifndef PHP_OUTPUT_DEBUG
-#	define PHP_OUTPUT_DEBUG 0
+# define PHP_OUTPUT_DEBUG 0
 #endif
 #ifndef PHP_OUTPUT_NOINLINE
-#	define PHP_OUTPUT_NOINLINE 0
+# define PHP_OUTPUT_NOINLINE 0
 #endif
 
 #include "php.h"
@@ -38,8 +38,8 @@
 ZEND_DECLARE_MODULE_GLOBALS(output);
 
 #if PHP_OUTPUT_NOINLINE || PHP_OUTPUT_DEBUG
-#	undef	inline
-#	define	inline
+# undef inline
+# define inline
 #endif
 
 /* {{{ aliases, conflict and reverse conflict hash tables */
