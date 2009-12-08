@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
+- Added realpath_cache_size() and realpath_cache_get(). (Stas)
 
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 

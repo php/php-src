@@ -1107,6 +1107,44 @@ FileFunction(php_if_lstat, FS_LSTAT)
 FileFunction(php_if_stat, FS_STAT)
 /* }}} */
 
+/* {{{ proto bool realpath_cache_size()
+   Get current size of realpath cache */
+PHP_FUNCTION(realpath_cache_size)
+{
+	RETURN_LONG(realpath_cache_size());
+}
+
+/* {{{ proto bool realpath_cache_get()
+   Get current size of realpath cache */
+PHP_FUNCTION(realpath_cache_get)
+{
+	realpath_cache_bucket **buckets = realpath_cache_get_buckets(), **end = buckets + realpath_cache_max_buckets();
+
+	array_init(return_value);
+	while(buckets < end) {
+		realpath_cache_bucket *bucket = *buckets;
+		while(bucket) {
+			zval *entry;
+			MAKE_STD_ZVAL(entry);
+			array_init(entry);
+
+			add_assoc_long(entry, "key", bucket->key);
+			add_assoc_bool(entry, "is_dir", bucket->is_dir);
+			add_assoc_stringl(entry, "realpath", bucket->realpath, bucket->realpath_len, 1);
+			add_assoc_long(entry, "expires", bucket->expires);
+#ifdef PHP_WIN32
+			add_assoc_bool(entry, "is_rvalid", bucket->is_rvalid);
+			add_assoc_bool(entry, "is_wvalid", bucket->is_wvalid);
+			add_assoc_bool(entry, "is_readable", bucket->is_readable);
+			add_assoc_bool(entry, "is_writable", bucket->is_writable);
+#endif
+			zend_hash_update(Z_ARRVAL_P(return_value), bucket->path, bucket->path_len+1, &entry, sizeof(zval *), NULL);
+			bucket = bucket->next;
+		}
+		buckets++;
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4

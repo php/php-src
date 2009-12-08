@@ -24,6 +24,8 @@
 PHP_RINIT_FUNCTION(filestat);
 PHP_RSHUTDOWN_FUNCTION(filestat);
 
+PHP_FUNCTION(realpath_cache_size);
+PHP_FUNCTION(realpath_cache_get);
 PHP_FUNCTION(clearstatcache);
 PHP_FUNCTION(fileatime);
 PHP_FUNCTION(filectime);
