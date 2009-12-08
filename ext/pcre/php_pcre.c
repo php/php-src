@@ -1314,9 +1314,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		if (!zend_is_callable(*replace, 0, &callback_name TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%s', to be a valid callback", callback_name);
 			efree(callback_name);
-			*return_value = **subject;
-			zval_copy_ctor(return_value);
-			INIT_PZVAL(return_value);
+			MAKE_COPY_ZVAL(subject, return_value);
 			return;
 		}
 		efree(callback_name);

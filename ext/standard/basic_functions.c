@@ -5837,9 +5837,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				break;
 			}
 			ALLOC_ZVAL(element);
-			*element = *arg2;
-			zval_copy_ctor(element);
-			INIT_PZVAL(element);
+			MAKE_COPY_ZVAL(&arg2, element);
 			zend_symtable_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, &element, sizeof(zval *), NULL);
 			break;
 
@@ -5882,9 +5880,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			ALLOC_ZVAL(element);
-			*element = *arg2;
-			zval_copy_ctor(element);
-			INIT_PZVAL(element);
+			MAKE_COPY_ZVAL(&arg2, element);
 
 			if (arg3 && Z_STRLEN_P(arg3) > 0) {
 				add_assoc_zval_ex(hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3) + 1, element);
