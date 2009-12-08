@@ -33,7 +33,7 @@
 
 
 #ifdef __GNUC__
-#include <string.h>        /* memset */
+#include <string.h> /* memset */
 extern char _edata, _end ; /* end of DATA (start of BSS), end of BSS */
 #endif
 
@@ -41,15 +41,15 @@ int _lib_start()
 {
 /*	printf("Inside _lib_start\n");*/
 #ifdef __GNUC__
-    memset (&_edata, 0, &_end - &_edata);
+	memset (&_edata, 0, &_end - &_edata);
 #endif
-    return 0;
+	return 0;
 }
 
 int _lib_stop()
 {
 /*	printf("Inside _lib_stop\n");*/
-    return 0;
+	return 0;
 }
 
 #endif	/* NETWARE */
