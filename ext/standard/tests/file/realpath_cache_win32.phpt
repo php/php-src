@@ -2,8 +2,8 @@
 realpath_cache_size() and realpath_cache_get()
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not on Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip only on Windows');
 }
 ?>
 --FILE--
@@ -17,7 +17,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 int(%d)
-array(4) {
+array(8) {
   ["key"]=>
   int(%d)
   ["is_dir"]=>
@@ -26,5 +26,13 @@ array(4) {
   string(%d) "%sfile"
   ["expires"]=>
   int(%d)
+  ["is_rvalid"]=>
+  bool(%s)
+  ["is_wvalid"]=>
+  bool(%s)
+  ["is_readable"]=>
+  bool(%s)
+  ["is_writable"]=>
+  bool(%s)
 }
 Done
