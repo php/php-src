@@ -2311,12 +2311,14 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		 *   otherwise it will get opened and added to the included_files list in zend_execute_scripts
 		 */
  		if (primary_file->filename &&
+ 		    (primary_file->filename[0] != '-' || primary_file->filename[1] != 0) &&
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			int realfile_len;
 			int dummy = 1;
-			if (VCWD_REALPATH(primary_file->filename, realfile)) {
+
+			if (expand_filepath(primary_file->filename, realfile TSRMLS_CC)) {
 				realfile_len =  strlen(realfile);
 				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
 				primary_file->opened_path = estrndup(realfile, realfile_len);
