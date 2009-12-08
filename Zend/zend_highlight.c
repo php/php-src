@@ -131,7 +131,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
 		if (Z_TYPE(token) == IS_STRING ||
-		    Z_TYPE(token) == IS_UNICODE) {
+			Z_TYPE(token) == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -185,7 +185,7 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
 					zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-  				}
+				}
 				zend_write("\n", sizeof("\n") - 1);
 				prev_space = 1;
 				Z_TYPE(token) = 0;
@@ -197,7 +197,7 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 		}
 
 		if (Z_TYPE(token) == IS_STRING ||
-		    Z_TYPE(token) == IS_UNICODE) {
+			Z_TYPE(token) == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
