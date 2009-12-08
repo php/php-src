@@ -3,6 +3,8 @@ fpm: $(SAPI_FPM_PATH)
 $(SAPI_FPM_PATH): $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(SAPI_EXTRA_DEPS)
 	$(BUILD_FPM)
 
+$(builddir)/fpm/fpm_conf.lo: $(builddir)/../../main/build-defs.h
+
 install-build: install-fpm
 
 install-fpm: install-sapi

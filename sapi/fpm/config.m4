@@ -534,6 +534,10 @@ AC_DEFUN([AC_FPM_VARS],
     php_fpm_conf_path="$PHP_FPM_CONF"
   fi
 
+  if test -z "$prefix" -o "$prefix" = "NONE"; then
+    prefix="/usr/local"
+  fi
+
   if test -z "$php_fpm_conf_path"; then
     php_fpm_conf_path=`eval echo "$sysconfdir"`
     php_fpm_conf_path="$php_fpm_conf_path/php-fpm.conf"
@@ -636,7 +640,7 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_CHECKS
   AC_FPM_CONF
 
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/fpm/Makefile.frag)
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag], [$abs_srcdir/sapi/fpm], [sapi/fpm])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
   PHP_SUBST(SAPI_FPM_PATH)
