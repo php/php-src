@@ -1114,14 +1114,14 @@ PHP_FUNCTION(realpath_cache_size)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_LONG(realpath_cache_size());
+	RETURN_LONG(realpath_cache_size(TSRMLS_C));
 }
 
 /* {{{ proto bool realpath_cache_get()
    Get current size of realpath cache */
 PHP_FUNCTION(realpath_cache_get)
 {
-	realpath_cache_bucket **buckets = realpath_cache_get_buckets(), **end = buckets + realpath_cache_max_buckets();
+	realpath_cache_bucket **buckets = realpath_cache_get_buckets(TSRMLS_C), **end = buckets + realpath_cache_max_buckets(TSRMLS_C);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
