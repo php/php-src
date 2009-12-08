@@ -396,27 +396,27 @@ PHP_MINFO_FUNCTION(apache)
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
-	sprintf(tmp, "%d", MODULE_MAGIC_NUMBER);
+	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER);
 	php_info_print_table_row(2, "Apache API Version", tmp);
 	
 	if (serv->server_admin && *(serv->server_admin)) {
 		php_info_print_table_row(2, "Server Administrator", serv->server_admin);
 	}
 	
-	sprintf(tmp, "%s:%u", serv->server_hostname, serv->port);
+	snprintf(tmp, sizeof(tmp), "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 	
 #if !defined(WIN32) && !defined(WINNT)
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
-	sprintf(tmp, "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
+	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
 #else
-	sprintf(tmp, "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
+	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
 #endif
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 
 	ap_mpm_query(AP_MPMQ_MAX_REQUESTS_DAEMON, &max_requests);
-	sprintf(tmp, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests, (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
+	snprintf(tmp, sizeof(tmp), "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests, (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", tmp);
 
 	apr_snprintf(tmp, sizeof tmp,
