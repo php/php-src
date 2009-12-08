@@ -208,9 +208,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 		RETURN_FALSE;
 	}
 
-	*return_value = **value;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(value, return_value);
 }
 /* }}} */
 
@@ -3243,9 +3241,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 			if (!(class_name.s && class_name.s[0] != '*' && u_strcmp(class_name.u, ce->name.u))) {				
 				/* copy: enforce read only access */
 				ALLOC_ZVAL(prop_copy);
-				*prop_copy = **value;
-				zval_copy_ctor(prop_copy);
-				INIT_PZVAL(prop_copy);
+				MAKE_COPY_ZVAL(value, prop_copy);
 
 				add_u_assoc_zval(return_value, IS_UNICODE, prop_name, prop_copy);
 			}
@@ -3371,9 +3367,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 
 				/* copy: enforce read only access */
 				ALLOC_ZVAL(prop_copy);
-				*prop_copy = **prop;
-				zval_copy_ctor(prop_copy);
-				INIT_PZVAL(prop_copy);
+				MAKE_COPY_ZVAL(prop, prop_copy);
 
 				add_u_assoc_zval(return_value, IS_UNICODE, prop_name, prop_copy);
 			}
@@ -3934,9 +3928,7 @@ ZEND_METHOD(reflection_class, getConstant)
 	if (zend_u_hash_find(&ce->constants_table, name_type, name, name_len + 1, (void **) &value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	*return_value = **value;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(value, return_value);
 }
 /* }}} */
 
@@ -4719,9 +4711,7 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 
 	if (zend_u_hash_quick_find(prop_defaults, utype, ref->prop.name, ref->prop.name_length+1, ref->prop.h, (void**)&zdef) == SUCCESS) {
 		ALLOC_ZVAL(zv);
-		*zv = **zdef;
-		zval_copy_ctor(zv);
-		INIT_PZVAL(zv);
+		MAKE_COPY_ZVAL(zdef, zv);
 		zval_update_constant_ex(&zv, (void*)1, ref->ce TSRMLS_CC);
 		RETURN_ZVAL(zv, 1, 1);
 	}
@@ -4771,9 +4761,7 @@ ZEND_METHOD(reflection_property, getValue)
 			zend_error(E_ERROR, "Internal error: Could not find the property %v::%v", intern->ce->name, ref->prop.name);
 			/* Bails out */
 		}
-		*return_value= **member;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(member, return_value);
 	} else {
 		zstr class_name, prop_name;
 		int prop_name_len;
@@ -4784,9 +4772,7 @@ ZEND_METHOD(reflection_property, getValue)
 		zend_u_unmangle_property_name(IS_UNICODE, ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
 		prop_name_len = u_strlen(prop_name.u);
 		member_p = zend_u_read_property(ref->ce, object, IS_UNICODE, prop_name, prop_name_len, 1 TSRMLS_CC);
-		*return_value= *member_p;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(&member_p, return_value);
 		if (member_p != EG(uninitialized_zval_ptr)) {
 			zval_add_ref(&member_p);
 			zval_ptr_dtor(&member_p);

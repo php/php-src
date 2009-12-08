@@ -1549,9 +1549,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		if (zend_u_hash_find(eg_active_symbol_table, Z_TYPE_P(entry), key, key_len + 1, (void **)&value_ptr) != FAILURE) {
 			value = *value_ptr;
 			ALLOC_ZVAL(data);
-			*data = *value;
-			zval_copy_ctor(data);
-			INIT_PZVAL(data);
+			MAKE_COPY_ZVAL(&value, data);
 
 			zend_u_hash_update(Z_ARRVAL_P(return_value), Z_TYPE_P(entry), key, key_len + 1, &data, sizeof(zval *), NULL);
 		}
@@ -4282,9 +4280,7 @@ PHP_FUNCTION(array_reduce)
 
 	if (ZEND_NUM_ARGS() > 2) {
 		ALLOC_ZVAL(result);
-		*result = *initial;
-		zval_copy_ctor(result);
-		INIT_PZVAL(result);
+		MAKE_COPY_ZVAL(&initial, result);
 	} else {
 		MAKE_STD_ZVAL(result);
 		ZVAL_NULL(result);

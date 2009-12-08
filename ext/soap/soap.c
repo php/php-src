@@ -1727,9 +1727,7 @@ PHP_METHOD(SoapServer, setObject)
 	service->type = SOAP_OBJECT;
 
 	MAKE_STD_ZVAL(service->soap_object);
-	*service->soap_object = *obj;
-	zval_copy_ctor(service->soap_object);
-	INIT_PZVAL(service->soap_object);
+	MAKE_COPY_ZVAL(&obj, service->soap_object);
 
 	SOAP_SERVER_END_CODE();
 }
@@ -2637,9 +2635,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			fault = add_soap_fault(SOAP_GLOBAL(error_object), code, buffer, NULL, NULL TSRMLS_CC);
 			efree(buffer);
 			MAKE_STD_ZVAL(exception);
-			*exception = *fault;
-			zval_copy_ctor(exception);
-			INIT_PZVAL(exception);
+			MAKE_COPY_ZVAL(&fault, exception);
 			zend_throw_exception_object(exception TSRMLS_CC);
 
 			old_objects = EG(objects_store).object_buckets;
@@ -3269,9 +3265,7 @@ static void do_soap_call(zval* this_ptr,
 
 	if (!ret) {
 		if (client->fault) {
-			*return_value = *client->fault;
-			zval_copy_ctor(return_value);
-			INIT_PZVAL(return_value);
+			MAKE_COPY_ZVAL(&client->fault, return_value);
 		} else {
 			*return_value = *add_soap_fault(this_ptr, "Client", "Unknown Error", NULL, NULL TSRMLS_CC);
 			zval_copy_ctor(return_value);
@@ -3279,9 +3273,7 @@ static void do_soap_call(zval* this_ptr,
 		}
 	} else {
 		if (client->fault) {
-			*return_value = *client->fault;
-			zval_copy_ctor(return_value);
-			INIT_PZVAL(return_value);
+			MAKE_COPY_ZVAL(&client->fault, return_value);
 		}
 	}
 	if (!EG(exception) &&
@@ -3291,9 +3283,7 @@ static void do_soap_call(zval* this_ptr,
 		zval *exception;
 
 		MAKE_STD_ZVAL(exception);
-		*exception = *return_value;
-		zval_copy_ctor(exception);
-		INIT_PZVAL(exception);
+		MAKE_COPY_ZVAL(&return_value, exception);
 		zend_throw_exception_object(exception TSRMLS_CC);
 	}
 	SOAP_GLOBAL(features) = old_features;
@@ -3687,9 +3677,7 @@ PHP_METHOD(SoapClient, __getCookies)
 	if (!client->cookies) {
 		array_init(return_value);
 	} else {
-		*return_value = *client->cookies;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(&client->cookies, return_value);
 	}
 }
 /* }}} */
@@ -3716,9 +3704,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		verify_soap_headers_array(Z_ARRVAL_P(headers) TSRMLS_CC);
 		ALLOC_ZVAL(client->default_headers);
-		*client->default_headers = *headers;
-		INIT_PZVAL(client->default_headers);
-		zval_copy_ctor(client->default_headers);
+		MAKE_COPY_ZVAL(&headers, client->default_headers);
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
 	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry TSRMLS_CC)) {
 		ALLOC_INIT_ZVAL(client->default_headers);
