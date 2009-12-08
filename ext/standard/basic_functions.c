@@ -5926,13 +5926,8 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				break;
 			}
 			ALLOC_ZVAL(element);
-			*element = *arg2;
-			zval_copy_ctor(element);
-			INIT_PZVAL(element);
-
-			name = *arg1;
-			zval_copy_ctor(&name);
-			INIT_PZVAL(&name);
+			MAKE_COPY_ZVAL(&arg2, element);
+			MAKE_COPY_ZVAL(&arg1, &name);
 
 			convert_to_unicode_with_converter(element, UG(utf8_conv));
 			convert_to_unicode_with_converter(&name, UG(utf8_conv));
@@ -5989,9 +5984,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			ALLOC_ZVAL(element);
-			*element = *arg2;
-			zval_copy_ctor(element);
-			INIT_PZVAL(element);
+			MAKE_COPY_ZVAL(&arg2, element);
 
 			convert_to_unicode_with_converter(element, UG(utf8_conv));
 
@@ -6018,9 +6011,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 	if (callback_type == ZEND_INI_PARSER_SECTION) {
 		MAKE_STD_ZVAL(BG(active_ini_file_section));
 		array_init(BG(active_ini_file_section));
-		name = *arg1;
-		zval_copy_ctor(&name);
-		INIT_PZVAL(&name);
+		MAKE_COPY_ZVAL(&arg1, &name);
 
 		convert_to_unicode_with_converter(&name, UG(utf8_conv));
 

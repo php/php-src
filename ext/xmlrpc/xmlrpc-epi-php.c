@@ -574,9 +574,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						}
 
 						MAKE_STD_ZVAL(val_arr);
-						*val_arr = *val;
-						zval_copy_ctor(val_arr);
-						INIT_PZVAL(val_arr);
+						MAKE_COPY_ZVAL(&val, val_arr);
 						convert_to_array(val_arr);
 						
 						vtype = determine_vector_type(Z_ARRVAL_P(val_arr));

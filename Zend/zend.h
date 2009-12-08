@@ -765,6 +765,11 @@ END_EXTERN_C()
 		FREE_ZVAL(pzv);						\
 	}										\
 	INIT_PZVAL(&(zv));
+	
+#define MAKE_COPY_ZVAL(ppzv, pzv) \
+	*(pzv) = **(ppzv);            \
+	zval_copy_ctor((pzv));        \
+	INIT_PZVAL((pzv));
 
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
 	int is_ref, refcount;						\

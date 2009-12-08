@@ -5418,9 +5418,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 	/* If search is an array */
 	if (Z_TYPE_P(search) == IS_ARRAY) {
 		/* Duplicate subject string for repeated replacement */
-		*result = **subject;
-		zval_copy_ctor(result);
-		INIT_PZVAL(result);
+		MAKE_COPY_ZVAL(subject, result);
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(search));
 
@@ -5527,9 +5525,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 															   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
 			}
 		} else {
-			*result = **subject;
-			zval_copy_ctor(result);
-			INIT_PZVAL(result);
+			MAKE_COPY_ZVAL(subject, result);
 		}
 	}
 }

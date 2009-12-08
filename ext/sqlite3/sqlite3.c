@@ -885,9 +885,7 @@ PHP_METHOD(sqlite3, createFunction)
 		func->func_name = eustrdup(sql_func);
 
 		MAKE_STD_ZVAL(func->func);
-		*(func->func) = *callback_func;
-		zval_copy_ctor(func->func);
-		INIT_PZVAL(func->func);
+		MAKE_COPY_ZVAL(&callback_func, func->func);
 
 		func->argc = sql_func_num_args;
 		func->next = db_obj->funcs;
@@ -944,14 +942,10 @@ PHP_METHOD(sqlite3, createAggregate)
 		func->func_name = eustrdup(sql_func);
 
 		MAKE_STD_ZVAL(func->step);
-		*(func->step) = *step_callback;
-		zval_copy_ctor(func->step);
-		INIT_PZVAL(func->step);
+		MAKE_COPY_ZVAL(&step_callback, func->step);
 
 		MAKE_STD_ZVAL(func->fini);
-		*(func->fini) = *fini_callback;
-		zval_copy_ctor(func->fini);
-		INIT_PZVAL(func->fini);
+		MAKE_COPY_ZVAL(&fini_callback, func->fini);
 
 		func->argc = sql_func_num_args;
 		func->next = db_obj->funcs;
