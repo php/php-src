@@ -581,6 +581,9 @@ int LSAPI_Init(void)
 #if defined(SIGXFSZ) && defined(SIG_IGN)
         signal(SIGXFSZ, SIG_IGN);
 #endif
+        /* let STDOUT function as STDERR, 
+           just in case writing to STDOUT directly */
+        dup2( 2, 1 );
 
         if ( LSAPI_InitRequest( &g_req, LSAPI_SOCK_FILENO ) == -1 ) {
             return -1;
