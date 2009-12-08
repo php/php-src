@@ -245,7 +245,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_aolserver_getallheaders, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const static zend_function_entry aolserver_functions[] = {
+static const zend_function_entry aolserver_functions[] = {
 	PHP_FE(getallheaders, arginfo_aolserver_getallheaders)
 	{NULL, NULL, NULL}
 };
