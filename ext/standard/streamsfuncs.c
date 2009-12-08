@@ -484,9 +484,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	
 	if (stream->wrapperdata) {
 		MAKE_STD_ZVAL(newval);
-		*newval = *(stream->wrapperdata);
-		zval_copy_ctor(newval);
-		INIT_PZVAL(newval);
+		MAKE_COPY_ZVAL(&stream->wrapperdata, newval);
 
 		add_assoc_zval(return_value, "wrapper_data", newval);
 	}

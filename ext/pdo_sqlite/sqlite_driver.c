@@ -496,9 +496,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 		func->funcname = estrdup(func_name);
 		
 		MAKE_STD_ZVAL(func->func);
-		*(func->func) = *callback;
-		zval_copy_ctor(func->func);
-		INIT_PZVAL(func->func);
+		MAKE_COPY_ZVAL(&callback, func->func);
 		
 		func->argc = argc;
 
@@ -575,14 +573,10 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 		func->funcname = estrdup(func_name);
 		
 		MAKE_STD_ZVAL(func->step);
-		*(func->step) = *step_callback;
-		zval_copy_ctor(func->step);
-		INIT_PZVAL(func->step);
+		MAKE_COPY_ZVAL(&step_callback, func->step);
 
 		MAKE_STD_ZVAL(func->fini);
-		*(func->fini) = *fini_callback;
-		zval_copy_ctor(func->fini);
-		INIT_PZVAL(func->fini);
+		MAKE_COPY_ZVAL(&fini_callback, func->fini);
 		
 		func->argc = argc;
 

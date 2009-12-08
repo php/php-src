@@ -213,9 +213,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 		RETURN_FALSE;
 	}
 
-	*return_value = **value;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(value, return_value);
 }
 
 #ifdef ilia_0
@@ -3087,9 +3085,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 			if (!(class_name && class_name[0] != '*' && strcmp(class_name, ce->name))) {
 				/* copy: enforce read only access */
 				ALLOC_ZVAL(prop_copy);
-				*prop_copy = **value;
-				zval_copy_ctor(prop_copy);
-				INIT_PZVAL(prop_copy);
+				MAKE_COPY_ZVAL(value, prop_copy);
 
 				add_assoc_zval(return_value, prop_name, prop_copy);
 			}
@@ -3212,9 +3208,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 
 				/* copy: enforce read only access */
 				ALLOC_ZVAL(prop_copy);
-				*prop_copy = **prop;
-				zval_copy_ctor(prop_copy);
-				INIT_PZVAL(prop_copy);
+				MAKE_COPY_ZVAL(prop, prop_copy);
 
 				add_assoc_zval(return_value, prop_name, prop_copy);
 			}
@@ -3746,9 +3740,7 @@ ZEND_METHOD(reflection_class, getConstant)
 	if (zend_hash_find(&ce->constants_table, name, name_len + 1, (void **) &value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	*return_value = **value;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(value, return_value);
 }
 /* }}} */
 
@@ -4531,9 +4523,7 @@ ZEND_METHOD(reflection_property, getValue)
 			zend_error(E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name, ref->prop.name);
 			/* Bails out */
 		}
-		*return_value= **member;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(member, return_value);
 	} else {
 		char *class_name, *prop_name;
 		
@@ -4542,9 +4532,7 @@ ZEND_METHOD(reflection_property, getValue)
 		}
 		zend_unmangle_property_name(ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
 		member_p = zend_read_property(ref->ce, object, prop_name, strlen(prop_name), 1 TSRMLS_CC);
-		*return_value= *member_p;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(&member_p, return_value);
 		if (member_p != EG(uninitialized_zval_ptr)) {
 			zval_add_ref(&member_p);
 			zval_ptr_dtor(&member_p);

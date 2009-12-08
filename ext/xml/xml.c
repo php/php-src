@@ -1270,9 +1270,7 @@ PHP_FUNCTION(xml_set_object)
 #endif */
 
 	ALLOC_ZVAL(parser->object);
-	*parser->object = *mythis;
-	zval_copy_ctor(parser->object);
-	INIT_PZVAL(parser->object);
+	MAKE_COPY_ZVAL(&mythis, parser->object);
 
 	RETVAL_TRUE;
 }

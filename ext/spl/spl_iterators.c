@@ -2382,10 +2382,8 @@ SPL_METHOD(CachingIterator, __toString)
 			return;
 		}
 	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
-		*return_value = *intern->current.data;
-		zval_copy_ctor(return_value);
+		MAKE_COPY_ZVAL(&intern->current.data, return_value);
 		convert_to_string(return_value);
-		INIT_PZVAL(return_value);
 		return;
 	}
 	if (intern->u.caching.zstr) {

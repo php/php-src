@@ -392,9 +392,7 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 	) {
 		zval **tmp; 
 		if (zend_hash_find(HASH_OF(options), "default", sizeof("default"), (void **)&tmp) == SUCCESS) {
-			**value = **tmp;
-			zval_copy_ctor(*value);
-			INIT_PZVAL(*value);
+			MAKE_COPY_ZVAL(tmp, *value);
 		}
 	}
 }
@@ -679,9 +677,7 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 		zval *tmp;
 
 		ALLOC_ZVAL(tmp);
-		*tmp = **filtered;
-		zval_copy_ctor(tmp);
-		INIT_PZVAL(tmp);
+		MAKE_COPY_ZVAL(filtered, tmp);
 
 		zval_dtor(*filtered);
 
@@ -701,15 +697,11 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 
 	if (!op) {
 		zval_dtor(return_value);
-		*return_value = *input;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(&input, return_value);
 		php_filter_call(&return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_LONG) {
 		zval_dtor(return_value);
-		*return_value = *input;
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		MAKE_COPY_ZVAL(&input, return_value);
 		php_filter_call(&return_value, Z_LVAL_PP(op), NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_PP(op) == IS_ARRAY) {
 		array_init(return_value);
@@ -735,9 +727,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				zval *nval;
 
 				ALLOC_ZVAL(nval);
-				*nval = **tmp;
-				zval_copy_ctor(nval);
-				INIT_PZVAL(nval);
+				MAKE_COPY_ZVAL(tmp, nval);
 
 				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 				add_assoc_zval_ex(return_value, arg_key, arg_key_len, nval);
@@ -783,9 +773,7 @@ PHP_FUNCTION(filter_input)
 				Z_TYPE_PP(opt) == IS_ARRAY &&
 				zend_hash_find(HASH_OF(*opt), "default", sizeof("default"), (void **)&def) == SUCCESS
 			) {
-				*return_value = **def;
-				zval_copy_ctor(return_value);
-				INIT_PZVAL(return_value);
+				MAKE_COPY_ZVAL(def, return_value);
 				return;
 			}
 		}
@@ -796,9 +784,7 @@ PHP_FUNCTION(filter_input)
 		}
 	}
 
-	*return_value = **tmp;
-	zval_copy_ctor(return_value);  /* Watch out for empty strings */
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(tmp, return_value);
 
 	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 }
@@ -820,9 +806,7 @@ PHP_FUNCTION(filter_var)
 		RETURN_FALSE;
 	}
 
-	*return_value = *data;
-	zval_copy_ctor(data);
-	INIT_PZVAL(return_value);
+	MAKE_COPY_ZVAL(&data, return_value);
 
 	php_filter_call(&return_value, filter, filter_args, 1, FILTER_REQUIRE_SCALAR TSRMLS_CC);
 }
