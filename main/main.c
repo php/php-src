@@ -1675,7 +1675,7 @@ void php_request_shutdown(void *dummy)
 		php_output_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */
+	/* 4. Send the set HTTP headers (note: This must be done AFTER php_output_discard_all() / php_output_end_all() !!) */
 	zend_try {
 		sapi_send_headers(TSRMLS_C);
 	} zend_end_try();
