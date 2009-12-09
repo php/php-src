@@ -223,9 +223,6 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES *result TSRMLS_DC)
 	}
 	set->data_cursor = NULL;
 	set->row_count	= 0;
-	if (set->qcache) {
-		mysqlnd_qcache_free_cache_reference(&set->qcache);
-	}
 
 	DBG_INF("Freeing set");
 	mnd_pefree(set, set->persistent);
@@ -1069,7 +1066,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		set->row_buffers = mnd_pemalloc(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *), to_cache);
 	}
 	set->persistent	= to_cache;
-	set->qcache		= to_cache? mysqlnd_qcache_get_cache_reference(conn->qcache):NULL;
 	set->references	= 1;
 
 	result->m.row_decoder = binary_protocol? php_mysqlnd_rowp_read_binary_protocol:
