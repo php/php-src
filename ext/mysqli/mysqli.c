@@ -73,10 +73,6 @@ zend_class_entry *mysqli_driver_class_entry;
 zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
-#ifdef MYSQLI_USE_MYSQLND
-MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
-#endif
-
 
 typedef int (*mysqli_read_t)(mysqli_object *obj, zval **retval TSRMLS_DC);
 typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval TSRMLS_DC);
@@ -633,8 +629,6 @@ PHP_MINIT_FUNCTION(mysqli)
 		return FAILURE;
 	}
 #endif
-#else
-	mysqli_mysqlnd_qcache = mysqlnd_qcache_init_cache();
 #endif
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -872,8 +866,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	mysql_server_end();
 #endif
 #endif
-#else
-	mysqlnd_qcache_free_cache_reference(&mysqli_mysqlnd_qcache);
 #endif
 
 	zend_hash_destroy(&mysqli_driver_properties);

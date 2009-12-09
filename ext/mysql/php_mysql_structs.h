@@ -124,9 +124,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long result_allocated;
 	long trace_mode;
 	long allow_local_infile;
-#ifdef MYSQL_USE_MYSQLND
-	MYSQLND_QCACHE			*mysqlnd_qcache;
-#endif
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS

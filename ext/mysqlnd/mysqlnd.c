@@ -211,11 +211,6 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->last_message, pers);
 		conn->last_message = NULL;
 	}
-	if (conn->qcache) {
-		DBG_INF("Freeing qcache reference");
-		mysqlnd_qcache_free_cache_reference(&conn->qcache);
-		conn->qcache = NULL;
-	}
 	if (conn->net.cmd_buffer.buffer) {
 		DBG_INF("Freeing cmd buffer");
 		mnd_pefree(conn->net.cmd_buffer.buffer, pers);

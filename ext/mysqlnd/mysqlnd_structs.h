@@ -107,9 +107,6 @@ typedef struct st_mysqlnd_error_info
 } mysqlnd_error_info;
 
 
-typedef struct st_mysqlnd_qcache				MYSQLND_QCACHE;
-
-
 typedef struct st_mysqlnd_infile_info
 {
 	php_stream			*fd;
@@ -480,9 +477,6 @@ struct st_mysqlnd_connection
 	/* options */
 	MYSQLND_OPTION	options;
 
-	/* qcache */
-	MYSQLND_QCACHE	*qcache;
-
 	/* stats */
 	MYSQLND_STATS	stats;
 
@@ -526,7 +520,6 @@ struct st_mysqlnd_buffered_result
 	uint64_t			initialized_rows;
 	zend_bool			persistent;
 
-	MYSQLND_QCACHE		*qcache;
 	unsigned int		references;
 
 	mysqlnd_error_info	error_info;
