@@ -796,7 +796,6 @@ PHP_FUNCTION(file)
 	zend_bool use_include_path;
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
-	zend_bool text_mode;
 	php_stream *stream;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -813,14 +812,13 @@ PHP_FUNCTION(file)
 	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
-	text_mode = !(flags & PHP_FILE_BINARY);
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 	if (php_stream_path_param_encode(ppfilename, &filename, &filename_len, REPORT_ERRORS, context) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, text_mode ? "rt" : "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_TEXT) ? "rt" : "rb", (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
 	}
