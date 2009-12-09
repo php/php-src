@@ -537,6 +537,13 @@ AC_DEFUN([AC_FPM_VARS],
   if test -z "$prefix" -o "$prefix" = "NONE"; then
     prefix="/usr/local"
   fi
+  
+  if test -z "$exec_prefix" -o "$exec_prefix" = "NONE"; then
+    exec_prefix="/usr/local"
+  fi
+
+  php_fpm_bin_path=`eval echo "$bindir"`
+  php_fpm_bin_path="$php_fpm_bin_path/php-fpm"
 
   if test -z "$php_fpm_conf_path"; then
     php_fpm_conf_path=`eval echo "$sysconfdir"`
@@ -580,6 +587,8 @@ AC_DEFUN([AC_FPM_VARS],
 
   PHP_SUBST_OLD(fpm_version)
   PHP_SUBST_OLD(php_fpm_conf_dir)
+  PHP_SUBST_OLD(php_fpm_conf_path)
+  PHP_SUBST_OLD(php_fpm_bin_path)
   PHP_SUBST_OLD(php_fpm_log_path)
   PHP_SUBST_OLD(php_fpm_pid_path)
   PHP_SUBST_OLD(php_fpm_log_dir)
@@ -602,7 +611,6 @@ AC_DEFUN([AC_FPM_OUTPUT],
 [
   PHP_OUTPUT(sapi/fpm/conf/php-fpm.conf:sapi/fpm/conf/php-fpm.conf.in)
   PHP_OUTPUT(sapi/fpm/conf/init.d.php-fpm:sapi/fpm/conf/init.d.php-fpm.in)
-  PHP_OUTPUT(sapi/fpm/conf/nginx-site-conf.sample:sapi/fpm/conf/nginx-site-conf.sample.in)
   PHP_OUTPUT(sapi/fpm/php-fpm.1:sapi/fpm/man/php-fpm.1.in)
 ])
 
