@@ -91,7 +91,7 @@ object(mysqli)#%d (%d) {
   [%u|b%"connect_errno"]=>
   int(0)
   [%u|b%"connect_error"]=>
-  %unicode|string%(0) ""
+  NULL
   [%u|b%"errno"]=>
   int(2006)
   [%u|b%"error"]=>
