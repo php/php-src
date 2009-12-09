@@ -1,7 +1,5 @@
 --TEST--
 Test gzuncompress() function : error conditions 
---XFAIL--
-Test will fail until bug #47179 resolved; no error when $length too small 
 --SKIPIF--
 <?php 
 if (!extension_loaded("zlib")) {
@@ -15,8 +13,6 @@ if (!extension_loaded("zlib")) {
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
-
 
 echo "*** Testing gzuncompress() : error conditions ***\n";
 
@@ -34,13 +30,11 @@ var_dump( gzuncompress($data, $length, $extra_arg) );
 echo "\n-- Testing with Unicode string --\n";
 var_dump(gzuncompress($data, $length));
 
-
 echo "\n-- Testing with a buffer that is too small --\n";
 $short_len = strlen($data) - 1;
 $compressed = gzcompress(b"$data");
 
 var_dump(gzuncompress($compressed, $short_len));
-
 
 echo "\n-- Testing with incorrect arguments --\n";
 var_dump(gzuncompress(123));
@@ -77,7 +71,8 @@ Warning: gzuncompress() expects parameter 1 to be strictly a binary string, Unic
 NULL
 
 -- Testing with a buffer that is too small --
-Warning: gzuncompress(): buffer error in %s on line %d
+
+Warning: gzuncompress(): insufficient memory in %s on line %d
 bool(false)
 
 -- Testing with incorrect arguments --
