@@ -2304,9 +2304,24 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_
 				isset = 0;
 			}
 		} else {
-			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-			if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
-				isset = 0;
+			if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+				if (CG(auto_globals_cache)[opline->op2.u.var]) {
+					value = CG(auto_globals_cache)[opline->op2.u.var];
+				} else {
+					zend_auto_global *auto_global = NULL;
+
+					zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+					if (zend_u_hash_find(&EG(symbol_table), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					} else if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+						CG(auto_globals_cache)[opline->op2.u.var] = value;
+					}
+				}
+			} else {
+				target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+				if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+					isset = 0;
+				}
 			}
 		}
 
@@ -5729,9 +5744,24 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HA
 				isset = 0;
 			}
 		} else {
-			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-			if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
-				isset = 0;
+			if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+				if (CG(auto_globals_cache)[opline->op2.u.var]) {
+					value = CG(auto_globals_cache)[opline->op2.u.var];
+				} else {
+					zend_auto_global *auto_global = NULL;
+
+					zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+					if (zend_u_hash_find(&EG(symbol_table), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					} else if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+						CG(auto_globals_cache)[opline->op2.u.var] = value;
+					}
+				}
+			} else {
+				target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+				if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+					isset = 0;
+				}
 			}
 		}
 
@@ -9386,9 +9416,24 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HA
 				isset = 0;
 			}
 		} else {
-			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-			if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
-				isset = 0;
+			if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+				if (CG(auto_globals_cache)[opline->op2.u.var]) {
+					value = CG(auto_globals_cache)[opline->op2.u.var];
+				} else {
+					zend_auto_global *auto_global = NULL;
+
+					zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+					if (zend_u_hash_find(&EG(symbol_table), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					} else if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+						CG(auto_globals_cache)[opline->op2.u.var] = value;
+					}
+				}
+			} else {
+				target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+				if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+					isset = 0;
+				}
 			}
 		}
 
@@ -23770,9 +23815,24 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HAN
 				isset = 0;
 			}
 		} else {
-			target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-			if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
-				isset = 0;
+			if (opline->op2.u.EA.type == ZEND_FETCH_AUTO_GLOBAL) {
+				if (CG(auto_globals_cache)[opline->op2.u.var]) {
+					value = CG(auto_globals_cache)[opline->op2.u.var];
+				} else {
+					zend_auto_global *auto_global = NULL;
+
+					zend_u_is_auto_global_ex(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1, &auto_global TSRMLS_CC);
+					if (zend_u_hash_find(&EG(symbol_table), Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+						isset = 0;
+					} else if (auto_global && (!auto_global->armed || !auto_global->runtime)) {
+						CG(auto_globals_cache)[opline->op2.u.var] = value;
+					}
+				}
+			} else {
+				target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
+				if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
+					isset = 0;
+				}
 			}
 		}
 
