@@ -524,11 +524,7 @@ PHP_FUNCTION(mysqli_query)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
 		RETURN_FALSE;
 	}
-	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~MYSQLI_ASYNC) != MYSQLI_STORE_RESULT
-#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
-		&& (resultmode & ~MYSQLI_ASYNC) != MYSQLI_BG_STORE_RESULT
-#endif
-	) {
+	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT && (resultmode & ~MYSQLI_ASYNC) != MYSQLI_STORE_RESULT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
 		RETURN_FALSE;
 	}
@@ -569,11 +565,6 @@ PHP_FUNCTION(mysqli_query)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
-		case MYSQLI_BG_STORE_RESULT:
-			result = mysqli_bg_store_result(mysql->mysql);
-			break;
-#endif
 	}
 	if (!result) {
 		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql) TSRMLS_CC,
@@ -807,11 +798,6 @@ PHP_FUNCTION(mysqli_reap_async_query)
 		case MYSQLI_USE_RESULT:
 			result = mysql_use_result(mysql->mysql);
 			break;
-#if defined(MYSQLI_USE_MYSQLND) && defined(MYSQLND_THREADED)
-		case MYSQLI_BG_STORE_RESULT:
-			result = mysqli_bg_store_result(mysql->mysql);
-			break;
-#endif
 	}
 
 	if (!result) {

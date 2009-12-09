@@ -133,80 +133,6 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_stmt::background_store_result */
-static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_stmt, background_store_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
-{
-	enum_func_status ret;
-	MYSQLND *conn = stmt->conn;
-	MYSQLND_RES *result;
-	zend_bool to_cache = FALSE;
-
-	DBG_ENTER("mysqlnd_stmt::background_store_result");
-	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
-
-	/* be compliant with libmysql - NULL will turn */
-	if (!stmt->field_count) {
-		DBG_RETURN(NULL);
-	}
-
-	if (stmt->cursor_exists) {
-		/* Silently convert buffered to unbuffered, for now */
-		MYSQLND_RES * res = stmt->m->use_result(stmt TSRMLS_CC);
-		DBG_RETURN(res);
-	}
-
-	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (CONN_GET_STATE(conn) != CONN_FETCHING_DATA ||
-		stmt->state != MYSQLND_STMT_WAITING_USE_OR_STORE)
-	{
-		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC,
-						 UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
-		DBG_RETURN(NULL);
-	}
-
-	stmt->default_rset_handler = stmt->m->store_result;
-
-	SET_EMPTY_ERROR(stmt->error_info);
-	SET_EMPTY_ERROR(stmt->conn->error_info);
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_PS_BUFFERED_SETS);
-
-	result = stmt->result;
-	result->type			= MYSQLND_RES_PS_BUF;
-	result->m.fetch_row		= mysqlnd_fetch_stmt_row_buffered;
-	result->m.fetch_lengths	= NULL;/* makes no sense */
-	if (!result->zval_cache) {
-		result->zval_cache = mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache);
-	}
-
-	/* Create room for 'next_extend' rows */
-
-	/* Not set for SHOW statements at PREPARE stage */
-	if (result->conn) {
-		result->conn->m->free_reference(result->conn TSRMLS_CC);
-		result->conn = NULL;	/* store result does not reference  the connection */
-	}
-
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE, to_cache TSRMLS_CC);
-
-	if (PASS == ret) {
-		/* libmysql API docs say it should be so for SELECT statements */
-		stmt->upsert_status.affected_rows = stmt->result->stored_data->row_count;
-
-		stmt->state = MYSQLND_STMT_USE_OR_STORE_CALLED;
-	} else {
-		conn->error_info = result->stored_data->error_info;
-		stmt->result->m.free_result_contents(stmt->result TSRMLS_CC);
-		mnd_efree(stmt->result);
-		stmt->result = NULL;
-		stmt->state = MYSQLND_STMT_PREPARED;
-	}
-
-	DBG_RETURN(result);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_stmt::get_result */
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
@@ -2122,7 +2048,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_stmt)
 	MYSQLND_METHOD(mysqlnd_stmt, execute),
 	MYSQLND_METHOD(mysqlnd_stmt, use_result),
 	MYSQLND_METHOD(mysqlnd_stmt, store_result),
-	MYSQLND_METHOD(mysqlnd_stmt, background_store_result),
 	MYSQLND_METHOD(mysqlnd_stmt, get_result),
 	MYSQLND_METHOD(mysqlnd_stmt, more_results),
 	MYSQLND_METHOD(mysqlnd_stmt, next_result),
