@@ -107,8 +107,6 @@ typedef struct st_mysqlnd_error_info
 } mysqlnd_error_info;
 
 
-typedef struct st_mysqlnd_zval_pcache			MYSQLND_ZVAL_PCACHE;
-typedef struct st_mysqlnd_thread_zval_pcache	MYSQLND_THD_ZVAL_PCACHE;
 typedef struct st_mysqlnd_qcache				MYSQLND_QCACHE;
 
 
@@ -253,7 +251,7 @@ typedef struct st_mysqlnd_net
 
 struct st_mysqlnd_conn_methods
 {
-	enum_func_status	(*connect)(MYSQLND *conn, const char *host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket, unsigned int mysql_flags, MYSQLND_THD_ZVAL_PCACHE * zval_cache TSRMLS_DC);
+	enum_func_status	(*connect)(MYSQLND *conn, const char *host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket, unsigned int mysql_flags TSRMLS_DC);
 	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 	enum_func_status	(*set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
 	enum_func_status	(*query)(MYSQLND *conn, const char *query, unsigned int query_len TSRMLS_DC);
@@ -352,7 +350,6 @@ struct st_mysqlnd_res_methods
 									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 									zend_bool persistent,
 									zend_bool as_unicode, zend_bool as_int_or_float,
-									MYSQLND_THD_ZVAL_PCACHE * zval_cache,
 									MYSQLND_STATS * stats TSRMLS_DC);
 
 
@@ -483,9 +480,6 @@ struct st_mysqlnd_connection
 	/* options */
 	MYSQLND_OPTION	options;
 
-	/* zval cache */
-	MYSQLND_THD_ZVAL_PCACHE	*zval_cache;
-
 	/* qcache */
 	MYSQLND_QCACHE	*qcache;
 
@@ -572,9 +566,6 @@ struct st_mysqlnd_res
 	unsigned long			*lengths;
 
 	php_mysql_packet_row	*row_packet;
-
-	/* zval cache */
-	MYSQLND_THD_ZVAL_PCACHE	*zval_cache;
 
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 };

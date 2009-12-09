@@ -74,7 +74,6 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 #ifdef MYSQLI_USE_MYSQLND
-MYSQLND_ZVAL_PCACHE *mysqli_mysqlnd_zval_cache;
 MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
 #endif
 
@@ -589,9 +588,6 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
-#ifdef MYSQLI_USE_MYSQLND
-	STD_PHP_INI_ENTRY("mysqli.cache_size",				"2000",	PHP_INI_SYSTEM,		OnUpdateLong,		cache_size,			zend_mysqli_globals,		mysqli_globals)
-#endif
 PHP_INI_END()
 /* }}} */
 
@@ -620,10 +616,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 #else
 	mysqli_globals->embedded = 0;
 #endif
-#ifdef MYSQLI_USE_MYSQLND
-	mysqli_globals->cache_size = 0;
-	mysqli_globals->mysqlnd_thd_zval_cache = NULL;
-#endif
 }
 /* }}} */
 
@@ -642,7 +634,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	}
 #endif
 #else
-	mysqli_mysqlnd_zval_cache = mysqlnd_palloc_init_cache(MyG(cache_size));
 	mysqli_mysqlnd_qcache = mysqlnd_qcache_init_cache();
 #endif
 
@@ -882,7 +873,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 #endif
 #endif
 #else
-	mysqlnd_palloc_free_cache(mysqli_mysqlnd_zval_cache);
 	mysqlnd_qcache_free_cache_reference(&mysqli_mysqlnd_qcache);
 #endif
 
@@ -909,9 +899,6 @@ PHP_RINIT_FUNCTION(mysqli)
 #endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
-#ifdef MYSQLI_USE_MYSQLND
-	MyG(mysqlnd_thd_zval_cache) = mysqlnd_palloc_rinit(mysqli_mysqlnd_zval_cache);
-#endif
 
 	return SUCCESS;
 }
@@ -951,7 +938,6 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 	}
 #ifdef MYSQLI_USE_MYSQLND
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_helper_once TSRMLS_CC);
-	mysqlnd_palloc_rshutdown(MyG(mysqlnd_thd_zval_cache));
 #endif
 	return SUCCESS;
 }
@@ -976,19 +962,6 @@ PHP_MINFO_FUNCTION(mysqli)
 #if !defined(MYSQLI_USE_MYSQLND)
 	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
 	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
-#else
-	{
-		zval values;
-
-		php_info_print_table_header(2, "Persistent cache", mysqli_mysqlnd_zval_cache? "enabled":"disabled");
-		
-		if (mysqli_mysqlnd_zval_cache) {
-			/* Now report cache status */
-			mysqlnd_palloc_stats(mysqli_mysqlnd_zval_cache, &values);
-			mysqlnd_minfo_print_hash(&values);
-			zval_dtor(&values);
-		}
-	}
 #endif
 	php_info_print_table_end();
 

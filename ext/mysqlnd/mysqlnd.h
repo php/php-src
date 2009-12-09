@@ -59,8 +59,6 @@
 #include "mysqlnd_structs.h"
 
 
-
-
 /* Library related */
 void mysqlnd_library_init(TSRMLS_D);
 void mysqlnd_library_end(TSRMLS_D);
@@ -81,8 +79,8 @@ PHPAPI struct st_mysqlnd_stmt_methods * mysqlnd_stmt_get_methods();
 PHPAPI void mysqlnd_stmt_set_methods(struct st_mysqlnd_stmt_methods *methods);
 
 
-#define mysqlnd_restart_psession(conn, cache) _mysqlnd_restart_psession((conn), (cache) TSRMLS_CC)
-PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC);
+#define mysqlnd_restart_psession(conn) _mysqlnd_restart_psession((conn) TSRMLS_CC)
+PHPAPI void _mysqlnd_restart_psession(MYSQLND * conn TSRMLS_DC);
 #define mysqlnd_end_psession(conn) _mysqlnd_end_psession((conn) TSRMLS_CC)
 PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC);
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
@@ -101,8 +99,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND *conn,
 						  const char *db, unsigned int db_len,
 						  unsigned int port,
 						  const char *socket,
-						  unsigned int mysql_flags,
-						  MYSQLND_THD_ZVAL_PCACHE *zval_cache
+						  unsigned int mysql_flags
 						  TSRMLS_DC);
 
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		(conn)->m->change_user((conn), (user), (passwd), (db), (silent) TSRMLS_CC)
@@ -308,35 +305,6 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 
 /* Performance statistics */
 PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
-
-/* Persistent caching zval allocator */
-#define mysqlnd_palloc_init_cache(size)		_mysqlnd_palloc_init_cache((size) TSRMLS_CC)
-#define mysqlnd_palloc_free_cache(cache)	_mysqlnd_palloc_free_cache((cache) TSRMLS_CC)
-PHPAPI MYSQLND_ZVAL_PCACHE*		_mysqlnd_palloc_init_cache(unsigned int cache_size TSRMLS_DC);
-PHPAPI void 					_mysqlnd_palloc_free_cache(MYSQLND_ZVAL_PCACHE *cache TSRMLS_DC);
-PHPAPI void						mysqlnd_palloc_stats(const MYSQLND_ZVAL_PCACHE * const cache,
-													 zval *return_value);
-
-#define mysqlnd_palloc_rinit(cache)		_mysqlnd_palloc_rinit((cache) TSRMLS_CC)
-#define mysqlnd_palloc_rshutdown(cache)	_mysqlnd_palloc_rshutdown((cache) TSRMLS_CC)
-PHPAPI MYSQLND_THD_ZVAL_PCACHE * _mysqlnd_palloc_rinit(MYSQLND_ZVAL_PCACHE * cache TSRMLS_DC);
-PHPAPI void						 _mysqlnd_palloc_rshutdown(MYSQLND_THD_ZVAL_PCACHE * cache TSRMLS_DC);
-
-
-#define mysqlnd_palloc_init_thd_cache(cache) 			_mysqlnd_palloc_init_thd_cache((cache) TSRMLS_CC)
-#define mysqlnd_palloc_free_thd_cache_reference(cache)	_mysqlnd_palloc_free_thd_cache_reference((cache) TSRMLS_CC)
-#define mysqlnd_palloc_get_thd_cache_reference(cache)	_mysqlnd_palloc_get_thd_cache_reference((cache) TSRMLS_CC)
-
-PHPAPI MYSQLND_THD_ZVAL_PCACHE*	_mysqlnd_palloc_init_thd_cache(MYSQLND_ZVAL_PCACHE * const cache TSRMLS_DC);
-MYSQLND_THD_ZVAL_PCACHE*		_mysqlnd_palloc_get_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE * const cache TSRMLS_DC);
-PHPAPI void						_mysqlnd_palloc_free_thd_cache_reference(MYSQLND_THD_ZVAL_PCACHE **cache TSRMLS_DC);
-
-
-/* There two should not be used from outside */
-void *	mysqlnd_palloc_get_zval(MYSQLND_THD_ZVAL_PCACHE * const cache, zend_bool *allocated TSRMLS_DC);
-void	mysqlnd_palloc_zval_ptr_dtor(zval **zv, MYSQLND_THD_ZVAL_PCACHE * const cache,
-									 enum_mysqlnd_res_type type, zend_bool *copy_ctor_called TSRMLS_DC);
-
 
 
 /* ---------------------- QUERY CACHE ---------------*/
