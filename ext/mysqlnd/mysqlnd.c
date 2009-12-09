@@ -211,11 +211,6 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->last_message, pers);
 		conn->last_message = NULL;
 	}
-	if (conn->zval_cache) {
-		DBG_INF("Freeing zval cache reference");
-		mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
-		conn->zval_cache = NULL;
-	}
 	if (conn->qcache) {
 		DBG_INF("Freeing qcache reference");
 		mysqlnd_qcache_free_cache_reference(&conn->qcache);
@@ -437,7 +432,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 
 
 /* {{{ _mysqlnd_restart_psession */
-PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC)
+PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_restart_psession");
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
@@ -450,7 +445,6 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn, MYSQLND_THD_ZVAL_PCACHE *ca
 	  The thd zval cache is always freed on request shutdown, so this has happened already.
 	  Don't touch the old value! Get new reference
 	*/
-	conn->zval_cache = mysqlnd_palloc_get_thd_cache_reference(cache);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -461,7 +455,6 @@ PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_end_psession");
 	/* The thd zval cache is always freed on request shutdown, so this has happened already */
-	mysqlnd_palloc_free_thd_cache_reference(&conn->zval_cache);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -475,8 +468,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 						 const char *db, unsigned int db_len,
 						 unsigned int port,
 						 const char *socket,
-						 unsigned int mysql_flags,
-						 MYSQLND_THD_ZVAL_PCACHE *zval_cache
+						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
 	char *transport = NULL, *errstr = NULL;
@@ -776,8 +768,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 
 		SET_EMPTY_ERROR(conn->error_info);
 
-		conn->zval_cache = mysqlnd_palloc_get_thd_cache_reference(zval_cache);
-
 		mysqlnd_local_infile_default(conn);
 		{
 			unsigned int buf_size;
@@ -864,8 +854,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						 const char *db, unsigned int db_len,
 						 unsigned int port,
 						 const char *socket,
-						 unsigned int mysql_flags,
-						 MYSQLND_THD_ZVAL_PCACHE *zval_cache
+						 unsigned int mysql_flags
 						 TSRMLS_DC)
 {
 	enum_func_status ret;
@@ -879,7 +868,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 		self_alloced = TRUE;
 	}
 
-	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket, mysql_flags, zval_cache TSRMLS_CC);
+	ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket, mysql_flags TSRMLS_CC);
 
 	if (ret == FAIL) {
 		if (self_alloced) {
@@ -1180,7 +1169,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND *conn, const char *table, cons
 	   Prepare for the worst case.
 	   MyISAM goes to 2500 BIT columns, double it for safety.
 	 */
-	result = mysqlnd_result_init(5000, mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache) TSRMLS_CC);
+	result = mysqlnd_result_init(5000 TSRMLS_CC);
 
 
 	if (FAIL == result->m.read_result_metadata(result, conn TSRMLS_CC)) {

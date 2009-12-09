@@ -1,4 +1,4 @@
-/*
+;/*
   +----------------------------------------------------------------------+
   | PHP Version 6                                                        |
   +----------------------------------------------------------------------+
@@ -25,7 +25,6 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_wireprotocol.h"
-#include "mysqlnd_palloc.h"
 #include "mysqlnd_statistics.h"
 #include "zend_builtin_functions.h"
 
@@ -305,7 +304,6 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 		 func_name == mysqlnd_efree_name	|| func_name == mysqlnd_pefree_name		|| 
 		 func_name == mysqlnd_malloc_name	|| func_name == mysqlnd_calloc_name		|| 
 		 func_name == mysqlnd_realloc_name	|| func_name == mysqlnd_free_name		||
-		 func_name == mysqlnd_palloc_zval_ptr_dtor_name	|| func_name == mysqlnd_palloc_get_zval_name ||
 		 func_name == mysqlnd_read_header_name || func_name == mysqlnd_read_body_name)) {
 		zend_stack_push(&self->call_stack, "", sizeof(""));
 	   	return FALSE;

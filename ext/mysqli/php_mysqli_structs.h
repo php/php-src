@@ -197,7 +197,6 @@ extern zend_property_info mysqli_driver_property_info_entries[];
 extern zend_property_info mysqli_warning_property_info_entries[];
 
 #ifdef MYSQLI_USE_MYSQLND
-extern MYSQLND_ZVAL_PCACHE	*mysqli_mysqlnd_zval_cache;
 extern MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
 #endif
 
@@ -367,9 +366,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	HashTable		*report_ht;
 	unsigned long	multi_query;
 	unsigned long	embedded;
-#ifdef MYSQLI_USE_MYSQLND
-	MYSQLND_THD_ZVAL_PCACHE	*mysqlnd_thd_zval_cache;
-#endif
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 

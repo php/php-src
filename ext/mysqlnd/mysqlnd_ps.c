@@ -107,9 +107,6 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	result->type			= MYSQLND_RES_PS_BUF;
 	result->m.fetch_row		= mysqlnd_fetch_stmt_row_buffered;
 	result->m.fetch_lengths	= NULL;/* makes no sense */
-	if (!result->zval_cache) {
-		result->zval_cache = mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache);
-	}
 
 	result->result_set_memory_pool = mysqlnd_mempool_create(16000 TSRMLS_CC);
 
@@ -164,8 +161,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	SET_EMPTY_ERROR(stmt->conn->error_info);
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BUFFERED_SETS);
 
-	result = mysqlnd_result_init(stmt->result->field_count,
-								 mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache) TSRMLS_CC);	
+	result = mysqlnd_result_init(stmt->result->field_count TSRMLS_CC);	
 
 	result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE TSRMLS_CC);
 
@@ -367,9 +363,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * co
 	  no metadata at prepare.
 	*/
 	if (stmt_to_prepare->field_count) {
-		MYSQLND_RES *result = mysqlnd_result_init(stmt_to_prepare->field_count,
-												  mysqlnd_palloc_get_thd_cache_reference(stmt->conn->zval_cache)
-												  TSRMLS_CC);
+		MYSQLND_RES *result = mysqlnd_result_init(stmt_to_prepare->field_count TSRMLS_CC);
 		/* Allocate the result now as it is needed for the reading of metadata */
 		stmt_to_prepare->result = result; 
 
@@ -668,7 +662,6 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 									  result->stored_data->persistent,
 									  result->conn->options.numeric_and_datetime_as_unicode,
 									  result->conn->options.int_and_float_native,
-									  result->conn->zval_cache,
 									  &result->conn->stats TSRMLS_CC);
 				if (stmt->update_max_length) {
 					for (i = 0; i < result->field_count; i++) {
@@ -784,7 +777,6 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 
 			for (i = 0; i < field_count; i++) {
@@ -962,7 +954,6 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 
 			/* If no result bind, do nothing. We consumed the data */
@@ -1656,7 +1647,7 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const stmt TSRMLS_D
 	  In the meantime we don't need a zval cache reference for this fake
 	  result set, so we don't get one.
 	*/
-	result = mysqlnd_result_init(stmt->field_count, NULL TSRMLS_CC);
+	result = mysqlnd_result_init(stmt->field_count TSRMLS_CC);
 	result->type = MYSQLND_RES_NORMAL;
 	result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
 	result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));

@@ -59,7 +59,6 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 						result->stored_data->persistent,
 						result->conn->options.numeric_and_datetime_as_unicode,
 						result->conn->options.int_and_float_native,
-						result->conn->zval_cache,
 						&result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
@@ -77,6 +76,53 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 		}
 		data_cursor += field_count;
 	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+
+/* {{{ mysqlnd_palloc_zval_ptr_dtor */
+void mysqlnd_palloc_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * copy_ctor_called TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_palloc_zval_ptr_dtor");
+	*copy_ctor_called = FALSE;
+	{
+		/*
+		  This zval is not from the cache block.
+		  Thus the refcount is -1 than of a zval from the cache,
+		  because the zvals from the cache are owned by it.
+		*/
+		if (type == MYSQLND_RES_PS_BUF || type == MYSQLND_RES_PS_UNBUF) {
+			; /* do nothing, zval_ptr_dtor will do the job*/
+		} else if (Z_REFCOUNT_PP(zv) > 1) {
+			/*
+			  Not a prepared statement, then we have to
+			  call copy_ctor and then zval_ptr_dtor()
+
+			  In Unicode mode the destruction  of the zvals should not call
+			  zval_copy_ctor() because then we will leak.
+			  I suppose we can use UG(unicode) in mysqlnd.c when freeing a result set
+			  to check if we need to call copy_ctor().
+
+			  If the type is IS_UNICODE, which can happen with PHP6, then we don't
+			  need to copy_ctor, as the data doesn't point to our internal buffers.
+			  If it's string (in PHP5 always) and in PHP6 if data is binary, then
+			  it still points to internal buffers and has to be copied.
+			*/
+			if (Z_TYPE_PP(zv) == IS_STRING) {
+				zval_copy_ctor(*zv);
+			}
+			*copy_ctor_called = TRUE;
+		} else {
+			if (Z_TYPE_PP(zv) == IS_STRING) {
+				ZVAL_NULL(*zv);
+			}
+		}
+		zval_ptr_dtor(zv);
+		DBG_VOID_RETURN;
+	}
+
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -102,9 +148,7 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 
 		DBG_INF_FMT("%u columns to free", result->field_count);
 		for (i = 0; i < result->field_count; i++) {
-			mysqlnd_palloc_zval_ptr_dtor(&(unbuf->last_row_data[i]),
-										 result->zval_cache, result->type,
-										 &copy_ctor_called TSRMLS_CC);
+			mysqlnd_palloc_zval_ptr_dtor(&(unbuf->last_row_data[i]), result->type, &copy_ctor_called TSRMLS_CC);
 			if (copy_ctor_called) {
 				ctor_called_count++;
 			}
@@ -138,7 +182,6 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 static void
 MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES *result TSRMLS_DC)
 {
-	MYSQLND_THD_ZVAL_PCACHE  *zval_cache = result->zval_cache;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 	unsigned int field_count = result->field_count;
 	int row;
@@ -157,8 +200,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES *result TSRMLS_DC)
 			if (current_row[0] == NULL) {
 				break;/* row that was never initialized */
 			}
-			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), zval_cache,
-										 result->type, &copy_ctor_called TSRMLS_CC);
+			mysqlnd_palloc_zval_ptr_dtor(&(current_row[col]), result->type, &copy_ctor_called TSRMLS_CC);
 #if MYSQLND_DEBUG_MEMORY
 			DBG_INF_FMT("Copy_ctor_called=%d", copy_ctor_called);
 #endif
@@ -243,12 +285,6 @@ void mysqlnd_internal_free_result_contents(MYSQLND_RES *result TSRMLS_DC)
 	if (result->meta) {
 		result->meta->m->free_metadata(result->meta, FALSE TSRMLS_CC);
 		result->meta = NULL;
-	}
-
-	if (result->zval_cache) {
-		DBG_INF("Freeing zval cache reference");
-		mysqlnd_palloc_free_thd_cache_reference(&result->zval_cache);
-		result->zval_cache = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -407,11 +443,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				/* PS has already allocated it */
 				conn->field_count = rset_header.field_count;
 				if (!stmt) {
-					result =
-						conn->current_result=
-							mysqlnd_result_init(rset_header.field_count,
-												mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache)
-												TSRMLS_CC);
+					result = conn->current_result = mysqlnd_result_init(rset_header.field_count TSRMLS_CC);
 				} else {
 					if (!stmt->result) {
 						DBG_INF("This is 'SHOW'/'EXPLAIN'-like query.");
@@ -420,11 +452,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
-						result =
-							stmt->result =
-								mysqlnd_result_init(rset_header.field_count,
-													mysqlnd_palloc_get_thd_cache_reference(conn->zval_cache)
-													TSRMLS_CC);
+						result = stmt->result = mysqlnd_result_init(rset_header.field_count TSRMLS_CC);
 					} else {
 						/*
 						  Update result set metadata if it for some reason changed between
@@ -615,7 +643,6 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 
 			retrow = mnd_malloc(result->field_count * sizeof(char *));
@@ -729,7 +756,6 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 
 			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
@@ -884,7 +910,6 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
@@ -954,7 +979,6 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 								  result->stored_data->persistent,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  result->conn->zval_cache,
 								  &result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
@@ -1511,16 +1535,15 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int 
 
 
 /* {{{ mysqlnd_result_init */
-MYSQLND_RES *mysqlnd_result_init(unsigned int field_count, MYSQLND_THD_ZVAL_PCACHE *cache TSRMLS_DC)
+MYSQLND_RES *mysqlnd_result_init(unsigned int field_count TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_RES *ret = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("mysqlnd_result_init");
-	DBG_INF_FMT("field_count=%u cache=%p", field_count, cache);
+	DBG_INF_FMT("field_count=%u", field_count);
 
 	ret->field_count	= field_count;
-	ret->zval_cache		= cache;
 
 	ret->m.use_result	= MYSQLND_METHOD(mysqlnd_res, use_result);
 	ret->m.store_result	= MYSQLND_METHOD(mysqlnd_res, store_result);

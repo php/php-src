@@ -125,9 +125,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long trace_mode;
 	long allow_local_infile;
 #ifdef MYSQL_USE_MYSQLND
-	MYSQLND_THD_ZVAL_PCACHE *mysqlnd_thd_zval_cache;
 	MYSQLND_QCACHE			*mysqlnd_qcache;
-	long					cache_size;
 #endif
 ZEND_END_MODULE_GLOBALS(mysql)
 

@@ -332,7 +332,6 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
 
@@ -340,7 +339,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
 enum_func_status mysqlnd_read_from_stream(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
