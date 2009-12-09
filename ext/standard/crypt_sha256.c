@@ -3,7 +3,6 @@
 /* Windows VC++ port by Pierre Joye <pierre@php.net> */
 
 #ifndef PHP_WIN32
-# include <endian.h>
 # include "php.h"
 # include "php_main.h"
 #endif
@@ -75,7 +74,7 @@ struct sha256_ctx {
 	char buffer[128]; /* NB: always correctly aligned for uint32_t.  */
 };
 
-#if PHP_WIN32 || (__BYTE_ORDER == __LITTLE_ENDIAN)
+#if PHP_WIN32 || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
     (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
 #else
