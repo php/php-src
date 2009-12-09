@@ -276,6 +276,6 @@ setting mysqli->unknown, mysqli_unknown = '13'
 setting mysqli->unknown, mysqli_unknown = 'friday'
 
 Access hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):
-mysqli->connect_error = ''/%unicode|string% (''/%unicode|string%)
+mysqli->connect_error = ''/NULL (''/NULL)
 mysqli->connect_errno = '0'/integer ('0'/integer)
 done!
