@@ -321,10 +321,10 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 	*buf = NULL;
 	*len = 0;
 
-	buffer.size = Z->avail_in;
+	buffer.size = (max && (max < Z->avail_in)) ? max : Z->avail_in;
 
 	do {
-		if ((max && (max < buffer.used)) || !(buffer.aptr = erealloc_recoverable(buffer.data, buffer.size))) {
+		if ((max && (max <= buffer.used)) || !(buffer.aptr = erealloc_recoverable(buffer.data, buffer.size))) {
 			status = Z_MEM_ERROR;
 		} else {
 			buffer.data = buffer.aptr;
