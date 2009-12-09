@@ -27,11 +27,6 @@ MYSQLND_RES *mysqlnd_result_init(unsigned int field_count, MYSQLND_THD_ZVAL_PCAC
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC);
 
-#ifdef MYSQLND_THREADED
-void * mysqlnd_fetch_thread(void *arg);
-#endif
-
-enum_func_status mysqlnd_background_store_result_fetch_data(MYSQLND_RES *result TSRMLS_DC);
 #endif /* MYSQLND_RESULT_H */
 
 /*
