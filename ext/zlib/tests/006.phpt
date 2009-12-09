@@ -31,7 +31,6 @@ var_dump(gzinflate($data1));
 var_dump(gzinflate($data2));
 $data2[4] = 0;
 var_dump(gzinflate((binary)$data2));
-
 echo "Done\n";
 ?>
 --EXPECTF--	
@@ -57,8 +56,12 @@ bool(false)
 
 Warning: gzinflate(): length (-1) must be greater or equal zero in %s on line %d
 bool(false)
-string(0) ""
-string(0) ""
+
+Warning: gzinflate(): data error in %s on line %d
+bool(false)
+
+Warning: gzinflate(): data error in %s on line %d
+bool(false)
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"

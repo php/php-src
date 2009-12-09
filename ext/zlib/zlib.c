@@ -344,15 +344,19 @@ static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, s
 		}
 	} while ((Z_BUF_ERROR == status || (Z_OK == status && Z->avail_in)) && ++round < 100);
 
-	if (status == Z_OK || status == Z_STREAM_END) {
+	if (status == Z_STREAM_END) {
 		buffer.data = erealloc(buffer.data, buffer.used + 1);
 		buffer.data[buffer.used] = '\0';
 		*buf = buffer.data;
 		*len = buffer.used;
-	} else if (buffer.data) {
-		efree(buffer.data);
+	} else {
+		if (buffer.data) {
+			efree(buffer.data);
+		}
+		/* HACK: See zlib/examples/zpipe.c inf() function for explanation. */
+		/* This works as long as this function is not used for streaming. Required to catch very short invalid data. */
+		status = (status == Z_OK) ? Z_DATA_ERROR : status;
 	}
-
 	return status;
 }
 /* }}} */
@@ -375,7 +379,6 @@ retry_raw_inflate:
 			Z.avail_in = in_len;
 
 			switch (status = php_zlib_inflate_rounds(&Z, max_len, out_buf, out_len)) {
-				case Z_OK:
 				case Z_STREAM_END:
 					inflateEnd(&Z);
 					return SUCCESS;
