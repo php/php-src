@@ -24,7 +24,6 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_statistics.h"
-#include "mysqlnd_palloc.h"
 #include "mysqlnd_debug.h"
 #include "mysqlnd_block_alloc.h"
 #include "ext/standard/sha1.h"
@@ -1600,17 +1599,12 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
 										 MYSQLND_STATS * stats TSRMLS_DC)
 {
 	int i;
 	zend_uchar *p = row_buffer->ptr;
 	zend_uchar *null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
-#ifdef USE_ZVAL_CACHE
-	zend_bool allocated;
-	void *obj;
-#endif
 
 	DBG_ENTER("php_mysqlnd_rowp_read_binary_protocol");
 
@@ -1624,20 +1618,8 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	bit	= 4;						/* first 2 bits are reserved */
 
 	for (i = 0; current_field < end_field; current_field++, i++) {
-#ifdef USE_ZVAL_CACHE
-		DBG_INF("Trying to use the zval cache");
-		obj = mysqlnd_palloc_get_zval(zval_cache, &allocated TSRMLS_CC);
-		if (allocated) {
-			*current_field = (zval *) obj;
-		} else {
-			/* It's from the cache, so we can upcast here */
-			*current_field = &((mysqlnd_zval *) obj)->zv;
-			((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_EXT_BUFFER;
-		}
-#else
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
-#endif
 
 		DBG_INF_FMT("Into zval=%p decoding column %d [%s.%s.%s] type=%d field->flags&unsigned=%d flags=%u is_bit=%d as_unicode=%d",
 			*current_field, i,
@@ -1703,7 +1685,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_THD_ZVAL_PCACHE * zval_cache,
 										 MYSQLND_STATS * stats TSRMLS_DC)
 {
 	int i;
@@ -1718,25 +1699,12 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 	end_field = (current_field = start_field = fields) + field_count;
 	for (i = 0; current_field < end_field; current_field++, i++) {
 		/* Don't reverse the order. It is significant!*/
-		void *obj = NULL;
-		zend_bool allocated = TRUE;
 		zend_uchar *this_field_len_pos = p;
 		/* php_mysqlnd_net_field_length() call should be after *this_field_len_pos = p; */
 		unsigned long len = php_mysqlnd_net_field_length(&p);
 
-#ifdef USE_ZVAL_CACHE
-		obj = mysqlnd_palloc_get_zval(zval_cache, &allocated TSRMLS_CC);
-		if (allocated) {
-			*current_field = (zval *) obj;
-		} else {
-			/* It's from the cache, so we can upcast here */
-			*current_field = &((mysqlnd_zval *) obj)->zv;
-			((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_FREE;
-		}
-#else
 		DBG_INF("Directly creating zval");
 		MAKE_STD_ZVAL(*current_field);
-#endif
 
 		if (current_field > start_field && last_field_was_string) {
 			/*
@@ -1874,9 +1842,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 					{
 						ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
 					}
-					if (allocated == FALSE) {
-						((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_INT_BUFFER;
-					}
 				} else if (Z_TYPE_PP(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_PP(current_field), Z_STRLEN_PP(current_field));
 					bit_area += Z_STRLEN_PP(current_field);
@@ -1890,9 +1855,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 					{
 						ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
 					}
-					if (allocated == FALSE) {
-						((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_INT_BUFFER;
-					}
 				}
 				/*
 				  IS_UNICODE should not be specially handled. In unicode mode
@@ -1902,9 +1864,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 #if PHP_MAJOR_VERSION < 6
 			{
 				ZVAL_STRINGL(*current_field, (char *)p, len, 0);
-				if (allocated == FALSE) {
-					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_INT_BUFFER;
-				}
 			}
 #else
 			/*
@@ -1914,10 +1873,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 
 			  Also the destruction of the zvals should not call zval_copy_ctor()
 			  because then we will leak.
-
-			  I suppose we can use UG(unicode) in mysqlnd.c/mysqlnd_palloc.c when
-			  freeing a result set
-			  to check if we need to call copy_ctor().
 
 			  XXX: Keep in mind that up there there is an open `else` in
 				   #ifdef MYSQLND_STRING_TO_INT_CONVERSION
@@ -1931,20 +1886,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 				ZVAL_STRINGL(*current_field, (char *)p, len, 0);
 			} else {
 				ZVAL_UTF8_STRINGL(*current_field, (char *)p, len, 0);
-			}
-			if (allocated == FALSE) {
-				/*
-				  The zval cache will check and see that the type is IS_STRING.
-				  In this case it will call copy_ctor(). This is valid when
-				  allocated == TRUE . In this case we can't upcast. Thus for non-PS
-				  point_type doesn't matter much, as the valuable information is
-				  in the type of result set. Still good to set it.
-				*/
-				if (Z_TYPE_P(*current_field) == IS_STRING) {
-					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_INT_BUFFER;
-				} else {
-					((mysqlnd_zval *) obj)->point_type = MYSQLND_POINTS_EXT_BUFFER;
-				}
 			}
 #endif
 			p += len;
