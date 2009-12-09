@@ -319,9 +319,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
 #ifdef MYSQLI_USE_MYSQLND
-#ifdef MYSQLND_THREADED
-#define MYSQLI_BG_STORE_RESULT 	4
-#endif
 #define MYSQLI_ASYNC	 	8
 #else
 /* libmysql */
