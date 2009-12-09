@@ -171,7 +171,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 							if (!mysql_ping(mysql->mysql)) {
 #endif
 #ifdef MYSQLI_USE_MYSQLND
-								mysqlnd_restart_psession(mysql->mysql, MyG(mysqlnd_thd_zval_cache));
+								mysqlnd_restart_psession(mysql->mysql);
 #endif
 								MyG(num_active_persistent)++;
 								goto end;
@@ -233,7 +233,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, CLIENT_MULTI_RESULTS) == NULL)
 #else
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
-						port, socket, flags, MyG(mysqlnd_thd_zval_cache) TSRMLS_CC) == NULL)
+						port, socket, flags TSRMLS_CC) == NULL)
 #endif
 	{
 		/* Save error messages - for mysqli_connect_error() & mysqli_connect_errno() */
@@ -420,7 +420,7 @@ PHP_FUNCTION(mysqli_get_cache_stats)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	mysqlnd_palloc_stats(mysqli_mysqlnd_zval_cache, return_value);
+	array_init(return_value);
 }
 /* }}} */
 

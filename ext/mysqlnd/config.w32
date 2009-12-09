@@ -11,7 +11,6 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_loaddata.c " +
-			"mysqlnd_palloc.c " +
 			"mysqlnd_ps.c " +
 			"mysqlnd_ps_codec.c " +
 			"mysqlnd_qcache.c " +
