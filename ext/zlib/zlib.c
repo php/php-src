@@ -312,8 +312,8 @@ static int php_zlib_encode(const char *in_buf, size_t in_len, char **out_buf, si
 }
 /* }}} */
 
-/* {{{ inflate_rounds() */
-static inline int inflate_rounds(z_stream *Z, size_t max, char **buf, size_t *len)
+/* {{{ php_zlib_inflate_rounds() */
+static inline int php_zlib_inflate_rounds(z_stream *Z, size_t max, char **buf, size_t *len)
 {
 	int status, round = 0;
 	php_zlib_buffer buffer = {NULL, NULL, 0, 0, 0};
@@ -374,7 +374,7 @@ retry_raw_inflate:
 			Z.next_in = (Bytef *) in_buf;
 			Z.avail_in = in_len;
 
-			switch (status = inflate_rounds(&Z, max_len, out_buf, out_len)) {
+			switch (status = php_zlib_inflate_rounds(&Z, max_len, out_buf, out_len)) {
 				case Z_OK:
 				case Z_STREAM_END:
 					inflateEnd(&Z);
