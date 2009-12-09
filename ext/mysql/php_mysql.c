@@ -125,9 +125,6 @@ typedef struct _php_mysql_conn {
 	int multi_query;
 } php_mysql_conn;
 
-#ifdef MYSQL_USE_MYSQLND
-static MYSQLND_QCACHE		*mysql_mysqlnd_qcache;
-#endif
 
 #if MYSQL_VERSION_ID >= 40101
 #define MYSQL_DISABLE_MQ if (mysql->multi_query) { \
@@ -457,8 +454,6 @@ ZEND_MODULE_STARTUP_D(mysql)
 		return FAILURE;
 	}
 #endif
-#else
-	mysql_mysqlnd_qcache = mysqlnd_qcache_init_cache();
 #endif
 
 	return SUCCESS;
@@ -484,8 +479,6 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
 	mysql_server_end();
 #endif
 #endif
-#else
-	mysqlnd_qcache_free_cache_reference(&mysql_mysqlnd_qcache);
 #endif
 
 	UNREGISTER_INI_ENTRIES();

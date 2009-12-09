@@ -196,10 +196,6 @@ extern zend_property_info mysqli_stmt_property_info_entries[];
 extern zend_property_info mysqli_driver_property_info_entries[];
 extern zend_property_info mysqli_warning_property_info_entries[];
 
-#ifdef MYSQLI_USE_MYSQLND
-extern MYSQLND_QCACHE		*mysqli_mysqlnd_qcache;
-#endif
-
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC);
 extern void php_clear_mysql(MY_MYSQL *);
