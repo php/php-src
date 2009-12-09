@@ -95,12 +95,6 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
 
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		return PASS; /* don't trace background threads */
-	}
-#endif
-
 	if (!self->stream) {
 		if (FAIL == self->m->open(self, FALSE)) {
 			return FAIL;
@@ -201,12 +195,6 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
 
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		return PASS; /* don't trace background threads */
-	}
-#endif
-
 	if (!self->stream) {
 		if (FAIL == self->m->open(self, FALSE)) {
 			return FAIL;
@@ -303,17 +291,9 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
 										  char * func_name, unsigned int func_name_len)
 {
-#ifdef MYSQLND_THREADED
-	MYSQLND_ZTS(self);
-#endif
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		return FALSE; /* don't trace background threads */
-	}
-#endif
 	if (zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return FALSE;
 	}
@@ -351,17 +331,9 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 										  const char * const file)
 {
 	char *func_name;
-#ifdef MYSQLND_THREADED
-	MYSQLND_ZTS(self);
-#endif
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
 	}
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		return PASS; /* don't trace background threads */
-	}
-#endif
 	if (zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return PASS;
 	}
@@ -670,11 +642,6 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_emalloc_name);
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		DBG_RETURN(_mysqlnd_pemalloc(size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
-	}
-#endif
 
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("before: %lu", zend_memory_usage(FALSE TSRMLS_CC));
@@ -723,11 +690,6 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_ecalloc_name);
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		DBG_RETURN(_mysqlnd_pecalloc(nmemb, size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
-	}
-#endif
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("before: %lu", zend_memory_usage(FALSE TSRMLS_CC));
 
@@ -776,11 +738,6 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 {
 	void *ret;
 	DBG_ENTER(mysqlnd_erealloc_name);
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		DBG_RETURN(_mysqlnd_perealloc(ptr, new_size, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
-	}
-#endif
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("ptr=%p new_size=%lu", ptr, new_size); 
 	DBG_INF_FMT("before: %lu", zend_memory_usage(FALSE TSRMLS_CC));
@@ -830,11 +787,6 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 void _mysqlnd_efree(void *ptr MYSQLND_MEM_D)
 {
 	DBG_ENTER(mysqlnd_efree_name);
-#ifdef MYSQLND_THREADED
-	if (MYSQLND_G(thread_id) != tsrm_thread_id()) {
-		DBG_RETURN(_mysqlnd_pefree(ptr, 1 TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC));
-	}
-#endif
 	DBG_INF_FMT("file=%-15s line=%4d", strrchr(__zend_filename, PHP_DIR_SEPARATOR) + 1, __zend_lineno);
 	DBG_INF_FMT("ptr=%p", ptr); 
 	DBG_INF_FMT("before: %lu", zend_memory_usage(FALSE TSRMLS_CC));

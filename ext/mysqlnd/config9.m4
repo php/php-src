@@ -3,11 +3,6 @@ dnl $Id$
 dnl config.m4 for mysqlnd driver
 
 
-PHP_ARG_ENABLE(mysqlnd_threading, whether to enable threaded fetch in mysqlnd,
-[  --enable-mysqlnd-threading
-                            EXPERIMENTAL: Enable mysqlnd threaded fetch.
-                            Note: This forces ZTS on!], no, no)
-
 PHP_ARG_ENABLE(disable_mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
                             Enable support for the MySQL compressed protocol in mysqlnd], yes)
@@ -29,10 +24,6 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
 
   dnl Windows uses config.w32 thus this code is safe for now
-  if test "$PHP_MYSQLND_THREADING" = "yes"; then
-    PHP_BUILD_THREAD_SAFE
-    AC_DEFINE([MYSQLND_THREADED], 1, [Use mysqlnd internal threading])
-  fi
 
   if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
     AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], 1, [Enable compressed protocol support])

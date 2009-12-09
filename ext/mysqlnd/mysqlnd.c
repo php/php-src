@@ -245,22 +245,6 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 	conn->m->free_contents(conn TSRMLS_CC);
 	conn->m->free_options(conn TSRMLS_CC);
 
-#ifdef MYSQLND_THREADED
-	if (conn->thread_is_running) {
-		pthread_mutex_lock(&conn->LOCK_work);
-		conn->thread_killed = TRUE;
-		pthread_cond_signal(&conn->COND_work);
-		pthread_cond_wait(&conn->COND_thread_ended, &conn->LOCK_work);
-		pthread_mutex_unlock(&conn->LOCK_work);
-	}
-
-	tsrm_mutex_free(conn->LOCK_state);
-
-	pthread_cond_destroy(&conn->COND_work);
-	pthread_cond_destroy(&conn->COND_work_done);
-	pthread_mutex_destroy(&conn->LOCK_work);
-#endif
-
 	mnd_pefree(conn, conn->persistent);
 
 	DBG_VOID_RETURN;
@@ -821,21 +805,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE,
 									   (char *)&as_unicode TSRMLS_CC);
 			DBG_INF("unicode set");
-		}
-#endif
-#ifdef MYSQLND_THREADED
-		{
-			pthread_t th;
-			pthread_attr_t connection_attrib;
-			conn->tsrm_ls = tsrm_ls;
-
-			pthread_attr_init(&connection_attrib);
-			pthread_attr_setdetachstate(&connection_attrib, PTHREAD_CREATE_DETACHED);
-
-			conn->thread_is_running = TRUE;
-			if (pthread_create(&th, &connection_attrib, mysqlnd_fetch_thread, (void*)conn)) {
-				conn->thread_is_running = FALSE;
-			}
 		}
 #endif
 
@@ -1630,25 +1599,12 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference)(MYSQLND * const conn TSRMLS
 
 
 /* {{{ mysqlnd_conn::get_state */
-#ifdef MYSQLND_THREADED
-static enum mysqlnd_connection_state
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state)(MYSQLND * const conn TSRMLS_DC)
-{
-	enum mysqlnd_connection_state state;
-	DBG_ENTER("mysqlnd_conn::get_state");
-	tsrm_mutex_lock(conn->LOCK_state);
-	state = conn->state;
-	tsrm_mutex_unlock(conn->LOCK_state);
-	DBG_RETURN(state);
-}
-#else
 static enum mysqlnd_connection_state
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state)(MYSQLND * const conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::get_state");
 	DBG_RETURN(conn->state);
 }
-#endif
 /* }}} */
 
 
@@ -1657,14 +1613,8 @@ static void
 MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::set_state");
-#ifdef MYSQLND_THREADED
- 	tsrm_mutex_lock(conn->LOCK_state);
-#endif
 	DBG_INF_FMT("New state=%d", new_state);
 	conn->state = new_state;
-#ifdef MYSQLND_THREADED
-	tsrm_mutex_unlock(conn->LOCK_state);
-#endif
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2190,44 +2140,6 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_conn::background_store_result */
-MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn, background_store_result)(MYSQLND * const conn TSRMLS_DC)
-{
-	MYSQLND_RES *result;
-
-	DBG_ENTER("mysqlnd_conn::store_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
-
-	if (!conn->current_result) {
-		DBG_RETURN(NULL);
-	}
-
-	/* Nothing to store for UPSERT/LOAD DATA*/
-	if (conn->last_query_type != QUERY_SELECT || CONN_GET_STATE(conn) != CONN_FETCHING_DATA) {
-		SET_CLIENT_ERROR(conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
-						 mysqlnd_out_of_sync);
-		DBG_ERR("Command out of sync");
-		DBG_RETURN(NULL);
-	}
-
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BUFFERED_SETS);
-
-	result = conn->current_result;
-
-	result = result->m.background_store_result(result, conn, FALSE TSRMLS_CC);
-
-	/*
-	  Should be here, because current_result is used by the fetching thread to get data info
-	  The thread is contacted in mysqlnd_res::background_store_result().
-	*/
-	conn->current_result = NULL;
-
-	DBG_RETURN(result);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_conn::get_connection_stats */
 static void
 MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
@@ -2254,7 +2166,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, reap_query),
 	MYSQLND_METHOD(mysqlnd_conn, use_result),
 	MYSQLND_METHOD(mysqlnd_conn, store_result),
-	MYSQLND_METHOD(mysqlnd_conn, background_store_result),
 	MYSQLND_METHOD(mysqlnd_conn, next_result),
 	MYSQLND_METHOD(mysqlnd_conn, more_results),
 
@@ -2325,15 +2236,6 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 
 	ret->net.stream_read = mysqlnd_read_from_stream;
 	ret->net.stream_write = mysqlnd_stream_write;
-
-#ifdef MYSQLND_THREADED
-	ret->LOCK_state = tsrm_mutex_alloc();
-
-	pthread_mutex_init(&ret->LOCK_work, NULL);
-	pthread_cond_init(&ret->COND_work, NULL);
-	pthread_cond_init(&ret->COND_work_done, NULL);
-	pthread_cond_init(&ret->COND_thread_ended, NULL);
-#endif
 
 	DBG_RETURN(ret);
 }

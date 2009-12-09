@@ -129,7 +129,6 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 
 #define mysqlnd_use_result(conn)		(conn)->m->use_result((conn) TSRMLS_CC)
 #define mysqlnd_store_result(conn)		(conn)->m->store_result((conn) TSRMLS_CC)
-#define mysqlnd_bg_store_result(conn) 	(conn)->m->background_store_result((conn) TSRMLS_CC)
 #define mysqlnd_next_result(conn)		(conn)->m->next_result((conn) TSRMLS_CC)
 #define mysqlnd_more_results(conn)		(conn)->m->more_results((conn) TSRMLS_CC)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
@@ -279,7 +278,6 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 /* PS */
 #define mysqlnd_stmt_init(conn)				(conn)->m->stmt_init((conn) TSRMLS_CC)
 #define mysqlnd_stmt_store_result(stmt)		(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->store_result((stmt) TSRMLS_CC)? PASS:FAIL))
-#define mysqlnd_stmt_bg_store_result(stmt)	(!mysqlnd_stmt_field_count((stmt)) ? PASS:((stmt)->m->background_store_result((stmt) TSRMLS_CC)? PASS:FAIL))
 #define mysqlnd_stmt_get_result(stmt)		(stmt)->m->get_result((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_more_results(stmt)		(stmt)->m->more_results((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_next_result(stmt)		(stmt)->m->next_result((stmt) TSRMLS_CC)
@@ -380,9 +378,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
 	long			log_mask;
-#ifdef MYSQLND_THREADED
-	THREAD_T		thread_id;
-#endif
 	long			net_read_timeout;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
