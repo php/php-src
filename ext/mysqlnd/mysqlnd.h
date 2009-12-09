@@ -306,34 +306,6 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 /* Performance statistics */
 PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
 
-
-/* ---------------------- QUERY CACHE ---------------*/
-struct st_mysqlnd_qcache {
-	HashTable		*ht;
-	unsigned int	references;
-#ifdef ZTS
-	MUTEX_T		LOCK_access;
-#endif
-};
-
-
-typedef struct st_mysqlnd_qcache_element {
-	MYSQLND_RES_BUFFERED *data;
-	MYSQLND_RES_METADATA *meta;
-	const char * query;
-	size_t	query_len;
-} MYSQLND_QCACHE_ELEMENT;
-
-
-PHPAPI MYSQLND_QCACHE *	mysqlnd_qcache_init_cache();
-PHPAPI MYSQLND_QCACHE *	mysqlnd_qcache_get_cache_reference(MYSQLND_QCACHE * const cache);
-PHPAPI void				mysqlnd_qcache_free_cache_reference(MYSQLND_QCACHE **cache);
-PHPAPI void				mysqlnd_qcache_stats(const MYSQLND_QCACHE * const cache, zval *return_value);
-MYSQLND_RES * 		mysqlnd_qcache_get(MYSQLND_QCACHE * const cache, const char * query,
-									   size_t query_len);
-void				mysqlnd_qcache_put(MYSQLND_QCACHE * const cache, char * query, size_t query_len,
-									   MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta);
-
 /* double check the class name to avoid naming conflicts when using these: */
 #define MYSQLND_METHOD(class, method) php_##class##_##method##_pub
 #define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
