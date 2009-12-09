@@ -39,24 +39,13 @@
 #  include <strings.h>
 # endif
 #endif
-#if 0
-#ifndef stpncpy
-char * stpncpy(char *dst, const char *src, size_t len)
-{
-	size_t n = strlen(src);
-	if (n > len) {
-		n = len;
-	}
-	return strncpy(dst, src, len) + n;
-}
+
+#ifndef HAVE_MEMPCPY
+extern void * mempcpy(void * dst, const void * src, size_t len);
 #endif
 
-#ifndef mempcpy
-void * mempcpy(void * dst, const void * src, size_t len)
-{
-	return (((char *)memcpy(dst, src, len)) + len);
-}
-#endif
+#ifndef HAVE_STRPNCPY
+extern char * stpncpy(char *dst, const char *src, size_t len);
 #endif
 
 #ifndef MIN
