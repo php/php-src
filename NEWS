@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
+- Added support for SHA-256 and SHA-512 to php's crypt. (Pierre)
 
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
@@ -37,6 +38,7 @@ PHP                                                                        NEWS
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Jani)
 - Fixed bug #50340 (php.ini parser does not allow spaces in ini keys). (Jani)
+- Fixed bug #50334 (crypt ignores sha512 prefix). (Pierre)
 - Fixed bug #50323 (Allow use of ; in values via ;; in PDO DSN).
   (Ilia, Pierrick)
 - Fixed bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays).
