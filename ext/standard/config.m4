@@ -173,6 +173,65 @@ main() {
   ac_cv_crypt_blowfish=no
 ])])
 
+AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_SHA512,[
+AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
+main() {
+#if HAVE_CRYPT
+    char salt[30], answer[80];
+    
+    salt[0]='$'; salt[1]='6'; salt[2]='$'; salt[3]='$'; salt[4]='b'; salt[5]='a'; salt[6]='r'; salt[7]='\0';
+    strcpy(answer, salt);
+    strcpy(&answer[29],"$6$$QMXjqd7rHQZPQ1yHsXkQqC1FBzDiVfTHXL.LaeDAeVV.IzMaV9VU4MQ8kPuZa2SOP1A0RPm772EaFYjpEJtdu.");
+    exit (strcmp((char *)crypt("foo",salt),answer));
+#else
+	exit(0);
+#endif
+}],[
+  ac_cv_crypt_SHA512=yes
+],[
+  ac_cv_crypt_SHA512=no
+],[
+  ac_cv_crypt_SHA512=no
+])])
+
+AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_SHA256,[
+AC_TRY_RUN([
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
+main() {
+#if HAVE_CRYPT
+    char salt[30], answer[80];
+    salt[0]='$'; salt[1]='5'; salt[2]='$'; salt[3]='$'; salt[4]='s'; salt[5]='a'; salt[6]='l'; salt[7]='t';  salt[8]='s'; salt[9]='t'; salt[10]='r'; salt[11]='i'; salt[12]='n'; salt[13]='g'; salt[14]='\0';    
+    strcat(salt,"");
+    strcpy(answer, salt);
+    strcpy(&answer[29], "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5");
+    exit (strcmp((char *)crypt("foo",salt),answer));
+#else
+	exit(0);
+#endif
+}],[
+  ac_cv_crypt_SHA256=yes
+],[
+  ac_cv_crypt_SHA256=no
+],[
+  ac_cv_crypt_SHA256=no
+])])
+
+
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
@@ -182,8 +241,10 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
   AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
   AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
   AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports extended DES salt])
+  AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, 1, [Whether the system supports SHA512 salt])
+  AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, 1, [Whether the system supports SHA256 salt])
 
-  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c php_crypt_r.c)
+  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 else
   if test "$ac_cv_crypt_des" = "yes"; then
     ac_result=1
@@ -212,13 +273,31 @@ else
   fi
   AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, $ac_result, [Whether the system supports extended DES salt])
 
+  if test "$ac_cv_crypt_sha512" = "yes"; then
+    ac_result=1
+    ac_crypt_sha512=1
+  else
+    ac_result=0
+    ac_crypt_sha512=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_EXT_SHA512_CRYPT, $ac_result, [Whether the system supports SHA512 salt])
+
+  if test "$ac_cv_crypt_sha256" = "yes"; then
+    ac_result=1
+    ac_crypt_sha256=1
+  else
+    ac_result=0
+    ac_crypt_sha256=0
+  fi
+  AC_DEFINE_UNQUOTED(PHP_EXT_SHA256_CRYPT, $ac_result, [Whether the system supports SHA256 salt])
+
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
 
 dnl
 dnl Check for available functions
 dnl
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan)
+AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
 dnl No longer needed after dropping support for autoconf 2.13

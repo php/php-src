@@ -83,6 +83,12 @@
 #define PHP_MAX_SALT_LEN 60
 #endif
 
+#if PHP_SHA512_CRYPT
+#undef PHP_MAX_SALT_LEN
+#define PHP_MAX_SALT_LEN 123
+#endif
+
+
 /* If the configure-time checks fail, we provide DES.
  * XXX: This is a hack. Fix the real problem! */
 
@@ -164,6 +170,7 @@ PHP_FUNCTION(crypt)
 		php_to64(&salt[0], PHP_CRYPT_RAND, 2);
 		salt[2] = '\0';
 #endif
+		salt_in_len = strlen(salt);
 	}
 
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and 
@@ -176,7 +183,36 @@ PHP_FUNCTION(crypt)
 			char output[MD5_HASH_MAX_LEN];
 
 			RETURN_STRING(php_md5_crypt_r(str, salt, output), 1);
-		} else  if (
+		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
+			const char sha512_salt_prefix[] = "$6$";
+			const char sha512_rounds_prefix[] = "rounds=";
+			char *output;
+			int needed = (sizeof(sha512_salt_prefix) - 1
+						+ sizeof(sha512_rounds_prefix) + 9 + 1
+						+ strlen(salt) + 1 + 43 + 1);
+			output = emalloc(needed * sizeof(char *));
+			salt[salt_in_len] = '\0';
+
+			php_sha512_crypt_r(str, salt, output, needed);
+
+			RETVAL_STRING(output, 1);
+			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+			efree(output);
+		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
+			const char sha256_salt_prefix[] = "$5$";
+			const char sha256_rounds_prefix[] = "rounds=";
+			char *output;
+			int needed = (sizeof(sha256_salt_prefix) - 1
+						+ sizeof(sha256_rounds_prefix) + 9 + 1
+						+ strlen(salt) + 1 + 43 + 1);
+			output = emalloc(needed * sizeof(char *));
+			salt[salt_in_len] = '\0';
+			php_sha256_crypt_r(str, salt, output, needed);
+
+			RETVAL_STRING(output, 1);
+			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+			efree(output);
+		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
 				salt[2] == 'a' &&
