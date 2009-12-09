@@ -9,7 +9,7 @@ AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1);
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
-	crc32.c crypt.c \
+	crc32.c crypt.c crypt_sha256.c crypt_sha512.c \
 	crypt_freesec.c crypt_blowfish.c php_crypt_r.c \
 	cyr_convert.c datetime.c dir.c dl.c dns.c dns_win32.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
