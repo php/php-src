@@ -14,7 +14,7 @@ if ($sv == 1) {
     ob_start();
     phpinfo(INFO_MODULES);
     $phpinfo = ob_get_clean();
-    $iv = preg_match('/Oracle .*Version => (11.2|12)\./', $phpinfo);
+    $iv = preg_match('/Oracle .*Version => (11.2|12)/', $phpinfo);
     if ($iv != 1) {
         die ("skip test expected to work only with Oracle 11g or greater version of client");
     }
