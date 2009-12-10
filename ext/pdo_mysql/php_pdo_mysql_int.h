@@ -63,8 +63,6 @@ static inline void PDO_DBG_ENTER(char *func_name) {}
 
 #ifdef PDO_USE_MYSQLND
 ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
-	MYSQLND_THD_ZVAL_PCACHE *mysqlnd_thd_zval_cache;
-	long          cache_size;
 #ifndef PHP_WIN32
 	char          *default_socket;
 #endif
