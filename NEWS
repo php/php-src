@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Dec 2009, PHP 5.2.12RC5
+
 10 Dec 2009, PHP 5.2.12RC4
 - Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
   single text node when using libxml2.7.3+. (Kalle)
