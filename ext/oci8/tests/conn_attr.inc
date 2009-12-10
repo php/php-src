@@ -36,6 +36,7 @@ foreach ($stmtarray as $stmt) {
 		$m = oci_error($s);
 		if (!in_array($m['code'], array(   // ignore expected errors
                         942 // table or view does not exist
+                     , 1918 // user does not exist 
                      , 2289 // sequence does not exist
                      , 4080 // trigger does not exist
                     , 38802 // edition does not exist
