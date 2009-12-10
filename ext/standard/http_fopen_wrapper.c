@@ -654,7 +654,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		if (php_stream_get_line(stream, ZSTR(http_header_line), HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			if (*e != '\n') { /* partial header */
-				php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length);
+				php_stream_get_line(stream, ZSTR(http_header_line), HTTP_HEADER_BLOCK_SIZE, &http_header_line_length);
 				continue;
 			}
 			while (*e == '\n' || *e == '\r') {
