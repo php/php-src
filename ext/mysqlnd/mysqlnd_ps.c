@@ -2081,7 +2081,8 @@ MYSQLND_CLASS_METHODS_END;
 /* {{{ _mysqlnd_stmt_init */
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 {
-	MYSQLND_STMT *stmt = mnd_ecalloc(1, sizeof(MYSQLND_STMT));
+	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_STMT *stmt = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("_mysqlnd_stmt_init");
 	DBG_INF_FMT("stmt=%p", stmt); 
@@ -2103,6 +2104,19 @@ MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 	stmt->m->set_result_bind_dtor(stmt, mysqlnd_efree_result_bind_dtor TSRMLS_CC); 
 
 	DBG_RETURN(stmt);
+}
+/* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_stmt_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_stmt_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!stmt || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)stmt + sizeof(MYSQLND_STMT) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
