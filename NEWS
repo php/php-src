@@ -95,6 +95,7 @@ PHP                                                                        NEWS
 - Fixed bug #49866 (Making reference on string offsets crashes PHP). (Dmitry)
 - Fixed bug #49855 (import_request_variables() always returns NULL). (Ilia,
   sjoerd at php dot net)
+- Fixed bug #49851 (http wrapper breaks on 1024 char long headers). (Ilia)
 - Fixed bug #49800 (SimpleXML allow (un)serialize() calls without warning).
   (Ilia, wmeler at wp-sa dot pl)
 - Fixed bug #49719 (ReflectionClass::hasProperty returns true for a private
