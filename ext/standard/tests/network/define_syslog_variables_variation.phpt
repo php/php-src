@@ -1,12 +1,5 @@
 --TEST--
 Test define_syslog_variables() function : variation
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip don't run on Windows");
-?> 
---INI--
-define_syslog_variables = true
 --FILE--
 <?php
 /* Prototype  : void define_syslog_variables(void)
@@ -15,6 +8,8 @@ define_syslog_variables = true
  * Alias to functions: 
  */
  
+define_syslog_variables();
+
 echo "*** Testing define_syslog_variables() : variation ***\n";
 
 $log_constants = array(
@@ -90,8 +85,8 @@ if ($failed == false) {
 }
 ?>
 ===DONE===
---EXPECT--
-Warning: Directive 'define_syslog_variables' is deprecated in PHP 5.3 and greater in Unknown on line 0
+--EXPECTF--
+Deprecated: Function define_syslog_variables() is deprecated in %s on line %d
 *** Testing define_syslog_variables() : variation ***
 PASSED
 ===DONE===
