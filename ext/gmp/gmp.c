@@ -356,6 +356,9 @@ ZEND_MODULE_STARTUP_D(gmp)
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
+#ifdef mpir_version
+	REGISTER_STRING_CONSTANT("GMP_MPIR_VERSION", (char *)mpir_version, CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
 
 	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
@@ -383,7 +386,11 @@ ZEND_MODULE_INFO_D(gmp)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "gmp support", "enabled");
+#ifdef mpir_version
+	php_info_print_table_row(2, "MPIR version", mpir_version);
+#else
 	php_info_print_table_row(2, "GMP version", gmp_version);
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
@@ -746,7 +753,7 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-#if __GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2
+#if (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2)
 	if (base && (base < 2 || base > 62)) {
 #else
 	if (base && (base < 2 || base > 36)) {
