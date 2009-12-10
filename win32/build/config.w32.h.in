@@ -28,6 +28,8 @@
 #define PHP_EXT_DES_CRYPT 1
 #define PHP_MD5_CRYPT 1
 #define PHP_BLOWFISH_CRYPT 1
+#define PHP_SHA512_CRYPT 1
+#define PHP_SHA256_CRYPT 1
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
