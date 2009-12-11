@@ -32,20 +32,14 @@
 # include <sys/param.h>
 # include <sys/types.h>
 # if HAVE_STRING_H
-#  define __USE_GNU 
 #  include <string.h>
 # else
 #  include <strings.h>
 # endif
 #endif
 
-#ifndef HAVE_MEMPCPY
-extern void * mempcpy(void * dst, const void * src, size_t len);
-#endif
-
-#ifndef HAVE_STRPNCPY
-extern char * stpncpy(char *dst, const char *src, size_t len);
-#endif
+extern void * __php_mempcpy(void * dst, const void * src, size_t len);
+extern char * __php_stpncpy(char *dst, const char *src, size_t len);
 
 #ifndef MIN
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -488,7 +482,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	/* Create byte sequence P.  */
 	cp = p_bytes = alloca(key_len);
 	for (cnt = key_len; cnt >= 64; cnt -= 64) {
-		cp = mempcpy((void *) cp, (const void *)temp_result, 64);
+		cp = __php_mempcpy((void *) cp, (const void *)temp_result, 64);
 	}
 
 	memcpy(cp, temp_result, cnt);
@@ -507,7 +501,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	/* Create byte sequence S.  */
 	cp = s_bytes = alloca(salt_len);
 	for (cnt = salt_len; cnt >= 64; cnt -= 64) {
-		cp = mempcpy(cp, temp_result, 64);
+		cp = __php_mempcpy(cp, temp_result, 64);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -547,7 +541,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 
 	/* Now we can construct the result string.  It consists of three
 	 parts.  */
-	cp = stpncpy(buffer, sha512_salt_prefix, MAX(0, buflen));
+	cp = __php_stpncpy(buffer, sha512_salt_prefix, MAX(0, buflen));
 	buflen -= sizeof(sha512_salt_prefix) - 1;
 
 	if (rounds_custom) {
@@ -560,7 +554,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	  buflen -= n;
 	}
 
-	cp = stpncpy(cp, salt, MIN((size_t) MAX(0, buflen), salt_len));
+	cp = __php_stpncpy(cp, salt, MIN((size_t) MAX(0, buflen), salt_len));
 	buflen -= (int) MIN((size_t) MAX(0, buflen), salt_len);
 
 	if (buflen > 0) {

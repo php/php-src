@@ -40,8 +40,7 @@
 # endif
 #endif
 
-#ifndef HAVE_STRPNCPY 
-char * stpncpy(char *dst, const char *src, size_t len)
+char * __php_stpncpy(char *dst, const char *src, size_t len)
 {
 	size_t n = strlen(src);
 	if (n > len) {
@@ -49,14 +48,11 @@ char * stpncpy(char *dst, const char *src, size_t len)
 	}
 	return strncpy(dst, src, len) + n;
 }
-#endif
 
-#ifndef HAVE_MEMPCPY 
-void * mempcpy(void * dst, const void * src, size_t len)
+void * __php_mempcpy(void * dst, const void * src, size_t len)
 {
 	return (((char *)memcpy(dst, src, len)) + len);
 }
-#endif
 
 #ifndef MIN
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -457,7 +453,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	/* Create byte sequence P.  */
 	cp = p_bytes = alloca(key_len);
 	for (cnt = key_len; cnt >= 32; cnt -= 32) {
-		cp = mempcpy((void *)cp, (const void *)temp_result, 32);
+		cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -475,7 +471,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	/* Create byte sequence S.  */
 	cp = s_bytes = alloca(salt_len);
 	for (cnt = salt_len; cnt >= 32; cnt -= 32) {
-		cp = mempcpy(cp, temp_result, 32);
+		cp = __php_mempcpy(cp, temp_result, 32);
 	}
 	memcpy(cp, temp_result, cnt);
 
@@ -515,7 +511,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
 	/* Now we can construct the result string.  It consists of three
 	parts.  */
-	cp = stpncpy(buffer, sha256_salt_prefix, MAX(0, buflen));
+	cp = __php_stpncpy(buffer, sha256_salt_prefix, MAX(0, buflen));
 	buflen -= sizeof(sha256_salt_prefix) - 1;
 
 	if (rounds_custom) {
@@ -528,7 +524,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 		buflen -= n;
 	}
 
-	cp = stpncpy(cp, salt, MIN ((size_t) MAX (0, buflen), salt_len));
+	cp = __php_stpncpy(cp, salt, MIN ((size_t) MAX (0, buflen), salt_len));
 	buflen -= MIN((size_t) MAX (0, buflen), salt_len);
 
 	if (buflen > 0) {
