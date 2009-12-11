@@ -446,7 +446,6 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn TSRMLS_DC)
 PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_end_psession");
-	/* The thd zval cache is always freed on request shutdown, so this has happened already */
 	DBG_VOID_RETURN;
 }
 /* }}} */
