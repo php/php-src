@@ -15,20 +15,19 @@ var_dump($status);
 array(1) {
   [0]=>
   array(7) {
-    ["chunk_size"]=>
+    [u"name"]=>
+    unicode(22) "default output handler"
+    [u"type"]=>
     int(0)
-    ["size"]=>
-    int(40960)
-    ["block_size"]=>
-    int(10240)
-    ["type"]=>
-    int(1)
-    ["status"]=>
+    [u"flags"]=>
+    int(112)
+    [u"level"]=>
     int(0)
-    ["name"]=>
-    string(22) "default output handler"
-    ["del"]=>
-    bool(true)
+    [u"chunk_size"]=>
+    int(0)
+    [u"buffer_size"]=>
+    int(16384)
+    [u"buffer_used"]=>
+    int(0)
   }
 }
-
