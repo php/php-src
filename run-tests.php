@@ -1140,7 +1140,6 @@ function run_test($php, $file, $env)
 	global $leak_check, $temp_source, $temp_target, $cfg, $environment;
 	global $no_clean;
 	global $valgrind_version;
-
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1427,7 +1426,7 @@ TEST $file
 				$env['USE_ZEND_ALLOC'] = '1';
 			}
 
-			$output = system_with_timeout("$extra $php $pass_options -q $ini_settings $test_skipif", $env);
+			$output = system_with_timeout("$extra $php $pass_options -q $ini_settings -d display_errors=0 $test_skipif", $env);
 
 			if (!$cfg['keep']['skip']) {
 				@unlink($test_skipif);
