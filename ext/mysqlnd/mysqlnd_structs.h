@@ -305,6 +305,9 @@ struct st_mysqlnd_conn_methods
 	enum_func_status	(*free_reference)(MYSQLND * const conn TSRMLS_DC);
 	enum mysqlnd_connection_state (*get_state)(MYSQLND * const conn TSRMLS_DC);
 	void				(*set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
+
+	enum_func_status	(*simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const char * const arg, size_t arg_len, enum php_mysql_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
+	enum_func_status	(*simple_command_handle_response)(MYSQLND *conn, enum php_mysql_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status TSRMLS_DC);
 };
 
 
@@ -348,8 +351,6 @@ struct st_mysqlnd_res_methods
 									zend_bool persistent,
 									zend_bool as_unicode, zend_bool as_int_or_float,
 									MYSQLND_STATS * stats TSRMLS_DC);
-
-
 };
 
 
