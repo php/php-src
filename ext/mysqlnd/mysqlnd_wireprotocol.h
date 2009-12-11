@@ -261,7 +261,6 @@ typedef struct st_php_mysql_packet_chg_user_resp {
 
 
 size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
-size_t mysqlnd_stream_write(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_server_command cmd TSRMLS_DC);
@@ -288,8 +287,8 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
 
-enum_func_status mysqlnd_read_from_stream(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
-
+MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
+void mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

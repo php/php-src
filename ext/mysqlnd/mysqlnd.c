@@ -145,23 +145,13 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		conn->current_result = NULL;
 	}
 
-	if (conn->net.stream) {
-		DBG_INF_FMT("Freeing stream. abstract=%p", conn->net.stream->abstract);
-		if (pers) {
-			php_stream_free(conn->net.stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
-		} else {
-			php_stream_free(conn->net.stream, PHP_STREAM_FREE_CLOSE);
-
-		}
-		conn->net.stream = NULL;
-	}
 #ifdef MYSQLND_COMPRESSION_ENABLED
-	if (conn->net.uncompressed_data) {
-		conn->net.uncompressed_data->free_buffer(&conn->net.uncompressed_data TSRMLS_CC);
+	if (conn->net->uncompressed_data) {
+		conn->net->uncompressed_data->free_buffer(&conn->net->uncompressed_data TSRMLS_CC);
 	}
 #endif
-
 	DBG_INF("Freeing memory of members");
+
 	if (conn->host) {
 		DBG_INF("Freeing host");
 		mnd_pefree(conn->host, pers);
@@ -211,12 +201,6 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		mnd_pefree(conn->last_message, pers);
 		conn->last_message = NULL;
 	}
-	if (conn->net.cmd_buffer.buffer) {
-		DBG_INF("Freeing cmd buffer");
-		mnd_pefree(conn->net.cmd_buffer.buffer, pers);
-		conn->net.cmd_buffer.buffer = NULL;
-	}
-
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
 
@@ -234,6 +218,12 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 
 	conn->m->free_contents(conn TSRMLS_CC);
 	conn->m->free_options(conn TSRMLS_CC);
+
+	if (conn->net) {
+		DBG_INF("Freeing net");
+		mysqlnd_net_free(conn->net TSRMLS_CC);
+		conn->net = NULL;
+	}
 
 	mnd_pefree(conn, conn->persistent);
 
@@ -500,14 +490,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 		/* Now reconnect using the same handle */
-		if (conn->net.compressed) {
+		if (conn->net->compressed) {
 			/*
-			  we need to save the state. As we will re-connect, net.compressed should be off, or
+			  we need to save the state. As we will re-connect, net->compressed should be off, or
 			  we will look for a compression header as part of the greet message, but there will
 			  be none.
 			*/
 			saved_compression = TRUE;
-			conn->net.compressed = FALSE;
+			conn->net->compressed = FALSE;
 		}
 	}
 
@@ -554,7 +544,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	}
 
 	CONN_SET_STATE(conn, CONN_ALLOCED);
-	conn->net.packet_no = conn->net.compressed_envelope_packet_no = 0;
+	conn->net->packet_no = conn->net->compressed_envelope_packet_no = 0;
 
 	if (conn->options.timeout_connect) {
 		tv.tv_sec = conn->options.timeout_connect;
@@ -568,13 +558,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	}
 	conn->scheme_len = strlen(conn->scheme);
 	DBG_INF(conn->scheme);
-	conn->net.stream = php_stream_xport_create(conn->scheme, transport_len, streams_options, streams_flags,
+	conn->net->stream = php_stream_xport_create(conn->scheme, transport_len, streams_options, streams_flags,
 											   hashed_details,
 											   (conn->options.timeout_connect) ? &tv : NULL,
 											    NULL /*ctx*/, &errstr, &errcode);
-	DBG_INF_FMT("stream=%p", conn->net.stream);
+	DBG_INF_FMT("stream=%p", conn->net->stream);
 
-	if (errstr || !conn->net.stream) {
+	if (errstr || !conn->net->stream) {
 		if (hashed_details) {
 			mnd_efree(hashed_details);
 		}
@@ -597,13 +587,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			  but STREAMS suck big time regarding persistent streams.
 			  Just not compatible for extensions that need persistency.
 			*/
-			conn->net.stream->in_free = 1;
+			conn->net->stream->in_free = 1;
 			zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_len + 1);
-			conn->net.stream->in_free = 0;
+			conn->net->stream->in_free = 0;
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
-		conn->net.stream->__exposed = 1;
+		conn->net->stream->__exposed = 1;
 #endif
 		mnd_efree(hashed_details);
 	}
@@ -616,12 +606,12 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	{
 		tv.tv_sec = conn->options.timeout_read;
 		tv.tv_usec = 0;
-		php_stream_set_option(conn->net.stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		php_stream_set_option(conn->net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 	}
 
 	if (!unix_socket) {
 		/* Set TCP_NODELAY */
-		mysqlnd_set_sock_no_delay(conn->net.stream);
+		mysqlnd_set_sock_no_delay(conn->net->stream);
 	}
 
 	{
@@ -711,14 +701,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	} else {
 		CONN_SET_STATE(conn, CONN_READY);
 		if (!self_alloced && saved_compression) {
-			conn->net.compressed = TRUE;
+			conn->net->compressed = TRUE;
 		}
 		/*
 		  If a connect on a existing handle is performed and mysql_flags is
 		  passed which doesn't CLIENT_COMPRESS, then we need to overwrite the value
 		  which we set based on saved_compression.
 		*/
-		conn->net.compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
+		conn->net->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 		conn->user				= pestrdup(user, conn->persistent);
 		conn->user_len			= strlen(conn->user);
@@ -829,7 +819,7 @@ err:
 		conn->scheme = NULL;
 	}
 
-	/* This will also close conn->net.stream if it has been opened */
+	/* This will also close conn->net->stream if it has been opened */
 	conn->m->free_contents(conn TSRMLS_CC);
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_FAILURE);
 
@@ -988,7 +978,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND **conn_array, fd_set *fds, php
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast((*p)->net.stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*p)->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
@@ -1013,7 +1003,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND **conn_array, fd_set *fds TS
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 
 	while (*fwd) {
-		if (SUCCESS == php_stream_cast((*fwd)->net.stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*fwd)->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
@@ -1461,13 +1451,13 @@ mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
 	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_send_close");
-	DBG_INF_FMT("conn=%llu conn->net.stream->abstract=%p",
-				conn->thread_id, conn->net.stream? conn->net.stream->abstract:NULL);
+	DBG_INF_FMT("conn=%llu conn->net->stream->abstract=%p",
+				conn->thread_id, conn->net->stream? conn->net->stream->abstract:NULL);
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
-			if (conn->net.stream) {
+			if (conn->net->stream) {
 				ret =  conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
 			}
 			/* Do nothing */
@@ -1957,14 +1947,14 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 				DBG_RETURN(FAIL);
 			}
-			conn->net.cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", conn->net.cmd_buffer.length);
-			if (!conn->net.cmd_buffer.buffer) {
-				conn->net.cmd_buffer.buffer = mnd_pemalloc(conn->net.cmd_buffer.length, conn->persistent);
+			conn->net->cmd_buffer.length = *(unsigned int*) value;
+			DBG_INF_FMT("new_length=%u", conn->net->cmd_buffer.length);
+			if (!conn->net->cmd_buffer.buffer) {
+				conn->net->cmd_buffer.buffer = mnd_pemalloc(conn->net->cmd_buffer.length, conn->net->persistent);
 			} else {
-				conn->net.cmd_buffer.buffer = mnd_perealloc(conn->net.cmd_buffer.buffer,
-															conn->net.cmd_buffer.length,
-															conn->persistent);
+				conn->net->cmd_buffer.buffer = mnd_perealloc(conn->net->cmd_buffer.buffer,
+															conn->net->cmd_buffer.length,
+															conn->net->persistent);
 			}
 			break;
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
@@ -2217,8 +2207,7 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	ret->m = mysqlnd_conn_methods;
 	ret->m->get_reference(ret TSRMLS_CC);
 
-	ret->net.stream_read = mysqlnd_read_from_stream;
-	ret->net.stream_write = mysqlnd_stream_write;
+	ret->net = mysqlnd_net_init(persistent TSRMLS_CC);
 
 	DBG_RETURN(ret);
 }
