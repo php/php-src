@@ -58,59 +58,6 @@ extern char * mysqlnd_read_body_name;
 #define PACKET_READ_ALLOCA(packet, conn)	PACKET_READ(&(packet), (conn))
 #define PACKET_FREE_ALLOCA(packet)			(packet.header.m->free_mem(&(packet), TRUE TSRMLS_CC))
 
-/* Enums */
-enum php_mysql_packet_type
-{
-	PROT_GREET_PACKET= 0,
-	PROT_AUTH_PACKET,
-	PROT_OK_PACKET,
-	PROT_EOF_PACKET,
-	PROT_CMD_PACKET,
-	PROT_RSET_HEADER_PACKET,
-	PROT_RSET_FLD_PACKET,
-	PROT_ROW_PACKET,
-	PROT_STATS_PACKET,
-	PROT_PREPARE_RESP_PACKET,
-	PROT_CHG_USER_PACKET,
-	PROT_LAST, /* should always be last */
-};
-
-
-enum php_mysqlnd_server_command
-{
-	COM_SLEEP = 0,
-	COM_QUIT,
-	COM_INIT_DB,
-	COM_QUERY,
-	COM_FIELD_LIST,
-	COM_CREATE_DB,
-	COM_DROP_DB,
-	COM_REFRESH,
-	COM_SHUTDOWN,
-	COM_STATISTICS,
-	COM_PROCESS_INFO,
-	COM_CONNECT,
-	COM_PROCESS_KILL,
-	COM_DEBUG,
-	COM_PING,
-	COM_TIME = 15,
-	COM_DELAYED_INSERT,
-	COM_CHANGE_USER,
-	COM_BINLOG_DUMP,
-	COM_TABLE_DUMP,
-	COM_CONNECT_OUT = 20,
-	COM_REGISTER_SLAVE,
-	COM_STMT_PREPARE = 22,
-	COM_STMT_EXECUTE = 23,
-	COM_STMT_SEND_LONG_DATA = 24,
-	COM_STMT_CLOSE = 25,
-	COM_STMT_RESET = 26,
-	COM_SET_OPTION = 27,
-	COM_STMT_FETCH = 28,
-	COM_DAEMON,
-	COM_END
-};
-
 extern const char * const mysqlnd_command_to_text[COM_END];
 
 /* Low-level extraction functionality */

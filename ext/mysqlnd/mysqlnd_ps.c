@@ -38,13 +38,6 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 
 static struct st_mysqlnd_stmt_methods *mysqlnd_stmt_methods;
 
-/* Exported by mysqlnd.c */
-enum_func_status mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
-										const char * const arg, size_t arg_len,
-										enum php_mysql_packet_type ok_packet,
-										zend_bool silent, zend_bool ignore_upsert_status
-										TSRMLS_DC);
-
 /* Exported by mysqlnd_ps_codec.c */
 zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
 												  zend_bool *free_buffer TSRMLS_DC);
@@ -343,8 +336,8 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * co
 		stmt_to_prepare = mysqlnd_stmt_init(stmt->conn);
 	}
 
-	if (FAIL == mysqlnd_simple_command(stmt_to_prepare->conn, COM_STMT_PREPARE, query,
-									   query_len, PROT_LAST, FALSE, TRUE TSRMLS_CC) ||
+	if (FAIL == stmt_to_prepare->conn->m->simple_command(stmt_to_prepare->conn, COM_STMT_PREPARE, query,
+															query_len, PROT_LAST, FALSE, TRUE TSRMLS_CC) ||
 		FAIL == mysqlnd_stmt_read_prepare_response(stmt_to_prepare TSRMLS_CC)) {
 		goto fail;
 	}
@@ -605,9 +598,9 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	
 	/* support for buffer types should be added here ! */
 
-	ret = mysqlnd_simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
-								 PROT_LAST /* we will handle the response packet*/,
-								 FALSE, FALSE TSRMLS_CC);
+	ret = stmt->conn->m->simple_command(stmt->conn, COM_STMT_EXECUTE, (char *)request, request_len,
+										PROT_LAST /* we will handle the response packet*/,
+										FALSE, FALSE TSRMLS_CC);
 
 	if (free_request) {
 		mnd_efree(request);
@@ -923,9 +916,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 	int4store(buf, stmt->stmt_id);
 	int4store(buf + STMT_ID_LENGTH, 1); /* for now fetch only one row */
 
-	if (FAIL == mysqlnd_simple_command(stmt->conn, COM_STMT_FETCH, (char *)buf, sizeof(buf),
-									   PROT_LAST /* we will handle the response packet*/,
-									   FALSE, TRUE TSRMLS_CC)) {
+	if (FAIL == stmt->conn->m->simple_command(stmt->conn, COM_STMT_FETCH, (char *)buf, sizeof(buf),
+											  PROT_LAST /* we will handle the response packet*/,
+											  FALSE, TRUE TSRMLS_CC)) {
 		stmt->error_info = stmt->conn->error_info;
 		DBG_RETURN(FAIL);
 	}
@@ -1133,7 +1126,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 		int4store(cmd_buf, stmt->stmt_id);
 		if (CONN_GET_STATE(conn) == CONN_READY &&
-			FAIL == (ret = mysqlnd_simple_command(conn, COM_STMT_RESET, (char *)cmd_buf,
+			FAIL == (ret = conn->m->simple_command(conn, COM_STMT_RESET, (char *)cmd_buf,
 												  sizeof(cmd_buf), PROT_OK_PACKET,
 												  FALSE, TRUE TSRMLS_CC))) {
 			stmt->error_info = conn->error_info;
@@ -1190,7 +1183,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 	  XXX:	Unfortunately we have to allocate additional buffer to be able the
 			additional data, which is like a header inside the payload.
 			This should be optimised, but it will be a pervasive change, so
-			mysqlnd_simple_command() will accept not a buffer, but actually MYSQLND_STRING*
+			conn->m->simple_command() will accept not a buffer, but actually MYSQLND_STRING*
 			terminated by NULL, to send. If the strings are not big, we can collapse them
 			on the buffer every connection has, but otherwise we will just send them
 			one by one to the wire.
@@ -1206,7 +1199,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 		memcpy(cmd_buf + STMT_ID_LENGTH + 2, data, length);
 
 		/* COM_STMT_SEND_LONG_DATA doesn't send an OK packet*/
-		ret = mysqlnd_simple_command(conn, cmd, (char *)cmd_buf, packet_len,
+		ret = conn->m->simple_command(conn, cmd, (char *)cmd_buf, packet_len,
 									 PROT_LAST , FALSE, TRUE TSRMLS_CC);
 		mnd_efree(cmd_buf);
 		if (FAIL == ret) {
@@ -1976,7 +1969,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 
 		int4store(cmd_buf, stmt->stmt_id);
 		if (CONN_GET_STATE(conn) == CONN_READY &&
-			FAIL == mysqlnd_simple_command(conn, COM_STMT_CLOSE, (char *)cmd_buf, sizeof(cmd_buf),
+			FAIL == conn->m->simple_command(conn, COM_STMT_CLOSE, (char *)cmd_buf, sizeof(cmd_buf),
 										   PROT_LAST /* COM_STMT_CLOSE doesn't send an OK packet*/,
 										   FALSE, TRUE TSRMLS_CC)) {
 			stmt->error_info = conn->error_info;

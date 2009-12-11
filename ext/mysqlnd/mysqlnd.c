@@ -242,16 +242,15 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_simple_command_handle_response */
-enum_func_status
-mysqlnd_simple_command_handle_response(MYSQLND *conn, enum php_mysql_packet_type ok_packet,
-									   zend_bool silent, enum php_mysqlnd_server_command command,
-									   zend_bool ignore_upsert_status
-									   TSRMLS_DC)
+/* {{{ mysqlnd_conn::simple_command_handle_response */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum php_mysql_packet_type ok_packet,
+									   						 zend_bool silent, enum php_mysqlnd_server_command command,
+									   						 zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret;
 
-	DBG_ENTER("mysqlnd_simple_command_handle_response");
+	DBG_ENTER("mysqlnd_conn::simple_command_handle_response");
 	DBG_INF_FMT("silent=%d packet=%d command=%s", silent, ok_packet, mysqlnd_command_to_text[command]);
 
 	switch (ok_packet) {
@@ -343,17 +342,16 @@ mysqlnd_simple_command_handle_response(MYSQLND *conn, enum php_mysql_packet_type
 /* }}} */
 
 
-/* {{{ mysqlnd_simple_command */
-enum_func_status
-mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
-					   const char * const arg, size_t arg_len,
-					   enum php_mysql_packet_type ok_packet, zend_bool silent,
-					   zend_bool ignore_upsert_status TSRMLS_DC)
+/* {{{ mysqlnd_conn::simple_command */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command,
+			   const char * const arg, size_t arg_len, enum php_mysql_packet_type ok_packet, zend_bool silent,
+			   zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 	php_mysql_packet_command cmd_packet;
 
-	DBG_ENTER("mysqlnd_simple_command");
+	DBG_ENTER("mysqlnd_conn::simple_command");
 	DBG_INF_FMT("command=%s ok_packet=%d silent=%d", mysqlnd_command_to_text[command], ok_packet, silent);
 
 	switch (CONN_GET_STATE(conn)) {
@@ -394,7 +392,7 @@ mysqlnd_simple_command(MYSQLND *conn, enum php_mysqlnd_server_command command,
 		DBG_ERR("Server is gone");
 		ret = FAIL;
 	} else if (ok_packet != PROT_LAST) {
-		ret = mysqlnd_simple_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status TSRMLS_CC);
+		ret = conn->m->simple_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status TSRMLS_CC);
 	}
 
 	/*
@@ -419,8 +417,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 	DBG_ENTER("mysqlnd_conn::set_server_option");
 
 	int2store(buffer, (unsigned int) option);
-	ret = mysqlnd_simple_command(conn, COM_SET_OPTION, buffer, sizeof(buffer),
-								 PROT_EOF_PACKET, FALSE, TRUE TSRMLS_CC);
+	ret = conn->m->simple_command(conn, COM_SET_OPTION, buffer, sizeof(buffer), PROT_EOF_PACKET, FALSE, TRUE TSRMLS_CC);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -892,7 +889,7 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 	DBG_ENTER("mysqlnd_conn::query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 
-	if (PASS != mysqlnd_simple_command(conn, COM_QUERY, query, query_len,
+	if (PASS != conn->m->simple_command(conn, COM_QUERY, query, query_len,
 									   PROT_LAST /* we will handle the OK packet*/,
 									   FALSE, FALSE TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
@@ -920,7 +917,7 @@ MYSQLND_METHOD(mysqlnd_conn, send_query)(MYSQLND *conn, const char *query, unsig
 	DBG_ENTER("mysqlnd_conn::send_query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 
-	ret = mysqlnd_simple_command(conn, COM_QUERY, query, query_len,
+	ret = conn->m->simple_command(conn, COM_QUERY, query, query_len,
 								 PROT_LAST /* we will handle the OK packet*/,
 								 FALSE, FALSE TSRMLS_CC);
 	CONN_SET_STATE(conn, CONN_QUERY_SENT);
@@ -1155,7 +1152,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND *conn, const char *table, cons
 		*p++ = '\0';
 	}
 
-	if (PASS != mysqlnd_simple_command(conn, COM_FIELD_LIST, buff, p - buff,
+	if (PASS != conn->m->simple_command(conn, COM_FIELD_LIST, buff, p - buff,
 									   PROT_LAST /* we will handle the OK packet*/,
 									   FALSE, TRUE TSRMLS_CC)) {
 		DBG_RETURN(NULL);
@@ -1278,7 +1275,7 @@ MYSQLND_METHOD(mysqlnd_conn, dump_debug_info)(MYSQLND * const conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::dump_debug_info");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
-	DBG_RETURN(mysqlnd_simple_command(conn, COM_DEBUG, NULL, 0, PROT_EOF_PACKET, FALSE, TRUE TSRMLS_CC));
+	DBG_RETURN(conn->m->simple_command(conn, COM_DEBUG, NULL, 0, PROT_EOF_PACKET, FALSE, TRUE TSRMLS_CC));
 }
 /* }}} */
 
@@ -1294,7 +1291,7 @@ MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn,
 	DBG_ENTER("mysqlnd_conn::select_db");
 	DBG_INF_FMT("conn=%llu db=%s", conn->thread_id, db);
 
-	ret = mysqlnd_simple_command(conn, COM_INIT_DB, db, db_len, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC);
+	ret = conn->m->simple_command(conn, COM_INIT_DB, db, db_len, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC);
 	/*
 	  The server sends 0 but libmysql doesn't read it and has established
 	  a protocol of giving back -1. Thus we have to follow it :(
@@ -1321,7 +1318,7 @@ MYSQLND_METHOD(mysqlnd_conn, ping)(MYSQLND * const conn TSRMLS_DC)
 	DBG_ENTER("mysqlnd_conn::ping");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
-	ret = mysqlnd_simple_command(conn, COM_PING, NULL, 0, PROT_OK_PACKET, TRUE, TRUE TSRMLS_CC);
+	ret = conn->m->simple_command(conn, COM_PING, NULL, 0, PROT_OK_PACKET, TRUE, TRUE TSRMLS_CC);
 	/*
 	  The server sends 0 but libmysql doesn't read it and has established
 	  a protocol of giving back -1. Thus we have to follow it :(
@@ -1344,7 +1341,7 @@ MYSQLND_METHOD(mysqlnd_conn, stat)(MYSQLND *conn, char **message, unsigned int *
 	DBG_ENTER("mysqlnd_conn::stat");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
-	ret = mysqlnd_simple_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE TSRMLS_CC);
+	ret = conn->m->simple_command(conn, COM_STATISTICS, NULL, 0, PROT_LAST, FALSE, TRUE TSRMLS_CC);
 	if (FAIL == ret) {
 		DBG_RETURN(FAIL);
 	}
@@ -1378,13 +1375,13 @@ MYSQLND_METHOD(mysqlnd_conn, kill)(MYSQLND *conn, unsigned int pid TSRMLS_DC)
 
 	/* If we kill ourselves don't expect OK packet, PROT_LAST will skip it */
 	if (pid != conn->thread_id) {
-		ret = mysqlnd_simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC);
+		ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC);
 		/*
 		  The server sends 0 but libmysql doesn't read it and has established
 		  a protocol of giving back -1. Thus we have to follow it :(
 		*/
 		SET_ERROR_AFF_ROWS(conn);
-	} else if (PASS == (ret = mysqlnd_simple_command(conn, COM_PROCESS_KILL, buff,
+	} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff,
 													 4, PROT_LAST, FALSE, TRUE TSRMLS_CC))) {
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 	}
@@ -1438,7 +1435,7 @@ MYSQLND_METHOD(mysqlnd_conn, refresh)(MYSQLND * const conn, uint8_t options TSRM
 
 	int1store(bits, options);
 
-	DBG_RETURN(mysqlnd_simple_command(conn, COM_REFRESH, (char *)bits, 1, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC));
+	DBG_RETURN(conn->m->simple_command(conn, COM_REFRESH, (char *)bits, 1, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC));
 }
 /* }}} */
 
@@ -1453,7 +1450,7 @@ MYSQLND_METHOD(mysqlnd_conn, shutdown)(MYSQLND * const conn, uint8_t level TSRML
 
 	int1store(bits, level);
 
-	DBG_RETURN(mysqlnd_simple_command(conn, COM_SHUTDOWN, (char *)bits, 1, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC));
+	DBG_RETURN(conn->m->simple_command(conn, COM_SHUTDOWN, (char *)bits, 1, PROT_OK_PACKET, FALSE, TRUE TSRMLS_CC));
 }
 /* }}} */
 
@@ -1472,7 +1469,7 @@ mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (conn->net.stream) {
-				ret =  mysqlnd_simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
+				ret =  conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
 			}
 			/* Do nothing */
 			break;
@@ -1888,7 +1885,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	}
 	*p++ = '\0';
 
-	if (PASS != mysqlnd_simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
+	if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer, p - buffer,
 									   PROT_LAST /* we will handle the OK packet*/,
 									   silent, TRUE TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
@@ -2200,6 +2197,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, get_state),
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state),
+
+	MYSQLND_METHOD(mysqlnd_conn, simple_command),
+	MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)
 MYSQLND_CLASS_METHODS_END;
 
 
