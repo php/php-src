@@ -25,12 +25,6 @@
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
 
-enum_func_status mysqlnd_simple_command_handle_response(MYSQLND *conn,
-										enum php_mysql_packet_type ok_packet,
-										zend_bool silent, enum php_mysqlnd_server_command command,
-										zend_bool ignore_upsert_status
-									  	TSRMLS_DC);
-
 
 #define ALLOC_CALLBACK_ARGS(a, b, c)\
 if (c) {\
@@ -242,7 +236,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 
 infile_error:
 	/* get response from server and update upsert values */
-	if (FAIL == mysqlnd_simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE TSRMLS_CC)) {
+	if (FAIL == conn->m->simple_command_handle_response(conn, PROT_OK_PACKET, FALSE, COM_QUERY, FALSE TSRMLS_CC)) {
 		result = FAIL;
 	}
 
