@@ -1667,7 +1667,15 @@ void php_request_shutdown(void *dummy)
 
 	/* 3. Flush all output buffers */
 	zend_try {
-		if (SG(request_info).headers_only) {
+		zend_bool send_buffer = SG(request_info).headers_only ? 0 : 1;
+
+		if (CG(unclean_shutdown) && PG(last_error_type) == E_ERROR &&
+			PG(memory_limit) < zend_memory_usage(1 TSRMLS_CC)
+		) {
+			send_buffer = 0;
+		}
+
+		if (!send_buffer) {
 			php_output_discard_all(TSRMLS_C);
 		} else {
 			php_output_end_all(TSRMLS_C);
