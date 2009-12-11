@@ -70,6 +70,12 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 	char          *debug; /* The actual string */
 	MYSQLND_DEBUG *dbg;	/* The DBG object */
 #endif
+#if defined(PHP_WIN32) && !PDO_DBG_ENABLED
+	/* dummy member so we get at least one member in the struct
+	 * and avoids build errors.
+	 */
+	void *dummymemmber;
+#endif
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pdo_mysql);

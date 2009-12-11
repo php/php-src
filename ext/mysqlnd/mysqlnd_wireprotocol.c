@@ -2319,8 +2319,10 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 void
 mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC)
 {
-	DBG_ENTER("mysqlnd_net_free");
 	zend_bool pers = net->persistent;
+
+	DBG_ENTER("mysqlnd_net_free");
+
 	if (net) {
 		if (net->cmd_buffer.buffer) {
 			DBG_INF("Freeing cmd buffer");
