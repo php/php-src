@@ -241,9 +241,9 @@ typedef struct st_mysqlnd_net
 #endif
 	/* cmd buffer */
 	MYSQLND_CMD_BUFFER	cmd_buffer;
+
+	zend_bool			persistent;
 } MYSQLND_NET;
-
-
 
 
 struct st_mysqlnd_conn_methods
@@ -415,7 +415,7 @@ struct st_mysqlnd_stmt_methods
 struct st_mysqlnd_connection
 {
 /* Operation related */
-	MYSQLND_NET		net;
+	MYSQLND_NET		* net;
 
 /* Information related */
 	char			*host;
