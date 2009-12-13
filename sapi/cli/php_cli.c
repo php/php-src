@@ -76,8 +76,10 @@
 #endif
 
 #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
+#if HAVE_LIBEDIT
+#include <editline/readline.h>
+#else
 #include <readline/readline.h>
-#if !HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
 #include "php_cli_readline.h"
