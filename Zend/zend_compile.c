@@ -4664,7 +4664,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 				--num;
 			}
 
-			if (num > 0 || CG(encoding_declared)) {
+			if (num > 0) {
 				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma must be the very first statement in the script");
 			}
 		}
