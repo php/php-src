@@ -65,7 +65,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
 elif test "$PHP_LIBEDIT" != "no"; then
 
   for i in $PHP_LIBEDIT /usr/local /usr; do
-    test -f $i/include/readline/readline.h && LIBEDIT_DIR=$i && break
+    test -f $i/include/editline/readline.h && LIBEDIT_DIR=$i && break
   done
 
   if test -z "$LIBEDIT_DIR"; then

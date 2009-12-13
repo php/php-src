@@ -62,6 +62,8 @@ PHP                                                                        NEWS
   (Pierrick)
 - Fixed bug #50212 (crash by ldap_get_option() with LDAP_OPT_NETWORK_TIMEOUT).
   (Ilia, shigeru_kitazaki at cybozu dot co dot jp)
+- Fixed bug #50209 (Compiling with libedit cannot find readline.h).
+  (tcallawa at redhat dot com)
 - Fixed bug #50207 (segmentation fault when concatenating very large strings on
   64bit linux). (Ilia)
 - Fixed bug #50195 (pg_copy_to() fails when table name contains schema. (Ilia)
