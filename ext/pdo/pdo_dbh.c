@@ -44,7 +44,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 	char *message = NULL;
 	const char *msg;
 
-	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh && dbh->error_mode == PDO_ERRMODE_SILENT) {
 #if 0
 		/* BUG: if user is running in silent mode and hits an error at the driver level
 		 * when they use the PDO methods to call up the error information, they may
@@ -71,7 +71,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
-	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
+	if (dbh && dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
 	} else {
 		zval *ex, *info;

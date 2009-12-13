@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   seg fault). (davbrown4 at yahoo dot com, Felipe)
 - Fixed bug #50209 (Compiling with libedit cannot find readline.h).
   (tcallawa at redhat dot com)
+- Fixed bug #49174 (crash on queryString set). (Felipe)
 
 10 Dec 2009, PHP 5.2.12RC4
 - Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
