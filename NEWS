@@ -116,6 +116,7 @@ PHP                                                                        NEWS
 - Fixed bug #49244 (Floating point NaN cause garbage characters). (Sjoerd)
 - Fixed bug #49224 (Compile error due to old DNS functions on AIX systems).
   (Scott)
+- Fixed bug #49174 (crash on queryString set). (Felipe)
 - Fixed bug #47848 (importNode doesn't preserve attribute namespaces). (Rob)
 - Fixed bug #45120 (PDOStatement->execute() returns true then false for same
   statement). (Pierrick)
