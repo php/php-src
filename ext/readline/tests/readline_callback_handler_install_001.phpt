@@ -1,7 +1,7 @@
 --TEST--
 readline_callback_handler_install(): Basic test
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); ?>
+<?php if (!extension_loaded("readline") || !function_exists('readline_callback_handler_install')) die("skip"); ?>
 --FILE--
 <?php
 
