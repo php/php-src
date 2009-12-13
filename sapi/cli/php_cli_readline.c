@@ -49,8 +49,10 @@
 #include <unixlib/local.h>
 #endif
 
+#if HAVE_LIBEDIT
+#include <editline/readline.h>
+#else
 #include <readline/readline.h>
-#if !HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
 

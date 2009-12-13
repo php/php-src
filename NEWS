@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug #50323 (Allow use of ; in values via ;; in PDO DSN).
   (Ilia, Pierrick)
 - Fixed bug #50266 (conflicting types for llabs). (Jani)
+- Fixed bug #50209 (Compiling with libedit cannot find readline.h).
+  (tcallawa at redhat dot com)
 - Fixed bug #50168 (FastCGI fails with wrong error on HEAD request to
   non-existent file). (Dmitry)
 - Fixed bug #50162 (Memory leak when fetching timestamp column from Oracle
