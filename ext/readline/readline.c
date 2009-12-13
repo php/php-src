@@ -33,8 +33,10 @@
 #define rl_completion_matches completion_matches
 #endif
 
+#ifdef HAVE_LIBEDIT
+#include <editline/readline.h>
+#else
 #include <readline/readline.h>
-#ifndef HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
 
