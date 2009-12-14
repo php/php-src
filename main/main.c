@@ -2083,7 +2083,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 		while (*p) {
 			if (cfg_get_long((char*)*p, &val) == SUCCESS && val) {
-				zend_error(E_ERROR, "Directive '%s' no longer exist in PHP 6 and greater", *p);
+				zend_error(E_CORE_ERROR, "Directive '%s' no longer exists in PHP 6 and greater", *p);
 			}
 			++p;
 		}
