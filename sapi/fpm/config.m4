@@ -539,7 +539,7 @@ AC_DEFUN([AC_FPM_VARS],
   fi
   
   if test -z "$exec_prefix" -o "$exec_prefix" = "NONE"; then
-    exec_prefix="/usr/local"
+    exec_prefix=`eval echo "$prefix"`
   fi
 
   php_fpm_bin_path=`eval echo "$bindir"`
@@ -606,21 +606,6 @@ AC_DEFUN([AC_FPM_VARS],
 
 ])
 
-
-AC_DEFUN([AC_FPM_OUTPUT],
-[
-  PHP_OUTPUT(sapi/fpm/conf/php-fpm.conf:sapi/fpm/conf/php-fpm.conf.in)
-  PHP_OUTPUT(sapi/fpm/conf/init.d.php-fpm:sapi/fpm/conf/init.d.php-fpm.in)
-  PHP_OUTPUT(sapi/fpm/php-fpm.1:sapi/fpm/man/php-fpm.1.in)
-])
-
-
-AC_DEFUN([AC_FPM_CONF],
-[
-  AC_FPM_ARGS
-  AC_FPM_VARS
-  AC_FPM_OUTPUT
-])
 dnl }}}
 
 
@@ -646,8 +631,10 @@ if test "$PHP_FPM" != "no"; then
   ])
 
   AC_FPM_CHECKS
-  AC_FPM_CONF
+  AC_FPM_ARGS
+  AC_FPM_VARS
 
+  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.1)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag], [$abs_srcdir/sapi/fpm], [sapi/fpm])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
