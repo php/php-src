@@ -41,6 +41,7 @@ int fpm_stdio_init_main() /* {{{ */
 
 int fpm_stdio_init_final() /* {{{ */
 {
+	zlog_set_level(fpm_globals.log_level);
 	if (fpm_global_config.daemonize) {
 		if (fpm_globals.error_log_fd != STDERR_FILENO) {
 			/* there might be messages to stderr from libevent, we need to log them all */
@@ -49,7 +50,6 @@ int fpm_stdio_init_final() /* {{{ */
 				return -1;
 			}
 		}
-		zlog_set_level(fpm_globals.log_level);
 		zlog_set_fd(fpm_globals.error_log_fd);
 	}
 	return 0;
