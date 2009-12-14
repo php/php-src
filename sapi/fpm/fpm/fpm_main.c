@@ -164,7 +164,7 @@ static const opt_struct OPTIONS[] = {
 	{'v', 0, "version"},
 	{'y', 1, "fpm-config"},
 	{'z', 1, "zend-extension"},
- 	{'T', 1, "timing"},
+	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -348,8 +348,8 @@ static void sapi_cgibin_flush(void *server_context)
 #define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
 typedef struct _http_error {
-  int code;
-  const char* msg;
+	int code;
+	const char* msg;
 } http_error;
 
 static const http_error http_error_codes[] = {
@@ -989,8 +989,8 @@ static void php_cgi_usage(char *argv0)
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
-                "  -y, --fpm-config <file>\n"
-                "                   Specify alternative path to FastCGI process manager config file.\n"
+				"  -y, --fpm-config <file>\n"
+				"                   Specify alternative path to FastCGI process manager config file.\n"
 				"  -z <file>        Load Zend extension <file>.\n"
 				"  -T <count>       Measure execution time of script repeated <count> times.\n",
 				prog, prog);
@@ -1166,8 +1166,8 @@ static void init_request_info(TSRMLS_D)
 			}
 
 			if (env_path_translated != NULL && env_redirect_url != NULL &&
- 			    env_path_translated != script_path_translated &&
- 			    strcmp(env_path_translated, script_path_translated) != 0) {
+			    env_path_translated != script_path_translated &&
+			    strcmp(env_path_translated, script_path_translated) != 0) {
 				/*
 				 * pretty much apache specific.  If we have a redirect_url
 				 * then our script_filename and script_name point to the
@@ -1688,9 +1688,9 @@ int main(int argc, char *argv[])
 #else
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2009 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
-                php_request_shutdown((void *) 0);
-                exit_status = 0;
-                goto out;
+				php_request_shutdown((void *) 0);
+				exit_status = 0;
+				goto out;
 		}
 	}
 	php_optind = orig_optind;

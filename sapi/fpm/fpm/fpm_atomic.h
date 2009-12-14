@@ -35,7 +35,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 	__asm__ volatile ( "lock;" "cmpxchgl %3, %1;" "sete %0;" :
 		"=a" (res) : "m" (*lock), "a" (old), "r" (set) : "memory");
 
-    return res;
+	return res;
 }
 /* }}} */
 
