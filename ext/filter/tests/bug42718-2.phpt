@@ -3,6 +3,7 @@ Bug #42718 - 2 (unsafe_raw filter not applied when configured as default filter)
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
+display_errors=0
 magic_quotes_gpc=1
 filter.default=unsafe_raw
 filter.default_flags=
