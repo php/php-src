@@ -30,4 +30,4 @@ array(4) {
     }
   }
 }
-unicode(106) "Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
+unicode(114) "main(): Input variable nesting level exceeded 10. To increase the limit change max_input_nesting_level in php.ini."
