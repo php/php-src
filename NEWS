@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #50464 (declare encoding doesn't work within an included file).
   (Felipe)
+- Fixed bug #50458 (PDO::FETCH_FUNC fails with Closures). (Felipe, Pierrick)
 - Fixed bug #50445 (PDO-ODBC stored procedure call from Solaris 64-bit causes
   seg fault). (davbrown4 at yahoo dot com, Felipe)
 - Fixed bug #50351 (performance regression handling objects, ten times slower
