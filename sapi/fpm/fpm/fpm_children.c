@@ -32,8 +32,6 @@
 static time_t *last_faults;
 static int fault;
 
-static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop);
-
 static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 {
 	free(last_faults);
@@ -180,12 +178,20 @@ void fpm_children_bury() /* {{{ */
 	while ( (pid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
 		char buf[128];
 		int severity = ZLOG_NOTICE;
+		int restart_child = 1;
 
 		child = fpm_child_find(pid);
 
 		if (WIFEXITED(status)) {
 
 			snprintf(buf, sizeof(buf), "with code %d", WEXITSTATUS(status));
+
+			/* if it's been killed because of dynamic process management
+			 * don't restart it automaticaly
+			 */
+			if (child && child->idle_kill) {
+				restart_child = 0;
+			}
 
 			if (WEXITSTATUS(status) != 0) {
 				severity = ZLOG_WARNING;
@@ -200,6 +206,13 @@ void fpm_children_bury() /* {{{ */
 			}
 
 			snprintf(buf, sizeof(buf), "on signal %d %s%s", WTERMSIG(status), signame, have_core);
+
+			/* if it's been killed because of dynamic process management
+			 * don't restart it automaticaly
+			 */
+			if (child && child->idle_kill && WTERMSIG(status) == SIGTERM) {
+				restart_child = 0;
+			}
 
 			if (WTERMSIG(status) != SIGQUIT) { /* possible request loss */
 				severity = ZLOG_WARNING;
@@ -227,8 +240,11 @@ void fpm_children_bury() /* {{{ */
 
 			timersub(&tv1, &child->started, &tv2);
 
-			zlog(ZLOG_STUFF, severity, "child %d (pool %s) exited %s after %ld.%06d seconds from start", (int) pid,
-						child->wp->config->name, buf, tv2.tv_sec, (int) tv2.tv_usec);
+			if (restart_child) {
+				zlog(ZLOG_STUFF, severity, "child %d (pool %s) exited %s after %ld.%06d seconds from start", (int) pid, child->wp->config->name, buf, tv2.tv_sec, (int) tv2.tv_usec);
+			} else {
+				zlog(ZLOG_STUFF, severity, "child %d (pool %s) has been killed by the process managment after %ld.%06d seconds from start", (int) pid, child->wp->config->name, tv2.tv_sec, (int) tv2.tv_usec);
+			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
 
@@ -254,17 +270,18 @@ void fpm_children_bury() /* {{{ */
 
 				if (restart_condition) {
 
-					zlog(ZLOG_STUFF, ZLOG_WARNING, "failed processes threshold (%d in %d sec) is reached, initiating reload",
-						fpm_global_config.emergency_restart_threshold, fpm_global_config.emergency_restart_interval);
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "failed processes threshold (%d in %d sec) is reached, initiating reload", fpm_global_config.emergency_restart_threshold, fpm_global_config.emergency_restart_interval);
 
 					fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET);
 				}
 			}
 
-			fpm_children_make(wp, 1 /* in event loop */);
+			if (restart_child) {
+				fpm_children_make(wp, 1 /* in event loop */, 1);
 
-			if (fpm_globals.is_child) {
-				break;
+				if (fpm_globals.is_child) {
+					break;
+				}
 			}
 		} else {
 			zlog(ZLOG_STUFF, ZLOG_ALERT, "oops, unknown child exited %s", buf);
@@ -326,14 +343,24 @@ static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop) /* {{{ */
+int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn) /* {{{ */
 {
 	int enough = 0;
 	pid_t pid;
 	struct fpm_child_s *child;
+	int max;
 
-	while (!enough && fpm_pctl_can_spawn_children() && wp->running_children < wp->config->pm->max_children) {
+	if (wp->config->pm->style == PM_STYLE_DYNAMIC) {
+		if (!in_event_loop) { /* stating */
+			max = wp->config->pm->dynamic.start_servers;
+		} else {
+			max = wp->running_children + nb_to_spawn;
+		}
+	} else { /* PM_STYLE_STATIC */
+		max = wp->config->pm->max_children;
+	}
 
+	while (!enough && fpm_pctl_can_spawn_children() && wp->running_children < max) {
 		child = fpm_resources_prepare(wp);
 
 		if (!child) {
@@ -378,7 +405,7 @@ static int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop) /*
 
 int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	return fpm_children_make(wp, 0 /* not in event loop yet */);
+	return fpm_children_make(wp, 0 /* not in event loop yet */, 0);
 }
 /* }}} */
 

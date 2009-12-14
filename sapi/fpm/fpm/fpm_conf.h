@@ -28,10 +28,10 @@ struct fpm_pm_s {
 	int style;
 	int max_children;
 	struct {
-		int StartServers;
-		int MinSpareServers;
-		int MaxSpareServers;
-	} options_apache_like;
+		int start_servers;
+		int min_spare_servers;
+		int max_spare_servers;
+	} dynamic;
 };
 
 struct fpm_listen_options_s {
@@ -62,7 +62,7 @@ struct fpm_worker_pool_config_s {
 	unsigned catch_workers_output:1;
 };
 
-enum { PM_STYLE_STATIC = 1, PM_STYLE_APACHE_LIKE = 2 };
+enum { PM_STYLE_STATIC = 1, PM_STYLE_DYNAMIC = 2 };
 
 int fpm_conf_init_main();
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);

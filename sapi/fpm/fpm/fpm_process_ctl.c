@@ -307,7 +307,89 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 			}
 		}
 	}
-	
+}
+/* }}} */
+
+static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{ */
+{
+	struct fpm_worker_pool_s *wp;
+	struct fpm_child_s *last_idle_child = NULL;
+	int i;
+
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		struct fpm_child_s *child;
+		int idle = 0;
+		int active = 0;
+
+		if (wp->config == NULL) continue;
+		if (wp->config->pm->style != PM_STYLE_DYNAMIC) continue;
+
+		for (child = wp->children; child; child = child->next) {
+			int ret = fpm_request_is_idle(child);
+			if (ret == 1) {
+				if (last_idle_child == NULL) {
+					last_idle_child = child;
+				} else {
+					if (child->started.tv_sec < last_idle_child->started.tv_sec) {
+						last_idle_child = child;
+					}
+				}
+				idle++;
+			} else if (ret == 0) {
+				active++;
+			}
+		}
+
+		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[%s] rate=%d idle=%d active=%d total=%d", wp->config->name, wp->idle_spawn_rate, idle, active, wp->running_children);
+
+		if ((active + idle) != wp->running_children) {
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s] unable to retrieve spawning informations", wp->config->name);
+			continue;
+		}
+
+		if (idle > wp->config->pm->dynamic.max_spare_servers && last_idle_child) {
+			last_idle_child->idle_kill = 1;
+			fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_TERM);
+			wp->idle_spawn_rate = 1;
+			continue;
+		}
+
+		if (idle < wp->config->pm->dynamic.min_spare_servers) {
+			if (wp->running_children >= wp->config->pm->max_children) {
+				if (!wp->warn_max_children) {
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "pool %s: server reached max_children setting, consider raising it",
+					     wp->config->name);
+					wp->warn_max_children = 1;
+				}
+				wp->idle_spawn_rate = 1;
+				continue;
+			}
+			wp->warn_max_children = 0;
+
+			if (wp->idle_spawn_rate >= 8) {
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "pool %s seems busy (you may need to increase start_servers, or min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
+			}
+
+			i = MIN(wp->idle_spawn_rate, wp->config->pm->dynamic.min_spare_servers - idle);
+			fpm_children_make(wp, 1, i);
+
+			/* if it's a child, stop here without creating the next event
+			 * this event is reserved to the master process
+			 */
+			if (fpm_globals.is_child) {
+				return;
+			}
+
+			zlog(ZLOG_STUFF, ZLOG_NOTICE, "pool %s: %d child(ren) have been created because of not enough spare children", wp->config->name, i);	
+
+			/* Double the spawn rate for the next iteration */
+			if (wp->idle_spawn_rate < FPM_MAX_SPAWN_RATE) {
+				wp->idle_spawn_rate *= 2;
+			}
+			continue;
+		}
+		wp->idle_spawn_rate = 1;
+	}
 }
 /* }}} */
 
@@ -324,6 +406,32 @@ void fpm_pctl_heartbeat(int fd, short which, void *arg) /* {{{ */
 	}
 
 	evtimer_set(&heartbeat, &fpm_pctl_heartbeat, 0);
+	evtimer_add(&heartbeat, &tv);
+}
+/* }}} */
+
+void fpm_pctl_perform_idle_server_maintenance_heartbeat(int fd, short which, void *arg) /* {{{ */
+{
+	static struct event heartbeat;
+	struct timeval tv = { .tv_sec = 0, .tv_usec = FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT };
+	struct timeval now;
+
+	if (which == EV_TIMEOUT) {
+		evtimer_del(&heartbeat);
+		fpm_clock_get(&now);
+		if (fpm_pctl_can_spawn_children()) {
+			fpm_pctl_perform_idle_server_maintenance(&now);
+
+			/* if it's a child, stop here without creating the next event
+			 * this event is reserved to the master process
+			 */
+			if (fpm_globals.is_child) {
+				return;
+			}
+		}
+	}
+
+	evtimer_set(&heartbeat, &fpm_pctl_perform_idle_server_maintenance_heartbeat, 0);
 	evtimer_add(&heartbeat, &tv);
 }
 /* }}} */

@@ -148,3 +148,18 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 }
 /* }}} */
 
+int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
+{
+	struct fpm_shm_slot_s *slot;
+	struct fpm_shm_slot_s slot_c;
+
+	slot = fpm_shm_slot(child);
+	if (!fpm_shm_slots_acquire(slot, 1)) {
+		return(-1);
+	}
+
+	slot_c = *slot;
+	fpm_shm_slots_release(slot);
+	return(!slot_c.accepted.tv_sec && !slot_c.accepted.tv_usec ? 1 : 0);
+}
+/* }}} */

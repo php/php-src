@@ -15,6 +15,7 @@ int fpm_children_create_initial(struct fpm_worker_pool_s *wp);
 int fpm_children_free(struct fpm_child_s *child);
 void fpm_children_bury();
 int fpm_children_init_main();
+int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn);
 
 struct fpm_child_s;
 
@@ -27,6 +28,7 @@ struct fpm_child_s {
 	int fd_stdout, fd_stderr;
 	void (*tracer)(struct fpm_child_s *);
 	struct timeval slow_logged;
+	int idle_kill;
 	pid_t pid;
 };
 

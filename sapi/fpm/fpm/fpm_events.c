@@ -100,6 +100,7 @@ int fpm_event_loop() /* {{{ */
 	event_set(&signal_fd_event, fpm_signals_get_fd(), EV_PERSIST | EV_READ, &fpm_got_signal, 0);
 	event_add(&signal_fd_event, 0);
 	fpm_pctl_heartbeat(-1, 0, 0);
+	fpm_pctl_perform_idle_server_maintenance_heartbeat(-1, 0, 0);
 	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: entering main loop");
 	event_loop(0);
 	return 0;

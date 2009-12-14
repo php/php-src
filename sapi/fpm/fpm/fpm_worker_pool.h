@@ -35,6 +35,8 @@ struct fpm_worker_pool_s {
 	/* runtime */
 	struct fpm_child_s *children;
 	int running_children;
+	int idle_spawn_rate;
+	int warn_max_children;
 };
 
 struct fpm_worker_pool_s *fpm_worker_pool_alloc();

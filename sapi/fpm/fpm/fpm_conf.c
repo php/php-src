@@ -82,8 +82,8 @@ static char *fpm_conf_set_pm_style(void **conf, char *name, void *vv, intptr_t o
 
 	if (!strcmp(value, "static")) {
 		c->style = PM_STYLE_STATIC;
-	} else if (!strcmp(value, "apache-like")) {
-		c->style = PM_STYLE_APACHE_LIKE;
+	} else if (!strcmp(value, "dynamic")) {
+		c->style = PM_STYLE_DYNAMIC;
 	} else {
 		return "invalid value for 'style'";
 	}
@@ -139,19 +139,19 @@ static char *fpm_conf_set_catch_workers_output(void **conf, char *name, void *vv
 }
 /* }}} */
 
-static struct xml_conf_section fpm_conf_set_apache_like_subsection_conf = {
-	.path = "apache_like somewhere", /* fixme */
+static struct xml_conf_section fpm_conf_set_dynamic_subsection_conf = {
+	.path = "dynamic somewhere", /* fixme */
 	.parsers = (struct xml_value_parser []) {
-		{ XML_CONF_SCALAR, "StartServers",		&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, options_apache_like.StartServers) },
-		{ XML_CONF_SCALAR, "MinSpareServers",	&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, options_apache_like.MinSpareServers) },
-		{ XML_CONF_SCALAR, "MaxSpareServers",	&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, options_apache_like.MaxSpareServers) },
+		{ XML_CONF_SCALAR, "start_servers",		&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, dynamic.start_servers) },
+		{ XML_CONF_SCALAR, "min_spare_servers",	&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, dynamic.min_spare_servers) },
+		{ XML_CONF_SCALAR, "max_spare_servers",	&xml_conf_set_slot_integer, offsetof(struct fpm_pm_s, dynamic.max_spare_servers) },
 		{ 0, 0, 0, 0 }
 	}
 };
 
-static char *fpm_conf_set_apache_like_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
+static char *fpm_conf_set_dynamic_subsection(void **conf, char *name, void *xml_node, intptr_t offset) /* {{{ */
 {
-	return xml_conf_parse_section(conf, &fpm_conf_set_apache_like_subsection_conf, xml_node);
+	return xml_conf_parse_section(conf, &fpm_conf_set_dynamic_subsection_conf, xml_node);
 }
 /* }}} */
 
@@ -191,7 +191,7 @@ static struct xml_conf_section fpm_conf_set_pm_subsection_conf = {
 	.parsers = (struct xml_value_parser []) {
 		{ XML_CONF_SCALAR,		"style",				&fpm_conf_set_pm_style,						0 },
 		{ XML_CONF_SCALAR,		"max_children",			&xml_conf_set_slot_integer,					offsetof(struct fpm_pm_s, max_children) },
-		{ XML_CONF_SUBSECTION,	"apache_like",			&fpm_conf_set_apache_like_subsection,		offsetof(struct fpm_pm_s, options_apache_like) },
+		{ XML_CONF_SUBSECTION,	"dynamic",			&fpm_conf_set_dynamic_subsection,		offsetof(struct fpm_pm_s, dynamic) },
 		{ 0, 0, 0, 0 }
 	}
 };
@@ -391,6 +391,46 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		} else {
 			wp->is_template = 1;
 		}
+
+		if (wp->config->pm == NULL) {
+			zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: the process manager is missing (static or dynamic)", wp->config->name);
+			return(-1);
+		}
+
+		if (wp->config->pm->style == PM_STYLE_DYNAMIC) {
+			struct fpm_pm_s *pm = wp->config->pm;
+
+			if (pm->dynamic.min_spare_servers <= 0) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: min_spare_servers must be a positive value", wp->config->name);
+				return(-1);
+			}
+
+			if (pm->dynamic.max_spare_servers <= 0) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: max_spare_servers must be a positive value", wp->config->name);
+				return(-1);
+			}
+
+			if (pm->dynamic.min_spare_servers > pm->max_children ||
+			    pm->dynamic.max_spare_servers > pm->max_children) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: min_spare_servers(%d) and max_spare_servers(%d) can't be greater than max_children(%d)",
+				     wp->config->name, pm->dynamic.min_spare_servers, pm->dynamic.max_spare_servers, pm->max_children);
+				return(-1);
+			}
+
+			if (pm->dynamic.max_spare_servers < pm->dynamic.min_spare_servers) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: max_spare_servers must be greater or equal than min_spare_servers", wp->config->name);
+				return(-1);
+			}
+
+			if (pm->dynamic.start_servers <= 0) {
+				pm->dynamic.start_servers = pm->dynamic.min_spare_servers + ((pm->dynamic.max_spare_servers - pm->dynamic.min_spare_servers) / 2);
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "pool %s: start_servers has been set to %d", wp->config->name, pm->dynamic.start_servers);
+			} else if (pm->dynamic.start_servers < pm->dynamic.min_spare_servers || pm->dynamic.start_servers > pm->dynamic.max_spare_servers) {
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: start_servers must not be less than min_spare_servers and not greaters than max_spare_servers", wp->config->name);
+				return(-1);
+			}
+		}
+
 
 		if (wp->config->request_slowlog_timeout) {
 #if HAVE_FPM_TRACE

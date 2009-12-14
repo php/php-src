@@ -986,13 +986,13 @@ int fcgi_accept_request(fcgi_request *req)
 						int n = 0;
 						int allowed = 0;
 
-							while (allowed_clients[n] != INADDR_NONE) {
-								if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
-									allowed = 1;
-									break;
-								}
-								n++;
+						while (allowed_clients[n] != INADDR_NONE) {
+							if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
+								allowed = 1;
+								break;
 							}
+							n++;
+						}
 						if (!allowed) {
 							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
 							closesocket(req->fd);

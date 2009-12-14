@@ -72,29 +72,29 @@
 			<value name="pm">
 
 				Sets style of controling worker process count.
-				Valid values are 'static' and 'apache-like'
+				Valid values are 'static' and 'dynamic'
 				<value name="style">static</value>
 
 				Sets the limit on the number of simultaneous requests that will be served.
 				Equivalent to Apache MaxClients directive.
 				Equivalent to PHP_FCGI_CHILDREN environment in original php.fcgi
 				Used with any pm_style.
-				<value name="max_children">5</value>
+				<value name="max_children">50</value>
 
-				Settings group for 'apache-like' pm style
-				<value name="apache_like">
+				Settings group for 'dynamic' pm style
+				<value name="dynamic">
 
 					Sets the number of server processes created on startup.
-					Used only when 'apache-like' pm_style is selected
-					<value name="StartServers">20</value>
+					Used only when 'dynamic' pm_style is selected
+					<value name="start_servers">20</value>
 
 					Sets the desired minimum number of idle server processes.
-					Used only when 'apache-like' pm_style is selected
-					<value name="MinSpareServers">5</value>
+					Used only when 'dynamic' pm_style is selected
+					<value name="min_spare_servers">5</value>
 
 					Sets the desired maximum number of idle server processes.
-					Used only when 'apache-like' pm_style is selected
-					<value name="MaxSpareServers">35</value>
+					Used only when 'dynamic' pm_style is selected
+					<value name="max_spare_servers">35</value>
 
 				</value>
 
