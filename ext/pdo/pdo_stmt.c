@@ -794,6 +794,10 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		}
 		return 0;
 	}
+	if (is_callable_error) {
+		/* Possible E_STRICT error message */
+		efree(is_callable_error);
+	}
 
 	fci->param_count = num_args; /* probably less */
 	fci->params = safe_emalloc(sizeof(zval**), num_args, 0);
