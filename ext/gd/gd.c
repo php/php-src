@@ -3844,7 +3844,7 @@ PHP_FUNCTION(imagepsencodefont)
 	T1_DeleteAllSizes(*f_ind);
 	if (T1_ReencodeFont(*f_ind, enc_vector)) {
 		T1_DeleteEncoding(enc_vector);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't reencode font");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't re-encode font");
 		RETURN_FALSE;
 	}
 
