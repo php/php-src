@@ -19,18 +19,16 @@ echo "Done\n";
 --EXPECTF--
 string(0) ""
 string(0) ""
+string(0) ""
 
-Warning: urldecode() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
-
-Warning: urldecode() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: urldecode() expects parameter 1 to be string (Unicode or binary), array given in /home/dmitry/php/php6/Zend/tests/null_argument_001.php on line 6
 NULL
 string(1) "1"
 string(0) ""
 
-Warning: urldecode() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: urldecode() expects parameter 1 to be string (Unicode or binary), object given in /home/dmitry/php/php6/Zend/tests/null_argument_001.php on line 9
 NULL
 
-Warning: urldecode() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: urldecode() expects parameter 1 to be string (Unicode or binary), resource given in /home/dmitry/php/php6/Zend/tests/null_argument_001.php on line 12
 NULL
 Done
