@@ -622,16 +622,30 @@ PHP_FUNCTION(urlencode)
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
-	char *in_str, *out_str;
+	zstr in_str;
+	char *out_str;
 	int in_str_len, out_str_len;
+	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
+							  &in_str_len, &in_str_type) == FAILURE) {
 		return;
 	}
 
-	out_str = estrndup(in_str, in_str_len);
+	if (in_str_type == IS_UNICODE) {
+		in_str.s = zend_unicode_to_ascii(in_str.u, in_str_len TSRMLS_CC);
+		if (!in_str.s) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
+	}
+
+	out_str = estrndup(in_str.s, in_str_len);
 	out_str_len = php_url_decode(out_str, in_str_len);
+
+	if (in_str_type == IS_UNICODE) {
+		efree(in_str.s);
+	}
 
     RETURN_STRINGL(out_str, out_str_len, 0);
 }
@@ -744,16 +758,30 @@ PHP_FUNCTION(rawurlencode)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	char *in_str, *out_str;
+	zstr in_str;
+	char *out_str;
 	int in_str_len, out_str_len;
+	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
+							  &in_str_len, &in_str_type) == FAILURE) {
 		return;
 	}
 
-	out_str = estrndup(in_str, in_str_len);
+	if (in_str_type == IS_UNICODE) {
+		in_str.s = zend_unicode_to_ascii(in_str.u, in_str_len TSRMLS_CC);
+		if (!in_str.s) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
+			RETURN_FALSE;
+		}
+	}
+
+	out_str = estrndup(in_str.s, in_str_len);
 	out_str_len = php_raw_url_decode(out_str, in_str_len);
+
+	if (in_str_type == IS_UNICODE) {
+		efree(in_str.s);
+	}
 
     RETURN_STRINGL(out_str, out_str_len, 0);
 }

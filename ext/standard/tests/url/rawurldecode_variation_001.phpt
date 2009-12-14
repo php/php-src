@@ -60,6 +60,9 @@ $values = array(
       "",
       '',
 
+      // non ASCII UNICODE
+      "привет",
+
       // object data
       new stdclass(),
 
@@ -81,8 +84,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing rawurldecode() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(64)
-Error: 8 - Undefined variable: unset_var, %s(67)
+Error: 8 - Undefined variable: undefined_var, %s(%d)
+Error: 8 - Undefined variable: unset_var, %s(%d)
 
 Arg value 0 
 string(1) "0"
@@ -110,30 +113,30 @@ string(13) "1.07654321E-9"
 
 Arg value 0.5 
 string(3) "0.5"
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
 NULL
-Error: 8 - Array to string conversion, %s(73)
+Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, array given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
 NULL
 
 Arg value  
@@ -155,16 +158,18 @@ Arg value
 string(0) ""
 
 Arg value  
-Error: 2 - rawurldecode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(74)
-NULL
+string(0) ""
 
 Arg value  
-Error: 2 - rawurldecode() expects parameter 1 to be strictly a binary string, Unicode string given, %s(74)
-NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
+string(0) ""
+
+Arg value привет 
+Error: 2 - rawurldecode(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received, %s(%d)
+bool(false)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 2 - rawurldecode() expects parameter 1 to be binary string, object given, %s(74)
+Error: 2 - rawurldecode() expects parameter 1 to be string (Unicode or binary), object given, %s(%d)
 NULL
 
 Arg value  
