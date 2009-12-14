@@ -2068,10 +2068,19 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* NOTE: If you add anything here, remember to add it also in Makefile.global! */
 	{
 		static const char *directives[] = {
+			"allow_call_time_pass_reference",
 			"define_syslog_variables", 
+			"detect_unicode",
+			"enable_dl",
+			"highlight_bg",
 			"register_globals",
 			"register_long_arrays",
 			"safe_mode",
+			"safe_mode_gid",
+			"safe_mode_include_dir",
+			"safe_mode_exec_dir",
+			"safe_mode_allowed_env_vars",
+			"safe_mode_protected_env_vars",
 			"magic_quotes_gpc",
 			"magic_quotes_runtime",
 			"magic_quotes_sybase",
