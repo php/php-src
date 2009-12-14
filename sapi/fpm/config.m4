@@ -653,11 +653,8 @@ if test "$PHP_FPM" != "no"; then
   SAPI_FPM_PATH=sapi/fpm/php-fpm
   PHP_SUBST(SAPI_FPM_PATH)
   
-  mkdir -p sapi/fpm/fpm
-  PHP_FPM_FILES=`cd $abs_srcdir/sapi/fpm && find fpm/ \( -name *.c \! -name fpm_trace*.c \) -exec printf "{} " \;`
-
-  if test "$fpm_trace_type" ; then
-    PHP_FPM_TRACE_FILES=`cd $abs_srcdir/sapi/fpm && find fpm/ \( -name fpm_trace.c -or -name fpm_trace_$fpm_trace_type.c \) -exec printf "{} " \;`
+  if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
+    PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
   fi
   
   PHP_FPM_CFLAGS="$LIBEVENT_CFLAGS -I$abs_srcdir/sapi/fpm"
@@ -666,6 +663,29 @@ if test "$PHP_FPM" != "no"; then
   PHP_SUBST(SAPI_EXTRA_LIBS)
  
   INSTALL_IT=":"
+  PHP_FPM_FILES="fpm/fastcgi.c \
+    fpm/fpm.c \
+    fpm/fpm_children.c \
+    fpm/fpm_cleanup.c \
+    fpm/fpm_clock.c \
+    fpm/fpm_conf.c \
+    fpm/fpm_env.c \
+    fpm/fpm_events.c \
+    fpm/fpm_main.c \
+    fpm/fpm_php.c \
+    fpm/fpm_php_trace.c \
+    fpm/fpm_process_ctl.c \
+    fpm/fpm_request.c \
+    fpm/fpm_shm.c \
+    fpm/fpm_shm_slots.c \
+    fpm/fpm_signals.c \
+    fpm/fpm_sockets.c \
+    fpm/fpm_stdio.c \
+    fpm/fpm_unix.c \
+    fpm/fpm_worker_pool.c \
+    fpm/xml_config.c \
+    fpm/zlog.c \
+  "
   PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
 
   case $host_alias in
