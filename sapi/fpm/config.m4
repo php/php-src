@@ -654,7 +654,7 @@ if test "$PHP_FPM" != "no"; then
   PHP_SUBST(SAPI_FPM_PATH)
   
   mkdir -p sapi/fpm/fpm
-  PHP_FPM_FILES=`cd $abs_srcdir/sapi/fpm && find fpm/ \( -name *.c -not -name fpm_trace*.c \) -exec printf "{} " \;`
+  PHP_FPM_FILES=`cd $abs_srcdir/sapi/fpm && find fpm/ \( -name *.c \! -name fpm_trace*.c \) -exec printf "{} " \;`
 
   if test "$fpm_trace_type" ; then
     PHP_FPM_TRACE_FILES=`cd $abs_srcdir/sapi/fpm && find fpm/ \( -name fpm_trace.c -or -name fpm_trace_$fpm_trace_type.c \) -exec printf "{} " \;`
