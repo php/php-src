@@ -141,13 +141,8 @@ typedef struct st_mysqlnd_infile
 	void	*userdata;
 } MYSQLND_INFILE;
 
-typedef struct st_mysqlnd_option
+typedef struct st_mysqlnd_options
 {
-	/* timeouts */
-	unsigned int		timeout_connect;
-	unsigned int		timeout_read;
-	unsigned int		timeout_write;
-
 	ulong		flags;
 
 	/* init commands - we need to send them to server directly after connect */
@@ -174,11 +169,21 @@ typedef struct st_mysqlnd_option
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
 #endif
+} MYSQLND_OPTIONS;
+
+typedef struct st_mysqlnd_net_options
+{
+	/* timeouts */
+	unsigned int timeout_connect;
+	unsigned int timeout_read;
+	unsigned int timeout_write;
+
 	unsigned int net_read_buffer_size;
-} MYSQLND_OPTION;
+} MYSQLND_NET_OPTIONS;
 
 
 typedef struct st_mysqlnd_connection MYSQLND;
+typedef struct st_mysqlnd_net	MYSQLND_NET;
 typedef struct st_mysqlnd_res	MYSQLND_RES;
 typedef char** 					MYSQLND_ROW_C;		/* return data as array of strings */
 typedef struct st_mysqlnd_stmt	MYSQLND_STMT;
@@ -223,27 +228,13 @@ typedef struct st_mysqlnd_read_buffer {
 } MYSQLND_READ_BUFFER;
 
 
-typedef struct st_mysqlnd_net
+struct st_mysqlnd_net_methods
 {
-	php_stream			*stream;
 	enum_func_status	(*stream_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
 	size_t 				(*stream_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
-
-	/* sequence for simple checking of correct packets */
-	zend_uchar			packet_no;
-	zend_bool			compressed;
-	zend_uchar			compressed_envelope_packet_no;
-#ifdef MYSQLND_COMPRESSION_ENABLED
-	MYSQLND_READ_BUFFER	* uncompressed_data;
-#endif
-#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	zend_uchar			last_command;
-#endif
-	/* cmd buffer */
-	MYSQLND_CMD_BUFFER	cmd_buffer;
-
-	zend_bool			persistent;
-} MYSQLND_NET;
+	enum_func_status	(*set_client_option)(MYSQLND_NET * const net, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
+	void				(*free_contents)(MYSQLND_NET * net TSRMLS_DC);
+};
 
 
 struct st_mysqlnd_conn_methods
@@ -412,6 +403,30 @@ struct st_mysqlnd_stmt_methods
 };
 
 
+struct st_mysqlnd_net
+{
+	php_stream			*stream;
+	struct st_mysqlnd_net_methods m;
+
+	/* sequence for simple checking of correct packets */
+	zend_uchar			packet_no;
+	zend_bool			compressed;
+	zend_uchar			compressed_envelope_packet_no;
+#ifdef MYSQLND_COMPRESSION_ENABLED
+	MYSQLND_READ_BUFFER	* uncompressed_data;
+#endif
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
+	zend_uchar			last_command;
+#endif
+	/* cmd buffer */
+	MYSQLND_CMD_BUFFER	cmd_buffer;
+
+	MYSQLND_NET_OPTIONS options;
+
+	zend_bool			persistent;
+};
+
+
 struct st_mysqlnd_connection
 {
 /* Operation related */
@@ -476,7 +491,7 @@ struct st_mysqlnd_connection
 	zend_bool		persistent;
 
 	/* options */
-	MYSQLND_OPTION	options;
+	MYSQLND_OPTIONS	options;
 
 	/* stats */
 	MYSQLND_STATS	stats;
