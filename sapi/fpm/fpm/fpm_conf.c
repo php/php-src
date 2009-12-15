@@ -518,7 +518,11 @@ static int fpm_conf_post_process() /* {{{ */
 	}
 
 	if (!fpm_global_config.error_log) {
-		fpm_global_config.error_log = strdup(PHP_FPM_LOG_PATH);
+		char *tmp_log_path;
+
+		spprintf(&tmp_log_path, 0, "%s/log/php-fpm.log", PHP_LOCALSTATEDIR);
+		fpm_global_config.error_log = strdup(tmp_log_path);
+		efree(tmp_log_path);
 	}
 
 	fpm_evaluate_full_path(&fpm_global_config.error_log);

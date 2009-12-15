@@ -10,8 +10,8 @@ install-build: install-fpm
 install-fpm: install-sapi
 	@echo "Installing PHP FPM binary:        $(INSTALL_ROOT)$(sbindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(sbindir)
-	@$(mkinstalldirs) $(INSTALL_ROOT)$(php_fpm_pid_dir)
-	@$(mkinstalldirs) $(INSTALL_ROOT)$(php_fpm_log_dir)
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
 	@$(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROO)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
 
 	@echo "Installing PHP FPM config:        $(INSTALL_ROOT)$(sysconfdir)/" && \

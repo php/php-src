@@ -6,10 +6,10 @@
 	<section name="global_options">
 
 		Pid file
-		<value name="pid_file">@php_fpm_pid_path@</value>
+		<value name="pid_file">@EXPANDED_LOCALSTATEDIR@/run/php-fpm.pid</value>
 
 		Error log file
-		<value name="error_log">@php_fpm_log_path@</value>
+		<value name="error_log">@EXPANDED_LOCALSTATEDIR@/log/php-fpm.log</value>
 
 		Log level
 		<value name="log_level">notice</value>
@@ -110,7 +110,7 @@
 			<value name="request_slowlog_timeout">0s</value>
 
 			The log file for slow requests
-			<value name="slowlog">@php_fpm_log_path@.slow</value>
+			<value name="slowlog">@EXPANDED_LOCALSTATEDIR@/log/php-fpm.log.slow</value>
 
 			Set open file desc rlimit
 			<value name="rlimit_files">1024</value>

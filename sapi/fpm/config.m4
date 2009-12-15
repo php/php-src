@@ -215,14 +215,6 @@ fi
 dnl }}}
 
 dnl configure checks {{{
-AC_DEFUN([AC_FPM_CHECKS],
-[
-  AC_FPM_STDLIBS
-  AC_FPM_PRCTL
-  AC_FPM_CLOCK
-  AC_FPM_TRACE
-])
-
 AC_DEFUN([AC_FPM_STDLIBS],
 [
   AC_CHECK_FUNCS(setenv clearenv)
@@ -506,71 +498,6 @@ AC_DEFUN([AC_FPM_TRACE],
 ])
 dnl }}}
 
-dnl configure options {{{
-AC_DEFUN([AC_FPM_ARGS],
-[
-  PHP_ARG_WITH(fpm-log,,
-  [  --with-fpm-log[=PATH]   Set the path for php-fpm log file. (default: /var/log/php-fpm.log)], yes, no)
-
-  PHP_ARG_WITH(fpm-pid,,
-  [  --with-fpm-pid[=PATH]   Set the path for php-fpm pid file. (default: /var/run/php-fpm.pid)], yes, no)
-
-  PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
-
-  PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
-                  should usually be set to match the fpm username (default: nobody)], nobody, no)
-])
-
-AC_DEFUN([AC_FPM_VARS],
-[
-  if test -z "$PHP_FPM_LOG" -o "$PHP_FPM_LOG" = "yes" -o "$PHP_FPM_LOG" = "no"; then
-    php_fpm_log_path="/var/log/php-fpm.log"
-  else
-    php_fpm_log_path="$PHP_FPM_LOG"
-  fi
-  php_fpm_log_dir=`dirname $php_fpm_log_path`
-
-  if test -z "$PHP_FPM_PID" -o "$PHP_FPM_PID" = "yes" -o "$PHP_FPM_PID" = "no"; then
-    php_fpm_pid_path="/var/run/php-fpm.pid"
-  else
-    php_fpm_pid_path="$PHP_FPM_PID"
-  fi
-  php_fpm_pid_dir=`dirname $php_fpm_pid_path`
-
-  if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
-    php_fpm_user="nobody"
-  else
-    php_fpm_user="$PHP_FPM_USER"
-  fi
-
-  if test -z "$PHP_FPM_GROUP" -o "$PHP_FPM_GROUP" = "yes" -o "$PHP_FPM_GROUP" = "no"; then
-    php_fpm_group="nobody"
-  else
-    php_fpm_group="$PHP_FPM_GROUP"
-  fi
-
-
-  PHP_SUBST_OLD(fpm_version)
-  PHP_SUBST_OLD(php_fpm_log_path)
-  PHP_SUBST_OLD(php_fpm_pid_path)
-  PHP_SUBST_OLD(php_fpm_log_dir)
-  PHP_SUBST_OLD(php_fpm_pid_dir)
-  PHP_SUBST_OLD(php_fpm_user)
-  PHP_SUBST_OLD(php_fpm_group)
-
-  AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
-  AC_DEFINE_UNQUOTED(PHP_FPM_LOG_PATH, "$php_fpm_log_path", [fpm log file path])
-  AC_DEFINE_UNQUOTED(PHP_FPM_PID_PATH, "$php_fpm_pid_path", [fpm pid file path])
-  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
-  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
-
-])
-
-dnl }}}
-
-
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
@@ -592,9 +519,37 @@ if test "$PHP_FPM" != "no"; then
     AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
   ])
 
-  AC_FPM_CHECKS
-  AC_FPM_ARGS
-  AC_FPM_VARS
+  AC_FPM_STDLIBS
+  AC_FPM_PRCTL
+  AC_FPM_CLOCK
+  AC_FPM_TRACE
+
+  PHP_ARG_WITH(fpm-user,,
+  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+
+  PHP_ARG_WITH(fpm-group,,
+  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
+                  should usually be set to match the fpm username (default: nobody)], nobody, no)
+
+  if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
+    php_fpm_user="nobody"
+  else
+    php_fpm_user="$PHP_FPM_USER"
+  fi
+
+  if test -z "$PHP_FPM_GROUP" -o "$PHP_FPM_GROUP" = "yes" -o "$PHP_FPM_GROUP" = "no"; then
+    php_fpm_group="nobody"
+  else
+    php_fpm_group="$PHP_FPM_GROUP"
+  fi
+
+  PHP_SUBST_OLD(fpm_version)
+  PHP_SUBST_OLD(php_fpm_user)
+  PHP_SUBST_OLD(php_fpm_group)
+
+  AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
+  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
+  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
 
   PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.1)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag], [$abs_srcdir/sapi/fpm], [sapi/fpm])
