@@ -40,8 +40,8 @@
   on production systems, if of course measured performance degradation is not
   minimal.
 */
-#if PHP_DEBUG
-//#define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
+#if A0 && PHP_DEBUG
+#define MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND 1
 #endif
 
 #if PHP_DEBUG && !defined(PHP_WIN32)
