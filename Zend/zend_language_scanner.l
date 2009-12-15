@@ -492,13 +492,13 @@ static int is_encoding_flex_compatible(const char *enc TSRMLS_DC)
 				char output[sizeof(expected)];
 
 				if (ucnv_fromUChars(conv,
-				                    output, sizeof(output),
-				                    ascii, sizeof(expected),
-				                    &status) != sizeof(expected) ||
+				                    output, sizeof(output)-1,
+				                    ascii, sizeof(expected)-1,
+				                    &status) != sizeof(expected)-1 ||
 				    U_FAILURE(status)) {
 					ret = 0;
 				} else {
-					ret = (memcmp(expected, output, sizeof(expected)) == 0);
+					ret = (memcmp(expected, output, sizeof(expected)-1) == 0);
 				}
 			}
 		}
