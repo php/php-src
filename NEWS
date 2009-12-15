@@ -40,6 +40,8 @@ PHP                                                                        NEWS
   seg fault). (davbrown4 at yahoo dot com, Felipe)
 - Fixed bug #50351 (performance regression handling objects, ten times slower
   in 5.3 than in 5.2). (Dmitry)
+- Fixed bug #50392 (date_create_from_format() enforces 6 digits for 'u'
+  format character). (Ilia)
 - Fixed bug #50345 (nanosleep not detected properly on some solaris versions).
   (Jani)
 - Fixed bug #50340 (php.ini parser does not allow spaces in ini keys). (Jani)
