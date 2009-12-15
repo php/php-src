@@ -7,6 +7,7 @@
 
 #include <TSRM.h>
 
+#include "php.h"
 #include "build-defs.h" /* for PHP_ defines */
 
 struct fpm_worker_pool_s;

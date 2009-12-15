@@ -29,7 +29,6 @@
 #include "xml_config.h"
 #include "zlog.h"
 
-
 struct fpm_global_config_s fpm_global_config;
 
 static void *fpm_global_config_ptr() /* {{{ */
@@ -551,10 +550,12 @@ int fpm_conf_init_main() /* {{{ */
 	}
 
 	if (filename == NULL) {
-		filename = PHP_FPM_CONF_PATH;
+		spprintf(&filename, 0, "%s/php-fpm.conf", PHP_SYSCONFDIR);
+		err = xml_conf_load_file(filename);
+		efree(filename);
+	} else {
+		err = xml_conf_load_file(filename);
 	}
-
-	err = xml_conf_load_file(filename);
 
 	if (err) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "failed to load configuration file: %s", err);

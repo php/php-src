@@ -10,8 +10,11 @@
 # Description:       starts the PHP FastCGI Process Manager daemon
 ### END INIT INFO
 
-php_fpm_BIN=@php_fpm_bin_path@
-php_fpm_CONF=@php_fpm_conf_path@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+php_fpm_BIN=@sbindir@/php-fpm
+php_fpm_CONF=@sysconfdir@/php-fpm.conf
 php_fpm_PID=@php_fpm_pid_path@
 
 

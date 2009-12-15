@@ -60,12 +60,12 @@ LD_LIBRARY_PATH_SAVED="$LD_LIBRARY_PATH"
 
 # Set our flags if we are checking a specific directory.
 if test -n "$ac_libevent_path" ; then
-	LIBEVENT_CPPFLAGS="-I$ac_libevent_path/include"
-	LIBEVENT_LDFLAGS="-L$ac_libevent_path/lib"
-	LD_LIBRARY_PATH="$ac_libevent_path/lib:$LD_LIBRARY_PATH"
+  LIBEVENT_CPPFLAGS="-I$ac_libevent_path/include"
+  LIBEVENT_LDFLAGS="-L$ac_libevent_path/lib"
+  LD_LIBRARY_PATH="$ac_libevent_path/lib:$LD_LIBRARY_PATH"
 else
-	LIBEVENT_CPPFLAGS=""
-	LIBEVENT_LDFLAGS=""
+  LIBEVENT_CPPFLAGS=""
+  LIBEVENT_LDFLAGS=""
 fi
 
 # Required flag for libevent.
@@ -173,7 +173,7 @@ if test "$PHP_LIBEVENT_DIR" != "no"; then
   if test "$PHP_LIBEVENT_DIR" != "yes" && test "$PHP_LIBEVENT_DIR" != "/usr/local"; then
     dnl don't try to be too smart, check only $PHP_LIBEVENT_DIR if specified
     ac_libevent_path=$PHP_LIBEVENT_DIR
-	AC_LIB_EVENT_DO_CHECK
+    AC_LIB_EVENT_DO_CHECK
     if test "$success" = "no"; then
       AC_MSG_ERROR([Could not find libevent >= $WANT_LIBEVENT_VERSION in $PHP_LIBEVENT_DIR])
     fi
@@ -196,7 +196,7 @@ if test "$PHP_LIBEVENT_DIR" != "no"; then
     ac_have_libevent=yes
     AC_DEFINE(HAVE_LIBEVENT, 1, [define if libevent is available])
   fi
-	
+
   LIBEVENT_LIBS="-levent"
 
   if test -n "$ac_libevent_path"; then
@@ -509,9 +509,6 @@ dnl }}}
 dnl configure options {{{
 AC_DEFUN([AC_FPM_ARGS],
 [
-  PHP_ARG_WITH(fpm-conf,,
-  [  --with-fpm-conf[=PATH]  Set the path for php-fpm configuration file. (default: \$sysconfdir/php-fpm.conf)], yes, no)
-
   PHP_ARG_WITH(fpm-log,,
   [  --with-fpm-log[=PATH]   Set the path for php-fpm log file. (default: /var/log/php-fpm.log)], yes, no)
 
@@ -528,36 +525,6 @@ AC_DEFUN([AC_FPM_ARGS],
 
 AC_DEFUN([AC_FPM_VARS],
 [
-  if test -z "$PHP_FPM_CONF" -o "$PHP_FPM_CONF" = "yes" -o "$PHP_FPM_CONF" = "no"; then
-    php_fpm_conf_path=""
-  else
-    php_fpm_conf_path="$PHP_FPM_CONF"
-  fi
-
-  if test -z "$prefix" -o "$prefix" = "NONE"; then
-    prefix="/usr/local"
-  fi
-  
-  if test -z "$exec_prefix" -o "$exec_prefix" = "NONE"; then
-    exec_prefix=`eval echo "$prefix"`
-  fi
-
-  php_fpm_bin_path=`eval echo "$bindir"`
-  php_fpm_bin_path="$php_fpm_bin_path/php-fpm"
-
-  if test -z "$php_fpm_conf_path"; then
-    php_fpm_conf_path=`eval echo "$sysconfdir"`
-    php_fpm_conf_path="$php_fpm_conf_path/php-fpm.conf"
-  fi
-
-  if test -d "$php_fpm_conf_path"; then 
-    php_fpm_conf_dir="$php_fpm_conf"
-    php_fpm_conf="$php_fpm_conf/php-fpm.conf"
-  else
-    php_fpm_conf_dir=`dirname $php_fpm_conf_path`
-    php_fpm_conf=`basename $php_fpm_conf_path`
-  fi
-
   if test -z "$PHP_FPM_LOG" -o "$PHP_FPM_LOG" = "yes" -o "$PHP_FPM_LOG" = "no"; then
     php_fpm_log_path="/var/log/php-fpm.log"
   else
@@ -586,9 +553,6 @@ AC_DEFUN([AC_FPM_VARS],
 
 
   PHP_SUBST_OLD(fpm_version)
-  PHP_SUBST_OLD(php_fpm_conf_dir)
-  PHP_SUBST_OLD(php_fpm_conf_path)
-  PHP_SUBST_OLD(php_fpm_bin_path)
   PHP_SUBST_OLD(php_fpm_log_path)
   PHP_SUBST_OLD(php_fpm_pid_path)
   PHP_SUBST_OLD(php_fpm_log_dir)
@@ -596,8 +560,6 @@ AC_DEFUN([AC_FPM_VARS],
   PHP_SUBST_OLD(php_fpm_user)
   PHP_SUBST_OLD(php_fpm_group)
 
-  AC_DEFINE_UNQUOTED(PHP_FPM_CONF_DIR, "$php_fpm_conf_dir", [fpm conf file dir])
-  AC_DEFINE_UNQUOTED(PHP_FPM_CONF_PATH, "$php_fpm_conf_path", [fpm conf file path])
   AC_DEFINE_UNQUOTED(PHP_FPM_VERSION, "$fpm_version", [fpm version])
   AC_DEFINE_UNQUOTED(PHP_FPM_LOG_PATH, "$php_fpm_log_path", [fpm log file path])
   AC_DEFINE_UNQUOTED(PHP_FPM_PID_PATH, "$php_fpm_pid_path", [fpm pid file path])
@@ -673,6 +635,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/xml_config.c \
     fpm/zlog.c \
   "
+
   PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
 
   case $host_alias in
