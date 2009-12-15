@@ -1771,33 +1771,56 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_uchar utype, char *s
    Quote regular expression characters plus an optional character */
 static PHP_FUNCTION(preg_quote)
 {
-	int		 in_str_len;
-	char	*in_str;		/* Input string argument */
-	char	*in_str_end;    /* End of the input string */
-	int		 delim_len = 0;
-	char	*delim = NULL;	/* Additional delimiter argument */
-	char	*out_str,		/* Output string with quoted characters */
-		 	*p,				/* Iterator for input string */
-			*q,				/* Iterator for output string */
-			 c;				/* Current character */
+	int          in_str_len;
+	zstr         in_str;		/* Input string argument */
+	char        *in_str_end;    /* End of the input string */
+	zend_uchar	 in_str_type;
+	int          delim_len = 0;
+	zstr         delim;			/* Additional delimiter argument */
+	zend_uchar	 delim_type;
+	char        *out_str,		/* Output string with quoted characters */
+	            *p,				/* Iterator for input string */
+	            *q,				/* Iterator for output string */
+	             c;				/* Current character */
 	UChar32	 delim_char=0;	/* Delimiter character to be quoted */
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
 	/* Get the arguments and check for errors */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&|s&", &in_str, &in_str_len, UG(utf8_conv),
-							  &delim, &delim_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &in_str, &in_str_len, &in_str_type,
+							  &delim, &delim_len, &delim_type) == FAILURE) {
 		return;
 	}
 	
-	in_str_end = in_str + in_str_len;
+	/* Conver to UTF-8 if necessary */
+	if (in_str_type == IS_UNICODE) {
+		if (zend_unicode_to_string(UG(utf8_conv), &in_str.s, &in_str_len, in_str.u, in_str_len TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
+		if (delim_len) {
+			if (zend_unicode_to_string(UG(utf8_conv), &delim.s, &delim_len, delim.u, delim_len TSRMLS_CC) == FAILURE) {
+				RETURN_FALSE;
+			}
+		}
+	} 
+
+	in_str_end = in_str.s + in_str_len;
 
 	/* Nothing to do if we got an empty string */
-	if (in_str == in_str_end) {
-		RETURN_EMPTY_UNICODE();
+	if (in_str.s == in_str_end) {
+		if (in_str_type == IS_UNICODE) {
+			RETVAL_EMPTY_UNICODE();
+			efree(in_str.s);
+			if (delim_len) {
+				efree(delim.s);
+			}
+		} else {
+			RETVAL_EMPTY_STRING();
+		}
+		return;
 	}
 
-	if (delim && *delim) {
-		U8_GET((unsigned char*)delim, 0, 0, delim_len, delim_char);
+	if (delim_len) {
+		U8_GET((unsigned char*)delim.s, 0, 0, delim_len, delim_char);
 		quote_delim = 1;
 	}
 	
@@ -1809,7 +1832,7 @@ static PHP_FUNCTION(preg_quote)
 	out_str = safe_emalloc(5, in_str_len, 1);
 	
 	/* Go through the string and quote necessary characters */
-	for(p = in_str, q = out_str; p != in_str_end; p++) {
+	for(p = in_str.s, q = out_str; p != in_str_end; p++) {
 		c = *p;
 		switch(c) {
 			case '.':
@@ -1865,7 +1888,15 @@ static PHP_FUNCTION(preg_quote)
 	*q = '\0';
 	
 	/* Reallocate string and return it */
-	RETVAL_UTF8_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, ZSTR_AUTOFREE);
+	if (in_str_type == IS_UNICODE) {
+		RETVAL_UTF8_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, ZSTR_AUTOFREE);
+		efree(in_str.s);
+		if (delim_len) {
+			efree(delim.s);
+		}
+	} else {
+		RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
+	}
 }
 /* }}} */
 
