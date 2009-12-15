@@ -677,14 +677,8 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 
 		mysqlnd_local_infile_default(conn);
 		{
-			unsigned int buf_size;
-			buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
-			conn->m->set_client_option(conn, MYSQLND_OPT_NET_READ_BUFFER_SIZE,
-								   		(char *)&buf_size TSRMLS_CC);
-
-			buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
-			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE,
-								   		(char *)&buf_size TSRMLS_CC);
+			unsigned int buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
+			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
 		}
 
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
