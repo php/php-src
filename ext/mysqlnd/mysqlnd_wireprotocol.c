@@ -2290,6 +2290,95 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 /* }}} */
 
 
+/* {{{ mysqlnd_net::connect */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_net, connect)(MYSQLND_NET * net, const char * const scheme, size_t scheme_len, zend_bool persistent, char **errstr, int * errcode TSRMLS_DC)
+{
+	unsigned int streams_options = ENFORCE_SAFE_MODE;
+	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
+	char * hashed_details = NULL;
+	int hashed_details_len = 0;
+	struct timeval tv;
+	DBG_ENTER("mysqlnd_net::connect");
+
+	if (persistent) {
+		hashed_details_len = spprintf(&hashed_details, 0, "%p", net);
+		DBG_INF_FMT("hashed_details=%s", hashed_details);
+	}
+
+	net->packet_no = net->compressed_envelope_packet_no = 0;
+
+	if (net->options.timeout_connect) {
+		tv.tv_sec = net->options.timeout_connect;
+		tv.tv_usec = 0;
+	}
+
+	net->stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
+										  hashed_details, (net->options.timeout_connect) ? &tv : NULL,
+										  NULL /*ctx*/, errstr, errcode);
+
+
+	if (*errstr || !net->stream) {
+		if (hashed_details) {
+			efree(hashed_details);
+		}
+		*errcode = CR_CONNECTION_ERROR;
+		DBG_RETURN(FAIL);
+	}
+
+	if (hashed_details) {
+		/*
+		  If persistent, the streams register it in EG(persistent_list).
+		  This is unwanted. ext/mysql or ext/mysqli are responsible to clean,
+		  whatever they have to.
+		*/
+		zend_rsrc_list_entry *le;
+
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_len + 1,
+						   (void*) &le) == SUCCESS) {
+			/*
+			  in_free will let streams code skip destructing - big HACK,
+			  but STREAMS suck big time regarding persistent streams.
+			  Just not compatible for extensions that need persistency.
+			*/
+			net->stream->in_free = 1;
+			zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_len + 1);
+			net->stream->in_free = 0;
+		}
+#if ZEND_DEBUG
+		/* Shut-up the streams, they don't know what they are doing */
+		net->stream->__exposed = 1;
+#endif
+		efree(hashed_details);
+	}
+
+	if (!net->options.timeout_read) {
+		/* should always happen because read_timeout cannot be set via API */
+		net->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
+	}
+	if (net->options.timeout_read)
+	{
+		tv.tv_sec = net->options.timeout_read;
+		tv.tv_usec = 0;
+		php_stream_set_option(net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+	}
+
+	if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
+		/* TCP -> Set TCP_NODELAY */
+		mysqlnd_set_sock_no_delay(net->stream);
+	}
+
+	{
+		unsigned int buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
+		net->m.set_client_option(net, MYSQLND_OPT_NET_READ_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
+	}
+
+
+	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_net::set_client_option */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mysqlnd_option option, const char * const value TSRMLS_DC)
@@ -2368,6 +2457,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	DBG_INF_FMT("persistent=%d", persistent);
 	net->persistent = persistent;
 
+	net->m.connect = MYSQLND_METHOD(mysqlnd_net, connect);
 	net->m.stream_read = MYSQLND_METHOD(mysqlnd_net, read_from_stream);
 	net->m.stream_write = MYSQLND_METHOD(mysqlnd_net, stream_write);
 	net->m.set_client_option = MYSQLND_METHOD(mysqlnd_net, set_client_option);
