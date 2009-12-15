@@ -230,6 +230,7 @@ typedef struct st_mysqlnd_read_buffer {
 
 struct st_mysqlnd_net_methods
 {
+	enum_func_status	(*connect)(MYSQLND_NET * net, const char * const scheme, size_t scheme_len, zend_bool persistent, char **errstr, int * errcode TSRMLS_DC);
 	enum_func_status	(*stream_read)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC);
 	size_t 				(*stream_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 	enum_func_status	(*set_client_option)(MYSQLND_NET * const net, enum_mysqlnd_option option, const char * const value TSRMLS_DC);
