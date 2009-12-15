@@ -2224,7 +2224,7 @@ PHPAPI unsigned int mysqlnd_plugin_register()
 
 
 /* {{{ mysqlnd_plugin_count */
-unsigned int mysqlnd_plugin_count()
+PHPAPI unsigned int mysqlnd_plugin_count()
 {
 	return mysqlnd_plugins_counter;
 }
