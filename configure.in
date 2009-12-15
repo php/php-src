@@ -1179,6 +1179,7 @@ PHP_SUBST_OLD(php_abs_top_builddir)
 PHP_SUBST_OLD(php_abs_top_srcdir)
 
 PHP_SUBST(bindir)
+PHP_SUBST(sbindir)
 PHP_SUBST(exec_prefix)
 PHP_SUBST_OLD(program_prefix)
 PHP_SUBST_OLD(program_suffix)
