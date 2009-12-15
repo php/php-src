@@ -145,11 +145,8 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 		conn->current_result = NULL;
 	}
 
-#ifdef MYSQLND_COMPRESSION_ENABLED
-	if (conn->net->uncompressed_data) {
-		conn->net->uncompressed_data->free_buffer(&conn->net->uncompressed_data TSRMLS_CC);
-	}
-#endif
+	conn->net->m.free_contents(conn->net TSRMLS_CC);
+
 	DBG_INF("Freeing memory of members");
 
 	if (conn->host) {
@@ -546,8 +543,8 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	CONN_SET_STATE(conn, CONN_ALLOCED);
 	conn->net->packet_no = conn->net->compressed_envelope_packet_no = 0;
 
-	if (conn->options.timeout_connect) {
-		tv.tv_sec = conn->options.timeout_connect;
+	if (conn->net->options.timeout_connect) {
+		tv.tv_sec = conn->net->options.timeout_connect;
 		tv.tv_usec = 0;
 	}
 	if (conn->persistent) {
@@ -560,7 +557,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	DBG_INF(conn->scheme);
 	conn->net->stream = php_stream_xport_create(conn->scheme, transport_len, streams_options, streams_flags,
 											   hashed_details,
-											   (conn->options.timeout_connect) ? &tv : NULL,
+											   (conn->net->options.timeout_connect) ? &tv : NULL,
 											    NULL /*ctx*/, &errstr, &errcode);
 	DBG_INF_FMT("stream=%p", conn->net->stream);
 
@@ -598,13 +595,13 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		mnd_efree(hashed_details);
 	}
 
-	if (!conn->options.timeout_read) {
+	if (!conn->net->options.timeout_read) {
 		/* should always happen because read_timeout cannot be set via API */
-		conn->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
+		conn->net->options.timeout_read = (unsigned int) MYSQLND_G(net_read_timeout);
 	}
-	if (conn->options.timeout_read)
+	if (conn->net->options.timeout_read)
 	{
-		tv.tv_sec = conn->options.timeout_read;
+		tv.tv_sec = conn->net->options.timeout_read;
 		tv.tv_usec = 0;
 		php_stream_set_option(conn->net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 	}
@@ -1937,49 +1934,27 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 	DBG_ENTER("mysqlnd_conn::set_client_option");
 	DBG_INF_FMT("conn=%llu option=%d", conn->thread_id, option);
 	switch (option) {
+#ifdef WHEN_SUPPORTED_BY_MYSQLI
+		case MYSQL_OPT_COMPRESS:
+#endif
+#ifdef WHEN_SUPPORTED_BY_MYSQLI
+		case MYSQL_OPT_READ_TIMEOUT:
+		case MYSQL_OPT_WRITE_TIMEOUT:
+#endif
+		case MYSQL_OPT_CONNECT_TIMEOUT:
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+			conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
+			break;
 #if PHP_MAJOR_VERSION >= 6
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
 			conn->options.numeric_and_datetime_as_unicode = *(unsigned int*) value;
 			break;
 #endif
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
-			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
-			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
-				DBG_RETURN(FAIL);
-			}
-			conn->net->cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", conn->net->cmd_buffer.length);
-			if (!conn->net->cmd_buffer.buffer) {
-				conn->net->cmd_buffer.buffer = mnd_pemalloc(conn->net->cmd_buffer.length, conn->net->persistent);
-			} else {
-				conn->net->cmd_buffer.buffer = mnd_perealloc(conn->net->cmd_buffer.buffer,
-															conn->net->cmd_buffer.length,
-															conn->net->persistent);
-			}
-			break;
-		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
-			conn->options.net_read_buffer_size = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", conn->options.net_read_buffer_size);
-			break;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
 			DBG_INF("MYSQLND_OPT_INT_AND_FLOAT_NATIVE");
 			conn->options.int_and_float_native = *(unsigned int*) value;
-			break;
-#endif
-		case MYSQL_OPT_CONNECT_TIMEOUT:
-			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
-			conn->options.timeout_connect = *(unsigned int*) value;
-			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_OPT_READ_TIMEOUT:
-			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
-			conn->options.timeout_read = *(unsigned int*) value;
-			break;
-		case MYSQL_OPT_WRITE_TIMEOUT:
-			DBG_INF("MYSQL_OPT_WRITE_TIMEOUT");
-			conn->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
@@ -1999,9 +1974,6 @@ MYSQLND_METHOD(mysqlnd_conn, set_client_option)(MYSQLND * const conn,
 			conn->options.init_commands[conn->options.num_commands] = pestrdup(value, conn->persistent);
 			++conn->options.num_commands;
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
-		case MYSQL_OPT_COMPRESS:
-#endif
 		case MYSQL_READ_DEFAULT_FILE:
 		case MYSQL_READ_DEFAULT_GROUP:
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
