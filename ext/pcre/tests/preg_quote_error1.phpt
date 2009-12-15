@@ -28,9 +28,9 @@ unicode(16) "this is a string"
 
 Arg value is: Array
 
-Warning: preg_quote() expects parameter 1 to be binary string, array given in %spreg_quote_error1.php on line %d
+Warning: preg_quote() expects parameter 1 to be string (Unicode or binary), array given in %spreg_quote_error1.php on line %d
 NULL
 
-Warning: preg_quote() expects parameter 1 to be binary string, object given in %spreg_quote_error1.php on line %d
+Warning: preg_quote() expects parameter 1 to be string (Unicode or binary), object given in %spreg_quote_error1.php on line %d
 NULL
 Done
