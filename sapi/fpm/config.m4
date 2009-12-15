@@ -61,7 +61,13 @@ LD_LIBRARY_PATH_SAVED="$LD_LIBRARY_PATH"
 # Set our flags if we are checking a specific directory.
 if test -n "$ac_libevent_path" ; then
   LIBEVENT_CPPFLAGS="-I$ac_libevent_path/include"
-  LIBEVENT_LDFLAGS="-L$ac_libevent_path/lib"
+ 
+  if test -z "$PHP_LIBDIR"; then
+    LIBEVENT_LDFLAGS="-L$ac_libevent_path/lib"
+  else 
+    LIBEVENT_LDFLAGS="-L$ac_libevent_path/$PHP_LIBDIR"
+  fi
+
   LD_LIBRARY_PATH="$ac_libevent_path/lib:$LD_LIBRARY_PATH"
 else
   LIBEVENT_CPPFLAGS=""
@@ -504,15 +510,10 @@ if test "$PHP_FPM" != "no"; then
 
   AC_LIB_EVENT([$minimum_libevent_version])
 
-  AC_CACHE_CHECK(whether libevent build works, php_cv_libevent_build_works, [
-    PHP_TEST_BUILD(event_init,
-    [
-      php_cv_libevent_build_works=yes
-    ], [
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR([build test failed. Please check the config.log for details.])
-    ], $LIBEVENT_LIBS)
-  ])
+  PHP_TEST_BUILD(event_init, [ ], [
+    AC_MSG_RESULT(no)
+    AC_MSG_ERROR([build test failed. Please check the config.log for details.])
+  ], $LIBEVENT_LIBS)
 
   PHP_SETUP_LIBXML(FPM_SHARED_LIBADD, [
   ], [
