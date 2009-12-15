@@ -64,7 +64,7 @@ void mysqlnd_library_init(TSRMLS_D);
 void mysqlnd_library_end(TSRMLS_D);
 
 PHPAPI unsigned int mysqlnd_plugin_register();
-unsigned int mysqlnd_plugin_count();
+PHPAPI unsigned int mysqlnd_plugin_count();
 PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC);
 #define mysqlnd_plugin_get_plugin_connection_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data((c), (p_id) TSRMLS_CC)
 
