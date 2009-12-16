@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
+- Fixed bug #50496 (Use of <stdbool.h> is valid only in a c99 compilation 
+  environment. (Sriram)
 - Added support for SHA-256 and SHA-512 to php's crypt. (Pierre)
 - Added realpath_cache_size() and realpath_cache_get() functions. (Stas)
 - Added FILTER_FLAG_STRIP_BACKTICK option to the filter extension. (Ilia)
