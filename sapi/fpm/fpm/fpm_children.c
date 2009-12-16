@@ -373,6 +373,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 		switch (pid) {
 
 			case 0 :
+				event_init(); /* reopen epoll descriptor */
 				fpm_child_resources_use(child);
 				fpm_globals.is_child = 1;
 				if (in_event_loop) {
