@@ -32,14 +32,14 @@ function bar($str, $offset, $len = false) {
 }
 
 foo("abcdefghijklmnopqrstuvwxyz", 5, 7, "ASCII");
-foo("あいうえおかきくけこさしす", 5, 7, "EUC-JP");
+foo(b"あいうえおかきくけこさしす", 5, 7, "EUC-JP");
 bar("This is a test", 100000);
 bar("This is a test", 0, 100000);
 bar("This is a test", -3);
 bar("This is a test", 0, -9);
 bar("This is a test", 0, -100000);
 bar("This is a test", -9, -100000);
-var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", "こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
+var_dump(iconv("ISO-2022-JP", "EUC-JP", iconv_substr(iconv("EUC-JP", "ISO-2022-JP", b"こんにちは ISO-2022-JP"), 3, 8, "ISO-2022-JP")));
 ?>
 --EXPECT--
 666768696a6b6c
