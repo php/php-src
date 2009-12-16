@@ -44,7 +44,12 @@ $tests = array(
 		b'$6$rounds=10$roundstoolow',
 		b'the minimum number is still observed',
 		b'$6$rounds=1000$roundstoolow$kUMsbe306n21p9R.FRkW3IGn.S9NPN0x50YhH1xhLsPuWGsUSklZt58jaTfF4ZEQpyUNGc0dqbpBYYBaHHrsX.'
-	)
+	),
+	8 => array(
+		b'$6$$bar$',
+		b'foo',
+		b'$6$$QMXjqd7rHQZPQ1yHsXkQqC1FBzDiVfTHXL.LaeDAeVV.IzMaV9VU4MQ8kPuZa2SOP1A0RPm772EaFYjpEJtdu.'
+	),
 );
 
 foreach ($tests as $iter => $t) {
