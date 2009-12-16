@@ -5402,17 +5402,25 @@ PHPAPI UChar *php_u_str_to_str_case_ex(UChar *str, int str_len,
 static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count TSRMLS_DC)
 {
 	zval		**search_entry,
-				**replace_entry = NULL,
+				**replace_entry,
+				 *replace_value,
+				  temp_replace,
 				  temp_result;
-	zstr		 replace_value = NULL_ZSTR;
-	int			 replace_len = 0;
 
 	/* Make sure we're dealing with strings. */
-	convert_to_unicode_ex(subject);
-	Z_TYPE_P(result) = IS_UNICODE;
-	if (Z_UNILEN_PP(subject) == 0) {
-		ZVAL_EMPTY_UNICODE(result);
-		return;
+	if (Z_TYPE_PP(subject) == IS_STRING) {
+		Z_TYPE_P(result) = IS_STRING;
+		if (Z_UNILEN_PP(subject) == 0) {
+			ZVAL_EMPTY_STRING(result);
+			return;
+		}
+	} else {
+		convert_to_unicode_ex(subject);
+		Z_TYPE_P(result) = IS_UNICODE;
+		if (Z_UNILEN_PP(subject) == 0) {
+			ZVAL_EMPTY_UNICODE(result);
+			return;
+		}
 	}
 
 	/* If search is an array */
@@ -5426,15 +5434,13 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
 		} else {
 			/* Set replacement value to the passed one */
-			replace_value = Z_UNIVAL_P(replace);
-			replace_len = Z_UNILEN_P(replace);
+			replace_value = replace;
 		}
 
 		/* For each entry in the search array, get the entry */
 		while (zend_hash_get_current_data(Z_ARRVAL_P(search), (void **) &search_entry) == SUCCESS) {
 			/* Make sure we're dealing with strings. */
 			SEPARATE_ZVAL(search_entry);
-			convert_to_unicode(*search_entry);
 			if (Z_UNILEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
@@ -5447,47 +5453,23 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
 				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
-					/* Make sure we're dealing with strings. */
 					SEPARATE_ZVAL(replace_entry);
-					convert_to_unicode(*replace_entry);
-
-					/* Set replacement value to the one we got from array */
-					replace_value = Z_UNIVAL_PP(replace_entry);
-					replace_len = Z_UNILEN_PP(replace_entry);
-
+					replace_value = *replace_entry;
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
-					replace_value = EMPTY_ZSTR;
-					replace_len = 0;
+					replace_value = &temp_replace;
+					Z_UNILEN_P(replace_value) = 0;
+					Z_UNIVAL_P(replace_value) = EMPTY_ZSTR;
+					if (Z_TYPE_PP(subject) == IS_STRING) {
+						Z_TYPE_P(replace_value) = IS_STRING;
+					} else {
+						Z_TYPE_P(replace_value) = IS_UNICODE;
+					}
 				}
 			}
 
-			if (Z_UNILEN_PP(search_entry) == 1) {
-				if (case_sensitivity) {
-					php_u_char_to_str_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
-										 Z_USTRVAL_PP(search_entry)[0],
-										 replace_value.u, replace_len,
-										 &temp_result, replace_count);
-				} else {
-					Z_USTRVAL(temp_result) = php_u_str_to_str_case_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
-																	  Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
-																	  replace_value.u, replace_len,
-																	  &Z_USTRLEN(temp_result), replace_count TSRMLS_CC);
-				}
-			} else if (Z_UNILEN_PP(search_entry) > 1) {
-				if (case_sensitivity) {
-					Z_USTRVAL(temp_result) = php_u_str_to_str_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
-																 Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
-																 replace_value.u, replace_len,
-																 &Z_USTRLEN(temp_result), replace_count);
-				} else {
-					Z_USTRVAL(temp_result) = php_u_str_to_str_case_ex(Z_USTRVAL_P(result), Z_USTRLEN_P(result),
-																	  Z_USTRVAL_PP(search_entry), Z_USTRLEN_PP(search_entry),
-																	  replace_value.u, replace_len,
-																	  &Z_USTRLEN(temp_result), replace_count TSRMLS_CC);
-				}
-			}
+			php_str_replace_in_subject(*search_entry, replace_value, &result, &temp_result, case_sensitivity, replace_count TSRMLS_CC);
 
 			efree(Z_UNIVAL_P(result).v);
 			Z_UNIVAL_P(result) = Z_UNIVAL(temp_result);
@@ -5500,32 +5482,55 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			zend_hash_move_forward(Z_ARRVAL_P(search));
 		}
 	} else {
-		if (Z_UNILEN_P(search) == 1) {
-			if (case_sensitivity) {
-				php_u_char_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-									 Z_USTRVAL_P(search)[0],
-									 Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-									 result, replace_count);
+		if (Z_TYPE_PP(subject) == IS_STRING) {
+			convert_to_string(search);
+			convert_to_string(replace);
+			if (Z_STRLEN_P(search) == 1) {
+				php_char_to_str_ex(Z_STRVAL_PP(subject),
+								Z_STRLEN_PP(subject),
+								Z_STRVAL_P(search)[0],
+								Z_STRVAL_P(replace),
+								Z_STRLEN_P(replace),
+								result,
+								case_sensitivity,
+								replace_count);
+			} else if (Z_STRLEN_P(search) > 1) {
+				Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+														Z_STRVAL_P(search), Z_STRLEN_P(search),
+														Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
 			} else {
-				Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-															   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-															   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-															   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
-			}
-		} else if (Z_STRLEN_P(search) > 1) {
-			if (case_sensitivity) {
-				Z_USTRVAL_P(result) = php_u_str_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-														  Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-														  Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-														  &Z_USTRLEN_P(result), replace_count);
-			} else {
-				Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
-															   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
-															   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
-															   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
+				MAKE_COPY_ZVAL(subject, result);
 			}
 		} else {
-			MAKE_COPY_ZVAL(subject, result);
+			convert_to_unicode(search);
+			convert_to_unicode(replace);
+			if (Z_UNILEN_P(search) == 1) {
+				if (case_sensitivity) {
+					php_u_char_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+										 Z_USTRVAL_P(search)[0],
+										 Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+										 result, replace_count);
+				} else {
+					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
+				}
+			} else if (Z_STRLEN_P(search) > 1) {
+				if (case_sensitivity) {
+					Z_USTRVAL_P(result) = php_u_str_to_str_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+															  Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+															  Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+															  &Z_USTRLEN_P(result), replace_count);
+				} else {
+					Z_USTRVAL_P(result) = php_u_str_to_str_case_ex(Z_USTRVAL_PP(subject), Z_USTRLEN_PP(subject),
+																   Z_USTRVAL_P(search), Z_USTRLEN_P(search),
+																   Z_USTRVAL_P(replace), Z_USTRLEN_P(replace),
+																   &Z_USTRLEN_P(result), replace_count TSRMLS_CC);
+				}
+			} else {
+				MAKE_COPY_ZVAL(subject, result);
+			}
 		}
 	}
 }
@@ -5546,14 +5551,6 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/z/|z", &search,
 							  &replace, &subject, &zcount) == FAILURE) {
 		return;
-	}
-
-	/* Make sure we're dealing with strings and do the replacement. */
-	if (Z_TYPE_P(search) != IS_ARRAY) {
-		convert_to_unicode(search);
-		convert_to_unicode(replace);
-	} else if (Z_TYPE_P(replace) != IS_ARRAY) {
-		convert_to_unicode(replace);
 	}
 
 	/* if subject is an array */
