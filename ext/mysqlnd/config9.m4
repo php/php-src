@@ -15,7 +15,7 @@ fi
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_sources="mysqlnd.c mysqlnd_charset.c mysqlnd_wireprotocol.c \
-                   mysqlnd_ps.c mysqlnd_loaddata.c \
+                   mysqlnd_ps.c mysqlnd_loaddata.c mysqlnd_net.c \
                    mysqlnd_ps_codec.c mysqlnd_statistics.c \
 				   mysqlnd_result.c mysqlnd_result_meta.c mysqlnd_debug.c\
 				   mysqlnd_block_alloc.c php_mysqlnd.c"
