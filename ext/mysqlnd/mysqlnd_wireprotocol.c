@@ -599,11 +599,11 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 {
 	size_t to_read = count;
 	zend_uchar * p = buffer;
+	MYSQLND_NET * net = conn->net;
 
 	DBG_ENTER("mysqlnd_real_read");
 #ifdef MYSQLND_COMPRESSION_ENABLED
-	if (conn->net->compressed) {
-		MYSQLND_NET * net = conn->net;
+	if (net->compressed) {
 		if (net->uncompressed_data) {
 			size_t to_read_from_buffer = MIN(net->uncompressed_data->bytes_left(net->uncompressed_data), to_read);
 			DBG_INF_FMT("reading %u from uncompressed_data buffer", to_read_from_buffer);
@@ -623,7 +623,7 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 			size_t net_payload_size;
 			zend_uchar packet_no;
 
-			if (FAIL == conn->net->m.stream_read(conn, net_header, MYSQLND_HEADER_SIZE TSRMLS_CC)) {
+			if (FAIL == net->m.stream_read(conn, net_header, MYSQLND_HEADER_SIZE TSRMLS_CC)) {
 				DBG_RETURN(FAIL);
 			}
 			net_payload_size = uint3korr(net_header);
@@ -634,9 +634,6 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 
 				php_error(E_WARNING, "Packets out of order. Expected %d received %d. Packet size="MYSQLND_SZ_T_SPEC,
 						  net->compressed_envelope_packet_no, packet_no, net_payload_size);
-#if 0
-				*(int *) NULL = 0;
-#endif
 				DBG_RETURN(FAIL);
 			}
 			net->compressed_envelope_packet_no++;
@@ -657,7 +654,7 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 		DBG_RETURN(PASS);
 	}
 #endif /* MYSQLND_COMPRESSION_ENABLED */
-	DBG_RETURN(conn->net->m.stream_read(conn, p, to_read TSRMLS_CC));
+	DBG_RETURN(net->m.stream_read(conn, p, to_read TSRMLS_CC));
 }
 /* }}} */
 
@@ -666,7 +663,7 @@ mysqlnd_real_read(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 static enum_func_status
 mysqlnd_read_header(MYSQLND * conn, mysqlnd_packet_header * header TSRMLS_DC)
 {
-	MYSQLND_NET *net = conn->net;
+	MYSQLND_NET * net = conn->net;
 	zend_uchar buffer[MYSQLND_HEADER_SIZE];
 
 	DBG_ENTER("mysqlnd_read_header_name");
@@ -681,8 +678,7 @@ mysqlnd_read_header(MYSQLND * conn, mysqlnd_packet_header * header TSRMLS_DC)
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
 	DBG_INF_FMT("HEADER: prot_packet_no=%d size=%3d", header->packet_no, header->size);
 #endif
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(&conn->stats,
-							STAT_BYTES_RECEIVED, MYSQLND_HEADER_SIZE,
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats,
 							STAT_PROTOCOL_OVERHEAD_IN, MYSQLND_HEADER_SIZE,
 							STAT_PACKETS_RECEIVED, 1);
 
@@ -710,11 +706,7 @@ mysqlnd_read_header(MYSQLND * conn, mysqlnd_packet_header * header TSRMLS_DC)
 static enum_func_status
 mysqlnd_read_body(MYSQLND *conn, mysqlnd_packet_header * header, zend_uchar * store_buf TSRMLS_DC)
 {
-	MYSQLND_NET *net = conn->net;
-
 	DBG_ENTER(mysqlnd_read_body_name);
-	DBG_INF_FMT("chunk_size=%d compression=%d", net->stream->chunk_size, net->compressed);
-
 	DBG_RETURN(mysqlnd_real_read(conn, store_buf, header->size TSRMLS_CC));
 }
 /* }}} */
