@@ -392,7 +392,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		}
 
 		if (wp->config->pm == NULL) {
-			zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: the process manager is missing (static or dynamic)", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] the process manager is missing (static or dynamic)", wp->config->name);
 			return(-1);
 		}
 
@@ -400,32 +400,32 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			struct fpm_pm_s *pm = wp->config->pm;
 
 			if (pm->dynamic.min_spare_servers <= 0) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: min_spare_servers must be a positive value", wp->config->name);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) must be a positive value", wp->config->name, pm->dynamic.min_spare_servers);
 				return(-1);
 			}
 
 			if (pm->dynamic.max_spare_servers <= 0) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: max_spare_servers must be a positive value", wp->config->name);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must be a positive value", wp->config->name, pm->dynamic.max_spare_servers);
 				return(-1);
 			}
 
 			if (pm->dynamic.min_spare_servers > pm->max_children ||
 			    pm->dynamic.max_spare_servers > pm->max_children) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: min_spare_servers(%d) and max_spare_servers(%d) can't be greater than max_children(%d)",
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) and max_spare_servers(%d) cannot be greater than max_children(%d)",
 				     wp->config->name, pm->dynamic.min_spare_servers, pm->dynamic.max_spare_servers, pm->max_children);
 				return(-1);
 			}
 
 			if (pm->dynamic.max_spare_servers < pm->dynamic.min_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: max_spare_servers must be greater or equal than min_spare_servers", wp->config->name);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must not be less than min_spare_servers(%d)", wp->config->name, pm->dynamic.max_spare_servers, pm->dynamic.min_spare_servers);
 				return(-1);
 			}
 
 			if (pm->dynamic.start_servers <= 0) {
 				pm->dynamic.start_servers = pm->dynamic.min_spare_servers + ((pm->dynamic.max_spare_servers - pm->dynamic.min_spare_servers) / 2);
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "pool %s: start_servers has been set to %d", wp->config->name, pm->dynamic.start_servers);
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] start_servers has been set to %d", wp->config->name, pm->dynamic.start_servers);
 			} else if (pm->dynamic.start_servers < pm->dynamic.min_spare_servers || pm->dynamic.start_servers > pm->dynamic.max_spare_servers) {
-				zlog(ZLOG_STUFF, ZLOG_ALERT, "pool %s: start_servers must not be less than min_spare_servers and not greaters than max_spare_servers", wp->config->name);
+				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] start_servers(%d) must not be less than min_spare_servers(%d) and not greater than max_spare_servers(%d)", wp->config->name, pm->dynamic.start_servers, pm->dynamic.min_spare_servers, pm->dynamic.max_spare_servers);
 				return(-1);
 			}
 		}
@@ -434,7 +434,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		if (wp->config->request_slowlog_timeout) {
 #if HAVE_FPM_TRACE
 			if (! (wp->config->slowlog && *wp->config->slowlog)) {
-				zlog(ZLOG_STUFF, ZLOG_ERROR, "pool %s: 'slowlog' must be specified for use with 'request_slowlog_timeout'",
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] 'slowlog' must be specified for use with 'request_slowlog_timeout'",
 					wp->config->name);
 				return -1;
 			}
@@ -442,7 +442,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			static int warned = 0;
 
 			if (!warned) {
-				zlog(ZLOG_STUFF, ZLOG_WARNING, "pool %s: 'request_slowlog_timeout' is not supported on your system",
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] 'request_slowlog_timeout' is not supported on your system",
 					wp->config->name);
 				warned = 1;
 			}

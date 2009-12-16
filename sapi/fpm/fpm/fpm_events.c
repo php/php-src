@@ -45,29 +45,35 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 
 		switch (c) {
 			case 'C' :                  /* SIGCHLD */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGCHLD");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGCHLD");
 				fpm_children_bury();
 				break;
 			case 'I' :                  /* SIGINT  */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGINT");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGINT");
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
 				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET);
 				break;
 			case 'T' :                  /* SIGTERM */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGTERM");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGTERM");
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
 				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET);
 				break;
 			case 'Q' :                  /* SIGQUIT */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGQUIT");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGQUIT");
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Finishing ...");
 				fpm_pctl(FPM_PCTL_STATE_FINISHING, FPM_PCTL_ACTION_SET);
 				break;
 			case '1' :                  /* SIGUSR1 */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGUSR1");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR1");
 				if (0 == fpm_stdio_open_error_log(1)) {
 					zlog(ZLOG_STUFF, ZLOG_NOTICE, "log file re-opened");
+				} else {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "unable to re-opened log file");
 				}
 				break;
 			case '2' :                  /* SIGUSR2 */
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "received SIGUSR2");
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR2");
+				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Reloading in progress ...");
 				fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET);
 				break;
 		}
@@ -101,7 +107,7 @@ int fpm_event_loop() /* {{{ */
 	event_add(&signal_fd_event, 0);
 	fpm_pctl_heartbeat(-1, 0, 0);
 	fpm_pctl_perform_idle_server_maintenance_heartbeat(-1, 0, 0);
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: entering main loop");
+	zlog(ZLOG_STUFF, ZLOG_NOTICE, "ready to handle connections");
 	event_loop(0);
 	return 0;
 }

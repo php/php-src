@@ -150,7 +150,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 		0 > fpm_env_init_child(wp) ||
 		0 > fpm_php_init_child(wp)) {
 
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "child failed to initialize (pool %s)", wp->config->name);
+		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(255);
 	}
 }
@@ -241,9 +241,9 @@ void fpm_children_bury() /* {{{ */
 			timersub(&tv1, &child->started, &tv2);
 
 			if (restart_child) {
-				zlog(ZLOG_STUFF, severity, "child %d (pool %s) exited %s after %ld.%06d seconds from start", (int) pid, child->wp->config->name, buf, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_STUFF, severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_STUFF, severity, "child %d (pool %s) has been killed by the process managment after %ld.%06d seconds from start", (int) pid, child->wp->config->name, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] child %d has been killed by the process managment after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -277,7 +277,7 @@ void fpm_children_bury() /* {{{ */
 			}
 
 			if (restart_child) {
-				fpm_children_make(wp, 1 /* in event loop */, 1);
+				fpm_children_make(wp, 1 /* in event loop */, 1, 0);
 
 				if (fpm_globals.is_child) {
 					break;
@@ -297,7 +297,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 	c = fpm_child_alloc();
 
 	if (!c) {
-		zlog(ZLOG_STUFF, ZLOG_ERROR, "malloc failed (pool %s)", wp->config->name);
+		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] malloc failed", wp->config->name);
 		return 0;
 	}
 
@@ -343,7 +343,7 @@ static void fpm_parent_resources_use(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn) /* {{{ */
+int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to_spawn, int is_debug) /* {{{ */
 {
 	int enough = 0;
 	pid_t pid;
@@ -351,7 +351,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	int max;
 
 	if (wp->config->pm->style == PM_STYLE_DYNAMIC) {
-		if (!in_event_loop) { /* stating */
+		if (!in_event_loop) { /* starting */
 			max = wp->config->pm->dynamic.start_servers;
 		} else {
 			max = wp->running_children + nb_to_spawn;
@@ -394,7 +394,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 				fpm_clock_get(&child->started);
 				fpm_parent_resources_use(child);
 
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "child %d (pool %s) started", (int) pid, wp->config->name);
+				zlog(ZLOG_STUFF, is_debug ? ZLOG_DEBUG : ZLOG_NOTICE, "[pool %s] child %d started", wp->config->name, (int) pid);
 		}
 
 	}
@@ -405,7 +405,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 
 int fpm_children_create_initial(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	return fpm_children_make(wp, 0 /* not in event loop yet */, 0);
+	return fpm_children_make(wp, 0 /* not in event loop yet */, 0, 1);
 }
 /* }}} */
 

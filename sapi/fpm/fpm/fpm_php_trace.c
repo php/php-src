@@ -53,7 +53,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 
 	zlog_print_time(&tv, buf, buf_size);
 
-	fprintf(slowlog, "\n%s pid %d (pool %s)\n", buf, (int) pid, child->wp->config->name);
+	fprintf(slowlog, "\n%s [pool %s] pid %d\n", buf, child->wp->config->name, (int) pid);
 
 	if (0 > fpm_trace_get_strz(buf, buf_size, (long) &SG(request_info).path_translated)) {
 		return -1;

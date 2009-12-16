@@ -132,8 +132,8 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 			fpm_trace_signal(child->pid);
 
-			zlog(ZLOG_STUFF, ZLOG_WARNING, "child %d, script '%s' (pool %s) executing too slow (%d.%06d sec), logging",
-				(int) child->pid, purified_script_filename, child->wp->config->name, (int) tv.tv_sec, (int) tv.tv_usec);
+			zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] child %d, script '%s' executing too slow (%d.%06d sec), logging",
+				child->wp->config->name, (int) child->pid, purified_script_filename, (int) tv.tv_sec, (int) tv.tv_usec);
 		}
 		else
 #endif
@@ -141,8 +141,8 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 			str_purify_filename(purified_script_filename, slot_c.script_filename, sizeof(slot_c.script_filename));
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
-			zlog(ZLOG_STUFF, ZLOG_WARNING, "child %d, script '%s' (pool %s) execution timed out (%d.%06d sec), terminating",
-				(int) child->pid, purified_script_filename, child->wp->config->name, (int) tv.tv_sec, (int) tv.tv_usec);
+			zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] child %d, script '%s' execution timed out (%d.%06d sec), terminating",
+				child->wp->config->name, (int) child->pid, purified_script_filename, (int) tv.tv_sec, (int) tv.tv_usec);
 		}
 	}
 }

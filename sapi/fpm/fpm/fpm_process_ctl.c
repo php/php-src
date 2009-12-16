@@ -157,9 +157,9 @@ static void fpm_pctl_kill_all(int signo) /* {{{ */
 		for (child = wp->children; child; child = child->next) {
 			int res = kill(child->pid, signo);
 
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "sending signal %d %s to child %d (pool %s)", signo,
-				fpm_signal_names[signo] ? fpm_signal_names[signo] : "",
-				(int) child->pid, child->wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] sending signal %d %s to child %d",
+				child->wp->config->name, signo,
+				fpm_signal_names[signo] ? fpm_signal_names[signo] : "", (int) child->pid);
 
 			if (res == 0) {
 				++alive_children;
@@ -168,7 +168,7 @@ static void fpm_pctl_kill_all(int signo) /* {{{ */
 	}
 
 	if (alive_children) {
-		zlog(ZLOG_STUFF, ZLOG_NOTICE, "%d %s still alive", alive_children, alive_children == 1 ? "child is" : "children are");
+		zlog(ZLOG_STUFF, ZLOG_NOTICE, "%d child(ren) still alive", alive_children);
 	}
 }
 /* }}} */
@@ -340,10 +340,10 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			}
 		}
 
-		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[%s] rate=%d idle=%d active=%d total=%d", wp->config->name, wp->idle_spawn_rate, idle, active, wp->running_children);
+		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children, %d running children. Spawning rate %d", wp->config->name, active, idle, wp->running_children, wp->idle_spawn_rate);
 
 		if ((active + idle) != wp->running_children) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[%s] unable to retrieve spawning informations", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to retrieve process activiry of one or more child(ren). Will try again later.", wp->config->name);
 			continue;
 		}
 
@@ -357,8 +357,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		if (idle < wp->config->pm->dynamic.min_spare_servers) {
 			if (wp->running_children >= wp->config->pm->max_children) {
 				if (!wp->warn_max_children) {
-					zlog(ZLOG_STUFF, ZLOG_WARNING, "pool %s: server reached max_children setting, consider raising it",
-					     wp->config->name);
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm->max_children);
 					wp->warn_max_children = 1;
 				}
 				wp->idle_spawn_rate = 1;
@@ -367,11 +366,11 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			wp->warn_max_children = 0;
 
 			if (wp->idle_spawn_rate >= 8) {
-				zlog(ZLOG_STUFF, ZLOG_WARNING, "pool %s seems busy (you may need to increase start_servers, or min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
+				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] seems busy (you may need to increase start_servers, or min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
 			}
 
 			i = MIN(wp->idle_spawn_rate, wp->config->pm->dynamic.min_spare_servers - idle);
-			fpm_children_make(wp, 1, i);
+			fpm_children_make(wp, 1, i, 1);
 
 			/* if it's a child, stop here without creating the next event
 			 * this event is reserved to the master process
@@ -380,7 +379,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 				return;
 			}
 
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "pool %s: %d child(ren) have been created because of not enough spare children", wp->config->name, i);	
+			zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] %d child(ren) have been created dynamically", wp->config->name, i);	
 
 			/* Double the spawn rate for the next iteration */
 			if (wp->idle_spawn_rate < FPM_MAX_SPAWN_RATE) {
