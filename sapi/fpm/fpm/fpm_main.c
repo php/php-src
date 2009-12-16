@@ -145,26 +145,16 @@ static int php_optind = 1;
 static zend_module_entry cgi_module_entry;
 
 static const opt_struct OPTIONS[] = {
-	{'a', 0, "interactive"},
-	{'C', 0, "no-chdir"},
 	{'c', 1, "php-ini"},
 	{'d', 1, "define"},
 	{'e', 0, "profile-info"},
-	{'f', 1, "file"},
 	{'h', 0, "help"},
 	{'i', 0, "info"},
-	{'l', 0, "syntax-check"},
 	{'m', 0, "modules"},
 	{'n', 0, "no-php-ini"},
-	{'q', 0, "no-header"},
-	{'s', 0, "syntax-highlight"},
-	{'s', 0, "syntax-highlighting"},
-	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'y', 1, "fpm-config"},
-	{'z', 1, "zend-extension"},
-	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -971,29 +961,18 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>]\n"
-				"       %s <file> [args...]\n"
-				"  -a               Run interactively\n"
-				"  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
-				"  -C               Do not chdir to the script's directory\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 				"  -e               Generate extended information for debugger/profiler\n"
-				"  -f <file>        Parse <file>.  Implies `-q'\n"
 				"  -h               This help\n"
 				"  -i               PHP information\n"
-				"  -l               Syntax check only (lint)\n"
 				"  -m               Show compiled in modules\n"
-				"  -q               Quiet-mode.  Suppress HTTP Header output.\n"
-				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
-				"  -w               Display source with stripped comments and whitespace.\n"
 				"  -y, --fpm-config <file>\n"
-				"                   Specify alternative path to FastCGI process manager config file.\n"
-				"  -z <file>        Load Zend extension <file>.\n"
-				"  -T <count>       Measure execution time of script repeated <count> times.\n",
-				prog, prog);
+				"                   Specify alternative path to FastCGI process manager config file.\n",
+				prog);
 }
 /* }}} */
 
@@ -1662,6 +1641,7 @@ int main(int argc, char *argv[])
 				exit_status = 0;
 				goto out;
 
+			default:
 			case 'h':
 			case '?':
 				cgi_sapi_module.startup(&cgi_sapi_module);
@@ -1693,6 +1673,19 @@ int main(int argc, char *argv[])
 				goto out;
 		}
 	}
+
+	/* No other args are permitted here as there is not interactive mode */
+	if (argc != php_optind) {
+		cgi_sapi_module.startup(&cgi_sapi_module);
+		php_output_startup();
+		php_output_activate(TSRMLS_C);
+		SG(headers_sent) = 1;
+		php_cgi_usage(argv[0]);
+		php_end_ob_buffers(1 TSRMLS_CC);
+		exit_status = 0;
+		goto out;
+	}
+
 	php_optind = orig_optind;
 	php_optarg = orig_optarg;
 
