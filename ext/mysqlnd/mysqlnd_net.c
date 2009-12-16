@@ -287,6 +287,7 @@ mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC)
 	DBG_ENTER("mysqlnd_net_free");
 
 	if (net) {
+		net->m.free_contents(net TSRMLS_CC);
 		if (net->cmd_buffer.buffer) {
 			DBG_INF("Freeing cmd buffer");
 			mnd_pefree(net->cmd_buffer.buffer, pers);
