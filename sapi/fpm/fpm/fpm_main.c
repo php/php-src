@@ -1776,24 +1776,32 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
-			if (SG(request_info).path_translated) {
-				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
-					zend_try {
-						if (errno == EACCES) {
-							SG(sapi_headers).http_response_code = 403;
-							PUTS("Access denied.\n");
-						} else {
-							SG(sapi_headers).http_response_code = 404;
-							PUTS("No input file specified.\n");
-						}
-					} zend_catch {
-					} zend_end_try();
-					/* we want to serve more requests if this is fastcgi
-					 * so cleanup and continue, request shutdown is
-					 * handled later */
+			/* If path_translated is NULL, terminate here with a 404 */
+			if (!SG(request_info).path_translated) {
+				zend_try {
+					SG(sapi_headers).http_response_code = 404;
+				} zend_catch {
+				} zend_end_try();
+				goto fastcgi_request_done;
+			}
 
-					goto fastcgi_request_done;
-				}
+			/* path_translated exists, we can continue ! */
+			if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
+				zend_try {
+					if (errno == EACCES) {
+						SG(sapi_headers).http_response_code = 403;
+						PUTS("Access denied.\n");
+					} else {
+						SG(sapi_headers).http_response_code = 404;
+						PUTS("No input file specified.\n");
+					}
+				} zend_catch {
+				} zend_end_try();
+				/* we want to serve more requests if this is fastcgi
+				 * so cleanup and continue, request shutdown is
+				 * handled later */
+
+				goto fastcgi_request_done;
 			}
 
 			fpm_request_executing();
