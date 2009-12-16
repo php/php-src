@@ -10,7 +10,7 @@ unicode.output_encoding=ISO-8859-1
 <?php
 /* charset=EUC-JP */
 
-$str = "
+$str = b"
 日本語テキストとEnglish Text
 日本語テキストとEnglish Text
 日本語テキストとEnglish Text

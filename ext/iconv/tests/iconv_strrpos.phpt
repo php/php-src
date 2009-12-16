@@ -28,11 +28,11 @@ function foo($haystk, $needle, $to_charset = false, $from_charset = false)
 }
 foo("abecdbcdabcdef", "bcd");
 foo(str_repeat("abcab", 60)."abcdb".str_repeat("adabc", 60), "abcd");
-foo(str_repeat("あいうえお", 30)."いうおえあ".str_repeat("あいえおう", 30), "うお", "EUC-JP");
+foo(str_repeat(b"あいうえお", 30).b"いうおえあ".str_repeat(b"あいえおう", 30), b"うお", "EUC-JP");
 
 for ($i = 0; $i <=6; ++$i) {
-	$str = str_repeat("あいうえお", 60).str_repeat('$', $i).str_repeat("あいえおう", 60);
-	foo($str, '$', "ISO-2022-JP", "EUC-JP");
+	$str = str_repeat(b"あいうえお", 60).str_repeat(b'$', $i).str_repeat(b"あいえおう", 60);
+	foo($str, b'$', "ISO-2022-JP", "EUC-JP");
 }
 
 var_dump(iconv_strrpos("string", ""));
