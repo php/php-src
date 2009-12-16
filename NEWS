@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2010, PHP 5.2.13
+
 17 Dec 2009, PHP 5.2.12
 
 - Added LIBXML_PARSEHUGE constant to overrides the maximum text size of a
