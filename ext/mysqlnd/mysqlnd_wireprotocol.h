@@ -23,6 +23,8 @@
 #ifndef MYSQLND_WIREPROTOCOL_H
 #define MYSQLND_WIREPROTOCOL_H
 
+#include "mysqlnd_net.h"
+
 #define MYSQLND_HEADER_SIZE 4
 #define COMPRESSED_HEADER_SIZE 3
 
@@ -286,9 +288,6 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
-
-MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
-void mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

@@ -169,9 +169,6 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
 								unsigned int byte_count TSRMLS_DC);
 
-
-
-int mysqlnd_set_sock_no_delay(php_stream *stream);
 #endif	/* MYSQLND_PRIV_H */
 
 
