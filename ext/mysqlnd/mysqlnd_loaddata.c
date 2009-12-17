@@ -182,7 +182,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	if (!(conn->options.flags & CLIENT_LOCAL_FILES)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		/* write empty packet to server */
-		ret = mysqlnd_stream_write_w_header(conn, empty_packet, 0 TSRMLS_CC);
+		ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC);
 		*is_warning = TRUE;
 		goto infile_error;
 	}
@@ -202,14 +202,14 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 				infile.local_infile_error(info, conn->error_info.error,
 										  sizeof(conn->error_info.error) TSRMLS_CC);
 		/* write empty packet to server */
-		ret = mysqlnd_stream_write_w_header(conn, empty_packet, 0 TSRMLS_CC);
+		ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC);
 		goto infile_error;
 	}
 
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE,
 												buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
-		if ((ret = mysqlnd_stream_write_w_header(conn, buf, bufsize TSRMLS_CC)) < 0) {
+		if ((ret = conn->net->m.send(conn, buf, bufsize TSRMLS_CC)) < 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
@@ -217,7 +217,7 @@ mysqlnd_handle_local_infile(MYSQLND *conn, const char *filename, zend_bool *is_w
 	}
 
 	/* send empty packet for eof */
-	if ((ret = mysqlnd_stream_write_w_header(conn, empty_packet, 0 TSRMLS_CC)) < 0) {
+	if ((ret = conn->net->m.send(conn, empty_packet, 0 TSRMLS_CC)) < 0) {
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		goto infile_error;
 	}
