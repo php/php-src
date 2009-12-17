@@ -302,7 +302,7 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && stmt->last_errno) { \
 	php_mysqli_report_error(stmt->sqlstate, stmt->last_errno, stmt->last_error TSRMLS_CC); \
 }
 
-#if MYSQL_VERSION_ID > 32300 && MYSQL_VERSION_ID < 60000
+#if MYSQL_VERSION_ID > 32300 && MYSQL_VERSION_ID < 50500
 #define HAVE_LIBMYSQL_REPLICATION
 #endif
 
