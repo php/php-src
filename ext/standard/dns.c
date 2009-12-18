@@ -34,14 +34,14 @@
 #endif
 /* located in www.php.net/extra/bindlib.zip */
 #if HAVE_ARPA_INET_H 
-#include "arpa/inet.h"
+#include <arpa/inet.h>
 #endif
-#include "netdb.h"
+#include <netdb.h>
 #if HAVE_ARPA_NAMESERV_H
-#include "arpa/nameser.h"
+#include <arpa/nameser.h>
 #endif
 #if HAVE_RESOLV_H
-#include "resolv.h"
+#include <resolv.h>
 #endif
 #endif /* HAVE_LIBBIND */
 #include <winsock2.h>
@@ -54,9 +54,6 @@
 #ifdef _OSD_POSIX
 #undef STATUS
 #undef T_UNSPEC
-#endif
-#if HAVE_ARPA_NAMESER_COMPAT_H
-#include <arpa/nameser_compat.h>
 #endif
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
