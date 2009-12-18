@@ -46,9 +46,6 @@
 #if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
-#if HAVE_ARPA_NAMESER_COMPAT_H
-#include <arpa/nameser_compat.h>
-#endif
 #if HAVE_RESOLV_H
 #include <resolv.h>
 #endif

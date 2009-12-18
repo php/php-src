@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50508 (compile failure: Conflicting HEADER type declarations).
+  (Jani)
 - Fixed bug #50496 (Use of <stdbool.h> is valid only in a c99 compilation 
   environment. (Sriram)
 - Fixed bug #50464 (declare encoding doesn't work within an included file).
