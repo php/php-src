@@ -771,7 +771,7 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 	call_user_call->arg_info = NULL;
 	call_user_call->num_args = 0;
 	call_user_call->scope = ce;
-	call_user_call->fn_flags = 0;
+	call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 	call_user_call->function_name = estrndup(method_name, method_len);
 	call_user_call->pass_rest_by_reference = 0;
 	call_user_call->return_reference = ZEND_RETURN_VALUE;

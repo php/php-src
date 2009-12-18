@@ -143,6 +143,10 @@ typedef struct _zend_try_catch_element {
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
 
+/* function flag for internal user call handler __call */
+#define ZEND_ACC_CALL_VIA_HANDLER     0x200000
+
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 
