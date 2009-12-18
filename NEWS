@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Fixed bug #50458 (PDO::FETCH_FUNC fails with Closures). (Felipe, Pierrick)
 - Fixed bug #50445 (PDO-ODBC stored procedure call from Solaris 64-bit causes
   seg fault). (davbrown4 at yahoo dot com, Felipe)
+- Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
 - Fixed bug #50351 (performance regression handling objects, ten times slower
   in 5.3 than in 5.2). (Dmitry)
 - Fixed bug #50392 (date_create_from_format() enforces 6 digits for 'u'
