@@ -873,6 +873,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval *param;
 
 		if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION 
+			&& (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 
 			&& !ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)
 			&& PZVAL_IS_REF(*fci->params[i])) {
 			SEPARATE_ZVAL(fci->params[i]);
