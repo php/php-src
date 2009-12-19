@@ -77,6 +77,8 @@ PHP                                                                        NEWS
   (tcallawa at redhat dot com)
 - Fixed bug #50207 (segmentation fault when concatenating very large strings on
   64bit linux). (Ilia)
+- Fixed bug #50196 (stream_copy_to_stream() produces warning when source is 
+  not file). (Stas)
 - Fixed bug #50195 (pg_copy_to() fails when table name contains schema. (Ilia)
 - Fixed bug #50185 (ldap_get_entries() return false instead of an empty array
   when there is no error). (Jani)
