@@ -363,13 +363,26 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 				wp->idle_spawn_rate = 1;
 				continue;
 			}
-			wp->warn_max_children = 0;
 
 			if (wp->idle_spawn_rate >= 8) {
 				zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] seems busy (you may need to increase start_servers, or min/max_spare_servers), spawning %d children, there are %d idle, and %d total children", wp->config->name, wp->idle_spawn_rate, idle, wp->running_children);
 			}
 
+			/* compute the number of idle process to spawn */
 			i = MIN(wp->idle_spawn_rate, wp->config->pm->dynamic.min_spare_servers - idle);
+
+			/* get sure it won't exceed max_children */
+			i = MIN(i, wp->config->pm->max_children - wp->running_children);
+			if (i <= 0) {
+				if (!wp->warn_max_children) {
+					zlog(ZLOG_STUFF, ZLOG_WARNING, "[pool %s] server reached max_children setting (%d), consider raising it", wp->config->name, wp->config->pm->max_children);
+					wp->warn_max_children = 1;
+				}
+				wp->idle_spawn_rate = 1;
+				continue;
+			}
+			wp->warn_max_children = 0;
+
 			fpm_children_make(wp, 1, i, 1);
 
 			/* if it's a child, stop here without creating the next event
