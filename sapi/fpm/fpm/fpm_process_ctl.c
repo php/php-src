@@ -157,7 +157,7 @@ static void fpm_pctl_kill_all(int signo) /* {{{ */
 		for (child = wp->children; child; child = child->next) {
 			int res = kill(child->pid, signo);
 
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] sending signal %d %s to child %d",
+			zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] sending signal %d %s to child %d",
 				child->wp->config->name, signo,
 				fpm_signal_names[signo] ? fpm_signal_names[signo] : "", (int) child->pid);
 
@@ -168,7 +168,7 @@ static void fpm_pctl_kill_all(int signo) /* {{{ */
 	}
 
 	if (alive_children) {
-		zlog(ZLOG_STUFF, ZLOG_NOTICE, "%d child(ren) still alive", alive_children);
+		zlog(ZLOG_STUFF, ZLOG_DEBUG, "%d child(ren) still alive", alive_children);
 	}
 }
 /* }}} */
@@ -223,7 +223,7 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 					if (new_state == FPM_PCTL_STATE_TERMINATING) break;
 				case FPM_PCTL_STATE_TERMINATING :
 					/* nothing can override 'terminating' state */
-					zlog(ZLOG_STUFF, ZLOG_NOTICE, "not switching to '%s' state, because already in '%s' state",
+					zlog(ZLOG_STUFF, ZLOG_DEBUG, "not switching to '%s' state, because already in '%s' state",
 						fpm_state_names[new_state], fpm_state_names[fpm_state]);
 					return;
 			}
@@ -231,7 +231,7 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 			fpm_signal_sent = 0;
 			fpm_state = new_state;
 
-			zlog(ZLOG_STUFF, ZLOG_NOTICE, "switching to '%s' state", fpm_state_names[fpm_state]);
+			zlog(ZLOG_STUFF, ZLOG_DEBUG, "switching to '%s' state", fpm_state_names[fpm_state]);
 			/* fall down */
 
 		case FPM_PCTL_ACTION_TIMEOUT :
