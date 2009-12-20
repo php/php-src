@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #50508 (compile failure: Conflicting HEADER type declarations).
   (Jani)
 - Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
+- Fixed bug #49851 (http wrapper breaks on 1024 char long headers). (Ilia)
 
 
 17 Dec 2009, PHP 5.2.12
