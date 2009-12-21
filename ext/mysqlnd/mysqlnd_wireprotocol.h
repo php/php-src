@@ -264,10 +264,6 @@ typedef struct st_php_mysql_packet_chg_user_resp {
 
 size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
 
-#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_server_command cmd TSRMLS_DC);
-#endif
-
 void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
