@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 #if HAVE_INTTYPES_H
 # include <inttypes.h>
 #else
@@ -26,6 +27,8 @@
 #include "fpm_cleanup.h"
 #include "fpm_php.h"
 #include "fpm_sockets.h"
+#include "fpm_shm.h"
+#include "fpm_status.h"
 #include "xml_config.h"
 #include "zlog.h"
 
@@ -190,6 +193,9 @@ static struct xml_conf_section fpm_conf_set_pm_subsection_conf = {
 	.parsers = (struct xml_value_parser []) {
 		{ XML_CONF_SCALAR,		"style",				&fpm_conf_set_pm_style,						0 },
 		{ XML_CONF_SCALAR,		"max_children",			&xml_conf_set_slot_integer,					offsetof(struct fpm_pm_s, max_children) },
+		{ XML_CONF_SCALAR, "status",	&xml_conf_set_slot_string, offsetof(struct fpm_pm_s, status) },
+		{ XML_CONF_SCALAR, "ping",	&xml_conf_set_slot_string, offsetof(struct fpm_pm_s, ping) },
+		{ XML_CONF_SCALAR, "pong",	&xml_conf_set_slot_string, offsetof(struct fpm_pm_s, pong) },
 		{ XML_CONF_SUBSECTION,	"dynamic",			&fpm_conf_set_dynamic_subsection,		offsetof(struct fpm_pm_s, dynamic) },
 		{ 0, 0, 0, 0 }
 	}
@@ -288,6 +294,9 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 
 	free(wpc->name);
 	free(wpc->listen_address);
+	free(wpc->pm->status);
+	free(wpc->pm->ping);
+	free(wpc->pm->pong);
 	if (wpc->listen_options) {
 		free(wpc->listen_options->owner);
 		free(wpc->listen_options->group);
@@ -465,6 +474,74 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				}
 				close(fd);
 			}
+		}
+
+		if (wp->config->pm->ping && *wp->config->pm->ping) {
+			char *ping = wp->config->pm->ping;
+			int i;
+
+			if (*ping != '/') {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' must start with a '/'", wp->config->name, ping);
+				return(-1);
+			}
+
+			if (strlen(ping) < 2) {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' is not long enough", wp->config->name, ping);
+				return(-1);
+			}
+
+			for (i=0; i<strlen(ping); i++) {
+				if (!isalnum(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.') {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' must containt only the following characters '[alphanum]/_-.'", wp->config->name, ping);
+					return(-1);
+				}
+			}
+
+			if (!wp->config->pm->pong) {
+				wp->config->pm->pong = strdup("pong");
+			} else {
+				if (strlen(wp->config->pm->pong) < 1) {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping response page '%s' is not long enough", wp->config->name, wp->config->pm->pong);
+					return(-1);
+				}
+			}
+		} else {
+			if (wp->config->pm->pong) {
+				free(wp->config->pm->pong);
+				wp->config->pm->pong = NULL;
+			}
+		}
+
+		if (wp->config->pm->status && *wp->config->pm->status) {
+			int i;
+			char *status = wp->config->pm->status;
+			struct fpm_status_s fpm_status;
+
+			if (*status != '/') {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' must start with a '/'", wp->config->name, status);
+				return(-1);
+			}
+
+			if (strlen(status) < 2) {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' is not long enough", wp->config->name, status);
+				return(-1);
+			}
+
+			for (i=0; i<strlen(status); i++) {
+				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.') {
+					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' must containt only the following characters '[alphanum]/_-.'", wp->config->name, status);
+					return(-1);
+				}
+			}
+			wp->shm_status = fpm_shm_alloc(sizeof(struct fpm_status_s));
+			if (!wp->shm_status) {
+				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to allocate shared memory for status page '%s'", wp->config->name, status);
+				return(-1);
+			}
+			fpm_status_update_accepted_conn(wp->shm_status, 0);
+			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 1);
+			fpm_status_set_pm(wp->shm_status, wp->config->pm->style);
+			//memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update));
 		}
 	}
 	return 0;

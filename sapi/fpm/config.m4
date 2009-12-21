@@ -585,6 +585,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_shm_slots.c \
     fpm/fpm_signals.c \
     fpm/fpm_sockets.c \
+    fpm/fpm_status.c \
     fpm/fpm_stdio.c \
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \

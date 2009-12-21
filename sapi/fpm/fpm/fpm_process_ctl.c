@@ -18,6 +18,7 @@
 #include "fpm_cleanup.h"
 #include "fpm_request.h"
 #include "fpm_worker_pool.h"
+#include "fpm_status.h"
 #include "zlog.h"
 
 
@@ -322,7 +323,6 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		int active = 0;
 
 		if (wp->config == NULL) continue;
-		if (wp->config->pm->style != PM_STYLE_DYNAMIC) continue;
 
 		for (child = wp->children; child; child = child->next) {
 			int ret = fpm_request_is_idle(child);
@@ -340,12 +340,18 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			}
 		}
 
-		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children, %d running children. Spawning rate %d", wp->config->name, active, idle, wp->running_children, wp->idle_spawn_rate);
-
 		if ((active + idle) != wp->running_children) {
 			zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to retrieve process activiry of one or more child(ren). Will try again later.", wp->config->name);
 			continue;
 		}
+
+		/* update status structure for all PMs */
+		fpm_status_update_activity(wp->shm_status, idle, active, idle + active, 0);
+
+		/* the rest is only used by PM_STYLE_DYNAMIC */
+		if (wp->config->pm->style != PM_STYLE_DYNAMIC) continue;
+
+		zlog(ZLOG_STUFF, ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children, %d running children. Spawning rate %d", wp->config->name, active, idle, wp->running_children, wp->idle_spawn_rate);
 
 		if (idle > wp->config->pm->dynamic.max_spare_servers && last_idle_child) {
 			last_idle_child->idle_kill = 1;

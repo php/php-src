@@ -41,7 +41,7 @@ struct fpm_shm_s *fpm_shm_alloc(size_t sz) /* {{{ */
 }
 /* }}} */
 
-static void fpm_shm_free(struct fpm_shm_s *shm, int do_unmap) /* {{{ */
+void fpm_shm_free(struct fpm_shm_s *shm, int do_unmap) /* {{{ */
 {
 	if (do_unmap) {
 		munmap(shm->mem, shm->sz);

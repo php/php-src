@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "fpm.h"
 #include "fpm_worker_pool.h"
 #include "fpm_cleanup.h"
 #include "fpm_children.h"
@@ -32,6 +33,9 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		free(wp->user);
 		free(wp->home);
 		free(wp);
+		if (wp->shm_status) {
+			fpm_shm_free(wp->shm_status, !fpm_globals.is_child);
+		}
 	}
 	fpm_worker_all_pools = 0;
 }

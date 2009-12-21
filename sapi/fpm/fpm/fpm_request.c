@@ -13,6 +13,7 @@
 #include "fpm_process_ctl.h"
 #include "fpm_children.h"
 #include "fpm_shm_slots.h"
+#include "fpm_status.h"
 #include "fpm_request.h"
 
 #include "zlog.h"
@@ -40,6 +41,8 @@ void fpm_request_reading_headers() /* {{{ */
 	fpm_clock_get(&slot->tv);
 	slot->accepted = slot->tv;
 	fpm_shm_slots_release(slot);
+
+	fpm_status_increment_accepted_conn(fpm_status_shm);
 }
 /* }}} */
 

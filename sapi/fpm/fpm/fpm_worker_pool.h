@@ -7,6 +7,7 @@
 
 #include "fpm_conf.h"
 #include "fpm_arrays.h"
+#include "fpm_shm.h"
 
 struct fpm_worker_pool_s;
 struct fpm_child_s;
@@ -37,6 +38,7 @@ struct fpm_worker_pool_s {
 	int running_children;
 	int idle_spawn_rate;
 	int warn_max_children;
+	struct fpm_shm_s *shm_status;
 };
 
 struct fpm_worker_pool_s *fpm_worker_pool_alloc();

@@ -5,6 +5,8 @@
 #ifndef FPM_CONF_H
 #define FPM_CONF_H 1
 
+#define FPM_CONF_MAX_PONG_LENGTH 64
+
 struct key_value_s;
 
 struct key_value_s {
@@ -27,6 +29,9 @@ extern struct fpm_global_config_s fpm_global_config;
 struct fpm_pm_s {
 	int style;
 	int max_children;
+	char *status;
+	char *ping;
+	char *pong;
 	struct {
 		int start_servers;
 		int min_spare_servers;
