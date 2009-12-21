@@ -204,54 +204,6 @@ zend_uchar *php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 /* }}} */
 
 
-/* {{{ php_mysqlnd_consume_uneaten_data */
-#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-size_t php_mysqlnd_consume_uneaten_data(MYSQLND * const conn, enum php_mysqlnd_server_command cmd TSRMLS_DC)
-{
-
-	/*
-	  Switch to non-blocking mode and try to consume something from
-	  the line, if possible, then continue. This saves us from looking for
-	  the actuall place where out-of-order packets have been sent.
-	  If someone is completely sure that everything is fine, he can switch it
-	  off.
-	*/
-	char tmp_buf[256];
-	MYSQLND_NET *net = conn->net;
-	size_t skipped_bytes = 0;
-	int opt = PHP_STREAM_OPTION_BLOCKING;
-	int was_blocked = net->stream->ops->set_option(net->stream, opt, 0, NULL TSRMLS_CC);
-
-	DBG_ENTER("php_mysqlnd_consume_uneaten_data");
-
-	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
-		/* Do a read of 1 byte */
-		int bytes_consumed;
-
-		do {
-			skipped_bytes += (bytes_consumed = php_stream_read(net->stream, tmp_buf, sizeof(tmp_buf)));
-		} while (bytes_consumed == sizeof(tmp_buf));
-
-		if (was_blocked) {
-			net->stream->ops->set_option(net->stream, opt, 1, NULL TSRMLS_CC);
-		}
-
-		if (bytes_consumed) {
-			DBG_ERR_FMT("Skipped %u bytes. Last command %s hasn't consumed all the output from the server",
-						bytes_consumed, mysqlnd_command_to_text[net->last_command]);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Skipped %u bytes. Last command %s hasn't "
-							 "consumed all the output from the server",
-							 bytes_consumed, mysqlnd_command_to_text[net->last_command]);
-		}
-	}
-	net->last_command = cmd;
-
-	DBG_RETURN(skipped_bytes);
-}
-#endif
-/* }}} */
-
-
 /* {{{ php_mysqlnd_read_error_from_line */
 static enum_func_status
 php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
@@ -723,7 +675,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_PACKETS_SENT_CMD);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	php_mysqlnd_consume_uneaten_data(conn, packet->command TSRMLS_CC);
+	net->m.consume_uneaten_data(net, packet->command TSRMLS_CC);
 #endif
 
 	if (!packet->argument || !packet->arg_len) {

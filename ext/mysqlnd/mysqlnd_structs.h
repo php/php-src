@@ -238,6 +238,7 @@ struct st_mysqlnd_net_methods
 	size_t 				(*network_write)(MYSQLND * const conn, const zend_uchar * const buf, size_t count TSRMLS_DC);
 	enum_func_status	(*decode)(zend_uchar * uncompressed_data, size_t uncompressed_data_len, const zend_uchar * const compressed_data, size_t compressed_data_len TSRMLS_DC);
 	enum_func_status	(*encode)(zend_uchar * compress_buffer, size_t compress_buffer_len, const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC);
+	size_t				(*consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd TSRMLS_DC);
 	void				(*free_contents)(MYSQLND_NET * net TSRMLS_DC);
 };
 
