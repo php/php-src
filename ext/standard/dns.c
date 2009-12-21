@@ -44,6 +44,9 @@
 #undef T_UNSPEC
 #endif
 #if HAVE_ARPA_NAMESER_H
+#ifdef DARWIN
+# define BIND_8_COMPAT 1
+#endif
 #include <arpa/nameser.h>
 #endif
 #if HAVE_RESOLV_H
