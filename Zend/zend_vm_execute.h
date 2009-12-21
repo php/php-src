@@ -574,8 +574,8 @@ static int ZEND_FASTCALL  ZEND_DECLARE_INHERITED_CLASS_DELAYED_SPEC_HANDLER(ZEND
 	zend_op *opline = EX(opline);
 	zend_class_entry **pce, **pce_orig;
 
-	if (zend_hash_find(EG(class_table), Z_STRVAL(opline->op2.u.constant), Z_STRLEN(opline->op2.u.constant)+1, (void**)&pce) == FAILURE ||
-	    (zend_hash_find(EG(class_table), Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
+	if (zend_u_hash_find(EG(class_table), Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void**)&pce) == FAILURE ||
+	    (zend_u_hash_find(EG(class_table), Z_TYPE(opline->op1.u.constant), Z_UNIVAL(opline->op1.u.constant), Z_UNILEN(opline->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
 	     *pce != *pce_orig)) {
 		do_bind_inherited_class(opline, EG(class_table), EX_T(opline->extended_value).class_entry, 0 TSRMLS_CC);
 	}
