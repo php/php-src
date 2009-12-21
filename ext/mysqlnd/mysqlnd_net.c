@@ -591,6 +591,55 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 }
 /* }}} */
 
+/* {{{ mysqlnd_net::consume_uneaten_data */
+size_t 
+MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd TSRMLS_DC)
+{
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
+	/*
+	  Switch to non-blocking mode and try to consume something from
+	  the line, if possible, then continue. This saves us from looking for
+	  the actuall place where out-of-order packets have been sent.
+	  If someone is completely sure that everything is fine, he can switch it
+	  off.
+	*/
+	char tmp_buf[256];
+	size_t skipped_bytes = 0;
+	int opt = PHP_STREAM_OPTION_BLOCKING;
+	int was_blocked = net->stream->ops->set_option(net->stream, opt, 0, NULL TSRMLS_CC);
+
+	DBG_ENTER("mysqlnd_net::consume_uneaten_data");
+
+	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
+		/* Do a read of 1 byte */
+		int bytes_consumed;
+
+		do {
+			skipped_bytes += (bytes_consumed = php_stream_read(net->stream, tmp_buf, sizeof(tmp_buf)));
+		} while (bytes_consumed == sizeof(tmp_buf));
+
+		if (was_blocked) {
+			net->stream->ops->set_option(net->stream, opt, 1, NULL TSRMLS_CC);
+		}
+
+		if (bytes_consumed) {
+			DBG_ERR_FMT("Skipped %u bytes. Last command %s hasn't consumed all the output from the server",
+						bytes_consumed, mysqlnd_command_to_text[net->last_command]);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Skipped %u bytes. Last command %s hasn't "
+							 "consumed all the output from the server",
+							 bytes_consumed, mysqlnd_command_to_text[net->last_command]);
+		}
+	}
+	net->last_command = cmd;
+
+	DBG_RETURN(skipped_bytes);
+#else
+	return 0;
+#endif
+}
+/* }}} */
+
+
 
 /* {{{ mysqlnd_net::set_client_option */
 static void
@@ -626,6 +675,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	net->m.network_write = MYSQLND_METHOD(mysqlnd_net, network_write);
 	net->m.decode = MYSQLND_METHOD(mysqlnd_net, decode);
 	net->m.encode = MYSQLND_METHOD(mysqlnd_net, encode);
+	net->m.consume_uneaten_data = MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data);
 	net->m.free_contents = MYSQLND_METHOD(mysqlnd_net, free_contents);
 
 	{
