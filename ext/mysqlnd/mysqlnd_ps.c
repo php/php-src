@@ -1225,7 +1225,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 		usleep(120000);
 #endif
-		if ((packet_len = php_mysqlnd_consume_uneaten_data(conn, cmd TSRMLS_CC))) {
+		if ((packet_len = conn->net->m.consume_uneaten_data(conn->net, cmd TSRMLS_CC))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error "
 							 "while sending long data. Probably max_allowed_packet_size "
 							 "is smaller than the data. You have to increase it or send "
