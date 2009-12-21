@@ -231,23 +231,17 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 #ifdef MYSQLND_COMPRESSION_ENABLED
 		if (net->compressed == TRUE) {
 			/* here we need to compress the data and then write it, first comes the compressed header */
-			uLong tmp_complen = to_be_sent;
+			size_t tmp_complen = to_be_sent;
 			size_t payload_size;
 			zend_uchar * uncompressed_payload = p; /* should include the header */
-			int res;
 
 			STORE_HEADER_SIZE(safe_storage, uncompressed_payload);
 			int3store(uncompressed_payload, to_be_sent);
 			int1store(uncompressed_payload + 3, net->packet_no);
-
-			DBG_INF_FMT("compress(%p, %p, %p, %d)", (compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen, p, to_be_sent + MYSQLND_HEADER_SIZE);
-			res = compress((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen, uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE);
-			if (res == Z_OK) {
-				DBG_INF_FMT("compression successful. compressed size=%d", tmp_complen);
+			if (PASS == net->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), tmp_complen, uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE TSRMLS_CC)) {
 				int3store(compress_buf + MYSQLND_HEADER_SIZE, to_be_sent + MYSQLND_HEADER_SIZE);
 				payload_size = tmp_complen;
 			} else {
-				DBG_INF_FMT("compression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", res, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
 				int3store(compress_buf + MYSQLND_HEADER_SIZE, 0);
 				memcpy(compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE);
 				payload_size = to_be_sent + MYSQLND_HEADER_SIZE;
@@ -262,9 +256,8 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
   #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
-				uLongf tmp_complen2 = decompressed_size;
 				zend_uchar * decompressed_data = malloc(decompressed_size);
-				int error = uncompress(decompressed_data, &tmp_complen2, compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
+				int error = net->m.decode(decompressed_data, decompressed_size, compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 				if (error == Z_OK) {
 					int i;
 					DBG_INF("success decompressing");
@@ -414,21 +407,14 @@ mysqlnd_read_compressed_packet_from_stream_and_fill_read_buffer(MYSQLND * conn, 
 	/* we need to decompress the data */
 
 	if (decompressed_size) {
-		int error;
-		uLongf tmp_complen = decompressed_size;
 		compressed_data = emalloc(net_payload_size);
 		if (FAIL == conn->net->m.network_read(conn, compressed_data, net_payload_size TSRMLS_CC)) {
 			ret = FAIL;
 			goto end;
 		}
-
 		net->uncompressed_data = mysqlnd_create_read_buffer(decompressed_size TSRMLS_CC);
-		error = uncompress(net->uncompressed_data->data, &tmp_complen, compressed_data, net_payload_size);
-
-		DBG_INF_FMT("compressed data: decomp_len=%d compressed_size=%d", decompressed_size, net_payload_size);
-		if (error != Z_OK) {
-			DBG_ERR_FMT("Can't uncompress packet, error: %d", error);
-			ret = FAIL;
+		ret = net->m.decode(net->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size TSRMLS_CC);
+		if (ret == FAIL) {
 			goto end;
 		}
 	} else {
@@ -445,7 +431,47 @@ end:
 	}
 	DBG_RETURN(ret);
 }
+/* }}} */
 #endif /* MYSQLND_COMPRESSION_ENABLED */
+
+
+/* {{{ mysqlnd_net::decode */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_net, decode)(zend_uchar * uncompressed_data, size_t uncompressed_data_len,
+									const zend_uchar * const compressed_data, size_t compressed_data_len TSRMLS_DC)
+{
+	int error;
+	uLongf tmp_complen = uncompressed_data_len;
+	DBG_ENTER("mysqlnd_net::decode");
+	error = uncompress(uncompressed_data, &tmp_complen, compressed_data, compressed_data_len);
+
+	DBG_INF_FMT("compressed data: decomp_len=%d compressed_size=%d", tmp_complen, compressed_data_len);
+	if (error != Z_OK) {
+		DBG_INF_FMT("decompression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
+	}
+	DBG_RETURN(error == Z_OK? PASS:FAIL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_net::encode */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compress_buffer_len,
+									const zend_uchar * const uncompressed_data, size_t uncompressed_data_len TSRMLS_DC)
+{
+	int error;
+	uLongf tmp_complen = compress_buffer_len;
+	DBG_ENTER("mysqlnd_net::encode");
+	error = compress(compress_buffer, &tmp_complen, uncompressed_data, uncompressed_data_len);
+
+	if (error != Z_OK) {
+		DBG_INF_FMT("compression NOT successful. error=%d Z_OK=%d Z_BUF_ERROR=%d Z_MEM_ERROR=%d", error, Z_OK, Z_BUF_ERROR, Z_MEM_ERROR);
+	} else {
+		DBG_INF_FMT("compression successful. compressed size=%d", tmp_complen);
+	}
+	DBG_RETURN(error == Z_OK? PASS:FAIL);
+}
+/* }}} */
 
 
 /* {{{ mysqlnd_net::receive */
@@ -598,6 +624,8 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 	net->m.set_client_option = MYSQLND_METHOD(mysqlnd_net, set_client_option);
 	net->m.network_read = MYSQLND_METHOD(mysqlnd_net, network_read);
 	net->m.network_write = MYSQLND_METHOD(mysqlnd_net, network_write);
+	net->m.decode = MYSQLND_METHOD(mysqlnd_net, decode);
+	net->m.encode = MYSQLND_METHOD(mysqlnd_net, encode);
 	net->m.free_contents = MYSQLND_METHOD(mysqlnd_net, free_contents);
 
 	{
