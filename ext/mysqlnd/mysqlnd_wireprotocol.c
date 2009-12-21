@@ -72,6 +72,9 @@ char * mysqlnd_read_header_name	= "mysqlnd_read_header";
 char * mysqlnd_read_body_name	= "mysqlnd_read_body";
 
 
+#define ERROR_MARKER 0xFF
+#define EODATA_MARKER 0xFE
+
 /* {{{ mysqlnd_command_to_text
  */
 const char * const mysqlnd_command_to_text[COM_END] =
@@ -342,7 +345,7 @@ php_mysqlnd_greet_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	packet->protocol_version = uint1korr(p);
 	p++;
 
-	if (packet->protocol_version == 0xFF) {
+	if (ERROR_MARKER == packet->protocol_version) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
@@ -564,11 +567,11 @@ php_mysqlnd_ok_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "OK", PROT_OK_PACKET);
 
-	/* Should be always 0x0 or 0xFF for error */
+	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->field_count = uint1korr(p);
 	p++;
 
-	if (0xFF == packet->field_count) {
+	if (ERROR_MARKER == packet->field_count) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
@@ -644,11 +647,11 @@ php_mysqlnd_eof_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "EOF", PROT_EOF_PACKET);
 
-	/* Should be always 0xFE */
+	/* Should be always EODATA_MARKER */
 	packet->field_count = uint1korr(p);
 	p++;
 
-	if (0xFF == packet->field_count) {
+	if (ERROR_MARKER == packet->field_count) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
@@ -782,10 +785,10 @@ php_mysqlnd_rset_header_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "resultset header", PROT_RSET_HEADER_PACKET);
 
 	/*
-	  Don't increment. First byte is 0xFF on error, but otherwise is starting byte
+	  Don't increment. First byte is ERROR_MARKER on error, but otherwise is starting byte
 	  of encoded sequence for length.
 	*/
-	if (*p == 0xFF) {
+	if (ERROR_MARKER == *p) {
 		/* Error */
 		p++;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
@@ -900,7 +903,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (packet->skip_parsing) {
 		DBG_RETURN(PASS);
 	}
-	if (*p == 0xFF) {
+	if (ERROR_MARKER == *p) {
 		/* Error */
 		p++;
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
@@ -909,7 +912,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 										 TSRMLS_CC);
 		DBG_ERR_FMT("Server error : (%d) %s", packet->error_info.error_no, packet->error_info.error);
 		DBG_RETURN(PASS);
-	} else if (*p == 0xFE && packet->header.size < 8) {
+	} else if (EODATA_MARKER == *p && packet->header.size < 8) {
 		/* Premature EOF. That should be COM_FIELD_LIST */
 		DBG_INF("Premature EOF. That should be COM_FIELD_LIST");
 		packet->stupid_list_fields_eof = TRUE;
@@ -1155,7 +1158,7 @@ void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffe
 	end_field = (current_field = start_field = fields) + field_count;
 
 
-	/* skip the first byte, not 0xFE -> 0x0, status */
+	/* skip the first byte, not EODATA_MARKER -> 0x0, status */
 	p++;
 	null_ptr= p;
 	p += (field_count + 9)/8;		/* skip null bits */
@@ -1485,7 +1488,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	packet->header.size = data_size;
 	packet->row_buffer->app = data_size;
 
-	if ((*(p = packet->row_buffer->ptr)) == 0xFF) {
+	if (ERROR_MARKER == (*(p = packet->row_buffer->ptr))) {
 		/*
 		   Error message as part of the result set,
 		   not good but we should not hang. See:
@@ -1498,7 +1501,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 										 &packet->error_info.error_no,
 										 packet->error_info.sqlstate
 										 TSRMLS_CC);
-	} else if (*p == 0xFE && data_size < 8) { /* EOF */
+	} else if (EODATA_MARKER == *p && data_size < 8) { /* EOF */
 		packet->eof = TRUE;
 		p++;
 		if (data_size > 1) {
@@ -1637,7 +1640,7 @@ php_mysqlnd_prepare_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	packet->error_code = uint1korr(p);
 	p++;
 
-	if (0xFF == packet->error_code) {
+	if (ERROR_MARKER == packet->error_code) {
 		php_mysqlnd_read_error_from_line(p, data_size - 1,
 										 packet->error_info.error,
 										 sizeof(packet->error_info.error),
@@ -1714,21 +1717,20 @@ php_mysqlnd_chg_user_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_len, "change user response", PROT_CHG_USER_PACKET);
 
 	/*
-	  Don't increment. First byte is 0xFF on error, but otherwise is starting byte
+	  Don't increment. First byte is ERROR_MARKER on error, but otherwise is starting byte
 	  of encoded sequence for length.
 	*/
 
-	/* Should be always 0x0 or 0xFF for error */
+	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->field_count= uint1korr(p);
 	p++;
 
-	if (packet->header.size == 1 && buf[0] == 0xFE &&
-		packet->server_capabilities & CLIENT_SECURE_CONNECTION) {
+	if (packet->header.size == 1 && buf[0] == EODATA_MARKER && packet->server_capabilities & CLIENT_SECURE_CONNECTION) {
 		/* We don't handle 3.23 authentication */
 		DBG_RETURN(FAIL);
 	}
 
-	if (0xFF == packet->field_count) {
+	if (ERROR_MARKER == packet->field_count) {
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error,
 										 sizeof(packet->error_info.error),
