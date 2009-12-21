@@ -2009,6 +2009,7 @@ PHP_FUNCTION(ldap_first_reference)
 		resultentry->id = Z_LVAL_PP(result);
 		zend_list_addref(resultentry->id);
 		resultentry->data = entry;
+		resultentry->ber = NULL;
 	}
 }
 /* }}} */
@@ -2037,6 +2038,7 @@ PHP_FUNCTION(ldap_next_reference)
 		resultentry_next->id = resultentry->id;
 		zend_list_addref(resultentry->id);
 		resultentry_next->data = entry_next;
+		resultentry_next->ber = NULL;
 	}
 }
 /* }}} */

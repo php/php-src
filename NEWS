@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2010, PHP 5.2.13
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50540 (Crash while running ldap_next_reference test cases).
+  (Sriram)
 - Fixed bug #50508 (compile failure: Conflicting HEADER type declarations).
   (Jani)
 - Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
