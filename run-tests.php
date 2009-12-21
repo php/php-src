@@ -80,6 +80,13 @@ if (PHP_VERSION_ID < 50300) {
 	}	
 }
 
+// (unicode) is available from 6.0.0
+if (PHP_VERSION_ID < 60000) {
+	define('STRING_TYPE', 'string');
+} else {
+	define('STRING_TYPE', 'unicode');
+}
+
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -355,8 +362,8 @@ function save_or_mail_results()
 			if ($sum_results['FAILED']) {
 				foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
 					$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']), FILE_BINARY);
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']), FILE_BINARY);
 					$failed_tests_data .= $sep . "\n\n";
 				}
 				$status = "failed";
@@ -1130,15 +1137,19 @@ function show_file_block($file, $block, $section = null)
 	}
 }
 
-function binary_section($section) {
-	return ($section == 'FILE' ||
-	        $section == 'FILEEOF' ||
-			$section == 'EXPECT' ||
-			$section == 'EXPECTF' ||
-			$section == 'EXPECTREGEX' ||
-			$section == 'EXPECTHEADERS' ||
-			$section == 'SKIPIF' ||
-			$section == 'CLEAN');
+function binary_section($section)
+{
+	return PHP_MAJOR_VERSION < 6 || 
+		(
+			$section == 'FILE'			||
+	        $section == 'FILEEOF'		||
+			$section == 'EXPECT'		||
+			$section == 'EXPECTF'		||
+			$section == 'EXPECTREGEX'	||
+			$section == 'EXPECTHEADERS'	||
+			$section == 'SKIPIF'		||
+			$section == 'CLEAN'
+		);
 }
 
 //
@@ -1204,7 +1215,8 @@ TEST $file
 
 		// Match the beginning of a section.
 		if (preg_match(b'/^--([_A-Z]+)--/', $line, $r)) {
-			$section = (unicode)$r[1];
+			$section = $r[1];
+			settype($section, STRING_TYPE);
 
 			if (isset($section_text[$section])) {
 				$bork_info = "duplicated $section section";
@@ -1266,7 +1278,7 @@ TEST $file
 				$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
 
 				if (file_exists($section_text['FILE_EXTERNAL'])) {
-					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL']);
+					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL'], FILE_BINARY);
 					unset($section_text['FILE_EXTERNAL']);
 				} else {
 					$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
