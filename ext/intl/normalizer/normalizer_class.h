@@ -39,14 +39,5 @@ typedef struct {
 #define NORMALIZER_ERROR_CODE_P(co) &(INTL_ERROR_CODE(NORMALIZER_ERROR(co)))
 
 void normalizer_register_Normalizer_class( TSRMLS_D );
-void normalizer_object_init( Normalizer_object* co TSRMLS_DC );
-void normalizer_object_destroy( Normalizer_object* co TSRMLS_DC );
-
 extern zend_class_entry *Normalizer_ce_ptr;
-
-/* Auxiliary macros */
-
-#define NORMALIZER_METHOD_INIT_VARS     \
-    intl_error_reset( NULL TSRMLS_CC ); \
-
 #endif // #ifndef NORMALIZER_CLASS_H
