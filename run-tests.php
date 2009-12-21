@@ -80,6 +80,13 @@ if (PHP_VERSION_ID < 50300) {
 	}	
 }
 
+// (unicode) is available from 6.0.0
+if (PHP_VERSION_ID < 60000) {
+	define('STRING_TYPE', 'string');
+} else {
+	define('STRING_TYPE', 'unicode');
+}
+
 // If timezone is not set, use UTC.
 if (ini_get('date.timezone') == '') {
 	date_default_timezone_set('UTC');
@@ -355,8 +362,8 @@ function save_or_mail_results()
 			if ($sum_results['FAILED']) {
 				foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
 					$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']), FILE_BINARY);
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']), FILE_BINARY);
 					$failed_tests_data .= $sep . "\n\n";
 				}
 				$status = "failed";
@@ -1130,6 +1137,21 @@ function show_file_block($file, $block, $section = null)
 	}
 }
 
+function binary_section($section)
+{
+	return PHP_MAJOR_VERSION < 6 || 
+		(
+			$section == 'FILE'			||
+	        $section == 'FILEEOF'		||
+			$section == 'EXPECT'		||
+			$section == 'EXPECTF'		||
+			$section == 'EXPECTREGEX'	||
+			$section == 'EXPECTHEADERS'	||
+			$section == 'SKIPIF'		||
+			$section == 'CLEAN'
+		);
+}
+
 //
 //  Run an individual test case.
 //
@@ -1159,7 +1181,7 @@ TEST $file
 	// Load the sections of the test file.
 	$section_text = array('TEST' => '');
 
-	$fp = fopen($file, "rt") or error("Cannot open test file: $file");
+	$fp = fopen($file, "rb") or error("Cannot open test file: $file");
 
 	$borked = false;
 	$bork_info = '';
@@ -1187,19 +1209,33 @@ TEST $file
 	while (!feof($fp)) {
 		$line = fgets($fp);
 
+		if ($line === false) {
+			break;
+		}
+
 		// Match the beginning of a section.
-		if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
+		if (preg_match(b'/^--([_A-Z]+)--/', $line, $r)) {
 			$section = $r[1];
+			settype($section, STRING_TYPE);
 
 			if (isset($section_text[$section])) {
 				$bork_info = "duplicated $section section";
 				$borked    = true;
 			}
 
-			$section_text[$section] = '';
+			$section_text[$section] = binary_section($section) ? b'' : '';
 			$secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
 			$secdone = false;
 			continue;
+		}
+
+		if (!binary_section($section)) {
+			$line = unicode_decode($line, "utf-8");
+			if ($line == false) {
+				$bork_info = "cannot read test";
+				$borked = true;
+				break;
+			}
 		}
 
 		// Add to the section text.
@@ -1208,7 +1244,7 @@ TEST $file
 		}
 
 		// End of actual test?
-		if ($secfile && preg_match('/^===DONE===\s*$/', $line)) {
+		if ($secfile && preg_match(b'/^===DONE===\s*$/', $line)) {
 			$secdone = true;
 		}
 	}
@@ -1233,7 +1269,7 @@ TEST $file
 			}
 
 			if (@count($section_text['FILEEOF']) == 1) {
-				$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
+				$section_text['FILE'] = preg_replace(b"/[\r\n]+$/", b'', $section_text['FILEEOF']);
 				unset($section_text['FILEEOF']);
 			}
 
@@ -1242,7 +1278,7 @@ TEST $file
 				$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
 
 				if (file_exists($section_text['FILE_EXTERNAL'])) {
-					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL']);
+					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL'], FILE_BINARY);
 					unset($section_text['FILE_EXTERNAL']);
 				} else {
 					$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
@@ -1776,7 +1812,9 @@ COMMAND $cmd
 				// quote a non re portion of the string
 				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  b'/');
 				// add the re unquoted.
-				$temp = $temp . b'(' . substr($wanted_re, $start+2, ($end - $start-2)). b')';
+				if ($end > $start) {
+					$temp = $temp . b'(' . substr($wanted_re, $start+2, ($end - $start-2)). b')';
+				}
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
@@ -1956,7 +1994,7 @@ $output
 function comp_line($l1, $l2, $is_reg)
 {
 	if ($is_reg) {
-		return preg_match((binary) "/^$l1$/s", (binary) $l2);
+		return preg_match(b'/^'. (binary) $l1 . b'$/s', (binary) $l2);
 	} else {
 		return !strcmp((binary) $l1, (binary) $l2);
 	}
