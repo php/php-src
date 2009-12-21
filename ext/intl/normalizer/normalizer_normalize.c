@@ -45,8 +45,6 @@ PHP_FUNCTION( normalizer_normalize )
 		
 	int32_t			size_needed;
 		
-	NORMALIZER_METHOD_INIT_VARS
-
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
@@ -144,8 +142,6 @@ PHP_FUNCTION( normalizer_is_normalized )
 		
 	UBool		uret = FALSE;
 		
-	NORMALIZER_METHOD_INIT_VARS
-
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
