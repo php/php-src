@@ -737,8 +737,6 @@ err:
 		conn->scheme = NULL;
 	}
 
-	/* This will also close conn->net->stream if it has been opened */
-	conn->m->free_contents(conn TSRMLS_CC);
 	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_FAILURE);
 
 	DBG_RETURN(FAIL);
@@ -776,6 +774,9 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 			  object - we are free to kill it!
 			*/
 			conn->m->dtor(conn TSRMLS_CC);
+		} else {
+			/* This will also close conn->net->stream if it has been opened */
+			conn->m->free_contents(conn TSRMLS_CC);
 		}
 		DBG_RETURN(NULL);
 	}
