@@ -100,9 +100,9 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-3. Update the MD5 sums in ``qaweb/include/rc-md5sums.txt`` (no empty lines).
+3. Update the MD5 sums in ``web/qa/trunk/include/rc-md5sums.txt`` (no empty lines).
 
-4. Update in ``qaweb/include/release-qa.php`` constants with the new RC and
+4. Update in ``web/qa/trunk/include/release-qa.php`` constants with the new RC and
 commit this.
 
  a. ``$BUILD_TEST_RELEASES`` = array("4.4.7RC1", "5.2.2RC1")
@@ -111,7 +111,7 @@ commit this.
 
  c. ``$RELEASE_PROCESS`` = array(4 => true, 5 => true)
 
-1. Update in ``php-bugs-web/include/functions.inc`` the ``show_version_option``
+1. Update in ``php-bugs/trunk/include/functions.inc`` the ``show_version_option``
 function to include the new RC and commit.
 
 2. Update ``phpweb/include/version.inc`` (x=major version number)
