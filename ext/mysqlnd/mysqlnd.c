@@ -531,8 +531,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	PACKET_INIT(auth_packet, PROT_AUTH_PACKET, php_mysql_packet_auth *, FALSE);
 	PACKET_INIT_ALLOCA(ok_packet, PROT_OK_PACKET);
 
-	CONN_SET_STATE(conn, CONN_ALLOCED);
-
 	if (conn->persistent) {
 		conn->scheme = pestrndup(transport, transport_len, 1);
 		mnd_efree(transport);
@@ -2103,6 +2101,8 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	ret->m->get_reference(ret TSRMLS_CC);
 
 	ret->net = mysqlnd_net_init(persistent TSRMLS_CC);
+
+	CONN_SET_STATE(ret, CONN_ALLOCED);
 
 	DBG_RETURN(ret);
 }
