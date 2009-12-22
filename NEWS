@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.3.2
+22 Dec 2009, PHP 5.3.2 RC 1
 - Upgraded bundled sqlite to version 3.6.21. (Ilia)
 - Upgraded bundled PCRE to version 8.00. (Scott)
 
