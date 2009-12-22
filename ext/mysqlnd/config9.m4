@@ -22,6 +22,7 @@ if test "$PHP_MYSQLND_ENABLED" = "yes"; then
 
   PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, no)
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
+  PHP_INSTALL_HEADERS([ext/mysqlnd/])
 
   dnl Windows uses config.w32 thus this code is safe for now
 
