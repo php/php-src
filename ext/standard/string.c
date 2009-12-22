@@ -6406,7 +6406,7 @@ PHPAPI int php_u_strip_tags(UChar *rbuf, int len, int *stateptr, UChar *allow, i
 				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
 				*(tp++) = ch;
 			}
-			if (state && prev1 != 0x5C /*'\\'*/ && (!in_q || ch == in_q)) {
+			if (state && (state ==1 || prev1 != 0x5C /*'\\'*/) && (!in_q || ch == in_q)) {
 				if (in_q) {
 					in_q = 0;
 				} else {
@@ -6650,7 +6650,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
 					*(tp++) = c;
 				}
-				if (state && p != buf && *(p-1) != '\\' && (!in_q || *p == in_q)) {
+				if (state && p != buf && (state == 1 || *(p-1) != '\\') && (!in_q || *p == in_q)) {
 					if (in_q) {
 						in_q = 0;
 					} else {
