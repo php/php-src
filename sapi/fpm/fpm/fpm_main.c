@@ -1778,7 +1778,7 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
-			if (fpm_status_handle_status(SG(request_info).request_uri, &status_buffer)) {
+			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, &status_buffer)) {
 				sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
 				if (status_buffer) {
 					int i;
@@ -1792,7 +1792,7 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
-			if (status_buffer = fpm_status_handle_ping(SG(request_info).request_uri)) {
+			if (!strcasecmp(SG(request_info).request_method, "GET") && (status_buffer = fpm_status_handle_ping(SG(request_info).request_uri))) {
 				sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
 				SG(sapi_headers).http_response_code = 200;
 				PUTS(status_buffer);
