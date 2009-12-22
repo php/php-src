@@ -1765,7 +1765,7 @@ consult the installation file that came with this distribution, or visit \n\
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
 			CG(interactive) = 0;
-			char *status_buffer;
+			char *status_buffer, *status_content_type;
 
 			fpm_request_info();
 
@@ -1778,14 +1778,24 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 
-			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, &status_buffer)) {
-				sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, SG(request_info).query_string, &status_buffer, &status_content_type)) {
 				if (status_buffer) {
 					int i;
+
+					if (status_content_type) {
+						sapi_add_header_ex(status_content_type, strlen(status_content_type), 1, 1 TSRMLS_CC);
+					} else {
+						sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+					}
+
 					SG(sapi_headers).http_response_code = 200;
 					PUTS(status_buffer);
 					efree(status_buffer);
+					if (status_content_type) {
+						efree(status_content_type);
+					}
 				} else {
+					sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
 					SG(sapi_headers).http_response_code = 500;
 					PUTS("Unable to retrieve status\n");
 				}

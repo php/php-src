@@ -144,12 +144,73 @@ int fpm_status_get(int *idle, int *active, int *total, int *pm) /* {{{ */
 }
 /* }}} */
 
+static void fpm_status_handle_status_txt(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
+{
+	if (!status || !output || !content_type) {
+		return;
+	}
+
+	spprintf(output, 0, 
+		"accepted conn:   %lu\n"
+		"pool:             %s\n"
+		"process manager:  %s\n"
+		"idle processes:   %d\n"
+		"active processes: %d\n"
+		"total processes:  %d\n",
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+
+	spprintf(content_type, 0, "text/plain");
+}
+/* }}} */
+
+static void fpm_status_handle_status_html(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
+{
+	if (!status || !output || !content_type) {
+		return;
+	}
+
+	spprintf(output, 0, 
+		"<table>\n"
+		"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
+		"<tr><th>pool</th><td>%s</td></tr>\n"
+		"<tr><th>process manager</th><td>%s</td></tr>\n"
+		"<tr><th>idle processes</th><td>%d</td></tr>\n"
+		"<tr><th>active processes</th><td>%d</td></tr>\n"
+		"<tr><th>total processes</th><td>%d</td></tr>\n"
+		"</table>",
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+
+	spprintf(content_type, 0, "text/html");
+}
+/* }}} */
+
+static void fpm_status_handle_status_json(struct fpm_status_s *status, char **output, char **content_type) /* {{{ */
+{
+	if (!status || !output || !content_type) {
+		return;
+	}
+
+	spprintf(output, 0, 
+		"{"
+		"\"accepted conn\":%lu,"
+		"\"pool\":\"%s\","
+		"\"process manager\":\"%s\","
+		"\"idle processes\":%d,"
+		"\"active processes\":%d,"
+		"\"total processes\":%d"
+		"}",
+		status->accepted_conn, fpm_status_pool, status->pm == PM_STYLE_STATIC ? "static" : "dynamic", status->idle, status->active, status->total);
+
+	spprintf(content_type, 0, "application/jsonrequest");
+}
+/* }}} */
+
 /* return 0 if it's not the request page
  * return 1 if ouput has been set)
  * *output unchanged: error (return 500)
  * *output changed: no error (return 200)
  */
-int fpm_status_handle_status(char *uri, char **output) /* {{{ */
+int fpm_status_handle_status(char *uri, char *query_string, char **output, char **content_type) /* {{{ */
 {
 	struct fpm_status_s status;
 
@@ -162,7 +223,7 @@ int fpm_status_handle_status(char *uri, char **output) /* {{{ */
 		return(0);
 	}
 
-	if (!output || !fpm_status_shm) {
+	if (!output || !content_type || !fpm_status_shm) {
 		return(1);
 	}
 
@@ -177,16 +238,15 @@ int fpm_status_handle_status(char *uri, char **output) /* {{{ */
 		return(1);
 	}
 
-	spprintf(output, 0, 
-		"accepted conn:   %lu\n"
-		"pool:             %s\n"
-		"process manager:  %s\n"
-		"idle processes:   %d\n"
-		"active processes: %d\n"
-		"total processes:  %d\n",
-		status.accepted_conn, fpm_status_pool, status.pm == PM_STYLE_STATIC ? "static" : "dynamic", status.idle, status.active, status.total);
+	if (query_string && strstr(query_string, "html")) {
+		fpm_status_handle_status_html(&status, output, content_type);
+	} else if (query_string && strstr(query_string, "json")) {
+		fpm_status_handle_status_json(&status, output, content_type);
+	} else {
+		fpm_status_handle_status_txt(&status, output, content_type);
+	}
 
-	if (!*output) {
+	if (!*output || !content_type) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to allocate status ouput buffer", fpm_status_pool);
 		return(1);
 	}

@@ -83,7 +83,7 @@
 
 				Sets the status URI to call to obtain php-fpm status page.
 				If not set, no URI will be recognized as a status page.
-				It show text/plain looking like:
+				By default, it returns text/plain looking like:
 				accepted conn:   12073
 				pool:             default
 				process manager:  static
@@ -98,6 +98,13 @@
 				"total processes": idle + active
 				The last three number are uptaded every second.
 				The "accepted conn" is updated in real time
+				*** Output ***
+				By default it returns text/plain
+				But passing as a query string html or json, it will returns
+				the corresponding output syntax:
+				http://www.foo.bar/status
+				http://www.foo.bar/status?json
+				http://www.foo.bar/status?html
 				*** WARNING ***
 				It has to start with a /. It could be named has you want.
 				It's maybe not a good idea to use .php extension to be certain

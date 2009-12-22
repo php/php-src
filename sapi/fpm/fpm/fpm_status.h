@@ -24,7 +24,7 @@ void fpm_status_update_accepted_conn(struct fpm_shm_s *shm, unsigned long int ac
 void fpm_status_increment_accepted_conn(struct fpm_shm_s *shm);
 void fpm_status_set_pm(struct fpm_shm_s *shm, int pm);
 int fpm_status_get(int *idle, int *active, int *total, int *pm);
-int fpm_status_handle_status(char *uri, char **output);
+int fpm_status_handle_status(char *uri, char *query_string, char **output, char **content_type);
 char* fpm_status_handle_ping(char *uri);
 
 extern struct fpm_shm_s *fpm_status_shm;
