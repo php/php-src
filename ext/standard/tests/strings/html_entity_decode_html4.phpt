@@ -1,0 +1,516 @@
+--TEST--
+html_entity_decode() conformance check (HTML 4)
+--FILE--
+<?php
+$map = array(
+    "&quot;",
+    "&amp;",
+    "&lt;",
+    "&gt;",
+    "&nbsp;",
+    "&iexcl;",
+    "&cent;",
+    "&pound;",
+    "&curren;",
+    "&yen;",
+    "&brvbar;",
+    "&sect;",
+    "&uml;",
+    "&copy;",
+    "&ordf;",
+    "&laquo;",
+    "&not;",
+    "&shy;",
+    "&reg;",
+    "&macr;",
+    "&deg;",
+    "&plusmn;",
+    "&sup2;",
+    "&sup3;",
+    "&acute;",
+    "&micro;",
+    "&para;",
+    "&middot;",
+    "&cedil;",
+    "&sup1;",
+    "&ordm;",
+    "&raquo;",
+    "&frac14;",
+    "&frac12;",
+    "&frac34;",
+    "&iquest;",
+    "&Agrave;",
+    "&Aacute;",
+    "&Acirc;",
+    "&Atilde;",
+    "&Auml;",
+    "&Aring;",
+    "&AElig;",
+    "&Ccedil;",
+    "&Egrave;",
+    "&Eacute;",
+    "&Ecirc;",
+    "&Euml;",
+    "&Igrave;",
+    "&Iacute;",
+    "&Icirc;",
+    "&Iuml;",
+    "&ETH;",
+    "&Ntilde;",
+    "&Ograve;",
+    "&Oacute;",
+    "&Ocirc;",
+    "&Otilde;",
+    "&Ouml;",
+    "&times;",
+    "&Oslash;",
+    "&Ugrave;",
+    "&Uacute;",
+    "&Ucirc;",
+    "&Uuml;",
+    "&Yacute;",
+    "&THORN;",
+    "&szlig;",
+    "&agrave;",
+    "&aacute;",
+    "&acirc;",
+    "&atilde;",
+    "&auml;",
+    "&aring;",
+    "&aelig;",
+    "&ccedil;",
+    "&egrave;",
+    "&eacute;",
+    "&ecirc;",
+    "&euml;",
+    "&igrave;",
+    "&iacute;",
+    "&icirc;",
+    "&iuml;",
+    "&eth;",
+    "&ntilde;",
+    "&ograve;",
+    "&oacute;",
+    "&ocirc;",
+    "&otilde;",
+    "&ouml;",
+    "&divide;",
+    "&oslash;",
+    "&ugrave;",
+    "&uacute;",
+    "&ucirc;",
+    "&uuml;",
+    "&yacute;",
+    "&thorn;",
+    "&yuml;",
+    "&OElig;",
+    "&oelig;",
+    "&Scaron;",
+    "&scaron;",
+    "&Yuml;",
+    "&fnof;",
+    "&circ;",
+    "&tilde;",
+    "&Alpha;",
+    "&Beta;",
+    "&Gamma;",
+    "&Delta;",
+    "&Epsilon;",
+    "&Zeta;",
+    "&Eta;",
+    "&Theta;",
+    "&Iota;",
+    "&Kappa;",
+    "&Lambda;",
+    "&Mu;",
+    "&Nu;",
+    "&Xi;",
+    "&Omicron;",
+    "&Pi;",
+    "&Rho;",
+    "&Sigma;",
+    "&Tau;",
+    "&Upsilon;",
+    "&Phi;",
+    "&Chi;",
+    "&Psi;",
+    "&Omega;",
+    "&alpha;",
+    "&beta;",
+    "&gamma;",
+    "&delta;",
+    "&epsilon;",
+    "&zeta;",
+    "&eta;",
+    "&theta;",
+    "&iota;",
+    "&kappa;",
+    "&lambda;",
+    "&mu;",
+    "&nu;",
+    "&xi;",
+    "&omicron;",
+    "&pi;",
+    "&rho;",
+    "&sigmaf;",
+    "&sigma;",
+    "&tau;",
+    "&upsilon;",
+    "&phi;",
+    "&chi;",
+    "&psi;",
+    "&omega;",
+    "&thetasym;",
+    "&upsih;",
+    "&piv;",
+    "&ensp;",
+    "&emsp;",
+    "&thinsp;",
+    "&zwnj;",
+    "&zwj;",
+    "&lrm;",
+    "&rlm;",
+    "&ndash;",
+    "&mdash;",
+    "&lsquo;",
+    "&rsquo;",
+    "&sbquo;",
+    "&ldquo;",
+    "&rdquo;",
+    "&bdquo;",
+    "&dagger;",
+    "&Dagger;",
+    "&bull;",
+    "&hellip;",
+    "&permil;",
+    "&prime;",
+    "&Prime;",
+    "&lsaquo;",
+    "&rsaquo;",
+    "&oline;",
+    "&frasl;",
+    "&euro;",
+    "&image;",
+    "&weierp;",
+    "&real;",
+    "&trade;",
+    "&alefsym;",
+    "&larr;",
+    "&uarr;",
+    "&rarr;",
+    "&darr;",
+    "&harr;",
+    "&crarr;",
+    "&lArr;",
+    "&uArr;",
+    "&rArr;",
+    "&dArr;",
+    "&hArr;",
+    "&forall;",
+    "&part;",
+    "&exist;",
+    "&empty;",
+    "&nabla;",
+    "&isin;",
+    "&notin;",
+    "&ni;",
+    "&prod;",
+    "&sum;",
+    "&minus;",
+    "&lowast;",
+    "&radic;",
+    "&prop;",
+    "&infin;",
+    "&ang;",
+    "&and;",
+    "&or;",
+    "&cap;",
+    "&cup;",
+    "&int;",
+    "&there4;",
+    "&sim;",
+    "&cong;",
+    "&asymp;",
+    "&ne;",
+    "&equiv;",
+    "&le;",
+    "&ge;",
+    "&sub;",
+    "&sup;",
+    "&nsub;",
+    "&sube;",
+    "&supe;",
+    "&oplus;",
+    "&otimes;",
+    "&perp;",
+    "&sdot;",
+    "&lceil;",
+    "&rceil;",
+    "&lfloor;",
+    "&rfloor;",
+    "&lang;",
+    "&rang;",
+    "&loz;",
+    "&spades;",
+    "&clubs;",
+    "&hearts;",
+    "&diams;",
+);
+
+foreach ($map as $str) {
+    echo bin2hex(html_entity_decode($str, ENT_QUOTES, "UTF-8")), "\n";
+}
+?>
+--EXPECT--
+22
+26
+3c
+3e
+c2a0
+c2a1
+c2a2
+c2a3
+c2a4
+c2a5
+c2a6
+c2a7
+c2a8
+c2a9
+c2aa
+c2ab
+c2ac
+c2ad
+c2ae
+c2af
+c2b0
+c2b1
+c2b2
+c2b3
+c2b4
+c2b5
+c2b6
+c2b7
+c2b8
+c2b9
+c2ba
+c2bb
+c2bc
+c2bd
+c2be
+c2bf
+c380
+c381
+c382
+c383
+c384
+c385
+c386
+c387
+c388
+c389
+c38a
+c38b
+c38c
+c38d
+c38e
+c38f
+c390
+c391
+c392
+c393
+c394
+c395
+c396
+c397
+c398
+c399
+c39a
+c39b
+c39c
+c39d
+c39e
+c39f
+c3a0
+c3a1
+c3a2
+c3a3
+c3a4
+c3a5
+c3a6
+c3a7
+c3a8
+c3a9
+c3aa
+c3ab
+c3ac
+c3ad
+c3ae
+c3af
+c3b0
+c3b1
+c3b2
+c3b3
+c3b4
+c3b5
+c3b6
+c3b7
+c3b8
+c3b9
+c3ba
+c3bb
+c3bc
+c3bd
+c3be
+c3bf
+c592
+c593
+c5a0
+c5a1
+c5b8
+c692
+cb86
+cb9c
+ce91
+ce92
+ce93
+ce94
+ce95
+ce96
+ce97
+ce98
+ce99
+ce9a
+ce9b
+ce9c
+ce9d
+ce9e
+ce9f
+cea0
+cea1
+cea3
+cea4
+cea5
+cea6
+cea7
+cea8
+cea9
+ceb1
+ceb2
+ceb3
+ceb4
+ceb5
+ceb6
+ceb7
+ceb8
+ceb9
+ceba
+cebb
+cebc
+cebd
+cebe
+cebf
+cf80
+cf81
+cf82
+cf83
+cf84
+cf85
+cf86
+cf87
+cf88
+cf89
+cf91
+cf92
+cf96
+e28082
+e28083
+e28089
+e2808c
+e2808d
+e2808e
+e2808f
+e28093
+e28094
+e28098
+e28099
+e2809a
+e2809c
+e2809d
+e2809e
+e280a0
+e280a1
+e280a2
+e280a6
+e280b0
+e280b2
+e280b3
+e280b9
+e280ba
+e280be
+e28184
+e282ac
+e28491
+e28498
+e2849c
+e284a2
+e284b5
+e28690
+e28691
+e28692
+e28693
+e28694
+e286b5
+e28790
+e28791
+e28792
+e28793
+e28794
+e28880
+e28882
+e28883
+e28885
+e28887
+e28888
+e28889
+e2888b
+e2888f
+e28891
+e28892
+e28897
+e2889a
+e2889d
+e2889e
+e288a0
+e288a7
+e288a8
+e288a9
+e288aa
+e288ab
+e288b4
+e288bc
+e28985
+e28988
+e289a0
+e289a1
+e289a4
+e289a5
+e28a82
+e28a83
+e28a84
+e28a86
+e28a87
+e28a95
+e28a97
+e28aa5
+e28b85
+e28c88
+e28c89
+e28c8a
+e28c8b
+e28ca9
+e28caa
+e2978a
+e299a0
+e299a3
+e299a5
+e299a6
