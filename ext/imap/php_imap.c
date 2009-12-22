@@ -1276,18 +1276,17 @@ PHP_FUNCTION(imap_append)
 	int folder_len, message_len, internal_date_len = 0, flags_len = 0;
 	pils *imap_le_struct;
 	STRING st;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|ss", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len, &internal_date, &internal_date_len) == FAILURE) {
-		return;
-	}
-
 	char* regex = "/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/";
-	int regex_len = strlen(regex);
+	const int regex_len = strlen(regex);
 	pcre_cache_entry *pce;				/* Compiled regex */
 	zval *subpats = NULL;				/* Parts (not used) */
 	long regex_flags = 0;				/* Flags (not used) */
 	long start_offset = 0;				/* Start offset (not used) */
 	int global = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|ss", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len, &internal_date, &internal_date_len) == FAILURE) {
+		return;
+	}
 
 	if (internal_date) {
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
