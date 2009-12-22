@@ -341,7 +341,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		}
 
 		if ((active + idle) != wp->running_children) {
-			zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to retrieve process activiry of one or more child(ren). Will try again later.", wp->config->name);
+			zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to retrieve process activity of one or more child(ren). Will try again later.", wp->config->name);
 			continue;
 		}
 
