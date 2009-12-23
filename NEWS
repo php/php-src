@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed bug #45599 (strip_tags() truncates rest of string with invalid
   attribute). (Ilia, hradtke)  
 
+
 17 Dec 2009, PHP 5.2.12
 - Updated timezone database to version 2009.19 (2009s). (Derick)
 
