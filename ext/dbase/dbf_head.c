@@ -22,7 +22,7 @@ dbhead_t *get_dbf_head(int fd)
 	dbhead_t *dbh;
 	struct dbf_dhead  dbhead;
 	dbfield_t *dbf, *cur_f, *tdbf;
-	int ret, nfields, offset, gf_retval;
+	int ret, nfields, offset, gf_retval, cur_f_offset, tdbf_size;
 
 	if ((dbh = (dbhead_t *)calloc(1, sizeof(dbhead_t))) == NULL)
 		return NULL;
@@ -46,14 +46,13 @@ dbhead_t *get_dbf_head(int fd)
 		dbhead.dbh_date[DBH_DATE_MONTH],
 		dbhead.dbh_date[DBH_DATE_DAY]);
 
-	/* malloc enough memory for the maximum number of fields:
-	   32 * 1024 = 32K dBase5 (for Win) seems to allow that many */
-	tdbf = (dbfield_t *)calloc(1, sizeof(dbfield_t)*1024);
-	
+	tdbf_size = 1024;
+	tdbf = (dbfield_t *)calloc(1, sizeof(dbfield_t) * tdbf_size);
+
 	offset = 1;
 	nfields = 0;
 	gf_retval = 0;
-	for (cur_f = tdbf; gf_retval < 2 && nfields < 1024; cur_f++) {
+	for (cur_f = tdbf; gf_retval < 2; cur_f++) {
 		gf_retval = get_dbf_field(dbh, cur_f);
 
 		if (gf_retval < 0) {
@@ -61,6 +60,15 @@ dbhead_t *get_dbf_head(int fd)
 			free(tdbf);
 			return NULL;
 		}
+
+		if (nfields >= tdbf_size) {
+			cur_f_offset = cur_f - tdbf;
+			tdbf = realloc(tdbf, sizeof(dbfield_t) * tdbf_size * 2);
+			memset(tdbf + tdbf_size, '\0', tdbf_size);
+			tdbf_size *= 2;
+			cur_f = tdbf + cur_f_offset;
+		}
+
 		if (gf_retval != 2 ) {
 			cur_f->db_foffset = offset;
 			offset += cur_f->db_flen;
