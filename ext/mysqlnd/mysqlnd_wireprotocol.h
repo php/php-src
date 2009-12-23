@@ -181,7 +181,7 @@ typedef struct st_php_mysql_packet_rset_header {
 	char		*info_or_local_file;
 	size_t		info_or_local_file_len;
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 } php_mysql_packet_rset_header;
 
 
@@ -193,7 +193,7 @@ typedef struct st_php_mysql_packet_res_field {
 	zend_bool				skip_parsing;
 	zend_bool				stupid_list_fields_eof;
 
-	mysqlnd_error_info		error_info;
+	MYSQLND_ERROR_INFO		error_info;
 } php_mysql_packet_res_field;
 
 
@@ -222,7 +222,7 @@ struct st_php_mysql_packet_row {
 	size_t			bit_fields_total_len; /* trailing \0 not counted */
 
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 };
 
 
@@ -246,7 +246,7 @@ typedef struct st_php_mysql_packet_prepare_response {
 	unsigned int	warning_count;
 
 	/* present in case of error */
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 } php_mysql_packet_prepare_response;
 
 
@@ -258,7 +258,7 @@ typedef struct st_php_mysql_packet_chg_user_resp {
 	/* message_len is not part of the packet*/
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 } php_mysql_packet_chg_user_resp;
 
 
