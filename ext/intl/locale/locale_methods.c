@@ -389,7 +389,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,  msg , 1 TSRMLS_CC );
 		efree(msg);
 
-		RETURN_NULL();
+		RETURN_FALSE;
     }
 
 	if(loc_name_len == 0) {
@@ -1129,10 +1129,10 @@ PHP_FUNCTION(locale_get_all_variants)
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s",
 	&loc_name, &loc_name_len ) == FAILURE)
 	{
-	intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 	     "locale_parse: unable to parse input params", 0 TSRMLS_CC );
 
-	RETURN_FALSE;
+		RETURN_FALSE;
 	}
 
 	if(loc_name_len == 0) {
@@ -1524,7 +1524,7 @@ PHP_FUNCTION(locale_lookup)
 	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "as|bs", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc, &fallback_loc_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 TSRMLS_CC );
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	if(loc_range_len == 0) {
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(locale_accept_from_http)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 		"locale_accept_from_http: unable to parse input parameters", 0 TSRMLS_CC );
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 	
 	available = ures_openAvailableLocales(NULL, &status);

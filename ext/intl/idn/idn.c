@@ -65,7 +65,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int32_t   converted_ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "u|l", (char **)&domain, &domain_len, &option) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (domain_len < 1) {
