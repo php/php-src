@@ -1445,6 +1445,9 @@ PHP_FUNCTION(extract)
 				if (var_exists && var_name_len == sizeof("GLOBALS") && ZEND_U_EQUAL(key_type, var_name, var_name_len - 1, "GLOBALS", sizeof("GLOBALS") - 1)) {
 					break;
 				}
+				if (var_exists && var_name_len == sizeof("this") && ZEND_U_EQUAL(key_type, var_name, var_name_len - 1, "this", sizeof("this") - 1)) {
+					break;
+				}
 				ZVAL_ZSTRL(&final_name, key_type, var_name, var_name_len, 1);
 				break;
 
