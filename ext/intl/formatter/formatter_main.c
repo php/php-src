@@ -141,7 +141,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	/* Return last error message. */
-	message = intl_error_get_message( &INTL_DATA_ERROR(nfo) TSRMLS_CC );
+	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }
 /* }}} */
