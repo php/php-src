@@ -42,5 +42,6 @@ char*       intl_error_get_message( intl_error* err TSRMLS_DC );
 void        intl_errors_reset( intl_error* err TSRMLS_DC );
 void        intl_errors_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_DC );
 void        intl_errors_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC );
+void        intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC );
 
 #endif // INTL_ERROR_H

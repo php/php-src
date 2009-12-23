@@ -84,7 +84,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		intl_error_set_code(NULL, status TSRMLS_CC);
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree(ustring);
 		RETURN_FALSE;
 	} else {
@@ -111,7 +111,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			intl_error_set_code(NULL, status TSRMLS_CC);
 
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 1 TSRMLS_CC );
+			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
 			efree(converted_utf8);
 			RETURN_FALSE;
 		}

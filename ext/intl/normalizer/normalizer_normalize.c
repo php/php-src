@@ -57,9 +57,9 @@ PHP_FUNCTION( normalizer_normalize )
 				&input, &input_len, &form ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						 "normalizer_normalize: unable to parse input params", 1 TSRMLS_CC );
+						 "normalizer_normalize: unable to parse input params", 0 TSRMLS_CC );
 
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	expansion_factor = 1;
@@ -78,8 +78,8 @@ PHP_FUNCTION( normalizer_normalize )
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 1 TSRMLS_CC );
-			RETURN_NULL();
+						"normalizer_normalize: illegal normalization form", 0 TSRMLS_CC );
+			RETURN_FALSE;
 	}
 
 	/*
@@ -95,9 +95,9 @@ PHP_FUNCTION( normalizer_normalize )
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree( uinput );
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 
@@ -134,10 +134,10 @@ PHP_FUNCTION( normalizer_normalize )
 		/* Bail out if an unexpected error occured. */
 		if( U_FAILURE(status)  ) {
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL,"Error normalizing string", 1 TSRMLS_CC );
+			intl_error_set_custom_msg( NULL,"Error normalizing string", 0 TSRMLS_CC );
 			efree( uret_buf );
 			efree( uinput );
-			RETURN_NULL();
+			RETURN_FALSE;
 		}
 	}
 
@@ -152,8 +152,8 @@ PHP_FUNCTION( normalizer_normalize )
 	if( U_FAILURE( status ) )
 	{
 		intl_error_set( NULL, status,
-				"normalizer_normalize: error converting normalized text UTF-8", 1 TSRMLS_CC );
-		RETURN_NULL();
+				"normalizer_normalize: error converting normalized text UTF-8", 0 TSRMLS_CC );
+		RETURN_FALSE;
 	}
 
 	/* Return it. */
@@ -186,7 +186,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 				&input, &input_len, &form) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"normalizer_is_normalized: unable to parse input params", 1 TSRMLS_CC );
+				"normalizer_is_normalized: unable to parse input params", 0 TSRMLS_CC );
 
 		RETURN_FALSE;
 	}
@@ -201,8 +201,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"normalizer_normalize: illegal normalization form", 1 TSRMLS_CC );
-			RETURN_NULL();
+						"normalizer_normalize: illegal normalization form", 0 TSRMLS_CC );
+			RETURN_FALSE;
 	}
 
 
@@ -219,7 +219,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting string to UTF-16.", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting string to UTF-16.", 0 TSRMLS_CC );
 		efree( uinput );
 		RETURN_FALSE;
 	}
@@ -233,7 +233,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	/* Bail out if an unexpected error occured. */
 	if( U_FAILURE(status)  ) {
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
 

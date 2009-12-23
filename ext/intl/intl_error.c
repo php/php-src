@@ -44,10 +44,9 @@ static void intl_free_custom_error_msg( intl_error* err TSRMLS_DC )
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
 		return;
 
-	if( !err->free_custom_error_message )
-		return;
-
-	efree( err->custom_error_message );
+	if(err->free_custom_error_message ) {
+		efree( err->custom_error_message );
+	}
 
 	err->custom_error_message      = NULL;
 	err->free_custom_error_message = 0;
@@ -178,6 +177,16 @@ void intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TS
 {
 	intl_error_set_code( err, code TSRMLS_CC );
 	intl_error_set_custom_msg( err, msg, copyMsg TSRMLS_CC );
+}
+/* }}} */
+
+/* {{{ void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg )
+ * Set error code and message.
+ */
+void intl_errors_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC )
+{
+	intl_errors_set_code( err, code TSRMLS_CC );
+	intl_errors_set_custom_msg( err, msg, copyMsg TSRMLS_CC );
 }
 /* }}} */
 
