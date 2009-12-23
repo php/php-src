@@ -9,10 +9,12 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
 - Fixed bug #49851 (http wrapper breaks on 1024 char long headers). (Ilia)
-- Fixed bug #45599 (strip_tags() truncates rest of string with invalid
-  attribute). (Ilia, hradtke)
+- Fixed bug #47409 (extract() problem with array containing word "this").
+  (Ilia, chrisstocktonaz at gmail dot com)
 - Fixed bug #47002 (Field truncation when reading from dbase dbs with more
   then 1024 fields). (Ilia, sjoerd-php at linuxonly dot nl)
+- Fixed bug #45599 (strip_tags() truncates rest of string with invalid
+  attribute). (Ilia, hradtke)  
 
 17 Dec 2009, PHP 5.2.12
 - Updated timezone database to version 2009.19 (2009s). (Derick)
