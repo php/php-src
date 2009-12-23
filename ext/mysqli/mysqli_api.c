@@ -1815,7 +1815,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(last_error, stmt->stmt->last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
-			mysqlnd_error_info error_info = mysql->mysql->error_info;
+			MYSQLND_ERROR_INFO error_info = mysql->mysql->error_info;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;
