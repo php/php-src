@@ -83,7 +83,7 @@ PHP_FUNCTION(grapheme_strlen)
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree( ustring );
 		RETURN_NULL();
 	}
@@ -446,7 +446,7 @@ PHP_FUNCTION(grapheme_substr)
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree( ustr );
 		RETURN_FALSE;
 	}
@@ -507,7 +507,7 @@ PHP_FUNCTION(grapheme_substr)
 			intl_error_set_code( NULL, status TSRMLS_CC );
 
 			/* Set error messages. */
-			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 1 TSRMLS_CC );
+			intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
 
 			efree( sub_str );
 
@@ -563,7 +563,7 @@ PHP_FUNCTION(grapheme_substr)
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting output string to UTF-8", 0 TSRMLS_CC );
 
 		if ( NULL != sub_str )
 			efree( sub_str );
@@ -869,7 +869,7 @@ PHP_FUNCTION(grapheme_extract)
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 
 		if ( NULL != ustr )
 			efree( ustr );
