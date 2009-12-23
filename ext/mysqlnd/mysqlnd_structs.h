@@ -96,7 +96,7 @@ typedef struct st_mysqlnd_upsert_result
 	unsigned int	server_status;
 	uint64_t		affected_rows;
 	uint64_t		last_insert_id;
-} mysqlnd_upsert_status;
+} MYSQLND_UPSERT_STATUS;
 
 
 typedef struct st_mysqlnd_error_info
@@ -104,7 +104,7 @@ typedef struct st_mysqlnd_error_info
 	char error[MYSQLND_ERRMSG_SIZE+1];
 	char sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int error_no;
-} mysqlnd_error_info;
+} MYSQLND_ERROR_INFO;
 
 
 typedef struct st_mysqlnd_infile_info
@@ -465,12 +465,12 @@ struct st_mysqlnd_connection
 	unsigned long	server_capabilities;
 
 	/* For UPSERT queries */
-	mysqlnd_upsert_status upsert_status;
+	MYSQLND_UPSERT_STATUS upsert_status;
 	char			*last_message;
 	unsigned int	last_message_len;
 
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 
 	/*
 	  To prevent queries during unbuffered fetches. Also to
@@ -544,7 +544,7 @@ struct st_mysqlnd_buffered_result
 
 	unsigned int		references;
 
-	mysqlnd_error_info	error_info;
+	MYSQLND_ERROR_INFO	error_info;
 };
 
 
@@ -615,9 +615,9 @@ struct st_mysqlnd_stmt
 	MYSQLND_RESULT_BIND			*result_bind;
 	zend_bool					result_zvals_separated_once;
 
-	mysqlnd_upsert_status		upsert_status;
+	MYSQLND_UPSERT_STATUS		upsert_status;
 
-	mysqlnd_error_info			error_info;
+	MYSQLND_ERROR_INFO			error_info;
 
 	zend_bool					update_max_length;
 	unsigned long				prefetch_rows;
