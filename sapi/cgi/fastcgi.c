@@ -186,6 +186,9 @@ void fcgi_shutdown(void)
 		zend_hash_destroy(&fcgi_mgmt_vars);
 	}
 	is_fastcgi = 0;
+	if (allowed_clients) {
+		free(allowed_clients);
+	}
 }
 
 int fcgi_init(void)
