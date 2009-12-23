@@ -23,13 +23,13 @@
 #define PHP_ICONV_H
 
 #ifdef PHP_WIN32
-#ifdef PHP_ICONV_EXPORTS
-#define PHP_ICONV_API __declspec(dllexport)
+# ifdef PHP_ICONV_EXPORTS
+#  define PHP_ICONV_API __declspec(dllexport)
+# else
+#  define PHP_ICONV_API __declspec(dllimport)
+# endif 
 #else
-#define PHP_ICONV_API __declspec(dllimport)
-#endif 
-#else
-#define PHP_ICONV_API
+# define PHP_ICONV_API
 #endif
 
 #ifdef PHP_ATOM_INC
@@ -41,7 +41,6 @@
 #include "ext/iconv/php_php_iconv_impl.h"
 #include "ext/iconv/php_php_iconv_h_path.h"
 #endif
-
 
 #ifdef HAVE_ICONV
 extern zend_module_entry iconv_module_entry;
@@ -70,9 +69,9 @@ ZEND_BEGIN_MODULE_GLOBALS(iconv)
 ZEND_END_MODULE_GLOBALS(iconv)
 
 #ifdef ZTS
-#define ICONVG(v) TSRMG(iconv_globals_id, zend_iconv_globals *, v)
+# define ICONVG(v) TSRMG(iconv_globals_id, zend_iconv_globals *, v)
 #else
-#define ICONVG(v) (iconv_globals.v)
+# define ICONVG(v) (iconv_globals.v)
 #endif
 
 #define ICONV_INPUT_ENCODING "ISO-8859-1" 
@@ -108,7 +107,6 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len,
 #define phpext_iconv_ptr iconv_module_ptr
 
 #endif	/* PHP_ICONV_H */
-
 
 /*
  * Local variables:
