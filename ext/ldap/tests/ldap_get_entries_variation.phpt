@@ -29,5 +29,8 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link);
 ?>
 --EXPECT--
-NULL
+array(1) {
+  ["count"]=>
+  int(0)
+}
 ===DONE===
