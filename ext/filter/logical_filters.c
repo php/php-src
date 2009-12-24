@@ -456,12 +456,35 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
+	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
+		char *e, *s;
+
+		if (url->host == NULL) {
+			goto bad_url;
+		}
+
+		e = url->host + strlen(url->host);
+		s = url->host;
+
+		while (s < e) {
+			if (!isalnum((int)*(unsigned char *)s) && *s != '_' && *s != '.') {
+				goto bad_url;
+			}
+			s++;
+		}
+
+		if (*(e - 1) == '.') {
+			goto bad_url;
+		}
+	}
+
 	if (
 		url->scheme == NULL || 
 		/* some schemas allow the host to be empty */
 		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
+bad_url:
 		php_url_free(url);
 		RETURN_VALIDATION_FAILED
 	}
