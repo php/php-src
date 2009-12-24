@@ -4,8 +4,12 @@ HTML entities with invalid chars
 output_handler=
 --FILE--
 <?php 
-setlocale (LC_CTYPE, "C");
-$strings = array("<", "\xD0", "\xD0\x90", "\xD0\x90\xD0", "\xD0\x90\xD0\xB0", "\xE0", "A\xE0", "\xE0\x80", "\xE0\x80\xBE");
+@setlocale (LC_CTYPE, "C");
+$strings = array(b"<", b"\xD0", b"\xD0\x90", b"\xD0\x90\xD0", b"\xD0\x90\xD0\xB0", b"\xE0", b"A\xE0", b"\xE0\x80", b"\xE0\x79", b"\xE0\x80\xBE",
+	b"Voil\xE0", b"Clich\xE9s",
+	b"\xFE", b"\xFE\x41", b"\xC3\xA9", b"\xC3\x79", b"\xF7\xBF\xBF\xBF", b"\xFB\xBF\xBF\xBF\xBF", b"\xFD\xBF\xBF\xBF\xBF\xBF",
+	b"\x41\xF7\xF7\x42", b"\x42\xFB\xFB\x42", b"\x43\xFD\xFD\x42", b"\x44\xF7\xF7", b"\x45\xFB\xFB", b"\x46\xFD\xFD"
+	);
 foreach($strings as $string) {
 	$sc_encoded = htmlspecialchars ($string, ENT_QUOTES, "utf-8");
 	var_dump(bin2hex($sc_encoded));
@@ -13,22 +17,54 @@ foreach($strings as $string) {
 	var_dump(bin2hex($ent_encoded));
 }
 ?>
---EXPECT--
-string(8) "266c743b"
-string(8) "266c743b"
-string(0) ""
-string(0) ""
-string(4) "d090"
-string(4) "d090"
-string(0) ""
-string(0) ""
-string(8) "d090d0b0"
-string(8) "d090d0b0"
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(8) "2667743b"
-string(8) "2667743b"
+--EXPECTF--
+%unicode|string%(8) "266c743b"
+%unicode|string%(8) "266c743b"
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(4) "d090"
+%unicode|string%(4) "d090"
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(8) "d090d0b0"
+%unicode|string%(8) "d090d0b0"
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(4) "c3a9"
+%unicode|string%(16) "266561637574653b"
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(8) "f7bfbfbf"
+%unicode|string%(8) "f7bfbfbf"
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
+%unicode|string%(0) ""
