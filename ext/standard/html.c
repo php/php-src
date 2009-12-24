@@ -150,7 +150,7 @@ static entity_table_t ent_uni_greek[] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"thetasym", "upsih",
 	NULL, NULL, NULL,
-	"piv" 
+	"piv"
 };
 
 static entity_table_t ent_uni_punct[] = {
@@ -160,7 +160,7 @@ static entity_table_t ent_uni_punct[] = {
 	NULL, NULL, NULL, "ndash", "mdash", NULL, NULL, NULL,
 	/* 8216 */
 	"lsquo", "rsquo", "sbquo", NULL, "ldquo", "rdquo", "bdquo", NULL,
-	"dagger", "Dagger",	"bull", NULL, NULL, NULL, "hellip",
+	"dagger", "Dagger", "bull", NULL, NULL, NULL, "hellip",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "permil", NULL,
 	/* 8242 */
 	"prime", "Prime", NULL, NULL, NULL, NULL, NULL, "lsaquo", "rsaquo", NULL,
@@ -200,39 +200,39 @@ static entity_table_t ent_uni_8592_9002[] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8656 (0x21d0) */
-	"lArr", "uArr", "rArr", "dArr", "hArr", "vArr", NULL, NULL,
-	NULL, NULL, "lAarr", "rAarr", NULL, "rarrw", NULL, NULL,
+	"lArr", "uArr", "rArr", "dArr", "hArr", NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8672 (0x21e0) */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8704 (0x2200) */
-	"forall", "comp", "part", "exist", "nexist", "empty", NULL, "nabla",
-	"isin", "notin", "epsis", "ni", "notni", "bepsi", NULL, "prod",
+	"forall", NULL, "part", "exist", NULL, "empty", NULL, "nabla",
+	"isin", "notin", NULL, "ni", NULL, NULL, NULL, "prod",
 	/* 8720 (0x2210) */
-	"coprod", "sum", "minus", "mnplus", "plusdo", NULL, "setmn", "lowast",
-	"compfn", NULL, "radic", NULL, NULL, "prop", "infin", "ang90",
+	NULL, "sum", "minus", NULL, NULL, NULL, NULL, "lowast",
+	NULL, NULL, "radic", NULL, NULL, "prop", "infin", NULL,
 	/* 8736 (0x2220) */
-	"ang", "angmsd", "angsph", "mid", "nmid", "par", "npar", "and",
-	"or", "cap", "cup", "int", NULL, NULL, "conint", NULL,
+	"ang", NULL, NULL, NULL, NULL, NULL, NULL, "and",
+	"or", "cap", "cup", "int", NULL, NULL, NULL, NULL,
 	/* 8752 (0x2230) */
-	NULL, NULL, NULL, NULL, "there4", "becaus", NULL, NULL,
-	NULL, NULL, NULL, NULL, "sim", "bsim", NULL, NULL,
+	NULL, NULL, NULL, NULL, "there4", NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, "sim", NULL, NULL, NULL,
 	/* 8768 (0x2240) */
-	"wreath", "nsim", NULL, "sime", "nsime", "cong", NULL, "ncong",
-	"asymp", "nap", "ape", NULL, "bcong", "asymp", "bump", "bumpe",
+	NULL, NULL, NULL, NULL, NULL, "cong", NULL, NULL,
+	"asymp", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8784 (0x2250) */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8800 (0x2260) */
-	"ne", "equiv", NULL, NULL, "le", "ge", "lE", "gE",
-	"lnE", "gnE", "Lt", "Gt", "twixt", NULL, "nlt", "ngt",
+	"ne", "equiv", NULL, NULL, "le", "ge", NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8816 (0x2270) */
-	"nles", "nges", "lsim", "gsim", NULL, NULL, "lg", "gl",
-	NULL, NULL, "pr", "sc", "cupre", "sscue", "prsim", "scsim",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8832 (0x2280) */
-	"npr", "nsc", "sub", "sup", "nsub", "nsup", "sube", "supe",
+	NULL, NULL, "sub", "sup", "nsub", NULL, "sube", "supe",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	/* 8848 (0x2290) */
 	NULL, NULL, NULL, NULL, NULL, "oplus", NULL, "otimes",
