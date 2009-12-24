@@ -36,5 +36,8 @@ remove_dummy_data($link);
 ?>
 --EXPECT--
 bool(true)
-NULL
+array(1) {
+  ["count"]=>
+  int(0)
+}
 ===DONE===
