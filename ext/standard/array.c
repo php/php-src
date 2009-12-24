@@ -2749,12 +2749,12 @@ PHP_FUNCTION(array_pad)
 		WRONG_PARAM_COUNT;
 	}
 	
+	convert_to_long_ex(pad_size);
 	/* Make sure arguments are of the proper type */
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
 		return;
 	}
-	convert_to_long_ex(pad_size);
 	
 	/* Do some initial calculations */
 	input_size = zend_hash_num_elements(Z_ARRVAL_PP(input));
