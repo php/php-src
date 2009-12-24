@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.3
+- Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
+  (Ilia)
+
 - Fixed bug #47409 (extract() problem with array containing word "this").
   (Ilia, chrisstocktonaz at gmail dot com)
 
