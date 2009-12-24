@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.13
+- Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
+  (Ilia)
+
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
 - Fixed bug #50540 (Crash while running ldap_next_reference test cases).
