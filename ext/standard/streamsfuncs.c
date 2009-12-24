@@ -1668,7 +1668,7 @@ PHP_FUNCTION(stream_encoding)
 }
 /* }}} */
 
-/* {{{ proto string stream_resolve_include_path(string filename) U
+/* {{{ proto string stream_resolve_include_path(string filename [, resource context]) U
 Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
