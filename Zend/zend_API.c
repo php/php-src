@@ -1191,7 +1191,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 		RETURN_IF_ZERO_ARGS(num_args, p, quiet);
 
 		va_start(va, type_spec);
-		retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
+		retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
 		va_end(va);
 	} else {
 		p++;
