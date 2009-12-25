@@ -472,6 +472,24 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
  */
 static unsigned char *php_pdo_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
 {
+#ifdef HAVE_PQUNESCAPEBYTEA
+	size_t tmp_len;
+	char *buffer;
+	char *tmp_ptr = PQunescapeBytea(strtext, &tmp_len);
+
+	if (!tmp_ptr) {
+		/* PQunescapeBytea returned an error, this
+		   function will return en empty string */
+		tmp_len = 0;
+		buffer = emalloc(0);
+	} else {
+		buffer = emalloc(tmp_len);
+		memcpy(buffer, tmp_ptr, tmp_len);
+		PQfreemem(tmp_ptr);
+	}
+	*retbuflen = tmp_len;
+	return buffer;
+#else
 	size_t		buflen;
 	unsigned char *buffer,
 			   *sp,
@@ -480,6 +498,7 @@ static unsigned char *php_pdo_pgsql_unescape_bytea(unsigned char *strtext, size_
 
 	if (strtext == NULL)
 		return NULL;
+
 	buflen = strlen(strtext);	/* will shrink, also we discover if
 								 * strtext */
 	buffer = (unsigned char *) emalloc(buflen);	/* isn't NULL terminated */
@@ -549,6 +568,7 @@ static unsigned char *php_pdo_pgsql_unescape_bytea(unsigned char *strtext, size_
 
 	*retbuflen = buflen;
 	return buffer;
+#endif
 }
 
 static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees  TSRMLS_DC)
