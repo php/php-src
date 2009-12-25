@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL escape functions
+PostgreSQL escape functions (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -27,7 +27,7 @@ else {
 
 // pg_escape_bytea() test
 $before = "ABC\\ABC";
-$expect  = "ABC\\\\\\\\ABC";
+$expect  = "\\x4142435c414243";
 $after  = pg_escape_bytea($before);
 if ($expect === $after) {
 	echo "pg_escape_bytea() is Ok\n";

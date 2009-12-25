@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_select()
+PostgreSQL pg_select() (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -30,7 +30,7 @@ array(1) {
     ["str"]=>
     string(3) "AAA"
     ["bin"]=>
-    string(3) "BBB"
+    string(8) "\x424242"
   }
 }
 SELECT * FROM php_pgsql_test WHERE num=1234;
