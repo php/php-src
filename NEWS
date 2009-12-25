@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Changed "post_max_size" php.ini directive to allow unlimited post size by
   setting it to 0. (Rasmus)
 
+- Removed automatic file descriptor unlocking happening on shutdown and/or 
+  stream close (on all OSes). (Tony, Ilia)
+
 - Added INTERNALDATE support to imap_append. (nick at mailtrust dot com)
 - Added support for SHA-256 and SHA-512 to php's crypt. (Pierre)
 - Added realpath_cache_size() and realpath_cache_get() functions. (Stas)
