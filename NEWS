@@ -47,6 +47,8 @@ PHP                                                                        NEWS
 - Fixed bug #50558 (Broken object model when extending tidy). (Pierrick)
 - Fixed bug #50540 (Crash while running ldap_next_reference test cases).
   (Sriram)
+- Fixed bug #50519 (segfault in garbage collection when using set_error_handler
+  and DomDocument). (Dmitry)
 - Fixed bug #50508 (compile failure: Conflicting HEADER type declarations).
   (Jani)
 - Fixed bug #50496 (Use of <stdbool.h> is valid only in a c99 compilation 
