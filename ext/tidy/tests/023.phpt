@@ -6,15 +6,10 @@ tidy and tidyNode OO
 <?php
 
 //test leaks here:
-new tidyNode();
-var_dump(new tidyNode());
 new tidy();
 var_dump(new tidy());
 
 echo "-------\n";
-
-$x = new tidyNode();
-var_dump($x->isHtml());
 
 $tidy = new tidy();
 $tidy->parseString('<html><?php echo "xpto;" ?></html>');
@@ -30,8 +25,6 @@ var_dump(tidy_get_root($tidy)->child[0]->child[0]->hasChildren());
 
 ?>
 --EXPECT--
-object(tidyNode)#1 (0) {
-}
 object(tidy)#1 (2) {
   ["errorBuffer"]=>
   NULL
@@ -39,7 +32,6 @@ object(tidy)#1 (2) {
   NULL
 }
 -------
-bool(false)
 bool(true)
 bool(true)
 bool(false)
