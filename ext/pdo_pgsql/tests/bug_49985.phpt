@@ -22,7 +22,7 @@ for ($i = 0; $i < 3; $i++) {
         var_dump($stmt->execute(array(1)));
         $db->commit();
     } catch (Exception $e) {
-        echo $e->getMessage()."\n";
+        echo trim(current(explode("\n", $e->getMessage())))."\n";
         $db->rollback();
     }
 }
