@@ -213,8 +213,6 @@ static char *php_tidy_file_to_mem(char *, zend_bool, int * TSRMLS_DC);
 static void tidy_object_free_storage(void * TSRMLS_DC);
 static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
-static zend_class_entry *tidy_get_ce_node(const zval * TSRMLS_DC);
-static zend_class_entry *tidy_get_ce_doc(const zval * TSRMLS_DC);
 static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
 static int tidy_doc_cast_handler(zval *, zval *, int, void * TSRMLS_DC);
 static int tidy_node_cast_handler(zval *, zval *, int, void * TSRMLS_DC);
@@ -739,16 +737,6 @@ static zend_object_value tidy_object_new_doc(zend_class_entry *class_type TSRMLS
 	return retval;
 }
 
-static zend_class_entry *tidy_get_ce_node(const zval *object TSRMLS_DC)
-{
-	return tidy_ce_node;
-}
-
-static zend_class_entry *tidy_get_ce_doc(const zval *object TSRMLS_DC)
-{
-	return tidy_ce_doc;
-}
-
 static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
 	if (!object) {
@@ -1113,9 +1101,6 @@ static PHP_MINIT_FUNCTION(tidy)
 	REGISTER_TIDY_CLASS(tidy, doc,	NULL, 0);
 	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL_CLASS);
 
-	tidy_object_handlers_doc.get_class_entry = tidy_get_ce_doc;
-	tidy_object_handlers_node.get_class_entry = tidy_get_ce_node;
-	
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;
 
