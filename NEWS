@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Removed automatic file descriptor unlocking happening on shutdown and/or 
   stream close (on all OSes excluding Windows). (Tony, Ilia)
-
+- Changed tidyNode class to disallow manual node creation. (Pierrick)
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
