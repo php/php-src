@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_update()
+PostgreSQL pg_update() (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -21,5 +21,5 @@ echo pg_update($db, $table_name, $fields, $ids, PGSQL_DML_STRING)."\n";
 echo "Ok\n";
 ?>
 --EXPECT--
-UPDATE php_pgsql_test SET num=1234,str='ABC',bin='XYZ' WHERE num=1234;
+UPDATE php_pgsql_test SET num=1234,str='ABC',bin='\\x58595a' WHERE num=1234;
 Ok

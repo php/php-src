@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_insert()
+PostgreSQL pg_insert() (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -20,5 +20,5 @@ echo pg_insert($db, $table_name, $fields, PGSQL_DML_STRING)."\n";
 echo "Ok\n";
 ?>
 --EXPECT--
-INSERT INTO php_pgsql_test (num,str,bin) VALUES (1234,'AAA','BBB');
+INSERT INTO php_pgsql_test (num,str,bin) VALUES (1234,'AAA','\\x424242');
 Ok
