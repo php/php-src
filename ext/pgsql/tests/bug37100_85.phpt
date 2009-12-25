@@ -1,9 +1,9 @@
 --TEST--
-Bug #37100 (data is returned truncated with BINARY CURSOR)
+Bug #37100 (data is returned truncated with BINARY CURSOR) (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -40,7 +40,7 @@ pg_close($db);
 
 ?>
 --EXPECT--
-string(24) "\001\003\252\000\010\022"
+string(14) "\x0103aa000812"
 string(12) "0103aa000812"
 int(6)
 string(12) "0103aa000812"
