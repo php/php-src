@@ -180,6 +180,9 @@ ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue) /* {{{ */
 
 ZEND_API void _zval_dtor_wrapper(zval *zvalue) /* {{{ */
 {
+	TSRMLS_FETCH();
+
+	GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
 	zval_dtor(zvalue);
 }
 /* }}} */
