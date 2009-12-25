@@ -80,10 +80,14 @@ else
 
 # Expected to fail; unless told otherwise, PDO assumes string inputs
 # false -> "" as string, which pgsql doesn't like
-if (!$res->execute(array(false)))
-	print_r($res->errorInfo());
-else
+if (!$res->execute(array(false))) {
+	$err = $res->errorInfo();
+	// Strip additional lines ouputted by recent PgSQL versions
+	$err[2] = trim(current(explode("\n", $err[2])));
+	print_r($err);
+} else {
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
+}
 
 
 
