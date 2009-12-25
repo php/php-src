@@ -266,6 +266,7 @@ static TIDY_NODE_METHOD(isJste);
 static TIDY_NODE_METHOD(isAsp);
 static TIDY_NODE_METHOD(isPhp);
 static TIDY_NODE_METHOD(getParent);
+static TIDY_NODE_METHOD(__construct);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
@@ -441,6 +442,7 @@ static const zend_function_entry tidy_funcs_node[] = {
 	TIDY_NODE_ME(isAsp, NULL)
 	TIDY_NODE_ME(isPhp, NULL)
 	TIDY_NODE_ME(getParent, NULL)
+	TIDY_NODE_ME(__construct, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1773,6 +1775,14 @@ static TIDY_NODE_METHOD(getParent)
 		ZVAL_NULL(return_value);
 	}
 }
+/* }}} */
+
+/* {{{ proto void tidyNode::__construct()
+         __constructor for tidyNode. */
+static TIDY_NODE_METHOD(__construct)
+{
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "You should not create a tidyNode manually");
+}   
 /* }}} */
 
 static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)

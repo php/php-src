@@ -5,15 +5,6 @@ tidyNode tests
 --FILE--
 <?php
 
-new tidyNode;
-$node = new tidyNode();
-
-var_dump($node->isPhp());
-var_dump($node->isText());
-var_dump($node->isComment());
-var_dump($node->hasSiblings());
-var_dump((string)$node);
-
 $tidy=tidy_parse_string('<% %>');
 var_dump($tidy->Root()->child[0]->isAsp());
 
@@ -34,11 +25,6 @@ var_dump($tidy->Root()->child[0]->child[0]->hasSiblings());
 
 ?>
 --EXPECT--
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-string(0) ""
 bool(true)
 bool(true)
 bool(true)
