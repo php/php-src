@@ -1,5 +1,5 @@
 --TEST--
-PostgreSQL pg_select() (8.5è+)
+PostgreSQL pg_select() (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
