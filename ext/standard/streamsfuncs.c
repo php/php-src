@@ -1691,7 +1691,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 			efree(resolved_path);
 			RETURN_UNICODEL(ustr, ulen, 0);
 		} else {
-			RETURN_STRINGL(resolved_path, strlen(resolved_path), 1);
+			RETURN_STRINGL(resolved_path, strlen(resolved_path), 0);
 		}
 	}
 	RETURN_FALSE;
