@@ -87,7 +87,9 @@ static int ps_files_valid_key(const char *key)
 
 	len = p - key;
 
-	if (len == 0) {
+	/* Somewhat arbitrary length limit here, but should be way more than
+	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
+	if (len == 0 || len > 128) {
 		ret = 0;
 	}
 
@@ -154,7 +156,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		ps_files_close(data);
 
 		if (!ps_files_valid_key(key)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			PS(invalid_session_id) = 1;
 			return;
 		}
