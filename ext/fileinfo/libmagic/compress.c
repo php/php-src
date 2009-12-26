@@ -32,12 +32,11 @@
  *	uncompress(method, old, n, newch) - uncompress old into new, 
  *					    using method, return sizeof new
  */
-
 #include "config.h"
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.56 2008/02/07 00:58:52 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.63 2009/03/23 14:21:51 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -89,7 +88,6 @@ private const struct {
 
 #define NODATA ((size_t)~0)
 
-
 private ssize_t swrite(int, const void *, size_t);
 #ifdef PHP_FILEINFO_UNCOMPRESS
 private size_t uncompressbuf(struct magic_set *, int, size_t,
@@ -107,9 +105,12 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	size_t i, nsz;
 	int rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
+	size_t ncompr;
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
+
+	ncompr = sizeof(compr) / sizeof(compr[0]);
 
 	for (i = 0; i < ncompr; i++) {
 		if (nbytes < compr[i].maglen)
@@ -189,6 +190,7 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 #ifdef FIONREAD
 	if ((canbepipe && (ioctl(fd, FIONREAD, &t) == -1)) || (t == 0)) {
 #ifdef FD_ZERO
+		int cnt;
 		for (cnt = 0;; cnt++) {
 			fd_set check;
 			struct timeval tout = {0, 100 * 1000};
@@ -310,6 +312,7 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 #define FNAME		(1 << 3)
 #define FCOMMENT	(1 << 4)
 
+
 private size_t
 uncompressgzipped(struct magic_set *ms, const unsigned char *old,
     unsigned char **newch, size_t n)
@@ -372,7 +375,6 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 	return n;
 }
 #endif
-
 
 private size_t
 uncompressbuf(struct magic_set *ms, int fd, size_t method,
@@ -490,7 +492,7 @@ err:
 		(void)wait(NULL);
 #endif
 		(void) close(fdin[0]);
-		
+	    
 		return n;
 	}
 }

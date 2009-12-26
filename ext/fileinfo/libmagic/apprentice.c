@@ -34,7 +34,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apprentice.c,v 1.132 2008/03/28 18:19:30 christos Exp $")
+FILE_RCSID("@(#)$File: apprentice.c,v 1.151 2009/03/18 15:19:23 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -44,7 +44,7 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.132 2008/03/28 18:19:30 christos Exp $")
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
 #if _MSC_VER <= 1300
-#include "win32/php_strtoi64.h"
+# include "win32/php_strtoi64.h"
 #endif
 #define strtoull _strtoui64
 #else
@@ -55,7 +55,9 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.132 2008/03/28 18:19:30 christos Exp $")
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-
+#ifndef PHP_WIN32
+#include <dirent.h>
+#endif
 
 #define	EATAB {while (isascii((unsigned char) *l) && \
 		      isspace((unsigned char) *l))  ++l;}
@@ -609,7 +611,11 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 	} else {
 
 		/* read and parse this file */
+#if (PHP_MAJOR_VERSION < 6)
 		for (ms->line = 1; (line = php_stream_get_line(stream, buffer , BUFSIZ, &line_len)) != NULL; ms->line++) {
+#else		
+		for (ms->line = 1; (line = php_stream_get_line(stream, ZSTR(buffer), BUFSIZ, &line_len)) != NULL; ms->line++) {
+#endif
 			if (line_len == 0) /* null line, garbage, etc */
 				continue;
 
@@ -851,9 +857,9 @@ file_signextend(struct magic_set *ms, struct magic *m, uint64_t v)
 		case FILE_INDIRECT:
 			break;
 		default:
-			if (ms->flags & MAGIC_CHECK) {
-			    file_magwarn(ms, "cannot happen: m->type=%d\n", m->type);
-			}
+			if (ms->flags & MAGIC_CHECK)
+			    file_magwarn(ms, "cannot happen: m->type=%d\n",
+				    m->type);
 			return ~0U;
 		}
 	}
@@ -1669,7 +1675,7 @@ check_format(struct magic_set *ms, struct magic *m)
 		 */
 		file_magwarn(ms, "Printf format `%c' is not valid for type "
 		    "`%s' in description `%s'", *ptr ? *ptr : '?',
-            file_names[m->type], m->desc);
+		    file_names[m->type], m->desc);
 		return -1;
 	}
 	

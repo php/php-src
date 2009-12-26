@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readelf.c,v 1.73 2008/03/27 22:00:28 christos Exp $")
+FILE_RCSID("@(#)$File: readelf.c,v 1.81 2008/11/04 16:38:28 christos Exp $")
 #endif
 
 #ifdef BUILTIN_ELF
@@ -1118,6 +1118,7 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	return 0;
 }
 
+
 protected int
 file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
     size_t nbytes)
@@ -1137,7 +1138,6 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 
 	if (ms->flags & (MAGIC_MIME|MAGIC_APPLE))
 		return 0;
-
 	/*
 	 * ELF executables have multiple section headers in arbitrary
 	 * file locations and thus file(1) cannot determine it from easily.

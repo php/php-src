@@ -1,8 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.3
+- Upgraded bundled libmagic to version 5.03. (Mikko)
+
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
+- Added stream_resolve_include_path(). (Mikko)
 
 - Fixed bug #47409 (extract() problem with array containing word "this").
   (Ilia, chrisstocktonaz at gmail dot com)
@@ -36,7 +39,6 @@ PHP                                                                        NEWS
 - Added support for CURLOPT_CERTINFO. FR #49253.
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
-- Added stream_resolve_include_path() (Mikko)
 
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
