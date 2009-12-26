@@ -26,17 +26,15 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.11 2009/02/03 20:27:51 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.18 2009/05/06 20:48:22 christos Exp $")
 #endif
 
 #include <stdlib.h>
-
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
 #else
 #include <unistd.h>
 #endif
-
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
@@ -202,7 +200,7 @@ protected int
 file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
     size_t nbytes)
 {
-	cdf_info_t info;	
+	cdf_info_t info;
 	cdf_header_t h;
 	cdf_sat_t sat, ssat;
 	cdf_stream_t sst, scn;
@@ -246,7 +244,6 @@ file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
 		expn = "Cannot read short stream";
 		goto out3;
 	}
-
 #ifdef CDF_DEBUG
 	cdf_dump_dir(&info, &h, &sat, &ssat, &sst, &dir);
 #endif

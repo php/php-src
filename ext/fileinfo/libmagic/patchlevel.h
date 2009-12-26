@@ -6,14 +6,14 @@
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
  *
  * $Log$
- * Revision 1.1.2.3  2009/05/04 20:54:53  scottmac
- * MFH Update libmagic to 5.02
+ * Revision 1.4  2009/05/04 20:52:43  scottmac
+ * Update libmagic to 5.02
  *
- * Revision 1.1.2.2  2009/03/15 23:04:18  scottmac
- * MFH Update fileinfo to libmagic 5.00 and remove dependency on dirent.h on Windows
+ * Revision 1.3  2009/03/15 23:02:35  scottmac
+ * Update fileinfo to libmagic 5.00 and remove dependency on dirent.h on Windows
  *
- * Revision 1.1.2.1  2008/11/02 16:13:49  scottmac
- * MFH: Sync libmagic with 4.26 and add support for the new v6 magic file format
+ * Revision 1.2  2008/11/02 16:09:27  scottmac
+ * Update libmagic to 4.26 and add support for v6 of the magic file format.
  *
  * Revision 1.1  2008/07/11 14:13:50  derick
  * - Move lib to libmagic
