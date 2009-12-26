@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readelf.c,v 1.73 2008/03/27 22:00:28 christos Exp $")
+FILE_RCSID("@(#)$File: readelf.c,v 1.81 2008/11/04 16:38:28 christos Exp $")
 #endif
 
 #ifdef BUILTIN_ELF

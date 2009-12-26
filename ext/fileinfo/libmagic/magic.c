@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Christos Zoulas 2003.
  * All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -11,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.62 2009/03/20 21:25:41 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -68,7 +68,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.50 2008/02/19 00:58:59 rrt Exp $")
 
 #include "patchlevel.h"
 
-#ifndef PIPE_BUF 
+#ifndef PIPE_BUF
 /* Get the PIPE_BUF from pathconf */
 #ifdef _PC_PIPE_BUF
 #define PIPE_BUF pathconf(".", _PC_PIPE_BUF)

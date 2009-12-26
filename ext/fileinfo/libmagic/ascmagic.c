@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.62 2008/03/01 22:21:48 rrt Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.75 2009/02/03 20:27:51 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -66,14 +66,14 @@ trim_nuls(const unsigned char *buf, size_t nbytes)
 {
 	while (nbytes > 1 && buf[nbytes - 1] == '\0')
 		nbytes--;
- 
+
 	return nbytes;
 }
 
 protected int
 file_ascmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes)
 {
-	unichar *ubuf = NULL;	
+	unichar *ubuf = NULL;
 	size_t ulen;
 	int rv = 1;
 
@@ -264,7 +264,7 @@ subtype_identified:
 			if (file_printf(ms, ", with") == -1)
 				goto done;
 
-			if (n_crlf == 0 && n_cr == 0 && n_nel == 0 && n_lf == 0)			{
+			if (n_crlf == 0 && n_cr == 0 && n_nel == 0 && n_lf == 0) {
 				if (file_printf(ms, " no") == -1)
 					goto done;
 			} else {

@@ -36,7 +36,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.56 2008/02/07 00:58:52 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.63 2009/03/23 14:21:51 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -86,10 +86,7 @@ private const struct {
  	{ "\3757zXZ\0",6,{ "xz", "-cd", NULL }, 1 },		/* XZ Utils */
 };
 
-private size_t ncompr = sizeof(compr) / sizeof(compr[0]);
-
 #define NODATA ((size_t)~0)
-
 
 private ssize_t swrite(int, const void *, size_t);
 #ifdef PHP_FILEINFO_UNCOMPRESS
@@ -108,9 +105,12 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 	size_t i, nsz;
 	int rv = 0;
 	int mime = ms->flags & MAGIC_MIME;
+	size_t ncompr;
 
 	if ((ms->flags & MAGIC_COMPRESS) == 0)
 		return 0;
+
+	ncompr = sizeof(compr) / sizeof(compr[0]);
 
 	for (i = 0; i < ncompr; i++) {
 		if (nbytes < compr[i].maglen)
@@ -191,7 +191,6 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 	if ((canbepipe && (ioctl(fd, FIONREAD, &t) == -1)) || (t == 0)) {
 #ifdef FD_ZERO
 		int cnt;
-
 		for (cnt = 0;; cnt++) {
 			fd_set check;
 			struct timeval tout = {0, 100 * 1000};
@@ -493,7 +492,7 @@ err:
 		(void)wait(NULL);
 #endif
 		(void) close(fdin[0]);
-		
+	    
 		return n;
 	}
 }

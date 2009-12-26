@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.103 2008/03/01 22:21:49 rrt Exp $
+ * @(#)$File: file.h,v 1.119 2009/02/04 18:24:32 christos Exp $
  */
 
 #ifndef __file_h__
@@ -138,7 +138,7 @@ struct magic {
 #define UNSIGNED	0x08	/* comparison is unsigned */
 #define NOSPACE		0x10	/* suppress space character before output */
 #define BINTEST		0x20	/* test is for a binary type (set only
-                                   for top-level tests) */
+				   for top-level tests) */
 #define TEXTTEST	0	/* for passing to file_softmagic */
 
 	uint8_t factor;
@@ -216,7 +216,7 @@ struct magic {
 #else
 	uint8_t dummy;	
 #endif
-	uint8_t factor_op;	
+	uint8_t factor_op;
 #define		FILE_FACTOR_OP_PLUS	'+'
 #define		FILE_FACTOR_OP_MINUS	'-'
 #define		FILE_FACTOR_OP_TIMES	'*'
@@ -264,7 +264,7 @@ struct magic {
 #define str_range _u._s._count
 #define str_flags _u._s._flags
 	/* Words 9-16 */
-	union VALUETYPE value; /* either number of string */
+	union VALUETYPE value;	/* either number or string */
 	/* Words 17-24 */
 	char desc[MAXDESC];	/* description */
 	/* Words 25-32 */
@@ -312,7 +312,6 @@ struct level_info {
 	int last_cond;	/* used for error checking by parse() */
 #endif
 };
-
 struct magic_set {
 	struct mlist *mlist;
 	struct cont {

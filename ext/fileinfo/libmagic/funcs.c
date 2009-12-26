@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Christos Zoulas 2003.
  * All Rights Reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -11,7 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.39 2008/03/01 22:21:49 rrt Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.53 2009/04/07 11:07:00 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -392,7 +392,7 @@ file_getbuffer(struct magic_set *ms)
 
 	for (np = ms->o.pbuf, op = ms->o.buf; *op; op++) {
 		if (isprint((unsigned char)*op)) {
-			*np++ = *op;	
+			*np++ = *op;
 		} else {
 			OCTALIFY(np, op);
 		}

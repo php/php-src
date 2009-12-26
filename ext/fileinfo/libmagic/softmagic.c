@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: softmagic.c,v 1.117 2008/03/01 22:21:49 rrt Exp $")
+FILE_RCSID("@(#)$File: softmagic.c,v 1.135 2009/03/27 22:42:49 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -149,7 +149,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 		default:
 			if (m->type == FILE_INDIRECT)
 				returnval = 1;
-
+				
 			switch (magiccheck(ms, m)) {
 			case -1:
 				return -1;
@@ -163,7 +163,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 			break;
 		}
 		if (flush) {
-			/* 
+			/*
 			 * main entry didn't match,
 			 * flush its continuations
 			 */
@@ -188,7 +188,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 
 
 		if (print && mprint(ms, m) == -1)
-		 			return -1;
+			return -1;
 
 		ms->c.li[cont_level].off = moffset(ms, m);
 
@@ -227,7 +227,7 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 				return -1;
 			case 0:
 				if (m->reln != '!')
-				continue;
+					continue;
 				flush = 1;
 				break;
 			default:
@@ -305,11 +305,11 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 		if (printed_something) {
 			firstline = 0;
 			if (print)
-			returnval = 1;
+				returnval = 1;
 		}
 		if ((ms->flags & MAGIC_CONTINUE) == 0 && printed_something) {
 			return returnval; /* don't keep searching */
-		}			
+		}
 	}
 	return returnval;  /* This is hit if -k is set or there is no match */
 }
@@ -377,7 +377,8 @@ mprint(struct magic_set *ms, struct magic *m)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, m->desc, (unsigned short) v) == -1)
+			if (
+			    file_printf(ms, m->desc, (unsigned short) v) == -1)
 				return -1;
 			break;
 		}
@@ -932,7 +933,7 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			}
 			if (lines)
 				last = (const char *)s + nbytes;
-			
+
 			ms->search.s = buf;
 			ms->search.s_len = last - buf;
 			ms->search.offset = offset;
@@ -945,10 +946,10 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const unsigned char *esrc = s + nbytes;
 			char *dst = p->s;
 			char *edst = &p->s[sizeof(p->s) - 1];
-			
+
 			if (type == FILE_BESTRING16)
 				src++;
-			
+
 			/* check for pointer overflow */
 			if (src < s) {
 				file_magerror(ms, "invalid offset %u in mcopy()",
@@ -1506,14 +1507,14 @@ mget(struct magic_set *ms, const unsigned char *s,
 		if (nbytes < (offset + 1)) /* should alway be true */
 			return 0;
 		break;
-		
+
 	case FILE_SHORT:
 	case FILE_BESHORT:
 	case FILE_LESHORT:
 		if (nbytes < (offset + 2))
 			return 0;
 		break;
-		
+
 	case FILE_LONG:
 	case FILE_BELONG:
 	case FILE_LELONG:
@@ -1532,7 +1533,7 @@ mget(struct magic_set *ms, const unsigned char *s,
 		if (nbytes < (offset + 4))
 			return 0;
 		break;
-		
+
 	case FILE_DOUBLE:
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
@@ -1591,7 +1592,7 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 	if (0L == flags) { /* normal string: do it fast */
 		while (len-- > 0)
 			if ((v = *b++ - *a++) != '\0')
-				break; 
+				break;
 	}
 	else { /* combine the others */
 		while (len-- > 0) {
@@ -1605,8 +1606,8 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 				if ((v = toupper(*b++) - *a++) != '\0')
 					break;
 			}
-			else if ((flags & STRING_COMPACT_BLANK) && 
-			    isspace(*a)) { 
+			else if ((flags & STRING_COMPACT_BLANK) &&
+			    isspace(*a)) {
 				a++;
 				if (isspace(*b++)) {
 					while (isspace(*b))
@@ -1761,23 +1762,23 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		case 'x':
 			matched = 1;
 			break;
-	
+
 		case '!':
 			matched = fv != fl;
 			break;
-	
+
 		case '=':
 			matched = fv == fl;
 			break;
-	
+
 		case '>':
 			matched = fv > fl;
 			break;
-	
+
 		case '<':
 			matched = fv < fl;
 			break;
-	
+
 		default:
 			matched = 0;
 			file_magerror(ms, "cannot happen with float: invalid relation `%c'",
@@ -1795,23 +1796,23 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		case 'x':
 			matched = 1;
 			break;
-	
+
 		case '!':
 			matched = dv != dl;
 			break;
-	
+
 		case '=':
 			matched = dv == dl;
 			break;
-	
+
 		case '>':
 			matched = dv > dl;
 			break;
-	
+
 		case '<':
 			matched = dv < dl;
 			break;
-	
+
 		default:
 			matched = 0;
 			file_magerror(ms, "cannot happen with double: invalid relation `%c'", m->reln);
@@ -1859,7 +1860,6 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		}
 		break;
 	}
-			
 	case FILE_REGEX: {
 		zval *pattern;
 		int options = 0;
@@ -1867,9 +1867,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		TSRMLS_FETCH();
 		
 		MAKE_STD_ZVAL(pattern);
-		Z_STRVAL_P(pattern) = (char *)m->value.s;
-		Z_STRLEN_P(pattern) = m->vallen;
-		Z_TYPE_P(pattern) = IS_STRING; 
+		ZVAL_STRINGL(pattern, (char *)m->value.s, m->vallen, 0);
 	
 		options |= PCRE_MULTILINE;
 		
@@ -1878,8 +1876,14 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		}
 		
 		convert_libmagic_pattern(pattern, options);
-
+		
+#if (PHP_MAJOR_VERSION < 6)
+		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
+#else
 		if ((pce = pcre_get_compiled_regex_cache(IS_STRING, Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
+#endif
+			zval_dtor(pattern);
+			FREE_ZVAL(pattern);
 			return -1;
 		} else {
 			/* pce now contains the compiled regex */
@@ -1894,16 +1898,19 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			haystack = estrndup(ms->search.s, ms->search.s_len);
 
 			/* match v = 0, no match v = 1 */
+#if (PHP_MAJOR_VERSION < 6)
+			php_pcre_match_impl(pce, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
+#else			
 			php_pcre_match_impl(pce, IS_STRING, haystack, ms->search.s_len, retval, subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
-			
+#endif
 			/* Free haystack */
 			efree(haystack);
 			
 			if (Z_LVAL_P(retval) < 0) {
 				zval_ptr_dtor(&subpats);
 				FREE_ZVAL(retval);
-				efree(Z_STRVAL_P(pattern));
-				efree(pattern);
+				zval_dtor(pattern);
+				FREE_ZVAL(pattern);
 				return -1;
 			} else if ((Z_LVAL_P(retval) > 0) && (Z_TYPE_P(subpats) == IS_ARRAY)) {
 				
@@ -1991,8 +1998,8 @@ magiccheck(struct magic_set *ms, struct magic *m)
 					} else {
 						zval_ptr_dtor(&subpats);
 						FREE_ZVAL(retval);
-						efree(Z_STRVAL_P(pattern));
-						efree(pattern);
+						zval_dtor(pattern);
+						FREE_ZVAL(pattern);
 						return -1;
 					}					
 				}
@@ -2004,8 +2011,8 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			zval_ptr_dtor(&subpats);
 			FREE_ZVAL(retval);
 		}
-		efree(Z_STRVAL_P(pattern));
-		efree(pattern);
+		zval_dtor(pattern);
+		FREE_ZVAL(pattern);
 		break;	
 	}
 	case FILE_INDIRECT:
@@ -2123,7 +2130,7 @@ print_sep(struct magic_set *ms, int firstline)
 	if (firstline)
 		return 0;
 	/*
-	 * we found another match 
+	 * we found another match
 	 * put a newline and '-' to do some simple formatting
 	 */
 	return file_printf(ms, "\n- ");
