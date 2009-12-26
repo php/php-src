@@ -27,9 +27,8 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apptype.c,v 1.7 2007/01/12 17:38:27 christos Exp $")
+FILE_RCSID("@(#)$File: apptype.c,v 1.11 2009/02/04 18:24:32 christos Exp $")
 #endif /* lint */
-
 
 #include <stdlib.h>
 #include <string.h>
