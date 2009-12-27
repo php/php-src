@@ -29,4 +29,5 @@ if test "$PHP_SOCKETS" != "no"; then
   AC_DEFINE([HAVE_SOCKETS], 1, [ ])
 
   PHP_NEW_EXTENSION([sockets], [sockets.c], [$ext_shared])
+  PHP_INSTALL_HEADERS([ext/sockets/], [php_sockets.h])
 fi

@@ -110,7 +110,7 @@ static char *php_strerror(int error TSRMLS_DC);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, errn, php_strerror(errn TSRMLS_CC))
 
 static int le_socket;
-#define le_socket_name "Socket"
+#define le_socket_name php_sockets_le_socket_name
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_select, 0, 0, 4)
