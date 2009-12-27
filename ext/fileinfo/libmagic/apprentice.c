@@ -2120,7 +2120,7 @@ internal_loaded:
 	}
 
 	if (dbname) {
-		free(dbname);
+		efree(dbname);
 	}
 	return ret;
 
@@ -2137,7 +2137,7 @@ error1:
 	}
 error2:
 	if (dbname) {
-		free(dbname);
+		efree(dbname);
 	}
 	return -1;
 }
@@ -2195,7 +2195,7 @@ apprentice_compile(struct magic_set *ms, struct magic **magicp,
 
 	rv = 0;
 out:
-	free(dbname);
+	efree(dbname);
 	return rv;
 }
 
@@ -2229,14 +2229,14 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 	q++;
 	/* Compatibility with old code that looked in .mime */
 	if (ms->flags & MAGIC_MIME) {
-		asprintf(&buf, "%.*s.mime%s", (int)(q - fn), fn, ext);
-		if (access(buf, R_OK) != -1) {
+		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
+		if (VCWD_ACCESS(buf, R_OK) != -1) {
 			ms->flags &= MAGIC_MIME_TYPE;
 			return buf;
 		}
-		free(buf);
+		efree(buf);
 	}
-	asprintf(&buf, "%.*s%s", (int)(q - fn), fn, ext);
+	spprintf(&buf, MAXPATHLEN, "%.*s%s", (int)(q - fn), fn, ext);
 
 	/* Compatibility with old code that looked in .mime */
 	if (strstr(p, ".mime") != NULL)
