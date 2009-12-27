@@ -2208,6 +2208,7 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 {
 	const char *p, *q;
 	char *buf;
+	TSRMLS_FETCH();
 
 	if (strip) {
 		if ((p = strrchr(fn, '/')) != NULL)
