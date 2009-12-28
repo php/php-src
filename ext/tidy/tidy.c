@@ -342,7 +342,7 @@ static zend_function_entry tidy_funcs_node[] = {
 	TIDY_NODE_ME(isAsp, NULL)
 	TIDY_NODE_ME(isPhp, NULL)
 	TIDY_NODE_ME(getParent, NULL)
-	TIDY_NODE_ME(__construct, NULL)
+	TIDY_NODE_PRIVATE_ME(__construct, NULL)
 	{NULL, NULL, NULL}
 };
 
