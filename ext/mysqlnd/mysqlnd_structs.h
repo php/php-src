@@ -245,6 +245,7 @@ struct st_mysqlnd_net_methods
 
 struct st_mysqlnd_conn_methods
 {
+	void				(*init)(MYSQLND * conn TSRMLS_DC);
 	enum_func_status	(*connect)(MYSQLND *conn, const char *host, const char * user, const char * passwd, unsigned int passwd_len, const char * db, unsigned int db_len, unsigned int port, const char * socket, unsigned int mysql_flags TSRMLS_DC);
 	ulong				(*escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC);
 	enum_func_status	(*set_charset)(MYSQLND * const conn, const char * const charset TSRMLS_DC);
