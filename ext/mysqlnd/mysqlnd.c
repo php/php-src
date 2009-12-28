@@ -2019,8 +2019,11 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 
 
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
+static void MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC);
+
 
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
+	MYSQLND_METHOD(mysqlnd_conn, init),
 	MYSQLND_METHOD(mysqlnd_conn, connect),
 
 	MYSQLND_METHOD(mysqlnd_conn, escape_string),
@@ -2086,6 +2089,20 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 MYSQLND_CLASS_METHODS_END;
 
 
+/* {{{ mysqlnd_conn::init */
+static void
+MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::init");
+	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
+
+	SET_ERROR_AFF_ROWS(conn);
+
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_init */
 PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
@@ -2095,19 +2112,17 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 	DBG_ENTER("mysqlnd_init");
 	DBG_INF_FMT("persistent=%d", persistent);
 
-	SET_ERROR_AFF_ROWS(ret);
 	ret->persistent = persistent;
-
 	ret->m = mysqlnd_conn_methods;
+	CONN_SET_STATE(ret, CONN_ALLOCED);
 	ret->m->get_reference(ret TSRMLS_CC);
 
-	ret->net = mysqlnd_net_init(persistent TSRMLS_CC);
-
-	CONN_SET_STATE(ret, CONN_ALLOCED);
+	ret->m->init(ret TSRMLS_CC);
 
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_library_init */
 void mysqlnd_library_init(TSRMLS_D)
