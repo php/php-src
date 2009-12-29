@@ -1,11 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.13
-- Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
-  (Ilia)
 - Removed automatic file descriptor unlocking happening on shutdown and/or 
   stream close (on all OSes excluding Windows). (Tony, Ilia)
+
 - Changed tidyNode class to disallow manual node creation. (Pierrick)
+
+- Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
+  (Ilia)
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
