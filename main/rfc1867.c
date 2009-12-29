@@ -32,6 +32,7 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
+#include "ext/standard/php_string.h"
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
@@ -796,6 +797,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	void *event_extra_data = NULL;
 	int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
+	
+	
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -804,6 +807,18 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 	/* Get the boundary */
 	boundary = strstr(content_type_dup, "boundary");
+	if (!boundary) {
+		int content_type_len = strlen(content_type_dup);
+		char *content_type_lcase = estrndup(content_type_dup, content_type_len);
+
+		php_strtolower(content_type_lcase, content_type_len);
+		boundary = strstr(content_type_lcase, "boundary");
+		if (boundary) {
+			boundary = content_type_dup + (boundary - content_type_lcase);
+		}
+		efree(content_type_lcase);
+	}
+
 	if (!boundary || !(boundary=strchr(boundary, '='))) {
 		sapi_module.sapi_error(E_WARNING, "Missing boundary in multipart/form-data POST data");
 		return;
