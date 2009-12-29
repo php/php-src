@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Jani Taskinen <sniper@php.net>                              |
+   |          Jani Taskinen <jani@php.net>                                |
    +----------------------------------------------------------------------+
  */
 
@@ -65,7 +65,7 @@ PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **
 #define UPLOAD_ERROR_F    7  /* Failed to write file to disk */
 #define UPLOAD_ERROR_X    8  /* File upload stopped by extension */
 
-void php_rfc1867_register_constants(TSRMLS_D)
+void php_rfc1867_register_constants(TSRMLS_D) /* {{{ */
 {
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_OK",         UPLOAD_ERROR_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_INI_SIZE",   UPLOAD_ERROR_A,  CONST_CS | CONST_PERSISTENT);
@@ -76,24 +76,24 @@ void php_rfc1867_register_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_CANT_WRITE", UPLOAD_ERROR_F,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
 }
+/* }}} */
 
-static int unlink_filename(char **filename TSRMLS_DC)
+static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
 {
 	VCWD_UNLINK(*filename);
 	return 0;
 }
+/* }}} */
 
-void destroy_uploaded_files_hash(TSRMLS_D)
+void destroy_uploaded_files_hash(TSRMLS_D) /* {{{ */
 {
 	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename TSRMLS_CC);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
+/* }}} */
 
-/*
- *  Following code is based on apache_multipart_buffer.c from libapreq-0.33 package.
- *
- */
+/* {{{ Following code is based on apache_multipart_buffer.c from libapreq-0.33 package. */
 
 #define FILLUNIT (1024 * 5)
 
@@ -118,9 +118,9 @@ typedef struct {
 } mime_header_entry;
 
 /*
-  fill up the buffer with client data.
-  returns number of bytes added to buffer.
-*/
+ * Fill up the buffer with client data.
+ * Returns number of bytes added to buffer.
+ */
 static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 {
 	int bytes_to_read, total_read = 0, actual_read = 0;
@@ -195,15 +195,15 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 }
 
 /*
-  gets the next CRLF terminated line from the input buffer.
-  if it doesn't find a CRLF, and the buffer isn't completely full, returns
-  NULL; otherwise, returns the beginning of the null-terminated line,
-  minus the CRLF.
-
-  note that we really just look for LF terminated lines. this works
-  around a bug in internet explorer for the macintosh which sends mime
-  boundaries that are only LF terminated when you use an image submit
-  button in a multipart/form-data form.
+ * Gets the next CRLF terminated line from the input buffer.
+ * If it doesn't find a CRLF, and the buffer isn't completely full, returns
+ * NULL; otherwise, returns the beginning of the null-terminated line,
+ * minus the CRLF.
+ *
+ * Note that we really just look for LF terminated lines. This works
+ * around a bug in internet explorer for the macintosh which sends mime
+ * boundaries that are only LF terminated when you use an image submit
+ * button in a multipart/form-data form.
  */
 static char *next_line(multipart_buffer *self)
 {
@@ -239,7 +239,7 @@ static char *next_line(multipart_buffer *self)
 	return line;
 }
 
-/* returns the next CRLF terminated line from the client */
+/* Returns the next CRLF terminated line from the client */
 static char *get_line(multipart_buffer *self TSRMLS_DC)
 {
 	char* ptr = next_line(self);
@@ -362,7 +362,6 @@ static char *php_ap_getword(char **line, char stop)
 	char *res;
 
 	while (*pos && *pos != stop) {
-
 		if ((quote = *pos) == '"' || quote == '\'') {
 			++pos;
 			while (*pos && *pos != quote) {
@@ -376,7 +375,6 @@ static char *php_ap_getword(char **line, char stop)
 				++pos;
 			}
 		} else ++pos;
-
 	}
 	if (*pos == '\0') {
 		res = estrdup(*line);
@@ -467,10 +465,10 @@ look_for_quote:
 }
 
 /*
-  search for a string in a fixed-length byte string.
-  if partial is true, partial matches are allowed at the end of the buffer.
-  returns NULL if not found, or a pointer to the start of the first match.
-*/
+ * Search for a string in a fixed-length byte string.
+ * If partial is true, partial matches are allowed at the end of the buffer.
+ * Returns NULL if not found, or a pointer to the start of the first match.
+ */
 static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int needlen, int partial)
 {
 	int len = haystacklen;
@@ -559,13 +557,15 @@ static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *le
 
 	return out;
 }
+/* }}} */
 
-static void register_raw_var_ex(char *var, zval *value, HashTable *array)
+static void register_raw_var_ex(char *var, zval *value, HashTable *array) /* {{{ */
 {
 	zend_hash_update(array, var, strlen(var) + 1, &value, sizeof(zval *), NULL);
 }
+/* }}} */
 
-static void register_raw_var(char *var, char *str, int str_len, HashTable *array)
+static void register_raw_var(char *var, char *str, int str_len, HashTable *array) /* {{{ */
 {
 	zval *new_entry;
 	assert(str != NULL);
@@ -576,28 +576,27 @@ static void register_raw_var(char *var, char *str, int str_len, HashTable *array
 
 	register_raw_var_ex(var, new_entry, array);
 }
+/* }}} */
 
 /*
  * The combined READER/HANDLER
  *
  */
 
-SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
+SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
-	char *boundary, *s=NULL, *boundary_end = NULL, *start_arr=NULL, *array_index=NULL;
-	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
-	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
-	int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
-	HashTable *uploaded_files=NULL;
+	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
+	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
+	int boundary_len = 0, total_bytes = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
+	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
+	HashTable *uploaded_files = NULL;
 	HashTable *post_vars, *files_vars;
 	multipart_buffer *mbuff;
-	int fd=-1;
+	int fd = -1;
 	zend_llist header;
 	void *event_extra_data = NULL;
 	int llen = 0;
 	int upload_cnt = INI_INT("max_file_uploads");
-	
-	
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
@@ -618,7 +617,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		efree(content_type_lcase);
 	}
 
-	if (!boundary || !(boundary=strchr(boundary, '='))) {
+	if (!boundary || !(boundary = strchr(boundary, '='))) {
 		sapi_module.sapi_error(E_WARNING, "Missing boundary in multipart/form-data POST data");
 		return;
 	}
@@ -731,7 +730,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					value_len = 0;
 				}
 
-                register_raw_var(param, value, value_len, post_vars);
+				register_raw_var(param, value, value_len, post_vars);
 
 				if (php_rfc1867_callback != NULL) {
 					multipart_event_formdata event_formdata;
@@ -804,7 +803,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				/* Handle file */
 				fd = php_open_temporary_fd(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
 				upload_cnt--;
-				if (fd==-1) {
+				if (fd == -1) {
 					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
 					cancel_upload = UPLOAD_ERROR_E;
 				}
@@ -824,7 +823,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 						}
 						efree(temp_filename);
 					}
-					temp_filename="";
+					temp_filename = "";
 					efree(param);
 					efree(filename);
 					continue;
@@ -892,7 +891,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					offset += wlen;
 				}
 			}
-			if (fd!=-1) { /* may not be initialized if file could not be created */
+			if (fd != -1) { /* may not be initialized if file could not be created */
 				close(fd);
 			}
 			if (!cancel_upload && !end) {
@@ -925,15 +924,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					}
 					efree(temp_filename);
 				}
-				temp_filename="";
+				temp_filename = "";
 			} else {
 				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
 			}
 
 			/* is_arr_upload is true when name of file upload field
 			 * ends in [.*]
-			 * start_arr is set to point to 1st [
-			 */
+			 * start_arr is set to point to 1st [ */
 			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
 
 			if (is_arr_upload) {
@@ -955,8 +953,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			 * it is a valid path separator. However, IE in all it's wisdom always sends
 			 * the full path of the file on the user's filesystem, which means that unless
 			 * the user does basename() they get a bogus file name. Until IE's user base drops
-			 * to nill or problem is fixed this code must remain enabled for all systems.
-			 */
+			 * to nill or problem is fixed this code must remain enabled for all systems. */
 			s = strrchr(filename, '\\');
 			if ((tmp = strrchr(filename, '/')) > s) {
 				s = tmp;
@@ -1053,6 +1050,7 @@ fileupload_done:
 
 	SAFE_RETURN;
 }
+/* }}} */
 
 /*
  * Local variables:
