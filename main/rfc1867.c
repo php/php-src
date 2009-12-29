@@ -262,7 +262,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
+static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
 {
 	VCWD_UNLINK(*filename);
 	return 0;
@@ -303,7 +303,7 @@ typedef struct {
 
 /*
  * Fill up the buffer with client data.
- * returns number of bytes added to buffer.
+ * Returns number of bytes added to buffer.
  */
 static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 {
@@ -416,7 +416,7 @@ static char *next_line(multipart_buffer *self)
 	return line;
 }
 
-/* returns the next CRLF terminated line from the client */
+/* Returns the next CRLF terminated line from the client */
 static char *get_line(multipart_buffer *self TSRMLS_DC)
 {
 	char* ptr = next_line(self);
@@ -664,7 +664,7 @@ look_for_quote:
  * Search for a string in a fixed-length byte string.
  * If partial is true, partial matches are allowed at the end of the buffer.
  * Returns NULL if not found, or a pointer to the start of the first match.
-*/
+ */
 static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int needlen, int partial)
 {
 	int len = haystacklen;
@@ -746,12 +746,14 @@ static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *le
 		total_bytes += read_bytes;
 	}
 
-	if (out) out[total_bytes] = '\0';
+	if (out) {
+		out[total_bytes] = '\0';
+	}
 	*len = total_bytes;
 
 	return out;
 }
-/* }}} */
+/* }}} */
 
 /*
  * The combined READER/HANDLER
@@ -772,7 +774,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 #endif
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
-	int fd=-1;
+	int fd = -1;
 	zend_llist header;
 	void *event_extra_data = NULL;
 	int llen = 0;
@@ -859,7 +861,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
 	{
 		char buff[FILLUNIT];
-		char *cd = NULL,*param = NULL, *filename = NULL, *tmp = NULL;
+		char *cd = NULL, *param = NULL, *filename = NULL, *tmp = NULL;
 		size_t blen = 0, wlen = 0;
 		off_t offset;
 
@@ -1083,7 +1085,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
-
 					wlen = write(fd, buff, blen);
 
 					if (wlen == -1) {
@@ -1118,7 +1119,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				cancel_upload = 5;
 			}
 #endif
-
 			if (php_rfc1867_callback != NULL) {
 				multipart_event_file_end event_file_end;
 
@@ -1152,7 +1152,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				if (array_index) {
 					efree(array_index);
 				}
-				array_index = estrndup(start_arr+1, array_len-2);
+				array_index = estrndup(start_arr + 1, array_len - 2);
 			}
 
 			/* Add $foo_name */
@@ -1338,6 +1338,7 @@ filedone:
 			efree(param);
 		}
 	}
+
 fileupload_done:
 	if (php_rfc1867_callback != NULL) {
 		multipart_event_end event_end;
@@ -1348,6 +1349,7 @@ fileupload_done:
 
 	SAFE_RETURN;
 }
+/* }}} */
 
 /*
  * Local variables:
