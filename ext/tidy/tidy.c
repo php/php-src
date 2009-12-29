@@ -59,7 +59,7 @@
 			RETURN_FALSE;	\
 		}	\
 	}	\
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
+	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
@@ -67,7 +67,7 @@
 	if (zend_parse_parameters_none() == FAILURE) {	\
 		return;	\
 	}	\
-	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
+	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
 #define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
 	if (_val) { \
@@ -131,7 +131,7 @@
 			ZVAL_EMPTY_STRING(tmp); \
 		} \
 		zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
-}
+	}
 
 #define ADD_PROPERTY_LONG(_table, _key, _long) \
 	{ \
@@ -158,9 +158,9 @@
    }
 
 #define TIDY_OPEN_BASEDIR_CHECK(filename) \
-if (php_check_open_basedir(filename TSRMLS_CC)) { \
-	RETURN_FALSE; \
-} \
+	if (php_check_open_basedir(filename TSRMLS_CC)) { \
+		RETURN_FALSE; \
+	}
 
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
