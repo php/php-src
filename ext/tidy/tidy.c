@@ -155,7 +155,7 @@
 		MAKE_STD_ZVAL(tmp); \
 		ZVAL_BOOL(tmp, _bool); \
 		zend_ascii_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
-   }
+	}
 
 #define TIDY_OPEN_BASEDIR_CHECK(filename) \
 	if (php_check_open_basedir(filename TSRMLS_CC)) { \
