@@ -26,41 +26,41 @@ echo "Ok\n";
 --EXPECT--
 bool(true)
 object(stdClass)#1 (3) {
-  ["num"]=>
-  string(1) "1"
-  ["str"]=>
-  string(3) "ABC"
-  ["bin"]=>
+  [u"num"]=>
+  unicode(1) "1"
+  [u"str"]=>
+  unicode(3) "ABC"
+  [u"bin"]=>
   NULL
 }
 array(6) {
   [0]=>
-  string(1) "1"
-  ["num"]=>
-  string(1) "1"
+  unicode(1) "1"
+  [u"num"]=>
+  unicode(1) "1"
   [1]=>
-  string(3) "ABC"
-  ["str"]=>
-  string(3) "ABC"
+  unicode(3) "ABC"
+  [u"str"]=>
+  unicode(3) "ABC"
   [2]=>
   NULL
-  ["bin"]=>
+  [u"bin"]=>
   NULL
 }
 array(3) {
   [0]=>
-  string(1) "1"
+  unicode(1) "1"
   [1]=>
-  string(3) "ABC"
+  unicode(3) "ABC"
   [2]=>
   NULL
 }
 array(3) {
-  ["num"]=>
-  string(1) "1"
-  ["str"]=>
-  string(3) "ABC"
-  ["bin"]=>
+  [u"num"]=>
+  unicode(1) "1"
+  [u"str"]=>
+  unicode(3) "ABC"
+  [u"bin"]=>
   NULL
 }
 bool(true)

@@ -43,10 +43,10 @@ bool(false)
 array(1) {
   [0]=>
   array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["id2"]=>
-    string(1) "2"
+    [u"id"]=>
+    unicode(1) "1"
+    [u"id2"]=>
+    unicode(1) "2"
   }
 }
 
@@ -55,9 +55,9 @@ bool(false)
 array(1) {
   [0]=>
   array(2) {
-    ["id4"]=>
-    string(1) "4"
-    ["id3"]=>
-    string(1) "5"
+    [u"id4"]=>
+    unicode(1) "4"
+    [u"id3"]=>
+    unicode(1) "5"
   }
 }

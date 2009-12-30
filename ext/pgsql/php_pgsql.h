@@ -271,8 +271,8 @@ typedef struct _php_pgsql_result_handle {
 } pgsql_result_handle;
 
 typedef struct _php_pgsql_notice {
-	char *message;
-	size_t len;
+	UChar *message;
+	int len;
 } php_pgsql_notice;
 
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)

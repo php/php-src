@@ -40,7 +40,7 @@ pg_close($db);
 
 ?>
 --EXPECT--
-string(14) "\x0103aa000812"
-string(12) "0103aa000812"
+unicode(14) "\x0103aa000812"
+unicode(12) "0103aa000812"
 int(6)
-string(12) "0103aa000812"
+unicode(12) "0103aa000812"

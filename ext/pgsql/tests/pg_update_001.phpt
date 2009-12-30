@@ -35,17 +35,17 @@ pg_query('DROP SCHEMA phptests');
 
 ?>
 --EXPECT--
-string(32) "UPDATE foo SET id=10 WHERE id=1;"
-string(43) "UPDATE phptests.foo SET id=100 WHERE id2=2;"
+unicode(32) "UPDATE foo SET id=10 WHERE id=1;"
+unicode(43) "UPDATE phptests.foo SET id=100 WHERE id2=2;"
 array(2) {
-  ["id"]=>
-  string(2) "10"
-  ["id2"]=>
-  string(1) "1"
+  [u"id"]=>
+  unicode(2) "10"
+  [u"id2"]=>
+  unicode(1) "1"
 }
 array(2) {
-  ["id"]=>
-  string(3) "100"
-  ["id2"]=>
-  string(1) "2"
+  [u"id"]=>
+  unicode(3) "100"
+  [u"id2"]=>
+  unicode(1) "2"
 }

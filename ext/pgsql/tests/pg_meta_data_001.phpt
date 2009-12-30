@@ -27,66 +27,66 @@ pg_query('DROP SCHEMA phptests');
 ?>
 --EXPECT--
 array(2) {
-  ["id"]=>
+  [u"id"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(1)
-    ["type"]=>
-    string(4) "int4"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "int4"
+    [u"len"]=>
     int(4)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
-  ["id3"]=>
+  [u"id3"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(2)
-    ["type"]=>
-    string(4) "int4"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "int4"
+    [u"len"]=>
     int(4)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
 }
 array(2) {
-  ["id"]=>
+  [u"id"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(1)
-    ["type"]=>
-    string(4) "int4"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "int4"
+    [u"len"]=>
     int(4)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
-  ["id2"]=>
+  [u"id2"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(2)
-    ["type"]=>
-    string(4) "int4"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "int4"
+    [u"len"]=>
     int(4)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
 }
