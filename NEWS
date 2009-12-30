@@ -28,6 +28,7 @@ PHP                                                                        NEWS
   then 1024 fields). (Ilia, sjoerd-php at linuxonly dot nl)
 - Fixed bug #45599 (strip_tags() truncates rest of string with invalid
   attribute). (Ilia, hradtke)  
+- Fixed bug #44827 (define() allows :: in constant names). (Ilia)
 
 
 17 Dec 2009, PHP 5.2.12
