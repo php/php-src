@@ -16,49 +16,49 @@ var_dump($meta);
 ?>
 --EXPECT--
 array(3) {
-  ["num"]=>
+  [u"num"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(1)
-    ["type"]=>
-    string(4) "int4"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "int4"
+    [u"len"]=>
     int(4)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
-  ["str"]=>
+  [u"str"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(2)
-    ["type"]=>
-    string(4) "text"
-    ["len"]=>
+    [u"type"]=>
+    unicode(4) "text"
+    [u"len"]=>
     int(-1)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
-  ["bin"]=>
+  [u"bin"]=>
   array(6) {
-    ["num"]=>
+    [u"num"]=>
     int(3)
-    ["type"]=>
-    string(5) "bytea"
-    ["len"]=>
+    [u"type"]=>
+    unicode(5) "bytea"
+    [u"len"]=>
     int(-1)
-    ["not null"]=>
+    [u"not null"]=>
     bool(false)
-    ["has default"]=>
+    [u"has default"]=>
     bool(false)
-    ["array dims"]=>
+    [u"array dims"]=>
     int(0)
   }
 }

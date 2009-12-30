@@ -51,7 +51,7 @@ pg_close(dbh);
 --EXPECTF--
 array(1) {
   [0]=>
-  string(1) "f"
+  unicode(1) "f"
 }
-string(14) "NOTICE:  11111"
+unicode(14) "NOTICE:  11111"
 ===DONE===

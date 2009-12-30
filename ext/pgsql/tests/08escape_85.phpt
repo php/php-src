@@ -25,19 +25,36 @@ else {
 	var_dump($expect);
 }
 
-// pg_escape_bytea() test
+// pg_escape_bytea() test w/o database
 $before = "ABC\\ABC";
-$expect  = "\\x4142435c414243";
+$expect  = "ABC\\\\\\\\ABC";
 $after  = pg_escape_bytea($before);
 if ($expect === $after) {
-	echo "pg_escape_bytea() is Ok\n";
+	echo "pg_escape_bytea() w/o db is Ok\n";
 }
 else {
-	echo "pg_escape_bytea() is NOT Ok\n";
+	echo "pg_escape_bytea() w/o db is NOT Ok\n";
 	var_dump($before);
 	var_dump($after);
 	var_dump($expect);
 }
+
+$db   = pg_connect($conn_str);
+
+// pg_escape_bytea() test w/ database
+$before = "ABC\\ABC";
+$expect  = "\\\\x4142435c414243";
+$after  = pg_escape_bytea($before);
+if ($expect === $after) {
+	echo "pg_escape_bytea() w/db is Ok\n";
+}
+else {
+	echo "pg_escape_bytea() w/db is NOT Ok\n";
+	var_dump($before);
+	var_dump($after);
+	var_dump($expect);
+}
+
 
 // Test using database
 $data = file_get_contents(FILE_NAME);
@@ -67,5 +84,6 @@ pg_escape_string() is NOT Ok
 unicode(9) "ABC\ABC\'"
 unicode(12) "ABC\\ABC\\''"
 unicode(10) "ABC\\ABC\'"
-pg_escape_bytea() is Ok
+pg_escape_bytea() w/o db is Ok
+pg_escape_bytea() w/db is Ok
 pg_escape_bytea() actually works with database

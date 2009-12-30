@@ -25,12 +25,12 @@ echo "Ok\n";
 array(1) {
   [0]=>
   array(3) {
-    ["num"]=>
-    string(4) "1234"
-    ["str"]=>
-    string(3) "AAA"
-    ["bin"]=>
-    string(8) "\x424242"
+    [u"num"]=>
+    unicode(4) "1234"
+    [u"str"]=>
+    unicode(3) "AAA"
+    [u"bin"]=>
+    unicode(8) "\x424242"
   }
 }
 SELECT * FROM php_pgsql_test WHERE num=1234;
