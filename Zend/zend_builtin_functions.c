@@ -623,12 +623,25 @@ ZEND_FUNCTION(define)
 	zend_bool non_cs = 0;
 	int case_sensitive = CONST_CS;
 	zend_constant c;
+	void *found = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz|b", &name, &name_len, &name_type, &val, &non_cs) == FAILURE) {
 		return;
 	}
 
-	if(non_cs) {
+	if (name_type == IS_UNICODE) {
+		UChar *sep = USTR_MAKE("::");
+		found = zend_u_memnstr(name.u, sep, sizeof("::") - 1, name.u + name_len);
+		efree(sep);
+	} else {
+		found = zend_memnstr(name.s, "::", sizeof("::") - 1, name.s + name_len);
+	}
+	if (found) {
+		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
+		RETURN_FALSE;
+	}
+
+	if (non_cs) {
 		case_sensitive = 0;
 	}
 
