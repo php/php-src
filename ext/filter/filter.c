@@ -768,7 +768,8 @@ PHP_FUNCTION(filter_input)
 				filter_flags = Z_LVAL_PP(filter_args);
 			} else if (Z_TYPE_PP(filter_args) == IS_ARRAY && zend_hash_find(HASH_OF(*filter_args), "flags", sizeof("flags"), (void **)&option) == SUCCESS) {
 				PHP_FILTER_GET_LONG_OPT(option, filter_flags);
-			} else if (Z_TYPE_PP(filter_args) == IS_ARRAY && 
+			}
+			if (Z_TYPE_PP(filter_args) == IS_ARRAY && 
 				zend_hash_find(HASH_OF(*filter_args), "options", sizeof("options"), (void **)&opt) == SUCCESS &&
 				Z_TYPE_PP(opt) == IS_ARRAY &&
 				zend_hash_find(HASH_OF(*opt), "default", sizeof("default"), (void **)&def) == SUCCESS
