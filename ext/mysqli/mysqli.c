@@ -936,7 +936,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		zval *retval_ptr; 
 	
 		object_and_properties_init(return_value, ce, NULL);
-		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
 	
 		if (ce->constructor) {
 			fci.size = sizeof(fci);
@@ -991,6 +990,8 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
 		}
+		
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
 	}
 }
 /* }}} */

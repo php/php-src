@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50636 (MySQLi_Result sets values before calling constructor).
+  (Pierrick)
 - Fixed bug #50575 (PDO_PGSQL LOBs are not compatible with PostgreSQL 8.5).
   (Matteo)
 - Fixed bug #50558 (Broken object model when extending tidy). (Pierrick)
