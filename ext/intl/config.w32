@@ -58,6 +58,11 @@ if (PHP_INTL != "no") {
 		ADD_SOURCES(configure_module_dirname + "/idn", "\
 				idn.c  \
 				 ", "intl");
+ 		ADD_SOURCES(configure_module_dirname + "/resourcebundle", "\
+ 				resourcebundle.c \
+ 				resourcebundle_class.c \
+ 				resourcebundle_iterator.c",
+ 				"intl");
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");
 		// if int32_t and uint32_t types are made available in PHP, uncomment next line
 		// ADD_FLAG("CFLAGS_INTL", "/D U_HAVE_INT32_T /D U_HAVE_UINT32_T");

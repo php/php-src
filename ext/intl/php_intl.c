@@ -54,6 +54,8 @@
 #include "locale/locale_class.h"
 #include "locale/locale_methods.h"
 
+#include "resourcebundle/resourcebundle_class.h"
+
 #include "idn/idn.h"
 
 #include <unicode/uloc.h>
@@ -66,11 +68,11 @@
 #define INTL_MODULE_VERSION PHP_INTL_VERSION
 
 /*
- * locale_get_default has a conflict since ICU also has 
+ * locale_get_default has a conflict since ICU also has
  * a function with the same  name
  * in fact ICU appends the version no. to it also
  * Hence the following undef for ICU version
- * Same true for the locale_set_default function 
+ * Same true for the locale_set_default function
 */
 #undef locale_get_default
 #undef locale_set_default
@@ -299,6 +301,36 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_utf8, 0, 0, 1)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
+	ZEND_ARG_INFO( 0, locale )
+	ZEND_ARG_INFO( 0, bundlename )
+	ZEND_ARG_INFO( 0, fallback )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_proc, 0, 0, 2 )
+    ZEND_ARG_INFO( 0, bundle )
+	ZEND_ARG_INFO( 0, index )
+	ZEND_ARG_INFO( 0, fallback )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_count_proc, 0, 0, 1 )
+  ZEND_ARG_INFO( 0, bundle )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_locales_proc, 0, 0, 1 )
+	ZEND_ARG_INFO( 0, bundlename )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_code_proc, 0, 0, 1 )
+  ZEND_ARG_INFO( 0, bundle )
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message_proc, 0, 0, 1 )
+  ZEND_ARG_INFO( 0, bundle )
+ZEND_END_ARG_INFO()
+
+
 /* }}} */
 
 /* {{{ intl_functions[]
@@ -392,6 +424,14 @@ zend_function_entry intl_functions[] = {
 	PHP_FALIAS(idn_to_utf8, idn_to_unicode, arginfo_idn_to_ascii)
 	PHP_FE(idn_to_unicode, arginfo_idn_to_ascii)
 
+ 	/* ResourceBundle functions */
+ 	PHP_FE( resourcebundle_create, arginfo_resourcebundle_create_proc )
+ 	PHP_FE( resourcebundle_get, arginfo_resourcebundle_get_proc )
+ 	PHP_FE( resourcebundle_count, arginfo_resourcebundle_count_proc )
+ 	PHP_FE( resourcebundle_locales, arginfo_resourcebundle_locales_proc )
+ 	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code_proc )
+ 	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message_proc )
+ 
 	/* common functions */
 	PHP_FE( intl_get_error_code, intl_0_args )
 	PHP_FE( intl_get_error_message, intl_0_args )
@@ -471,7 +511,7 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Expose Normalizer constants to PHP scripts */
 	normalizer_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-	
+
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class( TSRMLS_C );
 
@@ -484,6 +524,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants( INIT_FUNC_ARGS_PASSTHRU );
+
+	/* Register 'ResourceBundle' PHP class */
+	resourcebundle_register_class( TSRMLS_C);
 
 	/* Expose ICU error codes to PHP scripts. */
 	intl_expose_icu_error_codes( INIT_FUNC_ARGS_PASSTHRU );
