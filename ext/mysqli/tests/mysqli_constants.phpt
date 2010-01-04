@@ -117,7 +117,9 @@ require_once('skipifconnectfailure.inc');
 	if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
 		$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
 	}
-	if ($version > 60005 || $IS_MYSQLND) {
+
+	/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
+	if ($version >= 50500 || $IS_MYSQLND) {
 		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
 	}
 
