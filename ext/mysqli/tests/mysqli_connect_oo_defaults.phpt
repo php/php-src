@@ -30,8 +30,13 @@ new mysqli()
 
 			if (!$res = $mysqli->query("SELECT 'mysqli.default_socket' AS testing"))
 				printf("[001] [%d] %s\n", $mysqli->errno, $mysqli->error);
-			var_dump($res->fetch_assoc());
+			$tmp = $res->fetch_assoc();
 			$res->free_result();
+
+			if (!isset($tmp['testing']) || $tmp['testing'] != $socket) {
+				printf("[002] mysqli.default_socket not properly set?\n");
+				var_dump($tmp);
+			}
 
 			$mysqli->close();
 
@@ -149,10 +154,6 @@ new mysqli()
 	print "done!";
 ?>
 --EXPECTF--
-array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(21) "mysqli.default_socket"
-}
 array(1) {
   [%u|b%"testing"]=>
   %unicode|string%(19) "mysqli.default_port"
