@@ -460,4 +460,28 @@ function ut_datefmt_localtime( $fmt , $value ,$parse_pos=0 )
 {
     return $GLOBALS['oo-mode'] ? $fmt->localtime(  $value , $parse_pos ) : datefmt_localtime( $fmt ,  $value , $parse_pos );
 }
-?>
+
+function ut_resourcebundle_create( $locale, $bundle, $fallback=true )
+{
+    return $GLOBALS['oo-mode'] ? new ResourceBundle($locale, $bundle, $fallback): resourcebundle_create($locale, $bundle, $fallback);
+}
+function ut_resourcebundle_count($bundle )
+{
+    return $GLOBALS['oo-mode'] ? $bundle->count():resourcebundle_count($bundle);
+}
+function ut_resourcebundle_locales($bundle )
+{
+    return $GLOBALS['oo-mode'] ? ResourceBundle::getLocales($bundle):resourcebundle_locales($bundle);
+}
+function ut_resourcebundle_get($bundle, $idx )
+{
+    return $GLOBALS['oo-mode'] ? $bundle->get($idx):resourcebundle_get($bundle, $idx);
+}
+function ut_resourcebundle_get_error_code($bundle )
+{
+    return $GLOBALS['oo-mode'] ? $bundle->getErrorCode():resourcebundle_get_error_code($bundle);
+}
+function ut_resourcebundle_get_error_message($bundle )
+{
+    return $GLOBALS['oo-mode'] ? $bundle->getErrorMessage():resourcebundle_get_error_message($bundle);
+}
