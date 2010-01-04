@@ -1,8 +1,8 @@
 --TEST--
 phpinfo() mysql section
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
+<?php
+require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -62,8 +62,7 @@ if ($IS_MYSQLND) {
 		'connect_failure', 'connection_reused', 'explicit_close', 'implicit_close',
 		'disconnect_close', 'in_middle_of_command_close', 'explicit_free_result',
 		'implicit_free_result', 'explicit_stmt_close', 'implicit_stmt_close',
-		'put_hits', 'put_misses', 'get_hits', 'get_misses',
-		'size', 'free_items', 'references', 'mysql.cache_size',
+		'size',
 	);
 	foreach ($expected as $k => $entry)
 		if (!stristr($phpinfo, $entry))
