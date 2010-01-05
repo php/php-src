@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   (Pierrick)
 - Fixed bug #50632 (filter_input() does not return default value if the
   variable does not exist). (Ilia)
+- Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
 - Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
   in HTTP uploads). (Ilia)
 - Fixed bug #47409 (extract() problem with array containing word "this").
