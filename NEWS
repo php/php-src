@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   (Pierrick)
 - Fixed bug #50632 (filter_input() does not return default value if the
   variable does not exist). (Ilia)
+- Fixed bug #50576 (XML_OPTION_SKIP_TAGSTART option has no effect). (Pierrick)
 - Fixed bug #50575 (PDO_PGSQL LOBs are not compatible with PostgreSQL 8.5).
   (Matteo)
 - Fixed bug #50558 (Broken object model when extending tidy). (Pierrick)
