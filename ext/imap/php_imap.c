@@ -1169,7 +1169,6 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (params) {
 		zval **disabled_auth_method;
-		DebugBreak();
 		if (zend_hash_find(HASH_OF(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR"), (void **)&disabled_auth_method) == SUCCESS) {
 			switch (Z_TYPE_PP(disabled_auth_method)) {
 				case IS_STRING:
