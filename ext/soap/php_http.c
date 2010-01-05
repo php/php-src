@@ -764,9 +764,9 @@ try_again:
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
+		smart_str_free(&soap_headers);
 		if (err != soap_headers.len) {
 			if (request != buf) {efree(request);}
-			smart_str_free(&soap_headers);
 			php_stream_close(stream);
 			if (client->url) {
 				php_url_free(client->url);
@@ -778,8 +778,6 @@ try_again:
 			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
-		smart_str_free(&soap_headers);
-
 	} else {
 		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL TSRMLS_CC);
 		smart_str_free(&soap_headers_z);
@@ -1034,8 +1032,8 @@ try_again:
 				phpurl = new_url;
 
 				if (--redirect_max < 1) {
-					smart_str_free(&soap_headers_z);
 					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL TSRMLS_CC);
+					smart_str_free(&soap_headers_z);
 					return FALSE;
 				}
 
