@@ -815,7 +815,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 		if (parser->startElementHandler) {
 			args[0] = _xml_resource_zval(parser->index);
-			args[1] = _xml_string_zval(tag_name);
+			args[1] = _xml_string_zval(((char *) tag_name) + parser->toffset);
 			MAKE_STD_ZVAL(args[2]);
 			array_init(args[2]);
 
@@ -897,7 +897,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 
 		if (parser->endElementHandler) {
 			args[0] = _xml_resource_zval(parser->index);
-			args[1] = _xml_string_zval(tag_name);
+			args[1] = _xml_string_zval(((char *) tag_name) + parser->toffset);
 
 			if ((retval = xml_call_handler(parser, parser->endElementHandler, parser->endElementPtr, 2, args))) {
 				zval_ptr_dtor(&retval);
