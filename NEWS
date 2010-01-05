@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled libmagic to version 5.03. (Mikko)
 
+- Added support for DISABLE_AUTHENTICATOR for imap_open. (Pierre)
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
 - Added stream_resolve_include_path(). (Mikko)
