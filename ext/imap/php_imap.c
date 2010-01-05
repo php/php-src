@@ -41,6 +41,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/pcre/php_pcre.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -118,6 +119,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_append, 0, 0, 3)
 	ZEND_ARG_INFO(0, folder)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, date)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_msg, 0, 0, 1)
@@ -1266,20 +1268,45 @@ PHP_FUNCTION(imap_reopen)
 PHP_FUNCTION(imap_append)
 {
 	zval *streamind;
-	char *folder, *message, *flags = NULL;
-	int folder_len, message_len, flags_len = 0;
+	char *folder, *message, *internal_date = NULL, *flags = NULL;
+	int folder_len, message_len, internal_date_len = 0, flags_len = 0;
 	pils *imap_le_struct;
 	STRING st;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|s", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|ss", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len, &internal_date, &internal_date_len) == FAILURE) {
 		return;
 	}
+
+	zend_uchar unicode_date = (zend_uchar) internal_date;
+	char* regex = "/[ 0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/";
+	int regex_len = strlen(regex);
+	pcre_cache_entry *pce;				/* Compiled regex */
+	zval *subpats = NULL;				/* Parts (not used) */
+	long regex_flags = 0;				/* Flags (not used) */
+	long start_offset = 0;				/* Start offset (not used) */
+	int global = 0;
+
+	if (internal_date) {
+		/* Make sure the given internal_date string matches the RFC specified format */
+		if ((pce = pcre_get_compiled_regex_cache(unicode_date, regex, regex_len TSRMLS_CC)) == NULL) {
+			RETURN_FALSE;
+		}
+
+		php_pcre_match_impl(pce, unicode_date, internal_date, internal_date_len, return_value, subpats, global,
+			0, regex_flags, start_offset TSRMLS_CC);
+
+		if (!Z_LVAL_P(return_value)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "internal date not correctly formatted");
+			internal_date = NULL;
+		}
+	}
+
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
 	INIT (&st, mail_string, (void *) message, message_len);
 
-	if (mail_append_full(imap_le_struct->imap_stream, folder, (flags ? flags : NIL), NIL, &st)) {
+	if (mail_append_full(imap_le_struct->imap_stream, folder, (flags ? flags : NIL), (internal_date ? internal_date : NIL), &st)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
