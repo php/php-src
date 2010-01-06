@@ -1106,9 +1106,7 @@ PHP_FUNCTION(oci_rollback)
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
 	if (connection->descriptors) {
-		zend_hash_destroy(connection->descriptors);
-		efree(connection->descriptors);
-		connection->descriptors = NULL;
+		php_oci_connection_descriptors_free(connection TSRMLS_CC);
 	}
 
 	if (php_oci_connection_rollback(connection TSRMLS_CC)) {
@@ -1132,9 +1130,7 @@ PHP_FUNCTION(oci_commit)
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
 	if (connection->descriptors) {
-		zend_hash_destroy(connection->descriptors);
-		efree(connection->descriptors);
-		connection->descriptors = NULL;
+		php_oci_connection_descriptors_free(connection TSRMLS_CC);
 	}
 	
 	if (php_oci_connection_commit(connection TSRMLS_CC)) {
