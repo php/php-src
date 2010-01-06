@@ -95,6 +95,7 @@ php_oci_statement *php_oci_statement_create (php_oci_connection *connection, zst
 
 	statement->connection = connection;
 	statement->has_data = 0;
+	statement->has_descr = 0;
 	statement->parent_stmtid = 0;
 	zend_list_addref(statement->connection->rsrc_id);
 
@@ -133,6 +134,40 @@ int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRML
 }
 /* }}} */
 
+/* {{{ php_oci_cleanup_pre_fetch()
+   Helper function to cleanup ref-cursors and descriptors from the previous row */
+int php_oci_cleanup_pre_fetch(void *data TSRMLS_DC)
+{
+	php_oci_out_column *outcol = data;
+
+	if (!outcol->is_descr && !outcol->is_cursor)
+		return ZEND_HASH_APPLY_KEEP;
+
+	switch(outcol->data_type) {
+		case SQLT_CLOB:
+		case SQLT_BLOB:
+		case SQLT_RDD:
+		case SQLT_BFILE:
+			if (outcol->descid) {
+				zend_list_delete(outcol->descid);
+				outcol->descid = 0;
+			}
+			break;
+		case SQLT_RSET:
+			if (outcol->stmtid) {
+				zend_list_delete(outcol->stmtid);
+				outcol->stmtid = 0;
+				outcol->nested_statement = NULL;
+			}
+			break;
+		default:
+			break;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+
+} /* }}} */
+
+
 /* {{{ php_oci_statement_fetch()
  Fetch a row from the statement */
 int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
@@ -144,6 +179,10 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 	zend_bool piecewisecols = 0;
 	php_oci_out_column *column;
 	zstr zstr_data;
+
+	if (statement->has_descr && statement->columns) {
+		zend_hash_apply(statement->columns, (apply_func_t) php_oci_cleanup_pre_fetch TSRMLS_CC);
+    }
 
 	PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
 
@@ -577,6 +616,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 
 					define_type = SQLT_RSET;
 					outcol->is_cursor = 1;
+					outcol->statement->has_descr = 1;
 					outcol->storage_size4 = -1;
 					outcol->retlen = -1;
 					dynamic = OCI_DYNAMIC_FETCH;
@@ -590,6 +630,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 
 					define_type = outcol->data_type;
 					outcol->is_descr = 1;
+					outcol->statement->has_descr = 1;
 					outcol->storage_size4 = -1;
 					dynamic = OCI_DYNAMIC_FETCH;
 					break;

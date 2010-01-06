@@ -1368,22 +1368,19 @@ void php_oci_descriptor_flush_hash_dtor(void *data)
 }
 /* }}} */
 
-/* {{{ php_oci_descriptor_delete_from_hash()
- *
- * Delete descriptor from the hash
- */
-int php_oci_descriptor_delete_from_hash(void *data, void *id TSRMLS_DC)
-{
-	php_oci_descriptor *descriptor = *(php_oci_descriptor **)data;
-	int *desc_id = (int *) id;
-
-	if (descriptor && desc_id && descriptor->id == *desc_id) {
-		return 1;
-	}
-	return 0;
-}
 /* }}} */
 
+/* {{{ php_oci_connection_descriptors_free()
+ *
+ * Free descriptors for a connection
+ */
+void php_oci_connection_descriptors_free(php_oci_connection *connection TSRMLS_DC)
+{
+	zend_hash_destroy(connection->descriptors);
+	efree(connection->descriptors);
+	connection->descriptors = NULL;
+	connection->descriptor_count = 0;
+}
 /* }}} */
 
 /* {{{ php_oci_error()
@@ -2111,9 +2108,7 @@ int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC)
 	}
 
 	if (connection->descriptors) {
-		zend_hash_destroy(connection->descriptors);
-		efree(connection->descriptors);
-		connection->descriptors = NULL;
+		php_oci_connection_descriptors_free(connection TSRMLS_CC);
 	}
 
 	if (connection->svc) {

@@ -95,9 +95,17 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 		if (!connection->descriptors) {
 			ALLOC_HASHTABLE(connection->descriptors);
 			zend_hash_init(connection->descriptors, 0, NULL, php_oci_descriptor_flush_hash_dtor, 0);
+			connection->descriptor_count = 0;
+		}
+		
+		descriptor->index = (connection->descriptor_count)++;
+		if (connection->descriptor_count == LONG_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal descriptor counter has reached limit");
+			php_oci_connection_descriptors_free(connection TSRMLS_CC);
+			return NULL;
 		}
 
-		zend_hash_next_index_insert(connection->descriptors,&descriptor,sizeof(php_oci_descriptor *),NULL);
+		zend_hash_index_update(connection->descriptors,descriptor->index,&descriptor,sizeof(php_oci_descriptor *),NULL);
 	}
 	return descriptor;
 
@@ -672,7 +680,25 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 
 	if (descriptor->connection->descriptors) {
 		/* delete descriptor from the hash */
-		zend_hash_apply_with_argument(descriptor->connection->descriptors, php_oci_descriptor_delete_from_hash, (void *)&descriptor->id TSRMLS_CC);
+		zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
+		if (zend_hash_num_elements(descriptor->connection->descriptors) == 0) {
+			descriptor->connection->descriptor_count = 0;
+		} else {
+			if (descriptor->index + 1 == descriptor->connection->descriptor_count) {
+				/* If the descriptor being freed is the end-most one
+				 * allocated, then the descriptor_count is reduced so
+				 * a future descriptor can reuse the hash table index.
+				 * This can prevent the hash index range increasing in
+				 * the common case that each descriptor is
+				 * allocated/used/freed before another descriptor is
+				 * needed.  However it is possible that a script frees
+				 * descriptors in arbitrary order which would prevent
+				 * descriptor_count ever being reduced to zero until
+				 * zend_hash_num_elements() returns 0.
+				 */
+				descriptor->connection->descriptor_count--;
+			}
+		}
 	}
 	
 	/* flushing Lobs & Files with buffering enabled */
