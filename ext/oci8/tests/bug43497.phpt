@@ -157,7 +157,7 @@ for ($i = 1; $i <= 10; $i++) {
     readxmltab_im($c);
 }
 
-echo "\nExplicit LOB with no free (i.e. a temp lob leak)\n";
+echo "\nExplicit LOB with no free\n";
 for ($i = 1; $i <= 10; $i++) {
     echo "\nRun              = " . $i . "\n";
     echo "Temporary LOBs   = " . templobs($c, $sid) . "\n";
@@ -259,45 +259,45 @@ Run              = 10
 Temporary LOBs   = 0
 Loop count check = 100
 
-Explicit LOB with no free (i.e. a temp lob leak)
+Explicit LOB with no free
 
 Run              = 1
 Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 2
-Temporary LOBs   = 99
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 3
-Temporary LOBs   = 198
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 4
-Temporary LOBs   = 297
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 5
-Temporary LOBs   = 396
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 6
-Temporary LOBs   = 495
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 7
-Temporary LOBs   = 594
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 8
-Temporary LOBs   = 693
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 9
-Temporary LOBs   = 792
+Temporary LOBs   = 0
 Loop count check = 100
 
 Run              = 10
-Temporary LOBs   = 891
+Temporary LOBs   = 0
 Loop count check = 100
 Done
