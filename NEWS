@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Added stream_resolve_include_path(). (Mikko)
 
+- Fixed bug #50661 (DOMDocument::loadXML does not allow UTF-16). (Rob)
 - Fixed bug #50657 (copy() with an empty (zero-byte) HTTP source succeeds
   but returns false). (Ilia)
 - Fixed bug #50636 (MySQLi_Result sets values before calling constructor).
