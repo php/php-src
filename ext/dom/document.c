@@ -1598,7 +1598,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 
 
 /* {{{ */
-static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int options TSRMLS_DC) {
+static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int source_len, int options TSRMLS_DC) {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt = NULL;
 	dom_doc_propsptr doc_props;
@@ -1634,7 +1634,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int optio
 		}
 		
 	} else {
-		ctxt = xmlCreateDocParserCtxt(source);
+		ctxt = xmlCreateMemoryParserCtxt(source, source_len);
 	}
 
 	if (ctxt == NULL) {
@@ -1737,7 +1737,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		RETURN_FALSE;
 	}
 
-	newdoc = dom_document_parser(id, mode, source, options TSRMLS_CC);
+	newdoc = dom_document_parser(id, mode, source, source_len, options TSRMLS_CC);
 
 	if (!newdoc)
 		RETURN_FALSE;
