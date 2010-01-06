@@ -1386,7 +1386,7 @@ PHPAPI size_t _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, s
 	/* we've got at least 1 byte to read. 
 	 * less than 1 is an error */
 
-	if (haveread > 0) {
+	if (haveread > 0 || src->eof) {
 		return SUCCESS;
 	}
 	return FAILURE;
