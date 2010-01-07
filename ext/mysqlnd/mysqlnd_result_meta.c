@@ -142,7 +142,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 												MYSQLND *conn TSRMLS_DC)
 {
 	unsigned int i = 0;
-	php_mysql_packet_res_field field_packet;
+	php_mysql_packet_res_field * field_packet;
 #if PHP_MAJOR_VERSION >= 6
 	UChar *ustr;
 	int ulen;
@@ -150,7 +150,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
-	PACKET_INIT_ALLOCA(field_packet, PROT_RSET_FLD_PACKET);
+	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE TSRMLS_CC);
 	for (;i < meta->field_count; i++) {
 		long idx;
 
@@ -160,19 +160,19 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			meta->fields[i].root = NULL;
 		}
 
-		field_packet.metadata = &(meta->fields[i]);
-		if (FAIL == PACKET_READ_ALLOCA(field_packet, conn)) {
-			PACKET_FREE_ALLOCA(field_packet);
+		field_packet->metadata = &(meta->fields[i]);
+		if (FAIL == PACKET_READ(field_packet, conn)) {
+			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
-		if (field_packet.error_info.error_no) {
-			conn->error_info = field_packet.error_info;
+		if (field_packet->error_info.error_no) {
+			conn->error_info = field_packet->error_info;
 			/* Return back from CONN_QUERY_SENT */
-			PACKET_FREE_ALLOCA(field_packet);
+			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
 		
-		if (field_packet.stupid_list_fields_eof == TRUE) {
+		if (field_packet->stupid_list_fields_eof == TRUE) {
 			meta->field_count = i;
 			break;
 		}
@@ -184,7 +184,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 							 "Unknown type %d sent by the server. "
 							 "Please send a report to the developers",
 							 meta->fields[i].type);
-			PACKET_FREE_ALLOCA(field_packet);
+			PACKET_FREE(field_packet);
 			DBG_RETURN(FAIL);
 		}
 		if (meta->fields[i].type == MYSQL_TYPE_BIT) {
@@ -240,19 +240,19 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 #else
 		/* For BC we have to check whether the key is numeric and use it like this */
 		if ((meta->zend_hash_keys[i].is_numeric =
-					mysqlnd_is_key_numeric(field_packet.metadata->name,
-										   field_packet.metadata->name_length + 1,
+					mysqlnd_is_key_numeric(field_packet->metadata->name,
+										   field_packet->metadata->name_length + 1,
 										   &idx)))
 		{
 			meta->zend_hash_keys[i].key = idx;
 		} else {
 			meta->zend_hash_keys[i].key =
-					zend_get_hash_value(field_packet.metadata->name,
-										field_packet.metadata->name_length + 1);
+					zend_get_hash_value(field_packet->metadata->name,
+										field_packet->metadata->name_length + 1);
 		}
 #endif
 	}
-	PACKET_FREE_ALLOCA(field_packet);
+	PACKET_FREE(field_packet);
 
 	DBG_RETURN(PASS);
 }

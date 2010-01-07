@@ -354,21 +354,21 @@ enum_func_status
 mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC)
 {
 	enum_func_status ret;
-	php_mysql_packet_rset_header rset_header;
+	php_mysql_packet_rset_header * rset_header;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
 	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
 
 	ret = FAIL;
-	PACKET_INIT_ALLOCA(rset_header, PROT_RSET_HEADER_PACKET);
+	rset_header = conn->protocol->m.get_rset_header_packet(conn->protocol, FALSE TSRMLS_CC);
 	do {
 		SET_ERROR_AFF_ROWS(conn);
-		if (FAIL == (ret = PACKET_READ_ALLOCA(rset_header, conn))) {
+		if (FAIL == (ret = PACKET_READ(rset_header, conn))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading result set's header");
 			break;
 		}
 
-		if (rset_header.error_info.error_no) {
+		if (rset_header->error_info.error_no) {
 			/*
 			  Cover a protocol design error: error packet does not
 			  contain the server status. Therefore, the client has no way
@@ -383,7 +383,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 			  This will copy the error code and the messages, as they
 			  are buffers in the struct
 			*/
-			conn->error_info = rset_header.error_info;
+			conn->error_info = rset_header->error_info;
 			ret = FAIL;
 			/* Return back from CONN_QUERY_SENT */
 			CONN_SET_STATE(conn, CONN_READY);
@@ -391,13 +391,13 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 		}
 		conn->error_info.error_no = 0;
 
-		switch (rset_header.field_count) {
+		switch (rset_header->field_count) {
 			case MYSQLND_NULL_LENGTH: {	/* LOAD DATA LOCAL INFILE */
 				zend_bool is_warning;
 				DBG_INF("LOAD DATA");
 				conn->last_query_type = QUERY_LOAD_LOCAL;
 				CONN_SET_STATE(conn, CONN_SENDING_LOAD_DATA);
-				ret = mysqlnd_handle_local_infile(conn, rset_header.info_or_local_file, &is_warning TSRMLS_CC);
+				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file, &is_warning TSRMLS_CC);
 				CONN_SET_STATE(conn,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
 				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_NON_RSET_QUERY);
 				break;
@@ -405,13 +405,13 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 			case 0:				/* UPSERT */
 				DBG_INF("UPSERT");
 				conn->last_query_type = QUERY_UPSERT;
-				conn->field_count = rset_header.field_count;
-				conn->upsert_status.warning_count = rset_header.warning_count;
-				conn->upsert_status.server_status = rset_header.server_status;
-				conn->upsert_status.affected_rows = rset_header.affected_rows;
-				conn->upsert_status.last_insert_id = rset_header.last_insert_id;
+				conn->field_count = rset_header->field_count;
+				conn->upsert_status.warning_count = rset_header->warning_count;
+				conn->upsert_status.server_status = rset_header->server_status;
+				conn->upsert_status.affected_rows = rset_header->affected_rows;
+				conn->upsert_status.last_insert_id = rset_header->last_insert_id;
 				SET_NEW_MESSAGE(conn->last_message, conn->last_message_len,
-								rset_header.info_or_local_file, rset_header.info_or_local_file_len,
+								rset_header->info_or_local_file, rset_header->info_or_local_file_len,
 								conn->persistent);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (conn->upsert_status.server_status & SERVER_MORE_RESULTS_EXISTS) {
@@ -423,7 +423,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_NON_RSET_QUERY);
 				break;
 			default:{			/* Result set	*/
-				php_mysql_packet_eof fields_eof;
+				php_mysql_packet_eof * fields_eof;
 				MYSQLND_RES *result;
 				enum_mysqlnd_collected_stats stat = STAT_LAST;
 
@@ -438,9 +438,9 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				conn->last_query_type = QUERY_SELECT;
 				CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 				/* PS has already allocated it */
-				conn->field_count = rset_header.field_count;
+				conn->field_count = rset_header->field_count;
 				if (!stmt) {
-					result = conn->current_result = mysqlnd_result_init(rset_header.field_count TSRMLS_CC);
+					result = conn->current_result = mysqlnd_result_init(rset_header->field_count TSRMLS_CC);
 				} else {
 					if (!stmt->result) {
 						DBG_INF("This is 'SHOW'/'EXPLAIN'-like query.");
@@ -449,7 +449,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
-						result = stmt->result = mysqlnd_result_init(rset_header.field_count TSRMLS_CC);
+						result = stmt->result = mysqlnd_result_init(rset_header->field_count TSRMLS_CC);
 					} else {
 						/*
 						  Update result set metadata if it for some reason changed between
@@ -478,8 +478,8 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				}
 
 				/* Check for SERVER_STATUS_MORE_RESULTS if needed */
-				PACKET_INIT_ALLOCA(fields_eof, PROT_EOF_PACKET);
-				if (FAIL == (ret = PACKET_READ_ALLOCA(fields_eof, conn))) {
+				fields_eof = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
+				if (FAIL == (ret = PACKET_READ(fields_eof, conn))) {
 					DBG_ERR("Error ocurred while reading the EOF packet");
 					result->m.free_result_contents(result TSRMLS_CC);
 					mnd_efree(result);
@@ -492,9 +492,9 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 					}
 				} else {
 					unsigned int to_log = MYSQLND_G(log_mask);
-					to_log &= fields_eof.server_status;
-					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof.warning_count, fields_eof.server_status);
-					conn->upsert_status.warning_count = fields_eof.warning_count;
+					to_log &= fields_eof->server_status;
+					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof->warning_count, fields_eof->server_status);
+					conn->upsert_status.warning_count = fields_eof->warning_count;
 					/*
 					  If SERVER_MORE_RESULTS_EXISTS is set then this is either MULTI_QUERY or a CALL()
 					  The first packet after sending the query/com_execute has the bit set only
@@ -502,12 +502,12 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 					  will include many result sets. What actually matters are the bits set at the end
 					  of every result set (the EOF packet).
 					*/
-					conn->upsert_status.server_status = fields_eof.server_status;
-					if (fields_eof.server_status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
+					conn->upsert_status.server_status = fields_eof->server_status;
+					if (fields_eof->server_status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
 						stat = STAT_BAD_INDEX_USED;
-					} else if (fields_eof.server_status & SERVER_QUERY_NO_INDEX_USED) {
+					} else if (fields_eof->server_status & SERVER_QUERY_NO_INDEX_USED) {
 						stat = STAT_NO_INDEX_USED;
-					} else if (fields_eof.server_status & SERVER_QUERY_WAS_SLOW) {
+					} else if (fields_eof->server_status & SERVER_QUERY_WAS_SLOW) {
 						stat = STAT_QUERY_WAS_SLOW;
 					}
 					if (to_log) {
@@ -520,13 +520,13 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 					MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
 				}
 
-				PACKET_FREE_ALLOCA(fields_eof);
+				PACKET_FREE(fields_eof);
 
 				break;
 			}
 		}
 	} while (0);
-	PACKET_FREE_ALLOCA(rset_header);
+	PACKET_FREE(rset_header);
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -866,7 +866,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 	  this to be not NULL.
 	*/
 	/* FALSE = non-persistent */
-	PACKET_INIT(result->row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, FALSE);
+	result->row_packet = result->conn->protocol->m.get_row_packet(result->conn->protocol, FALSE TSRMLS_CC);
 	result->row_packet->result_set_memory_pool = result->result_set_memory_pool;
 	result->row_packet->field_count = result->field_count;
 	result->row_packet->binary_protocol = ps;
@@ -1072,7 +1072,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 											 php_mysqlnd_rowp_read_text_protocol;
 
 	/* non-persistent */
-	PACKET_INIT(row_packet, PROT_ROW_PACKET, php_mysql_packet_row *, FALSE);
+	row_packet = conn->protocol->m.get_row_packet(conn->protocol, FALSE TSRMLS_CC);
 	row_packet->result_set_memory_pool = result->result_set_memory_pool;
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;

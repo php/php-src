@@ -687,9 +687,9 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_net_init */
+/* {{{ mysqlnd_net_free */
 void
-mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC)
+mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 {
 	zend_bool pers = net->persistent;
 

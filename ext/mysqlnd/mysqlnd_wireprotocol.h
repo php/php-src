@@ -36,13 +36,6 @@ extern char * mysqlnd_read_body_name;
 
 
 /* Packet handling */
-#define PACKET_INIT(packet, enum_type, c_type, pers)  \
-	{ \
-		packet = (c_type) pecalloc(1, packet_methods[(enum_type)].struct_size, (pers)); \
-		((c_type) (packet))->header.m = &packet_methods[(enum_type)]; \
-		((c_type) (packet))->header.persistent = (pers); \
-		DBG_INF_FMT("PACKET_INIT(%p, %d, %d)", packet, (int) enum_type, (int) pers); \
-	}
 #define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn) TSRMLS_CC))
 #define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
 #define PACKET_FREE(packet) \
@@ -50,15 +43,6 @@ extern char * mysqlnd_read_body_name;
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
 		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
 	} while (0);
-
-#define PACKET_INIT_ALLOCA(packet, enum_type)  \
-	{ \
-		memset(&(packet), 0, packet_methods[enum_type].struct_size); \
-		(packet).header.m = &packet_methods[enum_type]; \
-	}
-#define PACKET_WRITE_ALLOCA(packet, conn)	PACKET_WRITE(&(packet), (conn))
-#define PACKET_READ_ALLOCA(packet, conn)	PACKET_READ(&(packet), (conn))
-#define PACKET_FREE_ALLOCA(packet)			(packet.header.m->free_mem(&(packet), TRUE TSRMLS_CC))
 
 extern const char * const mysqlnd_command_to_text[COM_END];
 
@@ -284,6 +268,11 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
+
+
+MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);
+void mysqlnd_protocol_free(MYSQLND_PROTOCOL * net TSRMLS_DC);
+
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 
