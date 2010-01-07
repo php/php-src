@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50680 (strtotime() does not support eighth ordinal number).
+  (Ilia)
 - Fixed bug #50661 (DOMDocument::loadXML does not allow UTF-16). (Rob)
 - Fixed bug #50657 (copy() with an empty (zero-byte) HTTP source succeeds but
   returns false). (Ilia)
