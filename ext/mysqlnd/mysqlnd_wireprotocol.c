@@ -1786,6 +1786,194 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 /* }}} */
 
 
+
+/* {{{ mysqlnd_protocol::get_greet_packet */
+static struct st_php_mysql_packet_greet *
+MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_greet * packet = pecalloc(1, packet_methods[PROT_GREET_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_greet_packet");
+	packet->header.m = &packet_methods[PROT_GREET_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_auth_packet */
+static struct st_php_mysql_packet_auth *
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_auth * packet = pecalloc(1, packet_methods[PROT_AUTH_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_auth_packet");
+	packet->header.m = &packet_methods[PROT_AUTH_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_ok_packet */
+static struct st_php_mysql_packet_ok *
+MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_ok * packet = pecalloc(1, packet_methods[PROT_OK_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_ok_packet");
+	packet->header.m = &packet_methods[PROT_OK_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_eof_packet */
+static struct st_php_mysql_packet_eof *
+MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_eof * packet = pecalloc(1, packet_methods[PROT_EOF_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_eof_packet");
+	packet->header.m = &packet_methods[PROT_EOF_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_command_packet */
+static struct st_php_mysql_packet_command *
+MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_command * packet = pecalloc(1, packet_methods[PROT_CMD_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_command_packet");
+	packet->header.m = &packet_methods[PROT_CMD_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_rset_packet */
+static struct st_php_mysql_packet_rset_header *
+MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_rset_header * packet = pecalloc(1, packet_methods[PROT_RSET_HEADER_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_rset_header_packet");
+	packet->header.m = &packet_methods[PROT_RSET_HEADER_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_result_field_packet */
+static struct st_php_mysql_packet_res_field *
+MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_res_field * packet = pecalloc(1, packet_methods[PROT_RSET_FLD_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_result_field_packet");
+	packet->header.m = &packet_methods[PROT_RSET_FLD_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_row_packet */
+static struct st_php_mysql_packet_row *
+MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_row * packet = pecalloc(1, packet_methods[PROT_ROW_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_row_packet");
+	packet->header.m = &packet_methods[PROT_ROW_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_stats_packet */
+static struct st_php_mysql_packet_stats *
+MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_stats * packet = pecalloc(1, packet_methods[PROT_STATS_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_stats_packet");
+	packet->header.m = &packet_methods[PROT_STATS_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_prepare_response_packet */
+static struct st_php_mysql_packet_prepare_response *
+MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_prepare_response * packet = pecalloc(1, packet_methods[PROT_PREPARE_RESP_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_prepare_response_packet");
+	packet->header.m = &packet_methods[PROT_PREPARE_RESP_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_change_user_response_packet */
+static struct st_php_mysql_packet_chg_user_resp*
+MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_php_mysql_packet_chg_user_resp * packet = pecalloc(1, packet_methods[PROT_CHG_USER_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_change_user_response_packet");
+	packet->header.m = &packet_methods[PROT_CHG_USER_PACKET];
+	packet->header.persistent = persistent;
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol_init */
+MYSQLND_PROTOCOL *
+mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
+{
+	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_PROTOCOL *ret = mnd_pecalloc(1, alloc_size, persistent);
+
+	DBG_ENTER("mysqlnd_protocol_init");
+	DBG_INF_FMT("persistent=%d", persistent);
+	ret->persistent = persistent;
+
+	ret->m.get_greet_packet = MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet);
+	ret->m.get_auth_packet = MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet);
+	ret->m.get_ok_packet = MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet);
+	ret->m.get_command_packet = MYSQLND_METHOD(mysqlnd_protocol, get_command_packet);
+	ret->m.get_eof_packet = MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet);
+	ret->m.get_rset_header_packet = MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet);
+	ret->m.get_result_field_packet = MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet);
+	ret->m.get_row_packet = MYSQLND_METHOD(mysqlnd_protocol, get_row_packet);
+	ret->m.get_stats_packet = MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet);
+	ret->m.get_prepare_response_packet = MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet);
+	ret->m.get_change_user_response_packet = MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet);
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol_free */
+void
+mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
+{
+	zend_bool pers = protocol->persistent;
+
+	DBG_ENTER("mysqlnd_protocol_free");
+
+	if (protocol) {
+		mnd_pefree(protocol, pers);
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4

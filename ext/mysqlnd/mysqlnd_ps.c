@@ -218,20 +218,20 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT *stmt TSRMLS_DC)
 	/* Follows parameter metadata, we have just to skip it, as libmysql does */
 	unsigned int i = 0;
 	enum_func_status ret = PASS;
-	php_mysql_packet_res_field field_packet;
+	php_mysql_packet_res_field * field_packet;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	PACKET_INIT_ALLOCA(field_packet, PROT_RSET_FLD_PACKET);
-	field_packet.skip_parsing = TRUE;
+	field_packet = stmt->conn->protocol->m.get_result_field_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
+	field_packet->skip_parsing = TRUE;
 	for (;i < stmt->param_count; i++) {
-		if (FAIL == PACKET_READ_ALLOCA(field_packet, stmt->conn)) {
+		if (FAIL == PACKET_READ(field_packet, stmt->conn)) {
 			ret = FAIL;
 			break;
 		}
 	}
-	PACKET_FREE_ALLOCA(field_packet);
+	PACKET_FREE(field_packet);
 
 	DBG_RETURN(ret);
 }
@@ -242,31 +242,31 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT *stmt TSRMLS_DC)
 static enum_func_status
 mysqlnd_stmt_read_prepare_response(MYSQLND_STMT *stmt TSRMLS_DC)
 {
-	php_mysql_packet_prepare_response prepare_resp;
+	php_mysql_packet_prepare_response * prepare_resp;
 	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_stmt_read_prepare_response");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	PACKET_INIT_ALLOCA(prepare_resp, PROT_PREPARE_RESP_PACKET);
-	if (FAIL == PACKET_READ_ALLOCA(prepare_resp, stmt->conn)) {
+	prepare_resp = stmt->conn->protocol->m.get_prepare_response_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
+	if (FAIL == PACKET_READ(prepare_resp, stmt->conn)) {
 		ret = FAIL;
 		goto done;
 	}
 
-	if (0xFF == prepare_resp.error_code) {
-		stmt->error_info = stmt->conn->error_info = prepare_resp.error_info;
+	if (0xFF == prepare_resp->error_code) {
+		stmt->error_info = stmt->conn->error_info = prepare_resp->error_info;
 		ret = FAIL;
 		goto done;
 	}
 
-	stmt->stmt_id = prepare_resp.stmt_id;
-	stmt->warning_count = stmt->conn->upsert_status.warning_count = prepare_resp.warning_count;
-	stmt->field_count = stmt->conn->field_count = prepare_resp.field_count;
-	stmt->param_count = prepare_resp.param_count;
-	PACKET_FREE_ALLOCA(prepare_resp);
-
+	stmt->stmt_id = prepare_resp->stmt_id;
+	stmt->warning_count = stmt->conn->upsert_status.warning_count = prepare_resp->warning_count;
+	stmt->field_count = stmt->conn->field_count = prepare_resp->field_count;
+	stmt->param_count = prepare_resp->param_count;
 done:
+	PACKET_FREE(prepare_resp);
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -276,14 +276,14 @@ done:
 static enum_func_status
 mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT *stmt TSRMLS_DC)
 {
-	php_mysql_packet_eof fields_eof;
+	php_mysql_packet_eof * fields_eof;
 	enum_func_status ret;
 
 	DBG_ENTER("mysqlnd_stmt_prepare_read_eof");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
-	PACKET_INIT_ALLOCA(fields_eof, PROT_EOF_PACKET);
-	if (FAIL == (ret = PACKET_READ_ALLOCA(fields_eof, stmt->conn))) {
+	fields_eof = stmt->conn->protocol->m.get_eof_packet(stmt->conn->protocol, FALSE TSRMLS_CC);
+	if (FAIL == (ret = PACKET_READ(fields_eof, stmt->conn))) {
 		if (stmt->result) {
 			stmt->result->m.free_result_contents(stmt->result TSRMLS_CC);
 			mnd_efree(stmt->result);
@@ -291,11 +291,11 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT *stmt TSRMLS_DC)
 			stmt->state = MYSQLND_STMT_INITTED;
 		}
 	} else {
-		stmt->upsert_status.server_status = fields_eof.server_status;
-		stmt->upsert_status.warning_count = fields_eof.warning_count;
+		stmt->upsert_status.server_status = fields_eof->server_status;
+		stmt->upsert_status.warning_count = fields_eof->warning_count;
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
-	PACKET_FREE_ALLOCA(fields_eof);
+	PACKET_FREE(fields_eof);
 
 	DBG_RETURN(ret);
 }
@@ -794,7 +794,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
-						// copied data, thus also the ownership. Thus null data
+						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
 				}
@@ -973,7 +973,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 							result->meta->fields[i].max_length = Z_STRLEN_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
-						// copied data, thus also the ownership. Thus null data
+						/* copied data, thus also the ownership. Thus null data */
 						ZVAL_NULL(data);
 					}
 				}
