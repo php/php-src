@@ -24,7 +24,10 @@ PHP                                                                        NEWS
   in HTTP uploads). (Ilia)
 - Fixed bug #47409 (extract() problem with array containing word "this").
   (Ilia, chrisstocktonaz at gmail dot com)
+- Fixed bug #47281 ($php_errormsg is limited in size of characters)
+  (Oracle Corp.)
 - Fixed bug #44827 (define() allows :: in constant names). (Ilia)
+
 
 ?? ??? 20??, PHP 5.3.2
 - Upgraded bundled sqlite to version 3.6.21. (Ilia)
