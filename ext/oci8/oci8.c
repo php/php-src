@@ -79,7 +79,7 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define SQLT_CFILEE 115
 #endif
 
-#define PHP_OCI_ERRBUF_LEN 512
+#define PHP_OCI_ERRBUF_LEN 1024
 
 #if ZEND_MODULE_API_NO > 20020429
 #define ONUPDATELONGFUNC OnUpdateLong
@@ -1450,8 +1450,6 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 {
 	sb4 error_code = 0;
 	text err_buf[PHP_OCI_ERRBUF_LEN];
-
-	err_buf[0] = '\0';
 
 	memset(err_buf, 0, sizeof(err_buf));
 	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, err_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR));
