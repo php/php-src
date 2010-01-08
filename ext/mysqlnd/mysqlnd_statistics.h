@@ -220,8 +220,8 @@ void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_val
 							 TSRMLS_DC ZEND_FILE_LINE_DC);
 
 
-void mysqlnd_stats_init(MYSQLND_STATS ** stats);
-void mysqlnd_stats_end(MYSQLND_STATS * stats);
+PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats);
+PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
 
 #endif	/* MYSQLND_STATISTICS_H */
 

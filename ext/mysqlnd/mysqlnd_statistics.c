@@ -236,7 +236,7 @@ PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LIN
 
 
 /* {{{ mysqlnd_stats_init */
-void
+PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
@@ -250,7 +250,7 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats)
 
 
 /* {{{ mysqlnd_stats_end */
-void
+PHPAPI void
 mysqlnd_stats_end(MYSQLND_STATS * stats)
 {
 #ifdef ZTS
