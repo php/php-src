@@ -78,7 +78,7 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 	struct timeval tv;
 
 	if (gettimeofday(&tv, NULL) == 0) {
-		LCG(s1) = tv.tv_sec ^ (~tv.tv_usec);
+		LCG(s1) = tv.tv_sec ^ (tv.tv_usec<<11);
 	} else {
 		LCG(s1) = 1;
 	}
@@ -87,6 +87,11 @@ static void lcg_seed(TSRMLS_D) /* {{{ */
 #else
 	LCG(s2) = (long) getpid();
 #endif
+
+	/* Add entropy to s2 by calling gettimeofday() again */
+	if (gettimeofday(&tv, NULL) == 0) {
+		LCG(s2) ^= (tv.tv_usec<<11);
+	}
 
 	LCG(seeded) = 1;
 }
