@@ -240,6 +240,7 @@ void
 mysqlnd_stats_init(MYSQLND_STATS ** stats)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
+	(*stats)->handlers = calloc(STAT_LAST, sizeof(mysqlnd_stat_handler));
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
@@ -255,6 +256,7 @@ mysqlnd_stats_end(MYSQLND_STATS * stats)
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
+	free(stats->handlers);
 	/* mnd_free will reference LOCK_access and crash...*/
 	free(stats);
 }
