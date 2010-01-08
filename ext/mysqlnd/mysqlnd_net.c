@@ -658,7 +658,7 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 
 
 /* {{{ mysqlnd_net_init */
-MYSQLND_NET *
+PHPAPI MYSQLND_NET *
 mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
@@ -689,7 +689,7 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 
 
 /* {{{ mysqlnd_net_free */
-void
+PHPAPI void
 mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 {
 	zend_bool pers = net->persistent;
