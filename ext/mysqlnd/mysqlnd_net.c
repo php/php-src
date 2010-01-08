@@ -78,7 +78,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read)(MYSQLND * conn, zend_uchar * buffer, s
 		buffer += ret;
 		to_read -= ret;
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_BYTES_RECEIVED, count);
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_BYTES_RECEIVED, count);
 	conn->net->stream->chunk_size = old_chunk_size;
 	DBG_RETURN(PASS);
 }
@@ -307,7 +307,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
 
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(&conn->stats,
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn->stats,
 			STAT_BYTES_SENT, count + packets_sent * MYSQLND_HEADER_SIZE,
 			STAT_PROTOCOL_OVERHEAD_OUT, packets_sent * MYSQLND_HEADER_SIZE,
 			STAT_PACKETS_SENT, packets_sent);
