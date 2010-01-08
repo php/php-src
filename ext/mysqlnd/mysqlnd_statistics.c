@@ -240,7 +240,8 @@ PHPAPI void
 mysqlnd_stats_init(MYSQLND_STATS ** stats)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
-	(*stats)->handlers = calloc(STAT_LAST, sizeof(mysqlnd_stat_handler));
+	(*stats)->triggers = calloc(STAT_LAST, sizeof(mysqlnd_stat_trigger));
+	(*stats)->in_trigger = FALSE;
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
@@ -256,9 +257,42 @@ mysqlnd_stats_end(MYSQLND_STATS * stats)
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
-	free(stats->handlers);
+	free(stats->triggers);
 	/* mnd_free will reference LOCK_access and crash...*/
 	free(stats);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stats_set_trigger */
+PHPAPI mysqlnd_stat_trigger
+mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC)
+{
+	mysqlnd_stat_trigger ret = NULL;
+	DBG_ENTER("mysqlnd_stats_set_trigger");
+	if (stats) {
+		MYSQLND_STATS_LOCK(stats);
+		ret = stats->triggers[stat];
+		stats->triggers[stat] = trigger;
+		MYSQLND_STATS_UNLOCK(stats);
+	}
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stats_set_handler */
+PHPAPI mysqlnd_stat_trigger
+mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC)
+{
+	mysqlnd_stat_trigger ret = NULL;
+	DBG_ENTER("mysqlnd_stats_reset_trigger");
+	if (stats) {
+		MYSQLND_STATS_LOCK(stats);
+		memset(stats->triggers, 0, STAT_LAST * sizeof(mysqlnd_stat_trigger));
+		MYSQLND_STATS_UNLOCK(stats);
+	}
+	DBG_RETURN(ret);
 }
 /* }}} */
 

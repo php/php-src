@@ -43,10 +43,10 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #endif
 
 #define MYSQLND_CHECK_AND_CALL_HANDLER(stats, statistic, value) \
-			if ((stats)->handlers[(statistic)] && (stats)->in_handler == FALSE) { \
-				(stats)->in_handler = TRUE; \
-				(stats)->handlers[(statistic)]((stats), (statistic), (value) TSRMLS_CC); \
-				(stats)->in_handler = FALSE; \
+			if ((stats)->triggers[(statistic)] && (stats)->in_trigger == FALSE) { \
+				(stats)->in_trigger = TRUE; \
+				(stats)->triggers[(statistic)]((stats), (statistic), (value) TSRMLS_CC); \
+				(stats)->in_trigger = FALSE; \
 			} \
 
 
@@ -222,6 +222,8 @@ void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_val
 
 PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats);
 PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC);
 
 #endif	/* MYSQLND_STATISTICS_H */
 

@@ -210,13 +210,13 @@ typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 
 typedef struct st_mysqlnd_stats MYSQLND_STATS;
 
-typedef void (*mysqlnd_stat_handler)(MYSQLND_STATS * stats, enum_mysqlnd_collected_stats stat, int64_t change TSRMLS_DC);
+typedef void (*mysqlnd_stat_trigger)(MYSQLND_STATS * stats, enum_mysqlnd_collected_stats stat, int64_t change TSRMLS_DC);
 
 struct st_mysqlnd_stats
 {
 	uint64_t				values[STAT_LAST];
-	mysqlnd_stat_handler 	*handlers;
-	zend_bool				in_handler;
+	mysqlnd_stat_trigger 	*triggers;
+	zend_bool				in_trigger;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
