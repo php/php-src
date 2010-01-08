@@ -23,8 +23,8 @@
 #ifndef MYSQLND_NET_H
 #define MYSQLND_NET_H
 
-MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
-void mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC);
+PHPAPI MYSQLND_NET * mysqlnd_net_init(zend_bool persistent TSRMLS_DC);
+PHPAPI void mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC);
 
 #endif /* MYSQLND_NET_H */
 
