@@ -1974,6 +1974,19 @@ mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
 /* }}} */
 
 
+/* {{{ _mysqlnd_plugin_get_plugin_protocol_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_protocol_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!protocol || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)protocol + sizeof(MYSQLND_PROTOCOL) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4
