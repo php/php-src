@@ -661,7 +661,8 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 MYSQLND_NET *
 mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 {
-	MYSQLND_NET * net = mnd_pecalloc(1, sizeof(MYSQLND_NET), persistent);
+	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_net_init");
 	DBG_INF_FMT("persistent=%d", persistent);
@@ -717,6 +718,20 @@ mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_net_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_net_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!net || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)net + sizeof(MYSQLND_NET) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
 
 
 /*
