@@ -54,7 +54,7 @@
 			DBG_ERR_FMT("Empty '%s' packet body", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
 		} \
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, packet_type_to_statistic_byte_count[packet_type], \
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, packet_type_to_statistic_byte_count[packet_type], \
 											MYSQLND_HEADER_SIZE + (packet)->header.size, \
 											packet_type_to_statistic_packet_count[packet_type], \
 											1); \
@@ -257,7 +257,7 @@ mysqlnd_read_header(MYSQLND * conn, mysqlnd_packet_header * header TSRMLS_DC)
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
 	DBG_INF_FMT("HEADER: prot_packet_no=%d size=%3d", header->packet_no, header->size);
 #endif
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats,
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats,
 							STAT_PROTOCOL_OVERHEAD_IN, MYSQLND_HEADER_SIZE,
 							STAT_PACKETS_RECEIVED, 1);
 
@@ -672,7 +672,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 		EG(error_reporting) = 0;
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_PACKETS_SENT_CMD);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PACKETS_SENT_CMD);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	net->m.consume_uneaten_data(net, packet->command TSRMLS_CC);
@@ -696,7 +696,7 @@ size_t php_mysqlnd_cmd_write(void *_packet, MYSQLND *conn TSRMLS_DC)
 
 		ret = conn->net->m.send(conn, (char *)tmp, tmp_len - MYSQLND_HEADER_SIZE TSRMLS_CC);
 		if (tmp != net->cmd_buffer.buffer) {
-			MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
+			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
 		}
 		written = ret;
@@ -1431,7 +1431,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 	if (FAIL == ret) {
 		goto end;
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, packet_type_to_statistic_byte_count[PROT_ROW_PACKET],
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, packet_type_to_statistic_byte_count[PROT_ROW_PACKET],
 										MYSQLND_HEADER_SIZE + packet->header.size,
 										packet_type_to_statistic_packet_count[PROT_ROW_PACKET],
 										1);
@@ -1465,7 +1465,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 						packet->server_status, packet->warning_count);
 		}
 	} else {
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats,
+		MYSQLND_INC_CONN_STATISTIC(conn->stats,
 									packet->binary_protocol? STAT_ROWS_FETCHED_FROM_SERVER_PS:
 															 STAT_ROWS_FETCHED_FROM_SERVER_NORMAL);
 
@@ -1489,7 +1489,7 @@ php_mysqlnd_rowp_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 														packet->persistent_alloc);
 			}
 		} else {
-			MYSQLND_INC_CONN_STATISTIC(&conn->stats,
+			MYSQLND_INC_CONN_STATISTIC(conn->stats,
 										packet->binary_protocol? STAT_ROWS_SKIPPED_PS:
 																 STAT_ROWS_SKIPPED_NORMAL);
 		}
