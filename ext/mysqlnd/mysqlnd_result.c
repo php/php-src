@@ -59,7 +59,7 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 						result->stored_data->persistent,
 						result->conn->options.numeric_and_datetime_as_unicode,
 						result->conn->options.int_and_float_native,
-						&result->conn->stats TSRMLS_CC);
+						result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
 				  NULL fields are 0 length, 0 is not more than 0
@@ -144,7 +144,7 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 	if (unbuf->last_row_data) {
 		unsigned int i, ctor_called_count = 0;
 		zend_bool copy_ctor_called;
-		MYSQLND_STATS *global_stats = result->conn? &result->conn->stats:NULL;
+		MYSQLND_STATS *global_stats = result->conn? result->conn->stats:NULL;
 
 		DBG_INF_FMT("%u columns to free", result->field_count);
 		for (i = 0; i < result->field_count; i++) {
@@ -399,7 +399,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				CONN_SET_STATE(conn, CONN_SENDING_LOAD_DATA);
 				ret = mysqlnd_handle_local_infile(conn, rset_header->info_or_local_file, &is_warning TSRMLS_CC);
 				CONN_SET_STATE(conn,  (ret == PASS || is_warning == TRUE)? CONN_READY:CONN_QUIT_SENT);
-				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_NON_RSET_QUERY);
+				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
 			}
 			case 0:				/* UPSERT */
@@ -420,7 +420,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 					CONN_SET_STATE(conn, CONN_READY);
 				}
 				ret = PASS;
-				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_NON_RSET_QUERY);
+				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
 			default:{			/* Result set	*/
 				php_mysql_packet_eof * fields_eof;
@@ -430,7 +430,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				DBG_INF("Result set pending");
 				SET_EMPTY_MESSAGE(conn->last_message, conn->last_message_len, conn->persistent);
 
-				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_RSET_QUERY);
+				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
 				memset(&conn->upsert_status, 0, sizeof(conn->upsert_status));
 				/* restore after zeroing */
 				SET_ERROR_AFF_ROWS(conn);
@@ -517,7 +517,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						efree(backtrace);
 #endif
 					}
-					MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
+					MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
 				}
 
 				PACKET_FREE(fields_eof);
@@ -627,7 +627,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 		row_packet->fields = NULL;
 		row_packet->row_buffer = NULL;
 
-		MYSQLND_INC_CONN_STATISTIC(&result->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
+		MYSQLND_INC_CONN_STATISTIC(result->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
 		if (!row_packet->skip_extraction) {
 			MYSQLND_FIELD *field = result->meta->fields;
@@ -640,7 +640,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 
 			retrow = mnd_malloc(result->field_count * sizeof(char *));
 
@@ -737,7 +737,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 		row_packet->row_buffer = NULL;
 
 
-		MYSQLND_INC_CONN_STATISTIC(&result->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
+		MYSQLND_INC_CONN_STATISTIC(result->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
 		if (!row_packet->skip_extraction) {
 			HashTable *row_ht = Z_ARRVAL_P(row);
@@ -753,7 +753,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 
 			for (i = 0; i < field_count; i++, field++, zend_hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
@@ -907,7 +907,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
 				  NULL fields are 0 length, 0 is not more than 0
@@ -976,7 +976,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
 								  result->stored_data->persistent,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 			for (i = 0; i < result->field_count; i++) {
 				/*
 				  NULL fields are 0 length, 0 is not more than 0
@@ -1113,7 +1113,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 		memset(set->data, 0, set->row_count * meta->field_count * sizeof(zval *));
 	}
 
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats,
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats,
 									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
 														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
 									   set->row_count);
@@ -1209,7 +1209,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result TSRMLS_DC)
 	{
 		DBG_INF("skipping result");
 		/* We have to fetch all data to clean the line */
-		MYSQLND_INC_CONN_STATISTIC(&result->conn->stats,
+		MYSQLND_INC_CONN_STATISTIC(result->conn->stats,
 									result->type == MYSQLND_RES_NORMAL? STAT_FLUSHED_NORMAL_SETS:
 																		STAT_FLUSHED_PS_SETS);
 
@@ -1232,7 +1232,7 @@ MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES *result, zend_bool implicit
 	DBG_INF_FMT("implicit=%d", implicit);
 
 	result->m.skip_result(result TSRMLS_CC);
-	MYSQLND_INC_CONN_STATISTIC(result->conn? &result->conn->stats : NULL,
+	MYSQLND_INC_CONN_STATISTIC(result->conn? result->conn->stats : NULL,
 							   implicit == TRUE?	STAT_FREE_RESULT_IMPLICIT:
 							   						STAT_FREE_RESULT_EXPLICIT);
 

@@ -94,7 +94,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(stmt->conn->error_info);
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_PS_BUFFERED_SETS);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PS_BUFFERED_SETS);
 
 	result = stmt->result;
 	result->type			= MYSQLND_RES_PS_BUF;
@@ -152,7 +152,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 	SET_EMPTY_ERROR(stmt->error_info);
 	SET_EMPTY_ERROR(stmt->conn->error_info);
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BUFFERED_SETS);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
 	result = mysqlnd_result_init(stmt->result->field_count TSRMLS_CC);	
 
@@ -616,7 +616,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 	ret = mysqlnd_stmt_execute_parse_response(stmt TSRMLS_CC);
 
 	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && stmt->upsert_status.affected_rows) {
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status.affected_rows);
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_PS, stmt->upsert_status.affected_rows);
 	}
 	DBG_RETURN(ret);
 }
@@ -655,7 +655,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 									  result->stored_data->persistent,
 									  result->conn->options.numeric_and_datetime_as_unicode,
 									  result->conn->options.int_and_float_native,
-									  &result->conn->stats TSRMLS_CC);
+									  result->conn->stats TSRMLS_CC);
 				if (stmt->update_max_length) {
 					for (i = 0; i < result->field_count; i++) {
 						/*
@@ -770,7 +770,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 
 			for (i = 0; i < field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
@@ -799,7 +799,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 					}
 				}
 			}
-			MYSQLND_INC_CONN_STATISTIC(&stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_UNBUF);
+			MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_UNBUF);
 		} else {
 			DBG_INF("skipping extraction");
 			/*
@@ -866,7 +866,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT *stmt TSRMLS_DC)
 
 	SET_EMPTY_ERROR(stmt->error_info);
 
-	MYSQLND_INC_CONN_STATISTIC(&stmt->conn->stats, STAT_PS_UNBUFFERED_SETS);
+	MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_PS_UNBUFFERED_SETS);
 	result = stmt->result;
 
 	DBG_INF_FMT("%scursor exists", stmt->cursor_exists? "":"no ");
@@ -947,7 +947,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 								  FALSE,
 								  result->conn->options.numeric_and_datetime_as_unicode,
 								  result->conn->options.int_and_float_native,
-								  &result->conn->stats TSRMLS_CC);
+								  result->conn->stats TSRMLS_CC);
 
 			/* If no result bind, do nothing. We consumed the data */
 			for (i = 0; i < field_count; i++) {
@@ -995,7 +995,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 			row_packet->row_buffer->free_chunk(row_packet->row_buffer, TRUE TSRMLS_CC);
 			row_packet->row_buffer = NULL;
 		}
-		MYSQLND_INC_CONN_STATISTIC(&stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);
+		MYSQLND_INC_CONN_STATISTIC(stmt->conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);
 	} else {
 		*fetched_anything = FALSE;
 
@@ -1987,7 +1987,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, net_close)(MYSQLND_STMT * const stmt, zend_
 			break;
 	}
 	if (stat != STAT_LAST) {
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
 	}
 
 	if (stmt->execute_cmd_buffer.buffer) {

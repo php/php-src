@@ -208,13 +208,19 @@ typedef enum_func_status  (*mysqlnd_fetch_row_func)(MYSQLND_RES *result,
 													zend_bool *fetched_anything
 													TSRMLS_DC);
 
-typedef struct st_mysqlnd_stats
+typedef struct st_mysqlnd_stats MYSQLND_STATS;
+
+typedef void (*mysqlnd_stat_handler)(MYSQLND_STATS * stats, enum_mysqlnd_collected_stats stat, int64_t change TSRMLS_DC);
+
+struct st_mysqlnd_stats
 {
-	uint64_t	values[STAT_LAST];
+	uint64_t				values[STAT_LAST];
+	mysqlnd_stat_handler 	*handlers;
+	zend_bool				in_handler;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
 #endif
-} MYSQLND_STATS;
+};
 
 
 typedef struct st_mysqlnd_read_buffer {
@@ -542,7 +548,7 @@ struct st_mysqlnd_connection
 	MYSQLND_OPTIONS	options;
 
 	/* stats */
-	MYSQLND_STATS	stats;
+	MYSQLND_STATS	* stats;
 
 	struct st_mysqlnd_conn_methods *m;
 };

@@ -228,6 +228,10 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 		conn->protocol = NULL;
 	}
 
+	if (conn->stats) {
+		mysqlnd_stats_end(conn->stats);
+	}
+
 	mnd_pefree(conn, conn->persistent);
 
 	DBG_VOID_RETURN;
@@ -371,7 +375,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND *conn, enum php_mysqlnd_ser
 		cmd_packet->arg_len  = arg_len;
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_COM_QUIT + command - 1 /* because of COM_SLEEP */ );
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_COM_QUIT + command - 1 /* because of COM_SLEEP */ );
 
 	if (! PACKET_WRITE(cmd_packet, conn)) {
 		if (!silent) {
@@ -431,7 +435,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, restart_psession)(MYSQLND * conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::restart_psession");
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
 	/* Free here what should not be seen by the next script */
 	if (conn->last_message) {
 		mnd_pefree(conn->last_message, conn->persistent);
@@ -486,15 +490,15 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		DBG_INF("Connecting on a connected handle.");
 
 		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
-			MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CLOSE_IMPLICIT);
+			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CLOSE_IMPLICIT);
 			reconnect = TRUE;
 			mysqlnd_send_close(conn TSRMLS_CC);
 		}
 
 		conn->m->free_contents(conn TSRMLS_CC);
-		MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_CONNECTIONS);
+		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
-			MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
+			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 		/* Now reconnect using the same handle */
 		if (conn->net->compressed) {
@@ -690,12 +694,12 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			conn->m->set_client_option(conn, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
 		}
 
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
 		if (reconnect) {
 			MYSQLND_INC_GLOBAL_STATISTIC(STAT_RECONNECT);
 		}
 		if (conn->persistent) {
-			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(&conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
+			MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_PCONNECT_SUCCESS, 1, STAT_OPENED_PERSISTENT_CONNECTIONS, 1);
 		}
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
@@ -712,9 +716,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 			int current_command = 0;
 			for (; current_command < conn->options.num_commands; ++current_command) {
 				const char * const command = conn->options.init_commands[current_command];
-				MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
+				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
 				if (PASS != conn->m->query(conn, command, strlen(command) TSRMLS_CC)) {
-					MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
+					MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
 					goto err;
 				}
 				if (conn->last_query_type == QUERY_SELECT) {
@@ -748,7 +752,7 @@ err:
 		conn->scheme = NULL;
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_FAILURE);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_FAILURE);
 
 	DBG_RETURN(FAIL);
 }
@@ -820,7 +824,7 @@ MYSQLND_METHOD(mysqlnd_conn, query)(MYSQLND *conn, const char *query, unsigned i
 	*/
 	ret = conn->m->query_read_result_set_header(conn, NULL TSRMLS_CC);
 	if (ret == PASS && conn->last_query_type == QUERY_UPSERT && conn->upsert_status.affected_rows) {
-		MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
+		MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_ROWS_AFFECTED_NORMAL, conn->upsert_status.affected_rows);
 	}
 
 	DBG_RETURN(ret);
@@ -1448,10 +1452,10 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (conn->state >= CONN_READY) {
-		MYSQLND_INC_CONN_STATISTIC(&conn->stats, stat);
-		MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_CONNECTIONS);
+		MYSQLND_INC_CONN_STATISTIC(conn->stats, stat);
+		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
 		if (conn->persistent) {
-			MYSQLND_DEC_CONN_STATISTIC(&conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
+			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 	}
 
@@ -1973,7 +1977,7 @@ MYSQLND_METHOD(mysqlnd_conn, use_result)(MYSQLND * const conn TSRMLS_DC)
 		DBG_RETURN(NULL);
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_UNBUFFERED_SETS);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_UNBUFFERED_SETS);
 
 	result = conn->current_result;
 	conn->current_result = NULL;
@@ -2006,7 +2010,7 @@ MYSQLND_METHOD(mysqlnd_conn, store_result)(MYSQLND * const conn TSRMLS_DC)
 		DBG_RETURN(NULL);
 	}
 
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_BUFFERED_SETS);
+	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
 	result = conn->current_result;
 	conn->current_result = NULL;
@@ -2025,7 +2029,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 {
 	DBG_ENTER("mysqlnd_conn::get_connection_stats");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
-	mysqlnd_fill_stats_hash(&(conn->stats), return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(conn->stats, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -2111,6 +2115,7 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 	DBG_ENTER("mysqlnd_conn::init");
 	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
 	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
+	mysqlnd_stats_init(&conn->stats);
 
 	SET_ERROR_AFF_ROWS(conn);
 
