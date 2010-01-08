@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
 - Added stream_resolve_include_path(). (Mikko)
+- Improved LCG entropy (Rasmus, Samy Kamkar)
 
 - Fixed bug #50680 (strtotime() does not support eighth ordinal number).
   (Ilia)
