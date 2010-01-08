@@ -74,6 +74,9 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result
 PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id TSRMLS_DC);
 #define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id) TSRMLS_CC)
 
+PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC);
+#define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id) TSRMLS_CC)
+
 
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
 PHPAPI void mysqlnd_conn_set_methods(struct st_mysqlnd_conn_methods *methods);
