@@ -9,9 +9,9 @@ PHP                                                                        NEWS
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
 
-- Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
+- Improved LCG entropy. (Rasmus, Samy Kamkar)
 
-- Improved LCG entropy (Rasmus, Samy Kamkar)
+- Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
 - Fixed bug #50680 (strtotime() does not support eighth ordinal number).
   (Ilia)
