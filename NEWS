@@ -163,6 +163,7 @@ PHP                                                                        NEWS
   ini variables). (Jani)
 - Fixed bug #49660 (libxml 2.7.3+ limits text nodes to 10MB). (Felipe)
 - Fixed bug #49647 (DOMUserData does not exist). (Rob)
+- Fixed bug #49600 (imageTTFText text shifted right). (Takeshi Abe)
 - Fixed bug #49521 (PDO fetchObject sets values before calling constructor).
   (Pierrick)
 - Fixed bug #49472 (Constants defined in Interfaces can be overridden).
