@@ -336,6 +336,9 @@ struct st_mysqlnd_conn_methods
 
 	enum_func_status	(*simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const char * const arg, size_t arg_len, enum php_mysql_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
 	enum_func_status	(*simple_command_handle_response)(MYSQLND *conn, enum php_mysql_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status TSRMLS_DC);
+
+	enum_func_status	(*restart_psession)(MYSQLND *conn TSRMLS_DC);
+	enum_func_status	(*end_psession)(MYSQLND *conn TSRMLS_DC);
 };
 
 

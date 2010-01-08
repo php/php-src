@@ -411,16 +411,7 @@ MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
 PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_restart_psession");
-	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
-	/* Free here what should not be seen by the next script */
-	if (conn->last_message) {
-		mnd_pefree(conn->last_message, conn->persistent);
-		conn->last_message = NULL;
-	}
-	/*
-	  The thd zval cache is always freed on request shutdown, so this has happened already.
-	  Don't touch the old value! Get new reference
-	*/
+	conn->m->restart_psession(conn TSRMLS_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -430,7 +421,33 @@ PHPAPI void _mysqlnd_restart_psession(MYSQLND *conn TSRMLS_DC)
 PHPAPI void _mysqlnd_end_psession(MYSQLND *conn TSRMLS_DC)
 {
 	DBG_ENTER("_mysqlnd_end_psession");
+	conn->m->end_psession(conn TSRMLS_CC);
 	DBG_VOID_RETURN;
+}
+/* }}} */
+
+/* {{{ mysqlnd_conn::restart_psession */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, restart_psession)(MYSQLND * conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::restart_psession");
+	MYSQLND_INC_CONN_STATISTIC(&conn->stats, STAT_CONNECT_REUSED);
+	/* Free here what should not be seen by the next script */
+	if (conn->last_message) {
+		mnd_pefree(conn->last_message, conn->persistent);
+		conn->last_message = NULL;
+	}
+	DBG_RETURN(PASS);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn::end_psession */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn, end_psession)(MYSQLND * conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn::end_psession");
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
@@ -2081,7 +2098,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state),
 
 	MYSQLND_METHOD(mysqlnd_conn, simple_command),
-	MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)
+	MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response),
+	MYSQLND_METHOD(mysqlnd_conn, restart_psession),
+	MYSQLND_METHOD(mysqlnd_conn, end_psession)
 MYSQLND_CLASS_METHODS_END;
 
 
