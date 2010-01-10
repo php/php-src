@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 
 - Improved LCG entropy. (Rasmus, Samy Kamkar)
 
+- Added libpng 1.4.0 support. (Pierre)
 - Added support for DISABLE_AUTHENTICATOR for imap_open. (Pierre)
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
