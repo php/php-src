@@ -145,7 +145,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		return NULL;
 	}
 
-	if (!png_check_sig (sig, 8)) { /* bad signature */
+	if (png_sig_cmp(sig, 0, 8) != 0) { /* bad signature */
 		return NULL;
 	}
 
