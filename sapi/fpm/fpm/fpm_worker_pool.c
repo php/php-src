@@ -33,7 +33,7 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		free(wp->user);
 		free(wp->home);
 		free(wp);
-		if (wp->shm_status) {
+		if (wp->shm_status && which != FPM_CLEANUP_CHILD) {
 			fpm_shm_free(wp->shm_status, !fpm_globals.is_child);
 		}
 	}
