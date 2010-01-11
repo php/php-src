@@ -12,7 +12,7 @@ install-fpm: install-sapi
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(sbindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
-	@$(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROO)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
+	@$(INSTALL) -m 0755 $(SAPI_FPM_PATH) $(INSTALL_ROOT)$(sbindir)/$(program_prefix)php-fpm$(program_suffix)$(EXEEXT)
 
 	@echo "Installing PHP FPM config:        $(INSTALL_ROOT)$(sysconfdir)/" && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(sysconfdir) || :

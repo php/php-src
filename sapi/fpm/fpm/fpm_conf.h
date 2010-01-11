@@ -6,6 +6,7 @@
 #define FPM_CONF_H 1
 
 #define FPM_CONF_MAX_PONG_LENGTH 64
+#define FPM_CONF_MAX_HOSTNAME_LENGTH 255
 
 struct key_value_s;
 
@@ -64,6 +65,9 @@ struct fpm_worker_pool_config_s {
 	int max_requests;
 	int rlimit_files;
 	int rlimit_core;
+	int sticky;
+	char *sticky_cookie;
+	char *sticky_route;
 	unsigned catch_workers_output:1;
 };
 
