@@ -479,7 +479,7 @@ typedef enum mysqlnd_collected_stats
 
 
 /* Enums */
-enum php_mysql_packet_type
+enum mysqlnd_packet_type
 {
 	PROT_GREET_PACKET= 0,
 	PROT_AUTH_PACKET,
@@ -491,7 +491,7 @@ enum php_mysql_packet_type
 	PROT_ROW_PACKET,
 	PROT_STATS_PACKET,
 	PROT_PREPARE_RESP_PACKET,
-	PROT_CHG_USER_PACKET,
+	PROT_CHG_USER_RESP_PACKET,
 	PROT_LAST, /* should always be last */
 };
 
