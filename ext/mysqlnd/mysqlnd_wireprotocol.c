@@ -238,7 +238,7 @@ php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
 
 /* {{{ mysqlnd_read_header */
 static enum_func_status
-mysqlnd_read_header(MYSQLND * conn, mysqlnd_packet_header * header TSRMLS_DC)
+mysqlnd_read_header(MYSQLND * conn, MYSQLND_PACKET_HEADER * header TSRMLS_DC)
 {
 	MYSQLND_NET * net = conn->net;
 	zend_uchar buffer[MYSQLND_HEADER_SIZE];
@@ -1023,7 +1023,7 @@ php_mysqlnd_read_row_ex(MYSQLND *conn, MYSQLND_MEMORY_POOL * result_set_memory_p
 						unsigned int prealloc_more_bytes TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
-	mysqlnd_packet_header header;
+	MYSQLND_PACKET_HEADER header;
 	zend_uchar *p = NULL;
 	zend_bool first_iteration = TRUE;
 
