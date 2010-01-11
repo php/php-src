@@ -61,8 +61,6 @@
 	}
 
 
-extern mysqlnd_packet_methods packet_methods[];
-
 static const char *unknown_sqlstate= "HY000";
 
 char * const mysqlnd_empty_string = "";
@@ -1714,6 +1712,7 @@ void php_mysqlnd_chg_user_free_mem(void *_packet, zend_bool alloca TSRMLS_DC)
 
 /* {{{ packet_methods
  */
+static
 mysqlnd_packet_methods packet_methods[PROT_LAST] =
 {
 	{
@@ -1931,7 +1930,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 
 
 /* {{{ mysqlnd_protocol_init */
-MYSQLND_PROTOCOL *
+PHPAPI MYSQLND_PROTOCOL *
 mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
@@ -1959,7 +1958,7 @@ mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
 
 
 /* {{{ mysqlnd_protocol_free */
-void
+PHPAPI void
 mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
 {
 	zend_bool pers = protocol->persistent;

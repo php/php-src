@@ -54,8 +54,6 @@ typedef struct st_mysqlnd_packet_methods {
 	void				(*free_mem)(void *packet, zend_bool alloca TSRMLS_DC);
 } mysqlnd_packet_methods;
 
-extern mysqlnd_packet_methods packet_methods[];
-
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
