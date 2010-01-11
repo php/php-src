@@ -241,7 +241,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, dtor)(MYSQLND *conn TSRMLS_DC)
 
 /* {{{ mysqlnd_conn::simple_command_handle_response */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum php_mysql_packet_type ok_packet,
+MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum mysqlnd_packet_type ok_packet,
 									   						 zend_bool silent, enum php_mysqlnd_server_command command,
 									   						 zend_bool ignore_upsert_status TSRMLS_DC)
 {
@@ -252,7 +252,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum
 
 	switch (ok_packet) {
 		case PROT_OK_PACKET:{
-			php_mysql_packet_ok * ok_response = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+			MYSQLND_PACKET_OK * ok_response = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				if (!silent) {
 					DBG_ERR_FMT("Error while reading %s's OK packet", mysqlnd_command_to_text[command]);
@@ -293,7 +293,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum
 			break;
 		}
 		case PROT_EOF_PACKET:{
-			php_mysql_packet_eof * ok_response = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
+			MYSQLND_PACKET_EOF * ok_response = conn->protocol->m.get_eof_packet(conn->protocol, FALSE TSRMLS_CC);
 			if (FAIL == (ret = PACKET_READ(ok_response, conn))) {
 				SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE,
 								 "Malformed packet");
@@ -338,11 +338,11 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response)(MYSQLND *conn, enum
 /* {{{ mysqlnd_conn::simple_command */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command,
-			   const char * const arg, size_t arg_len, enum php_mysql_packet_type ok_packet, zend_bool silent,
+			   const char * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
 			   zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
-	php_mysql_packet_command * cmd_packet;
+	MYSQLND_PACKET_COMMAND * cmd_packet;
 
 	DBG_ENTER("mysqlnd_conn::simple_command");
 	DBG_INF_FMT("command=%s ok_packet=%d silent=%d", mysqlnd_command_to_text[command], ok_packet, silent);
@@ -475,9 +475,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 
-	php_mysql_packet_greet * greet_packet = NULL;
-	php_mysql_packet_auth * auth_packet = NULL;
-	php_mysql_packet_ok * ok_packet = NULL;
+	MYSQLND_PACKET_GREET * greet_packet = NULL;
+	MYSQLND_PACKET_AUTH * auth_packet = NULL;
+	MYSQLND_PACKET_OK * ok_packet = NULL;
 
 	DBG_ENTER("mysqlnd_conn::connect");
 
@@ -1262,7 +1262,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, stat)(MYSQLND *conn, char **message, unsigned int * message_len TSRMLS_DC)
 {
 	enum_func_status ret;
-	php_mysql_packet_stats * stats_header;
+	MYSQLND_PACKET_STATS * stats_header;
 
 	DBG_ENTER("mysqlnd_conn::stat");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
@@ -1770,7 +1770,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 	*/
 	size_t user_len;
 	enum_func_status ret;
-	php_mysql_packet_chg_user_resp * chg_user_resp;
+	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp;
 	char buffer[MYSQLND_MAX_ALLOWED_USER_LEN + 1 + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1];
 	char *p = buffer;
 
@@ -1832,7 +1832,7 @@ MYSQLND_METHOD(mysqlnd_conn, change_user)(MYSQLND * const conn,
 		if (mysqlnd_get_server_version(conn) > 50113L &&
 			mysqlnd_get_server_version(conn) < 50118L)
 		{
-			php_mysql_packet_ok * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
 			PACKET_READ(redundant_error_packet, conn);
 			PACKET_FREE(redundant_error_packet);
 			DBG_INF_FMT("Server is %d, buggy, sends two ERR messages", mysqlnd_get_server_version(conn));

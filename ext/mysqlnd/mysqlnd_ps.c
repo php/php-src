@@ -218,7 +218,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT *stmt TSRMLS_DC)
 	/* Follows parameter metadata, we have just to skip it, as libmysql does */
 	unsigned int i = 0;
 	enum_func_status ret = PASS;
-	php_mysql_packet_res_field * field_packet;
+	MYSQLND_PACKET_RES_FIELD * field_packet;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
@@ -242,7 +242,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT *stmt TSRMLS_DC)
 static enum_func_status
 mysqlnd_stmt_read_prepare_response(MYSQLND_STMT *stmt TSRMLS_DC)
 {
-	php_mysql_packet_prepare_response * prepare_resp;
+	MYSQLND_PACKET_PREPARE_RESPONSE * prepare_resp;
 	enum_func_status ret = PASS;
 
 	DBG_ENTER("mysqlnd_stmt_read_prepare_response");
@@ -276,7 +276,7 @@ done:
 static enum_func_status
 mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT *stmt TSRMLS_DC)
 {
-	php_mysql_packet_eof * fields_eof;
+	MYSQLND_PACKET_EOF * fields_eof;
 	enum_func_status ret;
 
 	DBG_ENTER("mysqlnd_stmt_prepare_read_eof");
@@ -726,7 +726,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 {
 	enum_func_status ret;
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
-	php_mysql_packet_row *row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW *row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_unbuffered");
 
@@ -891,7 +891,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 	enum_func_status ret;
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
 	zend_uchar buf[STMT_ID_LENGTH /* statement id */ + 4 /* number of rows to fetch */];
-	php_mysql_packet_row *row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW *row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
