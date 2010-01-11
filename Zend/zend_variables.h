@@ -50,26 +50,25 @@ ZEND_API int zend_print_variable(zval *var);
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval **zvalue ZEND_FILE_LINE_DC);
+ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 #define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_internal_ptr_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
+#define zval_dtor_wrapper _zval_dtor_wrapper
 
 #if ZEND_DEBUG
 ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue);
-ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr);
 ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue);
 ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zvalue);
 #define zval_copy_ctor_wrapper _zval_copy_ctor_wrapper
-#define zval_dtor_wrapper _zval_dtor_wrapper
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor_wrapper
 #define zval_internal_dtor_wrapper _zval_internal_dtor_wrapper
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor_wrapper
 #else
 #define zval_copy_ctor_wrapper _zval_copy_ctor_func
-#define zval_dtor_wrapper _zval_dtor_func
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor
 #define zval_internal_dtor_wrapper _zval_internal_dtor
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor

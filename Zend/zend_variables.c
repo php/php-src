@@ -171,19 +171,19 @@ ZEND_API int zend_print_variable(zval *var) /* {{{ */
 }
 /* }}} */
 
-#if ZEND_DEBUG
-ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue) /* {{{ */
-{
-	zval_copy_ctor(zvalue);
-}
-/* }}} */
-
 ZEND_API void _zval_dtor_wrapper(zval *zvalue) /* {{{ */
 {
 	TSRMLS_FETCH();
 
 	GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
 	zval_dtor(zvalue);
+}
+/* }}} */
+
+#if ZEND_DEBUG
+ZEND_API void _zval_copy_ctor_wrapper(zval *zvalue) /* {{{ */
+{
+	zval_copy_ctor(zvalue);
 }
 /* }}} */
 
