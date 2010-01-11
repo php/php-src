@@ -336,6 +336,8 @@ ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
 #endif
 
 
+PHPAPI void mysqlnd_minfo_print_hash(zval *values);
+
 #endif	/* MYSQLND_H */
 
 

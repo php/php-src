@@ -69,7 +69,7 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 	}
 }
 #else
-void mysqlnd_minfo_print_hash(zval *values)
+PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 {
 	zval **values_entry;
 	HashPosition pos_values;
