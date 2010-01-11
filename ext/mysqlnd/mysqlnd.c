@@ -2115,7 +2115,7 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 	DBG_ENTER("mysqlnd_conn::init");
 	conn->net = mysqlnd_net_init(conn->persistent TSRMLS_CC);
 	conn->protocol = mysqlnd_protocol_init(conn->persistent TSRMLS_CC);
-	mysqlnd_stats_init(&conn->stats);
+	mysqlnd_stats_init(&conn->stats, STAT_LAST);
 
 	SET_ERROR_AFF_ROWS(conn);
 
@@ -2153,7 +2153,7 @@ void mysqlnd_library_init(TSRMLS_D)
 		mysqlnd_conn_methods = &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_conn);
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
-		mysqlnd_stats_init(&mysqlnd_global_stats);
+		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
 	}
 }
 /* }}} */

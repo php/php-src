@@ -214,8 +214,9 @@ typedef void (*mysqlnd_stat_trigger)(MYSQLND_STATS * stats, enum_mysqlnd_collect
 
 struct st_mysqlnd_stats
 {
-	uint64_t				values[STAT_LAST];
+	uint64_t				*values;
 	mysqlnd_stat_trigger 	*triggers;
+	size_t					count;
 	zend_bool				in_trigger;
 #ifdef ZTS
 	MUTEX_T	LOCK_access;
