@@ -237,11 +237,13 @@ PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LIN
 
 /* {{{ mysqlnd_stats_init */
 PHPAPI void
-mysqlnd_stats_init(MYSQLND_STATS ** stats)
+mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
-	(*stats)->triggers = calloc(STAT_LAST, sizeof(mysqlnd_stat_trigger));
+	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
+	(*stats)->triggers = calloc(statistic_count, sizeof(mysqlnd_stat_trigger));
 	(*stats)->in_trigger = FALSE;
+	(*stats)->count = statistic_count;
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
@@ -258,6 +260,7 @@ mysqlnd_stats_end(MYSQLND_STATS * stats)
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
 	free(stats->triggers);
+	free(stats->values);
 	/* mnd_free will reference LOCK_access and crash...*/
 	free(stats);
 }
