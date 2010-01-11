@@ -244,8 +244,6 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
-size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
-
 void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
