@@ -2029,7 +2029,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 {
 	DBG_ENTER("mysqlnd_conn::get_connection_stats");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
-	mysqlnd_fill_stats_hash(conn->stats, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(conn->stats, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
