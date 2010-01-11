@@ -297,8 +297,6 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->pm->status);
 	free(wpc->pm->ping);
 	free(wpc->pm->pong);
-	free(wpc->sticky_cookie);
-	free(wpc->sticky_route);
 	if (wpc->listen_options) {
 		free(wpc->listen_options->owner);
 		free(wpc->listen_options->group);
@@ -349,9 +347,6 @@ static struct xml_conf_section xml_section_fpm_worker_pool_config = {
 		{ XML_CONF_SCALAR,		"rlimit_files",					&xml_conf_set_slot_integer,					offsetof(struct fpm_worker_pool_config_s, rlimit_files) },
 		{ XML_CONF_SCALAR,		"rlimit_core",					&fpm_conf_set_rlimit_core,					0 },
 		{ XML_CONF_SCALAR,		"max_requests",					&xml_conf_set_slot_integer,					offsetof(struct fpm_worker_pool_config_s, max_requests) },
-		{ XML_CONF_SCALAR,		"sticky",					&xml_conf_set_slot_boolean,					offsetof(struct fpm_worker_pool_config_s, sticky) },
-		{ XML_CONF_SCALAR,		"sticky_cookie",					&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, sticky_cookie) },
-		{ XML_CONF_SCALAR,		"sticky_route",					&xml_conf_set_slot_string,					offsetof(struct fpm_worker_pool_config_s, sticky_route) },
 		{ XML_CONF_SCALAR,		"catch_workers_output",			&fpm_conf_set_catch_workers_output,			0 },
 		{ XML_CONF_SUBSECTION,	"pm",							&fpm_conf_set_pm_subsection,				offsetof(struct fpm_worker_pool_config_s, pm) },
 		{ 0, 0, 0, 0 }
@@ -478,64 +473,6 @@ static int fpm_conf_process_all_pools() /* {{{ */
 					return -1;
 				}
 				close(fd);
-			}
-		}
-		if (wp->config->sticky) {
-			char *cookie = wp->config->sticky_cookie;
-			char *route = wp->config->sticky_route;
-			int i;
-
-			if (!cookie) {
-				wp->config->sticky_cookie = strdup("FPMCOOKIE");
-			} else {
-				if (strlen(cookie) < 2) {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the sticky cookie '%s' is not long enough", wp->config->name, cookie);
-					return(-1);
-				}
-
-				for (i=0; i<strlen(cookie); i++) {
-					if (!isalnum(cookie[i])) {
-						zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the sticky cookie '%s' must containt only the alphanum characters", wp->config->name, cookie);
-						return(-1);
-					}
-				}
-			}
-
-			if (!route) {
-				char *hostname;
-				hostname = malloc(sizeof(char) * (FPM_CONF_MAX_HOSTNAME_LENGTH + 1));
-				if (!hostname) {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] sticky: unable to malloc memory for hostname", wp->config->name);
-					return(-1);
-				}
-				if (gethostname(hostname, FPM_CONF_MAX_HOSTNAME_LENGTH) != 0) {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] sticky: unable to retrieve hostname", wp->config->name);
-					return(-1);
-				}
-				hostname[FPM_CONF_MAX_HOSTNAME_LENGTH] = '\0';
-				wp->config->sticky_route = strdup(hostname);
-				zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] the sticky route has been set to the local hostname '%s'", wp->config->name, wp->config->sticky_route);
-				free(hostname);
-			} else {
-				if (strlen(route) < 2) {
-					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the sticky route '%s' is not long enough", wp->config->name, route);
-					return(-1);
-				}
-
-				for (i=0; i<strlen(route); i++) {
-					if (!isalnum(route[i])) {
-						zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the sticky route '%s' must containt only the alphanum characters", wp->config->name, route);
-						return(-1);
-					}
-				}
-			}
-zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] sticky is set to %s=%s", wp->config->name, wp->config->sticky_cookie, wp->config->sticky_route);
-		} else {
-			if (wp->config->sticky_route) {
-				free(wp->config->sticky_route);
-			}
-			if (wp->config->sticky_cookie) {
-				free(wp->config->sticky_cookie);
 			}
 		}
 
