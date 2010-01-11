@@ -290,7 +290,7 @@ mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC)
 	DBG_ENTER("mysqlnd_stats_reset_trigger");
 	if (stats) {
 		MYSQLND_STATS_LOCK(stats);
-		memset(stats->triggers, 0, STAT_LAST * sizeof(mysqlnd_stat_trigger));
+		memset(stats->triggers, 0, stats->count * sizeof(mysqlnd_stat_trigger));
 		MYSQLND_STATS_UNLOCK(stats);
 	}
 	DBG_RETURN(ret);
