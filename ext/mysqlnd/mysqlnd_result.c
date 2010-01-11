@@ -354,7 +354,7 @@ enum_func_status
 mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC)
 {
 	enum_func_status ret;
-	php_mysql_packet_rset_header * rset_header;
+	MYSQLND_PACKET_RSET_HEADER * rset_header;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
 	DBG_INF_FMT("stmt=%d", stmt? stmt->stmt_id:0);
@@ -423,7 +423,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_NON_RSET_QUERY);
 				break;
 			default:{			/* Result set	*/
-				php_mysql_packet_eof * fields_eof;
+				MYSQLND_PACKET_EOF * fields_eof;
 				MYSQLND_RES *result;
 				enum_mysqlnd_collected_stats stat = STAT_LAST;
 
@@ -596,7 +596,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 	MYSQLND_ROW_C 			retrow = NULL;
 	unsigned int			i,
 							field_count = result->field_count;
-	php_mysql_packet_row	*row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
 	unsigned long			*lengths = result->lengths;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered_c");
@@ -703,7 +703,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flag
 {
 	enum_func_status		ret;
 	zval 					*row = (zval *) param;
-	php_mysql_packet_row	*row_packet = result->row_packet;
+	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered");
 	DBG_INF_FMT("flags=%d", flags);
@@ -1053,7 +1053,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND * const conn, MYSQL
 													zend_bool to_cache TSRMLS_DC)
 {
 	enum_func_status ret;
-	php_mysql_packet_row *row_packet;
+	MYSQLND_PACKET_ROW *row_packet;
 	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
 	MYSQLND_RES_BUFFERED *set;
 
