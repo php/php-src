@@ -173,6 +173,7 @@ typedef struct _php_cgi_globals_struct {
 #endif
 	HashTable user_config_cache;
 	char *error_header;
+	struct event_base *event_base;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -1744,11 +1745,11 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config)) {
+	if (0 > fpm_init(argc, argv, fpm_config, &CGIG(event_base))) {
 		return FAILURE;
 	}
 
-	fcgi_fd = fpm_run(&max_requests);
+	fcgi_fd = fpm_run(&max_requests, CGIG(event_base));
 	parent = 0;
 	fcgi_set_is_fastcgi(1);
 
@@ -1780,8 +1781,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 			if (!strcasecmp(SG(request_info).request_method, "GET") && fpm_status_handle_status(SG(request_info).request_uri, SG(request_info).query_string, &status_buffer, &status_content_type)) {
 				if (status_buffer) {
-					int i;
-
 					if (status_content_type) {
 						sapi_add_header_ex(status_content_type, strlen(status_content_type), 1, 1 TSRMLS_CC);
 					} else {

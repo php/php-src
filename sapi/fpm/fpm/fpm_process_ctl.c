@@ -52,13 +52,15 @@ static struct event pctl_event;
 
 static void fpm_pctl_action(int fd, short which, void *arg) /* {{{ */
 {
+	struct event_base *base = (struct event_base *)arg;
+
 	evtimer_del(&pctl_event);
 	memset(&pctl_event, 0, sizeof(pctl_event));
-	fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_TIMEOUT);
+	fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_TIMEOUT, base);
 }
 /* }}} */
 
-static int fpm_pctl_timeout_set(int sec) /* {{{ */
+static int fpm_pctl_timeout_set(int sec, struct event_base *base) /* {{{ */
 {
 	struct timeval tv = { .tv_sec = sec, .tv_usec = 0 };
 
@@ -66,7 +68,8 @@ static int fpm_pctl_timeout_set(int sec) /* {{{ */
 		evtimer_del(&pctl_event);
 	}
 
-	evtimer_set(&pctl_event, &fpm_pctl_action, 0);
+	evtimer_set(&pctl_event, &fpm_pctl_action, base);
+	event_base_set(base, &pctl_event);
 	evtimer_add(&pctl_event, &tv);
 	return 0;
 }
@@ -174,7 +177,7 @@ static void fpm_pctl_kill_all(int signo) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_action_next() /* {{{ */
+static void fpm_pctl_action_next(struct event_base *base) /* {{{ */
 {
 	int sig, timeout;
 
@@ -200,11 +203,11 @@ static void fpm_pctl_action_next() /* {{{ */
 
 	fpm_pctl_kill_all(sig);
 	fpm_signal_sent = sig;
-	fpm_pctl_timeout_set(timeout);
+	fpm_pctl_timeout_set(timeout, base);
 }
 /* }}} */
 
-void fpm_pctl(int new_state, int action) /* {{{ */
+void fpm_pctl(int new_state, int action, struct event_base *base) /* {{{ */
 {
 	switch (action) {
 		case FPM_PCTL_ACTION_SET :
@@ -236,7 +239,7 @@ void fpm_pctl(int new_state, int action) /* {{{ */
 			/* fall down */
 
 		case FPM_PCTL_ACTION_TIMEOUT :
-			fpm_pctl_action_next();
+			fpm_pctl_action_next(base);
 			break;
 		case FPM_PCTL_ACTION_LAST_CHILD_EXITED :
 			fpm_pctl_action_last();
@@ -252,14 +255,14 @@ int fpm_pctl_can_spawn_children() /* {{{ */
 }
 /* }}} */
 
-int fpm_pctl_child_exited() /* {{{ */
+int fpm_pctl_child_exited(struct event_base *base) /* {{{ */
 {
 	if (fpm_state == FPM_PCTL_STATE_NORMAL) {
 		return 0;
 	}
 
 	if (!fpm_globals.running_children) {
-		fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_LAST_CHILD_EXITED);
+		fpm_pctl(FPM_PCTL_STATE_UNSPECIFIED, FPM_PCTL_ACTION_LAST_CHILD_EXITED, base);
 	}
 	return 0;
 }
@@ -311,7 +314,7 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 }
 /* }}} */
 
-static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{ */
+static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now, struct event_base *base) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 	struct fpm_child_s *last_idle_child = NULL;
@@ -389,7 +392,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			}
 			wp->warn_max_children = 0;
 
-			fpm_children_make(wp, 1, i, 1);
+			fpm_children_make(wp, 1, i, 1, base);
 
 			/* if it's a child, stop here without creating the next event
 			 * this event is reserved to the master process
@@ -416,6 +419,7 @@ void fpm_pctl_heartbeat(int fd, short which, void *arg) /* {{{ */
 	static struct event heartbeat;
 	struct timeval tv = { .tv_sec = 0, .tv_usec = 130000 };
 	struct timeval now;
+	struct event_base *base = (struct event_base *)arg;
 
 	if (which == EV_TIMEOUT) {
 		evtimer_del(&heartbeat);
@@ -423,7 +427,8 @@ void fpm_pctl_heartbeat(int fd, short which, void *arg) /* {{{ */
 		fpm_pctl_check_request_timeout(&now);
 	}
 
-	evtimer_set(&heartbeat, &fpm_pctl_heartbeat, 0);
+	evtimer_set(&heartbeat, &fpm_pctl_heartbeat, base);
+	event_base_set(base, &heartbeat);
 	evtimer_add(&heartbeat, &tv);
 }
 /* }}} */
@@ -433,12 +438,13 @@ void fpm_pctl_perform_idle_server_maintenance_heartbeat(int fd, short which, voi
 	static struct event heartbeat;
 	struct timeval tv = { .tv_sec = 0, .tv_usec = FPM_IDLE_SERVER_MAINTENANCE_HEARTBEAT };
 	struct timeval now;
+	struct event_base *base = (struct event_base *)arg;
 
 	if (which == EV_TIMEOUT) {
 		evtimer_del(&heartbeat);
 		fpm_clock_get(&now);
 		if (fpm_pctl_can_spawn_children()) {
-			fpm_pctl_perform_idle_server_maintenance(&now);
+			fpm_pctl_perform_idle_server_maintenance(&now, base);
 
 			/* if it's a child, stop here without creating the next event
 			 * this event is reserved to the master process
@@ -449,7 +455,8 @@ void fpm_pctl_perform_idle_server_maintenance_heartbeat(int fd, short which, voi
 		}
 	}
 
-	evtimer_set(&heartbeat, &fpm_pctl_perform_idle_server_maintenance_heartbeat, 0);
+	evtimer_set(&heartbeat, &fpm_pctl_perform_idle_server_maintenance_heartbeat, base);
+	event_base_set(base, &heartbeat);
 	evtimer_add(&heartbeat, &tv);
 }
 /* }}} */

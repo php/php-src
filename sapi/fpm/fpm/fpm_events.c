@@ -8,8 +8,6 @@
 #include <errno.h>
 #include <stdlib.h> /* for putenv */
 #include <string.h>
-#include <sys/types.h> /* for event.h below */
-#include <event.h>
 
 #include "fpm.h"
 #include "fpm_process_ctl.h"
@@ -22,7 +20,8 @@
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
-	event_base_free(0);
+	struct event_base *base = (struct event_base *)arg;
+	event_base_free(base);
 }
 /* }}} */
 
@@ -30,6 +29,7 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 {
 	char c;
 	int res;
+	struct event_base *base = (struct event_base *)arg;
 
 	do {
 		do {
@@ -46,22 +46,22 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 		switch (c) {
 			case 'C' :                  /* SIGCHLD */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGCHLD");
-				fpm_children_bury();
+				fpm_children_bury(base);
 				break;
 			case 'I' :                  /* SIGINT  */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGINT");
 				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
-				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET);
+				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case 'T' :                  /* SIGTERM */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGTERM");
 				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Terminating ...");
-				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET);
+				fpm_pctl(FPM_PCTL_STATE_TERMINATING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case 'Q' :                  /* SIGQUIT */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGQUIT");
 				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Finishing ...");
-				fpm_pctl(FPM_PCTL_STATE_FINISHING, FPM_PCTL_ACTION_SET);
+				fpm_pctl(FPM_PCTL_STATE_FINISHING, FPM_PCTL_ACTION_SET, base);
 				break;
 			case '1' :                  /* SIGUSR1 */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR1");
@@ -74,7 +74,7 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 			case '2' :                  /* SIGUSR2 */
 				zlog(ZLOG_STUFF, ZLOG_DEBUG, "received SIGUSR2");
 				zlog(ZLOG_STUFF, ZLOG_NOTICE, "Reloading in progress ...");
-				fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET);
+				fpm_pctl(FPM_PCTL_STATE_RELOADING, FPM_PCTL_ACTION_SET, base);
 				break;
 		}
 
@@ -86,36 +86,38 @@ static void fpm_got_signal(int fd, short ev, void *arg) /* {{{ */
 }
 /* }}} */
 
-int fpm_event_init_main() /* {{{ */
+int fpm_event_init_main(struct event_base **base) /* {{{ */
 {
-	event_init();
+	*base = event_base_new();
 
-	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: using %s", event_get_method());
+	zlog(ZLOG_STUFF, ZLOG_NOTICE, "libevent: using %s", event_base_get_method(*base));
 
-	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, 0)) {
+	if (0 > fpm_cleanup_add(FPM_CLEANUP_ALL, fpm_event_cleanup, *base)) {
 		return -1;
 	}
 	return 0;
 }
 /* }}} */
 
-int fpm_event_loop() /* {{{ */
+int fpm_event_loop(struct event_base *base) /* {{{ */
 {
 	static struct event signal_fd_event;
 
-	event_set(&signal_fd_event, fpm_signals_get_fd(), EV_PERSIST | EV_READ, &fpm_got_signal, 0);
+	event_set(&signal_fd_event, fpm_signals_get_fd(), EV_PERSIST | EV_READ, &fpm_got_signal, base);
+	event_base_set(base, &signal_fd_event);
 	event_add(&signal_fd_event, 0);
-	fpm_pctl_heartbeat(-1, 0, 0);
-	fpm_pctl_perform_idle_server_maintenance_heartbeat(-1, 0, 0);
+	fpm_pctl_heartbeat(-1, 0, base);
+	fpm_pctl_perform_idle_server_maintenance_heartbeat(-1, 0, base);
 	zlog(ZLOG_STUFF, ZLOG_NOTICE, "ready to handle connections");
-	event_loop(0);
+	event_base_dispatch(base);
 	return 0;
 }
 /* }}} */
 
-int fpm_event_add(int fd, struct event *ev, void (*callback)(int, short, void *), void *arg) /* {{{ */
+int fpm_event_add(int fd, struct event_base *base, struct event *ev, void (*callback)(int, short, void *), void *arg) /* {{{ */
 {
 	event_set(ev, fd, EV_PERSIST | EV_READ, callback, arg);
+	event_base_set(base, ev);
 	return event_add(ev, 0);
 }
 /* }}} */
@@ -126,9 +128,9 @@ int fpm_event_del(struct event *ev) /* {{{ */
 }
 /* }}} */
 
-void fpm_event_exit_loop() /* {{{ */
+void fpm_event_exit_loop(struct event_base *base) /* {{{ */
 {
-	event_loopbreak();
+	event_base_loopbreak(base);
 }
 /* }}} */
 

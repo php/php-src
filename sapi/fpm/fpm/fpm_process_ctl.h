@@ -12,7 +12,7 @@
 
 struct fpm_child_s;
 
-void fpm_pctl(int new_state, int action);
+void fpm_pctl(int new_state, int action, struct event_base *base);
 int fpm_pctl_can_spawn_children();
 int fpm_pctl_kill(pid_t pid, int how);
 void fpm_pctl_heartbeat(int fd, short which, void *arg);

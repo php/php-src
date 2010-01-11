@@ -195,7 +195,7 @@ int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
-int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
+int fpm_stdio_parent_use_pipes(struct fpm_child_s *child, struct event_base *base) /* {{{ */
 {
 	if (0 == child->wp->config->catch_workers_output) { /* not required */
 		return 0;
@@ -207,8 +207,8 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 	child->fd_stdout = fd_stdout[0];
 	child->fd_stderr = fd_stderr[0];
 
-	fpm_event_add(child->fd_stdout, &child->ev_stdout, fpm_stdio_child_said, child);
-	fpm_event_add(child->fd_stderr, &child->ev_stderr, fpm_stdio_child_said, child);
+	fpm_event_add(child->fd_stdout, base, &child->ev_stdout, fpm_stdio_child_said, child);
+	fpm_event_add(child->fd_stderr, base, &child->ev_stderr, fpm_stdio_child_said, child);
 	return 0;
 }
 /* }}} */

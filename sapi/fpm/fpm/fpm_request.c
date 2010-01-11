@@ -4,6 +4,7 @@
 
 #include "fpm_config.h"
 
+#include "fpm.h"
 #include "fpm_php.h"
 #include "fpm_str.h"
 #include "fpm_clock.h"

@@ -23,7 +23,7 @@
 
 struct fpm_globals_s fpm_globals;
 
-int fpm_init(int argc, char **argv, char *config) /* {{{ */
+int fpm_init(int argc, char **argv, char *config, struct event_base **base) /* {{{ */
 {
 	fpm_globals.argc = argc;
 	fpm_globals.argv = argv;
@@ -39,7 +39,7 @@ int fpm_init(int argc, char **argv, char *config) /* {{{ */
 		0 > fpm_children_init_main()         ||
 		0 > fpm_sockets_init_main()          ||
 		0 > fpm_worker_pool_init_main()      ||
-		0 > fpm_event_init_main()) {
+		0 > fpm_event_init_main(base)) {
 		return -1;
 	}
 
@@ -55,7 +55,7 @@ int fpm_init(int argc, char **argv, char *config) /* {{{ */
 
 /*	children: return listening socket
 	parent: never return */
-int fpm_run(int *max_requests) /* {{{ */
+int fpm_run(int *max_requests, struct event_base *base) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -63,7 +63,7 @@ int fpm_run(int *max_requests) /* {{{ */
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		int is_parent;
 
-		is_parent = fpm_children_create_initial(wp);
+		is_parent = fpm_children_create_initial(wp, base);
 
 		if (!is_parent) {
 			goto run_child;
@@ -71,7 +71,7 @@ int fpm_run(int *max_requests) /* {{{ */
 	}
 
 	/* run event loop forever */
-	fpm_event_loop();
+	fpm_event_loop(base);
 
 run_child: /* only workers reach this point */
 

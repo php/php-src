@@ -6,9 +6,11 @@
 #define FPM_H 1
 
 #include <unistd.h>
+#include <sys/types.h> /* for event.h below */
+#include <event.h>
 
-int fpm_run(int *max_requests);
-int fpm_init(int argc, char **argv, char *config);
+int fpm_run(int *max_requests, struct event_base *base);
+int fpm_init(int argc, char **argv, char *config, struct event_base **base);
 
 struct fpm_globals_s {
 	pid_t parent_pid;

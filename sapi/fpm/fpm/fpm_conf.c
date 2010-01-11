@@ -515,7 +515,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		if (wp->config->pm->status && *wp->config->pm->status) {
 			int i;
 			char *status = wp->config->pm->status;
-			struct fpm_status_s fpm_status;
+			/* struct fpm_status_s fpm_status; */
 
 			if (*status != '/') {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' must start with a '/'", wp->config->name, status);
@@ -541,7 +541,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			fpm_status_update_accepted_conn(wp->shm_status, 0);
 			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 1);
 			fpm_status_set_pm(wp->shm_status, wp->config->pm->style);
-			//memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update));
+			/* memset(&fpm_status.last_update, 0, sizeof(fpm_status.last_update)); */
 		}
 	}
 	return 0;
