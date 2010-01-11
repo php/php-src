@@ -106,7 +106,7 @@ static char * nvmatch(char *s1, char *s2) /* {{{ */
 	if(*s1 == '\0' && *(s2-1) == '=') { 
 		return s2;
 	}
-	return(NULL);
+	return NULL;
 }
 /* }}} */
 #endif

@@ -21,13 +21,13 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	if (!wp || !wp->config) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "unable to init fpm_status because conf structure is NULL");
-		return(-1);
+		return -1;
 	}
 	if (wp->config->pm->status || wp->config->pm->ping) {
 		if (wp->config->pm->status) {
 			if (!wp->shm_status) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to init fpm_status because the dedicated SHM has not been set", wp->config->name);
-				return(-1);
+				return -1;
 			}
 			fpm_status_shm = wp->shm_status;
 		}
@@ -38,13 +38,13 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		if (wp->config->pm->ping) {
 			if (!wp->config->pm->pong) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] ping is set (%s) but pong is not set.", wp->config->name, wp->config->pm->ping);
-				return(-1);
+				return -1;
 			}
 			fpm_status_ping = strdup(wp->config->pm->ping);
 			fpm_status_pong = strdup(wp->config->pm->pong);
 		}
 	}
-	return(0);
+	return 0;
 }
 /* }}} */
 
@@ -63,6 +63,7 @@ void fpm_status_set_pm(struct fpm_shm_s *shm, int pm) /* {{{ */
 	/* one shot operation */
 	*(struct fpm_status_s *)shm->mem = status;
 }
+/* }}} */
 
 void fpm_status_increment_accepted_conn(struct fpm_shm_s *shm) /* {{{ */
 {
@@ -127,20 +128,29 @@ int fpm_status_get(int *idle, int *active, int *total, int *pm) /* {{{ */
 	struct fpm_status_s status;
 	if (!fpm_status_shm || !fpm_status_shm->mem) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to access status shared memory", fpm_status_pool);
-		return(0);
+		return 0;
 	}
 	if (!idle || !active || !total) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to get status information : pointers are NULL", fpm_status_pool);
-		return(0);
+		return 0;
 	}
 
 	/* one shot operation */
 	status = *(struct fpm_status_s *)fpm_status_shm->mem;
 
-	if (idle) *idle = status.idle;
-	if (active) *active = status.active;
-	if (total) *total = status.total;
-	if (pm) *pm = status.pm;
+	if (idle) {
+		*idle = status.idle;
+	}
+	if (active) {
+		*active = status.active;
+	}
+	if (total) {
+		*total = status.total;
+	}
+	if (pm) {
+		*pm = status.pm;
+	}
+	return 1;
 }
 /* }}} */
 
@@ -215,27 +225,27 @@ int fpm_status_handle_status(char *uri, char *query_string, char **output, char 
 	struct fpm_status_s status;
 
 	if (!fpm_status_uri || !uri) {
-		return(0);
+		return 0;
 	}
 
 	/* It's not the status page */
 	if (strcmp(fpm_status_uri, uri)) {
-		return(0);
+		return 0;
 	}
 
 	if (!output || !content_type || !fpm_status_shm) {
-		return(1);
+		return 1;
 	}
 
 	if (!fpm_status_shm->mem) {
-		return(1);
+		return 1;
 	}
 
 	/* one shot operation */
 	status = *(struct fpm_status_s *)fpm_status_shm->mem;
 
 	if (status.idle < 0 || status.active < 0 || status.total < 0) {
-		return(1);
+		return 1;
 	}
 
 	if (query_string && strstr(query_string, "html")) {
@@ -248,25 +258,25 @@ int fpm_status_handle_status(char *uri, char *query_string, char **output, char 
 
 	if (!*output || !content_type) {
 		zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to allocate status ouput buffer", fpm_status_pool);
-		return(1);
+		return 1;
 	}
 
-	return(1);
+	return 1;
 }
 /* }}} */
 
 char *fpm_status_handle_ping(char *uri) /* {{{ */
 {
 	if (!fpm_status_ping || !fpm_status_pong || !uri) {
-		return(NULL);
+		return NULL;
 	}
 
 	/* It's not the status page */
 	if (strcmp(fpm_status_ping, uri)) {
-		return(NULL);
+		return NULL;
 	}
 
-	return(fpm_status_pong);
+	return fpm_status_pong;
 }
 /* }}} */
 

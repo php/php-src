@@ -402,7 +402,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 		if (wp->config->pm == NULL) {
 			zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] the process manager is missing (static or dynamic)", wp->config->name);
-			return(-1);
+			return -1;
 		}
 
 		if (wp->config->pm->style == PM_STYLE_DYNAMIC) {
@@ -410,24 +410,24 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			if (pm->dynamic.min_spare_servers <= 0) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) must be a positive value", wp->config->name, pm->dynamic.min_spare_servers);
-				return(-1);
+				return -1;
 			}
 
 			if (pm->dynamic.max_spare_servers <= 0) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must be a positive value", wp->config->name, pm->dynamic.max_spare_servers);
-				return(-1);
+				return -1;
 			}
 
 			if (pm->dynamic.min_spare_servers > pm->max_children ||
 			    pm->dynamic.max_spare_servers > pm->max_children) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] min_spare_servers(%d) and max_spare_servers(%d) cannot be greater than max_children(%d)",
 				     wp->config->name, pm->dynamic.min_spare_servers, pm->dynamic.max_spare_servers, pm->max_children);
-				return(-1);
+				return -1;
 			}
 
 			if (pm->dynamic.max_spare_servers < pm->dynamic.min_spare_servers) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] max_spare_servers(%d) must not be less than min_spare_servers(%d)", wp->config->name, pm->dynamic.max_spare_servers, pm->dynamic.min_spare_servers);
-				return(-1);
+				return -1;
 			}
 
 			if (pm->dynamic.start_servers <= 0) {
@@ -435,7 +435,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				zlog(ZLOG_STUFF, ZLOG_NOTICE, "[pool %s] start_servers has been set to %d", wp->config->name, pm->dynamic.start_servers);
 			} else if (pm->dynamic.start_servers < pm->dynamic.min_spare_servers || pm->dynamic.start_servers > pm->dynamic.max_spare_servers) {
 				zlog(ZLOG_STUFF, ZLOG_ALERT, "[pool %s] start_servers(%d) must not be less than min_spare_servers(%d) and not greater than max_spare_servers(%d)", wp->config->name, pm->dynamic.start_servers, pm->dynamic.min_spare_servers, pm->dynamic.max_spare_servers);
-				return(-1);
+				return -1;
 			}
 		}
 
@@ -482,18 +482,18 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			if (*ping != '/') {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' must start with a '/'", wp->config->name, ping);
-				return(-1);
+				return -1;
 			}
 
 			if (strlen(ping) < 2) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' is not long enough", wp->config->name, ping);
-				return(-1);
+				return -1;
 			}
 
 			for (i=0; i<strlen(ping); i++) {
 				if (!isalnum(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.') {
 					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping page '%s' must containt only the following characters '[alphanum]/_-.'", wp->config->name, ping);
-					return(-1);
+					return -1;
 				}
 			}
 
@@ -502,7 +502,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			} else {
 				if (strlen(wp->config->pm->pong) < 1) {
 					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the ping response page '%s' is not long enough", wp->config->name, wp->config->pm->pong);
-					return(-1);
+					return -1;
 				}
 			}
 		} else {
@@ -519,24 +519,24 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			if (*status != '/') {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' must start with a '/'", wp->config->name, status);
-				return(-1);
+				return -1;
 			}
 
 			if (strlen(status) < 2) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' is not long enough", wp->config->name, status);
-				return(-1);
+				return -1;
 			}
 
 			for (i=0; i<strlen(status); i++) {
 				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.') {
 					zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] the status page '%s' must containt only the following characters '[alphanum]/_-.'", wp->config->name, status);
-					return(-1);
+					return -1;
 				}
 			}
 			wp->shm_status = fpm_shm_alloc(sizeof(struct fpm_status_s));
 			if (!wp->shm_status) {
 				zlog(ZLOG_STUFF, ZLOG_ERROR, "[pool %s] unable to allocate shared memory for status page '%s'", wp->config->name, status);
-				return(-1);
+				return -1;
 			}
 			fpm_status_update_accepted_conn(wp->shm_status, 0);
 			fpm_status_update_activity(wp->shm_status, -1, -1, -1, 1);

@@ -159,7 +159,7 @@ int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 
 	slot = fpm_shm_slot(child);
 	if (!fpm_shm_slots_acquire(slot, 1)) {
-		return(-1);
+		return -1;
 	}
 
 	slot_c = *slot;
