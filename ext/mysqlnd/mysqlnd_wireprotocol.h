@@ -60,11 +60,11 @@ typedef struct st_mysqlnd_packet_header {
 	mysqlnd_packet_methods *m;
 	zend_uchar	packet_no;
 	zend_bool	persistent;
-} mysqlnd_packet_header;
+} MYSQLND_PACKET_HEADER;
 
 /* Server greets the client */
 typedef struct st_mysqlnd_packet_greet {
-	mysqlnd_packet_header		header;
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
@@ -84,7 +84,7 @@ typedef struct st_mysqlnd_packet_greet {
 
 /* Client authenticates */
 typedef struct st_mysqlnd_packet_auth {
-	mysqlnd_packet_header		header;
+	MYSQLND_PACKET_HEADER		header;
 	uint32_t	client_flags;
 	uint32_t	max_packet_size;
 	uint8_t	charset_no;
@@ -103,7 +103,7 @@ typedef struct st_mysqlnd_packet_auth {
 
 /* OK packet */
 typedef struct st_mysqlnd_packet_ok {
-	mysqlnd_packet_header		header;
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		field_count; /* always 0x0 */
 	uint64_t	affected_rows;
 	uint64_t	last_insert_id;
@@ -120,7 +120,7 @@ typedef struct st_mysqlnd_packet_ok {
 
 /* Command packet */
 typedef struct st_mysqlnd_packet_command {
-	mysqlnd_packet_header			header;
+	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
 	const char						*argument;
 	size_t							arg_len;
@@ -129,7 +129,7 @@ typedef struct st_mysqlnd_packet_command {
 
 /* EOF packet */
 typedef struct st_mysqlnd_packet_eof {
-	mysqlnd_packet_header		header;
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		field_count; /* 0xFE */
 	uint16_t	warning_count;
 	uint16_t	server_status;
@@ -143,7 +143,7 @@ typedef struct st_mysqlnd_packet_eof {
 
 /* Result Set header*/
 typedef struct st_mysqlnd_packet_rset_header {
-	mysqlnd_packet_header		header;
+	MYSQLND_PACKET_HEADER		header;
 	/*
 	  0x00 => ok
 	  ~0   => LOAD DATA LOCAL
@@ -169,7 +169,7 @@ typedef struct st_mysqlnd_packet_rset_header {
 
 /* Result set field packet */
 typedef struct st_mysqlnd_packet_res_field {
-	mysqlnd_packet_header	header;
+	MYSQLND_PACKET_HEADER	header;
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
@@ -181,7 +181,7 @@ typedef struct st_mysqlnd_packet_res_field {
 
 /* Row packet */
 typedef struct st_mysqlnd_packet_row {
-	mysqlnd_packet_header	header;
+	MYSQLND_PACKET_HEADER	header;
 	zval		**fields;
 	uint32_t	field_count;
 	zend_bool	eof;
@@ -210,7 +210,7 @@ typedef struct st_mysqlnd_packet_row {
 
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_stats {
-	mysqlnd_packet_header	header;
+	MYSQLND_PACKET_HEADER	header;
 	char *message;
 	/* message_len is not part of the packet*/
 	size_t message_len;
@@ -219,7 +219,7 @@ typedef struct st_mysqlnd_packet_stats {
 
 /* COM_PREPARE response packet */
 typedef struct st_mysqlnd_packet_prepare_response {
-	mysqlnd_packet_header	header;
+	MYSQLND_PACKET_HEADER	header;
 	/* also known as field_count 0x00=OK , 0xFF=error */
 	unsigned char	error_code;
 	unsigned long	stmt_id;
@@ -234,7 +234,7 @@ typedef struct st_mysqlnd_packet_prepare_response {
 
 /* Statistics packet */
 typedef struct st_mysqlnd_packet_chg_user_resp {
-	mysqlnd_packet_header	header;
+	MYSQLND_PACKET_HEADER	header;
 	uint32_t			field_count;
 
 	/* message_len is not part of the packet*/
