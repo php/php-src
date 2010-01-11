@@ -63,7 +63,7 @@ typedef struct st_mysqlnd_packet_header {
 } mysqlnd_packet_header;
 
 /* Server greets the client */
-typedef struct st_php_mysql_packet_greet {
+typedef struct st_mysqlnd_packet_greet {
 	mysqlnd_packet_header		header;
 	uint8_t		protocol_version;
 	char		*server_version;
@@ -79,11 +79,11 @@ typedef struct st_php_mysql_packet_greet {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_greet;
+} MYSQLND_PACKET_GREET;
 
 
 /* Client authenticates */
-typedef struct st_php_mysql_packet_auth {
+typedef struct st_mysqlnd_packet_auth {
 	mysqlnd_packet_header		header;
 	uint32_t	client_flags;
 	uint32_t	max_packet_size;
@@ -99,10 +99,10 @@ typedef struct st_php_mysql_packet_auth {
 	/* +1 for \0 because of scramble() */
 	unsigned char	*server_scramble_buf;
 	size_t			db_len;
-} php_mysql_packet_auth;
+} MYSQLND_PACKET_AUTH;
 
 /* OK packet */
-typedef struct st_php_mysql_packet_ok {
+typedef struct st_mysqlnd_packet_ok {
 	mysqlnd_packet_header		header;
 	uint8_t		field_count; /* always 0x0 */
 	uint64_t	affected_rows;
@@ -115,20 +115,20 @@ typedef struct st_php_mysql_packet_ok {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_ok;
+} MYSQLND_PACKET_OK;
 
 
 /* Command packet */
-typedef struct st_php_mysql_packet_command {
+typedef struct st_mysqlnd_packet_command {
 	mysqlnd_packet_header			header;
 	enum php_mysqlnd_server_command	command;
 	const char						*argument;
 	size_t							arg_len;
-} php_mysql_packet_command;
+} MYSQLND_PACKET_COMMAND;
 
 
 /* EOF packet */
-typedef struct st_php_mysql_packet_eof {
+typedef struct st_mysqlnd_packet_eof {
 	mysqlnd_packet_header		header;
 	uint8_t		field_count; /* 0xFE */
 	uint16_t	warning_count;
@@ -137,12 +137,12 @@ typedef struct st_php_mysql_packet_eof {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_eof;
+} MYSQLND_PACKET_EOF;
 /* EOF packet */
 
 
 /* Result Set header*/
-typedef struct st_php_mysql_packet_rset_header {
+typedef struct st_mysqlnd_packet_rset_header {
 	mysqlnd_packet_header		header;
 	/*
 	  0x00 => ok
@@ -164,11 +164,11 @@ typedef struct st_php_mysql_packet_rset_header {
 	size_t		info_or_local_file_len;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
-} php_mysql_packet_rset_header;
+} MYSQLND_PACKET_RSET_HEADER;
 
 
 /* Result set field packet */
-typedef struct st_php_mysql_packet_res_field {
+typedef struct st_mysqlnd_packet_res_field {
 	mysqlnd_packet_header	header;
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
@@ -176,11 +176,11 @@ typedef struct st_php_mysql_packet_res_field {
 	zend_bool				stupid_list_fields_eof;
 
 	MYSQLND_ERROR_INFO		error_info;
-} php_mysql_packet_res_field;
+} MYSQLND_PACKET_RES_FIELD;
 
 
 /* Row packet */
-struct st_php_mysql_packet_row {
+typedef struct st_mysqlnd_packet_row {
 	mysqlnd_packet_header	header;
 	zval		**fields;
 	uint32_t	field_count;
@@ -205,20 +205,20 @@ struct st_php_mysql_packet_row {
 
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
-};
+} MYSQLND_PACKET_ROW;
 
 
 /* Statistics packet */
-typedef struct st_php_mysql_packet_stats {
+typedef struct st_mysqlnd_packet_stats {
 	mysqlnd_packet_header	header;
 	char *message;
 	/* message_len is not part of the packet*/
 	size_t message_len;
-} php_mysql_packet_stats;
+} MYSQLND_PACKET_STATS;
 
 
 /* COM_PREPARE response packet */
-typedef struct st_php_mysql_packet_prepare_response {
+typedef struct st_mysqlnd_packet_prepare_response {
 	mysqlnd_packet_header	header;
 	/* also known as field_count 0x00=OK , 0xFF=error */
 	unsigned char	error_code;
@@ -229,11 +229,11 @@ typedef struct st_php_mysql_packet_prepare_response {
 
 	/* present in case of error */
 	MYSQLND_ERROR_INFO	error_info;
-} php_mysql_packet_prepare_response;
+} MYSQLND_PACKET_PREPARE_RESPONSE;
 
 
 /* Statistics packet */
-typedef struct st_php_mysql_packet_chg_user_resp {
+typedef struct st_mysqlnd_packet_chg_user_resp {
 	mysqlnd_packet_header	header;
 	uint32_t			field_count;
 
@@ -241,7 +241,7 @@ typedef struct st_php_mysql_packet_chg_user_resp {
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;
-} php_mysql_packet_chg_user_resp;
+} MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
 size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);

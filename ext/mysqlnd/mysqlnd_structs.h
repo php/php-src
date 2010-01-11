@@ -251,32 +251,32 @@ struct st_mysqlnd_net_methods
 };
 
 
-struct st_php_mysql_packet_greet;
-struct st_php_mysql_packet_greet;
-struct st_php_mysql_packet_auth;
-struct st_php_mysql_packet_ok;
-struct st_php_mysql_packet_command;
-struct st_php_mysql_packet_eof;
-struct st_php_mysql_packet_rset_header;
-struct st_php_mysql_packet_res_field;
-struct st_php_mysql_packet_row;
-struct st_php_mysql_packet_stats;
-struct st_php_mysql_packet_prepare_response;
-struct st_php_mysql_packet_chg_user_resp;
+struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_packet_greet;
+struct st_mysqlnd_packet_auth;
+struct st_mysqlnd_packet_ok;
+struct st_mysqlnd_packet_command;
+struct st_mysqlnd_packet_eof;
+struct st_mysqlnd_packet_rset_header;
+struct st_mysqlnd_packet_res_field;
+struct st_mysqlnd_packet_row;
+struct st_mysqlnd_packet_stats;
+struct st_mysqlnd_packet_prepare_response;
+struct st_mysqlnd_packet_chg_user_resp;
 
 struct st_mysqlnd_protocol_methods
 {
-	struct st_php_mysql_packet_greet *		(*get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_auth *		(*get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_ok *			(*get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_command *	(*get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_eof *		(*get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_rset_header *(*get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_res_field *	(*get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_row *		(*get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_stats *		(*get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_prepare_response *(*get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
-	struct st_php_mysql_packet_chg_user_resp*(*get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_greet *		(*get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_auth *		(*get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_ok *			(*get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_command *	(*get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_eof *		(*get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_rset_header *(*get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_res_field *	(*get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_row *		(*get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_stats *		(*get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_prepare_response *(*get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+	struct st_mysqlnd_packet_chg_user_resp*(*get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 };
 
 
@@ -341,8 +341,8 @@ struct st_mysqlnd_conn_methods
 	enum mysqlnd_connection_state (*get_state)(MYSQLND * const conn TSRMLS_DC);
 	void				(*set_state)(MYSQLND * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
 
-	enum_func_status	(*simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const char * const arg, size_t arg_len, enum php_mysql_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
-	enum_func_status	(*simple_command_handle_response)(MYSQLND *conn, enum php_mysql_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status TSRMLS_DC);
+	enum_func_status	(*simple_command)(MYSQLND *conn, enum php_mysqlnd_server_command command, const char * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
+	enum_func_status	(*simple_command_handle_response)(MYSQLND *conn, enum mysqlnd_packet_type ok_packet, zend_bool silent, enum php_mysqlnd_server_command command, zend_bool ignore_upsert_status TSRMLS_DC);
 
 	enum_func_status	(*restart_psession)(MYSQLND *conn TSRMLS_DC);
 	enum_func_status	(*end_psession)(MYSQLND *conn TSRMLS_DC);
@@ -554,8 +554,6 @@ struct st_mysqlnd_connection
 	struct st_mysqlnd_conn_methods *m;
 };
 
-typedef struct st_php_mysql_packet_row php_mysql_packet_row;
-
 
 struct mysqlnd_field_hash_key
 {
@@ -629,7 +627,7 @@ struct st_mysqlnd_res
 	*/
 	unsigned long			*lengths;
 
-	php_mysql_packet_row	*row_packet;
+	struct st_mysqlnd_packet_row * row_packet;
 
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 };

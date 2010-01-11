@@ -142,7 +142,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 												MYSQLND *conn TSRMLS_DC)
 {
 	unsigned int i = 0;
-	php_mysql_packet_res_field * field_packet;
+	MYSQLND_PACKET_RES_FIELD * field_packet;
 #if PHP_MAJOR_VERSION >= 6
 	UChar *ustr;
 	int ulen;
