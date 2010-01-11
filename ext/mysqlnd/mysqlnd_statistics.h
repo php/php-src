@@ -163,9 +163,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 	 MYSQLND_INC_STATISTIC_W_VALUE3(MYSQLND_G(collect_statistics), (conn_stats), (statistic1), (value1), (statistic2), (value2), (statistic3), (value3));
 
 
-void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value
-							 TSRMLS_DC ZEND_FILE_LINE_DC);
-
+PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
 
 PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count);
 PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
