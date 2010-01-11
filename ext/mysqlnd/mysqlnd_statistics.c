@@ -190,13 +190,13 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 
 
 /* {{{ mysqlnd_fill_stats_hash */
-void
-mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+PHPAPI void
+mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	unsigned int i;
 
-	mysqlnd_array_init(return_value, STAT_LAST);
-	for (i = 0; i < STAT_LAST; i++) {
+	mysqlnd_array_init(return_value, stats->count);
+	for (i = 0; i < stats->count; i++) {
 #if PHP_MAJOR_VERSION >= 6
 		UChar *ustr, *tstr;
 		int ulen, tlen;
@@ -205,15 +205,13 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TS
 		
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
 #if PHP_MAJOR_VERSION >= 6
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysqlnd_stats_values_names[i].s,
-								mysqlnd_stats_values_names[i].l + 1 TSRMLS_CC);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, names[i].s, names[i].l + 1 TSRMLS_CC);
 		zend_string_to_unicode(UG(utf8_conv), &tstr, &tlen, tmp, strlen(tmp) + 1 TSRMLS_CC);
 		add_u_assoc_unicode_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen, tstr, 1);
 		efree(ustr);
 		efree(tstr);
 #else
-		add_assoc_string_ex(return_value, mysqlnd_stats_values_names[i].s,
-							mysqlnd_stats_values_names[i].l + 1, tmp, 1);
+		add_assoc_string_ex(return_value, names[i].s, names[i].l + 1, tmp, 1);
 #endif
 	}
 }
@@ -229,7 +227,7 @@ PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LIN
 		memset(&stats, 0, sizeof(stats));
 		stats_ptr = &stats;
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
