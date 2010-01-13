@@ -1531,7 +1531,8 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int 
 
 
 /* {{{ mysqlnd_result_init */
-MYSQLND_RES *mysqlnd_result_init(unsigned int field_count TSRMLS_DC)
+PHPAPI MYSQLND_RES *
+mysqlnd_result_init(unsigned int field_count TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_RES *ret = mnd_ecalloc(1, alloc_size);

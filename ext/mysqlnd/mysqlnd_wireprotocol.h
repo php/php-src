@@ -31,8 +31,8 @@
 #define MYSQLND_NULL_LENGTH	(unsigned long) ~0
 
 /* Used in mysqlnd_debug.c */
-extern const char mysqlnd_read_header_name[];
-extern const char mysqlnd_read_body_name[];
+PHPAPI extern const char mysqlnd_read_header_name[];
+PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
@@ -44,7 +44,7 @@ extern const char mysqlnd_read_body_name[];
 		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
 	} while (0);
 
-extern const char * const mysqlnd_command_to_text[COM_END];
+PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
@@ -244,12 +244,12 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
+PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 
-extern char * const mysqlnd_empty_string;
+PHPAPI extern char * const mysqlnd_empty_string;
 
 
 void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,

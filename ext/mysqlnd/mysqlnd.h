@@ -60,8 +60,8 @@
 
 
 /* Library related */
-void mysqlnd_library_init(TSRMLS_D);
-void mysqlnd_library_end(TSRMLS_D);
+PHPAPI void mysqlnd_library_init(TSRMLS_D);
+PHPAPI void mysqlnd_library_end(TSRMLS_D);
 
 PHPAPI unsigned int mysqlnd_plugin_register();
 PHPAPI unsigned int mysqlnd_plugin_count();

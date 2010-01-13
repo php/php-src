@@ -24,7 +24,7 @@
 #define MYSQLND_STATISTICS_H
 
 
-extern MYSQLND_STATS *mysqlnd_global_stats;
+PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
 
 typedef struct st_mysqlnd_string
 {
