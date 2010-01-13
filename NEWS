@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0). (Joey,
   Ilia)
 - Fixed bug #50680 (strtotime() does not support eighth ordinal number).

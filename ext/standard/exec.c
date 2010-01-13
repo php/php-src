@@ -118,7 +118,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 
 	if (type != 3) {
 		b = buf;
-		
+
 		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
@@ -154,7 +154,7 @@ int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 		}
 		if (bufl) {
 			/* strip trailing whitespaces if we have not done so already */	
-			if ((type == 2 && bufl && !l) || type != 2) {
+			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (int)(bufl - 1)) {
