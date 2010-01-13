@@ -130,7 +130,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 		}
 		if (bufl) {
 			/* strip trailing whitespaces if we have not done so already */
-			if ((type == 2 && bufl && !l) || type != 2) {
+			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l != (bufl - 1)) {
