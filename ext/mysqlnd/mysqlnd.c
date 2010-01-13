@@ -57,11 +57,11 @@ extern MYSQLND_CHARSET *mysqlnd_charsets;
 
 
 
-const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using old authentication";
-const char * const mysqlnd_server_gone = "MySQL server has gone away";
-const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
+PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using old authentication";
+PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
+PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
 
-MYSQLND_STATS *mysqlnd_global_stats = NULL;
+PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
 static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
@@ -69,7 +69,7 @@ static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
 static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
 /* {{{ mysqlnd_library_end */
-void mysqlnd_library_end(TSRMLS_D)
+PHPAPI void mysqlnd_library_end(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == TRUE) {
 		mysqlnd_stats_end(mysqlnd_global_stats);
@@ -2038,7 +2038,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_connection_stats)(const MYSQLND * const conn,
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC);
 static void MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC);
 
-
+static
 MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, init),
 	MYSQLND_METHOD(mysqlnd_conn, connect),
@@ -2125,7 +2125,7 @@ MYSQLND_METHOD(mysqlnd_conn, init)(MYSQLND * conn TSRMLS_DC)
 
 
 /* {{{ mysqlnd_init */
-PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
+PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND *ret = mnd_pecalloc(1, alloc_size, persistent);
@@ -2146,7 +2146,7 @@ PHPAPI MYSQLND *_mysqlnd_init(zend_bool persistent TSRMLS_DC)
 
 
 /* {{{ mysqlnd_library_init */
-void mysqlnd_library_init(TSRMLS_D)
+PHPAPI void mysqlnd_library_init(TSRMLS_D)
 {
 	if (mysqlnd_library_initted == FALSE) {
 		mysqlnd_library_initted = TRUE;
