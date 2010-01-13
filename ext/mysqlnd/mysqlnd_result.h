@@ -23,7 +23,7 @@
 #ifndef MYSQLND_RESULT_H
 #define MYSQLND_RESULT_H
 
-MYSQLND_RES *mysqlnd_result_init(unsigned int field_count TSRMLS_DC);
+PHPAPI MYSQLND_RES * mysqlnd_result_init(unsigned int field_count TSRMLS_DC);
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC);
 

@@ -58,27 +58,27 @@ struct st_mysqlnd_debug
 	const char ** skip_functions;
 };
 
-extern const char * mysqlnd_debug_std_no_trace_funcs[];
+PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
 
 #define MYSQLND_MEM_D 	TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
 
 
-void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
-void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
-void 	_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
-void 	_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
+PHPAPI void 	_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
+PHPAPI void 	_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
+PHPAPI void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 
-char *	mysqlnd_get_backtrace(TSRMLS_D);
+PHPAPI char *	mysqlnd_get_backtrace(TSRMLS_D);
 
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)

@@ -437,7 +437,7 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ mysqlnd_result_meta_init */
-MYSQLND_RES_METADATA *
+PHPAPI MYSQLND_RES_METADATA *
 mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC)
 {
 	MYSQLND_RES_METADATA *ret;
