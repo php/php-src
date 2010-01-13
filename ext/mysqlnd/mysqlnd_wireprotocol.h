@@ -31,8 +31,8 @@
 #define MYSQLND_NULL_LENGTH	(unsigned long) ~0
 
 /* Used in mysqlnd_debug.c */
-extern char * mysqlnd_read_header_name;
-extern char * mysqlnd_read_body_name;
+extern const char mysqlnd_read_header_name[];
+extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
