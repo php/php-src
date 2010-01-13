@@ -66,8 +66,8 @@ static const char *unknown_sqlstate= "HY000";
 char * const mysqlnd_empty_string = "";
 
 /* Used in mysqlnd_debug.c */
-char * mysqlnd_read_header_name	= "mysqlnd_read_header";
-char * mysqlnd_read_body_name	= "mysqlnd_read_body";
+const char mysqlnd_read_header_name[]	= "mysqlnd_read_header";
+const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
 
 
 #define ERROR_MARKER 0xFF
