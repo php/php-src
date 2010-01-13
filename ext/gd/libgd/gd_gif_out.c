@@ -117,9 +117,8 @@ void gdImageGif (gdImagePtr im, FILE * outFile)
 void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 {
 	gdImagePtr pim = 0, tim = im;
-	int interlace, transparent, BitsPerPixel;
+	int interlace, BitsPerPixel;
 	interlace = im->interlace;
-	transparent = im->transparent;
 	if (im->trueColor) {
 		/* Expensive, but the only way that produces an
 			acceptable result: mix down to a palette
