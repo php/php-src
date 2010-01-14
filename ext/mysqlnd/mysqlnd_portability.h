@@ -369,16 +369,6 @@ typedef union {
                                (((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
                                (((uint32_t) ((zend_uchar) (A)[3])) << 24))
 
-
-#define bit_uint8korr(A) ((uint64_t)(((uint32_t) (((zend_uchar*) (A))[7])) +\
-									(((uint32_t) (((zend_uchar*) (A))[6])) << 8) +\
-									(((uint32_t) (((zend_uchar*) (A))[5])) << 16) +\
-									(((uint32_t) (((zend_uchar*) (A))[4])) << 24)) +\
-									(((uint64_t) (((uint32_t) (((zend_uchar*) (A))[3])) +\
-									(((uint32_t) (((zend_uchar*) (A))[2])) << 8) +\
-									(((uint32_t) (((zend_uchar*) (A))[1])) << 16) +\
-									(((uint32_t) (((zend_uchar*) (A))[0])) << 24))) << 32))
-
 #define uint8korr(A)	((uint64_t)(((uint32_t) ((zend_uchar) (A)[0])) +\
 									(((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
 									(((uint32_t) ((zend_uchar) (A)[2])) << 16) +\
