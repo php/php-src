@@ -23,6 +23,7 @@
 #define MYSQLI_MYSQLND_H
 
 #include "ext/mysqlnd/mysqlnd_libmysql_compat.h"
+#include "ext/mysqlnd/mysqlnd_portability.h"
 
 /* Here comes non-libmysql API to have less ifdefs in mysqli*/
 #define MYSQLI_CLOSE_EXPLICIT                  MYSQLND_CLOSE_EXPLICIT
