@@ -31,7 +31,6 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
-#include "ext/mysqlnd/mysqlnd_portability.h"
 
 /* {{{ proto mixed mysqli_affected_rows(object link) U
    Get number of affected rows in previous MySQL operation */
