@@ -32,7 +32,6 @@
 #include "ext/standard/php_string.h"
 #include "php_mysqli_structs.h"
 #include "zend_exceptions.h"
-#include "ext/mysqlnd/mysqlnd_portability.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static PHP_GINIT_FUNCTION(mysqli);
