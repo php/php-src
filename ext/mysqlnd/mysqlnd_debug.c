@@ -317,7 +317,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	}
 
 	if ((self->flags & MYSQLND_DEBUG_TRACE_MEMORY_CALLS) == 0 && self->skip_functions) {
-		char ** p = self->skip_functions;
+		const char ** p = self->skip_functions;
 		while (*p) {
 			if (*p == func_name) {
 				zend_stack_push(&self->call_stack, "", sizeof(""));
