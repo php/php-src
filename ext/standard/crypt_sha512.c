@@ -2,10 +2,8 @@
    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
 /* Windows VC++ port by Pierre Joye <pierre@php.net> */
 
-#ifndef PHP_WIN32
-# include "php.h"
-# include "php_main.h"
-#endif
+#include "php.h"
+#include "php_main.h"
 
 #include <errno.h>
 #include <limits.h>
