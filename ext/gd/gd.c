@@ -3749,7 +3749,10 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have at least 3 points in your array");
 		RETURN_FALSE;
 	}
-
+	if (npoints <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must give a positive number of points");
+		RETURN_FALSE;
+	}
 	if (nelem < npoints * 2) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to use %d points in array with only %d points", npoints, nelem/2);
 		RETURN_FALSE;
