@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Added missing host validation for HTTP urls inside FILTER_VALIDATE_URL.
   (Ilia)
 - Added stream_resolve_include_path(). (Mikko)
+- Added stream filter support to mcrypt extension (ported from 
+  mcrypt_filter). (Stas)
 
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0). (Joey,
