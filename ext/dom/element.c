@@ -777,9 +777,15 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				node_list_unlink(nodep->children TSRMLS_CC);
 			}
 
-			if (xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") || 
+				(prefix == NULL && xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) && 
+				xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 				is_xmlns = 1;
-				nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
+				if (prefix == NULL) {
+					nsptr = dom_get_nsdecl(elemp, NULL);
+				} else {
+					nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
+				}
 			} else {
 				nsptr = xmlSearchNsByHref(elemp->doc, elemp, (xmlChar *)uri);
 				if (nsptr && nsptr->prefix == NULL) {
@@ -802,7 +808,12 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 			if (nsptr == NULL) {
 				if (prefix == NULL) {
-					errorcode = NAMESPACE_ERR;
+					if (is_xmlns == 1) {
+						xmlNewNs(elemp, (xmlChar *)value, NULL);
+						xmlReconciliateNs(elemp->doc, elemp);
+					} else {
+						errorcode = NAMESPACE_ERR;
+					}
 				} else {
 					if (is_xmlns == 1) {
 						xmlNewNs(elemp, (xmlChar *)value, (xmlChar *)localname);
