@@ -178,7 +178,7 @@ char *alloca ();
 #endif
 
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3400
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
 #else
 # define __restrict__
 #endif
