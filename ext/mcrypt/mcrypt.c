@@ -41,6 +41,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_rand.h"
+#include "php_mcrypt_filter.h"
 
 static int le_mcrypt;
 
@@ -469,12 +470,19 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	MCRYPT_ENTRY2_2_4(MODE_OFB, "ofb");
 	MCRYPT_ENTRY2_2_4(MODE_STREAM, "stream");
 	REGISTER_INI_ENTRIES();
+
+	php_stream_filter_register_factory("mcrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
+	php_stream_filter_register_factory("mdecrypt.*", &php_mcrypt_filter_factory TSRMLS_CC);
+
 	return SUCCESS;
 }
 /* }}} */
 
 static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 {
+	php_stream_filter_unregister_factory("mcrypt.*" TSRMLS_CC);
+	php_stream_filter_unregister_factory("mdecrypt.*" TSRMLS_CC);
+
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -516,6 +524,7 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "mcrypt support", "enabled");
+	php_info_print_table_header(2, "mcrypt_filter support", "enabled");
 	php_info_print_table_row(2, "Version", LIBMCRYPT_VERSION);
 	php_info_print_table_row(2, "Api No", mcrypt_api_no);
 	php_info_print_table_row(2, "Supported ciphers", tmp1.c);
