@@ -3588,7 +3588,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	long col = -1, x = -1, y = -1;
 	int str_len, fontname_len, i, brect[8];
 	double ptsize, angle;
-	unsigned char *str = NULL, *fontname = NULL;
+	char *str = NULL, *fontname = NULL;
 	char *error = NULL;
 	int argc = ZEND_NUM_ARGS();
 #if HAVE_GD_STRINGFTEX
@@ -3657,14 +3657,10 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	{
 		char tmp_font_path[MAXPATHLEN];
 
-		if (VCWD_REALPATH(fontname, tmp_font_path)) {
-			fontname = (unsigned char *) fontname;
-		} else {
+		if (!VCWD_REALPATH(fontname, tmp_font_path)) {
 			fontname = NULL;
 		}
 	}
-#else
-	fontname = (unsigned char *) fontname;
 #endif
 
 	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
