@@ -1729,7 +1729,7 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	gdImagePtr im;
 	int ct = (-1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
 		RETURN_FALSE;
 	}
 
