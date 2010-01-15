@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   variable does not exist). (Ilia)
 - Fixed bug #50576 (XML_OPTION_SKIP_TAGSTART option has no effect). (Pierrick)
 - Fixed bug #49560 (oci8: using LOBs causes slow PHP shutdown). (Oracle Corp.)
+- Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
 - Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
 - Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
   in HTTP uploads). (Ilia)
