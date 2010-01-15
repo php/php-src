@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 - Fixed bug #50394 (Reference argument converted to value in __call). (Stas)
 - Fixed bug #49851 (http wrapper breaks on 1024 char long headers). (Ilia)
 - Fixed bug #49600 (imageTTFText text shifted right). (Takeshi Abe)
+- Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
 - Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
 - Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
   in HTTP uploads). (Ilia)
