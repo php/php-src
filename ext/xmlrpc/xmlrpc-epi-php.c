@@ -911,12 +911,26 @@ PHP_FUNCTION(xmlrpc_server_destroy)
 static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRequest, void* data) /* {{{ */
 {
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
+	zval** php_function;
 	zval* xmlrpc_params;
 	zval* callback_params[3];
 	TSRMLS_FETCH();
 
+	zval_dtor(pData->xmlrpc_method);
+	zval_dtor(pData->return_data);
+
 	/* convert xmlrpc to native php types */
+	ZVAL_STRING(pData->xmlrpc_method, XMLRPC_RequestGetMethodName(xRequest), 1);
 	xmlrpc_params = XMLRPC_to_PHP(XMLRPC_RequestGetData(xRequest));
+	
+	/* check if the called method has been previous registered */
+	if(zend_hash_find(Z_ARRVAL_P(pData->server->method_map),
+                      Z_STRVAL_P(pData->xmlrpc_method), 
+                      Z_STRLEN_P(pData->xmlrpc_method) + 1, 
+                      (void**)&php_function) == SUCCESS) {
+
+		pData->php_function = *php_function;
+	}
 
 	/* setup data hoojum */
 	callback_params[0] = pData->xmlrpc_method;
@@ -932,7 +946,7 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 
 	zval_ptr_dtor(&xmlrpc_params);
 
-	return NULL;
+	return PHP_to_XMLRPC(pData->return_data TSRMLS_CC);
 }
 /* }}} */
 
@@ -1101,33 +1115,16 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 
 		if (xRequest) {
 			const char* methodname = XMLRPC_RequestGetMethodName(xRequest);
-			zval **php_function;
 			XMLRPC_VALUE xAnswer = NULL;
 			MAKE_STD_ZVAL(data.xmlrpc_method); /* init. very important.  spent a frustrating day finding this out. */
 			MAKE_STD_ZVAL(data.return_data);
 			Z_TYPE_P(data.return_data) = IS_NULL;  /* in case value is never init'd, we don't dtor to think it is a string or something */
 			Z_TYPE_P(data.xmlrpc_method) = IS_NULL;
 
-			if (!methodname) {
-				methodname = "";
-			}
-            
 			/* setup some data to pass to the callback function */
-			Z_STRVAL_P(data.xmlrpc_method) = estrdup(methodname);
-			Z_STRLEN_P(data.xmlrpc_method) = strlen(methodname);
-			Z_TYPE_P(data.xmlrpc_method) = IS_STRING;
 			data.caller_params = *caller_params;
 			data.php_executed = 0;
 			data.server = server;
-
-			/* check if the called method has been previous registered */
-			if (zend_hash_find(Z_ARRVAL_P(server->method_map),
-								Z_STRVAL_P(data.xmlrpc_method), 
-								Z_STRLEN_P(data.xmlrpc_method) + 1, 
-								(void**)&php_function) == SUCCESS) {
-
-				data.php_function = *php_function;
-			}
 
 			/* We could just call the php method directly ourselves at this point, but we do this 
 			 * with a C callback in case the xmlrpc library ever implements some cool usage stats,
@@ -1138,7 +1135,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				zval_dtor(data.return_data);
 				FREE_ZVAL(data.return_data);
 				data.return_data = XMLRPC_to_PHP(xAnswer);
-			} else if (data.php_executed && !out.b_php_out) {
+			} else if (data.php_executed && !out.b_php_out && !xAnswer) {
 				xAnswer = PHP_to_XMLRPC(data.return_data TSRMLS_CC);
 			}
 
