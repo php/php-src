@@ -2,8 +2,13 @@ The Win32 Build System.
 $Id$
 Wez Furlong <wez@thebrainroom.com>
 
+
+NOTE:
+  These instructions are outdated, use at your own risk.
+
+
 If you need help with the build system, send mail to
-internals@lists.php.net; please don't email me directly.
+internals-win@lists.php.net; please don't email me directly.
 
 ===========================================================
 Contents:
