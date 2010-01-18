@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed bug #50787 (stream_set_write_buffer() has no effect on socket
+  streams). (vnegrier at optilian dot com, Ilia)
 - Fixed bug #50761 (system.multiCall crashes in xmlrpc extension). (hiroaki
   dot kawai at gmail dot com, Ilia)
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
