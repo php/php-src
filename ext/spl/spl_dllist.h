@@ -24,9 +24,9 @@
 #include "php.h"
 #include "php_spl.h"
 
-PHPAPI zend_class_entry *spl_ce_SplDoublyLinkedList;
-PHPAPI zend_class_entry *spl_ce_SplQueue;
-PHPAPI zend_class_entry *spl_ce_SplStack;
+extern PHPAPI zend_class_entry *spl_ce_SplDoublyLinkedList;
+extern PHPAPI zend_class_entry *spl_ce_SplQueue;
+extern PHPAPI zend_class_entry *spl_ce_SplStack;
 
 PHP_MINIT_FUNCTION(spl_dllist);
 
