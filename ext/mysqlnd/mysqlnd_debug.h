@@ -80,6 +80,7 @@ PHPAPI void	_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 
 PHPAPI char *	mysqlnd_get_backtrace(TSRMLS_D);
 
+#if !defined(PHP_WIN32)
 #define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
 #define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
 #define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
@@ -89,6 +90,16 @@ PHPAPI char *	mysqlnd_get_backtrace(TSRMLS_D);
 #define DBG_RETURN_EX(dbg_obj, value)	do { if ((dbg_obj)) (dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__); return (value); } while (0)
 #define DBG_VOID_RETURN_EX(dbg_obj)		do { if ((dbg_obj)) (dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__); return; } while (0)
 
+#else
+static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
+static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
+static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}
+static inline void DBG_ERR_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}
+static inline void DBG_ENTER_EX(MYSQLND_DEBUG * dbg_obj, const char * const func_name) {}
+#define DBG_RETURN_EX(dbg_obj, value) return (value)
+#define DBG_VOID_RETURN_EX(dbg_obj) return
+
+#endif
 
 #if MYSQLND_DBG_ENABLED == 1
 
@@ -102,6 +113,8 @@ PHPAPI char *	mysqlnd_get_backtrace(TSRMLS_D);
 #define DBG_VOID_RETURN			DBG_VOID_RETURN_EX(MYSQLND_G(dbg))
 
 #elif MYSQLND_DBG_ENABLED == 0
+
+
 
 static inline void DBG_INF(const char * const msg) {}
 static inline void DBG_ERR(const char * const msg) {}
