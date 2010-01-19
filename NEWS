@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50791 (Compile failure: Bad logic in defining fopencookie
+  emulation). (Jani)
 - Fixed bug #50787 (stream_set_write_buffer() has no effect on socket
   streams). (vnegrier at optilian dot com, Ilia)
 - Fixed bug #50761 (system.multiCall crashes in xmlrpc extension). (hiroaki
