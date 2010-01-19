@@ -22,7 +22,7 @@
 #ifndef SPL_FIXEDARRAY_H
 #define SPL_FIXEDARRAY_H
 
-PHPAPI zend_class_entry *spl_ce_SplFixedArray;
+extern PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
 PHP_MINIT_FUNCTION(spl_fixedarray);
 

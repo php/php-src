@@ -41,7 +41,7 @@ typedef struct _opt_struct {
 
 BEGIN_EXTERN_C()
 /* holds the index of the latest fetched element from the opts array */
-PHPAPI int php_optidx;
+extern PHPAPI int php_optidx;
 PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start);
 END_EXTERN_C()
 
