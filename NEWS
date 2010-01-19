@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.3.3
+- Upgraded bundled sqlite to version 3.6.22. (Ilia)
 - Upgraded bundled libmagic to version 5.03. (Mikko)
 
 - Improved LCG entropy. (Rasmus, Samy Kamkar)
