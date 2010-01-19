@@ -24,11 +24,11 @@
 #include "php.h"
 #include "php_spl.h"
 
-PHPAPI zend_class_entry *spl_ce_SplHeap;
-PHPAPI zend_class_entry *spl_ce_SplMinHeap;
-PHPAPI zend_class_entry *spl_ce_SplMaxHeap;
+extern PHPAPI zend_class_entry *spl_ce_SplHeap;
+extern PHPAPI zend_class_entry *spl_ce_SplMinHeap;
+extern PHPAPI zend_class_entry *spl_ce_SplMaxHeap;
 
-PHPAPI zend_class_entry *spl_ce_SplPriorityQueue;
+extern PHPAPI zend_class_entry *spl_ce_SplPriorityQueue;
 
 PHP_MINIT_FUNCTION(spl_heap);
 
