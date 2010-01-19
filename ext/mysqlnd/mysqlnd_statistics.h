@@ -42,13 +42,20 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 #define MYSQLND_STATS_UNLOCK(stats)
 #endif
 
-#define MYSQLND_CHECK_AND_CALL_HANDLER(stats, statistic, value) \
+#define MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(stats, statistic, value) \
 	{ \
+		 	MYSQLND_STATS_LOCK(stats); \
+			(stats)->values[(statistic)] += (value); \
 			if ((stats)->triggers[(statistic)] && (stats)->in_trigger == FALSE) { \
 				(stats)->in_trigger = TRUE; \
+		 		MYSQLND_STATS_UNLOCK(stats); \
+																							\
 				(stats)->triggers[(statistic)]((stats), (statistic), (value) TSRMLS_CC); \
+																							\
+		 		MYSQLND_STATS_LOCK(stats); \
 				(stats)->in_trigger = FALSE; \
 			} \
+			MYSQLND_STATS_UNLOCK(_p_s); \
 	} \
 	
 #define MYSQLND_DEC_STATISTIC(enabler, stats, statistic) \
@@ -56,10 +63,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 	enum_mysqlnd_collected_stats _s = (statistic);\
 	MYSQLND_STATS * _p_s = (MYSQLND_STATS *) (stats); \
  	if ((enabler) && _p_s && _s != _p_s->count) { \
- 		MYSQLND_STATS_LOCK(_p_s); \
-		MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s, -1); \
-		_p_s->values[_s]--; \
- 		MYSQLND_STATS_UNLOCK(_p_s); \
+		MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s, -1); \
 	}\
  }
 
@@ -68,10 +72,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 	enum_mysqlnd_collected_stats _s = (statistic);\
 	MYSQLND_STATS * _p_s = (MYSQLND_STATS *) (stats); \
  	if ((enabler) && _p_s && _s != _p_s->count) { \
- 		MYSQLND_STATS_LOCK(_p_s); \
-		MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s, 1); \
-		_p_s->values[_s]++; \
- 		MYSQLND_STATS_UNLOCK(_p_s); \
+		MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s, 1); \
 	}\
  }
 
@@ -81,10 +82,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 	MYSQLND_STATS * _p_s = (MYSQLND_STATS *) (stats); \
  	if ((enabler) && _p_s && _s != _p_s->count) { \
 		uint64_t v = (uint64_t) (value); \
- 		MYSQLND_STATS_LOCK(_p_s); \
-		MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s, v); \
-		_p_s->values[_s] += v; \
- 		MYSQLND_STATS_UNLOCK(_p_s); \
+		MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s, v); \
 	}\
  }
 
@@ -96,16 +94,8 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 		uint64_t v2 = (uint64_t) (value2); \
 		enum_mysqlnd_collected_stats _s1 = (statistic1);\
 		enum_mysqlnd_collected_stats _s2 = (statistic2);\
- 		MYSQLND_STATS_LOCK(_p_s); \
-		if (_s1 != _p_s->count) { \
-			MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s1, v1); \
-			_p_s->values[_s1]+= v1; \
-		} \
-		if (_s2 != _p_s->count) { \
-			MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s2, v2); \
-			_p_s->values[_s2]+= v2; \
-		} \
- 		MYSQLND_STATS_UNLOCK(_p_s); \
+		if (_s1 != _p_s->count) MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s1, v1); \
+		if (_s2 != _p_s->count) MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s2, v2); \
 	}\
  }
 
@@ -119,20 +109,9 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 		enum_mysqlnd_collected_stats _s1 = (statistic1);\
 		enum_mysqlnd_collected_stats _s2 = (statistic2);\
 		enum_mysqlnd_collected_stats _s3 = (statistic3);\
- 		MYSQLND_STATS_LOCK(_p_s); \
-		if (_s1 != _p_s->count) { \
-			MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s1, v1); \
-			_p_s->values[_s1]+= v1; \
-		} \
-		if (_s2 != _p_s->count) { \
-			MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s2, v2); \
-			_p_s->values[_s2]+= v2; \
-		} \
-		if (_s3 != _p_s->count) { \
-			MYSQLND_CHECK_AND_CALL_HANDLER(_p_s, _s3, v3); \
-			_p_s->values[_s3]+= v3; \
-		} \
- 		MYSQLND_STATS_UNLOCK(_p_s); \
+		if (_s1 != _p_s->count) MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s1, v1); \
+		if (_s2 != _p_s->count) MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s2, v2); \
+		if (_s3 != _p_s->count) MYSQLND_UPDATE_VALUE_AND_CALL_TRIGGER(_p_s, _s3, v3); \
 	}\
  }
 
