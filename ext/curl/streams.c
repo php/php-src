@@ -280,7 +280,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	 * have a FILE* associated with it.
 	 * Otherwise, use the "smart" memory stream that will turn itself into a file
 	 * when it gets large */
-#if !HAVE_FOPENCOOKIE
+#ifndef HAVE_FOPENCOOKIE
 	if (options & STREAM_WILL_CAST) {
 		curlstream->readbuffer.buf = php_stream_fopen_tmpfile();
 	} else
@@ -445,7 +445,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	php_stream_to_zval(curlstream->readbuffer.buf, tmp);
 	add_assoc_zval(stream->wrapperdata, "readbuf", tmp);
 
-#if !HAVE_FOPENCOOKIE
+#ifndef HAVE_FOPENCOOKIE
 	if (options & STREAM_WILL_CAST) {
 		/* we will need to download the whole resource now,
 		 * since we cannot get the actual FD for the download,
