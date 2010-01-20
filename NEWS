@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Improved LCG entropy. (Rasmus, Samy Kamkar)
 
+- Fixed bug in bundled libgd causing spurious horizontal lines drawn by 
+  gdImageFilledPolygon (libgd #100). (Takeshi Abe)
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
 - Fixed bug #50791 (Compile failure: Bad logic in defining fopencookie
