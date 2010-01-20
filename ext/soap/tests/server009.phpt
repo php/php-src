@@ -7,6 +7,9 @@ SOAP Server 9: setclass and setpersistence(SOAP_PERSISTENCE_SESSION)
 		die('skip this test needs session extension');
 	}
 ?>
+--INI--
+session.auto_start=1
+session.save_handler=files
 --FILE--
 <?php
 class foo {
