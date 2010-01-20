@@ -69,7 +69,7 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 	}
 }
 #else
-void mysqlnd_minfo_print_hash(zval *values)
+PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 {
 	zval **values_entry;
 	HashPosition pos_values;
@@ -205,7 +205,7 @@ static PHP_RINIT_FUNCTION(mysqlnd)
 {
 #if defined(PHP_DEBUG)
 	if (MYSQLND_G(debug)) {
-		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(TSRMLS_C);
+		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
 		if (!dbg) {
 			return FAILURE;
 		}

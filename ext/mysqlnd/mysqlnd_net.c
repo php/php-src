@@ -78,7 +78,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read)(MYSQLND * conn, zend_uchar * buffer, s
 		buffer += ret;
 		to_read -= ret;
 	}
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE(&conn->stats, STAT_BYTES_RECEIVED, count);
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats, STAT_BYTES_RECEIVED, count);
 	conn->net->stream->chunk_size = old_chunk_size;
 	DBG_RETURN(PASS);
 }
@@ -307,7 +307,7 @@ MYSQLND_METHOD(mysqlnd_net, send)(MYSQLND * const conn, char * const buf, size_t
 		SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
 
-	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(&conn->stats,
+	MYSQLND_INC_CONN_STATISTIC_W_VALUE3(conn->stats,
 			STAT_BYTES_SENT, count + packets_sent * MYSQLND_HEADER_SIZE,
 			STAT_PROTOCOL_OVERHEAD_OUT, packets_sent * MYSQLND_HEADER_SIZE,
 			STAT_PACKETS_SENT, packets_sent);
@@ -475,7 +475,7 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t compres
 
 
 /* {{{ mysqlnd_net::receive */
-static enum_func_status
+static size_t
 MYSQLND_METHOD(mysqlnd_net, receive)(MYSQLND * conn, zend_uchar * buffer, size_t count TSRMLS_DC)
 {
 	size_t to_read = count;
@@ -658,10 +658,11 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 
 
 /* {{{ mysqlnd_net_init */
-MYSQLND_NET *
+PHPAPI MYSQLND_NET *
 mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 {
-	MYSQLND_NET * net = mnd_pecalloc(1, sizeof(MYSQLND_NET), persistent);
+	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_net_init");
 	DBG_INF_FMT("persistent=%d", persistent);
@@ -687,9 +688,9 @@ mysqlnd_net_init(zend_bool persistent TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_net_init */
-void
-mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC)
+/* {{{ mysqlnd_net_free */
+PHPAPI void
+mysqlnd_net_free(MYSQLND_NET * const net TSRMLS_DC)
 {
 	zend_bool pers = net->persistent;
 
@@ -717,6 +718,20 @@ mysqlnd_net_free(MYSQLND_NET * net TSRMLS_DC)
 	DBG_VOID_RETURN;
 }
 /* }}} */
+
+
+/* {{{ _mysqlnd_plugin_get_plugin_net_data */
+PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id TSRMLS_DC)
+{
+	DBG_ENTER("_mysqlnd_plugin_get_plugin_net_data");
+	DBG_INF_FMT("plugin_id=%u", plugin_id);
+	if (!net || plugin_id >= mysqlnd_plugin_count()) {
+		return NULL;
+	}
+	DBG_RETURN((void *)((char *)net + sizeof(MYSQLND_NET) + plugin_id * sizeof(void *)));
+}
+/* }}} */
+
 
 
 /*

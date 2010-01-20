@@ -31,7 +31,6 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
-#include "ext/mysqlnd/mysqlnd_portability.h"
 
 /* {{{ proto mixed mysqli_affected_rows(object link)
    Get number of affected rows in previous MySQL operation */
@@ -1760,7 +1759,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(last_error, stmt->stmt->last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
-			mysqlnd_error_info error_info = mysql->mysql->error_info;
+			MYSQLND_ERROR_INFO error_info = mysql->mysql->error_info;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;

@@ -24,7 +24,7 @@
 #define MYSQLND_RESULT_META_H
 
 
-MYSQLND_RES_METADATA *mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC);
+PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC);
 
 
 

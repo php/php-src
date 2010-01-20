@@ -31,18 +31,11 @@
 #define MYSQLND_NULL_LENGTH	(unsigned long) ~0
 
 /* Used in mysqlnd_debug.c */
-extern char * mysqlnd_read_header_name;
-extern char * mysqlnd_read_body_name;
+PHPAPI extern const char mysqlnd_read_header_name[];
+PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
-#define PACKET_INIT(packet, enum_type, c_type, pers)  \
-	{ \
-		packet = (c_type) pecalloc(1, packet_methods[(enum_type)].struct_size, (pers)); \
-		((c_type) (packet))->header.m = &packet_methods[(enum_type)]; \
-		((c_type) (packet))->header.persistent = (pers); \
-		DBG_INF_FMT("PACKET_INIT(%p, %d, %d)", packet, (int) enum_type, (int) pers); \
-	}
 #define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn) TSRMLS_CC))
 #define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
 #define PACKET_FREE(packet) \
@@ -51,16 +44,7 @@ extern char * mysqlnd_read_body_name;
 		((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
 	} while (0);
 
-#define PACKET_INIT_ALLOCA(packet, enum_type)  \
-	{ \
-		memset(&(packet), 0, packet_methods[enum_type].struct_size); \
-		(packet).header.m = &packet_methods[enum_type]; \
-	}
-#define PACKET_WRITE_ALLOCA(packet, conn)	PACKET_WRITE(&(packet), (conn))
-#define PACKET_READ_ALLOCA(packet, conn)	PACKET_READ(&(packet), (conn))
-#define PACKET_FREE_ALLOCA(packet)			(packet.header.m->free_mem(&(packet), TRUE TSRMLS_CC))
-
-extern const char * const mysqlnd_command_to_text[COM_END];
+PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
@@ -70,19 +54,17 @@ typedef struct st_mysqlnd_packet_methods {
 	void				(*free_mem)(void *packet, zend_bool alloca TSRMLS_DC);
 } mysqlnd_packet_methods;
 
-extern mysqlnd_packet_methods packet_methods[];
-
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
 	mysqlnd_packet_methods *m;
 	zend_uchar	packet_no;
 	zend_bool	persistent;
-} mysqlnd_packet_header;
+} MYSQLND_PACKET_HEADER;
 
 /* Server greets the client */
-typedef struct st_php_mysql_packet_greet {
-	mysqlnd_packet_header		header;
+typedef struct st_mysqlnd_packet_greet {
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		protocol_version;
 	char		*server_version;
 	uint32_t	thread_id;
@@ -97,12 +79,12 @@ typedef struct st_php_mysql_packet_greet {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_greet;
+} MYSQLND_PACKET_GREET;
 
 
 /* Client authenticates */
-typedef struct st_php_mysql_packet_auth {
-	mysqlnd_packet_header		header;
+typedef struct st_mysqlnd_packet_auth {
+	MYSQLND_PACKET_HEADER		header;
 	uint32_t	client_flags;
 	uint32_t	max_packet_size;
 	uint8_t	charset_no;
@@ -117,11 +99,11 @@ typedef struct st_php_mysql_packet_auth {
 	/* +1 for \0 because of scramble() */
 	unsigned char	*server_scramble_buf;
 	size_t			db_len;
-} php_mysql_packet_auth;
+} MYSQLND_PACKET_AUTH;
 
 /* OK packet */
-typedef struct st_php_mysql_packet_ok {
-	mysqlnd_packet_header		header;
+typedef struct st_mysqlnd_packet_ok {
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		field_count; /* always 0x0 */
 	uint64_t	affected_rows;
 	uint64_t	last_insert_id;
@@ -133,21 +115,21 @@ typedef struct st_php_mysql_packet_ok {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_ok;
+} MYSQLND_PACKET_OK;
 
 
 /* Command packet */
-typedef struct st_php_mysql_packet_command {
-	mysqlnd_packet_header			header;
+typedef struct st_mysqlnd_packet_command {
+	MYSQLND_PACKET_HEADER			header;
 	enum php_mysqlnd_server_command	command;
 	const char						*argument;
 	size_t							arg_len;
-} php_mysql_packet_command;
+} MYSQLND_PACKET_COMMAND;
 
 
 /* EOF packet */
-typedef struct st_php_mysql_packet_eof {
-	mysqlnd_packet_header		header;
+typedef struct st_mysqlnd_packet_eof {
+	MYSQLND_PACKET_HEADER		header;
 	uint8_t		field_count; /* 0xFE */
 	uint16_t	warning_count;
 	uint16_t	server_status;
@@ -155,13 +137,13 @@ typedef struct st_php_mysql_packet_eof {
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int 	error_no;
-} php_mysql_packet_eof;
+} MYSQLND_PACKET_EOF;
 /* EOF packet */
 
 
 /* Result Set header*/
-typedef struct st_php_mysql_packet_rset_header {
-	mysqlnd_packet_header		header;
+typedef struct st_mysqlnd_packet_rset_header {
+	MYSQLND_PACKET_HEADER		header;
 	/*
 	  0x00 => ok
 	  ~0   => LOAD DATA LOCAL
@@ -181,25 +163,25 @@ typedef struct st_php_mysql_packet_rset_header {
 	char		*info_or_local_file;
 	size_t		info_or_local_file_len;
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
-} php_mysql_packet_rset_header;
+	MYSQLND_ERROR_INFO	error_info;
+} MYSQLND_PACKET_RSET_HEADER;
 
 
 /* Result set field packet */
-typedef struct st_php_mysql_packet_res_field {
-	mysqlnd_packet_header	header;
+typedef struct st_mysqlnd_packet_res_field {
+	MYSQLND_PACKET_HEADER	header;
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
 	zend_bool				stupid_list_fields_eof;
 
-	mysqlnd_error_info		error_info;
-} php_mysql_packet_res_field;
+	MYSQLND_ERROR_INFO		error_info;
+} MYSQLND_PACKET_RES_FIELD;
 
 
 /* Row packet */
-struct st_php_mysql_packet_row {
-	mysqlnd_packet_header	header;
+typedef struct st_mysqlnd_packet_row {
+	MYSQLND_PACKET_HEADER	header;
 	zval		**fields;
 	uint32_t	field_count;
 	zend_bool	eof;
@@ -222,22 +204,22 @@ struct st_php_mysql_packet_row {
 	size_t			bit_fields_total_len; /* trailing \0 not counted */
 
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
-};
+	MYSQLND_ERROR_INFO	error_info;
+} MYSQLND_PACKET_ROW;
 
 
 /* Statistics packet */
-typedef struct st_php_mysql_packet_stats {
-	mysqlnd_packet_header	header;
+typedef struct st_mysqlnd_packet_stats {
+	MYSQLND_PACKET_HEADER	header;
 	char *message;
 	/* message_len is not part of the packet*/
 	size_t message_len;
-} php_mysql_packet_stats;
+} MYSQLND_PACKET_STATS;
 
 
 /* COM_PREPARE response packet */
-typedef struct st_php_mysql_packet_prepare_response {
-	mysqlnd_packet_header	header;
+typedef struct st_mysqlnd_packet_prepare_response {
+	MYSQLND_PACKET_HEADER	header;
 	/* also known as field_count 0x00=OK , 0xFF=error */
 	unsigned char	error_code;
 	unsigned long	stmt_id;
@@ -246,30 +228,28 @@ typedef struct st_php_mysql_packet_prepare_response {
 	unsigned int	warning_count;
 
 	/* present in case of error */
-	mysqlnd_error_info	error_info;
-} php_mysql_packet_prepare_response;
+	MYSQLND_ERROR_INFO	error_info;
+} MYSQLND_PACKET_PREPARE_RESPONSE;
 
 
 /* Statistics packet */
-typedef struct st_php_mysql_packet_chg_user_resp {
-	mysqlnd_packet_header	header;
+typedef struct st_mysqlnd_packet_chg_user_resp {
+	MYSQLND_PACKET_HEADER	header;
 	uint32_t			field_count;
 
 	/* message_len is not part of the packet*/
 	uint16_t			server_capabilities;
 	/* If error packet, we use these */
-	mysqlnd_error_info	error_info;
-} php_mysql_packet_chg_user_resp;
+	MYSQLND_ERROR_INFO	error_info;
+} MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
-size_t mysqlnd_stream_write_w_header(MYSQLND * const conn, char * const buf, size_t count TSRMLS_DC);
-
-void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
+PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
 
-extern char * const mysqlnd_empty_string;
+PHPAPI extern char * const mysqlnd_empty_string;
 
 
 void php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
@@ -284,6 +264,11 @@ void php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 										 zend_bool persistent,
 										 zend_bool as_unicode, zend_bool as_int_or_float,
 										 MYSQLND_STATS * stats TSRMLS_DC);
+
+
+PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);
+PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * net TSRMLS_DC);
+
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

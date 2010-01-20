@@ -190,13 +190,13 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 
 
 /* {{{ mysqlnd_fill_stats_hash */
-void
-mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+PHPAPI void
+mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	unsigned int i;
 
-	mysqlnd_array_init(return_value, STAT_LAST);
-	for (i = 0; i < STAT_LAST; i++) {
+	mysqlnd_array_init(return_value, stats->count);
+	for (i = 0; i < stats->count; i++) {
 #if PHP_MAJOR_VERSION >= 6
 		UChar *ustr, *tstr;
 		int ulen, tlen;
@@ -205,15 +205,13 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, zval *return_value TS
 		
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
 #if PHP_MAJOR_VERSION >= 6
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, mysqlnd_stats_values_names[i].s,
-								mysqlnd_stats_values_names[i].l + 1 TSRMLS_CC);
+		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, names[i].s, names[i].l + 1 TSRMLS_CC);
 		zend_string_to_unicode(UG(utf8_conv), &tstr, &tlen, tmp, strlen(tmp) + 1 TSRMLS_CC);
 		add_u_assoc_unicode_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen, tstr, 1);
 		efree(ustr);
 		efree(tstr);
 #else
-		add_assoc_string_ex(return_value, mysqlnd_stats_values_names[i].s,
-							mysqlnd_stats_values_names[i].l + 1, tmp, 1);
+		add_assoc_string_ex(return_value, names[i].s, names[i].l + 1, tmp, 1);
 #endif
 	}
 }
@@ -229,17 +227,21 @@ PHPAPI void _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LIN
 		memset(&stats, 0, sizeof(stats));
 		stats_ptr = &stats;
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_stats_init */
-void
-mysqlnd_stats_init(MYSQLND_STATS ** stats)
+PHPAPI void
+mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count)
 {
 	*stats = calloc(1, sizeof(MYSQLND_STATS));
+	(*stats)->values = calloc(statistic_count, sizeof(uint64_t));
+	(*stats)->triggers = calloc(statistic_count, sizeof(mysqlnd_stat_trigger));
+	(*stats)->in_trigger = FALSE;
+	(*stats)->count = statistic_count;
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
 #endif
@@ -249,14 +251,49 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats)
 
 
 /* {{{ mysqlnd_stats_end */
-void
+PHPAPI void
 mysqlnd_stats_end(MYSQLND_STATS * stats)
 {
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
+	free(stats->triggers);
+	free(stats->values);
 	/* mnd_free will reference LOCK_access and crash...*/
 	free(stats);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stats_set_trigger */
+PHPAPI mysqlnd_stat_trigger
+mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC)
+{
+	mysqlnd_stat_trigger ret = NULL;
+	DBG_ENTER("mysqlnd_stats_set_trigger");
+	if (stats) {
+		MYSQLND_STATS_LOCK(stats);
+		ret = stats->triggers[stat];
+		stats->triggers[stat] = trigger;
+		MYSQLND_STATS_UNLOCK(stats);
+	}
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stats_set_handler */
+PHPAPI mysqlnd_stat_trigger
+mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC)
+{
+	mysqlnd_stat_trigger ret = NULL;
+	DBG_ENTER("mysqlnd_stats_reset_trigger");
+	if (stats) {
+		MYSQLND_STATS_LOCK(stats);
+		memset(stats->triggers, 0, stats->count * sizeof(mysqlnd_stat_trigger));
+		MYSQLND_STATS_UNLOCK(stats);
+	}
+	DBG_RETURN(ret);
 }
 /* }}} */
 

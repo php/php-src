@@ -60,8 +60,8 @@
 
 
 /* Library related */
-void mysqlnd_library_init(TSRMLS_D);
-void mysqlnd_library_end(TSRMLS_D);
+PHPAPI void mysqlnd_library_init(TSRMLS_D);
+PHPAPI void mysqlnd_library_end(TSRMLS_D);
 
 PHPAPI unsigned int mysqlnd_plugin_register();
 PHPAPI unsigned int mysqlnd_plugin_count();
@@ -73,6 +73,9 @@ PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result
 
 PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id TSRMLS_DC);
 #define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id) TSRMLS_CC)
+
+PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC);
+#define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id) TSRMLS_CC)
 
 
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();
@@ -332,6 +335,8 @@ ZEND_EXTERN_MODULE_GLOBALS(mysqlnd);
 #define MYSQLND_G(v) (mysqlnd_globals.v)
 #endif
 
+
+PHPAPI void mysqlnd_minfo_print_hash(zval *values);
 
 #endif	/* MYSQLND_H */
 

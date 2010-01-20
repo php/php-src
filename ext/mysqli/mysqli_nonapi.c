@@ -486,7 +486,7 @@ PHP_FUNCTION(mysqli_multi_query)
 		strcpy(s_sqlstate, mysql_sqlstate(mysql->mysql));
 		s_errno = mysql_errno(mysql->mysql);
 #else
-		mysqlnd_error_info error_info = mysql->mysql->error_info;
+		MYSQLND_ERROR_INFO error_info = mysql->mysql->error_info;
 #endif
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		MYSQLI_DISABLE_MQ;
