@@ -86,7 +86,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) {
 	char *    pbuf;
 
 	zval                  *object = return_value;
-	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object );
+	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
 
 	intl_error_reset( NULL TSRMLS_CC );
 
@@ -253,7 +253,7 @@ PHP_FUNCTION( resourcebundle_get )
 /* {{{ resourcebundle_array_count */
 int resourcebundle_array_count(zval *object, long *count TSRMLS_DC) 
 {
-	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object );
+	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
 
 	*count = ures_getSize( rb->me );
 
