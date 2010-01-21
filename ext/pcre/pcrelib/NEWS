@@ -1,6 +1,13 @@
 News about PCRE releases
 ------------------------
 
+Release 8.01 19-Jan-2010
+------------------------
+
+This is a bug-fix release. Several bugs in the code itself and some bugs and
+infelicities in the build system have been fixed.
+
+
 Release 8.00 19-Oct-09
 ----------------------
 

@@ -7584,4 +7584,30 @@ No match
     BAD    
 No match
 
+/^(?!a(*SKIP)b)/
+    ac
+Error -16
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+No match
+    ac
+Error -16
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+Error -16
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+Error -16
+    ** Failers 
+No match
+    ac
+Error -16
+
+/^(?(?!a(*SKIP)b))/
+    ac
+Error -16
+
 /-- End of testinput7 --/

@@ -311,10 +311,10 @@ The "configure" script builds the following files for the basic C library:
 . RunTest is a script for running tests on the basic C library
 . RunGrepTest is a script for running tests on the pcregrep command
 
-Versions of config.h and pcre.h are distributed in the PCRE tarballs under
-the names config.h.generic and pcre.h.generic. These are provided for the
-benefit of those who have to built PCRE without the benefit of "configure". If
-you use "configure", the .generic versions are not used.
+Versions of config.h and pcre.h are distributed in the PCRE tarballs under the
+names config.h.generic and pcre.h.generic. These are provided for those who
+have to built PCRE without using "configure" or CMake. If you use "configure"
+or CMake, the .generic versions are not used.
 
 If a C++ compiler is found, the following files are also built:
 
@@ -796,4 +796,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 19 October 2009
+Last updated: 19 January 2010
