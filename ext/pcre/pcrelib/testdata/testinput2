@@ -344,10 +344,25 @@
     *** Failers
     a
 
-/This one is here because I think Perl 5.005_02 gets the setting of $1 wrong/I
+/This one is here because Perl behaves differently; see also the following/I
 
 /^(a\1?){4}$/I
+    aaaa
     aaaaaa
+    
+/Perl does not fail these two for the final subjects. Neither did PCRE until/
+/release 8.01. The problem is in backtracking into a subpattern that contains/
+/a recursive reference to itself. PCRE has now made these into atomic patterns./
+
+/^(xa|=?\1a){2}$/
+    xa=xaa
+    ** Failers
+    xa=xaaa
+
+/^(xa|=?\1a)+$/
+    xa=xaa
+    ** Failers
+    xa=xaaa
 
 /These are syntax tests from Perl 5.005/I
 
@@ -3168,5 +3183,25 @@ a random value. /Ix
 
 /(\3)(\1)(a)/SI
     cat
+
+/i(?(DEFINE)(?<s>a))/SI
+    i
+    
+/()i(?(1)a)/SI 
+    ia
+
+/(?i)a(?-i)b|c/BZ
+    XabX
+    XAbX
+    CcC 
+    ** Failers
+    XABX   
+
+/(?i)a(?s)b|c/BZ
+
+/(?i)a(?s-i)b|c/BZ
+
+/^(ab(c\1)d|x){2}$/BZ
+    xabcxd
 
 /-- End of testinput2 --/
