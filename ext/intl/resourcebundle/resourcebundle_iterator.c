@@ -94,7 +94,7 @@ static void resourcebundle_iterator_current( zend_object_iterator *iter, zval **
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 	if (!iterator->current) {
-		resourcebundle_iterator_read( iterator );
+		resourcebundle_iterator_read( iterator TSRMLS_CC);
 	}
 	*data = &iterator->current;
 }
@@ -106,7 +106,7 @@ static int resourcebundle_iterator_key( zend_object_iterator *iter, char **str_k
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 
 	if (!iterator->current) {
-		resourcebundle_iterator_read( iterator );
+		resourcebundle_iterator_read( iterator TSRMLS_CC);
 	}
 	if (iterator->is_table) {
 		*str_key = estrdup( iterator->currentkey );
