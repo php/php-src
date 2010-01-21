@@ -742,4 +742,7 @@ can't tell the difference.) --/
     xxxxabcde\P
     xxxxabcde\P\P
 
+/X\W{3}X/8
+    \PX
+
 /-- End of testinput5 --/

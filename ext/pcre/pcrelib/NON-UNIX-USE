@@ -127,12 +127,16 @@ The following are generic comments about building the PCRE C library "by hand".
      your system has static and shared libraries, you may have to do this once
      for each type.
 
- (8) Similarly, compile pcreposix.c (remembering -DHAVE_CONFIG_H if necessary)
-     and link the result (on its own) as the pcreposix library.
+ (8) Similarly, if you want to build the POSIX wrapper functions, ensure that
+     you have the pcreposix.h file and then compile pcreposix.c (remembering
+     -DHAVE_CONFIG_H if necessary). Link the result (on its own) as the
+     pcreposix library.
 
  (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
-     This needs the functions in the pcre and pcreposix libraries when linking.
-     It also needs the pcre_printint.src source file, which it #includes.
+     This needs the functions in the PCRE library when linking. It also needs
+     the pcreposix wrapper functions unless you compile it with -DNOPOSIX. The
+     pcretest.c program also needs the pcre_printint.src source file, which it
+     #includes.
 
 (10) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. Note that the
@@ -273,8 +277,7 @@ gcc and MinGW's gcc). So, a user can:
 
 The test files that are supplied with PCRE are in Unix format, with LF
 characters as line terminators. It may be necessary to change the line
-terminators in order to get some of the tests to work. We hope to improve
-things in this area in future.
+terminators in order to get some of the tests to work.
 
 
 BUILDING PCRE ON WINDOWS WITH CMAKE
@@ -494,5 +497,5 @@ build.log file in the root of the package also.
 
 
 =========================
-Last Updated: 05 October 2009
+Last Updated: 19 January 2010
 ****

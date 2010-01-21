@@ -2072,4 +2072,8 @@ Partial match: abca
     xxxxabcde\P\P
 Partial match: abcde
 
+/X\W{3}X/8
+    \PX
+Partial match: X
+
 /-- End of testinput5 --/

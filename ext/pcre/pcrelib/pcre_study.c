@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -94,13 +94,28 @@ for (;;)
 
   switch (op)
     {
+    case OP_COND:
+    case OP_SCOND:
+
+    /* If there is only one branch in a condition, the implied branch has zero
+    length, so we don't add anything. This covers the DEFINE "condition"
+    automatically. */
+
+    cs = cc + GET(cc, 1);
+    if (*cs != OP_ALT)
+      {
+      cc = cs + 1 + LINK_SIZE;
+      break;
+      }
+
+    /* Otherwise we can fall through and treat it the same as any other
+    subpattern. */
+
     case OP_CBRA:
     case OP_SCBRA:
     case OP_BRA:
     case OP_SBRA:
     case OP_ONCE:
-    case OP_COND:
-    case OP_SCOND:
     d = find_minlength(cc, startcode, options);
     if (d < 0) return d;
     branchlength += d;
@@ -427,7 +442,8 @@ Returns:        nothing
 */
 
 static void
-set_bit(uschar *start_bits, unsigned int c, BOOL caseless, compile_data *cd)
+set_table_bit(uschar *start_bits, unsigned int c, BOOL caseless,
+  compile_data *cd)
 {
 start_bits[c/8] |= (1 << (c&7));
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0)
@@ -589,7 +605,7 @@ do
       case OP_QUERY:
       case OP_MINQUERY:
       case OP_POSQUERY:
-      set_bit(start_bits, tcode[1], caseless, cd);
+      set_table_bit(start_bits, tcode[1], caseless, cd);
       tcode += 2;
 #ifdef SUPPORT_UTF8
       if (utf8 && tcode[-1] >= 0xc0)
@@ -602,7 +618,7 @@ do
       case OP_UPTO:
       case OP_MINUPTO:
       case OP_POSUPTO:
-      set_bit(start_bits, tcode[3], caseless, cd);
+      set_table_bit(start_bits, tcode[3], caseless, cd);
       tcode += 4;
 #ifdef SUPPORT_UTF8
       if (utf8 && tcode[-1] >= 0xc0)
@@ -620,7 +636,7 @@ do
       case OP_PLUS:
       case OP_MINPLUS:
       case OP_POSPLUS:
-      set_bit(start_bits, tcode[1], caseless, cd);
+      set_table_bit(start_bits, tcode[1], caseless, cd);
       try_next = FALSE;
       break;
 
