@@ -1120,9 +1120,10 @@ static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_l
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
 
-	if (!(*level)--) {
+	if (!*level) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
+	--*level;
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
@@ -1296,9 +1297,10 @@ static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_l
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
 
-	if (!(*level)--) {
+	if (!*level) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
+	--*level;
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
