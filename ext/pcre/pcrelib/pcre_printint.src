@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,8 @@ internal form of a compiled regular expression, along with some supporting
 local functions. This source file is used in two places:
 
 (1) It is #included by pcre_compile.c when it is compiled in debugging mode
-(DEBUG defined in pcre_internal.h). It is not included in production compiles.
+(PCRE_DEBUG defined in pcre_internal.h). It is not included in production
+compiles.
 
 (2) It is always #included by pcretest.c, which can be asked to print out a
 compiled regex for debugging purposes. */

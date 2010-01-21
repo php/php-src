@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2010 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ static const char rep_max[] = { 0, 0, 0, 0, 1, 1 };
 
 
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 /*************************************************
 *        Debugging function to print chars       *
 *************************************************/
@@ -139,7 +139,7 @@ match_ref(int offset, register USPTR eptr, int length, match_data *md,
 {
 USPTR p = md->start_subject + md->offset_vector[offset];
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 if (eptr >= md->end_subject)
   printf("matching subject <null>");
 else
@@ -252,7 +252,7 @@ actuall used in this definition. */
 #ifndef NO_RECURSE
 #define REGISTER register
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
 #define RMATCH(ra,rb,rc,rd,re,rf,rg,rw) \
   { \
   printf("match() called in line %d\n", __LINE__); \
@@ -620,7 +620,7 @@ TAIL_RECURSE:
 /* OK, now we can get on with the real code of the function. Recursive calls
 are specified by the macro RMATCH and RRETURN is used to return. When
 NO_RECURSE is *not* defined, these just turn into a recursive call to match()
-and a "return", respectively (possibly with some debugging if DEBUG is
+and a "return", respectively (possibly with some debugging if PCRE_DEBUG is
 defined). However, RMATCH isn't like a function call because it's quite a
 complicated macro. It has to be used in one particular way. This shouldn't,
 however, impact performance when true recursion is being used. */
@@ -711,7 +711,7 @@ for (;;)
     number = GET2(ecode, 1+LINK_SIZE);
     offset = number << 1;
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
     printf("start bracket %d\n", number);
     printf("subject=");
     pchars(eptr, 16, TRUE, md);
@@ -1037,7 +1037,7 @@ for (;;)
     number = GET2(ecode, 1);
     offset = number << 1;
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
       printf("end bracket %d at *ACCEPT", number);
       printf("\n");
 #endif
@@ -1131,7 +1131,9 @@ for (;;)
     offset_top = md->end_offset_top;
     continue;
 
-    /* Negative assertion: all branches must fail to match */
+    /* Negative assertion: all branches must fail to match. Encountering SKIP,
+    PRUNE, or COMMIT means we must assume failure without checking subsequent
+    branches. */
 
     case OP_ASSERT_NOT:
     case OP_ASSERTBACK_NOT:
@@ -1140,6 +1142,11 @@ for (;;)
       RMATCH(eptr, ecode + 1 + LINK_SIZE, offset_top, md, ims, NULL, 0,
         RM5);
       if (rrc == MATCH_MATCH) RRETURN(MATCH_NOMATCH);
+      if (rrc == MATCH_SKIP || rrc == MATCH_PRUNE || rrc == MATCH_COMMIT)
+        {
+        do ecode += GET(ecode,1); while (*ecode == OP_ALT);
+        break;
+        }
       if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN) RRETURN(rrc);
       ecode += GET(ecode,1);
       }
@@ -1459,7 +1466,7 @@ for (;;)
       number = GET2(prev, 1+LINK_SIZE);
       offset = number << 1;
 
-#ifdef DEBUG
+#ifdef PCRE_DEBUG
       printf("end bracket %d", number);
       printf("\n");
 #endif
@@ -3686,8 +3693,12 @@ for (;;)
         case OP_NOT_WORDCHAR:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject ||
-             (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0))
+          if (eptr >= md->end_subject)
+            {
+            SCHECK_PARTIAL();
+            RRETURN(MATCH_NOMATCH);
+            }
+          if (*eptr < 128 && (md->ctypes[*eptr] & ctype_word) != 0)
             RRETURN(MATCH_NOMATCH);
           while (++eptr < md->end_subject && (*eptr & 0xc0) == 0x80);
           }
@@ -5563,7 +5574,7 @@ for(;;)
     bytes to avoid spending too much time in this optimization. */
 
     if (study != NULL && (study->flags & PCRE_STUDY_MINLEN) != 0 &&
-        end_subject - start_match < study->minlength)
+        (pcre_uint32)(end_subject - start_match) < study->minlength)
       {
       rc = MATCH_NOMATCH;
       break;
@@ -5626,7 +5637,7 @@ for(;;)
       }
     }
 
-#ifdef DEBUG  /* Sigh. Some compilers never learn. */
+#ifdef PCRE_DEBUG  /* Sigh. Some compilers never learn. */
   printf(">>>> Match against: ");
   pchars(start_match, end_subject - start_match, TRUE, md);
   printf("\n");

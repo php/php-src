@@ -7,14 +7,24 @@ of calling the PCRE regular expression library from a C program. See the
 pcresample documentation for a short discussion ("man pcresample" if you have
 the PCRE man pages installed).
 
-In Unix-like environments, compile this program thuswise:
+In Unix-like environments, if PCRE is installed in your standard system
+libraries, you should be able to compile this program using this command:
 
-  gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
-    -R/usr/local/lib -lpcre
+gcc -Wall pcredemo.c -lpcre -o pcredemo
+
+If PCRE is not installed in a standard place, it is likely to be installed with
+support for the pkg-config mechanism. If you have pkg-config, you can compile
+this program using this command:
+
+gcc -Wall pcredemo.c `pkg-config --cflags --libs libpcre` -o pcredemo
+
+If you do not have pkg-config, you may have to use this:
+
+gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
+  -R/usr/local/lib -lpcre -o pcredemo
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
-library files for PCRE are installed on your system. You don't need -I and -L
-if PCRE is installed in the standard system libraries. Only some operating
+library files for PCRE are installed on your system. Only some operating
 systems (e.g. Solaris) use the -R option.
 
 Building under Windows:

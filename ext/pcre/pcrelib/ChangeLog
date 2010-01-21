@@ -1,6 +1,134 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.01 19-Jan-2010
+------------------------
+
+1.  If a pattern contained a conditional subpattern with only one branch (in
+    particular, this includes all (*DEFINE) patterns), a call to pcre_study()
+    computed the wrong minimum data length (which is of course zero for such
+    subpatterns). This could cause incorrect "no match" results.
+
+2.  For patterns such as (?i)a(?-i)b|c where an option setting at the start of
+    the pattern is reset in the first branch, pcre_compile() failed with
+    "internal error: code overflow at offset...". This happened only when
+    the reset was to the original external option setting. (An optimization
+    abstracts leading options settings into an external setting, which was the
+    cause of this.)
+
+3.  A pattern such as ^(?!a(*SKIP)b) where a negative assertion contained one
+    of the verbs SKIP, PRUNE, or COMMIT, did not work correctly. When the
+    assertion pattern did not match (meaning that the assertion was true), it
+    was incorrectly treated as false if the SKIP had been reached during the
+    matching. This also applied to assertions used as conditions.
+
+4.  If an item that is not supported by pcre_dfa_exec() was encountered in an
+    assertion subpattern, including such a pattern used as a condition,
+    unpredictable results occurred, instead of the error return
+    PCRE_ERROR_DFA_UITEM.
+
+5.  The C++ GlobalReplace function was not working like Perl for the special
+    situation when an empty string is matched. It now does the fancy magic
+    stuff that is necessary.
+
+6.  In pcre_internal.h, obsolete includes to setjmp.h and stdarg.h have been
+    removed. (These were left over from very, very early versions of PCRE.)
+
+7.  Some cosmetic changes to the code to make life easier when compiling it
+    as part of something else:
+
+    (a) Change DEBUG to PCRE_DEBUG.
+
+    (b) In pcre_compile(), rename the member of the "branch_chain" structure
+        called "current" as "current_branch", to prevent a collision with the
+        Linux macro when compiled as a kernel module.
+
+    (c) In pcre_study(), rename the function set_bit() as set_table_bit(), to
+        prevent a collision with the Linux macro when compiled as a kernel
+        module.
+
+8.  In pcre_compile() there are some checks for integer overflows that used to
+    cast potentially large values to (double). This has been changed to that
+    when building, a check for int64_t is made, and if it is found, it is used
+    instead, thus avoiding the use of floating point arithmetic. (There is no
+    other use of FP in PCRE.) If int64_t is not found, the fallback is to
+    double.
+
+9.  Added two casts to avoid signed/unsigned warnings from VS Studio Express
+    2005 (difference between two addresses compared to an unsigned value).
+
+10. Change the standard AC_CHECK_LIB test for libbz2 in configure.ac to a
+    custom one, because of the following reported problem in Windows:
+
+      - libbz2 uses the Pascal calling convention (WINAPI) for the functions
+          under Win32.
+      - The standard autoconf AC_CHECK_LIB fails to include "bzlib.h",
+          therefore missing the function definition.
+      - The compiler thus generates a "C" signature for the test function.
+      - The linker fails to find the "C" function.
+      - PCRE fails to configure if asked to do so against libbz2.
+
+11. When running libtoolize from libtool-2.2.6b as part of autogen.sh, these
+    messages were output:
+
+      Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
+      rerunning libtoolize, to keep the correct libtool macros in-tree.
+      Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
+
+    I have done both of these things.
+
+12. Although pcre_dfa_exec() does not use nearly as much stack as pcre_exec()
+    most of the time, it *can* run out if it is given a pattern that contains a
+    runaway infinite recursion. I updated the discussion in the pcrestack man
+    page.
+
+13. Now that we have gone to the x.xx style of version numbers, the minor
+    version may start with zero. Using 08 or 09 is a bad idea because users
+    might check the value of PCRE_MINOR in their code, and 08 or 09 may be
+    interpreted as invalid octal numbers. I've updated the previous comment in
+    configure.ac, and also added a check that gives an error if 08 or 09 are
+    used.
+
+14. Change 8.00/11 was not quite complete: code had been accidentally omitted,
+    causing partial matching to fail when the end of the subject matched \W
+    in a UTF-8 pattern where \W was quantified with a minimum of 3.
+
+15. There were some discrepancies between the declarations in pcre_internal.h
+    of _pcre_is_newline(), _pcre_was_newline(), and _pcre_valid_utf8() and
+    their definitions. The declarations used "const uschar *" and the
+    definitions used USPTR. Even though USPTR is normally defined as "const
+    unsigned char *" (and uschar is typedeffed as "unsigned char"), it was
+    reported that: "This difference in casting confuses some C++ compilers, for
+    example, SunCC recognizes above declarations as different functions and
+    generates broken code for hbpcre." I have changed the declarations to use
+    USPTR.
+
+16. GNU libtool is named differently on some systems. The autogen.sh script now
+    tries several variants such as glibtoolize (MacOSX) and libtoolize1x
+    (FreeBSD).
+
+17. Applied Craig's patch that fixes an HP aCC compile error in pcre 8.00
+    (strtoXX undefined when compiling pcrecpp.cc). The patch contains this
+    comment: "Figure out how to create a longlong from a string: strtoll and
+    equivalent. It's not enough to call AC_CHECK_FUNCS: hpux has a strtoll, for
+    instance, but it only takes 2 args instead of 3!"
+
+18. A subtle bug concerned with back references has been fixed by a change of
+    specification, with a corresponding code fix. A pattern such as
+    ^(xa|=?\1a)+$ which contains a back reference inside the group to which it
+    refers, was giving matches when it shouldn't. For example, xa=xaaa would
+    match that pattern. Interestingly, Perl (at least up to 5.11.3) has the
+    same bug. Such groups have to be quantified to be useful, or contained
+    inside another quantified group. (If there's no repetition, the reference
+    can never match.) The problem arises because, having left the group and
+    moved on to the rest of the pattern, a later failure that backtracks into
+    the group uses the captured value from the final iteration of the group
+    rather than the correct earlier one. I have fixed this in PCRE by forcing
+    any group that contains a reference to itself to be an atomic group; that
+    is, there cannot be any backtracking into it once it has completed. This is
+    similar to recursive and subroutine calls.
+
+
 Version 8.00 19-Oct-09
 ----------------------
 
