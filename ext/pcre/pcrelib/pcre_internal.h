@@ -192,7 +192,11 @@ stdint.h is available, include it; it may define INT64_MAX. The macro int64_t
 may be set by "configure". */
 
 #if HAVE_STDINT_H
-#include <stdint.h>
+# ifdef PHP_WIN32
+#  include "win32/php_stdint.h"
+# else
+#  include <stdint.h>
+# endif
 #endif
 
 #if defined INT64_MAX || defined int64_t
