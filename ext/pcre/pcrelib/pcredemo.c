@@ -7,14 +7,24 @@ of calling the PCRE regular expression library from a C program. See the
 pcresample documentation for a short discussion ("man pcresample" if you have
 the PCRE man pages installed).
 
-In Unix-like environments, compile this program thuswise:
+In Unix-like environments, if PCRE is installed in your standard system
+libraries, you should be able to compile this program using this command:
 
-  gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
-    -R/usr/local/lib -lpcre
+gcc -Wall pcredemo.c -lpcre -o pcredemo
+
+If PCRE is not installed in a standard place, it is likely to be installed with
+support for the pkg-config mechanism. If you have pkg-config, you can compile
+this program using this command:
+
+gcc -Wall pcredemo.c `pkg-config --cflags --libs libpcre` -o pcredemo
+
+If you do not have pkg-config, you may have to use this:
+
+gcc -Wall pcredemo.c -I/usr/local/include -L/usr/local/lib \
+  -R/usr/local/lib -lpcre -o pcredemo
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
-library files for PCRE are installed on your system. You don't need -I and -L
-if PCRE is installed in the standard system libraries. Only some operating
+library files for PCRE are installed on your system. Only some operating
 systems (e.g. Solaris) use the -R option.
 
 Building under Windows:
@@ -223,12 +233,12 @@ if (namecount <= 0) printf("No named substrings\n"); else
 *                                                                        *
 * If the previous match WAS for an empty string, we can't do that, as it *
 * would lead to an infinite loop. Instead, a special call of pcre_exec() *
-* is made with the PCRE_NOTEMPTY and PCRE_ANCHORED flags set. The first  *
-* of these tells PCRE that an empty string is not a valid match; other   *
-* possibilities must be tried. The second flag restricts PCRE to one     *
-* match attempt at the initial string position. If this match succeeds,  *
-* an alternative to the empty string match has been found, and we can    *
-* proceed round the loop.                                                *
+* is made with the PCRE_NOTEMPTY_ATSTART and PCRE_ANCHORED flags set.    *
+* The first of these tells PCRE that an empty string at the start of the *
+* subject is not a valid match; other possibilities must be tried. The   *
+* second flag restricts PCRE to one match attempt at the initial string  *
+* position. If this match succeeds, an alternative to the empty string   *
+* match has been found, and we can proceed round the loop.               *
 *************************************************************************/
 
 if (!find_all)
@@ -251,7 +261,7 @@ for (;;)
   if (ovector[0] == ovector[1])
     {
     if (ovector[0] == subject_length) break;
-    options = PCRE_NOTEMPTY | PCRE_ANCHORED;
+    options = PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED;
     }
 
   /* Run the next matching operation */

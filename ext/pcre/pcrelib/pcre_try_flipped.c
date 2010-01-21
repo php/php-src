@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -126,7 +126,9 @@ if (study != NULL)
   {
   *internal_study = *study;   /* To copy other fields */
   internal_study->size = byteflip(study->size, sizeof(study->size));
-  internal_study->options = byteflip(study->options, sizeof(study->options));
+  internal_study->flags = byteflip(study->flags, sizeof(study->flags));
+  internal_study->minlength = byteflip(study->minlength,
+    sizeof(study->minlength));
   }
 
 return internal_re;

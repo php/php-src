@@ -68,64 +68,80 @@ static const int eint[] = {
   REG_EESCAPE, /* \c at end of pattern */
   REG_EESCAPE, /* unrecognized character follows \ */
   REG_BADBR,   /* numbers out of order in {} quantifier */
+  /* 5 */
   REG_BADBR,   /* number too big in {} quantifier */
   REG_EBRACK,  /* missing terminating ] for character class */
   REG_ECTYPE,  /* invalid escape sequence in character class */
   REG_ERANGE,  /* range out of order in character class */
   REG_BADRPT,  /* nothing to repeat */
+  /* 10 */
   REG_BADRPT,  /* operand of unlimited repeat could match the empty string */
   REG_ASSERT,  /* internal error: unexpected repeat */
   REG_BADPAT,  /* unrecognized character after (? */
   REG_BADPAT,  /* POSIX named classes are supported only within a class */
   REG_EPAREN,  /* missing ) */
+  /* 15 */
   REG_ESUBREG, /* reference to non-existent subpattern */
   REG_INVARG,  /* erroffset passed as NULL */
   REG_INVARG,  /* unknown option bit(s) set */
   REG_EPAREN,  /* missing ) after comment */
   REG_ESIZE,   /* parentheses nested too deeply */
+  /* 20 */
   REG_ESIZE,   /* regular expression too large */
   REG_ESPACE,  /* failed to get memory */
-  REG_EPAREN,  /* unmatched brackets */
+  REG_EPAREN,  /* unmatched parentheses */
   REG_ASSERT,  /* internal error: code overflow */
   REG_BADPAT,  /* unrecognized character after (?< */
+  /* 25 */
   REG_BADPAT,  /* lookbehind assertion is not fixed length */
   REG_BADPAT,  /* malformed number or name after (?( */
   REG_BADPAT,  /* conditional group contains more than two branches */
   REG_BADPAT,  /* assertion expected after (?( */
   REG_BADPAT,  /* (?R or (?[+-]digits must be followed by ) */
+  /* 30 */
   REG_ECTYPE,  /* unknown POSIX class name */
   REG_BADPAT,  /* POSIX collating elements are not supported */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UTF8 support */
   REG_BADPAT,  /* spare error */
   REG_BADPAT,  /* character value in \x{...} sequence is too large */
+  /* 35 */
   REG_BADPAT,  /* invalid condition (?(0) */
   REG_BADPAT,  /* \C not allowed in lookbehind assertion */
   REG_EESCAPE, /* PCRE does not support \L, \l, \N, \U, or \u */
   REG_BADPAT,  /* number after (?C is > 255 */
   REG_BADPAT,  /* closing ) for (?C expected */
+  /* 40 */
   REG_BADPAT,  /* recursive call could loop indefinitely */
   REG_BADPAT,  /* unrecognized character after (?P */
   REG_BADPAT,  /* syntax error in subpattern name (missing terminator) */
   REG_BADPAT,  /* two named subpatterns have the same name */
   REG_BADPAT,  /* invalid UTF-8 string */
+  /* 45 */
   REG_BADPAT,  /* support for \P, \p, and \X has not been compiled */
   REG_BADPAT,  /* malformed \P or \p sequence */
   REG_BADPAT,  /* unknown property name after \P or \p */
   REG_BADPAT,  /* subpattern name is too long (maximum 32 characters) */
   REG_BADPAT,  /* too many named subpatterns (maximum 10,000) */
+  /* 50 */
   REG_BADPAT,  /* repeated subpattern is too long */
   REG_BADPAT,  /* octal value is greater than \377 (not in UTF-8 mode) */
   REG_BADPAT,  /* internal error: overran compiling workspace */
   REG_BADPAT,  /* internal error: previously-checked referenced subpattern not found */
   REG_BADPAT,  /* DEFINE group contains more than one branch */
+  /* 55 */
   REG_BADPAT,  /* repeating a DEFINE group is not allowed */
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
-  REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
+  REG_BADPAT,  /* a numbered reference must not be zero */
+  REG_BADPAT,  /* (*VERB) with an argument is not supported */
+  /* 60 */
+  REG_BADPAT,  /* (*VERB) not recognized */
   REG_BADPAT,  /* number is too big */
   REG_BADPAT,  /* subpattern name expected */
   REG_BADPAT,  /* digit expected after (?+ */
-  REG_BADPAT   /* ] is an invalid data character in JavaScript compatibility mode */
+  REG_BADPAT,  /* ] is an invalid data character in JavaScript compatibility mode */
+  /* 65 */
+  REG_BADPAT   /* different names for subpatterns of the same number are not allowed */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -224,17 +240,25 @@ int erroffset;
 int errorcode;
 int options = 0;
 
-if ((cflags & REG_ICASE) != 0)   options |= PCRE_CASELESS;
-if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
-if ((cflags & REG_DOTALL) != 0)  options |= PCRE_DOTALL;
-if ((cflags & REG_NOSUB) != 0)   options |= PCRE_NO_AUTO_CAPTURE;
-if ((cflags & REG_UTF8) != 0)    options |= PCRE_UTF8;
+if ((cflags & REG_ICASE) != 0)    options |= PCRE_CASELESS;
+if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
+if ((cflags & REG_DOTALL) != 0)   options |= PCRE_DOTALL;
+if ((cflags & REG_NOSUB) != 0)    options |= PCRE_NO_AUTO_CAPTURE;
+if ((cflags & REG_UTF8) != 0)     options |= PCRE_UTF8;
+if ((cflags & REG_UNGREEDY) != 0) options |= PCRE_UNGREEDY;
 
 preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,
   &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
-if (preg->re_pcre == NULL) return eint[errorcode];
+/* Safety: if the error code is too big for the translation vector (which
+should not happen, but we all make mistakes), return REG_BADPAT. */
+
+if (preg->re_pcre == NULL)
+  {
+  return (errorcode < sizeof(eint)/sizeof(const int))?
+    eint[errorcode] : REG_BADPAT;
+  }
 
 preg->re_nsub = pcre_info((const pcre *)preg->re_pcre, NULL, NULL);
 return 0;
@@ -276,10 +300,11 @@ if ((eflags & REG_NOTEMPTY) != 0) options |= PCRE_NOTEMPTY;
 
 ((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 
-/* When no string data is being returned, ensure that nmatch is zero.
-Otherwise, ensure the vector for holding the return data is large enough. */
+/* When no string data is being returned, or no vector has been passed in which
+to put it, ensure that nmatch is zero. Otherwise, ensure the vector for holding
+the return data is large enough. */
 
-if (nosub) nmatch = 0;
+if (nosub || pmatch == NULL) nmatch = 0;
 
 else if (nmatch > 0)
   {

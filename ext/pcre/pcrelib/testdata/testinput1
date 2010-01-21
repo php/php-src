@@ -1,3 +1,6 @@
+/-- This set of tests is for features that are compatible with all versions of
+    Perl 5, in non-UTF-8 mode. --/
+
 /the quick brown fox/
     the quick brown fox
     The quick brown FOX
@@ -2329,15 +2332,14 @@
     baz
     foobarbaz 
 
-/The case of aaaaaa is missed out below because I think Perl 5.005_02 gets/
-/it wrong; it sets $1 to aaa rather than aa. Compare the following test,/
-/where it does set $1 to aa when matching aaaaaa./
+/The cases of aaaa and aaaaaa are missed out below because Perl does things/
+/differently. We know that odd, and maybe incorrect, things happen with/
+/recursive references in Perl, as far as 5.11.3 - see some stuff in test #2./
 
 /^(a\1?){4}$/
     a
     aa
     aaa
-    aaaa
     aaaaa
     aaaaaaa
     aaaaaaaa
@@ -4064,4 +4066,11 @@
 /^%((?(?=[a])[^%])|b)*%$/
     %ab%
 
-/ End of testinput1 /
+/(?i)a(?-i)b|c/
+    XabX
+    XAbX
+    CcC 
+    ** Failers
+    XABX   
+
+/-- End of testinput1 --/

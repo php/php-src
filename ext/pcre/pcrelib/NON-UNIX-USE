@@ -12,9 +12,10 @@ This document contains the following sections:
   Comments about Win32 builds
   Building PCRE on Windows with CMake
   Use of relative paths with CMake on Windows
-  Testing with runtest.bat
+  Testing with RunTest.bat
   Building under Windows with BCC5.5
   Building PCRE on OpenVMS
+  Building PCRE on Stratus OpenVOS
 
 
 GENERAL
@@ -36,10 +37,10 @@ wrapper functions are a separate issue (see below).
 
 The PCRE distribution includes a "configure" file for use by the Configure/Make
 build system, as found in many Unix-like environments. There is also support
-support for CMake, which some users prefer, in particular in Windows
-environments. There are some instructions for CMake under Windows in the
-section entitled "Building PCRE with CMake" below. CMake can also be used to
-build PCRE in Unix-like systems.
+support for CMake, which some users prefer, especially in Windows environments.
+There are some instructions for CMake under Windows in the section entitled
+"Building PCRE with CMake" below. CMake can also be used to build PCRE in
+Unix-like systems.
 
 
 GENERIC INSTRUCTIONS FOR THE PCRE C LIBRARY
@@ -126,12 +127,16 @@ The following are generic comments about building the PCRE C library "by hand".
      your system has static and shared libraries, you may have to do this once
      for each type.
 
- (8) Similarly, compile pcreposix.c (remembering -DHAVE_CONFIG_H if necessary)
-     and link the result (on its own) as the pcreposix library.
+ (8) Similarly, if you want to build the POSIX wrapper functions, ensure that
+     you have the pcreposix.h file and then compile pcreposix.c (remembering
+     -DHAVE_CONFIG_H if necessary). Link the result (on its own) as the
+     pcreposix library.
 
  (9) Compile the test program pcretest.c (again, don't forget -DHAVE_CONFIG_H).
-     This needs the functions in the pcre and pcreposix libraries when linking.
-     It also needs the pcre_printint.src source file, which it #includes.
+     This needs the functions in the PCRE library when linking. It also needs
+     the pcreposix wrapper functions unless you compile it with -DNOPOSIX. The
+     pcretest.c program also needs the pcre_printint.src source file, which it
+     #includes.
 
 (10) Run pcretest on the testinput files in the testdata directory, and check
      that the output matches the corresponding testoutput files. Note that the
@@ -272,46 +277,47 @@ gcc and MinGW's gcc). So, a user can:
 
 The test files that are supplied with PCRE are in Unix format, with LF
 characters as line terminators. It may be necessary to change the line
-terminators in order to get some of the tests to work. We hope to improve
-things in this area in future.
+terminators in order to get some of the tests to work.
 
 
 BUILDING PCRE ON WINDOWS WITH CMAKE
 
-CMake is an alternative build facility that can be used instead of the
-traditional Unix "configure". CMake version 2.4.7 supports Borland makefiles,
-MinGW makefiles, MSYS makefiles, NMake makefiles, UNIX makefiles, Visual Studio
-6, Visual Studio 7, Visual Studio 8, and Watcom W8. The following instructions
+CMake is an alternative configuration facility that can be used instead of the
+traditional Unix "configure". CMake creates project files (make files, solution
+files, etc.) tailored to numerous development environments, including Visual
+Studio, Borland, Msys, MinGW, NMake, and Unix. The following instructions
 were contributed by a PCRE user.
 
-1.  Download CMake 2.4.7 or above from http://www.cmake.org/, install and ensure
-    that cmake\bin is on your path.
+1.  Install the latest CMake version available from http://www.cmake.org/, and
+    ensure that cmake\bin is on your path.
 
 2.  Unzip (retaining folder structure) the PCRE source tree into a source
     directory such as C:\pcre.
 
-3.  Create a new, empty build directory: C:\pcre\build\
+3.  Create a new, empty build directory, for example C:\pcre\build\
 
-4.  Run CMakeSetup from the Shell envirornment of your build tool, e.g., Msys
-    for Msys/MinGW or Visual Studio Command Prompt for VC/VC++
+4.  Run cmake-gui from the Shell envirornment of your build tool, for example,
+    Msys for Msys/MinGW or Visual Studio Command Prompt for VC/VC++.
 
 5.  Enter C:\pcre\pcre-xx and C:\pcre\build for the source and build
-    directories, respectively
+    directories, respectively.
 
 6.  Hit the "Configure" button.
 
-7.  Select the particular IDE / build tool that you are using (Visual Studio,
-    MSYS makefiles, MinGW makefiles, etc.)
+7.  Select the particular IDE / build tool that you are using (Visual
+    Studio, MSYS makefiles, MinGW makefiles, etc.)
 
-8.  The GUI will then list several configuration options. This is where you can
-    enable UTF-8 support, etc.
+8.  The GUI will then list several configuration options. This is where
+    you can enable UTF-8 support or other PCRE optional features.
 
-9.  Hit "Configure" again. The adjacent "OK" button should now be active.
+9.  Hit "Configure" again. The adjacent "Generate" button should now be
+    active.
 
-10. Hit "OK".
+10. Hit "Generate".
 
 11. The build directory should now contain a usable build system, be it a
-    solution file for Visual Studio, makefiles for MinGW, etc.
+    solution file for Visual Studio, makefiles for MinGW, etc. Exit from
+    cmake-gui and use the generated build system with your compiler or IDE.
 
 
 USE OF RELATIVE PATHS WITH CMAKE ON WINDOWS
@@ -444,5 +450,52 @@ $!   Locale could not be set to fr
 $!
 =========================
 
-Last Updated: 17 March 2009
+
+BUILDING PCRE ON STRATUS OPENVOS
+
+These notes on the port of PCRE to VOS (lightly edited) were supplied by
+Ashutosh Warikoo, whose email address has the local part awarikoo and the
+domain nse.co.in. The port was for version 7.9 in August 2009.
+
+1.   Building PCRE
+
+I built pcre on OpenVOS Release 17.0.1at using GNU Tools 3.4a without any
+problems. I used the following packages to build PCRE:
+
+  ftp://ftp.stratus.com/pub/vos/posix/ga/posix.save.evf.gz
+
+Please read and follow the instructions that come with these packages. To start
+the build of pcre, from the root of the package type:
+
+  ./build.sh
+
+2. Installing PCRE
+
+Once you have successfully built PCRE, login to the SysAdmin group, switch to
+the root user, and type
+
+  [ !create_dir (master_disk)>usr   --if needed ]
+  [ !create_dir (master_disk)>usr>local   --if needed ]
+    !gmake install
+
+This installs PCRE and its man pages into /usr/local. You can add
+(master_disk)>usr>local>bin to your command search paths, or if you are in
+BASH, add /usr/local/bin to the PATH environment variable.
+
+4. Restrictions
+
+This port requires readline library optionally. However during the build I
+faced some yet unexplored errors while linking with readline. As it was an
+optional component I chose to disable it.
+
+5. Known Problems
+
+I ran a the test suite, but you will have to be your own judge of whether this
+command, and this port, suits your purposes. If you find any problems that
+appear to be related to the port itself, please let me know. Please see the
+build.log file in the root of the package also.
+
+
+=========================
+Last Updated: 19 January 2010
 ****
