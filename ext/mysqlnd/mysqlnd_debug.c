@@ -1113,10 +1113,16 @@ static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_l
 	long line;
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
+	uint * level;
 
+	level = va_arg(args, uint *);
 	str = va_arg(args, char**);
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
+
+	if (!(*level)--) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
@@ -1283,10 +1289,16 @@ static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_l
 	long line;
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
+	uint * level;
 
+	level = va_arg(args, uint *);
 	str = va_arg(args, char**);
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
+
+	if (!(*level)--) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
@@ -1323,24 +1335,30 @@ static int mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_l
 #endif
 
 
-char * mysqlnd_get_backtrace(TSRMLS_D)
+PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
 {
 	zval *trace;
 	char *res = estrdup(""), **str = &res, *s_tmp;
 	int res_len = 0, *len = &res_len, num = 0;
+	if (max_levels == 0) {
+		max_levels = 99999;
+	}
 
 	MAKE_STD_ZVAL(trace);
 	zend_fetch_debug_backtrace(trace, 0, 0 TSRMLS_CC);
 
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_string, 3, str, len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_string, 4, &max_levels, str, len, &num);
 	zval_ptr_dtor(&trace);
 
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
-	sprintf(s_tmp, "#%d {main}", num);
-	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
-	efree(s_tmp);
+	if (max_levels) {
+		s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
+		sprintf(s_tmp, "#%d {main}", num);
+		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+		efree(s_tmp);
+	}
 
 	res[res_len] = '\0';
+	*length = res_len;
 
 	return res;
 }
