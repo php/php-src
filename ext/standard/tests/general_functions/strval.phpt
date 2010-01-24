@@ -268,10 +268,10 @@ unicode(4) "true"
 -- Iteration 54 --
 unicode(4) "true"
 -- Iteration 55 --
-unicode(54) "This is a multiline heredoc
+unicode(5%d) "This is a multiline heredoc
 string. Numeric = 1232455."
 -- Iteration 56 --
-unicode(10) "12345
+unicode(1%d) "12345
 2345"
 -- Iteration 57 --
 unicode(0) ""
