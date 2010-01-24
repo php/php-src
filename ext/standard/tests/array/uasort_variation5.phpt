@@ -139,7 +139,7 @@ array(4) {
   [1]=>
   string(7) "Heredoc"
   [3]=>
-  string(43) "heredoc string	with!@# and 123
+  string(4%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
 Done
