@@ -980,6 +980,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			php_log_err(log_buffer TSRMLS_CC);
 			efree(log_buffer);
 		}
+
 		if (PG(display_errors)
 			&& ((module_initialized && !PG(during_request_startup))
 				|| (PG(display_startup_errors) 
@@ -1008,7 +1009,12 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
+#ifdef PHP_WIN32
+						fprintf(stderr, "%s: %s in %s on line%d\n", error_type_str, buffer, error_filename, error_lineno);
+						fflush(stderr);
+#else
 						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
+#endif
 					} else {
 						php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}
@@ -1850,7 +1856,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	EG(bailout) = NULL;
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
-
+	EG(active_symbol_table) = NULL;
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
 	SG(request_info).argv0 = NULL;
