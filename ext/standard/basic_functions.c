@@ -5661,6 +5661,15 @@ PHP_FUNCTION(getservbyname)
 		return;
 	}
 
+
+/* empty string behaves like NULL on windows implementation of 
+   getservbyname. Let be portable instead. */
+#ifdef PHP_WIN32
+	if (proto_len == 0) {
+		RETURN_FALSE;
+	}
+#endif
+
 	serv = getservbyname(name, proto);
 
 	if (serv == NULL) {
