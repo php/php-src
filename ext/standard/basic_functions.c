@@ -4043,7 +4043,7 @@ PHP_FUNCTION(putenv)
 
 #ifdef PHP_WIN32
 		if (equals) {
-			if (pe.key_len < setting_len - 2) {
+			if (pe.key_len < setting_len - 1) {
 				value = p + 1;
 			} else {
 				/* empty string*/
