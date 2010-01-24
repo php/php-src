@@ -5,6 +5,10 @@ Italian PHP TestFest 2009 Cesena 19-20-21 june
 Fabio Fabbrucci (fabbrucci@grupporetina.com)
 Michele Orselli (mo@ideato.it)
 Simone Gentili (sensorario@gmail.com)
+--SKIPIF--
+<?php
+if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
+?>
 --FILE--
 <?php
 
