@@ -139,7 +139,7 @@ array(4) {
   [1]=>
   unicode(7) "Heredoc"
   [3]=>
-  unicode(43) "heredoc string	with!@# and 123
+  unicode(4%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
 Done
