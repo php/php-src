@@ -1972,7 +1972,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 	EG(bailout) = NULL;
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
-
+	EG(active_symbol_table) = NULL;
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
 	SG(request_info).argv0 = NULL;
