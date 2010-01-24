@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed possible crash when a error/warning is raised during php 
+  startup. (Pierre)
+
 - Fixed bug #50787 (stream_set_write_buffer() has no effect on socket
   streams). (vnegrier at optilian dot com, Ilia)
 - Fixed bug #50761 (system.multiCall crashes in xmlrpc extension). (hiroaki
@@ -23,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0). (Joey,
   Ilia)
+- Fixed bug #50690 (putenv does not set ENV when the value is only
+  one char). (Pierre)
 - Fixed bug #50680 (strtotime() does not support eighth ordinal number).
   (Ilia)
 - Fixed bug #50661 (DOMDocument::loadXML does not allow UTF-16). (Rob)
