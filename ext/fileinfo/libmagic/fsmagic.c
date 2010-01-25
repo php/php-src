@@ -176,7 +176,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 			return 1;
 # endif
 #endif
-			
+
 #ifdef	S_IFIFO
 			case S_IFIFO:
 				if((ms->flags & MAGIC_DEVICES) != 0)
