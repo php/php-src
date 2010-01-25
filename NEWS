@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.13
-- Updated timezone database to version 2010.1. (Derick)
+- Updated timezone database to version 2010.2. (Derick)
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
 - Removed automatic file descriptor unlocking happening on shutdown and/or 
