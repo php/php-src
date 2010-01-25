@@ -387,9 +387,6 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 #endif
 	
 	if (close_handle) {
-		if (data->lock_flag != LOCK_UN) {
-			php_stream_lock(stream, LOCK_UN);
-		}
 		if (data->file) {
 			if (data->is_process_pipe) {
 				errno = 0;
