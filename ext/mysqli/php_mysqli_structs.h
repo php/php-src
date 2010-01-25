@@ -338,6 +338,8 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
 
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
 
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
+
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
