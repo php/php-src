@@ -1341,6 +1341,10 @@ static int zend_check_symbol(zval **pz TSRMLS_DC) /* {{{ */
 {
 	if (Z_TYPE_PP(pz) > 9) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
 	} else if (Z_TYPE_PP(pz) == IS_ARRAY) {
 		zend_hash_apply(Z_ARRVAL_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
 	} else if (Z_TYPE_PP(pz) == IS_OBJECT) {

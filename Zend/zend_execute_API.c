@@ -85,6 +85,10 @@ static void zend_handle_sigsegv(int dummy) /* {{{ */
 				get_active_function_name(TSRMLS_C).s,
 				zend_get_executed_filename(TSRMLS_C),
 				zend_get_executed_lineno(TSRMLS_C));
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
 	}
 	if (original_sigsegv_handler!=zend_handle_sigsegv) {
 		original_sigsegv_handler(dummy);
