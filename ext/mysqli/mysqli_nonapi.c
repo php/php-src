@@ -80,7 +80,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #endif
 
 	if (getThis() && !ZEND_NUM_ARGS() && in_ctor) {
-		RETURN_NULL();
+		php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
 	}
 	hostname = username = dbname = passwd = socket = NULL;
 

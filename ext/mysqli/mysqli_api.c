@@ -1333,9 +1333,9 @@ PHP_FUNCTION(mysqli_info)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_init(void)
-   Initialize mysqli and return a resource for use with mysql_real_connect */
-PHP_FUNCTION(mysqli_init)
+
+/* {{{ php_mysqli_init() */
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
@@ -1369,6 +1369,15 @@ PHP_FUNCTION(mysqli_init)
 	} else {
 		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
 	}
+}
+/* }}} */
+
+
+/* {{{ proto resource mysqli_init(void)
+   Initialize mysqli and return a resource for use with mysql_real_connect */
+PHP_FUNCTION(mysqli_init)
+{
+	php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
