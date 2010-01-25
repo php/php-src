@@ -312,6 +312,8 @@ PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_D
 PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);
 PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC);
 
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
+
 PHP_MINIT_FUNCTION(mysqli);
 PHP_MSHUTDOWN_FUNCTION(mysqli);
 PHP_RINIT_FUNCTION(mysqli);

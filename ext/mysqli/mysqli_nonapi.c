@@ -40,8 +40,15 @@ PHP_FUNCTION(mysqli_connect)
 	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	long				port=0;
 
+	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+						"Headers and client library minor version mismatch. Headers:%d Library:%ld",
+						MYSQL_VERSION_ID, mysql_get_client_version());
+	}
+
 	if (getThis() && !ZEND_NUM_ARGS()) {
-		RETURN_NULL();
+		php_mysqli_init(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 

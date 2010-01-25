@@ -7,7 +7,7 @@
 	if (!$driver->embedded) {
 		$host = "localhost";
 		$user = "root";
-		$passwd = "";
+		$passwd = "root";
 	} else {
 		$path =  dirname(__FILE__);
 		$host = ":embedded";
