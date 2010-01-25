@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   gdImageFilledPolygon (libgd #100). (Takeshi Abe)
 - Fixed build of mysqli with MySQL 5.5.0-m2. (Andrey)
 
+- Fixed bug #50832 (HTTP fopen wrapper does not support passwordless HTTP
+  authentication). (Jani)
 - Fixed bug #50823 (ReflectionFunction::isDeprecated producing "cannot be called
   statically" error). (Jani, Felipe)
 - Fixed bug #50791 (Compile failure: Bad logic in defining fopencookie
