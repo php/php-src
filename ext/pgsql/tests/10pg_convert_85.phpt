@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_convert()
+PostgreSQL pg_convert() (8.5+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_server_version('8.5dev', '<');
 ?>
 --FILE--
 <?php
@@ -25,5 +25,5 @@ array(3) {
   ["str"]=>
   string(5) "'AAA'"
   ["bin"]=>
-  string(5) "'BBB'"
+  string(11) "'\\x424242'"
 }
