@@ -1383,7 +1383,7 @@ PHP_FUNCTION(extract)
 				if (var_exists && var_name_len == sizeof("GLOBALS") && !strcmp(var_name, "GLOBALS")) {
 					break;
 				}
-				if (var_exists && var_name_len == sizeof("this")  && !strcmp(var_name, "this") && EG(scope) && "" != EG(scope)->name) {
+				if (var_exists && var_name_len == sizeof("this")  && !strcmp(var_name, "this") && EG(scope) && EG(scope)->name_length != 0) {
 					break;
 				}
 				ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
