@@ -416,15 +416,19 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* auth header if it was specified */
-	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user && resource->pass)	{
+	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user) {
 		/* decode the strings first */
 		php_url_decode(resource->user, strlen(resource->user));
-		php_url_decode(resource->pass, strlen(resource->pass));
 
 		/* scratch is large enough, since it was made large enough for the whole URL */
 		strcpy(scratch, resource->user);
 		strcat(scratch, ":");
-		strcat(scratch, resource->pass);
+
+		/* Note: password is optional! */
+		if (resource->pass) {
+			php_url_decode(resource->pass, strlen(resource->pass));
+			strcat(scratch, resource->pass);
+		}
 
 		tmp = (char*)php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
 		
@@ -746,7 +750,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			s++;	\
 		}	\
 	}	\
-}	\
+}
 			/* check for control characters in login, password & path */
 			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
 				CHECK_FOR_CNTRL_CHARS(resource->user)
