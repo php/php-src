@@ -2010,6 +2010,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_stream_get_wrappers, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_stream_resolve_include_path, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_stream_is_local, 0)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
@@ -3115,6 +3119,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_wrapper_restore,											arginfo_stream_wrapper_restore)
 	PHP_FE(stream_get_wrappers,												arginfo_stream_get_wrappers)
 	PHP_FE(stream_get_transports,											arginfo_stream_get_transports)
+	PHP_FE(stream_resolve_include_path,										arginfo_stream_resolve_include_path)
 	PHP_FE(stream_is_local,												arginfo_stream_is_local)
 	PHP_FE(get_headers,														arginfo_get_headers)
 

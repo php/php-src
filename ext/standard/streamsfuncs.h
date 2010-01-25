@@ -56,6 +56,7 @@ PHP_FUNCTION(stream_filter_append);
 PHP_FUNCTION(stream_filter_remove);
 PHP_FUNCTION(stream_socket_enable_crypto);
 PHP_FUNCTION(stream_socket_shutdown);
+PHP_FUNCTION(stream_resolve_include_path);
 PHP_FUNCTION(stream_is_local);
 PHP_FUNCTION(stream_supports_lock);
 
