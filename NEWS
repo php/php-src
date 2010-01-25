@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed possible crash when a error/warning is raised during php startup.
   (Pierre)
 
+- Fixed bug #50832 (HTTP fopen wrapper does not support passwordless HTTP
+  authentication). (Jani)
 - Fixed bug #50787 (stream_set_write_buffer() has no effect on socket streams).
   (vnegrier at optilian dot com, Ilia)
 - Fixed bug #50761 (system.multiCall crashes in xmlrpc extension).
