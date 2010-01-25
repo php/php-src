@@ -181,8 +181,7 @@ PHP_METHOD( IntlDateFormatter, __construct )
  */
 PHP_FUNCTION( datefmt_get_error_code )
 {
-	zval*                    object  = NULL;
-	IntlDateFormatter_object*  dfo     = NULL;
+	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
@@ -208,8 +207,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 PHP_FUNCTION( datefmt_get_error_message )
 {
 	char*                    message = NULL;
-	zval*                    object  = NULL;
-	IntlDateFormatter_object*  dfo     = NULL;
+	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
@@ -224,7 +222,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	/* Return last error message. */
-	message = intl_error_get_message( &dfo->datef_data.error TSRMLS_CC );
+	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) TSRMLS_CC );
 	RETURN_STRING( message, 0);
 }
 /* }}} */

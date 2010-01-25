@@ -169,7 +169,7 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
         intl_error_set_code( NULL, status TSRMLS_CC );
 
         /* Set error messages. */
-        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
         efree( uhaystack );
         return -1;
     }
@@ -202,7 +202,7 @@ grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned c
         intl_error_set_code( NULL, status TSRMLS_CC );
 
         /* Set error messages. */
-        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+        intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
         efree( uhaystack );
         efree( uneedle );
         ubrk_close (bi);
@@ -294,7 +294,7 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree( uhaystack );
 		return -1;
 	}
@@ -331,7 +331,7 @@ grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned ch
 		intl_error_set_code( NULL, status TSRMLS_CC );
 
 		/* Set error messages. */
-		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 1 TSRMLS_CC );
+		intl_error_set_custom_msg( NULL, "Error converting input string to UTF-16", 0 TSRMLS_CC );
 		efree( uhaystack );
 		efree( uneedle );
 		ubrk_close (bi);
