@@ -228,6 +228,8 @@ extern void php_mysqli_dtor_p_elements(void *data);
 
 extern void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC);
 
+extern void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
+
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
