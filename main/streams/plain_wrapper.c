@@ -1057,12 +1057,13 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	ret = VCWD_RENAME(url_from, url_to);
 
 	if (ret == -1) {
-#ifdef EXDEV
+#ifndef PHP_WIN32
+# ifdef EXDEV
 		if (errno == EXDEV) {
 			struct stat sb;
 			if (php_copy_file(url_from, url_to TSRMLS_CC) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#  if !defined(TSRM_WIN32) && !defined(NETWARE)
 					if (VCWD_CHMOD(url_to, sb.st_mode)) {
 						if (errno == EPERM) {
 							php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
@@ -1081,7 +1082,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 						php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
 						return 0;
 					}
-#endif
+#  endif
 					VCWD_UNLINK(url_from);
 					return 1;
 				}
@@ -1089,8 +1090,14 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 			php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
 			return 0;
 		}
+# endif
 #endif
+
+#ifdef PHP_WIN32
+		php_win32_docref2_from_error(GetLastError(), url_from, url_to TSRMLS_CC);
+#else
 		php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
+#endif
         return 0;
 	}
 
