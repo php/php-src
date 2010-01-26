@@ -61,7 +61,6 @@ static inline void PDO_DBG_ENTER(char *func_name) {}
 #include "ext/mysqlnd/mysqlnd_debug.h"
 #endif
 
-#ifdef PDO_USE_MYSQLND
 ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 #ifndef PHP_WIN32
 	char          *default_socket;
@@ -79,7 +78,6 @@ ZEND_BEGIN_MODULE_GLOBALS(pdo_mysql)
 ZEND_END_MODULE_GLOBALS(pdo_mysql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pdo_mysql);
-#endif
 
 #ifdef ZTS
 #define PDO_MYSQL_G(v) TSRMG(pdo_mysql_globals_id, zend_pdo_mysql_globals *, v)
