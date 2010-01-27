@@ -432,8 +432,8 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 static inline unsigned long realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 	register unsigned long h;
-	char *bucket_key = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
-	char *bucket_key_start = (char *)bucket_key;
+	char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
+	char *bucket_key = (char *)bucket_key_start;
 	const char *e = bucket_key + strlen(bucket_key);
 
 	if (!bucket_key) {
@@ -444,11 +444,7 @@ static inline unsigned long realpath_cache_key(const char *path, int path_len TS
 		h *= 16777619;
 		h ^= *bucket_key++;
 	}
-	/* if no SID were present the path is returned. Otherwise a Heap 
-	   allocated string is returned. */
-	if (bucket_key_start != path) {
-		LocalFree(bucket_key_start);
-	}
+	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
 	return h;
 }
 /* }}} */
