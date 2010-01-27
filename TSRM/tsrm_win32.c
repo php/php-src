@@ -271,6 +271,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
 				goto Finished;
 			}
+		} else {
+			/* we already have it, free it then */
+			free(token_sid);
 		}
 
 		if (CWDG(realpath_cache_size_limit)) {
