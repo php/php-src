@@ -176,6 +176,7 @@ PSID tsrm_win32_get_token_sid(HANDLE hToken)
 	if (!CopySid(sid_len, pResultSid, pTokenUser->User.Sid)) {
 		goto Finished;
 	}
+	HeapFree(GetProcessHeap(), 0, (LPVOID)pTokenUser);
 	return pResultSid;
 
 Finished:
