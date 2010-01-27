@@ -1846,8 +1846,6 @@ fastcgi_request_done:
 			}
 			request_body_fd = -2;
 
-			STR_FREE(SG(request_info).path_translated);
-
 			if (EG(exit_status) == 255) {
 				if (CGIG(error_header) && *CGIG(error_header)) {
 					sapi_header_line ctr = {0};
@@ -1868,6 +1866,9 @@ fastcgi_request_done:
 				free(SG(request_info).query_string);
 				SG(request_info).query_string = NULL;
 			}
+
+			STR_FREE(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
 
 			requests++;
 			if (max_requests && (requests == max_requests)) {
