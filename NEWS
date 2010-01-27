@@ -19,8 +19,8 @@ PHP                                                                        NEWS
   (Pierre)
 - Fixed possible bad behavior of rename on windows when used with symbolic
   links or invalid paths. (Pierre)
-- Fixed stderr output of errors messages on windows, it is now print out
-  synchronously as on most unix platforms. (Pierre)
+- Remove output buffering for error messages sent through stderr on
+  Windows. (Pierre)
 
 - Fixed bug #50829 (php.ini directive pdo_mysql.default_socket is ignored).
   (Ilia)
