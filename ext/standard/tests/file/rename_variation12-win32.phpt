@@ -4,7 +4,7 @@ Test rename() function : variation - various relative, absolute paths
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') die('skip..  for Windows');
 ?>
 --FILE--
 <?php

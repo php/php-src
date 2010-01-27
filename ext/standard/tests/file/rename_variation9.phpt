@@ -41,7 +41,7 @@ echo "Done\n";
 unlink(dirname(__FILE__)."/rename_variation9_new.tmp");
 rmdir(dirname(__FILE__)."/rename_variation_dir9_new");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() by giving stream context as third argument ***
 bool(true)
 bool(false)

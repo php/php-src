@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Not for Windows");
+  die("skip. Not for Windows");
 ?>
 --FILE--
 <?php
@@ -14,7 +14,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
 
 echo "*** Testing rename() with obscure files ***\n";
 $file_path = dirname(__FILE__)."/renameVar13";
