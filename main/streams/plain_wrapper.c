@@ -38,6 +38,10 @@
 #endif
 #include "SAPI.h"
 
+#ifdef PHP_WIN32
+# include "ext/standard/php_string.h"
+#endif
+
 #include "php_streams_int.h"
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
@@ -1060,6 +1064,28 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 		return 0;
 	}
 
+#ifdef PHP_WIN32
+	/* Prevent bad things to happen when passing ' ' to MoveFileEx */
+	{
+		int url_from_len = strlen(url_from);
+		int url_to_len = strlen(url_to);
+		char *trimed = php_trim(url_from, url_from_len, NULL, 0, NULL, 1 TSRMLS_CC);
+		int trimed_len = strlen(trimed);
+
+		if (trimed_len == 0 || trimed_len != url_from_len) {
+			php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+			return 0;
+		}
+
+		trimed = php_trim(url_to, url_to_len, NULL, 0, NULL, 1 TSRMLS_CC);
+		trimed_len = strlen(trimed);
+		if (trimed_len == 0 || trimed_len != url_to_len) {
+			php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+			return 0;
+		}
+	}
+#endif
+
 	if ((p = strstr(url_from, "://")) != NULL) {
 		url_from = p + 3;
 	}
@@ -1076,7 +1102,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	if (php_check_open_basedir(url_from TSRMLS_CC) || php_check_open_basedir(url_to TSRMLS_CC)) {
 		return 0;
 	}
-
+__debugbreak();
 	ret = VCWD_RENAME(url_from, url_to);
 
 	if (ret == -1) {
