@@ -29,13 +29,13 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		fpm_array_free(&wp->slots_used);
 		fpm_array_free(&wp->slots_free);
 		fpm_shm_free_list(wp->shm_list, which == FPM_CLEANUP_CHILD ? fpm_shm_slots_mem() : 0);
+		if (wp->shm_status && which != FPM_CLEANUP_CHILD) {
+			fpm_shm_free(wp->shm_status, !fpm_globals.is_child);
+		}
 		free(wp->config);
 		free(wp->user);
 		free(wp->home);
 		free(wp);
-		if (wp->shm_status && which != FPM_CLEANUP_CHILD) {
-			fpm_shm_free(wp->shm_status, !fpm_globals.is_child);
-		}
 	}
 	fpm_worker_all_pools = 0;
 }
