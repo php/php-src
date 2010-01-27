@@ -105,6 +105,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, n_retries)
+	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_reopen, 0, 0, 2)
@@ -1148,10 +1149,11 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	long retries = 0, flags = NIL, cl_flags = NIL;
 	MAILSTREAM *imap_stream;
 	pils *imap_le_struct;
+	zval *params = NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "sss|ll", &mailbox, &mailbox_len, &user, &user_len,
-		&passwd, &passwd_len, &flags, &retries) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "sss|lla", &mailbox, &mailbox_len, &user, &user_len,
+		&passwd, &passwd_len, &flags, &retries, &params) == FAILURE) {
 		return;
 	}
 
@@ -1162,6 +1164,46 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		if (flags & OP_PROTOTYPE) {
 			cl_flags |= OP_PROTOTYPE;
+		}
+	}
+
+	if (params) {
+		zval **disabled_auth_method;
+
+		if (zend_hash_find(HASH_OF(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR"), (void **)&disabled_auth_method) == SUCCESS) {
+			switch (Z_TYPE_PP(disabled_auth_method)) {
+				case IS_STRING:
+					if (Z_STRLEN_PP(disabled_auth_method) > 1) {
+						mail_parameters (NIL, DISABLE_AUTHENTICATOR, (void *)Z_STRVAL_PP(disabled_auth_method));
+					}
+					break;
+				case IS_ARRAY:
+					{
+						zval **z_auth_method;
+						int i;
+						int nelems = zend_hash_num_elements(Z_ARRVAL_PP(disabled_auth_method));
+
+						if (nelems == 0 ) {
+							break;
+						}
+						for (i = 0; i < nelems; i++) {
+							if (zend_hash_index_find(Z_ARRVAL_PP(disabled_auth_method), i, (void **) &z_auth_method) == SUCCESS) {
+								if (Z_TYPE_PP(z_auth_method) == IS_STRING) {
+									if (Z_STRLEN_PP(z_auth_method) > 1) {
+										mail_parameters (NIL, DISABLE_AUTHENTICATOR, (void *)Z_STRVAL_PP(disabled_auth_method));
+									}
+								} else {
+									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect string or array of strings");
+								}
+							}
+						}
+					}
+					break;
+				case IS_LONG:
+				default:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect string or array of strings");
+					break;
+			}
 		}
 	}
 
