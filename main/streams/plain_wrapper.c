@@ -1043,7 +1043,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	}
 
 #ifdef PHP_WIN32
-	/* Prevent bad things to happen when passing ' ' to MoveFileEx */
+	/* Prevent bad things to happen when invalid path are used with MoveFileEx */
 	{
 		int url_from_len = strlen(url_from);
 		int url_to_len = strlen(url_to);
