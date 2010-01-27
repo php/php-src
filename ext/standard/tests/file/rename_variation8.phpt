@@ -1,5 +1,9 @@
 --TEST--
 Test rename() function: variation
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
+?>
 --FILE--
 <?php
 /* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
@@ -64,3 +68,4 @@ bool(false)
 bool(false)
 bool(false)
 Done
+
