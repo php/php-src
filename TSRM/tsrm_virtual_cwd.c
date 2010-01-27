@@ -1514,6 +1514,7 @@ CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC) /* {{{ */
 	/* rename on windows will fail if newname already exists.
 	   MoveFileEx has to be used */
 #ifdef TSRM_WIN32
+	/* MoveFileEx returns 0 on failure, other way 'round for this function */
 	retval = (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) ? -1 : 0;
 #else
 	retval = rename(oldname, newname);
