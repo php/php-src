@@ -10,6 +10,11 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 if(PHP_WINDOWS_VERSION_MAJOR < 6)  {
         die('skip windows version 6.0+ only test');
 }
+
+$ret = exec('mklink rename_variation13tmp.lnk ' . __FILE__ .' 2>&1', $out);
+if (strpos($ret, 'privilege')) {
+	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
+}
 ?>
 --FILE--
 <?php
