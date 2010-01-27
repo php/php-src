@@ -19,8 +19,7 @@ PHP                                                                        NEWS
   (Pierre)
 - Fixed possible bad behavior of rename on windows when used with symbolic
   links or invalid paths. (Pierre)
-- Remove output buffering for error messages sent through stderr on
-  Windows. (Pierre)
+- Fixed error output to stderr on Windows. (Pierre)
 
 - Fixed bug #50859 (build fails with openssl 1.0 due to md2 deprecation).   
   (Ilia, hanno at hboeck dot de)
