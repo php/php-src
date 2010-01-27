@@ -207,6 +207,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int http_1_1;
 	int http_status;
 	int content_type_xml = 0;
+	long redirect_max = 20;
 	char *content_encoding;
 	char *http_msg = NULL;
 	zend_bool old_allow_url_fopen;
@@ -281,6 +282,14 @@ int make_http_soap_request(zval  *this_ptr,
 	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(this_ptr),
 			"_stream_context", sizeof("_stream_context"), (void**)&tmp)) {
 		context = php_stream_context_from_zval(*tmp, 0);
+	}
+
+	if (context && 
+		php_stream_context_get_option(context, "http", "max_redirects", &tmp) == SUCCESS) {
+		if (Z_TYPE_PP(tmp) != IS_STRING || !is_numeric_string(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &redirect_max, NULL, 1)) {
+			if (Z_TYPE_PP(tmp) == IS_LONG)
+				redirect_max = Z_LVAL_PP(tmp);
+		}
 	}
 
 try_again:
@@ -1011,6 +1020,12 @@ try_again:
 					}
 				}
 				phpurl = new_url;
+
+				if (--redirect_max < 1) {
+					smart_str_free(&soap_headers_z);
+					add_soap_fault(this_ptr, "HTTP", "Redirection limit reached, aborting", NULL, NULL TSRMLS_CC);
+					return FALSE;
+				}
 
 				goto try_again;
 			}
