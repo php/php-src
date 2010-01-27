@@ -52,6 +52,9 @@ if test "$PHP_INTL" != "no"; then
     msgformat/msgformat_parse.c \
     grapheme/grapheme_string.c \
     grapheme/grapheme_util.c \
+    resourcebundle/resourcebundle.c \
+    resourcebundle/resourcebundle_class.c \
+    resourcebundle/resourcebundle_iterator.c \
     idn/idn.c, $ext_shared,,$ICU_INCS)
 
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
@@ -62,5 +65,6 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/locale)
   PHP_ADD_BUILD_DIR($ext_builddir/msgformat)
   PHP_ADD_BUILD_DIR($ext_builddir/grapheme)
+  PHP_ADD_BUILD_DIR($ext_builddir/resourcebundle)
   PHP_ADD_BUILD_DIR($ext_builddir/idn)
 fi

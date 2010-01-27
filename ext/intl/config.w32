@@ -66,6 +66,11 @@ if (PHP_INTL != "no") {
 		ADD_SOURCES(configure_module_dirname + "/idn", "\
 				idn.c",
 				"intl");
+		ADD_SOURCES(configure_module_dirname + "/resourcebundle", "\
+				resourcebundle.c \
+				resourcebundle_class.c \
+				resourcebundle_iterator.c",
+				"intl");
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {
