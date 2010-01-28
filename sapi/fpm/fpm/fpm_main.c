@@ -1529,6 +1529,8 @@ int main(int argc, char *argv[])
 	fcgi_request request;
 	char *fpm_config = NULL;
 
+	fcgi_init();
+
 #if 0 && defined(PHP_DEBUG)
 	/* IIS is always making things more difficult.  This allows
 	 * us to stop PHP and attach a debugger before much gets started */
