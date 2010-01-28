@@ -35,6 +35,10 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$string_with_tags = str_replace("\r",'', $string_with_tags);
+}
+
 $filename = dirname(__FILE__)."/fgetss_variation3.tmp"; 
 
 /* try reading the file opened in different modes of reading */
