@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, PHP 5.2.13
+28 Jan 2010, PHP 5.2.13RC1
 - Updated timezone database to version 2010.2. (Derick)
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
