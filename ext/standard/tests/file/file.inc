@@ -347,16 +347,16 @@ function create_files( $file_path,
      filled => total files filled, always returned as 1
      perms_changed => total files permission changed
 */
-function create_links( $file_path,
-		       $filename,
-                       $link_count = 1,
-                       $link_type = "soft",
-                       $link_size = 1024,
-                       $link_name_prefix = "link",
-                       $link_name_suffix = 1,
-                       $link_file_content = "text",
-                       $link_perms = 0755,
-                       $link_file_extension = ".tmp"
+function create_links($file_path,
+                      $filename,
+                      $link_count = 1,
+                      $link_type = "soft",
+                      $link_size = 1024,
+                      $link_name_prefix = "link",
+                      $link_name_suffix = 1,
+                      $link_file_content = "text",
+                      $link_perms = 0755,
+                      $link_file_extension = ".tmp"
                      )
 {
   $return_value = array('created' => 0, 'filled' => 0, 'perms_changed' => 0);

@@ -36,6 +36,10 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$string_with_tags = str_replace("\r",'', $string_with_tags);
+}
+
 $filename = dirname(__FILE__)."/fgetss_variation1.tmp";
 
 /* try reading the file opened in different modes of reading */
@@ -73,7 +77,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetss() : usage variations ***
 
 -- Testing fgetss() with file opened using w mode --
