@@ -37,7 +37,7 @@ function runtest() {
     mkdir($dir1.'/'.$extraDir);
     mkdir($extraDir);
     
-	$tmpfile = $extraDir.'/ basename(__FILE__, ".php") . ".tmp"';
+	$tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
 	$h = fopen($tmpfile, "w+", true);
 	fwrite($h, (binary) "This is the test file");
 	fclose($h);
