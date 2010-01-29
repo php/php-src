@@ -1764,11 +1764,11 @@ consult the installation file that came with this distribution, or visit \n\
 
 	zend_first_try {
 		while (fcgi_accept_request(&request) >= 0) {
+			char *status_buffer, *status_content_type;
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
 			CG(interactive) = 0;
-			char *status_buffer, *status_content_type;
 
 			fpm_request_info();
 
@@ -1858,6 +1858,9 @@ fastcgi_request_done:
 				}
 			}
 
+			STR_FREE(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+
 			php_request_shutdown((void *) 0);
 
 			if (exit_status == 0) {
@@ -1868,9 +1871,6 @@ fastcgi_request_done:
 				free(SG(request_info).query_string);
 				SG(request_info).query_string = NULL;
 			}
-
-			STR_FREE(SG(request_info).path_translated);
-			SG(request_info).path_translated = NULL;
 
 			requests++;
 			if (max_requests && (requests == max_requests)) {
