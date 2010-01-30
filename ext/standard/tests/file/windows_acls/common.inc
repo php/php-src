@@ -118,12 +118,11 @@ function create_dir($name, $perms) {
 
 function create_file($name, $perms) {
 	if (empty($name)) {
-		echo "create_dir: Empty name is not allowed\n";
+		echo "create_file: Empty name is not allowed\n";
 		return;
 	}
 
 	touch($name);
-	$dst = realpath($name);
 	icacls_set($name, PHPT_ACL_GRANT, $perms);
 }
 
