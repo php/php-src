@@ -21,11 +21,12 @@ $i = 1;
 $path = __DIR__ . '/a.txt';
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
+	clearstatcache(true, $path);
 	echo 'Iteration #' . $i++ . ': ';
 	if (is_readable($path) == $exp) {
 		echo "passed.\n";
 	} else {
-		var_dump(is_writable($path), $exp);
+		var_dump(is_readable($path), $exp);
 		echo "failed.\n";
 	}
 	delete_file($path);
@@ -36,11 +37,12 @@ $path = __DIR__ . '/adir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
+	clearstatcache(true, $path);
 	echo 'Iteration #' . $i++ . ': ';
 	if (is_readable($path) == $exp) {
 		echo "passed.\n";
 	} else {
-		var_dump(is_writable($path), $exp);
+		var_dump(is_readable($path), $exp);
 		echo "failed.\n";
 	}
 	delete_file($path);
