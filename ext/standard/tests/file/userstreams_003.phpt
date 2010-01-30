@@ -101,7 +101,7 @@ bool(false)
 value:
 int(0)
 ptrparam:
-int(8192)
+int(%d)
 $option === 3 === 3:
 bool(true)
 $value === 0 === 0:
