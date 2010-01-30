@@ -19,7 +19,7 @@ if (count($output) == 0) {
 <?php
 $old_dir = __DIR__;
 $dirname = __DIR__ . "\\mnt\\test\\directory";
-exec("mkdir " . $dirname, $output, $ret_val);
+mkdir($dirname, 0700, true);
 chdir(__DIR__ . "\\mnt\\test");
 $drive = substr(__DIR__, 0, 2);
 $pathwithoutdrive = substr(__DIR__, 2);
@@ -36,6 +36,7 @@ var_dump(is_dir("$fullpath"));
 var_dump(is_readable("mklink_junction"));
 var_dump(is_writeable("$fullpath"));
 chdir($old_dir);
+
 rmdir(__DIR__ . "\\mnt\\test\\directory");
 rmdir(__DIR__ . "\\mnt\\test\\mklink_junction");
 rmdir(__DIR__ . "\\mnt\\test\\mounted_volume");
