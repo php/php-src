@@ -223,11 +223,13 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
  		}
 
 		if(access(pathname, mode)) {
+			free(real_path);
 			return errno;
 		}
 
  		/* If only existence check is made, return now */
  		if (mode == 0) {
+			free(real_path);
 			return 0;
 		}
 
