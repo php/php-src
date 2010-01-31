@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2010, PHP 5.2.13
+- Fixed a possible open_basedir/safe_mode bypass in session extension
+  identified by Grzegorz Stachowiak. (Ilia)
+
 
 28 Jan 2010, PHP 5.2.13RC1
 - Updated timezone database to version 2010.2. (Derick)
