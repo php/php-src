@@ -563,8 +563,13 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 			return FAILURE;
 		}
 
-		if ((p = zend_memrchr(new_value, ';', new_value_length))) {
+		/* we do not use zend_memrchr() since path can contain ; itself */
+		if ((p = strchr(new_value, ';'))) {
+			char *p2;
 			p++;
+			if ((p2 = strchr(p, ';'))) {
+				p = p2 + 1;
+			}
 		} else {
 			p = new_value;
 		}
