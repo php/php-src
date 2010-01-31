@@ -5,8 +5,6 @@ PHP                                                                        NEWS
 - Upgraded bundled sqlite to version 3.6.22. (Ilia)
 - Upgraded bundled libmagic to version 5.03. (Mikko)
 
-- Fixed a possible open_basedir/safe_mode bypass in session extension
-  identified by Grzegorz Stachowiak. (Ilia)
 - Improved LCG entropy. (Rasmus, Samy Kamkar)
 
 - Added libpng 1.4.0 support. (Pierre)
@@ -17,6 +15,8 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed a possible open_basedir/safe_mode bypass in session extension
+  identified by Grzegorz Stachowiak. (Ilia)
 - Fixed possible crash when a error/warning is raised during php startup.
   (Pierre)
 - Fixed possible bad behavior of rename on windows when used with symbolic
