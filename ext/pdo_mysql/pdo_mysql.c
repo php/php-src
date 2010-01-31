@@ -196,7 +196,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	pdo_mysql_functions,
 	PHP_MINIT(pdo_mysql),
 	PHP_MSHUTDOWN(pdo_mysql),
-#if defined(PDO_USE_MYSQLND) && defined(PDO_DBG_ENABLED)
+#if PDO_USE_MYSQLND && PDO_DBG_ENABLED
 	PHP_RINIT(pdo_mysql),
 	PHP_RSHUTDOWN(pdo_mysql),
 #else
