@@ -115,12 +115,11 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 /* }}} */
 
 
-#if PDO_USE_MYSQLND
+#if PDO_USE_MYSQLND && PDO_DBG_ENABLED
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
 {	
-#if PDO_DBG_ENABLED
 	if (PDO_MYSQL_G(debug)) {
 		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
 		if (!dbg) {
@@ -129,18 +128,15 @@ static PHP_RINIT_FUNCTION(pdo_mysql)
 		dbg->m->set_mode(dbg, PDO_MYSQL_G(debug));
 		PDO_MYSQL_G(dbg) = dbg;
 	}
-#endif
 	
 	return SUCCESS;
 }
 /* }}} */
 
-
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
 {
-#if PDO_DBG_ENABLED
 	MYSQLND_DEBUG *dbg = PDO_MYSQL_G(dbg);
 	PDO_DBG_ENTER("RSHUTDOWN");
 	if (dbg) {
@@ -148,11 +144,11 @@ static PHP_RSHUTDOWN_FUNCTION(pdo_mysql)
 		dbg->m->free_handle(dbg);
 		PDO_MYSQL_G(dbg) = NULL;
 	}
-#endif
+
 	return SUCCESS;
 }
 /* }}} */
-
+#endif
 
 /* {{{ PHP_GINIT_FUNCTION
  */
@@ -167,8 +163,6 @@ static PHP_GINIT_FUNCTION(pdo_mysql)
 #endif
 }
 /* }}} */
-#endif
-
 
 /* {{{ pdo_mysql_functions[] */
 const zend_function_entry pdo_mysql_functions[] = {
@@ -205,15 +199,11 @@ zend_module_entry pdo_mysql_module_entry = {
 #endif
 	PHP_MINFO(pdo_mysql),
 	"1.0.2",
-#if PDO_USE_MYSQLND
 	PHP_MODULE_GLOBALS(pdo_mysql),
 	PHP_GINIT(pdo_mysql),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
-#else
-	STANDARD_MODULE_PROPERTIES
-#endif
 };
 /* }}} */
 
