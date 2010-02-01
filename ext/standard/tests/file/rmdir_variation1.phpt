@@ -81,7 +81,7 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( rmdir($value) );
+      var_dump(rmdir($value));
 };
 
 ?>
