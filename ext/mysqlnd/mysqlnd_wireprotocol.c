@@ -957,6 +957,7 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		len = meta->db_length;
 		meta->db = memcpy(root_ptr, meta->db, len);
 		*(root_ptr + len) = '\0';
+		root_ptr++;
 	}
 
 	if (meta->table && meta->table != mysqlnd_empty_string) {
