@@ -1001,6 +1001,11 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	TSRMLS_FETCH();
 
 	if (path_length == 0 || path_length >= MAXPATHLEN-1) {
+#ifdef TSRM_WIN32
+		_set_errno(EINVAL);
+#else
+		errno = EINVAL
+#endif
 		return 1;
 	}
 
