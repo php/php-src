@@ -6512,7 +6512,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q=0;
-	int state = 0;
+	int state = 0, pos;
 
 	if (stateptr)
 		state = *stateptr;
@@ -6525,7 +6525,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 	br = 0;
 	if (allow) {
 		php_strtolower(allow, allow_len);
-		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
+		tbuf = emalloc(PHP_TAG_BUF_SIZE + 1);
 		tp = tbuf;
 	} else {
 		tbuf = tp = NULL;
@@ -6546,7 +6546,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					lc = '<';
 					state = 1;
 					if (allow) {
-						tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+						if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+							pos = tp - tbuf;
+							tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+							tp = tbuf + pos;
+						}
 						*(tp++) = '<';
 					}
 				} else if (state == 1) {
@@ -6561,7 +6565,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 						br++;
 					}
 				} else if (allow && state == 1) {
-					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+					if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+						pos = tp - tbuf;
+						tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+						tp = tbuf + pos;
+					}
 					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
@@ -6575,7 +6583,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 						br--;
 					}
 				} else if (allow && state == 1) {
-					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+					if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+						pos = tp - tbuf;
+						tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+						tp = tbuf + pos;
+					}
 					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
@@ -6597,7 +6609,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 						lc = '>';
 						in_q = state = 0;
 						if (allow) {
-							tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+							if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+								pos = tp - tbuf;
+								tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+								tp = tbuf + pos;
+							}
 							*(tp++) = '>';
 							*tp='\0';
 							if (php_tag_find(tbuf, tp-tbuf, allow)) {
@@ -6647,7 +6663,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 				} else if (state == 0) {
 					*(rp++) = c;
 				} else if (allow && state == 1) {
-					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+					if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+						pos = tp - tbuf;
+						tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+						tp = tbuf + pos;
+					}
 					*(tp++) = c;
 				}
 				if (state && p != buf && (state == 1 || *(p-1) != '\\') && (!in_q || *p == in_q)) {
@@ -6668,7 +6688,11 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 					if (state == 0) {
 						*(rp++) = c;
 					} else if (allow && state == 1) {
-						tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+						if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+							pos = tp - tbuf;
+							tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+							tp = tbuf + pos;
+						}
 						*(tp++) = c;
 					}
 				}
@@ -6723,7 +6747,11 @@ reg_char:
 				if (state == 0) {
 					*(rp++) = c;
 				} else if (allow && state == 1) {
-					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+					if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
+						pos = tp - tbuf;
+						tbuf = erealloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+						tp = tbuf + pos;
+					}
 					*(tp++) = c;
 				}
 				break;
