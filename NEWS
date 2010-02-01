@@ -40,6 +40,8 @@ PHP                                                                        NEWS
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0). (Joey,
   Ilia)
+- Fixed bug #50727 	Accesing mysqli->affected_rows on no connection causes
+  segfault). (Andrey, Johannes)
 - Fixed bug #50680 (strtotime() does not support eighth ordinal number).
   (Ilia)
 - Fixed bug #50661 (DOMDocument::loadXML does not allow UTF-16). (Rob)
