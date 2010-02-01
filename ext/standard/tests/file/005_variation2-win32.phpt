@@ -108,18 +108,18 @@ Warning: filectime(): stat failed for | in %s on line %d
 
 
 *** testing touch ***
-Warning: touch(): Unable to create file  because %s in %s on line %d
+Warning: touch(): %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file  because %s in %s on line %d
+Warning: touch(): %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file  because %s in %s on line %d
+Warning: touch(): %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file   because %s in %s on line %d
+Warning: touch(): %s in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file | because %s in %s on line %d
+Warning: touch(): %s in %s on line %d
 bool(false)
 Done

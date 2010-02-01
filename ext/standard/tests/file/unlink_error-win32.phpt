@@ -77,15 +77,15 @@ bool(true)
 
 -- Testing unlink() on invalid arguments --
 
-Warning: unlink(): No such file or directory in %s on line %d
+Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(): No such file or directory in %s on line %d
+Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(): No such file or directory in %s on line %d
+Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
