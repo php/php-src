@@ -193,7 +193,8 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
-	    if (_zip_dirent_read(&de, za->zp, NULL, 0, 1, &za->error) != 0) {
+	    if (_zip_dirent_read(&de, za->zp, NULL, NULL, 1,
+				 &za->error) != 0) {
 		error = 1;
 		break;
 	    }
@@ -233,11 +234,10 @@ zip_close(struct zip *za)
 
 	    zs = NULL;
 	    if (!ZIP_ENTRY_DATA_CHANGED(za->entry+i)) {
-		if ((zs=zip_source_zip(za, za, i, ZIP_FL_RECOMPRESS, 0, -1))
-		    == NULL) {
-		    error = 1;
-		    break;
-		}
+			if ((zs=zip_source_zip(za, za, i, ZIP_FL_RECOMPRESS, 0, -1)) == NULL) {
+				error = 1;
+				break;
+	    	}
 	    }
 
 	    if (add_data(za, zs ? zs : za->entry[i].source, &de, out) < 0) {
@@ -266,6 +266,8 @@ zip_close(struct zip *za)
 	_zip_dirent_finalize(&de);
     }
 
+    free(filelist);
+
     if (!error) {
 	if (write_cdir(za, cd, out) < 0)
 	    error = 1;
@@ -290,27 +292,29 @@ zip_close(struct zip *za)
 	return -1;
     }
 
-    if (za->zp) {
-	fclose(za->zp);
-	za->zp = NULL;
-	reopen_on_error = 1;
+	if (za->zp) {
+		fclose(za->zp);
+		za->zp = NULL;
+		reopen_on_error = 1;
     }
     if (_zip_rename(temp, za->zn) != 0) {
-	_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
-	remove(temp);
-	free(temp);
-	if (reopen_on_error) {
-	    /* ignore errors, since we're already in an error case */
-	    za->zp = fopen(za->zn, "rb");
+		_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
+		remove(temp);
+		free(temp);
+		if (reopen_on_error) {
+	    	/* ignore errors, since we're already in an error case */
+	    	za->zp = fopen(za->zn, "rb");
+		}
+		return -1;
 	}
-	return -1;
-    }
     mask = umask(0);
     umask(mask);
     chmod(za->zn, 0666&~mask);
+    if (za->ch_comment)
+        free(za->ch_comment);
 
     _zip_free(za);
-    free(temp);
+	free(temp);
 
     return 0;
 }
@@ -445,6 +449,7 @@ add_data_uncomp(struct zip *za, zip_source_callback cb, void *ud,
 
     zstr.next_out = (Bytef *)b2;
     zstr.avail_out = sizeof(b2);
+    zstr.next_in = NULL;
     zstr.avail_in = 0;
 
     flush = 0;
