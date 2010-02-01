@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #50859 (build fails with openssl 1.0 due to md2 deprecation).   
   (Ilia, hanno at hboeck dot de)
+- Fixed bug #50847 (strip_tags() removes all tags greater then 1023 bytes
+  long). (Ilia)
 - Fixed bug #50829 (php.ini directive pdo_mysql.default_socket is ignored).
   (Ilia)
 - Fixed bug #50832 (HTTP fopen wrapper does not support passwordless HTTP
