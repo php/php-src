@@ -213,6 +213,7 @@ extern const int _zip_err_type[];
 
 int _zip_cdir_compute_crc(struct zip *, uLong *);
 void _zip_cdir_free(struct zip_cdir *);
+int _zip_cdir_grow(struct zip_cdir *, int, struct zip_error *);
 struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
 int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 
