@@ -135,6 +135,7 @@ zip_close(struct zip *za)
 
     if ((temp=_zip_create_temp_output(za, &out)) == NULL) {
 	_zip_cdir_free(cd);
+	free(filelist);
 	return -1;
     }
 
