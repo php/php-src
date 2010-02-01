@@ -1004,7 +1004,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #ifdef TSRM_WIN32
 		_set_errno(EINVAL);
 #else
-		errno = EINVAL
+		errno = EINVAL;
 #endif
 		return 1;
 	}
