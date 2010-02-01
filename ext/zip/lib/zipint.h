@@ -219,8 +219,8 @@ int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 
 void _zip_dirent_finalize(struct zip_dirent *);
 void _zip_dirent_init(struct zip_dirent *);
-int _zip_dirent_read(struct zip_dirent *, FILE *,
-		     unsigned char **, unsigned int, int, struct zip_error *);
+int _zip_dirent_read(struct zip_dirent *, FILE *, unsigned char **,
+		     unsigned int *, int, struct zip_error *);
 void _zip_dirent_torrent_normalize(struct zip_dirent *);
 int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
 
