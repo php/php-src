@@ -344,6 +344,10 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			if (class_type->num_interfaces) {
 				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
+						zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time.",
+									class_type->name,
+									interface->name,
+									zend_ce_iterator->name);
 						return FAILURE;
 					}
 					if (class_type->interfaces[i] == zend_ce_traversable) {
@@ -369,8 +373,14 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has the necessary userland methods */
 			return SUCCESS;
-		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
+		} else {
 			/* c-level get_iterator cannot be changed */
+			if (class_type->get_iterator == zend_user_it_get_new_iterator) {
+				zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time.",
+							class_type->name,
+							interface->name,
+							zend_ce_aggregate->name);
+			}
 			return FAILURE;
 		}
 	}
