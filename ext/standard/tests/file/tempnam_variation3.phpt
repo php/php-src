@@ -106,9 +106,9 @@ File created in => directory specified
 -- Iteration 7 --
 
 Notice: Array to string conversion in %sp on line %d
-File name is => %s/%s
-File permissions are => 100600
-File created in => directory specified
+-- File is not created --
+
+Warning: unlink(): %s in %s on line %d
 -- Iteration 8 --
 File name is => %s/dir%s
 File permissions are => 100600
