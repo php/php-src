@@ -68,6 +68,30 @@ _zip_cdir_free(struct zip_cdir *cd)
 
 
 
+int
+_zip_cdir_grow(struct zip_cdir *cd, int nentry, struct zip_error *error)
+{
+    struct zip_dirent *entry;
+
+    if (nentry < cd->nentry) {
+	_zip_error_set(error, ZIP_ER_INTERNAL, 0);
+	return -1;
+    }
+
+    if ((entry=((struct zip_dirent *)
+		realloc(cd->entry, sizeof(*(cd->entry))*nentry))) == NULL) {
+	_zip_error_set(error, ZIP_ER_MEMORY, 0);
+	return -1;
+    }
+
+    cd->nentry = nentry;
+    cd->entry = entry;
+
+    return 0;
+}
+
+
+
 struct zip_cdir *
 _zip_cdir_new(int nentry, struct zip_error *error)
 {
@@ -173,19 +197,23 @@ _zip_dirent_init(struct zip_dirent *de)
    Fills the zip directory entry zde.
 
    If bufp is non-NULL, data is taken from there and bufp is advanced
-   by the amount of data used; no more than left bytes are used.
-   Otherwise data is read from fp as needed.
+   by the amount of data used; otherwise data is read from fp as needed.
+   
+   if leftp is non-NULL, no more bytes than specified by it are used,
+   and *leftp is reduced by the number of bytes used.
 
-   If localp != 0, it reads a local header instead of a central
+   If local != 0, it reads a local header instead of a central
    directory entry.
 
    Returns 0 if successful. On error, error is filled in and -1 is
    returned.
+
+   XXX: leftp and file position undefined on error.
 */
 
 int
 _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
-		 unsigned char **bufp, unsigned int left, int localp,
+		 unsigned char **bufp, unsigned int *leftp, int local,
 		 struct zip_error *error)
 {
     unsigned char buf[CDENTRYSIZE];
@@ -193,18 +221,19 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     unsigned short dostime, dosdate;
     unsigned int size;
 
-    if (localp)
+    if (local)
 	size = LENTRYSIZE;
     else
 	size = CDENTRYSIZE;
-    
+
+    if (leftp && (*leftp < size)) {
+	_zip_error_set(error, ZIP_ER_NOZIP, 0);
+	return -1;
+    }
+
     if (bufp) {
 	/* use data from buffer */
 	cur = *bufp;
-	if (left < size) {
-	    _zip_error_set(error, ZIP_ER_NOZIP, 0);
-	    return -1;
-	}
     }
     else {
 	/* read entry from disk */
@@ -212,11 +241,10 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 	    _zip_error_set(error, ZIP_ER_READ, errno);
 	    return -1;
 	}
-	left = size;
 	cur = buf;
     }
 
-    if (memcmp(cur, (localp ? LOCAL_MAGIC : CENTRAL_MAGIC), 4) != 0) {
+    if (memcmp(cur, (local ? LOCAL_MAGIC : CENTRAL_MAGIC), 4) != 0) {
 	_zip_error_set(error, ZIP_ER_NOZIP, 0);
 	return -1;
     }
@@ -225,7 +253,7 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     
     /* convert buffercontents to zip_dirent */
     
-    if (!localp)
+    if (!local)
 	zde->version_madeby = _zip_read2(&cur);
     else
 	zde->version_madeby = 0;
@@ -245,7 +273,7 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     zde->filename_len = _zip_read2(&cur);
     zde->extrafield_len = _zip_read2(&cur);
     
-    if (localp) {
+    if (local) {
 	zde->comment_len = 0;
 	zde->disk_number = 0;
 	zde->int_attrib = 0;
@@ -263,13 +291,14 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     zde->extrafield = NULL;
     zde->comment = NULL;
 
-    if (bufp) {
-	if (left < CDENTRYSIZE + (zde->filename_len+zde->extrafield_len
-				  +zde->comment_len)) {
-	    _zip_error_set(error, ZIP_ER_NOZIP, 0);
-	    return -1;
-	}
+    size += zde->filename_len+zde->extrafield_len+zde->comment_len;
 
+    if (leftp && (*leftp < size)) {
+	_zip_error_set(error, ZIP_ER_NOZIP, 0);
+	return -1;
+    }
+
+    if (bufp) {
 	if (zde->filename_len) {
 	    zde->filename = _zip_readstr(&cur, zde->filename_len, 1, error);
 	    if (!zde->filename)
@@ -312,6 +341,8 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 
     if (bufp)
       *bufp = cur;
+    if (leftp)
+	*leftp -= size;
 
     return 0;
 }
@@ -442,23 +473,22 @@ _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 static time_t
 _zip_d2u_time(int dtime, int ddate)
 {
-    struct tm *tm;
-    time_t now;
+    struct tm tm;
 
-    now = time(NULL);
-    tm = localtime(&now);
-    /* let mktime decide if DST is in effect */
-    tm->tm_isdst = -1;
+    memset(&tm, sizeof(tm), 0);
     
-    tm->tm_year = ((ddate>>9)&127) + 1980 - 1900;
-    tm->tm_mon = ((ddate>>5)&15) - 1;
-    tm->tm_mday = ddate&31;
+    /* let mktime decide if DST is in effect */
+    tm.tm_isdst = -1;
+    
+    tm.tm_year = ((ddate>>9)&127) + 1980 - 1900;
+    tm.tm_mon = ((ddate>>5)&15) - 1;
+    tm.tm_mday = ddate&31;
 
-    tm->tm_hour = (dtime>>11)&31;
-    tm->tm_min = (dtime>>5)&63;
-    tm->tm_sec = (dtime<<1)&62;
+    tm.tm_hour = (dtime>>11)&31;
+    tm.tm_min = (dtime>>5)&63;
+    tm.tm_sec = (dtime<<1)&62;
 
-    return mktime(tm);
+    return mktime(&tm);
 }
 
 
