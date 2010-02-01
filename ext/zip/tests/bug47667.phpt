@@ -33,6 +33,7 @@ if ($zip->open($filename, ZipArchive::CREATE) !== true) {
 }
 
 echo "files: " , $zip->numFiles;
+$zip->close();
 
 unlink($filename);
 
