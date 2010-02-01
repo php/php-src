@@ -13,7 +13,9 @@ $write_handle = fopen($file_name, "w");
 
 $string = "Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^ 
           Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^\n";
-
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$string = str_replace("\r",'', $string);
+}
 fwrite($write_handle, $string);
 fclose($write_handle);
 
