@@ -51,15 +51,15 @@ for( $i=0; $i < count($names_arr); $i++ ) {
   touch($aFile);
   var_dump(rename($aFile, $name));
   if (file_exists($name)) {
-     unlink($name);
+     @unlink($name);
   }
 
   if (file_exists($aFile)) {
-     unlink($aFile);
+     @unlink($aFile);
   }
   var_dump(rename($name, $aFile));
   if (file_exists($aFile)) {
-     unlink($aFile);
+     @unlink($aFile);
   }
 }
 
@@ -80,24 +80,24 @@ Warning: rename(1,%s/renameVar13/afile.tmp): The system cannot find the file spe
 bool(false)
 -- 2 testing '' boolean --
 
-Warning: rename(%s/renameVar13/afile.tmp,): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- 3 testing '' NULL --
 
-Warning: rename(%s/renameVar13/afile.tmp,): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- 4 testing '' string --
 
-Warning: rename(%s/renameVar13/afile.tmp,): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp):%s in %s on line %d
 bool(false)
 -- 5 testing ' ' string --
 
@@ -107,10 +107,10 @@ bool(false)
 Warning: rename( ,%s/renameVar13/afile.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
 bool(false)
 -- 6 testing '
-Warning: rename(%s/renameVar13/afile.tmp,): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): The filename, directory name, or volume label syntax is incorrect. (code: 123) in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- 7 testing 'Array' array --
 

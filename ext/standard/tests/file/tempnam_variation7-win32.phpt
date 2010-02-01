@@ -95,9 +95,9 @@ File created in => temp dir
 -- Iteration 7 --
 
 Notice: Array to string conversion in %s on line %d
-File name is => %s%et%s
-File permissions are => 100666
-File created in => temp dir
+-- File is not created --
+
+Warning: unlink(): %s in %s on line %d
 -- Iteration 8 --
 File name is => %s%et%s
 File permissions are => 100666
