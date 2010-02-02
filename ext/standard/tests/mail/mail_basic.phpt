@@ -2,6 +2,7 @@
 Test mail() function : basic functionality 
 --INI--
 sendmail_path=tee mailBasic.out >/dev/null
+mail.add_x_header = Off
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
