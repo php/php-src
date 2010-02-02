@@ -3,6 +3,7 @@ Test mail() function : variation force extra parameters
 --INI--
 sendmail_path="sed > /tmp/php_test_mailVariation2.out"
 mail.force_extra_parameters="-e4a---forced-params"
+mail.add_x_header = Off
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
