@@ -361,7 +361,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			if (class_type->num_interfaces) {
 				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
-						zend_error(E_ERROR, "Class %v cannot implement both %v and %v at the same time.",
+						zend_error(E_ERROR, "Class %v cannot implement both %v and %v at the same time",
 									class_type->name,
 									interface->name,
 									zend_ce_iterator->name);
@@ -393,7 +393,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		} else {
 			/* c-level get_iterator cannot be changed */
 			if (class_type->get_iterator == zend_user_it_get_new_iterator) {
-				zend_error(E_ERROR, "Class %v cannot implement both %v and %v at the same time.",
+				zend_error(E_ERROR, "Class %v cannot implement both %v and %v at the same time",
 							class_type->name,
 							interface->name,
 							zend_ce_aggregate->name);
