@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@ internal form of a compiled regular expression, along with some supporting
 local functions. This source file is used in two places:
 
 (1) It is #included by pcre_compile.c when it is compiled in debugging mode
-(PCRE_DEBUG defined in pcre_internal.h). It is not included in production
-compiles.
+(DEBUG defined in pcre_internal.h). It is not included in production compiles.
 
 (2) It is always #included by pcretest.c, which can be asked to print out a
 compiled regex for debugging purposes. */
@@ -247,12 +246,7 @@ for(;;)
     fprintf(f, "%s", OP_names[*code]);
     break;
 
-    case OP_CLOSE:
-    fprintf(f, "    %s %d", OP_names[*code], GET2(code, 1));
-    break;
-
     case OP_CREF:
-    case OP_NCREF:
     fprintf(f, "%3d %s", GET2(code,1), OP_names[*code]);
     break;
 
@@ -262,14 +256,6 @@ for(;;)
       fprintf(f, "    Cond recurse any");
     else
       fprintf(f, "    Cond recurse %d", c);
-    break;
-
-    case OP_NRREF:
-    c = GET2(code, 1);
-    if (c == RREF_ANY)
-      fprintf(f, "    Cond nrecurse any");
-    else
-      fprintf(f, "    Cond nrecurse %d", c);
     break;
 
     case OP_DEF:

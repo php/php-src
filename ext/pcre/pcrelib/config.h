@@ -134,16 +134,13 @@ them both to 0; an emulation function will be used. */
 #define HAVE_STRING_H 1
 #endif
 
-/* Define to 1 if you have `strtoimax'. */
-/* #undef HAVE_STRTOIMAX */
+/* Define to 1 if you have the `strtoll' function. */
+/* #undef HAVE_STRTOLL */
 
-/* Define to 1 if you have `strtoll'. */
-#ifndef HAVE_STRTOLL
-#define HAVE_STRTOLL 1
+/* Define to 1 if you have the `strtoq' function. */
+#ifndef HAVE_STRTOQ
+#define HAVE_STRTOQ 1
 #endif
-
-/* Define to 1 if you have `strtoq'. */
-/* #undef HAVE_STRTOQ */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #ifndef HAVE_SYS_STAT_H
@@ -176,7 +173,7 @@ them both to 0; an emulation function will be used. */
 #define HAVE_ZLIB_H 1
 #endif
 
-/* Define to 1 if you have `_strtoi64'. */
+/* Define to 1 if you have the `_strtoi64' function. */
 /* #undef HAVE__STRTOI64 */
 
 /* The value of LINK_SIZE determines the number of bytes used to store links
@@ -187,12 +184,6 @@ them both to 0; an emulation function will be used. */
    "configure" can be used to override this default. */
 #ifndef LINK_SIZE
 #define LINK_SIZE 2
-#endif
-
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#ifndef LT_OBJDIR
-#define LT_OBJDIR ".libs/"
 #endif
 
 /* The value of MATCH_LIMIT determines the default number of times the
@@ -261,13 +252,13 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 8.01"
+#define PACKAGE_STRING "PCRE 7.9"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.01"
+#define PACKAGE_VERSION "7.9"
 
 
 /* If you are compiling for a system other than a Unix-like system or
@@ -323,15 +314,11 @@ them both to 0; an emulation function will be used. */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "8.01"
+#define VERSION "7.9"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
-
-/* Define to the type of a signed integer type of width exactly 64 bits if
-   such a type exists and the standard includes do not define it. */
-/* #undef int64_t */
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */

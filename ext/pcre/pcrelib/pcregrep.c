@@ -81,7 +81,7 @@ typedef int BOOL;
 output. The order is important; it is assumed that a file name is wanted for
 all values greater than FN_DEFAULT. */
 
-enum { FN_NONE, FN_DEFAULT, FN_MATCH_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
+enum { FN_NONE, FN_DEFAULT, FN_ONLY, FN_NOMATCH_ONLY, FN_FORCE };
 
 /* File reading styles */
 
@@ -163,7 +163,6 @@ static BOOL invert = FALSE;
 static BOOL line_offsets = FALSE;
 static BOOL multiline = FALSE;
 static BOOL number = FALSE;
-static BOOL omit_zero_count = FALSE;
 static BOOL only_matching = FALSE;
 static BOOL quiet = FALSE;
 static BOOL silent = FALSE;
@@ -208,8 +207,8 @@ static option_item optionlist[] = {
   { OP_OP_STRING, N_COLOUR, &colour_option,    "colour=option", "matched text colour option" },
   { OP_STRING,    'D',      &DEE_option,       "devices=action","how to handle devices, FIFOs, and sockets" },
   { OP_STRING,    'd',      &dee_option,       "directories=action", "how to handle directories" },
-  { OP_PATLIST,   'e',      NULL,              "regex(p)=pattern", "specify pattern (may be used more than once)" },
-  { OP_NODATA,    'F',      NULL,              "fixed-strings", "patterns are sets of newline-separated strings" },
+  { OP_PATLIST,   'e',      NULL,              "regex(p)",      "specify pattern (may be used more than once)" },
+  { OP_NODATA,    'F',      NULL,              "fixed_strings", "patterns are sets of newline-separated strings" },
   { OP_STRING,    'f',      &pattern_filename, "file=path",     "read patterns from file" },
   { OP_NODATA,    N_FOFFSETS, NULL,            "file-offsets",  "output file offsets, not text" },
   { OP_NODATA,    'H',      NULL,              "with-filename", "force the prefixing filename on output" },
@@ -1060,7 +1059,7 @@ while (ptr < endptr)
     /* If all we want is a file name, there is no need to scan any more lines
     in the file. */
 
-    else if (filenames == FN_MATCH_ONLY)
+    else if (filenames == FN_ONLY)
       {
       fprintf(stdout, "%s\n", printname);
       return 0;
@@ -1364,12 +1363,8 @@ if (filenames == FN_NOMATCH_ONLY)
 
 if (count_only)
   {
-  if (count > 0 || !omit_zero_count)
-    {
-    if (printname != NULL && filenames != FN_NONE)
-      fprintf(stdout, "%s:", printname);
-    fprintf(stdout, "%d\n", count);
-    }
+  if (printname != NULL) fprintf(stdout, "%s:", printname);
+  fprintf(stdout, "%d\n", count);
   }
 
 return rc;
@@ -1533,7 +1528,7 @@ an attempt to read a .bz2 file indicates that it really is a plain file. */
 PLAIN_FILE:
 #endif
   {
-  in = fopen(pathname, "rb");
+  in = fopen(pathname, "r");
   handle = (void *)in;
   frtype = FR_PLAIN;
   }
@@ -1689,7 +1684,7 @@ switch(letter)
   case 'H': filenames = FN_FORCE; break;
   case 'h': filenames = FN_NONE; break;
   case 'i': options |= PCRE_CASELESS; break;
-  case 'l': omit_zero_count = TRUE; filenames = FN_MATCH_ONLY; break;
+  case 'l': filenames = FN_ONLY; break;
   case 'L': filenames = FN_NOMATCH_ONLY; break;
   case 'M': multiline = TRUE; options |= PCRE_MULTILINE|PCRE_FIRSTLINE; break;
   case 'n': number = TRUE; break;
@@ -1927,17 +1922,14 @@ for (i = 1; i < argc; i++)
     Some options have variations in the long name spelling: specifically, we
     allow "regexp" because GNU grep allows it, though I personally go along
     with Jeffrey Friedl and Larry Wall in preferring "regex" without the "p".
-    These options are entered in the table as "regex(p)". Options can be in
-    both these categories. */
+    These options are entered in the table as "regex(p)". No option is in both
+    these categories, fortunately. */
 
     for (op = optionlist; op->one_char != 0; op++)
       {
       char *opbra = strchr(op->long_name, '(');
       char *equals = strchr(op->long_name, '=');
-
-      /* Handle options with only one spelling of the name */
-
-      if (opbra == NULL)     /* Does not contain '(' */
+      if (opbra == NULL)     /* Not a (p) case */
         {
         if (equals == NULL)  /* Not thing=data case */
           {
@@ -1959,36 +1951,16 @@ for (i = 1; i < argc; i++)
             }
           }
         }
-
-      /* Handle options with an alternate spelling of the name */
-
-      else
+      else                   /* Special case xxxx(p) */
         {
         char buff1[24];
         char buff2[24];
-
         int baselen = opbra - op->long_name;
-        int fulllen = strchr(op->long_name, ')') - op->long_name + 1;
-        int arglen = (argequals == NULL || equals == NULL)?
-          (int)strlen(arg) : argequals - arg;
-
         sprintf(buff1, "%.*s", baselen, op->long_name);
-        sprintf(buff2, "%s%.*s", buff1, fulllen - baselen - 2, opbra + 1);
-
-        if (strncmp(arg, buff1, arglen) == 0 ||
-           strncmp(arg, buff2, arglen) == 0)
-          {
-          if (equals != NULL && argequals != NULL)
-            {
-            option_data = argequals;
-            if (*option_data == '=')
-              {
-              option_data++;
-              longopwasequals = TRUE;
-              }
-            }
+        sprintf(buff2, "%s%.*s", buff1,
+          (int)strlen(op->long_name) - baselen - 2, opbra + 1);
+        if (strcmp(arg, buff1) == 0 || strcmp(arg, buff2) == 0)
           break;
-          }
         }
       }
 
@@ -1998,6 +1970,7 @@ for (i = 1; i < argc; i++)
       exit(usage(2));
       }
     }
+
 
   /* Jeffrey Friedl's debugging harness uses these additional options which
   are not in the right form for putting in the option table because they use

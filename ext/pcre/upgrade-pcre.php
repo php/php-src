@@ -84,7 +84,7 @@ function recurse($path)
 recurse('pcrelib');
 
 $dirorig = scandir('pcrelib/testdata');
-$k = array_search('CVS', $dirorig);
+$k = array_search('.svn', $dirorig);
 unset($dirorig[$k]);
 
 $dirnew = scandir("$newpcre/testdata");

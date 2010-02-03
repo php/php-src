@@ -7,7 +7,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -45,10 +45,10 @@ functions whose names all begin with "_pcre_". */
 #ifndef PCRE_INTERNAL_H
 #define PCRE_INTERNAL_H
 
-/* Define PCRE_DEBUG to get debugging output on stdout. */
+/* Define DEBUG to get debugging output on stdout. */
 
 #if 0
-#define PCRE_DEBUG
+#define DEBUG
 #endif
 
 /* We do not support both EBCDIC and UTF-8 at the same time. The "configure"
@@ -74,7 +74,7 @@ It turns out that the Mac Debugging.h header also defines the macro DPRINTF, so
 be absolutely sure we get our version. */
 
 #undef DPRINTF
-#ifdef PCRE_DEBUG
+#ifdef DEBUG
 #define DPRINTF(p) printf p
 #else
 #define DPRINTF(p) /* Nothing */
@@ -86,6 +86,8 @@ setjmp and stdarg are used is when NO_RECURSE is set. */
 
 #include <ctype.h>
 #include <limits.h>
+#include <setjmp.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -182,27 +184,6 @@ preprocessor time in standard C environments. */
   typedef long int pcre_int32;
 #else
   #error Cannot determine a type for 32-bit unsigned integers
-#endif
-
-/* When checking for integer overflow in pcre_compile(), we need to handle
-large integers. If a 64-bit integer type is available, we can use that.
-Otherwise we have to cast to double, which of course requires floating point
-arithmetic. Handle this by defining a macro for the appropriate type. If
-stdint.h is available, include it; it may define INT64_MAX. The macro int64_t
-may be set by "configure". */
-
-#if HAVE_STDINT_H
-#if defined(PHP_WIN32) && !defined(int64_t)
-typedef __int64 int64_t;
-# else
-#  include <stdint.h>
-# endif
-#endif
-
-#if defined INT64_MAX || defined int64_t
-#define INT64_OR_DOUBLE int64_t
-#else
-#define INT64_OR_DOUBLE double
 #endif
 
 /* All character handling must be done as unsigned characters. Otherwise there
@@ -554,9 +535,7 @@ Standard C system should have one. */
 
 /* Private flags containing information about the compiled regex. They used to
 live at the top end of the options word, but that got almost full, so now they
-are in a 16-bit flags word. From release 8.00, PCRE_NOPARTIAL is unused, as
-the restrictions on partial matching have been lifted. It remains for backwards
-compatibility. */
+are in a 16-bit flags word. */
 
 #define PCRE_NOPARTIAL     0x0001  /* can't use partial with this regex */
 #define PCRE_FIRSTSET      0x0002  /* first_byte is set */
@@ -568,7 +547,6 @@ compatibility. */
 /* Options for the "extra" block produced by pcre_study(). */
 
 #define PCRE_STUDY_MAPPED   0x01     /* a map of starting chars exists */
-#define PCRE_STUDY_MINLEN   0x02     /* a minimum length field exists */
 
 /* Masks for identifying the public options that are permitted at compile
 time, run time, or study time, respectively. */
@@ -584,15 +562,14 @@ time, run time, or study time, respectively. */
    PCRE_JAVASCRIPT_COMPAT)
 
 #define PUBLIC_EXEC_OPTIONS \
-  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
-   PCRE_NO_UTF8_CHECK|PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_NEWLINE_BITS| \
-   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
+   PCRE_PARTIAL|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
+   PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_DFA_EXEC_OPTIONS \
-  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NOTEMPTY_ATSTART| \
-   PCRE_NO_UTF8_CHECK|PCRE_PARTIAL_HARD|PCRE_PARTIAL_SOFT|PCRE_DFA_SHORTEST| \
-   PCRE_DFA_RESTART|PCRE_NEWLINE_BITS|PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE| \
-   PCRE_NO_START_OPTIMIZE)
+  (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY|PCRE_NO_UTF8_CHECK| \
+   PCRE_PARTIAL|PCRE_DFA_SHORTEST|PCRE_DFA_RESTART|PCRE_NEWLINE_BITS| \
+   PCRE_BSR_ANYCRLF|PCRE_BSR_UNICODE|PCRE_NO_START_OPTIMIZE)
 
 #define PUBLIC_STUDY_OPTIONS 0   /* None defined */
 
@@ -1229,8 +1206,8 @@ enum { ESC_A = 1, ESC_G, ESC_K, ESC_B, ESC_b, ESC_D, ESC_d, ESC_S, ESC_s,
 OP_EOD must correspond in order to the list of escapes immediately above.
 
 *** NOTE NOTE NOTE *** Whenever this list is updated, the two macro definitions
-that follow must also be updated to match. There are also tables called
-"coptable" and "poptable" in pcre_dfa_exec.c that must be updated. */
+that follow must also be updated to match. There is also a table called
+"coptable" in pcre_dfa_exec.c that must be updated. */
 
 enum {
   OP_END,            /* 0 End of pattern */
@@ -1366,38 +1343,29 @@ enum {
   OP_SCBRA,          /* 98 Start of capturing bracket, check empty */
   OP_SCOND,          /* 99 Conditional group, check empty */
 
-  /* The next two pairs must (respectively) be kept together. */
-
   OP_CREF,           /* 100 Used to hold a capture number as condition */
-  OP_NCREF,          /* 101 Same, but generaged by a name reference*/
-  OP_RREF,           /* 102 Used to hold a recursion number as condition */
-  OP_NRREF,          /* 103 Same, but generaged by a name reference*/
-  OP_DEF,            /* 104 The DEFINE condition */
+  OP_RREF,           /* 101 Used to hold a recursion number as condition */
+  OP_DEF,            /* 102 The DEFINE condition */
 
-  OP_BRAZERO,        /* 105 These two must remain together and in this */
-  OP_BRAMINZERO,     /* 106 order. */
+  OP_BRAZERO,        /* 103 These two must remain together and in this */
+  OP_BRAMINZERO,     /* 104 order. */
 
   /* These are backtracking control verbs */
 
-  OP_PRUNE,          /* 107 */
-  OP_SKIP,           /* 108 */
-  OP_THEN,           /* 109 */
-  OP_COMMIT,         /* 110 */
+  OP_PRUNE,          /* 105 */
+  OP_SKIP,           /* 106 */
+  OP_THEN,           /* 107 */
+  OP_COMMIT,         /* 108 */
 
   /* These are forced failure and success verbs */
 
-  OP_FAIL,           /* 111 */
-  OP_ACCEPT,         /* 112 */
-  OP_CLOSE,          /* 113 Used before OP_ACCEPT to close open captures */
+  OP_FAIL,           /* 109 */
+  OP_ACCEPT,         /* 110 */
 
   /* This is used to skip a subpattern with a {0} quantifier */
 
-  OP_SKIPZERO        /* 114 */
+  OP_SKIPZERO        /* 111 */
 };
-
-/* *** NOTE NOTE NOTE *** Whenever the list above is updated, the two macro
-definitions that follow must also be updated to match. There are also tables
-called "coptable" cna "poptable" in pcre_dfa_exec.c that must be updated. */
 
 
 /* This macro defines textual names for all the opcodes. These are used only
@@ -1420,10 +1388,9 @@ for debugging. The macro is referenced only in pcre_printint.c. */
   "Alt", "Ket", "KetRmax", "KetRmin", "Assert", "Assert not",     \
   "AssertB", "AssertB not", "Reverse",                            \
   "Once", "Bra", "CBra", "Cond", "SBra", "SCBra", "SCond",        \
-  "Cond ref", "Cond nref", "Cond rec", "Cond nrec", "Cond def",   \
-  "Brazero", "Braminzero",                                        \
+  "Cond ref", "Cond rec", "Cond def", "Brazero", "Braminzero",    \
   "*PRUNE", "*SKIP", "*THEN", "*COMMIT", "*FAIL", "*ACCEPT",      \
-  "Close", "Skip zero"
+  "Skip zero"
 
 
 /* This macro defines the length of fixed length operations in the compiled
@@ -1483,16 +1450,15 @@ in UTF-8 mode. The code that uses this table must know about such things. */
   1+LINK_SIZE,                   /* SBRA                                   */ \
   3+LINK_SIZE,                   /* SCBRA                                  */ \
   1+LINK_SIZE,                   /* SCOND                                  */ \
-  3, 3,                          /* CREF, NCREF                            */ \
-  3, 3,                          /* RREF, NRREF                            */ \
+  3,                             /* CREF                                   */ \
+  3,                             /* RREF                                   */ \
   1,                             /* DEF                                    */ \
   1, 1,                          /* BRAZERO, BRAMINZERO                    */ \
   1, 1, 1, 1,                    /* PRUNE, SKIP, THEN, COMMIT,             */ \
-  1, 1, 3, 1                     /* FAIL, ACCEPT, CLOSE, SKIPZERO          */
+  1, 1, 1                        /* FAIL, ACCEPT, SKIPZERO                 */
 
 
-/* A magic value for OP_RREF and OP_NRREF to indicate the "any recursion"
-condition. */
+/* A magic value for OP_RREF to indicate the "any recursion" condition. */
 
 #define RREF_ANY  0xffff
 
@@ -1505,7 +1471,7 @@ enum { ERR0,  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,
        ERR30, ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39,
        ERR40, ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47, ERR48, ERR49,
        ERR50, ERR51, ERR52, ERR53, ERR54, ERR55, ERR56, ERR57, ERR58, ERR59,
-       ERR60, ERR61, ERR62, ERR63, ERR64, ERR65 };
+       ERR60, ERR61, ERR62, ERR63, ERR64 };
 
 /* The real format of the start of the pcre block; the index of names and the
 code vector run on as long as necessary after the end. We store an explicit
@@ -1521,7 +1487,7 @@ Because people can now save and re-use compiled patterns, any additions to this
 structure should be made at the end, and something earlier (e.g. a new
 flag in the options or one of the dummy fields) should indicate that the new
 fields are present. Currently PCRE always sets the dummy fields to zero.
-NOTE NOTE NOTE
+NOTE NOTE NOTE:
 */
 
 typedef struct real_pcre {
@@ -1548,21 +1514,9 @@ remark (see NOTE above) about extending this structure applies. */
 
 typedef struct pcre_study_data {
   pcre_uint32 size;               /* Total that was malloced */
-  pcre_uint32 flags;              /* Private flags */
-  uschar start_bits[32];          /* Starting char bits */
-  pcre_uint32 minlength;          /* Minimum subject length */
+  pcre_uint32 options;
+  uschar start_bits[32];
 } pcre_study_data;
-
-/* Structure for building a chain of open capturing subpatterns during
-compiling, so that instructions to close them can be compiled when (*ACCEPT) is
-encountered. This is also used to identify subpatterns that contain recursive
-back references to themselves, so that they can be made atomic. */
-
-typedef struct open_capitem {
-  struct open_capitem *next;    /* Chain link */
-  pcre_uint16 number;           /* Capture number */
-  pcre_uint16 flag;             /* Set TRUE if recursive back ref */
-} open_capitem;
 
 /* Structure for passing "static" information around between the functions
 doing the compiling, so that they are thread-safe. */
@@ -1576,7 +1530,6 @@ typedef struct compile_data {
   const uschar *start_code;     /* The start of the compiled code */
   const uschar *start_pattern;  /* The start of the pattern */
   const uschar *end_pattern;    /* The end of the pattern */
-  open_capitem *open_caps;      /* Chain of open capture items */
   uschar *hwm;                  /* High watermark of workspace */
   uschar *name_table;           /* The name/number table */
   int  names_found;             /* Number of entries so far */
@@ -1589,7 +1542,6 @@ typedef struct compile_data {
   int  external_flags;          /* External flag bits to be set */
   int  req_varyopt;             /* "After variable item" flag for reqbyte */
   BOOL had_accept;              /* (*ACCEPT) encountered */
-  BOOL check_lookbehind;        /* Lookbehinds need later checking */
   int  nltype;                  /* Newline type */
   int  nllen;                   /* Newline string length */
   uschar nl[4];                 /* Newline string when fixed length */
@@ -1600,7 +1552,7 @@ branches, for testing for left recursion. */
 
 typedef struct branch_chain {
   struct branch_chain *outer;
-  uschar *current_branch;
+  uschar *current;
 } branch_chain;
 
 /* Structure for items in a linked list that represents an explicit recursive
@@ -1613,7 +1565,6 @@ typedef struct recursion_info {
   USPTR save_start;             /* Old value of mstart */
   int *offset_save;             /* Pointer to start of saved offsets */
   int saved_max;                /* Number of saved offsets */
-  int save_offset_top;          /* Current value of offset_top */
 } recursion_info;
 
 /* Structure for building a chain of data for holding the values of the subject
@@ -1638,9 +1589,6 @@ typedef struct match_data {
   int    offset_max;            /* The maximum usable for return data */
   int    nltype;                /* Newline type */
   int    nllen;                 /* Newline string length */
-  int    name_count;            /* Number of names in name table */
-  int    name_entry_size;       /* Size of entry in names table */
-  uschar *name_table;           /* Table of names */
   uschar nl[4];                 /* Newline string when fixed */
   const uschar *lcc;            /* Points to lower casing table */
   const uschar *ctypes;         /* Points to table of type maps */
@@ -1651,7 +1599,7 @@ typedef struct match_data {
   BOOL   jscript_compat;        /* JAVASCRIPT_COMPAT flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
-  BOOL   notempty_atstart;      /* Empty string match at start not wanted */
+  BOOL   partial;               /* PARTIAL flag */
   BOOL   hitend;                /* Hit the end of the subject at some point */
   BOOL   bsr_anycrlf;           /* \R is just any CRLF, not full Unicode */
   const uschar *start_code;     /* For use when recursing */
@@ -1659,8 +1607,6 @@ typedef struct match_data {
   USPTR  end_subject;           /* End of the subject string */
   USPTR  start_match_ptr;       /* Start of matched string */
   USPTR  end_match_ptr;         /* Subject position at end match */
-  USPTR  start_used_ptr;        /* Earliest consulted character */
-  int    partial;               /* PARTIAL options */
   int    end_offset_top;        /* Highwater mark at end of match */
   int    capture_last;          /* Most recent capture number */
   int    start_offset;          /* The start offset value */
@@ -1677,9 +1623,7 @@ typedef struct dfa_match_data {
   const uschar *start_code;     /* Start of the compiled pattern */
   const uschar *start_subject;  /* Start of the subject string */
   const uschar *end_subject;    /* End of subject string */
-  const uschar *start_used_ptr; /* Earliest consulted character */
   const uschar *tables;         /* Character tables */
-  int   start_offset;           /* The start offset value */
   int   moptions;               /* Match options */
   int   poptions;               /* Pattern options */
   int    nltype;                /* Newline type */
@@ -1758,14 +1702,15 @@ extern const uschar _pcre_OP_lengths[];
 one of the exported public functions. They have to be "external" in the C
 sense, but are not part of the PCRE public API. */
 
-extern const uschar *_pcre_find_bracket(const uschar *, BOOL, int);
-extern BOOL          _pcre_is_newline(USPTR, int, USPTR, int *, BOOL);
-extern int           _pcre_ord2utf8(int, uschar *);
-extern real_pcre    *_pcre_try_flipped(const real_pcre *, real_pcre *,
-                       const pcre_study_data *, pcre_study_data *);
-extern int           _pcre_valid_utf8(USPTR, int);
-extern BOOL          _pcre_was_newline(USPTR, int, USPTR, int *, BOOL);
-extern BOOL          _pcre_xclass(int, const uschar *);
+extern BOOL         _pcre_is_newline(const uschar *, int, const uschar *,
+                      int *, BOOL);
+extern int          _pcre_ord2utf8(int, uschar *);
+extern real_pcre   *_pcre_try_flipped(const real_pcre *, real_pcre *,
+                      const pcre_study_data *, pcre_study_data *);
+extern int          _pcre_valid_utf8(const uschar *, int);
+extern BOOL         _pcre_was_newline(const uschar *, int, const uschar *,
+                      int *, BOOL);
+extern BOOL         _pcre_xclass(int, const uschar *);
 
 
 /* Unicode character database (UCD) */

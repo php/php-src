@@ -1,7 +1,3 @@
-/-- This set of tests check Unicode property support with the DFA matching 
-    functionality of pcre_dfa_exec(). The -dfa flag must be used with pcretest
-    when running it. --/
-
 /\pL\P{Nd}/8
     AB
     *** Failers
@@ -847,4 +843,4 @@
     ** Failers 
     \x{1d79}\x{a77d} 
 
-/-- End of testinput9 --/ 
+/ End / 

@@ -1,6 +1,7 @@
-/-- This set of tests if for UTF-8 support, excluding Unicode properties. It is
-    compatible with all versions of Perl 5. --/
-   
+/-- Do not use the \x{} construct except with patterns that have the --/
+/-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
+/-- that option is set. However, the latest Perls recognize them always. --/
+
 /a.b/8
     acb
     a\x7fb
@@ -622,22 +623,4 @@
 
 /(?i)[\xc3\xa9\xc3\xbd]|[\xc3\xa9\xc3\xbdA]/8
 
-/^[a\x{c0}]b/8
-    \x{c0}b
-    
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
-
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-
-/^([a\x{c0}]*)aa/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-
-/^([a\x{c0}]*)a\x{c0}/8
-    a\x{c0}aaaa/ 
-    a\x{c0}a\x{c0}aaa/ 
-
-/-- End of testinput4 --/
+/ End of testinput4 /
