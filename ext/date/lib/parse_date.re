@@ -236,6 +236,7 @@ static timelib_lookup_table const timelib_reltext_lookup[] = {
 	{ "sixth",    0,  6 },
 	{ "seventh",  0,  7 },
 	{ "eight",    0,  8 },
+	{ "eighth",   0,  8 },
 	{ "ninth",    0,  9 },
 	{ "tenth",    0, 10 },
 	{ "eleventh", 0, 11 },
@@ -951,7 +952,7 @@ dateshortwithtimelongtz = datenoyear iso8601normtz;
 /*
  * Relative regexps
  */
-reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'ninth'|'tenth'|'eleventh'|'twelfth';
+reltextnumber = 'first'|'second'|'third'|'fourth'|'fifth'|'sixth'|'seventh'|'eight'|'eighth'|'ninth'|'tenth'|'eleventh'|'twelfth';
 reltexttext = 'next'|'last'|'previous'|'this';
 reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'fortnight'|'forthnight'|'month'|'year') 's'?) | 'weeks' | daytext;
 
