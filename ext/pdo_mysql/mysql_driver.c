@@ -462,7 +462,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 		case PDO_ATTR_SERVER_INFO: {
 			char *tmp;
 #if PDO_USE_MYSQLND
-			int tmp_len;
+			unsigned int tmp_len;
 
 			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
 				ZVAL_STRINGL(return_value, tmp, tmp_len, 0);

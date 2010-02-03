@@ -304,8 +304,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT *stmt TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt::prepare */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * const query,
-									  unsigned int query_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const stmt, const char * const query, unsigned int query_len TSRMLS_DC)
 {
 	MYSQLND_STMT *stmt_to_prepare = stmt;
 
@@ -625,8 +624,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const stmt TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_stmt_row_buffered */
 enum_func_status
-mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
-								zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
@@ -721,8 +719,7 @@ mysqlnd_fetch_stmt_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 
 /* {{{ mysqlnd_stmt_fetch_row_unbuffered */
 static enum_func_status
-mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags,
-								zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
@@ -885,8 +882,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT *stmt TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
-mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int flags,
-							  zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT *stmt = (MYSQLND_STMT *) param;
@@ -1027,8 +1023,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 /* {{{ mysqlnd_stmt::fetch */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const stmt,
-									zend_bool * const fetched_anything TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const stmt, zend_bool * const fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	DBG_ENTER("mysqlnd_stmt::fetch");
@@ -1245,8 +1240,7 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const stmt, unsigned
 
 /* {{{ mysqlnd_stmt::bind_parameters */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const stmt,
-											  MYSQLND_PARAM_BIND * const param_bind TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * const param_bind TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_stmt::bind_param");
 	DBG_INF_FMT("stmt=%lu param_count=%u", stmt->stmt_id, stmt->param_count);
@@ -1512,7 +1506,7 @@ MYSQLND_METHOD(mysqlnd_stmt, set_result_bind_dtor)(MYSQLND_STMT * const stmt,
 
 /* {{{ mysqlnd_stmt::insert_id */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->upsert_status.last_insert_id;
 }
@@ -1521,7 +1515,7 @@ MYSQLND_METHOD(mysqlnd_stmt, insert_id)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::affected_rows */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->upsert_status.affected_rows;
 }
@@ -1530,7 +1524,7 @@ MYSQLND_METHOD(mysqlnd_stmt, affected_rows)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::num_rows */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->result? mysqlnd_num_rows(stmt->result):0;
 }
@@ -1539,7 +1533,7 @@ MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::warning_count */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->upsert_status.warning_count;
 }
@@ -1548,7 +1542,7 @@ MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::field_count */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->field_count;
 }
@@ -1557,7 +1551,7 @@ MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::param_count */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->param_count;
 }
@@ -1566,7 +1560,7 @@ MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::errno */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_stmt, errno)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, errno)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->error_info.error_no;
 }
@@ -1575,7 +1569,7 @@ MYSQLND_METHOD(mysqlnd_stmt, errno)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::error */
 static const char *
-MYSQLND_METHOD(mysqlnd_stmt, error)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, error)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->error_info.error;
 }
@@ -1584,7 +1578,7 @@ MYSQLND_METHOD(mysqlnd_stmt, error)(const MYSQLND_STMT * const stmt)
 
 /* {{{ mysqlnd_stmt::sqlstate */
 static const char *
-MYSQLND_METHOD(mysqlnd_stmt, sqlstate)(const MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, sqlstate)(const MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	return stmt->error_info.sqlstate[0] ? stmt->error_info.sqlstate:MYSQLND_SQLSTATE_NULL;
 }
@@ -1602,7 +1596,7 @@ MYSQLND_METHOD(mysqlnd_stmt, data_seek)(const MYSQLND_STMT * const stmt, uint64_
 
 /* {{{ mysqlnd_stmt::param_metadata */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_stmt, param_metadata)(MYSQLND_STMT * const stmt)
+MYSQLND_METHOD(mysqlnd_stmt, param_metadata)(MYSQLND_STMT * const stmt TSRMLS_DC)
 {
 	if (!stmt->param_count) {
 		return NULL;
