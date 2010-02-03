@@ -138,8 +138,7 @@ zend_bool mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
 
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta,
-												MYSQLND *conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND *conn TSRMLS_DC)
 {
 	unsigned int i = 0;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
@@ -303,8 +302,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA *meta, zend_bool per
 
 /* {{{ mysqlnd_res::clone_metadata */
 static MYSQLND_RES_METADATA *
-MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta,
-												 zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent TSRMLS_DC)
 {
 	unsigned int i;
 	/* +1 is to have empty marker at the end */
@@ -393,8 +391,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 
 /* {{{ mysqlnd_res_meta::fetch_field_direct */
 static const MYSQLND_FIELD *
-MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta,
-													 MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%d", fieldnr);
@@ -418,7 +415,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields)(MYSQLND_RES_METADATA * const meta
 
 /* {{{ mysqlnd_res_meta::field_tell */
 static MYSQLND_FIELD_OFFSET
-MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const meta)
+MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const meta TSRMLS_DC)
 {
 	return meta->current_field;
 }
