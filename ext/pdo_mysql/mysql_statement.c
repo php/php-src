@@ -120,7 +120,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
+static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
@@ -237,7 +237,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) 
 		}
 	}
 	
-	pdo_mysql_stmt_set_row_count(stmt);
+	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
@@ -280,7 +280,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 		}
 	}
 	
-	pdo_mysql_stmt_set_row_count(stmt);
+	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
