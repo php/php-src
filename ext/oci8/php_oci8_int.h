@@ -130,6 +130,7 @@ typedef struct { /* php_oci_connection {{{ */
 	sword			errcode;					/* last errcode */
 
 	HashTable	   *descriptors;				/* descriptors hash, used to flush all the LOBs using this connection on commit */
+	ulong			descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
 	unsigned		is_open:1;					/* hels to determine if the connection is dead or not */
 	unsigned		is_attached:1;				/* hels to determine if we should detach from the server when closing/freeing the connection */
 	unsigned		is_persistent:1;			/* self-descriptive */
@@ -146,6 +147,7 @@ typedef struct { /* php_oci_connection {{{ */
 
 typedef struct { /* php_oci_descriptor {{{ */
 	int					 id;
+	ulong				 index;		            /* descriptors hash table index */
 	php_oci_connection	*connection;			/* parent connection handle */
 	dvoid				*descriptor;			/* OCI descriptor handle */
 	ub4					 type;					/* descriptor type (FILE/LOB) */
@@ -197,6 +199,7 @@ typedef struct { /* php_oci_statement {{{ */
 	int					 ncolumns;				/* number of columns in the result */
 	unsigned			 executed:1;			/* statement executed flag */
 	unsigned			 has_data:1;			/* statement has more data flag */
+	unsigned			 has_descr:1;			/* statement has at least one descriptor or cursor column */
 	ub2					 stmttype;				/* statement type */
 } php_oci_statement; /* }}} */
 
@@ -367,7 +370,8 @@ void php_oci_column_hash_dtor (void *data);
 void php_oci_define_hash_dtor (void *data);
 void php_oci_bind_hash_dtor (void *data);
 void php_oci_descriptor_flush_hash_dtor (void *data);
-int php_oci_descriptor_delete_from_hash(void *data, void *id TSRMLS_DC);
+
+void php_oci_connection_descriptors_free(php_oci_connection *connection TSRMLS_DC);
 
 sb4 php_oci_error (OCIError *, sword TSRMLS_DC);
 sb4 php_oci_fetch_errmsg(OCIError *, text ** TSRMLS_DC);
@@ -452,6 +456,7 @@ int php_oci_bind_by_name(php_oci_statement *, char *, int, zval*, long, ub2 TSRM
 sb4 php_oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
 sb4 php_oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS, int need_data);
+int php_oci_cleanup_pre_fetch(void *data TSRMLS_DC);
 
 int php_oci_statement_get_type(php_oci_statement *, ub2 * TSRMLS_DC);
 int php_oci_statement_get_numrows(php_oci_statement *, ub4 * TSRMLS_DC);
