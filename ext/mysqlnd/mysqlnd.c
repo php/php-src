@@ -397,8 +397,7 @@ MYSQLND_METHOD(mysqlnd_conn, simple_command)(MYSQLND *conn, enum php_mysqlnd_ser
 
 /* {{{ mysqlnd_conn::set_server_option */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn,
-												enum_mysqlnd_server_option option TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, set_server_option)(MYSQLND * const conn, enum_mysqlnd_server_option option TSRMLS_DC)
 {
 	enum_func_status ret;
 	char buffer[2];
@@ -1108,8 +1107,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND *conn, const char *table, cons
 
 /* {{{ mysqlnd_conn::list_method */
 MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND *conn, const char *query,
-										  const char *achtung_wild, char *par1 TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND *conn, const char *query, const char *achtung_wild, char *par1 TSRMLS_DC)
 {
 	char *show_query = NULL;
 	size_t show_query_len;
@@ -1145,7 +1143,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_method)(MYSQLND *conn, const char *query,
 
 /* {{{ mysqlnd_conn::errno */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_conn, errno)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, errno)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->error_info.error_no;
 }
@@ -1154,7 +1152,7 @@ MYSQLND_METHOD(mysqlnd_conn, errno)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::error */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, error)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, error)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->error_info.error;
 }
@@ -1163,7 +1161,7 @@ MYSQLND_METHOD(mysqlnd_conn, error)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::sqlstate */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, sqlstate)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, sqlstate)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->error_info.sqlstate[0] ? conn->error_info.sqlstate:MYSQLND_SQLSTATE_NULL;
 }
@@ -1182,8 +1180,7 @@ PHPAPI ulong mysqlnd_old_escape_string(char *newstr, const char *escapestr, size
 
 /* {{{ mysqlnd_conn::escape_string */
 static ulong
-MYSQLND_METHOD(mysqlnd_conn, escape_string)(const MYSQLND * const conn, char *newstr,
-											const char *escapestr, size_t escapestr_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, escape_string)(const MYSQLND * const conn, char *newstr, const char *escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
@@ -1208,9 +1205,7 @@ MYSQLND_METHOD(mysqlnd_conn, dump_debug_info)(MYSQLND * const conn TSRMLS_DC)
 
 /* {{{ mysqlnd_conn::select_db */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn,
-										const char * const db,
-										unsigned int db_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, select_db)(MYSQLND * const conn, const char * const db, unsigned int db_len TSRMLS_DC)
 {
 	enum_func_status ret;
 
@@ -1529,7 +1524,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, set_state)(MYSQLND * const conn, enum mysql
 
 /* {{{ mysqlnd_conn::field_count */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_conn, field_count)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, field_count)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->field_count;
 }
@@ -1538,7 +1533,7 @@ MYSQLND_METHOD(mysqlnd_conn, field_count)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::insert_id */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->upsert_status.last_insert_id;
 }
@@ -1547,7 +1542,7 @@ MYSQLND_METHOD(mysqlnd_conn, insert_id)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::affected_rows */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_conn, affected_rows)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, affected_rows)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->upsert_status.affected_rows;
 }
@@ -1556,7 +1551,7 @@ MYSQLND_METHOD(mysqlnd_conn, affected_rows)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::warning_count */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_conn, warning_count)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, warning_count)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->upsert_status.warning_count;
 }
@@ -1565,7 +1560,7 @@ MYSQLND_METHOD(mysqlnd_conn, warning_count)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::info */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, info)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, info)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->last_message;
 }
@@ -1590,7 +1585,7 @@ PHPAPI unsigned int mysqlnd_get_client_version()
 
 /* {{{ mysqlnd_conn::get_server_info */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, get_server_info)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, get_server_info)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->server_version;
 }
@@ -1599,7 +1594,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_server_info)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::get_host_info */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, get_host_info)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, get_host_info)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->host_info;
 }
@@ -1608,7 +1603,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_host_info)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::get_proto_info */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_conn, get_proto_info)(const MYSQLND *const conn)
+MYSQLND_METHOD(mysqlnd_conn, get_proto_info)(const MYSQLND *const conn TSRMLS_DC)
 {
 	return conn->protocol_version;
 }
@@ -1617,7 +1612,7 @@ MYSQLND_METHOD(mysqlnd_conn, get_proto_info)(const MYSQLND *const conn)
 
 /* {{{ mysqlnd_conn::charset_name */
 static const char *
-MYSQLND_METHOD(mysqlnd_conn, charset_name)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, charset_name)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->charset->name;
 }
@@ -1626,7 +1621,7 @@ MYSQLND_METHOD(mysqlnd_conn, charset_name)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::thread_id */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_conn, thread_id)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, thread_id)(const MYSQLND * const conn TSRMLS_DC)
 {
 	return conn->thread_id;
 }
@@ -1635,7 +1630,7 @@ MYSQLND_METHOD(mysqlnd_conn, thread_id)(const MYSQLND * const conn)
 
 /* {{{ mysqlnd_conn::get_server_version */
 static unsigned long
-MYSQLND_METHOD(mysqlnd_conn, get_server_version)(const MYSQLND * const conn)
+MYSQLND_METHOD(mysqlnd_conn, get_server_version)(const MYSQLND * const conn TSRMLS_DC)
 {
 	long major, minor, patch;
 	char *p;
