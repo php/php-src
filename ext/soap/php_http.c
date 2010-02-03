@@ -759,7 +759,6 @@ try_again:
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
-		smart_str_free(&soap_headers);
 		if (err != soap_headers.len) {
 			if (request != buf) {efree(request);}
 			php_stream_close(stream);
@@ -770,6 +769,7 @@ try_again:
 			smart_str_free(&soap_headers_z);
 			return FALSE;
 		}
+		smart_str_free(&soap_headers);
 	} else {
 		add_soap_fault(this_ptr, "HTTP", "Failed to create stream??", NULL, NULL TSRMLS_CC);
 		smart_str_free(&soap_headers_z);
