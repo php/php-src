@@ -202,12 +202,7 @@ case $host_cpu in
     ;;
   sparc*)
     if test "$SUNCC" = "yes"; then
-      CFLAGS="$CFLAGS -xc99=all -xmemalign=8s"
-    fi
-    ;;
-  i386)
-    if test "$SUNCC" = "yes"; then
-      CFLAGS="$CFLAGS -xc99=all"
+      CFLAGS="$CFLAGS -xmemalign=8s"
     fi
     ;;
 esac
