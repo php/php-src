@@ -2568,7 +2568,7 @@ void gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	typedef void (*image_line)(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 	image_line draw_line;
 
-	if (!n) {
+	if (n <= 0) {
 		return;
 	}
 
@@ -2621,7 +2621,7 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	int ints;
 	int fill_color;
 
-	if (!n) {
+	if (n <= 0) {
 		return;
 	}
 
