@@ -135,6 +135,7 @@ zip_close(struct zip *za)
 
     if ((temp=_zip_create_temp_output(za, &out)) == NULL) {
 	_zip_cdir_free(cd);
+	free(filelist);
 	return -1;
     }
 
@@ -192,7 +193,8 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
-	    if (_zip_dirent_read(&de, za->zp, NULL, 0, 1, &za->error) != 0) {
+	    if (_zip_dirent_read(&de, za->zp, NULL, NULL, 1,
+				 &za->error) != 0) {
 		error = 1;
 		break;
 	    }
@@ -264,6 +266,8 @@ zip_close(struct zip *za)
 	_zip_dirent_finalize(&de);
     }
 
+    free(filelist);
+
     if (!error) {
 	if (write_cdir(za, cd, out) < 0)
 	    error = 1;
@@ -306,6 +310,8 @@ zip_close(struct zip *za)
     mask = umask(0);
     umask(mask);
     chmod(za->zn, 0666&~mask);
+    if (za->ch_comment)
+        free(za->ch_comment);
 
     _zip_free(za);
 	free(temp);
@@ -443,6 +449,7 @@ add_data_uncomp(struct zip *za, zip_source_callback cb, void *ud,
 
     zstr.next_out = (Bytef *)b2;
     zstr.avail_out = sizeof(b2);
+    zstr.next_in = NULL;
     zstr.avail_in = 0;
 
     flush = 0;

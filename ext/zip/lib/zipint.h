@@ -213,13 +213,14 @@ extern const int _zip_err_type[];
 
 int _zip_cdir_compute_crc(struct zip *, uLong *);
 void _zip_cdir_free(struct zip_cdir *);
+int _zip_cdir_grow(struct zip_cdir *, int, struct zip_error *);
 struct zip_cdir *_zip_cdir_new(int, struct zip_error *);
 int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 
 void _zip_dirent_finalize(struct zip_dirent *);
 void _zip_dirent_init(struct zip_dirent *);
-int _zip_dirent_read(struct zip_dirent *, FILE *,
-		     unsigned char **, unsigned int, int, struct zip_error *);
+int _zip_dirent_read(struct zip_dirent *, FILE *, unsigned char **,
+		     unsigned int *, int, struct zip_error *);
 void _zip_dirent_torrent_normalize(struct zip_dirent *);
 int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
 
