@@ -101,7 +101,8 @@ MySQLPDOTest::skip();
 		}
 
 		// what about long values for a valid option ...
-		$dsn = MySQLPDOTest::getDSN(array('host' => str_repeat('0123456789', 1024 * 100)));
+		// hostnames > 1024 chars break on some NIS-enabled FreeBSD...
+		$dsn = MySQLPDOTest::getDSN(array('host' => str_repeat('0123456789', 100)));
 		try { $db = @new PDO($dsn, $user, $pass); assert(false); printf("%s\n", $dsn); } catch (PDOException $e) {
 			$tmp = $e->getMessage();
 			if (!stristr($tmp, 'HY000') && !stristr($tmp, '2005') && !stristr($tmp, '2002'))
