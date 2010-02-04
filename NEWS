@@ -9,6 +9,39 @@ PHP                                                                        NEWS
   (Ilia)
 - Added stream_resolve_include_path(). (Mikko)
 
+- Fixed a possible open_basedir/safe_mode bypass in session extension
+  identified by Grzegorz Stachowiak. (Ilia)
+- Fixed possible crash when a error/warning is raised during php startup.
+  (Pierre)
+- Fixed possible bad behavior of rename on windows when used with symbolic
+  links or invalid paths. (Pierre)
+- Fixed error output to stderr on Windows. (Pierre)
+
+- Fixed bug #50859 (build fails with openssl 1.0 due to md2 deprecation).   
+  (Ilia, hanno at hboeck dot de)
+- Fixed bug #50847 (strip_tags() removes all tags greater then 1023 bytes
+  long). (Ilia)
+- Fixed bug #50829 (php.ini directive pdo_mysql.default_socket is ignored).
+  (Ilia)
+- Fixed bug #50832 (HTTP fopen wrapper does not support passwordless HTTP
+  authentication). (Jani)
+- Fixed bug #50787 (stream_set_write_buffer() has no effect on socket streams).
+  (vnegrier at optilian dot com, Ilia)
+- Fixed bug #50761 (system.multiCall crashes in xmlrpc extension).
+  (hiroaki dot kawai at gmail dot com, Ilia)
+- Fixed bug #50756 (CURLOPT_FTP_SKIP_PASV_IP does not exist). (Sriram)
+- Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
+- Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0).
+  (Joey, Ilia)
+- Fixed bug #50723 (Bug in garbage collector causes crash). (Dmitry)
+- Fixed bug #50690 (putenv does not set ENV when the value is only one char).
+  (Pierre)
+- Fixed bug #50680 (strtotime() does not support eighth ordinal number). (Ilia)
+- Fixed bug #50661 (DOMDocument::loadXML does not allow UTF-16). (Rob)
+- Fixed bug #50657 (copy() with an empty (zero-byte) HTTP source succeeds but
+  returns false). (Ilia)
+- Fixed bug #50636 (MySQLi_Result sets values before calling constructor).
+  (Pierrick)
 - Fixed bug #50632 (filter_input() does not return default value if the
   variable does not exist). (Ilia)
 - Fixed bug #50576 (XML_OPTION_SKIP_TAGSTART option has no effect). (Pierrick)
