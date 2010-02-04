@@ -542,7 +542,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
   completeness.
 */
 static 
-unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result)
+unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	unsigned int i;
 	zval **previous_row;
@@ -573,7 +573,7 @@ unsigned long * mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_fetch_lengths_unbuffered */
 static
-unsigned long * mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result)
+unsigned long * mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->lengths;
 }
@@ -581,9 +581,9 @@ unsigned long * mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result)
 
 #if !defined(MYSQLND_USE_OPTIMISATIONS) || MYSQLND_USE_OPTIMISATIONS == 0
 /* {{{ mysqlnd_res::fetch_lengths */
-PHPAPI unsigned long * mysqlnd_fetch_lengths(MYSQLND_RES * const result)
+PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_DC)
 {
-	return result->m.fetch_lengths? result->m.fetch_lengths(result):NULL;
+	return result->m.fetch_lengths? result->m.fetch_lengths(result TSRMLS_CC) : NULL;
 }
 /* }}} */
 #endif
@@ -698,8 +698,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_unbuffered */
 static enum_func_status
-mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags,
-							zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status		ret;
 	zval 					*row = (zval *) param;
@@ -948,8 +947,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_buffered */
 static enum_func_status
-mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags,
-						   zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	unsigned int i;
 	zval *row = (zval *) param;
@@ -1267,7 +1265,7 @@ MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES *result, uint64_t row TSRMLS_
 
 /* {{{ mysqlnd_res::num_rows */
 static uint64_t
-MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result)
+MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result TSRMLS_DC)
 {
 	/* Be compatible with libmysql. We count row_count, but will return 0 */
 	return result->stored_data? result->stored_data->row_count:0;
@@ -1277,7 +1275,7 @@ MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_res::num_fields */
 static unsigned int
-MYSQLND_METHOD(mysqlnd_res, num_fields)(const MYSQLND_RES * const result)
+MYSQLND_METHOD(mysqlnd_res, num_fields)(const MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->field_count;
 }
@@ -1314,8 +1312,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::fetch_field_direct */
 static const MYSQLND_FIELD *
-MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result,
-												MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res::fetch_field_direct");
 	if (result->meta) {
@@ -1362,8 +1359,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_fields)(MYSQLND_RES * const result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::field_seek */
 static MYSQLND_FIELD_OFFSET
-MYSQLND_METHOD(mysqlnd_res, field_seek)(MYSQLND_RES * const result,
-										MYSQLND_FIELD_OFFSET field_offset)
+MYSQLND_METHOD(mysqlnd_res, field_seek)(MYSQLND_RES * const result, MYSQLND_FIELD_OFFSET field_offset TSRMLS_DC)
 {
 	MYSQLND_FIELD_OFFSET return_value = 0;
 	if (result->meta) {
@@ -1377,9 +1373,9 @@ MYSQLND_METHOD(mysqlnd_res, field_seek)(MYSQLND_RES * const result,
 
 /* {{{ mysqlnd_res::field_tell */
 static MYSQLND_FIELD_OFFSET
-MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result)
+MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result TSRMLS_DC)
 {
-	return result->meta? result->meta->m->field_tell(result->meta):0;
+	return result->meta? result->meta->m->field_tell(result->meta TSRMLS_CC) : 0;
 }
 /* }}} */
 
@@ -1451,8 +1447,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES *result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::fetch_all */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags,
-									   zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  *row;
 	ulong i = 0;
@@ -1487,8 +1482,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES *result, unsigned int flags,
 
 /* {{{ mysqlnd_res::fetch_field_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int offset,
-											  zval *return_value TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int offset, zval *return_value TSRMLS_DC)
 {
 	zval row;
 	zval **entry;
