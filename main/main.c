@@ -848,6 +848,27 @@ PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, 
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+#define PHP_WIN32_ERROR_MSG_BUFFER_SIZE 512
+PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2 TSRMLS_DC) {
+	if (error == 0) {
+		php_error_docref2(NULL TSRMLS_CC, param1, param2, E_WARNING, "%s", strerror(errno));
+	} else {
+		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
+		int buf_len;
+
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
+		buf_len = strlen(buf);
+		if (buf_len >= 2) {
+			buf[buf_len - 1] = '\0';
+			buf[buf_len - 2] = '\0';
+		}
+		php_error_docref2(NULL TSRMLS_CC, param1, param2, E_WARNING, "%s (code: %lu)", (char *)buf, error);
+	}
+}
+#undef PHP_WIN32_ERROR_MSG_BUFFER_SIZE
+#endif
+
 /* {{{ php_html_puts */
 PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 {
