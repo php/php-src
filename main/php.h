@@ -309,8 +309,9 @@ PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, 
 	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
 PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
+#ifdef PHP_WIN32
 PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2 TSRMLS_DC);
-
+#endif
 END_EXTERN_C()
 
 #define php_error_docref php_error_docref0
