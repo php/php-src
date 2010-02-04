@@ -167,6 +167,10 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
 
+    11.2)
+      PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
+      ;;
+
     *)
       AC_MSG_ERROR(Unsupported Oracle version! $PDO_OCI_VERSION)
       ;;
