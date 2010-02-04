@@ -7,7 +7,7 @@ PHP                                                                        NEWS
 
 - Fixed bug #50847 (strip_tags() removes all tags greater then 1023 bytes
   long). (Ilia)
-- Fixed bug #50727 (Accesing mysqli->affected_rows on no connection causes
+- Fixed bug #50727 (Accessing mysqli->affected_rows on no connection causes
   segfault). (Andrey, Johannes)
 - Fixed bug #48667 (Implementing Iterator and IteratorAggregate). (Etienne)
 
