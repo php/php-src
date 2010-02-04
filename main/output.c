@@ -50,6 +50,10 @@ php_output_globals output_globals;
 PHPAPI int php_default_output_func(const char *str, uint str_len TSRMLS_DC)
 {
 	fwrite(str, 1, str_len, stderr);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+	fflush(stderr);
+#endif
 	return str_len;
 }
 /* }}} */
