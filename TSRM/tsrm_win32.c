@@ -170,6 +170,7 @@ PSID tsrm_win32_get_token_sid(HANDLE hToken)
 
 	/* ConvertSidToStringSid(pTokenUser->User.Sid, &ptcSidOwner); */
 	pResultSid = malloc(sid_len);
+
 	if (!pResultSid) {
 		goto Finished;
 	}
@@ -271,6 +272,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
 				goto Finished;
 			}
+		} else {
+			/* we already have it, free it then */
+			free(token_sid);
 		}
 
 		if (CWDG(realpath_cache_size_limit)) {
