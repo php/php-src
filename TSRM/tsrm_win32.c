@@ -350,7 +350,7 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 			else if(desired_access == FILE_GENERIC_WRITE) {
 				bucket->is_wvalid = 1;
 				bucket->is_writable = fAccess;
-			} else if (desired_access == FILE_GENERIC_READ | FILE_GENERIC_WRITE) {
+			} else if (desired_access == (FILE_GENERIC_READ | FILE_GENERIC_WRITE)) {
 				bucket->is_rvalid = 1;
 				bucket->is_readable = fAccess;
 				bucket->is_wvalid = 1;
