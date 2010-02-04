@@ -944,15 +944,27 @@ static void zend_mm_free_cache(zend_mm_heap *heap)
 #endif
 
 #if ZEND_MM_HEAP_PROTECTION || ZEND_MM_COOKIES
-static void zend_mm_random(unsigned char *buf, size_t size)
+static void zend_mm_random(unsigned char *buf, size_t size) /* {{{ */
 {
 	size_t i = 0;
 	unsigned char t;
 
 #ifdef ZEND_WIN32
 	HCRYPTPROV   hCryptProv;
+	int has_context = 0;
 
-	if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+	if (!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, 0)) {
+		/* Could mean that the key container does not exist, let try 
+		   again by asking for a new one */
+		if (GetLastError() == NTE_BAD_KEYSET) {
+			if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
+				has_context = 1;
+			}
+		}
+	} else {
+		has_context = 1;
+	}
+	if (has_context) {
 		do {
 			BOOL ret = CryptGenRandom(hCryptProv, size, buf);
 			CryptReleaseContext(hCryptProv, 0);
@@ -961,7 +973,7 @@ static void zend_mm_random(unsigned char *buf, size_t size)
 					i++;
 				}
 				if (i == size) {
-				    return;
+					return;
 				}
 		   }
 		} while (0);
@@ -990,6 +1002,7 @@ static void zend_mm_random(unsigned char *buf, size_t size)
 		t = buf[i++] << 1;
     }
 }
+/* }}} */
 #endif
 
 /* Notes:
