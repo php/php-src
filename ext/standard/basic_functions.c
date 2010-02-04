@@ -4056,7 +4056,7 @@ PHP_FUNCTION(putenv)
 		pe.key_len = strlen(pe.key);
 #ifdef PHP_WIN32
 		if (equals) {
-			if (pe.key_len < setting_len - 2) {
+			if (pe.key_len < setting_len - 1) {
 				value = p + 1;
 			} else {
 				/* empty string*/
