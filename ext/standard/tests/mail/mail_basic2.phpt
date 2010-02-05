@@ -7,6 +7,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --INI--
 sendmail_path="sed > /tmp/php_test_mailBasic2.out"
+mail.add_x_header = Off
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
