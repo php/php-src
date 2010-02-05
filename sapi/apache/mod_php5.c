@@ -196,6 +196,8 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 
 			if (!strcasecmp(header_name, "Content-Type")) {
 				r->content_type = pstrdup(r->pool, header_content);
+                       } else if (!strcasecmp(header_name, "Content-Length")) {
+                               ap_set_content_length(r, strtol(header_content, (char **)NULL, 10));
 			} else if (!strcasecmp(header_name, "Set-Cookie")) {
 				table_add(r->headers_out, header_name, header_content);
 			} else if (op == SAPI_HEADER_REPLACE) {
