@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   links or invalid paths. (Pierre)
 - Fixed error output to stderr on Windows. (Pierre)
 
+- Fixed bug #50940 Custom content-length set incorrectly in Apache sapis. 
+  (Brian France, Rasmus)
 - Fixed bug #50907 (X-PHP-Originating-Script adding two new lines in *NIX).
   (Ilia)
 - Fixed bug #50859 (build fails with openssl 1.0 due to md2 deprecation).   
