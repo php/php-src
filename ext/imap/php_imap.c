@@ -1169,6 +1169,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (params) {
 		zval **disabled_auth_method;
+
 		if (zend_hash_find(HASH_OF(params), "DISABLE_AUTHENTICATOR", sizeof("DISABLE_AUTHENTICATOR"), (void **)&disabled_auth_method) == SUCCESS) {
 			switch (Z_TYPE_PP(disabled_auth_method)) {
 				case IS_STRING:
@@ -2662,7 +2663,7 @@ PHP_FUNCTION(imap_utf8)
 #ifndef HAVE_NEW_MIME2TEXT
 	utf8_mime2text(&src, &dest);
 #else
-	utf8_mime2text(&src, &dest, U8T_CANONICAL);
+	utf8_mime2text(&src, &dest, U8T_DECOMPOSE);
 #endif
 	RETVAL_STRINGL(dest.data, dest.size, 1);
 	if (dest.data) {
