@@ -69,7 +69,8 @@ PHP                                                                        NEWS
 - Fixed bug #47281 ($php_errormsg is limited in size of characters)
   (Oracle Corp.)
 - Fixed bug #44827 (define() allows :: in constant names). (Ilia)
-
+- Fixed bug #44098 (imap_utf8() returns only capital letters).
+  (steffen at dislabs dot de, Pierre)
 
 ?? ??? 20??, PHP 5.3.2
 - Upgraded bundled sqlite to version 3.6.21. (Ilia)
