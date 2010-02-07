@@ -113,6 +113,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		return -1;
 	}
 
+#ifdef PHP_WIN32
+	if (!php_win32_check_trailing_space(pfx, (const int)strlen(pfx))) {
+		SetLastError(ERROR_INVALID_NAME);
+		return -1;
+	}
+#endif
+
 	if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		cwd[0] = '\0';
 	}
@@ -138,12 +145,14 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	}
 
 #ifdef PHP_WIN32
+
 	if (GetTempFileName(new_state.cwd, pfx, 0, opened_path)) {
 		/* Some versions of windows set the temp file to be read-only,
 		 * which means that opening it will fail... */
 		VCWD_CHMOD(opened_path, 0600);
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
 	}
+
 #elif defined(HAVE_MKSTEMP)
 	fd = mkstemp(opened_path);
 #else
@@ -151,6 +160,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		fd = VCWD_OPEN(opened_path, open_flags);
 	}
 #endif
+
 	if (fd == -1 || !opened_path_p) {
 		efree(opened_path);
 	} else {
