@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Not for Windows");
+  die("skip. Not for Windows");
 ?>
 --FILE--
 <?php
@@ -14,7 +14,6 @@ if(substr(PHP_OS, 0, 3) == "WIN")
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
 
 echo "*** Testing rename() with obscure files ***\n";
 $file_path = dirname(__FILE__)."/renameVar13";
@@ -74,24 +73,24 @@ Warning: rename(1,%s/renameVar13/afile.tmp): No such file or directory in %s on 
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): No such file or directory in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
-bool(false)
--- testing '' --
-
-Warning: rename(%s/renameVar13/afile.tmp,): No such file or directory in %s on line %d
-bool(false)
-
-Warning: rename(,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): No such file or directory in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
+bool(false)
+-- testing '' --
+
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
+bool(false)
+
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- testing ' ' --
 bool(true)
@@ -103,7 +102,7 @@ bool(false)
 Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
 -- testing 'Array' --
 

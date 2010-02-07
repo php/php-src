@@ -159,11 +159,11 @@ Error: 2 - chmod() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --lowercase true--
@@ -171,7 +171,7 @@ Error: 2 - chmod(): No such file or directory, %s(%d)
 bool(false)
 
 --lowercase false--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --uppercase TRUE--
@@ -179,15 +179,15 @@ Error: 2 - chmod(): No such file or directory, %s(%d)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --empty string SQ--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --instance of classWithToString--
@@ -199,11 +199,11 @@ Error: 2 - chmod() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - chmod(): No such file or directory, %s(%d)
+Error: 2 - chmod(): %s, %s(%d)
 bool(false)
 ===DONE===
 

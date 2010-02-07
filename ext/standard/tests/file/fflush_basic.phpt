@@ -21,6 +21,10 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$data = str_replace("\r",'', $data);
+}
+
 // writing data to the file
 var_dump( fwrite($file_handle, $data) );
 var_dump( fflush($file_handle) );

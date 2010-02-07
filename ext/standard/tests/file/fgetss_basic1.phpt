@@ -22,7 +22,9 @@ is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
 <html> html </html> <?php echo "php"; ?>
 EOT;
 
-
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$string_with_tags = str_replace("\r",'', $string_with_tags);
+}
 /* try reading the file opened in different modes of reading */
 $file_modes = array("r","rb", "rt","r+", "r+b", "r+t");
 
@@ -62,7 +64,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetss() : Basic operations ***
 
 -- Testing fgetss() with file opened using r mode --

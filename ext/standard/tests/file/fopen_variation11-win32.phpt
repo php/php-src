@@ -6,6 +6,10 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Run only on Windows");
+if (!is_writable('c:\\fopen_variation10.tmp')) {
+	die('skip. C:\\ not writable.');
+}
+
 ?>
 --FILE--
 <?php

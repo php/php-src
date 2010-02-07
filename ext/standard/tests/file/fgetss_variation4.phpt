@@ -1,5 +1,10 @@
 --TEST--
 Test fgetss() function : usage variations - read  modes, file pointer at EOF
+--SKIPIF--
+<?php
+if(substr(PHP_OS, 0, 3) == "WIN")
+  die("skip not for Windows");
+?>
 --FILE--
 <?php
 /*

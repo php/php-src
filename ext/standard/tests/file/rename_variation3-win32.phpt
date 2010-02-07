@@ -24,6 +24,9 @@ mkdir($dirname);
 
 $filename = "$file_path/rename_variation3.tmp"; 
 $fp = fopen($filename, "w");
+if (!$fp) {
+	die("Cannot create $filename\n");
+}
 fclose($fp);
 
 echo "\n-- Renaming file to same file name --\n";
@@ -68,7 +71,7 @@ bool(true)
 
 -- Renaming existing file to existing directory name --
 
-Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): No such file or directory in %s on line %d
+Warning: rename(%s/rename_variation3.tmp,%s/rename_variation3_dir): Access is denied. (code: 5) in %s on line %d
 bool(false)
 bool(true)
 bool(true)

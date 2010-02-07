@@ -9,11 +9,11 @@ Venkat Raman Don (don.raman@microsoft.com)
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
-$cmd = "mklink.exe /?";
-$ret = @exec($cmd, $output, $return_val);
-if (count($output) == 0) {
-    die("mklink.exe not found in PATH");
+$ret = exec('mklink bug48746_tmp.lnk ' . __FILE__ .' 2>&1', $out);
+if (strpos($ret, 'privilege')) {
+	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
 }
+unlink('mklink bug48746_tmp.lnk');
 ?>
 --FILE--
 <?php

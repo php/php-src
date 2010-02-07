@@ -1,5 +1,9 @@
 --TEST--
 Test rename() function: variation
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
+?>
 --FILE--
 <?php
 /* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
@@ -41,6 +45,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
+unlink(dirname(__FILE__)."/rename_basic_new2.tmp");
 rmdir(dirname(__FILE__)."/rename_basic_dir1");
 ?>
 --EXPECTF--

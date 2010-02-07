@@ -4,7 +4,7 @@ Test rename() function : variation - various relative, absolute paths
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') die('skip..  for Windows');
 ?>
 --FILE--
 <?php
@@ -89,12 +89,12 @@ bool(true)
 
 -- Iteration 5 --
 
-Warning: rename(%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/renameMe.tmp,%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/renameMe.tmp,%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: rename(%s/renameVar11/renameVar11Sub/BADDIR/renameMe.tmp,%s/renameVar11/renameVar11Sub/BADDIR/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(%s/renameVar11/renameVar11Sub/BADDIR/renameMe.tmp,%s/renameVar11/renameVar11Sub/BADDIR/IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -115,7 +115,7 @@ bool(true)
 
 -- Iteration 11 --
 
-Warning: rename(BADDIR/renameMe.tmp,BADDIR/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(BADDIR/renameMe.tmp,BADDIR/IwasRenamed.tmp): The system cannot find the path specified. (code: 3) in %s on line %d
 bool(false)
 
 *** Done ***
