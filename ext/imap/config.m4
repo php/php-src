@@ -141,23 +141,23 @@ if test "$PHP_IMAP" != "no"; then
 
     old_CFLAGS=$CFLAGS
     CFLAGS="-I$IMAP_INC_DIR"
-    AC_CACHE_CHECK(for U8T_CANONICAL, ac_cv_u8t_canonical,
+    AC_CACHE_CHECK(for U8T_DECOMPOSE, ac_cv_u8t_canonical,
       AC_TRY_COMPILE([
 #include <c-client.h>
       ],[
          int i = U8T_CANONICAL;
       ],[
-         ac_cv_u8t_canonical=yes
+         ac_cv_u8t_decompose=yes
       ],[
-         ac_cv_u8t_canonical=no
+         ac_cv_u8t_decompose=no
       ])
     )
     CFLAGS=$old_CFLAGS
 
-    if test "$ac_cv_u8t_canonical" = "no" && test "$ac_cv_utf8_mime2text" = "new"; then
+    if test "$ac_cv_u8t_decompose" = "no" && test "$ac_cv_utf8_mime2text" = "new"; then
 		AC_MSG_ERROR([utf8_mime2text() has new signature, but U8T_CANONICAL is missing. This should not happen. Check config.log for additional information.])
     fi
-    if test "$ac_cv_u8t_canonical" = "yes" && test "$ac_cv_utf8_mime2text" = "old"; then
+    if test "$ac_cv_u8t_decompose" = "yes" && test "$ac_cv_utf8_mime2text" = "old"; then
 		AC_MSG_ERROR([utf8_mime2text() has old signature, but U8T_CANONICAL is present. This should not happen. Check config.log for additional information.])
     fi
 

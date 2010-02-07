@@ -2277,7 +2277,7 @@ PHP_FUNCTION(imap_utf8)
 #ifndef HAVE_NEW_MIME2TEXT
 	utf8_mime2text(&src, &dest);
 #else
-	utf8_mime2text(&src, &dest, U8T_CANONICAL);
+	utf8_mime2text(&src, &dest, U8T_DECOMPOSE);
 #endif
 	RETVAL_STRINGL(dest.data, dest.size, 1);
 	if (dest.data) {
