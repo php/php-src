@@ -267,10 +267,10 @@ string(4) "true"
 -- Iteration 54 --
 string(4) "true"
 -- Iteration 55 --
-string(54) "This is a multiline heredoc
+string(5%d) "This is a multiline heredoc
 string. Numeric = 1232455."
 -- Iteration 56 --
-string(10) "12345
+string(1%d) "12345
 2345"
 -- Iteration 57 --
 string(0) ""

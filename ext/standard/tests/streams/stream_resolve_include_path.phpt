@@ -32,6 +32,6 @@ rmdir($include_path);
 Warning: stream_resolve_include_path() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
-string(%d) "%s/test_path/file"
-string(%d) "%s/test_path/nested/file"
+string(%d) "%stest_path%sfile"
+string(%d) "%stest_path%snested%sfile"
 

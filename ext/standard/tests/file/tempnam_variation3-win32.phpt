@@ -39,11 +39,20 @@ for( $i=0; $i<count($names_arr); $i++ ) {
   echo "-- Iteration $i --\n";
   $file_name = tempnam("$file_path", $names_arr[$i]);
 
-  /* creating the files in existing dir */
-  if( file_exists($file_name) ) {
-    echo "File name is => ";
-    print($file_name);
-    echo "\n";
+	/* creating the files in existing dir */
+	if (file_exists($file_name) && !$res_arr[$i]) {
+		echo "Failed\n";
+	}
+	if ($res_arr[$i]) {
+		$file_dir = dirname($file_name);
+		if (realpath($file_dir) == $file_path || realpath($file_dir . "\\") == $file_path) {
+			echo "OK\n";
+		} else {
+			echo "Failed, not created in the correct directory " . realpath($file_dir) . ' vs ' . $file_path ."\n";
+		}
+		
+		if (!is_writable($file_name)) {
+			printf("%o\n", fileperms($file_name) );
 
     echo "File permissions are => ";
     printf("%o", fileperms($file_name) );
@@ -94,9 +103,8 @@ File name is => %s\%s
 File permissions are => 100666
 File created in => directory specified
 -- Iteration 5 --
-File name is => %s\%s
-File permissions are => 100666
-File created in => directory specified
+Failed, not created in the correct directory %s vs %s
+0
 -- Iteration 6 --
 File name is => %s\%s
 File permissions are => 100666

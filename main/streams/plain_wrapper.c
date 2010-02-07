@@ -39,6 +39,9 @@
 #include "SAPI.h"
 
 #include "php_streams_int.h"
+#ifdef PHP_WIN32
+# include "win32/winutil.h"
+#endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
 #define php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_REL_CC TSRMLS_CC)
@@ -1060,6 +1063,17 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 		return 0;
 	}
 
+#ifdef PHP_WIN32
+	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+		return 0;
+	}
+	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+		return 0;
+	}
+#endif
+
 	if ((p = strstr(url_from, "://")) != NULL) {
 		url_from = p + 3;
 	}
@@ -1225,6 +1239,9 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
+#if PHP_WIN32
+	int url_len = strlen(url);
+#endif
 	if (PG(safe_mode) &&(!php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		return 0;
 	}
@@ -1232,6 +1249,13 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
+
+#if PHP_WIN32
+	if (!php_win32_check_trailing_space(url, url_len)) {
+		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(ENOENT));
+		return 0;
+	}
+#endif
 
 	if (VCWD_RMDIR(url) < 0) {
 		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));
