@@ -70,7 +70,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 		if (realpath($file_dir) == $file_path || realpath($file_dir . "\\") == $file_path) {
 			echo "OK\n";
 		} else {
-			echo "Failed, not created in the correct directory" . realpath($file_dir) . ' vs ' . $file_path ."\n";
+			echo "Failed, not created in the correct directory " . realpath($file_dir) . ' vs ' . $file_path ."\n";
 		}
 		
 		if (!is_writable($file_name)) {
@@ -99,7 +99,8 @@ OK
 -- Iteration 4 --
 OK
 -- Iteration 5 --
-OK
+Failed, not created in the correct directory %s vs %s
+0
 -- Iteration 6 --
 OK
 -- Iteration 7 --

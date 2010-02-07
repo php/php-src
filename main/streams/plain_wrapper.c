@@ -39,6 +39,9 @@
 #include "SAPI.h"
 
 #include "php_streams_int.h"
+#ifdef PHP_WIN32
+# include "win32/winutil.h"
+#endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
 #define php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_REL_CC TSRMLS_CC)
@@ -1043,24 +1046,13 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	}
 
 #ifdef PHP_WIN32
-	/* Prevent bad things to happen when invalid path are used with MoveFileEx */
-	{
-		int url_from_len = strlen(url_from);
-		int url_to_len = strlen(url_to);
-		char *trimed = php_trim(url_from, url_from_len, NULL, 0, NULL, 1 TSRMLS_CC);
-		int trimed_len = strlen(trimed);
-
-		if (trimed_len == 0 || trimed_len != url_from_len) {
-			php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
-			return 0;
-		}
-
-		trimed = php_trim(url_to, url_to_len, NULL, 0, NULL, 1 TSRMLS_CC);
-		trimed_len = strlen(trimed);
-		if (trimed_len == 0 || trimed_len != url_to_len) {
-			php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
-			return 0;
-		}
+	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+		return 0;
+	}
+	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
+		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
+		return 0;
 	}
 #endif
 
@@ -1224,9 +1216,19 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
+#if PHP_WIN32
+	int url_len = strlen(url);
+#endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
+
+#if PHP_WIN32
+	if (!php_win32_check_trailing_space(url, url_len)) {
+		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(ENOENT));
+		return 0;
+	}
+#endif
 
 	if (VCWD_RMDIR(url) < 0) {
 		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));

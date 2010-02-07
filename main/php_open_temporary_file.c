@@ -113,6 +113,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		return -1;
 	}
 
+#ifdef PHP_WIN32
+	if (!php_win32_check_trailing_space(pfx, (const int)strlen(pfx))) {
+		SetLastError(ERROR_INVALID_NAME);
+		return -1;
+	}
+#endif
+
 	if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		cwd[0] = '\0';
 	}
