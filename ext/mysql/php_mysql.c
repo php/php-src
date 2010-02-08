@@ -659,6 +659,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			client_flags ^= CLIENT_LOCAL_FILES;
 		}
 
+#ifdef CLIENT_MULTI_RESULTS
+		client_flags |= CLIENT_MULTI_RESULTS; /* compatibility with 5.2, see bug#50416 */
+#endif
 #ifdef CLIENT_MULTI_STATEMENTS
 		client_flags &= ~CLIENT_MULTI_STATEMENTS;   /* don't allow multi_queries via connect parameter */
 #endif
