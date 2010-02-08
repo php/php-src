@@ -265,7 +265,6 @@ ZEND_API int zend_get_constant_ex(char *name, uint name_len, zval *result, zend_
 				retval = 0;
 			}
 		} else {
-			zend_error(E_ERROR, "Class '%s' not found", class_name);
 			retval = 0;
 		}
 		efree(class_name);

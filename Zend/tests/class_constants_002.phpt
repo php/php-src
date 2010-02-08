@@ -28,4 +28,4 @@ int(1)
 int(5)
 int(10)
 
-Fatal error: Class 'NoSuchClass' not found in %s on line %d
+Fatal error: Undefined class constant 'NoSuchClass::val' in %s on line %d

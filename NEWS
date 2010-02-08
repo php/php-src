@@ -12,7 +12,8 @@ PHP                                                                        NEWS
 - Fixed bug #50727 (Accessing mysqli->affected_rows on no connection causes
   segfault). (Andrey, Johannes)
 - Fixed bug #48667 (Implementing Iterator and IteratorAggregate). (Etienne)
-
+- Fixed bug #47601 (defined() requires class to exist when testing for class
+  constants). (Ilia)
 
 28 Jan 2010, PHP 5.2.13RC1
 - Updated timezone database to version 2010.2. (Derick)
