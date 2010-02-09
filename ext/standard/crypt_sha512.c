@@ -17,6 +17,15 @@
 # elif HAVE_STDINT_H
 #  include <stdint.h>
 # endif
+# ifndef HAVE_ALIGNOF
+#  include <stddef.h>
+#  define __alignof__(type) offsetof (struct { char c; type member;}, member)
+# endif
+# if HAVE_ATTRIBUTE_ALIGNED
+#  define ALIGNED(size) __attribute__ ((__aligned__ (size)))
+# else
+#  define ALIGNED(size)
+# endif
 #endif
 
 #include <stdio.h>
@@ -363,10 +372,8 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	__declspec(align(64)) unsigned char alt_result[64];
 	__declspec(align(64)) unsigned char temp_result[64];
 #else
-	unsigned char alt_result[64]
-		__attribute__ ((__aligned__ (__alignof__ (uint64_t))));
-	unsigned char temp_result[64]
-		__attribute__ ((__aligned__ (__alignof__ (uint64_t))));
+	unsigned char alt_result[64] ALIGNED(__alignof__ (uint64_t));
+	unsigned char temp_result[64] ALIGNED(__alignof__ (uint64_t));
 #endif
 	struct sha512_ctx ctx;
 	struct sha512_ctx alt_ctx;
