@@ -346,6 +346,7 @@ struct st_mysqlnd_conn_methods
 
 	enum_func_status	(*restart_psession)(MYSQLND *conn TSRMLS_DC);
 	enum_func_status	(*end_psession)(MYSQLND *conn TSRMLS_DC);
+	enum_func_status	(*send_close)(MYSQLND * conn TSRMLS_DC);
 };
 
 
