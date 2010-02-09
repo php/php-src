@@ -64,8 +64,6 @@ PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't
 PHPAPI MYSQLND_STATS *mysqlnd_global_stats = NULL;
 static zend_bool mysqlnd_library_initted = FALSE;
 
-static enum_func_status mysqlnd_send_close(MYSQLND * conn TSRMLS_DC);
-
 static struct st_mysqlnd_conn_methods *mysqlnd_conn_methods;
 
 /* {{{ mysqlnd_library_end */
@@ -491,7 +489,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		if (CONN_GET_STATE(conn) < CONN_QUIT_SENT) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CLOSE_IMPLICIT);
 			reconnect = TRUE;
-			mysqlnd_send_close(conn TSRMLS_CC);
+			conn->m->send_close(conn TSRMLS_CC);
 		}
 
 		conn->m->free_contents(conn TSRMLS_CC);
@@ -1378,7 +1376,7 @@ MYSQLND_METHOD(mysqlnd_conn, shutdown)(MYSQLND * const conn, uint8_t level TSRML
 
 /* {{{ mysqlnd_send_close */
 static enum_func_status
-mysqlnd_send_close(MYSQLND * conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn, send_close)(MYSQLND * const conn TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 
@@ -1458,7 +1456,7 @@ MYSQLND_METHOD(mysqlnd_conn, close)(MYSQLND * conn, enum_connection_close_type c
 	  Close now, free_reference will try,
 	  if we are last, but that's not a problem.
 	*/
-	ret = mysqlnd_send_close(conn TSRMLS_CC);
+	ret = conn->m->send_close(conn TSRMLS_CC);
 
 	ret = conn->m->free_reference(conn TSRMLS_CC);
 
@@ -1492,7 +1490,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn, free_reference)(MYSQLND * const conn TSRMLS
 		  This will free the object too, of course because references has
 		  reached zero.
 		*/
-		ret = mysqlnd_send_close(conn TSRMLS_CC);
+		ret = conn->m->send_close(conn TSRMLS_CC);
 		conn->m->dtor(conn TSRMLS_CC);
 	}
 	DBG_RETURN(ret);
@@ -2099,7 +2097,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn)
 	MYSQLND_METHOD(mysqlnd_conn, simple_command),
 	MYSQLND_METHOD(mysqlnd_conn, simple_command_handle_response),
 	MYSQLND_METHOD(mysqlnd_conn, restart_psession),
-	MYSQLND_METHOD(mysqlnd_conn, end_psession)
+	MYSQLND_METHOD(mysqlnd_conn, end_psession),
+	MYSQLND_METHOD(mysqlnd_conn, send_close)
 MYSQLND_CLASS_METHODS_END;
 
 
