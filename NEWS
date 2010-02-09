@@ -62,7 +62,7 @@ PHP                                                                        NEWS
 - Fixed bug #49560 (oci8: using LOBs causes slow PHP shutdown). (Oracle Corp.)
 - Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
 - Fixed bug #48811 (Directives in PATH section do not get applied to
-  subdirectories). (Patch by: ct at swin dot edu dot au)
+  sub-directories). (Patch by: ct at swin dot edu dot au)
 - Fixed bug #48590 (SoapClient does not honor max_redirects). (Sriram)
 - Fixed bug #48190 (Content-type parameter "boundary" is not case-insensitive
   in HTTP uploads). (Ilia)
