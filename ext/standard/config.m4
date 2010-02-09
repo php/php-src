@@ -235,6 +235,41 @@ dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
 if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "x$php_crypt_r" = "x0"; then
+
+  dnl
+  dnl Check for __alignof__ support in the compiler
+  dnl
+  AC_CACHE_CHECK(whether the compiler supports __alignof__,ac_cv_alignof_exists,[
+  AC_TRY_COMPILE([
+int main() {
+	int align = __alignof__(int);
+	return 0;
+}
+  ],[
+    ac_cv_alignof_exists=yes
+  ],[
+    ac_cv_alignof_exists=no
+  ])])
+  if test "$ac_cv_alignof_exists" = "yes"; then
+    AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
+  fi
+
+  dnl 
+  dnl Check for __attribute__ ((__aligned__)) support in the compiler
+  dnl
+  AC_CACHE_CHECK(whether the compiler supports aligned attribute,ac_cv_attribute_aligned,[
+  AC_TRY_COMPILE([
+    unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
+  ],[
+    ac_cv_attribute_aligned=yes
+  ],[
+    ac_cv_attribute_aligned=no
+  ])])
+  if test "$ac_cv_attribute_aligned" = "yes"; then
+    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [wheter the compiler supports __attribute__ ((__aligned__))])
+  fi
+    
+
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
   AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
   AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
