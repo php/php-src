@@ -9,7 +9,7 @@ $d = new _d("1pm Aug 1 GMT 2007");
 var_dump($d->format(DateTime::RFC822));
 $c = clone $d;
 var_dump($c->format(DateTime::RFC822));
-$d->modify("1 hour after");
+$d->modify("1 hour");
 $c->modify("1 second ago");
 var_dump($d->format(DateTime::RFC822));
 var_dump($c->format(DateTime::RFC822));
