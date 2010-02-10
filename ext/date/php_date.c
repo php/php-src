@@ -30,15 +30,11 @@
 #include "lib/timelib.h"
 #include <time.h>
 
-#ifndef HAVE_LLABS
-# ifdef PHP_WIN32
-static __inline __int64 llabs( __int64 i ) { return i >= 0? i: -i; }
-# elif defined(__GNUC__) && __GNUC__ < 3
-static __inline __int64_t llabs( __int64_t i ) { return i >= 0 ? i : -i; }
-# elif defined(NETWARE) && defined(__MWERKS__)
-static __inline long long llabs( long long i ) { return i >= 0 ? i : -i; }
-# endif
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
 #endif
+
+static __inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 
 /* {{{ arginfo */
 static
@@ -752,7 +748,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 {
 	smart_str            string = {0};
 	int                  i, length;
-	char                 buffer[33];
+	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
 	int                  rfc_colon;
@@ -811,7 +807,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			/* year */
 			case 'L': length = slprintf(buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
 			case 'y': length = slprintf(buffer, 32, "%02d", (int) t->y % 100); break;
-			case 'Y': length = slprintf(buffer, 32, "%s%04lld", t->y < 0 ? "-" : "", llabs(t->y)); break;
+			case 'Y': length = slprintf(buffer, 32, "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
 			case 'a': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
@@ -875,7 +871,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = slprintf(buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = slprintf(buffer, 96, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -1936,6 +1932,7 @@ PHP_FUNCTION(date_modify)
 	char         *modify;
 	int           modify_len;
 	timelib_time *tmp_time;
+	timelib_error_container *err = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1943,7 +1940,16 @@ PHP_FUNCTION(date_modify)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
-	tmp_time = timelib_strtotime(modify, modify_len, NULL, DATE_TIMEZONEDB);
+	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB);
+
+	if (err && err->error_count) {
+		/* spit out the first library error message, at least */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
+			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
+		timelib_time_dtor(tmp_time);
+		RETURN_FALSE;
+	}
+
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
 	dateobj->time->have_relative = tmp_time->have_relative;
 	dateobj->time->have_weekday_relative = tmp_time->have_weekday_relative;
