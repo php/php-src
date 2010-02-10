@@ -7,10 +7,14 @@ PHP                                                                        NEWS
 
 - Fixed bug #50940 Custom content-length set incorrectly in Apache sapis. 
   (Brian France, Rasmus)
+- Fixed bug #50930 (Wrong date by php_date.c patch with ancient gcc/glibc
+  versions). (Derick)
 - Fixed bug #50847 (strip_tags() removes all tags greater then 1023 bytes
   long). (Ilia)
 - Fixed bug #50727 (Accessing mysqli->affected_rows on no connection causes
   segfault). (Andrey, Johannes)
+- Fixed bug #49585 (date_format buffer not long enough for >4 digit years).
+  (Derick, Adam)
 - Fixed bug #48667 (Implementing Iterator and IteratorAggregate). (Etienne)
 - Fixed bug #47601 (defined() requires class to exist when testing for class
   constants). (Ilia)

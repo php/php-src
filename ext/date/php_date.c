@@ -863,7 +863,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			case 'Z': length = slprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': length = slprintf(buffer, 96, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
