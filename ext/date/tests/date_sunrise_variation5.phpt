@@ -113,12 +113,12 @@ bool(false)
 bool(false)
 
 --int 12345--
-string(5) "09:51"
+unicode(5) "09:51"
 float(9.855%d)
 int(1218169278)
 
 --int -12345--
-string(5) "09:54"
+unicode(5) "09:54"
 float(9.9097820911118)
 int(1218169475)
 

@@ -113,7 +113,7 @@ bool(false)
 bool(false)
 
 --int 12345--
-string(5) "19:20"
+unicode(5) "19:20"
 float(19.340%d)
 int(1218203424)
 
