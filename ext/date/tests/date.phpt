@@ -3,13 +3,13 @@ date() function
 --FILE--
 <?php
 $tmp = "cr";
-putenv ("TZ=GMT0");
+date_default_timezone_set("GMT");
 
 for($a = 0;$a < strlen($tmp); $a++){
 	echo $tmp[$a], ': ', date($tmp[$a], 1043324459)."\n";
 }
 
-putenv ("TZ=MET");
+date_default_timezone_set("CET");
 
 for($a = 0;$a < strlen($tmp); $a++){
 	echo $tmp[$a], ': ', date($tmp[$a], 1043324459)."\n";
