@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #50940 (Custom content-length set incorrectly in Apache SAPIs).
   (Brian France, Rasmus)
+- Fixed bug #50930 (Wrong date by php_date.c patch with ancient gcc/glibc
+  versions). (Derick)
 - Fixed bug #50907 (X-PHP-Originating-Script adding two new lines in *NIX).
   (Ilia)
 - Fixed bug #50859 (build fails with openssl 1.0 due to md2 deprecation).   
@@ -59,6 +61,8 @@ PHP                                                                        NEWS
 - Fixed bug #50576 (XML_OPTION_SKIP_TAGSTART option has no effect). (Pierrick)
 - Fixed bug #50416 (PROCEDURE db.myproc can't return a result set in the given
   context). (Andrey)
+- Fixed bug #49585 (date_format buffer not long enough for >4 digit years).
+  (Derick, Adam)
 - Fixed bug #49560 (oci8: using LOBs causes slow PHP shutdown). (Oracle Corp.)
 - Fixed bug #49463 (setAttributeNS fails setting default namespace). (Rob)
 - Fixed bug #48811 (Directives in PATH section do not get applied to
