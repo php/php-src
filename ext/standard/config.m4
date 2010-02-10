@@ -265,7 +265,7 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
     ac_cv_attribute_aligned=no
   ])])
   if test "$ac_cv_attribute_aligned" = "yes"; then
-    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [Wheter the compiler supports __attribute__ ((__aligned__))])
+    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
   fi
     
 
