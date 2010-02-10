@@ -36,13 +36,7 @@
 # include "win32/php_stdint.h"
 #endif
 
-#ifndef HAVE_LLABS
-# if defined(__GNUC__) && __GNUC__ < 3
-static __inline __int64_t llabs( __int64_t i ) { return i >= 0 ? i : -i; }
-# elif defined(NETWARE) && defined(__MWERKS__)
-static __inline long long llabs( long long i ) { return i >= 0 ? i : -i; }
-# endif
-#endif
+static __inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
@@ -790,7 +784,6 @@ PHP_MINIT_FUNCTION(date)
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;
-
 	DATEG(last_errors) = NULL;
 	return SUCCESS;
 }
@@ -2889,7 +2882,7 @@ PHP_FUNCTION(date_modify)
 	char         *modify;
 	int           modify_len;
 	timelib_time *tmp_time;
-	struct timelib_error_container *error;
+	timelib_error_container *err = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &modify, &modify_len) == FAILURE) {
 		RETURN_FALSE;
@@ -2897,13 +2890,14 @@ PHP_FUNCTION(date_modify)
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 
-	tmp_time = timelib_strtotime(modify, modify_len, &error, DATE_TIMEZONEDB);
+	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB);
 
-	/* update last errors and warnings, and display the first one */
-	update_errors_warnings(error TSRMLS_CC);
-	if (error && error->error_count > 0) {
+	/* update last errors and warnings */
+	update_errors_warnings(err TSRMLS_CC);
+	if (err && err->error_count) {
+		/* spit out the first library error message, at least */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
-			error->error_messages[0].position, error->error_messages[0].character, error->error_messages[0].message);
+			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 		timelib_time_dtor(tmp_time);
 		RETURN_FALSE;
 	}
