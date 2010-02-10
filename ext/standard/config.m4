@@ -240,12 +240,10 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
   dnl
   dnl Check for __alignof__ support in the compiler
   dnl
-  AC_CACHE_CHECK(whether the compiler supports __alignof__,ac_cv_alignof_exists,[
+  AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
   AC_TRY_COMPILE([
-int main() {
-	int align = __alignof__(int);
-	return 0;
-}
+  ],[
+    int align = __alignof__(int);
   ],[
     ac_cv_alignof_exists=yes
   ],[
@@ -258,8 +256,9 @@ int main() {
   dnl 
   dnl Check for __attribute__ ((__aligned__)) support in the compiler
   dnl
-  AC_CACHE_CHECK(whether the compiler supports aligned attribute,ac_cv_attribute_aligned,[
+  AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
   AC_TRY_COMPILE([
+  ],[
     unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
   ],[
     ac_cv_attribute_aligned=yes
@@ -267,7 +266,7 @@ int main() {
     ac_cv_attribute_aligned=no
   ])])
   if test "$ac_cv_attribute_aligned" = "yes"; then
-    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [wheter the compiler supports __attribute__ ((__aligned__))])
+    AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [Wheter the compiler supports __attribute__ ((__aligned__))])
   fi
     
 
