@@ -1951,8 +1951,8 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 
 					TIMELIB_CHECK_NUMBER;
 					tptr = ptr;
-					if ((f = timelib_get_nr((char **) &ptr, 6)) == TIMELIB_UNSET || (ptr - tptr) < 1) {
-						add_pbf_error(s, "At least a single digit millisecond could not be found", string, begin);
+					if ((f = timelib_get_nr((char **) &ptr, 6)) == TIMELIB_UNSET || ptr - tptr != 6) {
+						add_pbf_error(s, "A six digit millisecond could not be found", string, begin);
 					} else {
 						s->time->f = (f / 1000000);
 					}
