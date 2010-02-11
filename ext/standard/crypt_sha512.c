@@ -9,7 +9,6 @@
 #include <limits.h>
 #ifdef PHP_WIN32
 # include "win32/php_stdint.h"
-# include "win32/php_stdbool.h"
 # define __alignof__ __alignof
 # define alloca _alloca
 #else
@@ -395,7 +394,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	bool rounds_custom = false;
+	zend_bool rounds_custom = 0;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	 be present.  Just in case it is not.  */
@@ -412,7 +411,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 		if (*endp == '$') {
 			salt = endp + 1;
 			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
-			rounds_custom = true;
+			rounds_custom = 1;
 		}
 	}
 
