@@ -1607,7 +1607,6 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ 
 		}
 #endif
 	}
-
 	if (module->module_startup_func) {
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
