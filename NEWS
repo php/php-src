@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - Fixed possible bad behavior of rename on windows when used with symbolic
   links or invalid paths. (Pierre)
 - Fixed error output to stderr on Windows. (Pierre)
+- Fixed memory leaks in is_writable/readable/etc on Windows. (Pierre)
+- Fixed memory leaks in the ACL function on Windows. (Pierre)
+- Fixed memory leak in the realpath cache on Windows. (Pierre)
+- Fixed memory leak in zip_close. (Pierre)
 
 - Fixed bug #50952 (allow underscore _ in constants parsed in php.ini files).
   (Jani)
