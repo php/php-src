@@ -71,21 +71,21 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
-myclass::__construct(0, 1): 0 / 0
 myclass::__set(id, -'1'-) 1
 myclass::__set(, -''-) 2
 myclass::__set(null, -NULL-) 3
 myclass::__set(, -''-) 4
-myclass::__construct(1, 2): 4 / 0
+myclass::__construct(0, 1): 4 / 4
 myclass::__set(id, -'2'-) 1
 myclass::__set(, -''-) 2
 myclass::__set(null, -NULL-) 3
 myclass::__set(, -''-) 4
-myclass::__construct(2, 3): 8 / 0
+myclass::__construct(1, 2): 8 / 4
 myclass::__set(id, -'3'-) 1
 myclass::__set(, -''-) 2
 myclass::__set(null, -NULL-) 3
 myclass::__set(, -''-) 4
+myclass::__construct(2, 3): 12 / 4
 object(myclass)#%d (4) {
   [%u|b%"set_calls":"myclass":private]=>
   int(4)
