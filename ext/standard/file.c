@@ -836,7 +836,7 @@ PHP_FUNCTION(tempnam)
 		return;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
