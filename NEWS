@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed safe_mode validation inside tempnam() when the directory path does
+  not end with a /). (Martin Jansen)
 - Fixed a possible open_basedir/safe_mode bypass in session extension
   identified by Grzegorz Stachowiak. (Ilia)
 - Fixed possible crash when a error/warning is raised during php startup.
