@@ -102,6 +102,7 @@ PHP                                                                        NEWS
 - Fixed memory leak in extension loading when an error occurs on Windows.
   (Pierre)
 
+- Fixed bug #50558 (Broken object model when extending tidy). (Pierrick)
 - Fixed bug #50540 (Crash while running ldap_next_reference test cases).
   (Sriram)
 - Fixed bug #50519 (segfault in garbage collection when using set_error_handler
