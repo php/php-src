@@ -1,5 +1,7 @@
 --TEST--
 Bug #50761 (system.multiCall crashes)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 $req = '<?xml version="1.0"?>

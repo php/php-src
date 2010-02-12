@@ -1,5 +1,7 @@
 --TEST--
 Bug #47818 (Segfault due to bound callback param)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 

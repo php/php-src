@@ -1,5 +1,7 @@
 --TEST--
 Bug #50285 (xmlrpc does not preserve keys in encoded indexed arrays)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 
