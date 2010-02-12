@@ -1,5 +1,7 @@
 --TEST--
 Bug #45556 (Return value from callback isn't freed)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 
