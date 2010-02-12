@@ -1,7 +1,5 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2010, PHP 5.2.13
-
 11 Feb 2010, PHP 5.2.13RC2
 - Downgrade bundled PCRE to version 7.9. (Ilia)
 - Fixed safe_mode validation inside tempnam() when the directory path does
