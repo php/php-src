@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.3.2 RC 2
+12 Feb 2010, PHP 5.3.2 RC 2
 - Upgraded bundled sqlite to version 3.6.22. (Ilia)
 - Upgraded bundled libmagic to version 5.03. (Mikko)
 
