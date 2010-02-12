@@ -1,5 +1,7 @@
 --TEST--
 Bug #18916 (xmlrpc_set_type() not working)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --INI--
 date.timezone="America/Sao_Paulo"
 --FILE--
