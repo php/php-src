@@ -1,5 +1,7 @@
 --TEST--
 Bug #44996 (xmlrpc_decode() ignores time zone on iso8601.datetime)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --FILE--
 <?php
 

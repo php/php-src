@@ -1,5 +1,7 @@
 --TEST--
 Bug #45226 (xmlrpc_set_type() segfaults with valid ISO8601 date string)
+--SKIPIF--
+<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
 --INI--
 date.timezone="America/Sao_Paulo"
 --FILE--
