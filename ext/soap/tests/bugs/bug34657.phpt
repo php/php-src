@@ -31,5 +31,5 @@ Warning: SoapClient::__construct(http://i_dont_exist.com/some.wsdl): failed to o
 
 Warning: SoapClient::__construct(): I/O warning : failed to load external entity "http://i_dont_exist.com/some.wsdl" in %sbug34657.php on line 3
 SoapFault
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://i_dont_exist.com/some.wsdl'
+SOAP-ERROR: Parsing WSDL: Couldn't load from 'http://i_dont_exist.com/some.wsdl'%S
 ok
