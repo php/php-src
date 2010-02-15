@@ -20,7 +20,7 @@ Basic test of POSIX getgid and getgrid fucntions
 Array
 (
     [name] => %s
-    [passwd] => %s
+    [passwd] => %a
     [members] => Array
 %a
 
