@@ -31,5 +31,5 @@ Warning: xmlwriter_write_attribute_ns() expects exactly %d parameters, %d given 
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
  <elem1 attr1="first"/>
-</root>
+</root>%w
 bool(false)
