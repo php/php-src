@@ -1,5 +1,7 @@
 --TEST--
 Bug #46427 (SoapClient() stumbles over its "stream_context" parameter)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 error_reporting(E_ALL|E_STRICT);
