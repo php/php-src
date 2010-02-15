@@ -1,5 +1,7 @@
 --TEST--
 Bug #48557 (Numeric string keys in Apache Hashmaps are not cast to integers)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
