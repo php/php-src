@@ -39,9 +39,9 @@ PHP_FUNCTION(str_transliterate)
 	}
 
 	if (variant) {
-		id_len = u_snprintf(id, sizeof(id)-1, "%S-%S/%S", from, to, variant);
+		id_len = u_snprintf(id, TEXT_CHARS(sizeof(id))-1, "%S-%S/%S", from, to, variant);
 	} else {
-		id_len = u_snprintf(id, sizeof(id)-1, "%S-%S", from, to);
+		id_len = u_snprintf(id, TEXT_CHARS(sizeof(id))-1, "%S-%S", from, to);
 	}
 
 	if (id_len < 0) {
