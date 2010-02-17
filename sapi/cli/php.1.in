@@ -1,6 +1,5 @@
 .TH PHP 1 "2010" "The PHP Group" "Scripting Language"
 .SH NAME
-.TP 15
 php \- PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
 .B php
