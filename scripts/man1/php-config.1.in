@@ -1,6 +1,5 @@
-.TH php\-config 1 "2006" "The PHP Group" "Scripting Language"
+.TH php\-config 1 "2010" "The PHP Group" "Scripting Language"
 .SH NAME
-.TP 15
 php\-config \- get information about PHP configuration and compile options
 .SH SYNOPSIS
 .B php\-config
@@ -62,7 +61,7 @@ PHP version as integer
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2006 The PHP Group
+Copyright \(co 1997\-2010 The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
