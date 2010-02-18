@@ -991,7 +991,11 @@ mkdir )
                     if [ ".$opt_t" = .yes ]; then
                         echo "mkdir $pathcomp" 1>&2
                     fi
-                    mkdir $pathcomp || errstatus=$?
+                    mkdir $pathcomp || {
+                        _errstatus=$?
+                        [ -d "$pathcomp" ] || errstatus=${_errstatus}
+                        unset _errstatus
+                    }
                     if [ ".$opt_o" != . ]; then
                         if [ ".$opt_t" = .yes ]; then
                             echo "chown $opt_o $pathcomp" 1>&2
