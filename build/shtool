@@ -1,12 +1,12 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2006 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2008 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  2.0.6 (19-Apr-2006)
+##  Version:  2.0.8 (18-Jul-2008)
 ##  Contents: 5/19 available modules
 ##
 
@@ -92,8 +92,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 2.0.6 (19-Apr-2006)"
-    echo 'Copyright (c) 1994-2006 Ralf S. Engelschall <rse@engelschall.com>'
+    echo "This is GNU shtool, version 2.0.8 (18-Jul-2008)"
+    echo 'Copyright (c) 1994-2008 Ralf S. Engelschall <rse@engelschall.com>'
     echo 'Report bugs to <bug-shtool@gnu.org>'
     echo ''
     echo 'Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]'
@@ -161,11 +161,11 @@ if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" ] || [ ".$1" = ".--version" ]; then
-    echo "GNU shtool 2.0.6 (19-Apr-2006)"
+    echo "GNU shtool 2.0.8 (18-Jul-2008)"
     exit 0
 fi
 if [ ".$1" = ".-r" ] || [ ".$1" = ".--recreate" ]; then
-    shtoolize -oshtool echo install mkdir platform path
+    shtoolize -obuild/shtool echo install mkdir platform path
     exit 0
 fi
 if [ ".$1" = ".-d" ] || [ ".$1" = ".--debug" ]; then
@@ -473,7 +473,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2008 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     text="$*"
@@ -594,11 +594,14 @@ echo )
                         userid=`grep "^${username}:" /etc/passwd 2>/dev/null | \
                                 sed -e 's/[^:]*:[^:]*://' -e 's/:.*$//'`
                         if [ ".$userid" = . ]; then
-                            userid=`(ypcat passwd) 2>/dev/null |
-                                    grep "^${username}:" | \
-                                    sed -e 's/[^:]*:[^:]*://' -e 's/:.*$//'`
+                            userid=`(ypmatch "${username}" passwd; nismatch "${username}" passwd) 2>/dev/null | \
+                                    sed -e 'q' | sed -e 's/[^:]*:[^:]*://' -e 's/:.*$//'`
                             if [ ".$userid" = . ]; then
-                                userid='?'
+                                userid=`(nidump passwd . | grep "^${username}:") 2>/dev/null | \
+                                        sed -e 's/[^:]*:[^:]*://' -e 's/:.*$//'`
+                                if [ ".$userid" = . ]; then
+                                    userid='?'
+                                fi
                             fi
                         fi
                     fi
@@ -623,10 +626,14 @@ echo )
                     groupid=`grep "^${username}:" /etc/passwd 2>/dev/null | \
                              sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
                     if [ ".$groupid" = . ]; then
-                        groupid=`(ypcat passwd) 2>/dev/null | grep "^${username}:" | \
-                                 sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+                        groupid=`(ypmatch "${username}" passwd; nismatch "${username}" passwd) 2>/dev/null | \
+                                 sed -e 'q' | sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
                         if [ ".$groupid" = . ]; then
-                            groupid='?'
+                            groupid=`(nidump passwd . | grep "^${username}:") 2>/dev/null | \
+                                     sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+                            if [ ".$groupid" = . ]; then
+                                groupid='?'
+                            fi
                         fi
                     fi
                 fi
@@ -651,11 +658,16 @@ echo )
                     groupname=`grep "^[^:]*:[^:]*:${groupid}:" /etc/group 2>/dev/null | \
                                sed -e 's/:.*$//'`
                     if [ ".$groupname" = . ]; then
-                        groupname=`(ypcat group) 2>/dev/null | \
-                                   grep "^[^:]*:[^:]*:${groupid}:" | \
+                        groupname=`(ypcat group; niscat group) 2>/dev/null | \
+                                   sed -e 'q' | grep "^[^:]*:[^:]*:${groupid}:" | \
                                    sed -e 's/:.*$//'`
                         if [ ".$groupname" = . ]; then
-                            groupname='?'
+                            groupname=`(nidump group .) 2>/dev/null | \
+                                       grep "^[^:]*:[^:]*:${groupid}:" | \
+                                       sed -e 's/:.*$//'`
+                            if [ ".$groupname" = . ]; then
+                                groupname='?'
+                            fi
                         fi
                     fi
                 fi
@@ -771,7 +783,7 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2008 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     #   special case: "shtool install -d <dir> [...]" internally
@@ -857,12 +869,12 @@ install )
             if [ ".$opt_t" = .yes ]; then
                 echo "cp $src $dsttmp" 1>&2
             fi
-            cp $src $dsttmp || shtool_exit $?
+            cp "$src" "$dsttmp" || shtool_exit $?
         else
             if [ ".$opt_t" = .yes ]; then
                 echo "mv $src $dsttmp" 1>&2
             fi
-            mv $src $dsttmp || shtool_exit $?
+            mv "$src" "$dsttmp" || shtool_exit $?
         fi
 
         #   adjust the target file
@@ -873,7 +885,7 @@ install )
             do
                 sed="$sed -e '$e'"
             done
-            cp $dsttmp $dsttmp.old
+            cp "$dsttmp" "$dsttmp.old"
             chmod u+w $dsttmp
             eval "$sed <$dsttmp.old >$dsttmp" || shtool_exit $?
             rm -f $dsttmp.old
@@ -908,7 +920,7 @@ install )
         quick=no
         if [ ".$opt_C" = .yes ]; then
             if [ -r $dst ]; then
-                if cmp -s $src $dst; then
+                if cmp -s "$src" "$dst"; then
                     quick=yes
                 fi
             fi
@@ -934,7 +946,7 @@ install )
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2008 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     errstatus=0
@@ -991,11 +1003,7 @@ mkdir )
                     if [ ".$opt_t" = .yes ]; then
                         echo "mkdir $pathcomp" 1>&2
                     fi
-                    mkdir $pathcomp || {
-                        _errstatus=$?
-                        [ -d "$pathcomp" ] || errstatus=${_errstatus}
-                        unset _errstatus
-                    }
+                    mkdir $pathcomp || errstatus=$?
                     if [ ".$opt_o" != . ]; then
                         if [ ".$opt_t" = .yes ]; then
                             echo "chown $opt_o $pathcomp" 1>&2
@@ -1026,7 +1034,7 @@ mkdir )
 platform )
     ##
     ##  platform -- Platform Identification Utility
-    ##  Copyright (c) 2003-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 2003-2008 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     #   option post-processing
@@ -1174,6 +1182,22 @@ platform )
             SC="4.4BSD"
             ;;
 
+        #   DragonFly BSD
+        *:DragonFly:* )
+            #   determine architecture
+            AT="${UNAME_MACHINE}"
+            AP="${AT}"
+            case "${AP}" in
+                i[3-6]86 ) AP="iX86" ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            r=`echo "${UNAME_RELEASE}" | sed -e 's/\([-_].*\)$/[\1]/'`
+            ST="DragonFly ${r}"
+            SP="${ST}"
+            SC="4.4BSD"
+            ;;
+
         #   GNU/Linux
         *:Linux:* )
             #   determine architecture
@@ -1221,7 +1245,7 @@ platform )
                            -e 's/^#.*$//'`
                     case "`util_lower ${n}`" in
                         redhat )
-                            if [ ".`grep 'Red Hat Enterprise Linux' /etc/${tagfile}`" != . ]; then
+                            if [ ".`egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${tagfile}`" != . ]; then
                                 n="<R>ed <H>at <E>nterprise <L>inux"
                             else
                                 n="<R>ed <H>at <L>inux"
@@ -1230,7 +1254,7 @@ platform )
                         debian             ) n="Debian[ GNU/Linux]"        ;;
                         ubuntu             ) n="Ubuntu[ GNU/Linux]"        ;;
                         fedora             ) n="<Fedora> Core[ GNU/Linux]" ;;
-                        suse               ) n="SuSE[ Linux]"              ;;
+                        suse               ) n="[Novell ]SUSE[ Linux]"     ;;
                         mandrake*|mandriva ) n="Mandriva[ Linux]"          ;;
                         gentoo             ) n="Gentoo[ GNU/Linux]"        ;;
                         slackware          ) n="Slackware[ Linux]"         ;;
@@ -1390,15 +1414,16 @@ platform )
 
         #   IBM AIX
         *:AIX:* )
-            cpu_arch=rs6000
+            #   determine architecture
+            cpu_arch=RS6000
             if [ -x /usr/sbin/lsdev -a -x /usr/sbin/lsattr ]; then
                 cpu_id=`/usr/sbin/lsdev -C -c processor -S available | sed 1q | awk '{ print $1 }'`
                 if [ ".`/usr/sbin/lsattr -El ${cpu_id} | grep -i powerpc`" != . ]; then
-                    cpu_arch=powerpc
+                    cpu_arch=PPC
                 fi
             elif [ -d /QOpenSys ]; then
                 #   IBM i5/OS (aka OS/400) with PASE (Portable Application Solutions Environment)
-                cpu_arch=powerpc
+                cpu_arch=PPC
             fi
             if [ -x /usr/bin/oslevel ]; then
                 os_level=`/usr/bin/oslevel`
@@ -1411,6 +1436,7 @@ platform )
             AT="${cpu_arch}"
             AP="${AT}"
             AC="${AP}"
+            #   determine system
             ST="[IBM ]<AIX >${os_level}"
             SP="${ST}"
             case "${os_level}" in
@@ -1419,20 +1445,78 @@ platform )
             esac
             ;;
 
-        #   Apple MacOS X Darwin
+        #   Apple Mac OS X (Darwin)
         *:Darwin:* )
-            AT=`uname -p`
+            #   determine architecture
+            AT="`uname -p`"
             case "${AT}" in
                 powerpc ) AT="PPC" ;;
             esac
             AP="${AT}"
-            AC="${AP}"
-            case "${AC}" in
-                i?86 ) AC="iX86" ;;
+            case "${AP}" in
+                i?86 ) AP="iX86" ;;
             esac
-            ST="[Apple ]${UNAME_SYSTEM} ${UNAME_RELEASE}"
-            SP="${ST}"
-            SC="4.4BSD/Mach3"
+            AC="${AP}"
+            #   determine system
+            unset v1; unset v2; unset v3
+            eval `echo "${UNAME_RELEASE}" |\
+                  sed -e 's/^/#/' \
+                      -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"; v3="\3"/' \
+                      -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"/' \
+                      -e 's/^#\([0-9][0-9]*\).*$/v1="\1"/' \
+                      -e 's/^#.*$/v1="0"/'`
+            ST="[Apple ]<${UNAME_SYSTEM} ${v1}>${v2+.$v2}${v3+[.$v3]}"
+            SP="$ST"
+            v="`(sw_vers) 2>/dev/null | grep 'ProductVersion:' | sed -e 's/^ProductVersion:[^0-9]*\([0-9][0-9.]*\).*$/\1/'`"
+            if [ ".$v" = . ]; then
+                for name in System Server; do
+                    if [ -f /System/Library/CoreServices/${name}Version.plist ]; then
+                        v=`(defaults read "/System/Library/CoreServices/${name}Version" "ProductVersion") 2>/dev/null`
+                        [ ".$v" != . ] && break
+                    fi
+                done
+            fi
+            if [ ".$v" != . ]; then
+                unset v1; unset v2; unset v3
+                eval `echo "${v}" |\
+                      sed -e 's/^/#/' \
+                          -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"; v3="\3"/' \
+                          -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"/' \
+                          -e 's/^#\([0-9][0-9]*\).*$/v1="\1"/' \
+                          -e 's/^#.*$/v1="0"/'`
+                SP="[Apple ]Mac OS X ${v1}${v2+.$v2}${v3+[.$v3]}"
+            fi
+            SC="4.4BSD/Mach3.0"
+            ;;
+
+        #   Windows/Cygwin
+        *:CYGWIN*:* )
+            #   determine architecture
+            AT="`uname -m`"
+            AP="${AT}"
+            case "${AP}" in
+                i?86 ) AP="iX86" ;;
+            esac
+            AC="${AP}"
+            #   determine system
+            unset v1; unset v2; unset v3
+            eval `echo "${UNAME_RELEASE}" |\
+                  sed -e 's/^/#/' \
+                      -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"; v3="\3"/' \
+                      -e 's/^#\([0-9][0-9]*\)\.\([0-9][0-9]*\).*$/v1="\1"; v2="\2"/' \
+                      -e 's/^#\([0-9][0-9]*\).*$/v1="\1"/' \
+                      -e 's/^#.*$/v1="0"/'`
+            ST="Cygwin ${v1}${v2+.$v2}${v3+[.$v3]}"
+            SP="$ST"
+            SC="Windows"
+            v=`echo "${UNAME_SYSTEM}" | sed -e 's/^CYGWIN_NT-//' |\
+               sed -e 's/^/#/' -e 's/^#\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' -e 's/^#.*$//'`
+            case "$v" in
+                4.0 ) SC="$SC[ NT]"    ;;
+                5.0 ) SC="$SC[ 2000]"  ;;
+                5.1 ) SC="$SC[ XP]"    ;;
+                6.0 ) SC="$SC[ Vista]" ;;
+            esac
             ;;
 
         #   TODO ...ADD YOUR NEW PLATFORM CHECK HERE... TODO
@@ -1579,7 +1663,7 @@ platform )
 path )
     ##
     ##  path -- Deal with program paths
-    ##  Copyright (c) 1998-2006 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2008 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     namelist="$*"
