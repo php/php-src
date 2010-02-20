@@ -272,7 +272,7 @@ if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
   AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, 1, [Whether the system supports standard DES salt])
   AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, 1, [Whether the system supports BlowFish salt])
-  AC_DEFINE_UNQUOTED(PHP_EXT_DES_CRYPT, 1, [Whether the system supports extended DES salt])
+  AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports MD5 salt])
   AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, 1, [Whether the system supports extended DES salt])
   AC_DEFINE_UNQUOTED(PHP_SHA512_CRYPT, 1, [Whether the system supports SHA512 salt])
   AC_DEFINE_UNQUOTED(PHP_SHA256_CRYPT, 1, [Whether the system supports SHA256 salt])
