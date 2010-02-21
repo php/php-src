@@ -863,6 +863,10 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 	dir = VCWD_OPENDIR(path);
 
 #ifdef PHP_WIN32
+	if (!dir) {
+		php_win32_docref2_from_error(GetLastError(), path, path TSRMLS_CC);
+	}
+
 	if (dir && dir->finished) {
 		closedir(dir);
 		dir = NULL;
