@@ -1,7 +1,5 @@
 --TEST--
 Test Blowfish crypt() with invalid rounds
---XFAIL--
-Needs a patch from Pierre
 --FILE--
 <?php
 
