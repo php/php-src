@@ -15,6 +15,7 @@
    | Authors: Stig Bakken <ssb@php.net>                                   |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -146,7 +147,7 @@ PHP_FUNCTION(crypt)
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL;
 	int str_len, salt_in_len = 0;
-
+	char *crypt_res;
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
@@ -195,9 +196,13 @@ PHP_FUNCTION(crypt)
 			output = emalloc(needed * sizeof(char *));
 			salt[salt_in_len] = '\0';
 
-			php_sha512_crypt_r(str, salt, output, needed);
+			crypt_res = php_sha512_crypt_r(str, salt, output, needed);
+			if (!crypt_res) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRING(output, 1);
+			}
 
-			RETVAL_STRING(output, 1);
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 			efree(output);
 		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
@@ -209,9 +214,14 @@ PHP_FUNCTION(crypt)
 						+ strlen(salt) + 1 + 43 + 1);
 			output = emalloc(needed * sizeof(char *));
 			salt[salt_in_len] = '\0';
-			php_sha256_crypt_r(str, salt, output, needed);
 
-			RETVAL_STRING(output, 1);
+			crypt_res = php_sha256_crypt_r(str, salt, output, needed);
+			if (!crypt_res) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRING(output, 1);
+			}
+
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 			efree(output);
 		} else if (
@@ -225,14 +235,25 @@ PHP_FUNCTION(crypt)
 			char output[PHP_MAX_SALT_LEN + 1];
 
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
-			php_crypt_blowfish_rn(str, salt, output, sizeof(output));
 
-			RETVAL_STRING(output, 1);
+			crypt_res = php_crypt_blowfish_rn(str, salt, output, sizeof(output));
+			if (!crypt_res) {
+				RETVAL_FALSE;
+			} else {
+				RETVAL_STRING(output, 1);
+			}
+
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 		} else {
 			memset(&buffer, 0, sizeof(buffer));
 			_crypt_extended_init_r();
-			RETURN_STRING(_crypt_extended_r(str, salt, &buffer), 1);
+
+			crypt_res = _crypt_extended_r(str, salt, &buffer);
+			if (!crypt_res) {
+				RETURN_FALSE;
+			} else {
+				RETURN_STRING(crypt_res, 1);
+			}
 		}
 	}
 #else
@@ -247,8 +268,12 @@ PHP_FUNCTION(crypt)
 #  else
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
-
-		RETURN_STRING(crypt_r(str, salt, &buffer), 1);
+		crypt_res = crypt_r(str, salt, &buffer);
+		if (!crypt_res) {
+			RETURN_FALSE;
+		} else {
+			RETURN_STRING(crypt_res, 1);
+		}
 	}
 # endif
 #endif

@@ -1,7 +1,5 @@
 --TEST--
 Bug #51059 crypt() segfaults on certain salts
---XFAIL--
-Needs a patch from Pierre
 --FILE--
 <?php
 
