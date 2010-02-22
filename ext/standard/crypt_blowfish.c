@@ -606,6 +606,7 @@ char *php_crypt_blowfish_rn(__CONST char *key, __CONST char *setting,
 	    setting[3] != '$' ||
 	    setting[4] < '0' || setting[4] > '3' ||
 	    setting[5] < '0' || setting[5] > '9' ||
+	    (setting[4] == '3' && setting[5] > '1') ||
 	    setting[6] != '$') {
 		__set_errno(EINVAL);
 		return NULL;
