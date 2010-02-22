@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
-- Improved crypt support for edge cases (UFC compatibility). (Joey, Pierre)
+- Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
+  Joey, Pierre)
 
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
