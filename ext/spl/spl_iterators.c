@@ -923,7 +923,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			}
 			if (intern->u.limit.offset < 0) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be > 0", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be >= 0", 0 TSRMLS_CC);
 				return NULL;
 			}
 			if (intern->u.limit.count < 0 && intern->u.limit.count != -1) {
