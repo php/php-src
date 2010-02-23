@@ -199,7 +199,11 @@ PHP_FUNCTION(crypt)
 
 			crypt_res = php_sha512_crypt_r(str, salt, output, needed);
 			if (!crypt_res) {
-				RETVAL_FALSE;
+				if (salt[0]=='*' && salt[1]=='0') {
+					RETVAL_STRING("*1", 1);
+				} else {
+					RETVAL_STRING("*0", 1);
+				}
 			} else {
 				RETVAL_STRING(output, 1);
 			}
@@ -218,7 +222,11 @@ PHP_FUNCTION(crypt)
 
 			crypt_res = php_sha256_crypt_r(str, salt, output, needed);
 			if (!crypt_res) {
-				RETVAL_FALSE;
+				if (salt[0]=='*' && salt[1]=='0') {
+					RETVAL_STRING("*1", 1);
+				} else {
+					RETVAL_STRING("*0", 1);
+				}
 			} else {
 				RETVAL_STRING(output, 1);
 			}
@@ -239,7 +247,11 @@ PHP_FUNCTION(crypt)
 
 			crypt_res = php_crypt_blowfish_rn(str, salt, output, sizeof(output));
 			if (!crypt_res) {
-				RETVAL_FALSE;
+				if (salt[0]=='*' && salt[1]=='0') {
+					RETVAL_STRING("*1", 1);
+				} else {
+					RETVAL_STRING("*0", 1);
+				}
 			} else {
 				RETVAL_STRING(output, 1);
 			}
@@ -251,7 +263,11 @@ PHP_FUNCTION(crypt)
 
 			crypt_res = _crypt_extended_r(str, salt, &buffer);
 			if (!crypt_res) {
-				RETURN_FALSE;
+				if (salt[0]=='*' && salt[1]=='0') {
+					RETURN_STRING("*1", 1);
+				} else {
+					RETURN_STRING("*0", 1);
+				}
 			} else {
 				RETURN_STRING(crypt_res, 1);
 			}
@@ -271,7 +287,11 @@ PHP_FUNCTION(crypt)
 #  endif
 		crypt_res = crypt_r(str, salt, &buffer);
 		if (!crypt_res) {
-			RETURN_FALSE;
+				if (salt[0]=='*' && salt[1]=='0') {
+					RETURN_STRING("*1", 1);
+				} else {
+					RETURN_STRING("*0", 1);
+				}
 		} else {
 			RETURN_STRING(crypt_res, 1);
 		}
