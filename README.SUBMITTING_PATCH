@@ -20,24 +20,37 @@ an existing bug at http://bugs.php.net/. This can be used to track
 the patch progress and prevent your changes getting lost in the PHP
 mail archives.
 
-If your code change is large then first discuss it with the extension
+If your code change is large, then first discuss it with the extension
 maintainer and/or a development mail list. Extension maintainers can
 be found in the EXTENSIONS file in the PHP source. Use the
 internals@lists.php.net mail list to discuss changes to the base PHP
 code. Use pecl-dev@lists.php.net for changes to code that is only
 available from PECL (http://pecl.php.net/). Use pear-dev@lists.php.net
-for PEAR modules (http://pear.php.net/). Mail list subscription is
-explained on http://www.php.net/mailing-lists.php.
+for PEAR modules (http://pear.php.net/). Use phpdoc@lists.php.net for
+PHP documentation questions. Mail list subscription is explained on
+http://www.php.net/mailing-lists.php.
 
-If a PHP or PECL patch affects user-functionality or makes significant
-internal changes then create a simple RFC on http://wiki.php.net/rfc
-before starting discussion. This RFC can be used for initial
-discussion and later for documentation. Wiki accounts can be requested
-on http://wiki.php.net/start?do=register
+If a PHP or PECL patch affects user functionality or makes significant
+internal changes then create a simple Request For Comment (RFC) page
+on http://wiki.php.net/rfc before starting discussion. This RFC can be
+used for initial discussion and later for documentation. Wiki accounts
+can be requested on http://wiki.php.net/start?do=register
+
+Online information on PHP internal C functions is at
+http://www.php.net/internals, though this is considered
+incomplete. Various external resources can be found on the web. A
+standard reference is the book "Extending and Embedding PHP" by Sara
+Golemon.
+
+Information on contributing to PEAR is available at
+http://pear.php.net/manual/en/guide-developers.php
+
+Information on contributing to PHP documentation is at
+http://php.net/dochowto and http://wiki.php.net/doc/howto
 
 There are several IRC channels where PHP developers are often
-available to discuss questions.  They include #php.pecl on the EFNet
-network and #php-dev-win on FreeNode.
+available to discuss questions. They include #php.pecl and #php.doc
+on the EFNet network and #php-dev-win on FreeNode.
 
 
 How to create your patch
@@ -93,13 +106,16 @@ pecl-dev@lists.php.net
 If you are patching PEAR then send the patch to
 pear-dev@lists.php.net
 
+If you are patching PHP's documentation then send the patch to
+phpdoc@lists.php.net
+
 The mail can be CC'd to the extension maintainer (see EXTENSIONS).
 
-Please make the subject prefix "[PATCH]".
+Please make the subject prefix "[PATCH]", for example "[PATCH] Fix
+return value of all array functions"
 
-Include the patch as an attachment. Note: only MIME attachments of
-type 'text/*' are accepted. The easiest way to accomplish this is to
-make the file extension '.txt'.
+Include the patch as an attachment with a file extension of ".txt".
+This is because only MIME attachments of type 'text/*' are accepted.
 
 Explain what has been fixed/added/changed by your patch. Test scripts
 should be included in the email.
@@ -129,8 +145,8 @@ these questions:
 
 What happens when your patch is applied
 ---------------------------------------
-Your name will be included together with your email address in the SVN
-commit log. If your patch affects end users, a brief description
-and your name might be added to the NEWS file.
+Your name will be included in the SVN commit log. If your patch
+affects end users, a brief description and your name might be added to
+the NEWS file.
 
 Thank you for patching PHP!
