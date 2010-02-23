@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2010, PHP 5.3.2 RC 4
+
+
 23 Feb 2010, PHP 5.3.2 RC 3
 - Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
   Joey, Pierre)
