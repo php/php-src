@@ -1374,8 +1374,11 @@ ZEND_FUNCTION(gmp_random)
 
 		GMPG(rand_initialized) = 1;
 	}
+#ifdef GMP_LIMB_BITS
+	mpz_urandomb(*gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
+#else
 	mpz_urandomb(*gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
-
+#endif
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
 /* }}} */
