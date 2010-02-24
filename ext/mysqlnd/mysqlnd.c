@@ -57,10 +57,10 @@ extern MYSQLND_CHARSET *mysqlnd_charsets;
 
 
 
-PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. Your password has length of 16. "
-"Please execute the SET PASSWORD command (`SET PASSWORD = PASSWORD('your_existing_password')`) with the "
-"help of a administration tool to set your password again. This will store a new, and more secure, hash value with the length of 41, in mysql.user. If you are using PHP 5.2 or earlier to "
-"connect to this database you might need to remove the old-passwords flag from your my.cnf";
+PHPAPI const char * const mysqlnd_old_passwd  = "mysqlnd cannot connect to MySQL 4.1+ using the old insecure authentication. "
+"Please use an administration tool to reset your password with the command SET PASSWORD = PASSWORD('your_existing_password'). This will "
+"store a new, and more secure, hash value in mysql.user. If this user is used in other scripts executed by PHP 5.2 or earlier you might need to remove the old-passwords "
+"flag from your my.cnf file";
 
 PHPAPI const char * const mysqlnd_server_gone = "MySQL server has gone away";
 PHPAPI const char * const mysqlnd_out_of_sync = "Commands out of sync; you can't run this command now";
