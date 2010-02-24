@@ -3,16 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.3.3
 - Upgraded bundled PCRE to version 8.01. (Ilia)
 
-- Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
-  Joey, Pierre)
-
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
-
-- Fixed crypt's blowfish sanity check of the "setting" string, to reject iteration
-  counts encoded as 36 through 39. (Pierre)
- 
-- Fixed #51059 (crypt crashes when invalid salt are given). (Pierre)
 
 
 ?? ??? 20??, PHP 5.3.2
@@ -50,8 +42,12 @@ PHP                                                                        NEWS
   (Linus Nielsen Feltzing <linus@haxx.se>)
 - Added client-side server name indication support in openssl. (Arnaud)
 
+- Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
+  Joey, Pierre)
 - Improved fix for bug #50006 (Segfault caused by uksort()). (Stas)
 
+- Fixed crypt's blowfish sanity check of the "setting" string, to reject iteration
+  counts encoded as 36 through 39. (Solar Designer, Joey, Pierre)
 - Fixed mysqlnd hang when queries exactly 16777214 bytes long are sent. (Andrey)
 - Fixed incorrect decoding of 5-byte BIT sequences in mysqlnd. (Andrey)
 - Fixed error_log() to be binary safe when using message_type 3. (Jani)
@@ -73,6 +69,7 @@ PHP                                                                        NEWS
 - Fixed memory leak in the realpath cache on Windows. (Pierre)
 - Fixed memory leak in zip_close. (Pierre)
 
+- Fixed #51059 (crypt crashes when invalid salt are given). (Pierre)
 - Fixed bug #50952 (allow underscore _ in constants parsed in php.ini files).
   (Jani)
 - Fixed bug #50940 (Custom content-length set incorrectly in Apache SAPIs).
