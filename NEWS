@@ -6,8 +6,10 @@ PHP                                                                        NEWS
 23 Feb 2010, PHP 5.3.2 RC 3
 - Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
   Joey, Pierre)
-- Fixed crypt's blowfish sanity check of the "setting" string, to reject
-  iteration counts encoded as 36 through 39. (Pierre)
+
+- Fixed crypt's blowfish sanity check of the "setting" string, to reject iteration
+  counts encoded as 36 through 39. (Solar Designer, Joey, Pierre)
+
 - Fixed #51059 (crypt crashes when invalid salt are given). (Pierre)
 
 12 Feb 2010, PHP 5.3.2 RC 2
