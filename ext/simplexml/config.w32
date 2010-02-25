@@ -17,7 +17,7 @@ if (PHP_SIMPLEXML == "yes") {
 		}
 		ADD_FLAG("CFLAGS_SIMPLEXML", "/D PHP_SIMPLEXML_EXPORTS ");
 	} else {
-		PHP_SIMPLEXML == "no";
+		PHP_SIMPLEXML = "no";
 		WARNING("simplexml not enabled; libraries and headers not found");
 	}
 }
