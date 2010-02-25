@@ -1863,12 +1863,16 @@ static int sxe_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int SimpleXMLIterator::count()
+/* {{{ proto int SimpleXMLElement::count()
  Get number of child elements */
 SXE_METHOD(count)
 {
 	long count = 0;
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	php_sxe_count_elements_helper(sxe, &count TSRMLS_CC);
 	
