@@ -568,7 +568,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	if (PG(error_log) != NULL) {
 #ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
-			php_syslog(LOG_NOTICE, "%.500s", log_message);
+			php_syslog(LOG_NOTICE, "%s", log_message);
 			PG(in_error_log) = 0;
 			return;
 		}
