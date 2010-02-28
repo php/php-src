@@ -153,8 +153,8 @@ mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
 				} else if (s >= 0 && s < jisx0208_ucs_table_size) {		/* X 0208 */
 					w = jisx0208_ucs_table[s];
-				} else if (s >= (84*94)) {		/* user (85ku - 94ku) */
-					w = s - (84*94) + 0xe000;
+				} else if (s >= (84 * 94)) {		/* user (85ku - 94ku) */
+					w = s - (84 * 94) + 0xe000;
 				}
 			}
 			if (w <= 0) {
