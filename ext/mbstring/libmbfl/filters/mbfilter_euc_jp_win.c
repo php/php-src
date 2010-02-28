@@ -327,8 +327,10 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			c1 = 0;
 			c2 = cp932ext1_ucs_table_max - cp932ext1_ucs_table_min;
 			while (c1 < c2) {		/* CP932 vendor ext1 (13ku) */
+				const int oh = cp932ext1_ucs_table_min / 94;
+
 				if (c == cp932ext1_ucs_table[c1]) {
-					s1 = ((c1/94 + 0x2d) << 8) + (c1%94 + 0x21);
+					s1 = ((c1 / 94 + oh + 0x21) << 8) + (c1 % 94 + 0x21);
 					break;
 				}
 				c1++;
