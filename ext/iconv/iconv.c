@@ -1331,7 +1331,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						break;
 					}
 
-					out_size -= ((nbytes_required - (char_cnt - 2)) + 1) / (3 - 1);
+					out_size -= ((nbytes_required - (char_cnt - 2)) + 1) / 3;
 					in_left = ini_in_left;
 					in_p = ini_in_p;
 				}
