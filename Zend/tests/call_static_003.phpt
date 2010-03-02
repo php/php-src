@@ -28,9 +28,9 @@ foo::BAZ();
 --EXPECT--
 nonstatic
 string(6) "fOoBaR"
-nonstatic
+static
 string(6) "foOBAr"
-nonstatic
+static
 string(6) "fOOBAr"
 static
 string(3) "bAr"

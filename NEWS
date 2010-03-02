@@ -69,7 +69,9 @@ PHP                                                                        NEWS
 - Fixed memory leak in the realpath cache on Windows. (Pierre)
 - Fixed memory leak in zip_close. (Pierre)
 
-- Fixed #51059 (crypt crashes when invalid salt are given). (Pierre)
+- Fixed bug #51176 (Static calling in non-static method behaves like $this->).
+  (Felipe)
+- Fixed bug #51059 (crypt crashes when invalid salt are given). (Pierre)
 - Fixed bug #50952 (allow underscore _ in constants parsed in php.ini files).
   (Jani)
 - Fixed bug #50940 (Custom content-length set incorrectly in Apache SAPIs).
