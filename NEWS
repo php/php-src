@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    
+  an invalid option is provided). (Ilia)
 
 ?? ??? 20??, PHP 5.3.2
 - Upgraded bundled sqlite to version 3.6.22. (Ilia)
