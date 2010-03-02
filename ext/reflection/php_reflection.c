@@ -4750,13 +4750,15 @@ static zend_function_entry reflection_object_functions[] = {
 
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_export, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_export, 0, 0, 2)
+	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_INFO(0, argument)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_property___construct, 0)
+	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_INFO(0, argument)
 ZEND_END_ARG_INFO()
 
@@ -4766,7 +4768,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_getValue, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setValue, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_property_setValue, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
