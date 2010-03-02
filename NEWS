@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.14
+- Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when 
+  an invalid option is provided). (Ilia)
 
 
 25 Feb 2010, PHP 5.2.13

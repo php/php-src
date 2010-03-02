@@ -1772,6 +1772,10 @@ PHP_FUNCTION(curl_setopt)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
 	convert_to_long_ex(zoption);
+	if (Z_LVAL_PP(zoption) <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid curl configuration option");
+		RETURN_FALSE;
+	}
 
 	if (!_php_curl_setopt(ch, Z_LVAL_PP(zoption), zvalue, return_value TSRMLS_CC)) {
 		RETURN_TRUE;
