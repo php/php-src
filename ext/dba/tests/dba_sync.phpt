@@ -1,6 +1,10 @@
 --TEST--
 DBA Sync Test
 --SKIPIF--
+<?php
+	require_once dirname(__FILE__) .'/skipif.inc';
+	die("info $HND handler used");
+?>
 --FILE--
 <?php
 require_once(dirname(__FILE__) .'/test.inc');
