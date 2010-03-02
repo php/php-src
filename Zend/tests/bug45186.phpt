@@ -35,17 +35,17 @@ call_user_func('self::y');
 
 ?>
 --EXPECTF--
-__call:
+__callstatic:
 unicode(3) "ABC"
-__call:
+__callstatic:
 unicode(3) "ABC"
 __call:
 unicode(3) "xyz"
-__call:
+__callstatic:
 unicode(3) "www"
 __call:
 unicode(1) "y"
-__call:
+__callstatic:
 unicode(1) "y"
 ok
 __callstatic:
