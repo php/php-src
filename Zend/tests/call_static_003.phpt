@@ -28,9 +28,9 @@ foo::BAZ();
 --EXPECT--
 nonstatic
 unicode(6) "fOoBaR"
-nonstatic
+static
 unicode(6) "foOBAr"
-nonstatic
+static
 unicode(6) "fOOBAr"
 static
 unicode(3) "bAr"

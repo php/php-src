@@ -43,11 +43,11 @@ __call:
 unicode(3) "ABC"
 __call:
 unicode(3) "ABC"
-__call:
+__callstatic:
 unicode(3) "XYZ"
-__call:
+__callstatic:
 unicode(3) "WWW"
-__call:
+__callstatic:
 unicode(3) "ABC"
 __callstatic:
 unicode(1) "A"
