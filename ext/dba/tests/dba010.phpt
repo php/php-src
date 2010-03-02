@@ -37,5 +37,5 @@ require_once(dirname(__FILE__) .'/clean.inc');
 
 ?>
 --EXPECTF--
-database handler: flatfile
+database handler: %s
 6YYYYYY
