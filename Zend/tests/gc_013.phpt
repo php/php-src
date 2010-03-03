@@ -1,5 +1,7 @@
 --TEST--
 GC 013: Too many cycles in one array
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array();

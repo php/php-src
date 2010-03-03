@@ -1,5 +1,7 @@
 --TEST--
 GC 012: collection of many loops at once
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a=array();

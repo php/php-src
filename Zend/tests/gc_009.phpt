@@ -1,5 +1,7 @@
 --TEST--
 GC 009: Unreferensed array-object cycle
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array();

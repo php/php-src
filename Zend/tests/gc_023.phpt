@@ -1,5 +1,7 @@
 --TEST--
 GC 023: Root buffer overflow (automatic collection)
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a=array();

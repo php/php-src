@@ -1,5 +1,7 @@
 --TEST--
 GC 006: Simple array-object cycle
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = new stdClass();

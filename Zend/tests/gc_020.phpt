@@ -1,5 +1,7 @@
 --TEST--
 GC 020: GC detach reference with assign
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array();
