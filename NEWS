@@ -6,8 +6,12 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed bug #51176 (Static calling in non-static method behaves like $this->).
+  (Felipe)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    
   an invalid option is provided). (Ilia)
+- Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
+  spl_autoload_register). (Felipe)
 
 ?? ??? 20??, PHP 5.3.2
 - Upgraded bundled sqlite to version 3.6.22. (Ilia)
@@ -71,8 +75,6 @@ PHP                                                                        NEWS
 - Fixed memory leak in the realpath cache on Windows. (Pierre)
 - Fixed memory leak in zip_close. (Pierre)
 
-- Fixed bug #51176 (Static calling in non-static method behaves like $this->).
-  (Felipe)
 - Fixed bug #51059 (crypt crashes when invalid salt are given). (Pierre)
 - Fixed bug #50952 (allow underscore _ in constants parsed in php.ini files).
   (Jani)
@@ -96,8 +98,6 @@ PHP                                                                        NEWS
   (hiroaki dot kawai at gmail dot com, Ilia)
 - Fixed bug #50756 (CURLOPT_FTP_SKIP_PASV_IP does not exist). (Sriram)
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
-- Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
-  spl_autoload_register). (Felipe)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0).
   (Joey, Ilia)
 - Fixed bug #50723 (Bug in garbage collector causes crash). (Dmitry)
