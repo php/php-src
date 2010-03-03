@@ -1070,7 +1070,7 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 	zval *retval_ptr = NULL;
 	int retval;
 	unsigned int lc_name_len;
-	zstr lc_name, lc_free;
+	zstr lc_name, lc_free, name_p;
 	char dummy = 1;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
@@ -1133,7 +1133,15 @@ ZEND_API int zend_u_lookup_class_ex(zend_uchar type, zstr name, int name_length,
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
-	ZVAL_ZSTRL(class_name_ptr, type, autoload_name, name_length, 1);
+	name_p.v = autoload_name.v;
+	if (name_length != lc_name_len) {		
+		if (type == IS_UNICODE) {
+			name_p.u++;
+		} else if (type == IS_STRING) {
+			name_p.s++;
+		}
+	}
+	ZVAL_ZSTRL(class_name_ptr, type, name_p, lc_name_len, 1);
 
 	args[0] = &class_name_ptr;
 
