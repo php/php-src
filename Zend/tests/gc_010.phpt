@@ -1,5 +1,7 @@
 --TEST--
 GC 010: Cycle with reference to $GLOBALS
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array();
