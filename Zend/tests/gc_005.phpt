@@ -1,5 +1,7 @@
 --TEST--
 GC 005: Simple object cycle
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = new stdClass();

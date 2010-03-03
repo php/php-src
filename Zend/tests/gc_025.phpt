@@ -1,5 +1,7 @@
 --TEST--
 GC 025: Automatic GC on request shutdown
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array(array());
