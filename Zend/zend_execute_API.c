@@ -1076,7 +1076,11 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, int use_aut
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
-	ZVAL_STRINGL(class_name_ptr, name, name_length, 1);
+	if (name[0] == '\\') {
+		ZVAL_STRINGL(class_name_ptr, name+1, name_length-1, 1);
+	} else {
+		ZVAL_STRINGL(class_name_ptr, name, name_length, 1);
+	}
 
 	args[0] = &class_name_ptr;
 

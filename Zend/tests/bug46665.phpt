@@ -12,4 +12,4 @@ function __autoload($class) {
 
 ?>
 --EXPECTF--
-%string|unicode%(12) "\Foo\Bar\Baz"
+%string|unicode%(11) "Foo\Bar\Baz"

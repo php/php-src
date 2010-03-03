@@ -96,6 +96,8 @@ PHP                                                                        NEWS
   (hiroaki dot kawai at gmail dot com, Ilia)
 - Fixed bug #50756 (CURLOPT_FTP_SKIP_PASV_IP does not exist). (Sriram)
 - Fixed bug #50732 (exec() adds single byte twice to $output array). (Ilia)
+- Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
+  spl_autoload_register). (Felipe)
 - Fixed bug #50728 (All PDOExceptions hardcode 'code' property to 0).
   (Joey, Ilia)
 - Fixed bug #50723 (Bug in garbage collector causes crash). (Dmitry)
