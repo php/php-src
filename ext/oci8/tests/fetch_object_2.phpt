@@ -87,7 +87,7 @@ object(stdClass)#%d (3) {
   [%u|b%"COL2"]=>
   object(OCI-Lob)#%d (1) {
     [%u|b%"descriptor"]=>
-    resource(15) of type (oci8 descriptor)
+    resource(%d) of type (oci8 descriptor)
   }
   [%u|b%"COL3"]=>
   %unicode|string%(11) "1 more text"
@@ -98,7 +98,7 @@ object(stdClass)#%d (3) {
   [%u|b%"COL2"]=>
   object(OCI-Lob)#%d (1) {
     [%u|b%"descriptor"]=>
-    resource(16) of type (oci8 descriptor)
+    resource(%d) of type (oci8 descriptor)
   }
   [%u|b%"COL3"]=>
   NULL
@@ -109,7 +109,7 @@ object(stdClass)#%d (3) {
   [%u|b%"COL2"]=>
   object(OCI-Lob)#%d (1) {
     [%u|b%"descriptor"]=>
-    resource(17) of type (oci8 descriptor)
+    resource(%d) of type (oci8 descriptor)
   }
   [%u|b%"COL3"]=>
   %unicode|string%(11) "3 more text"
