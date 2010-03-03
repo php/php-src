@@ -1,5 +1,7 @@
 --TEST--
 GC 016: nested GC calls
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 class Foo {

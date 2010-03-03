@@ -2,6 +2,7 @@
 GC 022: GC detach reference in executor's PZVAL_UNLOCK()
 --INI--
 error_reporting=0
+zend.enable_gc=1
 --FILE--
 <?php
 $a = array(array());

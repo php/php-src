@@ -1,5 +1,7 @@
 --TEST--
 GC 027: GC and properties of internal classes
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 try {

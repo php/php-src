@@ -1,5 +1,7 @@
 --TEST--
 GC 017: GC and destructors with unset
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 class Node {

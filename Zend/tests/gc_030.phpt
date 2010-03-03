@@ -1,5 +1,7 @@
 --TEST--
 GC 030: GC and exceptions in destructors
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 class foo {
