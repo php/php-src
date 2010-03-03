@@ -1,7 +1,7 @@
 --TEST--
 Bug #45877 (Array key '2147483647' left as string)
 --INI--
-precision=20
+precision=16
 --FILE--
 <?php
 $keys = array(PHP_INT_MAX,
@@ -18,6 +18,6 @@ array(3) {
   int(1)
   [-%d8]=>
   int(1)
-  ["%d8"]=>
+  ["%s"]=>
   int(1)
 }
