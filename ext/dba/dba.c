@@ -250,7 +250,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	int skip = 0;  												\
+	long skip = 0;  											\
 	switch(ac) {												\
 	case 2: 													\
 		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
