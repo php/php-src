@@ -467,7 +467,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		s = url->host;
 
 		while (s < e) {
-			if (!isalnum((int)*(unsigned char *)s) && *s != '_' && *s != '.') {
+			if (!isalnum((int)*(unsigned char *)s) && *s != '-' && *s != '.') {
 				goto bad_url;
 			}
 			s++;
