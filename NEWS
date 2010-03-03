@@ -1,9 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.3.2 RC 4
-
+- Updated timezone database to version 2010.3. (Derick)
 
 23 Feb 2010, PHP 5.3.2 RC 3
+
 - Improved crypt support for edge cases (UFC compatibility). (Solar Designer,
   Joey, Pierre)
 
