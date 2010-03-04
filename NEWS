@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Fixed bug #51192 (FILTER_VALIDATE_URL will invalidate a hostname that
   includes '-'). (Adam, solar at azrael dot ws).
+- Fixed bug #51190 (ftp_put() returns false when transfer was successful).
+  (Ilia)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when 
   an invalid option is provided). (Ilia)
 - Fixed bug #43314 (iconv_mime_encode(), broken Q scheme). (Rasmus)

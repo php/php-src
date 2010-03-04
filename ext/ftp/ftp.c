@@ -948,7 +948,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 	}
 	ftp->data = data = data_close(ftp, data);
 
-	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
+	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
 	return 1;
