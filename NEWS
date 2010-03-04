@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed bug #51190 (ftp_put() returns false when transfer was successful).  
+  (Ilia)
 - Fixed bug #51176 (Static calling in non-static method behaves like $this->).
   (Felipe)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    
