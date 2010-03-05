@@ -261,11 +261,11 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     fi
   done
   if test -z "$THIS_LIBS"; then
-    AC_MSG_CHECKING([for db$1 major version])
+    AC_MSG_CHECKING([for DB$1 major version])
     AC_MSG_ERROR([Header contains different version])
   fi
   if test "$1" = "4"; then
-    AC_MSG_CHECKING([for db4 minor version and patch level])
+    AC_MSG_CHECKING([for DB4 minor version and patch level])
     AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
 #if DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25
@@ -310,10 +310,18 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
 if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp="/usr/local/BerkeleyDB.4."
-  for i in $PHP_DB4 ${dbdp}6 ${dbdp}5 ${dbdp}4 ${dbdp}3  ${dbdp}2 ${dbdp}1 ${dbdp}0 /usr/local /usr; do
+  for i in $PHP_DB4 ${dbdp}8 ${dbdp}7 ${dbdp}6 ${dbdp}5 ${dbdp}4 ${dbdp}3  ${dbdp}2 ${dbdp}1 ${dbdp}0 /usr/local /usr; do
     if test -f "$i/db4/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db4/db.h
+      break
+    elif test -f "$i/include/db4.8/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db4.8/db.h
+      break
+    elif test -f "$i/include/db4.7/db.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/db4.7/db.h
       break
     elif test -f "$i/include/db4.6/db.h"; then
       THIS_PREFIX=$i
@@ -341,7 +349,7 @@ if test "$PHP_DB4" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(4, db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK(4, db-4.8 db-4.7 db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
 PHP_DBA_STD_RESULT(db4,Berkeley DB4)
 
