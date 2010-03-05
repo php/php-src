@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   (Felipe)
 - Fixed bug #51171 (curl_setopt() doesn't output any errors or warnings when    
   an invalid option is provided). (Ilia)
+- Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)
+- Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
 - Fixed bug #50999 (unaligned memory access in dba_fetch()). (Felipe)
 - Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
   spl_autoload_register). (Felipe)
