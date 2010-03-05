@@ -2,16 +2,20 @@
 DBA DB4 handler test
 --SKIPIF--
 <?php 
-	$handler = 'db4';
-	require_once dirname(__FILE__) .'/skipif.inc';
+$handler = 'db4';
+require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
 --FILE--
 <?php
-	$handler = 'db4';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+$handler = 'db4';
+require_once(dirname(__FILE__) .'/test.inc');
+require_once(dirname(__FILE__) .'/dba_handler.inc');
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+require(dirname(__FILE__) .'/clean.inc'); 
+?>
 --EXPECT--
 database handler: db4
 3NYNYY
