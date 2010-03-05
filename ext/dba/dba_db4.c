@@ -43,7 +43,19 @@ static void php_dba_db4_errcall_fcn(
 	const char *errpfx, const char *msg)
 {
 	TSRMLS_FETCH();
-	
+
+#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8 && DB_VERSION_PATCH <= 26) 
+/* Bug 51086, Berkeley DB 4.8.26 */
+/* This code suppresses a BDB 4.8 error message that BDB incorrectly emits */
+	{
+		char *function = get_active_function_name(TSRMLS_C);
+		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
+			&& !strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)) {
+			return;
+		}
+	}
+#endif
+
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 
@@ -67,6 +79,7 @@ DBA_OPEN_FUNC(db4)
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
+#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR <= 7)  /* Bug 51086 */
 	if (!s && !check_stat.st_size) {
 		info->mode = DBA_TRUNC; /* force truncate */
 	}
@@ -80,6 +93,20 @@ DBA_OPEN_FUNC(db4)
 		(info->mode == DBA_CREAT && !s) ? 0 :
 		info->mode == DBA_WRITER ? 0         : 
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
+#else
+	if (!s && !check_stat.st_size) {
+		info->mode = DBA_CREAT; /* force creation */
+	}
+
+	type = info->mode == DBA_READER ? DB_UNKNOWN :
+		(info->mode == DBA_TRUNC || info->mode == DBA_CREAT) ? DB_BTREE :
+		s ? DB_BTREE : DB_UNKNOWN;
+	  
+	gmode = info->mode == DBA_READER ? DB_RDONLY :
+		info->mode == DBA_CREAT ? DB_CREATE : 
+		info->mode == DBA_WRITER ? 0         : 
+		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
+#endif
 
 	if (gmode == -1) {
 		return FAILURE; /* not possible */
