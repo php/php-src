@@ -193,7 +193,7 @@ static PHP_GINIT_FUNCTION(iconv)
 }
 /* }}} */
 
-#ifdef HAVE_LIBICONV
+#if defined(HAVE_LIBICONV) && defined(HAVE_LIBICONV_IN_LIBICONV)
 #define iconv libiconv
 #endif
 
