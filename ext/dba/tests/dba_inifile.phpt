@@ -12,6 +12,8 @@ DBA INIFILE handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--XFAIL--
+Unicode status incomplete
 --EXPECT--
 database handler: inifile
 3NYNYY
