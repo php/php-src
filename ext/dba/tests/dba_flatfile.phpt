@@ -3,15 +3,21 @@ DBA FlatFile handler test
 --SKIPIF--
 <?php 
 	$handler = 'flatfile';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
 --FILE--
 <?php
 	$handler = 'flatfile';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+	require_once(dirname(__FILE__) .'/test.inc');
+	require_once(dirname(__FILE__) .'/dba_handler.inc');
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
+?>
+--XFAIL--
+Unicode status incomplete
 --EXPECT--
 database handler: flatfile
 3NYNYY
