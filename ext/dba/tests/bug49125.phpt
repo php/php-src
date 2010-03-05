@@ -3,7 +3,7 @@ Bug #49125 (Error in dba_exists C code)
 --SKIPIF--
 <?php 
 	$handler = 'db4';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once(dirname(__FILE__) .'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -11,7 +11,7 @@ Bug #49125 (Error in dba_exists C code)
 error_reporting(E_ALL);
 
 $handler = 'db4';
-require_once dirname(__FILE__) .'/test.inc';
+require_once(dirname(__FILE__) .'/test.inc');
 
 $db = dba_popen($db_filename, 'c', 'db4');
 
@@ -21,7 +21,10 @@ var_dump(dba_exists('foo', $db));
 
 dba_close($db);
 
-unlink($db_filename);
-
+?>
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
+?>
 --EXPECT--
 bool(true)

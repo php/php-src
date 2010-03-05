@@ -2,7 +2,7 @@
 DBA with array keys
 --SKIPIF--
 <?php 
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once(dirname(__FILE__) .'/skipif.inc');
 	die("info $HND handler used");
 ?>
 --FILE--
@@ -28,13 +28,16 @@ if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
         echo dba_exists("[key$i]name$i", $db_file) ? "Y" : "N";
     }
     echo dba_exists(array("key5","name5"), $db_file) ? "Y" : "N";
+    echo "\n";
     dba_close($db_file);
 } else {
     echo "Error creating database\n";
 }
 
-require_once(dirname(__FILE__) .'/clean.inc');
-
+?>
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
 ?>
 --EXPECTF--
 database handler: %s
