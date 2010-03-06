@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   parsing date strings). (Derick)
 - Fixed bug #51086 (DBA DB4 doesn't work with Berkeley DB 4.8). (Chris Jones)
 - Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
+- Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
+  (Raphael Geissert)
 - Fixed bug #50999 (unaligned memory access in dba_fetch()). (Felipe)
 - Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
   spl_autoload_register). (Felipe)
