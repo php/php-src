@@ -68,7 +68,7 @@
 
 static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret TSRMLS_DC) { /* {{{ */
 	long ctx_value;
-	int sign = 0;
+	int sign = 0, digit = 0;
 	const char *end = str + str_len;
 
 	switch (*str) {
@@ -82,7 +82,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 
 	/* must start with 1..9*/
 	if (str < end && *str >= '1' && *str <= '9') {
-		ctx_value = ((*(str++)) - '0');
+		ctx_value = ((sign)?-1:1) * ((*(str++)) - '0');
 	} else {
 		return -1;
 	}
@@ -95,18 +95,17 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 
 	while (str < end) {
 		if (*str >= '0' && *str <= '9') {
-			ctx_value = (ctx_value * 10) + (*(str++) - '0');
+			digit = (*(str++) - '0');
+			if ( (!sign) && ctx_value <= (LONG_MAX-digit)/10 ) {
+				ctx_value = (ctx_value * 10) + digit;
+			} else if ( sign && ctx_value >= (LONG_MIN+digit)/10) {
+				ctx_value = (ctx_value * 10) - digit;
+			} else {
+				return -1;
+			}
 		} else {
 			return -1;
 		}
-	}
-	if (sign) {
-		ctx_value = -ctx_value;
-		if (ctx_value > 0) { /* overflow */
-			return -1;
-		}
-	} else if (ctx_value < 0) { /* overflow */
-		return -1;
 	}
 
 	*ret = ctx_value;
