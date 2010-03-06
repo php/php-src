@@ -24,8 +24,10 @@
 # define PHAR_TAR_PACK
 #elif defined(__sgi)
 # define PHAR_TAR_PACK
-#else
+#elif defined(__GNUC__)
 # define PHAR_TAR_PACK __attribute__((__packed__))
+#else
+# define PHAR_TAR_PACK
 #endif
 
 #if defined(__sgi)
