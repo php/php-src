@@ -154,8 +154,9 @@ Reflecting on method ReflectionProperty::__construct()
 __toString():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
-  - Parameters [1] {
-    Parameter #0 [ <required> $argument ]
+  - Parameters [2] {
+    Parameter #0 [ <required> $class ]
+    Parameter #1 [ <required> $argument ]
   }
 }
 "
@@ -163,8 +164,9 @@ string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 export():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
-  - Parameters [1] {
-    Parameter #0 [ <required> $argument ]
+  - Parameters [2] {
+    Parameter #0 [ <required> $class ]
+    Parameter #1 [ <required> $argument ]
   }
 }
 "
