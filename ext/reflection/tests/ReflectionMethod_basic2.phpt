@@ -153,8 +153,8 @@ __toString():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <optional> $class ]
-    Parameter #1 [ <optional> $name ]
+    Parameter #0 [ <required> $class ]
+    Parameter #1 [ <required> $name ]
   }
 }
 "
@@ -163,8 +163,8 @@ export():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <optional> $class ]
-    Parameter #1 [ <optional> $name ]
+    Parameter #0 [ <required> $class ]
+    Parameter #1 [ <required> $name ]
   }
 }
 "
