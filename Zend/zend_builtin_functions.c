@@ -2236,7 +2236,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 			while (prev) {
 				if (prev->function_state.function &&
-					prev->function_state.function->common.type != ZEND_USER_FUNCTION) {
+					prev->function_state.function->common.type != ZEND_USER_FUNCTION &&
+					!(prev->function_state.function->common.type == ZEND_INTERNAL_FUNCTION &&
+						(prev->function_state.function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
 					break;
 				}				    
 				if (prev->op_array) {
