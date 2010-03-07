@@ -13,11 +13,11 @@ PHP                                                                        NEWS
 - Fixed bug #51062 (DBA DB4 uses mismatched headers and libraries). (Chris Jones)
 - Fixed bug #51023 (filter doesn't detect int overflows with GCC 4.4).
   (Raphael Geissert)
-- Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
-  file and line in trace). (Felipe)
+- Fixed bug #50383 (Exceptions thrown in __call() / __callStatic() do not
+  include file and line in trace). (Felipe)
 - Fixed bug #49267 (Linking fails for iconv). (Moriyosh)
 - Fixed bug #43314 (iconv_mime_encode(), broken Q scheme). (Rasmus)
-- Fixed bug #23229 (syslog function truncates messages). (Adam)
+- Fixed bug #23229 (syslog() truncates messages). (Adam)
 
 25 Feb 2010, PHP 5.2.13
 - Updated timezone database to version 2010.2. (Derick)
