@@ -26,7 +26,7 @@
 	{ "msd",   1,    4,  "Europe/Moscow" },
 	{ "gst",   0,    4,  "Asia/Dubai" },
 	{ "pkt",   0,    5,  "Asia/Karachi" },
-	{ "ist",   0,  5.5,  "Asia/Calcutta" },
+	{ "ist",   0,  5.5,  "Asia/Kolkata" },
 	{ "npt",   0, 5.75,  "Asia/Katmandu" },
 	{ "yekt",  1,    6,  "Asia/Yekaterinburg" },
 	{ "novst", 1,    7,  "Asia/Novosibirsk" },
