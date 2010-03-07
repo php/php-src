@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
   file and line in trace). (Felipe)
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
+- Fixed bug #49778 (DateInterval::format("%a") is always zero when an interval
+  is created from an ISO string). (Derick)
 
 
 ?? ??? 20??, PHP 5.3.2
