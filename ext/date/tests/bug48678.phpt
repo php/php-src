@@ -16,7 +16,7 @@ DateInterval Object
     [i] => 30
     [s] => 5
     [invert] => 0
-    [days] => 0
+    [days] => 
 )
 DateInterval Object
 (
@@ -27,5 +27,5 @@ DateInterval Object
     [i] => 30
     [s] => 5
     [invert] => 0
-    [days] => 0
+    [days] => 
 )
