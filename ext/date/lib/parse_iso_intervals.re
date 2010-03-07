@@ -512,6 +512,7 @@ void timelib_strtointerval(char *s, int len,
 	in.period->weekday = 0;
 	in.period->weekday_behavior = 0;
 	in.period->first_last_day_of = 0;
+	in.period->days = TIMELIB_UNSET;
 
 	in.recurrences = 1;
 

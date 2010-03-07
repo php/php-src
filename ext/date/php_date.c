@@ -2240,7 +2240,13 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
+	if (intervalobj->diff->days != -99999) {
+		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
+	} else {
+		MAKE_STD_ZVAL(zv);
+		ZVAL_FALSE(zv);
+		zend_hash_update(props, "days", 5, &zv, sizeof(zval), NULL);
+	}
 
 	return props;
 }
@@ -3598,7 +3604,13 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 				case 'S': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
 				case 's': length = slprintf(buffer, 32, "%d", (int) t->s); break;
 
-				case 'a': length = slprintf(buffer, 32, "%d", (int) t->days); break;
+				case 'a': {
+					if ((int) t->days != -99999) {
+						length = slprintf(buffer, 32, "%d", (int) t->days);
+					} else {
+						length = slprintf(buffer, 32, "(unknown)");
+					}
+				} break;
 				case 'r': length = slprintf(buffer, 32, "%s", t->invert ? "-" : ""); break;
 				case 'R': length = slprintf(buffer, 32, "%c", t->invert ? '-' : '+'); break;
 
