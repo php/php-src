@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
 - Fixed bug #49778 (DateInterval::format("%a") is always zero when an interval
   is created from an ISO string). (Derick)
+- Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
+  (yoarvi@gmail.com, Derick)
 
 
 ?? ??? 20??, PHP 5.3.2
