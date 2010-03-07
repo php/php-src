@@ -2851,6 +2851,11 @@ PHP_FUNCTION(date_sub)
 	intobj = (php_interval_obj *) zend_object_store_get_object(interval TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
+	if (intobj->diff->have_special_relative) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
+		return;
+	}
+
 	if (intobj->diff->invert) {
 		bias = -1;
 	}
