@@ -1151,10 +1151,8 @@ ZEND_FUNCTION(property_exists)
 	}
 
 	h = zend_get_hash_value(property, property_len+1);
-	if (zend_hash_quick_find(&ce->properties_info, property, property_len+1, h, (void **) &property_info) == SUCCESS) {
-		if (property_info->flags & ZEND_ACC_SHADOW) {
-			RETURN_FALSE;
-		}
+	if (zend_hash_quick_find(&ce->properties_info, property, property_len+1, h, (void **) &property_info) == SUCCESS
+		&& (property_info->flags & ZEND_ACC_SHADOW) == 0) {
 		RETURN_TRUE;
 	}
 
