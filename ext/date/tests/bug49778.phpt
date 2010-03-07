@@ -9,21 +9,21 @@ echo $i->format("%a"), "\n";
 ?>
 --EXPECT--
 object(DateInterval)#1 (8) {
-  ["y"]=>
+  [u"y"]=>
   int(0)
-  ["m"]=>
+  [u"m"]=>
   int(0)
-  ["d"]=>
+  [u"d"]=>
   int(7)
-  ["h"]=>
+  [u"h"]=>
   int(0)
-  ["i"]=>
+  [u"i"]=>
   int(0)
-  ["s"]=>
+  [u"s"]=>
   int(0)
-  ["invert"]=>
+  [u"invert"]=>
   int(0)
-  ["days"]=>
+  [u"days"]=>
   bool(false)
 }
 7
