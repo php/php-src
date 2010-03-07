@@ -22,12 +22,12 @@ PHP                                                                        NEWS
 - Fixed bug #50810 (property_exists does not work for private). (Felipe)
 - Fixed bug #50731 (Inconsistent namespaces sent to functions registered with
   spl_autoload_register). (Felipe)
+- Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications). (Derick)
 - Fixed bug #50392 (date_create_from_format enforces 6 digits for 'u' format
   character). (Derick)
 - Fixed bug #50383 (Exceptions thrown in __call / __callStatic do not include
   file and line in trace). (Felipe)
 - Fixed bug #50358 (Compile failure compiling ext/phar/util.lo). (Felipe)
-- Fixed bug #50555 (DateTime::sub() allows 'relative' time modifications). (Derick)
 
 
 ?? ??? 20??, PHP 5.3.2
