@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   is created from an ISO string). (Derick)
 - Fixed bug #49059 (DateTime::diff() repeats previous sub() operation).
   (yoarvi@gmail.com, Derick)
+- Fixed bug #48902 (Timezone database fallback map is outdated). (Derick)
 
 
 ?? ??? 20??, PHP 5.3.2
