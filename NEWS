@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2010, PHP 5.2.14
 - Updated timezone database to version 2010.3. (Derick)
 
+- Fixed bug #51213 (pdo_mssql is trimming value of the money column). (Ilia,
+  alexr at oplot dot com)
 - Fixed bug #51192 (FILTER_VALIDATE_URL will invalidate a hostname that
   includes '-'). (Adam, solar at azrael dot ws).
 - Fixed bug #51190 (ftp_put() returns false when transfer was successful).
