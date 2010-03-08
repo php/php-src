@@ -92,7 +92,7 @@ extern char *ap_php_optarg;
 extern int ap_php_optind;
 
 static int flag_debug=0;
-static char *filename;
+static char *filename = NULL;
 
 /* per thread */
 ZEND_BEGIN_MODULE_GLOBALS(milter)
@@ -127,6 +127,11 @@ static int mlfi_init()
 	/* disable headers */
 	SG(headers_sent) = 1;
 	SG(request_info).no_headers = 1;
+	 
+	if (filename == NULL) {
+		php_printf("No input file specified");
+		return SMFIS_TEMPFAIL;
+	}
 
 	if (!(file_handle.handle.fp = VCWD_FOPEN(filename, "rb"))) {
 		php_printf("Could not open input file: %s\n", filename);
@@ -188,6 +193,11 @@ static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 	/* disable headers */
 	SG(headers_sent) = 1;
 	SG(request_info).no_headers = 1;
+	
+	if (filename == NULL) {
+		php_printf("No input file specified");
+		return SMFIS_TEMPFAIL;
+	}
 	
 	if (!(file_handle.handle.fp = VCWD_FOPEN(filename, "rb"))) {
 		php_printf("Could not open input file: %s\n", filename);
