@@ -896,7 +896,6 @@ static void php_milter_usage(char *argv0)
 	}
 
 	printf(     "Usage: %s [options] [-f] <file> [args...]\n"
-	            "       %s [options] -r <code> [args...]\n"
 	            "       %s [options] [-- args...]\n"
 				"  -a               Run interactively\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
@@ -912,7 +911,7 @@ static void php_milter_usage(char *argv0)
 				"  -z <file>        Load Zend extension <file>.\n"
 				"  args...          Arguments passed to script. Use -- args when first argument \n"
 				"                   starts with - or script is read from stdin\n"
-				, prog, prog, prog);
+				, prog, prog);
 }
 /* }}} */
 
