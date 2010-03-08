@@ -2424,7 +2424,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   echo > ext/iconv/php_have_libiconv.h
   echo > ext/iconv/php_have_iconv.h
   echo > ext/iconv/php_php_iconv_impl.h
-  echo > ext/iconv/php_have_libiconv_in_libiconv.h
+  echo > ext/iconv/php_iconv_aliased_libiconv.h
   echo > ext/iconv/php_php_iconv_h_path.h
   echo > ext/iconv/php_iconv_supports_errno.h
 
@@ -2472,8 +2472,8 @@ AC_DEFUN([PHP_SETUP_ICONV], [
         found_iconv=yes
         PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
         AC_DEFINE(HAVE_LIBICONV,1,[ ])
-        PHP_DEFINE([HAVE_LIBICONV_IN_LIBICONV],1,[ext/iconv])
-        AC_DEFINE([HAVE_LIBICONV_IN_LIBICONV],1,[iconv() is aliased to libiconv() in -liconv])
+        PHP_DEFINE([ICONV_ALIASED_LIBICONV],1,[ext/iconv])
+        AC_DEFINE([ICONV_ALIASED_LIBICONV],1,[iconv() is aliased to libiconv() in -liconv])
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
           found_iconv=yes
