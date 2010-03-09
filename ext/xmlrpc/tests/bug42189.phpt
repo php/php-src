@@ -11,5 +11,5 @@ var_dump($ok);
 echo "Done\n";
 ?>
 --EXPECT--	
-bool(true)
+bool(false)
 Done
