@@ -42,9 +42,9 @@ foreach ($h as $key => $val) {
 <?php 
 require(dirname(__FILE__) .'/clean.inc'); 
 ?>
---EXPECTF--
+--EXPECTREGEX--
 database handler: db4
 Test 1
 Success: db4 enabled
 Test 2 - full info
-Berkeley DB 4.%s
+.*Berkeley DB 4.*
