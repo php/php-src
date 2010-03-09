@@ -527,9 +527,6 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 		db = "";
 		db_len = 0;
 	}
-	if (!port && !socket) {
-		port = 3306;
-	}
 	host_len = strlen(host);
 #ifndef PHP_WIN32
 	if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
@@ -541,6 +538,10 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND *conn,
 	} else
 #endif
 	{
+		if (!port) {
+			port = 3306;
+		}
+
 		transport_len = spprintf(&transport, 0, "tcp://%s:%d", host, port);
 	}
 	DBG_INF_FMT("transport=%s", transport);
