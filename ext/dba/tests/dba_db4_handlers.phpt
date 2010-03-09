@@ -44,9 +44,9 @@ require(dirname(__FILE__) .'/clean.inc');
 ?>
 --XFAIL--
 Memory leak in this branch only
---EXPECTF--
+--EXPECTREGEX--
 database handler: db4
 Test 1
 Success: db4 enabled
 Test 2 - full info
-Berkeley DB 4.%s
+.*Berkeley DB 4.*
