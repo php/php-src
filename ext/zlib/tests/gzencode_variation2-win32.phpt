@@ -5,8 +5,8 @@ Test will fail until bug #47178 resolved; missing gzip headers whne FORCE_DEFLAT
 --SKIPIF--
 <?php 
 
-if( substr(PHP_OS, 0, 3) == "WIN" ) {
-  die("skip.. Do not run on Windows");
+if( substr(PHP_OS, 0, 3) != "WIN" ) {
+  die("skip.. only for Windows");
 }
 
 if (!extension_loaded("zlib")) {
@@ -36,7 +36,7 @@ var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 *** Testing gzencode() : variation ***
 
 -- Testing with each encoding_mode  --
-string(90) "1f8b0800000000000003735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
-string(90) "1f8b0800000000000003735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
-string(86) "1f8b0800000000000003789c735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200735808cd"
+string(90) "1f8b080000000000000b735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
+string(90) "1f8b080000000000000b735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
+string(86) "1f8b080000000000000b789c735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200735808cd"
 ===DONE===

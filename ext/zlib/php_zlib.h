@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stefan Röhrich <sr@linux.de>                                |
+   |          Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -24,38 +25,49 @@
 
 #include <zlib.h>
 
+#define PHP_ZLIB_ENCODING_RAW		-0xf
+#define PHP_ZLIB_ENCODING_GZIP		0x1f
+#define PHP_ZLIB_ENCODING_DEFLATE	0x0f
+
+#define PHP_ZLIB_ENCODING_ANY		0x2f
+
+#define PHP_ZLIB_OUTPUT_HANDLER_NAME "zlib output compression"
+#define PHP_ZLIB_BUFFER_SIZE_GUESS(in_len) (((size_t) ((double) in_len * (double) 1.015)) + 10 + 8 + 4 + 1)
+
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	/* variables for transparent gzip encoding */
 	int compression_coding;
-	z_stream stream;
-	uLong crc;
-	int ob_gzhandler_status;
 	long output_compression;
 	long output_compression_level;
 	char *output_handler;
-ZEND_END_MODULE_GLOBALS(zlib)
+ZEND_END_MODULE_GLOBALS(zlib);
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(zlib)
+typedef struct _php_zlib_buffer {
+	char *data;
+	char *aptr;
+	size_t used;
+	size_t free;
+	size_t size;
+} php_zlib_buffer;
 
+typedef struct _php_zlib_context {
+	z_stream Z;
+	php_zlib_buffer buffer;
+} php_zlib_context;
+
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+extern php_stream_ops php_stream_gzio_ops;
+extern php_stream_wrapper php_stream_gzip_wrapper;
 extern php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
-
-int php_ob_gzhandler_check(TSRMLS_D);
-
-php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-extern php_stream_wrapper php_stream_gzip_wrapper;
-
-#ifdef ZTS
-#define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
-#else
-#define ZLIBG(v) (zlib_globals.v)
-#endif
-
 #define phpext_zlib_ptr zlib_module_ptr
 
-#define CODING_GZIP		1
-#define CODING_DEFLATE	2
+#ifdef ZTS
+# define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
+#else
+# define ZLIBG(v) (zlib_globals.v)
+#endif
 
 #endif /* PHP_ZLIB_H */
 

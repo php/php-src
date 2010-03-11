@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzcompress(string data [, int level])
+/* Prototype  : string gzcompress(string data [, int level, [int encoding]])
  * Description: Gzip-compress a string 
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
@@ -17,8 +17,6 @@ if (!extension_loaded("zlib")) {
 include(dirname(__FILE__) . '/data.inc');
 
 echo "*** Testing gzcompress() : variation ***\n";
-
-
 
 echo "\n-- Testing multiple compression --\n";
 $output = gzcompress($data);

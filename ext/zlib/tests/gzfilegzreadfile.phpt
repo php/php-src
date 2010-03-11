@@ -5,7 +5,7 @@ gzfile(), gzreadfile()
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
-$original = <<<EOD
+$original = b<<<EOD
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah

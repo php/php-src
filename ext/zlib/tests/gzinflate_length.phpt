@@ -4,7 +4,7 @@ gzinflate() and $length argument
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
-$original = b'aaaaaaaaaaaaaaa';
+$original = 'aaaaaaaaaaaaaaa';
 $packed=gzdeflate($original);
 echo strlen($packed)." ".strlen($original)."\n";
 $unpacked=gzinflate($packed, strlen($original));

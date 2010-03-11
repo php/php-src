@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-$org_data = <<<EOT
+$org_data = b<<<EOT
 uncompressed contents of 004.txt.gz is:
 When you're taught through feelings
 Destiny flying high above

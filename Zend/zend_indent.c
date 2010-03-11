@@ -30,11 +30,10 @@
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
 
-
-static void handle_whitespace(int *emit_whitespace)
+static void handle_whitespace(unsigned int *emit_whitespace) /* {{{ */
 {
 	unsigned char c;
-	int i;
+	unsigned int i;
 
 	for (c=0; c<128; c++) {
 		if (emit_whitespace[c]>0) {
@@ -45,29 +44,29 @@ static void handle_whitespace(int *emit_whitespace)
 	}
 	memset(emit_whitespace, 0, sizeof(int)*256);
 }
+/* }}} */
 
-
-ZEND_API void zend_indent()
+ZEND_API void zend_indent(void) /* {{{ */
 {
 	zval token;
 	int token_type;
 	int in_string=0;
-	int nest_level=0;
-	int emit_whitespace[256];
-	int i;
+	unsigned int nest_level=0;
+	unsigned int emit_whitespace[256];
+	unsigned int i;
 	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
 	/* highlight stuff coming back from zendlex() */
-	token.type = 0;
+	Z_TYPE(token) = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
-					token.type = 0;
+					Z_TYPE(token) = 0;
 					/* eat whitespace, emit newlines */
 					for (i=0; i<LANG_SCNG(yy_leng); i++) {
 						emit_whitespace[(unsigned char) LANG_SCNG(yy_text)[i]]++;
@@ -79,7 +78,7 @@ ZEND_API void zend_indent()
 				in_string = !in_string;
 				/* break missing intentionally */
 			default:
-				if (token.type==0) {
+				if (Z_TYPE(token)==0) {
 					/* keyword */
 					switch (token_type) {
 						case ',':
@@ -132,20 +131,21 @@ dflt_printout:
 				}
 				break;
 		}
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 			case T_OPEN_TAG:
 			case T_CLOSE_TAG:
 			case T_WHITESPACE:
 				break;
 			default:
-				efree(token.value.str.val);
+				efree(Z_STRVAL(token));
 				break;
 			}
 		}
-		token.type = 0;
+		Z_TYPE(token) = 0;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:

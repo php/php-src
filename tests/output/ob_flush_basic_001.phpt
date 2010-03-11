@@ -30,7 +30,7 @@ echo "Done";
 
 -- Testing ob_flush() function with Zero arguments --
 
-Notice: ob_flush(): failed to flush buffer. No buffer to flush. in %s on line 12
+Notice: ob_flush(): failed to flush buffer. No buffer to flush in %s on line 12
 bool(false)
 This should get flushed.
 bool(true)
