@@ -1056,7 +1056,7 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 						sapi_add_header_ex(ZEND_STRL("Content-Encoding: deflate"), 1, 1 TSRMLS_CC);
 						break;
 				}
-				sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+				sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 0 TSRMLS_CC);
 			} else {
 				/* Disable compression if headers can not be set (Fix for bug #49816) */
 				ZLIBG(output_compression) = 0;

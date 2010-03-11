@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51257 (CURL_VERSION_LARGEFILE incorrectly used after libcurl
   version 7.10.1). (aron dot ujvari at microsec dot hu)
 - Fixed bug #51242 (Empty mysql.default_port does not default to 3306 anymore,
