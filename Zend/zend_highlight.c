@@ -26,7 +26,7 @@
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
 
-ZEND_API void zend_html_putc(char c)
+ZEND_API void zend_html_putc(char c) /* {{{ */
 {
 	switch (c) {
 		case '\n':
@@ -52,9 +52,9 @@ ZEND_API void zend_html_putc(char c)
 			break;
 	}
 }
+/* }}} */
 
-
-ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
+ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC) /* {{{ */
 {
 	const char *ptr=s, *end=s+len;
 
@@ -85,9 +85,9 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 	}
 #endif /* ZEND_MULTIBYTE */
 }
+/* }}} */
 
-
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC) /* {{{ */
 {
 	zval token;
 	int token_type;
@@ -97,7 +97,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
-	token.type = 0;
+	Z_TYPE(token) = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
@@ -121,11 +121,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_WHITESPACE:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
-				token.type = 0;
+				Z_TYPE(token) = 0;
 				continue;
 				break;
 			default:
-				if (token.type == 0) {
+				if (Z_TYPE(token) == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
 					next_color = syntax_highlighter_ini->highlight_default;
@@ -145,7 +145,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -155,13 +155,13 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					efree(token.value.str.val);
+					efree(Z_STRVAL(token));
 					break;
 			}
 		} else if (token_type == T_END_HEREDOC) {
-			efree(token.value.str.val);
+			efree(Z_STRVAL(token));
 		}
-		token.type = 0;
+		Z_TYPE(token) = 0;
 	}
 
 	if (last_color != syntax_highlighter_ini->highlight_html) {
@@ -170,14 +170,15 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("</span>\n");
 	zend_printf("</code>");
 }
+/* }}} */
 
-ZEND_API void zend_strip(TSRMLS_D)
+ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 {
 	zval token;
 	int token_type;
 	int prev_space = 0;
 
-	token.type = 0;
+	Z_TYPE(token) = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_WHITESPACE:
@@ -188,19 +189,19 @@ ZEND_API void zend_strip(TSRMLS_D)
 						/* lack of break; is intentional */
 			case T_COMMENT:
 			case T_DOC_COMMENT:
-				token.type = 0;
+				Z_TYPE(token) = 0;
 				continue;
-			
+
 			case T_END_HEREDOC:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-				efree(token.value.str.val);
+				efree(Z_STRVAL(token));
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
 					zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
 				zend_write("\n", sizeof("\n") - 1);
 				prev_space = 1;
-				token.type = 0;
+				Z_TYPE(token) = 0;
 				continue;
 
 			default:
@@ -208,7 +209,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				break;
 		}
 
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -219,13 +220,14 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 
 				default:
-					efree(token.value.str.val);
+					efree(Z_STRVAL(token));
 					break;
 			}
 		}
-		prev_space = token.type = 0;
+		prev_space = Z_TYPE(token) = 0;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
@@ -234,4 +236,3 @@ ZEND_API void zend_strip(TSRMLS_D)
  * indent-tabs-mode: t
  * End:
  */
-

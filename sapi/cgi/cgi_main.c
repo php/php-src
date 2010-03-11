@@ -1634,9 +1634,8 @@ int main(int argc, char *argv[])
 			 * in case some server does something different than above */
 			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
 		) {
-			zend_try {
-				SG(sapi_headers).http_response_code = 400;
-				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
+			SG(sapi_headers).http_response_code = 400;
+			PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
@@ -1645,8 +1644,6 @@ manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
-			} zend_catch {
-			} zend_end_try();
 #if defined(ZTS) && !defined(PHP_DEBUG)
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
@@ -1809,11 +1806,9 @@ consult the installation file that came with this distribution, or visit \n\
 				case '?':
 					fcgi_shutdown();
 					no_headers = 1;
-					php_output_startup();
-					php_output_activate(TSRMLS_C);
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_end_ob_buffers(1 TSRMLS_CC);
+					php_output_end_all(TSRMLS_C);
 					exit_status = 0;
 					goto out;
 			}
@@ -1887,15 +1882,13 @@ consult the installation file that came with this distribution, or visit \n\
 							if (script_file) {
 								efree(script_file);
 							}
-							php_output_startup();
-							php_output_activate(TSRMLS_C);
 							SG(headers_sent) = 1;
 							php_printf("[PHP Modules]\n");
 							print_modules(TSRMLS_C);
 							php_printf("\n[Zend Modules]\n");
 							print_extensions(TSRMLS_C);
 							php_printf("\n");
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_end_all(TSRMLS_C);
 							exit_status = 0;
 							goto out;
 
@@ -2042,16 +2035,13 @@ consult the installation file that came with this distribution, or visit \n\
 			*/
 			if (cgi || fastcgi || SG(request_info).path_translated) {
 				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
-					zend_try {
-						if (errno == EACCES) {
-							SG(sapi_headers).http_response_code = 403;
-							PUTS("Access denied.\n");
-						} else {
-							SG(sapi_headers).http_response_code = 404;
-							PUTS("No input file specified.\n");
-						}
-					} zend_catch {
-					} zend_end_try();
+					if (errno == EACCES) {
+						SG(sapi_headers).http_response_code = 403;
+						PUTS("Access denied.\n");
+					} else {
+						SG(sapi_headers).http_response_code = 404;
+						PUTS("No input file specified.\n");
+					}
 					/* we want to serve more requests if this is fastcgi
 					 * so cleanup and continue, request shutdown is
 					 * handled later */
@@ -2114,7 +2104,7 @@ consult the installation file that came with this distribution, or visit \n\
 					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						zend_strip(TSRMLS_C);
 						zend_file_handle_dtor(&file_handle TSRMLS_CC);
-						php_end_ob_buffers(1 TSRMLS_CC);
+						php_output_teardown();
 					}
 					return SUCCESS;
 					break;
@@ -2129,7 +2119,7 @@ consult the installation file that came with this distribution, or visit \n\
 								goto fastcgi_request_done;
 							}
 							zend_file_handle_dtor(&file_handle TSRMLS_CC);
-							php_end_ob_buffers(1 TSRMLS_CC);
+							php_output_teardown();
 						}
 						return SUCCESS;
 					}
@@ -2140,6 +2130,7 @@ consult the installation file that came with this distribution, or visit \n\
 					open_file_for_scanning(&file_handle TSRMLS_CC);
 					zend_indent();
 					zend_file_handle_dtor(&file_handle TSRMLS_CC);
+					php_output_teardown();
 					return SUCCESS;
 					break;
 #endif

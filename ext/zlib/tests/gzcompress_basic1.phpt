@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzcompress(string data [, int level])
+/* Prototype  : string gzcompress(string data [, int level, [int encoding]])
  * Description: Gzip-compress a string 
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
@@ -63,7 +63,7 @@ int(0)
 string(32) "c2e070f4320d1f674965eaab95b53d9c"
 int(0)
 -- Compression level 2 --
-string(32) "400a53d19ca337727f8cd362f5cd3ee0"
+string(32) "36922f486410d08209d0d0d21b26030e"
 int(0)
 -- Compression level 3 --
 string(32) "a441a2f5169bb303cd45b860a5a9dbf9"
