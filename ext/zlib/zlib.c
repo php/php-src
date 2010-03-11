@@ -102,7 +102,7 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 			-Vary: $ HTTP_ACCEPT_ENCODING= ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n"; ob_end_clean();'
 		*/
 		if (output_context->op != (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_CLEAN|PHP_OUTPUT_HANDLER_FINAL)) {
-			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 0 TSRMLS_CC);
 		}
 		return FAILURE;
 	}
@@ -196,7 +196,7 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 					deflateEnd(&ctx->Z);
 					return FAILURE;
 			}
-			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Vary: Accept-Encoding"), 1, 0 TSRMLS_CC);
 			php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
 		}
 
