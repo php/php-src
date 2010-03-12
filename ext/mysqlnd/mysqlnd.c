@@ -142,8 +142,8 @@ MYSQLND_METHOD(mysqlnd_conn, free_contents)(MYSQLND *conn TSRMLS_DC)
 
 	mysqlnd_local_infile_default(conn);
 	if (conn->current_result) {
-		conn->current_result->m.free_result_contents(conn->current_result TSRMLS_CC);
-		mnd_efree(conn->current_result);
+		conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
+//		mnd_pefree(conn->current_result, conn->current_result->persistent);
 		conn->current_result = NULL;
 	}
 
@@ -1089,7 +1089,7 @@ MYSQLND_METHOD(mysqlnd_conn, list_fields)(MYSQLND *conn, const char *table, cons
 	   Prepare for the worst case.
 	   MyISAM goes to 2500 BIT columns, double it for safety.
 	 */
-	result = mysqlnd_result_init(5000 TSRMLS_CC);
+	result = mysqlnd_result_init(5000, conn->persistent TSRMLS_CC);
 
 
 	if (FAIL == result->m.read_result_metadata(result, conn TSRMLS_CC)) {
