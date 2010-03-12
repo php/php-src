@@ -280,7 +280,7 @@ void mysqlnd_internal_free_result_contents(MYSQLND_RES *result TSRMLS_DC)
 	result->m.free_result_buffers(result TSRMLS_CC);
 
 	if (result->meta) {
-		result->meta->m->free_metadata(result->meta, FALSE TSRMLS_CC);
+		result->meta->m->free_metadata(result->meta TSRMLS_CC);
 		result->meta = NULL;
 	}
 
@@ -301,7 +301,7 @@ void mysqlnd_internal_free_result(MYSQLND_RES *result TSRMLS_DC)
 		result->conn = NULL;
 	}
 
-	mnd_efree(result);
+	mnd_pefree(result, result->persistent);
 
 	DBG_VOID_RETURN;
 }
@@ -321,11 +321,11 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES *result, MYSQLND *
 	  infrastructure!
 	*/
 	if (result->meta) {
-		result->meta->m->free_metadata(result->meta, FALSE TSRMLS_CC);
+		result->meta->m->free_metadata(result->meta TSRMLS_CC);
 		result->meta = NULL;
 	}
 
-	result->meta = mysqlnd_result_meta_init(result->field_count TSRMLS_CC);
+	result->meta = mysqlnd_result_meta_init(result->field_count, result->persistent TSRMLS_CC);
 
 	/* 1. Read all fields metadata */
 
@@ -440,7 +440,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 				/* PS has already allocated it */
 				conn->field_count = rset_header->field_count;
 				if (!stmt) {
-					result = conn->current_result = mysqlnd_result_init(rset_header->field_count TSRMLS_CC);
+					result = conn->current_result = mysqlnd_result_init(rset_header->field_count, conn->persistent TSRMLS_CC);
 				} else {
 					if (!stmt->result) {
 						DBG_INF("This is 'SHOW'/'EXPLAIN'-like query.");
@@ -449,7 +449,7 @@ mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
-						result = stmt->result = mysqlnd_result_init(rset_header->field_count TSRMLS_CC);
+						result = stmt->result = mysqlnd_result_init(rset_header->field_count, stmt->persistent TSRMLS_CC);
 					} else {
 						/*
 						  Update result set metadata if it for some reason changed between
@@ -1524,16 +1524,17 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES *result, unsigned int 
 /* }}} */
 
 
-/* {{{ mysqlnd_result_init */
+/* {{{ mysqlnd_result_init_ex */
 PHPAPI MYSQLND_RES *
-mysqlnd_result_init(unsigned int field_count TSRMLS_DC)
+mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES *ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_RES *ret = mnd_pecalloc(1, alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_result_init");
 	DBG_INF_FMT("field_count=%u", field_count);
 
+	ret->persistent		= persistent;
 	ret->field_count	= field_count;
 
 	ret->m.use_result	= MYSQLND_METHOD(mysqlnd_res, use_result);
