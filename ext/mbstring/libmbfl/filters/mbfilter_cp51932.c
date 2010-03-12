@@ -200,21 +200,6 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-int
-cp932ext3_to_cp51932(int c)
-{
-	int idx;
-
-	idx = sjistoidx(c >> 8, c & 0xff);
-	if (idx >= sjistoidx(0xfa, 0x5c))
-		idx -=  sjistoidx(0xfa, 0x5c) - sjistoidx(0xed, 0x40);
-	else if (idx >= sjistoidx(0xfa, 0x55))
-		idx -=  sjistoidx(0xfa, 0x55) - sjistoidx(0xee, 0xfa);
-	else if (idx >= sjistoidx(0xfa, 0x40))
-		idx -=  sjistoidx(0xfa, 0x40) - sjistoidx(0xee, 0xef);
-	return idxtoeuc1(idx) << 8 | idxtoeuc2(idx);
-}
-
 /*
  * wchar => cp51932
  */
@@ -250,9 +235,9 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 				s1 = -1;
 			}
 		} else if (c == 0xa5) {		/* YEN SIGN */
-			s1 = 0x216f;			/* FULLWIDTH YEN SIGN */
+			s1 = 0x005c;			/* YEN SIGN */
 		} else if (c == 0x203e) {	/* OVER LINE */
-			s1 = 0x2131;			/* FULLWIDTH MACRON */
+			s1 = 0x007e;			/* FULLWIDTH MACRON */
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
 		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */

@@ -1,4 +1,3 @@
-EXTRA_DIST=Makefile.bcc32
 noinst_LTLIBRARIES=libmbfl_nls.la
 INCLUDES=-I../mbfl
 libmbfl_nls_la_LDFLAGS=-version-info $(SHLIB_VERSION)

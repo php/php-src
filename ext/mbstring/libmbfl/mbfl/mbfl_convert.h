@@ -40,6 +40,7 @@ typedef struct _mbfl_convert_filter mbfl_convert_filter;
 struct _mbfl_convert_filter {
 	void (*filter_ctor)(mbfl_convert_filter *filter);
 	void (*filter_dtor)(mbfl_convert_filter *filter);
+	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
 	int (*filter_flush)(mbfl_convert_filter *filter);
 	int (*output_function)(int c, void *data);
@@ -62,6 +63,7 @@ struct mbfl_convert_vtbl {
 	void (*filter_dtor)(mbfl_convert_filter *filter);
 	int (*filter_function)(int c, mbfl_convert_filter *filter);
 	int (*filter_flush)(mbfl_convert_filter *filter);
+	void (*filter_copy)(mbfl_convert_filter *src, mbfl_convert_filter *dest);
 };
 
 MBFLAPI extern const struct mbfl_convert_vtbl *mbfl_convert_filter_list[];
@@ -69,6 +71,11 @@ MBFLAPI extern const struct mbfl_convert_vtbl *mbfl_convert_filter_list[];
 MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new(
     enum mbfl_no_encoding from,
     enum mbfl_no_encoding to,
+    int (*output_function)(int, void *),
+    int (*flush_function)(void *),
+    void *data );
+MBFLAPI extern mbfl_convert_filter *mbfl_convert_filter_new2(
+	const struct mbfl_convert_vtbl *vtbl,
     int (*output_function)(int, void *),
     int (*flush_function)(void *),
     void *data );
