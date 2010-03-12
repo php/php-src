@@ -102,6 +102,7 @@
 #include "mbfilter.h"
 #include "mbfl_filter_output.h"
 #include "mbfilter_pass.h"
+#include "filters/mbfilter_tl_jisx0201_jisx0208.h"
 
 #include "eaw_table.h"
 
@@ -149,11 +150,15 @@ mbfl_buffer_converter_new(
 	convd->filter1 = NULL;
 	convd->filter2 = NULL;
 	if (mbfl_convert_filter_get_vtbl(convd->from->no_encoding, convd->to->no_encoding) != NULL) {
-		convd->filter1 = mbfl_convert_filter_new(convd->from->no_encoding, convd->to->no_encoding, mbfl_memory_device_output, 0, &convd->device);
+		convd->filter1 = mbfl_convert_filter_new(convd->from->no_encoding, convd->to->no_encoding, mbfl_memory_device_output, NULL, &convd->device);
 	} else {
-		convd->filter2 = mbfl_convert_filter_new(mbfl_no_encoding_wchar, convd->to->no_encoding, mbfl_memory_device_output, 0, &convd->device);
+		convd->filter2 = mbfl_convert_filter_new(mbfl_no_encoding_wchar, convd->to->no_encoding, mbfl_memory_device_output, NULL, &convd->device);
 		if (convd->filter2 != NULL) {
-			convd->filter1 = mbfl_convert_filter_new(convd->from->no_encoding, mbfl_no_encoding_wchar, (int (*)(int, void*))convd->filter2->filter_function, NULL, convd->filter2);
+			convd->filter1 = mbfl_convert_filter_new(convd->from->no_encoding,
+					mbfl_no_encoding_wchar,
+					(int (*)(int, void*))convd->filter2->filter_function,
+					(int (*)(void*))convd->filter2->filter_flush,
+					convd->filter2);
 			if (convd->filter1 == NULL) {
 				mbfl_convert_filter_delete(convd->filter2);
 			}
@@ -468,7 +473,8 @@ enum mbfl_no_encoding mbfl_encoding_detector_judge(mbfl_encoding_detector *ident
 			}
 			n--;
 		}
-
+ 
+		/* fallback judge */
 		if (encoding ==	mbfl_no_encoding_invalid) {
 			n = identd->filter_list_size - 1;
 			while (n >= 0) {
@@ -477,7 +483,7 @@ enum mbfl_no_encoding mbfl_encoding_detector_judge(mbfl_encoding_detector *ident
 					encoding = filter->encoding->no_encoding;
 				}
 				n--;
-			}
+ 			}
 		}
 	}
 
@@ -611,8 +617,8 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 		filter = &flist[i];
 		if (!filter->flag) {
 			if (strict && filter->status) {
-				continue;
-			}
+ 				continue;
+ 			}
 			encoding = filter->encoding;
 			break;
 		}
@@ -628,7 +634,7 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 			}
 		}
 	}
-
+ 
 	/* cleanup */
 	/* dtors should be called in reverse order */
 	i = num; while (--i >= 0) {
@@ -1326,7 +1332,6 @@ mbfl_substr(
 	return result;
 }
 
-
 /*
  *  strcut
  */
@@ -1338,183 +1343,280 @@ mbfl_strcut(
     int length)
 {
 	const mbfl_encoding *encoding;
-	int n, m, k, len, start, end;
-	unsigned char *p, *w;
-	const unsigned char *mbtab;
 	mbfl_memory_device device;
-	mbfl_convert_filter *encoder, *encoder_tmp, *decoder, *decoder_tmp;
 
-	encoding = mbfl_no2encoding(string->no_encoding);
-	if (encoding == NULL || string == NULL || result == NULL) {
+	/* validate the parameters */
+	if (string == NULL || string->val == NULL || result == NULL) {
 		return NULL;
 	}
+
+	if (from < 0 || length < 0) {
+		return NULL;
+	}
+
+	if (from >= string->len) {
+		from = string->len;
+	}
+
+	encoding = mbfl_no2encoding(string->no_encoding);
+	if (encoding == NULL) {
+		return NULL;
+	}
+
 	mbfl_string_init(result);
 	result->no_language = string->no_language;
 	result->no_encoding = string->no_encoding;
 
-	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
-	   encoding->mblen_table != NULL) {
-		len = string->len;
-		start = from;
-		end = from + length;
-		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
-			start /= 2;
-			start *= 2;
-			end = length/2;
-			end *= 2;
-			end += start;
-		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
-			start /= 4;
-			start *= 4;
-			end = length/4;
-			end *= 4;
-			end += start;
-		} else if (encoding->mblen_table != NULL) {
-			mbtab = encoding->mblen_table;
-			start = 0;
-			end = 0;
-			n = 0;
-			p = string->val;
-			if (p != NULL) {
-				/* search start position */
-				for (;;) {
-					m = mbtab[*p];
-					n += m;
-					p += m;
-					if (n > from) {
-						break;
-					}
-					start = n;
-				}
-				/* search end position */
-				k = start + length;
-				if (k >= (int)string->len) {
-					end = string->len;
-				} else {
-					end = start;
-					while (n <= k) {
-						end = n;
-						m = mbtab[*p];
-						n += m;
-						p += m;
-					}
-				}
-			}
-		}
+	if ((encoding->flag & (MBFL_ENCTYPE_SBCS
+				| MBFL_ENCTYPE_WCS2BE
+				| MBFL_ENCTYPE_WCS2LE
+				| MBFL_ENCTYPE_WCS4BE
+				| MBFL_ENCTYPE_WCS4LE))
+			|| encoding->mblen_table != NULL) {
+		const unsigned char *start = NULL;
+		const unsigned char *end = NULL;
+		unsigned char *w;
+		unsigned int sz;
 
-		if (start > len) {
-			start = len;
-		}
-		if (start < 0) {
-			start = 0;
-		}
-		if (end > len) {
-			end = len;
-		}
-		if (end < 0) {
-			end = 0;
-		}
-		if (start > end) {
-			start = end;
-		}
-		/* allocate memory and copy string */
-		n = end - start;
-		result->len = 0;
-		result->val = w = (unsigned char*)mbfl_malloc((n + 8)*sizeof(unsigned char));
-		if (w != NULL) {
-			result->len = n;
-			p = &(string->val[start]);
-			while (n > 0) {
-				*w++ = *p++;
-				n--;
+		if (encoding->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+			from &= -2;
+
+			if (from + length >= string->len) {
+				length = string->len - from;
 			}
-			*w++ = '\0';
-			*w++ = '\0';
-			*w++ = '\0';
-			*w = '\0';
+
+			start = string->val + from;
+			end   = start + (length & -2);
+		} else if (encoding->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+			from &= -4;
+
+			if (from + length >= string->len) {
+				length = string->len - from;
+			}
+
+			start = string->val + from;
+			end   = start + (length & -4);
+		} else if ((encoding->flag & MBFL_ENCTYPE_SBCS)) {
+			start = string->val + from;
+			end = start + length;
+		} else if (encoding->mblen_table != NULL) {
+			const unsigned char *mbtab = encoding->mblen_table;
+			const unsigned char *p, *q;
+			int m;
+
+			/* search start position */
+			for (m = 0, p = string->val, q = p + from;
+					p < q; p += (m = mbtab[*p]));
+
+			if (p > q) {
+				p -= m;
+			}
+
+			start = p;
+
+			/* search end position */
+			if ((start - string->val) + length >= (int)string->len) {
+				end = string->val + string->len;
+			} else {
+				for (q = p + length; p < q; p += (m = mbtab[*p]));
+
+				if (p > q) {
+					p -= m;
+				}
+				end = p;
+			}
 		} else {
-			result = NULL;
-		}
-	} else {
-		/* wchar filter */
-		encoder = mbfl_convert_filter_new(
-		  string->no_encoding,
-		  mbfl_no_encoding_wchar,
-		  mbfl_filter_output_null, 0, 0);
-		encoder_tmp = mbfl_convert_filter_new(
-		  string->no_encoding,
-		  mbfl_no_encoding_wchar,
-		  mbfl_filter_output_null, 0, 0);
-		/* output code filter */
-		decoder = mbfl_convert_filter_new(
-		  mbfl_no_encoding_wchar,
-		  string->no_encoding,
-		  mbfl_memory_device_output, 0, &device);
-		decoder_tmp = mbfl_convert_filter_new(
-		  mbfl_no_encoding_wchar,
-		  string->no_encoding,
-		  mbfl_memory_device_output, 0, &device);
-		if (encoder == NULL || encoder_tmp == NULL || decoder == NULL || decoder_tmp == NULL) {
-			mbfl_convert_filter_delete(encoder);
-			mbfl_convert_filter_delete(encoder_tmp);
-			mbfl_convert_filter_delete(decoder);
-			mbfl_convert_filter_delete(decoder_tmp);
+			/* never reached */
 			return NULL;
 		}
-		mbfl_memory_device_init(&device, length + 8, 0);
-		k = 0;
-		n = 0;
-		p = string->val;
-		if (p != NULL) {
-			/* seartch start position */
-			while (n < from) {
-				(*encoder->filter_function)(*p++, encoder);
-				n++;
-			}
-			/* output a little shorter than "length" */
-			encoder->output_function = mbfl_filter_output_pipe;
-			encoder->data = decoder;
-			k = length - 20;
-			len = string->len;
-			while (n < len && device.pos < k) {
-				(*encoder->filter_function)(*p++, encoder);
-				n++;
-			}
-			/* detect end position */
-			for (;;) {
-				/* backup current state */
-				k = device.pos;
-				mbfl_convert_filter_copy(encoder, encoder_tmp);
-				mbfl_convert_filter_copy(decoder, decoder_tmp);
-				if (n >= len) {
-					break;
-				}
-				/* feed 1byte and flush */
-				(*encoder->filter_function)(*p, encoder);
-				(*encoder->filter_flush)(encoder);
-				(*decoder->filter_flush)(decoder);
-				if (device.pos > length) {
-					break;
-				}
-				/* restore filter and re-feed data */
-				device.pos = k;
-				mbfl_convert_filter_copy(encoder_tmp, encoder);
-				mbfl_convert_filter_copy(decoder_tmp, decoder);
-				(*encoder->filter_function)(*p, encoder);
-				p++;
-				n++;
-			}
-			device.pos = k;
-			mbfl_convert_filter_copy(encoder_tmp, encoder);
-			mbfl_convert_filter_copy(decoder_tmp, decoder);
-			mbfl_convert_filter_flush(encoder);
-			mbfl_convert_filter_flush(decoder);
+
+		/* allocate memory and copy string */
+		sz = end - start;
+		if ((w = (unsigned char*)mbfl_calloc(sz + 8,
+				sizeof(unsigned char))) == NULL) {
+			return NULL;
 		}
+
+		memcpy(w, start, sz);
+		w[sz] = '\0';
+		w[sz + 1] = '\0';
+		w[sz + 2] = '\0';
+		w[sz + 3] = '\0';
+
+		result->val = w;
+		result->len = sz;
+	} else {
+		mbfl_convert_filter *encoder     = NULL;
+		mbfl_convert_filter *decoder     = NULL;
+		const unsigned char *p, *q, *r;
+		struct {
+			mbfl_convert_filter encoder;
+			mbfl_convert_filter decoder;
+			const unsigned char *p;
+			int pos;
+		} bk, _bk;
+
+		/* output code filter */
+		if (!(decoder = mbfl_convert_filter_new(
+				mbfl_no_encoding_wchar,
+				string->no_encoding,
+				mbfl_memory_device_output, 0, &device))) {
+			return NULL;
+		}
+
+		/* wchar filter */
+		if (!(encoder = mbfl_convert_filter_new(
+				string->no_encoding,
+				mbfl_no_encoding_wchar,
+				mbfl_filter_output_null,
+				NULL, NULL))) {
+			mbfl_convert_filter_delete(decoder);
+			return NULL;
+		}
+
+		mbfl_memory_device_init(&device, length + 8, 0);
+
+		p = string->val;
+
+		/* search start position */
+		for (q = string->val + from; p < q; p++) {
+			(*encoder->filter_function)(*p, encoder);
+		}
+
+		/* switch the drain direction */
+		encoder->output_function = (int(*)(int,void *))decoder->filter_function;
+		encoder->flush_function = (int(*)(void *))decoder->filter_flush;
+		encoder->data = decoder;
+
+		q = string->val + string->len;
+
+		/* save the encoder, decoder state and the pointer */
+		mbfl_convert_filter_copy(decoder, &_bk.decoder);
+		mbfl_convert_filter_copy(encoder, &_bk.encoder);
+		_bk.p = p;
+		_bk.pos = device.pos;
+
+		if (length > q - p) {
+			length = q - p;
+		}
+
+		if (length >= 20) {
+			/* output a little shorter than "length" */
+			/* XXX: the constant "20" was determined purely on the heuristics. */
+			for (r = p + length - 20; p < r; p++) {
+				(*encoder->filter_function)(*p, encoder);
+			}
+
+			/* if the offset of the resulting string exceeds the length,
+			 * then restore the state */
+			if (device.pos > length) {
+				p = _bk.p;
+				device.pos = _bk.pos;
+				decoder->filter_dtor(decoder);
+				encoder->filter_dtor(encoder);
+				mbfl_convert_filter_copy(&_bk.decoder, decoder);
+				mbfl_convert_filter_copy(&_bk.encoder, encoder);
+				bk = _bk;
+			} else {
+				/* save the encoder, decoder state and the pointer */
+				mbfl_convert_filter_copy(decoder, &bk.decoder);
+				mbfl_convert_filter_copy(encoder, &bk.encoder);
+				bk.p = p;
+				bk.pos = device.pos;
+
+				/* flush the stream */
+				(*encoder->filter_flush)(encoder);
+
+				/* if the offset of the resulting string exceeds the length,
+				 * then restore the state */
+				if (device.pos > length) {
+					bk.decoder.filter_dtor(&bk.decoder);
+					bk.encoder.filter_dtor(&bk.encoder);
+
+					p = _bk.p;
+					device.pos = _bk.pos;
+					decoder->filter_dtor(decoder);
+					encoder->filter_dtor(encoder);
+					mbfl_convert_filter_copy(&_bk.decoder, decoder);
+					mbfl_convert_filter_copy(&_bk.encoder, encoder);
+					bk = _bk;
+				} else {
+					_bk.decoder.filter_dtor(&_bk.decoder);
+					_bk.encoder.filter_dtor(&_bk.encoder);
+
+					p = bk.p;
+					device.pos = bk.pos;
+					decoder->filter_dtor(decoder);
+					encoder->filter_dtor(encoder);
+					mbfl_convert_filter_copy(&bk.decoder, decoder);
+					mbfl_convert_filter_copy(&bk.encoder, encoder);
+				}
+			}
+		} else {
+			bk = _bk;
+		}
+
+		/* detect end position */
+		while (p < q) {
+			(*encoder->filter_function)(*p, encoder);
+
+			if (device.pos > length) {
+				/* restore filter */
+				p = bk.p;
+				device.pos = bk.pos;
+				decoder->filter_dtor(decoder);
+				encoder->filter_dtor(encoder);
+				mbfl_convert_filter_copy(&bk.decoder, decoder);
+				mbfl_convert_filter_copy(&bk.encoder, encoder);
+				break;
+			}
+
+			p++;
+
+			/* backup current state */
+			mbfl_convert_filter_copy(decoder, &_bk.decoder);
+			mbfl_convert_filter_copy(encoder, &_bk.encoder);
+			_bk.pos = device.pos;
+			_bk.p = p;
+
+			(*encoder->filter_flush)(encoder);
+
+			if (device.pos > length) {
+				_bk.decoder.filter_dtor(&_bk.decoder);
+				_bk.encoder.filter_dtor(&_bk.encoder);
+
+				/* restore filter */
+				p = bk.p;
+				device.pos = bk.pos;
+				decoder->filter_dtor(decoder);
+				encoder->filter_dtor(encoder);
+				mbfl_convert_filter_copy(&bk.decoder, decoder);
+				mbfl_convert_filter_copy(&bk.encoder, encoder);
+				break;
+			}
+
+			bk.decoder.filter_dtor(&bk.decoder);
+			bk.encoder.filter_dtor(&bk.encoder);
+
+			p = _bk.p;
+			device.pos = _bk.pos;
+			decoder->filter_dtor(decoder);
+			encoder->filter_dtor(encoder);
+			mbfl_convert_filter_copy(&_bk.decoder, decoder);
+			mbfl_convert_filter_copy(&_bk.encoder, encoder);
+
+			bk = _bk;
+		}
+
+		(*encoder->filter_flush)(encoder);
+
+		bk.decoder.filter_dtor(&bk.decoder);
+		bk.encoder.filter_dtor(&bk.encoder);
+
 		result = mbfl_memory_device_result(&device, result);
+
 		mbfl_convert_filter_delete(encoder);
-		mbfl_convert_filter_delete(encoder_tmp);
 		mbfl_convert_filter_delete(decoder);
-		mbfl_convert_filter_delete(decoder_tmp);
 	}
 
 	return result;
@@ -1731,276 +1833,6 @@ mbfl_strimwidth(
 	return result;
 }
 
-
-
-/*
- *  convert Hankaku and Zenkaku
- */
-struct collector_hantozen_data {
-	mbfl_convert_filter *next_filter;
-	int mode;
-	int status;
-	int cache;
-};
-
-static const unsigned char hankana2zenkata_table[64] = {
-	0x00,0x02,0x0C,0x0D,0x01,0xFB,0xF2,0xA1,0xA3,0xA5,
-	0xA7,0xA9,0xE3,0xE5,0xE7,0xC3,0xFC,0xA2,0xA4,0xA6,
-	0xA8,0xAA,0xAB,0xAD,0xAF,0xB1,0xB3,0xB5,0xB7,0xB9,
-	0xBB,0xBD,0xBF,0xC1,0xC4,0xC6,0xC8,0xCA,0xCB,0xCC,
-	0xCD,0xCE,0xCF,0xD2,0xD5,0xD8,0xDB,0xDE,0xDF,0xE0,
-	0xE1,0xE2,0xE4,0xE6,0xE8,0xE9,0xEA,0xEB,0xEC,0xED,
-	0xEF,0xF3,0x9B,0x9C
-};
-static const unsigned char hankana2zenhira_table[64] = {
-	0x00,0x02,0x0C,0x0D,0x01,0xFB,0x92,0x41,0x43,0x45,
-	0x47,0x49,0x83,0x85,0x87,0x63,0xFC,0x42,0x44,0x46,
-	0x48,0x4A,0x4B,0x4D,0x4F,0x51,0x53,0x55,0x57,0x59,
-	0x5B,0x5D,0x5F,0x61,0x64,0x66,0x68,0x6A,0x6B,0x6C,
-	0x6D,0x6E,0x6F,0x72,0x75,0x78,0x7B,0x7E,0x7F,0x80,
-	0x81,0x82,0x84,0x86,0x88,0x89,0x8A,0x8B,0x8C,0x8D,
-	0x8F,0x93,0x9B,0x9C
-};
-static const unsigned char zenkana2hankana_table[84][2] = {
-	{0x67,0x00},{0x71,0x00},{0x68,0x00},{0x72,0x00},{0x69,0x00},
-	{0x73,0x00},{0x6A,0x00},{0x74,0x00},{0x6B,0x00},{0x75,0x00},
-	{0x76,0x00},{0x76,0x9E},{0x77,0x00},{0x77,0x9E},{0x78,0x00},
-	{0x78,0x9E},{0x79,0x00},{0x79,0x9E},{0x7A,0x00},{0x7A,0x9E},
-	{0x7B,0x00},{0x7B,0x9E},{0x7C,0x00},{0x7C,0x9E},{0x7D,0x00},
-	{0x7D,0x9E},{0x7E,0x00},{0x7E,0x9E},{0x7F,0x00},{0x7F,0x9E},
-	{0x80,0x00},{0x80,0x9E},{0x81,0x00},{0x81,0x9E},{0x6F,0x00},
-	{0x82,0x00},{0x82,0x9E},{0x83,0x00},{0x83,0x9E},{0x84,0x00},
-	{0x84,0x9E},{0x85,0x00},{0x86,0x00},{0x87,0x00},{0x88,0x00},
-	{0x89,0x00},{0x8A,0x00},{0x8A,0x9E},{0x8A,0x9F},{0x8B,0x00},
-	{0x8B,0x9E},{0x8B,0x9F},{0x8C,0x00},{0x8C,0x9E},{0x8C,0x9F},
-	{0x8D,0x00},{0x8D,0x9E},{0x8D,0x9F},{0x8E,0x00},{0x8E,0x9E},
-	{0x8E,0x9F},{0x8F,0x00},{0x90,0x00},{0x91,0x00},{0x92,0x00},
-	{0x93,0x00},{0x6C,0x00},{0x94,0x00},{0x6D,0x00},{0x95,0x00},
-	{0x6E,0x00},{0x96,0x00},{0x97,0x00},{0x98,0x00},{0x99,0x00},
-	{0x9A,0x00},{0x9B,0x00},{0x9C,0x00},{0x9C,0x00},{0x72,0x00},
-	{0x74,0x00},{0x66,0x00},{0x9D,0x00},{0x73,0x9E}
-};
-
-static int
-collector_hantozen(int c, void* data)
-{
-	int s, mode, n;
-	struct collector_hantozen_data *pc = (struct collector_hantozen_data*)data;
-
-	s = c;
-	mode = pc->mode;
-
-	if (mode & 0xf) { /* hankaku to zenkaku */
-		if ((mode & 0x1) && c >= 0x21 && c <= 0x7d && c != 0x22 && c != 0x27 && c != 0x5c) {	/* all except <"> <'> <\> <~> */
-			s = c + 0xfee0;
-		} else if ((mode & 0x2) && ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a))) {	/* alpha */
-			s = c + 0xfee0;
-		} else if ((mode & 0x4) && c >= 0x30 && c <= 0x39) {	/* num */
-			s = c + 0xfee0;
-		} else if ((mode & 0x8) && c == 0x20) {	/* spase */
-			s = 0x3000;
-		}
-	}
-
-	if (mode & 0xf0) { /* zenkaku to hankaku */
-		if ((mode & 0x10) && c >= 0xff01 && c <= 0xff5d && c != 0xff02 && c != 0xff07 && c!= 0xff3c) {	/* all except <"> <'> <\> <~> */
-			s = c - 0xfee0;
-		} else if ((mode & 0x20) && ((c >= 0xff21 && c <= 0xff3a) || (c >= 0xff41 && c <= 0xff5a))) {	/* alpha */
-			s = c - 0xfee0;
-		} else if ((mode & 0x40) && (c >= 0xff10 && c <= 0xff19)) {	/* num */
-			s = c - 0xfee0;
-		} else if ((mode & 0x80) && (c == 0x3000)) {	/* spase */
-			s = 0x20;
-		} else if ((mode & 0x10) && (c == 0x2212)) {	/* MINUS SIGN */
-			s = 0x2d;
-		}
-	}
-
-	if (mode & 0x300) {	/* hankaku kana to zenkaku kana */
-		if ((mode & 0x100) && (mode & 0x800)) {	/* hankaku kana to zenkaku katakana and glue voiced sound mark */
-			if (c >= 0xff61 && c <= 0xff9f) {
-				if (pc->status) {
-					n = (pc->cache - 0xff60) & 0x3f;
-					if (c == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						pc->status = 0;
-						s = 0x3001 + hankana2zenkata_table[n];
-					} else if (c == 0xff9e && n == 19) {
-						pc->status = 0;
-						s = 0x30f4;
-					} else if (c == 0xff9f && (n >= 42 && n <= 46)) {
-						pc->status = 0;
-						s = 0x3002 + hankana2zenkata_table[n];
-					} else {
-						pc->status = 1;
-						pc->cache = c;
-						s = 0x3000 + hankana2zenkata_table[n];
-					}
-				} else {
-					pc->status = 1;
-					pc->cache = c;
-					return c;
-				}
-			} else {
-				if (pc->status) {
-					n = (pc->cache - 0xff60) & 0x3f;
-					pc->status = 0;
-					(*pc->next_filter->filter_function)(0x3000 + hankana2zenkata_table[n], pc->next_filter);
-				}
-			}
-		} else if ((mode & 0x200) && (mode & 0x800)) {	/* hankaku kana to zenkaku hirangana and glue voiced sound mark */
-			if (c >= 0xff61 && c <= 0xff9f) {
-				if (pc->status) {
-					n = (pc->cache - 0xff60) & 0x3f;
-					if (c == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						pc->status = 0;
-						s = 0x3001 + hankana2zenhira_table[n];
-					} else if (c == 0xff9f && (n >= 42 && n <= 46)) {
-						pc->status = 0;
-						s = 0x3002 + hankana2zenhira_table[n];
-					} else {
-						pc->status = 1;
-						pc->cache = c;
-						s = 0x3000 + hankana2zenhira_table[n];
-					}
-				} else {
-					pc->status = 1;
-					pc->cache = c;
-					return c;
-				}
-			} else {
-				if (pc->status) {
-					n = (pc->cache - 0xff60) & 0x3f;
-					pc->status = 0;
-					(*pc->next_filter->filter_function)(0x3000 + hankana2zenhira_table[n], pc->next_filter);
-				}
-			}
-		} else if ((mode & 0x100) && c >= 0xff61 && c <= 0xff9f) {	/* hankaku kana to zenkaku katakana */
-			s = 0x3000 + hankana2zenkata_table[c - 0xff60];
-		} else if ((mode & 0x200) && c >= 0xff61 && c <= 0xff9f) {	/* hankaku kana to zenkaku hirangana */
-			s = 0x3000 + hankana2zenhira_table[c - 0xff60];
-		}
-	}
-
-	if (mode & 0x3000) {	/* Zenkaku kana to hankaku kana */
-		if ((mode & 0x1000) && c >= 0x30a1 && c <= 0x30f4) {	/* Zenkaku katakana to hankaku kana */
-			n = c - 0x30a1;
-			if (zenkana2hankana_table[n][1] != 0) {
-				(*pc->next_filter->filter_function)(0xff00 + zenkana2hankana_table[n][0], pc->next_filter);
-				s = 0xff00 + zenkana2hankana_table[n][1];
-			} else {
-				s = 0xff00 + zenkana2hankana_table[n][0];
-			}
-		} else if ((mode & 0x2000) && c >= 0x3041 && c <= 0x3093) {	/* Zenkaku hirangana to hankaku kana */
-			n = c - 0x3041;
-			if (zenkana2hankana_table[n][1] != 0) {
-				(*pc->next_filter->filter_function)(0xff00 + zenkana2hankana_table[n][0], pc->next_filter);
-				s = 0xff00 + zenkana2hankana_table[n][1];
-			} else {
-				s = 0xff00 + zenkana2hankana_table[n][0];
-			}
-		} else if (c == 0x3001) {
-			s = 0xff64;				/* HALFWIDTH IDEOGRAPHIC COMMA */
-		} else if (c == 0x3002) {
-			s = 0xff61;				/* HALFWIDTH IDEOGRAPHIC FULL STOP */
-		} else if (c == 0x300c) {
-			s = 0xff62;				/* HALFWIDTH LEFT CORNER BRACKET */
-		} else if (c == 0x300d) {
-			s = 0xff63;				/* HALFWIDTH RIGHT CORNER BRACKET */
-		} else if (c == 0x309b) {
-			s = 0xff9e;				/* HALFWIDTH KATAKANA VOICED SOUND MARK */
-		} else if (c == 0x309c) {
-			s = 0xff9f;				/* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
-		} else if (c == 0x30fc) {
-			s = 0xff70;				/* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
-		} else if (c == 0x30fb) {
-			s = 0xff65;				/* HALFWIDTH KATAKANA MIDDLE DOT */
-		}
-	} else if (mode & 0x30000) { 
-		if ((mode & 0x10000) && c >= 0x3041 && c <= 0x3093) {	/* Zenkaku hirangana to Zenkaku katakana */
-			s = c + 0x60;
-		} else if ((mode & 0x20000) && c >= 0x30a1 && c <= 0x30f3) {	/* Zenkaku katakana to Zenkaku hirangana */
-			s = c - 0x60;
-		}
-	}
-
-	if (mode & 0x100000) {	/* special ascii to symbol */
-		if (c == 0x5c) {
-			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
-		} else if (c == 0xa5) {		/* YEN SIGN */
-			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
-		} else if (c == 0x7e) {
-			s = 0xffe3;				/* FULLWIDTH MACRON */
-		} else if (c == 0x203e) {	/* OVERLINE */
-			s = 0xffe3;				/* FULLWIDTH MACRON */
-		} else if (c == 0x27) {
-			s = 0x2019;				/* RIGHT SINGLE QUOTATION MARK */
-		} else if (c == 0x22) {
-			s = 0x201d;				/* RIGHT DOUBLE QUOTATION MARK */
-		}
-	} else if (mode & 0x200000) {	/* special symbol to ascii */
-		if (c == 0xffe5) {			/* FULLWIDTH YEN SIGN */
-			s = 0x5c;
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x5c;
-		} else if (c == 0xffe3) {	/* FULLWIDTH MACRON */
-			s = 0x7e;
-		} else if (c == 0x203e) {	/* OVERLINE */
-			s = 0x7e;
-		} else if (c == 0x2018) {	/* LEFT SINGLE QUOTATION MARK*/
-			s = 0x27;
-		} else if (c == 0x2019) {	/* RIGHT SINGLE QUOTATION MARK */
-			s = 0x27;
-		} else if (c == 0x201c) {	/* LEFT DOUBLE QUOTATION MARK */
-			s = 0x22;
-		} else if (c == 0x201d) {	/* RIGHT DOUBLE QUOTATION MARK */
-			s = 0x22;
-		}
-	}
-
-	if (mode & 0x400000) {	/* special ascii to symbol */
-		if (c == 0x5c) {
-			s = 0xff3c;				/* FULLWIDTH REVERSE SOLIDUS */
-		} else if (c == 0x7e) {
-			s = 0xff5e;				/* FULLWIDTH TILDE */
-		} else if (c == 0x27) {
-			s = 0xff07;				/* FULLWIDTH APOSTROPHE */
-		} else if (c == 0x22) {
-			s = 0xff02;				/* FULLWIDTH QUOTATION MARK */
-		}
-	} else if (mode & 0x800000) {	/* special symbol to ascii */
-		if (c == 0xff3c) {			/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x5c;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x7e;
-		} else if (c == 0xff07) {	/* FULLWIDTH APOSTROPHE */
-			s = 0x27;
-		} else if (c == 0xff02) {	/* FULLWIDTH QUOTATION MARK */
-			s = 0x22;
-		}
-	}
-
-	return (*pc->next_filter->filter_function)(s, pc->next_filter);
-}
-
-static int
-collector_hantozen_flush(struct collector_hantozen_data *pc)
-{
-	int ret, n;
-
-	ret = 0;
-	if (pc->status) {
-		n = (pc->cache - 0xff60) & 0x3f;
-		if (pc->mode & 0x100) {	/* hankaku kana to zenkaku katakana */
-			ret = (*pc->next_filter->filter_function)(0x3000 + hankana2zenkata_table[n], pc->next_filter);
-		} else if (pc->mode & 0x200) {	/* hankaku kana to zenkaku hirangana */
-			ret = (*pc->next_filter->filter_function)(0x3000 + hankana2zenhira_table[n], pc->next_filter);
-		}
-		pc->status = 0;
-	}
-
-	return ret;
-}
-
 mbfl_string *
 mbfl_ja_jp_hantozen(
     mbfl_string *string,
@@ -2011,39 +1843,67 @@ mbfl_ja_jp_hantozen(
 	unsigned char *p;
 	const mbfl_encoding *encoding;
 	mbfl_memory_device device;
-	struct collector_hantozen_data pc;
-	mbfl_convert_filter *decoder;
-	mbfl_convert_filter *encoder;
+	mbfl_convert_filter *decoder = NULL;
+	mbfl_convert_filter *encoder = NULL;
+	mbfl_convert_filter *tl_filter = NULL;
+	mbfl_convert_filter *next_filter = NULL;
+	mbfl_filt_tl_jisx0201_jisx0208_param *param = NULL;
 
-	/* initialize */
+	/* validate parameters */
 	if (string == NULL || result == NULL) {
 		return NULL;
 	}
+
 	encoding = mbfl_no2encoding(string->no_encoding);
 	if (encoding == NULL) {
 		return NULL;
 	}
+
 	mbfl_memory_device_init(&device, string->len, 0);
 	mbfl_string_init(result);
+
 	result->no_language = string->no_language;
 	result->no_encoding = string->no_encoding;
+
 	decoder = mbfl_convert_filter_new(
-	  mbfl_no_encoding_wchar,
-	  string->no_encoding,
-	  mbfl_memory_device_output, 0, &device);
-	encoder = mbfl_convert_filter_new(
-	  string->no_encoding,
-	  mbfl_no_encoding_wchar,
-	  collector_hantozen, 0, &pc);
-	if (decoder == NULL || encoder == NULL) {
-		mbfl_convert_filter_delete(encoder);
-		mbfl_convert_filter_delete(decoder);
-		return NULL;
+		mbfl_no_encoding_wchar,
+		string->no_encoding,
+		mbfl_memory_device_output, 0, &device);
+	if (decoder == NULL) {
+		goto out;
 	}
-	pc.next_filter = decoder;
-	pc.mode = mode;
-	pc.status = 0;
-	pc.cache = 0;
+	next_filter = decoder;
+
+	param =
+		(mbfl_filt_tl_jisx0201_jisx0208_param *)mbfl_malloc(sizeof(mbfl_filt_tl_jisx0201_jisx0208_param));
+	if (param == NULL) {
+		goto out;
+	}
+
+	param->mode = mode;
+
+	tl_filter = mbfl_convert_filter_new2(
+		&vtbl_tl_jisx0201_jisx0208,
+		(int(*)(int, void*))next_filter->filter_function,
+		(int(*)(void*))next_filter->filter_flush,
+		next_filter);
+	if (tl_filter == NULL) {
+		mbfl_free(param);
+		goto out;
+	}
+
+	tl_filter->opaque = param;
+	next_filter = tl_filter;
+
+	encoder = mbfl_convert_filter_new(
+		string->no_encoding,
+		mbfl_no_encoding_wchar,
+		(int(*)(int, void*))next_filter->filter_function,
+		(int(*)(void*))next_filter->filter_flush,
+		next_filter);	
+	if (encoder == NULL) {
+		goto out;
+	}
 
 	/* feed data */
 	p = string->val;
@@ -2058,11 +1918,22 @@ mbfl_ja_jp_hantozen(
 	}
 
 	mbfl_convert_filter_flush(encoder);
-	collector_hantozen_flush(&pc);
-	mbfl_convert_filter_flush(decoder);
 	result = mbfl_memory_device_result(&device, result);
-	mbfl_convert_filter_delete(encoder);
-	mbfl_convert_filter_delete(decoder);
+out:
+	if (tl_filter != NULL) {
+		if (tl_filter->opaque != NULL) {
+			mbfl_free(tl_filter->opaque);
+		}
+		mbfl_convert_filter_delete(tl_filter);
+	}
+
+	if (decoder != NULL) {
+		mbfl_convert_filter_delete(decoder);
+	}
+
+	if (encoder != NULL) {
+		mbfl_convert_filter_delete(encoder);
+	}
 
 	return result;
 }
