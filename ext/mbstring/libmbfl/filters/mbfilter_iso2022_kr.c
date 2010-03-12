@@ -276,7 +276,13 @@ mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)
 	if ((filter->status & 0xff00) != 0) {
 		CK((*filter->output_function)(0x0f, filter->data));		/* SI */
 	}
+
 	filter->status &= 0xff;
+
+	if (filter->flush_function != NULL) {
+		return (*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
