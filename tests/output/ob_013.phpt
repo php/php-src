@@ -37,69 +37,67 @@ Array
 )
 Array
 (
-    [name] => d
+    [level] => 5
     [type] => 1
-    [flags] => 4209
-    [level] => 4
-    [chunk_size] => %d
-    [buffer_size] => 16384
-    [buffer_used] => 96
+    [status] => 1
+    [name] => d
+    [del] => 1
 )
 Array
 (
     [0] => Array
         (
+            [chunk_size] => 0
+            [size] => 40960
+            [block_size] => 10240
+            [type] => 1
+            [status] => 0
             [name] => default output handler
-            [type] => 0
-            [flags] => 112
-            [level] => 0
-            [chunk_size] => %d
-            [buffer_size] => 16384
-            [buffer_used] => 0
+            [del] => 1
         )
 
     [1] => Array
         (
-            [name] => a
+            [chunk_size] => 0
+            [size] => 40960
+            [block_size] => 10240
             [type] => 1
-            [flags] => 113
-            [level] => 1
-            [chunk_size] => %d
-            [buffer_size] => 16384
-            [buffer_used] => 0
+            [status] => 0
+            [name] => a
+            [del] => 1
         )
 
     [2] => Array
         (
-            [name] => b
+            [chunk_size] => 0
+            [size] => 40960
+            [block_size] => 10240
             [type] => 1
-            [flags] => 113
-            [level] => 2
-            [chunk_size] => %d
-            [buffer_size] => 16384
-            [buffer_used] => 0
+            [status] => 0
+            [name] => b
+            [del] => 1
         )
 
     [3] => Array
         (
-            [name] => c
+            [chunk_size] => 0
+            [size] => 40960
+            [block_size] => 10240
             [type] => 1
-            [flags] => 113
-            [level] => 3
-            [chunk_size] => %d
-            [buffer_size] => 16384
-            [buffer_used] => 4
+            [status] => 0
+            [name] => c
+            [del] => 1
         )
 
     [4] => Array
         (
-            [name] => d
+            [chunk_size] => 0
+            [size] => 40960
+            [block_size] => 10240
             [type] => 1
-            [flags] => 4209
-            [level] => 4
-            [chunk_size] => %d
-            [buffer_size] => 16384
-            [buffer_used] => %d
+            [status] => 1
+            [name] => d
+            [del] => 1
         )
 
 )

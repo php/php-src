@@ -27,7 +27,7 @@ var_dump(strcmp($data, gzuncompress($compressed)));
 
 
 $length = 3547;
-echo "\n-- Calling gzuncompress() with all max length of $length --\n";
+echo "\n-- Calling gzuncompress() with max length of $length --\n";
 echo "Result length is ".  strlen(gzuncompress($compressed, $length)) .  "\n";
 
 ?>
@@ -38,6 +38,6 @@ echo "Result length is ".  strlen(gzuncompress($compressed, $length)) .  "\n";
 -- Basic decompress --
 int(0)
 
--- Calling gzuncompress() with all max length of 3547 --
+-- Calling gzuncompress() with max length of 3547 --
 Result length is 3547
 ===DONE===
