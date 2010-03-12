@@ -741,8 +741,8 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 			return cs_eucjp;
 
 		case mbfl_no_encoding_sjis:
-		case mbfl_no_encoding_sjis_win:
-		case mbfl_no_encoding_sjis_mac:
+		case mbfl_no_encoding_sjis_open:
+		case mbfl_no_encoding_cp932:
 			return cs_sjis;
 
 		case mbfl_no_encoding_cp1252:
