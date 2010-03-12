@@ -1,13 +1,7 @@
 --TEST--
 Test gzencode() function : variation - verify header contents with all encoding modes
---XFAIL--
-Test will fail until bug #47178 resolved; missing gzip headers whne FORCE_DEFLATE specified
 --SKIPIF--
 <?php 
-
-if( substr(PHP_OS, 0, 3) == "WIN" ) {
-  die("skip.. Do not run on Windows");
-}
 
 if (!extension_loaded("zlib")) {
 	print "skip - ZLIB extension not loaded"; 

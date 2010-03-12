@@ -18,6 +18,8 @@ include(dirname(__FILE__) . '/data.inc');
 
 echo "*** Testing gzdeflate() : variation ***\n";
 
+
+
 echo "\n-- Testing multiple compression --\n";
 $output = gzdeflate($data);
 var_dump( md5($output));

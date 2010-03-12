@@ -5137,7 +5137,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 PHP_FUNCTION(highlight_file)
 {
 	char *filename;
-	int filename_len, ret;
+	int filename_len;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	zend_bool i = 0;
 
@@ -5154,23 +5154,32 @@ PHP_FUNCTION(highlight_file)
 	}
 
 	if (i) {
-		php_output_start_default(TSRMLS_C);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	ret = highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC);
-
-	if (ret == FAILURE) {
+	if (highlight_file(filename, &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
 		if (i) {
-			php_output_end(TSRMLS_C);
+			int res = php_ob_get_buffer(return_value TSRMLS_CC);
+
+			/* flush the buffer only if there is something to flush */
+			if (res == SUCCESS && Z_STRLEN_P(return_value) > 0) {
+				php_end_ob_buffer (1, 0 TSRMLS_CC);
+				zval_dtor(return_value);
+			} else {
+				php_end_ob_buffer (0, 0 TSRMLS_CC);
+				if (res == SUCCESS) {
+					zval_dtor(return_value);
+				}
+			}
 		}
 		RETURN_FALSE;
 	}
 
 	if (i) {
-		php_output_get_contents(return_value TSRMLS_CC);
-		php_output_discard(TSRMLS_C);
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
 	} else {
 		RETURN_TRUE;
 	}
@@ -5190,26 +5199,25 @@ PHP_FUNCTION(php_strip_whitespace)
 		RETURN_FALSE;
 	}
 
-	php_output_start_default(TSRMLS_C);
-
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
-	if (open_file_for_scanning(&file_handle TSRMLS_CC) == FAILURE) {
+	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
 		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-		php_output_end(TSRMLS_C);
 		RETURN_EMPTY_STRING();
 	}
+
+	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
 
 	zend_strip(TSRMLS_C);
 
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 
-	php_output_get_contents(return_value TSRMLS_CC);
-	php_output_discard(TSRMLS_C);
+	php_ob_get_buffer(return_value TSRMLS_CC);
+	php_end_ob_buffer(0, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -5229,7 +5237,7 @@ PHP_FUNCTION(highlight_string)
 	convert_to_string_ex(expr);
 
 	if (i) {
-		php_output_start_default(TSRMLS_C);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
 	EG(error_reporting) = E_ERROR;
@@ -5242,7 +5250,7 @@ PHP_FUNCTION(highlight_string)
 		efree(hicompiled_string_description);
 		EG(error_reporting) = old_error_reporting;
 		if (i) {
-			php_output_end(TSRMLS_C);
+			php_end_ob_buffer (1, 0 TSRMLS_CC);
 		}
 		RETURN_FALSE;
 	}
@@ -5251,8 +5259,8 @@ PHP_FUNCTION(highlight_string)
 	EG(error_reporting) = old_error_reporting;
 
 	if (i) {
-		php_output_get_contents(return_value TSRMLS_CC);
-		php_output_discard(TSRMLS_C);
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
 	} else {
 		RETURN_TRUE;
 	}
@@ -5509,14 +5517,14 @@ PHP_FUNCTION(print_r)
 	}
 
 	if (do_return) {
-		php_output_start_default(TSRMLS_C);
+		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
 	zend_print_zval_r(var, 0 TSRMLS_CC);
 
 	if (do_return) {
-		php_output_get_contents(return_value TSRMLS_CC);
-		php_output_discard(TSRMLS_C);
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
 	} else {
 		RETURN_TRUE;
 	}

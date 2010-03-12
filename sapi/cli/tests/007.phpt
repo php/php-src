@@ -32,8 +32,8 @@ class test { /* {{{ */
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -w "$filename"`);
-var_dump(`"$php" -n -w "wrong"`);
+var_dump(`$php -n -w "$filename"`);
+var_dump(`$php -n -w "wrong"`);
 var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() {} } ?>" | $php -n -w`);
 
 @unlink($filename);
@@ -45,8 +45,8 @@ string(81) "
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>
 "
-string(33) "Could not open input file: wrong
-"
+Could not open input file: wrong
+NULL
 string(43) "<?php  class test { function foo() {} } ?>
 "
 Done
