@@ -150,12 +150,13 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
 	field_packet = conn->protocol->m.get_result_field_packet(conn->protocol, FALSE TSRMLS_CC);
+	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
 		long idx;
 
 		if (meta->fields[i].root) {
 			/* We re-read metadata for PS */
-			mnd_efree(meta->fields[i].root);
+			mnd_pefree(meta->fields[i].root, meta->persistent);
 			meta->fields[i].root = NULL;
 		}
 
@@ -260,21 +261,20 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 
 /* {{{ mysqlnd_res_meta::free */
 static void
-MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA *meta, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 {
 	int i;
 	MYSQLND_FIELD *fields;
-
 	DBG_ENTER("mysqlnd_res_meta::free");
-	DBG_INF_FMT("persistent=%d", persistent);
+	DBG_INF_FMT("persistent=%d", meta->persistent);
 
 	if ((fields = meta->fields)) {
 		DBG_INF("Freeing fields metadata");
 		i = meta->field_count;
 		while (i--) {
-			php_mysqlnd_free_field_metadata(fields++, persistent TSRMLS_CC);
+			php_mysqlnd_free_field_metadata(fields++, meta->persistent TSRMLS_CC);
 		}
-		mnd_pefree(meta->fields, persistent);
+		mnd_pefree(meta->fields, meta->persistent);
 		meta->fields = NULL;
 	}
 
@@ -284,16 +284,16 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA *meta, zend_bool per
 		if (UG(unicode)) {
 			for (i = 0; i < meta->field_count; i++) {
 				if (meta->zend_hash_keys[i].ustr.v) {
-					mnd_pefree(meta->zend_hash_keys[i].ustr.v, persistent);
+					mnd_pefree(meta->zend_hash_keys[i].ustr.v, meta->persistent);
 				}
 			}
 		}
 #endif
-		mnd_pefree(meta->zend_hash_keys, persistent);
+		mnd_pefree(meta->zend_hash_keys, meta->persistent);
 		meta->zend_hash_keys = NULL;
 	}
 	DBG_INF("Freeing metadata structure");
-	mnd_pefree(meta, persistent);
+	mnd_pefree(meta, meta->persistent);
 
 	DBG_VOID_RETURN;
 }
@@ -314,6 +314,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	DBG_ENTER("mysqlnd_res_meta::clone_metadata");
 	DBG_INF_FMT("persistent=%d", persistent);
 
+	new_meta->persistent = persistent;
 	new_meta->zend_hash_keys = mnd_pemalloc(len, persistent);
 	memcpy(new_meta->zend_hash_keys, meta->zend_hash_keys, len);
 	new_meta->m = meta->m;
@@ -435,16 +436,18 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_result_meta_init */
 PHPAPI MYSQLND_RES_METADATA *
-mysqlnd_result_meta_init(unsigned int field_count TSRMLS_DC)
+mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
 {
 	MYSQLND_RES_METADATA *ret;
 	DBG_ENTER("mysqlnd_result_meta_init");
+	DBG_INF_FMT("persistent=%d", persistent);
 
 	/* +1 is to have empty marker at the end */
-	ret = mnd_ecalloc(1, sizeof(MYSQLND_RES_METADATA));
+	ret = mnd_pecalloc(1, sizeof(MYSQLND_RES_METADATA), persistent);
+	ret->persistent = persistent;
 	ret->field_count = field_count;
-	ret->fields = mnd_ecalloc(field_count + 1, sizeof(MYSQLND_FIELD));
-	ret->zend_hash_keys = mnd_ecalloc(field_count, sizeof(struct mysqlnd_field_hash_key));
+	ret->fields = mnd_pecalloc(field_count + 1, sizeof(MYSQLND_FIELD), ret->persistent);
+	ret->zend_hash_keys = mnd_pecalloc(field_count, sizeof(struct mysqlnd_field_hash_key), ret->persistent);
 
 	ret->m = & mysqlnd_mysqlnd_res_meta_methods;
 	DBG_INF_FMT("meta=%p", ret);

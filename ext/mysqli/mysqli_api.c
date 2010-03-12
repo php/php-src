@@ -166,7 +166,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 	if (argc == start) {
 		return PASS;
 	}
-	params = safe_emalloc(argc - start, sizeof(MYSQLND_PARAM_BIND), 0);
+	params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
 	for (i = 0; i < (argc - start); i++) {
 		zend_uchar type;
 		switch (types[i]) {
@@ -190,7 +190,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 				/* We count parameters from 1 */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + start + 1);
 				ret = FAIL;
-				efree(params);
+				mysqlnd_stmt_free_param_bind(stmt->stmt, params);
 				goto end;
 		}
 		params[i].zv = *(args[i + start]);
@@ -452,9 +452,7 @@ static int
 mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, unsigned int start TSRMLS_DC)
 {
 	unsigned int i;
-	MYSQLND_RESULT_BIND *params;
-
-	params = safe_emalloc(argc - start, sizeof(MYSQLND_RESULT_BIND), 0);
+	MYSQLND_RESULT_BIND * params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	for (i = 0; i < (argc - start); i++) {
 		params[i].zv = *(args[i + start]);
 	}
