@@ -405,6 +405,11 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(0x2d, filter->data));		/* '-' */
 		break;
 	}
+
+	if (filter->flush_function != NULL) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 

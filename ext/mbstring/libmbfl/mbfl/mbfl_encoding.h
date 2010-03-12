@@ -68,8 +68,8 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_euc_jp,
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_sjis_win,
-	mbfl_no_encoding_sjis_mac,
+	mbfl_no_encoding_sjis_open,
+	mbfl_no_encoding_cp932,
 	mbfl_no_encoding_cp51932,
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_2022jp,
@@ -104,6 +104,11 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_armscii8,
 	mbfl_no_encoding_cp850,
+	mbfl_no_encoding_jis_ms,
+	mbfl_no_encoding_cp50220,
+	mbfl_no_encoding_cp50220raw,
+	mbfl_no_encoding_cp50221,
+	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_charset_max
 };
 
