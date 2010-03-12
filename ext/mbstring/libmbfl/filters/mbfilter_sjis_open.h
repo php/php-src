@@ -22,36 +22,22 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
- * by Moriyoshi Koizumi <moriyoshi@php.net> on 20 Dec 2002. The file
- * mbfilter.c is included in this package .
+ * the source code included in this files was separated from mbfilter_ja.c
+ * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ifndef MBFL_MBFILTER_SJIS_OPEN_H
+#define MBFL_MBFILTER_SJIS_OPEN_H
 
-#include "mbfl_convert.h"
-#include "mbfl_filter_output.h"
+#include "mbfilter.h"
 
-int mbfl_filter_output_pipe(int c, void* data)
-{
-	mbfl_convert_filter *filter = (mbfl_convert_filter*)data;
-	return (*filter->filter_function)(c, filter);
-}
+extern const mbfl_encoding mbfl_encoding_sjis_open;
+extern const struct mbfl_identify_vtbl vtbl_identify_sjis_open;
+extern const struct mbfl_convert_vtbl vtbl_sjis_open_wchar;
+extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_open;
 
-int mbfl_filter_output_pipe_flush(void *data)
-{
-	mbfl_convert_filter *filter = (mbfl_convert_filter*)data;
-	if (filter->filter_flush != NULL) {
-		return (*filter->filter_flush)(filter);
-	}
+int mbfl_filt_conv_sjis_open_wchar(int c, mbfl_convert_filter *filter);
+int mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter);
 
-	return 0;
-}
-
-int mbfl_filter_output_null(int c, void* data)
-{
-	return c;
-}
+#endif /* MBFL_MBFILTER_SJIS_OPEN_H */

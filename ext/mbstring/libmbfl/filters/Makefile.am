@@ -1,4 +1,4 @@
-EXTRA_DIST=Makefile.bcc32 mk_sb_tbl.awk
+EXTRA_DIST=mk_sb_tbl.awk
 noinst_LTLIBRARIES=libmbfl_filters.la
 INCLUDES=-I../mbfl
 libmbfl_filters_la_LDFLAGS=-version-info $(SHLIB_VERSION)
@@ -32,6 +32,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_uuencode.c \
 	mbfilter_base64.c \
 	mbfilter_sjis.c \
+	mbfilter_sjis_open.c \
 	mbfilter_7bit.c \
 	mbfilter_qprint.c \
 	mbfilter_ucs4.c \
@@ -47,12 +48,15 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_euc_cn.c \
 	mbfilter_euc_kr.c \
 	mbfilter_uhc.c \
+	mbfilter_iso2022_jp_ms.c \
 	mbfilter_iso2022_kr.c \
 	mbfilter_cp866.c \
 	mbfilter_koi8r.c \
 	mbfilter_koi8u.c \
 	mbfilter_armscii8.c \
 	mbfilter_cp850.c \
+	mbfilter_cp5022x.c \
+	mbfilter_tl_jisx0201_jisx0208.c \
 	html_entities.c \
 	cp932_table.h \
 	html_entities.h \
@@ -75,6 +79,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_euc_tw.h \
 	mbfilter_htmlent.h \
 	mbfilter_hz.h \
+	mbfilter_iso2022_jp_ms.h \
 	mbfilter_iso2022_kr.h \
 	mbfilter_iso8859_1.h \
 	mbfilter_iso8859_10.h \
@@ -96,6 +101,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_armscii8.h \
 	mbfilter_qprint.h \
 	mbfilter_sjis.h \
+	mbfilter_sjis_open.h \
 	mbfilter_ucs2.h \
 	mbfilter_ucs4.h \
 	mbfilter_uhc.h \
@@ -105,8 +111,10 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf7imap.h \
 	mbfilter_utf8.h \
 	mbfilter_uuencode.h \
+	mbfilter_cp5022x.h \
 	mbfilter_cp51932.h \
 	mbfilter_cp850.h \
+	mbfilter_tl_jisx0201_jisx0208.h \
 	unicode_prop.h \
 	unicode_table_big5.h \
 	unicode_table_cns11643.h \
@@ -134,7 +142,8 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	unicode_table_koi8u.h \
 	unicode_table_armscii8.h \
 	unicode_table_cp850.h \
-	unicode_table_uhc.h
+	unicode_table_uhc.h \
+	translit_kana_jisx0201_jisx0208.h
 
 mbfilter_iso8859_2.c: unicode_table_iso8859_2.h
 

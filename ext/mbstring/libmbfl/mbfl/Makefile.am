@@ -1,4 +1,4 @@
-EXTRA_DIST=Makefile.bcc32 mk_eaw_tbl.awk
+EXTRA_DIST=mk_eaw_tbl.awk
 lib_LTLIBRARIES=libmbfl.la
 libmbfl_la_SOURCES=mbfilter.c \
 	mbfl_string.c \

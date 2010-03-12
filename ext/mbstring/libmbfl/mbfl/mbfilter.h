@@ -102,8 +102,8 @@
  * version information
  */
 #define MBFL_VERSION_MAJOR 1
-#define MBFL_VERSION_MINOR 0
-#define MBFL_VERSION_TEENY 2
+#define MBFL_VERSION_MINOR 1
+#define MBFL_VERSION_TEENY 0
 
 /*
  * convert filter

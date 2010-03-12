@@ -1,0 +1,99 @@
+#!/usr/bin/expect -f
+set timeout 1
+
+spawn tests/conv_encoding Japanese CP932 UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "CP932"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%5c (1)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese SJIS-open UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "SJIS-open"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%81%8f (2)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese eucJP-open UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "eucJP-open"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%a1%ef (2)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese CP51932 UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "CP51932"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%5c (1)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese ISO-2022-JP-MS UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "ISO-2022-JP-MS"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%1b%24%42%21%6f%1b%28%42 (8)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese CP50220 UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "CP50220"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%1b%28%4a%5c%1b%28%42 (7)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese CP50221 UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "CP50221"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%1b%28%4a%5c%1b%28%42 (7)\r\n" { pass $test }
+}
+close
+
+spawn tests/conv_encoding Japanese CP50222 UTF-8
+expect_after {
+    "\[^\r\n\]*\r\n" { fail $test }
+}
+set test "CP50222"
+send "\xc2\xa5\r"
+sleep 0.01
+expect {
+    "%1b%28%4a%5c%1b%28%42 (7)\r\n" { pass $test }
+}
+close
+# vim: sts=4 ts=4 sw=4 et
