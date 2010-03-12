@@ -26,6 +26,10 @@ if (($db_file = dba_open($db_filename, "c", $handler)) !== FALSE) {
     echo "Error creating $db_filename\n";
 }
 
+// Check the file still exists
+$s = file_get_contents($db_filename);
+echo "$s\n";
+
 ?>
 --CLEAN--
 <?php 
@@ -39,3 +43,4 @@ Notice: dba_open(): %stest0.dbm: unexpected file type or format in %sdba_db4_003
 
 Warning: dba_open(%stest0.dbm,c): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_003.php on line %d
 Error creating %stest0.dbm
+Dummy contents
