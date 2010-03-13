@@ -6,6 +6,9 @@ PHP                                                                        NEWS
 - Added stream filter support to mcrypt extension (ported from 
   mcrypt_filter). (Stas)
 
+- Fixed a NULL pointer dereference when processing invalid XML-RPC
+  requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
+
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51257 (CURL_VERSION_LARGEFILE incorrectly used after libcurl
   version 7.10.1). (aron dot ujvari at microsec dot hu)

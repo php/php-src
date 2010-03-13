@@ -778,6 +778,7 @@ zval* decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zva
 	zval* retval = NULL;
 	XMLRPC_REQUEST response;
 	STRUCT_XMLRPC_REQUEST_INPUT_OPTIONS opts = {{0}};
+	const char *method_name;
 	opts.xml_elem_opts.encoding = encoding_in ? utf8_get_encoding_id_from_string(encoding_in) : ENCODING_DEFAULT;
 
 	/* generate XMLRPC_REQUEST from raw xml */
@@ -788,10 +789,15 @@ zval* decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zva
 
 		if (XMLRPC_RequestGetRequestType(response) == xmlrpc_request_call) {
 			if (method_name_out) {
-				zval_dtor(method_name_out);
-				Z_TYPE_P(method_name_out) = IS_STRING;
-				Z_STRVAL_P(method_name_out) = estrdup(XMLRPC_RequestGetMethodName(response));
-				Z_STRLEN_P(method_name_out) = strlen(Z_STRVAL_P(method_name_out));
+				method_name = XMLRPC_RequestGetMethodName(response);
+				if (method_name) {
+					zval_dtor(method_name_out);
+					Z_TYPE_P(method_name_out) = IS_STRING;
+					Z_STRVAL_P(method_name_out) = estrdup(method_name);
+					Z_STRLEN_P(method_name_out) = strlen(Z_STRVAL_P(method_name_out));
+				} else {
+					retval = NULL;
+				}
 			}
 		}
 
