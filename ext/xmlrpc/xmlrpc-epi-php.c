@@ -795,7 +795,8 @@ zval* decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zva
 					Z_TYPE_P(method_name_out) = IS_STRING;
 					Z_STRVAL_P(method_name_out) = estrdup(method_name);
 					Z_STRLEN_P(method_name_out) = strlen(Z_STRVAL_P(method_name_out));
-				} else {
+				} else if (retval) {
+					zval_ptr_dtor(&retval);
 					retval = NULL;
 				}
 			}
