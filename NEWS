@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2010, PHP 5.2.14
 - Updated timezone database to version 2010.3. (Derick)
 
+- Fixed a NULL pointer dereference when processing invalid XML-RPC
+  requests (Fixes CVE-2010-0397, bug #51288). (Raphael Geissert)
+
 - Fixed bug #51269 (zlib.output_compression Overwrites Vary Header). (Adam)
 - Fixed bug #51237 (milter SAPI crash on startup). (igmar at palsenberg dot com)
 - Fixed bug #51213 (pdo_mssql is trimming value of the money column). (Ilia,
