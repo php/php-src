@@ -595,9 +595,10 @@ mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, 
 
 /* {{{ mysqlnd_stmt_execute_store_params */
 static void
-mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uchar **p,
+mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p,
 								  size_t *buf_len, unsigned int null_byte_offset TSRMLS_DC)
 {
+	MYSQLND_STMT_DATA * stmt = s->data;
 	unsigned int i = 0;
 	size_t left = (*buf_len - (*p - *buf));
 	size_t data_size = 0;
@@ -784,9 +785,10 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT *stmt, zend_uchar **buf, zend_uch
 
 
 /* {{{ mysqlnd_stmt_execute_generate_request */
-zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *request_len,
-												  zend_bool *free_buffer TSRMLS_DC)
+zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * s, size_t *request_len,
+												  zend_bool * free_buffer TSRMLS_DC)
 {
+	MYSQLND_STMT_DATA * stmt = s->data;
 	zend_uchar	*p = stmt->execute_cmd_buffer.buffer,
 				*cmd_buffer = stmt->execute_cmd_buffer.buffer;
 	size_t cmd_buffer_length = stmt->execute_cmd_buffer.length;
@@ -815,7 +817,7 @@ zend_uchar* mysqlnd_stmt_execute_generate_request(MYSQLND_STMT *stmt, size_t *re
 	int1store(p, stmt->send_types_to_server); 
 	p++;
 
-	mysqlnd_stmt_execute_store_params(stmt, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
+	mysqlnd_stmt_execute_store_params(s, &cmd_buffer, &p, &cmd_buffer_length, null_byte_offset TSRMLS_CC);
 
 	*free_buffer = (cmd_buffer != stmt->execute_cmd_buffer.buffer);
 	*request_len = (p - cmd_buffer);
