@@ -189,6 +189,7 @@ typedef struct st_mysqlnd_net	MYSQLND_NET;
 typedef struct st_mysqlnd_protocol	MYSQLND_PROTOCOL;
 typedef struct st_mysqlnd_res	MYSQLND_RES;
 typedef char** 					MYSQLND_ROW_C;		/* return data as array of strings */
+typedef struct st_mysqlnd_stmt_data	MYSQLND_STMT_DATA;
 typedef struct st_mysqlnd_stmt	MYSQLND_STMT;
 typedef unsigned int			MYSQLND_FIELD_OFFSET;
 
@@ -579,7 +580,7 @@ typedef MYSQLND_PARAM_BIND *(*func_mysqlnd_stmt__alloc_param_bind)(MYSQLND_STMT 
 typedef MYSQLND_RESULT_BIND*(*func_mysqlnd_stmt__alloc_result_bind)(MYSQLND_STMT * const stmt TSRMLS_DC);
 typedef	void 				(*func_mysqlnd_stmt__free_parameter_bind)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * TSRMLS_DC);
 typedef	void 				(*func_mysqlnd_stmt__free_result_bind)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * TSRMLS_DC);
-
+typedef unsigned int		(*func_mysqlnd_stmt__server_status)(const MYSQLND_STMT * const stmt TSRMLS_DC);
 
 struct st_mysqlnd_stmt_methods
 {
@@ -626,6 +627,8 @@ struct st_mysqlnd_stmt_methods
 
 	func_mysqlnd_stmt__free_parameter_bind free_parameter_bind;
 	func_mysqlnd_stmt__free_result_bind free_result_bind;
+
+	func_mysqlnd_stmt__server_status get_server_status;
 };
 
 
@@ -828,7 +831,7 @@ struct st_mysqlnd_result_bind
 };
 
 
-struct st_mysqlnd_stmt
+struct st_mysqlnd_stmt_data
 {
 	MYSQLND						*conn;
 	unsigned long				stmt_id;
@@ -856,7 +859,12 @@ struct st_mysqlnd_stmt
 
 	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */
+};
 
+
+struct st_mysqlnd_stmt
+{
+	MYSQLND_STMT_DATA * data;
 	struct st_mysqlnd_stmt_methods	*m;
 };
 

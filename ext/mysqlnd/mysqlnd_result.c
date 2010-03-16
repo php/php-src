@@ -351,8 +351,9 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES *result, MYSQLND *
 
 /* {{{ mysqlnd_query_read_result_set_header */
 enum_func_status
-mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT *stmt TSRMLS_DC)
+mysqlnd_query_read_result_set_header(MYSQLND *conn, MYSQLND_STMT * s TSRMLS_DC)
 {
+	MYSQLND_STMT_DATA * stmt = s ? s->data:NULL;
 	enum_func_status ret;
 	MYSQLND_PACKET_RSET_HEADER * rset_header;
 

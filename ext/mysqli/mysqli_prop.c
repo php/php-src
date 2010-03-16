@@ -268,7 +268,7 @@ static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_LONG(*retval, p->stmt->stmt_id);
+		ZVAL_LONG(*retval, mysqli_stmt_get_id(p->stmt));
 	}
 	return SUCCESS;
 }
