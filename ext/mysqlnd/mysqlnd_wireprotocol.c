@@ -929,8 +929,8 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 		(len = php_mysqlnd_net_field_length(&p)) &&
 		len != MYSQLND_NULL_LENGTH)
 	{
-		DBG_INF_FMT("Def found, length %lu", len);
-		meta->def = mnd_emalloc(len + 1);
+		DBG_INF_FMT("Def found, length %lu, persistent=%d", len, packet->persistent_alloc);
+		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
 		meta->def_length = len;
@@ -943,7 +943,8 @@ php_mysqlnd_rset_field_read(void *_packet, MYSQLND *conn TSRMLS_DC)
 				 		"shorter than expected", p - begin - packet->header.size);
 	}
 
-	root_ptr = meta->root = mnd_emalloc(total_len);
+	DBG_INF_FMT("allocing root. persistent=%d", packet->persistent_alloc);
+	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	meta->root_len = total_len;
 	/* Now do allocs */
 	if (meta->catalog && meta->catalog != mysqlnd_empty_string) {

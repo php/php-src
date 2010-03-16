@@ -264,7 +264,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 	}
 
 	/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
-	stmt->column_count = S->stmt->field_count;
+	stmt->column_count = mysql_stmt_field_count(S->stmt);
 	for (i = 0; i < stmt->column_count; i++) {
 		mysqlnd_stmt_bind_one_result(S->stmt, i);
 	}
@@ -376,7 +376,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			/* for SHOW/DESCRIBE and others the column/field count is not available before execute */
 			int i;
 
-			stmt->column_count = S->stmt->field_count;
+			stmt->column_count = mysql_stmt_field_count(S->stmt);
 			for (i = 0; i < stmt->column_count; i++) {
 				mysqlnd_stmt_bind_one_result(S->stmt, i);
 			}
@@ -745,8 +745,8 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	}
 #if PDO_USE_MYSQLND
 	if (S->stmt) {
-		Z_ADDREF_P(S->stmt->result_bind[colno].zv);
-		*ptr = (char*)&S->stmt->result_bind[colno].zv;
+		Z_ADDREF_P(S->stmt->data->result_bind[colno].zv);
+		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
 		*len = sizeof(zval);
 		PDO_DBG_RETURN(1);
 	}

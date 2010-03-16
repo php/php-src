@@ -189,6 +189,7 @@ typedef struct st_mysqlnd_net	MYSQLND_NET;
 typedef struct st_mysqlnd_protocol	MYSQLND_PROTOCOL;
 typedef struct st_mysqlnd_res	MYSQLND_RES;
 typedef char** 					MYSQLND_ROW_C;		/* return data as array of strings */
+typedef struct st_mysqlnd_stmt_data	MYSQLND_STMT_DATA;
 typedef struct st_mysqlnd_stmt	MYSQLND_STMT;
 typedef unsigned int			MYSQLND_FIELD_OFFSET;
 
@@ -527,9 +528,9 @@ typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_field)(MYSQLND_RES_
 typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC);
 typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_fields)(MYSQLND_RES_METADATA * const meta TSRMLS_DC);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_tell)(const MYSQLND_RES_METADATA * const meta TSRMLS_DC);
-typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND *conn TSRMLS_DC);
+typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND * conn TSRMLS_DC);
 typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent TSRMLS_DC);
-typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA *meta, zend_bool persistent TSRMLS_DC);
+typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA * meta TSRMLS_DC);
 
 struct st_mysqlnd_res_meta_methods
 {
@@ -559,10 +560,8 @@ typedef enum_func_status	(*func_mysqlnd_stmt__fetch)(MYSQLND_STMT * const stmt, 
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_parameters)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * const param_bind TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_one_parameter)(MYSQLND_STMT * const stmt, unsigned int param_no, zval * const zv, zend_uchar	type TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__refresh_bind_param)(MYSQLND_STMT * const stmt TSRMLS_DC);
-typedef void				(*func_mysqlnd_stmt__set_param_bind_dtor)(MYSQLND_STMT * const stmt, void (*param_bind_dtor)(MYSQLND_PARAM_BIND * TSRMLS_DC) TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_result)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * const result_bind TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__bind_one_result)(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
-typedef void				(*func_mysqlnd_stmt__set_result_bind_dtor)(MYSQLND_STMT * const stmt, void (*result_bind_dtor)(MYSQLND_RESULT_BIND * TSRMLS_DC) TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__send_long_data)(MYSQLND_STMT * const stmt, unsigned int param_num, const char * const data, unsigned long length TSRMLS_DC);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__get_parameter_metadata)(MYSQLND_STMT * const stmt TSRMLS_DC);
 typedef MYSQLND_RES *		(*func_mysqlnd_stmt__get_result_metadata)(MYSQLND_STMT * const stmt TSRMLS_DC);
@@ -577,7 +576,11 @@ typedef const char *		(*func_mysqlnd_stmt__get_error_str)(const MYSQLND_STMT * c
 typedef const char *		(*func_mysqlnd_stmt__get_sqlstate)(const MYSQLND_STMT * const stmt TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__get_attribute)(const MYSQLND_STMT * const stmt, enum mysqlnd_stmt_attr attr_type, void * const value TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_stmt__set_attribute)(MYSQLND_STMT * const stmt, enum mysqlnd_stmt_attr attr_type, const void * const value TSRMLS_DC);
-
+typedef MYSQLND_PARAM_BIND *(*func_mysqlnd_stmt__alloc_param_bind)(MYSQLND_STMT * const stmt TSRMLS_DC);
+typedef MYSQLND_RESULT_BIND*(*func_mysqlnd_stmt__alloc_result_bind)(MYSQLND_STMT * const stmt TSRMLS_DC);
+typedef	void 				(*func_mysqlnd_stmt__free_parameter_bind)(MYSQLND_STMT * const stmt, MYSQLND_PARAM_BIND * TSRMLS_DC);
+typedef	void 				(*func_mysqlnd_stmt__free_result_bind)(MYSQLND_STMT * const stmt, MYSQLND_RESULT_BIND * TSRMLS_DC);
+typedef unsigned int		(*func_mysqlnd_stmt__server_status)(const MYSQLND_STMT * const stmt TSRMLS_DC);
 
 struct st_mysqlnd_stmt_methods
 {
@@ -598,10 +601,8 @@ struct st_mysqlnd_stmt_methods
 	func_mysqlnd_stmt__bind_parameters bind_parameters;
 	func_mysqlnd_stmt__bind_one_parameter bind_one_parameter;
 	func_mysqlnd_stmt__refresh_bind_param refresh_bind_param;
-	func_mysqlnd_stmt__set_param_bind_dtor set_param_bind_dtor;
 	func_mysqlnd_stmt__bind_result bind_result;
 	func_mysqlnd_stmt__bind_one_result bind_one_result;
-	func_mysqlnd_stmt__set_result_bind_dtor set_result_bind_dtor;
 	func_mysqlnd_stmt__send_long_data send_long_data;
 	func_mysqlnd_stmt__get_parameter_metadata get_parameter_metadata;
 	func_mysqlnd_stmt__get_result_metadata get_result_metadata;
@@ -620,6 +621,14 @@ struct st_mysqlnd_stmt_methods
 
 	func_mysqlnd_stmt__get_attribute get_attribute;
 	func_mysqlnd_stmt__set_attribute set_attribute;
+
+	func_mysqlnd_stmt__alloc_param_bind alloc_parameter_bind;
+	func_mysqlnd_stmt__alloc_result_bind alloc_result_bind;
+
+	func_mysqlnd_stmt__free_parameter_bind free_parameter_bind;
+	func_mysqlnd_stmt__free_result_bind free_result_bind;
+
+	func_mysqlnd_stmt__server_status get_server_status;
 };
 
 
@@ -748,6 +757,7 @@ struct st_mysqlnd_result_metadata
 	/* We need this to make fast allocs in rowp_read */
 	unsigned int					bit_fields_count;
 	size_t							bit_fields_total_len; /* trailing \0 not counted */
+	zend_bool						persistent;
 
 	struct st_mysqlnd_res_meta_methods *m;
 };
@@ -803,6 +813,7 @@ struct st_mysqlnd_res
 	struct st_mysqlnd_packet_row * row_packet;
 
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
+	zend_bool				persistent;
 };
 
 
@@ -820,7 +831,7 @@ struct st_mysqlnd_result_bind
 };
 
 
-struct st_mysqlnd_stmt
+struct st_mysqlnd_stmt_data
 {
 	MYSQLND						*conn;
 	unsigned long				stmt_id;
@@ -834,6 +845,7 @@ struct st_mysqlnd_stmt
 	MYSQLND_PARAM_BIND			*param_bind;
 	MYSQLND_RESULT_BIND			*result_bind;
 	zend_bool					result_zvals_separated_once;
+	zend_bool					persistent;
 
 	MYSQLND_UPSERT_STATUS		upsert_status;
 
@@ -847,10 +859,12 @@ struct st_mysqlnd_stmt
 
 	MYSQLND_CMD_BUFFER			execute_cmd_buffer;
 	unsigned int				execute_count;/* count how many times the stmt was executed */
+};
 
-	void 						(*param_bind_dtor)(MYSQLND_PARAM_BIND * TSRMLS_DC);
-	void 						(*result_bind_dtor)(MYSQLND_RESULT_BIND * TSRMLS_DC);
 
+struct st_mysqlnd_stmt
+{
+	MYSQLND_STMT_DATA * data;
 	struct st_mysqlnd_stmt_methods	*m;
 };
 
