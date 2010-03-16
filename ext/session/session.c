@@ -1122,7 +1122,6 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 {
 	smart_str ncookie = {0};
-	char *date_fmt = NULL;
 	char *e_session_name, *e_id;
 
 	if (SG(headers_sent)) {
@@ -1157,9 +1156,18 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 		t = tv.tv_sec + PS(cookie_lifetime);
 
 		if (t > 0) {
+			UChar *date_fmt = NULL;
+			char *date_fmt_str = NULL;
+
 			date_fmt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0 TSRMLS_CC);
-			smart_str_appends(&ncookie, COOKIE_EXPIRES);
-			smart_str_appends(&ncookie, date_fmt);
+			date_fmt_str = zend_unicode_to_ascii(date_fmt, u_strlen(date_fmt) TSRMLS_CC);
+			if (date_fmt_str == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot convert date to string for session cookie expiry");
+			} else {
+				smart_str_appends(&ncookie, COOKIE_EXPIRES);
+				smart_str_appends(&ncookie, date_fmt_str);
+				efree(date_fmt_str);
+			}
 			efree(date_fmt);
 		}
 	}
