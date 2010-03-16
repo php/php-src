@@ -137,60 +137,6 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
 #define mysqlnd_data_seek(result, row)	(result)->m.seek_data((result), (row) TSRMLS_CC)
 
-/*****************************************************************************************************/
-#if defined(MYSQLND_USE_OPTIMISATIONS) && MYSQLND_USE_OPTIMISATIONS == 1
-
-/* Errors */
-#define mysqlnd_errno(conn)				(conn)->error_info.error_no
-#define mysqlnd_error(conn)				(conn)->error_info.error
-#define mysqlnd_sqlstate(conn)  		((conn)->error_info.sqlstate[0] ? conn->error_info.sqlstate:MYSQLND_SQLSTATE_NULL)
-
-/* Charset */
-#define mysqlnd_character_set_name(conn) (conn)->charset->name
-
-/* Simple metadata */
-#define mysqlnd_field_count(conn)		(conn)->field_count
-#define mysqlnd_insert_id(conn)			(conn)->upsert_status.last_insert_id
-#define mysqlnd_affected_rows(conn)		(conn)->upsert_status.affected_rows
-#define mysqlnd_warning_count(conn)		(conn)->upsert_status.warning_count
-#define mysqlnd_info(conn)  			(conn)->last_message
-#define mysqlnd_get_server_info(conn)	(conn)->server_version
-#define mysqlnd_get_host_info(conn)		(conn)->host_info
-#define mysqlnd_get_proto_info(conn)	(conn)->protocol_version
-#define mysqlnd_thread_id(conn)			(conn)->thread_id
-
-#define mysqlnd_num_rows(result)		((result)->stored_data? (result)->stored_data->row_count:0)
-#define mysqlnd_num_fields(result)		(result)->field_count
-
-#define mysqlnd_fetch_lengths(result)	((result)->m.fetch_lengths? (result)->m.fetch_lengths((result)  TSRMLS_CC) : NULL)
-
-#define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs))
-#define mysqlnd_field_tell(result)				((result)->meta? (result)->meta->current_field:0)
-#define mysqlnd_fetch_field(result)				(result)->m.fetch_field((result) TSRMLS_CC)
-#define mysqlnd_fetch_field_direct(result,fnr)	(result)->m.fetch_field_direct((result), (fnr) TSRMLS_CC)
-#define mysqlnd_fetch_fields(result)			(result)->m.fetch_fields((result) TSRMLS_CC)
-
-/* mysqlnd metadata */
-#define mysqlnd_get_client_info()		MYSQLND_VERSION
-#define mysqlnd_get_client_version()	MYSQLND_VERSION_ID
-
-/* PS */
-#define mysqlnd_stmt_insert_id(stmt)		(stmt)->upsert_status.last_insert_id
-#define mysqlnd_stmt_affected_rows(stmt)	(stmt)->upsert_status.affected_rows
-#define mysqlnd_stmt_num_rows(stmt)			(stmt)->result? mysqlnd_num_rows((stmt)->result):0
-#define mysqlnd_stmt_param_count(stmt)		(stmt)->param_count
-#define mysqlnd_stmt_field_count(stmt)		(stmt)->field_count
-#define mysqlnd_stmt_warning_count(stmt)	(stmt)->upsert_status.warning_count
-#define mysqlnd_stmt_errno(stmt)			(stmt)->error_info.error_no
-#define mysqlnd_stmt_error(stmt)			(stmt)->error_info.error
-#define mysqlnd_stmt_sqlstate(stmt)			((stmt)->error_info.sqlstate[0] ? (stmt)->error_info.sqlstate:MYSQLND_SQLSTATE_NULL)
-
-
-
-/*****************************************************************************************************/
-#else /* Using plain functions */
-/*****************************************************************************************************/
-
 /* Errors */
 #define mysqlnd_errno(conn)				(conn)->m->get_error_no((conn) TSRMLS_CC)
 #define mysqlnd_error(conn)				(conn)->m->get_error_str((conn) TSRMLS_CC)
@@ -233,11 +179,10 @@ PHPAPI unsigned int	mysqlnd_get_client_version();
 #define mysqlnd_stmt_param_count(stmt)		(stmt)->m->get_param_count((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_field_count(stmt)		(stmt)->m->get_field_count((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_warning_count(stmt)	(stmt)->m->get_warning_count((stmt) TSRMLS_CC)
+#define mysqlnd_stmt_server_status(stmt)	(stmt)->m->get_server_status((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_errno(stmt)			(stmt)->m->get_error_no((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_error(stmt)			(stmt)->m->get_error_str((stmt) TSRMLS_CC)
 #define mysqlnd_stmt_sqlstate(stmt)			(stmt)->m->get_sqlstate((stmt) TSRMLS_CC)
-#endif /* MYSQLND_USE_OPTIMISATIONS */
-/*****************************************************************************************************/
 
 
 PHPAPI void mysqlnd_efree_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind TSRMLS_DC);
