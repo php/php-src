@@ -31,6 +31,7 @@
 
 #define mysqli_result_is_unbuffered(r)		((r)->handle && (r)->handle->status == MYSQL_STATUS_USE_RESULT)
 #define mysqli_server_status(c)				(c)->server_status
+#define mysqli_stmt_get_id(s)				((s)->stmt_id)
 #define mysqli_stmt_warning_count(s)		mysql_warning_count((s)->mysql)
 #define mysqli_stmt_server_status(s)		(s)->mysql->server_status
 #define mysqli_stmt_get_connection(s)		(s)->mysql
