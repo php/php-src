@@ -2143,7 +2143,7 @@ MYSQLND_CLASS_METHODS_END;
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_STMT * ret = mnd_pemalloc(alloc_size, conn->persistent);
+	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
 	MYSQLND_STMT_DATA * stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
 
 	DBG_ENTER("_mysqlnd_stmt_init");
