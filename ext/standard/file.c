@@ -584,8 +584,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	int filename_len;
 	zval *data;
-	size_t numbytes = 0;
-	int result = SUCCESS;
+	int numbytes = 0;
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -635,7 +634,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_RESOURCE: {
 			size_t len;
 			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				result = FAILURE;
+				numbytes = -1;
 			} else {
 				numbytes = len;
 			}
@@ -653,7 +652,7 @@ PHP_FUNCTION(file_put_contents)
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
-					result = FAILURE;
+					numbytes = -1;
 				}
 			}
 			break;
@@ -679,7 +678,7 @@ PHP_FUNCTION(file_put_contents)
 							} else {
 								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, Z_STRLEN_PP(tmp));
 							}
-							result = FAILURE;
+							numbytes = -1;
 							break;
 						}
 					}
@@ -696,19 +695,19 @@ PHP_FUNCTION(file_put_contents)
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
-						result = FAILURE;
+						numbytes = -1;
 					}
 					zval_dtor(&out);
 					break;
 				}
 			}
 		default:
-			result = FAILURE;
+			numbytes = -1;
 			break;
 	}
 	php_stream_close(stream);
 
-	if (result == FAILURE) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 

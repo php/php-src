@@ -120,11 +120,7 @@ typedef struct _sapi_globals_struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
-#ifdef HAVE_LARGE_UPLOADS_FIX
-	size_t read_post_bytes;
-#else
 	int read_post_bytes;
-#endif
 	unsigned char headers_sent;
 	struct stat global_stat;
 	char *default_mimetype;
