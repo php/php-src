@@ -33,7 +33,7 @@ var_dump($statement->fetchObject('Book', array(1)));
 Book::__construct
 object(Book)#%d (2) {
   [%u|b%"title"]=>
-  string(3) "PHP"
+  string(0) ""
   [%u|b%"author"]=>
   string(6) "Rasmus"
 }
