@@ -896,12 +896,6 @@ else
   AC_MSG_RESULT([using system default])
 fi
 
-PHP_ARG_ENABLE(large-uploads-fix, whether to enable large files (2G-4G) uploads fix,
-[  --enable-large-uploads-fix Enable large files (2G-4G) uploads fix], no, no)
-if test "$PHP_LARGE_UPLOADS_FIX" = "yes"; then
-	AC_DEFINE(HAVE_LARGE_UPLOADS_FIX, 1, [Whether to enable large files (2G-4G) uploads fix])
-fi
-
 divert(5)
 
 dnl ## In diversion 5 we check which extensions should be compiled.
