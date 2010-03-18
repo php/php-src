@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2010, PHP 5.2.14
+- Reverted bug fix #49521 (PDO fetchObject sets values before calling
+  constructor). (Felipe)
+
 - Updated timezone database to version 2010.5. (Derick)
 
 - Fixed a NULL pointer dereference when processing invalid XML-RPC
