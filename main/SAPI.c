@@ -191,8 +191,8 @@ static void sapi_read_post_data(TSRMLS_D)
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
-	int read_bytes;
-	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
+	size_t read_bytes;
+	size_t allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
