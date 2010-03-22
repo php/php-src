@@ -1343,7 +1343,11 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	int nrand;
 	int lensess;
 
-	PS(apply_trans_sid) = PS(use_trans_sid);
+	if (PS(use_only_cookies)) {
+		PS(apply_trans_sid) = 0;
+	} else {
+		PS(apply_trans_sid) = PS(use_trans_sid);
+	}
 
 	switch (PS(session_status)) {
 		case php_session_active:
@@ -1445,7 +1449,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		efree(PS(id));
 		PS(id) = NULL;
 		PS(send_cookie) = 1;
-		if (PS(use_trans_sid)) {
+		if (PS(use_trans_sid) && !PS(use_only_cookies)) {
 			PS(apply_trans_sid) = 1;
 		}
 	}
@@ -1453,7 +1457,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	php_session_initialize(TSRMLS_C);
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
-		if (PS(use_trans_sid)) {
+		if (PS(use_trans_sid) && !PS(use_only_cookies)) {
 			PS(apply_trans_sid) = 1;
 		}
 		PS(send_cookie) = 0;
