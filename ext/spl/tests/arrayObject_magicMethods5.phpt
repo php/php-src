@@ -77,29 +77,29 @@ In UsesMagic::__set(dynamic,new)
 In UsesMagic::__set(dynamic,new.changed)
   Original wrapped object:
 object(C)#1 (4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
+  ["priv":"C":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(29) "This should appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(29) "This should appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
+    ["priv":"C":private]=>
+    string(6) "secret"
   }
 }
 
@@ -112,29 +112,29 @@ In UsesMagic::__get(dynamic)
 NULL
   Original wrapped object:
 object(C)#1 (4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
+  ["priv":"C":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(29) "This should appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(29) "This should appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
+    ["priv":"C":private]=>
+    string(6) "secret"
   }
 }
 
@@ -147,29 +147,29 @@ In UsesMagic::__isset(dynamic)
 bool(false)
   Original wrapped object:
 object(C)#1 (4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
+  ["priv":"C":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(29) "This should appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(29) "This should appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
+    ["priv":"C":private]=>
+    string(6) "secret"
   }
 }
 
@@ -179,28 +179,28 @@ In UsesMagic::__unset(nonexistent)
 In UsesMagic::__unset(dynamic)
   Original wrapped object:
 object(C)#1 (4) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"C":private]=>
-  unicode(6) "secret"
+  ["priv":"C":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(UsesMagic)#2 (2) {
-  [u"b"]=>
-  unicode(29) "This should appear in storage"
-  [u"storage":u"ArrayObject":private]=>
+  ["b"]=>
+  string(29) "This should appear in storage"
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (4) {
-    [u"a"]=>
+    ["a"]=>
     int(1)
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"C":private]=>
-    unicode(6) "secret"
+    ["priv":"C":private]=>
+    string(6) "secret"
   }
 }

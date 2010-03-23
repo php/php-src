@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -22,9 +22,16 @@
 #define PHP_JSON_H
 
 #define PHP_JSON_VERSION "1.2.1"
+#include "ext/standard/php_smart_str.h"
 
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
+
+#if defined(PHP_WIN32) && defined(JSON_EXPORTS)
+#define PHP_JSON_API __declspec(dllexport)
+#else
+#define PHP_JSON_API PHPAPI
+#endif
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -39,6 +46,9 @@ ZEND_END_MODULE_GLOBALS(json)
 #else
 # define JSON_G(v) (json_globals.v)
 #endif
+
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
+PHP_JSON_API void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC);
 
 #endif  /* PHP_JSON_H */
 

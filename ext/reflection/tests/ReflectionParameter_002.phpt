@@ -52,28 +52,28 @@ echo "done\n";
 Parameters from staticMethod:
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(8) "paramOne"
+  ["name"]=>
+  string(8) "paramOne"
 }
 This param is passed by reference
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(12) "anotherParam"
+  ["name"]=>
+  string(12) "anotherParam"
 }
 This param is not passed by reference
 
 Parameters from instanceMethod:
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(10) "firstParam"
+  ["name"]=>
+  string(10) "firstParam"
 }
 This param is not passed by reference
 
 object(ReflectionParameter)#%i (1) {
-  [u"name"]=>
-  unicode(11) "secondParam"
+  ["name"]=>
+  string(11) "secondParam"
 }
 This param is passed by reference
 

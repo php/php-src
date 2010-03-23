@@ -30,9 +30,7 @@ var_dump(spl_autoload_functions());
 --EXPECTF--
 array(3) {
   [0]=>
-  object(Closure)#%d (2) {
-    ["this"]=>
-    NULL
+  object(Closure)#%d (1) {
     ["parameter"]=>
     array(1) {
       ["$class"]=>
@@ -41,13 +39,13 @@ array(3) {
   }
   [1]=>
   object(Autoloader)#%d (1) {
-    [u"dir":u"Autoloader":private]=>
-    unicode(2) "d1"
+    ["dir":"Autoloader":private]=>
+    string(2) "d1"
   }
   [2]=>
   object(Autoloader)#%d (1) {
-    [u"dir":u"Autoloader":private]=>
-    unicode(2) "d2"
+    ["dir":"Autoloader":private]=>
+    string(2) "d2"
   }
 }
 ===DONE===

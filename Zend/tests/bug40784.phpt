@@ -18,7 +18,7 @@ $b = new B;
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 I'm A
 I'm A
 Done

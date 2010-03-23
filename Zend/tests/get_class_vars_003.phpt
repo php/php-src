@@ -34,16 +34,16 @@ new C;
 ?>
 --EXPECT--
 array(6) {
-  [u"aaa"]=>
+  ["aaa"]=>
   int(7)
-  [u"ccc"]=>
+  ["ccc"]=>
   int(9)
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"aa"]=>
+  ["aa"]=>
   int(4)
-  [u"bb"]=>
+  ["bb"]=>
   int(5)
-  [u"cc"]=>
+  ["cc"]=>
   int(6)
 }

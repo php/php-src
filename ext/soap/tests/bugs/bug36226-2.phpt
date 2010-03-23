@@ -1,7 +1,7 @@
 --TEST--
 Bug #36226 (Inconsistent handling when passing nillable arrays)
 --SKIPIF--
-<?php if (!extension_loaded("soap")) die("skip"); ?>
+<?php require_once('skipif.inc'); ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -96,28 +96,28 @@ class IVREvents {
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testurl/Message" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SOAP-ENV:Body><ns1:ivrEvents version="1.0" activityId="101" messageId="12345" source="IVR"><ns1:logOffEvent audienceMemberId="34567" timestamp="2005-11-08T11:22:07+03:00" smokeStatus="Smoked" callInitiator="IVR"/><ns1:logOnEvent xsi:nil="true"/></ns1:ivrEvents></SOAP-ENV:Body></SOAP-ENV:Envelope>
 
 object(IVREvents)#5 (6) {
-  [u"version"]=>
-  unicode(3) "1.0"
-  [u"activityId"]=>
+  ["version"]=>
+  string(3) "1.0"
+  ["activityId"]=>
   int(101)
-  [u"messageId"]=>
+  ["messageId"]=>
   int(12345)
-  [u"source"]=>
-  unicode(3) "IVR"
-  [u"logOnEvent"]=>
+  ["source"]=>
+  string(3) "IVR"
+  ["logOnEvent"]=>
   NULL
-  [u"logOffEvent"]=>
+  ["logOffEvent"]=>
   array(1) {
     [0]=>
     object(LogOffEvent)#6 (4) {
-      [u"audienceMemberId"]=>
+      ["audienceMemberId"]=>
       int(34567)
-      [u"timestamp"]=>
-      unicode(25) "2005-11-08T11:22:07+03:00"
-      [u"smokeStatus"]=>
-      unicode(6) "Smoked"
-      [u"callInitiator"]=>
-      unicode(3) "IVR"
+      ["timestamp"]=>
+      string(25) "2005-11-08T11:22:07+03:00"
+      ["smokeStatus"]=>
+      string(6) "Smoked"
+      ["callInitiator"]=>
+      string(3) "IVR"
     }
   }
 }

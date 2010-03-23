@@ -35,37 +35,37 @@ echo "Done";
 
 -- Passed array: --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(4) "zero"
-  [u"two"]=>
-  unicode(4) "deux"
+  string(4) "zero"
+  ["two"]=>
+  string(4) "deux"
   [20]=>
-  unicode(6) "twenty"
+  string(6) "twenty"
 }
 
 -- Initial position: --
 array(4) {
   [1]=>
   int(1)
-  [u"value"]=>
+  ["value"]=>
   int(1)
   [0]=>
-  unicode(3) "one"
-  [u"key"]=>
-  unicode(3) "one"
+  string(3) "one"
+  ["key"]=>
+  string(3) "one"
 }
 
 -- End position: --
 array(4) {
   [1]=>
-  unicode(6) "twenty"
-  [u"value"]=>
-  unicode(6) "twenty"
+  string(6) "twenty"
+  ["value"]=>
+  string(6) "twenty"
   [0]=>
   int(20)
-  [u"key"]=>
+  ["key"]=>
   int(20)
 }
 

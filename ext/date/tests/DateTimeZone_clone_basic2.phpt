@@ -32,35 +32,35 @@ var_dump($d2_clone);
 --EXPECTF--
 *** Testing clone on objects whoose class derived from DateTimeZone class ***
 object(DateTimeZoneExt1)#%d (2) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 object(DateTimeZoneExt1)#%d (2) {
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 object(DateTimeZoneExt2)#%d (4) {
-  [u"property3"]=>
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 object(DateTimeZoneExt2)#%d (4) {
-  [u"property3"]=>
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
-  [u"property1"]=>
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 ===DONE===

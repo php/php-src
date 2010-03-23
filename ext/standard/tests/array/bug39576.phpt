@@ -32,21 +32,21 @@ array_intersect_key (
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Strict Standards: Only variables should be passed by reference in %s on line %d
 object(Test)#%d (4) {
-  [u"_table"]=>
-  unicode(0) ""
-  [u"_columns"]=>
+  ["_table"]=>
+  string(0) ""
+  ["_columns"]=>
   array(1) {
-    [u"name"]=>
+    ["name"]=>
     object(stdClass)#%d (0) {
     }
   }
-  [u"_primary"]=>
+  ["_primary"]=>
   array(0) {
   }
-  [u"name"]=>
-  unicode(4) "test"
+  ["name"]=>
+  string(4) "test"
 }
 Done

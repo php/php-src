@@ -86,139 +86,139 @@ fclose($file_handle);  //closing the file handle
 *** Testing strtr() function: with unexpected inputs for all arguments ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 3 --
-unicode(2) "-2"
+string(2) "-2"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 4 --
-unicode(4) "10.5"
+string(4) "10.5"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 5 --
-unicode(5) "-20.5"
+string(5) "-20.5"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 6 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 10 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 12 --
-unicode(1) "1"
+string(1) "1"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 13 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 14 --
-unicode(1) "1"
+string(1) "1"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 15 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 17 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 18 --
-unicode(13) "sample object"
+string(13) "sample object"
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
 -- Iteration 20 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 
 Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)

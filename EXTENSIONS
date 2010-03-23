@@ -169,7 +169,7 @@ STATUS:              Working
 COMMENT:             Working 
 -------------------------------------------------------------------------------
 EXTENSION:           pdo
-PRIMARY MAINTAINER:  Unknown
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Wez Furlong <wez@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
@@ -187,7 +187,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_mysql
-PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes Schlüter <johannes@php.net>, Andrey Hristov <andrey@php.net>, Ulf Wendel <uw@php.net>
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes Schlüter <johannes@php.net>, Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
@@ -211,7 +211,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_sqlite
-PRIMARY MAINTAINER:  Unknown
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
@@ -223,7 +223,7 @@ STATUS:              Working
 COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>, Ilia Alshanetsky <iliaa@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0 (Since 4.3.2 in PECL)
@@ -384,6 +384,12 @@ PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           intl
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.3
+-------------------------------------------------------------------------------
 EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>, Ilia Alshanetsky <iliaa@php.net>, Pierre-Alain Joye <pajoye@php.net>
 MAINTENANCE:         Maintained
@@ -443,7 +449,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           phar
-PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>
+PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>, Steph Fox <sfox@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -520,12 +526,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           tokenizer
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           unicode
-MAINTENANCE:         Andrei Zmievski <andrei@php.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zip

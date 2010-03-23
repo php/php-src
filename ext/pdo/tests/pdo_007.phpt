@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -30,36 +30,36 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_UNIQUE));
 ?>
 --EXPECT--
 array(3) {
-  [u"A"]=>
+  ["A"]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
-  [u"B"]=>
+  ["B"]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
-  [u"C"]=>
+  ["C"]=>
   array(1) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
   }
 }
 array(3) {
-  [u"A"]=>
+  ["A"]=>
   array(1) {
-    [u"val"]=>
-    unicode(1) "A"
+    ["val"]=>
+    string(1) "A"
   }
-  [u"B"]=>
+  ["B"]=>
   array(1) {
-    [u"val"]=>
-    unicode(1) "A"
+    ["val"]=>
+    string(1) "A"
   }
-  [u"C"]=>
+  ["C"]=>
   array(1) {
-    [u"val"]=>
-    unicode(1) "C"
+    ["val"]=>
+    string(1) "C"
   }
 }

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,7 +59,7 @@ PHPAPI int flock(int fd, int operation);
 #endif
 
 #ifndef PHP_WIN32
-extern int inet_aton(const char *, struct in_addr *);
+extern int inet_aton(const char *, struct in_addr *); 
 #endif
 #endif
 

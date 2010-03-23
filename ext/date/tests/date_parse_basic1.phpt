@@ -21,87 +21,87 @@ var_dump( date_parse("2009-02-27") );
 --EXPECT--
 *** Testing date_parse() : basic functionality ***
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2009)
-  [u"month"]=>
+  ["month"]=>
   int(2)
-  [u"day"]=>
+  ["day"]=>
   int(27)
-  [u"hour"]=>
+  ["hour"]=>
   int(10)
-  [u"minute"]=>
+  ["minute"]=>
   int(0)
-  [u"second"]=>
+  ["second"]=>
   int(0)
-  [u"fraction"]=>
+  ["fraction"]=>
   float(0.5)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   int(10)
-  [u"minute"]=>
+  ["minute"]=>
   int(0)
-  [u"second"]=>
+  ["second"]=>
   int(0)
-  [u"fraction"]=>
+  ["fraction"]=>
   float(0.5)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2009)
-  [u"month"]=>
+  ["month"]=>
   int(2)
-  [u"day"]=>
+  ["day"]=>
   int(27)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 ===DONE===

@@ -53,15 +53,15 @@ Initiate Obj
 Assign values
 Collection::offsetSet(NULL,foo)
 Collection::offsetGet(0)
-unicode(3) "foo"
+string(3) "foo"
 Collection::offsetSet(NULL,bar)
 Collection::offsetGet(0)
-unicode(3) "foo"
+string(3) "foo"
 Collection::offsetGet(1)
-unicode(3) "bar"
+string(3) "bar"
 Collection::offsetSet(foo,baz)
 Collection::offsetGet(foo)
-unicode(3) "baz"
+string(3) "baz"
 Collection Object
 (
     [data:Collection:private] => Array

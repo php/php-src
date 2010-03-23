@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -103,7 +103,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						}
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
-
+					
 					case PDO_PARAM_INT:
 					case PDO_PARAM_BOOL:
 						if (Z_TYPE_P(param->parameter) == IS_NULL) {
@@ -117,8 +117,8 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							}
 						}
 						pdo_sqlite_error_stmt(stmt);
-						return 0;					
-	
+						return 0;
+					
 					case PDO_PARAM_LOB:
 						if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 							php_stream *stm;
@@ -127,7 +127,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								SEPARATE_ZVAL(&param->parameter);
 								Z_TYPE_P(param->parameter) = IS_STRING;
 								Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
-									(void *)&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
 							} else {
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
 								return 0;
@@ -150,7 +150,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						}
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
-
+							
 					case PDO_PARAM_STR:
 					default:
 						if (Z_TYPE_P(param->parameter) == IS_NULL) {

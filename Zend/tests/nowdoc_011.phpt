@@ -16,5 +16,5 @@ THISMUSTNOTERROR;
 print e::E . "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 If you DON'T see this, something's wrong.

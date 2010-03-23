@@ -83,20 +83,16 @@ Failed to write data to: \0
 
 -- Filename: array() --
 
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-9 bytes written to: Array
-
-Notice: Array to string conversion in %s on line %d
+Warning: file_put_contents() expects parameter 1 to be string, array given in %s on line %d
+Failed to write data to: array()
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_put_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_put_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d
 Failed to write data to: /no/such/file/dir
 
 -- Filename: php/php --
 
-Warning: file_put_contents(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
 Failed to write data to: php/php
 ===Done===

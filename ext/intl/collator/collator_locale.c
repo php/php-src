@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,10 +57,9 @@ PHP_FUNCTION( collator_get_locale )
 	COLLATOR_CHECK_STATUS( co, "Error getting locale by type" );
 
 	/* Return it. */
-	RETURN_ASCII_STRINGL( locale_name, strlen(locale_name), TRUE );
+	RETVAL_STRINGL( locale_name, strlen(locale_name), TRUE );
 }
 /* }}} */
-
 
 /*
  * Local variables:

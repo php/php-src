@@ -82,8 +82,6 @@ echo "*** Done ***\n";
 
 --EXPECTF--
 *** Testing copy() function: copying data file across directories ***
-
-Notice: fwrite(): 3500 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 - Size of source file => int(3500)
 
 --- Now applying copy() on source file to create copies ---

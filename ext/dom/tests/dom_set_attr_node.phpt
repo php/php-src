@@ -5,12 +5,12 @@ Test: setAttributeNode()
 --FILE--
 <?php
 
-$xml = b<<<HERE
+$xml = <<<HERE
 <?xml version="1.0" ?>
 <root a="b" />
 HERE;
 
-$xml2 = b<<<HERE
+$xml2 = <<<HERE
 <?xml version="1.0" ?>
 <doc2 />
 HERE;
@@ -31,30 +31,30 @@ try {
 
 ?>
 --EXPECTF--
-object(DOMException)#%d (%d) {
-  [u"message":protected]=>
-  unicode(20) "Wrong Document Error"
-  [u"string":u"Exception":private]=>
-  unicode(0) ""
-  [u"file":protected]=>
-  unicode(%d) "%sdom_set_attr_node.php"
-  [u"line":protected]=>
+object(DOMException)#%d (7) {
+  ["message":protected]=>
+  string(20) "Wrong Document Error"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["file":protected]=>
+  string(%d) "%sdom_set_attr_node.php"
+  ["line":protected]=>
   int(%d)
-  [u"trace":u"Exception":private]=>
+  ["trace":"Exception":private]=>
   array(1) {
     [0]=>
     array(6) {
-      [u"file"]=>
-      unicode(%d) "%sdom_set_attr_node.php"
-      [u"line"]=>
+      ["file"]=>
+      string(%d) "%sdom_set_attr_node.php"
+      ["line"]=>
       int(%d)
-      [u"function"]=>
-      unicode(16) "setAttributeNode"
-      [u"class"]=>
-      unicode(10) "DOMElement"
-      [u"type"]=>
-      unicode(2) "->"
-      [u"args"]=>
+      ["function"]=>
+      string(16) "setAttributeNode"
+      ["class"]=>
+      string(10) "DOMElement"
+      ["type"]=>
+      string(2) "->"
+      ["args"]=>
       array(1) {
         [0]=>
         object(DOMAttr)#%d (0) {
@@ -62,8 +62,8 @@ object(DOMException)#%d (%d) {
       }
     }
   }
-  [u"previous":u"Exception":private]=>
+  ["previous":"Exception":private]=>
   NULL
-  [u"code"]=>
+  ["code"]=>
   int(4)
 }

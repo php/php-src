@@ -74,60 +74,60 @@ Warning: Illegal offset type in %s on line %d
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 2 --
 array(3) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [4]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 -- Iteration 3 --
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iteration 4 --
 array(3) {
   [1]=>
-  unicode(2) "f1"
+  string(2) "f1"
   [3]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [3333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iteration 5 --
 array(3) {
-  [u"\tHello"]=>
+  ["\tHello"]=>
   int(111)
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
 }
 -- Iteration 6 --
 array(3) {
-  [u"	Hello"]=>
+  ["	Hello"]=>
   int(111)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
 }
 -- Iteration 7 --
 array(2) {
   [0]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 8 --
 array(2) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
   [0]=>
   int(11)
 }

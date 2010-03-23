@@ -1,5 +1,5 @@
 --TEST--
-Test strncasecmp() function: usage variations - case-sensitivity 
+Test strncasecmp() function: usage variations - case-sensitivity
 --FILE--
 <?php
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
@@ -23,7 +23,7 @@ for($ASCII = 97; $ASCII <= 122; $ASCII++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Test strncasecmp() function: with alphabets ***
 -- Passing upper-case letters for 'str1' --
 int(0)

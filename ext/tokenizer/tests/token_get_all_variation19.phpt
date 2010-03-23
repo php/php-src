@@ -52,7 +52,7 @@ eval($script);
 
 ?>
 --EXPECT--
-unicode(259) "
+string(259) "
 
 // A php script to test token_get_all()
 

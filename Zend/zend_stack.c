@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -22,7 +22,7 @@
 #include "zend.h"
 #include "zend_stack.h"
 
-ZEND_API int zend_stack_init(zend_stack *stack) /* {{{ */
+ZEND_API int zend_stack_init(zend_stack *stack)
 {
 	stack->top = 0;
 	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
@@ -33,9 +33,8 @@ ZEND_API int zend_stack_init(zend_stack *stack) /* {{{ */
 		return SUCCESS;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size) /* {{{ */
+ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size)
 {
 	if (stack->top >= stack->max) {		/* we need to allocate more memory */
 		stack->elements = (void **) erealloc(stack->elements,
@@ -48,9 +47,9 @@ ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size) /
 	memcpy(stack->elements[stack->top], element, size);
 	return stack->top++;
 }
-/* }}} */
 
-ZEND_API int zend_stack_top(const zend_stack *stack, void **element) /* {{{ */
+
+ZEND_API int zend_stack_top(const zend_stack *stack, void **element)
 {
 	if (stack->top > 0) {
 		*element = stack->elements[stack->top - 1];
@@ -60,18 +59,18 @@ ZEND_API int zend_stack_top(const zend_stack *stack, void **element) /* {{{ */
 		return FAILURE;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_stack_del_top(zend_stack *stack) /* {{{ */
+
+ZEND_API int zend_stack_del_top(zend_stack *stack)
 {
 	if (stack->top > 0) {
 		efree(stack->elements[--stack->top]);
 	}
 	return SUCCESS;
 }
-/* }}} */
 
-ZEND_API int zend_stack_int_top(const zend_stack *stack) /* {{{ */
+
+ZEND_API int zend_stack_int_top(const zend_stack *stack)
 {
 	int *e;
 
@@ -81,9 +80,9 @@ ZEND_API int zend_stack_int_top(const zend_stack *stack) /* {{{ */
 		return *e;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_stack_is_empty(const zend_stack *stack) /* {{{ */
+
+ZEND_API int zend_stack_is_empty(const zend_stack *stack)
 {
 	if (stack->top == 0) {
 		return 1;
@@ -91,9 +90,9 @@ ZEND_API int zend_stack_is_empty(const zend_stack *stack) /* {{{ */
 		return 0;
 	}
 }
-/* }}} */
 
-ZEND_API int zend_stack_destroy(zend_stack *stack) /* {{{ */
+
+ZEND_API int zend_stack_destroy(zend_stack *stack)
 {
 	int i;
 
@@ -107,21 +106,21 @@ ZEND_API int zend_stack_destroy(zend_stack *stack) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-ZEND_API void **zend_stack_base(const zend_stack *stack) /* {{{ */
+
+ZEND_API void **zend_stack_base(const zend_stack *stack)
 {
 	return stack->elements;
 }
-/* }}} */
 
-ZEND_API int zend_stack_count(const zend_stack *stack) /* {{{ */
+
+ZEND_API int zend_stack_count(const zend_stack *stack)
 {
 	return stack->top;
 }
-/* }}} */
 
-ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function)(void *element)) /* {{{ */
+
+ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function)(void *element))
 {
 	int i;
 
@@ -142,9 +141,9 @@ ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function
 			break;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg) /* {{{ */
+
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
 {
 	int i;
 
@@ -165,7 +164,6 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 			break;
 	}
 }
-/* }}} */
 
 /*
  * Local variables:

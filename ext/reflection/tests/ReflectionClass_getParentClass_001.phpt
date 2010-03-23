@@ -21,8 +21,8 @@ var_dump($rc->getParentClass('x', 123));
 ?>
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(1) "A"
+  ["name"]=>
+  string(1) "A"
 }
 bool(false)
 

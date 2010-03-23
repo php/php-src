@@ -37,7 +37,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return "Class A object";
+		return b"Class A object";
 	}
 }
 
@@ -149,19 +149,19 @@ bool(false)
 bool(false)
 
 --empty array--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, array given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, array given, %s(%d)
 bool(false)
 
 --int indexed array--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, array given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, array given, %s(%d)
 bool(false)
 
 --associative array--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, array given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, array given, %s(%d)
 bool(false)
 
 --nested arrays--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, array given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
@@ -192,7 +192,7 @@ bool(false)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, object given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, object given, %s(%d)
 bool(false)
 
 --undefined var--
@@ -202,6 +202,6 @@ bool(false)
 bool(false)
 
 --resource--
-Error: 2 - mb_strrchr() expects parameter 2 to be binary string, resource given, %s(%d)
+Error: 2 - mb_strrchr() expects parameter 2 to be string, resource given, %s(%d)
 bool(false)
 ===DONE===

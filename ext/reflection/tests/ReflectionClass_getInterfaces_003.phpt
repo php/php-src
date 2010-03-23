@@ -41,7 +41,7 @@ Naturally, this remains true if we modify the object:
 array(1) {
   [0]=>
   &object(stdClass)#%d (1) {
-    [u"x"]=>
+    ["x"]=>
     int(1)
   }
 }
@@ -51,19 +51,19 @@ Obtain the array of interfaces implemented by C.
 The result is an array in which each element is an object (an instance of ReflectionClass)
 Var_dumping this array shows that the elements are referenced. By what?
 array(1) {
-  [u"I"]=>
+  ["I"]=>
   &object(ReflectionClass)#%d (1) {
-    [u"name"]=>
-    unicode(1) "I"
+    ["name"]=>
+    string(1) "I"
   }
 }
 Modify the object, and it is apparently no longer referenced.
 array(1) {
-  [u"I"]=>
+  ["I"]=>
   object(ReflectionClass)#%d (2) {
-    [u"name"]=>
-    unicode(1) "I"
-    [u"x"]=>
+    ["name"]=>
+    string(1) "I"
+    ["x"]=>
     int(1)
   }
 }

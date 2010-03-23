@@ -1,7 +1,7 @@
 --TEST--
 Bug #41861 (getNamespaces() returns the namespaces of a node's siblings)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
+<?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -30,6 +30,7 @@ foreach (array(null, '#ns1', '#ns2', '#ns3') as $ns)
 	}
 }
 ?>
+===DONE===
 --EXPECT--
 root(recursive): 'root' -- namespaces: #ns1, #ns2, #ns3
 root(non-recursive): 'root' -- namespaces: 
@@ -38,3 +39,4 @@ children(): 'last_node_no_ns' -- namespaces:
 children(#ns1): 'node1' -- namespaces: #ns1
 children(#ns2): 'node2' -- namespaces: #ns2
 children(#ns3): 'node3' -- namespaces: #ns3
+===DONE===

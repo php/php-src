@@ -5,7 +5,7 @@ SimpleXML: foreach
 --FILE--
 <?php 
 
-$sxe = simplexml_load_string(b<<<EOF
+$sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -61,21 +61,20 @@ foreach($sxe->elem1 as $name => $data) {
 
 ?>
 ===DONE===
-<?php exit(0); __halt_compiler(); ?>
 --EXPECT--
-unicode(5) "elem1"
-unicode(10) "Bla bla 1."
-unicode(6) "elem11"
-unicode(10) "Bla bla 2."
+string(5) "elem1"
+string(10) "Bla bla 1."
+string(6) "elem11"
+string(10) "Bla bla 2."
 ===CLONE===
-unicode(5) "elem1"
-unicode(10) "Bla bla 1."
-unicode(6) "elem11"
-unicode(10) "Bla bla 2."
+string(5) "elem1"
+string(10) "Bla bla 1."
+string(6) "elem11"
+string(10) "Bla bla 2."
 ===ELEMENT===
-unicode(6) "elem11"
-unicode(10) "Bla bla 2."
+string(6) "elem11"
+string(10) "Bla bla 2."
 ===COMMENT===
-unicode(5) "elem1"
-unicode(10) "Bla bla 1."
+string(5) "elem1"
+string(10) "Bla bla 1."
 ===DONE===

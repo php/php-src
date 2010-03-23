@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -80,24 +80,16 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 {
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
-	char *old_allow_url_fopen_list;
+	zend_bool old_allow_url_fopen;
 
 /*
 	xmlInitParser();
 */
 
-	old_allow_url_fopen_list = PG(allow_url_fopen_list);
-	if (old_allow_url_fopen_list) {
-		old_allow_url_fopen_list = estrdup(old_allow_url_fopen_list);
-	} else {
-		old_allow_url_fopen_list = STR_EMPTY_ALLOC();
-	}
-
-	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), "*", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
+	old_allow_url_fopen = PG(allow_url_fopen);
+	PG(allow_url_fopen) = 1;
 	ctxt = xmlCreateFileParserCtxt(filename);
-	zend_alter_ini_entry("allow_url_fopen", sizeof("allow_url_fopen"), old_allow_url_fopen_list, strlen(old_allow_url_fopen_list), PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
-	efree(old_allow_url_fopen_list);
-
+	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
@@ -176,6 +168,32 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 */
 	return ret;
 }
+
+#ifndef ZEND_ENGINE_2
+int php_stream_xmlIO_match_wrapper(const char *filename)
+{
+	TSRMLS_FETCH();
+	return php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ? 1 : 0;
+}
+
+void *php_stream_xmlIO_open_wrapper(const char *filename)
+{
+	TSRMLS_FETCH();
+	return php_stream_open_wrapper((char*)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+}
+
+int php_stream_xmlIO_read(void *context, char *buffer, int len)
+{
+	TSRMLS_FETCH();
+	return php_stream_read((php_stream*)context, buffer, len);
+}
+
+int php_stream_xmlIO_close(void *context)
+{
+	TSRMLS_FETCH();
+	return php_stream_close((php_stream*)context);
+}
+#endif
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node)
 {

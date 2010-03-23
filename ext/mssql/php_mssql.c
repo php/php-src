@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -484,7 +484,7 @@ PHP_RINIT_FUNCTION(mssql)
 {
 	MS_SQL_G(default_link) = -1;
 	MS_SQL_G(num_links) = MS_SQL_G(num_persistent);
-	MS_SQL_G(appname) = estrndup("PHP 6", 5);
+	MS_SQL_G(appname) = estrndup("PHP 5", 5);
 	MS_SQL_G(server_message) = NULL;
 	MS_SQL_G(min_error_severity) = MS_SQL_G(cfg_min_error_severity);
 	MS_SQL_G(min_message_severity) = MS_SQL_G(cfg_min_message_severity);
@@ -553,13 +553,13 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	/* Limit strings to 255 chars to prevent overflow issues in underlying libraries */
 	if(host_len>255) {
 		host[255] = '\0';
-	} 
+	}
 	if(user_len>255) {
 		user[255] = '\0';
-	} 
+	}
 	if(passwd_len>255) {
 		passwd[255] = '\0';
-	} 
+	}
 
 	switch(ZEND_NUM_ARGS())
 	{
@@ -985,7 +985,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			} else {
 				ZVAL_STRINGL(result, (char *)dbdata(mssql_ptr->link, offset), res_length, 1);
 			}
-			}
+		}
 			break;
 		case SQLNUMERIC:
 		default: {
@@ -1514,9 +1514,16 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			int should_copy;
 
 			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
-				data = Z_STRVAL(result->data[result->cur_row][i]);
-				data_len = Z_STRLEN(result->data[result->cur_row][i]);
-				should_copy = 1;
+				if (PG(magic_quotes_runtime)) {
+					data = php_addslashes(Z_STRVAL(result->data[result->cur_row][i]), Z_STRLEN(result->data[result->cur_row][i]), &data_len, 0 TSRMLS_CC);
+					should_copy = 0;
+				}
+				else
+				{
+					data = Z_STRVAL(result->data[result->cur_row][i]);
+					data_len = Z_STRLEN(result->data[result->cur_row][i]);
+					should_copy = 1;
+				}
 
 				if (result_type & MSSQL_NUM) {
 					add_index_stringl(return_value, i, data, data_len, should_copy);

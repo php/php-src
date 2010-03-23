@@ -92,67 +92,67 @@ fclose($file_handle);  //closing the file handle
 *** Testing strtr() function: with unexpected inputs for 'to' ***
 
 -- Iteration 1 --
-unicode(6) "0120tm"
+string(6) "0120tm"
 
 -- Iteration 2 --
-unicode(6) "0121tm"
+string(6) "0121tm"
 
 -- Iteration 3 --
-unicode(6) "012-2m"
+string(6) "012-2m"
 
 -- Iteration 4 --
-unicode(6) "51210."
+string(6) "51210."
 
 -- Iteration 5 --
-unicode(6) ".52-20"
+string(6) ".52-20"
 
 -- Iteration 6 --
-unicode(6) "234101"
+string(6) "234101"
 
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 10 --
-unicode(6) "0121tm"
+string(6) "0121tm"
 
 -- Iteration 11 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 12 --
-unicode(6) "0121tm"
+string(6) "0121tm"
 
 -- Iteration 13 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 14 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 15 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 16 --
-unicode(6) "plesam"
+string(6) "plesam"
 
 -- Iteration 17 --
 
-Warning: strtr() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtr() expects parameter 3 to be string, resource given in %s on line %d
 NULL
 
 -- Iteration 18 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 19 --
-unicode(6) "012atm"
+string(6) "012atm"
 ===DONE===

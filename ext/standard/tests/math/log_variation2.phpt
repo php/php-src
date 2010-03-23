@@ -89,7 +89,9 @@ fclose($fp);
 *** Testing log() : usage variations ***
 
 -- Iteration 1 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 2 --
 float(INF)
@@ -123,31 +125,39 @@ float(-0.055781611216686)
 float(-1.6507645591169)
 
 -- Iteration 11 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 12 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 13 --
 float(INF)
 
 -- Iteration 14 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 15 --
 float(INF)
 
 -- Iteration 16 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 17 --
 
-Warning: log() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: log() expects parameter 2 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: log() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: log() expects parameter 2 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -157,17 +167,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: log() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: log() expects parameter 2 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: log() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: log() expects parameter 2 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: log() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: log() expects parameter 2 to be double, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
@@ -176,10 +186,14 @@ Warning: log() expects parameter 2 to be double, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 25 --
-float(1.1442227999202)
+
+Warning: log(): base must be greater than 0 in %s on line %d
+bool(false)
 
 -- Iteration 26 --
 

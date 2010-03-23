@@ -26,7 +26,7 @@ class classA
   }
 }
 
-// heredoc Unicode string
+// heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
@@ -62,9 +62,9 @@ $inputs = array(
        '',
        array(),
 
-       // Unicode string data
-/*19*/ "Unicode string",
-       'Unicode string',
+       // string data
+/*19*/ "string",
+       'string',
        $heredoc,
        
        // object data
@@ -166,12 +166,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -181,17 +181,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: rewinddir() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: rewinddir() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

@@ -78,39 +78,39 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-unicode(116) "2 0 12 
+string(116) "2 0 12 
    361100 o 37777775456 2322
                           
    30071 14 37777777764 37777416700
    12 361100 2 0"
 
 -- Iteration 2 --
-unicode(146) "2 37777777776 2 
+string(146) "2 37777777776 2 
    361100 o 37720715133 57062645
                           
    57060664 4475347 37721631371 37720717336
    2 361100 2 37777777776"
 
 -- Iteration 3 --
-unicode(88) "0 0 0 
+string(88) "0 0 0 
    173 o 37777777605 173 
                           
    2322 0 $0 _0
    0 173 0 0"
 
 -- Iteration 4 --
-unicode(75) "1 1 1 
+string(75) "1 1 1 
    1 o    1 1   
                           
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 5 --
-unicode(75) "1 1 0 
+string(75) "1 1 0 
    1 o    0 1   
                           
    #0 1 $1 _0

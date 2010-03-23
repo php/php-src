@@ -28,13 +28,13 @@ var_dump($arr2);
 --EXPECTF--
 array(2) {
   [0]=>
-  unicode(10) "original.0"
+  string(10) "original.0"
   [1]=>
-  unicode(10) "original.1"
+  string(10) "original.1"
 }
 array(2) {
   [0]=>
-  &unicode(7) "changed"
+  &string(7) "changed"
   [1]=>
-  unicode(10) "original.1"
+  string(10) "original.1"
 }

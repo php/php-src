@@ -1,5 +1,5 @@
 --TEST--
-ReflectionParameter::getclass(), getDeclaringClass(), getDeclaringFunction()
+ReflectionParameter::getClass(), getDeclaringClass(), getDeclaringFunction()
 --FILE--
 <?php
 
@@ -36,9 +36,11 @@ function check_params_func($r, $f)
 function check_params($r)
 {
 	echo "#####" . ($r instanceof ReflectionMethod ? $r->class . '::' : '') . $r->name . "()#####\n";
+	$i = 0;
 	foreach($r->getParameters() as $p)
 	{
-		echo "===" . $p->getPosition() . "===\n";
+		echo "===" . $i . "===\n";
+		$i++;
 		check_params_func($p, 'getName');
 		check_params_func($p, 'isPassedByReference');
 		try
@@ -50,7 +52,7 @@ function check_params($r)
 			echo $e->getMessage() . "\n";
 		}
 		check_params_decl_class($p, 'getDeclaringClass');
-		check_params_decl_func($p, 'getDeclaringFunction');
+//		check_params_decl_func($p, 'getDeclaringFunction');
 		check_params_func($p, 'isArray');
 		check_params_func($p, 'allowsNull');
 		check_params_func($p, 'isOptional');
@@ -72,148 +74,134 @@ check_params(new ReflectionMethod('test::test'));
 --EXPECT--
 #####test()#####
 ===0===
-getName: unicode(3) "nix"
+getName: string(3) "nix"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===1===
-getName: unicode(2) "ar"
+getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
-getName: unicode(3) "ref"
+getName: string(3) "ref"
 isPassedByReference: bool(true)
 getClass: NULL
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===3===
-getName: unicode(3) "std"
+getName: string(3) "std"
 isPassedByReference: bool(false)
 getClass: stdClass
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===4===
-getName: unicode(2) "na"
+getName: string(2) "na"
 isPassedByReference: bool(false)
 Class NonExistingClass does not exist
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===5===
-getName: unicode(3) "opt"
+getName: string(3) "opt"
 isPassedByReference: bool(true)
 getClass: stdClass
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
 getDefaultValue: NULL
 ===6===
-getName: unicode(3) "def"
+getName: string(3) "def"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-getDeclaringFunction: test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
-getDefaultValue: unicode(6) "FooBar"
+getDefaultValue: string(6) "FooBar"
 #####test::test()#####
 ===0===
-getName: unicode(3) "nix"
+getName: string(3) "nix"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===1===
-getName: unicode(2) "ar"
+getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
-getName: unicode(3) "ref"
+getName: string(3) "ref"
 isPassedByReference: bool(true)
 getClass: NULL
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===3===
-getName: unicode(3) "std"
+getName: string(3) "std"
 isPassedByReference: bool(false)
 getClass: stdClass
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===4===
-getName: unicode(2) "na"
+getName: string(2) "na"
 isPassedByReference: bool(false)
 Class NonExistingClass does not exist
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===5===
-getName: unicode(3) "opt"
+getName: string(3) "opt"
 isPassedByReference: bool(false)
 getClass: stdClass
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
 getDefaultValue: NULL
 ===6===
-getName: unicode(3) "def"
+getName: string(3) "def"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
-getDeclaringFunction: test::test()
 isArray: bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
-getDefaultValue: unicode(6) "FooBar"
+getDefaultValue: string(6) "FooBar"
 ===DONE===

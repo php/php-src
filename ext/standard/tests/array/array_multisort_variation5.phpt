@@ -28,25 +28,25 @@ var_dump($ar);
 *** Testing array_multisort() : Testing  all array sort specifiers ***
 array(3) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [2]=>
   int(2)
 }
 array(3) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
   int(2)
   [2]=>
-  unicode(2) "aa"
+  string(2) "aa"
 }
 array(3) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
   int(2)
 }

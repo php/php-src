@@ -134,17 +134,17 @@ unlink($filename);
 --float .5--
 0.5
 --empty array--
-Error: 8 - Array to string conversion, %s(%d)
-Array
+Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
 --int indexed array--
-Error: 8 - Array to string conversion, %s(%d)
-Array
+Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
 --associative array--
-Error: 8 - Array to string conversion, %s(%d)
-Array
+Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-Array
+Error: 2 - fwrite() expects parameter 2 to be string, array given, %s(%d)
+
 --uppercase NULL--
 
 --lowercase null--
@@ -164,9 +164,8 @@ Array
 --instance of classWithToString--
 Class A object
 --instance of classWithoutToString--
-Error: 4096 - Object of class classWithoutToString could not be converted to binary string, %s(%d)
-Error: 8 - Object of class classWithoutToString to string conversion, %s(%d)
-Object
+Error: 2 - fwrite() expects parameter 2 to be string, object given, %s(%d)
+
 --undefined var--
 
 --unset var--

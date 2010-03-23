@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,24 +47,25 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include "safe_mode.h"
 #include "php_link.h"
-#include "ext/standard/file.h"
 #include "php_string.h"
 
-/* {{{ proto string readlink(string filename) U
+/* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
-	zval **pp_link;
 	char *link;
-	UChar *target;
-	int link_len, target_len;
+	int link_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &pp_link) == FAILURE ||
-		php_stream_path_param_encode(pp_link, &link, &link_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
 		return;
+	}
+
+	if (PG(safe_mode) && !php_checkuid(link, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(link TSRMLS_CC)) {
@@ -80,26 +81,20 @@ PHP_FUNCTION(readlink)
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	if (SUCCESS == php_stream_path_decode(NULL, &target, &target_len, buff, strlen(buff), REPORT_ERRORS, FG(default_context))) {
-		RETURN_UNICODEL(target, target_len, 0);
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_STRING(buff, 1);
 }
 /* }}} */
 
-/* {{{ proto int linkinfo(string filename) U
+/* {{{ proto int linkinfo(string filename)
    Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
-	zval **pp_link;
 	char *link;
 	int link_len;
 	struct stat sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &pp_link) == FAILURE ||
-		php_stream_path_param_encode(pp_link, &link, &link_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
 		return;
 	}
 
@@ -113,11 +108,10 @@ PHP_FUNCTION(linkinfo)
 }
 /* }}} */
 
-/* {{{ proto int symlink(string target, string link) U
+/* {{{ proto int symlink(string target, string link)
    Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
-	zval **pp_topath, **pp_frompath;
 	char *topath, *frompath;
 	int topath_len, frompath_len;
 	int ret;
@@ -126,13 +120,10 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &pp_topath, &pp_frompath) == FAILURE ||
-		php_stream_path_param_encode(pp_topath, &topath, &topath_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
-		php_stream_path_param_encode(pp_frompath, &frompath, &frompath_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
-
+	
 	if (!expand_filepath(frompath, source_p TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
@@ -153,6 +144,14 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
+	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
@@ -162,7 +161,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
-	 * For the target the exact string given by the user must be used, relative or not, existing or not. 
+	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
 	ret = symlink(topath, source_p);
 
@@ -175,20 +174,17 @@ PHP_FUNCTION(symlink)
 }
 /* }}} */
 
-/* {{{ proto int link(string target, string link) U
+/* {{{ proto int link(string target, string link)
    Create a hard link */
 PHP_FUNCTION(link)
 {
-	zval **pp_topath, **pp_frompath;
 	char *topath, *frompath;
 	int topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &pp_topath, &pp_frompath) == FAILURE ||
-		php_stream_path_param_encode(pp_topath, &topath, &topath_len, REPORT_ERRORS, FG(default_context)) == FAILURE ||
-		php_stream_path_param_encode(pp_frompath, &frompath, &frompath_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
 
@@ -201,6 +197,14 @@ PHP_FUNCTION(link)
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
+		RETURN_FALSE;
+	}
+
+	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 

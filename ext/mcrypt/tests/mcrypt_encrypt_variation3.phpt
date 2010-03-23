@@ -39,7 +39,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return "Class A object";
+		return b"Class A object";
 	}
 }
 
@@ -124,89 +124,87 @@ fclose($fp);
 *** Testing mcrypt_encrypt() : usage variation ***
 
 --int 0--
-unicode(16) "51dc9cd9179b718b"
+string(16) "51dc9cd9179b718b"
 
 --int 1--
-unicode(16) "619c335f8c4f9cbf"
+string(16) "619c335f8c4f9cbf"
 
 --int 12345--
-unicode(16) "b1258d67ab73de00"
+string(16) "b1258d67ab73de00"
 
 --int -12345--
-unicode(16) "8eecf134443bd6b9"
+string(16) "8eecf134443bd6b9"
 
 --float 10.5--
-unicode(16) "34b5750a793baff5"
+string(16) "34b5750a793baff5"
 
 --float -10.5--
-unicode(16) "7a605f2aacc8a11d"
+string(16) "7a605f2aacc8a11d"
 
 --float 12.3456789000e10--
-unicode(32) "74a0d7026ae586f476d4b17808851e86"
+string(32) "74a0d7026ae586f476d4b17808851e86"
 
 --float -12.3456789000e10--
-unicode(32) "bfb155997017986c01090afebd62c7ca"
+string(32) "bfb155997017986c01090afebd62c7ca"
 
 --float .5--
-unicode(16) "cc60ac201164b6c7"
+string(16) "cc60ac201164b6c7"
 
 --empty array--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
+string(0) ""
 
 --int indexed array--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
+string(0) ""
 
 --associative array--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
+string(0) ""
 
 --nested arrays--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, array given, %s(%d)
+string(0) ""
 
 --uppercase NULL--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --lowercase null--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --lowercase true--
-unicode(16) "619c335f8c4f9cbf"
+string(16) "619c335f8c4f9cbf"
 
 --lowercase false--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --uppercase TRUE--
-unicode(16) "619c335f8c4f9cbf"
+string(16) "619c335f8c4f9cbf"
 
 --uppercase FALSE--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --empty string DQ--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be strictly a binary string, Unicode string given, %s(%d)
-unicode(0) ""
+string(16) "6ece228c41457539"
 
 --empty string SQ--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be strictly a binary string, Unicode string given, %s(%d)
-unicode(0) ""
+string(16) "6ece228c41457539"
 
 --instance of classWithToString--
-unicode(32) "749c3b4d16731d98370128754b7c930f"
+string(32) "749c3b4d16731d98370128754b7c930f"
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, object given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, object given, %s(%d)
+string(0) ""
 
 --undefined var--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --unset var--
-unicode(16) "6ece228c41457539"
+string(16) "6ece228c41457539"
 
 --resource--
-Error: 2 - mcrypt_encrypt() expects parameter 3 to be binary string, resource given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_encrypt() expects parameter 3 to be string, resource given, %s(%d)
+string(0) ""
 ===DONE===
 

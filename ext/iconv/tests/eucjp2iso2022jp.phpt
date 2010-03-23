@@ -4,10 +4,9 @@ EUC-JP to ISO-2022-JP
 <?php include('skipif.inc'); ?>
 --INI--
 error_reporting=2039
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
+/* include('test.inc'); */
 /* charset=EUC-JP */
 
 function hexdump($str) {
@@ -18,8 +17,8 @@ function hexdump($str) {
 	print "\n";
 }
 
-$str = str_repeat(b"日本語テキストと English text", 30);
-$str .= b"日本語";
+$str = str_repeat("日本語テキストと English text", 30);
+$str .= "日本語";
 
 echo hexdump(iconv("EUC-JP", "ISO-2022-JP", $str));
 ?>

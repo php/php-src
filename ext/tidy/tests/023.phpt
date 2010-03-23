@@ -26,9 +26,9 @@ var_dump(tidy_get_root($tidy)->child[0]->child[0]->hasChildren());
 ?>
 --EXPECT--
 object(tidy)#1 (2) {
-  [u"errorBuffer"]=>
+  ["errorBuffer"]=>
   NULL
-  [u"value"]=>
+  ["value"]=>
   NULL
 }
 -------

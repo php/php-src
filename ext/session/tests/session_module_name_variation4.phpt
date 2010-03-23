@@ -44,20 +44,20 @@ ob_end_flush();
 *** Testing session_module_name() : variation ***
 
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
 NULL
 array(3) {
-  [u"Blah"]=>
-  unicode(12) "Hello World!"
-  [u"Foo"]=>
+  ["Blah"]=>
+  string(12) "Hello World!"
+  ["Foo"]=>
   bool(false)
-  [u"Guff"]=>
+  ["Guff"]=>
   int(1234567890)
 }
 bool(true)

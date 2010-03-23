@@ -50,204 +50,204 @@ echo "\ndone\n";
 ?>
 --EXPECT--
 basename for path foo, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix .b is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix . is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix   is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix foo is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix foo.bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix foo/bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix foo\bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix / is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo, supplying suffix \ is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix .b is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix . is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix   is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix foo is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix foo.bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix foo/bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix foo\bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix / is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo/, supplying suffix \ is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo\, supplying suffix .bar is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix .b is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix . is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix   is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix foo is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix foo.bar is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix foo/bar is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix foo\bar is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix / is:
-unicode(4) "foo\"
+string(4) "foo\"
 basename for path foo\, supplying suffix \ is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo.bar, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo.bar, supplying suffix .b is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix . is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix   is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix foo is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix foo.bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix foo/bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix foo\bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix / is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar, supplying suffix \ is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path foo.bar/, supplying suffix .b is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix . is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix   is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix foo is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix foo.bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix foo/bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix foo\bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix / is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar/, supplying suffix \ is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path foo.bar\, supplying suffix .bar is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix .b is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix . is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix   is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix foo is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix foo.bar is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix foo/bar is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix foo\bar is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix / is:
-unicode(8) "foo.bar\"
+string(8) "foo.bar\"
 basename for path foo.bar\, supplying suffix \ is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path dir/foo.bar, supplying suffix .b is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix . is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix   is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix foo is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix foo.bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix foo/bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix foo\bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix / is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir/foo.bar, supplying suffix \ is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir\foo.bar, supplying suffix .bar is:
-unicode(7) "dir\foo"
+string(7) "dir\foo"
 basename for path dir\foo.bar, supplying suffix .b is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix . is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix   is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix foo is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix foo.bar is:
-unicode(4) "dir\"
+string(4) "dir\"
 basename for path dir\foo.bar, supplying suffix foo/bar is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix foo\bar is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix / is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir\foo.bar, supplying suffix \ is:
-unicode(11) "dir\foo.bar"
+string(11) "dir\foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix .bar is:
-unicode(3) "foo"
+string(3) "foo"
 basename for path dir with spaces/foo.bar, supplying suffix .b is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix . is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix   is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix foo is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix foo.bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix foo/bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix foo\bar is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix / is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces/foo.bar, supplying suffix \ is:
-unicode(7) "foo.bar"
+string(7) "foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix .bar is:
-unicode(19) "dir with spaces\foo"
+string(19) "dir with spaces\foo"
 basename for path dir with spaces\foo.bar, supplying suffix .b is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix . is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix   is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix foo is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix foo.bar is:
-unicode(16) "dir with spaces\"
+string(16) "dir with spaces\"
 basename for path dir with spaces\foo.bar, supplying suffix foo/bar is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix foo\bar is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix / is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 basename for path dir with spaces\foo.bar, supplying suffix \ is:
-unicode(23) "dir with spaces\foo.bar"
+string(23) "dir with spaces\foo.bar"
 
 done

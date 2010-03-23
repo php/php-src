@@ -52,18 +52,18 @@ var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, true)));
 *** Testing mb_strrichr() : basic functionality ***
 
 -- ASCII string: needle exists --
-unicode(10) "4263447978"
-unicode(16) "616263446566207a"
-unicode(10) "4263447978"
-unicode(16) "616263446566207a"
-unicode(10) "4263447978"
-unicode(16) "616263446566207a"
+string(10) "4263447978"
+string(16) "616263446566207a"
+string(10) "4263447978"
+string(16) "616263446566207a"
+string(10) "4263447978"
+string(16) "616263446566207a"
 
 -- Multibyte string: needle exists --
-unicode(20) "ce9cce9dcebecebfcea0"
-unicode(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
-unicode(20) "ce9cce9dcebecebfcea0"
-unicode(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
-unicode(20) "ce9cce9dcebecebfcea0"
-unicode(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
+string(20) "ce9cce9dcebecebfcea0"
+string(42) "cebacebbcebccebdcebece9fcea0cea120cebacebb"
 ===DONE===

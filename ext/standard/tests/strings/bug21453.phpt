@@ -11,7 +11,7 @@ $test = "
 	var_dump(strip_tags($test));
 ?>
 --EXPECT--
-unicode(80) "
+string(80) "
 
 	first cell before < first cell after
 	second cell before < second cell after

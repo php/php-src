@@ -47,33 +47,33 @@ float(6.1)
 float(4.2)
 
 *** Testing array_reduce() to string ***
-unicode(23) "quuxfoofoobarquxquxquux"
-unicode(4) "quux"
+string(23) "quuxfoofoobarquxquxquux"
+string(4) "quux"
 
 *** Testing array_reduce() to array ***
 array(4) {
-  [u"foo"]=>
+  ["foo"]=>
   int(44)
-  [u"bar"]=>
+  ["bar"]=>
   int(18)
-  [u"qux"]=>
+  ["qux"]=>
   int(0)
-  [u"quux"]=>
+  ["quux"]=>
   int(1)
 }
 array(4) {
-  [u"foo"]=>
+  ["foo"]=>
   int(42)
-  [u"bar"]=>
+  ["bar"]=>
   int(17)
-  [u"qux"]=>
+  ["qux"]=>
   int(-2)
-  [u"quux"]=>
+  ["quux"]=>
   int(0)
 }
 
 *** Testing array_reduce() to null ***
-unicode(19) "foofoobarquxquxquux"
+string(19) "foofoobarquxquxquux"
 NULL
 
 Done

@@ -16,7 +16,7 @@ var_dump(
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECT--	
 array(2) {
   [0]=>
   int(2)
@@ -36,21 +36,21 @@ array(2) {
   int(3)
 }
 array(2) {
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(2)
 }
 array(2) {
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(2)
 }
 array(2) {
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(2)
 }
 Done

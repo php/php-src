@@ -23,7 +23,7 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_unique() : basic functionality ***
 array(2) {
   [0]=>
@@ -33,16 +33,16 @@ array(2) {
 }
 array(2) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(3) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 Done

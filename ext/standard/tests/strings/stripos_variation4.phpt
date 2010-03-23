@@ -1,5 +1,5 @@
 --TEST--
-Test stripos() function : usage variations - heredoc string containing special chars for 'haystack' arguments
+Test stripos() function : usage variations - heredoc string containing special chars for 'haystack' argument
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
@@ -7,7 +7,9 @@ Test stripos() function : usage variations - heredoc string containing special c
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing heredoc string containing special chars for 'haystack' arguments */
+/* Test stripos() function by passing heredoc string containing special chars for haystack
+ *  and with various needles & offets 
+*/
 
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing special chars --\n";
@@ -26,7 +28,7 @@ var_dump( stripos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
 int(0)

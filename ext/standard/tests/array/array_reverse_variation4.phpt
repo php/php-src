@@ -104,274 +104,274 @@ array(0) {
 - default argument -
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 - $preserve keys = true -
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 - $preserve_keys = false -
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 3 --
 - default argument -
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 - $preserve keys = true -
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 - $preserve_keys = false -
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 4 --
 - default argument -
 array(4) {
   [0]=>
-  unicode(1) "4"
+  string(1) "4"
   [1]=>
-  unicode(1) "3"
+  string(1) "3"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 - $preserve keys = true -
 array(4) {
   [4]=>
-  unicode(1) "4"
+  string(1) "4"
   [3]=>
-  unicode(1) "3"
+  string(1) "3"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 - $preserve_keys = false -
 array(4) {
   [0]=>
-  unicode(1) "4"
+  string(1) "4"
   [1]=>
-  unicode(1) "3"
+  string(1) "3"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 5 --
 - default argument -
 array(1) {
   [0]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 - $preserve keys = true -
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 - $preserve_keys = false -
 array(1) {
   [0]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iteration 6 --
 - default argument -
 array(4) {
   [0]=>
-  unicode(2) "f4"
+  string(2) "f4"
   [1]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [2]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [3]=>
-  unicode(2) "f1"
+  string(2) "f1"
 }
 - $preserve keys = true -
 array(4) {
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
   [4]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [3]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [1]=>
-  unicode(2) "f1"
+  string(2) "f1"
 }
 - $preserve_keys = false -
 array(4) {
   [0]=>
-  unicode(2) "f4"
+  string(2) "f4"
   [1]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [2]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [3]=>
-  unicode(2) "f1"
+  string(2) "f1"
 }
 -- Iteration 7 --
 - default argument -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 - $preserve keys = true -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 - $preserve_keys = false -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 -- Iteration 8 --
 - default argument -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 - $preserve keys = true -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 - $preserve_keys = false -
 array(4) {
-  [u"pen
+  ["pen
 "]=>
   int(33)
-  [u"world"]=>
+  ["world"]=>
   float(2.2)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"	Hello"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["	Hello"]=>
   int(111)
 }
 -- Iteration 9 --
 - default argument -
 array(2) {
-  [u"Hello world"]=>
-  unicode(6) "string"
+  ["Hello world"]=>
+  string(6) "string"
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve keys = true -
 array(2) {
-  [u"Hello world"]=>
-  unicode(6) "string"
+  ["Hello world"]=>
+  string(6) "string"
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 - $preserve_keys = false -
 array(2) {
-  [u"Hello world"]=>
-  unicode(6) "string"
+  ["Hello world"]=>
+  string(6) "string"
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 -- Iteration 10 --
 - default argument -
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 - $preserve keys = true -
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 - $preserve_keys = false -
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 -- Iteration 11 --
 - default argument -
 array(6) {
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
-  [u""]=>
-  unicode(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
+  [""]=>
+  string(5) "unset"
   [0]=>
-  unicode(5) "float"
+  string(5) "float"
   [1]=>
-  unicode(3) "int"
-  [u"fruit"]=>
+  string(3) "int"
+  ["fruit"]=>
   float(2.2)
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
 }
 - $preserve keys = true -
 array(6) {
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
-  [u""]=>
-  unicode(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
+  [""]=>
+  string(5) "unset"
   [444]=>
-  unicode(5) "float"
+  string(5) "float"
   [133]=>
-  unicode(3) "int"
-  [u"fruit"]=>
+  string(3) "int"
+  ["fruit"]=>
   float(2.2)
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
 }
 - $preserve_keys = false -
 array(6) {
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
-  [u""]=>
-  unicode(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
+  [""]=>
+  string(5) "unset"
   [0]=>
-  unicode(5) "float"
+  string(5) "float"
   [1]=>
-  unicode(3) "int"
-  [u"fruit"]=>
+  string(3) "int"
+  ["fruit"]=>
   float(2.2)
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
 }
 Done

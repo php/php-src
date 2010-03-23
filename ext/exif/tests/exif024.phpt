@@ -1,7 +1,5 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD0, EXIF, INTEROP data in Intel byte-order.
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -13,44 +11,45 @@ var_dump(exif_read_data(dirname(__FILE__).'/image024.jpg'));
 ?>
 --EXPECTF--
 array(14) {
-  [u"FileName"]=>
-  unicode(12) "image024.jpg"
-  [u"FileDateTime"]=>
+  ["FileName"]=>
+  string(12) "image024.jpg"
+  ["FileDateTime"]=>
   int(%d)
-  [u"FileSize"]=>
+  ["FileSize"]=>
   int(%d)
-  [u"FileType"]=>
+  ["FileType"]=>
   int(2)
-  [u"MimeType"]=>
-  unicode(10) "image/jpeg"
-  [u"SectionsFound"]=>
-  unicode(28) "ANY_TAG, IFD0, EXIF, INTEROP"
-  [u"COMPUTED"]=>
+  ["MimeType"]=>
+  string(10) "image/jpeg"
+  ["SectionsFound"]=>
+  string(28) "ANY_TAG, IFD0, EXIF, INTEROP"
+  ["COMPUTED"]=>
   array(5) {
-    [u"html"]=>
-    unicode(20) "width="1" height="1""
-    [u"Height"]=>
+    ["html"]=>
+    string(20) "width="1" height="1""
+    ["Height"]=>
     int(1)
-    [u"Width"]=>
+    ["Width"]=>
     int(1)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
-    [u"ByteOrderMotorola"]=>
+    ["ByteOrderMotorola"]=>
     int(0)
   }
-  [u"Exif_IFD_Pointer"]=>
+  ["Exif_IFD_Pointer"]=>
   int(26)
-  [u"InteroperabilityOffset"]=>
+  ["InteroperabilityOffset"]=>
   int(44)
-  [u"InterOperabilityIndex"]=>
-  unicode(3) "R98"
-  [u"InterOperabilityVersion"]=>
-  unicode(4) "0100"
-  [u"RelatedFileFormat"]=>
-  unicode(12) "image024.jpg"
-  [u"RelatedImageWidth"]=>
+  ["InterOperabilityIndex"]=>
+  string(3) "R98"
+  ["InterOperabilityVersion"]=>
+  string(4) "0100"
+  ["RelatedFileFormat"]=>
+  string(12) "image024.jpg"
+  ["RelatedImageWidth"]=>
   int(1)
-  [u"RelatedImageHeight"]=>
+  ["RelatedImageHeight"]=>
   int(1)
 }
-
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>

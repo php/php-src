@@ -4,7 +4,7 @@
  * @brief   Program Find a specific file by name.
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2006
+ * @date    2003 - 2005
  *
  * Usage: php findfile.php \<path\> \<name\>
  *

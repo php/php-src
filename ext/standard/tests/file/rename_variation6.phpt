@@ -1,8 +1,8 @@
 --TEST--
-Test rename() function: usage variations-7
+Test rename() function: usage variations-6
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows');
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip.. not for Windows');
 if (!function_exists("symlink")) die("skip symlinks are not supported");
 ?>
 --FILE--
@@ -28,9 +28,9 @@ var_dump(file_exists($tmp_file));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-unicode(%d) "%srename_variation6.php.tmp"
+string(%d) "%srename_variation6.php.tmp"
 bool(true)
 Done

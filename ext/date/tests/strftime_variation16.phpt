@@ -17,7 +17,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
@@ -42,14 +42,14 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Time in a.m/p.m notation--
-unicode(%d) "%d:%d:%d %s"
-unicode(11) "08:08:08 AM"
+string(%d) "%d:%d:%d %s"
+string(11) "08:08:08 AM"
 
 --Time in 24 hour notation--
-unicode(%d) "%d:%d"
-unicode(5) "08:08"
+string(%d) "%d:%d"
+string(5) "08:08"
 
 --Current time %H:%M:%S format--
-unicode(%d) "%d:%d:%d"
-unicode(8) "08:08:08"
+string(%d) "%d:%d:%d"
+string(8) "08:08:08"
 ===DONE===

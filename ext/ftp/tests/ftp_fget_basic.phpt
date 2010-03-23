@@ -1,7 +1,5 @@
 --TEST--
 FTP ftp_fget file for both binary and ASCII transfer modes
---XFAIL--
-Mising implementation in PHP6
 --CREDITS--
 Nathaniel McHugh
 --SKIPIF--

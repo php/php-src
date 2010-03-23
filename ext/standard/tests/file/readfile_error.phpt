@@ -48,7 +48,7 @@ bool(false)
 Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
 
-Warning: readfile() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: readfile() expects parameter 3 to be resource, string given in %s on line %d
 bool(false)
 
 Warning: readfile() expects parameter 3 to be resource, boolean given in %s on line %d

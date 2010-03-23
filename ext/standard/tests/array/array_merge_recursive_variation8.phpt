@@ -27,41 +27,47 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge_recursive() : array with binary data for $arr1 argument ***
 -- With default argument --
 array(5) {
   [0]=>
   string(1) "1"
   ["hello"]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [1]=>
   string(5) "world"
-  [u"str1"]=>
+  ["str1"]=>
   string(5) "hello"
-  [u"str2"]=>
-  unicode(5) "world"
+  ["str2"]=>
+  string(5) "world"
 }
 -- With more arguments --
-array(7) {
+array(5) {
   [0]=>
   string(1) "1"
   ["hello"]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(6) "binary"
+    string(6) "binary"
   }
   [1]=>
   string(5) "world"
-  [u"str1"]=>
-  string(5) "hello"
-  [u"str2"]=>
-  unicode(5) "world"
   ["str1"]=>
-  string(6) "binary"
+  array(2) {
+    [0]=>
+    string(5) "hello"
+    [1]=>
+    string(6) "binary"
+  }
   ["str2"]=>
-  string(6) "binary"
+  array(2) {
+    [0]=>
+    string(5) "world"
+    [1]=>
+    string(6) "binary"
+  }
 }
 Done

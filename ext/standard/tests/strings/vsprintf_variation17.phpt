@@ -23,7 +23,7 @@ $formats = array(
   '%3$e %4$e %1$e %2$e'
 );
 
-// Arrays of scientific values for the format defined in $format. 
+// Arrays of scientific values for the format defined in $format.
 // Each sub array contains scientific values which correspond to each format string in $format
 $args_array = array(
   array(0, 1e0, "10e2" ),
@@ -44,21 +44,21 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : scientific formats and scientific values ***
 
 -- Iteration 1 --
-unicode(36) "0.000000e+0 +1.000000e+0 1.000000e+3"
+string(36) "0.000000e+0 +1.000000e+0 1.000000e+3"
 
 -- Iteration 2 --
-unicode(38) "2.200000e+2 e 1.000000e+1 1.000000e+10"
+string(38) "2.200000e+2 e 1.000000e+1 1.000000e+10"
 
 -- Iteration 3 --
-unicode(32) "-2.2000e+13 1.0000e+21 1.2000e+2"
+string(32) "-2.2000e+13 1.0000e+21 1.2000e+2"
 
 -- Iteration 4 --
-unicode(74) "#########1.000000e+1 1.000000e+2 $$$$$$$$-1.000000e+3 _________1.000000e+2"
+string(74) "#########1.000000e+1 1.000000e+2 $$$$$$$$-1.000000e+3 _________1.000000e+2"
 
 -- Iteration 5 --
-unicode(47) "1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3"
+string(47) "1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3"
 Done

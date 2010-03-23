@@ -55,7 +55,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 rmdir("$file_path/lstat_stat_variation5");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stat() for directory after using touch() on the directory ***
 bool(true)
 bool(true)

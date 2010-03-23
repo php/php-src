@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,7 +25,6 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/file.h"
 
 #include "SAPI.h"
 
@@ -50,15 +49,23 @@
 #endif
 #endif /* defined(HAVE_LIBDL) */
 
-/* {{{ proto int dl(string extension_filename) U
+/* {{{ proto int dl(string extension_filename)
    Load a PHP extension at runtime */
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &filename, &filename_len, ZEND_U_CONVERTER(UG(filesystem_encoding_conv))) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
+	}
+
+	if (!PG(enable_dl)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
+		RETURN_FALSE;
+	} else if (PG(safe_mode)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't allowed when running in Safe Mode");
+		RETURN_FALSE;
 	}
 
 	if (filename_len >= MAXPATHLEN) {

@@ -104,82 +104,82 @@ foreach($inputs as $key =>$value) {
 *** Testing basename() : usage variation ***
 
 --int 0--
-unicode(1) "0"
+string(1) "0"
 
 --int 1--
-unicode(1) "1"
+string(1) "1"
 
 --int 12345--
-unicode(5) "12345"
+string(5) "12345"
 
 --int -12345--
-unicode(5) "-2345"
+string(5) "-2345"
 
 --float 10.5--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --float -10.5--
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 --float 12.3456789000e10--
-unicode(12) "123456789000"
+string(12) "123456789000"
 
 --float -12.3456789000e10--
-unicode(13) "-123456789000"
+string(13) "-123456789000"
 
 --float .5--
-unicode(3) "0.5"
+string(3) "0.5"
 
 --empty array--
-Error: 2 - basename() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - basename() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - basename() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - basename() expects parameter 1 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-unicode(0) ""
+string(0) ""
 
 --lowercase null--
-unicode(0) ""
+string(0) ""
 
 --lowercase true--
-unicode(1) "1"
+string(1) "1"
 
 --lowercase false--
-unicode(0) ""
+string(0) ""
 
 --uppercase TRUE--
-unicode(1) "1"
+string(1) "1"
 
 --uppercase FALSE--
-unicode(0) ""
+string(0) ""
 
 --empty string DQ--
-unicode(0) ""
+string(0) ""
 
 --empty string SQ--
-unicode(0) ""
+string(0) ""
 
 --instance of classWithToString--
-unicode(14) "Class A object"
+string(14) "Class A object"
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 1 to be string (Unicode or binary), object given, %s(%d)
+Error: 2 - basename() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
-unicode(0) ""
+string(0) ""
 
 --unset var--
-unicode(0) ""
+string(0) ""
 ===DONE===

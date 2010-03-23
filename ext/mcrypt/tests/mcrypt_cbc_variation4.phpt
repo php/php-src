@@ -1,7 +1,5 @@
 --TEST--
 Test mcrypt_cbc() function : usage variation 
---XFAIL--
-Bug #46834
 --SKIPIF--
 <?php 
 if (!extension_loaded("mcrypt")) {
@@ -126,82 +124,82 @@ fclose($fp);
 *** Testing mcrypt_cbc() : usage variation ***
 
 --float 10.5--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float -10.5--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float 12.3456789000e10--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float -12.3456789000e10--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float .5--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty array--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --int indexed array--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --associative array--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --nested arrays--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --uppercase NULL--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --lowercase null--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --lowercase true--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --lowercase false--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --uppercase TRUE--
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --uppercase FALSE--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty string DQ--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty string SQ--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --string DQ--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --string SQ--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --mixed case string--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --heredoc--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --instance of classWithToString--
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --instance of classWithoutToString--
 Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
-unicode(32) "983d5edc5f77fe42e2372a0339dc22b0"
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --undefined var--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --unset var--
-unicode(32) "5f781523f696d596e4b809d72197a0cc"
+string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --resource--
-unicode(%d) %s
+string(%d) %s
 ===DONE===

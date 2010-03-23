@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,9 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@php.net>                               |
-  |          Andrey Hristov <andrey@php.net>                             |
-  |          Ulf Wendel <uw@php.net>                                     |
+  | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
 */
@@ -46,7 +44,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "laa", &start, &args, &grps) == FAILURE) {
 		return;
-	}	
+	}
 
 	if (!start) {
 		mysql_server_init(-1,NULL, NULL);
@@ -74,8 +72,8 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	}
 
 	/* get groups */
-	if ((zend_hash_num_elements(HASH_OF(*grps)))) {
-		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(*grps)) + 1, 0);
+	if ((zend_hash_num_elements(HASH_OF(grps)))) {
+		groups = safe_emalloc(sizeof(char *), zend_hash_num_elements(HASH_OF(grps)) + 1, 0);
 		groups[0] = NULL; 
 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(grps), &pos);

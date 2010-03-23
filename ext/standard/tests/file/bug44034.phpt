@@ -10,7 +10,7 @@ $urls[] = "data://text/plain,foo\r\nbar";
 
 foreach($urls as $url) {
 	echo strtr($url, array("\r" => "\\r", "\n" => "\\n")) . "\n";
-	var_dump(file($url, FILE_IGNORE_NEW_LINES|FILE_TEXT));
+	var_dump(file($url, FILE_IGNORE_NEW_LINES));
 }
 ?>
 --EXPECTF--

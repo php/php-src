@@ -47,7 +47,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_unicode($value)) {
+			if (is_string($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -68,28 +68,27 @@ Regex encoding set to utf-8
 int(38)
 array(5) {
   [0]=>
-  string(38) "This is an English string. 0123456789."
+  string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
   [1]=>
-  string(6) "This i"
+  string(8) "VGhpcyBp"
   [2]=>
-  string(2) " i"
+  string(4) "IGk="
   [3]=>
-  string(5) "56789"
+  string(8) "NTY3ODk="
   [4]=>
-  string(2) "89"
+  string(4) "ODk="
 }
 int(64)
 array(5) {
   [0]=>
-  string(64) "Αυτό είναι ελληνικό κείμενο. 0123456789."
+  string(88) "zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg=="
   [1]=>
-  string(11) "είναι "
+  string(16) "zrXOr869zrHOuSA="
   [2]=>
-  string(2) "ο"
+  string(4) "zr8="
   [3]=>
-  string(5) "56789"
+  string(8) "NTY3ODk="
   [4]=>
-  string(2) "89"
+  string(4) "ODk="
 }
 Done
-

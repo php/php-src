@@ -36,19 +36,19 @@ call_user_func('self::y');
 ?>
 --EXPECTF--
 __callstatic:
-unicode(3) "ABC"
+string(3) "ABC"
 __callstatic:
-unicode(3) "ABC"
+string(3) "ABC"
 __call:
-unicode(3) "xyz"
+string(3) "xyz"
 __callstatic:
-unicode(3) "www"
+string(3) "www"
 __call:
-unicode(1) "y"
+string(1) "y"
 __callstatic:
-unicode(1) "y"
+string(1) "y"
 ok
 __callstatic:
-unicode(3) "www"
+string(3) "www"
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, cannot access self:: when no class scope is active in %sbug45186.php on line 31

@@ -75,7 +75,7 @@ rmdir($base_dir);
 
 echo "*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing copy() function: copying links across different directories ***
 
 -- Iteration 1 --

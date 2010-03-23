@@ -22,5 +22,5 @@ echo "Done\n";
 *** Testing umask() : error conditions ***
 
 Warning: umask() expects at most 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 Done

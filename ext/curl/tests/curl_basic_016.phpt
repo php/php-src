@@ -5,6 +5,7 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 --SKIPIF--
 <?php 
 if (!extension_loaded("curl")) exit("skip curl extension not loaded");
+$curl_version = curl_version();
 if ($curl_version['version_number'] > 0x071201) {
     exit("skip: tests works only on older versions of curl");
 }
@@ -20,44 +21,43 @@ if ($curl_version['version_number'] > 0x071201) {
 array(2%d) {
   [%u|b%"url"]=>
   string(0) ""
-  [u"content_type"]=>
+  ["content_type"]=>
   NULL
-  [u"http_code"]=>
+  ["http_code"]=>
   int(0)
-  [u"header_size"]=>
+  ["header_size"]=>
   int(0)
-  [u"request_size"]=>
+  ["request_size"]=>
   int(0)
-  [u"filetime"]=>
+  ["filetime"]=>
   int(0)
-  [u"ssl_verify_result"]=>
+  ["ssl_verify_result"]=>
   int(0)
-  [u"redirect_count"]=>
+  ["redirect_count"]=>
   int(0)
-  [u"total_time"]=>
+  ["total_time"]=>
   float(0)
-  [u"namelookup_time"]=>
+  ["namelookup_time"]=>
   float(0)
-  [u"connect_time"]=>
+  ["connect_time"]=>
   float(0)
-  [u"pretransfer_time"]=>
+  ["pretransfer_time"]=>
   float(0)
-  [u"size_upload"]=>
+  ["size_upload"]=>
   float(0)
-  [u"size_download"]=>
+  ["size_download"]=>
   float(0)
-  [u"speed_download"]=>
+  ["speed_download"]=>
   float(0)
-  [u"speed_upload"]=>
+  ["speed_upload"]=>
   float(0)
-  [u"download_content_length"]=>
-  float(0)
-  [u"upload_content_length"]=>
+  ["download_content_length"]=>
   float(%f)
-  [u"starttransfer_time"]=>
+  ["upload_content_length"]=>
   float(%f)
-  [u"redirect_time"]=>
+  ["starttransfer_time"]=>
   float(0)
-%A
+  ["redirect_time"]=>
+  float(0)
 }
 ===DONE===

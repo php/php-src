@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,7 +22,6 @@
 
 #include "php.h"
 #include "md5.h"
-#include "ext/standard/file.h"
 
 PHPAPI void make_digest(char *md5str, const unsigned char *digest) /* {{{ */
 {
@@ -43,76 +42,54 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 }
 /* }}} */
 
-/* {{{ proto string md5(string str, [ bool raw_output]) U
+/* {{{ proto string md5(string str, [ bool raw_output])
    Calculate the md5 hash of a string */
 PHP_NAMED_FUNCTION(php_if_md5)
 {
-	zstr arg;
+	char *arg;
 	int arg_len;
-	zend_uchar arg_type;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
-	}
-
-	if (arg_type == IS_UNICODE) {
-		arg.s = zend_unicode_to_ascii(arg.u, arg_len TSRMLS_CC);
-		if (!arg.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
 	}
 	
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, arg.s, arg_len);
+	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETVAL_STRINGL((char*)digest, 16, 1);
+		RETURN_STRINGL(digest, 16, 1);
 	} else {
 		make_digest_ex(md5str, digest, 16);
-		RETVAL_ASCII_STRING(md5str, ZSTR_DUPLICATE);
+		RETVAL_STRING(md5str, 1);
 	}
 
-	if (arg_type == IS_UNICODE) {
-		efree(arg.s);
-	}
 }
 /* }}} */
 
-/* {{{ proto string md5_file(string filename [, bool raw_output]) U
+/* {{{ proto string md5_file(string filename [, bool raw_output])
    Calculate the md5 hash of given filename */
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
-	zstr          arg;
+	char          *arg;
 	int           arg_len;
-	zend_uchar    arg_type;
 	zend_bool raw_output = 0;
 	char          md5str[33];
-	char          buf[1024];
+	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|b", &arg, &arg_len, &arg_type, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-
-	if (arg_type == IS_UNICODE) {
-		if (php_stream_path_encode(NULL, &arg.s, &arg_len, arg.u, arg_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
 	
-	stream = php_stream_open_wrapper(arg.s, "rb", REPORT_ERRORS, NULL);
-	if (arg_type == IS_UNICODE) {
-		efree(arg.s);
-	}
+	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -132,10 +109,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL((char*)digest, 16, 1);
+		RETURN_STRINGL(digest, 16, 1);
 	} else {
 		make_digest_ex(md5str, digest, 16);
-		RETURN_ASCII_STRING(md5str, ZSTR_DUPLICATE);
+		RETVAL_STRING(md5str, 1);
 	}
 }
 /* }}} */

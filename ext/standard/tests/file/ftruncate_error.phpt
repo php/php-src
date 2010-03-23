@@ -77,48 +77,48 @@ unlink( $filename );
 -- Testing ftruncate() with less than expected number of arguments --
 
 Warning: ftruncate() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: ftruncate() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
+bool(false)
 int(36)
 -- Testing ftruncate() with more than expected number of arguments --
 
 Warning: ftruncate() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
+bool(false)
 int(36)
 -- Testing ftruncate() with invalid file pointer --
 -- Iteration 1 --
 
-Warning: ftruncate() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: ftruncate() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: ftruncate() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: ftruncate() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: ftruncate() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: ftruncate() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: ftruncate() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing ftruncate() with closed/unset file handle --
 
-Warning: ftruncate(): %d is not a valid stream resource in %s on line %d
+Warning: ftruncate(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 int(36)
 
 Warning: ftruncate() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 int(36)
 Done

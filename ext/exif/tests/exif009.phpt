@@ -1,7 +1,5 @@
 --TEST--
 Check for exif_read_data, JPEG with IFD data in Motorola byte-order.
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -13,54 +11,55 @@ var_dump(exif_read_data(dirname(__FILE__).'/image009.jpg'));
 ?>
 --EXPECTF--
 array(16) {
-  [u"FileName"]=>
-  unicode(12) "image009.jpg"
-  [u"FileDateTime"]=>
+  ["FileName"]=>
+  string(12) "image009.jpg"
+  ["FileDateTime"]=>
   int(%d)
-  [u"FileSize"]=>
+  ["FileSize"]=>
   int(%d)
-  [u"FileType"]=>
+  ["FileType"]=>
   int(2)
-  [u"MimeType"]=>
-  unicode(10) "image/jpeg"
-  [u"SectionsFound"]=>
-  unicode(13) "ANY_TAG, IFD0"
-  [u"COMPUTED"]=>
+  ["MimeType"]=>
+  string(10) "image/jpeg"
+  ["SectionsFound"]=>
+  string(13) "ANY_TAG, IFD0"
+  ["COMPUTED"]=>
   array(8) {
-    [u"html"]=>
-    unicode(20) "width="1" height="1""
-    [u"Height"]=>
+    ["html"]=>
+    string(20) "width="1" height="1""
+    ["Height"]=>
     int(1)
-    [u"Width"]=>
+    ["Width"]=>
     int(1)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
-    [u"ByteOrderMotorola"]=>
+    ["ByteOrderMotorola"]=>
     int(1)
-    [u"Copyright"]=>
-    unicode(24) "Eric Stewart, Hex Editor"
-    [u"Copyright.Photographer"]=>
-    unicode(12) "Eric Stewart"
-    [u"Copyright.Editor"]=>
-    unicode(10) "Hex Editor"
+    ["Copyright"]=>
+    string(24) "Eric Stewart, Hex Editor"
+    ["Copyright.Photographer"]=>
+    string(12) "Eric Stewart"
+    ["Copyright.Editor"]=>
+    string(10) "Hex Editor"
   }
-  [u"ImageDescription"]=>
-  unicode(15) "My description."
-  [u"Make"]=>
-  unicode(11) "OpenShutter"
-  [u"Model"]=>
-  unicode(8) "OS 1.0.0"
-  [u"XResolution"]=>
-  unicode(4) "72/1"
-  [u"YResolution"]=>
-  unicode(4) "72/1"
-  [u"ResolutionUnit"]=>
+  ["ImageDescription"]=>
+  string(15) "My description."
+  ["Make"]=>
+  string(11) "OpenShutter"
+  ["Model"]=>
+  string(8) "OS 1.0.0"
+  ["XResolution"]=>
+  string(4) "72/1"
+  ["YResolution"]=>
+  string(4) "72/1"
+  ["ResolutionUnit"]=>
   int(2)
-  [u"DateTime"]=>
-  unicode(%d) "%s"
-  [u"Artist"]=>
-  unicode(12) "Eric Stewart"
-  [u"Copyright"]=>
-  unicode(12) "Eric Stewart"
+  ["DateTime"]=>
+  string(19) "2008:06:19 01:47:53"
+  ["Artist"]=>
+  string(12) "Eric Stewart"
+  ["Copyright"]=>
+  string(12) "Eric Stewart"
 }
-
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>

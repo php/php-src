@@ -14,5 +14,6 @@ var_dump($a['foo']);
 echo "Done\n";
 ?>
 --EXPECTF--
-unicode(%d) "changed.foo"
+string(%d) "changed.foo"
 Done
+

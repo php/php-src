@@ -40,17 +40,17 @@ var_dump($methodInfo->getStaticVariables());
 --EXPECT--
 Public method:
 array(3) {
-  [u"c"]=>
+  ["c"]=>
   NULL
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
-  unicode(5) "hello"
+  ["b"]=>
+  string(5) "hello"
 }
 
 Private method:
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 

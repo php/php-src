@@ -4,7 +4,7 @@ SimpleXML: foreach
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$sxe = simplexml_load_string(b<<<EOF
+$sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -22,14 +22,14 @@ var_dump($sxe->children());
 <?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (3) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"id"]=>
-    unicode(5) "elem1"
+    ["id"]=>
+    string(5) "elem1"
   }
-  [u"elem1"]=>
-  unicode(10) "Bla bla 1."
-  [u"elem11"]=>
-  unicode(10) "Bla bla 2."
+  ["elem1"]=>
+  string(10) "Bla bla 1."
+  ["elem11"]=>
+  string(10) "Bla bla 2."
 }
 ===DONE===

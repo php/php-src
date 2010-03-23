@@ -29,7 +29,7 @@ var_dump(array_slice($input, $offset, -PHP_INT_MAX));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- $length is -6 --
@@ -47,25 +47,25 @@ array(0) {
 -- $length is -3 --
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 -- $length is -2 --
 array(2) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 
 -- $length is -1 --
 array(3) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
+  string(4) "nine"
 }
 
 -- $length is 0 --
@@ -75,72 +75,72 @@ array(0) {
 -- $length is 1 --
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 -- $length is 2 --
 array(2) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 
 -- $length is 3 --
 array(3) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
+  string(4) "nine"
 }
 
 -- $length is 4 --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $length is 5 --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $length is 6 --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 
 -- $length is maximum integer value --
 array(4) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(5) "three"
+  string(5) "three"
   [2]=>
-  unicode(4) "nine"
-  [u"ten"]=>
+  string(4) "nine"
+  ["ten"]=>
   int(10)
 }
 

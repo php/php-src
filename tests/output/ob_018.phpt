@@ -14,4 +14,4 @@ zlib.output_compression=1
 ob_start('ob_gzhandler');
 ?>
 --EXPECTF--
-‹%s
+‹%a

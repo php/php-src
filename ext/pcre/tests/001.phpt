@@ -19,69 +19,69 @@ foreach (array('2006-05-13', '06-12-12', 'data: "12-Aug-87"') as $s) {
 int(1)
 array(10) {
   [0]=>
-  unicode(10) "2006-05-13"
-  [u"date"]=>
-  unicode(10) "2006-05-13"
+  string(10) "2006-05-13"
+  ["date"]=>
+  string(10) "2006-05-13"
   [1]=>
-  unicode(10) "2006-05-13"
-  [u"year"]=>
-  unicode(4) "2006"
+  string(10) "2006-05-13"
+  ["year"]=>
+  string(4) "2006"
   [2]=>
-  unicode(4) "2006"
+  string(4) "2006"
   [3]=>
-  unicode(2) "20"
-  [u"month"]=>
-  unicode(2) "05"
+  string(2) "20"
+  ["month"]=>
+  string(2) "05"
   [4]=>
-  unicode(2) "05"
-  [u"day"]=>
-  unicode(2) "13"
+  string(2) "05"
+  ["day"]=>
+  string(2) "13"
   [5]=>
-  unicode(2) "13"
+  string(2) "13"
 }
 int(1)
 array(10) {
   [0]=>
-  unicode(8) "06-12-12"
-  [u"date"]=>
-  unicode(8) "06-12-12"
+  string(8) "06-12-12"
+  ["date"]=>
+  string(8) "06-12-12"
   [1]=>
-  unicode(8) "06-12-12"
-  [u"year"]=>
-  unicode(2) "06"
+  string(8) "06-12-12"
+  ["year"]=>
+  string(2) "06"
   [2]=>
-  unicode(2) "06"
+  string(2) "06"
   [3]=>
-  unicode(0) ""
-  [u"month"]=>
-  unicode(2) "12"
+  string(0) ""
+  ["month"]=>
+  string(2) "12"
   [4]=>
-  unicode(2) "12"
-  [u"day"]=>
-  unicode(2) "12"
+  string(2) "12"
+  ["day"]=>
+  string(2) "12"
   [5]=>
-  unicode(2) "12"
+  string(2) "12"
 }
 int(1)
 array(10) {
   [0]=>
-  unicode(8) "12-Aug-8"
-  [u"date"]=>
-  unicode(8) "12-Aug-8"
+  string(8) "12-Aug-8"
+  ["date"]=>
+  string(8) "12-Aug-8"
   [1]=>
-  unicode(8) "12-Aug-8"
-  [u"year"]=>
-  unicode(2) "12"
+  string(8) "12-Aug-8"
+  ["year"]=>
+  string(2) "12"
   [2]=>
-  unicode(2) "12"
+  string(2) "12"
   [3]=>
-  unicode(0) ""
-  [u"month"]=>
-  unicode(3) "Aug"
+  string(0) ""
+  ["month"]=>
+  string(3) "Aug"
   [4]=>
-  unicode(3) "Aug"
-  [u"day"]=>
-  unicode(1) "8"
+  string(3) "Aug"
+  ["day"]=>
+  string(1) "8"
   [5]=>
-  unicode(1) "8"
+  string(1) "8"
 }

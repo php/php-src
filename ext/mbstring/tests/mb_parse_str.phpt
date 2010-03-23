@@ -4,6 +4,7 @@ mb_parse_str()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 arg_separator.input=&
+register_globals=0
 --FILE--
 <?php
 $queries = array(
@@ -28,27 +29,27 @@ foreach ($queries as $query) {
 ?>
 --EXPECT--
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   string(3) "abc"
-  [u"bar"]=>
+  ["bar"]=>
   string(3) "def"
 }
-unicode(0) ""
-unicode(0) ""
-unicode(3) "abc"
-unicode(3) "def"
+string(0) ""
+string(0) ""
+string(3) "abc"
+string(3) "def"
 array(2) {
-  [u"+foo"]=>
+  ["+foo"]=>
   string(3) "def"
-  [u"-bar"]=>
+  ["-bar"]=>
   string(3) "jkl"
 }
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     string(3) "abc"
@@ -57,14 +58,14 @@ array(2) {
     [2]=>
     string(3) "ghi"
   }
-  [u"bar"]=>
+  ["bar"]=>
   array(1) {
     [0]=>
     string(3) "jkl"
   }
 }
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 array(3) {
   [0]=>
   string(3) "abc"

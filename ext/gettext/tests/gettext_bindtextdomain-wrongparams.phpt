@@ -7,9 +7,7 @@ if (!extension_loaded("gettext")) {
 }
 --FILE--
 <?php
-
 chdir(dirname(__FILE__));
-
 bindtextdomain('foobar');
 bindtextdomain();
 --EXPECTF--

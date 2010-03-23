@@ -32,11 +32,11 @@ echo "Done";
 
 -- Testing is_a() function with more than expected no. of arguments --
 
-Warning: is_a() expects exactly 2 parameters, 3 given in %s on line %d
+Warning: is_a() expects exactly 2 parameters, 3 given in %s on line 16
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --
 
-Warning: is_a() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: is_a() expects exactly 2 parameters, 1 given in %s on line 21
 NULL
 Done

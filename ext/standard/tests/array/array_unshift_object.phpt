@@ -108,13 +108,13 @@ int(5)
 array(5) {
   [0]=>
   object(SimpleClass)#%d (1) {
-    [u"var1"]=>
+    ["var1"]=>
     int(1)
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -124,17 +124,17 @@ int(7)
 array(7) {
   [0]=>
   object(SimpleClass)#%d (1) {
-    [u"var1"]=>
+    ["var1"]=>
     int(1)
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -146,10 +146,10 @@ array(5) {
   [0]=>
   object(EmptyClass)#%d (0) {
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -161,13 +161,13 @@ array(7) {
   object(EmptyClass)#%d (0) {
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -178,15 +178,15 @@ int(5)
 array(5) {
   [0]=>
   object(ChildClass)#%d (2) {
-    [u"var3":u"ChildClass":private]=>
+    ["var3":"ChildClass":private]=>
     NULL
-    [u"var2":protected]=>
+    ["var2":protected]=>
     int(5)
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -196,19 +196,19 @@ int(7)
 array(7) {
   [0]=>
   object(ChildClass)#%d (2) {
-    [u"var3":u"ChildClass":private]=>
+    ["var3":"ChildClass":private]=>
     NULL
-    [u"var2":protected]=>
+    ["var2":protected]=>
     int(5)
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -219,13 +219,13 @@ int(5)
 array(5) {
   [0]=>
   object(FinalClass)#%d (1) {
-    [u"var4":u"FinalClass":private]=>
+    ["var4":"FinalClass":private]=>
     NULL
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -235,17 +235,17 @@ int(7)
 array(7) {
   [0]=>
   object(FinalClass)#%d (1) {
-    [u"var4":u"FinalClass":private]=>
+    ["var4":"FinalClass":private]=>
     NULL
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>
@@ -257,10 +257,10 @@ array(5) {
   [0]=>
   object(StaticClass)#%d (0) {
   }
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [1]=>
   int(1)
   [2]=>
@@ -272,13 +272,13 @@ array(7) {
   object(StaticClass)#%d (0) {
   }
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
-  unicode(5) "world"
-  [u"f"]=>
-  unicode(5) "first"
-  [u"s"]=>
-  unicode(6) "second"
+  string(5) "world"
+  ["f"]=>
+  string(5) "first"
+  ["s"]=>
+  string(6) "second"
   [3]=>
   int(1)
   [4]=>

@@ -27,23 +27,23 @@ var_dump($c);
 fubar
 array(3) {
   [0]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [1]=>
-  unicode(3) "bar"
+  string(3) "bar"
   [2]=>
-  unicode(6) "foobar"
+  string(6) "foobar"
 }
 fubar
 array(2) {
   [3]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [4]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }
 fubar
 array(2) {
-  [u"a"]=>
-  unicode(3) "foo"
-  [u"b"]=>
-  unicode(3) "bar"
+  ["a"]=>
+  string(3) "foo"
+  ["b"]=>
+  string(3) "bar"
 }

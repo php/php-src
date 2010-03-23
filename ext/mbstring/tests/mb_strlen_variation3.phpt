@@ -104,7 +104,7 @@ foreach($encoding as $enc) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_strlen() : usage variations ***
 
 -- Iteration 1: UCS-4 --

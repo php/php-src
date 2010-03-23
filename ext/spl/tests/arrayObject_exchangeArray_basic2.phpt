@@ -35,62 +35,62 @@ var_dump($ao);
 ?>
 --EXPECTF--
 --> exchangeArray(array):
-unicode(8) "original"
+string(8) "original"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    [u"key"]=>
-    unicode(8) "original"
+    ["key"]=>
+    string(8) "original"
   }
 }
 
 --> exchangeArray(normal object):
-unicode(18) "normal object prop"
+string(18) "normal object prop"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(stdClass)#%d (1) {
-    [u"key"]=>
-    unicode(18) "normal object prop"
+    ["key"]=>
+    string(18) "normal object prop"
   }
 }
 
 --> exchangeArray(ArrayObject):
-unicode(19) "ArrayObject element"
+string(19) "ArrayObject element"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(ArrayObject)#%d (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(1) {
-      [u"key"]=>
-      unicode(19) "ArrayObject element"
+      ["key"]=>
+      string(19) "ArrayObject element"
     }
   }
 }
 
 --> exchangeArray(ArrayIterator):
-unicode(21) "ArrayIterator element"
+string(21) "ArrayIterator element"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(ArrayIterator)#%d (1) {
-    [u"storage":u"ArrayIterator":private]=>
+    ["storage":"ArrayIterator":private]=>
     array(1) {
-      [u"key"]=>
-      unicode(21) "ArrayIterator element"
+      ["key"]=>
+      string(21) "ArrayIterator element"
     }
   }
 }
 
 --> exchangeArray(nested ArrayObject):
-unicode(26) "nested ArrayObject element"
+string(26) "nested ArrayObject element"
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(ArrayObject)#%d (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     object(ArrayObject)#%d (1) {
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(1) {
-        [u"key"]=>
-        unicode(26) "nested ArrayObject element"
+        ["key"]=>
+        string(26) "nested ArrayObject element"
       }
     }
   }

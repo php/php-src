@@ -18,13 +18,13 @@ var_dump(class_exists("stdClass"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: class_exists() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
 bool(false)
 
-Warning: class_exists() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: class_exists() expects parameter 1 to be string, array given in %s on line %d
 NULL
 bool(false)
 bool(true)

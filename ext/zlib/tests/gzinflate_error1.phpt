@@ -25,14 +25,11 @@ echo "\n-- Testing gzcompress() function with more than expected no. of argument
 $data = 'string_val';
 $length = 10;
 $extra_arg = 10;
-var_dump( gzinflate(b"$data", $length, $extra_arg) );
-
-echo "\n-- Testing with Unicode string --\n";
-var_dump(gzinflate($data, $length));
+var_dump( gzinflate($data, $length, $extra_arg) );
 
 echo "\n-- Testing with a buffer that is too small --\n";
 $short_len = strlen($data) - 1;
-$compressed = gzcompress(b"$data");
+$compressed = gzcompress($data);
 
 var_dump(gzinflate($compressed, $short_len));
 
@@ -46,7 +43,7 @@ class Tester {
 
 $testclass = new Tester();
 var_dump(gzinflate($testclass));
-var_dump(gzinflate(b"$data", $testclass));
+var_dump(gzinflate($data, $testclass));
 
 ?>
 ===DONE===
@@ -63,11 +60,6 @@ NULL
 Warning: gzinflate() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
--- Testing with Unicode string --
-
-Warning: gzinflate() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
-
 -- Testing with a buffer that is too small --
 
 Warning: gzinflate(): data error in %s on line %d
@@ -75,7 +67,7 @@ bool(false)
 
 -- Testing with incorrect parameters --
 
-Warning: gzinflate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gzinflate() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
 Warning: gzinflate() expects parameter 2 to be long, object given in %s on line %d

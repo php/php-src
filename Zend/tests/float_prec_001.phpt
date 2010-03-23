@@ -7,4 +7,4 @@ var_dump (substr (sprintf ("%.35f", 0.002877), 0, 10));
 ?>
 --EXPECT--
 bool(true)
-unicode(10) "0.00287699"
+string(10) "0.00287699"

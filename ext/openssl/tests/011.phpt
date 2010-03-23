@@ -4,7 +4,7 @@ openssl_encrypt() and openssl_decrypt() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$data = b"openssl_encrypt() and openssl_decrypt() tests";
+$data = "openssl_encrypt() and openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
 

@@ -23,14 +23,10 @@ foreach($it as $k=>$v)
 hasNext: yes
 1=>2
 hasNext: yes
-
-Notice: Array to string conversion in %s on line %d
 0=>31
 hasNext: yes
 1=>32
 hasNext: yes
-
-Notice: Array to string conversion in %s on line %d
 0=>331
 hasNext: no
 3=>4

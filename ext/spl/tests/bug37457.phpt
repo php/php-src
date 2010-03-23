@@ -76,5 +76,5 @@ Collection::valid
 Collection::current
 Collection::key
 TestFilter::accept
-unicode(17) "Failure in Accept"
+string(17) "Failure in Accept"
 ===DONE===

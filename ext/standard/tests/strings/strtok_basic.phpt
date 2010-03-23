@@ -31,7 +31,7 @@ for( $i = 2; $i <=7; $i++ )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : basic functionality ***
 
 The Input string is:
@@ -41,19 +41,19 @@ The token string is:
 " ()."
 
 --- Token 1 ---
-unicode(4) "This"
+string(4) "This"
 
 --- Token 2 ---
-unicode(8) "testcase"
+string(8) "testcase"
 
 --- Token 3 ---
-unicode(4) "test"
+string(4) "test"
 
 --- Token 4 ---
-unicode(6) "strtok"
+string(6) "strtok"
 
 --- Token 5 ---
-unicode(8) "function"
+string(8) "function"
 
 --- Token 6 ---
 bool(false)

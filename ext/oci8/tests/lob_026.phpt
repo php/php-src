@@ -22,10 +22,10 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump(oci_lob_write($blob, b"test"));
+var_dump(oci_lob_write($blob, "test"));
 var_dump(oci_lob_rewind());
 var_dump(oci_lob_rewind($blob));
-var_dump(oci_lob_write($blob, b"str"));
+var_dump(oci_lob_write($blob, "str"));
 var_dump(oci_lob_seek(10, OCI_SEEK_SET));
 var_dump(oci_lob_seek($blob, 10, OCI_SEEK_SET));
 
@@ -60,7 +60,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(4)
@@ -76,12 +76,12 @@ bool(true)
 array(2) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
-  [u"BLOB"]=>
+  ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

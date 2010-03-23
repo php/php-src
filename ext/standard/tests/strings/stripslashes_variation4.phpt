@@ -38,13 +38,13 @@ foreach( $str_array as $arr )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripslashes() : with double dimensional arrays ***
 
 -- Iteration 1 --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(0) {
   }
@@ -53,58 +53,58 @@ array(2) {
 -- Iteration 2 --
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
   }
 }
 
 -- Iteration 3 --
 array(3) {
   [0]=>
-  unicode(4) "f'oo"
+  string(4) "f'oo"
   [1]=>
-  unicode(4) "b'ar"
+  string(4) "b'ar"
   [2]=>
   array(2) {
     [0]=>
-    unicode(4) "fo'o"
+    string(4) "fo'o"
     [1]=>
-    unicode(4) "b'ar"
+    string(4) "b'ar"
   }
 }
 
 -- Iteration 4 --
 array(3) {
   [0]=>
-  unicode(4) "f'oo"
+  string(4) "f'oo"
   [1]=>
-  unicode(4) "b'ar"
+  string(4) "b'ar"
   [2]=>
   array(1) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
   }
 }
 
 -- Iteration 5 --
 array(3) {
   [0]=>
-  unicode(4) "f'oo"
+  string(4) "f'oo"
   [1]=>
-  unicode(4) "b'ar"
+  string(4) "b'ar"
   [2]=>
   array(3) {
     [0]=>
-    unicode(4) "fo'o"
+    string(4) "fo'o"
     [1]=>
-    unicode(4) "b'ar"
+    string(4) "b'ar"
     [2]=>
     array(1) {
       [0]=>
-      unicode(0) ""
+      string(0) ""
     }
   }
 }
@@ -112,21 +112,21 @@ array(3) {
 -- Iteration 6 --
 array(3) {
   [0]=>
-  unicode(4) "f'oo"
+  string(4) "f'oo"
   [1]=>
-  unicode(4) "b'ar"
+  string(4) "b'ar"
   [2]=>
   array(3) {
     [0]=>
-    unicode(4) "fo'o"
+    string(4) "fo'o"
     [1]=>
-    unicode(4) "b'ar"
+    string(4) "b'ar"
     [2]=>
     array(2) {
       [0]=>
-      unicode(4) "fo'o"
+      string(4) "fo'o"
       [1]=>
-      unicode(4) "b'ar"
+      string(4) "b'ar"
     }
   }
 }

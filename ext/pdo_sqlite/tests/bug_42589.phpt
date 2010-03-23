@@ -15,8 +15,8 @@ $result = $db->query('SELECT * FROM test t1 LEFT JOIN test t2 ON t1.field1 = t2.
 $meta1 = $result->getColumnMeta(0);
 $meta2 = $result->getColumnMeta(1);
 
-var_dump(!empty($meta1[b'table']) && $meta1[b'table'] == b'test');
-var_dump(!empty($meta2[b'table']) && $meta2[b'table'] == b'test');
+var_dump(!empty($meta1['table']) && $meta1['table'] == 'test');
+var_dump(!empty($meta2['table']) && $meta2['table'] == 'test');
 ?>
 --EXPECTF--
 bool(true)

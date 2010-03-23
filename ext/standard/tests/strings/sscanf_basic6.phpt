@@ -29,19 +29,19 @@ var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 *** Testing sscanf() : basic functionality - using unsigned format ***
 
 -- Try sccanf() WITHOUT optional args --
-unicode(10) "4294967285"
+string(10) "4294967285"
 int(11)
 int(11)
-unicode(10) "4294967285"
+string(10) "4294967285"
 NULL
 NULL
 
 -- Try sccanf() WITH optional args --
 int(4)
-unicode(10) "4294967285"
+string(10) "4294967285"
 int(11)
 int(11)
-unicode(10) "4294967285"
+string(10) "4294967285"
 NULL
 NULL
 ===DONE===

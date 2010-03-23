@@ -1,5 +1,7 @@
 --TEST--
 Test array_key_exists() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
@@ -31,11 +33,6 @@ echo "Done";
 ?>
 
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_key_exists() : usage variations ***
 
 -- $search is a reference to $array --

@@ -34,12 +34,12 @@ var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : basic functionality - using hexadecimal format ***
-unicode(1) "b"
-unicode(1) "B"
-unicode(4) "b 84"
-unicode(4) "B 84"
-unicode(7) "b 84 b1"
-unicode(7) "B 84 B1"
+string(1) "b"
+string(1) "B"
+string(4) "b 84"
+string(4) "B 84"
+string(7) "b 84 b1"
+string(7) "B 84 B1"
 Done

@@ -79,11 +79,11 @@ rmdir("$name_prefix/");
 *** Testing realpath(): usage variations ***
 
 *** Testing realpath() with filename stored inside a object ***
-unicode(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
 bool(false)
 
 *** Testing realpath() with filename stored in an array ***
-unicode(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
+string(%d) "%s\realpath_variation\home\tests\realpath_variation.tmp"
 bool(false)
 
 *** Testing realpath() with filename as empty string, NULL and single space ***
@@ -92,11 +92,11 @@ bool(false)
 -- Iteration2 --
 bool(false)
 -- Iteration3 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iteration4 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iteration5 --
-unicode(%d) "%s"
+string(%d) "%s"
 -- Iteration6 --
-unicode(%d) "%s"
+string(%d) "%s"
 Done

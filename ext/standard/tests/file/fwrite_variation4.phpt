@@ -53,7 +53,7 @@ foreach($file_content_types as $file_content_type) {
         filesize & by displaying the content */
     // write data to the file
     var_dump( ftell($file_handle) );
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written,400));
+    var_dump( fwrite($file_handle,$data_to_be_written,400));
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  // expected: true
 
@@ -70,7 +70,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --
@@ -81,7 +81,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 -- Opening file in xb --
 int(0)
 int(400)
@@ -89,7 +89,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 -- Opening file in xt --
 int(0)
 int(400)
@@ -97,7 +97,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 -- Opening file in x+ --
 int(0)
 int(400)
@@ -105,7 +105,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 -- Opening file in x+b --
 int(0)
 int(400)
@@ -113,7 +113,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 -- Opening file in x+t --
 int(0)
 int(400)
@@ -121,7 +121,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "f255efe87ebdf755e515868cea9ad24b"
+string(32) "f255efe87ebdf755e515868cea9ad24b"
 
 -- Testing fwrite() with file having content of type text --
 -- Opening file in x --
@@ -131,7 +131,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 -- Opening file in xb --
 int(0)
 int(400)
@@ -139,7 +139,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 -- Opening file in xt --
 int(0)
 int(400)
@@ -147,7 +147,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 -- Opening file in x+ --
 int(0)
 int(400)
@@ -155,7 +155,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 -- Opening file in x+b --
 int(0)
 int(400)
@@ -163,7 +163,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 -- Opening file in x+t --
 int(0)
 int(400)
@@ -171,7 +171,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "c2244282eeca7c2d32d0dacf21e19432"
+string(32) "c2244282eeca7c2d32d0dacf21e19432"
 
 -- Testing fwrite() with file having content of type text_with_new_line --
 -- Opening file in x --
@@ -181,7 +181,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 -- Opening file in xb --
 int(0)
 int(400)
@@ -189,7 +189,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 -- Opening file in xt --
 int(0)
 int(400)
@@ -197,7 +197,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 -- Opening file in x+ --
 int(0)
 int(400)
@@ -205,7 +205,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 -- Opening file in x+b --
 int(0)
 int(400)
@@ -213,7 +213,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 -- Opening file in x+t --
 int(0)
 int(400)
@@ -221,7 +221,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "fa6c79b925c2fc754b9d063c6de1d8df"
+string(32) "fa6c79b925c2fc754b9d063c6de1d8df"
 
 -- Testing fwrite() with file having content of type alphanumeric --
 -- Opening file in x --
@@ -231,7 +231,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 -- Opening file in xb --
 int(0)
 int(400)
@@ -239,7 +239,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 -- Opening file in xt --
 int(0)
 int(400)
@@ -247,7 +247,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 -- Opening file in x+ --
 int(0)
 int(400)
@@ -255,7 +255,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 -- Opening file in x+b --
 int(0)
 int(400)
@@ -263,7 +263,7 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 -- Opening file in x+t --
 int(0)
 int(400)
@@ -271,5 +271,5 @@ int(400)
 bool(false)
 bool(true)
 int(400)
-unicode(32) "b2a123e1d84e6a03c8520aff7689219e"
+string(32) "b2a123e1d84e6a03c8520aff7689219e"
 Done

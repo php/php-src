@@ -86,9 +86,9 @@ char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
 #ifndef NETWARE
-char *php_mailer = "PHP 6 WIN32";
+char *php_mailer = "PHP 5 WIN32";
 #else
-char *php_mailer = "PHP 6 NetWare";
+char *php_mailer = "PHP 5 NetWare";
 #endif	/* NETWARE */
 
 /* Error messages */
@@ -166,7 +166,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 	MAKE_STD_ZVAL(replace);
 	ZVAL_STRING(replace, PHP_WIN32_MAIL_UNIFY_REPLACE, 0);
 
-	result = php_pcre_replace(IS_STRING, PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
+	result = php_pcre_replace(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
 							  header, strlen(header),
 							  replace,
 							  0,
@@ -180,7 +180,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 
 	ZVAL_STRING(replace, PHP_WIN32_MAIL_RMVDBL_REPLACE, 0);
 
-	result2 = php_pcre_replace(IS_STRING, PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
+	result2 = php_pcre_replace(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
 							   result, result_len,
 							   replace,
 							   0,
@@ -975,15 +975,15 @@ static unsigned long GetAddr(LPSTR szHost)
 // Author/Date:  garretts 08/18/2009
 // History:
 //********************************************************************/
-static int FormatEmailAddress(char* Buffer, char* EmailAddress, char* FormatString ) {
+static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
 	char *tmpAddress1, *tmpAddress2;
 	int result;
 
 	if( (tmpAddress1 = strchr(EmailAddress, '<')) && (tmpAddress2 = strchr(tmpAddress1, '>'))  ) {
 		*tmpAddress2 = 0; // terminate the string temporarily.
-		result = snprintf(Buffer, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
+		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
 		*tmpAddress2 = '>'; // put it back the way it was.
 		return result;
 	} 
-	return snprintf(Buffer, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
+	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */

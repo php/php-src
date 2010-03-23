@@ -35,18 +35,18 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Abbreviated weekday name--
-unicode(%d) "%s"
-unicode(3) "Fri"
+string(%d) "%s"
+string(3) "Fri"
 
 --Full weekday name--
-unicode(%d) "%s"
-unicode(6) "Friday"
+string(%d) "%s"
+string(6) "Friday"
 
 --Week number of the year--
-unicode(%d) "%d"
-unicode(2) "31"
+string(%d) "%d"
+string(2) "31"
 
 --Week number of the year in decimal number--
-unicode(%d) "%d"
-unicode(2) "31"
+string(%d) "%d"
+string(2) "31"
 ===DONE===

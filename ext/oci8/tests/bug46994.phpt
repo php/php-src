@@ -76,11 +76,11 @@ oci_close($c);
 <?php exit(0); ?>
 --EXPECTF--
 Test 1
-unicode(26) "This should be the output."
+string(26) "This should be the output."
 Test 2
-unicode(37) "The output should be even longer now."
+string(37) "The output should be even longer now."
 Test 3
-unicode(26) "This should be the output."
+string(26) "This should be the output."
 Test 4
-unicode(26) "This should be the output."
+string(26) "This should be the output."
 ===DONE===

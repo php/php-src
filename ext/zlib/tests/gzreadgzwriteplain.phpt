@@ -5,7 +5,7 @@ gzopen(), gzread(), gzwrite() for non-compressed data
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php
-$original = str_repeat(b"hallo php",4096);
+$original = str_repeat("hallo php",4096);
 $filename = tempnam("/tmp", "phpt");
 
 $fp = fopen($filename, "wb");
@@ -15,12 +15,7 @@ var_dump(ftell($fp));
 fclose($fp);
 
 $fp = gzopen($filename, "rb");
-
-$data = '';
-while ($buf = gzread($fp, 8192)) {
-	$data .= $buf;
-}
-
+$data = gzread($fp, strlen($original));
 if ($data == $original) {
 	echo "Strings are equal\n";
 } else {
@@ -29,11 +24,7 @@ if ($data == $original) {
 }
 
 gzseek($fp, strlen($original) / 2);
-
-$data = '';
-while ($buf = gzread($fp, 8192)) {
-	$data .= $buf;
-}
+$data = gzread($fp, strlen($original));
 
 var_dump(strlen($data));
 if ($data == substr($original, strlen($original) / 2)) {

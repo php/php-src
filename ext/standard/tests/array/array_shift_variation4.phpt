@@ -36,7 +36,7 @@ var_dump($stack_last);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_shift() : usage variations ***
 
 -- Before shift: --
@@ -52,16 +52,16 @@ array(3) {
     int(3)
   }
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 ---- $stack_last:
 array(3) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   array(3) {
     [0]=>
@@ -86,18 +86,18 @@ Returned value:	array(3) {
 New array:
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 ---- Pop element from array within array:
 Returned value:	int(1)
 New array:
 array(3) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   array(2) {
     [0]=>

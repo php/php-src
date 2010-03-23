@@ -28,11 +28,11 @@ INSERT into table
 bool(true)
 bool(true)
 SELECTING results
-unicode(1) "a"
+string(1) "a"
 array(2) {
-  [u"id"]=>
-  unicode(1) "a"
-  [u"time"]=>
+  ["id"]=>
+  string(1) "a"
+  ["time"]=>
   int(%d)
 }
 Done

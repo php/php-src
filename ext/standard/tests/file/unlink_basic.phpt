@@ -34,8 +34,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing unlink() on a file ***
-
-Notice: fwrite(): 11 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 bool(true)
 bool(false)
 

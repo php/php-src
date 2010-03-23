@@ -2,7 +2,7 @@
 Test usort() function : usage variations - use built in functions as $cmp_function arg
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -47,30 +47,30 @@ var_dump( usort($temp_array4, 'exit') );
 bool(true)
 array(5) {
   [0]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [1]=>
-  unicode(6) "Banana"
+  string(6) "Banana"
   [2]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [4]=>
-  unicode(9) "Pineapple"
+  string(9) "Pineapple"
 }
 
 -- Testing usort() with built-in 'cmp_function': strcmp() --
 bool(true)
 array(5) {
   [0]=>
-  unicode(6) "Banana"
+  string(6) "Banana"
   [1]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [2]=>
-  unicode(9) "Pineapple"
+  string(9) "Pineapple"
   [3]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [4]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 
 -- Testing usort() with language construct as 'cmp_function' --

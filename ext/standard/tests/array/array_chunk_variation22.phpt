@@ -14,9 +14,9 @@ for ($i = 0; $i < (sizeof($array) + 1); $i++) {
 ?>
 --EXPECT--
 array(2) {
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(2)
 }
 [0]
@@ -40,12 +40,12 @@ array(2) {
 array(2) {
   [0]=>
   array(1) {
-    [u"b"]=>
+    ["b"]=>
     int(1)
   }
   [1]=>
   array(1) {
-    [u"c"]=>
+    ["c"]=>
     int(2)
   }
 }
@@ -75,9 +75,9 @@ array(1) {
 array(1) {
   [0]=>
   array(2) {
-    [u"b"]=>
+    ["b"]=>
     int(1)
-    [u"c"]=>
+    ["c"]=>
     int(2)
   }
 }

@@ -102,94 +102,94 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_mime_decode() : usage variations ***
 
 -- Iteration 1 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 2 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 3 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 4 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 5 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 6 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 7 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 8 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 9 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 10 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 11 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 12 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 13 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 14 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 15 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 16 --
 
-Warning: iconv_mime_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(0) ""
+Warning: iconv_mime_decode() expects parameter 2 to be long, string given in %s on line %d
+string(0) ""
 
 -- Iteration 17 --
 
-Warning: iconv_mime_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(0) ""
+Warning: iconv_mime_decode() expects parameter 2 to be long, string given in %s on line %d
+string(0) ""
 
 -- Iteration 18 --
 
-Warning: iconv_mime_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(0) ""
+Warning: iconv_mime_decode() expects parameter 2 to be long, string given in %s on line %d
+string(0) ""
 
 -- Iteration 19 --
 
-Warning: iconv_mime_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(0) ""
+Warning: iconv_mime_decode() expects parameter 2 to be long, string given in %s on line %d
+string(0) ""
 
 -- Iteration 20 --
 
-Warning: iconv_mime_decode() expects parameter 2 to be long, Unicode string given in %s on line %d
-unicode(0) ""
+Warning: iconv_mime_decode() expects parameter 2 to be long, string given in %s on line %d
+string(0) ""
 
 -- Iteration 21 --
 
 Warning: iconv_mime_decode() expects parameter 2 to be long, object given in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 22 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 23 --
-unicode(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 24 --
 
 Warning: iconv_mime_decode() expects parameter 2 to be long, resource given in %s on line %d
-unicode(0) ""
-===DONE===
+string(0) ""
+Done

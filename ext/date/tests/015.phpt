@@ -1,9 +1,8 @@
 --TEST--
 timezone object reference handling
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 $dto = new DateTime();
 $tzold = $dto->getTimezone();
 var_dump($tzold->getName());
@@ -15,8 +14,8 @@ var_dump($tzold->getName());
 echo "Done\n";
 ?>
 --EXPECTF--
-unicode(3) "UTC"
-unicode(3) "UTC"
-unicode(10) "US/Eastern"
-unicode(3) "UTC"
+string(3) "UTC"
+string(3) "UTC"
+string(10) "US/Eastern"
+string(3) "UTC"
 Done

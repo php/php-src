@@ -151,57 +151,57 @@ int(0)
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with mask value as "Array" --
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "Array" --
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with mask value as "Array" --
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with mask value as "" --
@@ -261,12 +261,12 @@ int(0)
 
 -- Iteration with mask value as "Resource id #%d" --
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 Done

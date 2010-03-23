@@ -7,10 +7,6 @@ Bug #45798 (sqlite3 doesn't track unexecuted statements)
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 
-class MyStmt extends SQLite3Stmt
-{
-}
-
 $stmt = $db->prepare("SELECT 1");
 
 var_dump($stmt->close());

@@ -7,10 +7,6 @@ DRCP: oci_pconnect() and oci_connect() with different character sets
 
 require dirname(__FILE__)."/details.inc";
 
-// Note PHP 6 Unicode mode ignores the character set, so connections
-// specifying different character sets are equivalent, and hence can
-// share connections aka resources.
-
 // Create connections with oci_connect and oci_pconnect with UTF8 as Charset
 
 $c1 = oci_connect($user,$password,$dbase,"UTF8");
@@ -37,7 +33,7 @@ var_dump($p2);
 if((int)$c1 === (int)$c2)
 	echo "First and third connections share a resource: NOT OK\n";
 else
-	echo "First and third connections are different: OK\n";
+	echo "First and third  connections are different: OK\n";
 
 // The two connections p1 and p2 should not share resources as they use different
 //character sets
@@ -60,6 +56,6 @@ resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 persistent connection)
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 persistent connection)
-First and third connections share a resource: NOT OK
-Second and fourth connections share a resource: NOT OK
+First and third  connections are different: OK
+Second and fourth connections are different: OK
 Done

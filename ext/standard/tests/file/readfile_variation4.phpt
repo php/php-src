@@ -1,7 +1,5 @@
 --TEST--
 Test readfile() function : usage variation 
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -210,27 +208,27 @@ Error: 2 - readfile() expects parameter 3 to be resource, boolean given, %s(%d)
 file not read
 
 --empty string DQ--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --empty string SQ--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --string DQ--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --string SQ--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --mixed case string--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --heredoc--
-Error: 2 - readfile() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, string given, %s(%d)
 file not read
 
 --instance of classWithToString--

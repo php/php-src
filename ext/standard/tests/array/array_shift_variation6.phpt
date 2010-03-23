@@ -37,47 +37,47 @@ var_dump($copied_array);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_shift() : usage variations ***
 
 -- Variable is referenced array --
-Result: unicode(4) "zero"
+Result: string(4) "zero"
 
 $original_array:
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 $copied_array:
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 -- Element is referenced array --
-Result: unicode(3) "one"
+Result: string(3) "one"
 
 $new_array:
 array(3) {
   [0]=>
   &array(1) {
     [0]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [1]=>
   int(1)
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 
 $copied_array
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 Done

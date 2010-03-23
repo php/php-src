@@ -4,13 +4,13 @@ SimpleXML: accessing singular subnode as array
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
    <person name="Joe"></person>
 </people>
 EOF;
 
-$xml2 =b<<<EOF
+$xml2 =<<<EOF
 <people>
    <person name="Joe"></person>
    <person name="Boe"></person>
@@ -39,18 +39,18 @@ var_dump($people->person[1]['name']);
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Joe"
+  string(3) "Joe"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(3) "Boe"
+  string(3) "Boe"
 }
 ===DONE===

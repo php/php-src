@@ -39,22 +39,22 @@ var_dump( array_diff_uassoc($array2, $array1, "strcasecmp") );
 -- Testing array_diff_uassoc() function with referenced variable $ref_var has value 'a' --
 array(1) {
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 
 -- Testing array_diff_uassoc() function with referenced variable $ref_var value changed to 10 --
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
   [0]=>
   &float(10)

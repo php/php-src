@@ -17,7 +17,7 @@ Test uasort() function : usage variations - sort array with reference variables
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
 {
@@ -55,7 +55,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : 'array_arg' with elements as reference ***
 -- Sorting 'array_arg' containing different references --
 bool(true)

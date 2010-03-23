@@ -40,7 +40,7 @@ var_dump( array_walk_recursive( $input, "callback"));
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_walk_recursive() : array with subarray ***
 int(0)
 int(1)
@@ -55,10 +55,10 @@ int(2)
 int(3)
 
 int(0)
-unicode(5) "Mango"
+string(5) "Mango"
 
 int(1)
-unicode(6) "Orange"
+string(6) "Orange"
 
 int(0)
 int(1)

@@ -52,7 +52,7 @@ EOF;
 
   $fname = tempnam ("./", "wsdl");
   $f = fopen($fname,"w");
-  @fwrite($f,$wsdl);
+  fwrite($f,$wsdl);
   fclose($f);
   ini_set("soap.wsdl_cache_enabled",0);
   $x = new SoapClient($fname, array("trace"=>1,"exceptions"=>0,"features"=>$features));
@@ -66,7 +66,7 @@ EOF;
   if ($style == "rpc") {
     $HTTP_RAW_POST_DATA = $req;
     ob_start();
-    $y->handle();
+    $y->handle($HTTP_RAW_POST_DATA);
     ob_end_clean();
     echo $req;
     var_dump($val);

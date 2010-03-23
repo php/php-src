@@ -447,33 +447,33 @@ array(4) {
   int(2)
   [2]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [3]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
 }
 array(4) {
   [0]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [2]=>
   int(1)
@@ -613,15 +613,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   int(1)
   [3]=>
@@ -634,15 +634,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
 }
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   int(1)
   [3]=>
@@ -655,15 +655,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
   [3]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(4) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
   int(1)
   [3]=>
@@ -676,15 +676,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
   [3]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(4) {
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [2]=>
   int(1)
   [3]=>
@@ -697,15 +697,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [3]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
 }
 array(4) {
   [0]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [1]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [2]=>
   int(1)
   [3]=>
@@ -718,18 +718,18 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(25) "Hello	 world!! string
+  string(25) "Hello	 world!! string
 "
   [3]=>
-  unicode(25) "Hello	 world!! string
+  string(25) "Hello	 world!! string
 "
 }
 array(4) {
   [0]=>
-  unicode(25) "Hello	 world!! string
+  string(25) "Hello	 world!! string
 "
   [1]=>
-  unicode(25) "Hello	 world!! string
+  string(25) "Hello	 world!! string
 "
   [2]=>
   int(1)
@@ -743,15 +743,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(30) "\v\fHello\t world!! \rstring\n"
+  string(30) "\v\fHello\t world!! \rstring\n"
   [3]=>
-  unicode(30) "\v\fHello\t world!! \rstring\n"
+  string(30) "\v\fHello\t world!! \rstring\n"
 }
 array(4) {
   [0]=>
-  unicode(30) "\v\fHello\t world!! \rstring\n"
+  string(30) "\v\fHello\t world!! \rstring\n"
   [1]=>
-  unicode(30) "\v\fHello\t world!! \rstring\n"
+  string(30) "\v\fHello\t world!! \rstring\n"
   [2]=>
   int(1)
   [3]=>
@@ -852,15 +852,15 @@ array(4) {
   [1]=>
   int(2)
   [2]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [3]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 array(4) {
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [1]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [2]=>
   int(1)
   [3]=>

@@ -25,14 +25,14 @@ sqlite_close($db);
 ?>
 --EXPECTF--
 object(stdClass)#1 (1) {
-  [u"a"]=>
-  unicode(3) "one"
+  ["a"]=>
+  string(3) "one"
 }
 object(stdClass)#2 (1) {
-  [u"a"]=>
-  unicode(3) "two"
+  ["a"]=>
+  string(3) "two"
 }
 object(stdClass)#1 (1) {
-  [u"a"]=>
-  unicode(5) "three"
+  ["a"]=>
+  string(5) "three"
 }

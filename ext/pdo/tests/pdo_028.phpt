@@ -33,13 +33,13 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 array(1) {
   [0]=>
   array(4) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val1"]=>
-    unicode(3) "one"
-    [u"val2"]=>
-    unicode(3) "two"
-    [u"val3"]=>
-    unicode(5) "three"
+    ["id"]=>
+    string(1) "1"
+    ["val1"]=>
+    string(3) "one"
+    ["val2"]=>
+    string(3) "two"
+    ["val3"]=>
+    string(5) "three"
   }
 }

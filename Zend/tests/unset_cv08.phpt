@@ -4,12 +4,12 @@ unset() CV 8 (unset() of global variable in array_unique($GLOBALS))
 <?php
 $a = "ok\n";
 $b = "ok\n";
-@array_unique($GLOBALS);
+array_unique($GLOBALS);
 echo $a;
 echo $b;
 echo "ok\n";
 ?>
---EXPECT--
+--EXPECTF--
 ok
 ok
 ok

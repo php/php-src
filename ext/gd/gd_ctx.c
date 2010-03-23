@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -90,7 +90,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	}
 
-    if (argc > 1 && file_len) {
+	if (argc > 1 && file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
 
 		fp = VCWD_FOPEN(file, "wb");
@@ -104,7 +104,17 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
+#if HAVE_LIBGD204
 		ctx->gd_free = _php_image_output_ctxfree;
+#else
+		ctx->free = _php_image_output_ctxfree;
+#endif
+
+#if APACHE && defined(CHARSET_EBCDIC)
+		/* XXX this is unlikely to work any more thies@thieso.net */
+		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
+		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
+#endif
 	}
 
 	switch(image_type) {
@@ -137,7 +147,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 	}
 
+#if HAVE_LIBGD204
 	ctx->gd_free(ctx);
+#else
+	ctx->free(ctx);
+#endif
 
 	if(fp) {
 		fflush(fp);

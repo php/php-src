@@ -41,28 +41,28 @@ var_dump($inputs);
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
 array(10) {
-  [u"empty string DQ"]=>
-  unicode(0) ""
-  [u"int 0"]=>
+  ["empty string DQ"]=>
+  string(0) ""
+  ["int 0"]=>
   int(0)
-  [u"uppercase NULL"]=>
+  ["uppercase NULL"]=>
   NULL
-  [u"undefined var"]=>
+  ["undefined var"]=>
   NULL
   [0]=>
   array(0) {
   }
-  [u"instance of classWithToString"]=>
+  ["instance of classWithToString"]=>
   object(classWithToString)#1 (0) {
   }
-  [u"instance of classWithoutToString"]=>
+  ["instance of classWithoutToString"]=>
   object(classWithoutToString)#2 (0) {
   }
-  [u"lowercase true"]=>
+  ["lowercase true"]=>
   bool(true)
-  [u"float -10.5"]=>
+  ["float -10.5"]=>
   float(-10.5)
-  [u"string DQ"]=>
-  unicode(6) "string"
+  ["string DQ"]=>
+  string(6) "string"
 }
 ===DONE===

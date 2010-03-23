@@ -26,50 +26,50 @@ var_dump( getdate() );
 --EXPECTF--
 *** Testing getdate() : basic functionality ***
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(10)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(10)
 }
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(%d)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(%d)
-  [u"hours"]=>
+  ["hours"]=>
   int(%d)
-  [u"mday"]=>
+  ["mday"]=>
   int(%d)
-  [u"wday"]=>
+  ["wday"]=>
   int(%d)
-  [u"mon"]=>
+  ["mon"]=>
   int(%d)
-  [u"year"]=>
+  ["year"]=>
   int(%d)
-  [u"yday"]=>
+  ["yday"]=>
   int(%d)
-  [u"weekday"]=>
-  unicode(%d) %s
-  [u"month"]=>
-  unicode(%d) %s
+  ["weekday"]=>
+  string(%d) %s
+  ["month"]=>
+  string(%d) %s
   [0]=>
   int(%d)
 }

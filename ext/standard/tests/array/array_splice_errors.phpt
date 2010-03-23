@@ -1,5 +1,5 @@
 --TEST--
-Test  array_splice() function : error conditions
+Test array_splice() function : error conditions
 --FILE--
 <?php
 /* 

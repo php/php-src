@@ -19,8 +19,8 @@ var_dump(parse_ini_file($filename));
 <?php @unlink(dirname(__FILE__) . '/bug49056.tmp'); ?>
 --EXPECT--
 array(2) {
-  [u"Cooking_furniture"]=>
-  unicode(19) "KÃ¼chen MÃ¶bel (en)"
-  [u"KÃ¼chen_MÃ¶bel"]=>
-  unicode(22) "Cooking furniture (en)"
+  ["Cooking_furniture"]=>
+  string(23) "KÃ¼chen MÃ¶bel (en)"
+  ["KÃ¼chen_MÃ¶bel"]=>
+  string(22) "Cooking furniture (en)"
 }

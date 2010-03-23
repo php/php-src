@@ -25,7 +25,7 @@ foreach ($values as $value){
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_keys() on all the types other than arrays ***
 array(0) {
 }
@@ -59,10 +59,10 @@ array(1) {
 }
 array(1) {
   [0]=>
-  unicode(3) "php"
+  string(3) "php"
 }
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 Done

@@ -85,124 +85,124 @@ fclose($file_handle);  //closing the file handle
 *** Testing count_chars() function: with unexpected inputs for 'string' argument ***
 -- Iteration 1 --
 array(1) {
-  [0]=>
+  [48]=>
   int(1)
 }
 -- Iteration 2 --
 array(1) {
-  [1]=>
+  [49]=>
   int(1)
 }
 -- Iteration 3 --
 array(2) {
-  [2]=>
+  [50]=>
   int(1)
-  [5]=>
+  [53]=>
   int(2)
 }
 -- Iteration 4 --
 array(3) {
-  [2]=>
+  [50]=>
   int(1)
-  [5]=>
+  [53]=>
   int(1)
-  [6]=>
+  [54]=>
   int(1)
 }
 -- Iteration 5 --
 array(7) {
-  [2]=>
+  [49]=>
   int(1)
-  [1]=>
+  [50]=>
   int(1)
-  [4]=>
+  [51]=>
+  int(1)
+  [52]=>
   int(3)
-  [7]=>
+  [54]=>
+  int(1)
+  [55]=>
   int(2)
-  [8]=>
-  int(1)
-  [3]=>
-  int(1)
-  [6]=>
+  [56]=>
   int(1)
 }
 -- Iteration 6 --
 array(8) {
-  [u"-"]=>
+  [45]=>
   int(1)
-  [2]=>
+  [49]=>
   int(1)
-  [1]=>
+  [50]=>
   int(1)
-  [4]=>
+  [51]=>
+  int(1)
+  [52]=>
   int(3)
-  [7]=>
+  [54]=>
   int(1)
-  [8]=>
+  [55]=>
+  int(1)
+  [56]=>
   int(2)
-  [3]=>
-  int(1)
-  [6]=>
-  int(1)
 }
 -- Iteration 7 --
 array(4) {
-  [1]=>
+  [46]=>
   int(1)
-  [0]=>
+  [48]=>
   int(1)
-  [u"."]=>
+  [49]=>
   int(1)
-  [5]=>
+  [53]=>
   int(1)
 }
 -- Iteration 8 --
 array(5) {
-  [u"-"]=>
+  [45]=>
   int(1)
-  [2]=>
+  [46]=>
   int(1)
-  [0]=>
+  [48]=>
   int(1)
-  [u"."]=>
+  [50]=>
   int(1)
-  [5]=>
+  [53]=>
   int(1)
 }
 -- Iteration 9 --
 array(8) {
-  [1]=>
-  int(2)
-  [0]=>
+  [48]=>
   int(4)
-  [2]=>
+  [49]=>
+  int(2)
+  [50]=>
   int(1)
-  [3]=>
+  [51]=>
   int(1)
-  [4]=>
+  [52]=>
   int(1)
-  [5]=>
+  [53]=>
   int(1)
-  [6]=>
+  [54]=>
   int(1)
-  [7]=>
+  [55]=>
   int(1)
 }
 -- Iteration 10 --
 
-Warning: count_chars() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: count_chars() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: count_chars() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(1) {
-  [1]=>
+  [49]=>
   int(1)
 }
 -- Iteration 14 --
@@ -210,7 +210,7 @@ array(0) {
 }
 -- Iteration 15 --
 array(1) {
-  [1]=>
+  [49]=>
   int(1)
 }
 -- Iteration 16 --
@@ -224,34 +224,34 @@ array(0) {
 }
 -- Iteration 19 --
 array(12) {
-  [u"s"]=>
+  [32]=>
   int(1)
-  [u"a"]=>
+  [97]=>
   int(1)
-  [u"m"]=>
+  [98]=>
   int(1)
-  [u"p"]=>
+  [99]=>
   int(1)
-  [u"l"]=>
-  int(1)
-  [u"e"]=>
+  [101]=>
   int(2)
-  [u" "]=>
+  [106]=>
   int(1)
-  [u"o"]=>
+  [108]=>
   int(1)
-  [u"b"]=>
+  [109]=>
   int(1)
-  [u"j"]=>
+  [111]=>
   int(1)
-  [u"c"]=>
+  [112]=>
   int(1)
-  [u"t"]=>
+  [115]=>
+  int(1)
+  [116]=>
   int(1)
 }
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: count_chars() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 array(0) {

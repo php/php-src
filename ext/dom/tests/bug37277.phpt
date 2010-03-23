@@ -1,12 +1,12 @@
 --TEST--
-Bug # 37277 (cloning Dom Documents or Nodes does not work)
+Bug #37277 (cloning Dom Documents or Nodes does not work)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 $dom1 = new DomDocument('1.0', 'UTF-8');
 
-$xml = b'<foo />';
+$xml = '<foo />';
 $dom1->loadXml($xml);
 
 $node = clone $dom1->documentElement;
@@ -22,3 +22,4 @@ print $dom2->saveXML();
 
 <?xml version="1.0" encoding="UTF-8"?>
 <foo/>
+

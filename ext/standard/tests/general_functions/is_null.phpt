@@ -135,13 +135,12 @@ var_dump( is_null() );
 var_dump( is_null(NULL, null) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_null() with valid null values ***
 -- Iteration 1 --
@@ -290,8 +289,8 @@ bool(false)
 *** Testing error conditions ***
 
 Warning: is_null() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_null() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 Done

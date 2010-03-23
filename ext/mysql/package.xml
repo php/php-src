@@ -28,11 +28,12 @@ These functions allow you to access MySQL database servers.
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>5.0.0rc1</version>
-  <date>2004-03-19</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2005-09-04</date>
   <notes>
-package.xml added to support installation using pear installer
+This is the MySQL driver, taken from the PHP 5.1 release.
+It can also be built against PHP 4.
   </notes>
   <configureoptions>
     <configureoption name="with-mysql" default="autodetect" prompt="mysql installation dir?"/>
@@ -47,7 +48,6 @@ package.xml added to support installation using pear installer
    <file role="src" name="mysql.mak"/>
    <file role="src" name="php_mysql.c"/>
    <file role="src" name="php_mysql.h"/>
-   <file role="src" name="mysql_mysqlnd.h"/>
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
    <file role="test" name="tests/003.phpt"/>
@@ -55,7 +55,7 @@ package.xml added to support installation using pear installer
    <file role="test" name="tests/skipif.inc"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5" />
+   <dep type="php" rel="ge" version="4" />
   </deps>
  </release>
 </package>

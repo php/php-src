@@ -13,9 +13,7 @@ if(fileowner($filename) == 0) {
         unlink ($filename);
         die('skip cannot be run as root');
 }
-
 unlink($filename);
-
 ?>
 --FILE--
 <?php
@@ -81,7 +79,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_readable_variation2/");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on directory without read permission ***

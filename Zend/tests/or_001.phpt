@@ -3,25 +3,25 @@ bitwise OR and strings
 --FILE--
 <?php
 
-$s = b"323423";
-$s1 = b"2323.555";
+$s = "323423";
+$s1 = "2323.555";
 
 var_dump($s | $s1);
 var_dump($s1 | $s);
 
-$s = b"some";
-$s1 = b"test";
+$s = "some";
+$s1 = "test";
 
 var_dump($s | $s1);
 
-$s = b"some";
-$s |= b"test";
+$s = "some";
+$s |= "test";
 
 var_dump($s);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 string(8) "3337>755"
 string(8) "3337>755"
 string(4) "wou"

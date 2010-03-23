@@ -22,6 +22,7 @@ test('sxe->elem1');
 test('sxe->elem1[0]');
 test('sxe->elem1[0]->elem2');
 test('sxe->elem1[0]->elem2->bla');
+if (!ini_get("unicode_semantics")) test('sxe->elem1[0]["attr1"]');
 test('sxe->elem1[0]->attr1');
 test('sxe->elem1[1]');
 test('sxe->elem1[2]');
@@ -42,31 +43,31 @@ bool(true)
 bool(true)
 int(3)
 object(SimpleXMLElement)#%d (3) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"id"]=>
-    unicode(3) "123"
+    ["id"]=>
+    string(3) "123"
   }
-  [u"elem1"]=>
+  ["elem1"]=>
   array(2) {
     [0]=>
-    unicode(36) "There is some text.Here is some more"
+    string(36) "There is some text.Here is some more"
     [1]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"@attributes"]=>
+      ["@attributes"]=>
       array(2) {
-        [u"attr1"]=>
-        unicode(2) "11"
-        [u"attr2"]=>
-        unicode(2) "12"
+        ["attr1"]=>
+        string(2) "11"
+        ["attr2"]=>
+        string(2) "12"
       }
     }
   }
-  [u"elem11"]=>
+  ["elem11"]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"elem111"]=>
+    ["elem111"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"elem1111"]=>
+      ["elem1111"]=>
       object(SimpleXMLElement)#%d (0) {
       }
     }
@@ -77,30 +78,30 @@ bool(true)
 bool(true)
 int(2)
 object(SimpleXMLElement)#%d (3) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(2) {
-    [u"attr1"]=>
-    unicode(5) "first"
-    [u"attr2"]=>
-    unicode(6) "second"
+    ["attr1"]=>
+    string(5) "first"
+    ["attr2"]=>
+    string(6) "second"
   }
-  [u"comment"]=>
+  ["comment"]=>
   object(SimpleXMLElement)#%d (0) {
   }
-  [u"elem2"]=>
+  ["elem2"]=>
   object(SimpleXMLElement)#%d (2) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(2) {
-      [u"att25"]=>
-      unicode(2) "25"
-      [u"att42"]=>
-      unicode(2) "42"
+      ["att25"]=>
+      string(2) "25"
+      ["att42"]=>
+      string(2) "42"
     }
-    [u"elem3"]=>
+    ["elem3"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"elem4"]=>
+      ["elem4"]=>
       object(SimpleXMLElement)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         object(SimpleXMLElement)#%d (0) {
         }
       }
@@ -112,30 +113,30 @@ bool(true)
 bool(true)
 int(1)
 object(SimpleXMLElement)#%d (3) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(2) {
-    [u"attr1"]=>
-    unicode(5) "first"
-    [u"attr2"]=>
-    unicode(6) "second"
+    ["attr1"]=>
+    string(5) "first"
+    ["attr2"]=>
+    string(6) "second"
   }
-  [u"comment"]=>
+  ["comment"]=>
   object(SimpleXMLElement)#%d (0) {
   }
-  [u"elem2"]=>
+  ["elem2"]=>
   object(SimpleXMLElement)#%d (2) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(2) {
-      [u"att25"]=>
-      unicode(2) "25"
-      [u"att42"]=>
-      unicode(2) "42"
+      ["att25"]=>
+      string(2) "25"
+      ["att42"]=>
+      string(2) "42"
     }
-    [u"elem3"]=>
+    ["elem3"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"elem4"]=>
+      ["elem4"]=>
       object(SimpleXMLElement)#%d (1) {
-        [u"test"]=>
+        ["test"]=>
         object(SimpleXMLElement)#%d (0) {
         }
       }
@@ -147,18 +148,18 @@ bool(true)
 bool(true)
 int(1)
 object(SimpleXMLElement)#%d (2) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(2) {
-    [u"att25"]=>
-    unicode(2) "25"
-    [u"att42"]=>
-    unicode(2) "42"
+    ["att25"]=>
+    string(2) "25"
+    ["att42"]=>
+    string(2) "42"
   }
-  [u"elem3"]=>
+  ["elem3"]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"elem4"]=>
+    ["elem4"]=>
     object(SimpleXMLElement)#%d (1) {
-      [u"test"]=>
+      ["test"]=>
       object(SimpleXMLElement)#%d (0) {
       }
     }
@@ -169,6 +170,14 @@ bool(false)
 bool(false)
 int(0)
 object(SimpleXMLElement)#%d (0) {
+}
+===sxe->elem1[0]["attr1"]
+bool(true)
+bool(true)
+int(0)
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  string(5) "first"
 }
 ===sxe->elem1[0]->attr1
 bool(false)
@@ -181,12 +190,12 @@ bool(true)
 bool(true)
 int(0)
 object(SimpleXMLElement)#%d (1) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(2) {
-    [u"attr1"]=>
-    unicode(2) "11"
-    [u"attr2"]=>
-    unicode(2) "12"
+    ["attr1"]=>
+    string(2) "11"
+    ["attr2"]=>
+    string(2) "12"
   }
 }
 ===sxe->elem1[2]
@@ -199,9 +208,9 @@ bool(true)
 bool(true)
 int(1)
 object(SimpleXMLElement)#%d (1) {
-  [u"elem111"]=>
+  ["elem111"]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"elem1111"]=>
+    ["elem1111"]=>
     object(SimpleXMLElement)#%d (0) {
     }
   }
@@ -211,7 +220,7 @@ bool(true)
 bool(true)
 int(1)
 object(SimpleXMLElement)#%d (1) {
-  [u"elem1111"]=>
+  ["elem1111"]=>
   object(SimpleXMLElement)#%d (0) {
   }
 }

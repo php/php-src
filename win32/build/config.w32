@@ -150,6 +150,7 @@ if (VCVERS >= 1400) {
 
 ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
+		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
 		} else {
@@ -173,7 +174,7 @@ DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
 // General libs
 // urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib ");
+DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib");
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
@@ -190,8 +191,8 @@ if (PHP_DEBUG == "yes") {
 		ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 	}
 	// Equivalent to Release_TSInline build -> best optimization
-	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG \
-/D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+
 	// if you have VS.Net /GS hardens the binary against buffer overruns
 	// ADD_FLAG("CFLAGS", "/GS");
 }
@@ -199,7 +200,9 @@ if (PHP_DEBUG == "yes") {
 if (PHP_ZTS == "yes") {
 	ADD_FLAG("CFLAGS", "/D ZTS=1");
 }
+
 DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
+
 
 // we want msvcrt in the PHP DLL
 ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
@@ -249,14 +252,15 @@ if (PHP_PHP_BUILD == 'no') {
 			}
 		}
 	}
+	PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
 }
 DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
 
-var php_usual_include_suspects = PHP_PHP_BUILD+"\\include;..\\deps\\include";
-var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib;..\\deps\\lib";
+var php_usual_include_suspects = PHP_PHP_BUILD+"\\include";
+var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib";
 
 ADD_FLAG("CFLAGS", '/I "' + php_usual_include_suspects + '" ');
 ADD_FLAG("LDFLAGS", '/libpath:"\\"' + php_usual_lib_suspects + '\\"" ');
@@ -269,25 +273,6 @@ function probe_basic_headers()
 	if (PHP_PHP_BUILD != "no") {
 		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
 		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
-
-		path = php_usual_include_suspects.split(';');
-		for (i = 0; i < path.length; i++) {
-			f = FSO.GetAbsolutePathName(path[i]);
-			if (FSO.FolderExists(f)) {
-				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
-			}
-		}
-		path = php_usual_lib_suspects.split(';');
-		for (i = 0; i < path.length; i++) {
-			f = FSO.GetAbsolutePathName(path[i]);
-			if (FSO.FolderExists(f)) {
-				if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
-					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
-				} else {
-					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
-				}
-			}
-		}
 	}
 }
 
@@ -323,21 +308,6 @@ function add_extra_dirs()
 probe_basic_headers();
 add_extra_dirs();
 
-// Do we want static ICU lib
-ARG_WITH('static-icu', 'Link against the static version of the ICU library', 'no');
-if (PHP_STATIC_ICU == "yes") {
-	if (!CHECK_LIB('sicuuc.lib', null, PHP_STATIC_ICU)) {
-		ERROR('static ICU library not found');
-	}
-	ADD_FLAG("LIBS", "sicuuc.lib sicuin.lib sicuio.lib sicule.lib siculx.lib sicudt.lib");
-	ADD_FLAG("CFLAGS", "/D U_STATIC_IMPLEMENTATION=1")
-} else {
-	if (!CHECK_LIB('icuuc.lib', null)) {
-		ERROR('ICU library not found');
-	}
-	ADD_FLAG("LIBS", "icuuc.lib icuin.lib icuio.lib icule.lib iculx.lib");
-}
-
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 STDOUT.WriteBlankLines(1);
@@ -346,14 +316,14 @@ STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PH
 
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
-	zend_constants.c zend_exceptions.c \
+	zend_constants.c zend_dynamic_array.c zend_exceptions.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
 	zend_hash.c zend_list.c zend_indent.c zend_builtin_functions.c \
-	zend_sprintf.c zend_ini.c zend_qsort.c zend_ts_hash.c \
+	zend_sprintf.c zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
-	zend_object_handlers.c zend_objects_API.c  zend_unicode.c zend_strtol.c  \
+	zend_object_handlers.c zend_objects_API.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
 	zend_float.c");
 
@@ -361,12 +331,10 @@ if (VCVERS == 1200) {
 	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 }
 
-ADD_SOURCES("main", "main.c snprintf.c spprintf.c fopen_wrappers.c \
+ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
-	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c \
-	getopt.c");
-
+	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c");
 ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 // Newer versions have it
@@ -378,7 +346,7 @@ if (VCVERS >= 1400) {
 }
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
-	userspace.c transports.c xp_socket.c mmap.c unicode_filter.c glob_wrapper.c");
+	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");
 
 ADD_SOURCES("win32", "glob.c readdir.c \
 	registry.c select.c sendmail.c time.c wfile.c winutil.c wsyslog.c globals.c");
@@ -404,6 +372,12 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
 ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 
+ARG_ENABLE("zend-multibyte", "Enable Zend multibyte encoding support", "no");
+if (PHP_ZEND_MULTIBYTE == "yes") {
+   STDOUT.WriteLine("Enabling Zend multibyte encoding support");
+   AC_DEFINE('ZEND_MULTIBYTE', 1);
+}
+ 
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 

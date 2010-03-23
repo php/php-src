@@ -11,9 +11,6 @@ Zend
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
       interfaces difficult which pass const parameters to us.
-    * Clean up object->string conversion behavior wherever possible (switch(),
-      comparison, etc)
-    * Port safe-allocation functions from 5.3 (zend_alloc.[ch])
 
 
 global
@@ -32,6 +29,8 @@ global
       of compliance.
     * see what functions might need to be changed to use HashPosition, so
       that the internal array pointer is not affected.
+    * Move most extensions and PEAR packages out of the PHP CVS tree,
+      include them again during release packaging.
 
     Other
     * use thread-safe resolver functions (either require BIND 8 or adns).
@@ -65,14 +64,6 @@ documentation
     * Add developer documentation.
     * Add detailed documentation for Java extension.
 
-ext/bz2
--------
-    * Add an ini directive to specify the size of decompression buffer.
-      The default 4k is too small for large files and also requires much time
-      for decompression. 40k is suitable for such files, however it may be too
-      much under certain environments. There should be appropriate default
-      settings for the various SAPI modules (e.g. apache and cli).
-
 ext/curl
 --------
     * Have a warning scheme for when people use unsupported features.
@@ -105,13 +96,6 @@ ext/pcntl
     * Remove all zend_extension code
     * Add object callback support to pcntl_signal()
 
-ext/pgsql
----------
-    For PHP 4.3.0:
-    * Add pg_metadata() with metadata cache feature.
-    * Add pg_convert() to check and convert array value for query.
-    * Add pg_insert/pg_update/pg_delete/pg_select for simple query.
-
 ext/session
 -----------
     For PHP 4.3.0:
@@ -138,7 +122,6 @@ ext/standard
 ext/wddx
 --------
     * See if we can support the remaining data types:
-        dateTime
         binary
 
         http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm

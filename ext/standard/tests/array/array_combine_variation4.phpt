@@ -15,7 +15,6 @@ Test array_combine() function : usage variations - associative array with differ
 */
 
 echo "*** Testing array_combine() : assoc array with diff keys to both \$keys and \$values argument ***\n";
-
 // get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -107,47 +106,47 @@ bool(false)
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 3 --
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 4 --
 array(4) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(1) "3"
+  string(1) "3"
   [4]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 -- Iteration 5 --
 array(1) {
-  [u"float"]=>
-  unicode(5) "float"
+  ["float"]=>
+  string(5) "float"
 }
 -- Iteration 6 --
 array(4) {
-  [u"f1"]=>
-  unicode(2) "f1"
-  [u"f2"]=>
-  unicode(2) "f2"
-  [u"f3"]=>
-  unicode(2) "f3"
-  [u"f4"]=>
-  unicode(2) "f4"
+  ["f1"]=>
+  string(2) "f1"
+  ["f2"]=>
+  string(2) "f2"
+  ["f3"]=>
+  string(2) "f3"
+  ["f4"]=>
+  string(2) "f4"
 }
 -- Iteration 7 --
 array(4) {
   [111]=>
   int(111)
-  [u"color"]=>
-  unicode(5) "color"
-  [u"2.2"]=>
+  ["color"]=>
+  string(5) "color"
+  ["2.2"]=>
   float(2.2)
   [33]=>
   int(33)
@@ -156,38 +155,38 @@ array(4) {
 array(4) {
   [111]=>
   int(111)
-  [u"color"]=>
-  unicode(5) "color"
-  [u"2.2"]=>
+  ["color"]=>
+  string(5) "color"
+  ["2.2"]=>
   float(2.2)
   [33]=>
   int(33)
 }
 -- Iteration 9 --
 array(2) {
-  [u"hello"]=>
-  unicode(5) "hello"
-  [u"string"]=>
-  unicode(6) "string"
+  ["hello"]=>
+  string(5) "hello"
+  ["string"]=>
+  string(6) "string"
 }
 -- Iteration 10 --
 array(1) {
-  [u"hello"]=>
-  unicode(5) "hello"
+  ["hello"]=>
+  string(5) "hello"
 }
 -- Iteration 11 --
 array(6) {
   [1]=>
   int(1)
-  [u"2.2"]=>
+  ["2.2"]=>
   float(2.2)
-  [u"int"]=>
-  unicode(3) "int"
-  [u"float"]=>
-  unicode(5) "float"
-  [u"unset"]=>
-  unicode(5) "unset"
-  [u"heredoc"]=>
-  unicode(7) "heredoc"
+  ["int"]=>
+  string(3) "int"
+  ["float"]=>
+  string(5) "float"
+  ["unset"]=>
+  string(5) "unset"
+  ["heredoc"]=>
+  string(7) "heredoc"
 }
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Bug # 37456 (DOMElement->setAttribute() loops forever)
+Bug #37456 (DOMElement->setAttribute() loops forever)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -19,3 +19,4 @@ print $attr->nodeValue;
 --EXPECT--
 
 newval
+

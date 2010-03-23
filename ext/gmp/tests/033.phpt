@@ -41,16 +41,16 @@ gmp_setbit($a,array());
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(2) "-1"
+--EXPECTF--	
+string(2) "-1"
 
 Warning: gmp_setbit(): Index must be greater than or equal to zero in %s on line %d
-unicode(1) "5"
-unicode(1) "1"
-unicode(1) "7"
-unicode(12) "100008388608"
-unicode(12) "100000000000"
-unicode(12) "100000000008"
+string(1) "5"
+string(1) "1"
+string(1) "7"
+string(12) "100008388608"
+string(12) "100000000000"
+string(12) "100000000008"
 
 Warning: gmp_setbit(): supplied argument is not a valid GMP integer resource in %s on line %d
 

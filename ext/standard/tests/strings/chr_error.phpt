@@ -24,11 +24,11 @@ var_dump( chr(72, $extra_arg) );
 
 -- Testing chr() function with no arguments --
 
-Warning: chr() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: Wrong parameter count for chr() in %s on line %d
 NULL
 
 -- Testing chr() function with more than expected no. of arguments --
 
-Warning: chr() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: Wrong parameter count for chr() in %s on line %d
 NULL
 ===DONE===

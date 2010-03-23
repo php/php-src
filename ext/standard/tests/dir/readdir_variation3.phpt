@@ -15,6 +15,7 @@ Test readdir() function : usage variations - sub-directories
 echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
+chdir(dirname(__FILE__));
 include(dirname(__FILE__)."/../file/file.inc");
 
 $path_top = dirname(__FILE__) . '/readdir_variation3';
@@ -22,8 +23,8 @@ $path_sub = $path_top . '/sub_folder';
 mkdir($path_top);
 mkdir($path_sub);
 
-@create_files($path_top, 2);
-@create_files($path_sub, 2);
+create_files($path_top, 2);
+create_files($path_sub, 2);
 
 $dir_handle = opendir($path_top);
 while(FALSE !== ($file = readdir($dir_handle))) {
@@ -50,18 +51,18 @@ $path_sub = $path_top . '/sub_folder';
 rmdir($path_sub);
 rmdir($path_top);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing readdir() : usage variations ***
 array(5) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [3]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [4]=>
-  unicode(10) "sub_folder"
+  string(10) "sub_folder"
 }
 ===DONE===

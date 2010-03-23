@@ -97,23 +97,22 @@ bool(true)
 
 Warning: rename( ,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
 bool(false)
--- testing '
-Warning: rename(%s/renameVar13/afile.tmp,): No such file or directory in %s on line %d
+-- testing '%s' --
+
+Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
 bool(false)
-
-Notice: Array to string conversion in %s on line %d
 -- testing 'Array' --
 
-Notice: Array to string conversion in %s on line %d
-bool(true)
+Warning: rename() expects parameter 2 to be string, array given in %s on line %d
+bool(false)
 
-Warning: file_exists() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: file_exists() expects parameter 1 to be string, array given in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
-bool(true)
+Warning: rename() expects parameter 1 to be string, array given in %s on line %d
+bool(false)
 -- testing '/no/such/file/dir' --
 
 Warning: rename(%s/renameVar13/afile.tmp,/no/such/file/dir): No such file or directory in %s on line %d
@@ -123,11 +122,10 @@ Warning: rename(/no/such/file/dir,%s/renameVar13/afile.tmp): No such file or dir
 bool(false)
 -- testing 'php/php' --
 
-Warning: rename(%s/renameVar13/afile.tmp,php/php): %s in %s on line %d
+Warning: rename(%s/renameVar13/afile.tmp,php/php): %s directory in %s on line %d
 bool(false)
 
-Warning: rename(php/php,%s/renameVar13/afile.tmp): %s in %s on line %d
+Warning: rename(php/php,%s/renameVar13/afile.tmp): %s directory in %s on line %d
 bool(false)
 
 *** Done ***
-

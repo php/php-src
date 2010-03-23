@@ -21,10 +21,10 @@ var_dump( join("TEST", $sub_array) );
 // glue as array & pieces as array containing sub array
 var_dump( join(array(1, 2, 3, 4), $sub_array) );
 
-// numeric value as glue, pieces as array containg subarray
+// numeric value as glue, pieces as array containg sub array
 var_dump( join(2, $sub_array) );
 
-// using direclty the sub_array inside an array as pieces
+// using directly the sub_array as pieces
 var_dump( join(", ", $sub_array[0]) );
 var_dump( join(", ", $sub_array[1]) );
 
@@ -36,15 +36,15 @@ echo "Done\n";
 Notice: Array to string conversion in %s on line %d
 
 Notice: Array to string conversion in %s on line %d
-unicode(27) "ArrayTESTArrayTESTPHPTEST50"
+string(27) "ArrayTESTArrayTESTPHPTEST50"
 
 Notice: Array to string conversion in %s on line %d
-unicode(19) "1Array2Array3Array4"
+string(19) "1Array2Array3Array4"
 
 Notice: Array to string conversion in %s on line %d
 
 Notice: Array to string conversion in %s on line %d
-unicode(18) "Array2Array2PHP250"
-unicode(10) "1, 2, 3, 4"
-unicode(8) "one, two"
+string(18) "Array2Array2PHP250"
+string(10) "1, 2, 3, 4"
+string(8) "one, two"
 Done

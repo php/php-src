@@ -40,11 +40,11 @@ unlink("array_count_file");
 --EXPECTF--
 *** Testing array_count_values() : parameter variations ***
 array(3) {
-  [u"bobv"]=>
+  ["bobv"]=>
   int(1)
-  [u"val"]=>
+  ["val"]=>
   int(1)
-  [u"val6"]=>
+  ["val6"]=>
   int(1)
 }
 

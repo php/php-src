@@ -95,67 +95,65 @@ echo "Done";
 --EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 2 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 3 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 4 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 5 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 6 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 7 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 8 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 9 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 10 --
 
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
+string(10) "helloworld"
 -- Iteration 11 --
 
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
+string(10) "helloworld"
 -- Iteration 12 --
 
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
+string(10) "helloworld"
 -- Iteration 13 --
 
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
+string(10) "helloworld"
 -- Iteration 14 --
 
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
+string(10) "helloworld"
 -- Iteration 15 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 16 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 17 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 18 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 19 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 20 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 21 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 22 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 23 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 24 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 25 --
-unicode(10) "helloworld"
+string(10) "helloworld"
 -- Iteration 26 --
-
-Warning: strip_tags() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
-NULL
+string(10) "helloworld"
 Done

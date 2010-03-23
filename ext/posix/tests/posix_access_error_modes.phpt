@@ -14,12 +14,14 @@ if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }
 ?>
+--INI--
+safe_mode = 1
 --FILE--
 <?php
 $filename = dirname(__FILE__) . '/foo.test';
 var_dump(posix_access($filename, POSIX_F_OK));
 $fp = fopen($filename,"w");
-fwrite($fp,b"foo");
+fwrite($fp,"foo");
 fclose($fp);
 
 chmod ($filename, 0000);
@@ -35,6 +37,7 @@ chmod ($filename, 0700);
 unlink($filename);
 ?>
 --EXPECTF--
+Warning: Directive 'safe_mode' is deprecated in PHP 5.3 and greater in Unknown on line %d
 bool(false)
 bool(false)
 bool(false)

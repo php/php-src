@@ -5,7 +5,7 @@ Bug #35342 (isset(DOMNodeList->length) returns false)
 --FILE--
 <?php
 $dom = new DOMDocument();
-$dom->loadXML(b"<root><foo>foobar</foo><foo>foobar#2</foo></root>");
+$dom->loadXML("<root><foo>foobar</foo><foo>foobar#2</foo></root>");
 
 $nodelist = $dom->getElementsByTagName("foo");
 

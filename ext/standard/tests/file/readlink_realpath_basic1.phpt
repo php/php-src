@@ -74,16 +74,16 @@ rmdir("$name_prefix/");
 *** Testing readlink() and realpath(): with valid and invalid path ***
 
 -- Iteration 1 --
-unicode(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
-unicode(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp"
 
 -- Iteration 2 --
-unicode(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-unicode(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 
 -- Iteration 3 --
-unicode(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
-unicode(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
+string(%d) "%s/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp"
 
 -- Iteration 4 --
 

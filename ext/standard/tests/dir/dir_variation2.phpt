@@ -190,23 +190,23 @@ Warning: dir() expects parameter 2 to be resource, boolean given in %s on line %
 NULL
 
 -- Iteration 21 --
-Warning: dir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
-Warning: dir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
-Warning: dir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 24 --
-Warning: dir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 25 --
-Warning: dir() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 26 --

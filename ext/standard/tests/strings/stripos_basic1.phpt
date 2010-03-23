@@ -28,15 +28,11 @@ var_dump( stripos($heredoc_str, "Hello, World") );
 var_dump( stripos($heredoc_str, 'Hello') );
 var_dump( stripos($heredoc_str, $heredoc_str) );
 
-//unicode strings for haystack & needle
-var_dump( stripos((unicode)"Hello, World", "Hello") );
-var_dump( stripos('Hello, World', (unicode)"hello") );
-
 //non-existing needle in haystack
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stripos() function: basic functionality ***
 -- With default arguments --
 int(0)
@@ -45,8 +41,6 @@ int(7)
 int(7)
 int(4)
 int(5)
-int(0)
-int(0)
 int(0)
 int(0)
 int(0)

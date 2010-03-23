@@ -106,92 +106,92 @@ echo "Done";
 -- Iteration 1 : int data --
 array(4) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [12345]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [-2345]=>
-  unicode(8) "negative"
+  string(8) "negative"
 }
 
 -- Iteration 2 : float data --
 array(3) {
   [10]=>
-  unicode(8) "positive"
+  string(8) "positive"
   [-10]=>
-  unicode(8) "negative"
+  string(8) "negative"
   [0]=>
-  unicode(4) "half"
+  string(4) "half"
 }
 
 -- Iteration 3 : extreme floats data --
 array(2) {
   [12345678]=>
-  unicode(5) "large"
+  string(5) "large"
   [0]=>
-  unicode(5) "small"
+  string(5) "small"
 }
 
 -- Iteration 4 : null uppercase data --
 array(1) {
-  [u""]=>
-  unicode(6) "null 1"
+  [""]=>
+  string(6) "null 1"
 }
 
 -- Iteration 5 : null lowercase data --
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 -- Iteration 6 : bool lowercase data --
 array(2) {
   [1]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
   [0]=>
-  unicode(6) "lowerf"
+  string(6) "lowerf"
 }
 
 -- Iteration 7 : bool uppercase data --
 array(2) {
   [1]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
   [0]=>
-  unicode(6) "upperf"
+  string(6) "upperf"
 }
 
 -- Iteration 8 : empty double quotes data --
 array(1) {
-  [u""]=>
-  unicode(6) "emptyd"
+  [""]=>
+  string(6) "emptyd"
 }
 
 -- Iteration 9 : empty single quotes data --
 array(1) {
-  [u""]=>
-  unicode(6) "emptys"
+  [""]=>
+  string(6) "emptys"
 }
 
 -- Iteration 10 : string data --
 array(3) {
-  [u"STRINGD"]=>
-  unicode(7) "stringd"
-  [u"STRINGS"]=>
-  unicode(7) "strings"
-  [u"HELLO WORLD"]=>
-  unicode(7) "stringh"
+  ["STRINGD"]=>
+  string(7) "stringd"
+  ["STRINGS"]=>
+  string(7) "strings"
+  ["HELLO WORLD"]=>
+  string(7) "stringh"
 }
 
 -- Iteration 11 : undefined data --
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 -- Iteration 12 : unset data --
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 Done

@@ -98,77 +98,77 @@ ob_end_flush();
 *** Testing session_name() : error functionality ***
 
 -- Iteration 1 --
-unicode(9) "PHPSESSID"
+string(9) "PHPSESSID"
 
 -- Iteration 2 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 3 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 4 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- Iteration 5 --
-unicode(5) "-2345"
+string(5) "-2345"
 
 -- Iteration 6 --
-unicode(4) "10.5"
+string(4) "10.5"
 
 -- Iteration 7 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 -- Iteration 8 --
-unicode(12) "123456789000"
+string(12) "123456789000"
 
 -- Iteration 9 --
-unicode(13) "1.23456789E-9"
+string(13) "1.23456789E-9"
 
 -- Iteration 10 --
-unicode(3) "0.5"
+string(3) "0.5"
 
 -- Iteration 11 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 12 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 13 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 14 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 15 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 17 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 19 --
-unicode(7) "Nothing"
+string(7) "Nothing"
 
 -- Iteration 20 --
-unicode(7) "Nothing"
+string(7) "Nothing"
 
 -- Iteration 21 --
-unicode(12) "Hello World!"
+string(12) "Hello World!"
 
 -- Iteration 22 --
-unicode(12) "Hello World!"
+string(12) "Hello World!"
 
 -- Iteration 23 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 24 --
 
-Warning: session_name() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: session_name() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
 

@@ -2739,17 +2739,17 @@ dnl
 dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
-  AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
+  AC_CACHE_CHECK([for PDO includes], pdo_inc_path, [
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
+      pdo_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$prefix/include/php/ext
+      pdo_inc_path=$prefix/include/php/ext
     fi
   ])
-  if test -n "$pdo_cv_inc_path"; then
+  if test -n "$pdo_inc_path"; then
 ifelse([$1],[],:,[$1])
   else
 ifelse([$2],[],[AC_MSG_ERROR([Cannot find php_pdo_driver.h.])],[$2])
@@ -2875,60 +2875,5 @@ main()
   if test "$ac_cv_write_stdout" = "yes"; then
     AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
   fi
-])
-
-dnl
-dnl Generate dtrace targets
-dnl
-AC_DEFUN([PHP_GENERATE_DTRACE],[
-  old_IFS=[$]IFS
-  IFS=.
-  set $ac_src
-  IFS=$old_IFS
-  build_target=$2
-  PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS $1.o"
-  for src in $PHP_DTRACE_OBJS; do
-    case [$]build_target in
-      program|static)
-        obj="$obj `dirname $src`/`basename $src | sed 's,\.lo$,.o,'` " ;;
-      *)
-        obj="$obj `dirname $src`/.libs/`basename $src | sed 's,\.lo$,.o,'` " ;;
-    esac
-  done
-
-  cat >>Makefile.objects<<EOF
-$1.o: \$(PHP_DTRACE_OBJS)
-	dtrace -G -o $1.o -s $1 $obj
-EOF
-
-])
-
-dnl
-dnl Link given source files with dtrace
-dnl PHP_ADD_DTRACE(providerdesc, sources, module)
-dnl
-AC_DEFUN([PHP_ADD_DTRACE],[
-   case "$3" in
-    ""[)] unset ac_bdir;;
-    /*[)] ac_bdir=$ac_srcdir;;
-    *[)] extdir=PHP_EXT_DIR($3); ac_bdir="$extdir/";;
-    esac
-  old_IFS=[$]IFS
-  for ac_src in $2; do
-    IFS=.
-    set $ac_src
-    ac_obj=[$]1
-    IFS=$old_IFS
-
-    PHP_DTRACE_OBJS="[$]PHP_DTRACE_OBJS [$]ac_bdir[$]ac_obj.lo"
-  done;
-])
-
-dnl
-dnl Generate platform specific dtrace header
-dnl
-AC_DEFUN([PHP_INIT_DTRACE], [
-  dtrace -h -C -s $1 -o $2
-  $SED -ibak 's,PHP_,DTRACE_,g' $2
 ])
 

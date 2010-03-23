@@ -30,6 +30,6 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_encode() : variation ***
 bool(true)
-unicode(64) "data|a:5:{i:0;i:1;i:1;i:2;i:2;i:3;U:3:"foo";R:1;U:4:"blah";R:1;}"
+string(64) "data|a:5:{i:0;i:1;i:1;i:2;i:2;i:3;s:3:"foo";R:1;s:4:"blah";R:1;}"
 bool(true)
 Done

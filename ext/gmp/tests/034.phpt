@@ -35,16 +35,16 @@ gmp_clrbit();
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(1) "0"
+--EXPECTF--	
+string(1) "0"
 
 Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
-unicode(2) "-1"
+string(2) "-1"
 
 Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line %d
-unicode(7) "1000000"
-unicode(7) "1000000"
-unicode(30) "238462734628347239571822592658"
+string(7) "1000000"
+string(7) "1000000"
+string(30) "238462734628347239571822592658"
 
 Warning: gmp_clrbit(): supplied argument is not a valid GMP integer resource in %s on line %d
 

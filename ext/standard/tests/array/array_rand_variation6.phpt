@@ -70,34 +70,35 @@ echo "Done";
 \*\*\* Testing array_rand\(\) : with keys of input array as heredoc strings \*\*\*
 
 -- with default parameters --
-unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 
 -- with num_req = 1 --
-unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 
 -- with num_req = 3 --
 array\(3\) {
   \[0\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[1\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[2\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 }
 
 -- with num_req = 6 --
 array\(6\) {
   \[0\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[1\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[2\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[3\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[4\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
   \[5\]=>
-  unicode\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
+  string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 }
 Done
+

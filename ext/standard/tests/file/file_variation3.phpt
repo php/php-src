@@ -113,7 +113,6 @@ unlink(__FILE__ . ".tmp");
 ===DONE===
 --EXPECTF--
 *** Testing file() : usage variation ***
-Error: 8 - fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding, %s(%d)
 
 --float 10.5--
 array(3) {
@@ -238,27 +237,27 @@ array(3) {
 }
 
 --empty string DQ--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - file() expects parameter 2 to be long, Unicode string given, %s(%d)
+Error: 2 - file() expects parameter 2 to be long, string given, %s(%d)
 NULL
 
 --instance of classWithToString--

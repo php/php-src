@@ -8,5 +8,5 @@ Bug #23624 (foreach leaves current array key as null)
     var_dump(current($arr));
 ?>
 --EXPECT--
-unicode(3) "one"
+string(3) "one"
 bool(false)

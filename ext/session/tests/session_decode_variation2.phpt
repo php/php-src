@@ -34,16 +34,16 @@ bool(true)
 array(0) {
 }
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1234567890)
-  [u"bar"]=>
-  unicode(12) "Hello World!"
-  [u"guff"]=>
+  ["bar"]=>
+  string(12) "Hello World!"
+  ["guff"]=>
   float(123.456)
 }
 bool(true)
 array(4) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -52,9 +52,9 @@ array(4) {
     [2]=>
     int(3)
   }
-  [u"bar"]=>
-  unicode(12) "Hello World!"
-  [u"guff"]=>
+  ["bar"]=>
+  string(12) "Hello World!"
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -63,7 +63,7 @@ array(4) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
   &array(3) {
     [0]=>
     int(1)

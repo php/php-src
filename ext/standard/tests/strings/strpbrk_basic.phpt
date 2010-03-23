@@ -30,12 +30,12 @@ var_dump( strpbrk(5, "5") );
 ===DONE===
 --EXPECT--
 *** Testing strpbrk() : basic functionality ***
-unicode(20) "is is a Simple text."
-unicode(12) "Simple text."
+string(20) "is is a Simple text."
+string(12) "Simple text."
 bool(false)
 bool(false)
 bool(false)
-unicode(12) "  aaa aaaSLR"
-unicode(1) "5"
-unicode(1) "5"
+string(12) "  aaa aaaSLR"
+string(1) "5"
+string(1) "5"
 ===DONE===

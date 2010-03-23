@@ -88,7 +88,7 @@ chmod(dirname(__FILE__)."/006_variation2", 0777);
 unlink(dirname(__FILE__)."/006_variation2.tmp");
 rmdir(dirname(__FILE__)."/006_variation2");
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing fileperms() & chmod() : usage variations ***
 
 *** Testing fileperms(), chmod() with miscellaneous permissions ***
@@ -149,38 +149,38 @@ bool(true)
 43567
 -- Iteration 12 --
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 43567
 -- Iteration 13 --
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 43567
 -- Iteration 14 --
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 43567
 -- Iteration 15 --
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 103567
 
-Warning: chmod() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: chmod() expects parameter 2 to be long, string given in %s on line %d
 NULL
 43567
 *** Done ***

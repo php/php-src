@@ -1,5 +1,5 @@
 --TEST--
-stream_resolve_include_path(string path[, stream context])
+stream_resolve_include_path(string path)
 --FILE--
 <?php
 $include_path = __DIR__ . '/test_path';
@@ -29,8 +29,9 @@ rmdir($include_path_nested);
 unlink($include_path_file);
 rmdir($include_path);
 --EXPECTF--
-Warning: stream_resolve_include_path() expects at least 1 parameter, 0 given in %s on line %d
+Warning: stream_resolve_include_path() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
-%unicode|string%(%d) "%stest_path%sfile"
-%unicode|string%(%d) "%stest_path%snested%sfile"
+string(%d) "%stest_path%sfile"
+string(%d) "%stest_path%snested%sfile"
+

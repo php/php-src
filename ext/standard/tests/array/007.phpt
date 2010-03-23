@@ -169,7 +169,7 @@ array(2) {
 array(5) {
   [0]=>
   int(1)
-  [u"big"]=>
+  ["big"]=>
   int(2)
   [1]=>
   int(3)
@@ -214,36 +214,36 @@ $c=array (
 Results:
 
 array(5) {
-  [u"a"]=>
+  ["a"]=>
   int(2)
-  [u"c"]=>
-  unicode(4) "done"
-  [u"fan"]=>
-  unicode(3) "fen"
+  ["c"]=>
+  string(4) "done"
+  ["fan"]=>
+  string(3) "fen"
   [9]=>
   int(25)
-  [u"want"]=>
-  unicode(5) "wanna"
+  ["want"]=>
+  string(5) "wanna"
 }
 array(9) {
-  [u"a"]=>
+  ["a"]=>
   int(2)
-  [u"b"]=>
-  unicode(4) "some"
-  [u"c"]=>
-  unicode(4) "done"
-  [u"z"]=>
-  unicode(3) "foo"
-  [u"fan"]=>
-  unicode(3) "fen"
+  ["b"]=>
+  string(4) "some"
+  ["c"]=>
+  string(4) "done"
+  ["z"]=>
+  string(3) "foo"
+  ["fan"]=>
+  string(3) "fen"
   [9]=>
   int(25)
   [12]=>
   int(42)
   [45]=>
   int(42)
-  [u"want"]=>
-  unicode(5) "wanna"
+  ["want"]=>
+  string(5) "wanna"
 }
 -=-=-=-=-=-=-=-=- New functionality from 5.0.0 -=-=-=-=-=-=-=-
 $a=array (
@@ -302,25 +302,25 @@ $b=array (
 );
 var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(3) {
-  [u"0.1"]=>
+  ["0.1"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(9)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(9)
   }
-  [u"0.5"]=>
+  ["0.5"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(12)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(23)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(23)
   }
 }
@@ -380,25 +380,25 @@ $b=array (
 );
 var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(3) {
-  [u"0.1"]=>
+  ["0.1"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(9)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(9)
   }
-  [u"0.5"]=>
+  ["0.5"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(12)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(23)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(23)
   }
 }
@@ -458,18 +458,18 @@ $b=array (
 );
 var_dump(array_udiff($a, $b, "comp_func_cr"));
 array(2) {
-  [u"0.5"]=>
+  ["0.5"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(12)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(23)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(23)
   }
 }
@@ -529,25 +529,25 @@ $b=array (
 );
 var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
 array(3) {
-  [u"0.1"]=>
+  ["0.1"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(9)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(9)
   }
-  [u"0.5"]=>
+  ["0.5"]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(12)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(12)
   }
   [0]=>
   object(cr)#%d (2) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(23)
-    [u"public_member"]=>
+    ["public_member"]=>
     int(23)
   }
 }

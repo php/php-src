@@ -15,6 +15,7 @@ Test chunk_split() function : basic functionality
 
 echo "*** Testing chunk_split() : basic functionality ***\n";
 
+
 // Initialise all required variables
 $str = 'Testing';
 $chunklen = 2;
@@ -36,17 +37,17 @@ var_dump( chunk_split($str) );
 	
 echo "Done"   
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing chunk_split() : basic functionality ***
 -- Testing chunk_split() with all possible arguments --
-unicode(15) "Te##st##in##g##"
+string(15) "Te##st##in##g##"
 -- Testing chunk_split() with default ending string --
-unicode(15) "Te
+string(15) "Te
 st
 in
 g
 "
 -- Testing chunk_split() with default chunklen and ending string --
-unicode(9) "Testing
+string(9) "Testing
 "
 Done

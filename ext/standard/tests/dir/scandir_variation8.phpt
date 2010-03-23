@@ -105,8 +105,6 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 -- Iteration 11 --
-
-Notice: Array to string conversion in %s on line %d
 resource(%d) of type (stream)
 
 -- Iteration 12 --
@@ -121,36 +119,36 @@ resource(%d) of type (stream)
 -- Call to scandir() --
 array(16) {
   [0]=>
-  unicode(9) "-10.5.tmp"
+  string(9) "-10.5.tmp"
   [1]=>
-  unicode(9) "-2345.tmp"
+  string(9) "-2345.tmp"
   [2]=>
-  unicode(1) "."
+  string(1) "."
   [3]=>
-  unicode(2) ".."
+  string(2) ".."
   [4]=>
-  unicode(4) ".tmp"
+  string(4) ".tmp"
   [5]=>
-  unicode(7) "0.5.tmp"
+  string(7) "0.5.tmp"
   [6]=>
-  unicode(5) "0.tmp"
+  string(5) "0.tmp"
   [7]=>
-  unicode(17) "1.23456789E-9.tmp"
+  string(17) "1.23456789E-9.tmp"
   [8]=>
-  unicode(5) "1.tmp"
+  string(5) "1.tmp"
   [9]=>
-  unicode(8) "10.5.tmp"
+  string(8) "10.5.tmp"
   [10]=>
-  unicode(9) "12345.tmp"
+  string(9) "12345.tmp"
   [11]=>
-  unicode(16) "123456789000.tmp"
+  string(16) "123456789000.tmp"
   [12]=>
-  unicode(9) "Array.tmp"
+  string(9) "Array.tmp"
   [13]=>
-  unicode(15) "double_file.tmp"
+  string(15) "double_file.tmp"
   [14]=>
-  unicode(11) "hd_file.tmp"
+  string(11) "hd_file.tmp"
   [15]=>
-  unicode(15) "single_file.tmp"
+  string(15) "single_file.tmp"
 }
 ===DONE===

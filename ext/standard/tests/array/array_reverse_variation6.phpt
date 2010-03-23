@@ -43,26 +43,26 @@ var_dump( array_reverse($two_dimensional_array[1], false) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_reverse() : usage variations ***
 -- with default argument --
 array(3) {
   [0]=>
   array(7) {
-    [u"a"]=>
-    unicode(5) "green"
+    ["a"]=>
+    string(5) "green"
     [0]=>
-    unicode(3) "red"
+    string(3) "red"
     [1]=>
-    unicode(5) "brown"
+    string(5) "brown"
     [2]=>
     int(33)
     [3]=>
     int(88)
     [4]=>
-    unicode(6) "orange"
-    [u"item"]=>
-    unicode(4) "ball"
+    string(6) "orange"
+    ["item"]=>
+    string(4) "ball"
   }
   [1]=>
   array(5) {
@@ -79,12 +79,12 @@ array(3) {
   }
   [2]=>
   array(3) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
-    [u"place"]=>
-    unicode(2) "LA"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+    ["place"]=>
+    string(2) "LA"
   }
 }
 array(5) {
@@ -103,20 +103,20 @@ array(5) {
 array(3) {
   [2]=>
   array(7) {
-    [u"a"]=>
-    unicode(5) "green"
+    ["a"]=>
+    string(5) "green"
     [0]=>
-    unicode(3) "red"
+    string(3) "red"
     [1]=>
-    unicode(5) "brown"
+    string(5) "brown"
     [2]=>
     int(33)
     [3]=>
     int(88)
     [4]=>
-    unicode(6) "orange"
-    [u"item"]=>
-    unicode(4) "ball"
+    string(6) "orange"
+    ["item"]=>
+    string(4) "ball"
   }
   [1]=>
   array(5) {
@@ -133,31 +133,31 @@ array(3) {
   }
   [0]=>
   array(3) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
-    [u"place"]=>
-    unicode(2) "LA"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+    ["place"]=>
+    string(2) "LA"
   }
 }
 array(3) {
   [0]=>
   array(7) {
-    [u"a"]=>
-    unicode(5) "green"
+    ["a"]=>
+    string(5) "green"
     [0]=>
-    unicode(3) "red"
+    string(3) "red"
     [1]=>
-    unicode(5) "brown"
+    string(5) "brown"
     [2]=>
     int(33)
     [3]=>
     int(88)
     [4]=>
-    unicode(6) "orange"
-    [u"item"]=>
-    unicode(4) "ball"
+    string(6) "orange"
+    ["item"]=>
+    string(4) "ball"
   }
   [1]=>
   array(5) {
@@ -174,12 +174,12 @@ array(3) {
   }
   [2]=>
   array(3) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
-    [u"place"]=>
-    unicode(2) "LA"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
+    ["place"]=>
+    string(2) "LA"
   }
 }
 array(5) {

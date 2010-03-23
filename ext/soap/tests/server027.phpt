@@ -23,8 +23,8 @@ echo "ok\n";
 --EXPECT--
 array(2) {
   [0]=>
-  unicode(3) "Foo"
+  string(3) "Foo"
   [1]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 ok

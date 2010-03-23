@@ -72,16 +72,16 @@ try {
 Public method:
 Called foo(), property = Hello
 object(TestClass)#%d (1) {
-  [u"prop"]=>
-  unicode(5) "Hello"
+  ["prop"]=>
+  string(5) "Hello"
 }
-unicode(10) "Return Val"
+string(10) "Return Val"
 Called foo(), property = Hello
 object(TestClass)#%d (1) {
-  [u"prop"]=>
-  unicode(5) "Hello"
+  ["prop"]=>
+  string(5) "Hello"
 }
-unicode(10) "Return Val"
+string(10) "Return Val"
 
 Method with args:
 Called methodWithArgs(1, arg2)
@@ -91,18 +91,18 @@ NULL
 
 Static method:
 
-Warning: ReflectionMethod::invoke() expects at least 1 parameter, 0 given in %sReflectionMethod_invoke_basic.php on line %d
+Warning: ReflectionMethod::invoke() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Called staticMethod()
 
-Notice: Undefined variable: this in %sReflectionMethod_invoke_basic.php on line %d
+Notice: Undefined variable: this in %s on line %d
 NULL
 NULL
 Called staticMethod()
 
-Notice: Undefined variable: this in %sReflectionMethod_invoke_basic.php on line %d
+Notice: Undefined variable: this in %s on line %d
 NULL
 NULL
 
 Method that throws an exception:
-unicode(18) "Called willThrow()"
+string(18) "Called willThrow()"

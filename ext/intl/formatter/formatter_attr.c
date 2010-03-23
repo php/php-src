@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_attr.h"
+#include "intl_convert.h"
 
 #include <unicode/ustring.h>
 
@@ -133,7 +134,7 @@ PHP_FUNCTION( numfmt_get_text_attribute )
 	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting attribute value" );
 
-	RETVAL_UNICODEL( value, length, ( value == value_buf ) );
+	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value != value_buf ) );
 }
 /* }}} */
 
@@ -206,13 +207,15 @@ PHP_FUNCTION( numfmt_set_attribute )
  */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
+	int slength = 0;
+	UChar *svalue = NULL;
 	long attribute;
-	UChar *value;
+	char *value;
 	int len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olu",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &attribute, &value, &len ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -224,8 +227,13 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
+	/* Convert given attribute value to UTF-16. */
+	intl_convert_utf8_to_utf16(&svalue, &slength, value, len, &INTL_DATA_ERROR_CODE(nfo));
+	INTL_METHOD_CHECK_STATUS( nfo, "Error converting attribute value to UTF-16" );
+
 	/* Actually set new attribute value. */
-	unum_setTextAttribute(FORMATTER_OBJECT(nfo), attribute, value, len, &INTL_DATA_ERROR_CODE(nfo));
+	unum_setTextAttribute(FORMATTER_OBJECT(nfo), attribute, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
+	efree(svalue);
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting text attribute" );
 
 	RETURN_TRUE;
@@ -271,7 +279,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting symbol value" );
 
-	RETVAL_UNICODEL( value, length, ( value_buf == value ) );
+	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value_buf != value ) );
 }
 /* }}} */
 
@@ -283,12 +291,14 @@ PHP_FUNCTION( numfmt_get_symbol )
 PHP_FUNCTION( numfmt_set_symbol )
 {
 	long       symbol;
-	UChar*     value     = NULL;
+	char*      value     = NULL;
 	int        value_len = 0;
+	UChar*     svalue  = 0;
+	int        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olu",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols",
 		&object, NumberFormatter_ce_ptr, &symbol, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -300,8 +310,13 @@ PHP_FUNCTION( numfmt_set_symbol )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
+	/* Convert given symbol to UTF-16. */
+	intl_convert_utf8_to_utf16(&svalue, &slength, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
+	INTL_METHOD_CHECK_STATUS( nfo, "Error converting symbol value to UTF-16" );
+
 	/* Actually set the symbol. */
-	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
+	unum_setSymbol(FORMATTER_OBJECT(nfo), symbol, svalue, slength, &INTL_DATA_ERROR_CODE(nfo));
+	efree(svalue);
 	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
 
 	RETURN_TRUE;
@@ -346,7 +361,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 	}
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting formatter pattern" );
 
-	RETVAL_UNICODEL( value, length, ( value == value_buf ) );
+	INTL_METHOD_RETVAL_UTF8( nfo, value, length, ( value != value_buf ) );
 }
 /* }}} */
 
@@ -357,12 +372,14 @@ PHP_FUNCTION( numfmt_get_pattern )
  */
 PHP_FUNCTION( numfmt_set_pattern )
 {
-	UChar*      value = NULL;
+	char*       value = NULL;
 	int         value_len = 0;
+	int         slength = 0;
+	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
 		&object, NumberFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -371,11 +388,16 @@ PHP_FUNCTION( numfmt_set_pattern )
 		RETURN_FALSE;
 	}
 
-	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, value, value_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
-	INTL_METHOD_CHECK_STATUS( nfo, "Error setting symbol value" );
+	/* Convert given pattern to UTF-16. */
+	intl_convert_utf8_to_utf16(&svalue, &slength, value, value_len, &INTL_DATA_ERROR_CODE(nfo));
+	INTL_METHOD_CHECK_STATUS( nfo, "Error converting pattern to UTF-16" );
+
+	/* TODO: add parse error information */
+	unum_applyPattern(FORMATTER_OBJECT(nfo), 0, svalue, slength, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	efree(svalue);
+	INTL_METHOD_CHECK_STATUS( nfo, "Error setting pattern value" );
 
 	RETURN_TRUE;
 }

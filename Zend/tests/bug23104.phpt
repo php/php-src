@@ -9,4 +9,4 @@ function foo($bar = array("a", "b", "c"))
 foo();
 ?>
 --EXPECT--
-unicode(1) "a"
+string(1) "a"

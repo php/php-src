@@ -27,12 +27,12 @@ foo::BAZ();
 ?>
 --EXPECT--
 nonstatic
-unicode(6) "fOoBaR"
+string(6) "fOoBaR"
 static
-unicode(6) "foOBAr"
+string(6) "foOBAr"
 static
-unicode(6) "fOOBAr"
+string(6) "fOOBAr"
 static
-unicode(3) "bAr"
+string(3) "bAr"
 static
-unicode(3) "BAZ"
+string(3) "BAZ"

@@ -9,7 +9,7 @@ Test token_get_all() function : usage variations - invalid token values
 
 /*
  * Testing token_get_all() with 'source' string containing invalid/unknown token value
- *  unknown tokens - T_UNKNOWN(309)
+ *  unknown tokens - T_UNKNOWN(307)
 */
 
 echo "*** Testing token_get_all() : with invalid/unknown tokens ***\n";
@@ -44,7 +44,7 @@ array(29) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -53,7 +53,7 @@ array(29) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -63,7 +63,7 @@ array(29) {
   [2]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(6) "struct"
     [2]=>
@@ -72,7 +72,7 @@ array(29) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -81,7 +81,7 @@ array(29) {
   [4]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(8) "myStruct"
     [2]=>
@@ -90,7 +90,7 @@ array(29) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -101,7 +101,7 @@ array(29) {
   [7]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -111,7 +111,7 @@ array(29) {
   [8]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(8) "variable"
     [2]=>
@@ -120,7 +120,7 @@ array(29) {
   [9]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -129,7 +129,7 @@ array(29) {
   [10]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -140,7 +140,7 @@ array(29) {
   [12]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -150,7 +150,7 @@ array(29) {
   [13]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(6) "method"
     [2]=>
@@ -163,7 +163,7 @@ array(29) {
   [16]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -174,7 +174,7 @@ array(29) {
   [18]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -183,7 +183,7 @@ array(29) {
   [19]=>
   array(3) {
     [0]=>
-    int(309)
+    int(307)
     [1]=>
     string(7) "display"
     [2]=>
@@ -192,7 +192,7 @@ array(29) {
   [20]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -201,7 +201,7 @@ array(29) {
   [21]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -212,7 +212,7 @@ array(29) {
   [23]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -223,7 +223,7 @@ array(29) {
   [25]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -235,7 +235,7 @@ array(29) {
   [27]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -245,7 +245,7 @@ array(29) {
   [28]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -257,7 +257,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(28) "<pli 
 echo "hello world"; ?>"
@@ -270,7 +270,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(19) "<PDP display  $a; <"
     [2]=>

@@ -105,10 +105,10 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
-%c
+
 bool(false)
 bool(false)
-%c
+
 -- Iteration  7 --
 bool(false)
 bool(true)
@@ -137,10 +137,10 @@ hello world
 bool(false)
 bool(true)
 bool(true)
-welcome%c
+welcome
 bool(false)
 bool(false)
-welcome%c
+welcome
 -- Iteration  11 --
 bool(false)
 bool(true)

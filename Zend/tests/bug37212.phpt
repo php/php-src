@@ -41,15 +41,15 @@ var_dump($B);
 ===DONE===
 --EXPECTF--
 object(B)#%d (1) {
-  [u"value":protected]=>
-  unicode(1) "B"
+  ["value":protected]=>
+  string(1) "B"
 }
 object(C)#%d (1) {
-  [u"value":protected]=>
-  unicode(1) "C"
+  ["value":protected]=>
+  string(1) "C"
 }
 object(B)#%d (1) {
-  [u"value":protected]=>
-  unicode(1) "C"
+  ["value":protected]=>
+  string(1) "C"
 }
 ===DONE===

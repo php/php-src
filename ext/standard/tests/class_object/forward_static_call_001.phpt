@@ -58,7 +58,7 @@ C::test3();
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 A
 -
 B

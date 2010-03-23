@@ -35,7 +35,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 // get resource variable
-$fp = fopen(__FILE__,'r');
+$fp = fopen(__FILE__, 'r');
 
 // different scalar/nonscalar values to be used in place of an 'input' argument
 $input_values = array(
@@ -200,31 +200,31 @@ Warning: array_walk_recursive() expects parameter 1 to be array, boolean given i
 NULL
 -- Iteration 16 --
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 20 --
 

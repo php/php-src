@@ -12,23 +12,23 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "3"
+    string(1) "3"
   }
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   array(1) {
-    [u"b"]=>
+    ["b"]=>
     array(2) {
-      [u"c"]=>
-      unicode(1) "1"
-      [u"d"]=>
-      unicode(1) "1"
+      ["c"]=>
+      string(1) "1"
+      ["d"]=>
+      string(1) "1"
     }
   }
 }

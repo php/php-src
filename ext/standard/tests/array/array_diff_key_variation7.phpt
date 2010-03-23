@@ -36,7 +36,7 @@ foreach($input_arrays as $key =>$value) {
 --null indexed--
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 array(0) {
 }
@@ -44,7 +44,7 @@ array(0) {
 --undefined indexed--
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 array(0) {
 }
@@ -52,7 +52,7 @@ array(0) {
 --unset  indexed--
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 array(0) {
 }

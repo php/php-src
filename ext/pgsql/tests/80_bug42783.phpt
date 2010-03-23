@@ -26,9 +26,9 @@ pg_close($dbh);
 ===DONE===
 --EXPECTF--
 array(2) {
-  [u"id"]=>
-  unicode(%d) "%d"
-  [u"time"]=>
-  unicode(%d) "%s"
+  ["id"]=>
+  string(%d) "%d"
+  ["time"]=>
+  string(%d) "%s"
 }
 ===DONE===

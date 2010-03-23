@@ -6,7 +6,7 @@ require_once('skipif.inc');
 ?>
 --FILE--
 <?php
-$xml = b<<< EOXML
+$xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE courses [
 <!ELEMENT courses (course+)>

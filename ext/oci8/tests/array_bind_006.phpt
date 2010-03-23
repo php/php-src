@@ -61,14 +61,14 @@ echo "Done\n";
 --EXPECT--	
 array(5) {
   [0]=>
-  unicode(4) "five"
+  string(4) "five"
   [1]=>
-  unicode(4) "four"
+  string(4) "four"
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
   [3]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 Done

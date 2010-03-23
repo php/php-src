@@ -23,7 +23,7 @@ $stmt = oci_parse($c, "SELECT fileimage FROM phptestlngraw");
 oci_execute($stmt);
 
 $row = oci_fetch_row($stmt);
-var_dump(md5((binary)$row[0]));
+var_dump(md5($row[0]));
 var_dump(strlen($row[0]));
 
 $stmt = oci_parse($c, "drop table phptestlngraw");
@@ -33,6 +33,6 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-unicode(32) "614fcbba1effb7caa27ef0ef25c27fcf"
+string(32) "614fcbba1effb7caa27ef0ef25c27fcf"
 int(2523)
 Done

@@ -40,14 +40,14 @@ echo "Done\n";
 --EXPECT--
 Original
 object(test)#1 (2) {
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
     int(3)
     [1]=>
     int(4)
   }
-  [u"a"]=>
+  ["a"]=>
   array(2) {
     [0]=>
     int(1)
@@ -57,14 +57,14 @@ object(test)#1 (2) {
 }
 Clone
 object(test)#2 (2) {
-  [u"b"]=>
+  ["b"]=>
   array(2) {
     [0]=>
     int(3)
     [1]=>
     int(4)
   }
-  [u"a"]=>
+  ["a"]=>
   array(2) {
     [0]=>
     int(1)
@@ -74,9 +74,9 @@ object(test)#2 (2) {
 }
 Modify
 object(test)#2 (2) {
-  [u"b"]=>
+  ["b"]=>
   int(6)
-  [u"a"]=>
+  ["a"]=>
   int(5)
 }
 Done

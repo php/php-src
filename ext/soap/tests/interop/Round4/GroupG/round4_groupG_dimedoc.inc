@@ -29,5 +29,5 @@ class SOAP_Interop_GroupG {
 
 $server = new SoapServer(dirname(__FILE__)."/round4_groupG_dimedoc.wsdl");
 $server->setClass("SOAP_Interop_GroupG");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ?>

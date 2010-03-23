@@ -31,75 +31,75 @@ var_dump($d2_clone);
 
 -- Create a DateTime object --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2009-02-03 12:34:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
   int(2)
-  [u"timezone"]=>
-  unicode(3) "GMT"
+  ["timezone"]=>
+  string(3) "GMT"
 }
 
 -- Add some properties --
 object(DateTime)#%d (5) {
-  [u"date"]=>
-  unicode(19) "2009-02-03 12:34:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
   int(2)
-  [u"timezone"]=>
-  unicode(3) "GMT"
-  [u"property1"]=>
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 
 -- clone it --
 object(DateTime)#%d (5) {
-  [u"date"]=>
-  unicode(19) "2009-02-03 12:34:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
   int(2)
-  [u"timezone"]=>
-  unicode(3) "GMT"
-  [u"property1"]=>
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
+  ["property2"]=>
+  string(5) "Hello"
 }
 
 -- Add some more properties --
 object(DateTime)#%d (7) {
-  [u"date"]=>
-  unicode(19) "2009-02-03 12:34:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
   int(2)
-  [u"timezone"]=>
-  unicode(3) "GMT"
-  [u"property1"]=>
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
-  [u"property3"]=>
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
 }
 
 -- clone it --
 object(DateTime)#%d (7) {
-  [u"date"]=>
-  unicode(19) "2009-02-03 12:34:41"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2009-02-03 12:34:41"
+  ["timezone_type"]=>
   int(2)
-  [u"timezone"]=>
-  unicode(3) "GMT"
-  [u"property1"]=>
+  ["timezone"]=>
+  string(3) "GMT"
+  ["property1"]=>
   int(99)
-  [u"property2"]=>
-  unicode(5) "Hello"
-  [u"property3"]=>
+  ["property2"]=>
+  string(5) "Hello"
+  ["property3"]=>
   bool(true)
-  [u"property4"]=>
+  ["property4"]=>
   float(10.5)
 }
 ===DONE===

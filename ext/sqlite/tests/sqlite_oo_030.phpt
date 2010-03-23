@@ -33,12 +33,12 @@ var_dump($db->singleQuery("select php('foo::bar(\"PHP\")')", 1));
 ===DONE===
 --EXPECTF--
 NULL
-unicode(1) "1"
-unicode(3) "PHP"
+string(1) "1"
+string(3) "PHP"
 NULL
-unicode(1) "1"
-unicode(3) "PHP"
+string(1) "1"
+string(3) "PHP"
 
-Warning: SQLiteDatabase::singleQuery(): function `foo::bar("PHP")' is not a function name in %s on line %d
+Warning: SQLiteDatabase::singleQuery(): function `foo::bar("PHP")' is not a function name in %ssqlite_oo_030.php on line %d
 bool(false)
 ===DONE===

@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -107,32 +107,32 @@ while($stmt2->fetch(PDO::FETCH_BOUND))
 
 ?>
 --EXPECT--
-unicode(1) "3"
+string(1) "3"
 array(3) {
   [0]=>
-  unicode(7) "String0"
+  string(7) "String0"
   [1]=>
-  unicode(7) "String1"
+  string(7) "String1"
   [2]=>
-  unicode(7) "String2"
+  string(7) "String2"
 }
 ===WHILE===
 array(1) {
   [0]=>
-  unicode(7) "String0"
+  string(7) "String0"
 }
 array(1) {
   [1]=>
-  unicode(7) "String1"
+  string(7) "String1"
 }
 array(1) {
   [2]=>
-  unicode(7) "String2"
+  string(7) "String2"
 }
 ===ALONE===
 array(1) {
   [0]=>
-  unicode(7) "String0"
+  string(7) "String0"
 }
 bool(true)
 bool(true)
@@ -140,11 +140,11 @@ bool(true)
 bool(true)
 array(1) {
   [0]=>
-  unicode(7) "String0"
+  string(7) "String0"
 }
 array(1) {
   [1]=>
-  unicode(7) "String1"
+  string(7) "String1"
 }
 bool(true)
 bool(true)
@@ -152,11 +152,11 @@ bool(true)
 bool(true)
 array(1) {
   [1]=>
-  unicode(7) "String1"
+  string(7) "String1"
 }
 array(1) {
   [2]=>
-  unicode(7) "String2"
+  string(7) "String2"
 }
 bool(true)
 bool(true)
@@ -164,40 +164,40 @@ bool(true)
 bool(true)
 array(1) {
   [2]=>
-  unicode(7) "String2"
+  string(7) "String2"
 }
 ===REBIND/SAME===
 array(1) {
   [0]=>
-  unicode(7) "String0"
+  string(7) "String0"
 }
 bool(true)
 bool(true)
-unicode(7) "String0"
+string(7) "String0"
 bool(true)
 bool(true)
-unicode(1) "0"
+string(1) "0"
 array(1) {
   [1]=>
-  unicode(7) "String1"
+  string(7) "String1"
 }
 bool(true)
 bool(true)
-unicode(7) "String1"
+string(7) "String1"
 bool(true)
 bool(true)
-unicode(1) "1"
+string(1) "1"
 array(1) {
   [2]=>
-  unicode(7) "String2"
+  string(7) "String2"
 }
 bool(true)
 bool(true)
-unicode(7) "String2"
+string(7) "String2"
 bool(true)
 bool(true)
-unicode(1) "2"
+string(1) "2"
 ===REBIND/CONFLICT===
-unicode(7) "String0"
-unicode(7) "String1"
-unicode(7) "String2"
+string(7) "String0"
+string(7) "String1"
+string(7) "String2"

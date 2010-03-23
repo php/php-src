@@ -33,13 +33,13 @@ array(6) {
   [1]=>
   int(10)
   [2]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [3]=>
-  unicode(3) "red"
+  string(3) "red"
   [4]=>
-  unicode(5) "green"
+  string(5) "green"
   [5]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(6) {
   [5]=>
@@ -47,13 +47,13 @@ array(6) {
   [4]=>
   int(10)
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(5) "green"
+  string(5) "green"
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(6) {
   [0]=>
@@ -61,12 +61,12 @@ array(6) {
   [1]=>
   int(10)
   [2]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [3]=>
-  unicode(3) "red"
+  string(3) "red"
   [4]=>
-  unicode(5) "green"
+  string(5) "green"
   [5]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 Done

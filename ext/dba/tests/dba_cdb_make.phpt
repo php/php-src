@@ -1,5 +1,7 @@
 --TEST--
 DBA CDB_MAKE handler test
+--INI--
+magic_quotes_runtime=1
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';
@@ -35,6 +37,7 @@ DBA CDB_MAKE handler test
 	require(dirname(__FILE__) .'/clean.inc'); 
 ?>
 --EXPECT--
+Warning: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line 0
 database handler: cdb_make
-unicode(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
-unicode(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
+string(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"
+string(32) "12fc5ba2b9dcfef2480e5324eeb5f3e5"

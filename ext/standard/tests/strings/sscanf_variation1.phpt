@@ -30,7 +30,7 @@ $inputs =  array (
 /*1*/	  0,
 		  1,
 		  -2,
-	      2147483647,
+ 		  2147483647,
 		  -2147483648,
 		
 		  // float values
@@ -86,66 +86,66 @@ fclose($file_handle);  //closing the file handle
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  unicode(2) "-2"
+  string(2) "-2"
 }
 -- Iteration 4 --
 array(1) {
   [0]=>
-  unicode(10) "2147483647"
+  string(10) "2147483647"
 }
 -- Iteration 5 --
 array(1) {
   [0]=>
-  unicode(11) "-2147483648"
+  string(11) "-2147483648"
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  unicode(4) "10.5"
+  string(4) "10.5"
 }
 -- Iteration 7 --
 array(1) {
   [0]=>
-  unicode(5) "-20.5"
+  string(5) "-20.5"
 }
 -- Iteration 8 --
 array(1) {
   [0]=>
-  unicode(12) "101234567000"
+  string(12) "101234567000"
 }
 -- Iteration 9 --
 
-Warning: sscanf() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: sscanf() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: sscanf() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 13 --
 NULL
 -- Iteration 14 --
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 15 --
 NULL
@@ -156,11 +156,11 @@ NULL
 -- Iteration 18 --
 array(1) {
   [0]=>
-  unicode(6) "sample"
+  string(6) "sample"
 }
 -- Iteration 19 --
 
-Warning: sscanf() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: sscanf() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 20 --
 NULL

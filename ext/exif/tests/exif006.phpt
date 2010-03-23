@@ -2,11 +2,13 @@
 Check for exif_read_data, magic_quotes_runtime
 --SKIPIF--
 <?php 
-	die('skip magic_quotes removed');
+	if (!extension_loaded('exif')) die('skip exif extension not available');
+	if (version_compare(PHP_VERSION, "4.4.0-dev", "<")) die('skip PHP 4.4 required');
 ?>
 --INI--
 output_handler=
 zlib.output_compression=0
+magic_quotes_runtime=1
 --FILE--
 <?php
 /*
@@ -18,6 +20,7 @@ zlib.output_compression=0
 var_dump(exif_read_data(dirname(__FILE__).'/test6.jpg','',true,false));
 ?>
 --EXPECTF--
+Warning: Directive 'magic_quotes_runtime' is deprecated in PHP 5.3 and greater in Unknown on line 0
 array(5) {
   ["FILE"]=>
   array(6) {

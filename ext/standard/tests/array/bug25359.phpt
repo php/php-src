@@ -20,13 +20,13 @@ does_not_work();
 --EXPECT--
 array(5) {
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
   [1]=>
-  unicode(6) "second"
+  string(6) "second"
   [2]=>
-  unicode(5) "third"
+  string(5) "third"
   [3]=>
-  unicode(5) "forth"
+  string(5) "forth"
   [4]=>
-  unicode(5) "fifth"
+  string(5) "fifth"
 }

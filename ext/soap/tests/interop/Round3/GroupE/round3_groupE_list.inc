@@ -12,6 +12,6 @@ class SOAP_Interop_GroupE {
 
 $server = new SoapServer(dirname(__FILE__)."/round3_groupE_list.wsdl");
 $server->setClass("SOAP_Interop_GroupE");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 var_dump($d);
 ?>

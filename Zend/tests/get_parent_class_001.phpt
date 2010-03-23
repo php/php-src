@@ -24,5 +24,5 @@ $a->foo();
 
 ?>
 --EXPECT--
-unicode(3) "bar"
+string(3) "bar"
 bool(false)

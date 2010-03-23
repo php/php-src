@@ -1,7 +1,11 @@
 --TEST--
 Test sprintf() function : basic functionality - octal format
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
+<?php
+if (PHP_INT_SIZE != 4) {
+	    die("skip this test is for 32bit platform only");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
@@ -34,10 +38,10 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : basic functionality - using octal format ***
-unicode(6) "format"
-unicode(2) "21"
-unicode(14) "21 37777777431"
-unicode(18) "21 37777777431 567"
+string(6) "format"
+string(2) "21"
+string(14) "21 37777777431"
+string(18) "21 37777777431 567"
 Done

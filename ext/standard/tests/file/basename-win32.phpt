@@ -138,177 +138,177 @@ echo "Done\n";
 *** Testing basic operations ***
 
 --Iteration 1--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 2--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 3--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 4--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 5--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 6--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 7--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 8--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 9--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 10--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 11--
-unicode(7) "bar.zip"
+string(7) "bar.zip"
 
 --Iteration 12--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 13--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 14--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 15--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 16--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 17--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 18--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 19--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 20--
-unicode(4) ".zip"
+string(4) ".zip"
 
 --Iteration 21--
-unicode(4) ".zip"
+string(4) ".zip"
 
 --Iteration 22--
-unicode(4) ".zip"
+string(4) ".zip"
 
 --Iteration 23--
-unicode(4) ".zip"
+string(4) ".zip"
 
 --Iteration 24--
-unicode(4) ".zip"
+string(4) ".zip"
 
 --Iteration 25--
-unicode(4) ".zip"
+string(4) ".zip"
 
 *** Testing possible variations in path and suffix ***
 
 --Iteration 1--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 2--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 3--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 4--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 5--
-unicode(3) "bar"
+string(3) "bar"
 
 --Iteration 6--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 7--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 8--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 9--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 10--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 11--
-unicode(7) "bar.tar"
+string(7) "bar.tar"
 
 --Iteration 12--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 13--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 14--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 15--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 16--
-unicode(2) "10"
+string(2) "10"
 
 --Iteration 17--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 18--
-unicode(4) "10.5"
+string(4) "10.5"
 
 --Iteration 19--
-unicode(6) "10.zip"
+string(6) "10.zip"
 
 --Iteration 20--
-unicode(1) "0"
+string(1) "0"
 
 --Iteration 21--
-unicode(1) "0"
+string(1) "0"
 
 --Iteration 22--
-unicode(7) "bar.zip"
+string(7) "bar.zip"
 
 --Iteration 23--
-unicode(7) "bar.zip"
+string(7) "bar.zip"
 
 --Iteration 24--
-unicode(7) "bar.zip"
+string(7) "bar.zip"
 
 --Iteration 25--
-unicode(1) " "
+string(1) " "
 
 --Iteration 26--
-unicode(1) " "
+string(1) " "
 
 --Iteration 27--
-unicode(0) ""
+string(0) ""
 
 --Iteration 28--
-unicode(1) " "
+string(1) " "
 
 --Iteration 29--
-unicode(1) " "
+string(1) " "
 
 --Iteration 30--
-unicode(0) ""
+string(0) ""
 
 --Iteration 31--
-unicode(0) ""
+string(0) ""
 
 --Iteration 32--
-unicode(0) ""
+string(0) ""
 
 *** Testing error conditions ***
 
@@ -318,24 +318,24 @@ NULL
 Warning: basename() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: basename() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: basename() expects parameter 2 to be string (Unicode or binary), object given in %s on line %d
+Warning: basename() expects parameter 2 to be string, object given in %s on line %d
 NULL
 Done

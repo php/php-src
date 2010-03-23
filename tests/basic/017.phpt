@@ -9,9 +9,9 @@ var_dump($_POST['a']);
 --EXPECT--
 array(3) {
   [0]=>
-  unicode(1) "1"
-  [u"a"]=>
-  unicode(1) "1"
-  [u"b"]=>
-  unicode(1) "3"
+  string(1) "1"
+  ["a"]=>
+  string(1) "1"
+  ["b"]=>
+  string(1) "3"
 }

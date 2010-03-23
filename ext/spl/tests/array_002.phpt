@@ -21,20 +21,20 @@ var_dump($arrayObject);
 <?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(ArrayObject)#1 (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(5) {
       [1]=>
-      unicode(3) "one"
+      string(3) "one"
       [2]=>
-      unicode(3) "two"
+      string(3) "two"
       [3]=>
-      unicode(5) "three"
+      string(5) "three"
       [4]=>
-      unicode(4) "four"
+      string(4) "four"
       [5]=>
-      unicode(4) "five"
+      string(4) "five"
     }
   }
 }

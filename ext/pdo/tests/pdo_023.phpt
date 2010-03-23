@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 class PDOStatementX extends PDOStatement
@@ -78,9 +78,9 @@ $db = NULL;
 int(1)
 int(2)
 object(PDODatabaseX)#%d (2) {
-  [u"test1"]=>
+  ["test1"]=>
   int(1)
-  [u"test2"]=>
+  ["test2"]=>
   int(22)
 }
 PDODatabaseX::query()
@@ -95,18 +95,18 @@ PDOStatementX::__destruct()
 PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
-  [u"test1"]=>
+  ["test1"]=>
   int(1)
-  [u"queryString"]=>
-  unicode(24) "SELECT val, id FROM test"
-  [u"test2"]=>
+  ["queryString"]=>
+  string(24) "SELECT val, id FROM test"
+  ["test2"]=>
   int(22)
 }
 array(2) {
-  [u"A"]=>
-  unicode(1) "0"
-  [u"B"]=>
-  unicode(1) "1"
+  ["A"]=>
+  string(1) "0"
+  ["B"]=>
+  string(1) "1"
 }
 PDOStatementX::__destruct()
 PDODatabaseX::__destruct()

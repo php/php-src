@@ -23,4 +23,3 @@ Bug #42369 (Implicit conversion to string leaks memory)
 explicit conversion
 no conversion
 ===DONE===
-	

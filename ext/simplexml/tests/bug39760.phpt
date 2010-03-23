@@ -5,7 +5,7 @@ Bug #39760 (cloning fails on nested SimpleXML-Object)
 --FILE--
 <?php
 
-$xml = b'<?xml version="1.0" ?>
+$xml = '<?xml version="1.0" ?>
 <test>
     <level1>
         <level2a>text1</level2a>
@@ -27,14 +27,14 @@ echo "Done\n";
 --EXPECTF--	
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(5) "text1"
+  string(5) "text1"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(5) "text1"
+  string(5) "text1"
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(5) "text1"
+  string(5) "text1"
 }
 Done

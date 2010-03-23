@@ -24,38 +24,21 @@ var_dump($y()->test);
 ?>
 --EXPECTF--
 object(foo)#%d (%d) {
-  [u"test":u"foo":private]=>
+  ["test":"foo":private]=>
   int(3)
-  [u"a"]=>
-  object(Closure)#%d (2) {
-    ["this"]=>
-    object(foo)#%d (2) {
-      [u"test":u"foo":private]=>
-      int(3)
-      [u"a"]=>
-      object(Closure)#%d (2) {
-        ["this"]=>
-        *RECURSION*
-        ["static"]=>
-        array(1) {
-          [u"a"]=>
-          *RECURSION*
-        }
-      }
-    }
+  ["a"]=>
+  object(Closure)#%d (1) {
     ["static"]=>
     array(1) {
-      [u"a"]=>
+      ["a"]=>
       &object(foo)#%d (2) {
-        [u"test":u"foo":private]=>
+        ["test":"foo":private]=>
         int(3)
-        [u"a"]=>
-        object(Closure)#%d (2) {
-          ["this"]=>
-          *RECURSION*
+        ["a"]=>
+        object(Closure)#%d (1) {
           ["static"]=>
           array(1) {
-            [u"a"]=>
+            ["a"]=>
             *RECURSION*
           }
         }

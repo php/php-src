@@ -35,7 +35,7 @@ $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing wordwrap() : basic functionality ***
 string(96) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
 doooooooooooooooooooooog."

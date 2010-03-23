@@ -104,7 +104,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo"Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fread() : usage variations ***
 
 -- Testing fread() with file having content of type numeric --
@@ -115,14 +115,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode a+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -130,29 +130,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode a+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+bool(false)
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -160,14 +160,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -175,29 +175,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode w+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+bool(false)
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -205,14 +205,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -220,29 +220,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 -- File opened in mode x+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "950b7457d1deb6332f2fc5d42f3129d6"
+bool(false)
+string(32) "950b7457d1deb6332f2fc5d42f3129d6"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "4501f99f2b79d0345f26f1394aca58a3"
+string(32) "4501f99f2b79d0345f26f1394aca58a3"
 
 -- Testing fread() with file having content of type text --
 -- File opened in mode a+ --
@@ -252,14 +252,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode a+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -267,29 +267,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode a+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+bool(false)
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -297,14 +297,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -312,29 +312,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode w+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+bool(false)
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -342,14 +342,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -357,29 +357,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 -- File opened in mode x+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "e486000c4c8452774f746a27658d87fa"
+bool(false)
+string(32) "e486000c4c8452774f746a27658d87fa"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
+string(32) "2ec76a59f8c44b8f8a0f5139f61bb1bd"
 
 -- Testing fread() with file having content of type text_with_new_line --
 -- File opened in mode a+ --
@@ -389,14 +389,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode a+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -404,29 +404,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode a+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+bool(false)
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -434,14 +434,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -449,29 +449,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode w+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+bool(false)
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -479,14 +479,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -494,29 +494,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 -- File opened in mode x+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "b09c8026a64a88d36d4c2f17983964bb"
+bool(false)
+string(32) "b09c8026a64a88d36d4c2f17983964bb"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a148fa8110bbac875d84fc9d7056c0a1"
+string(32) "a148fa8110bbac875d84fc9d7056c0a1"
 
 -- Testing fread() with file having content of type alphanumeric --
 -- File opened in mode a+ --
@@ -526,14 +526,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode a+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -541,29 +541,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode a+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+bool(false)
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -571,14 +571,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -586,29 +586,29 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode w+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+bool(false)
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+ --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -616,14 +616,14 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+b --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
@@ -631,27 +631,27 @@ bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
 bool(false)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 -- File opened in mode x+t --
 -- Reading entire file content, expeceted : 1024 bytes --
 int(0)
 bool(false)
 Reading 1024 bytes from file, expecting 1024 bytes ... OK
 int(1024)
-bool(true)
-unicode(32) "3fabd48d8eaa65c14e0d93d6880c560c"
+bool(false)
+string(32) "3fabd48d8eaa65c14e0d93d6880c560c"
 -- Reading file content less than max. file size, expeceted : 1000 bytes --
 int(0)
 bool(false)
 Reading 1000 bytes from file, expecting 1000 bytes ... OK
 int(1000)
 bool(false)
-unicode(32) "a49d752f980184c7f44568e930f89c72"
+string(32) "a49d752f980184c7f44568e930f89c72"
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Bug #40809 (Poor performance of ".=")
+Bug #40809 (Poor perfomance of ".=")
 --FILE--
 <?php
 error_reporting(E_ALL|E_STRICT);

@@ -132,13 +132,13 @@ NULL
 bool(true)
 
 -- Iteration 5 : empty string data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 6 : empty array data --
 bool(false)
 
 -- Iteration 7 : string data --
-unicode(6) "string"
+string(6) "string"
 
 -- Iteration 8 : object data --
 object(classA)#%d (0) {

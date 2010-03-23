@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,14 +79,14 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 }
 /* }}} */
 
-/*
+/* 
  * 'IntlDateFormatter' class registration structures & functions
  */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX( datefmt_parse_args, 0, 0, 1 )
-		ZEND_ARG_INFO( 0, string )
-		ZEND_ARG_INFO( 1, position )
+ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 1)
+		ZEND_ARG_INFO(0, string)
+		ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_format, 0, 0, 0)

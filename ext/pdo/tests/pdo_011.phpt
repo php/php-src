@@ -91,30 +91,30 @@ test(2,N/A)
 test(3,N/A)
 test(4,N/A)
 array(2) {
-  [u"Group1"]=>
+  ["Group1"]=>
   array(2) {
     [0]=>
     array(1) {
       [1]=>
-      unicode(3) "N/A"
+      string(3) "N/A"
     }
     [1]=>
     array(1) {
       [2]=>
-      unicode(3) "N/A"
+      string(3) "N/A"
     }
   }
-  [u"Group2"]=>
+  ["Group2"]=>
   array(2) {
     [0]=>
     array(1) {
       [3]=>
-      unicode(3) "N/A"
+      string(3) "N/A"
     }
     [1]=>
     array(1) {
       [4]=>
-      unicode(3) "N/A"
+      string(3) "N/A"
     }
   }
 }
@@ -126,22 +126,22 @@ array(4) {
   [0]=>
   array(1) {
     [1]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [2]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [2]=>
   array(1) {
     [3]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [3]=>
   array(1) {
     [4]=>
-    unicode(1) "D"
+    string(1) "D"
   }
 }
 Test1::factory(1,A)
@@ -155,31 +155,31 @@ Test1::__construct(4,D)
 array(4) {
   [0]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val"]=>
-    unicode(1) "A"
+    ["id"]=>
+    string(1) "1"
+    ["val"]=>
+    string(1) "A"
   }
   [1]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val"]=>
-    unicode(1) "B"
+    ["id"]=>
+    string(1) "2"
+    ["val"]=>
+    string(1) "B"
   }
   [2]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "3"
-    [u"val"]=>
-    unicode(1) "C"
+    ["id"]=>
+    string(1) "3"
+    ["val"]=>
+    string(1) "C"
   }
   [3]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "4"
-    [u"val"]=>
-    unicode(1) "D"
+    ["id"]=>
+    string(1) "4"
+    ["val"]=>
+    string(1) "D"
   }
 }
 Test1::factory(1,A)
@@ -193,34 +193,34 @@ Test1::__construct(4,D)
 array(4) {
   [0]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"val"]=>
-    unicode(1) "A"
+    ["id"]=>
+    string(1) "1"
+    ["val"]=>
+    string(1) "A"
   }
   [1]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "2"
-    [u"val"]=>
-    unicode(1) "B"
+    ["id"]=>
+    string(1) "2"
+    ["val"]=>
+    string(1) "B"
   }
   [2]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "3"
-    [u"val"]=>
-    unicode(1) "C"
+    ["id"]=>
+    string(1) "3"
+    ["val"]=>
+    string(1) "C"
   }
   [3]=>
   object(Test1)#%d (2) {
-    [u"id"]=>
-    unicode(1) "4"
-    [u"val"]=>
-    unicode(1) "D"
+    ["id"]=>
+    string(1) "4"
+    ["val"]=>
+    string(1) "D"
   }
 }
-unicode(16) "DerivedStatement"
+string(16) "DerivedStatement"
 DerivedStatement::reTrieve(1,A)
 DerivedStatement::reTrieve(2,B)
 DerivedStatement::reTrieve(3,C)
@@ -229,48 +229,22 @@ array(4) {
   [0]=>
   array(1) {
     [1]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [2]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [2]=>
   array(1) {
     [3]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [3]=>
   array(1) {
     [4]=>
-    unicode(1) "D"
-  }
-}
-DerivedStatement::reTrieve(1,A)
-DerivedStatement::reTrieve(2,B)
-DerivedStatement::reTrieve(3,C)
-DerivedStatement::reTrieve(4,D)
-array(4) {
-  [0]=>
-  array(1) {
-    [1]=>
-    unicode(1) "A"
-  }
-  [1]=>
-  array(1) {
-    [2]=>
-    unicode(1) "B"
-  }
-  [2]=>
-  array(1) {
-    [3]=>
-    unicode(1) "C"
-  }
-  [3]=>
-  array(1) {
-    [4]=>
-    unicode(1) "D"
+    string(1) "D"
   }
 }
 DerivedStatement::reTrieve(1,A)
@@ -281,21 +255,47 @@ array(4) {
   [0]=>
   array(1) {
     [1]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [2]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [2]=>
   array(1) {
     [3]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [3]=>
   array(1) {
     [4]=>
-    unicode(1) "D"
+    string(1) "D"
+  }
+}
+DerivedStatement::reTrieve(1,A)
+DerivedStatement::reTrieve(2,B)
+DerivedStatement::reTrieve(3,C)
+DerivedStatement::reTrieve(4,D)
+array(4) {
+  [0]=>
+  array(1) {
+    [1]=>
+    string(1) "A"
+  }
+  [1]=>
+  array(1) {
+    [2]=>
+    string(1) "B"
+  }
+  [2]=>
+  array(1) {
+    [3]=>
+    string(1) "C"
+  }
+  [3]=>
+  array(1) {
+    [4]=>
+    string(1) "D"
   }
 }

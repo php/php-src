@@ -34,14 +34,14 @@ var_dump( array_diff_uassoc($arr_string_float, $arr_string_int, "key_compare_fun
 -- Result of comparing strings containing integers and strings containing floating points --
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(2) {
   [0]=>
-  unicode(4) "1.00"
-  [u"1.00"]=>
-  unicode(4) "2.00"
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
 }
 ===DONE===

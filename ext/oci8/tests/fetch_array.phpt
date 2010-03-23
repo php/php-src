@@ -79,230 +79,230 @@ echo "Done\n";
 --EXPECT--
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
-  NULL
-}
-array(10) {
-  [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
-  [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [2]=>
-  NULL
-  [u"BLOB"]=>
-  NULL
-  [3]=>
-  NULL
-  [u"CLOB"]=>
-  NULL
-  [4]=>
-  NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
+  NULL
+}
+array(10) {
+  [0]=>
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  [1]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
+  [2]=>
+  NULL
+  ["BLOB"]=>
+  NULL
+  [3]=>
+  NULL
+  ["CLOB"]=>
+  NULL
+  [4]=>
+  NULL
+  ["STRING"]=>
   NULL
 }
 Done

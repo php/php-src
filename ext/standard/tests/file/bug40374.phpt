@@ -12,6 +12,6 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(%d) "%s"
+--EXPECTF--	
+string(%d) "%s"
 Done

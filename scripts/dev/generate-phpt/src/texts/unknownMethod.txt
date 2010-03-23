@@ -1,0 +1,4 @@
+
+The method name is not a valid PHP method name.
+Check that the extension containing the method is loaded.
+

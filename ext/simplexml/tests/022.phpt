@@ -5,7 +5,7 @@ SimpleXML: Attributes inside foreach
 --FILE--
 <?php 
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version='1.0'?>
 <pres><content><file glob="slide_*.xml"/></content></pres>
 EOF;
@@ -30,33 +30,33 @@ foreach($sxe->content->file as $file)
 --EXPECTF--
 ===CONTENT===
 object(SimpleXMLElement)#%d (1) {
-  [u"file"]=>
+  ["file"]=>
   object(SimpleXMLElement)#%d (1) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"glob"]=>
-      unicode(11) "slide_*.xml"
+      ["glob"]=>
+      string(11) "slide_*.xml"
     }
   }
 }
 ===FILE===
 object(SimpleXMLElement)#%d (1) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"glob"]=>
-    unicode(11) "slide_*.xml"
+    ["glob"]=>
+    string(11) "slide_*.xml"
   }
 }
 ===FOREACH===
 object(SimpleXMLElement)#%d (1) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"glob"]=>
-    unicode(11) "slide_*.xml"
+    ["glob"]=>
+    string(11) "slide_*.xml"
   }
 }
 object(SimpleXMLElement)#%d (1) {
   [0]=>
-  unicode(11) "slide_*.xml"
+  string(11) "slide_*.xml"
 }
 ===DONE===

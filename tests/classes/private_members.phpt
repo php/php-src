@@ -53,7 +53,7 @@ unset($t);
 echo "Done\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 derived::__construct(begin)
 base::__construct(begin)
 base::test

@@ -142,8 +142,10 @@ if test "$PHP_OCI8" != "no"; then
   IFS=$ac_IFS
   oci8_php_version=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
 
-  if test "$oci8_php_version" -lt "6000000"; then
-    AC_MSG_ERROR([You need at least PHP 6.0.0 to be able to use this version of OCI8. PHP $php_version found])
+  if test "$oci8_php_version" -lt "4003009"; then
+    AC_MSG_ERROR([You need at least PHP 4.3.9 to be able to use this version of OCI8. PHP $php_version found])
+  elif test "$oci8_php_version" -ge "6000000"; then
+    AC_MSG_ERROR([This version of OCI8 is not compatible with PHP 6 or higher])
   else
     AC_MSG_RESULT([$php_version, ok])
   fi

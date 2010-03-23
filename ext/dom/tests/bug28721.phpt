@@ -1,5 +1,5 @@
 --TEST--
-Bug # 28721: (appendChild() and insertBefore() unset DOMText)
+Bug #28721 (appendChild() and insertBefore() unset DOMText)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

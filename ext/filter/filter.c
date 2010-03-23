@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -139,7 +139,7 @@ zend_module_entry filter_module_entry = {
 	filter_functions,
 	PHP_MINIT(filter),
 	PHP_MSHUTDOWN(filter),
-	PHP_RINIT(filter),
+	NULL,
 	PHP_RSHUTDOWN(filter),
 	PHP_MINFO(filter),
 	"0.11.0",
@@ -284,20 +284,6 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 {
 	UNREGISTER_INI_ENTRIES();
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(filter)
-{
-	IF_G(get_array) = NULL;
-	IF_G(post_array) = NULL;
-	IF_G(cookie_array) = NULL;
-	IF_G(server_array) = NULL;
-	IF_G(env_array) = NULL;
-	IF_G(session_array) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -478,13 +464,14 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 		Z_STRLEN(new_var) = val_len;
 		Z_TYPE(new_var) = IS_STRING;
 
-		if (IF_G(default_filter) != FILTER_UNSAFE_RAW || IF_G(default_filter_flags) != 0) {
+		if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
 			zval *tmp_new_var = &new_var;
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 			INIT_PZVAL(tmp_new_var);
- 			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
-		}
-		else {
+			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
+		} else if (PG(magic_quotes_gpc) && !retval) { /* for PARSE_STRING php_register_variable_safe() will do the addslashes() */
+			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
+		} else {
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 		}
 	} else { /* empty string */
@@ -548,7 +535,7 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
-	zend_bool jit_initialization = (PG(auto_globals_jit));
+	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays));
 
 	switch (arg) {
 		case PARSE_GET:
@@ -702,7 +689,7 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 
 static void php_filter_array_handler(zval *input, zval **op, zval *return_value TSRMLS_DC) /* {{{ */
 {
-	zstr arg_key;
+	char *arg_key;
 	uint arg_key_len;
 	ulong index;
 	HashPosition pos;
@@ -734,8 +721,8 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
-			if (zend_hash_find(Z_ARRVAL_P(input), arg_key.s, arg_key_len, (void **)&tmp) != SUCCESS) {
-				add_assoc_null_ex(return_value, arg_key.s, arg_key_len);
+			if (zend_hash_find(Z_ARRVAL_P(input), arg_key, arg_key_len, (void **)&tmp) != SUCCESS) {
+				add_assoc_null_ex(return_value, arg_key, arg_key_len);
 			} else {
 				zval *nval;
 
@@ -743,7 +730,7 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value 
 				MAKE_COPY_ZVAL(tmp, nval);
 
 				php_filter_call(&nval, -1, arg_elm, 0, FILTER_REQUIRE_SCALAR TSRMLS_CC);
-				add_assoc_zval_ex(return_value, arg_key.s, arg_key_len, nval);
+				add_assoc_zval_ex(return_value, arg_key, arg_key_len, nval);
 			}
 		}
 	} else {

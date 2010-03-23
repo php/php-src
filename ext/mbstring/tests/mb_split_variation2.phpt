@@ -243,6 +243,6 @@ array(1) {
 
 -- Iteration 24 --
 
-Warning: mb_split() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: mb_split() expects parameter 2 to be string, resource given in %s on line %d
 bool(false)
 Done

@@ -71,27 +71,27 @@ rmdir($dir_path2);
 
 -- With valid paths --
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation91/sub_dir11/sub_dir111/.."
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation91/sub_dir11/sub_dir111/.."
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir11/.."
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir11/.."
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation91/sub_dir11/sub_dir111/../../../dir_variation92/sub_dir21/.."
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation91/sub_dir11/sub_dir111/../../../dir_variation92/sub_dir21/.."
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 

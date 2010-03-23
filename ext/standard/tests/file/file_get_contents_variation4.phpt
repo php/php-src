@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : usage variation - different types for context.
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -185,10 +183,10 @@ Error: 2 - file_get_contents() expects parameter 3 to be resource, array given, 
 NULL
 
 --uppercase NULL--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --lowercase null--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --lowercase true--
 Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given, %s(%d)
@@ -207,27 +205,27 @@ Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given
 NULL
 
 --empty string DQ--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
@@ -239,15 +237,15 @@ Error: 2 - file_get_contents() expects parameter 3 to be resource, object given,
 NULL
 
 --undefined var--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --unset var--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --file resource--
 Error: 2 - file_get_contents(): supplied resource is not a valid Stream-Context resource, %s(%d)
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --stream context--
-unicode(%d) "contents read"
+string(%d) "contents read"
 ===DONE===

@@ -118,27 +118,27 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 3 of Outerloop Iteration 1 --
 -- Testing fgetc() : file opened using rt mode --
-unicode(1) "2"
+string(1) "2"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(6)
 bool(false)
 resource(%d) of type (stream)
@@ -196,27 +196,27 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 6 of Outerloop Iteration 1 --
 -- Testing fgetc() : file opened using r+t mode --
-unicode(1) "2"
+string(1) "2"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "2"
+string(1) "2"
 int(6)
 bool(false)
 resource(%d) of type (stream)
@@ -275,27 +275,27 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 3 of Outerloop Iteration 2 --
 -- Testing fgetc() : file opened using rt mode --
-unicode(1) "t"
+string(1) "t"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "e"
+string(1) "e"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "x"
+string(1) "x"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "t"
+string(1) "t"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) " "
+string(1) " "
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "t"
+string(1) "t"
 int(6)
 bool(false)
 resource(%d) of type (stream)
@@ -353,27 +353,27 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 6 of Outerloop Iteration 2 --
 -- Testing fgetc() : file opened using r+t mode --
-unicode(1) "t"
+string(1) "t"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "e"
+string(1) "e"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "x"
+string(1) "x"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "t"
+string(1) "t"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) " "
+string(1) " "
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "t"
+string(1) "t"
 int(6)
 bool(false)
 resource(%d) of type (stream)
@@ -434,28 +434,28 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 3 of Outerloop Iteration 3 --
 -- Testing fgetc() : file opened using rt mode --
-unicode(1) "l"
+string(1) "l"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "i"
+string(1) "i"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "n"
+string(1) "n"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "e"
+string(1) "e"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "
+string(1) "
 "
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "l"
+string(1) "l"
 int(6)
 bool(false)
 resource(%d) of type (stream)
@@ -515,30 +515,29 @@ bool(false)
 resource(%d) of type (stream)
 -- Innerloop iteration 6 of Outerloop Iteration 3 --
 -- Testing fgetc() : file opened using r+t mode --
-unicode(1) "l"
+string(1) "l"
 int(1)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "i"
+string(1) "i"
 int(2)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "n"
+string(1) "n"
 int(3)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "e"
+string(1) "e"
 int(4)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "
+string(1) "
 "
 int(5)
 bool(false)
 resource(%d) of type (stream)
-unicode(1) "l"
+string(1) "l"
 int(6)
 bool(false)
 resource(%d) of type (stream)
 Done
-

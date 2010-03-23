@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -86,10 +86,7 @@ PHP_FUNCTION(sqlite_factory);
 PHP_FUNCTION(sqlite_fetch_column_types);
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
-	long assoc_case;
-#ifdef SQLITE_ISO8859
-	UConverter *iso8859_conv;
-#endif
+	 long assoc_case;
 ZEND_END_MODULE_GLOBALS(sqlite)
 
 #ifdef ZTS

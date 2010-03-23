@@ -26,8 +26,8 @@ var_dump(test::$pri);
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -f "$filename"`);
-var_dump(`"$php" -n -f "wrong"`);
+var_dump(`$php -n -f "$filename"`);
+var_dump(`$php -n -f "wrong"`);
 
 @unlink($filename);
 
@@ -38,6 +38,6 @@ string(%d) "
 
 Fatal error: Cannot access private property test::$pri in %s on line %d
 "
-string(33) "Could not open input file: wrong
-"
+Could not open input file: wrong
+NULL
 Done

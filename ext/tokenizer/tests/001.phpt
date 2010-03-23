@@ -130,7 +130,7 @@ echo token_name(array()), "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 T_INCLUDE
 T_INCLUDE_ONCE
 T_EVAL
@@ -251,7 +251,7 @@ T_HALT_COMPILER
 UNKNOWN
 UNKNOWN
 
-Warning: token_name() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: token_name() expects parameter 1 to be long, string given in %s on line %d
 
 
 Warning: token_name() expects parameter 1 to be long, array given in %s on line %d

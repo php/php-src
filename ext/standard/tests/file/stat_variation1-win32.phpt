@@ -77,7 +77,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/stat_variation1a.tmp");
 rmdir("$file_path/stat_variation1a");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing stat(): on file and directory ater renaming them ***
 -- Testing stat() for files after being renamed --
 bool(true)
@@ -91,3 +91,4 @@ bool(true)
 bool(true)
 
 *** Done ***
+

@@ -13,7 +13,7 @@ $client_version = $db->getAttribute(PDO::ATTR_CLIENT_VERSION);
 $server_version = $db->getAttribute(PDO::ATTR_SERVER_VERSION);
 
 if (version_compare($server_version, '7.4', '<') || version_compare($client_version, '7.4', '<')) {
-	die('skip');
+        die('skip');
 }
 
 ?>

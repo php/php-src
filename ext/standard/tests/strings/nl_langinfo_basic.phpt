@@ -29,23 +29,9 @@ setlocale(LC_ALL, $original);
 ===DONE===
 --EXPECTF--
 *** Testing nl_langinfo() : basic functionality ***
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(3) "Mon"
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(9) "Wednesday"
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(3) "Jul"
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(5) "April"
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 string(1) "."
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 ===DONE===

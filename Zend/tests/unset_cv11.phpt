@@ -11,11 +11,11 @@ echo "ok\n";
 ?>
 --EXPECT--
 array(1) {
-  [u"default"]=>
-  unicode(2) "ok"
+  ["default"]=>
+  string(2) "ok"
 }
 array(1) {
-  [u"default"]=>
-  unicode(2) "ok"
+  ["default"]=>
+  string(2) "ok"
 }
 ok

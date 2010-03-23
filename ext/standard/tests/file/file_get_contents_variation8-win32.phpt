@@ -19,7 +19,7 @@ echo "*** Testing file_get_contents() : variation ***\n";
 
 /* An array of filenames */ 
 $names_arr = array(
-  /* Invalid args */ 
+  /* Invalid args */
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
@@ -82,10 +82,8 @@ bool(false)
 
 -- Filename: array() --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: file_get_contents(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Filename: /no/such/file/dir --
 

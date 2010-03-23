@@ -28,15 +28,15 @@ echo "Done";
 --EXPECTF--
 *** Testing serialize()/unserialize() : error conditions ***
 
-Warning: serialize() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: serialize() expects exactly 1 parameter, 0 given in %s on line 16
 NULL
 
-Warning: unserialize() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: unserialize() expects exactly 1 parameter, 0 given in %s on line 17
 bool(false)
 
-Warning: serialize() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: serialize() expects exactly 1 parameter, 2 given in %s on line 20
 NULL
 
-Warning: unserialize() expects exactly 1 parameter, 2 given in %s on line %d
+Warning: unserialize() expects exactly 1 parameter, 2 given in %s on line 21
 bool(false)
 Done

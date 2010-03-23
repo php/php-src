@@ -19,6 +19,6 @@ class test3 extends test {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Strict Standards: Declaration of test3::foo() should be compatible with that of test::foo() in %s on line %d
 Done

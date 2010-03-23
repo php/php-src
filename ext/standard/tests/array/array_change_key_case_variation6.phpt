@@ -31,42 +31,42 @@ echo "Done";
 
 -- Pass a two-dimensional array as $input argument --
 array(3) {
-  [u"ENGLISH"]=>
+  ["ENGLISH"]=>
   array(3) {
-    [u"one"]=>
+    ["one"]=>
     int(1)
-    [u"two"]=>
+    ["two"]=>
     int(2)
-    [u"three"]=>
+    ["three"]=>
     int(3)
   }
-  [u"FRENCH"]=>
+  ["FRENCH"]=>
   array(3) {
-    [u"un"]=>
+    ["un"]=>
     int(1)
-    [u"deux"]=>
+    ["deux"]=>
     int(2)
-    [u"trois"]=>
+    ["trois"]=>
     int(3)
   }
-  [u"GERMAN"]=>
+  ["GERMAN"]=>
   array(3) {
-    [u"eins"]=>
+    ["eins"]=>
     int(1)
-    [u"zwei"]=>
+    ["zwei"]=>
     int(2)
-    [u"drei"]=>
+    ["drei"]=>
     int(3)
   }
 }
 
 -- Pass a sub-arry as $input argument --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 Done

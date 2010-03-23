@@ -74,42 +74,42 @@ t3();
 ?>
 --EXPECT--
 array(1) {
-  [u"foo"]=>
-  unicode(3) "aaa"
+  ["foo"]=>
+  string(3) "aaa"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "bbb"
+  ["foo"]=>
+  string(3) "bbb"
 }
 array(1) {
-  [u"foo"]=>
-  &unicode(3) "noo"
+  ["foo"]=>
+  &string(3) "noo"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "bbb"
+  ["foo"]=>
+  string(3) "bbb"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "bbb"
+  ["foo"]=>
+  string(3) "bbb"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "bbb"
+  ["foo"]=>
+  string(3) "bbb"
 }
 array(1) {
-  [u"foo"]=>
-  &unicode(3) "noo"
+  ["foo"]=>
+  &string(3) "noo"
 }
 array(1) {
-  [u"foo"]=>
-  &unicode(3) "noo"
+  ["foo"]=>
+  &string(3) "noo"
 }
 array(1) {
-  [u"foo"]=>
-  unicode(3) "aaa"
+  ["foo"]=>
+  string(3) "aaa"
 }
 array(1) {
-  [u"foo"]=>
-  &unicode(3) "noo"
+  ["foo"]=>
+  &string(3) "noo"
 }

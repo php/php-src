@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -388,8 +388,9 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 			/* if buffered, pre-fetch all the data */
 			if (H->buffered) {
-				if (mysql_stmt_store_result(S->stmt))
+				if (mysql_stmt_store_result(S->stmt)) {
 					PDO_DBG_RETURN(1);
+				}
 			}
 		}
 		row_count = (long) mysql_stmt_affected_rows(S->stmt);
@@ -426,7 +427,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			row_count = 0;
 		} else {
 			S->result = mysql_store_result(H->server);
-			if ((my_ulonglong)-1 == (row_count = mysql_affected_rows(H->server))) {
+			if ((long)-1 == (row_count = (long) mysql_affected_rows(H->server))) {
 				pdo_mysql_error_stmt(stmt);
 				PDO_DBG_RETURN(0);
 			}
@@ -436,7 +437,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		stmt->row_count = (long) row_count;
+		stmt->row_count = row_count;
 		stmt->column_count = (int) mysql_num_fields(S->result);
 		S->fields = mysql_fetch_fields(S->result);
 		PDO_DBG_RETURN(1);

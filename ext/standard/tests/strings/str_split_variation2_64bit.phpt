@@ -99,11 +99,11 @@ echo "Done";
 --Iteration 1 --
 array(3) {
   [0]=>
-  unicode(10) "variation2"
+  string(10) "variation2"
   [1]=>
-  unicode(10) ":split_len"
+  string(10) ":split_len"
   [2]=>
-  unicode(3) "gth"
+  string(3) "gth"
 }
 --Iteration 2 --
 
@@ -112,7 +112,7 @@ bool(false)
 --Iteration 3 --
 array(1) {
   [0]=>
-  unicode(23) "variation2:split_length"
+  string(23) "variation2:split_length"
 }
 --Iteration 4 --
 
@@ -153,51 +153,51 @@ bool(false)
 --Iteration 13 --
 array(23) {
   [0]=>
-  unicode(1) "v"
+  string(1) "v"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(1) "r"
+  string(1) "r"
   [3]=>
-  unicode(1) "i"
+  string(1) "i"
   [4]=>
-  unicode(1) "a"
+  string(1) "a"
   [5]=>
-  unicode(1) "t"
+  string(1) "t"
   [6]=>
-  unicode(1) "i"
+  string(1) "i"
   [7]=>
-  unicode(1) "o"
+  string(1) "o"
   [8]=>
-  unicode(1) "n"
+  string(1) "n"
   [9]=>
-  unicode(1) "2"
+  string(1) "2"
   [10]=>
-  unicode(1) ":"
+  string(1) ":"
   [11]=>
-  unicode(1) "s"
+  string(1) "s"
   [12]=>
-  unicode(1) "p"
+  string(1) "p"
   [13]=>
-  unicode(1) "l"
+  string(1) "l"
   [14]=>
-  unicode(1) "i"
+  string(1) "i"
   [15]=>
-  unicode(1) "t"
+  string(1) "t"
   [16]=>
-  unicode(1) "_"
+  string(1) "_"
   [17]=>
-  unicode(1) "l"
+  string(1) "l"
   [18]=>
-  unicode(1) "e"
+  string(1) "e"
   [19]=>
-  unicode(1) "n"
+  string(1) "n"
   [20]=>
-  unicode(1) "g"
+  string(1) "g"
   [21]=>
-  unicode(1) "t"
+  string(1) "t"
   [22]=>
-  unicode(1) "h"
+  string(1) "h"
 }
 --Iteration 14 --
 
@@ -206,51 +206,51 @@ bool(false)
 --Iteration 15 --
 array(23) {
   [0]=>
-  unicode(1) "v"
+  string(1) "v"
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(1) "r"
+  string(1) "r"
   [3]=>
-  unicode(1) "i"
+  string(1) "i"
   [4]=>
-  unicode(1) "a"
+  string(1) "a"
   [5]=>
-  unicode(1) "t"
+  string(1) "t"
   [6]=>
-  unicode(1) "i"
+  string(1) "i"
   [7]=>
-  unicode(1) "o"
+  string(1) "o"
   [8]=>
-  unicode(1) "n"
+  string(1) "n"
   [9]=>
-  unicode(1) "2"
+  string(1) "2"
   [10]=>
-  unicode(1) ":"
+  string(1) ":"
   [11]=>
-  unicode(1) "s"
+  string(1) "s"
   [12]=>
-  unicode(1) "p"
+  string(1) "p"
   [13]=>
-  unicode(1) "l"
+  string(1) "l"
   [14]=>
-  unicode(1) "i"
+  string(1) "i"
   [15]=>
-  unicode(1) "t"
+  string(1) "t"
   [16]=>
-  unicode(1) "_"
+  string(1) "_"
   [17]=>
-  unicode(1) "l"
+  string(1) "l"
   [18]=>
-  unicode(1) "e"
+  string(1) "e"
   [19]=>
-  unicode(1) "n"
+  string(1) "n"
   [20]=>
-  unicode(1) "g"
+  string(1) "g"
   [21]=>
-  unicode(1) "t"
+  string(1) "t"
   [22]=>
-  unicode(1) "h"
+  string(1) "h"
 }
 --Iteration 16 --
 
@@ -258,19 +258,19 @@ Warning: str_split(): The length of each segment must be greater than zero in %s
 bool(false)
 --Iteration 17 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
 NULL
 --Iteration 18 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
 NULL
 --Iteration 19 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
 NULL
 --Iteration 20 --
 
-Warning: str_split() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: str_split() expects parameter 2 to be long, string given in %s on line %d
 NULL
 --Iteration 21 --
 

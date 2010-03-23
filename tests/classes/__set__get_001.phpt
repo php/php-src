@@ -23,7 +23,7 @@ class setter {
 
 	function __set($nm, $val) {
 		echo "Setting [$nm] to $val\n";
-
+                    
 		if (isset($this->x[$nm])) {
 			$this->x[$nm] = $val;
 			echo "OK!\n";
@@ -58,15 +58,15 @@ Nothing!
 Setting [z] to 1
 Not OK!
 object(setter)#%d (2) {
-  [u"n"]=>
+  ["n"]=>
   int(1)
-  [u"x"]=>
+  ["x"]=>
   array(3) {
-    [u"a"]=>
+    ["a"]=>
     int(101)
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
   }
 }

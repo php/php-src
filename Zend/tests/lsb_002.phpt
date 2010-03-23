@@ -53,7 +53,7 @@ echo $childClass2->testClassConst() . "\n";
 echo $childClass2->testStaticFunction() . "\n";
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 TestClassStatic
 TestClassConst
 TestClassFunction

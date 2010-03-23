@@ -56,40 +56,40 @@ echo "Done\n";
 -- Testing rewind() with zero argument --
 
 Warning: rewind() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing rewind() with more than expected number of arguments --
 
 Warning: rewind() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 -- Testing rewind() with invalid arguments --
 -- Iteration 1 --
 
-Warning: rewind() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: rewind() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: rewind() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: rewind() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: rewind() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: rewind() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: rewind() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing rewind() with closed/unset file handle --
 Warning: rewind(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: rewind() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 Done

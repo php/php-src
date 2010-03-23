@@ -41,8 +41,8 @@ if (strcmp($str, $decode) == 0) {
 *** Testing str_rot13() : basic functionality ***
 
 Basic tests
-unicode(26) "fge_ebg13() grfgf fgnegvat"
-unicode(26) "nopqrstuvwxyzabcdefghijklm"
+string(26) "fge_ebg13() grfgf fgnegvat"
+string(26) "nopqrstuvwxyzabcdefghijklm"
 
 Ensure numeric characters are left untouched
 Strings equal : TEST PASSED

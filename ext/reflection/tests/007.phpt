@@ -91,15 +91,15 @@ test('WithCtorWithArgs');
 
 ====>Class_does_not_exist
 __autoload(Class_does_not_exist)
-unicode(41) "Class Class_does_not_exist does not exist"
+string(41) "Class Class_does_not_exist does not exist"
 ====>NoCtor
 ====>newInstance()
 object(NoCtor)#%d (0) {
 }
 ====>newInstance(25)
-unicode(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
 ====>newInstance(25, 42)
-unicode(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
+string(86) "Class NoCtor does not have a constructor, so you cannot pass any constructor arguments"
 
 ====>WithCtor
 ====>newInstance()

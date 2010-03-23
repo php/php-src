@@ -26,15 +26,15 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- Call array_slice() --
 array(2) {
   [0]=>
-  unicode(12) "twenty-three"
+  string(12) "twenty-three"
   [1]=>
-  unicode(4) "zero"
+  string(4) "zero"
 }
 -- Position of Internal Pointer in Result: --
 0 => twenty-three

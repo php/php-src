@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,8 +25,6 @@
 
 extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry
-
-#define PHP_SEM_RSRC_NAME "sysvsem"
 
 PHP_MINIT_FUNCTION(sysvsem);
 PHP_FUNCTION(sem_get);

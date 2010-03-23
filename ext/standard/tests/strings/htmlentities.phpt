@@ -2,8 +2,6 @@
 HTML entities
 --INI--
 output_handler=
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php 
 setlocale (LC_CTYPE, "C");
@@ -14,8 +12,7 @@ echo $ent_encoded;
 echo html_entity_decode($sc_encoded);
 echo html_entity_decode($ent_encoded);
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+--EXPECT--
 &lt;&gt;&quot;&amp;åÄ
 &lt;&gt;&quot;&amp;&aring;&Auml;
 <>"&åÄ

@@ -38,7 +38,7 @@ typedef struct _zend_user_iterator {
 	zval                     *value;
 } zend_user_iterator;
 
-ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, int function_name_type, zstr function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
+ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 0, NULL, NULL TSRMLS_CC)
@@ -49,14 +49,9 @@ ZEND_API zval* zend_u_call_method(zval **object_pp, zend_class_entry *obj_ce, ze
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2 TSRMLS_CC)
 
-static inline zval* zend_call_method(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
-{
-	return zend_u_call_method(obj, obj_ce, fn_proxy, IS_STRING, ZSTR(function_name), function_name_len, retval_ptr_ptr, param_count, arg1, arg2 TSRMLS_CC);
-}
-
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC);
-ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC);
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC);
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC);
@@ -66,11 +61,11 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
 
-ZEND_API int zend_user_serialize(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
-ZEND_API int zend_class_serialize_deny(zval *object, int *type, zstr *buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, int type, const zstr buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 END_EXTERN_C()
 

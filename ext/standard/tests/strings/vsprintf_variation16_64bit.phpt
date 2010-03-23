@@ -71,32 +71,32 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-unicode(143) "2 0 10 
+string(143) "2 0 10 
    123456 u 1234 20000000000
    2000000000000 22000000000000 12345 
    12 18446744073709551604 18446744073709428160 _3
    10 123456 2 0"
 
 -- Iteration 2 --
-unicode(98) "0 0 0 
+string(98) "0 0 0 
    123 u 18446744073709551493 123 
             0 0          0 
    1234 0 $0 _0
    0 123 0 0"
 
 -- Iteration 3 --
-unicode(76) "1 1 1 
+string(76) "1 1 1 
    1 u    1 1   
             1 1          1 
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 4 --
-unicode(76) "1 1 0 
+string(76) "1 1 0 
    1 u    0 1   
             1 1          0 
    #0 1 $1 _0

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -336,8 +336,6 @@ static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to TSRMLS_DC)
 
 /* }}} */
 
-zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
-
 static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_object *intern = (spl_dllist_object *)object;
@@ -362,6 +360,8 @@ static void spl_dllist_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	efree(object);
 }
 /* }}} */
+
+zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
 static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, spl_dllist_object **obj, zval *orig, int clone_orig TSRMLS_DC) /* {{{ */
 {
@@ -407,8 +407,10 @@ static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, 
 	while (parent) {
 		if (parent == spl_ce_SplStack) {
 			intern->flags |= (SPL_DLLIST_IT_FIX | SPL_DLLIST_IT_LIFO);
+			retval.handlers = &spl_handler_SplDoublyLinkedList;
 		} else if (parent == spl_ce_SplQueue) {
 			intern->flags |= SPL_DLLIST_IT_FIX;
+			retval.handlers = &spl_handler_SplDoublyLinkedList;
 		}
 
 		if (parent == spl_ce_SplDoublyLinkedList) {
@@ -506,15 +508,15 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval *tmp, zrv, *dllist_array;
-	zstr pnstr;
+	char *pnstr;
 	int  pnlen;
-	int  i = 0;;
+	int  i = 0;
 
 	*is_temp = 0;
 
 	if (intern->debug_info == NULL) {
 		ALLOC_HASHTABLE(intern->debug_info);
-		ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
+		zend_hash_init(intern->debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
 	if (intern->debug_info->nApplyCount == 0) {
@@ -524,8 +526,8 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
-		add_u_assoc_long_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, intern->flags);
-		efree(pnstr.v);
+		add_assoc_long_ex(&zrv, pnstr, pnlen+1, intern->flags);
+		efree(pnstr);
 
 		ALLOC_INIT_ZVAL(dllist_array);
 		array_init(dllist_array);
@@ -541,8 +543,8 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		}
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
-		add_u_assoc_zval_ex(&zrv, IS_UNICODE, pnstr, pnlen+1, dllist_array);
-		efree(pnstr.v);
+		add_assoc_zval_ex(&zrv, pnstr, pnlen+1, dllist_array);
+		efree(pnstr);
 	}
 
 	return intern->debug_info;
@@ -596,7 +598,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -619,7 +621,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -642,7 +644,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -665,7 +667,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -688,7 +690,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 	long count;
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -703,7 +705,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
 	long count;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -743,7 +745,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
@@ -966,6 +968,7 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 			}
 		} else {
 			*traverse_pointer_ptr = old->next;
+
 			if (flags & SPL_DLLIST_IT_DELETE) {
 				zval *prev = (zval *)spl_ptr_llist_shift(llist TSRMLS_CC);
 
@@ -1015,7 +1018,7 @@ static void spl_dllist_it_get_current_data(zend_object_iterator *iter, zval ***d
 }
 /* }}} */
 
-static int spl_dllist_it_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static int spl_dllist_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 
@@ -1131,10 +1134,10 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 	iterator->traverse_position  = dllist_object->traverse_position;
 	iterator->traverse_pointer   = dllist_object->traverse_pointer;
 	iterator->flags              = dllist_object->flags & SPL_DLLIST_IT_MASK;
+	iterator->object             = dllist_object;
 
 	SPL_LLIST_CHECK_ADDREF(iterator->traverse_pointer);
 
-	iterator->object = dllist_object;
 
 	return (zend_object_iterator*)iterator;
 }

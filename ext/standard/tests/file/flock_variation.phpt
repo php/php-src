@@ -64,7 +64,7 @@ fclose($fp);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--	
 *** Testing flock() fun with the various operation and 
             wouldblock values                                ***
 --- Outer iteration 0 ---

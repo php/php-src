@@ -47,7 +47,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation16.tmp");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing lstat() on a file after changing its access permission ***
 bool(true)
 bool(true)

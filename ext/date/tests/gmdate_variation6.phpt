@@ -40,22 +40,22 @@ var_dump( gmdate('t', $timestamp) );
 *** Testing gmdate() : usage variation ***
 
 -- Testing gmdate() function with full textual representation of month format --
-unicode(%d) "%s"
-unicode(6) "August"
+string(%d) "%s"
+string(6) "August"
 
 -- Testing gmdate() function with numeric representation of month format --
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 
 -- Testing gmdate() function with short textual representation of month format --
-unicode(%d) "%s"
-unicode(3) "Aug"
+string(%d) "%s"
+string(3) "Aug"
 
 -- Testing gmdate() function with numeric representation of month without leading zeros format --
-unicode(%d) "%d"
-unicode(1) "8"
+string(%d) "%d"
+string(1) "8"
 
 -- Testing gmdate() function with number of days in a month format --
-unicode(%d) "%d"
-unicode(2) "31"
+string(%d) "%d"
+string(2) "31"
 ===DONE===

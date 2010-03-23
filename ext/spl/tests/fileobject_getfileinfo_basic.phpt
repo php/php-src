@@ -14,20 +14,31 @@ var_dump($fi = $s->getFileInfo(), (string)$fi);
 $d = new SplFileInfo( __DIR__ );
 echo "\n";
 var_dump($fi = $d->getFileInfo(), (string)$fi);
+$d = new SplFileInfo( __DIR__."/" );
+echo "\n";
+var_dump($fi = $d->getFileInfo(), (string)$fi);
 ?>
 --EXPECTF--
-object(SplFileInfo)#2 (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  %s(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
-  [u"fileName":u"SplFileInfo":private]=>
-  %s(%d) "fileobject_getfileinfo_basic.php"
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "fileobject_getfileinfo_basic.php"
 }
-%s(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
+string(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
 
-object(SplFileInfo)#4 (2) {
-  [u"pathName":u"SplFileInfo":private]=>
-  %s(%d) "%sext%espl%stests"
-  [u"fileName":u"SplFileInfo":private]=>
-  %s(%d) "tests"
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%sext%espl%etests"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "tests"
 }
-%s(%d) "%sext%espl%etests"
+string(%d) "%sext%espl%etests"
+
+object(SplFileInfo)#%d (2) {
+  ["pathName":"SplFileInfo":private]=>
+  string(%d) "%sext%espl%etests"
+  ["fileName":"SplFileInfo":private]=>
+  string(%d) "tests"
+}
+string(%d) "%sext%espl%etests"

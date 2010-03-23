@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -78,12 +78,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 PHPAPI int php_copy_file_ex(char *src, char *dest, int src_chk TSRMLS_DC);
 PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC);
 PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC);
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI void php_fgetcsv_ex(php_stream *stream, char *delimiter, int delimiter_len, char *enclosure, int enclosure_len, char *escape, int escape_len,
-		char *buffer, int buffer_len, zval *return_value TSRMLS_DC);
-PHPAPI void php_u_fgetcsv(php_stream *stream, UChar *delimiter, int delimiter_len, UChar *enclosure, int enclosure_len, UChar *escape, int escape_len,
-		UChar *buffer, int buffer_len, zval *return_value TSRMLS_DC);
-
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -92,10 +87,6 @@ PHPAPI void php_u_fgetcsv(php_stream *stream, UChar *delimiter, int delimiter_le
 #define PHP_FILE_SKIP_EMPTY_LINES 4
 #define PHP_FILE_APPEND 8
 #define PHP_FILE_NO_DEFAULT_CONTEXT 16
-
-/* Specified as explicit values so that file_put_contents() can override context param default mode */
-#define PHP_FILE_TEXT 32
-#define PHP_FILE_BINARY 64
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,

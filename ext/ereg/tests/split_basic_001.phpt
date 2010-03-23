@@ -28,6 +28,8 @@ echo "Done";
 *** Testing ereg() : basic functionality ***
 
 --> Pattern: '..(a|b|c)(a|b|c)..'; match: '--- ab ---'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(2) "--"
@@ -37,15 +39,21 @@ array(2) {
 
 --> Pattern: '()'; match: ''
 
-Warning: split(): Invalid Regular Expression in %s on line 19
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): Invalid Regular Expression in %s on line %d
 bool(false)
 
 --> Pattern: '()'; match: 'abcdef'
 
-Warning: split(): Invalid Regular Expression in %s on line 19
+Deprecated: Function split() is deprecated in %s on line %d
+
+Warning: split(): Invalid Regular Expression in %s on line %d
 bool(false)
 
 --> Pattern: '[x]|[^x]'; match: 'abcdef'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""
@@ -54,6 +62,8 @@ array(2) {
 }
 
 --> Pattern: '(a{1})(a{1,}) (b{1,3}) (c+) (d?ddd|e)'; match: '--- aaa bbb ccc ddd ---'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(4) "--- "
@@ -62,6 +72,8 @@ array(2) {
 }
 
 --> Pattern: '\\\`\^\.\[\$\(\)\|\*\+\?\{\''; match: '\`^.[$()|*+?{''
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""
@@ -70,6 +82,8 @@ array(2) {
 }
 
 --> Pattern: '\a'; match: 'a'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""
@@ -78,6 +92,8 @@ array(2) {
 }
 
 --> Pattern: '[0-9][^0-9]'; match: '2a'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""
@@ -86,12 +102,16 @@ array(2) {
 }
 
 --> Pattern: '^[[:alnum:]]{62,62}$'; match: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(1) {
   [0]=>
   string(196) "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ |1| 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ |2| 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 }
 
 --> Pattern: '^[[:digit:]]{5}'; match: '0123456789'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""
@@ -100,6 +120,8 @@ array(2) {
 }
 
 --> Pattern: '[[:digit:]]{5}$'; match: '0123456789'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(35) "0123456789 |1| 0123456789 |2| 01234"
@@ -109,6 +131,8 @@ array(2) {
 
 --> Pattern: '[[:blank:]]{1,10}'; match: '
  	'
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(1) "
@@ -120,6 +144,8 @@ array(2) {
 }
 
 --> Pattern: '[[:print:]]{3}'; match: ' a '
+
+Deprecated: Function split() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(0) ""

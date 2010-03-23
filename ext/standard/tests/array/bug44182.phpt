@@ -14,6 +14,6 @@ var_dump($nonref);
 echo "Done\n";
 ?>
 --EXPECTF--
-unicode(%d) "original.foo"
+string(%d) "original.foo"
 Done
 

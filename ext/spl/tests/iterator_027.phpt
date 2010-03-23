@@ -67,9 +67,9 @@ int(1)
 int(32)
 int(3)
 int(4)
-unicode(3) "foo"
-unicode(3) "bar"
-unicode(2) "25"
+string(3) "foo"
+string(3) "bar"
+string(2) "25"
 bool(false)
 bool(true)
 bool(false)

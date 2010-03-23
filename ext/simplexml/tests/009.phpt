@@ -4,7 +4,7 @@ SimpleXML: foreach
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$sxe = simplexml_load_string(b<<<EOF
+$sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -36,10 +36,10 @@ foreach($sxe->children() as $name=>$val) {
 ?>
 ===DONE===
 --EXPECT--
-unicode(5) "elem1"
-unicode(16) "SimpleXMLElement"
-unicode(10) "Bla bla 1."
-unicode(6) "elem11"
-unicode(16) "SimpleXMLElement"
-unicode(10) "Bla bla 2."
+string(5) "elem1"
+string(16) "SimpleXMLElement"
+string(10) "Bla bla 1."
+string(6) "elem11"
+string(16) "SimpleXMLElement"
+string(10) "Bla bla 2."
 ===DONE===

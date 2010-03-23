@@ -9,7 +9,7 @@ Test ksort() function : usage variations - unexpected values for 'array' argumen
 
 /*
  * testing ksort() by providing different unexpected values for array argument with following flag values:
- *  1. flag value as default
+ *  1. flag value as defualt
  *  2. SORT_REGULAR - compare items normally
  *  3. SORT_NUMERIC - compare items numerically
  *  4. SORT_STRING - compare items as strings
@@ -74,7 +74,7 @@ $unexpected_values = array (
 // loop though each element of the array and check the working of ksort()
 // when $array arugment is supplied with different values from $unexpected_values
 echo "\n-- Testing ksort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are default, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {
@@ -94,7 +94,7 @@ echo "Done";
 
 -- Testing ksort() by supplying different unexpected values for 'array' argument --
 
--- Flag values are default, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --
+-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --
 -- Iteration 1 --
 
 Warning: ksort() expects parameter 1 to be array, integer given in %s on line %d
@@ -292,55 +292,55 @@ Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
 bool(false)
 -- Iteration 16 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 18 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
@@ -357,29 +357,29 @@ Warning: ksort() expects parameter 1 to be array, object given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 22 --
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, string given in %s on line %d
 bool(false)
 -- Iteration 23 --
 

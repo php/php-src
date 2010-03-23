@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,6 +54,8 @@ ZEND_END_MODULE_GLOBALS(intl)
 #else
 #define INTL_G(v) (intl_globals.v)
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(intl)
 
 PHP_MINIT_FUNCTION(intl);
 PHP_MSHUTDOWN_FUNCTION(intl);

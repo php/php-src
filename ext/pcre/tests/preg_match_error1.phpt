@@ -51,11 +51,11 @@ bool(false)
 
 Arg value is Array
 
-Warning: preg_match() expects parameter 1 to be string (Unicode or binary), array given in %spreg_match_error1.php on line %d
+Warning: preg_match() expects parameter 1 to be string, array given in %spreg_match_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]/
 int(1)
 
-Warning: preg_match() expects parameter 1 to be string (Unicode or binary), object given in %spreg_match_error1.php on line %d
+Warning: preg_match() expects parameter 1 to be string, object given in %spreg_match_error1.php on line %d
 bool(false)

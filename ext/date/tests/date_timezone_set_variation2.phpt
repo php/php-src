@@ -197,32 +197,32 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, Unicode string given in %s on line %d
+Warning: date_timezone_set() expects parameter 2 to be DateTimeZone, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

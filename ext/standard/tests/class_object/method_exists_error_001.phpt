@@ -30,11 +30,11 @@ echo "Done";
 
 -- Testing method_exists() function with more than expected no. of arguments --
 
-Warning: method_exists() expects exactly 2 parameters, 3 given in %s on line %d
+Warning: method_exists() expects exactly 2 parameters, 3 given in %s on line 16
 NULL
 
 -- Testing method_exists() function with less than expected no. of arguments --
 
-Warning: method_exists() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: method_exists() expects exactly 2 parameters, 1 given in %s on line 21
 NULL
 Done

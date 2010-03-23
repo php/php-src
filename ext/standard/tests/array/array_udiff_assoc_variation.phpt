@@ -29,8 +29,8 @@ var_dump( array_udiff_assoc($arr1, $arr2, $arr3, $arr4, $key_compare_function) )
 *** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***
 array(2) {
   [4]=>
-  unicode(4) "four"
-  [u"0.5"]=>
+  string(4) "four"
+  ["0.5"]=>
   int(5)
 }
 ===DONE===

@@ -13,11 +13,11 @@ var_dump($words);
 --EXPECT--
 array(4) {
   [0]=>
-  unicode(3) "the"
+  string(3) "the"
   [1]=>
-  unicode(3) "the"
+  string(3) "the"
   [2]=>
-  unicode(3) "the"
+  string(3) "the"
   [3]=>
-  unicode(3) "the"
+  string(3) "the"
 }

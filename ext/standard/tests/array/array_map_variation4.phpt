@@ -79,101 +79,101 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : associative array with diff. keys for 'arr1' argument ***
 
-Warning: Illegal offset type in %s on line %d
+Warning: Illegal offset type in %s on line %d%d
 
-Warning: Illegal offset type in %s on line %d
+Warning: Illegal offset type in %s on line %d%d
 
-Warning: Illegal offset type in %s on line %d
+Warning: Illegal offset type in %s on line %d%d
 
-Warning: Illegal offset type in %s on line %d
+Warning: Illegal offset type in %s on line %d%d
 -- Iteration 1 --
 array(0) {
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 -- Iteration 3 --
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iteration 4 --
 array(4) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
   [3]=>
-  unicode(1) "3"
+  string(1) "3"
   [4]=>
-  unicode(1) "4"
+  string(1) "4"
 }
 -- Iteration 5 --
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iteration 6 --
 array(4) {
   [1]=>
-  unicode(2) "f1"
+  string(2) "f1"
   [3]=>
-  unicode(2) "f2"
+  string(2) "f2"
   [4]=>
-  unicode(2) "f3"
+  string(2) "f3"
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iteration 7 --
 array(4) {
-  [u"\tHello"]=>
+  ["\tHello"]=>
   int(111)
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
-  [u"pen\n"]=>
+  ["pen\n"]=>
   int(33)
 }
 -- Iteration 8 --
 array(4) {
-  [u"	Hello"]=>
+  ["	Hello"]=>
   int(111)
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
-  [u"pen
+  ["pen
 "]=>
   int(33)
 }
 -- Iteration 9 --
 array(2) {
   [0]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iteration 10 --
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 -- Iteration 11 --
 array(6) {
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
-  [u"fruit"]=>
+  ["fruit"]=>
   float(2.2)
   [133]=>
-  unicode(3) "int"
+  string(3) "int"
   [444]=>
-  unicode(5) "float"
-  [u""]=>
-  unicode(5) "unset"
-  [u"Hello world"]=>
-  unicode(7) "heredoc"
+  string(5) "float"
+  [""]=>
+  string(5) "unset"
+  ["Hello world"]=>
+  string(7) "heredoc"
 }
 Done

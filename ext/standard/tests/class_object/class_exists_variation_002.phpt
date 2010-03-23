@@ -125,27 +125,22 @@ bool(false)
 Arg value 0.5 
 In __autoload(string_val)
 bool(false)
-Error: 8 - Array to string conversion, %s(80)
 
 Arg value Array 
 Error: 2 - class_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
-Error: 8 - Array to string conversion, %s(80)
 
 Arg value Array 
 Error: 2 - class_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
-Error: 8 - Array to string conversion, %s(80)
 
 Arg value Array 
 Error: 2 - class_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
-Error: 8 - Array to string conversion, %s(80)
 
 Arg value Array 
 Error: 2 - class_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
-Error: 8 - Array to string conversion, %s(80)
 
 Arg value Array 
 Error: 2 - class_exists() expects parameter 2 to be boolean, array given, %s(81)

@@ -35,14 +35,14 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Abbreviated month name--
-unicode(%d) "%s"
-unicode(3) "Aug"
+string(%d) "%s"
+string(3) "Aug"
 
 --Full month name--
-unicode(%d) "%s"
-unicode(6) "August"
+string(%d) "%s"
+string(6) "August"
 
 --Month as decimal--
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 ===DONE===

@@ -7,7 +7,7 @@ SimpleXML: Split text content
 --FILE--
 <?php 
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo>bar<baz/>bar</foo>
 EOF;
@@ -19,5 +19,5 @@ var_dump((string)$sxe);
 ?>
 ===DONE===
 --EXPECT--
-unicode(6) "barbar"
+string(6) "barbar"
 ===DONE===

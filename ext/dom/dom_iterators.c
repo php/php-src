@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -147,15 +147,17 @@ static int php_dom_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 		return FAILURE;
 	}
 }
+/* }}} */
 
-static void php_dom_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+static void php_dom_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
 	*data = &iterator->curobj;
 }
+/* }}} */
 
-static int php_dom_iterator_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	zval *curobj;
 	xmlNodePtr curnode = NULL;
@@ -181,7 +183,7 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, zstr *str_ke
 		}
 
 		namelen = xmlStrlen(curnode->name);
-		str_key->s = estrndup(curnode->name, namelen);
+		*str_key = estrndup(curnode->name, namelen);
 		*str_key_len = namelen + 1;
 		return HASH_KEY_IS_STRING;
 	}
@@ -279,7 +281,6 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-
 	iterator = emalloc(sizeof(php_dom_iterator));
 
 	Z_ADDREF_P(object);

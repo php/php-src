@@ -10,7 +10,7 @@ var_dump($standard->getDependencies());
 ==DONE==
 --EXPECTF--
 array(1) {
-  [%s"session"]=>
+  ["session"]=>
   %s(8) "Optional"
 }
 ==DONE==

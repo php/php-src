@@ -40,6 +40,6 @@ catch (Exception $e)
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 Catchable
 ===DONE===

@@ -55,14 +55,14 @@ foreach($file_content_types as $file_content_type) {
         filesize & by displaying the content */
     // append the data to the file, starting from current position of the file pointer
     var_dump( ftell($file_handle) ); // expected: 1024
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written,400) );
+    var_dump( fwrite($file_handle,$data_to_be_written,400) );
     var_dump( ftell($file_handle) ); // expected: 1024 + 400
     var_dump( feof($file_handle) );  // expected : true
 
     /*overwrite data in middle of the file*/
     fseek($file_handle, SEEK_SET, (1024 + 400)/2 );
     var_dump( ftell($file_handle));  // expected: (1024 + 400)/2
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 200) );
+    var_dump( fwrite($file_handle, $data_to_be_written, 200) );
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );  //Expecting bool(false)
 
@@ -79,7 +79,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --
@@ -94,7 +94,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 -- Opening file in ab --
 int(0)
 int(400)
@@ -106,7 +106,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 -- Opening file in at --
 int(0)
 int(400)
@@ -118,7 +118,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 -- Opening file in a+ --
 int(0)
 int(400)
@@ -130,7 +130,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 -- Opening file in a+b --
 int(0)
 int(400)
@@ -142,7 +142,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 -- Opening file in a+t --
 int(0)
 int(400)
@@ -154,7 +154,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "59ce5bf03b69069d00d6354bdc969ff6"
+string(32) "59ce5bf03b69069d00d6354bdc969ff6"
 
 -- Testing fwrite() with file having content of type text --
 -- Opening file in a --
@@ -168,7 +168,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 -- Opening file in ab --
 int(0)
 int(400)
@@ -180,7 +180,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 -- Opening file in at --
 int(0)
 int(400)
@@ -192,7 +192,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 -- Opening file in a+ --
 int(0)
 int(400)
@@ -204,7 +204,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 -- Opening file in a+b --
 int(0)
 int(400)
@@ -216,7 +216,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 -- Opening file in a+t --
 int(0)
 int(400)
@@ -228,7 +228,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "dbd9dffd809d82e299bc1e5c55087f3b"
+string(32) "dbd9dffd809d82e299bc1e5c55087f3b"
 
 -- Testing fwrite() with file having content of type text_with_new_line --
 -- Opening file in a --
@@ -242,7 +242,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "3f0a483fe8a2f405677844e0b1af6cf4"
+string(32) "3f0a483fe8a2f405677844e0b1af6cf4"
 -- Opening file in ab --
 int(0)
 int(400)
@@ -254,7 +254,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "3f0a483fe8a2f405677844e0b1af6cf4"
+string(32) "3f0a483fe8a2f405677844e0b1af6cf4"
 -- Opening file in at --
 int(0)
 int(400)
@@ -266,7 +266,7 @@ int(600)
 bool(false)
 bool(true)
 int(1690)
-unicode(32) "656648355b64df6fded53b12fb355ab8"
+string(32) "656648355b64df6fded53b12fb355ab8"
 -- Opening file in a+ --
 int(0)
 int(400)
@@ -278,7 +278,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "3f0a483fe8a2f405677844e0b1af6cf4"
+string(32) "3f0a483fe8a2f405677844e0b1af6cf4"
 -- Opening file in a+b --
 int(0)
 int(400)
@@ -290,7 +290,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "3f0a483fe8a2f405677844e0b1af6cf4"
+string(32) "3f0a483fe8a2f405677844e0b1af6cf4"
 -- Opening file in a+t --
 int(0)
 int(400)
@@ -302,7 +302,7 @@ int(600)
 bool(false)
 bool(true)
 int(1690)
-unicode(32) "656648355b64df6fded53b12fb355ab8"
+string(32) "656648355b64df6fded53b12fb355ab8"
 
 -- Testing fwrite() with file having content of type alphanumeric --
 -- Opening file in a --
@@ -316,7 +316,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 -- Opening file in ab --
 int(0)
 int(400)
@@ -328,7 +328,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 -- Opening file in at --
 int(0)
 int(400)
@@ -340,7 +340,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 -- Opening file in a+ --
 int(0)
 int(400)
@@ -352,7 +352,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 -- Opening file in a+b --
 int(0)
 int(400)
@@ -364,7 +364,7 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 -- Opening file in a+t --
 int(0)
 int(400)
@@ -376,5 +376,5 @@ int(600)
 bool(false)
 bool(true)
 int(1624)
-unicode(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
+string(32) "ea0c0bfa0b10aa8e614fd33ffe295cb9"
 Done

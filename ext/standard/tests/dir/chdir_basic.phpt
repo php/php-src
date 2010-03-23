@@ -45,9 +45,9 @@ rmdir("$file_path/level_one");
 
 -- Testing chdir() with absolute path: --
 bool(true)
-unicode(%d) "%slevel_one"
+string(%d) "%slevel_one"
 
 -- Testing chdir() with relative paths: --
 bool(true)
-unicode(%d) "%slevel_one%elevel_two"
+string(%d) "%slevel_one%elevel_two"
 ===DONE===

@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzdeflate(string data [, int level, [int encoding]])
+/* Prototype  : string gzdeflate(string data [, int level])
  * Description: Gzip-compress a string 
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
@@ -28,20 +28,12 @@ var_dump( gzdeflate() );
 echo "\n-- Testing gzdeflate() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $level = 2;
-$encoding = ZLIB_ENCODING_RAW;
 $extra_arg = 10;
-var_dump( gzdeflate(b"$data", $level, $encoding, $extra_arg) );
-
-echo "\n-- Testing with Unicode string --\n";
-var_dump(gzdeflate($data, $level));
+var_dump( gzdeflate($data, $level, $extra_arg) );
 
 echo "\n-- Testing with incorrect compression level --\n";
 $bad_level = 99; 
-var_dump(gzdeflate(b"$data", $bad_level));
-
-echo "\n-- Testing with incorrect encoding --\n";
-$bad_encoding = 99; 
-var_dump(gzdeflate(b"$data", $level, $bad_encoding));
+var_dump(gzdeflate($data, $bad_level));
 
 class Tester {
     function Hello() {
@@ -52,7 +44,7 @@ class Tester {
 echo "\n-- Testing with incorrect parameters --\n";
 $testclass = new Tester();
 var_dump(gzdeflate($testclass));
-var_dump(gzdeflate(b"$data", $testclass));
+var_dump(gzdeflate($data, $testclass));
 
 ?>
 ===Done===
@@ -66,12 +58,7 @@ NULL
 
 -- Testing gzdeflate() function with more than expected no. of arguments --
 
-Warning: gzdeflate() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
--- Testing with Unicode string --
-
-Warning: gzdeflate() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
+Warning: gzdeflate() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 -- Testing with incorrect compression level --
@@ -79,14 +66,9 @@ NULL
 Warning: gzdeflate(): compression level (99) must be within -1..9 in %s on line %d
 bool(false)
 
--- Testing with incorrect encoding --
-
-Warning: gzdeflate(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
-bool(false)
-
 -- Testing with incorrect parameters --
 
-Warning: gzdeflate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gzdeflate() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
 Warning: gzdeflate() expects parameter 2 to be long, object given in %s on line %d

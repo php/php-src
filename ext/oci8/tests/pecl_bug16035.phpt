@@ -16,7 +16,6 @@ ORACLE_HOME=""
 --FILE--
 <?php
 
-putenv('ORACLE_HOME=""');
 oci_connect('abc', 'def', 'ghi', 'jkl');
 
 ?>

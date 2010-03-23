@@ -15,5 +15,5 @@ var_dump(register_shutdown_function(array("test","__call")));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Fatal error: Non-static method test::__call() cannot be called statically in %s on line %d

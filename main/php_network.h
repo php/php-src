@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -41,7 +41,7 @@
 #  undef EINPROGRESS
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
-# define EINPROGRESS WSAEWOULDBLOCK
+# define EINPROGRESS	WSAEWOULDBLOCK
 # define fsync _commit
 # define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */

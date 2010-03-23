@@ -4,8 +4,9 @@ Bug #37565 (Using reflection::export with simplexml causing a crash)
 <?php if (!extension_loaded("simplexml") || !extension_loaded('reflection')) print "skip"; ?>
 --FILE--
 <?php
+
 function my_error_handler($errno, $errstr, $errfile, $errline) {
-	        echo "Error: $errstr\n";
+	    echo "Error: $errstr\n";
 }
 
 set_error_handler('my_error_handler');
@@ -14,7 +15,7 @@ class Setting extends ReflectionObject
 {
 }
 
-Reflection::export(simplexml_load_string(b'<test/>', 'Setting'));
+Reflection::export(simplexml_load_string('<test/>', 'Setting'));
 
 Reflection::export(simplexml_load_file('data:,<test/>', 'Setting'));
 

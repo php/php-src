@@ -29,29 +29,29 @@ echo "Done";
 -- Before sorting: --
 array(5) {
   [0]=>
-  unicode(3) "A01"
+  string(3) "A01"
   [1]=>
-  unicode(2) "a1"
+  string(2) "a1"
   [2]=>
-  unicode(3) "b10"
+  string(3) "b10"
   [3]=>
-  unicode(3) "a01"
+  string(3) "a01"
   [4]=>
-  unicode(3) "b01"
+  string(3) "b01"
 }
 
 -- After Sorting: --
 bool(true)
 array(5) {
   [3]=>
-  unicode(3) "a01"
+  string(3) "a01"
   [0]=>
-  unicode(3) "A01"
+  string(3) "A01"
   [1]=>
-  unicode(2) "a1"
+  string(2) "a1"
   [4]=>
-  unicode(3) "b01"
+  string(3) "b01"
   [2]=>
-  unicode(3) "b10"
+  string(3) "b10"
 }
 Done

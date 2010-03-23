@@ -9,6 +9,6 @@ $obj = new ReflectionExtension('reflection');
 var_dump($obj->getName());
 ?>
 ==DONE==
---EXPECTF--
-%s(10) "Reflection"
+--EXPECT--
+string(10) "Reflection"
 ==DONE==

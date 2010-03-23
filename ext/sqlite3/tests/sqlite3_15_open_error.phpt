@@ -10,11 +10,14 @@ chmod($unreadable,  0200);
 try {
 	$db = new SQLite3($unreadable);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+	echo $e . "\n";
 }
 echo "Done\n";
 unlink($unreadable);
 ?>
 --EXPECTF--
-Unable to open database: unable to open database file
+exception 'Exception' with message 'Unable to open database: unable to open database file' in %s/sqlite3_15_open_error.php:%d
+Stack trace:
+#0 %s/sqlite3_15_open_error.php(%d): SQLite3->__construct('%s')
+#1 {main}
 Done

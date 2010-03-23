@@ -13,9 +13,9 @@ foo($state);
 reset($state);
 var_dump( key($state), current($state) );
 ?>
---EXPECT--
+--EXPECT--	
 three => 3
 two => 2
 one => 1
-unicode(3) "one"
+string(3) "one"
 int(1)

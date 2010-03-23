@@ -103,7 +103,7 @@ echo "Done"
 array(5) {
   [0]=>
   object(SimpleClass)#%d (1) {
-    [u"var1"]=>
+    ["var1"]=>
     int(10)
   }
   [1]=>
@@ -111,14 +111,14 @@ array(5) {
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    [u"var3":u"ChildClass":private]=>
+    ["var3":"ChildClass":private]=>
     NULL
-    [u"var2":protected]=>
+    ["var2":protected]=>
     int(5)
   }
   [3]=>
   object(FinalClass)#%d (1) {
-    [u"var4":u"FinalClass":private]=>
+    ["var4":"FinalClass":private]=>
     NULL
   }
   [4]=>
@@ -128,7 +128,7 @@ array(5) {
 array(5) {
   [0]=>
   object(SimpleClass)#%d (1) {
-    [u"var1"]=>
+    ["var1"]=>
     int(10)
   }
   [1]=>
@@ -136,14 +136,14 @@ array(5) {
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    [u"var3":u"ChildClass":private]=>
+    ["var3":"ChildClass":private]=>
     NULL
-    [u"var2":protected]=>
+    ["var2":protected]=>
     int(5)
   }
   [3]=>
   object(FinalClass)#%d (1) {
-    [u"var4":u"FinalClass":private]=>
+    ["var4":"FinalClass":private]=>
     NULL
   }
   [4]=>

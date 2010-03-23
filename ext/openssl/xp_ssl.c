@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -112,7 +112,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
 				if (nr_bytes == 0) {
-					if (!is_http_stream_talking_to_iis(stream TSRMLS_CC)) {
+					if (!is_http_stream_talking_to_iis(stream TSRMLS_CC) && ERR_get_error() != 0) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING,
 								"SSL: fatal protocol error");
 					}
@@ -184,7 +184,7 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 			didwrite = SSL_write(sslsock->ssl_handle, buf, count);
 
 			if (didwrite <= 0) {
-				retry = handle_ssl_error(stream, didwrite, 0 TSRMLS_CC); 
+				retry = handle_ssl_error(stream, didwrite, 0 TSRMLS_CC);
 			} else {
 				break;
 			}
@@ -435,7 +435,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			}
 
 			if (n <= 0) {
-				retry = handle_ssl_error(stream, n, 1 TSRMLS_CC); 
+				retry = handle_ssl_error(stream, n, 1 TSRMLS_CC);
 			} else {
 				break;
 			}
@@ -499,6 +499,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 								add_next_index_zval(arr, zcert);
 								FREE_ZVAL(zcert);
 							}
+
 						} else {
 							ZVAL_NULL(arr);
 						}
@@ -780,7 +781,7 @@ static char * get_sni(php_stream_context *ctx, char *resourcename, long resource
 			return NULL;
 		}
 		if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {
-			convert_to_string_with_converter_ex(val, UG(utf8_conv));
+			convert_to_string_ex(val);
 			return pestrdup(Z_STRVAL_PP(val), is_persistent);
 		}
 	}
@@ -842,7 +843,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 	sslsock->s.socket = -1;
 	
 	/* Initialize context as NULL */
-	sslsock->ctx = NULL;
+	sslsock->ctx = NULL;	
 	
 	stream = php_stream_alloc_rel(&php_openssl_socket_ops, sslsock, persistent_id, "r+");
 

@@ -24,5 +24,5 @@ var_dump( $d1_clone->getName() );
 --EXPECTF--
 *** Testing clone of objects derived from DateTimeZone class with __clone magic method***
 -- DateTimeExt1 __clone magic method called --
-unicode(16) "America/New_York"
+string(16) "America/New_York"
 ===DONE===

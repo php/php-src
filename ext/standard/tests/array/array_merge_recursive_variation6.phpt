@@ -33,16 +33,16 @@ var_dump( array_merge_recursive($arr1_string_key, $arr2) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge_recursive() : array with duplicate keys for $arr1 argument ***
 -- With default argument --
 array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(9) "duplicate"
+    string(9) "duplicate"
     [1]=>
-    unicode(7) "strings"
+    string(7) "strings"
   }
   [1]=>
   array(2) {
@@ -52,12 +52,12 @@ array(3) {
     int(2)
   }
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 array(2) {
-  [u"str1"]=>
-  unicode(5) "world"
-  [u"str2"]=>
+  ["str1"]=>
+  string(5) "world"
+  ["str2"]=>
   float(111.111)
 }
 -- With more arguments --
@@ -65,9 +65,9 @@ array(6) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(9) "duplicate"
+    string(9) "duplicate"
     [1]=>
-    unicode(7) "strings"
+    string(7) "strings"
   }
   [1]=>
   array(2) {
@@ -77,37 +77,37 @@ array(6) {
     int(2)
   }
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
   [3]=>
-  unicode(3) "one"
-  [u"str1"]=>
-  unicode(3) "two"
+  string(3) "one"
+  ["str1"]=>
+  string(3) "two"
   [4]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
 }
 array(4) {
-  [u"str1"]=>
+  ["str1"]=>
   array(2) {
     [0]=>
-    unicode(5) "world"
+    string(5) "world"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
-  [u"str2"]=>
+  ["str2"]=>
   float(111.111)
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   array(2) {
     [0]=>
-    unicode(3) "one"
+    string(3) "one"
     [1]=>
-    unicode(3) "two"
+    string(3) "two"
   }
 }
 Done

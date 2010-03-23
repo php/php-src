@@ -152,20 +152,7 @@ $var_values = array (
 
   /* undefined/unset vars */
   $unset_var,
-  $undef_var,
-
-  /* binary strings */
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
+  $undef_var
 );
                 
 /* test conversion to object type */
@@ -192,7 +179,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -200,356 +187,356 @@ echo "Done\n";
 
 -- Setting type of data to object --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 object(stdClass)#4 (0) {
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   bool(false)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   bool(true)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   bool(true)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) "Ã¿"
+  ["scalar"]=>
+  string(1) "ÿ"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) "f"
+  ["scalar"]=>
+  string(1) "f"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) "
+  ["scalar"]=>
+  string(2) "
 3"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(0) ""
+  ["scalar"]=>
+  string(0) ""
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(0) ""
+  ["scalar"]=>
+  string(0) ""
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) " "
+  ["scalar"]=>
+  string(1) " "
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) " "
+  ["scalar"]=>
+  string(1) " "
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) "10"
+  ["scalar"]=>
+  string(2) "10"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) "10"
+  ["scalar"]=>
+  string(2) "10"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(8) "10string"
+  ["scalar"]=>
+  string(8) "10string"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(8) "10string"
+  ["scalar"]=>
+  string(8) "10string"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) "1"
+  ["scalar"]=>
+  string(1) "1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) "-1"
+  ["scalar"]=>
+  string(2) "-1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(3) "1e2"
+  ["scalar"]=>
+  string(3) "1e2"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) " 1"
+  ["scalar"]=>
+  string(2) " 1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(22) "2974394749328742328432"
+  ["scalar"]=>
+  string(22) "2974394749328742328432"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "-1e-2"
+  ["scalar"]=>
+  string(5) "-1e-2"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(1) "1"
+  ["scalar"]=>
+  string(1) "1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) "-1"
+  ["scalar"]=>
+  string(2) "-1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(3) "1e2"
+  ["scalar"]=>
+  string(3) "1e2"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(2) " 1"
+  ["scalar"]=>
+  string(2) " 1"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(22) "2974394749328742328432"
+  ["scalar"]=>
+  string(22) "2974394749328742328432"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "-1e-2"
+  ["scalar"]=>
+  string(5) "-1e-2"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(4) "0xff"
+  ["scalar"]=>
+  string(4) "0xff"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(4) "0x55"
+  ["scalar"]=>
+  string(4) "0x55"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "0XA55"
+  ["scalar"]=>
+  string(5) "0XA55"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "0X123"
+  ["scalar"]=>
+  string(5) "0X123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(4) "0123"
+  ["scalar"]=>
+  string(4) "0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(4) "0123"
+  ["scalar"]=>
+  string(4) "0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "-0123"
+  ["scalar"]=>
+  string(5) "-0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "+0123"
+  ["scalar"]=>
+  string(5) "+0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "-0123"
+  ["scalar"]=>
+  string(5) "-0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(5) "+0123"
+  ["scalar"]=>
+  string(5) "+0123"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(8) "-0x80001"
+  ["scalar"]=>
+  string(8) "-0x80001"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(8) "+0x80001"
+  ["scalar"]=>
+  string(8) "+0x80001"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(10) "-0x80001.5"
+  ["scalar"]=>
+  string(10) "-0x80001.5"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(9) "0x80001.5"
+  ["scalar"]=>
+  string(9) "0x80001.5"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  unicode(12) "@$%#$%^$%^&^"
+  ["scalar"]=>
+  string(12) "@$%#$%^$%^&^"
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 object(stdClass)#4 (0) {
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 object(stdClass)#4 (1) {
   [0]=>
   NULL
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 object(stdClass)#4 (4) {
   [0]=>
@@ -561,23 +548,23 @@ object(stdClass)#4 (4) {
   [3]=>
   int(4)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 object(stdClass)#4 (4) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
-  [u"four"]=>
+  string(5) "three"
+  ["four"]=>
   int(4)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 object(stdClass)#4 (3) {
   [0]=>
@@ -587,359 +574,271 @@ object(stdClass)#4 (3) {
   [2]=>
   float(6500000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-2147483648)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(2147483647)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(2147483649)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(1232147483649)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(85)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(1058513956921)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(-21903)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(365)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(-365)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(80561044571754)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(100000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-100000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(100000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-100000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-1.5)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(0.5)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-0.5)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(500000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-500000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-5.0E-7)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(500000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-500000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(512000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-512000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(5.12E-7)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(5.12E-7)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(512000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 object(stdClass)#4 (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(-512000)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 object(point)#1 (2) {
-  [u"x"]=>
+  ["x"]=>
   NULL
-  [u"y"]=>
+  ["y"]=>
   NULL
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 object(point)#2 (2) {
-  [u"x"]=>
+  ["x"]=>
   float(2.5)
-  [u"y"]=>
+  ["y"]=>
   float(40.5)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 object(point)#3 (2) {
-  [u"x"]=>
+  ["x"]=>
   int(0)
-  [u"y"]=>
+  ["y"]=>
   int(0)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 object(stdClass)#4 (0) {
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 object(stdClass)#4 (0) {
 }
-unicode(6) "object"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(8) "10string"
-}
-unicode(6) "object"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(8) "10string"
-}
-unicode(6) "object"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(5) "+0123"
-}
-unicode(6) "object"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(5) "-0123"
-}
-unicode(6) "object"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(4) "0xff"
-}
-unicode(6) "object"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(4) "0x55"
-}
-unicode(6) "object"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(3) "1e2"
-}
-unicode(6) "object"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(22) "2974394749328742328432"
-}
-unicode(6) "object"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(3) "1e2"
-}
-unicode(6) "object"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(8) "10string"
-}
-unicode(6) "object"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-object(stdClass)#4 (1) {
-  [u"scalar"]=>
-  string(8) "10string"
-}
-unicode(6) "object"
+string(6) "object"
 Done

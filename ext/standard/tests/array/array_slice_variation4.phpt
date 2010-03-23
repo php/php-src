@@ -97,7 +97,7 @@ echo "Done";
 
 -- Iteration 1 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -107,7 +107,7 @@ array(3) {
 
 -- Iteration 2 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -117,7 +117,7 @@ array(3) {
 
 -- Iteration 3 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -127,7 +127,7 @@ array(3) {
 
 -- Iteration 4 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -137,7 +137,7 @@ array(3) {
 
 -- Iteration 5 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -147,7 +147,7 @@ array(3) {
 
 -- Iteration 6 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -157,7 +157,7 @@ array(3) {
 
 -- Iteration 7 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -167,7 +167,7 @@ array(3) {
 
 -- Iteration 8 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -177,7 +177,7 @@ array(3) {
 
 -- Iteration 9 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -187,7 +187,7 @@ array(3) {
 
 -- Iteration 10 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -197,7 +197,7 @@ array(3) {
 
 -- Iteration 11 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -207,7 +207,7 @@ array(3) {
 
 -- Iteration 12 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -217,7 +217,7 @@ array(3) {
 
 -- Iteration 13 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -227,7 +227,7 @@ array(3) {
 
 -- Iteration 14 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -237,7 +237,7 @@ array(3) {
 
 -- Iteration 15 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -247,7 +247,7 @@ array(3) {
 
 -- Iteration 16 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -257,7 +257,7 @@ array(3) {
 
 -- Iteration 17 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -272,7 +272,7 @@ NULL
 
 -- Iteration 19 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -282,7 +282,7 @@ array(3) {
 
 -- Iteration 20 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -292,7 +292,7 @@ array(3) {
 
 -- Iteration 21 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -307,7 +307,7 @@ NULL
 
 -- Iteration 23 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -317,7 +317,7 @@ array(3) {
 
 -- Iteration 24 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)

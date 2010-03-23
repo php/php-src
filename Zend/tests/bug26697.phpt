@@ -16,7 +16,7 @@ var_dump(class_exists('NotExistingClass'));
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 __autoload(NotExistingClass)
 bool(false)
 __autoload(NotExistingClass), done

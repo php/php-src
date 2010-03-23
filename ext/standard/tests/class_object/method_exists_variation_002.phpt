@@ -84,8 +84,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing method_exists() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(%d)
-Error: 8 - Undefined variable: unset_var, %s(%d)
+Error: 8 - Undefined variable: undefined_var, %s(67)
+Error: 8 - Undefined variable: unset_var, %s(70)
 
 Arg value 0 
 bool(false)
@@ -113,30 +113,25 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
-Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), array given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 
 Arg value  
@@ -162,10 +157,10 @@ bool(false)
 
 Arg value  
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
 Arg value  
-Error: 2 - method_exists() expects parameter 2 to be string (Unicode or binary), object given, %s(%d)
+Error: 2 - method_exists() expects parameter 2 to be string, object given, %s(77)
 NULL
 
 Arg value  

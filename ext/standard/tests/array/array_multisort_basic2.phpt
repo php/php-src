@@ -30,14 +30,14 @@ array(3) {
   int(1)
   [1]=>
   int(1)
-  [u"strkey"]=>
+  ["strkey"]=>
   int(2)
 }
 array(3) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
   int(2)
 }

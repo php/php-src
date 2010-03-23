@@ -30,15 +30,15 @@ foreach ( $variation_array as $var ) {
 ===DONE===
 --EXPECTF--
 
-Warning: gzfile() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gzfile() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gzfile() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gzfile() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gzfile() expects parameter 2 to be long, string given in %s on line %d
 NULL
 ===DONE===

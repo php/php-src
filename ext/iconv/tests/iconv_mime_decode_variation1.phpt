@@ -102,8 +102,8 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_mime_decode() : usage variations ***
 
@@ -178,6 +178,6 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: iconv_mime_decode() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: iconv_mime_decode() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
-===DONE===
+Done

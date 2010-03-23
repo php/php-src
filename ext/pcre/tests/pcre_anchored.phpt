@@ -1,7 +1,7 @@
 --TEST--
 A (PCRE_ANCHORED) modififer
 --SKIPIF--
-<?php 
+<?php
 if (@preg_match_all('/\p{N}/', '0123456789', $dummy) === false) {
 	die("skip no support for \p support PCRE library");
 }
@@ -21,7 +21,7 @@ var_dump(preg_match('/^\P{N}+/A', '123abc'));
 int(1)
 array(1) {
   [0]=>
-  unicode(3) "abc"
+  string(3) "abc"
 }
 int(0)
 int(0)

@@ -19,7 +19,7 @@ array(5) {
   [2]=>
   int(13)
   [3]=>
-  unicode(24) "width="550" height="400""
-  [u"mime"]=>
-  unicode(29) "application/x-shockwave-flash"
+  string(24) "width="550" height="400""
+  ["mime"]=>
+  string(29) "application/x-shockwave-flash"
 }

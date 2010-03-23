@@ -1,71 +1,39 @@
 --TEST--
-ReflectionProperty::getDefaultValue()
+ReflectionMethod::__construct() tests
 --FILE--
 <?php
 
+$a = array("", 1, "::", "a::", "::b", "a::b");
 
-class root
-{
-	public    $rPub = "rPub";
-	public    $xPub = "xPub";
-	protected $rPro = "rPro";
-	protected $xPro = "xPub";
-	private   $rPri = "rPri";
-	private   $xPri = "xPri";
-	
-	static public $stat = "rStat";
+foreach ($a as $val) {
+	try {
+		new ReflectionMethod($val);
+	} catch (Exception $e) {
+		var_dump($e->getMessage());
+	}
 }
-
-class derived extends root
-{
-	public    $dPub = "dPub";
-	public    $xPub = "nPub";
-	protected $dPro = "dPro";
-	protected $xPro = "nPub";
-	private   $dPri = "dPri";
-	private   $xPri = "nPri";	
-}
-
-function show_prop($p)
-{
-	echo "{$p->class}::{$p->name} = " . $p->getDefaultValue() . "\n";
-}
-
-function show_class($c)
-{
-	echo "===$c===\n";
-
-	$r = new ReflectionClass($c);
-
-	foreach($r->getProperties() as $p)
-	{
-		show_prop($p);
+ 
+$a = array("", 1, "");
+$b = array("", "", 1);
+ 
+foreach ($a as $key=>$val) {
+	try {
+		new ReflectionMethod($val, $b[$key]);
+	} catch (Exception $e) {
+		var_dump($e->getMessage());
 	}
 }
 
-show_class("root");
-show_class("derived");
-
+echo "Done\n";
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
-===root===
-root::rPub = rPub
-root::xPub = xPub
-root::rPro = rPro
-root::xPro = xPub
-root::rPri = rPri
-root::xPri = xPri
-root::stat = rStat
-===derived===
-derived::dPub = dPub
-derived::xPub = nPub
-derived::dPro = dPro
-derived::xPro = nPub
-derived::dPri = dPri
-derived::xPri = nPri
-root::rPub = rPub
-root::rPro = rPro
-root::stat = rStat
-===DONE===
+--EXPECTF--	
+string(20) "Invalid method name "
+string(21) "Invalid method name 1"
+string(21) "Class  does not exist"
+string(22) "Class a does not exist"
+string(21) "Class  does not exist"
+string(22) "Class a does not exist"
+string(21) "Class  does not exist"
+string(66) "The parameter class is expected to be either a string or an object"
+string(21) "Class  does not exist"
+Done

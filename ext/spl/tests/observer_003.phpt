@@ -45,14 +45,14 @@ foreach($storage2 as $object)
 --EXPECTF--
 int(4)
 int(1)
-unicode(1) "2"
-unicode(3) "foo"
+string(1) "2"
+string(3) "foo"
 bool(true)
-unicode(%d) "%s"
+string(%d) "%s"
 ===UNSERIALIZE===
 int(4)
 int(1)
-unicode(1) "2"
-unicode(3) "foo"
+string(1) "2"
+string(3) "foo"
 bool(true)
 ===DONE===

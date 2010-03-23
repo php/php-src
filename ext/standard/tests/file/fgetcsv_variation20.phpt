@@ -35,7 +35,7 @@ $loop_counter = 1;
       exit();
     }
     // write line of text 
-    @fwrite($file_handle, "This is line of text without csv fields\n");
+    fwrite($file_handle, "This is line of text without csv fields\n");
 
     // close the file if the mode to be used is read mode  and re-open using read mode
     // else rewind the file pointer to begining of the file 
@@ -88,10 +88,10 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
-bool(true)
+bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 array(1) {
@@ -112,10 +112,10 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
-bool(true)
+bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 array(1) {
@@ -136,10 +136,10 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
-bool(true)
+bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 array(1) {
@@ -160,10 +160,10 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
-bool(true)
+bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 array(1) {
@@ -184,8 +184,8 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
-bool(true)
+bool(false)
 Done

@@ -35,10 +35,10 @@ $values = array(
   // float data
   10.5,
   -10.5,
-  10.1234567e10,
-  10.7654321E-10,
+  (float) PHP_INT_MAX + 1,
+  (float) -PHP_INT_MAX - 1,
   .5,
-
+ 
   // array data
   array(),
   array(0),
@@ -83,16 +83,15 @@ for($count = 0; $count < count($values); $count++) {
   var_dump( chunk_split($str, $values[$count], $ending) );
 }
 
-echo "Done";
-
 //closing resource
 fclose($fp);
 
 ?>
+===DONE===
 --EXPECTF--
 *** Testing chunk_split() : with unexpected values for 'chunklen' argument ***
 -- Iteration 1 --
-unicode(28) "This is ch*uklen vari*ation*"
+string(28) "This is ch*uklen vari*ation*"
 -- Iteration 2 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
@@ -138,32 +137,32 @@ bool(false)
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 13 --
-unicode(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 14 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 15 --
-unicode(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 16 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: chunk_split() expects parameter 2 to be long, Unicode string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 18 --
 
-Warning: chunk_split() expects parameter 2 to be long, Unicode string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 19 --
 
-Warning: chunk_split() expects parameter 2 to be long, Unicode string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 20 --
 
-Warning: chunk_split() expects parameter 2 to be long, Unicode string given in %schunk_split_variation2.php on line %d
+Warning: chunk_split() expects parameter 2 to be long, string given in %schunk_split_variation2.php on line %d
 NULL
 -- Iteration 21 --
 
@@ -181,4 +180,4 @@ bool(false)
 
 Warning: chunk_split() expects parameter 2 to be long, resource given in %schunk_split_variation2.php on line %d
 NULL
-Done
+===DONE===

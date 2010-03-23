@@ -4,7 +4,7 @@ SimpleXML: foreach and count
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
   <person name="Joe"/>
   <person name="John">
@@ -28,13 +28,13 @@ foreach($people as $person)
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "Joe"
+string(3) "Joe"
 int(3)
 int(0)
-unicode(4) "John"
+string(4) "John"
 int(3)
 int(1)
-unicode(4) "Jane"
+string(4) "Jane"
 int(3)
 int(0)
 ===DONE===

@@ -77,8 +77,6 @@ int(1024)
 int(0)
 int(0)
 -- Creating a file inside sub-dir, and checking size of base, subdir and file created --
-
-Notice: fwrite(): 12000 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 int(0)
 int(0)
 int(12000)

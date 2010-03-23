@@ -2,7 +2,7 @@
 Test fileatime(), filemtime(), filectime() & touch() functions : basic functionality
 --FILE--
 <?php
-/* 
+/*
    Prototype: int fileatime ( string $filename );
    Description: Returns the time the file was last accessed, or FALSE
      in case of an error. The time is returned as a Unix timestamp.
@@ -39,7 +39,7 @@ echo "\n*** Done ***\n";
 unlink(dirname(__FILE__)."/005_basic.tmp");
 unlink(dirname(__FILE__)."/005_basic");
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing the basic functionality with file ***
 %d:%s:%s:%d:%d:%d
 %d:%s:%s:%d:%d:%d

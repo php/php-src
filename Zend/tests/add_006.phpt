@@ -37,7 +37,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 int(75636)
 int(951858)
 int(48550510)

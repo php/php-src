@@ -183,12 +183,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: scandir() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: scandir() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -198,17 +198,17 @@ NULL
 
 -- Iteration 19 --
 
-Warning: scandir() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: scandir() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: scandir() expects parameter 3 to be resource, Unicode string given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -231,8 +231,8 @@ NULL
 Warning: scandir(): supplied resource is not a valid Stream-Context resource in %s on line %d
 array(2) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
 }
 ===DONE===

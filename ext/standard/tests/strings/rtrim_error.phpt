@@ -44,18 +44,18 @@ NULL
 -- Test rtrim function with various invalid charlists
 
 Warning: rtrim(): Invalid '..'-range, no character to the left of '..' in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: rtrim(): Invalid '..'-range, no character to the right of '..' in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: rtrim(): Invalid '..'-range, '..'-range needs to be incrementing in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 
 Warning: rtrim(): Invalid '..'-range in %s on line %d
-unicode(14) "  Hello World
+string(14) "  Hello World
 "
 ===DONE===

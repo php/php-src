@@ -85,6 +85,7 @@ echo "Done";
 ?>
 --EXPECTF--
 
+
 Array containing same object twice:
 array(2) {
   [0]=>
@@ -94,7 +95,7 @@ array(2) {
   object(stdClass)#%d (0) {
   }
 }
-unicode(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
 array(2) {
   [0]=>
   object(stdClass)#%d (0) {
@@ -106,22 +107,22 @@ array(2) {
 array(2) {
   [0]=>
   object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
   [1]=>
   object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
 }
 array(2) {
   [0]=>
-  unicode(10) "a0.changed"
+  string(10) "a0.changed"
   [1]=>
   object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
 }
 
@@ -135,7 +136,7 @@ array(2) {
   &object(stdClass)#%d (0) {
   }
 }
-unicode(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;R:2;}"
+string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;R:2;}"
 array(2) {
   [0]=>
   &object(stdClass)#%d (0) {
@@ -147,97 +148,97 @@ array(2) {
 array(2) {
   [0]=>
   &object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
   [1]=>
   &object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
 }
 array(2) {
   [0]=>
-  &unicode(10) "a0.changed"
+  &string(10) "a0.changed"
   [1]=>
-  &unicode(10) "a0.changed"
+  &string(10) "a0.changed"
 }
 
 
 Object containing same object twice:object(stdClass)#%d (2) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (0) {
   }
-  [u"b"]=>
-  object(stdClass)#%d (0) {
-  }
-}
-unicode(58) "O:8:"stdClass":2:{U:1:"a";O:8:"stdClass":0:{}U:1:"b";r:2;}"
-object(stdClass)#%d (2) {
-  [u"a"]=>
-  object(stdClass)#%d (0) {
-  }
-  [u"b"]=>
+  ["b"]=>
   object(stdClass)#%d (0) {
   }
 }
+string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";r:2;}"
 object(stdClass)#%d (2) {
-  [u"a"]=>
-  object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+  ["a"]=>
+  object(stdClass)#%d (0) {
   }
-  [u"b"]=>
-  object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+  ["b"]=>
+  object(stdClass)#%d (0) {
   }
 }
 object(stdClass)#%d (2) {
-  [u"a"]=>
-  unicode(20) "container->a.changed"
-  [u"b"]=>
+  ["a"]=>
   object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
+  }
+  ["b"]=>
+  object(stdClass)#%d (1) {
+    ["a"]=>
+    string(7) "newProp"
+  }
+}
+object(stdClass)#%d (2) {
+  ["a"]=>
+  string(20) "container->a.changed"
+  ["b"]=>
+  object(stdClass)#%d (1) {
+    ["a"]=>
+    string(7) "newProp"
   }
 }
 
 
 Object containing object and reference to that object:
 object(stdClass)#%d (2) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#%d (0) {
   }
-  [u"b"]=>
-  &object(stdClass)#%d (0) {
-  }
-}
-unicode(58) "O:8:"stdClass":2:{U:1:"a";O:8:"stdClass":0:{}U:1:"b";R:2;}"
-object(stdClass)#%d (2) {
-  [u"a"]=>
-  &object(stdClass)#%d (0) {
-  }
-  [u"b"]=>
+  ["b"]=>
   &object(stdClass)#%d (0) {
   }
 }
+string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";R:2;}"
 object(stdClass)#%d (2) {
-  [u"a"]=>
+  ["a"]=>
+  &object(stdClass)#%d (0) {
+  }
+  ["b"]=>
+  &object(stdClass)#%d (0) {
+  }
+}
+object(stdClass)#%d (2) {
+  ["a"]=>
   &object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
-  [u"b"]=>
+  ["b"]=>
   &object(stdClass)#%d (1) {
-    [u"a"]=>
-    unicode(7) "newProp"
+    ["a"]=>
+    string(7) "newProp"
   }
 }
 object(stdClass)#%d (2) {
-  [u"a"]=>
-  &unicode(20) "container->a.changed"
-  [u"b"]=>
-  &unicode(20) "container->a.changed"
+  ["a"]=>
+  &string(20) "container->a.changed"
+  ["b"]=>
+  &string(20) "container->a.changed"
 }
 Done

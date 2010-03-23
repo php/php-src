@@ -23,13 +23,12 @@ var_dump($a, $b);
 echo "Done";
 ?>
 --EXPECTF--
-
 Warning: Class __PHP_Incomplete_Class has no unserializer in %sserialization_objects_009.php on line %d
 
 Warning: Class C has no unserializer in %sserialization_objects_009.php on line %d
 object(__PHP_Incomplete_Class)#%d (1) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(1) "C"
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "C"
 }
 object(C)#%d (0) {
 }

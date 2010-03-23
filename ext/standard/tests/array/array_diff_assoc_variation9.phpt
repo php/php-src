@@ -37,11 +37,11 @@ var_dump(array_diff_assoc($array1, $array2['sub_arraya']));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_diff_assoc() : usage variations ***
 -- Compare two 2-D arrays --
 array(2) {
-  [u"sub_array1"]=>
+  ["sub_array1"]=>
   array(3) {
     [0]=>
     int(1)
@@ -50,18 +50,18 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"sub_array2"]=>
+  ["sub_array2"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 array(2) {
-  [u"sub_arraya"]=>
+  ["sub_arraya"]=>
   array(3) {
     [0]=>
     int(1)
@@ -70,14 +70,14 @@ array(2) {
     [2]=>
     int(5)
   }
-  [u"sub_arrayb"]=>
+  ["sub_arrayb"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "z"
+    string(1) "z"
     [2]=>
-    unicode(1) "y"
+    string(1) "y"
   }
 }
 
@@ -96,17 +96,17 @@ array(2) {
 }
 array(2) {
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(3) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "z"
+  string(1) "z"
   [2]=>
-  unicode(1) "y"
+  string(1) "y"
 }
 
 -- Compare a subarray from one 2-D array and one 2-D array --
@@ -119,7 +119,7 @@ array(3) {
   int(3)
 }
 array(2) {
-  [u"sub_array1"]=>
+  ["sub_array1"]=>
   array(3) {
     [0]=>
     int(1)
@@ -128,14 +128,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"sub_array2"]=>
+  ["sub_array2"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 Done

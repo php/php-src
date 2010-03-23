@@ -59,7 +59,7 @@ var_dump( array_filter($input, 'callback5') );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_filter() : usage variations - callback function with different return values***
 callback function with int return value
 array(9) {
@@ -76,7 +76,7 @@ array(9) {
   [5]=>
   int(1000)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
   [8]=>
@@ -97,7 +97,7 @@ array(9) {
   [5]=>
   int(1000)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
   [8]=>
@@ -118,7 +118,7 @@ array(9) {
   [5]=>
   int(1000)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
   [8]=>
@@ -142,7 +142,7 @@ array(9) {
   [5]=>
   int(1000)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
   [8]=>

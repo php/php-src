@@ -62,23 +62,23 @@ echo "Done\n";
 int(5)
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(5)
 array(2) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 int(5)
 array(5) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
   NULL
   [3]=>
@@ -89,73 +89,73 @@ array(5) {
 int(5)
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(5)
 array(4) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
 }
 int(5)
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 int(5)
 array(10) {
   [0]=>
-  unicode(1) "1"
-  [u"ID"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["ID"]=>
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
   [2]=>
   NULL
-  [u"BLOB"]=>
+  ["BLOB"]=>
   NULL
   [3]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
   [4]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 int(5)
 array(5) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
   NULL
   [3]=>
@@ -165,23 +165,23 @@ array(5) {
 }
 int(5)
 array(5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
+  ["BLOB"]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 int(5)
 array(5) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
   NULL
   [3]=>

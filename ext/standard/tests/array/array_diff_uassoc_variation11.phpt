@@ -26,20 +26,20 @@ var_dump( array_diff_uassoc($boolean_indx_array, $input_array, "strcasecmp") );
 -- Testing array_diff_key() function with float indexed array --
 array(5) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [-10]=>
-  unicode(3) "-10"
-  [u"true"]=>
+  string(3) "-10"
+  ["true"]=>
   int(1)
-  [u"false"]=>
+  ["false"]=>
   int(0)
 }
 array(2) {
   [1]=>
-  unicode(5) "boolT"
+  string(5) "boolT"
   [0]=>
-  unicode(5) "boolF"
+  string(5) "boolF"
 }
 ===DONE===

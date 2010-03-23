@@ -190,437 +190,437 @@ array(5) {
 
 ** Iteration 7 **
 array(1) {
-  [u""]=>
+  [""]=>
   int(1)
 }
 array(1) {
-  [u""]=>
+  [""]=>
   int(1)
 }
 array(1) {
-  [u""]=>
+  [""]=>
   int(1)
 }
 
 ** Iteration 8 **
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 array(1) {
-  [u"A"]=>
+  ["A"]=>
   int(1)
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 
 ** Iteration 9 **
 array(1) {
-  [u"z"]=>
+  ["z"]=>
   int(1)
 }
 array(1) {
-  [u"Z"]=>
+  ["Z"]=>
   int(1)
 }
 array(1) {
-  [u"z"]=>
+  ["z"]=>
   int(1)
 }
 
 ** Iteration 10 **
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
 }
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 
 ** Iteration 11 **
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
 }
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 
 ** Iteration 12 **
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
 }
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 
 ** Iteration 13 **
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 array(1) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
 }
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
 }
 
 ** Iteration 14 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 15 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 16 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 17 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 18 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 19 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 20 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 21 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 22 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 23 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 24 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 25 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 26 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 27 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 28 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 29 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 
 ** Iteration 30 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -628,19 +628,19 @@ array(2) {
 
 ** Iteration 31 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -648,19 +648,19 @@ array(2) {
 
 ** Iteration 32 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -668,19 +668,19 @@ array(2) {
 
 ** Iteration 33 **
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
   [0]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
@@ -688,130 +688,130 @@ array(2) {
 
 ** Iteration 34 **
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "four"
+  ["four"]=>
+  string(4) "four"
 }
 array(4) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
-  [u"FOUR"]=>
-  unicode(4) "four"
+  ["FOUR"]=>
+  string(4) "four"
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "four"
+  ["four"]=>
+  string(4) "four"
 }
 
 ** Iteration 35 **
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "FOUR"
+  ["four"]=>
+  string(4) "FOUR"
 }
 array(4) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
-  [u"FOUR"]=>
-  unicode(4) "FOUR"
+  ["FOUR"]=>
+  string(4) "FOUR"
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "FOUR"
+  ["four"]=>
+  string(4) "FOUR"
 }
 
 ** Iteration 36 **
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "FOUR"
+  ["four"]=>
+  string(4) "FOUR"
 }
 array(4) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
-  [u"FOUR"]=>
-  unicode(4) "FOUR"
+  ["FOUR"]=>
+  string(4) "FOUR"
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "FOUR"
+  ["four"]=>
+  string(4) "FOUR"
 }
 
 ** Iteration 37 **
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "four"
+  ["four"]=>
+  string(4) "four"
 }
 array(4) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
-  [u"FOUR"]=>
-  unicode(4) "four"
+  ["FOUR"]=>
+  string(4) "four"
 }
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
-  [u"four"]=>
-  unicode(4) "four"
+  ["four"]=>
+  string(4) "four"
 }
 
 end

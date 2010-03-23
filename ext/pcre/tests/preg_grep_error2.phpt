@@ -26,15 +26,15 @@ echo "Done";
 
 Arg value is: this is a string
 
-Warning: preg_grep() expects parameter 2 to be array, Unicode string given in %spreg_grep_error2.php on line %d
+Warning: preg_grep() expects parameter 2 to be array, string given in %spreg_grep_error2.php on line %d
 NULL
 
 Arg value is: Array
 array(2) {
   [0]=>
-  unicode(7) "this is"
+  string(7) "this is"
   [1]=>
-  unicode(10) "a subarray"
+  string(10) "a subarray"
 }
 
 Warning: preg_grep() expects parameter 2 to be array, object given in %spreg_grep_error2.php on line %d

@@ -30,7 +30,6 @@ var_dump( strrpos($heredoc_str, $heredoc_str, 1) );
 var_dump( strrpos("Hello, World", "o", 3) );
 var_dump( strrpos("Hello, World", "o", 6) );
 var_dump( strrpos("Hello, World", "o", 10) );
-var_dump( strrpos("Hello, World", "Hello, world", -2) );
 echo "*** Done ***";
 ?>
 --EXPECTF--
@@ -44,11 +43,8 @@ int(0)
 int(0)
 bool(false)
 int(0)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 int(8)
 int(8)
-bool(false)
 bool(false)
 *** Done ***

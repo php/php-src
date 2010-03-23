@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,8 +47,7 @@ const zend_function_entry php_dom_domerrorhandler_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
-/* {{{ proto dom_boolean dom_domerrorhandler_handle_error(domerror error) U
+/* {{{ proto dom_boolean dom_domerrorhandler_handle_error(domerror error);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-ERRORS-DOMErrorHandler-handleError
 Since: 
 */

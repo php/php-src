@@ -47,7 +47,7 @@ var_dump($Data = str_ireplace("\n", "<br>", $Data));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: str_ireplace() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
@@ -56,46 +56,46 @@ NULL
 
 Warning: str_ireplace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
-unicode(0) ""
-unicode(8) "aaaaaaaT"
-unicode(8) "aaaaaaaT"
+string(0) ""
+string(8) "aaaaaaaT"
+string(8) "aaaaaaaT"
 int(7)
-unicode(15) "aaaaaaaaaaaaaaT"
-unicode(15) "aaaaaaaaaaaaaaT"
+string(15) "aaaaaaaaaaaaaaT"
+string(15) "aaaaaaaaaaaaaaT"
 int(7)
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 int(7)
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 int(7)
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+string(22) "aaaaaaaaaaaaaaaaaaaaaT"
 array(2) {
   [0]=>
-  unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
+  string(22) "aaaaaaaaaaaaaaaaaaaaaT"
   [1]=>
-  unicode(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
+  string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
 array(2) {
-  [u"key"]=>
-  unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-  [u"test"]=>
-  unicode(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
+  ["key"]=>
+  string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+  ["test"]=>
+  string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
 array(2) {
-  [u"key"]=>
-  unicode(22) "aaaaaaaaaaaaaaaaaaaaaT"
-  [u"test"]=>
-  unicode(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
+  ["key"]=>
+  string(22) "aaaaaaaaaaaaaaaaaaaaaT"
+  ["test"]=>
+  string(36) "aabbbbbbaabbbasdabbbbbbahsdbbbbbbbbb"
 }
-unicode(143) "Change tracking and management software designed to watch
+string(143) "Change tracking and management software designed to watch
 	for abnormal system behavior.
 Suggest features, report bugs, or ask
 	questions here."
-unicode(152) "Change tracking and management software designed to watch<br>	for abnormal system behavior.<br>Suggest features, report bugs, or ask<br>	questions here."
+string(152) "Change tracking and management software designed to watch<br>	for abnormal system behavior.<br>Suggest features, report bugs, or ask<br>	questions here."
 Done

@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -56,41 +56,41 @@ foreach($stmt as $data)
 --EXPECTF--
 array(2) {
   [0]=>
-  unicode(1) "A"
+  string(1) "A"
   [1]=>
-  unicode(6) "Group1"
+  string(6) "Group1"
 }
 array(2) {
   [0]=>
-  unicode(1) "B"
+  string(1) "B"
   [1]=>
-  unicode(6) "Group2"
+  string(6) "Group2"
 }
 Test::__construct(N/A)
 object(Test)#%d (2) {
-  [u"val"]=>
-  unicode(1) "A"
-  [u"grp"]=>
-  unicode(6) "Group1"
+  ["val"]=>
+  string(1) "A"
+  ["grp"]=>
+  string(6) "Group1"
 }
 Test::__construct(N/A)
 object(Test)#%d (2) {
-  [u"val"]=>
-  unicode(1) "B"
-  [u"grp"]=>
-  unicode(6) "Group2"
+  ["val"]=>
+  string(1) "B"
+  ["grp"]=>
+  string(6) "Group2"
 }
 Test::__construct(WOW)
 object(Test)#%d (2) {
-  [u"val"]=>
-  unicode(1) "A"
-  [u"grp"]=>
-  unicode(6) "Group1"
+  ["val"]=>
+  string(1) "A"
+  ["grp"]=>
+  string(6) "Group1"
 }
 Test::__construct(WOW)
 object(Test)#%d (2) {
-  [u"val"]=>
-  unicode(1) "B"
-  [u"grp"]=>
-  unicode(6) "Group2"
+  ["val"]=>
+  string(1) "B"
+  ["grp"]=>
+  string(6) "Group2"
 }

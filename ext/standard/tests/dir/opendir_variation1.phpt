@@ -188,10 +188,8 @@ bool(false)
 
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: opendir(Array): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: opendir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
 resource(%d) of type (stream)
@@ -215,6 +213,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: opendir(Resource id #%d): failed to open dir: %s in %s on line %d
-bool(false)
+Warning: opendir() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 ===DONE===

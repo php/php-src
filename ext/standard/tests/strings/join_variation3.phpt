@@ -44,7 +44,7 @@ $pieces_arrays = array (
 // a multichar glue value
 $glue = "], [";
 
-// loop through each $pieces_arrays element and call join()
+// loop through each $pieces_arrays element and call join() 
 $iteration = 1;
 for($index = 0; $index < count($pieces_arrays); $index ++) {
   echo "-- Iteration $iteration --\n";
@@ -57,43 +57,43 @@ echo "Done\n";
 --EXPECTF--
 *** Testing join() : usage variations ***
 -- Iteration 1 --
-unicode(6) "1], [2"
+string(6) "1], [2"
 -- Iteration 2 --
-unicode(10) "1.1], [2.2"
+string(10) "1.1], [2.2"
 -- Iteration 3 --
 
 Notice: Array to string conversion in %s on line %d
 
 Notice: Array to string conversion in %s on line %d
-unicode(14) "Array], [Array"
+string(14) "Array], [Array"
 -- Iteration 4 --
-unicode(5) "], [1"
+string(5) "], [1"
 -- Iteration 5 --
-unicode(0) ""
+string(0) ""
 -- Iteration 6 --
-unicode(0) ""
+string(0) ""
 -- Iteration 7 --
-unicode(36) "a], [aaaa], [b], [bbbb], [c], [ccccc"
+string(36) "a], [aaaa], [b], [bbbb], [c], [ccccc"
 -- Iteration 8 --
-unicode(19) "one], [two], [three"
+string(19) "one], [two], [three"
 -- Iteration 9 --
-unicode(11) "1], [2], [3"
+string(11) "1], [2], [3"
 -- Iteration 10 --
-unicode(20) "10], [20], [40], [30"
+string(20) "10], [20], [40], [30"
 -- Iteration 11 --
-unicode(23) "ten], [twenty], [thirty"
+string(23) "ten], [twenty], [thirty"
 -- Iteration 12 --
-unicode(16) "1], [two], [four"
+string(16) "1], [two], [four"
 -- Iteration 13 --
-unicode(12) "null], [], ["
+string(12) "null], [], ["
 -- Iteration 14 --
-unicode(22) "true], [false], [], [1"
+string(22) "true], [false], [], [1"
 -- Iteration 15 --
-unicode(14) "emptys], [], ["
+string(14) "emptys], [], ["
 -- Iteration 16 --
-unicode(21) "], [], [], [], [], [1"
+string(21) "], [], [], [], [], [1"
 -- Iteration 17 --
-unicode(11) "4], [5], [6"
+string(11) "4], [5], [6"
 -- Iteration 18 --
-unicode(13) "10], [20], [3"
+string(13) "10], [20], [3"
 Done

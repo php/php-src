@@ -27,7 +27,7 @@ echo "\nDone\n";
 int(1)
 int(-2)
 float(2.09)
-unicode(0) ""
+string(0) ""
 bool(false)
 bool(false)
 bool(false)

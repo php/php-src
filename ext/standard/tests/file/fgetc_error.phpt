@@ -4,7 +4,7 @@ Test fgetc() function : error conditions
 <?php
 /*
  Prototype: string fgetc ( resource $handle );
- Description: Flushes the output to a file
+ Description: Gets character from file pointer
 */
 
 echo "*** Testing error conditions ***\n";
@@ -40,34 +40,34 @@ echo "Done\n";
 -- Testing fgetc() with zero argument --
 
 Warning: fgetc() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing fgetc() with more than expected number of arguments --
 
 Warning: fgetc() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 -- Testing fgetc() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetc() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: fgetc() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: fgetc() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: fgetc() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: fgetc() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: fgetc() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: fgetc() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 Done

@@ -24,9 +24,9 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-unicode(4) "test"
+string(4) "test"
 bool(true)
 bool(true)
-unicode(4) "test"
+string(4) "test"
 bool(true)
 Done

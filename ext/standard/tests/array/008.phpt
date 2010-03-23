@@ -140,7 +140,7 @@ $c=array (
 );
 array_intersect($a,$b,$c);
 array(3) {
-  [u"big"]=>
+  ["big"]=>
   int(2)
   [1]=>
   int(2)
@@ -154,7 +154,7 @@ array(1) {
 }
 array_intersect($a,$b);
 array(15) {
-  [u"big"]=>
+  ["big"]=>
   int(2)
   [1]=>
   int(2)
@@ -165,7 +165,7 @@ array(15) {
   [6]=>
   int(3)
   [8]=>
-  unicode(11) "some_string"
+  string(11) "some_string"
   [9]=>
   int(3)
   [10]=>
@@ -252,34 +252,34 @@ Results:
 
 array_intersect($a,$b,$c);
 array(6) {
-  [u"b"]=>
-  unicode(4) "some"
-  [u"z"]=>
-  unicode(3) "foo"
-  [u"gate"]=>
-  unicode(3) "web"
+  ["b"]=>
+  string(4) "some"
+  ["z"]=>
+  string(3) "foo"
+  ["gate"]=>
+  string(3) "web"
   [73]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [95]=>
-  unicode(4) "some"
-  [u"som3"]=>
-  unicode(4) "some"
+  string(4) "some"
+  ["som3"]=>
+  string(4) "some"
 }
 array_intersect_assoc($a,$b,$c);
 array(1) {
-  [u"gate"]=>
-  unicode(3) "web"
+  ["gate"]=>
+  string(3) "web"
 }
 array_intersect($a,$b);
 array(11) {
-  [u"b"]=>
-  unicode(4) "some"
-  [u"z"]=>
-  unicode(3) "foo"
-  [u"f"]=>
+  ["b"]=>
+  string(4) "some"
+  ["z"]=>
+  string(3) "foo"
+  ["f"]=>
   int(5)
-  [u"gate"]=>
-  unicode(3) "web"
+  ["gate"]=>
+  string(3) "web"
   [7]=>
   int(18)
   [11]=>
@@ -289,22 +289,22 @@ array(11) {
   [45]=>
   int(42)
   [73]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [95]=>
-  unicode(4) "some"
-  [u"som3"]=>
-  unicode(4) "some"
+  string(4) "some"
+  ["som3"]=>
+  string(4) "some"
 }
 array_intersect_assoc($a,$b);
 array(5) {
-  [u"f"]=>
+  ["f"]=>
   int(5)
-  [u"gate"]=>
-  unicode(3) "web"
+  ["gate"]=>
+  string(3) "web"
   [7]=>
   int(18)
   [11]=>
   int(42)
-  [u"som3"]=>
-  unicode(4) "some"
+  ["som3"]=>
+  string(4) "some"
 }

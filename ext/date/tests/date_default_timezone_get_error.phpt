@@ -22,6 +22,6 @@ var_dump( date_default_timezone_get($extra_arg));
 *** Testing date_default_timezone_get() : error conditions ***
 
 -- Testing date_create() function with more than expected no. of arguments --
-unicode(3) "UTC"
+string(3) "UTC"
 
 ===Done===

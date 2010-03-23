@@ -17,16 +17,11 @@ $escape_char_str = <<<EOD
 \escape \\seque\nce
 EOD;
 
-$heredoc_needle = <<<EOD
-\n
-EOD;
-
 $needles = array(
   "\t",
   '\n',
   "\r",
   "\\",
-  $heredoc_needle, //needle as heredoc string
   $escape_char_str //needle as haystack
 );
 
@@ -37,21 +32,19 @@ foreach($needles as $needle) {
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-unicode(33) "	 stch using
+string(33) "	 stch using
 \escape \seque
 ce"
-unicode(9) "\seque
+string(9) "\seque
 ce"
-unicode(25) " using
+string(25) " using
 \escape \seque
 ce"
-unicode(9) "\seque
+string(9) "\seque
 ce"
-unicode(3) "
-ce"
-unicode(33) "	 stch using
+string(33) "	 stch using
 \escape \seque
 ce"
 *** Done ***

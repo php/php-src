@@ -23,11 +23,11 @@ var_dump($arr_static_vars);
 ?>
 ===DONE===
 --EXPECT--
-unicode(4) "test"
+string(4) "test"
 array(1) {
   [0]=>
   array(1) {
-    [u"enabled"]=>
+    ["enabled"]=>
     bool(true)
   }
 }

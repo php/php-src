@@ -33,28 +33,29 @@ var_dump($a);
 
 ?>
 --EXPECTF--
+
+
 ---> Pass constant assignment by reference:
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
-unicode(10) "a.original"
-unicode(10) "a.original"
+Strict Standards: Only variables should be passed by reference in %s on line 9
+string(10) "a.original"
+string(10) "a.original"
 
 
 ---> Pass variable assignment by reference:
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
-unicode(10) "a.original"
-unicode(10) "a.original"
+Strict Standards: Only variables should be passed by reference in %s on line 15
+string(10) "a.original"
+string(10) "a.original"
 
 
 ---> Pass reference assignment by reference:
-unicode(10) "a.original"
-unicode(9) "a.changed"
+string(10) "a.original"
+string(9) "a.changed"
 
 
 ---> Pass concat assignment by reference:
 
-Strict Standards: Only variables should be passed by reference in %s on line %d
-unicode(20) "b.originala.original"
-unicode(10) "a.original"
-
+Strict Standards: Only variables should be passed by reference in %s on line 28
+string(20) "b.originala.original"
+string(10) "a.original"

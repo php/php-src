@@ -5,12 +5,12 @@ Test uasort() function : object functionality - sort diff. objects
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
  * Description: Sort an array with a user-defined comparison function and maintain index association 
  * Source code: ext/standard/array.c
-*/
+*
 
 /*
  * This testcase tests uasort() functionality with differnt objects
  * Objects of different classes: 
- *  simple class, 
+ *  simple class,
  *  child class,
  *  empty class & 
  *  static class
@@ -124,63 +124,63 @@ echo "Done"
 bool(true)
 array(4) {
   [3]=>
-  object(StaticClass)#4 (0) {
+  object(StaticClass)#%d (0) {
   }
   [2]=>
-  object(StaticClass)#3 (0) {
+  object(StaticClass)#%d (0) {
   }
   [1]=>
-  object(StaticClass)#2 (0) {
+  object(StaticClass)#%d (0) {
   }
   [0]=>
-  object(StaticClass)#1 (0) {
+  object(StaticClass)#%d (0) {
   }
 }
 -- Testing uasort() with EmptyClass objects --
 bool(true)
 array(4) {
   [3]=>
-  object(EmptyClass)#8 (0) {
+  object(EmptyClass)#%d (0) {
   }
   [2]=>
-  object(EmptyClass)#7 (0) {
+  object(EmptyClass)#%d (0) {
   }
   [1]=>
-  object(EmptyClass)#6 (0) {
+  object(EmptyClass)#%d (0) {
   }
   [0]=>
-  object(EmptyClass)#5 (0) {
+  object(EmptyClass)#%d (0) {
   }
 }
 -- Testing uasort() with ChildClass objects --
 bool(true)
 array(4) {
   [2]=>
-  object(ChildClass)#3 (2) {
-    [u"child_value"]=>
+  object(ChildClass)#%d (2) {
+    ["child_value"]=>
     int(15)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [0]=>
-  object(ChildClass)#1 (2) {
-    [u"child_value"]=>
+  object(ChildClass)#%d (2) {
+    ["child_value"]=>
     int(20)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [1]=>
-  object(ChildClass)#2 (2) {
-    [u"child_value"]=>
+  object(ChildClass)#%d (2) {
+    ["child_value"]=>
     int(500)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [3]=>
-  object(ChildClass)#4 (2) {
-    [u"child_value"]=>
+  object(ChildClass)#%d (2) {
+    ["child_value"]=>
     int(700)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
 }

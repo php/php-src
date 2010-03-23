@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -36,60 +36,6 @@
 #include "ebcdic.h"
 #endif /*APACHE*/
 #endif /*_OSD_POSIX*/
-
-
-/*
- * These macros are similar to ZVAL_U_STRING*() but they select between
- * Unicode/binary based on explicitly specified type, rather than the
- * UG(unicode) global. They may be useful for other functions, but implementing
- * them would probably require updating all of the corresponding add_*_assoc_*()
- * macros, so let's keep them here for now and revisit the issue if someone else
- * needs them in the future.
- */
-#define ZVAL_UT_STRING(conv, type, z, s, flags) { \
-		if (type == IS_UNICODE) { \
-			UErrorCode status = U_ZERO_ERROR; \
-			char *__s = (s); \
-			int __s_len = strlen(__s); \
-			UChar *u_str; \
-			int u_len; \
-			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-			ZVAL_UNICODEL(z, u_str, u_len, 0); \
-		} else { \
-			char *__s=(s);					\
-			Z_STRLEN_P(z) = strlen(__s);	\
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, Z_STRLEN_P(z)) : __s);	\
-			Z_TYPE_P(z) = IS_STRING;        \
-		} \
-	}
-
-#define ZVAL_UT_STRINGL(conv, type, z, s, l, flags) { \
-		if (type == IS_UNICODE) { \
-			UErrorCode status = U_ZERO_ERROR; \
-			char *__s = (s); \
-			int __s_len = (l); \
-			UChar *u_str; \
-			int u_len; \
-			zend_string_to_unicode_ex(conv, &u_str, &u_len, __s, __s_len, &status); \
-			if ((flags) & ZSTR_AUTOFREE) { \
-				efree(__s); \
-			} \
-			ZVAL_UNICODEL(z, u_str, u_len, 0); \
-		} else { \
-			char *__s=(s); int __l=l;	\
-			Z_STRLEN_P(z) = __l;	    \
-			Z_STRVAL_P(z) = (((flags) & ZSTR_DUPLICATE) ? estrndup(__s, __l) : __s);	\
-			Z_TYPE_P(z) = IS_STRING;    \
-		}\
-	}
-
-#define RETVAL_UT_STRING(conv, type, s, flags) 		ZVAL_UT_STRING(conv, type, return_value, s, flags)
-#define RETVAL_UT_STRINGL(conv, type, s, l, flags) 	ZVAL_UT_STRINGL(conv, type, return_value, s, l, flags)
-#define RETURN_UT_STRING(conv, type, t, flags)		{ RETVAL_UT_STRING(conv, type, t, flags); return; }
-#define RETURN_UT_STRINGL(conv, type, t, l, flags)	{ RETVAL_UT_STRINGL(conv, type, t, l, flags); return; }
 
 /* {{{ free_url
  */
@@ -136,17 +82,15 @@ PHPAPI char *php_replace_controlchars_ex(char *str, int len)
 } 
 /* }}} */
 
-PHPAPI char *php_replace_controlchars(char *str) /* {{{ */
+PHPAPI char *php_replace_controlchars(char *str)
 {
 	return php_replace_controlchars_ex(str, strlen(str));
 } 
-/* }}} */
 
-PHPAPI php_url *php_url_parse(char const *str) /* {{{ */
+PHPAPI php_url *php_url_parse(char const *str)
 {
 	return php_url_parse_ex(str, strlen(str));
 }
-/* }}} */
 
 /* {{{ php_url_parse
  */
@@ -396,72 +340,50 @@ end:
 }
 /* }}} */
 
-#define add_ascii_assoc_u_ascii_string(arg, key, str, type, duplicate) do { \
-		zval *___tmp; \
-		MAKE_STD_ZVAL(___tmp); \
-		ZVAL_UT_STRING(UG(ascii_conv), type, ___tmp, str, duplicate); \
-		add_ascii_assoc_zval(arg, key, ___tmp); \
-    } while (0)
-
-
-/* {{{ proto mixed parse_url(string url, [int url_component]) U
+/* {{{ proto mixed parse_url(string url, [int url_component])
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
-	zstr str;
+	char *str;
 	int str_len;
-	zend_uchar type;
 	php_url *resource;
 	long key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t|l", &str, &str_len, &type, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
 		return;
 	}
 
-	if (type == IS_UNICODE) {
-		char *temp;
-
-		if ((temp = zend_unicode_to_ascii(str.u, str_len TSRMLS_CC)) == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert URL parameter to ASCII");
-			return;
-		}
-		str.s = temp;
-	}
-
-	resource = php_url_parse_ex(str.s, str_len);
+	resource = php_url_parse_ex(str, str_len);
 	if (resource == NULL) {
-		php_error_docref1(NULL TSRMLS_CC, str.s, E_WARNING, "Unable to parse URL");
-		if (type == IS_UNICODE) {
-			efree(str.s);
-		}
+		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse URL");
 		RETURN_FALSE;
 	}
 
 	if (key > -1) {
 		switch (key) {
 			case PHP_URL_SCHEME:
-				if (resource->scheme != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->scheme, 1);
+				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme, 1);
 				break;
 			case PHP_URL_HOST:
-				if (resource->host != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->host, 1);
+				if (resource->host != NULL) RETVAL_STRING(resource->host, 1);
 				break;
 			case PHP_URL_PORT:
 				if (resource->port != 0) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
-				if (resource->user != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->user, 1);
+				if (resource->user != NULL) RETVAL_STRING(resource->user, 1);
 				break;
 			case PHP_URL_PASS:
-				if (resource->pass != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->pass, 1);
+				if (resource->pass != NULL) RETVAL_STRING(resource->pass, 1);
 				break;
 			case PHP_URL_PATH:
-				if (resource->path != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->path, 1);
+				if (resource->path != NULL) RETVAL_STRING(resource->path, 1);
 				break;
 			case PHP_URL_QUERY:
-				if (resource->query != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->query, 1);
+				if (resource->query != NULL) RETVAL_STRING(resource->query, 1);
 				break;
 			case PHP_URL_FRAGMENT:
-				if (resource->fragment != NULL) RETVAL_UT_STRING(UG(ascii_conv), type, resource->fragment, 1);
+				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
 				break;
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
@@ -475,26 +397,23 @@ PHP_FUNCTION(parse_url)
 
     /* add the various elements to the array */
 	if (resource->scheme != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "scheme", resource->scheme, type, 1);
+		add_assoc_string(return_value, "scheme", resource->scheme, 1);
 	if (resource->host != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "host", resource->host, type, 1);
+		add_assoc_string(return_value, "host", resource->host, 1);
 	if (resource->port != 0)
-		add_ascii_assoc_long(return_value, "port", resource->port);
+		add_assoc_long(return_value, "port", resource->port);
 	if (resource->user != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "user", resource->user, type, 1);
+		add_assoc_string(return_value, "user", resource->user, 1);
 	if (resource->pass != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "pass", resource->pass, type, 1);
+		add_assoc_string(return_value, "pass", resource->pass, 1);
 	if (resource->path != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "path", resource->path, type, 1);
+		add_assoc_string(return_value, "path", resource->path, 1);
 	if (resource->query != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "query", resource->query, type, 1);
+		add_assoc_string(return_value, "query", resource->query, 1);
 	if (resource->fragment != NULL)
-		add_ascii_assoc_u_ascii_string(return_value, "fragment", resource->fragment, type, 1);
+		add_assoc_string(return_value, "fragment", resource->fragment, 1);
 done:	
 	php_url_free(resource);
-	if (type == IS_UNICODE) {
-		efree(str.s);
-	}
 }
 /* }}} */
 
@@ -542,8 +461,8 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 	unsigned char *to, *start;
 	unsigned char const *from, *end;
 	
-	from = (unsigned char*)s;
-	end = from + len;
+	from = (unsigned char *)s;
+	end = (unsigned char *)s + len;
 	start = to = (unsigned char *) safe_emalloc(3, len, 1);
 
 	while (from < end) {
@@ -580,72 +499,37 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 }
 /* }}} */
 
-/* {{{ proto string urlencode(binary str) U
+/* {{{ proto string urlencode(string str)
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	zstr in_str;
-	char *out_str;
+	char *in_str, *out_str;
 	int in_str_len, out_str_len;
-	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
-							  &in_str_len, &in_str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+							  &in_str_len) == FAILURE) {
 		return;
 	}
 
-	if (in_str_type == IS_UNICODE) {
-		char *utf8_str = NULL;
-		int utf8_str_len;
-		UErrorCode status = U_ZERO_ERROR;
-
-		zend_unicode_to_string_ex(UG(utf8_conv), &utf8_str, &utf8_str_len, in_str.u, in_str_len, &status);
-		if (U_FAILURE(status)) {
-			if (utf8_str) {
-				efree(utf8_str);
-			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert argument to UTF-8");
-			RETURN_FALSE;
-		}
-
-		out_str = php_url_encode(utf8_str, utf8_str_len, &out_str_len);
-		efree(utf8_str);
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "expecting binary parameter, received Unicode parameter was converted to UTF-8");
-	} else {
-		out_str = php_url_encode(in_str.s, in_str_len, &out_str_len);
-	}
+	out_str = php_url_encode(in_str, in_str_len, &out_str_len);
 	RETURN_STRINGL(out_str, out_str_len, 0);
 }
 /* }}} */
 
-/* {{{ proto binary urldecode(binary str) U
+/* {{{ proto string urldecode(string str)
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
-	zstr in_str;
-	char *out_str;
+	char *in_str, *out_str;
 	int in_str_len, out_str_len;
-	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
-							  &in_str_len, &in_str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+							  &in_str_len) == FAILURE) {
 		return;
 	}
 
-	if (in_str_type == IS_UNICODE) {
-		in_str.s = zend_unicode_to_ascii(in_str.u, in_str_len TSRMLS_CC);
-		if (!in_str.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
-	}
-
-	out_str = estrndup(in_str.s, in_str_len);
+	out_str = estrndup(in_str, in_str_len);
 	out_str_len = php_url_decode(out_str, in_str_len);
-
-	if (in_str_type == IS_UNICODE) {
-		efree(in_str.s);
-	}
 
     RETURN_STRINGL(out_str, out_str_len, 0);
 }
@@ -716,72 +600,37 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 }
 /* }}} */
 
-/* {{{ proto binary rawurlencode(binary str) U
+/* {{{ proto string rawurlencode(string str)
    URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	zstr in_str;
-	char *out_str;
+	char *in_str, *out_str;
 	int in_str_len, out_str_len;
-	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
-							  &in_str_len, &in_str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+							  &in_str_len) == FAILURE) {
 		return;
 	}
 
-	if (in_str_type == IS_UNICODE) {
-		char *utf8_str = NULL;
-		int utf8_str_len;
-		UErrorCode status = U_ZERO_ERROR;
-
-		zend_unicode_to_string_ex(UG(utf8_conv), &utf8_str, &utf8_str_len, in_str.u, in_str_len, &status);
-		if (U_FAILURE(status)) {
-			if (utf8_str) {
-				efree(utf8_str);
-			}
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not convert argument to UTF-8");
-			RETURN_FALSE;
-		}
-
-		out_str = php_raw_url_encode(utf8_str, utf8_str_len, &out_str_len);
-		efree(utf8_str);
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "expecting binary parameter, received Unicode parameter was converted to UTF-8");
-	} else {
-		out_str = php_raw_url_encode(in_str.s, in_str_len, &out_str_len);
-	}
+	out_str = php_raw_url_encode(in_str, in_str_len, &out_str_len);
 	RETURN_STRINGL(out_str, out_str_len, 0);
 }
 /* }}} */
 
-/* {{{ proto binary rawurldecode(binary str) U
+/* {{{ proto string rawurldecode(string str)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	zstr in_str;
-	char *out_str;
+	char *in_str, *out_str;
 	int in_str_len, out_str_len;
-	zend_uchar in_str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &in_str,
-							  &in_str_len, &in_str_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
+							  &in_str_len) == FAILURE) {
 		return;
 	}
 
-	if (in_str_type == IS_UNICODE) {
-		in_str.s = zend_unicode_to_ascii(in_str.u, in_str_len TSRMLS_CC);
-		if (!in_str.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
-	}
-
-	out_str = estrndup(in_str.s, in_str_len);
+	out_str = estrndup(in_str, in_str_len);
 	out_str_len = php_raw_url_decode(out_str, in_str_len);
-
-	if (in_str_type == IS_UNICODE) {
-		efree(in_str.s);
-	}
 
     RETURN_STRINGL(out_str, out_str_len, 0);
 }
@@ -815,7 +664,7 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format]) U
+/* {{{ proto array get_headers(string url[, int format])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
@@ -862,7 +711,6 @@ PHP_FUNCTION(get_headers)
 			zend_hash_move_forward_ex(hashT, &pos);
 			continue;
 		}
-
 		if (!format) {
 no_name_header:
 			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);

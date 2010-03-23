@@ -1,5 +1,5 @@
 --TEST--
-foreach with Iterator.
+foreach with Iterator. 
 --FILE--
 <?php
 
@@ -64,21 +64,20 @@ foreach ($f as $k=>$v) {
 	
 }
 
-
 ?>
 ===DONE===
 --EXPECTF--
 object(MealIterator)#%d (2) {
-  [u"pos":u"MealIterator":private]=>
+  ["pos":"MealIterator":private]=>
   int(0)
-  [u"myContent":u"MealIterator":private]=>
+  ["myContent":"MealIterator":private]=>
   array(3) {
     [0]=>
-    unicode(9) "breakfast"
+    string(9) "breakfast"
     [1]=>
-    unicode(5) "lunch"
+    string(5) "lunch"
     [2]=>
-    unicode(6) "dinner"
+    string(6) "dinner"
   }
 }
 -----( Simple iteration: )-----

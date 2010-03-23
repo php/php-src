@@ -34,4 +34,3 @@ Object of class [ <user> class Foo ] {
   - Methods [0] {
   }
 }
-

@@ -35,6 +35,7 @@ foreach ($offsets as $i) {
 ?>
 
 --EXPECTF--
+
 -- Offset is -25 --
 Multibyte String:
 
@@ -82,4 +83,3 @@ mb_strrpos:
 int(9)
 strrpos:
 int(9)
-

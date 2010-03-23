@@ -38,17 +38,17 @@ var_dump( array_diff_key($array2, $array1) );
 
 -- Testing array_diff_key() function with multi dimensional array --
 array(1) {
-  [u"third"]=>
+  ["third"]=>
   array(1) {
     [0]=>
-    unicode(4) "zero"
+    string(4) "zero"
   }
 }
 array(1) {
-  [u"fourth"]=>
+  ["fourth"]=>
   array(1) {
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
   }
 }
 ===DONE===

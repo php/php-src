@@ -56,7 +56,7 @@ NULL
 Warning: ftp_close() expects exactly 1 parameter, 0 given in %s004.php on line 17
 NULL
 
-Warning: ftp_connect(): php_network_getaddresses: getaddrinfo failed: %s not known in %s004.php on line 18
+Warning: ftp_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s004.php on line 18
 bool(false)
 
 Warning: ftp_delete() expects parameter 2 to be string, array given in %s004.php on line 19

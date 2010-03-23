@@ -53,28 +53,28 @@ echo "Done\n";
 --EXPECTF--
 Test 1
 array(1) {
-  [u"DUMMY"]=>
+  ["DUMMY"]=>
   array(1) {
     [0]=>
-    unicode(1) "X"
+    string(1) "X"
   }
 }
 Test 2
 array(1) {
-  [u"DUMMY"]=>
+  ["DUMMY"]=>
   array(1) {
     [0]=>
-    unicode(1) "X"
+    string(1) "X"
   }
 }
 Test 3
 array(1) {
-  [u"CCLASS_NAME"]=>
+  ["CCLASS_NAME"]=>
   array(2) {
     [0]=>
-    unicode(21) "%s.cc1_%d"
+    string(21) "%s.cc1_%d"
     [1]=>
-    unicode(21) "%s.cc2_%d"
+    string(21) "%s.cc2_%d"
   }
 }
 Done

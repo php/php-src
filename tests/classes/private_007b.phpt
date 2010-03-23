@@ -25,7 +25,7 @@ $obj->priv();
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Bar::priv()
 Foo::priv()
 Done

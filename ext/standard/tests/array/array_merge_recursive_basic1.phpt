@@ -25,7 +25,7 @@ var_dump( array_merge_recursive($arr1,$arr2,$arr3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_merge_recursive() : array with default keys ***
 -- With default argument --
 array(2) {
@@ -55,9 +55,9 @@ array(4) {
   [3]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
   }
 }
 array(6) {
@@ -75,9 +75,9 @@ array(6) {
   [3]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [4]=>
   array(2) {
@@ -89,9 +89,9 @@ array(6) {
   [5]=>
   array(2) {
     [0]=>
-    unicode(4) "str1"
+    string(4) "str1"
     [1]=>
-    unicode(4) "str2"
+    string(4) "str2"
   }
 }
 Done

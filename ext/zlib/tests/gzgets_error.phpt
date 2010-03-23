@@ -23,8 +23,8 @@ var_dump(gzgets());
 --EXPECTF--
 
 Warning: gzgets() expects at most 2 parameters, 3 given in %s on line %d
-NULL
+bool(false)
 
 Warning: gzgets() expects at least 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 ===DONE===

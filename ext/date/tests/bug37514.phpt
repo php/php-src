@@ -1,9 +1,8 @@
 --TEST--
 Bug #37514 (strtotime doesn't assume year correctly).
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 echo date('r', strtotime('May 18th 5:05', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 5:05pm', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 5:05 pm', 1168156376)), "\n";

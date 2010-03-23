@@ -68,59 +68,48 @@ echo "Done\n";
 bool(true)
 int(0)
 array(5) {
-  [u"ID"]=>
+  ["ID"]=>
   array(0) {
   }
-  [u"VALUE"]=>
+  ["VALUE"]=>
   array(0) {
   }
-  [u"BLOB"]=>
+  ["BLOB"]=>
   array(0) {
   }
-  [u"CLOB"]=>
+  ["CLOB"]=>
   array(0) {
   }
-  [u"STRING"]=>
+  ["STRING"]=>
   array(0) {
   }
 }
 bool(true)
 int(4)
 array(5) {
-  [u"ID"]=>
+  ["ID"]=>
   array(4) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
-    unicode(1) "1"
+    string(1) "1"
     [3]=>
-    unicode(1) "1"
+    string(1) "1"
   }
-  [u"VALUE"]=>
+  ["VALUE"]=>
   array(4) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
     [2]=>
-    unicode(1) "1"
+    string(1) "1"
     [3]=>
-    unicode(1) "1"
+    string(1) "1"
   }
-  [u"BLOB"]=>
-  array(4) {
-    [0]=>
-    NULL
-    [1]=>
-    NULL
-    [2]=>
-    NULL
-    [3]=>
-    NULL
-  }
-  [u"CLOB"]=>
+  ["BLOB"]=>
   array(4) {
     [0]=>
     NULL
@@ -131,7 +120,18 @@ array(5) {
     [3]=>
     NULL
   }
-  [u"STRING"]=>
+  ["CLOB"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+  ["STRING"]=>
   array(4) {
     [0]=>
     NULL

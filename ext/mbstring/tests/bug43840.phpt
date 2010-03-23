@@ -73,4 +73,3 @@ bool(false)
 
 Warning: mb_strpos(): Offset not contained in string in %s on line %d
 bool(false)
-

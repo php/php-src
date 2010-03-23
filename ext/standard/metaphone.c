@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 
 static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional);
 
-/* {{{ proto string metaphone(string text[, int phones]) U
+/* {{{ proto string metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
@@ -42,7 +42,7 @@ PHP_FUNCTION(metaphone)
 	}
 
 	if (metaphone((unsigned char *)str, str_len, phones, &result, 1) == 0) {
-		RETVAL_ASCII_STRING(result, ZSTR_AUTOFREE);
+		RETVAL_STRING(result, 0);
 	} else {
 		if (result) {
 			efree(result);
@@ -124,8 +124,7 @@ char _codes[26] =
 
 /* Allows us to safely look ahead an arbitrary # of letters */
 /* I probably could have just used strlen... */
-
-static char Lookahead(char *word, int how_far) /* {{{ */
+static char Lookahead(char *word, int how_far)
 {
 	char letter_ahead = '\0';	/* null by default */
 	int idx;
@@ -137,7 +136,7 @@ static char Lookahead(char *word, int how_far) /* {{{ */
 								 */
 	return letter_ahead;
 }
-/* }}} */
+
 
 /* phonize one letter
  * We don't know the buffers size in advance. On way to solve this is to just
@@ -163,7 +162,9 @@ static char Lookahead(char *word, int how_far) /* {{{ */
 /* Note is a letter is a 'break' in the word */
 #define Isbreak(c)  (!isalpha(c))
 
-static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional) /* {{{ */
+/* {{{ metaphone
+ */
+static int metaphone(unsigned char *word, int word_len, long max_phonemes, char **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	int p_idx = 0;				/* end of the phoned phrase */

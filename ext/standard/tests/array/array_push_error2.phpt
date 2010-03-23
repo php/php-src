@@ -29,6 +29,6 @@ Warning: array_push(): Cannot add element to the array as the next element is al
 bool(false)
 array(1) {
   [%d]=>
-  unicode(3) "max"
+  string(3) "max"
 }
 Done

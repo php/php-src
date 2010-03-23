@@ -46,15 +46,15 @@ echo "Done\n";
 ?>
 --EXPECTF--
 array(5) {
-  [u"ID"]=>
-  unicode(1) "1"
-  [u"VALUE"]=>
-  unicode(1) "1"
-  [u"BLOB"]=>
+  ["ID"]=>
+  string(1) "1"
+  ["VALUE"]=>
+  string(1) "1"
+  ["BLOB"]=>
   NULL
-  [u"CLOB"]=>
+  ["CLOB"]=>
   NULL
-  [u"STRING"]=>
+  ["STRING"]=>
   NULL
 }
 bool(true)

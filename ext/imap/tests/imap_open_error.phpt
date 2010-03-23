@@ -19,8 +19,10 @@ imap_open('', '');
 echo "Checking with incorrect parameters\n" ;
 imap_open('', '', '');
 imap_open('', '', '', -1);
+
 require_once(dirname(__FILE__).'/imap_include.inc');
 imap_open($default_mailbox, $username, $password, NIL, -1);
+
 ?>
 --EXPECTF--
 Checking with no parameters

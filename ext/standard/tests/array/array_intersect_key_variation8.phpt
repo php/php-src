@@ -34,30 +34,30 @@ var_dump( array_intersect_key($array2,$array1 ) );
 --EXPECTF--
 *** Testing array_intersect_key() : usage variation ***
 array(2) {
-  [u"first"]=>
+  ["first"]=>
   array(2) {
-    [u"blue"]=>
+    ["blue"]=>
     int(1)
-    [u"red"]=>
+    ["red"]=>
     int(2)
   }
-  [u"second"]=>
+  ["second"]=>
   array(1) {
-    [u"yellow"]=>
+    ["yellow"]=>
     int(7)
   }
 }
 array(2) {
-  [u"first"]=>
+  ["first"]=>
   array(2) {
-    [u"blue"]=>
+    ["blue"]=>
     int(1)
-    [u"red"]=>
+    ["red"]=>
     int(2)
   }
-  [u"second"]=>
+  ["second"]=>
   array(1) {
-    [u"cyan"]=>
+    ["cyan"]=>
     int(8)
   }
 }

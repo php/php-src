@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -49,12 +49,12 @@ typedef char * caddr_t;
 #define getpid		_getpid
 #define php_sleep(t)	Sleep(t*1000)
 #ifndef getcwd
-#define getcwd(a, b)		_getcwd(a, b)
+# define getcwd(a, b)		_getcwd(a, b)
 #endif
 #define off_t		_off_t
 typedef unsigned int uint;
 typedef unsigned long ulong;
-#if !NSAPI && !defined(pid_t)
+#if !NSAPI
 typedef long pid_t;
 #endif
 
@@ -77,6 +77,7 @@ typedef long pid_t;
 #ifndef WINDOWS
 # define WINDOWS 1
 #endif
+
 
 /* Prevent use of VC5 OpenFile function */
 #define NOOPENFILE

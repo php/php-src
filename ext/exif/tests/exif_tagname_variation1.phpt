@@ -152,11 +152,11 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: exif_tagname() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: exif_tagname() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be long, string given in %s on line %d
 NULL
 -- Iteration 21 --
 bool(false)

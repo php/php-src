@@ -13,5 +13,5 @@ var_dump(md5(b"apple"));
 ===DONE===
 --EXPECTF--
 *** Testing md5() : basic functionality ***
-unicode(32) "1f3870be274f6c49b3e31a0c6728957f"
+string(32) "1f3870be274f6c49b3e31a0c6728957f"
 ===DONE===

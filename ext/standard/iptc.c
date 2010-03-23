@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,7 +35,6 @@
 #include "php.h"
 #include "php_iptc.h"
 #include "ext/standard/head.h"
-#include "ext/standard/file.h"
 
 #include <sys/stat.h>
 
@@ -174,35 +173,35 @@ static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf TS
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
-/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool]) U
+/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool])
    Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
-    zval **pp_jpeg_file;
 	char *iptcdata, *jpeg_file;
-	int jpeg_file_len, iptcdata_len;
-    FILE *fp;
-	unsigned int marker;
-	unsigned int done = 0;
-	int inx;	
+	int iptcdata_len, jpeg_file_len;
 	long spool = 0;
-	unsigned char *spoolbuf=0, *poi=0;
+	FILE *fp;
+	unsigned int marker, done = 0, inx;
+	unsigned char *spoolbuf = NULL, *poi = NULL;
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SZ|l", &iptcdata, &iptcdata_len, &pp_jpeg_file, &spool) == FAILURE ||
-		php_stream_path_param_encode(pp_jpeg_file, &jpeg_file, &jpeg_file_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 
-    if (php_check_open_basedir(jpeg_file TSRMLS_CC)) {
+	if (PG(safe_mode) && (!php_checkuid(jpeg_file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-    if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open %s", jpeg_file);
-        RETURN_FALSE;
-    }
+	if (php_check_open_basedir(jpeg_file TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	if ((fp = VCWD_FOPEN(jpeg_file, "rb")) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open %s", jpeg_file);
+		RETURN_FALSE;
+	}
 
 	if (spool < 2) {
 		fstat(fileno(fp), &sb);
@@ -247,7 +246,6 @@ PHP_FUNCTION(iptcembed)
 			case M_APP0:
 				/* APP0 is in each and every JPEG, so when we hit APP0 we insert our new APP13! */
 			case M_APP1:
-				/* APP1 is present in JFIF */
 				if (written) {
 					/* don't try to write the data twice */
 					break;
@@ -256,19 +254,23 @@ PHP_FUNCTION(iptcembed)
 
 				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 
-				if (iptcdata_len & 1) iptcdata_len++; /* make the length even */
+				if (iptcdata_len & 1) {
+					iptcdata_len++; /* make the length even */
+				}
 
 				psheader[ 2 ] = (iptcdata_len+28)>>8;
 				psheader[ 3 ] = (iptcdata_len+28)&0xff;
 
-				for (inx = 0; inx < 28; inx++)
+				for (inx = 0; inx < 28; inx++) {
 					php_iptc_put1(fp, spool, psheader[inx], poi?&poi:0 TSRMLS_CC);
+				}
 
 				php_iptc_put1(fp, spool, (unsigned char)(iptcdata_len>>8), poi?&poi:0 TSRMLS_CC);
 				php_iptc_put1(fp, spool, (unsigned char)(iptcdata_len&0xff), poi?&poi:0 TSRMLS_CC);
-					
-				for (inx = 0; inx < iptcdata_len; inx++)
+
+				for (inx = 0; inx < iptcdata_len; inx++) {
 					php_iptc_put1(fp, spool, iptcdata[inx], poi?&poi:0 TSRMLS_CC);
+				}
 				break;
 
 			case M_SOS:								
@@ -276,7 +278,7 @@ PHP_FUNCTION(iptcembed)
 				php_iptc_read_remaining(fp, spool, poi?&poi:0 TSRMLS_CC);
 				done = 1;
 				break;
-			
+
 			default:
 				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 				break;
@@ -286,31 +288,30 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL((char*)spoolbuf, poi - spoolbuf, 0);
+		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
 	} else {
 		RETURN_TRUE;
 	}
 }
 /* }}} */
 
-/* {{{ proto array iptcparse(string iptcdata) U
+/* {{{ proto array iptcparse(string iptcdata)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	unsigned int length, inx, len, tagsfound;
-	unsigned char *buffer;
-	unsigned char recnum, dataset;
-	char key[16];
+	unsigned int inx = 0, len, tagsfound = 0;
+	unsigned char *buffer, recnum, dataset, key[ 16 ];
+	char *str;
+	int str_len;
 	zval *values, **element;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buffer, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
 		return;
 	}
 
-	inx = 0;
-	tagsfound = 0; /* number of tags already found */
+	buffer = (unsigned char *)str;
 
-	while (inx < length) { /* find 1st tag */
+	while (inx < str_len) { /* find 1st tag */
 		if ((buffer[inx] == 0x1c) && ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){ 
 			break;
 		} else {
@@ -318,12 +319,12 @@ PHP_FUNCTION(iptcparse)
 		}
 	}
 
-	while (inx < length) {
+	while (inx < str_len) {
 		if (buffer[ inx++ ] != 0x1c) {
 			break;   /* we ran against some data which does not conform to IPTC - stop parsing! */
 		} 
 		
-		if ((inx + 4) >= length)
+		if ((inx + 4) >= str_len)
 			break;
 
 		dataset = buffer[ inx++ ];
@@ -340,25 +341,23 @@ PHP_FUNCTION(iptcparse)
 
 		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
 
-		if ((len > length) || (inx + len) > length)
+		if ((len > str_len) || (inx + len) > str_len) {
 			break;
+		}
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
 			array_init(return_value);
 		}
 
-		if (zend_ascii_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
-			ALLOC_ZVAL(values);
-			INIT_PZVAL(values);
+		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
+			MAKE_STD_ZVAL(values);
 			array_init(values);
 			
-			zend_ascii_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(zval*), (void **) &element);
+			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void *) &values, sizeof(zval*), (void **) &element);
 		} 
 			
-		add_next_index_stringl(*element, (char*)buffer+inx, len, 1);
-
+		add_next_index_stringl(*element, buffer+inx, len, 1);
 		inx += len;
-
 		tagsfound++;
 	}
 

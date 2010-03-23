@@ -36,7 +36,7 @@ in __autoload(FOO)
 
 Warning: unserialize(): Function check() hasn't defined the class it was called for in %s on line 23
 object(__PHP_Incomplete_Class)#%d (1) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(3) "FOO"
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(3) "FOO"
 }
 Done

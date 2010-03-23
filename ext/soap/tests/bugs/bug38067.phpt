@@ -3,8 +3,6 @@ Bug #38067 (Parameters are not decoded from utf-8 when using encoding option)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --INI--
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php

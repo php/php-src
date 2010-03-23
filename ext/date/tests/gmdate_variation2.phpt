@@ -104,25 +104,25 @@ foreach($inputs as $key =>$value) {
 *** Testing gmdate() : usage variation ***
 
 --int 0--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --int 1--
-unicode(24) "1970-01-01T00:00:01+0000"
+string(24) "1970-01-01T00:00:01+0000"
 
 --int 12345--
-unicode(24) "1970-01-01T03:25:45+0000"
+string(24) "1970-01-01T03:25:45+0000"
 
 --int -12345--
-unicode(24) "1969-12-31T20:34:15+0000"
+string(24) "1969-12-31T20:34:15+0000"
 
 --float 10.5--
-unicode(24) "1970-01-01T00:00:10+0000"
+string(24) "1970-01-01T00:00:10+0000"
 
 --float -10.5--
-unicode(24) "1969-12-31T23:59:50+0000"
+string(24) "1969-12-31T23:59:50+0000"
 
 --float .5--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --empty array--
 
@@ -145,51 +145,51 @@ Warning: gmdate() expects parameter 2 to be long, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --lowercase null--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --lowercase true--
-unicode(24) "1970-01-01T00:00:01+0000"
+string(24) "1970-01-01T00:00:01+0000"
 
 --lowercase false--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --uppercase TRUE--
-unicode(24) "1970-01-01T00:00:01+0000"
+string(24) "1970-01-01T00:00:01+0000"
 
 --uppercase FALSE--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --empty string DQ--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmdate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: gmdate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -203,8 +203,8 @@ Warning: gmdate() expects parameter 2 to be long, object given in %s on line %d
 bool(false)
 
 --undefined var--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 
 --unset var--
-unicode(24) "1970-01-01T00:00:00+0000"
+string(24) "1970-01-01T00:00:00+0000"
 ===DONE===

@@ -16,7 +16,7 @@ ob_start();
 echo "*** Testing session_cache_expire() : basic functionality ***\n";
 
 var_dump(session_cache_expire());
-var_dump(session_cache_expire(999));
+var_dump(session_cache_expire(1234567890));
 var_dump(session_cache_expire(180));
 var_dump(session_start());
 var_dump(session_cache_expire());
@@ -30,7 +30,7 @@ ob_end_flush();
 *** Testing session_cache_expire() : basic functionality ***
 int(180)
 int(180)
-int(999)
+int(1234567890)
 bool(true)
 int(180)
 bool(true)

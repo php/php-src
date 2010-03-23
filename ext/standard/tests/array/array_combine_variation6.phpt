@@ -30,7 +30,7 @@ var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_combine() : binary safe checking ***
 array(2) {
   ["hello"]=>
@@ -39,15 +39,15 @@ array(2) {
   string(5) "world"
 }
 array(2) {
-  [u"hello"]=>
+  ["hello"]=>
   string(5) "hello"
-  [u"world"]=>
+  ["world"]=>
   string(5) "world"
 }
 array(2) {
   ["hello"]=>
-  unicode(5) "hello"
+  string(5) "hello"
   ["world"]=>
-  unicode(5) "world"
+  string(5) "world"
 }
 Done

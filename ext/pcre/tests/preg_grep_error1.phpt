@@ -52,17 +52,17 @@ bool(false)
 
 Arg value is Array
 
-Warning: preg_grep() expects parameter 1 to be string (Unicode or binary), array given in %spreg_grep_error1.php on line %d
+Warning: preg_grep() expects parameter 1 to be string, array given in %spreg_grep_error1.php on line %d
 NULL
 
 Arg value is /[a-zA-Z]/
 array(2) {
   [1]=>
-  unicode(3) "abc"
+  string(3) "abc"
   [2]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 
-Warning: preg_grep() expects parameter 1 to be string (Unicode or binary), object given in %spreg_grep_error1.php on line %d
+Warning: preg_grep() expects parameter 1 to be string, object given in %spreg_grep_error1.php on line %d
 NULL
 Done

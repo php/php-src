@@ -225,7 +225,6 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	}
 #endif
 
-
 	switch (color_type) {
 		case PNG_COLOR_TYPE_PALETTE:
 			png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);

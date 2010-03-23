@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -53,8 +53,7 @@ const zend_function_entry php_dom_domimplementationsource_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
-/* {{{ proto domdomimplementation dom_domimplementationsource_get_domimplementation(string features) U
+/* {{{ proto domdomimplementation dom_domimplementationsource_get_domimplementation(string features);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpl
 Since: 
 */
@@ -64,8 +63,7 @@ PHP_FUNCTION(dom_domimplementationsource_get_domimplementation)
 }
 /* }}} end dom_domimplementationsource_get_domimplementation */
 
-
-/* {{{ proto domimplementationlist dom_domimplementationsource_get_domimplementations(string features) U
+/* {{{ proto domimplementationlist dom_domimplementationsource_get_domimplementations(string features);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpls
 Since: 
 */

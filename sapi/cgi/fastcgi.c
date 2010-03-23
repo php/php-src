@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -180,17 +180,6 @@ int fcgi_in_shutdown(void)
 	return in_shutdown;
 }
 
-void fcgi_shutdown(void)
-{
-	if (is_initialized) {
-		zend_hash_destroy(&fcgi_mgmt_vars);
-	}
-	is_fastcgi = 0;
-	if (allowed_clients) {
-		free(allowed_clients);
-	}
-}
-
 int fcgi_init(void)
 {
 	if (!is_initialized) {
@@ -260,6 +249,17 @@ int fcgi_is_fastcgi(void)
 	}
 }
 
+void fcgi_shutdown(void)
+{
+	if (is_initialized) {
+		zend_hash_destroy(&fcgi_mgmt_vars);
+	}
+	is_fastcgi = 0;
+	if (allowed_clients) {
+		free(allowed_clients);
+	}
+}
+
 #ifdef _WIN32
 /* Do some black magic with the NT security API.
  * We prepare a DACL (Discretionary Access Control List) so that
@@ -274,8 +274,8 @@ static PACL prepare_named_pipe_acl(PSECURITY_DESCRIPTOR sd, LPSECURITY_ATTRIBUTE
 	char everyone_buf[32], owner_buf[32];
 	PSID sid_everyone, sid_owner;
 	SID_IDENTIFIER_AUTHORITY
-			siaWorld = SECURITY_WORLD_SID_AUTHORITY,
-			siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
+		siaWorld = SECURITY_WORLD_SID_AUTHORITY,
+		siaCreator = SECURITY_CREATOR_SID_AUTHORITY;
 	PACL acl;
 
 	sid_everyone = (PSID)&everyone_buf;
@@ -517,8 +517,8 @@ void fcgi_init_request(fcgi_request *req, int listen_socket)
 	req->in_len = 0;
 	req->in_pad = 0;
 
-	req->out_hdr  = NULL;
-	req->out_pos  = req->out_buf;
+	req->out_hdr = NULL;
+	req->out_pos = req->out_buf;
 
 #ifdef _WIN32
 	req->tcp = !GetNamedPipeInfo((HANDLE)_get_osfhandle(req->listen_socket), NULL, NULL, NULL, NULL);
@@ -749,7 +749,7 @@ static int fcgi_read_request(fcgi_request *req)
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		unsigned char *p = buf + sizeof(fcgi_header);
 		HashPosition pos;
-		zstr key;
+		char * str_index;
 		uint str_length;
 		ulong num_index;
 		int key_type;
@@ -766,13 +766,13 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 
 		zend_hash_internal_pointer_reset_ex(req->env, &pos);
-		while ((key_type = zend_hash_get_current_key_ex(req->env, &key, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
 			int zlen;
 			zend_hash_move_forward_ex(req->env, &pos);
 			if (key_type != HASH_KEY_IS_STRING) {
 				continue;
 			}
-			if (zend_hash_find(&fcgi_mgmt_vars, key.s, str_length, (void**) &value) != SUCCESS) {
+			if (zend_hash_find(&fcgi_mgmt_vars, str_index, str_length, (void**) &value) != SUCCESS) {
 				continue;
 			}
 			--str_length;
@@ -796,7 +796,7 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, key.s, str_length);
+			memcpy(p, str_index, str_length);
 			p += str_length;
 			memcpy(p, Z_STRVAL_PP(value), zlen);
 			p += zlen;
@@ -963,13 +963,13 @@ int fcgi_accept_request(fcgi_request *req)
 						int n = 0;
 						int allowed = 0;
 
-						while (allowed_clients[n] != INADDR_NONE) {
-							if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
-								allowed = 1;
-								break;
+							while (allowed_clients[n] != INADDR_NONE) {
+								if (allowed_clients[n] == sa.sa_inet.sin_addr.s_addr) {
+									allowed = 1;
+									break;
+								}
+								n++;
 							}
-							n++;
-						}
 						if (!allowed) {
 							fprintf(stderr, "Connection from disallowed IP address '%s' is dropped.\n", inet_ntoa(sa.sa_inet.sin_addr));
 							closesocket(req->fd);

@@ -284,27 +284,27 @@ array(1) {
 
 -- Iteration 16 --
 
-Warning: mb_split() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_split() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: mb_split() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: mb_split() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: mb_split() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: mb_split() expects parameter 3 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -329,4 +329,3 @@ array(1) {
 Warning: mb_split() expects parameter 3 to be long, resource given in %s on line %d
 bool(false)
 Done
-

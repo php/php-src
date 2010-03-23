@@ -106,7 +106,7 @@ foreach($inputs as $key => $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_push() : usage variations ***
 
 -- Iteration 1 : int data --

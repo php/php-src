@@ -99,11 +99,11 @@ echo "Done";
 
 -- Iteration 1 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -113,7 +113,7 @@ array(4) {
 array(3) {
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -125,11 +125,11 @@ array(0) {
 
 -- Iteration 4 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -141,11 +141,11 @@ array(0) {
 
 -- Iteration 6 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -153,11 +153,11 @@ array(4) {
 
 -- Iteration 7 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -165,11 +165,11 @@ array(4) {
 
 -- Iteration 8 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -177,11 +177,11 @@ array(4) {
 
 -- Iteration 9 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -189,11 +189,11 @@ array(4) {
 
 -- Iteration 10 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -201,11 +201,11 @@ array(4) {
 
 -- Iteration 11 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -215,7 +215,7 @@ array(4) {
 array(3) {
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -223,11 +223,11 @@ array(3) {
 
 -- Iteration 13 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -237,7 +237,7 @@ array(4) {
 array(3) {
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -245,11 +245,11 @@ array(3) {
 
 -- Iteration 15 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -257,12 +257,12 @@ array(4) {
 
 -- Iteration 16 --
 
-Warning: array_slice() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_slice() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -272,26 +272,26 @@ NULL
 
 -- Iteration 19 --
 
-Warning: array_slice() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_slice() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_slice() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)
@@ -299,11 +299,11 @@ array(4) {
 
 -- Iteration 23 --
 array(4) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [1]=>
   int(4)

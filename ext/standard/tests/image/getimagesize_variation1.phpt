@@ -84,106 +84,99 @@ Error: 8 - Undefined variable: undefined_var, %s(%d)
 Error: 8 - Undefined variable: unset_var, %s(%d)
 
 -- Arg value: 0 --
-Error: 2 - getimagesize(0): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(0): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 1 --
-Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 12345 --
-Error: 2 - getimagesize(12345): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(12345): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: -2345 --
-Error: 2 - getimagesize(-2345): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(-2345): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 10.5 --
-Error: 2 - getimagesize(10.5): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(10.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: -10.5 --
-Error: 2 - getimagesize(-10.5): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(-10.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 10.1234567e5 --
-Error: 2 - getimagesize(101234567000): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(101234567000): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 10.7654321e-5 --
-Error: 2 - getimagesize(0.000107654321): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(0.000107654321): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: 12346 --
-Error: 2 - getimagesize(0.5): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(0.5): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: array() --
-Error: 8 - Array to string conversion, %s
-Error: 2 - getimagesize(Array): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 -- Arg value: array(0) --
-Error: 8 - Array to string conversion, %s
-Error: 2 - getimagesize(Array): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 -- Arg value: array(1) --
-Error: 8 - Array to string conversion, %s
-Error: 2 - getimagesize(Array): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 -- Arg value: array(1, 2) --
-Error: 8 - Array to string conversion, %s
-Error: 2 - getimagesize(Array): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 -- Arg value: array('color' => 'red', 'item' => 'pen') --
-Error: 8 - Array to string conversion, %s
-Error: 2 - getimagesize(Array): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, array given, %s(%d)
+NULL
 
 -- Arg value: NULL --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: null --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: true --
-Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: false --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: TRUE --
-Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s
+Error: 2 - getimagesize(1): failed to open stream: No such file or directory, %s(%d)
 bool(false)
 
 -- Arg value: FALSE --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: "" --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: '' --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: new stdclass() --
-Error: 4096 - Object of class stdClass could not be converted to binary string, %s
-Error: 8 - Object of class stdClass to string conversion, %s
-Error: 2 - getimagesize(Object): failed to open stream: No such file or directory, %s
-bool(false)
+Error: 2 - getimagesize() expects parameter 1 to be string, object given, %s(%d)
+NULL
 
 -- Arg value: undefined_var --
-Error: 2 - getimagesize(): Filename cannot be empty, %s
+Error: 2 - getimagesize(): Filename cannot be empty, %s(%d)
 bool(false)
 
 -- Arg value: unset_var --

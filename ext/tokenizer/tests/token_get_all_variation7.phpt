@@ -9,8 +9,8 @@ Test token_get_all() function : usage variations - with increment/decrement oper
 
 /*
  * Passing 'source' argument with different increment/decrement operators to test them for token
- *  ++ - T_INC(299)
- *  -- - T_DEC(298)
+ *  ++ - T_INC(297)
+ *  -- - T_DEC(296)
 */
 
 echo "*** Testing token_get_all() : 'source' string with different increment/decrement operators ***\n";
@@ -32,7 +32,7 @@ array(30) {
   [0]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -41,7 +41,7 @@ array(30) {
   [1]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -51,7 +51,7 @@ array(30) {
   [2]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -60,7 +60,7 @@ array(30) {
   [3]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -71,7 +71,7 @@ array(30) {
   [5]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -80,7 +80,7 @@ array(30) {
   [6]=>
   array(3) {
     [0]=>
-    int(307)
+    int(305)
     [1]=>
     string(2) "10"
     [2]=>
@@ -91,7 +91,7 @@ array(30) {
   [8]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -100,7 +100,7 @@ array(30) {
   [9]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -109,7 +109,7 @@ array(30) {
   [10]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -120,7 +120,7 @@ array(30) {
   [12]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -129,7 +129,7 @@ array(30) {
   [13]=>
   array(3) {
     [0]=>
-    int(307)
+    int(305)
     [1]=>
     string(1) "5"
     [2]=>
@@ -140,7 +140,7 @@ array(30) {
   [15]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -150,7 +150,7 @@ array(30) {
   [16]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -159,7 +159,7 @@ array(30) {
   [17]=>
   array(3) {
     [0]=>
-    int(299)
+    int(297)
     [1]=>
     string(2) "++"
     [2]=>
@@ -170,7 +170,7 @@ array(30) {
   [19]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -180,7 +180,7 @@ array(30) {
   [20]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -189,7 +189,7 @@ array(30) {
   [21]=>
   array(3) {
     [0]=>
-    int(298)
+    int(296)
     [1]=>
     string(2) "--"
     [2]=>
@@ -200,7 +200,7 @@ array(30) {
   [23]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -210,7 +210,7 @@ array(30) {
   [24]=>
   array(3) {
     [0]=>
-    int(318)
+    int(316)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -219,7 +219,7 @@ array(30) {
   [25]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -228,7 +228,7 @@ array(30) {
   [26]=>
   array(3) {
     [0]=>
-    int(311)
+    int(309)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -239,7 +239,7 @@ array(30) {
   [28]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -249,7 +249,7 @@ array(30) {
   [29]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>

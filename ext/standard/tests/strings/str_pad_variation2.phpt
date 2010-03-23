@@ -87,19 +87,19 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing str_pad() function: with unexpected inputs for 'pad_length' argument ***
 -- Iteration 1 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 2 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 3 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 4 --
-unicode(255) "Test string                                                                                                                                                                                                                                                    "
+string(255) "Test string                                                                                                                                                                                                                                                    "
 -- Iteration 5 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 6 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 7 --
-unicode(1012) "Test string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
+string(1012) "Test string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
 -- Iteration 8 --
 
 Warning: str_pad() expects parameter 2 to be long, array given in %s on line %d
@@ -113,17 +113,17 @@ NULL
 Warning: str_pad() expects parameter 2 to be long, array given in %s on line %d
 NULL
 -- Iteration 11 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 12 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 13 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 14 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 15 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 16 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 17 --
 
 Warning: str_pad() expects parameter 2 to be long, object given in %s on line %d
@@ -133,7 +133,7 @@ NULL
 Warning: str_pad() expects parameter 2 to be long, resource given in %s on line %d
 NULL
 -- Iteration 19 --
-unicode(11) "Test string"
+string(11) "Test string"
 -- Iteration 20 --
-unicode(11) "Test string"
+string(11) "Test string"
 ===DONE===

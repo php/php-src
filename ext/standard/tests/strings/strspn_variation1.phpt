@@ -1,5 +1,5 @@
 --TEST--
-Test strspn() function : usage variations - unexpected values for str argument
+Test strspn() function : usage variations  - unexpected values for str argument
 --FILE--
 <?php
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
@@ -152,57 +152,57 @@ int(0)
 
 -- Iteration with str value as "Array"
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with str value as "Array"
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as "Array"
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
--- Iteration with str value as "Array"
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-NULL
-
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as "Array"
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with str value as "Array"
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+-- Iteration with str value as "Array"
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
+NULL
+
+Warning: strspn() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration with str value as ""
@@ -262,12 +262,12 @@ bool(false)
 
 -- Iteration with str value as "Resource id #%d"
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: strspn() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strspn() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

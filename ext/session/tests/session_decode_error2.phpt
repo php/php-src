@@ -55,217 +55,217 @@ array(0) {
 -- Iteration 4 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 5 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 6 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 7 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 8 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 9 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 10 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 11 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 12 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 13 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 14 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 15 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 16 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 17 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 18 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 19 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 20 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 21 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 22 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 23 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 24 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 25 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 26 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 27 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 28 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 29 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 30 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 31 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 32 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 33 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   NULL
 }
 
 -- Iteration 34 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -279,7 +279,7 @@ array(1) {
 -- Iteration 35 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -293,7 +293,7 @@ array(1) {
 -- Iteration 36 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -307,7 +307,7 @@ array(1) {
 -- Iteration 37 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -321,7 +321,7 @@ array(1) {
 -- Iteration 38 --
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -335,7 +335,7 @@ array(1) {
 -- Iteration 39 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -344,14 +344,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   NULL
 }
 
 -- Iteration 40 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -360,14 +360,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   NULL
 }
 
 -- Iteration 41 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -376,14 +376,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   NULL
 }
 
 -- Iteration 42 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   array(3) {
     [0]=>
     int(1)
@@ -392,14 +392,14 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   NULL
 }
 
 -- Iteration 43 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -408,7 +408,7 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -422,7 +422,7 @@ array(2) {
 -- Iteration 44 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -431,7 +431,7 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -445,7 +445,7 @@ array(2) {
 -- Iteration 45 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -454,7 +454,7 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -468,7 +468,7 @@ array(2) {
 -- Iteration 46 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -477,7 +477,7 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -491,7 +491,7 @@ array(2) {
 -- Iteration 47 --
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -500,7 +500,7 @@ array(2) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -514,7 +514,7 @@ array(2) {
 -- Iteration 48 --
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -523,7 +523,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -532,14 +532,14 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
   NULL
 }
 
 -- Iteration 49 --
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -548,7 +548,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -557,14 +557,14 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
   NULL
 }
 
 -- Iteration 50 --
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -573,7 +573,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -582,14 +582,14 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
   NULL
 }
 
 -- Iteration 51 --
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -598,7 +598,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -607,7 +607,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
   NULL
 }
 bool(true)

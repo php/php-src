@@ -23,19 +23,19 @@ var_dump(gmp_strval(gmp_com()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(2) "-1"
-unicode(2) "-1"
-unicode(1) "0"
-unicode(14) "-2394876545679"
-unicode(3) "110"
-unicode(7) "-874654"
-unicode(4) "9875"
-unicode(9) "-98765468"
-unicode(12) "-98765463338"
+--EXPECTF--	
+string(2) "-1"
+string(2) "-1"
+string(1) "0"
+string(14) "-2394876545679"
+string(3) "110"
+string(7) "-874654"
+string(4) "9875"
+string(9) "-98765468"
+string(12) "-98765463338"
 
 Warning: gmp_com(): Unable to convert variable to GMP - wrong type in %s on line %d
-unicode(1) "0"
+string(1) "0"
 
 Warning: gmp_com() expects exactly 1 parameter, 0 given in %s on line %d
 

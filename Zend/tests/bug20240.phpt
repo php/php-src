@@ -39,5 +39,5 @@ echo "Done\n";
 2
 3
 Done
-test::__destruct
 test::destructor
+test::__destruct

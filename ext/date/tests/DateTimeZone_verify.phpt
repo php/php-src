@@ -22,90 +22,90 @@ var_dump($constants);
 *** Verify DateTimeZone class ***
 Verify DateTimeZone class registered OK
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(12) "DateTimeZone"
+  ["name"]=>
+  string(12) "DateTimeZone"
 }
 ..and get names of all its methods
 array(7) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(11) "__construct"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(11) "__construct"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "getName"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(7) "getName"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [2]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(9) "getOffset"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(9) "getOffset"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [3]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(14) "getTransitions"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(14) "getTransitions"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [4]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(11) "getLocation"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(11) "getLocation"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [5]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(17) "listAbbreviations"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(17) "listAbbreviations"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
   [6]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(15) "listIdentifiers"
-    [u"class"]=>
-    unicode(12) "DateTimeZone"
+    ["name"]=>
+    string(15) "listIdentifiers"
+    ["class"]=>
+    string(12) "DateTimeZone"
   }
 }
 ..and get names of all its class constants
 array(14) {
-  [u"AFRICA"]=>
+  ["AFRICA"]=>
   int(1)
-  [u"AMERICA"]=>
+  ["AMERICA"]=>
   int(2)
-  [u"ANTARCTICA"]=>
+  ["ANTARCTICA"]=>
   int(4)
-  [u"ARCTIC"]=>
+  ["ARCTIC"]=>
   int(8)
-  [u"ASIA"]=>
+  ["ASIA"]=>
   int(16)
-  [u"ATLANTIC"]=>
+  ["ATLANTIC"]=>
   int(32)
-  [u"AUSTRALIA"]=>
+  ["AUSTRALIA"]=>
   int(64)
-  [u"EUROPE"]=>
+  ["EUROPE"]=>
   int(128)
-  [u"INDIAN"]=>
+  ["INDIAN"]=>
   int(256)
-  [u"PACIFIC"]=>
+  ["PACIFIC"]=>
   int(512)
-  [u"UTC"]=>
+  ["UTC"]=>
   int(1024)
-  [u"ALL"]=>
+  ["ALL"]=>
   int(2047)
-  [u"ALL_WITH_BC"]=>
+  ["ALL_WITH_BC"]=>
   int(4095)
-  [u"PER_COUNTRY"]=>
+  ["PER_COUNTRY"]=>
   int(4096)
 }
 ===DONE===

@@ -73,11 +73,11 @@ resource(%d) of type (stream)
 -- Read and rewind first directory (argument supplied) --
 array(3) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
 }
 NULL
 bool(true)
@@ -85,11 +85,11 @@ bool(true)
 -- Read and rewind second directory (no argument supplied) --
 array(3) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
 }
 NULL
 bool(true)

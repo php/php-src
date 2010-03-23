@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -2097,7 +2097,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 					zend_hash_internal_pointer_reset((*tmp)->attributes);
 					while (zend_hash_get_current_data((*tmp)->attributes,(void**)&tmp_attr) == SUCCESS) {
 						if (zend_hash_get_current_key_type((*tmp)->attributes) == HASH_KEY_IS_STRING) {
-							zstr key;
+							char* key;
 							uint key_len;
 							sdlAttributePtr newAttr;
 
@@ -2118,7 +2118,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 							}
 
 							zend_hash_get_current_key_ex((*tmp)->attributes, &key, &key_len, NULL, 0, NULL);
-							zend_hash_add(ht, key.s, key_len, &newAttr, sizeof(sdlAttributePtr), NULL);
+							zend_hash_add(ht, key, key_len, &newAttr, sizeof(sdlAttributePtr), NULL);
 
 							zend_hash_move_forward((*tmp)->attributes);
 						} else {

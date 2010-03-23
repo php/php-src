@@ -21,7 +21,7 @@ unset($unset_var);
 //defining a class
 class sample  {
   public function __toString() {
-    return "My String";
+    return "sample object";
   } 
 }
 
@@ -119,13 +119,13 @@ Warning: strtr(): The second argument is not an array in %s on line %d
 bool(false)
 
 -- Iteration 7 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 8 --
-unicode(6) "012atm"
+string(6) "012atm"
 
 -- Iteration 9 --
-unicode(6) "122atm"
+string(6) "122atm"
 
 -- Iteration 10 --
 

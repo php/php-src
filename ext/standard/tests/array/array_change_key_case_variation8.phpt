@@ -36,93 +36,93 @@ echo "Done";
 
 -- $case = default --
 array(10) {
-  [u""]=>
+  [""]=>
   int(2)
-  [u"\a"]=>
+  ["\a"]=>
   int(3)
-  [u"\cx"]=>
+  ["\cx"]=>
   int(4)
-  [u"\e"]=>
+  ["\e"]=>
   int(5)
-  [u""]=>
+  [""]=>
   int(6)
-  [u"
+  ["
 "]=>
   int(7)
-  [u"	"]=>
+  ["	"]=>
   int(8)
-  [u"\xhh"]=>
+  ["\xhh"]=>
   int(9)
-  [u"\ddd"]=>
+  ["\ddd"]=>
   int(10)
-  [u""]=>
+  [""]=>
   int(11)
 }
 -- $case = upper --
 array(10) {
-  [u""]=>
+  [""]=>
   int(2)
-  [u"\A"]=>
+  ["\A"]=>
   int(3)
-  [u"\CX"]=>
+  ["\CX"]=>
   int(4)
-  [u"\E"]=>
+  ["\E"]=>
   int(5)
-  [u""]=>
+  [""]=>
   int(6)
-  [u"
+  ["
 "]=>
   int(7)
-  [u"	"]=>
+  ["	"]=>
   int(8)
-  [u"\XHH"]=>
+  ["\XHH"]=>
   int(9)
-  [u"\DDD"]=>
+  ["\DDD"]=>
   int(10)
-  [u""]=>
+  [""]=>
   int(11)
 }
 
 -- $case = default --
 array(9) {
-  [u"lemon"]=>
+  ["lemon"]=>
   int(1)
-  [u"orange"]=>
+  ["orange"]=>
   int(11)
-  [u"banana"]=>
+  ["banana"]=>
   int(12)
-  [u"apple"]=>
+  ["apple"]=>
   int(4)
-  [u"test"]=>
+  ["test"]=>
   int(5)
-  [u"tttt"]=>
+  ["tttt"]=>
   int(6)
-  [u"ttt"]=>
+  ["ttt"]=>
   int(7)
-  [u"ww"]=>
+  ["ww"]=>
   int(8)
-  [u"x"]=>
+  ["x"]=>
   int(10)
 }
 -- $case = upper --
 array(9) {
-  [u"LEMON"]=>
+  ["LEMON"]=>
   int(1)
-  [u"ORANGE"]=>
+  ["ORANGE"]=>
   int(11)
-  [u"BANANA"]=>
+  ["BANANA"]=>
   int(12)
-  [u"APPLE"]=>
+  ["APPLE"]=>
   int(4)
-  [u"TEST"]=>
+  ["TEST"]=>
   int(5)
-  [u"TTTT"]=>
+  ["TTTT"]=>
   int(6)
-  [u"TTT"]=>
+  ["TTT"]=>
   int(7)
-  [u"WW"]=>
+  ["WW"]=>
   int(8)
-  [u"X"]=>
+  ["X"]=>
   int(10)
 }
 Done

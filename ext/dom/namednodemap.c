@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -120,7 +120,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item(string name) U
+/* {{{ proto DOMNode dom_namednodemap_get_named_item(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since: 
 */
@@ -136,7 +136,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_namednodemap_class_entry, &named, &namedlen, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_namednodemap_class_entry, &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -174,7 +174,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 }
 /* }}} end dom_namednodemap_get_named_item */
 
-/* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg) U
+/* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
 Since: 
 */
@@ -184,7 +184,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item)
 }
 /* }}} end dom_namednodemap_set_named_item */
 
-/* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name) U
+/* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
 Since: 
 */
@@ -194,7 +194,7 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item)
 }
 /* }}} end dom_namednodemap_remove_named_item */
 
-/* {{{ proto DOMNode dom_namednodemap_item(int index) U
+/* {{{ proto DOMNode dom_namednodemap_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since: 
 */
@@ -252,7 +252,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 }
 /* }}} end dom_namednodemap_item */
 
-/* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName) U
+/* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
@@ -268,7 +268,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!&s&", &id, dom_namednodemap_class_entry, &uri, &urilen, UG(utf8_conv), &named, &namedlen, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_namednodemap_class_entry, &uri, &urilen, &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -306,7 +306,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 
-/* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg) U
+/* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
 Since: DOM Level 2
 */
@@ -316,7 +316,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
 }
 /* }}} end dom_namednodemap_set_named_item_ns */
 
-/* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName) U
+/* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
 Since: DOM Level 2
 */

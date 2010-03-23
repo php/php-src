@@ -81,9 +81,9 @@ array(0) {
 }
 array(2) {
   [0]=>
-  unicode(3) "bla"
+  string(3) "bla"
   [1]=>
-  unicode(4) "name"
+  string(4) "name"
 }
-unicode(17) "ReflectionClassEx"
+string(17) "ReflectionClassEx"
 ===DONE===

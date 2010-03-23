@@ -36,14 +36,14 @@ fclose($fp);
 ===DONE===
 --EXPECTF--	
 *** Testing str_replace() on basic operations ***
-unicode(0) ""
-unicode(4) "tbst"
-unicode(0) ""
+string(0) ""
+string(4) "tbst"
+string(0) ""
 int(0)
-unicode(1) "q"
+string(1) "q"
 int(1)
-unicode(0) ""
+string(0) ""
 int(0)
-unicode(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 int(1)
 ===DONE===

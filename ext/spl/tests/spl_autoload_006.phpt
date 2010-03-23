@@ -27,9 +27,9 @@ array(1) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(12) "MyAutoLoader"
+    string(12) "MyAutoLoader"
     [1]=>
-    unicode(8) "autoLoad"
+    string(8) "autoLoad"
   }
 }
 MyAutoLoader::autoLoad(TestClass)

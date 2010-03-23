@@ -8,7 +8,7 @@ Test convert_cyr_string() function : error conditions
  * Source code: ext/standard/string.c
 */
 
-$str = b"hello";
+$str = "hello";
 $from = "k";
 $to = "d";
 $extra_arg = 10;
@@ -56,18 +56,18 @@ NULL
 -- Testing convert_cyr_string() function with invalid 'from' character set --
 
 Warning: convert_cyr_string(): Unknown source charset: ? in %s on line %d
-unicode(10) "68656c6c6f"
+string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'to' character set --
 
 Warning: convert_cyr_string(): Unknown destination charset: ? in %s on line %d
-unicode(10) "68656c6c6f"
+string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --
 
 Warning: convert_cyr_string(): Unknown source charset: > in %s on line %d
 
 Warning: convert_cyr_string(): Unknown destination charset: ? in %s on line %d
-unicode(10) "68656c6c6f"
+string(10) "68656c6c6f"
  
 ===DONE===

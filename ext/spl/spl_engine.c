@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -38,7 +38,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRM
 		ALLOC_ZVAL(*object);
 	}
 	object_init_ex(*object, pce);
-	Z_SET_REFCOUNT_P((*object), 1);
+	Z_SET_REFCOUNT_PP(object, 1);
 	Z_SET_ISREF_PP(object); /* check if this can be hold always */
 }
 /* }}} */
@@ -48,9 +48,6 @@ PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ZEND_HANDLE_NUMERIC(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, idx);
-		break;
-	case IS_UNICODE:
-		ZEND_HANDLE_U_NUMERIC(Z_USTRVAL_P(offset), Z_USTRLEN_P(offset)+1, idx);
 		break;
 	case IS_DOUBLE:
 	case IS_RESOURCE:

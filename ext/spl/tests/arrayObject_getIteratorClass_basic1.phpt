@@ -60,17 +60,17 @@ foreach($ao as $key=>$value) {
 ?>
 --EXPECTF--
 --> Access using MyIterator:
-unicode(10) "MyIterator"
+string(10) "MyIterator"
 object(MyIterator)#2 (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   object(ArrayObject)#1 (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(3) {
-      [u"a"]=>
+      ["a"]=>
       int(1)
-      [u"b"]=>
+      ["b"]=>
       int(2)
-      [u"c"]=>
+      ["c"]=>
       int(3)
     }
   }
@@ -96,17 +96,17 @@ object(MyIterator)#2 (1) {
 
 --> Access using ArrayIterator:
 NULL
-unicode(13) "ArrayIterator"
+string(13) "ArrayIterator"
 object(ArrayIterator)#3 (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   object(ArrayObject)#1 (1) {
-    [u"storage":u"ArrayObject":private]=>
+    ["storage":"ArrayObject":private]=>
     array(3) {
-      [u"a"]=>
+      ["a"]=>
       int(1)
-      [u"b"]=>
+      ["b"]=>
       int(2)
-      [u"c"]=>
+      ["c"]=>
       int(3)
     }
   }

@@ -197,32 +197,32 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, Unicode string given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

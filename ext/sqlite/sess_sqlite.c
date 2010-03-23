@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -42,6 +42,7 @@ PS_OPEN_FUNC(sqlite)
 	char *errmsg = NULL;
 	sqlite *db;
 
+	/* TODO: do we need a safe_mode check here? */
 	db = sqlite_open(save_path, 0666, &errmsg);
 	if (db == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, 

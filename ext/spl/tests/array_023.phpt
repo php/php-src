@@ -38,50 +38,50 @@ var_dump($a->var);
 ?>
 --EXPECT--
 object(Name)#1 (4) {
-  [u"var"]=>
-  unicode(1) "a"
-  [u"bar":protected]=>
-  unicode(1) "b"
-  [u"foo":u"Name":private]=>
-  unicode(1) "c"
-  [u"storage":u"ArrayObject":private]=>
+  ["var"]=>
+  string(1) "a"
+  ["bar":protected]=>
+  string(1) "b"
+  ["foo":"Name":private]=>
+  string(1) "c"
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-unicode(1) "a"
+string(1) "a"
 object(Name)#2 (4) {
-  [u"var"]=>
-  unicode(1) "a"
-  [u"bar":protected]=>
-  unicode(1) "b"
-  [u"foo":u"Name":private]=>
-  unicode(1) "c"
-  [u"storage":u"ArrayObject":private]=>
+  ["var"]=>
+  string(1) "a"
+  ["bar":protected]=>
+  string(1) "b"
+  ["foo":"Name":private]=>
+  string(1) "c"
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-unicode(1) "a"
+string(1) "a"
 object(Bla)#1 (4) {
-  [u"var"]=>
-  unicode(3) "aaa"
-  [u"bar":protected]=>
-  unicode(3) "bbb"
-  [u"foo":u"Bla":private]=>
-  unicode(3) "ccc"
-  [u"storage":u"ArrayObject":private]=>
+  ["var"]=>
+  string(3) "aaa"
+  ["bar":protected]=>
+  string(3) "bbb"
+  ["foo":"Bla":private]=>
+  string(3) "ccc"
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-unicode(3) "aaa"
+string(3) "aaa"
 object(Bla)#2 (4) {
-  [u"var"]=>
-  unicode(3) "aaa"
-  [u"bar":protected]=>
-  unicode(3) "bbb"
-  [u"foo":u"Bla":private]=>
-  unicode(3) "ccc"
-  [u"storage":u"ArrayObject":private]=>
+  ["var"]=>
+  string(3) "aaa"
+  ["bar":protected]=>
+  string(3) "bbb"
+  ["foo":"Bla":private]=>
+  string(3) "ccc"
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
-unicode(3) "aaa"
+string(3) "aaa"

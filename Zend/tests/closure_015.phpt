@@ -10,8 +10,6 @@ function myErrorHandler($errno, $errstr, $errfile, $errline) {
 $x = function() { return 1; };
 print (string) $x;
 print "\n";
-print (unicode) $x;
-print "\n";
 print $x;
 print "\n";
 ?>
@@ -19,5 +17,3 @@ print "\n";
 Error: Object of class Closure could not be converted to string at %sclosure_015.php(8)
 
 Error: Object of class Closure could not be converted to string at %sclosure_015.php(10)
-
-Error: Object of class Closure could not be converted to string at %sclosure_015.php(12)

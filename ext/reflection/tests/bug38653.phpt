@@ -22,7 +22,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 int(10)
-unicode(0) ""
-unicode(4) "test"
+string(0) ""
+string(4) "test"
 bool(false)
 Done

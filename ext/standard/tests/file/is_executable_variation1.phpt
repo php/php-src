@@ -63,7 +63,7 @@ echo "Done\n";
 unlink(dirname(__FILE__)."/is_executable_variation1/bar.tmp");
 rmdir(dirname(__FILE__)."/is_executable_variation1/");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_executable(): usage variations ***
 -- Iteration 1 --
 bool(false)

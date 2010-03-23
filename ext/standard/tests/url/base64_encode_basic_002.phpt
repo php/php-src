@@ -15,11 +15,11 @@ Test base64_encode() function : basic functionality - check algorithm round trip
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
 $values = array(
-	b"Hello World",
-	b"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
-	b"\n\t Line with control characters\r\n",
-	b"\xC1\xC2\xC3\xC4\xC5\xC6",
-	b"\75\76\77\78\79\80"
+	"Hello World",
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
+	"\n\t Line with control characters\r\n",
+	"\xC1\xC2\xC3\xC4\xC5\xC6",
+	"\75\76\77\78\79\80"
 );
 
 echo "\n--- Testing base64_encode() with binary string input ---\n";

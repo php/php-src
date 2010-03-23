@@ -1,5 +1,7 @@
 --TEST--
 Test vfprintf() function : error conditions (wrong argument types)
+--CREDITS--
+Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
 precision=14
 --FILE--
@@ -13,9 +15,6 @@ precision=14
 // Open handle
 $file = 'vfprintf_test.txt';
 $fp = fopen( $file, "a+" );
-
-// Set unicode encoding
-stream_encoding( $fp, 'unicode' );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
 var_dump( vfprintf( $fp, array( 'foo %d', 'bar %s' ), 3.55552 ) );
@@ -40,7 +39,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_text.txt';
+$file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>
@@ -49,7 +48,7 @@ unlink( $file );
 
 Notice: Array to string conversion in %s on line %d
 int(5)
-unicode(5) "Array"
+string(5) "Array"
 int(9)
-unicode(9) "Foo  fake"
+string(9) "Foo  fake"
 ===DONE===

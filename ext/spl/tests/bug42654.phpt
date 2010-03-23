@@ -24,135 +24,135 @@ var_dump($copy);
 --EXPECTF--
 update 1
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(3) {
     [1]=>
-    unicode(4) "val1"
+    string(4) "val1"
     [2]=>
     array(2) {
       [2]=>
-      unicode(4) "val2"
+      string(4) "val2"
       [3]=>
       array(1) {
         [3]=>
-        unicode(4) "val3"
+        string(4) "val3"
       }
     }
     [4]=>
-    unicode(4) "val4"
+    string(4) "val4"
   }
 }
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(3) {
     [1]=>
-    unicode(5) "alter"
+    string(5) "alter"
     [2]=>
     array(2) {
       [2]=>
-      unicode(4) "val2"
+      string(4) "val2"
       [3]=>
       array(1) {
         [3]=>
-        unicode(4) "val3"
+        string(4) "val3"
       }
     }
     [4]=>
-    unicode(4) "val4"
+    string(4) "val4"
   }
 }
 update 2
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(2) {
     [2]=>
-    unicode(4) "val2"
+    string(4) "val2"
     [3]=>
     array(1) {
       [3]=>
-      unicode(4) "val3"
+      string(4) "val3"
     }
   }
 }
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(2) {
     [2]=>
-    unicode(5) "alter"
+    string(5) "alter"
     [3]=>
     array(1) {
       [3]=>
-      unicode(4) "val3"
+      string(4) "val3"
     }
   }
 }
 update 3
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(1) {
     [3]=>
-    unicode(4) "val3"
+    string(4) "val3"
   }
 }
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(1) {
     [3]=>
-    unicode(5) "alter"
+    string(5) "alter"
   }
 }
 update 4
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(3) {
     [1]=>
-    unicode(5) "alter"
+    string(5) "alter"
     [2]=>
     array(2) {
       [2]=>
-      unicode(4) "val2"
+      string(4) "val2"
       [3]=>
       array(1) {
         [3]=>
-        unicode(4) "val3"
+        string(4) "val3"
       }
     }
     [4]=>
-    unicode(4) "val4"
+    string(4) "val4"
   }
 }
 object(RecursiveArrayIterator)#%d (1) {
-  [u"storage":u"ArrayIterator":private]=>
+  ["storage":"ArrayIterator":private]=>
   array(3) {
     [1]=>
-    unicode(5) "alter"
+    string(5) "alter"
     [2]=>
     array(2) {
       [2]=>
-      unicode(4) "val2"
+      string(4) "val2"
       [3]=>
       array(1) {
         [3]=>
-        unicode(4) "val3"
+        string(4) "val3"
       }
     }
     [4]=>
-    unicode(5) "alter"
+    string(5) "alter"
   }
 }
 array(3) {
   [1]=>
-  unicode(5) "alter"
+  string(5) "alter"
   [2]=>
   array(2) {
     [2]=>
-    unicode(4) "val2"
+    string(4) "val2"
     [3]=>
     array(1) {
       [3]=>
-      unicode(4) "val3"
+      string(4) "val3"
     }
   }
   [4]=>
-  unicode(5) "alter"
+  string(5) "alter"
 }

@@ -98,7 +98,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_push() : usage variations ***
 
 -- Iteration 1 --

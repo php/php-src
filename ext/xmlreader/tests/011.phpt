@@ -9,7 +9,7 @@ if (!method_exists($reader, 'readInnerXml')) print "skip";
 <?php 
 /* $Id$ */
 
-$xmlstring = b'<?xml version="1.0" encoding="UTF-8"?>
+$xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>test</book></books>';
 
 $reader = new XMLReader();

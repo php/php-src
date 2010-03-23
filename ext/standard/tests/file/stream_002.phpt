@@ -20,34 +20,34 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: stream_socket_client(): unable to connect to  (Failed to parse address "") in %s on line %d
 bool(false)
 int(0)
-unicode(26) "Failed to parse address """
+string(26) "Failed to parse address """
 
 Warning: stream_socket_client(): unable to connect to [ (Failed to parse address "[") in %s on line %d
 bool(false)
 int(0)
-unicode(27) "Failed to parse address "[""
+string(27) "Failed to parse address "[""
 
 Warning: stream_socket_client(): unable to connect to [  (Failed to parse%saddress "[ ") in %s on line %d
 bool(false)
 int(0)
-unicode(%d) "Failed to parse%saddress "[ ""
+string(%d) "Failed to parse%saddress "[ ""
 
 Warning: stream_socket_client(): unable to connect to . (Failed to parse address ".") in %s on line %d
 bool(false)
 int(0)
-unicode(27) "Failed to parse address ".""
+string(27) "Failed to parse address ".""
 
 Warning: stream_socket_client(): unable to connect to 1 (Failed to parse address "1") in %s on line %d
 bool(false)
 int(0)
-unicode(27) "Failed to parse address "1""
+string(27) "Failed to parse address "1""
 
-Warning: stream_socket_client() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stream_socket_client() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 int(0)
-unicode(27) "Failed to parse address "1""
+string(27) "Failed to parse address "1""
 Done

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
 
-PHPAPI zstr spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len, zend_uchar *type TSRMLS_DC);
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
@@ -56,18 +56,17 @@ typedef struct _spl_other_handler {
 typedef struct {
 	zend_object_iterator  intern;
 	zval                  *current;
+	spl_filesystem_object *object;
 } spl_filesystem_iterator;
 
 struct _spl_filesystem_object {
 	zend_object        std;
 	void               *oth;
 	spl_other_handler  *oth_handler;
-	zend_uchar         _path_type;
-	zstr               _path;
+	char               *_path;
 	int                _path_len;
 	char               *orig_path;
-	zend_uchar         file_name_type;
-	zstr               file_name;
+	char               *file_name;
 	int                file_name_len;
 	SPL_FS_OBJ_TYPE    type;
 	long               flags;
@@ -77,8 +76,7 @@ struct _spl_filesystem_object {
 		struct {
 			php_stream         *dirp;
 			php_stream_dirent  entry;
-			zend_uchar         sub_path_type;
-			zstr               sub_path;
+			char               *sub_path;
 			int                sub_path_len;
 			int                index;
 			int                is_recursive;
@@ -121,7 +119,7 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_OBJECT_READ_AHEAD         0x00000002 /* read on rewind/next */
 #define SPL_FILE_OBJECT_SKIP_EMPTY         0x00000006 /* skip empty lines */
 #define SPL_FILE_OBJECT_READ_CSV           0x00000008 /* read via fgetcsv */
-#define SPL_FILE_OBJECT_MASK               0x0000000F /* mask */
+#define SPL_FILE_OBJECT_MASK               0x0000000F /* read via fgetcsv */
 
 #define SPL_FILE_DIR_CURRENT_AS_FILEINFO   0x00000000 /* make RecursiveDirectoryTree::current() return SplFileInfo */
 #define SPL_FILE_DIR_CURRENT_AS_SELF       0x00000010 /* make RecursiveDirectoryTree::current() return getSelf() */
@@ -134,7 +132,6 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_DIR_FOLLOW_SYMLINKS       0x00000200 /* make RecursiveDirectoryTree::hasChildren() follow symlinks */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
-
 
 #define SPL_FILE_DIR_SKIPDOTS              0x00001000 /* Tells whether it should skip dots or not */
 #define SPL_FILE_DIR_UNIXPATHS             0x00002000 /* Whether to unixify path separators */

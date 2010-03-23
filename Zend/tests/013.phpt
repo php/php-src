@@ -18,13 +18,13 @@ var_dump(interface_exists("stdClass"));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: interface_exists() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
 bool(false)
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: interface_exists() expects parameter 1 to be string, array given in %s on line %d
 NULL
 bool(false)
 bool(true)

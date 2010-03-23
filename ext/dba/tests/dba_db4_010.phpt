@@ -1,5 +1,5 @@
 --TEST--
-DBA DB4 Quote Test
+DBA DB4 magic_quotes_runtime Test
 --SKIPIF--
 <?php 
 $handler = "db4";
@@ -12,9 +12,14 @@ $handler = "db4";
 require_once(dirname(__FILE__) .'/test.inc');
 echo "database handler: $handler\n";
 if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
+    ini_set('magic_quotes_runtime', 0);
     dba_insert("key1", '"', $db_file);
     var_dump(dba_fetch("key1", $db_file));
+    ini_set('magic_quotes_runtime', 1);
+    var_dump(dba_fetch("key1", $db_file));
     dba_replace("key1", '\"', $db_file);
+    var_dump(dba_fetch("key1", $db_file));
+    ini_set('magic_quotes_runtime', 0);
     var_dump(dba_fetch("key1", $db_file));
     dba_close($db_file);
 } else {
@@ -29,3 +34,5 @@ require(dirname(__FILE__) .'/clean.inc');
 database handler: db4
 string(1) """
 string(2) "\""
+string(2) "\""
+string(1) """

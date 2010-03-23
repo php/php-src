@@ -17,8 +17,8 @@ var_dump(array_diff_ukey($array1, $array2, 'key_compare_func'));
 ?>
 --EXPECT--
 array(2) {
-  [u"red"]=>
+  ["red"]=>
   int(2)
-  [u"purple"]=>
+  ["purple"]=>
   int(4)
 }

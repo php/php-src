@@ -39,7 +39,7 @@ $arr = json_decode($arr_enc, true);
 var_dump($arr);
 
 ?>
---EXPECTF--
+--EXPECT--
 Testing: 
 {
     "JSON Test Pattern pass3": {
@@ -49,23 +49,23 @@ Testing:
 }
 
 DECODE: AS OBJECT
-object(stdClass)#%d (1) {
-  [u"JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
-    [u"The outermost value"]=>
-    unicode(27) "must be an object or array."
-    [u"In this test"]=>
-    unicode(16) "It is an object."
+object(stdClass)#1 (1) {
+  ["JSON Test Pattern pass3"]=>
+  object(stdClass)#2 (2) {
+    ["The outermost value"]=>
+    string(27) "must be an object or array."
+    ["In this test"]=>
+    string(16) "It is an object."
   }
 }
 DECODE: AS ARRAY
 array(1) {
-  [u"JSON Test Pattern pass3"]=>
+  ["JSON Test Pattern pass3"]=>
   array(2) {
-    [u"The outermost value"]=>
-    unicode(27) "must be an object or array."
-    [u"In this test"]=>
-    unicode(16) "It is an object."
+    ["The outermost value"]=>
+    string(27) "must be an object or array."
+    ["In this test"]=>
+    string(16) "It is an object."
   }
 }
 ENCODE: FROM OBJECT
@@ -73,22 +73,22 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 {"JSON Test Pattern pass3":{"The outermost value":"must be an object or array.","In this test":"It is an object."}}
 DECODE AGAIN: AS OBJECT
-object(stdClass)#%d (1) {
-  [u"JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
-    [u"The outermost value"]=>
-    unicode(27) "must be an object or array."
-    [u"In this test"]=>
-    unicode(16) "It is an object."
+object(stdClass)#3 (1) {
+  ["JSON Test Pattern pass3"]=>
+  object(stdClass)#4 (2) {
+    ["The outermost value"]=>
+    string(27) "must be an object or array."
+    ["In this test"]=>
+    string(16) "It is an object."
   }
 }
 DECODE AGAIN: AS ARRAY
 array(1) {
-  [u"JSON Test Pattern pass3"]=>
+  ["JSON Test Pattern pass3"]=>
   array(2) {
-    [u"The outermost value"]=>
-    unicode(27) "must be an object or array."
-    [u"In this test"]=>
-    unicode(16) "It is an object."
+    ["The outermost value"]=>
+    string(27) "must be an object or array."
+    ["In this test"]=>
+    string(16) "It is an object."
   }
 }

@@ -60,42 +60,6 @@ echo "Done";
 *** Testing array_intersect() : passing two dimensional array to both $arr1 and $arr2 arguments ***
 -- Passing the entire 2-D array to $arr1 and $arr2 --
 - With default arguments -
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(4) {
   [0]=>
   array(4) {
@@ -104,9 +68,9 @@ array(4) {
     [1]=>
     int(2)
     [2]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [3]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(4) {
@@ -122,79 +86,23 @@ array(4) {
   [2]=>
   array(3) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
     [3]=>
-    unicode(5) "three"
+    string(5) "three"
   }
   [3]=>
   array(3) {
-    [u"ten"]=>
+    ["ten"]=>
     int(10)
-    [u"twenty"]=>
+    ["twenty"]=>
     float(20)
-    [u"thirty"]=>
+    ["thirty"]=>
     int(30)
   }
 }
 - With more arguments -
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(4) {
   [0]=>
   array(4) {
@@ -203,9 +111,9 @@ array(4) {
     [1]=>
     int(2)
     [2]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [3]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(4) {
@@ -221,19 +129,19 @@ array(4) {
   [2]=>
   array(3) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
     [3]=>
-    unicode(5) "three"
+    string(5) "three"
   }
   [3]=>
   array(3) {
-    [u"ten"]=>
+    ["ten"]=>
     int(10)
-    [u"twenty"]=>
+    ["twenty"]=>
     float(20)
-    [u"thirty"]=>
+    ["thirty"]=>
     int(30)
   }
 }

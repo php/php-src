@@ -39,5 +39,5 @@ NULL
 
 Warning: addslashes() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-unicode(15) ""hello"\"world""
+string(15) ""hello"\"world""
 Done

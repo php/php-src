@@ -7,7 +7,7 @@ Test stripos() function : usage variations - unexpected inputs for 'haystack' an
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with unexpected inputs for haystack and needle arguments */
+/* Test stripos() function with unexpected inputs for 'haystack' and 'needle' arguments */
 
 echo "*** Testing stripos() function with unexpected values for haystack and needle ***\n";
 
@@ -23,7 +23,7 @@ class sample  {
 }
 
 //getting the resource
-$file_handle = fopen(__FILE__, "r");
+$file_handle = fopen(__FILE__, "r"); 
 
 // array with different values
 $values =  array (
@@ -65,7 +65,7 @@ $values =  array (
   NULL,
   null,
 
-  //resource
+  // resource
   $file_handle,
 
   // undefined variable
@@ -100,28 +100,16 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 4 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
 -- Iteration 6 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)
@@ -131,38 +119,38 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 bool(false)
@@ -209,10 +197,10 @@ Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 24 --
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: stripos() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)

@@ -3,7 +3,7 @@
 
 ARG_WITH("dom", "DOM support", "yes");
 
-if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
+if (PHP_DOM == "yes") {
 	if (PHP_LIBXML == "yes" && ADD_EXTENSION_DEP('dom', 'libxml')) {
 		EXTENSION("dom", "php_dom.c attr.c document.c domerrorhandler.c \
 			domstringlist.c domexception.c namelist.c processinginstruction.c \
@@ -13,7 +13,9 @@ if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
 			domconfiguration.c domimplementationsource.c entityreference.c \
 			notation.c xpath.c dom_iterators.c typeinfo.c domerror.c \
 			domlocator.c namednodemap.c userdatahandler.c");
+
 		AC_DEFINE("HAVE_DOM", 1, "DOM support");
+
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
 		}
@@ -22,5 +24,3 @@ if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
 		PHP_DOM = "no"
 	}
 }
-
-

@@ -56,7 +56,7 @@ var_dump( touch(__FILE__, 10, 100, 123) );
 
 echo "\nDone";
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing error conditions ***
 
 -- Testing with  Non-existing files --
@@ -123,3 +123,4 @@ Warning: touch() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 Done
+

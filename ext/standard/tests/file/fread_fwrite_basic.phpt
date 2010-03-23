@@ -1,7 +1,5 @@
 --TEST--
 fread & fwrite - Test reading and writing using a single resource
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

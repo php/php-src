@@ -28,14 +28,14 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing nl2br() : usage variations ***
-unicode(29) "<html>Hello<br />world</html>"
-unicode(19) "<html><br /></html>"
-unicode(45) "<html><br />
+string(29) "<html>Hello<br />world</html>"
+string(19) "<html><br /></html>"
+string(45) "<html><br />
 Hello<br />
 world<br /></html>"
-unicode(37) "<html><br />
+string(37) "<html><br />
  <br />
  <br /></html>"
 Done

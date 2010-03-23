@@ -2,8 +2,8 @@
 Test image_type_to_mime_type() function : usage variations - Passing IMAGETYPE_ICO and IMAGETYPE_SWC
 --SKIPIF--
 <?php
-	if (!extension_loaded('zlib')) {
-		die("skip zlib extension is not available");
+	if (!defined("IMAGETYPE_SWC") || !defined("IMAGETYPE_ICO") || !extension_loaded('zlib')) {
+		die("skip zlib extension is not available or IMAGETYPE_SWC/IMAGETYPE_ICO is not defined ");
 	}
 ?>
 --FILE--
@@ -24,6 +24,6 @@ var_dump( image_type_to_mime_type(IMAGETYPE_SWC) );
 ===DONE===
 --EXPECT--
 *** Testing image_type_to_mime_type() : usage variations ***
-unicode(24) "image/vnd.microsoft.icon"
-unicode(29) "application/x-shockwave-flash"
+string(24) "image/vnd.microsoft.icon"
+string(29) "application/x-shockwave-flash"
 ===DONE===

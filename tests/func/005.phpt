@@ -16,3 +16,4 @@ print "foo() will be called on shutdown...\n";
 --EXPECT--
 foo() will be called on shutdown...
 foo
+

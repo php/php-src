@@ -55,24 +55,24 @@ echo "Done";
 bool(true)
 array(11) {
   [0]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
   [1]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [2]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [3]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [4]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(1) "
+  string(1) "
 "
   [8]=>
-  unicode(1) "	"
+  string(1) "	"
   [9]=>
   NULL
   [10]=>
@@ -82,24 +82,24 @@ array(11) {
 bool(true)
 array(11) {
   [0]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
   [1]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [2]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [3]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [4]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(1) "
+  string(1) "
 "
   [8]=>
-  unicode(1) "	"
+  string(1) "	"
   [9]=>
   NULL
   [10]=>
@@ -109,24 +109,24 @@ array(11) {
 bool(true)
 array(11) {
   [0]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
   [1]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [2]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [3]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [4]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [6]=>
-  unicode(1) ""
+  string(1) ""
   [7]=>
-  unicode(1) "
+  string(1) "
 "
   [8]=>
-  unicode(1) "	"
+  string(1) "	"
   [9]=>
   NULL
   [10]=>
@@ -138,84 +138,84 @@ array(11) {
 bool(true)
 array(12) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [2]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [3]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [4]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [5]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [6]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [7]=>
-  unicode(1) "X"
+  string(1) "X"
   [8]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [9]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [10]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [11]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(12) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [2]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [3]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [4]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [5]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [6]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [7]=>
-  unicode(1) "X"
+  string(1) "X"
   [8]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [9]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [10]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [11]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
 }
 - Sort flag = SORT_STRING -
 bool(true)
 array(12) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [2]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [3]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [4]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [5]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [6]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [7]=>
-  unicode(1) "X"
+  string(1) "X"
   [8]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [9]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [10]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [11]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
 }
 Done

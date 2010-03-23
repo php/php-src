@@ -68,6 +68,19 @@ if (!file_exists($dirname . '__oo_extract_tmp/foo')) {
 rmdir_rf($dirname . '__oo_extract_tmp');
 ?>
 --EXPECTF--
+blabla laber rababer sülz
+
+bar
+
+foo
+
+
+bar
+
+bar
+
+foo
+--UEXPECTF--
 blabla laber rababer sÃ¼lz
 
 bar

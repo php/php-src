@@ -28,68 +28,68 @@ var_dump($ar);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-unicode(3) "1,2"
+string(3) "1,2"
 array(3) {
   [0]=>
-  unicode(3) "1,2"
+  string(3) "1,2"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
 }
-unicode(5) "1,2,3"
+string(5) "1,2,3"
 array(3) {
   [0]=>
-  unicode(3) "1,2"
+  string(3) "1,2"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
   [2]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 int(1)
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
-unicode(3) "1,2"
+string(3) "1,2"
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
-unicode(5) "1,2,3"
+string(5) "1,2,3"
 array(2) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 int(0)
 array(2) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
   [1]=>
-  unicode(1) "0"
+  string(1) "0"
 }
-object(ArrayIterator)#1 (1) {
-  [u"storage":u"ArrayIterator":private]=>
+object(ArrayIterator)#%d (1) {
+  ["storage":"ArrayIterator":private]=>
   array(7) {
     [1]=>
     int(0)
-    [u"1,2"]=>
+    ["1,2"]=>
     int(1)
-    [u"1,2,3"]=>
+    ["1,2,3"]=>
     int(2)
     [0]=>
     int(3)
-    [u"FooBar"]=>
+    ["FooBar"]=>
     int(4)
-    [u","]=>
+    [","]=>
     int(5)
-    [u",,"]=>
+    [",,"]=>
     int(6)
   }
 }

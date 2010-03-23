@@ -9,5 +9,5 @@ final final class test {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Parse error: %s error,%sexpecting %s in %s on line %d

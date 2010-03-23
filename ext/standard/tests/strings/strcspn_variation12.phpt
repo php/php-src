@@ -1,8 +1,8 @@
 --TEST--
-Test strcspn() function : usage variations - with varying start and len args (Bug #42831)
+Test strcspn() function : usage variations - with varying start and len args
 --FILE--
 <?php
-/* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
+/* Prototype  : proto int strcspn(string str, string mask [,int start [,int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
                 If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
  * Source code: ext/standard/string.c
@@ -79,7 +79,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strcspn() : with different start and len values ***
 
 -- Iteration 1 --

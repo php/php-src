@@ -16,7 +16,7 @@ var_dump(a, A, a::a, a::A);
 
 ?>
 --EXPECT--
-unicode(1) "a"
-unicode(1) "b"
-unicode(1) "c"
-unicode(1) "d"
+string(1) "a"
+string(1) "b"
+string(1) "c"
+string(1) "d"

@@ -16,7 +16,8 @@ $empty_str = <<<EOD
 EOD;
 
 $needles = array(
-  "", //needle as empty string 
+  "",
+  '',
   FALSE,
   NULL,
   "\0",
@@ -29,8 +30,9 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
+bool(false)
 bool(false)
 bool(false)
 bool(false)

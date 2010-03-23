@@ -26,7 +26,7 @@ array(1) {
     [0]=>
     array(2) {
       [0]=>
-      unicode(1) "3"
+      string(1) "3"
       [1]=>
       int(61)
     }
@@ -37,16 +37,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(15) "This is a test."
+    string(15) "This is a test."
     [1]=>
-    unicode(5) " test"
+    string(5) " test"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(21) "This is another test."
+    string(21) "This is another test."
     [1]=>
-    unicode(11) "nother test"
+    string(11) "nother test"
   }
 }
 int(1)
@@ -54,12 +54,12 @@ array(2) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(21) ". \[4]. 34534 string."
+    string(21) ". \[4]. 34534 string."
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(17) "[4]. 34534 string"
+    string(17) "[4]. 34534 string"
   }
 }
 int(0)

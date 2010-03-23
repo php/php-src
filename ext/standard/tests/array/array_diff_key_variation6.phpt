@@ -25,10 +25,10 @@ var_dump( array_diff_key($boolean_indx_array, $input_array) );
 -- Testing array_diff_key() function with boolean indexed array --
 array(3) {
   [-10]=>
-  unicode(3) "-10"
-  [u"true"]=>
+  string(3) "-10"
+  ["true"]=>
   int(1)
-  [u"false"]=>
+  ["false"]=>
   int(0)
 }
 array(0) {

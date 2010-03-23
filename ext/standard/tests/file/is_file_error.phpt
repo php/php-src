@@ -29,8 +29,12 @@ echo "\n*** Done ***";
 --CLEAN--
 <?php
 $file_path = dirname(__FILE__);
-unlink($file_path."/is_file_error.tmp");
-unlink($file_path."/is_file_error1.tmp");
+if(file_exists($file_path."/is_file_error.tmp")) {
+  unlink($file_path."/is_file_error.tmp");
+}
+if(file_exists($file_path."/is_file_error1.tmp")) {
+  unlink($file_path."/is_file_error1.tmp");
+}
 ?>
 --EXPECTF--
 *** Testing is_file() error conditions ***
@@ -41,7 +45,7 @@ Warning: is_file() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 bool(false)
 
-Warning: is_file() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: is_file() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
 *** Done ***

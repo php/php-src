@@ -52,10 +52,10 @@ function testAccess($c, $ao) {
       prop=>C::prop.orig
   - Read:
 NULL
-unicode(12) "C::prop.orig"
+string(12) "C::prop.orig"
   - Write:
-unicode(8) "changed1"
-unicode(8) "changed2"
+string(8) "changed1"
+string(8) "changed2"
   - Isset:
 bool(true)
 bool(true)
@@ -68,7 +68,7 @@ NULL
 NULL
   - After:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#1 (0) {
   }
 }
@@ -79,11 +79,11 @@ object(C)#1 (0) {
   - Iteration:
       prop=>C::prop.orig
   - Read:
-unicode(24) "MyArrayObject::prop.orig"
-unicode(12) "C::prop.orig"
+string(24) "MyArrayObject::prop.orig"
+string(12) "C::prop.orig"
   - Write:
-unicode(8) "changed1"
-unicode(8) "changed2"
+string(8) "changed1"
+string(8) "changed2"
   - Isset:
 bool(true)
 bool(true)
@@ -96,7 +96,7 @@ NULL
 NULL
   - After:
 object(MyArrayObject)#3 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(C)#4 (0) {
   }
 }

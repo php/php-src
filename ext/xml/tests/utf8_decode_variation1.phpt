@@ -89,88 +89,88 @@ echo "Done";
 *** Testing utf8_decode() : usage variations ***
 
 Arg value 0 
-unicode(1) "0"
+string(1) "0"
 
 Arg value 1 
-unicode(1) "1"
+string(1) "1"
 
 Arg value 12345 
-unicode(5) "12345"
+string(5) "12345"
 
 Arg value -2345 
-unicode(5) "-2345"
+string(5) "-2345"
 
 Arg value 10.5 
-unicode(4) "10.5"
+string(4) "10.5"
 
 Arg value -10.5 
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 Arg value 101234567000 
-unicode(12) "101234567000"
+string(12) "101234567000"
 
 Arg value 1.07654321E-9 
-unicode(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
 
 Arg value 0.5 
-unicode(3) "0.5"
+string(3) "0.5"
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
-bool(false)
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value 1 
-unicode(1) "1"
+string(1) "1"
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value 1 
-unicode(1) "1"
+string(1) "1"
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value Some Ascii Data 
-unicode(15) "Some Ascii Data"
+string(15) "Some Ascii Data"
 
 Arg value  
-unicode(0) ""
+string(0) ""
 
 Arg value  
-unicode(0) ""
+string(0) ""
 Done
 

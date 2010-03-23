@@ -11,7 +11,7 @@ Test strftime() function : usage variation - Passing literal related strings to 
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $format = "%%";
@@ -26,6 +26,6 @@ var_dump( strftime($format, $timestamp) );
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with a literal % character to format --
-unicode(1) "%"
-unicode(1) "%"
+string(1) "%"
+string(1) "%"
 ===DONE===

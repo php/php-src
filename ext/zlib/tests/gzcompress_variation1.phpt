@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-/* Prototype  : string gzcompress(string data [, int level, [int encoding]])
+/* Prototype  : string gzcompress(string data [, int level])
  * Description: Gzip-compress a string 
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
@@ -18,8 +18,10 @@ include(dirname(__FILE__) . '/data.inc');
 
 echo "*** Testing gzcompress() : variation ***\n";
 
+
+
 echo "\n-- Testing multiple compression --\n";
-$output = gzcompress(b"$data");
+$output = gzcompress($data);
 var_dump( md5($output));
 var_dump(md5(gzcompress($output)));
 
@@ -29,6 +31,6 @@ var_dump(md5(gzcompress($output)));
 *** Testing gzcompress() : variation ***
 
 -- Testing multiple compression --
-unicode(32) "764809aef15bb34cb73ad49ecb600d99"
-unicode(32) "eba942bc2061f23ea8688cc5101872a4"
+string(32) "764809aef15bb34cb73ad49ecb600d99"
+string(32) "eba942bc2061f23ea8688cc5101872a4"
 ===Done===

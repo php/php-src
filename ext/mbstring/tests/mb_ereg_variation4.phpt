@@ -59,7 +59,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_unicode($value)) {
+			if (is_string($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -80,21 +80,21 @@ echo "Done";
 int(47)
 array(1) {
   [0]=>
-  string(47) "日本語テキストです01234５６７８９"
+  string(64) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJk="
 }
 
 -- Iteration 2 --
 int(27)
 array(1) {
   [0]=>
-  string(27) "日本語テキストです"
+  string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
 }
 
 -- Iteration 3 --
 int(5)
 array(1) {
   [0]=>
-  string(5) "01234"
+  string(8) "MDEyMzQ="
 }
 
 -- Iteration 4 --
@@ -107,14 +107,14 @@ bool(false)
 int(20)
 array(1) {
   [0]=>
-  string(20) "01234５６７８９"
+  string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
 }
 
 -- Iteration 7 --
 int(50)
 array(1) {
   [0]=>
-  string(50) "日本語テキストです01234５６７８９。"
+  string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
 -- Iteration 8 --
@@ -124,14 +124,14 @@ bool(false)
 int(50)
 array(1) {
   [0]=>
-  string(50) "日本語テキストです01234５６７８９。"
+  string(68) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
 -- Iteration 10 --
 int(3)
 array(1) {
   [0]=>
-  string(3) "。"
+  string(4) "44CC"
 }
 
 -- Iteration 11 --
@@ -144,7 +144,6 @@ bool(false)
 int(5)
 array(1) {
   [0]=>
-  string(5) "01234"
+  string(8) "MDEyMzQ="
 }
 Done
-

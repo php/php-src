@@ -4,7 +4,7 @@ SimpleXML: iteration through subnodes
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
    <person name="Joe">
      <child name="Ann" />
@@ -16,7 +16,7 @@ $xml =b<<<EOF
    </person>
 </people>
 EOF;
-$xml1 =b<<<EOF
+$xml1 =<<<EOF
 <people>
    <person name="Joe">
      <child name="Ann" />

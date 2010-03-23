@@ -6,8 +6,8 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory('ext/pdo_sqlite/tests/common.phpt');
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->exec('CREATE TABLE test (text)');
 

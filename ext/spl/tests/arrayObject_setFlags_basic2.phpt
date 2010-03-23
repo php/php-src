@@ -22,8 +22,8 @@ C::go($c);
 var_dump($c->x);
 ?>
 --EXPECTF--
-unicode(6) "secret"
-unicode(6) "public"
-unicode(6) "secret"
+string(6) "secret"
+string(6) "public"
+string(6) "secret"
 
 Fatal error: Cannot access private property C::$x in %s on line 19

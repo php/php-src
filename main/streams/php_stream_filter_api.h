@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,14 +45,12 @@ struct _php_stream_bucket {
 	php_stream_bucket *next, *prev;
 	php_stream_bucket_brigade *brigade;
 
-	zstr buf;
-	int buflen; /* Length in units (char or UChar) */
-			
+	char *buf;
+	size_t buflen;
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
-	char own_buf;
-	char buf_type; /* IS_STRING or IS_UNICODE */
-	char is_persistent;
-
+	int own_buf;
+	int is_persistent;
+	
 	/* destroy this struct when refcount falls to zero */
 	int refcount;
 };
@@ -70,39 +68,18 @@ typedef enum {
 /* Buckets API. */
 BEGIN_EXTERN_C()
 PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent TSRMLS_DC);
-PHPAPI php_stream_bucket *php_stream_bucket_new_unicode(php_stream *stream, UChar *buf, int32_t buflen, int own_buf, int buf_persistent TSRMLS_DC);
 PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **left, php_stream_bucket **right, size_t length TSRMLS_DC);
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket TSRMLS_DC);
-#define php_stream_bucket_addref(bucket)	Z_ADDREF_P((bucket))
+#define php_stream_bucket_addref(bucket)	(bucket)->refcount++
 PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bucket TSRMLS_DC);
-PHPAPI int _php_stream_bucket_convert(php_stream_bucket *bucket, unsigned char type, UConverter *conv TSRMLS_DC);
 END_EXTERN_C()
-#define php_stream_bucket_convert(bucket, type, conv) _php_stream_bucket_convert((bucket), (type), (conv) TSRMLS_CC);
-#define php_stream_bucket_convert_notranscode(bucket, type) _php_stream_bucket_convert((bucket), (type), NULL TSRMLS_CC);
 
-#define PSFS_FLAG_NORMAL			0	/* regular read/write */
-#define PSFS_FLAG_FLUSH_INC			1	/* an incremental flush */
-#define PSFS_FLAG_FLUSH_CLOSE		2	/* final flush prior to closing */
-
-#define PSFO_FLAG_ACCEPTS_STRING		(1<<0)		/* can process non-unicode buckets */
-#define PSFO_FLAG_ACCEPTS_UNICODE		(1<<1)		/* can process unicode buckets */
-#define PSFO_FLAG_ACCEPTS_ANY			(PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_ACCEPTS_UNICODE)
-
-#define PSFO_FLAG_OUTPUTS_STRING		(1<<2)		/* can produce non-unicode buckets */
-#define PSFO_FLAG_OUTPUTS_UNICODE		(1<<3)		/* can produce unicode buckets */
-#define PSFO_FLAG_OUTPUTS_ANY			(PSFO_FLAG_OUTPUTS_STRING | PSFO_FLAG_OUTPUTS_UNICODE)
-
-/* produces buckets of the same type as provided */
-#define PSFO_FLAG_OUTPUTS_SAME			((1<<4) | PSFO_FLAG_ACCEPTS_ANY | PSFO_FLAG_OUTPUTS_ANY)
-
-/* produces buckets of the opposite type as provided */
-#define PSFO_FLAG_OUTPUTS_OPPOSITE		((1<<5) | PSFO_FLAG_ACCEPTS_ANY | PSFO_FLAG_OUTPUTS_ANY)
-
-#define PSFO_FLAG_ACCEPT_MASK			PSFO_FLAG_ACCEPTS_ANY
-#define PSFO_FLAG_ACCEPT_SHIFT			2			/* For comparing filter to filter bucket passing compatability */
+#define PSFS_FLAG_NORMAL		0	/* regular read/write */
+#define PSFS_FLAG_FLUSH_INC		1	/* an incremental flush */
+#define PSFS_FLAG_FLUSH_CLOSE	2	/* final flush prior to closing */
 
 typedef struct _php_stream_filter_ops {
 
@@ -118,8 +95,7 @@ typedef struct _php_stream_filter_ops {
 	void (*dtor)(php_stream_filter *thisfilter TSRMLS_DC);
 	
 	const char *label;
-
-	int flags;
+	
 } php_stream_filter_ops;
 
 typedef struct _php_stream_filter_chain {
@@ -144,9 +120,6 @@ struct _php_stream_filter {
 
 	/* filters are auto_registered when they're applied */
 	int rsrc_id;
-	int flags;
-
-	char *name;
 };
 
 /* stack filter onto a stream */
@@ -155,25 +128,16 @@ PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_strea
 PHPAPI int php_stream_filter_prepend_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
-PHPAPI int _php_stream_filter_check_chain(php_stream_filter_chain *chain TSRMLS_DC);
-PHPAPI int _php_stream_filter_output_prefer_unicode(php_stream_filter *filter TSRMLS_DC);
-PHPAPI int _php_stream_filter_product(php_stream_filter_chain *chain, int type TSRMLS_DC);
 PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC);
-PHPAPI int _php_stream_encoding_apply(php_stream *stream, int writechain, const char *encoding, uint16_t error_mode, UChar *subst TSRMLS_DC);
 END_EXTERN_C()
 #define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC TSRMLS_CC)
 #define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter) TSRMLS_CC)
 #define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter) TSRMLS_CC)
 #define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish) TSRMLS_CC)
-#define php_stream_filter_check_chain(chain) _php_stream_filter_check_chain((chain) TSRMLS_CC)
-#define php_stream_filter_output_prefer_unicode(filter) _php_stream_filter_output_prefer_unicode((filter) TSRMLS_CC)
-#define php_stream_filter_product(chain, type) _php_stream_filter_product((chain), (type) TSRMLS_CC)
-#define php_stream_encoding_apply(stream, writechain, encoding, error_mode, subst) \
-		_php_stream_encoding_apply((stream), (writechain), (encoding), (error_mode), (subst) TSRMLS_CC)
 
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 
@@ -187,12 +151,6 @@ PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS
 PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC);
 END_EXTERN_C()
-
-/* unicode_filter.c exports */
-extern php_stream_filter_ops php_unicode_to_string_filter_ops;
-extern php_stream_filter_ops php_unicode_from_string_filter_ops;
-extern php_stream_filter_ops php_unicode_tidy_filter_ops;
-extern php_stream_filter_factory php_unicode_filter_factory;
 
 /*
  * Local variables:

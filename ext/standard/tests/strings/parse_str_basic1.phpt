@@ -37,40 +37,40 @@ var_dump($res3_array);
 *** Testing parse_str() : basic functionality ***
 Basic test WITHOUT result arg
 NULL
-unicode(4) "val1"
-unicode(4) "val2"
-unicode(4) "val3"
+string(4) "val1"
+string(4) "val2"
+string(4) "val3"
 
 Basic test WITH undefined var for result arg
 NULL
 array(3) {
-  [u"first"]=>
-  unicode(4) "val1"
-  [u"second"]=>
-  unicode(4) "val2"
-  [u"third"]=>
-  unicode(4) "val3"
+  ["first"]=>
+  string(4) "val1"
+  ["second"]=>
+  string(4) "val2"
+  ["third"]=>
+  string(4) "val3"
 }
 
 Basic test WITH existing non-array var for result arg
 NULL
 array(3) {
-  [u"first"]=>
-  unicode(4) "val1"
-  [u"second"]=>
-  unicode(4) "val2"
-  [u"third"]=>
-  unicode(4) "val3"
+  ["first"]=>
+  string(4) "val1"
+  ["second"]=>
+  string(4) "val2"
+  ["third"]=>
+  string(4) "val3"
 }
 
 Basic test with an existing array as results array
 NULL
 array(3) {
-  [u"first"]=>
-  unicode(4) "val1"
-  [u"second"]=>
-  unicode(4) "val2"
-  [u"third"]=>
-  unicode(4) "val3"
+  ["first"]=>
+  string(4) "val1"
+  ["second"]=>
+  string(4) "val2"
+  ["third"]=>
+  string(4) "val3"
 }
 ===DONE===

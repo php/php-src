@@ -15,7 +15,7 @@ var_dump (array_walk_recursive ($arr, 'foo'));
 var_dump (array_walk_recursive ($arr, 'bar'));
 
 ?>
---EXPECT--
+--EXPECTF--
 1 foo
 2 foo
 3 foo

@@ -7,12 +7,10 @@ if (!extension_loaded("gettext")) {
 }
 --FILE--
 <?php
-
-
 chdir(dirname(__FILE__));
 bindtextdomain('', 'foobar');
 --EXPECTF--
-Warning: bindtextdomain(): the first parameter must not be empty in %s.php on line %d
+Warning: The first parameter of bindtextdomain must not be empty in %s on line %d
 --CREDITS--
 Till Klampaeckel, till@php.net
 PHP Testfest Berlin 2009-05-09

@@ -38,7 +38,7 @@ array(0) {
 }
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 
 --undefined indexed--
@@ -46,7 +46,7 @@ array(0) {
 }
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 
 --unset  indexed--
@@ -54,6 +54,6 @@ array(0) {
 }
 array(1) {
   [10]=>
-  unicode(2) "10"
+  string(2) "10"
 }
 ===DONE===

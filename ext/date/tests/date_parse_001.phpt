@@ -1,11 +1,10 @@
 --TEST--
 Test basic date_parse()
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+    date_default_timezone_set('UTC');
     var_dump(date_parse("2006-12-12 10:00:00.5"));
-	var_dump(date_parse("2006-12-12"));
+    var_dump(date_parse("2006-12-12"));
     var_dump(date_parse("2006-12--12"));
     var_dump(date_parse("2006-02-30"));
     var_dump(date_parse("2006-03-04"));
@@ -16,290 +15,290 @@ date.timezone=UTC
     var_dump(date_parse(array()));
     echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(12)
-  [u"day"]=>
+  ["day"]=>
   int(12)
-  [u"hour"]=>
+  ["hour"]=>
   int(10)
-  [u"minute"]=>
+  ["minute"]=>
   int(0)
-  [u"second"]=>
+  ["second"]=>
   int(0)
-  [u"fraction"]=>
+  ["fraction"]=>
   float(0.5)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(12)
-  [u"day"]=>
+  ["day"]=>
   int(12)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(15) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(12)
-  [u"day"]=>
+  ["day"]=>
   int(1)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(1)
-  [u"errors"]=>
+  ["errors"]=>
   array(1) {
     [7]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(true)
-  [u"zone_type"]=>
+  ["zone_type"]=>
   int(1)
-  [u"zone"]=>
+  ["zone"]=>
   int(720)
-  [u"is_dst"]=>
+  ["is_dst"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(2)
-  [u"day"]=>
+  ["day"]=>
   int(30)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(1)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(1) {
     [11]=>
-    unicode(27) "The parsed date was invalid"
+    string(27) "The parsed date was invalid"
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(3)
-  [u"day"]=>
+  ["day"]=>
   int(4)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   int(2006)
-  [u"month"]=>
+  ["month"]=>
   int(3)
-  [u"day"]=>
+  ["day"]=>
   int(1)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(0)
-  [u"errors"]=>
+  ["errors"]=>
   array(0) {
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 array(15) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(2)
-  [u"errors"]=>
+  ["errors"]=>
   array(2) {
     [0]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
     [1]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(true)
-  [u"zone_type"]=>
+  ["zone_type"]=>
   int(1)
-  [u"zone"]=>
+  ["zone"]=>
   int(180)
-  [u"is_dst"]=>
+  ["is_dst"]=>
   bool(false)
 }
 array(15) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(1)
-  [u"errors"]=>
+  ["errors"]=>
   array(1) {
     [0]=>
-    unicode(20) "Unexpected character"
+    string(20) "Unexpected character"
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(true)
-  [u"zone_type"]=>
+  ["zone_type"]=>
   int(1)
-  [u"zone"]=>
+  ["zone"]=>
   int(0)
-  [u"is_dst"]=>
+  ["is_dst"]=>
   bool(false)
 }
 array(12) {
-  [u"year"]=>
+  ["year"]=>
   bool(false)
-  [u"month"]=>
+  ["month"]=>
   bool(false)
-  [u"day"]=>
+  ["day"]=>
   bool(false)
-  [u"hour"]=>
+  ["hour"]=>
   bool(false)
-  [u"minute"]=>
+  ["minute"]=>
   bool(false)
-  [u"second"]=>
+  ["second"]=>
   bool(false)
-  [u"fraction"]=>
+  ["fraction"]=>
   bool(false)
-  [u"warning_count"]=>
+  ["warning_count"]=>
   int(0)
-  [u"warnings"]=>
+  ["warnings"]=>
   array(0) {
   }
-  [u"error_count"]=>
+  ["error_count"]=>
   int(1)
-  [u"errors"]=>
+  ["errors"]=>
   array(1) {
     [0]=>
-    unicode(12) "Empty string"
+    string(12) "Empty string"
   }
-  [u"is_localtime"]=>
+  ["is_localtime"]=>
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be binary string, array given in %sdate_parse_001.php on line 11
+Warning: date_parse() expects parameter 1 to be string, array given in %sdate_parse_001.php on line %d
 bool(false)
 Done

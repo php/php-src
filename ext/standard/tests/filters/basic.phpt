@@ -4,7 +4,7 @@ basic stream filter tests
 <?php
 # vim600:syn=php:
 
-$text = b"Hello There!";
+$text = "Hello There!";
 $filters = array("string.rot13", "string.toupper", "string.tolower");
 
 function filter_test($names)

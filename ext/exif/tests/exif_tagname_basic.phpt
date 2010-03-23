@@ -23,8 +23,7 @@ var_dump(exif_tagname(0x110));
 ===Done===
 --EXPECT--
 *** Testing exif_tagname() : basic functionality ***
-unicode(16) "ImageDescription"
-unicode(4) "Make"
-unicode(5) "Model"
+string(16) "ImageDescription"
+string(4) "Make"
+string(5) "Model"
 ===Done===
-

@@ -7,15 +7,15 @@ Test stripos() function : usage variations - unexpected inputs for 'offset' argu
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with unexpected inputs for offset argument */
+/* Test stripos() function with unexpected inputs for 'offset' argument */
 
-echo "*** Testing stripos() function with unexpected values for haystack and needle ***\n";
+echo "*** Testing stripos() function with unexpected values for offset ***\n";
 
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring a class
+// defining a class
 class sample  {
   public function __toString() {
     return "object";
@@ -23,7 +23,7 @@ class sample  {
 }
 
 //getting the resource
-$file_handle = fopen(__FILE__, "r");
+$file_handle = fopen(__FILE__, "r"); 
 
 //definition of input args
 $haystack = "hello world";
@@ -85,7 +85,7 @@ for($index = 0; $index < count($offsets); $index ++) {
 echo "*** Done ***";
 ?>
 --EXPECTF--
-*** Testing stripos() function with unexpected values for haystack and needle ***
+*** Testing stripos() function with unexpected values for offset ***
 -- Iteration 1 --
 int(6)
 -- Iteration 2 --
@@ -134,11 +134,11 @@ Warning: stripos() expects parameter 3 to be long, object given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: stripos() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
 NULL
 -- Iteration 18 --
 int(6)

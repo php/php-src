@@ -95,8 +95,7 @@ foreach($arrays as $arr1) {
   
 echo "Done";
 ?>
---EXPECT--
-
+--EXPECTF--
 *** Testing array_merge_recursive() : Passing different arrays to $arr1 argument ***
 -- Iteration 1 --
 -- With default argument --
@@ -113,19 +112,19 @@ array(6) {
   [1]=>
   int(2)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 2 --
@@ -143,19 +142,19 @@ array(6) {
   [1]=>
   float(2.2)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 3 --
@@ -173,19 +172,19 @@ array(6) {
   [1]=>
   bool(true)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 4 --
@@ -195,19 +194,19 @@ array(0) {
 -- With more arguments --
 array(4) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 5 --
@@ -221,207 +220,207 @@ array(5) {
   [0]=>
   NULL
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 6 --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(3) "a"
+  string(3) "a"
   [1]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
 array(8) {
   [0]=>
-  unicode(3) "a"
+  string(3) "a"
   [1]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
   [4]=>
-  unicode(3) "one"
+  string(3) "one"
   [5]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 7 --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(5) "a\v\f"
+  string(5) "a\v\f"
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
 array(8) {
   [0]=>
-  unicode(5) "a\v\f"
+  string(5) "a\v\f"
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
   [4]=>
-  unicode(3) "one"
+  string(3) "one"
   [5]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 8 --
 -- With default argument --
 array(3) {
-  [u"h1"]=>
-  unicode(1) "
+  ["h1"]=>
+  string(1) "
 "
-  [u"h2"]=>
-  unicode(88) "hello world
+  ["h2"]=>
+  string(88) "hello world
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 -- With more arguments --
 array(7) {
-  [u"h1"]=>
-  unicode(1) "
+  ["h1"]=>
+  string(1) "
 "
-  [u"h2"]=>
-  unicode(88) "hello world
+  ["h2"]=>
+  string(88) "hello world
 The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 9 --
 -- With default argument --
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 -- With more arguments --
 array(6) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 10 --
 -- With default argument --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
   int(1)
 }
 -- With more arguments --
 array(7) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
   [0]=>
   int(1)
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 11 --
@@ -443,198 +442,198 @@ array(7) {
   [2]=>
   int(40)
   [3]=>
-  unicode(3) "one"
+  string(3) "one"
   [4]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 12 --
 -- With default argument --
 array(2) {
-  [u"one"]=>
-  unicode(3) "ten"
-  [u"two"]=>
-  unicode(6) "twenty"
+  ["one"]=>
+  string(3) "ten"
+  ["two"]=>
+  string(6) "twenty"
 }
 -- With more arguments --
 array(6) {
-  [u"one"]=>
-  unicode(3) "ten"
-  [u"two"]=>
-  unicode(6) "twenty"
+  ["one"]=>
+  string(3) "ten"
+  ["two"]=>
+  string(6) "twenty"
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 13 --
 -- With default argument --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 -- With more arguments --
 array(7) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(4) "four"
+  string(4) "four"
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 14 --
 -- With default argument --
 array(3) {
-  [u""]=>
-  unicode(4) "null"
-  [u"NULL"]=>
+  [""]=>
+  string(4) "null"
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
 }
 -- With more arguments --
 array(7) {
-  [u""]=>
-  unicode(4) "null"
-  [u"NULL"]=>
+  [""]=>
+  string(4) "null"
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 15 --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(4) "true"
+  string(4) "true"
   [1]=>
-  unicode(5) "false"
-  [u"false"]=>
+  string(5) "false"
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
 }
 -- With more arguments --
 array(8) {
   [0]=>
-  unicode(4) "true"
+  string(4) "true"
   [1]=>
-  unicode(5) "false"
-  [u"false"]=>
+  string(5) "false"
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 16 --
 -- With default argument --
 array(3) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 -- With more arguments --
 array(7) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 17 --
 -- With default argument --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   NULL
   [3]=>
@@ -647,9 +646,9 @@ array(6) {
 -- With more arguments --
 array(10) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
   NULL
   [3]=>
@@ -659,25 +658,25 @@ array(10) {
   [5]=>
   bool(true)
   [6]=>
-  unicode(3) "one"
+  string(3) "one"
   [7]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 18 --
 -- With default argument --
 array(3) {
-  [u""]=>
+  [""]=>
   int(4)
   [0]=>
   int(5)
@@ -686,39 +685,39 @@ array(3) {
 }
 -- With more arguments --
 array(7) {
-  [u""]=>
+  [""]=>
   int(4)
   [0]=>
   int(5)
   [1]=>
   int(6)
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
-  [u"array"]=>
+  ["string"]=>
+  string(5) "hello"
+  ["array"]=>
   array(3) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
-    unicode(1) "b"
+    string(1) "b"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
   }
 }
 -- Iteration 19 --
 -- With default argument --
 array(3) {
   [0]=>
-  unicode(4) "str1"
-  [u"array"]=>
+  string(4) "str1"
+  ["array"]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(2) {
@@ -731,19 +730,19 @@ array(3) {
 -- With more arguments --
 array(6) {
   [0]=>
-  unicode(4) "str1"
-  [u"array"]=>
+  string(4) "str1"
+  ["array"]=>
   array(5) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
     [2]=>
-    unicode(1) "a"
+    string(1) "a"
     [3]=>
-    unicode(1) "b"
+    string(1) "b"
     [4]=>
-    unicode(1) "c"
+    string(1) "c"
   }
   [1]=>
   array(2) {
@@ -753,10 +752,10 @@ array(6) {
     int(2)
   }
   [2]=>
-  unicode(3) "one"
+  string(3) "one"
   [3]=>
   int(2)
-  [u"string"]=>
-  unicode(5) "hello"
+  ["string"]=>
+  string(5) "hello"
 }
 Done

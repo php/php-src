@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -246,7 +246,7 @@ static void function_dtor(void *pDest)
 {
 	zend_internal_function *f = (zend_internal_function*)pDest;
 
-	efree(f->function_name.s);
+	efree(f->function_name);
 	if (f->arg_info) {
 		efree(f->arg_info);
 	}
@@ -259,7 +259,7 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zval **object_ptr, zstr name, int len TSRMLS_DC)
+static union _zend_function *com_method_get(zval **object_ptr, char *name, int len TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
@@ -273,18 +273,18 @@ static union _zend_function *com_method_get(zval **object_ptr, zstr name, int le
 		return NULL;
 	}
 
-	if (FAILED(php_com_get_id_of_name(obj, name.s, len, &dummy TSRMLS_CC))) {
+	if (FAILED(php_com_get_id_of_name(obj, name, len, &dummy TSRMLS_CC))) {
 		return NULL;
 	}
 
 	/* check cache */
-	if (obj->method_cache == NULL || FAILURE == zend_hash_find(obj->method_cache, name.s, len, (void**)&fptr)) {
+	if (obj->method_cache == NULL || FAILURE == zend_hash_find(obj->method_cache, name, len, (void**)&fptr)) {
 		f.type = ZEND_OVERLOADED_FUNCTION;
 		f.num_args = 0;
 		f.arg_info = NULL;
 		f.scope = obj->ce;
 		f.fn_flags = 0;
-		f.function_name.s = estrndup(name.s, len);
+		f.function_name = estrndup(name, len);
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
@@ -300,7 +300,7 @@ static union _zend_function *com_method_get(zval **object_ptr, zstr name, int le
 			int i;
 
 			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
-				olename = php_com_string_to_olestring(name.s, len, obj->code_page TSRMLS_CC);
+				olename = php_com_string_to_olestring(name, len, obj->code_page TSRMLS_CC);
 				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
 
 				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
@@ -348,7 +348,7 @@ static union _zend_function *com_method_get(zval **object_ptr, zstr name, int le
 				zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
 			}
 
-			zend_hash_update(obj->method_cache, name.s, len, &f, sizeof(f), (void**)&fptr);
+			zend_hash_update(obj->method_cache, name, len, &f, sizeof(f), (void**)&fptr);
 		}
 	}
 
@@ -364,7 +364,7 @@ static union _zend_function *com_method_get(zval **object_ptr, zstr name, int le
 	return NULL;
 }
 
-static int com_call_method(zstr method, INTERNAL_FUNCTION_PARAMETERS)
+static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args = NULL;
 	php_com_dotnet_object *obj;
@@ -387,7 +387,7 @@ static int com_call_method(zstr method, INTERNAL_FUNCTION_PARAMETERS)
 
 	VariantInit(&v);
 
-	if (SUCCESS == php_com_do_invoke_byref(obj, method.s, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
+	if (SUCCESS == php_com_do_invoke_byref(obj, method, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
 		php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 		ret = SUCCESS;
 		VariantClear(&v);
@@ -417,7 +417,7 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 	f.handler = ZEND_FN(fn); \
 	return (union _zend_function*)&f;
 	
-	switch (obj->ce->name.s[0]) {
+	switch (obj->ce->name[0]) {
 #if HAVE_MSCOREE_H
 		case 'd':
 			POPULATE_CTOR(d, com_dotnet_create_instance);
@@ -442,12 +442,12 @@ static zend_class_entry *com_class_entry_get(const zval *object TSRMLS_DC)
 	return obj->ce;
 }
 
-static int com_class_name_get(const zval *object, zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int com_class_name_get(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
 
-	(*class_name).s = estrndup(obj->ce->name.s, obj->ce->name_length);
+	*class_name = estrndup(obj->ce->name, obj->ce->name_length);
 	*class_name_len = obj->ce->name_length;
 
 	return 0;
@@ -486,7 +486,7 @@ static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return ret;
 }
 
-static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
+static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -517,7 +517,6 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra 
 			vt = VT_BOOL;
 			break;
 		case IS_STRING:
-		case IS_UNICODE:
 			vt = VT_BSTR;
 			break;
 		default:
@@ -529,7 +528,6 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra 
 	}
 
 	if (SUCCEEDED(res)) {
-		/* FIXME use 'extra' here for IS_STRING/IS_UNICODE */
 		php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
 	}
 
@@ -539,7 +537,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, void *extra 
 		return SUCCESS;
 	}
 
-	return zend_std_cast_object_tostring(readobj, writeobj, type, extra TSRMLS_CC);
+	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
 }
 
 static int com_object_count(zval *object, long *count TSRMLS_DC)

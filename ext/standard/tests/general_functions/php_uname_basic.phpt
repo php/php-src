@@ -23,13 +23,13 @@ var_dump(php_uname('m'));
 ===DONE===
 --EXPECTF--
 *** Testing php_uname() - basic test
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Try all the defined mode's --
-unicode(%d) "%s"
-unicode(%d) "%s"
-unicode(%d) "%s"
-unicode(%d) "%s"
-unicode(%d) "%s"
-unicode(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 ===DONE===

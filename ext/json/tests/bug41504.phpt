@@ -13,19 +13,19 @@ echo "Done\n";
 ?>
 --EXPECT--	
 array(1) {
-  [u""]=>
-  unicode(5) "value"
+  [""]=>
+  string(5) "value"
 }
 array(2) {
-  [u""]=>
-  unicode(5) "value"
-  [u"key"]=>
-  unicode(5) "value"
+  [""]=>
+  string(5) "value"
+  ["key"]=>
+  string(5) "value"
 }
 array(2) {
-  [u"key"]=>
-  unicode(5) "value"
-  [u""]=>
-  unicode(5) "value"
+  ["key"]=>
+  string(5) "value"
+  [""]=>
+  string(5) "value"
 }
 Done

@@ -1,9 +1,8 @@
 --TEST--
 DateTime::setTimestamp()
---INI--
-date.timezone=Europe/Oslo
 --FILE--
 <?php
+date_default_timezone_set('Europe/Oslo');
 $d = new DateTime( '@1217184864' );
 echo $d->format( "Y-m-d H:i e\n" );
 

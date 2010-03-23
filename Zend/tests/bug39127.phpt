@@ -13,8 +13,8 @@ var_dump(is_callable(array($b,"__construct")));
 
 echo "Done\n";
 ?>
---EXPECTF--
-%s(13) "a::a() called"
+--EXPECTF--	
+string(13) "a::a() called"
 bool(true)
 bool(false)
 bool(false)

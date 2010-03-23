@@ -40,39 +40,39 @@ new B;
 --EXPECT--
 array(3) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
-  unicode(2) "bb"
+  string(2) "bb"
   [2]=>
-  unicode(2) "cc"
+  string(2) "cc"
 }
 array(9) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
-  unicode(2) "bb"
+  string(2) "bb"
   [2]=>
-  unicode(2) "cc"
+  string(2) "cc"
   [3]=>
-  unicode(11) "__construct"
+  string(11) "__construct"
   [4]=>
-  unicode(10) "__destruct"
+  string(10) "__destruct"
   [5]=>
-  unicode(1) "a"
+  string(1) "a"
   [6]=>
-  unicode(1) "b"
+  string(1) "b"
   [7]=>
-  unicode(8) "static_a"
+  string(8) "static_a"
   [8]=>
-  unicode(8) "static_b"
+  string(8) "static_b"
 }
 array(4) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(8) "static_a"
+  string(8) "static_a"
   [3]=>
-  unicode(8) "static_b"
+  string(8) "static_b"
 }

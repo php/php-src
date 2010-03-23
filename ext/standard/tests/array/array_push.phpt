@@ -78,7 +78,7 @@ NULL
 Warning: array_push() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: array_push() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, string given in %s on line %d
 NULL
 int(11)
 int(1)
@@ -262,21 +262,21 @@ int(12)
 int(8)
 array(8) {
   [0]=>
-  unicode(3) "One"
+  string(3) "One"
   [1]=>
-  unicode(4) "_Two"
+  string(4) "_Two"
   [2]=>
-  unicode(5) "Three"
+  string(5) "Three"
   [3]=>
-  unicode(4) "Four"
+  string(4) "Four"
   [4]=>
-  unicode(4) "Five"
+  string(4) "Five"
   [5]=>
   int(22)
   [6]=>
   int(33)
   [7]=>
-  unicode(2) "44"
+  string(2) "44"
 }
 
 Done

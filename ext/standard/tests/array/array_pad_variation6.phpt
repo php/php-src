@@ -90,7 +90,7 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_pad() : Passing different arrays to $input argument ***
 -- Iteration 1 --
 array(6) {
@@ -99,23 +99,23 @@ array(6) {
   [1]=>
   int(2)
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
   int(1)
   [5]=>
@@ -128,23 +128,23 @@ array(6) {
   [1]=>
   float(2.2)
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
   float(1.1)
   [5]=>
@@ -157,23 +157,23 @@ array(6) {
   [1]=>
   bool(true)
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
   bool(false)
   [5]=>
@@ -182,165 +182,165 @@ array(6) {
 -- Iteration 4 --
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 -- Iteration 5 --
 array(6) {
   [0]=>
   NULL
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
   NULL
 }
 -- Iteration 6 --
 array(6) {
   [0]=>
-  unicode(3) "a"
+  string(3) "a"
   [1]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
   [2]=>
-  unicode(5) "b	bbb"
+  string(5) "b	bbb"
   [3]=>
-  unicode(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(3) "a"
+  string(3) "a"
   [3]=>
-  unicode(5) "aaaa"
+  string(5) "aaaa"
   [4]=>
-  unicode(5) "b	bbb"
+  string(5) "b	bbb"
   [5]=>
-  unicode(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
+  string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
 array(6) {
   [0]=>
-  unicode(5) "a\v\f"
+  string(5) "a\v\f"
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
   [2]=>
-  unicode(6) "b\tbbb"
+  string(6) "b\tbbb"
   [3]=>
-  unicode(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "a\v\f"
+  string(5) "a\v\f"
   [3]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
   [4]=>
-  unicode(6) "b\tbbb"
+  string(6) "b\tbbb"
   [5]=>
-  unicode(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
+  string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
 array(6) {
-  [u"h1"]=>
-  unicode(1) "
+  ["h1"]=>
+  string(1) "
 "
-  [u"h2"]=>
-  unicode(86) "hello world
+  ["h2"]=>
+  string(86) "hello world
 The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [0]=>
-  unicode(90) "11 < 12. 123 >22
+  string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
 "
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
-  [u"h1"]=>
-  unicode(1) "
+  string(5) "HELLO"
+  ["h1"]=>
+  string(1) "
 "
-  [u"h2"]=>
-  unicode(86) "hello world
+  ["h2"]=>
+  string(86) "hello world
 The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [2]=>
-  unicode(90) "11 < 12. 123 >22
+  string(90) "11 < 12. 123 >22
 'single quoted string'
 "double quoted string"
 2222 != 1111.	 0000 = 0000
@@ -349,59 +349,59 @@ double quoted string. withdifferentwhitespaces"
 -- Iteration 9 --
 array(6) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(3) "one"
+  string(3) "one"
   [4]=>
-  unicode(3) "two"
+  string(3) "two"
   [5]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 -- Iteration 10 --
 array(6) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u"one"]=>
+  string(5) "HELLO"
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 -- Iteration 11 --
@@ -415,15 +415,15 @@ array(6) {
   [3]=>
   int(30)
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [5]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
   int(10)
   [3]=>
@@ -435,155 +435,155 @@ array(6) {
 }
 -- Iteration 12 --
 array(6) {
-  [u"one"]=>
-  unicode(3) "ten"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"three"]=>
-  unicode(6) "thirty"
+  ["one"]=>
+  string(3) "ten"
+  ["two"]=>
+  string(6) "twenty"
+  ["three"]=>
+  string(6) "thirty"
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u"one"]=>
-  unicode(3) "ten"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"three"]=>
-  unicode(6) "thirty"
+  string(5) "HELLO"
+  ["one"]=>
+  string(3) "ten"
+  ["two"]=>
+  string(6) "twenty"
+  ["three"]=>
+  string(6) "thirty"
 }
 -- Iteration 13 --
 array(6) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
   [1]=>
-  unicode(4) "four"
+  string(4) "four"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u"one"]=>
+  string(5) "HELLO"
+  ["one"]=>
   int(1)
   [3]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 -- Iteration 14 --
 array(6) {
-  [u""]=>
-  unicode(4) "null"
-  [u"NULL"]=>
+  [""]=>
+  string(4) "null"
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u""]=>
-  unicode(4) "null"
-  [u"NULL"]=>
+  string(5) "HELLO"
+  [""]=>
+  string(4) "null"
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
 }
 -- Iteration 15 --
 array(6) {
   [0]=>
-  unicode(4) "true"
+  string(4) "true"
   [1]=>
-  unicode(5) "false"
-  [u"false"]=>
+  string(5) "false"
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(4) "true"
+  string(4) "true"
   [3]=>
-  unicode(5) "false"
-  [u"false"]=>
+  string(5) "false"
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
 }
 -- Iteration 16 --
 array(6) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  string(5) "HELLO"
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 -- Iteration 17 --
 array(6) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
   NULL
   [4]=>
@@ -595,9 +595,9 @@ array(6) {
 }
 array(6) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
   NULL
   [4]=>
@@ -609,27 +609,27 @@ array(6) {
 }
 -- Iteration 18 --
 array(6) {
-  [u""]=>
+  [""]=>
   int(4)
   [0]=>
   int(5)
   [1]=>
   int(6)
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [3]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [4]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u""]=>
+  string(5) "HELLO"
+  [""]=>
   int(4)
   [3]=>
   int(5)
@@ -638,31 +638,31 @@ array(6) {
 }
 -- Iteration 19 --
 array(6) {
-  [u"One"]=>
+  ["One"]=>
   int(10)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
 }
 array(6) {
   [0]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [1]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [2]=>
-  unicode(5) "HELLO"
-  [u"One"]=>
+  string(5) "HELLO"
+  ["One"]=>
   int(10)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 Done

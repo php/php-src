@@ -28,7 +28,7 @@ Redeclare inherited protected property as protected.
   $b->showA();
   $b->showB();
 ?>
---EXPECT--
+--EXPECTF--
 A::p
 B::p
 B::p

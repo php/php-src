@@ -14,7 +14,7 @@ var_dump($class->getStaticProperties());
 ===DONE===
 --EXPECT--
 array(1) {
-  [u"a"]=>
-  unicode(4) "test"
+  ["a"]=>
+  string(4) "test"
 }
 ===DONE===

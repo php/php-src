@@ -25,23 +25,23 @@ foreach($classes as $class) {
 --EXPECTF--
 Constants from class C: 
 array(1) {
-  [u"a"]=>
-  unicode(12) "hello from C"
+  ["a"]=>
+  string(12) "hello from C"
 }
 Constants from class D: 
 array(1) {
-  [u"a"]=>
-  unicode(12) "hello from C"
+  ["a"]=>
+  string(12) "hello from C"
 }
 Constants from class E: 
 array(1) {
-  [u"a"]=>
-  unicode(12) "hello from C"
+  ["a"]=>
+  string(12) "hello from C"
 }
 Constants from class F: 
 array(1) {
-  [u"a"]=>
-  unicode(12) "hello from F"
+  ["a"]=>
+  string(12) "hello from F"
 }
 Constants from class X: 
 array(0) {

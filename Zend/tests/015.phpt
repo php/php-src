@@ -20,7 +20,7 @@ NULL
 Notice: error in %s on line %d
 bool(true)
 
-Warning: trigger_error() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: trigger_error() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 Warning: Invalid error type specified in %s on line %d

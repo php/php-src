@@ -14,10 +14,9 @@ if(!$dom) {
 }
 
 $node = $dom->documentElement;
-if ($node->hasAttributes()) {
-	$lang = $node->getAttributeNode('language');
-	echo "Language: ".$lang->value."\n";
-}
+
+$lang = $node->getAttributeNode('language');
+echo "Language: ".$lang->value."\n";
 
 $lang->value = 'en-US';
 echo "Language: ".$lang->value."\n";
@@ -33,18 +32,7 @@ $top_element = $node->cloneNode();
 
 print $dom->saveXML($top_element);
 
-$dom->loadXML(b'<root xmlns:a="urn::atest" a:att1="1" a:att2="2" />');
-$root = $dom->documentElement;
-$nmap = $root->attributes;
 
-print "\n\n";
-
-if ($attr = $nmap->getNamedItemNS(NULL, 'att1')) {
-	print $attr->nodeValue."\n";
-}
-if ($attr = $nmap->getNamedItemNS("urn::atest", 'att1')) {
-	print $attr->nodeValue."\n";
-}
 ?>
 --EXPECT--
 
@@ -53,4 +41,3 @@ Language: en-US
 Is ID?: NO
 <chapter language="en-US" num="1"/>
 
-1

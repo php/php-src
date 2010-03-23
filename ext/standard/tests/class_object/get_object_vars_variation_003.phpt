@@ -74,9 +74,9 @@ echo "Done";
 --EXPECTF--
 *** Testing get_object_vars() : usage variations ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
+Notice: Undefined variable: undefined_var in %s on line 56
 
-Notice: Undefined variable: unset_var in %s on line %d
+Notice: Undefined variable: unset_var in %s on line 59
 
 Arg value 0 
 
@@ -123,35 +123,25 @@ Arg value 0.5
 Warning: get_object_vars() expects parameter 1 to be object, double given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
+Arg value Array 
+
+Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
+NULL
 
 Arg value Array 
 
 Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
 Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
 Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
 NULL
-
-Notice: Array to string conversion in %s on line %d
-
-Arg value Array 
-
-Warning: get_object_vars() expects parameter 1 to be object, array given in %s on line %d
-NULL
-
-Notice: Array to string conversion in %s on line %d
 
 Arg value Array 
 
@@ -190,22 +180,22 @@ NULL
 
 Arg value  
 
-Warning: get_object_vars() expects parameter 1 to be object, Unicode string given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: get_object_vars() expects parameter 1 to be object, Unicode string given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: get_object_vars() expects parameter 1 to be object, Unicode string given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: get_object_vars() expects parameter 1 to be object, Unicode string given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
 Arg value  

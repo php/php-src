@@ -4,7 +4,7 @@ Test 2: getElementsByTagName() / getElementsByTagNameNS()
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$xml = b<<<HERE
+$xml = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"
      xmlns:fubar="http://www.example.com/ns/fubar">
@@ -31,27 +31,27 @@ dump($dom->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
 dump($doc->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
 ?>
 --EXPECT--
-unicode(3) "bar"
-unicode(5) "test1"
-unicode(3) "bar"
-unicode(5) "test2"
-unicode(9) "fubar:bar"
-unicode(5) "test3"
-unicode(9) "fubar:bar"
-unicode(5) "test4"
-unicode(3) "bar"
-unicode(5) "test1"
-unicode(3) "bar"
-unicode(5) "test2"
-unicode(9) "fubar:bar"
-unicode(5) "test3"
-unicode(9) "fubar:bar"
-unicode(5) "test4"
-unicode(9) "fubar:bar"
-unicode(5) "test3"
-unicode(9) "fubar:bar"
-unicode(5) "test4"
-unicode(9) "fubar:bar"
-unicode(5) "test3"
-unicode(9) "fubar:bar"
-unicode(5) "test4"
+string(3) "bar"
+string(5) "test1"
+string(3) "bar"
+string(5) "test2"
+string(9) "fubar:bar"
+string(5) "test3"
+string(9) "fubar:bar"
+string(5) "test4"
+string(3) "bar"
+string(5) "test1"
+string(3) "bar"
+string(5) "test2"
+string(9) "fubar:bar"
+string(5) "test3"
+string(9) "fubar:bar"
+string(5) "test4"
+string(9) "fubar:bar"
+string(5) "test3"
+string(9) "fubar:bar"
+string(5) "test4"
+string(9) "fubar:bar"
+string(5) "test3"
+string(9) "fubar:bar"
+string(5) "test4"

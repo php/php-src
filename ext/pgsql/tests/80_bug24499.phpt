@@ -59,8 +59,8 @@ Array
     [id] => 2
 )
 object(stdClass)#%d (1) {
-  [u"id"]=>
-  unicode(1) "3"
+  ["id"]=>
+  string(1) "3"
 }
-unicode(1) "3"
+string(1) "3"
 Done

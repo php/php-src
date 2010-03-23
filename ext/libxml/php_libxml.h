@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -60,8 +60,6 @@ typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	int   refcount;
 	libxml_doc_props *doc_props;
-	zend_bool persistent;
-	zend_bool external_owner;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
@@ -95,26 +93,10 @@ PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC);
-PHP_LIBXML_API char* php_libxml_unicode_to_string(UChar *ustr, int ustr_len, int *str_len TSRMLS_DC);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);
 PHP_LIBXML_API void php_libxml_shutdown(void);
-
-#define ZVAL_XML_STRING(z, s, flags) {								\
-	UConverter *libxml_utf_conv = NULL;								\
-	libxml_utf_conv = UG(utf8_conv);								\
-	ZVAL_U_STRING(libxml_utf_conv, z, s, flags);					\
-}
-
-#define ZVAL_XML_STRING_LEN(z, s, l, flags) {								\
-	UConverter *libxml_utf_conv = NULL;								\
-	libxml_utf_conv = UG(utf8_conv);								\
-	ZVAL_U_STRINGL(libxml_utf_conv, z, s, l, flags);					\
-}
-
-#define RETVAL_XML_STRING(s, flags)			ZVAL_XML_STRING(return_value, s, flags)
-#define RETVAL_XML_STRING_LEN(s, l, flags)	ZVAL_XML_STRING_LEN(return_value, s, l, flags)
 
 #ifdef ZTS
 #define LIBXML(v) TSRMG(libxml_globals_id, zend_libxml_globals *, v)

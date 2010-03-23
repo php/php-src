@@ -254,49 +254,49 @@ NULL
 bool(false)
 
 -- Iteration 16 --
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(0) ""
+string(0) ""
 
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(0) ""
+string(0) ""
 
 -- Iteration 17 --
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(0) ""
+string(0) ""
 
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(0) ""
+string(0) ""
 
 -- Iteration 18 --
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(6) "string"
+string(6) "string"
 
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(6) "string"
+string(6) "string"
 
 -- Iteration 19 --
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(6) "string"
+string(6) "string"
 
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(6) "string"
+string(6) "string"
 
 -- Iteration 20 --
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(11) "hello world"
+string(11) "hello world"
 
-Warning: array_unshift() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, string given in %s on line %d
 NULL
-unicode(11) "hello world"
+string(11) "hello world"
 
 -- Iteration 21 --
 Warning: array_unshift() expects parameter 1 to be array, object given in %s on line %d

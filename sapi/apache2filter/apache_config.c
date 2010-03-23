@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -123,7 +123,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	php_conf_rec *d = base_conf, *e = new_conf, *n = NULL;
 	php_dir_entry *pe;
 	php_dir_entry *data;
-	zstr str;
+	char *str;
 	uint str_len;
 	ulong num_index;
 
@@ -137,11 +137,11 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		if (zend_hash_find(&n->config, str.s, str_len, (void **) &pe) == SUCCESS) {
+		if (zend_hash_find(&n->config, str, str_len, (void **) &pe) == SUCCESS) {
 			if (pe->status >= data->status) continue;
 		}
-		zend_hash_update(&n->config, str.s, str_len, data, sizeof(*data), NULL);
-		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str.s, data->status, pe?pe->status:-1));
+		zend_hash_update(&n->config, str, str_len, data, sizeof(*data), NULL);
+		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1));
 	}
 
 	return n;
@@ -162,7 +162,7 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;
-	zstr str;
+	char *str;
 	uint str_len;
 	php_dir_entry *data;
 	
@@ -171,8 +171,8 @@ void apply_config(void *dummy)
 				NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str.s, data->value));
-		if (zend_alter_ini_entry(str.s, str_len, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
+		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}	
 	}

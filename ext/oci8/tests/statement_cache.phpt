@@ -22,14 +22,14 @@ echo "Done\n";
 --EXPECTF--	
 array(2) {
   [0]=>
-  unicode(1) "4"
-  [u"1+3"]=>
-  unicode(1) "4"
+  string(1) "4"
+  ["1+3"]=>
+  string(1) "4"
 }
 array(2) {
   [0]=>
-  unicode(1) "4"
-  [u"1+3"]=>
-  unicode(1) "4"
+  string(1) "4"
+  ["1+3"]=>
+  string(1) "4"
 }
 Done

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -92,18 +92,14 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_firebird_db_handle *H = S->H;
 
 	do {
-		/* named cursors should be closed first */
-		if (*S->name && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
+		/* named or open cursors should be closed first */
+		if ((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
 			break;
 		}
-		
+		S->cursor_open = 0;
 		/* assume all params have been bound */
 	
-		if ((S->statement_type == isc_info_sql_stmt_exec_procedure &&
-				isc_dsql_execute2(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION,
-					S->in_sqlda, &S->out_sqlda))
-				|| isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION,
-					S->in_sqlda)) {
+		if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 			break;
 		}
 		
@@ -113,7 +109,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 	
 		*S->name = 0;
-		S->exhausted = 0;
+		S->cursor_open = (S->out_sqlda.sqln > 0);	/* A cursor is opened, when more than zero columns returned */
+		S->exhausted = !S->cursor_open;
 		
 		return 1;
 	} while (0);
@@ -135,20 +132,16 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 		strcpy(stmt->error_code, "HY000");
 		H->last_app_error = "Cannot fetch from a closed cursor";
 	} else if (!S->exhausted) {
-
-		/* an EXECUTE PROCEDURE statement can be fetched from once, without calling the API, because
-		 * the result was returned in the execute call */
-		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
-			S->exhausted = 1;
-		} else {
-			if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
-				if (H->isc_status[0] && H->isc_status[1]) {
-					RECORD_ERROR(stmt);
-				}
-				S->exhausted = 1;
-				return 0;
+		if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
+			if (H->isc_status[0] && H->isc_status[1]) {
+				RECORD_ERROR(stmt);
 			}
+			S->exhausted = 1;
+			return 0;
 		}
+ 		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
+ 			S->exhausted = 1;
+ 		}
 		return 1;
 	}
 	return 0;
@@ -161,15 +154,27 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
+	int colname_len;
+	char *cp;
 	
 	/* allocate storage for the column */
 	var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
 	var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 
+	colname_len = (S->H->fetch_table_names && var->relname_length)
+					? (var->aliasname_length + var->relname_length + 1)
+					: (var->aliasname_length);
 	col->precision = -var->sqlscale;
 	col->maxlen = var->sqllen;
-	col->namelen = var->aliasname_length;
-	col->name = estrndup(var->aliasname,var->aliasname_length);
+	col->namelen = colname_len;
+	col->name = cp = emalloc(colname_len + 1);
+	if (colname_len > var->aliasname_length) {
+		memmove(cp, var->relname, var->relname_length);
+		cp += var->relname_length;
+		*cp++ = '.';
+	}
+	memmove(cp, var->aliasname, var->aliasname_length);
+	*(cp+var->aliasname_length) = '\0';
 	col->param_type = PDO_PARAM_STR;
 
 	return 1;
@@ -357,7 +362,6 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 						isc_decode_timestamp((ISC_TIMESTAMP*)var->sqldata, &t);
 						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
-
 					/* convert the timestamp into a string */
 					*len = 80;
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len, NULL);
@@ -617,6 +621,22 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 }
 /* }}} */
 
+static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	
+	/* close the statement handle */
+	if ((*S->name || S->cursor_open) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+	*S->name = 0;
+	S->cursor_open = 0;
+	return 1;
+}
+/* }}} */
+
+
 struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_dtor,
 	firebird_stmt_execute,
@@ -625,7 +645,10 @@ struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_get_col,
 	firebird_stmt_param_hook,
 	firebird_stmt_set_attribute,
-	firebird_stmt_get_attribute
+	firebird_stmt_get_attribute,
+	NULL, /* get_column_meta_func */
+	NULL, /* next_rowset_func */
+	firebird_stmt_cursor_closer
 };
 /* }}} */
 

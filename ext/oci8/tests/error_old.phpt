@@ -22,19 +22,19 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-resource(%d) of type (oci8 connection)
-resource(%d) of type (oci8 statement)
+resource(%s) of type (oci8 connection)
+resource(%s) of type (oci8 statement)
 
 Warning: ociexecute(): ORA-00900: invalid SQL statement in %s on line %d
 bool(false)
 array(4) {
-  [u"code"]=>
+  ["code"]=>
   int(900)
-  [u"message"]=>
-  unicode(32) "ORA-00900: invalid SQL statement"
-  [u"offset"]=>
+  ["message"]=>
+  string(32) "ORA-00900: invalid SQL statement"
+  ["offset"]=>
   int(0)
-  [u"sqltext"]=>
-  unicode(12) "WRONG SYNTAX"
+  ["sqltext"]=>
+  string(12) "WRONG SYNTAX"
 }
 Done

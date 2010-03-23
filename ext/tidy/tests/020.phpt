@@ -4,10 +4,9 @@ OO API
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-declare(encoding='latin1');
 
 $tidy = new tidy();
-$str  = b<<<EOF
+$str  = <<<EOF
 <p>Isto é um texto em Português<br>
 para testes.</p>
 EOF;

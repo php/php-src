@@ -27,14 +27,14 @@ foreach ( $variation_array as $var ) {
 --EXPECTF--
 *** Test substituting argument 2 with array values ***
 
-Warning: getservbyname() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: getservbyname() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: getservbyname() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: getservbyname() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: getservbyname() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: getservbyname() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Warning: getservbyname() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: getservbyname() expects parameter 2 to be string, array given in %s on line %d
 NULL

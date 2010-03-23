@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -36,21 +36,20 @@ static zend_object_handlers php_incomplete_object_handlers;
  */
 static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 {
-	zstr class_name;
+	char *class_name;
 	zend_bool class_name_alloced = 1;
 
 	class_name = php_lookup_class_name(object, NULL);
 	
-	/* FIXME: Unicode support??? */
-	if (!class_name.s) {
+	if (!class_name) {
 		class_name_alloced = 0;
-		class_name.s = "unknown";
+		class_name = "unknown";
 	}
 	
 	php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name);
 
 	if (class_name_alloced) {
-		efree(class_name.v);
+		efree(class_name);
 	}
 }
 /* }}} */
@@ -93,7 +92,7 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, zstr method, int method_len TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
@@ -111,7 +110,7 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	value.handlers = &php_incomplete_object_handlers;
 	
 	ALLOC_HASHTABLE(object->properties);
-	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	return value;
 }
 
@@ -136,20 +135,20 @@ PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
+PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
 {
 	zval **val;
-	zstr retval = NULL_ZSTR;
+	char *retval = NULL;
 	HashTable *object_properties;
 	TSRMLS_FETCH();
 
 	object_properties = Z_OBJPROP_P(object);
 
 	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		retval.u = eustrndup(Z_USTRVAL_PP(val), Z_USTRLEN_PP(val));
+		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 
 		if (nlen) {
-			*nlen = Z_UNILEN_PP(val);
+			*nlen = Z_STRLEN_PP(val);
 		}
 	}
 
@@ -159,13 +158,16 @@ PHPAPI zstr php_lookup_class_name(zval *object, zend_uint *nlen)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, zstr name, zend_uint len)
+PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
 {
 	zval *val;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(val);
-	ZVAL_UNICODEL(val, name.u, len, 1);
+
+	Z_TYPE_P(val)   = IS_STRING;
+	Z_STRVAL_P(val) = estrndup(name, len);
+	Z_STRLEN_P(val) = len;
 
 	zend_hash_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }

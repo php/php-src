@@ -22,7 +22,7 @@ unset($unset_var);
 // declaring a class
 class sample  {
   public function __toString() {
-  return "object";
+  return "obj'ct";
   } 
 }
 
@@ -126,23 +126,23 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -153,22 +153,18 @@ string(1) "1"
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --
-
-Warning: stripcslashes() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(0) ""
 -- Iteration 20 --
-
-Warning: stripcslashes() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+string(0) ""
 -- Iteration 21 --
 string(0) ""
 -- Iteration 22 --
 string(0) ""
 -- Iteration 23 --
-string(6) "object"
+string(6) "obj'ct"
 -- Iteration 24 --
 
-Warning: stripcslashes() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: stripcslashes() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 string(0) ""

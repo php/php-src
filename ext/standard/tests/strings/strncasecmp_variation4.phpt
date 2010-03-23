@@ -7,7 +7,7 @@ Test strncasecmp() function : usage variations - unexpected values for 'str1' & 
  * Source code: Zend/zend_builtin_functions.c
 */
 
-/* Test strncasecmp() function with the unexpected input strings */
+/* Test strncasecmp() function with the unexpected inputs for 'str1' and 'str2' */
 
 echo "*** Testing strncasecmp() function: with unexpected values for 'str1' and 'str2' ***\n";
 /* get an unset variable */
@@ -130,33 +130,33 @@ int(0)
 int(0)
 -- Iteration 15 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 20 --
 int(0)
@@ -180,9 +180,9 @@ int(0)
 int(0)
 -- Iteration 30 --
 
-Warning: strlen() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strlen() expects parameter 1 to be string, resource given in %s on line %d
 
-Warning: strncasecmp() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strncasecmp() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 31 --
 int(0)

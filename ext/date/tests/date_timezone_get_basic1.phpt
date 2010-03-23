@@ -29,7 +29,7 @@ var_dump( timezone_name_get($tz) );
 ===DONE===
 --EXPECTF--
 *** Testing date_timezone_get() : basic functionality ***
-unicode(13) "Europe/London"
-unicode(16) "America/New_York"
-unicode(19) "America/Los_Angeles"
+string(13) "Europe/London"
+string(16) "America/New_York"
+string(19) "America/Los_Angeles"
 ===DONE===

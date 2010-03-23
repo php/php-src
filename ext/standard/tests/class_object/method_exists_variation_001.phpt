@@ -114,23 +114,18 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %s(77)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %s(77)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %s(77)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %s(77)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %s(77)
 
 Arg value Array 
 bool(false)

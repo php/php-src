@@ -145,32 +145,32 @@ int(1970)
 
 --empty string DQ--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: idate() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: idate() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--

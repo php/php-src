@@ -15,8 +15,7 @@ var_dump(escapeshellcmd('?€®đæ?'));
 var_dump(escapeshellarg('aŊł€'));
 
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
+--EXPECT--
 string(13) "f\{o\}\<€\>"
 string(10) "'f~|;*Þ?'"
 string(13) "\?€®đæ\?"

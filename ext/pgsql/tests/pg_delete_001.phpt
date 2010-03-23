@@ -45,38 +45,38 @@ pg_query('DROP SCHEMA phptests');
 
 ?>
 --EXPECTF--
-unicode(37) "DELETE FROM foo WHERE id=1 AND id2=2;"
-unicode(46) "DELETE FROM phptests.foo WHERE id=2 AND id2=3;"
+string(37) "DELETE FROM foo WHERE id=1 AND id2=2;"
+string(46) "DELETE FROM phptests.foo WHERE id=2 AND id2=3;"
 array(2) {
   [0]=>
   array(2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"id2"]=>
-    unicode(1) "1"
+    ["id"]=>
+    string(1) "1"
+    ["id2"]=>
+    string(1) "1"
   }
   [1]=>
   array(2) {
-    [u"id"]=>
-    unicode(1) "3"
-    [u"id2"]=>
-    unicode(1) "3"
+    ["id"]=>
+    string(1) "3"
+    ["id2"]=>
+    string(1) "3"
   }
 }
 array(2) {
   [0]=>
   array(2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"id2"]=>
-    unicode(1) "1"
+    ["id"]=>
+    string(1) "1"
+    ["id2"]=>
+    string(1) "1"
   }
   [1]=>
   array(2) {
-    [u"id"]=>
-    unicode(1) "1"
-    [u"id2"]=>
-    unicode(1) "2"
+    ["id"]=>
+    string(1) "1"
+    ["id2"]=>
+    string(1) "2"
   }
 }
 

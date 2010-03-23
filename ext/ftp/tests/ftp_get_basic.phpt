@@ -1,7 +1,5 @@
 --TEST--
 FTP ftp_get file for both binary and ASCII transfer modes 
---XFAIL--
-Missing implementation in PHP6
 --CREDITS--
 Nathaniel McHugh
 --SKIPIF--

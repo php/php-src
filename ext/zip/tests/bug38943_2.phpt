@@ -4,9 +4,7 @@
 <?php
 /* $Id$ */
 if(!extension_loaded('zip')) die('skip');
-if (version_compare(PHP_VERSION, "5.3", "<")) die('skip test for 5.3+ only');
-if (version_compare(PHP_MAJOR_VERSION, "6", ">=")) die('skip test for 5.x only');
-
+if (version_compare(PHP_VERSION, "5.3", "<")) die('skip test for5.3+ only');
 ?>
 --FILE--
 <?php

@@ -17,7 +17,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: array_map(): An error occurred while invoking the map callback in %s on line %d
-unicode(17) "exception caught!"
+string(17) "exception caught!"
 Done

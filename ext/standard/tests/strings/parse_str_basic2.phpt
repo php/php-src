@@ -20,7 +20,7 @@ var_dump($first, $second, $third);
 --EXPECTF--
 *** Testing parse_str() : non-default arg_separator.input specified ***
 NULL
-unicode(4) "val1"
-unicode(4) "val2"
-unicode(4) "val3"
+string(4) "val1"
+string(4) "val2"
+string(4) "val3"
 ===DONE===

@@ -6,7 +6,7 @@
  *
  * SPL - Standard PHP Library
  *
- * (c) Marcus Boerger, 2003 - 2007
+ * (c) Marcus Boerger, 2003 - 2008
  */
 
 /** @mainpage SPL - Standard PHP Library

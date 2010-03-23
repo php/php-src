@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -33,31 +33,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
 	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_eregi, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_ereg_replace, 0)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, replacement)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_eregi_replace, 0)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, replacement)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(0, limit)  
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_spliti, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string) 
 	ZEND_ARG_INFO(0, limit)  
@@ -70,13 +52,13 @@ ZEND_END_ARG_INFO()
 
 /* {{{ Function table */
 const zend_function_entry ereg_functions[] = {
-	PHP_FE(ereg,						arginfo_ereg)  
-	PHP_FE(ereg_replace,				arginfo_ereg_replace)
-	PHP_FE(eregi,						arginfo_eregi)
-	PHP_FE(eregi_replace,				arginfo_eregi_replace)   
-	PHP_FE(split,						arginfo_split)
-	PHP_FE(spliti,						arginfo_spliti)
-	PHP_FE(sql_regcase,					arginfo_sql_regcase)
+	PHP_DEP_FE(ereg,			arginfo_ereg)
+	PHP_DEP_FE(ereg_replace,	arginfo_ereg_replace)
+	PHP_DEP_FE(eregi,			arginfo_ereg)
+	PHP_DEP_FE(eregi_replace,	arginfo_ereg_replace)
+	PHP_DEP_FE(split,			arginfo_split)
+	PHP_DEP_FE(spliti,			arginfo_split)
+	PHP_DEP_FE(sql_regcase,		arginfo_sql_regcase)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -155,7 +137,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 			zend_hash_clean(&EREG(ht_rc));
 			EREG(lru_counter) = 0;
 		} else {
-			int num_clean = EREG_CACHE_SIZE / 2;
+			int num_clean = EREG_CACHE_SIZE / 4;
 			zend_hash_apply_with_argument(&EREG(ht_rc), ereg_clean_cache, &num_clean TSRMLS_CC);
 		}
 	}
@@ -307,8 +289,9 @@ static void php_ereg_eprint(int err, regex_t *re) {
 static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **regex,			/* Regular expression */
-		**findin,		/* String to apply expression to */
 		**array = NULL;		/* Optional register array */
+	char *findin;		/* String to apply expression to */
+	int findin_len;
 	regex_t re;
 	regmatch_t *subs;
 	int err, match_len, string_len;
@@ -318,25 +301,27 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *buf = NULL;
 	char *string = NULL;
 	int   argc = ZEND_NUM_ARGS();
-	
-	if (argc < 2 || argc > 3 ||
-		zend_get_parameters_ex(argc, &regex, &findin, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "Zs|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
+		return;
 	}
 
-	if (icase)
+	if (icase) {
 		copts |= REG_ICASE;
+	}
 	
-	if (argc == 2)
+	if (argc == 2) {
 		copts |= REG_NOSUB;
+	}
 
 	/* compile the regular expression from the supplied regex */
 	if (Z_TYPE_PP(regex) == IS_STRING) {
 		err = regcomp(&re, Z_STRVAL_PP(regex), REG_EXTENDED | copts);
 	} else {
 		/* we convert numbers to integers and treat them as a string */
-		if (Z_TYPE_PP(regex) == IS_DOUBLE)
+		if (Z_TYPE_PP(regex) == IS_DOUBLE) {
 			convert_to_long_ex(regex);	/* get rid of decimal places */
+		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
 		err = regcomp(&re, Z_STRVAL_PP(regex), copts);
@@ -348,8 +333,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* make a copy of the string we're looking in */
-	convert_to_string_ex(findin);
-	string = estrndup(Z_STRVAL_PP(findin), Z_STRLEN_PP(findin));
+	string = estrndup(findin, findin_len);
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
@@ -366,7 +350,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	if (array && err != REG_NOMATCH) {
 		match_len = (int) (subs[0].rm_eo - subs[0].rm_so);
-		string_len = Z_STRLEN_PP(findin) + 1;
+		string_len = findin_len + 1;
 
 		buf = emalloc(string_len);
 
@@ -565,23 +549,23 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **arg_pattern,
-		**arg_replace,
-		**arg_string;
-	char *pattern;
+		**arg_replace;
+	char *pattern, *arg_string;
 	char *string;
 	char *replace;
 	char *ret;
+	int arg_string_len;
 	
-	if (ZEND_NUM_ARGS() != 3 || 
-		zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZs", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
+		return;
 	}
 
 	if (Z_TYPE_PP(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern))
+		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern)) {
 			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern));
-		else
+		} else {
 			pattern = STR_EMPTY_ALLOC();
+		}
 	} else {
 		convert_to_long_ex(arg_pattern);
 		pattern = emalloc(2);
@@ -590,10 +574,11 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_PP(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace))
+		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace)) {
 			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRLEN_PP(arg_replace));
-		else
+		} else {
 			replace = STR_EMPTY_ALLOC();
+		}
 	} else {
 		convert_to_long_ex(arg_replace);
 		replace = emalloc(2);
@@ -601,11 +586,11 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		replace[1] = '\0';
 	}
 
-	convert_to_string_ex(arg_string);
-	if (Z_STRVAL_PP(arg_string) && Z_STRLEN_PP(arg_string))
-		string = estrndup(Z_STRVAL_PP(arg_string), Z_STRLEN_PP(arg_string));
-	else
+	if (arg_string && arg_string_len) {
+		string = estrndup(arg_string, arg_string_len);
+	} else {
 		string = STR_EMPTY_ALLOC();
+	}
 
 	/* do the actual work */
 	ret = php_ereg_replace(pattern, replace, string, icase, 1);
@@ -744,21 +729,20 @@ PHP_FUNCTION(spliti)
    Make regular expression for case insensitive match */
 PHPAPI PHP_FUNCTION(sql_regcase)
 {
-	zval **string;
-	char *tmp;
+	char *string, *tmp;
+	int string_len;
 	unsigned char c;
 	register int i, j;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
+		return;
+	}
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &string)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}	
-	convert_to_string_ex(string);
+	tmp = safe_emalloc(string_len, 4, 1);
 	
-	tmp = safe_emalloc(Z_STRLEN_PP(string), 4, 1);
-	
-	for (i = j = 0; i < Z_STRLEN_PP(string); i++) {
-		c = (unsigned char) Z_STRVAL_PP(string)[i];
-		if(isalpha(c)) {
+	for (i = j = 0; i < string_len; i++) {
+		c = (unsigned char) string[i];
+		if (isalpha(c)) {
 			tmp[j++] = '[';
 			tmp[j++] = toupper(c);
 			tmp[j++] = tolower(c);

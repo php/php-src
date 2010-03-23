@@ -28,7 +28,7 @@ var_dump( strrpos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
 int(0)

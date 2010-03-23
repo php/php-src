@@ -161,12 +161,12 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 11 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 12 --
@@ -178,7 +178,7 @@ bool(false)
 
 -- Iteration 13 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 14 --
@@ -190,27 +190,23 @@ bool(false)
 
 -- Iteration 15 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 16 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: scandir(Array): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
+Warning: scandir() expects parameter 1 to be string, array given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
@@ -242,18 +238,16 @@ bool(false)
 
 -- Iteration 23 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 24 --
 
-Warning: scandir(): (errno %d): %s in %s on line %d
+Warning: scandir(): Directory name cannot be empty in %s on line %d
 bool(false)
 
 -- Iteration 25 --
 
-Warning: scandir(Resource id #%d): failed to open dir: %s in %s on line %d
-
-Warning: scandir(): (errno %d): %s in %s on line %d
-bool(false)
+Warning: scandir() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 ===DONE===

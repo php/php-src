@@ -31,7 +31,7 @@ Object of class [ <user> class foo extends foo2 ] {
   @@ %s 7-21
 
   - Constants [1] {
-    Constant [ Unicode string BAR ] { foo's bar }
+    Constant [ string BAR ] { foo's bar }
   }
 
   - Static properties [0] {

@@ -96,59 +96,59 @@ Test 1: Associate fetch of nested cursor
 Got row "11". Now getting nested cursor:
 bool(true)
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "21"
+  ["ID2"]=>
+  string(2) "21"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "22"
+  ["ID2"]=>
+  string(2) "22"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "23"
+  ["ID2"]=>
+  string(2) "23"
 }
 Got row "12". Now getting nested cursor:
 bool(true)
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "21"
+  ["ID2"]=>
+  string(2) "21"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "22"
+  ["ID2"]=>
+  string(2) "22"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "23"
+  ["ID2"]=>
+  string(2) "23"
 }
 Got row "13". Now getting nested cursor:
 bool(true)
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "21"
+  ["ID2"]=>
+  string(2) "21"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "22"
+  ["ID2"]=>
+  string(2) "22"
 }
 array(1) {
-  [u"ID2"]=>
-  unicode(2) "23"
+  ["ID2"]=>
+  string(2) "23"
 }
 
 Test 2: fetchall of nested cursor
 Rows returned 3
 array(2) {
-  [u"ID1"]=>
+  ["ID1"]=>
   array(3) {
     [0]=>
-    unicode(2) "11"
+    string(2) "11"
     [1]=>
-    unicode(2) "12"
+    string(2) "12"
     [2]=>
-    unicode(2) "13"
+    string(2) "13"
   }
-  [u"CURSOR"]=>
+  ["CURSOR"]=>
   array(3) {
     [0]=>
     resource(%d) of type (oci8 statement)
@@ -161,40 +161,40 @@ array(2) {
 Getting nested cursor
 bool(true)
 array(1) {
-  [u"ID2"]=>
+  ["ID2"]=>
   array(3) {
     [0]=>
-    unicode(2) "21"
+    string(2) "21"
     [1]=>
-    unicode(2) "22"
+    string(2) "22"
     [2]=>
-    unicode(2) "23"
+    string(2) "23"
   }
 }
 Getting nested cursor
 bool(true)
 array(1) {
-  [u"ID2"]=>
+  ["ID2"]=>
   array(3) {
     [0]=>
-    unicode(2) "21"
+    string(2) "21"
     [1]=>
-    unicode(2) "22"
+    string(2) "22"
     [2]=>
-    unicode(2) "23"
+    string(2) "23"
   }
 }
 Getting nested cursor
 bool(true)
 array(1) {
-  [u"ID2"]=>
+  ["ID2"]=>
   array(3) {
     [0]=>
-    unicode(2) "21"
+    string(2) "21"
     [1]=>
-    unicode(2) "22"
+    string(2) "22"
     [2]=>
-    unicode(2) "23"
+    string(2) "23"
   }
 }
 Done

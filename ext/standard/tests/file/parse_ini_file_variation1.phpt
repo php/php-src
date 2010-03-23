@@ -34,36 +34,35 @@ unlink($output_file);
 --EXPECT--
 *** Testing parse_ini_file() : variation ***
 array(2) {
-  [u"section1"]=>
+  ["section1"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(8) "original"
-    [u"value2"]=>
-    unicode(8) "original"
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(8) "original"
   }
-  [u"section2"]=>
+  ["section2"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(8) "original"
-    [u"value2"]=>
-    unicode(9) "different"
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(9) "different"
   }
 }
 array(2) {
-  [u"section1"]=>
+  ["section1"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(7) "changed"
-    [u"value2"]=>
-    unicode(8) "original"
+    ["value1"]=>
+    string(7) "changed"
+    ["value2"]=>
+    string(8) "original"
   }
-  [u"section2"]=>
+  ["section2"]=>
   array(2) {
-    [u"value1"]=>
-    unicode(8) "original"
-    [u"value2"]=>
-    unicode(9) "different"
+    ["value1"]=>
+    string(8) "original"
+    ["value2"]=>
+    string(9) "different"
   }
 }
 ===DONE===
-

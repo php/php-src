@@ -2,7 +2,7 @@
 Test usort() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -72,7 +72,7 @@ array(8) {
   [2]=>
   array(1) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
   }
   [3]=>
   array(1) {
@@ -109,15 +109,15 @@ array(8) {
   [7]=>
   array(5) {
     [0]=>
-    unicode(5) "apple"
+    string(5) "apple"
     [1]=>
-    unicode(5) "Apple"
+    string(5) "Apple"
     [2]=>
-    unicode(5) "APPLE"
+    string(5) "APPLE"
     [3]=>
-    unicode(5) "aPPle"
+    string(5) "aPPle"
     [4]=>
-    unicode(5) "aPpLe"
+    string(5) "aPpLe"
   }
 }
 

@@ -75,7 +75,7 @@ Popping elements off end of an unreferenced array
 --> State of array before loop:
 array(1) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -87,9 +87,9 @@ array(0) {
 --> State of array before loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -102,11 +102,11 @@ array(0) {
 --> State of array before loop:
 array(3) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -120,13 +120,13 @@ array(0) {
 --> State of array before loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -144,7 +144,7 @@ Shift elements off start of an unreferenced array
 --> State of array before loop:
 array(1) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -156,9 +156,9 @@ array(0) {
 --> State of array before loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -171,11 +171,11 @@ array(0) {
 --> State of array before loop:
 array(3) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -189,13 +189,13 @@ array(0) {
 --> State of array before loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -213,7 +213,7 @@ Remove current element of an unreferenced array
 --> State of array before loop:
 array(1) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -225,9 +225,9 @@ array(0) {
 --> State of array before loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -240,11 +240,11 @@ array(0) {
 --> State of array before loop:
 array(3) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -258,13 +258,13 @@ array(0) {
 --> State of array before loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -282,25 +282,25 @@ Adding elements to the end of an unreferenced array
 --> State of array before loop:
 array(1) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
 }
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -308,24 +308,24 @@ array(2) {
 --> State of array after loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [3]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
 }
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
 array(3) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -334,30 +334,30 @@ array(3) {
 --> State of array after loop:
 array(6) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [4]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
   [5]=>
-  unicode(5) "new.2"
+  string(5) "new.2"
 }
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -367,21 +367,21 @@ array(4) {
 --> State of array after loop:
 array(8) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
   [4]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [5]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
   [6]=>
-  unicode(5) "new.2"
+  string(5) "new.2"
   [7]=>
-  unicode(5) "new.3"
+  string(5) "new.3"
 }
 
 
@@ -391,25 +391,25 @@ Adding elements to the start of an unreferenced array
 --> State of array before loop:
 array(1) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
 --> State of array after loop:
 array(2) {
   [0]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [1]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
 }
 
 ---( Array with 2 element(s): )---
 --> State of array before loop:
 array(2) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -417,24 +417,24 @@ array(2) {
 --> State of array after loop:
 array(4) {
   [0]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
   [1]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [2]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [3]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
 }
 
 ---( Array with 3 element(s): )---
 --> State of array before loop:
 array(3) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -443,30 +443,30 @@ array(3) {
 --> State of array after loop:
 array(6) {
   [0]=>
-  unicode(5) "new.2"
+  string(5) "new.2"
   [1]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
   [2]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [3]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [4]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [5]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
 }
 
 ---( Array with 4 element(s): )---
 --> State of array before loop:
 array(4) {
   [0]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [1]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [2]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [3]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
@@ -476,19 +476,19 @@ array(4) {
 --> State of array after loop:
 array(8) {
   [0]=>
-  unicode(5) "new.3"
+  string(5) "new.3"
   [1]=>
-  unicode(5) "new.2"
+  string(5) "new.2"
   [2]=>
-  unicode(5) "new.1"
+  string(5) "new.1"
   [3]=>
-  unicode(5) "new.0"
+  string(5) "new.0"
   [4]=>
-  unicode(3) "v.0"
+  string(3) "v.0"
   [5]=>
-  unicode(3) "v.1"
+  string(3) "v.1"
   [6]=>
-  unicode(3) "v.2"
+  string(3) "v.2"
   [7]=>
-  unicode(3) "v.3"
+  string(3) "v.3"
 }

@@ -50,7 +50,7 @@ var_dump(current($multi_array[3][3][3][1]));
 *** Testing current() : usage variations ***
 
 -- Two Dimensional Array --
-Initial Position: unicode(4) "zero"
+Initial Position: string(4) "zero"
 Next Position:    array(3) {
   [0]=>
   int(1)
@@ -59,13 +59,13 @@ Next Position:    array(3) {
   [2]=>
   int(3)
 }
-End Position:     unicode(3) "two"
+End Position:     string(3) "two"
 
 -- Access an Array Within an Array --
 Initial Position: int(1)
 
 -- Recursive, Multidimensional Array --
-Current Position: unicode(3) "two"
-unicode(3) "two"
+Current Position: string(3) "two"
+string(3) "two"
 int(1)
 ===DONE===

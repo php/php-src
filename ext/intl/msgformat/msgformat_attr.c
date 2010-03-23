@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,11 +21,12 @@
 #include "php_intl.h"
 #include "msgformat_class.h"
 #include "msgformat_attr.h"
+#include "intl_convert.h"
 
 #include <unicode/ustring.h>
 
 
-/* {{{ proto unicode MessageFormatter::getPattern( )
+/* {{{ proto string MessageFormatter::getPattern( )
  * Get formatter pattern. }}} */
 /* {{{ proto string msgfmt_get_pattern( MessageFormatter $mf )
  * Get formatter pattern.
@@ -45,11 +46,11 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
- 	if(mfo->mf_data.orig_format) {
- 		RETURN_UNICODEL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len, 1);
-  	}
-  
- 	RETURN_FALSE;
+	if(mfo->mf_data.orig_format) {
+		RETURN_STRINGL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len, 1);
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -60,14 +61,15 @@ PHP_FUNCTION( msgfmt_get_pattern )
  */
 PHP_FUNCTION( msgfmt_set_pattern )
 {
-	int         slength = 0;
-	UChar*	    svalue  = NULL;
-	int free_pattern = 0;
+	char*       value = NULL;
+	int         value_len = 0;
+	int         spattern_len = 0;
+	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ou",
-		&object, MessageFormatter_ce_ptr, &svalue, &slength ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
 			"msgfmt_set_pattern: unable to parse input params", 0 TSRMLS_CC);
@@ -76,25 +78,26 @@ PHP_FUNCTION( msgfmt_set_pattern )
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
-	if(mfo->mf_data.orig_format) {
- 		efree(mfo->mf_data.orig_format);
- 	}
- 	mfo->mf_data.orig_format = eustrndup(svalue, slength);
- 	mfo->mf_data.orig_format_len = slength;
+	/* Convert given pattern to UTF-16. */
+	intl_convert_utf8_to_utf16(&spattern, &spattern_len, value, value_len, &INTL_DATA_ERROR_CODE(mfo));
+	INTL_METHOD_CHECK_STATUS(mfo, "Error converting pattern to UTF-16" );
 
-	if(msgformat_fix_quotes(&svalue, &slength, &INTL_DATA_ERROR_CODE(mfo), &free_pattern) != SUCCESS) {
- 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
- 			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
- 		RETURN_FALSE;
- 	}
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
+		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
+			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
+		RETURN_FALSE;
+	}
 
 	/* TODO: add parse error information */
-	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), svalue, slength, NULL, &INTL_DATA_ERROR_CODE(mfo));
-	if(free_pattern) {
-		efree(svalue);
-	}
+	umsg_applyPattern(MSG_FORMAT_OBJECT(mfo), spattern, spattern_len, NULL, &INTL_DATA_ERROR_CODE(mfo));
+	efree(spattern);
 	INTL_METHOD_CHECK_STATUS(mfo, "Error setting symbol value");
 
+	if(mfo->mf_data.orig_format) {
+		efree(mfo->mf_data.orig_format);
+	}
+	mfo->mf_data.orig_format = estrndup(value, value_len);
+	mfo->mf_data.orig_format_len = value_len;
 
 	RETURN_TRUE;
 }

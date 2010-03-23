@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -25,10 +25,9 @@
 #include <sys/types.h>
 #include "zend.h"
 
-#define HASH_KEY_NON_EXISTANT	IS_NULL
-#define HASH_KEY_IS_LONG		IS_LONG
-#define HASH_KEY_IS_STRING		IS_STRING
-#define HASH_KEY_IS_UNICODE		IS_UNICODE
+#define HASH_KEY_IS_STRING 1
+#define HASH_KEY_IS_LONG 2
+#define HASH_KEY_NON_EXISTANT 3
 
 #define HASH_UPDATE 		(1<<0)
 #define HASH_ADD			(1<<1)
@@ -52,14 +51,6 @@ typedef void (*copy_ctor_param_func_t)(void *pElement, void *pParam);
 
 struct _hashtable;
 
-typedef struct _key {
-	zend_uchar type;
-	union {
-		char  s[1];   /* Must be last element */
-		UChar u[1];   /* Must be last element */
-	} arKey;
-} HashKey;
-
 typedef struct bucket {
 	ulong h;						/* Used for numeric indexing */
 	uint nKeyLength;
@@ -69,7 +60,7 @@ typedef struct bucket {
 	struct bucket *pListLast;
 	struct bucket *pNext;
 	struct bucket *pLast;
-	HashKey key; /* Must be last element */
+	char arKey[1]; /* Must be last element */
 } Bucket;
 
 typedef struct _hashtable {
@@ -83,7 +74,6 @@ typedef struct _hashtable {
 	Bucket **arBuckets;
 	dtor_func_t pDestructor;
 	zend_bool persistent;
-	zend_bool unicode;
 	unsigned char nApplyCount;
 	zend_bool bApplyProtection;
 #if ZEND_DEBUG
@@ -93,10 +83,9 @@ typedef struct _hashtable {
 
 
 typedef struct _zend_hash_key {
-	ulong h;
+	char *arKey;
 	uint nKeyLength;
-	zend_uchar type;
-	zstr arKey;
+	ulong h;
 } zend_hash_key;
 
 
@@ -108,53 +97,24 @@ BEGIN_EXTERN_C()
 
 /* startup/shutdown */
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
-ZEND_API int _zend_u_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool unicode ZEND_FILE_LINE_DC);
 ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
-ZEND_API int _zend_u_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool unicode, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
 ZEND_API void zend_hash_destroy(HashTable *ht);
 ZEND_API void zend_hash_clean(HashTable *ht);
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)						_zend_hash_init((ht), (nSize), (pHashFunction), (pDestructor), (persistent) ZEND_FILE_LINE_CC)
-#define zend_u_hash_init(ht, nSize, pHashFunction, pDestructor, persistent, unicode)						_zend_u_hash_init((ht), (nSize), (pHashFunction), (pDestructor), (persistent), (unicode) ZEND_FILE_LINE_CC)
 #define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)		_zend_hash_init_ex((ht), (nSize), (pHashFunction), (pDestructor), (persistent), (bApplyProtection) ZEND_FILE_LINE_CC)
-#define zend_u_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, unicode, bApplyProtection)		_zend_u_hash_init_ex((ht), (nSize), (pHashFunction), (pDestructor), (persistent), (unicode), (bApplyProtection) ZEND_FILE_LINE_CC)
 
 /* additions/updates/changes */
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
-ZEND_API int _zend_ascii_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
-ZEND_API int _zend_rt_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
-ZEND_API int _zend_utf8_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
-ZEND_API int _zend_u_hash_add_or_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
-#define zend_ascii_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_ascii_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
-#define zend_rt_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_rt_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
-#define zend_utf8_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_utf8_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
-#define zend_u_hash_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_u_hash_add_or_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
-#define zend_ascii_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_ascii_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
-#define zend_rt_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_rt_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
-#define zend_utf8_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_utf8_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
-#define zend_u_hash_add(ht, type, arKey, nKeyLength, pData, nDataSize, pDest) \
-		_zend_u_hash_add_or_update(ht, type, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
 ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
-ZEND_API int _zend_u_hash_quick_add_or_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_quick_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
-#define zend_u_hash_quick_update(ht, type, arKey, nKeyLength, h, pData, nDataSize, pDest) \
-		_zend_u_hash_quick_add_or_update(ht, type, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
-#define zend_u_hash_quick_add(ht, type, arKey, nKeyLength, h, pData, nDataSize, pDest) \
-		_zend_u_hash_quick_add_or_update(ht, type, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
 ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_index_update(ht, h, pData, nDataSize, pDest) \
@@ -163,13 +123,11 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 		_zend_hash_index_update_or_next_insert(ht, 0, pData, nDataSize, pDest, HASH_NEXT_INSERT ZEND_FILE_LINE_CC)
 
 ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_u_hash_add_empty_element(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 
 
 #define ZEND_HASH_APPLY_KEEP				0
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1
-
 
 typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
@@ -189,46 +147,26 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
  */
 ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
 
-ZEND_API void zend_hash_to_unicode(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
 
 /* Deletes */
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag);
-ZEND_API int zend_ascii_hash_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_rt_hash_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_utf8_hash_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_u_hash_del_key_or_index(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, int flag);
 #define zend_hash_del(ht, arKey, nKeyLength) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
 #define zend_hash_quick_del(ht, arKey, nKeyLength, h) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
-#define zend_u_hash_del(ht, type, arKey, nKeyLength) \
-		zend_u_hash_del_key_or_index(ht, type, arKey, nKeyLength, 0, HASH_DEL_KEY)
-#define zend_u_hash_quick_del(ht, type, arKey, nKeyLength, h) \
-		zend_u_hash_del_key_or_index(ht, type, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
 ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength);
-ZEND_API ulong zend_u_get_hash_value(zend_uchar type, zstr arKey, uint nKeyLength);
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_ascii_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_rt_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_utf8_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_u_hash_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_hash_quick_find(const HashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData);
-ZEND_API int zend_u_hash_quick_find(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h, void **pData);
+ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h, void **pData);
 ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
 
 /* Misc */
 ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_ascii_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_rt_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_utf8_hash_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_u_hash_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
 ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint nKeyLength, ulong h);
-ZEND_API int zend_u_hash_quick_exists(const HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, ulong h);
 ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
@@ -238,12 +176,12 @@ ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTANT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zstr *str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zstr str_index, uint str_length, ulong num_index, int mode, HashPosition *pos);
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos);
 
 typedef struct _HashPointer {
 	HashPosition pos;
@@ -303,7 +241,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht);
  * numbers are not useable at all. The remaining 128 odd numbers
  * (except for the number 1) work more or less all equally well. They
  * all distribute in an acceptable way and this way fill a hash table
- * with an average percent of approx. 86%.
+ * with an average percent of approx. 86%. 
  *
  * If one compares the Chi^2 values of the variants, the number 33 not
  * even has the best value. But the number 33 and a few other equally
@@ -349,11 +287,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	return hash;
 }
 
-#define zend_u_inline_hash_func(type, arKey, nKeyLength) \
-	zend_inline_hash_func(arKey.s, USTR_BYTES(type, nKeyLength))
 
-#define zend_hash_func(arKey, nKeyLength) zend_get_hash_value(arKey, nKeyLength)
-#define zend_u_hash_func(type, arKey, nKeyLength) zend_u_get_hash_value(type, arKey, nKeyLength)
+ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength);
 
 #if ZEND_DEBUG
 /* debug */
@@ -369,39 +304,6 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
-
-ZEND_API int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
-ZEND_API int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos);
-#define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \
-	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, mode, NULL)
-
-ZEND_API int zend_ascii_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
-ZEND_API int zend_ascii_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_ascii_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_ascii_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-
-ZEND_API int zend_rt_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
-ZEND_API int zend_rt_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_rt_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_rt_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-
-ZEND_API int zend_utf8_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
-ZEND_API int zend_utf8_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength);
-ZEND_API int zend_utf8_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_utf8_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength);
-
-ZEND_API int zend_u_symtable_update(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest);
-ZEND_API int zend_u_symtable_del(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
-ZEND_API int zend_u_symtable_find(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_u_symtable_exists(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength);
-ZEND_API int zend_u_symtable_update_current_key_ex(HashTable *ht, zend_uchar type, zstr arKey, uint nKeyLength, int mode, HashPosition *pos);
-#define zend_u_symtable_update_current_key(ht,type,arKey,nKeyLength,mode) \
-	zend_u_symtable_update_current_key_ex(ht, type, arKey, nKeyLength, mode, NULL)
-
-/* {{{ ZEND_HANDLE_*_NUMERIC macros */
 #define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
 	register const char *tmp = key;											\
 																			\
@@ -438,43 +340,41 @@ ZEND_API int zend_u_symtable_update_current_key_ex(HashTable *ht, zend_uchar typ
 	}																		\
 } while (0)
 
-#define ZEND_HANDLE_U_NUMERIC(key, length, func) do {						\
-	register const UChar *tmp = key;										\
-																			\
-	if (*tmp == 0x2D /*'-'*/ ) {											\
-		tmp++;																\
-	}																		\
-	if (*tmp >= 0x30 /*'0'*/ && *tmp <= 0x39 /*'9'*/) {						\
-		/* possibly a numeric index */										\
-		const UChar *end = key + length - 1;								\
-		long idx;															\
-																			\
-		if ((*end != 0) /* not a null terminated string */					\
-		 || (*tmp == 0x30 && length > 2) /* numbers with leading zeros */	\
-		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
-		 || (SIZEOF_LONG == 4 &&											\
-		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
-		     *tmp > 0x32 /*'2'*/)) { /* overflow */							\
-			break;															\
-		}																	\
-		idx = (*tmp - '0');													\
-		while (++tmp != end && *tmp >= 0x30 && *tmp <= 0x39) {				\
-			idx = (idx * 10) + (*tmp - 0x30);								\
-		}																	\
-		if (tmp == end) {													\
-			if (*key == 0x2D) {												\
-				idx = -idx;													\
-				if (idx > 0) { /* overflow */								\
-					break;													\
-				}															\
-			} else if (idx < 0) { /* overflow */							\
-				break;														\
-			}																\
-			return func;													\
-		}																	\
-	}																		\
-} while (0)
-/* }}} */
+static inline int zend_symtable_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\
+{
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update(ht, idx, pData, nDataSize, pDest));
+	return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
+}
+
+
+static inline int zend_symtable_del(HashTable *ht, const char *arKey, uint nKeyLength)
+{
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_del(ht, idx));
+	return zend_hash_del(ht, arKey, nKeyLength);
+}
+
+
+static inline int zend_symtable_find(HashTable *ht, const char *arKey, uint nKeyLength, void **pData)
+{
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
+	return zend_hash_find(ht, arKey, nKeyLength, pData);
+}
+
+
+static inline int zend_symtable_exists(HashTable *ht, const char *arKey, uint nKeyLength)
+{
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+	return zend_hash_exists(ht, arKey, nKeyLength);
+}
+
+static inline int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos)
+{
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, pos));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, pos);
+}
+#define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \
+	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, mode, NULL)
+
 
 #endif							/* ZEND_HASH_H */
 

@@ -4,9 +4,13 @@
 ARG_ENABLE("odbc", "ODBC support", "yes");
 
 if (PHP_ODBC == "yes") {
-	EXTENSION("odbc", "php_odbc.c");
-	AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
-	ADD_FLAG('LIBS_ODBC', 'odbc32.lib odbccp32.lib');
+	if (CHECK_LIB("odbc32.lib", "odbc") && CHECK_LIB("odbccp32.lib", "odbc")
+	&& CHECK_HEADER_ADD_INCLUDE("sql.h", "CFLAGS_ODBC")
+	&& CHECK_HEADER_ADD_INCLUDE("sqlext.h", "CFLAGS_ODBC")) {
+		EXTENSION("odbc", "php_odbc.c");
+		AC_DEFINE("HAVE_UODBC", 1, "ODBC support");
+	} else {
+		WARNING("odbc support can't be enabled, libraries or header are missing (SDK)")
+		PHP_ODBC = "no"
+	}
 }
-
-

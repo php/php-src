@@ -64,7 +64,7 @@ Notice: Undefined variable: undef in %s on line 5
 Attempt to access various kinds of class constants:
 
 Notice: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s on line %d
-unicode(9) "UNDEFINED"
+string(9) "UNDEFINED"
 int(1)
 float(1.5)
 int(1)
@@ -72,17 +72,17 @@ float(1.5)
 int(-1)
 float(-1.5)
 int(15)
-unicode(%d) "%s"
-unicode(1) "C"
-unicode(3) "C::"
-unicode(0) ""
+string(%d) "%s"
+string(1) "C"
+string(1) "C"
+string(0) ""
 int(1234)
 int(456)
 NULL
-unicode(6) "hello1"
-unicode(6) "hello2"
-unicode(6) "hello2"
-unicode(6) "hello2"
+string(6) "hello1"
+string(6) "hello2"
+string(6) "hello2"
+string(6) "hello2"
 
 Expecting fatal error:
 

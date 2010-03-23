@@ -197,69 +197,69 @@ RETURNING INTO: ''
 RETURNING INTO: text
 Fetch as string
 array(2) {
-  [u"ID"]=>
+  ["ID"]=>
   array(9) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "2"
+    string(1) "2"
     [2]=>
-    unicode(1) "3"
+    string(1) "3"
     [3]=>
-    unicode(1) "4"
+    string(1) "4"
     [4]=>
-    unicode(1) "5"
+    string(1) "5"
     [5]=>
-    unicode(1) "6"
+    string(1) "6"
     [6]=>
-    unicode(1) "7"
+    string(1) "7"
     [7]=>
-    unicode(1) "8"
+    string(1) "8"
     [8]=>
-    unicode(1) "9"
+    string(1) "9"
   }
-  [u"DATA"]=>
+  ["DATA"]=>
   array(9) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
     [1]=>
-    unicode(0) ""
+    string(0) ""
     [2]=>
-    unicode(26) "Inserted via SQL statement"
+    string(26) "Inserted via SQL statement"
     [3]=>
-    unicode(0) ""
+    string(0) ""
     [4]=>
-    unicode(0) ""
+    string(0) ""
     [5]=>
-    unicode(32) "Inserted via procedure parameter"
+    string(32) "Inserted via procedure parameter"
     [6]=>
-    unicode(0) ""
+    string(0) ""
     [7]=>
-    unicode(0) ""
+    string(0) ""
     [8]=>
-    unicode(28) "Inserted with RETURNING INTO"
+    string(28) "Inserted with RETURNING INTO"
   }
 }
 
 Fetch as a descriptor
-1 is an object: unicode(0) ""
-2 is an object: unicode(0) ""
-3 is an object: unicode(26) "Inserted via SQL statement"
-4 is an object: unicode(0) ""
-5 is an object: unicode(0) ""
-6 is an object: unicode(32) "Inserted via procedure parameter"
-7 is an object: unicode(0) ""
-8 is an object: unicode(0) ""
-9 is an object: unicode(28) "Inserted with RETURNING INTO"
+1 is an object: string(0) ""
+2 is an object: string(0) ""
+3 is an object: string(26) "Inserted via SQL statement"
+4 is an object: string(0) ""
+5 is an object: string(0) ""
+6 is an object: string(32) "Inserted via procedure parameter"
+7 is an object: string(0) ""
+8 is an object: string(0) ""
+9 is an object: string(28) "Inserted with RETURNING INTO"
 
 Fetch via the procedure parameter
-1 is an object: unicode(0) ""
-2 is an object: unicode(0) ""
-3 is an object: unicode(26) "Inserted via SQL statement"
-4 is an object: unicode(0) ""
-5 is an object: unicode(0) ""
-6 is an object: unicode(32) "Inserted via procedure parameter"
-7 is an object: unicode(0) ""
-8 is an object: unicode(0) ""
-9 is an object: unicode(28) "Inserted with RETURNING INTO"
+1 is an object: string(0) ""
+2 is an object: string(0) ""
+3 is an object: string(26) "Inserted via SQL statement"
+4 is an object: string(0) ""
+5 is an object: string(0) ""
+6 is an object: string(32) "Inserted via procedure parameter"
+7 is an object: string(0) ""
+8 is an object: string(0) ""
+9 is an object: string(28) "Inserted with RETURNING INTO"
 Done

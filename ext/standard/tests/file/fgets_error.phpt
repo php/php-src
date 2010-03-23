@@ -1,7 +1,5 @@
 --TEST--
 Test fgets() function : error conditions
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*
@@ -78,7 +76,7 @@ bool(false)
 -- Testing fgets() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgets() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 -- Iteration 2 --
 

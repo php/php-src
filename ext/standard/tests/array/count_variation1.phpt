@@ -93,7 +93,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing count() : usage variations ***
 
 -- Iteration 1 --

@@ -1,5 +1,5 @@
 --TEST--
-Test strcspn() function : usage variations - with varying start and default len args (Bug #42731)
+Test strcspn() function : usage variations - with varying start and default len args
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
@@ -53,14 +53,14 @@ $mask_array = array(
 
 //defining array of start values
 $start_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    -2,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
-                   );
+                     0,
+                     1,
+                     2,
+                     -1,
+                     -2,
+                     2147483647,  // max positive integer
+                     -2147483648,  // min negative integer
+                    );
 		
 
 // loop through each element of the arrays for str,mask and start arguments
@@ -77,7 +77,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strcspn() : with different start and default len values ***
 
 -- Iteration 1 --

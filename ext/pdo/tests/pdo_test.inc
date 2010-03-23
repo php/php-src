@@ -11,6 +11,7 @@ if (getenv('PDOTEST_DSN') === false) {
 			$append = true;
 		}
 	}
+	if (ini_get('magic_quotes_runtime')) $common = stripslashes($common);
 	$conf = eval($common);
 	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 }
@@ -18,7 +19,7 @@ if (getenv('PDOTEST_DSN') === false) {
 class PDOTest {
 	// create an instance of the PDO driver, based on
 	// the current environment
-	static function factory($classname = 'PDO') {
+	static function factory($classname = 'PDO', $drop_test_tables = true) {
 		$dsn = getenv('PDOTEST_DSN');
 		$user = getenv('PDOTEST_USER');
 		$pass = getenv('PDOTEST_PASS');
@@ -31,7 +32,7 @@ class PDOTest {
 
 		if ($user === false) $user = NULL;
 		if ($pass === false) $pass = NULL;
-		
+
 		$db = new $classname($dsn, $user, $pass, $attr);
 
 		if (!$db) {
@@ -45,10 +46,12 @@ class PDOTest {
 			'test2',
 			'classtypes'
 			);
-		foreach ($test_tables as $table) {
-			$db->exec("DROP TABLE $table");
+		if ($drop_test_tables) {
+			foreach ($test_tables as $table) {
+				$db->exec("DROP TABLE $table");
+			}
 		}
-		
+
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 		$db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
 		$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
@@ -63,15 +66,6 @@ class PDOTest {
 		}
 	}
 
-	static function detect_transactional_mysql_engine($db) {
-		foreach ($db->query("show variables like 'have%'") as $row) {
-			if ($row[1] == 'YES' && ($row[0] == 'have_innodb' || $row[0] == 'have_bdb')) {
-				return str_replace("have_", "", $row[0]);
-			}
-		}
-		return false;
-	}
-
 	static function test_factory($file) {
 		$data = file_get_contents($file);
 		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
@@ -82,7 +76,4 @@ class PDOTest {
 		return self::factory();
 	}
 }
-
-
-
 ?>

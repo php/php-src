@@ -26,7 +26,7 @@ $str_array = array(
   ' ( t )t',
 
   // using quote chars in sentence
-  '"testing",ucwords,"test"',
+  '"testing",ucword,"test"',
   '"t""t",test, t',
   '\'t \'t\',test',
   
@@ -40,7 +40,7 @@ $str_array = array(
   //using special chars in sentence
   't@@#$% %test ^test &test *test +test -test',
   '!test ~test `test` =test= @test@test.com',
-  '/test/r\test\ ucwords\t\y\yu\3 \yy\ /uu/',
+  '/test/r\test\ucwords\t\y\y\u\3 \yy\ /uu/',
   
   //only special chars
   '!@#$%^&*()_+=-`~'
@@ -56,42 +56,42 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
-unicode(18) "Testing    Ucwords"
+string(18) "Testing    Ucwords"
 -- Iteration 2 --
-unicode(30) "T E S T I N G   U C W O R D S "
+string(30) "T E S T I N G   U C W O R D S "
 -- Iteration 3 --
-unicode(25) "Testing Function(ucwords)"
+string(25) "Testing Function(ucwords)"
 -- Iteration 4 --
-unicode(38) "(testing ( Function (ucwords) )a )test"
+string(38) "(testing ( Function (ucwords) )a )test"
 -- Iteration 5 --
-unicode(3) "(t)"
+string(3) "(t)"
 -- Iteration 6 --
-unicode(7) " ( T )t"
+string(7) " ( T )t"
 -- Iteration 7 --
-unicode(24) ""testing",ucwords,"test""
+string(23) ""testing",ucword,"test""
 -- Iteration 8 --
-unicode(14) ""t""t",test, T"
+string(14) ""t""t",test, T"
 -- Iteration 9 --
-unicode(11) "'t 't',test"
+string(11) "'t 't',test"
 -- Iteration 10 --
-unicode(27) "\ttesting\ttesting\tucwords"
+string(27) "\ttesting\ttesting\tucwords"
 -- Iteration 11 --
-unicode(32) "Testing\rucwords Testing Ucwords"
+string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 12 --
-unicode(37) "Testing\fucwords \f Testing \nucwords"
+string(37) "Testing\fucwords \f Testing \nucwords"
 -- Iteration 13 --
-unicode(39) "\ntesting\nucwords\n Testing \n Ucwords"
+string(39) "\ntesting\nucwords\n Testing \n Ucwords"
 -- Iteration 14 --
-unicode(20) "Using\vvertical\vtab"
+string(20) "Using\vvertical\vtab"
 -- Iteration 15 --
-unicode(42) "T@@#$% %test ^test &test *test +test -test"
+string(42) "T@@#$% %test ^test &test *test +test -test"
 -- Iteration 16 --
-unicode(40) "!test ~test `test` =test= @test@test.com"
+string(40) "!test ~test `test` =test= @test@test.com"
 -- Iteration 17 --
-unicode(40) "/test/r\test\ Ucwords\t\y\yu\3 \yy\ /uu/"
+string(40) "/test/r\test\ucwords\t\y\y\u\3 \yy\ /uu/"
 -- Iteration 18 --
-unicode(16) "!@#$%^&*()_+=-`~"
+string(16) "!@#$%^&*()_+=-`~"
 Done

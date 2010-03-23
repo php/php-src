@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -96,7 +96,7 @@ static int ps_files_valid_key(const char *key)
 	return ret;
 }
 
-static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key TSRMLS_DC)
+static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
 {
 	size_t key_len;
 	const char *p;
@@ -122,28 +122,6 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	memcpy(buf + n, key, key_len);
 	n += key_len;
 	buf[n] = '\0';
-
-	if (UG(filesystem_encoding_conv) &&
-		ucnv_getType(UG(filesystem_encoding_conv)) != UCNV_UTF8) {
-		char *newbuf = NULL;
-		int newlen;
-		UErrorCode status = U_ZERO_ERROR;
-
-		zend_convert_encodings(ZEND_U_CONVERTER(UG(filesystem_encoding_conv)), UG(utf8_conv), &newbuf, &newlen, buf, n, &status);
-
-		if (status != U_ZERO_ERROR) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failure converting savepath to local filesystem encoding, attempting to use utf8");
-		} else {
-			if ((unsigned int)newlen >= buflen) {
-				newlen = buflen - 1;
-				newbuf[newlen] = 0;
-			}
-			memcpy(buf, newbuf, newlen + 1);
-		}
-		if (newbuf) {
-			efree(newbuf);
-		}
-	}
 
 	return buf;
 }
@@ -182,7 +160,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			PS(invalid_session_id) = 1;
 			return;
 		}
-		if (!ps_files_path_create(buf, sizeof(buf), data, key TSRMLS_CC)) {
+		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 			return;
 		}
 
@@ -193,7 +171,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
 			/* check to make sure that the opened file is not a symlink, linking to data outside of allowable dirs */
-			if (PG(open_basedir)) {
+			if (PG(safe_mode) || PG(open_basedir)) {
 				struct stat sbuf;
 
 				if (fstat(data->fd, &sbuf)) {
@@ -202,7 +180,10 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 				}
 				if (
 					S_ISLNK(sbuf.st_mode) &&
-					php_check_open_basedir(buf TSRMLS_CC)
+					(
+						php_check_open_basedir(buf TSRMLS_CC) ||
+						(PG(safe_mode) && !php_checkuid(buf, NULL, CHECKUID_CHECK_FILE_AND_DIR))
+					)
 				) {
 					close(data->fd);
 					return;
@@ -293,6 +274,9 @@ PS_OPEN_FUNC(files)
 		/* if save path is an empty string, determine the temporary dir */
 		save_path = php_get_temporary_directory();
 
+		if (PG(safe_mode) && (!php_checkuid(save_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			return FAILURE;
+		}
 		if (php_check_open_basedir(save_path TSRMLS_CC)) {
 			return FAILURE;
 		}
@@ -442,7 +426,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, key TSRMLS_CC)) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
 	}
 

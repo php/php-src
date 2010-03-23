@@ -27,19 +27,19 @@ var_dump(explode('||', "", -1));
 -- positive limit --
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(16) "two||three||four"
+  string(16) "two||three||four"
 }
 
 -- negative limit (since PHP 5.1) --
 array(3) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
-  unicode(3) "two"
+  string(3) "two"
   [2]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 
 -- negative limit (since PHP 5.1) with null string -- 

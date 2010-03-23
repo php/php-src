@@ -169,32 +169,32 @@ int(%i)
 
 -- empty string DQ --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: mktime() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: mktime() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

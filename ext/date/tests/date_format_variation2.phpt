@@ -111,98 +111,98 @@ fclose( $file_handle );
 *** Testing date_format() : usage variation -  unexpected values to second argument $format***
 
 -- int 0 --
-unicode(1) "0"
+string(1) "0"
 
 -- int 1 --
-unicode(1) "1"
+string(1) "1"
 
 -- int 12345 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- int -12345 --
-unicode(6) "-12345"
+string(6) "-12345"
 
 -- float 10.5 --
-unicode(4) "10.5"
+string(4) "10.5"
 
 -- float -10.5 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 -- float .5 --
-unicode(3) "0.5"
+string(3) "0.5"
 
 -- empty array --
 
-Warning: date_format() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_format() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_format() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_format() expects parameter 2 to be binary string, array given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
-unicode(0) ""
+string(0) ""
 
 -- lowercase null --
-unicode(0) ""
+string(0) ""
 
 -- lowercase true --
-unicode(1) "1"
+string(1) "1"
 
 -- lowercase false --
-unicode(0) ""
+string(0) ""
 
 -- uppercase TRUE --
-unicode(1) "1"
+string(1) "1"
 
 -- uppercase FALSE --
-unicode(0) ""
+string(0) ""
 
 -- empty string DQ --
-unicode(0) ""
+string(0) ""
 
 -- empty string SQ --
-unicode(0) ""
+string(0) ""
 
 -- string DQ --
-unicode(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
+string(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
 
 -- string SQ --
-unicode(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
+string(40) "4131Thu, 14 Jul 2005 22:30:41 +010030710"
 
 -- mixed case string --
-unicode(40) "41BSTThu, 14 Jul 2005 22:30:41 +01001722"
+string(40) "41BSTThu, 14 Jul 2005 22:30:41 +01001722"
 
 -- heredoc --
-unicode(82) "10Europe/LondonThursdayThursday2005 42005Thu, 14 Jul 2005 22:30:41 +0100Thursday14"
+string(82) "10Europe/LondonThursdayThursday2005 42005Thu, 14 Jul 2005 22:30:41 +0100Thursday14"
 
 -- instance of classWithToString --
-unicode(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
+string(66) "CThursdaypm4141 PM 2005b14Europe/London2005-07-14T22:30:41+01:0031"
 
 -- instance of classWithoutToString --
 
-Warning: date_format() expects parameter 2 to be binary string, object given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
-unicode(0) ""
+string(0) ""
 
 -- unset var --
-unicode(0) ""
+string(0) ""
 
 -- resource --
 
-Warning: date_format() expects parameter 2 to be binary string, resource given in %s on line %d
+Warning: date_format() expects parameter 2 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

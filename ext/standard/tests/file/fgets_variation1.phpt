@@ -27,7 +27,7 @@ foreach ($file_modes as $file_mode ) {
     exit();
   }
   $data = "fgets_variation test";
-  fwrite($file_handle, (binary)$data);
+  fwrite($file_handle, $data);
 
   // rewind the file pointer to begining of the file
   var_dump( rewind($file_handle) ); 
@@ -48,7 +48,7 @@ foreach ($file_modes as $file_mode ) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgets() with file opened in write only mode ***
 -- File opened in mode : w --
 bool(true)

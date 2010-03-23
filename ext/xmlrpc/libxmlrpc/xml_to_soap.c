@@ -75,7 +75,7 @@ static xml_element_attr* new_attr(const char* key, const char* val) {
 }
 
 struct array_info {
-	char          kids_type[30];
+	char          kids_type[128];
 	unsigned long size;
 	/* ... ? */
 };
@@ -379,7 +379,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 			else if (!strcmp(type, TOKEN_ARRAY) || arrayType != NULL) {
 				/* determine magic associated with soap array type.
 				   this is passed down as we recurse, so our children have access to the info. */
-				ai = parse_array_type_info(arrayType);	/* alloc'ed ai free'd below.*/
+				ai = parse_array_type_info(arrayType);	/* alloc'ed ai free'd below. */
 				XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_array);
 			}
 			else {

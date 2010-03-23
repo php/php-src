@@ -41,16 +41,16 @@ NULL
 Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: popen(abc.txt,rw): Invalid argument in %s on line %d
+Warning: popen(abc.txt,rw): %s on line %d
 bool(false)
 
 Warning: pclose() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: pclose() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 
 Warning: pclose() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 
 --- Done ---

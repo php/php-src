@@ -23,19 +23,16 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 
     foreach( $arrays as $array )
     {
-        // Convert strings to UTF-16 if needed.
-        $u_array = u( $array );
-
         // Sort array values
-        $res_val = ut_coll_sort( $coll, $u_array, $sort_flag );
+        $res_val = ut_coll_sort( $coll, $array, $sort_flag );
 
         // Concatenate the sorted array and function result
         // with output string.
-        $res_dump = "\n" . dump_array( $u_array ) .
-                    "\n Result: " . dump_str( $res_val );
+        $res_dump = "\n" . dump( $array ) .
+                    "\n Result: " . dump( $res_val );
 
 		// Preppend test signature to output string
-             $md5 = md5( unicode_encode( $res_dump, 'utf-8' ) );
+        $md5 = md5( $res_dump );
 
         global $test_num;
         

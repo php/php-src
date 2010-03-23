@@ -2,6 +2,8 @@
 SOAP Interop Round2 base 013 (soap/direct): echoFloatArray
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $param =  new SoapParam(new SoapVar(array(

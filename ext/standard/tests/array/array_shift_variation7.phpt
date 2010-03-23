@@ -23,11 +23,11 @@ echo key($stack) . " => " . current ($stack) . "\n";
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_shift() : usage variations ***
 
 -- Call array_shift() --
-unicode(2) "un"
+string(2) "un"
 
 -- Position of Internal Pointer in Passed Array: --
 two => deux

@@ -22,7 +22,7 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-var_dump($blob->write((binary)str_repeat("string.", 1000)));
+var_dump($blob->write(str_repeat("string.", 1000)));
 oci_commit($c);
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
@@ -45,19 +45,19 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 int(7000)
 array(2) {
   [0]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
-  [u"BLOB"]=>
+  ["BLOB"]=>
   object(OCI-Lob)#%d (1) {
-    [u"descriptor"]=>
+    ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
 }

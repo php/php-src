@@ -37,7 +37,6 @@ unlink($filepath);
 
 ?>
 --EXPECT--
-Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 file() on a path containing .. and .
 array(3) {
   [0]=>

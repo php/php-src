@@ -29,11 +29,11 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_name() : variation ***
-unicode(4) "blah"
-unicode(4) "blah"
+string(4) "blah"
+string(4) "blah"
 bool(true)
-unicode(4) "blah"
+string(4) "blah"
 bool(true)
-unicode(4) "blah"
+string(4) "blah"
 Done
 

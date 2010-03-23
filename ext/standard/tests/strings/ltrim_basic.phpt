@@ -37,17 +37,17 @@ var_dump(ltrim($binary, "\x00..\x1F"));
 *** Testing ltrim() : basic functionality ***
 
 -- Trim string with all white space characters --
-unicode(29) "---These are a few words---  "
+string(29) "---These are a few words---  "
 
 -- Trim non-whitespace from a string --
-unicode(15) "Hello World===!"
+string(15) "Hello World===!"
 
 -- Trim some non-white space characters from a string --
-unicode(10) " World===!"
+string(10) " World===!"
 
 -- Trim some non-white space characters from a string suing a character range --
-unicode(10) "0123456789"
+string(10) "0123456789"
 
 -- Trim the ASCII control characters at the beginning of a string --
-unicode(14) "Example string"
+string(14) "Example string"
 ===DONE===

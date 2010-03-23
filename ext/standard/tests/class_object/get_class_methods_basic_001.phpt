@@ -35,25 +35,25 @@ var_dump( get_class_methods("NonExistent") );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing get_class_methods() : basic functionality ***
 Argument is class name:
 array(3) {
   [0]=>
-  unicode(1) "f"
+  string(1) "f"
   [1]=>
-  unicode(1) "g"
+  string(1) "g"
   [2]=>
-  unicode(1) "h"
+  string(1) "h"
 }
 Argument is class instance:
 array(3) {
   [0]=>
-  unicode(1) "f"
+  string(1) "f"
   [1]=>
-  unicode(1) "g"
+  string(1) "g"
   [2]=>
-  unicode(1) "h"
+  string(1) "h"
 }
 Argument is name of class which has no methods:
 array(0) {

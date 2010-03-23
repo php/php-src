@@ -19,9 +19,9 @@ echo "ok\n"
 ?>
 --EXPECT--
 object(Foo)#1 (1) {
-  [u"a"]=>
+  ["a"]=>
   object(Foo)#1 (1) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
   }
 }

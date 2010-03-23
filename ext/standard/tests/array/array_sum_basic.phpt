@@ -26,7 +26,7 @@ var_dump( array_sum($input) );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_sum() : basic functionality ***
 -- array_sum() with integer array entries --
 int(15)

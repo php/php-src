@@ -111,95 +111,95 @@ fclose( $file_handle );
 *** Testing timezone_name_from_abbr() : usage variation -  unexpected values to first argument $abbr***
 
 -- int 0 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- int 12345 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- int -12345 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- float 10.5 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- float -10.5 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- float .5 --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- empty array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- lowercase null --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- lowercase true --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- lowercase false --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- uppercase TRUE --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- uppercase FALSE --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- empty string DQ --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- empty string SQ --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- string DQ --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- string SQ --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- mixed case string --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- heredoc --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- instance of classWithToString --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- instance of classWithoutToString --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- unset var --
-unicode(13) "Europe/London"
+string(13) "Europe/London"
 
 -- resource --
 
-Warning: timezone_name_from_abbr() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

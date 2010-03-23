@@ -19,7 +19,7 @@ var_dump(method_exists('casesensiTivitytest', 'myMetHOD'));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing method_exists() : variation ***
 bool(true)
 bool(true)

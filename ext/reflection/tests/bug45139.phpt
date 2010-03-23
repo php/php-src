@@ -49,10 +49,10 @@ var_dump($rp->getDeclaringClass()->getName()); // C
 
 ?>
 --EXPECT--
-unicode(1) "C"
-unicode(1) "A"
-unicode(1) "B"
-unicode(1) "B"
-unicode(1) "C"
-unicode(1) "B"
-unicode(1) "C"
+string(1) "C"
+string(1) "A"
+string(1) "B"
+string(1) "B"
+string(1) "C"
+string(1) "B"
+string(1) "C"

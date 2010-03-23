@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -47,15 +47,11 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-
-		if (bucket->buf_type == IS_UNICODE) {
-			/* rot13 is silly enough, don't apply it to unicode data */
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-			return PSFS_ERR_FATAL;
-		}
-		php_strtr(bucket->buf.s, bucket->buflen, rot13_from, rot13_to, 52);
-		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, rot13_from, rot13_to, 52);
 		consumed += bucket->buflen;
+		
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
 	if (bytes_consumed) {
@@ -68,8 +64,7 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 static php_stream_filter_ops strfilter_rot13_ops = {
 	strfilter_rot13_filter,
 	NULL,
-	"string.rot13",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"string.rot13"
 };
 
 static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -99,41 +94,11 @@ static php_stream_filter_status_t strfilter_toupper_filter(
 	size_t consumed = 0;
 
 	while (buckets_in->head) {
-		bucket = buckets_in->head;
-		if (bucket->buf_type == IS_UNICODE) {
-			UErrorCode errCode = U_ZERO_ERROR;
-			int32_t outbuflen = bucket->buflen;
-			int is_persistent = php_stream_is_persistent(stream);
-			UChar *outbuf = peumalloc(outbuflen + 1, is_persistent);
-
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			while (1) {
-				if (!outbuf) {
-					php_stream_bucket_delref(bucket TSRMLS_CC);
-					return PSFS_ERR_FATAL;
-				}
-				u_strToUpper(outbuf, outbuflen, bucket->buf.u, bucket->buflen, NULL, &errCode);
-				if (errCode != U_BUFFER_OVERFLOW_ERROR) {
-					break;
-				}
-				outbuflen += 4;
-				outbuf = peurealloc(outbuf, outbuflen + 1, is_persistent);
-				consumed += UBYTES(bucket->buflen);
-			}
-			if (U_FAILURE(errCode)) {
-				pefree(outbuf, is_persistent);
-				php_stream_bucket_delref(bucket TSRMLS_CC);
-				return PSFS_ERR_FATAL;
-			}
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-
-			outbuf[outbuflen] = 0;
-			bucket = php_stream_bucket_new_unicode(stream, outbuf, outbuflen, 1, is_persistent TSRMLS_CC);
-		} else {
-			bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-			php_strtr(bucket->buf.s, bucket->buflen, lowercase, uppercase, 26);
-			consumed += bucket->buflen;
-		}
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, lowercase, uppercase, 26);
+		consumed += bucket->buflen;
+		
 		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
@@ -157,41 +122,11 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 	size_t consumed = 0;
 
 	while (buckets_in->head) {
-		bucket = buckets_in->head;
-		if (bucket->buf_type == IS_UNICODE) {
-			UErrorCode errCode = U_ZERO_ERROR;
-			int32_t outbuflen = bucket->buflen;
-			int is_persistent = php_stream_is_persistent(stream);
-			UChar *outbuf = peumalloc(outbuflen + 1, is_persistent);
-
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			while (1) {
-				if (!outbuf) {
-					php_stream_bucket_delref(bucket TSRMLS_CC);
-					return PSFS_ERR_FATAL;
-				}
-				u_strToLower(outbuf, outbuflen, bucket->buf.u, bucket->buflen, NULL, &errCode);
-				if (errCode != U_BUFFER_OVERFLOW_ERROR) {
-					break;
-				}
-				outbuflen += 4;
-				outbuf = peurealloc(outbuf, outbuflen + 1, is_persistent);
-				consumed += UBYTES(bucket->buflen);
-			}
-			if (U_FAILURE(errCode)) {
-				pefree(outbuf, is_persistent);
-				php_stream_bucket_delref(bucket TSRMLS_CC);
-				return PSFS_ERR_FATAL;
-			}
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-
-			outbuf[outbuflen] = 0;
-			bucket = php_stream_bucket_new_unicode(stream, outbuf, outbuflen, 1, is_persistent TSRMLS_CC);
-		} else {
-			bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-			php_strtr(bucket->buf.s, bucket->buflen, uppercase, lowercase, 26);
-			consumed += bucket->buflen;
-		}
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, uppercase, lowercase, 26);
+		consumed += bucket->buflen;
+		
 		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
@@ -205,15 +140,13 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 static php_stream_filter_ops strfilter_toupper_ops = {
 	strfilter_toupper_filter,
 	NULL,
-	"string.toupper",
-	PSFO_FLAG_OUTPUTS_SAME
+	"string.toupper"
 };
 
 static php_stream_filter_ops strfilter_tolower_ops = {
 	strfilter_tolower_filter,
 	NULL,
-	"string.tolower",
-	PSFO_FLAG_OUTPUTS_SAME
+	"string.tolower"
 };
 
 static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -234,8 +167,6 @@ static php_stream_filter_factory strfilter_tolower_factory = {
 	strfilter_tolower_create
 };
 /* }}} */
-
-/* UTODO: Extend to handle unicode data */
 
 /* {{{ strip_tags filter implementation */
 typedef struct _php_strip_tags_filter {
@@ -284,16 +215,9 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-
-		if (bucket->buf_type == IS_UNICODE) {
-			/* Uh oh! */
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-			return PSFS_ERR_FATAL;
-		}
-
 		consumed = bucket->buflen;
 		
-		bucket->buflen = php_strip_tags(bucket->buf.s, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
+		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
 	
 		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
@@ -317,8 +241,7 @@ static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops strfilter_strip_tags_ops = {
 	strfilter_strip_tags_filter,
 	strfilter_strip_tags_dtor,
-	"string.strip_tags",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"string.strip_tags"
 };
 
 static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -1383,7 +1306,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	ulong l;
+	long l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1504,8 +1427,10 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			size_t lbchars_len;
 
 			if (options != NULL) {
+				/* If line-break-chars are not specified, filter will attempt to detect line endings (\r, \n, or \r\n) */
 				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
 			}
+
 			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
 			if (lbchars != NULL) {
 				if (php_conv_qprint_decode_ctor((php_conv_qprint_decode *)retval, lbchars, lbchars_len, 1, persistent)) {
@@ -1793,15 +1718,11 @@ static php_stream_filter_status_t strfilter_convert_filter(
 
 	while (buckets_in->head != NULL) {
 		bucket = buckets_in->head;
-		if (bucket->buf_type == IS_UNICODE) {
-			/* Not a unicode capable filter */
-			return PSFS_ERR_FATAL;
-		}
 
 		php_stream_bucket_unlink(bucket TSRMLS_CC);
 
 		if (strfilter_convert_append_bucket(inst, stream, thisfilter,
-				buckets_out, bucket->buf.s, bucket->buflen, &consumed,
+				buckets_out, bucket->buf, bucket->buflen, &consumed,
 				php_stream_is_persistent(stream) TSRMLS_CC) != SUCCESS) {
 			goto out_failure;
 		}
@@ -1841,8 +1762,7 @@ static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops strfilter_convert_ops = {
 	strfilter_convert_filter,
 	strfilter_convert_dtor,
-	"convert.*",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"convert.*"
 };
 
 static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -1945,8 +1865,7 @@ static void consumed_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops consumed_filter_ops = {
 	consumed_filter_filter,
 	consumed_filter_dtor,
-	"consumed",
-	PSFO_FLAG_OUTPUTS_SAME
+	"consumed"
 };
 
 static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -2138,13 +2057,9 @@ static php_stream_filter_status_t php_chunked_filter(
 	php_chunked_filter_data *data = (php_chunked_filter_data *) thisfilter->abstract;
 
 	while (buckets_in->head) {
-		if (buckets_in->head->buf_type == IS_UNICODE) {
-			/* dechuk not allowed for unicode data */
-			return PSFS_ERR_FATAL;
-		}
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 		consumed += bucket->buflen;
-		bucket->buflen = php_dechunk(bucket->buf.s, bucket->buflen, data);	
+		bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);	
 		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
@@ -2166,8 +2081,7 @@ static void php_chunked_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops chunked_filter_ops = {
 	php_chunked_filter,
 	php_chunked_dtor,
-	"dechunk",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+	"dechunk"
 };
 
 static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)

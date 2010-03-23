@@ -18,7 +18,7 @@ class Hello {
 $res = fopen(__FILE__, "r");
 
 $vars = array(
-	"bool"=>false,
+	"bool"=>true,
 	"int 10"=>10,
 	"float 10.5"=>10.5,
 	"string"=>"Hello World",
@@ -54,7 +54,7 @@ NULL
 
 -- string --
 
-Warning: get_resource_type() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: get_resource_type() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
 -- array --

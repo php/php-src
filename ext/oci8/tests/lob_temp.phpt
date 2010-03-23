@@ -26,11 +26,11 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(true)
-unicode(4) "test"
+string(4) "test"
 bool(true)
-unicode(2) "te"
+string(2) "te"
 bool(true)
-unicode(4) "test"
+string(4) "test"
 bool(true)
-unicode(2) "te"
+string(2) "te"
 Done

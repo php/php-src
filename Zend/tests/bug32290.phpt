@@ -95,6 +95,7 @@ var_dump($x->doSomethingStatic(1));
 
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 ===A===
 TestB::doSomething(1)

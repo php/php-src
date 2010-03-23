@@ -87,68 +87,68 @@ fclose($file_handle);  //closing the file handle
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 2 --
 array(2) {
   [0]=>
-  unicode(5) "piece"
+  string(5) "piece"
   [1]=>
-  unicode(35) " piece2 piece3 piece4 piece5 piece6"
+  string(35) " piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 4 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 5 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 6 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 7 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 8 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 9 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 10 --
 
-Warning: explode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: explode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: explode() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: explode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(2) {
   [0]=>
-  unicode(5) "piece"
+  string(5) "piece"
   [1]=>
-  unicode(35) " piece2 piece3 piece4 piece5 piece6"
+  string(35) " piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 14 --
 
@@ -157,9 +157,9 @@ bool(false)
 -- Iteration 15 --
 array(2) {
   [0]=>
-  unicode(5) "piece"
+  string(5) "piece"
   [1]=>
-  unicode(35) " piece2 piece3 piece4 piece5 piece6"
+  string(35) " piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 16 --
 
@@ -176,11 +176,11 @@ bool(false)
 -- Iteration 19 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 20 --
 
-Warning: explode() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: explode() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 

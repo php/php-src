@@ -24,7 +24,7 @@
 #include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_operators.h"
-#include "zend_unicode.h"
+
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
@@ -60,7 +60,7 @@
 #endif
 
 #if ZEND_DEBUG
-void zend_debug_alloc_output(char *format, ...) /* {{{ */
+void zend_debug_alloc_output(char *format, ...)
 {
 	char output_buf[256];
 	va_list args;
@@ -75,14 +75,13 @@ void zend_debug_alloc_output(char *format, ...) /* {{{ */
 	fprintf(stderr, "%s", output_buf);
 #endif
 }
-/* }}} */
 #endif
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 static void zend_mm_panic(const char *message) __attribute__ ((noreturn));
 #endif
 
-static void zend_mm_panic(const char *message) /* {{{ */
+static void zend_mm_panic(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 /* See http://support.microsoft.com/kb/190351 */
@@ -94,7 +93,6 @@ static void zend_mm_panic(const char *message) /* {{{ */
 #endif
 	exit(1);
 }
-/* }}} */
 
 /*******************/
 /* Storage Manager */
@@ -136,26 +134,23 @@ static void zend_mm_panic(const char *message) /* {{{ */
 # endif
 #endif
 
-static zend_mm_storage* zend_mm_mem_dummy_init(void *params) /* {{{ */
+static zend_mm_storage* zend_mm_mem_dummy_init(void *params)
 {
 	return malloc(sizeof(zend_mm_storage));
 }
-/* }}} */
 
-static void zend_mm_mem_dummy_dtor(zend_mm_storage *storage) /* {{{ */
+static void zend_mm_mem_dummy_dtor(zend_mm_storage *storage)
 {
 	free(storage);
 }
-/* }}} */
 
-static void zend_mm_mem_dummy_compact(zend_mm_storage *storage) /* {{{ */
+static void zend_mm_mem_dummy_compact(zend_mm_storage *storage)
 {
 }
-/* }}} */
 
 #if defined(HAVE_MEM_MMAP_ANON) || defined(HAVE_MEM_MMAP_ZERO)
 
-static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
 {
 	zend_mm_segment *ret;
 #ifdef HAVE_MREMAP
@@ -177,19 +172,17 @@ static zend_mm_segment* zend_mm_mem_mmap_realloc(zend_mm_storage *storage, zend_
 #endif
 	return ret;
 }
-/* }}} */
 
-static void zend_mm_mem_mmap_free(zend_mm_storage *storage, zend_mm_segment* segment) /* {{{ */
+static void zend_mm_mem_mmap_free(zend_mm_storage *storage, zend_mm_segment* segment)
 {
 	munmap((void*)segment, segment->size);
 }
-/* }}} */
 
 #endif
 
 #ifdef HAVE_MEM_MMAP_ANON
 
-static zend_mm_segment* zend_mm_mem_mmap_anon_alloc(zend_mm_storage *storage, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_mmap_anon_alloc(zend_mm_storage *storage, size_t size)
 {
 	zend_mm_segment *ret = (zend_mm_segment*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 	if (ret == MAP_FAILED) {
@@ -197,7 +190,6 @@ static zend_mm_segment* zend_mm_mem_mmap_anon_alloc(zend_mm_storage *storage, si
 	}
 	return ret;
 }
-/* }}} */
 
 # define ZEND_MM_MEM_MMAP_ANON_DSC {"mmap_anon", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_mmap_anon_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
 
@@ -207,7 +199,7 @@ static zend_mm_segment* zend_mm_mem_mmap_anon_alloc(zend_mm_storage *storage, si
 
 static int zend_mm_dev_zero_fd = -1;
 
-static zend_mm_storage* zend_mm_mem_mmap_zero_init(void *params) /* {{{ */
+static zend_mm_storage* zend_mm_mem_mmap_zero_init(void *params)
 {
 	if (zend_mm_dev_zero_fd != -1) {
 		zend_mm_dev_zero_fd = open("/dev/zero", O_RDWR, S_IRUSR | S_IWUSR);
@@ -218,16 +210,14 @@ static zend_mm_storage* zend_mm_mem_mmap_zero_init(void *params) /* {{{ */
 		return NULL;
 	}
 }
-/* }}} */
 
-static void zend_mm_mem_mmap_zero_dtor(zend_mm_storage *storage) /* {{{ */
+static void zend_mm_mem_mmap_zero_dtor(zend_mm_storage *storage)
 {
 	close(zend_mm_dev_zero_fd);
 	free(storage);
 }
-/* }}} */
 
-static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, size_t size)
 {
 	zend_mm_segment *ret = (zend_mm_segment*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zend_mm_dev_zero_fd, 0);
 	if (ret == MAP_FAILED) {
@@ -235,7 +225,6 @@ static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, si
 	}
 	return ret;
 }
-/* }}} */
 
 # define ZEND_MM_MEM_MMAP_ZERO_DSC {"mmap_zero", zend_mm_mem_mmap_zero_init, zend_mm_mem_mmap_zero_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_mmap_zero_alloc, zend_mm_mem_mmap_realloc, zend_mm_mem_mmap_free}
 
@@ -243,7 +232,7 @@ static zend_mm_segment* zend_mm_mem_mmap_zero_alloc(zend_mm_storage *storage, si
 
 #ifdef HAVE_MEM_WIN32
 
-static zend_mm_storage* zend_mm_mem_win32_init(void *params) /* {{{ */
+static zend_mm_storage* zend_mm_mem_win32_init(void *params)
 {
 	HANDLE heap = HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
 	zend_mm_storage* storage;
@@ -255,39 +244,33 @@ static zend_mm_storage* zend_mm_mem_win32_init(void *params) /* {{{ */
 	storage->data = (void*) heap;
 	return storage;
 }
-/* }}} */
 
-static void zend_mm_mem_win32_dtor(zend_mm_storage *storage) /* {{{ */
+static void zend_mm_mem_win32_dtor(zend_mm_storage *storage)
 {
 	HeapDestroy((HANDLE)storage->data);
 	free(storage);
 }
-/* }}} */
 
-static void zend_mm_mem_win32_compact(zend_mm_storage *storage) /* {{{ */
+static void zend_mm_mem_win32_compact(zend_mm_storage *storage)
 {
     HeapDestroy((HANDLE)storage->data);
     storage->data = (void*)HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
 }
-/* }}} */
 
-static zend_mm_segment* zend_mm_mem_win32_alloc(zend_mm_storage *storage, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_win32_alloc(zend_mm_storage *storage, size_t size)
 {
 	return (zend_mm_segment*) HeapAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, size);
 }
-/* }}} */
 
-static void zend_mm_mem_win32_free(zend_mm_storage *storage, zend_mm_segment* segment) /* {{{ */
+static void zend_mm_mem_win32_free(zend_mm_storage *storage, zend_mm_segment* segment)
 {
 	HeapFree((HANDLE)storage->data, HEAP_NO_SERIALIZE, segment);
 }
-/* }}} */
 
-static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend_mm_segment* segment, size_t size)
 {
 	return (zend_mm_segment*) HeapReAlloc((HANDLE)storage->data, HEAP_NO_SERIALIZE, segment, size);
 }
-/* }}} */
 
 # define ZEND_MM_MEM_WIN32_DSC {"win32", zend_mm_mem_win32_init, zend_mm_mem_win32_dtor, zend_mm_mem_win32_compact, zend_mm_mem_win32_alloc, zend_mm_mem_win32_realloc, zend_mm_mem_win32_free}
 
@@ -295,23 +278,20 @@ static zend_mm_segment* zend_mm_mem_win32_realloc(zend_mm_storage *storage, zend
 
 #ifdef HAVE_MEM_MALLOC
 
-static zend_mm_segment* zend_mm_mem_malloc_alloc(zend_mm_storage *storage, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_malloc_alloc(zend_mm_storage *storage, size_t size)
 {
 	return (zend_mm_segment*)malloc(size);
 }
-/* }}} */
 
-static zend_mm_segment* zend_mm_mem_malloc_realloc(zend_mm_storage *storage, zend_mm_segment *ptr, size_t size) /* {{{ */
+static zend_mm_segment* zend_mm_mem_malloc_realloc(zend_mm_storage *storage, zend_mm_segment *ptr, size_t size)
 {
 	return (zend_mm_segment*)realloc(ptr, size);
 }
-/* }}} */
 
-static void zend_mm_mem_malloc_free(zend_mm_storage *storage, zend_mm_segment *ptr) /* {{{ */
+static void zend_mm_mem_malloc_free(zend_mm_storage *storage, zend_mm_segment *ptr)
 {
 	free(ptr);
 }
-/* }}} */
 
 # define ZEND_MM_MEM_MALLOC_DSC {"malloc", zend_mm_mem_dummy_init, zend_mm_mem_dummy_dtor, zend_mm_mem_dummy_compact, zend_mm_mem_malloc_alloc, zend_mm_mem_malloc_realloc, zend_mm_mem_malloc_free}
 
@@ -343,10 +323,10 @@ static const zend_mm_mem_handlers mem_handlers[] = {
 /****************/
 
 #define MEM_BLOCK_VALID  0x7312F8DC
-#define MEM_BLOCK_FREED  0x99954317
-#define MEM_BLOCK_CACHED 0xFB8277DC
-#define MEM_BLOCK_GUARD  0x2A8FCC84
-#define MEM_BLOCK_LEAK   0x6C5E8F2D
+#define	MEM_BLOCK_FREED  0x99954317
+#define	MEM_BLOCK_CACHED 0xFB8277DC
+#define	MEM_BLOCK_GUARD  0x2A8FCC84
+#define	MEM_BLOCK_LEAK   0x6C5E8F2D
 
 /* mm block type */
 typedef struct _zend_mm_block_info {
@@ -673,7 +653,7 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
-static inline unsigned int zend_mm_high_bit(size_t _size) /* {{{ */
+static inline unsigned int zend_mm_high_bit(size_t _size)
 {
 #if defined(__GNUC__) && defined(i386)
 	unsigned int n;
@@ -698,9 +678,8 @@ static inline unsigned int zend_mm_high_bit(size_t _size) /* {{{ */
 	return n-1;
 #endif
 }
-/* }}} */
 
-static inline unsigned int zend_mm_low_bit(size_t _size) /* {{{ */
+static inline unsigned int zend_mm_low_bit(size_t _size)
 {
 #if defined(__GNUC__) && defined(i386)
 	unsigned int n;
@@ -731,9 +710,8 @@ static inline unsigned int zend_mm_low_bit(size_t _size) /* {{{ */
 	return index + n;
 #endif
 }
-/* }}} */
 
-static inline void zend_mm_add_to_rest_list(zend_mm_heap *heap, zend_mm_free_block *mm_block) /* {{{ */
+static inline void zend_mm_add_to_rest_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	zend_mm_free_block *prev, *next;
 
@@ -749,9 +727,8 @@ static inline void zend_mm_add_to_rest_list(zend_mm_heap *heap, zend_mm_free_blo
 	mm_block->next_free_block = next;
 	prev->next_free_block = next->prev_free_block = mm_block;
 }
-/* }}} */
 
-static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block) /* {{{ */
+static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	size_t size;
 	size_t index;
@@ -811,9 +788,8 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_blo
 		prev->next_free_block = next->prev_free_block = mm_block;
 	}
 }
-/* }}} */
 
-static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block) /* {{{ */
+static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	zend_mm_free_block *prev = mm_block->prev_free_block;
 	zend_mm_free_block *next = mm_block->next_free_block;
@@ -883,9 +859,8 @@ subst_block:
 		}
 	}
 }
-/* }}} */
 
-static inline void zend_mm_init(zend_mm_heap *heap) /* {{{ */
+static inline void zend_mm_init(zend_mm_heap *heap)
 {
 	zend_mm_free_block* p;
 	int i;
@@ -910,9 +885,8 @@ static inline void zend_mm_init(zend_mm_heap *heap) /* {{{ */
 	}
 	heap->rest_buckets[0] = heap->rest_buckets[1] = ZEND_MM_REST_BUCKET(heap);
 }
-/* }}} */
 
-static void zend_mm_del_segment(zend_mm_heap *heap, zend_mm_segment *segment) /* {{{ */
+static void zend_mm_del_segment(zend_mm_heap *heap, zend_mm_segment *segment)
 {
 	zend_mm_segment **p = &heap->segments_list;
 
@@ -923,10 +897,9 @@ static void zend_mm_del_segment(zend_mm_heap *heap, zend_mm_segment *segment) /*
 	heap->real_size -= segment->size;
 	ZEND_MM_STORAGE_FREE(segment);
 }
-/* }}} */
 
 #if ZEND_MM_CACHE
-static void zend_mm_free_cache(zend_mm_heap *heap) /* {{{ */
+static void zend_mm_free_cache(zend_mm_heap *heap)
 {
 	int i;
 
@@ -968,7 +941,6 @@ static void zend_mm_free_cache(zend_mm_heap *heap) /* {{{ */
 		}
 	}
 }
-/* }}} */
 #endif
 
 #if ZEND_MM_HEAP_PROTECTION || ZEND_MM_COOKIES
@@ -1037,7 +1009,7 @@ static void zend_mm_random(unsigned char *buf, size_t size) /* {{{ */
  * - This function may alter the block_sizes values to match platform alignment
  * - This function does *not* perform sanity checks on the arguments
  */
-ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, size_t reserve_size, int internal, void *params) /* {{{ */
+ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, size_t block_size, size_t reserve_size, int internal, void *params)
 {
 	zend_mm_storage *storage;
 	zend_mm_heap    *heap;
@@ -1045,6 +1017,8 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 #if 0
 	int i;
 
+	printf("ZEND_MM_ALIGNMENT=%d\n", ZEND_MM_ALIGNMENT);
+	printf("ZEND_MM_ALIGNMENT_LOG2=%d\n", ZEND_MM_ALIGNMENT_LOG2);
 	printf("ZEND_MM_MIN_SIZE=%d\n", ZEND_MM_MIN_SIZE);
 	printf("ZEND_MM_MAX_SMALL_SIZE=%d\n", ZEND_MM_MAX_SMALL_SIZE);
 	printf("ZEND_MM_ALIGNED_HEADER_SIZE=%d\n", ZEND_MM_ALIGNED_HEADER_SIZE);
@@ -1148,9 +1122,8 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_mem_handlers *handlers, 
 	}
 	return heap;
 }
-/* }}} */
 
-ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
+ZEND_API zend_mm_heap *zend_mm_startup(void)
 {
 	int i;
 	size_t seg_size;
@@ -1219,10 +1192,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void) /* {{{ */
 	}
 	return heap;
 }
-/* }}} */
 
 #if ZEND_DEBUG
-static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b) /* {{{ */
+static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 {
 	long leaks = 0;
 	zend_mm_block *p, *q;
@@ -1262,9 +1234,8 @@ static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b) /* {{
 	}
 	return leaks;
 }
-/* }}} */
 
-static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC) /* {{{ */
+static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 {
 	zend_mm_segment *segment = heap->segments_list;
 	zend_mm_block *p, *q;
@@ -1323,9 +1294,8 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC) /* {{{ */
 		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total TSRMLS_CC);
 	}
 }
-/* }}} */
 
-static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_block *p;
 	int no_cache_notice = 0;
@@ -1341,7 +1311,7 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 	}
 	if (!silent) {
 		TSRMLS_FETCH();
-
+		
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
 		zend_debug_alloc_output("---------------------------------------\n");
 		zend_debug_alloc_output("%s(%d) : Block "PTR_FMT" status:\n" ZEND_FILE_LINE_RELAY_CC, ptr);
@@ -1548,9 +1518,8 @@ static int zend_mm_check_ptr(zend_mm_heap *heap, void *ptr, int silent ZEND_FILE
 	}
 	return ((!had_problems) ? 1 : 0);
 }
-/* }}} */
 
-static int zend_mm_check_heap(zend_mm_heap *heap, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+static int zend_mm_check_heap(zend_mm_heap *heap, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_segment *segment = heap->segments_list;
 	zend_mm_block *p, *q;
@@ -1590,10 +1559,9 @@ static int zend_mm_check_heap(zend_mm_heap *heap, int silent ZEND_FILE_LINE_DC Z
 		p = q;
 	}
 }
-/* }}} */
 #endif
 
-ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent TSRMLS_DC) /* {{{ */
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent TSRMLS_DC)
 {
 	zend_mm_storage *storage;
 	zend_mm_segment *segment;
@@ -1691,7 +1659,6 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent
 		heap->overflow = 0;
 	}
 }
-/* }}} */
 
 static void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *format,
@@ -1700,7 +1667,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 	const char *filename,
 	uint lineno,
 #endif
-	size_t size) /* {{{ */
+	size_t size)
 {
 	if (heap->reserve) {
 		_zend_mm_free_int(heap, heap->reserve ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
@@ -1756,9 +1723,8 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 	}
 	zend_bailout();
 }
-/* }}} */
 
-static zend_mm_free_block *zend_mm_search_large_block(zend_mm_heap *heap, size_t true_size) /* {{{ */
+static zend_mm_free_block *zend_mm_search_large_block(zend_mm_heap *heap, size_t true_size)
 {
 	zend_mm_free_block *best_fit;
 	size_t index = ZEND_MM_LARGE_BUCKET_INDEX(true_size);
@@ -1830,9 +1796,8 @@ static zend_mm_free_block *zend_mm_search_large_block(zend_mm_heap *heap, size_t
 	}
 	return best_fit->next_free_block;
 }
-/* }}} */
 
-static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_free_block *best_fit;
 	size_t true_size = ZEND_MM_TRUE_SIZE(size);
@@ -2007,9 +1972,9 @@ zend_mm_finished_searching_for_block:
 
 	return ZEND_MM_DATA_OF(best_fit);
 }
-/* }}} */
 
-static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+
+static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_block *mm_block;
 	zend_mm_block *next_block;
@@ -2018,6 +1983,7 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 	if (!ZEND_MM_VALID_PTR(p)) {
 		return;
 	}
+
 	mm_block = ZEND_MM_HEADER_OF(p);
 	size = ZEND_MM_BLOCK_SIZE(mm_block);
 	ZEND_MM_CHECK_PROTECTION(mm_block);
@@ -2067,9 +2033,8 @@ static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND
 	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
-/* }}} */
 
-static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_block *mm_block = ZEND_MM_HEADER_OF(p);
 	zend_mm_block *next_block;
@@ -2312,27 +2277,23 @@ out_of_memory:
 	_zend_mm_free_int(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	return ptr;
 }
-/* }}} */
 
-ZEND_API void *_zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	return _zend_mm_alloc_int(heap, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API void _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	_zend_mm_free_int(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API void *_zend_mm_realloc(zend_mm_heap *heap, void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_zend_mm_realloc(zend_mm_heap *heap, void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	return _zend_mm_realloc_int(heap, ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API size_t _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API size_t _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mm_block *mm_block;
 
@@ -2347,7 +2308,6 @@ ZEND_API size_t _zend_mm_block_size(zend_mm_heap *heap, void *p ZEND_FILE_LINE_D
 	return ZEND_MM_BLOCK_SIZE(mm_block);
 #endif
 }
-/* }}} */
 
 /**********************/
 /* Allocation Manager */
@@ -2365,13 +2325,12 @@ static int alloc_globals_id;
 static zend_alloc_globals alloc_globals;
 #endif
 
-ZEND_API int is_zend_mm(TSRMLS_D) /* {{{ */
+ZEND_API int is_zend_mm(TSRMLS_D)
 {
 	return AG(mm_heap)->use_zend_alloc;
 }
-/* }}} */
 
-ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
@@ -2380,9 +2339,8 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /*
 	}
 	return _zend_mm_alloc_int(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
@@ -2392,9 +2350,8 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ 
 	}
 	_zend_mm_free_int(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
@@ -2403,20 +2360,18 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	}
 	return _zend_mm_realloc_int(AG(mm_heap), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (UNEXPECTED(!AG(mm_heap)->use_zend_alloc)) {
 		return 0;
 	}
 	return _zend_mm_block_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
 #if defined(__GNUC__) && defined(i386)
 
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) /* {{{ */
+static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
 	size_t res = nmemb;
 	unsigned long overflow = 0;
@@ -2433,7 +2388,6 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) /* {
 	}
 	return res;
 }
-/* }}} */
 
 #elif defined(__GNUC__) && defined(__x86_64__)
 
@@ -2470,7 +2424,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 
 #else
 
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) /* {{{ */
+static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
 	size_t res = nmemb * size + offset;
 	double _d  = (double)nmemb * (double)size + (double)offset;
@@ -2482,106 +2436,31 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset) /* {
 	}
 	return res;
 }
-/* }}} */
 #endif
 
-ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+
+ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	return emalloc_rel(safe_address(nmemb, size, offset));
 }
-/* }}} */
 
-ZEND_API UChar *_safe_eumalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	size = safe_address(size, sizeof(UChar), 0);
-	offset = safe_address(offset, sizeof(UChar), 0);
-	return (UChar*) _safe_emalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-}
-/* }}} */
-
-ZEND_API zstr _safe_ezmalloc(int type, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_safe_emalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	} else {
-		return ZSTR(_safe_eumalloc(nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	}
-}
-/* }}} */
-
-ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset) /* {{{ */
+ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset)
 {
 	return pemalloc(safe_address(nmemb, size, offset), 1);
 }
-/* }}} */
 
-ZEND_API UChar *_safe_umalloc(size_t nmemb, size_t size, size_t offset) /* {{{ */
-{
-	size = safe_address(size, sizeof(UChar), 0);
-	offset = safe_address(size, sizeof(UChar), 0);
-	return pemalloc(safe_address(nmemb, size, offset), 1);
-}
-/* }}} */
-
-ZEND_API zstr _safe_zmalloc(int type, size_t nmemb, size_t size, size_t offset) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_safe_malloc(nmemb, size, offset));
-	} else {
-		return ZSTR(_safe_umalloc(nmemb, size, offset));
-	}
-}
-/* }}} */
-
-ZEND_API void *_safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	return erealloc_rel(ptr, safe_address(nmemb, size, offset));
 }
-/* }}} */
 
-ZEND_API UChar *_safe_eurealloc(UChar *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	size = safe_address(size, sizeof(UChar), 0);
-	offset = safe_address(offset, sizeof(UChar), 0);
-	return (UChar*) _safe_erealloc(ptr, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-}
-/* }}} */
-
-ZEND_API zstr _safe_ezrealloc(int type, zstr str, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_safe_erealloc(str.v, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	} else {
-		return ZSTR(_safe_eurealloc(str.u, nmemb, size, offset ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	}
-}
-/* }}} */
-
-ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset) /* {{{ */
+ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset)
 {
 	return perealloc(ptr, safe_address(nmemb, size, offset), 1);
 }
-/* }}} */
 
-ZEND_API UChar *_safe_urealloc(UChar *ptr, size_t nmemb, size_t size, size_t offset) /* {{{ */
-{
-	size = safe_address(size, sizeof(UChar), 0);
-	offset = safe_address(offset, sizeof(UChar), 0);
-	return (UChar*) perealloc(ptr, safe_address(nmemb, size, offset), 1);
-}
-/* }}} */
 
-ZEND_API zstr _safe_zrealloc(int type, zstr str, size_t nmemb, size_t size, size_t offset) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_safe_realloc(str.s, nmemb, size, offset));
-	} else {
-		return ZSTR(_safe_urealloc(str.u, nmemb, size, offset));
-	}
-}
-/* }}} */
-
-ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
 
@@ -2592,9 +2471,8 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 	memset(p, 0, size * nmemb);
 	return p;
 }
-/* }}} */
 
-ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	int length;
 	char *p;
@@ -2607,34 +2485,8 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) 
 	memcpy(p, s, length);
 	return p;
 }
-/* }}} */
 
-ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	int length;
-	UChar *p;
-
-	length = u_strlen(s)+1;
-	p = (UChar *) _emalloc(sizeof(UChar) * length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	if (!p) {
-		return (UChar *)NULL;
-	}
-	u_memcpy(p, s, length);
-	return p;
-}
-/* }}} */
-
-ZEND_API zstr _ezstrdup(int type, const zstr str ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_estrdup(str.s ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	} else {
-		return ZSTR(_eustrdup(str.u ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	}
-}
-/* }}} */
-
-ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 
@@ -2646,33 +2498,9 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 	p[length] = 0;
 	return p;
 }
-/* }}} */
 
-ZEND_API UChar *_eustrndup(const UChar *s, int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	UChar *p;
 
-	p = (UChar *) _emalloc(sizeof(UChar) * (length+1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	if (!p) {
-		return (UChar *)NULL;
-	}
-	memcpy(p, s, length * sizeof(UChar));
-	p[length] = 0;
-	return p;
-}
-/* }}} */
-
-ZEND_API zstr _ezstrndup(int type, const zstr s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(_estrndup(s.s, length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	} else {
-		return ZSTR(_eustrndup(s.u, length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC));
-	}
-}
-/* }}} */
-
-ZEND_API char *zend_strndup(const char *s, uint length) /* {{{ */
+ZEND_API char *zend_strndup(const char *s, uint length)
 {
 	char *p;
 
@@ -2686,63 +2514,9 @@ ZEND_API char *zend_strndup(const char *s, uint length) /* {{{ */
 	p[length] = 0;
 	return p;
 }
-/* }}} */
 
-ZEND_API UChar *zend_ustrdup(const UChar *s) /* {{{ */
-{
-	UChar *p;
-	uint length;
 
-	length = u_strlen(s)+1;
-	p = (UChar *) malloc(UBYTES(length+1));
-	if (!p) {
-		return (UChar *)NULL;
-	}
-	if (length) {
-		memcpy(p, s, UBYTES(length));
-	}
-	p[length] = 0;
-	return p;
-}
-/* }}} */
-
-ZEND_API UChar *zend_ustrndup(const UChar *s, uint length) /* {{{ */
-{
-	UChar *p;
-
-	p = (UChar *) malloc(UBYTES(length+1));
-	if (!p) {
-		return (UChar *)NULL;
-	}
-	if (length) {
-		memcpy(p, s, UBYTES(length));
-	}
-	p[length] = 0;
-	return p;
-}
-/* }}} */
-
-ZEND_API zstr zend_zstrndup(int type, const zstr s, uint length) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(zend_strndup(s.s, length));
-	} else {
-		return ZSTR(zend_ustrndup(s.u, length));
-	}
-}
-/* }}} */
-
-ZEND_API zstr zend_zstrdup(int type, const zstr s) /* {{{ */
-{
-	if (type == IS_STRING) {
-		return ZSTR(strdup(s.s));
-	} else {
-		return ZSTR(zend_ustrdup(s.u));
-	}
-}
-/* }}} */
-
-ZEND_API int zend_set_memory_limit(size_t memory_limit) /* {{{ */
+ZEND_API int zend_set_memory_limit(size_t memory_limit)
 {
 	TSRMLS_FETCH();
 
@@ -2750,9 +2524,8 @@ ZEND_API int zend_set_memory_limit(size_t memory_limit) /* {{{ */
 
 	return SUCCESS;
 }
-/* }}} */
 
-ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC) /* {{{ */
+ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC)
 {
 	if (real_usage) {
 		return AG(mm_heap)->real_size;
@@ -2764,9 +2537,8 @@ ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC) /* {{{ */
 		return usage;
 	}
 }
-/* }}} */
 
-ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC) /* {{{ */
+ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC)
 {
 	if (real_usage) {
 		return AG(mm_heap)->real_peak;
@@ -2774,15 +2546,13 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC) /* {{{ */
 		return AG(mm_heap)->peak;
 	}
 }
-/* }}} */
 
-ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC) /* {{{ */
+ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent TSRMLS_CC);
 }
-/* }}} */
 
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC) /* {{{ */
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
 	char *tmp;
 	alloc_globals->mm_heap = zend_mm_startup();
@@ -2797,17 +2567,15 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC) /* {
 		}
 	}
 }
-/* }}} */
 
 #ifdef ZTS
-static void alloc_globals_dtor(zend_alloc_globals *alloc_globals TSRMLS_DC) /* {{{ */
+static void alloc_globals_dtor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
 	shutdown_memory_manager(1, 1 TSRMLS_CC);
 }
-/* }}} */
 #endif
 
-ZEND_API void start_memory_manager(TSRMLS_D) /* {{{ */
+ZEND_API void start_memory_manager(TSRMLS_D)
 {
 #ifdef ZTS
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
@@ -2815,9 +2583,8 @@ ZEND_API void start_memory_manager(TSRMLS_D) /* {{{ */
 	alloc_globals_ctor(&alloc_globals);
 #endif
 }
-/* }}} */
 
-ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC) /* {{{ */
+ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC)
 {
 	zend_mm_heap *old_heap;
 
@@ -2825,13 +2592,11 @@ ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC) /* {{{
 	AG(mm_heap) = new_heap;
 	return old_heap;
 }
-/* }}} */
 
-ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap) /* {{{ */
+ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap)
 {
 	return heap->storage;
 }
-/* }}} */
 
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
@@ -2845,7 +2610,7 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 }
 
 #if ZEND_DEBUG
-ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
@@ -2854,9 +2619,9 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 	}
 	return zend_mm_check_ptr(AG(mm_heap), ptr, silent ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
-/* }}} */
 
-ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
+
+ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	int errors;
 	TSRMLS_FETCH();
@@ -2873,7 +2638,6 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 	zend_debug_alloc_output("End of full memory check %s:%d (%d errors)\n" ZEND_FILE_LINE_RELAY_CC, errors);
 	zend_debug_alloc_output("------------------------------------------------\n");
 }
-/* }}} */
 #endif
 
 /*

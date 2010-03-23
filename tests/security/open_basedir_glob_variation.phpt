@@ -21,6 +21,6 @@ rmdir($dir2);
 --EXPECT--
 array(1) {
   [0]=>
-  unicode(12) "../globtest1"
+  string(12) "../globtest1"
 }
 

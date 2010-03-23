@@ -14,7 +14,7 @@ foreach ($methods as $method) {
 }
 ?>
 --EXPECTF--
-unicode(%s) "%s"
+string(%d) "%s"
 
 Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

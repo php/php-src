@@ -17,7 +17,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
@@ -32,6 +32,6 @@ var_dump( strftime($format, $timestamp) );
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with  Abbreviated month name format %h --
-unicode(%d) "%s"
-unicode(3) "Aug"
+string(%d) "%s"
+string(3) "Aug"
 ===DONE===

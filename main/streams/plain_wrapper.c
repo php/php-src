@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -65,6 +65,9 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			break;
 		case 'x':
 			flags = O_CREAT|O_EXCL;
+			break;
+		case 'c':
+			flags = O_CREAT;
 			break;
 		default:
 			/* unknown mode */
@@ -252,7 +255,6 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 #endif
 		}
 	}
-	php_stream_fix_encoding(stream, mode, NULL TSRMLS_CC);
 
 	return stream;
 }
@@ -285,7 +287,6 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 			stream->position = ftell(file);
 		}
 	}
-	php_stream_fix_encoding(stream, mode, NULL TSRMLS_CC);
 
 	return stream;
 }
@@ -306,8 +307,6 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 	stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
-	php_stream_fix_encoding(stream, mode, NULL TSRMLS_CC);
-
 	return stream;
 }
 
@@ -860,6 +859,10 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 		return NULL;
 	}
 	
+	if (PG(safe_mode) &&(!php_checkuid(path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return NULL;
+	}
+	
 	dir = VCWD_OPENDIR(path);
 
 #ifdef PHP_WIN32
@@ -989,6 +992,13 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 		return NULL;
 	}
 
+	if ((php_check_safe_mode_include_dir(path TSRMLS_CC)) == 0) {
+		return php_stream_fopen_rel(path, mode, opened_path, options);
+	}
+
+	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
+		return NULL;
+
 	return php_stream_fopen_rel(path, mode, opened_path, options);
 }
 
@@ -997,6 +1007,10 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, in
 
 	if (strncmp(url, "file://", sizeof("file://") - 1) == 0) {
 		url += sizeof("file://") - 1;
+	}
+
+	if (PG(safe_mode) &&(!php_checkuid_ex(url, NULL, CHECKUID_CHECK_FILE_AND_DIR, (flags & PHP_STREAM_URL_STAT_QUIET) ? CHECKUID_NO_ERRORS : 0))) {
+		return -1;
 	}
 
 	if (php_check_open_basedir_ex(url, (flags & PHP_STREAM_URL_STAT_QUIET) ? 0 : 1 TSRMLS_CC)) {
@@ -1020,7 +1034,11 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 		url = p + 3;
 	}
 
-	if (!(options & STREAM_DISABLE_OPEN_BASEDIR)) {
+	if (options & ENFORCE_SAFE_MODE) {
+		if (PG(safe_mode) && !php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+			return 0;
+		}
+
 		if (php_check_open_basedir(url TSRMLS_CC)) {
 			return 0;
 		}
@@ -1066,6 +1084,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 
 	if ((p = strstr(url_to, "://")) != NULL) {
 		url_to = p + 3;
+	}
+
+	if (PG(safe_mode) && (!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR) ||
+				!php_checkuid(url_to, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return 0;
 	}
 
 	if (php_check_open_basedir(url_from TSRMLS_CC) || php_check_open_basedir(url_to TSRMLS_CC)) {
@@ -1223,6 +1246,10 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 #if PHP_WIN32
 	int url_len = strlen(url);
 #endif
+	if (PG(safe_mode) &&(!php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return 0;
+	}
+
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
@@ -1271,6 +1298,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	char *pathbuf, *ptr, *end;
 	char *exec_fname;
 	char trypath[MAXPATHLEN];
+	struct stat sb;
 	php_stream *stream;
 	int path_length;
 	int filename_length;
@@ -1302,8 +1330,16 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 			return NULL;
 		}
 
+		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
+			return NULL;
+		}
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
+
+	/*
+	 * files in safe_mode_include_dir (or subdir) are excluded from
+	 * safe mode GID/UID checks
+	 */
 
 not_relative_path:
 
@@ -1313,6 +1349,13 @@ not_relative_path:
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(filename TSRMLS_CC)) {
 			return NULL;
 		}
+
+		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
+			/* filename is in safe_mode_include_dir (or subdir) */
+			return php_stream_fopen_rel(filename, mode, opened_path, options);
+
+		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM)))
+			return NULL;
 
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
@@ -1334,12 +1377,21 @@ not_relative_path:
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;
 		}
-
+		if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC)) == 0) {
+			return php_stream_fopen_rel(trypath, mode, opened_path, options);
+		}	
+		if (PG(safe_mode) && (!php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))) {
+			return NULL;
+		}
+		
 		return php_stream_fopen_rel(trypath, mode, opened_path, options);
 	}
 #endif
 
 	if (!path || (path && !*path)) {
+		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
+			return NULL;
+		}
 		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
@@ -1387,8 +1439,21 @@ not_relative_path:
 			goto stream_skip;
 		}
 		
+		if (PG(safe_mode)) {
+			if (VCWD_STAT(trypath, &sb) == 0) {
+				/* file exists ... check permission */
+				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
+						php_checkuid_ex(trypath, mode, CHECKUID_CHECK_MODE_PARAM, CHECKUID_NO_ERRORS)) {
+					/* UID ok, or trypath is in safe_mode_include_dir */
+					stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
+					goto stream_done;
+				}
+			}
+			goto stream_skip;
+		}
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
+stream_done:
 			efree(pathbuf);
 			return stream;
 		}

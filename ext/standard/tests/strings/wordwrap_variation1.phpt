@@ -162,83 +162,83 @@ string(3) "0.5"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(1) "1"
@@ -266,19 +266,19 @@ string(0) ""
 string(0) ""
 -- Iteration 19 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, object given in %s on line %d
 NULL
 -- Iteration 20 --
 string(0) ""
@@ -306,19 +306,19 @@ string(0) ""
 string(0) ""
 -- Iteration 24 --
 
-Warning: wordwrap() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 
-Warning: wordwrap() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 string(0) ""

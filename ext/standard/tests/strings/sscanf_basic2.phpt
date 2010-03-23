@@ -32,13 +32,13 @@ var_dump($res, $part, $number, $stock);
 *** Testing sscanf() : basic functionality - using integer format ***
 
 -- Try sccanf() WITHOUT optional args --
-unicode(6) "Widget"
+string(6) "Widget"
 int(1234789)
 int(25)
 
 -- Try sccanf() WITH optional args --
 int(3)
-unicode(6) "Widget"
+string(6) "Widget"
 int(1234789)
 int(25)
 ===DONE===

@@ -16,8 +16,8 @@ set_error_handler('test_error_handler');
 echo "*** Testing eregi_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$pattern = b'1';
-$replacement = b'new value';
+$pattern = '1';
+$replacement = 'new value';
 
 //get an unset variable
 $unset_var = 10;
@@ -85,90 +85,109 @@ Error: 8 - Undefined variable: undefined_var, %s(64)
 Error: 8 - Undefined variable: unset_var, %s(67)
 
 Arg value 0 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(1) "0"
 
 Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(9) "new value"
 
 Arg value 12345 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(13) "new value2345"
 
 Arg value -2345 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(5) "-2345"
 
 Arg value 10.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(12) "new value0.5"
 
 Arg value -10.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(13) "-new value0.5"
 
 Arg value 101234567000 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(28) "new value0new value234567000"
 
 Arg value 1.07654321E-9 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(29) "new value.0765432new valueE-9"
 
 Arg value 0.5 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(3) "0.5"
-Error: 8 - Array to string conversion, %s(73)
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
-Error: 8 - Array to string conversion, %s(73)
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
-Error: 8 - Array to string conversion, %s(73)
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
-Error: 8 - Array to string conversion, %s(73)
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
-Error: 8 - Array to string conversion, %s(73)
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value Array 
-Error: 8 - Array to string conversion, %s(74)
-string(5) "Array"
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, array given, %s(74)
+NULL
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 
 Arg value  
-string(0) ""
-
-Arg value 1 
-string(9) "new value"
-
-Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 
 Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(9) "new value"
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+string(0) ""
+
+Arg value 1 
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+string(9) "new value"
+
+Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
-Error: 4096 - Object of class stdClass could not be converted to binary string, %s(74)
-Error: 8 - Object of class stdClass to string conversion, %s(74)
-string(6) "Object"
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
+Error: 2 - eregi_replace() expects parameter 3 to be string, object given, %s(74)
+NULL
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 
 Arg value  
+Error: 8192 - Function eregi_replace() is deprecated, %s(74)
 string(0) ""
 Done

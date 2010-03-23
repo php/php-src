@@ -40,7 +40,7 @@ echo "*** Done ***\n";
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation3.tmp");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing filesize(): usage variations ***
 -- Testing filesize() after truncating the file to a new length --
 bool(true)

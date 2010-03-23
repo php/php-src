@@ -41,19 +41,20 @@ for ($i = -10; $i <= 60; $i += 10) {
 	var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
 }
 
+echo "Done";
 ?>
-===DONE===
+
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***
 
 **-- Offset is: -10 --**
 -- ASCII String --
 
-Warning: iconv_strpos(): Offset not contained in string in %s on line %d
+Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
 --Multibyte String --
 
-Warning: iconv_strpos(): Offset not contained in string in %s on line %d
+Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
 bool(false)
 
 **-- Offset is: 0 --**
@@ -97,4 +98,4 @@ bool(false)
 bool(false)
 --Multibyte String --
 bool(false)
-===DONE===
+Done

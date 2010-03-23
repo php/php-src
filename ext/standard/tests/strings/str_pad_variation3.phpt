@@ -89,41 +89,41 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing str_pad() function: with unexpected inputs for 'pad_string' argument ***
 -- Iteration 1 --
-unicode(20) "Test string000000000"
+string(20) "Test string000000000"
 -- Iteration 2 --
-unicode(20) "Test string111111111"
+string(20) "Test string111111111"
 -- Iteration 3 --
-unicode(20) "Test string-2-2-2-2-"
+string(20) "Test string-2-2-2-2-"
 -- Iteration 4 --
-unicode(20) "Test string214748364"
+string(20) "Test string214748364"
 -- Iteration 5 --
-unicode(20) "Test string-21474836"
+string(20) "Test string-21474836"
 -- Iteration 6 --
-unicode(20) "Test string10.510.51"
+string(20) "Test string10.510.51"
 -- Iteration 7 --
-unicode(20) "Test string-20.5-20."
+string(20) "Test string-20.5-20."
 -- Iteration 8 --
-unicode(20) "Test string101234567"
+string(20) "Test string101234567"
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 3 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
-unicode(20) "Test string111111111"
+string(20) "Test string111111111"
 -- Iteration 13 --
 
 Warning: str_pad(): Padding string cannot be empty in %s on line %d
 NULL
 -- Iteration 14 --
-unicode(20) "Test string111111111"
+string(20) "Test string111111111"
 -- Iteration 15 --
 
 Warning: str_pad(): Padding string cannot be empty in %s on line %d
@@ -137,10 +137,10 @@ NULL
 Warning: str_pad(): Padding string cannot be empty in %s on line %d
 NULL
 -- Iteration 18 --
-unicode(20) "Test stringsample ob"
+string(20) "Test stringsample ob"
 -- Iteration 19 --
 
-Warning: str_pad() expects parameter 3 to be string (Unicode or binary), resource given in %s on line %d
+Warning: str_pad() expects parameter 3 to be string, resource given in %s on line %d
 NULL
 -- Iteration 20 --
 

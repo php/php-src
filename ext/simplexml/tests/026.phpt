@@ -4,7 +4,7 @@ SimpleXML: getName()
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
-$xml =b<<<EOF
+$xml =<<<EOF
 <people>
   <person>Jane</person>
 </people>

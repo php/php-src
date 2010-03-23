@@ -56,30 +56,30 @@ foreach($formats as $format) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : hexa formats with hexa values ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(13) "ffffffff 1 22"
+string(13) "ffffffff 1 22"
 
 -- Iteration 3 --
-unicode(28) "7fffffff x, 7000000 80000000"
+string(28) "7fffffff x, 7000000 80000000"
 
 -- Iteration 4 --
-unicode(35) "                      ffed2979 0000"
+string(35) "                      ffed2979 0000"
 
 -- Iteration 5 --
-unicode(22) "#1 2222 1b6db bbbbbbbc"
+string(22) "#1 2222 1b6db bbbbbbbc"
 
 -- Iteration 6 --
-unicode(12) "123b fab 0 a"
+string(12) "123b fab 0 a"
 
 -- Iteration 7 --
-unicode(5) "%34 x"
+string(5) "%34 x"
 
 -- Iteration 8 --
-unicode(7) "1 2 3 4"
+string(7) "1 2 3 4"
 Done

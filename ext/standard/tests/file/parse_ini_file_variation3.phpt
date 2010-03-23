@@ -78,27 +78,27 @@ foreach($newdirs as $newdir) {
 *** Testing parse_ini_file() : variation ***
 New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
 array(11) {
-  [u"error_reporting"]=>
-  unicode(5) "32767"
-  [u"display_errors"]=>
-  unicode(1) "1"
-  [u"display_startup_errors"]=>
-  unicode(0) ""
-  [u"log_errors"]=>
-  unicode(0) ""
-  [u"log_errors_max_len"]=>
-  unicode(4) "1024"
-  [u"ignore_repeated_errors"]=>
-  unicode(0) ""
-  [u"ignore_repeated_source"]=>
-  unicode(0) ""
-  [u"report_memleaks"]=>
-  unicode(1) "1"
-  [u"track_errors"]=>
-  unicode(0) ""
-  [u"docref_root"]=>
-  unicode(11) "/phpmanual/"
-  [u"docref_ext"]=>
-  unicode(5) ".html"
+  ["error_reporting"]=>
+  string(5) "30719"
+  ["display_errors"]=>
+  string(1) "1"
+  ["display_startup_errors"]=>
+  string(0) ""
+  ["log_errors"]=>
+  string(0) ""
+  ["log_errors_max_len"]=>
+  string(4) "1024"
+  ["ignore_repeated_errors"]=>
+  string(0) ""
+  ["ignore_repeated_source"]=>
+  string(0) ""
+  ["report_memleaks"]=>
+  string(1) "1"
+  ["track_errors"]=>
+  string(0) ""
+  ["docref_root"]=>
+  string(11) "/phpmanual/"
+  ["docref_ext"]=>
+  string(5) ".html"
 }
 ===Done===

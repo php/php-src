@@ -100,122 +100,122 @@ foreach($inputs as $key =>$value) {
 *** Testing gmdate() : usage variation ***
 
 --int 0--
-unicode(1) "0"
-unicode(1) "0"
+string(1) "0"
+string(1) "0"
 
 --int 1--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --int 12345--
-unicode(5) "12345"
-unicode(5) "12345"
+string(5) "12345"
+string(5) "12345"
 
 --int -12345--
-unicode(6) "-12345"
-unicode(6) "-12345"
+string(6) "-12345"
+string(6) "-12345"
 
 --float 10.5--
-unicode(4) "10.5"
-unicode(4) "10.5"
+string(4) "10.5"
+string(4) "10.5"
 
 --float -10.5--
-unicode(5) "-10.5"
-unicode(5) "-10.5"
+string(5) "-10.5"
+string(5) "-10.5"
 
 --float 12.3456789000e10--
-unicode(12) "123456789000"
-unicode(12) "123456789000"
+string(12) "123456789000"
+string(12) "123456789000"
 
 --float -12.3456789000e10--
-unicode(13) "-123456789000"
-unicode(13) "-123456789000"
+string(13) "-123456789000"
+string(13) "-123456789000"
 
 --float .5--
-unicode(3) "0.5"
-unicode(3) "0.5"
+string(3) "0.5"
+string(3) "0.5"
 
 --empty array--
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --lowercase null--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --lowercase true--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --lowercase false--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --uppercase TRUE--
-unicode(1) "1"
-unicode(1) "1"
+string(1) "1"
+string(1) "1"
 
 --uppercase FALSE--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --empty string DQ--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --empty string SQ--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --instance of classWithToString--
-unicode(53) "CFridayam0808 AM 2008b8UTC2008-08-08T08:08:08+00:0031"
-unicode(%d) "%s"
+string(53) "CFridayam0808 AM 2008b8UTC2008-08-08T08:08:08+00:0031"
+string(%d) "%s"
 
 --instance of classWithoutToString--
 
-Warning: gmdate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
-Warning: gmdate() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: gmdate() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 --undefined var--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 
 --unset var--
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
 ===DONE===

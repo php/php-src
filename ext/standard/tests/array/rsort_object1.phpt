@@ -34,7 +34,7 @@ class for_string_rsort
 	}
 
 	// return string value
-	function __tounicode() {
+	function __tostring() {
 		return (string)$this->value;
 	}
 
@@ -90,32 +90,32 @@ bool(true)
 array(6) {
   [0]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
   [1]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [2]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [3]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [4]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [5]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
 }
@@ -123,43 +123,43 @@ bool(true)
 array(8) {
   [0]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
   [1]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
   [2]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
   [3]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
   [4]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
   [5]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
   [6]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
   [7]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
 }
 
@@ -168,32 +168,32 @@ bool(true)
 array(6) {
   [0]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
   [1]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [2]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [3]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [4]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [5]=>
   object(for_integer_rsort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
 }
@@ -201,43 +201,43 @@ bool(true)
 array(8) {
   [0]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
   [1]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
   [2]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
   [3]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
   [4]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
   [5]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
   [6]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
   [7]=>
   object(for_string_rsort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
 }
 Done

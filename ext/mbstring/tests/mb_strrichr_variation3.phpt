@@ -134,31 +134,31 @@ fclose($fp);
 *** Testing mb_strrichr() : usage variation ***
 
 --int 0--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --int 1--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --int 12345--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --int -12345--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --float 10.5--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --float -10.5--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --float 12.3456789000e10--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --float -12.3456789000e10--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --float .5--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --empty array--
 Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
@@ -177,40 +177,40 @@ Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --lowercase null--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --lowercase true--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --lowercase false--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --uppercase TRUE--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --uppercase FALSE--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --empty string DQ--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --empty string SQ--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --string DQ--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --string SQ--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --mixed case string--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --heredoc--
-unicode(12) "737472696e67"
+string(12) "737472696e67"
 
 --instance of classWithToString--
 Error: 2 - mb_strrichr() expects parameter 3 to be boolean, object given, %s(%d)
@@ -221,10 +221,10 @@ Error: 2 - mb_strrichr() expects parameter 3 to be boolean, object given, %s(%d)
 bool(false)
 
 --undefined var--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --unset var--
-unicode(8) "5f76616c"
+string(8) "5f76616c"
 
 --resource--
 Error: 2 - mb_strrichr() expects parameter 3 to be boolean, resource given, %s(%d)

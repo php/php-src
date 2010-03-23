@@ -29,7 +29,9 @@ $string_with_tags = <<<EOT
 is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
 <html> html </html> <?php echo "php"; ?>
 EOT;
-
+if(substr(PHP_OS, 0, 3) == "WIN")  {
+	$string_with_tags = str_replace("\r",'', $string_with_tags);
+}
 $filename = dirname(__FILE__)."/fgetss_basic2.tmp"; 
 
 /* try reading the file opened in different modes of reading */
@@ -40,7 +42,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
-  fwrite($file_handle,(binary)$string_with_tags); //writing data to the file
+  fwrite($file_handle,$string_with_tags); //writing data to the file
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
     exit();
@@ -74,7 +76,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgetss() : basic operations ***
 
 -- Testing fgetss() with file opened using w+ mode --
@@ -113,12 +115,12 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 --
-unicode(27) "Testing fgetss() functions
+string(27) "Testing fgetss() functions
 "
 int(40)
 bool(false)
 -- fgets() with length = 30, file pointer at 0 --
-unicode(23) "Testing fgetss() functi"
+string(23) "Testing fgetss() functi"
 int(29)
 bool(false)
 
@@ -158,12 +160,12 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 --
-unicode(27) "Testing fgetss() functions
+string(27) "Testing fgetss() functions
 "
 int(40)
 bool(false)
 -- fgets() with length = 30, file pointer at 0 --
-unicode(23) "Testing fgetss() functi"
+string(23) "Testing fgetss() functi"
 int(29)
 bool(false)
 
@@ -203,12 +205,12 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 --
-unicode(27) "Testing fgetss() functions
+string(27) "Testing fgetss() functions
 "
 int(40)
 bool(false)
 -- fgets() with length = 30, file pointer at 0 --
-unicode(23) "Testing fgetss() functi"
+string(23) "Testing fgetss() functi"
 int(29)
 bool(false)
 Done

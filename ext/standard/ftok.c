@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "ext/standard/file.h"
 
 #include <sys/types.h>                                                                                                        
 
@@ -28,17 +27,15 @@
 #endif
 
 #if HAVE_FTOK
-/* {{{ proto int ftok(string pathname, string proj) U
+/* {{{ proto int ftok(string pathname, string proj)
    Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {
-	zval **pp_pathname;
-	char *proj, *pathname;
-	int proj_len, pathname_len;
+	char *pathname, *proj;
+	int pathname_len, proj_len;
 	key_t k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &pp_pathname, &proj, &proj_len) == FAILURE ||
-		php_stream_path_param_encode(pp_pathname, &pathname, &pathname_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {
 		return;
 	}
 
@@ -51,6 +48,10 @@ PHP_FUNCTION(ftok)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
 		RETURN_LONG(-1);
     }
+
+	if ((PG(safe_mode) && (!php_checkuid(pathname, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pathname TSRMLS_CC)) {
+		RETURN_LONG(-1);
+	}
 
 	k = ftok(pathname, proj[0]);
 	if (k == -1) {

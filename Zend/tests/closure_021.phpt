@@ -19,4 +19,4 @@ try {
 
 ?>
 --EXPECT--
-unicode(5) "test!"
+string(5) "test!"

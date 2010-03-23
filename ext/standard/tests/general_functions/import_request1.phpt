@@ -47,53 +47,53 @@ Warning: import_request_variables(): Attempted super-global (_FILES) variable ov
 
 Warning: import_request_variables(): Attempted super-global (_REQUEST) variable overwrite in %s on line %d
 array(5) {
-  [u"GET"]=>
-  unicode(1) "0"
-  [u"POST"]=>
-  unicode(1) "1"
-  [u"COOKIE"]=>
-  unicode(1) "2"
-  [u"FILES"]=>
-  unicode(1) "3"
-  [u"REQUEST"]=>
-  unicode(1) "4"
+  ["GET"]=>
+  string(1) "0"
+  ["POST"]=>
+  string(1) "1"
+  ["COOKIE"]=>
+  string(1) "2"
+  ["FILES"]=>
+  string(1) "3"
+  ["REQUEST"]=>
+  string(1) "4"
 }
 array(5) {
-  [u"GET"]=>
-  unicode(1) "5"
-  [u"POST"]=>
-  unicode(1) "6"
-  [u"COOKIE"]=>
-  unicode(1) "7"
-  [u"FILES"]=>
-  unicode(1) "8"
-  [u"REQUEST"]=>
-  unicode(1) "9"
+  ["GET"]=>
+  string(1) "5"
+  ["POST"]=>
+  string(1) "6"
+  ["COOKIE"]=>
+  string(1) "7"
+  ["FILES"]=>
+  string(1) "8"
+  ["REQUEST"]=>
+  string(1) "9"
 }
 array(5) {
-  [u"GET"]=>
-  unicode(2) "10"
-  [u"POST"]=>
-  unicode(2) "11"
-  [u"COOKIE"]=>
-  unicode(2) "12"
-  [u"FILES"]=>
-  unicode(2) "13"
-  [u"REQUEST"]=>
-  unicode(2) "14"
+  ["GET"]=>
+  string(2) "10"
+  ["POST"]=>
+  string(2) "11"
+  ["COOKIE"]=>
+  string(2) "12"
+  ["FILES"]=>
+  string(2) "13"
+  ["REQUEST"]=>
+  string(2) "14"
 }
 array(0) {
 }
 array(5) {
-  [u"GET"]=>
-  unicode(1) "5"
-  [u"POST"]=>
-  unicode(1) "6"
-  [u"COOKIE"]=>
-  unicode(1) "7"
-  [u"FILES"]=>
-  unicode(1) "8"
-  [u"REQUEST"]=>
-  unicode(1) "9"
+  ["GET"]=>
+  string(1) "5"
+  ["POST"]=>
+  string(1) "6"
+  ["COOKIE"]=>
+  string(1) "7"
+  ["FILES"]=>
+  string(1) "8"
+  ["REQUEST"]=>
+  string(1) "9"
 }
 Done

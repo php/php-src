@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -84,48 +84,6 @@
 #define HTTP_WRAPPER_HEADER_INIT    1
 #define HTTP_WRAPPER_REDIRECTED     2
 
-static inline char *php_http_detect_charset(char *http_header_line) /* {{{ */
-{
-	char *s;
-
-	/* Note: This is a fairly remedial parser which could be easily confused by invalid data
-	   The worst case scenario from such confusion should only result in the unicode filter not
-	   being applied.  While unfortunate, it's more an issue of the server sending a bad header */
-	for (s = strchr(http_header_line, ';'); s; s = strchr(s + 1, ';')) {
-		char *p = s;
-
-		while (*(++p) == ' ');
-		if (strncmp(p, "charset", sizeof("charset") - 1) != 0) {
-			continue;
-		}
-		p += sizeof("charset") - 1;
-
-		while (*p == ' ') p++;
-		if (*p != '=') {
-			continue;
-		}
-
-		while (*(++p) == ' ');
-		if (*p == '"') {
-			s = p + 1;
-			if (!(p = strchr(s, '"'))) {
-				/* Bad things, unmatched quote */
-				return NULL;
-			}
-			return estrndup(s, p - s);
-			break;
-		}
-
-		/* Unquoted value */
-		s = p;
-		while (*p && *p != ' ' && *p != ';') p++;
-		return estrndup(s, p - s);
-	}
-
-	return NULL;
-}
-/* }}} */
-
 php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int flags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
@@ -149,7 +107,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
-	char *charset = NULL;
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
@@ -174,7 +131,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			Z_TYPE_PP(tmpzval) != IS_STRING ||
 			Z_STRLEN_PP(tmpzval) <= 0) {
 			php_url_free(resource);
-			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
+			return php_stream_open_wrapper_ex(path, mode, ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
 		request_fulluri = 1;
@@ -256,7 +213,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
  	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
 
 			/* get response header */
-			while (php_stream_gets(stream, ZSTR(header_line), HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
 				if (header_line[0] == '\n' ||
 				    header_line[0] == '\r' ||
 				    header_line[0] == '\0') {
@@ -288,7 +245,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	eol_detect = stream->flags & (PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
 	stream->flags &= ~(PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
 
-	php_stream_context_set(stream, context TSRMLS_CC);
+	php_stream_context_set(stream, context);
 
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
@@ -521,7 +478,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		/* ensure the header is only sent if user_agent is not blank */
 		if (ua_len > sizeof(_UA_HEADER)) {
 			ua = emalloc(ua_len + 1);
-			if ((ua_len = snprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
+			if ((ua_len = slprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
 				ua[ua_len] = 0;
 				php_stream_write(stream, ua, ua_len);
 			} else {
@@ -560,7 +517,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS &&
 		Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
-			scratch_len = snprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
+			scratch_len = slprintf(scratch, scratch_len, "Content-Length: %d\r\n", Z_STRLEN_PP(tmpzval));
 			php_stream_write(stream, scratch, scratch_len);
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
@@ -590,7 +547,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	{
 		zval **rh;
-		zend_ascii_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &rh);
+		zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &rh);
 		response_header = *rh;
 	}
 
@@ -598,7 +555,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		size_t tmp_line_len;
 		/* get response header */
 
-		if (php_stream_get_line(stream, ZSTR(tmp_line), sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
+		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval *http_response;
 			int response_code;
 
@@ -655,13 +612,14 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	while (!body && !php_stream_eof(stream)) {
 		size_t http_header_line_length;
-		if (php_stream_get_line(stream, ZSTR(http_header_line), HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
+		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			if (*e != '\n') {
 				do { /* partial header */
-					php_stream_get_line(stream, ZSTR(http_header_line), HTTP_HEADER_BLOCK_SIZE, &http_header_line_length);
+					php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length);
 					e = http_header_line + http_header_line_length - 1;
 				} while (*e != '\n');
+				continue;
 			}
 			while (*e == '\n' || *e == '\r') {
 				e--;
@@ -672,11 +630,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
-
-				if (strchr(mode, 't')) {
-					charset = php_http_detect_charset(http_header_line + sizeof("Content-type: "));
-				}
-
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
 			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
 				file_size = atoi(http_header_line + 16);
@@ -731,11 +684,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		}
 		php_stream_close(stream);
 		stream = NULL;
-
-		if (charset) {
-			efree(charset);
-			charset = NULL;
-		}
 
 		if (location[0] != '\0')	{
 
@@ -857,13 +805,6 @@ out:
 		}
 	} else if (transfer_encoding) {
 		php_stream_filter_free(transfer_encoding TSRMLS_CC);
-	}
-
-	if (charset) {
-		if (stream && strchr(mode, 't')) {
-			php_stream_encoding_apply(stream, 0, charset, UG(to_error_mode), NULL);
-		}
-		efree(charset);
 	}
 
 	return stream;

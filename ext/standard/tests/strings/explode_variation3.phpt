@@ -81,63 +81,63 @@ foreach($limits as $limit) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
+===Done===
 --EXPECTF--
 *** Testing explode() function: with unexpected inputs for 'limit' argument ***
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 3 --
 array(6) {
   [0]=>
-  unicode(6) "piece1"
+  string(6) "piece1"
   [1]=>
-  unicode(6) "piece2"
+  string(6) "piece2"
   [2]=>
-  unicode(6) "piece3"
+  string(6) "piece3"
   [3]=>
-  unicode(6) "piece4"
+  string(6) "piece4"
   [4]=>
-  unicode(6) "piece5"
+  string(6) "piece5"
   [5]=>
-  unicode(6) "piece6"
+  string(6) "piece6"
 }
 -- Iteration 4 --
 array(6) {
   [0]=>
-  unicode(6) "piece1"
+  string(6) "piece1"
   [1]=>
-  unicode(6) "piece2"
+  string(6) "piece2"
   [2]=>
-  unicode(6) "piece3"
+  string(6) "piece3"
   [3]=>
-  unicode(6) "piece4"
+  string(6) "piece4"
   [4]=>
-  unicode(6) "piece5"
+  string(6) "piece5"
   [5]=>
-  unicode(6) "piece6"
+  string(6) "piece6"
 }
 -- Iteration 5 --
 array(6) {
   [0]=>
-  unicode(6) "piece1"
+  string(6) "piece1"
   [1]=>
-  unicode(6) "piece2"
+  string(6) "piece2"
   [2]=>
-  unicode(6) "piece3"
+  string(6) "piece3"
   [3]=>
-  unicode(6) "piece4"
+  string(6) "piece4"
   [4]=>
-  unicode(6) "piece5"
+  string(6) "piece5"
   [5]=>
-  unicode(6) "piece6"
+  string(6) "piece6"
 }
 -- Iteration 6 --
 array(0) {
@@ -145,17 +145,17 @@ array(0) {
 -- Iteration 7 --
 array(6) {
   [0]=>
-  unicode(6) "piece1"
+  string(6) "piece1"
   [1]=>
-  unicode(6) "piece2"
+  string(6) "piece2"
   [2]=>
-  unicode(6) "piece3"
+  string(6) "piece3"
   [3]=>
-  unicode(6) "piece4"
+  string(6) "piece4"
   [4]=>
-  unicode(6) "piece5"
+  string(6) "piece5"
   [5]=>
-  unicode(6) "piece6"
+  string(6) "piece6"
 }
 -- Iteration 8 --
 array(0) {
@@ -163,17 +163,17 @@ array(0) {
 -- Iteration 9 --
 array(6) {
   [0]=>
-  unicode(6) "piece1"
+  string(6) "piece1"
   [1]=>
-  unicode(6) "piece2"
+  string(6) "piece2"
   [2]=>
-  unicode(6) "piece3"
+  string(6) "piece3"
   [3]=>
-  unicode(6) "piece4"
+  string(6) "piece4"
   [4]=>
-  unicode(6) "piece5"
+  string(6) "piece5"
   [5]=>
-  unicode(6) "piece6"
+  string(6) "piece6"
 }
 -- Iteration 10 --
 
@@ -190,32 +190,32 @@ NULL
 -- Iteration 13 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 14 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 15 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 16 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 17 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 18 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 19 --
 
@@ -228,11 +228,11 @@ NULL
 -- Iteration 21 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
 -- Iteration 22 --
 array(1) {
   [0]=>
-  unicode(41) "piece1 piece2 piece3 piece4 piece5 piece6"
+  string(41) "piece1 piece2 piece3 piece4 piece5 piece6"
 }
-===DONE===
+===Done===

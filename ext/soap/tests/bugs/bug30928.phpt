@@ -45,19 +45,19 @@ echo "ok\n";
 ?>
 --EXPECTF--
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b"]=>
-  unicode(1) "b"
-  [u"c"]=>
-  unicode(1) "c"
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
 }
 object(foo)#%d (3) {
-  [u"a"]=>
-  unicode(1) "a"
-  [u"b":u"foo":private]=>
-  unicode(1) "b"
-  [u"c":protected]=>
-  unicode(1) "c"
+  ["a"]=>
+  string(1) "a"
+  ["b":"foo":private]=>
+  string(1) "b"
+  ["c":protected]=>
+  string(1) "c"
 }
 ok

@@ -1,7 +1,7 @@
 --TEST--
 SPL: ArrayIterator and foreach reference
 --INI--
-error_reporting=2047
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Test usort() function : object functionality - different number of properties
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -89,22 +89,22 @@ bool(true)
 array(4) {
   [0]=>
   object(SimpleClass1)#%d (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(1)
   }
   [1]=>
   object(SimpleClass1)#%d (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(10)
   }
   [2]=>
   object(SimpleClass1)#%d (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(50)
   }
   [3]=>
   object(SimpleClass1)#%d (1) {
-    [u"int_value":u"SimpleClass1":private]=>
+    ["int_value":"SimpleClass1":private]=>
     int(100)
   }
 }
@@ -112,30 +112,30 @@ bool(true)
 array(3) {
   [0]=>
   object(SimpleClass2)#%d (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(2)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(3.4)
-    [u"string_value"]=>
-    unicode(5) "mango"
+    ["string_value"]=>
+    string(5) "mango"
   }
   [1]=>
   object(SimpleClass2)#%d (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(5)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(2.5)
-    [u"string_value"]=>
-    unicode(6) "orange"
+    ["string_value"]=>
+    string(6) "orange"
   }
   [2]=>
   object(SimpleClass2)#%d (3) {
-    [u"int_value":u"SimpleClass2":private]=>
+    ["int_value":"SimpleClass2":private]=>
     int(10)
-    [u"float_value":protected]=>
+    ["float_value":protected]=>
     float(1.2)
-    [u"string_value"]=>
-    unicode(5) "apple"
+    ["string_value"]=>
+    string(5) "apple"
   }
 }
 ===DONE===

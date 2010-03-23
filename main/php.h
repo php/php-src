@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20070116
+#define PHP_API_VERSION 20090626
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
@@ -182,12 +182,9 @@ typedef unsigned int socklen_t;
 #endif
 
 #include "zend_hash.h"
+#include "php3_compat.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
-
-/* PHP3 Legacy */
-typedef zval pval;
-#define function_entry          zend_function_entry
 
 #if STDC_HEADERS
 # include <string.h>
@@ -199,6 +196,8 @@ typedef zval pval;
 #  define memmove(d, s, n)	bcopy ((s), (d), (n))
 # endif
 #endif
+
+#include "safe_mode.h"
 
 #ifndef HAVE_STRERROR
 char *strerror(int);
@@ -278,9 +277,10 @@ ssize_t pread(int, void *, size_t, off64_t);
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
-PHPAPI int php_printf(const char *format, ...);
+PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
+		2);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
-int Debug(char *format, ...);
+int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()
 
@@ -294,7 +294,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_set_error_handling(error_handli
 }
 static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC);
+PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 #ifdef ZTS
 #define PHP_ATTR_FMT_OFFSET 1
@@ -303,10 +303,12 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 #endif
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...);
-PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...);
-
-PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...);
+PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
+PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
+PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
+	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
 #ifdef PHP_WIN32
 PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2 TSRMLS_DC);
 #endif
@@ -378,12 +380,26 @@ END_EXTERN_C()
 #define PHP_MINFO_FUNCTION		ZEND_MODULE_INFO_D
 #define PHP_GINIT_FUNCTION		ZEND_GINIT_FUNCTION
 #define PHP_GSHUTDOWN_FUNCTION	ZEND_GSHUTDOWN_FUNCTION
-
+ 
 #define PHP_MODULE_GLOBALS		ZEND_MODULE_GLOBALS
+
 
 /* Output support */
 #include "main/php_output.h"
+#define PHPWRITE(str, str_len)		php_body_write((str), (str_len) TSRMLS_CC)
+#define PUTS(str)					do {			\
+	const char *__str = (str);						\
+	php_body_write(__str, strlen(__str) TSRMLS_CC);	\
+} while (0)
 
+#define PUTC(c)						(php_body_write(&(c), 1 TSRMLS_CC), (c))
+#define PHPWRITE_H(str, str_len)	php_header_write((str), (str_len) TSRMLS_CC)
+#define PUTS_H(str)					do {				\
+	const char *__str = (str);							\
+	php_header_write(__str, strlen(__str) TSRMLS_CC);	\
+} while (0)
+
+#define PUTC_H(c)					(php_header_write(&(c), 1 TSRMLS_CC), (c))
 
 #include "php_streams.h"
 #include "php_memory_streams.h"

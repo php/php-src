@@ -14,8 +14,7 @@ if(fileowner($filename) == 0) {
         die('skip cannot be run as root');
 }
 
-unlink($filename);
-
+unlink ($filename);
 ?>
 --FILE--
 <?php
@@ -86,7 +85,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_writable_variation2/");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() on directory without write permission ***

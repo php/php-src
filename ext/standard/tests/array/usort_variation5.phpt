@@ -2,7 +2,7 @@
 Test usort() function : usage variations - string data
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -81,63 +81,63 @@ var_dump($heredoc_values);
 bool(true)
 array(10) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(1) " "
+  string(1) " "
   [2]=>
-  unicode(1) "'"
+  string(1) "'"
   [3]=>
-  unicode(1) "0"
+  string(1) "0"
   [4]=>
-  unicode(8) "123Hello"
+  string(8) "123Hello"
   [5]=>
-  unicode(4) "@#$%"
+  string(4) "@#$%"
   [6]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [7]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [8]=>
-  unicode(2) "\t"
+  string(2) "\t"
   [9]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 
 -- Sorting Double Quoted String values --
 bool(true)
 array(10) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(1) "	"
+  string(1) "	"
   [2]=>
-  unicode(1) " "
+  string(1) " "
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(1) "0"
+  string(1) "0"
   [5]=>
-  unicode(8) "123Hello"
+  string(8) "123Hello"
   [6]=>
-  unicode(4) "@#$%"
+  string(4) "@#$%"
   [7]=>
-  unicode(5) "HELLO"
+  string(5) "HELLO"
   [8]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [9]=>
-  unicode(4) "test"
+  string(4) "test"
 }
 
 -- Sorting Heredoc String values --
 bool(true)
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(7) "HEREDOC"
+  string(7) "HEREDOC"
   [2]=>
-  unicode(7) "Heredoc"
+  string(7) "Heredoc"
   [3]=>
-  unicode(%d) "heredoc string	with!@# and 123
+  string(%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
 ===DONE===

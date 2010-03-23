@@ -40,14 +40,14 @@ echo "Done\n";
 --EXPECTF--
 Status: 403 Forbidden
 X-Powered-By: PHP/%s
-Content-type: text/html%s
+Content-type: text/html
 
 Status: 403 Forbidden
 X-Powered-By: PHP/%s
-Content-type: text/html%s
+Content-type: text/html
 
 X-Powered-By: PHP/%s
 Status: 403 Also Forbidden
-Content-type: text/html%s
+Content-type: text/html
 
 Done

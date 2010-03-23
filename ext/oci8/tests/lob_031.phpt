@@ -20,10 +20,10 @@ $blob = oci_new_descriptor($c,OCI_D_LOB);
 oci_bind_by_name($statement,":v_blob", $blob,-1,OCI_B_BLOB);
 oci_execute($statement, OCI_DEFAULT);
 
-$blob->write(b"test");
+$blob->write("test");
 $blob->tell();
 $blob->seek(10, OCI_SEEK_CUR);
-$blob->write(b"string");
+$blob->write("string");
 $blob->flush();
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name;

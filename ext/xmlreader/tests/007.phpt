@@ -1,15 +1,12 @@
 --TEST--
 XMLReader: libxml2 XML Reader, setRelaxNGSchema
 --SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip";
-$reader = new XMLReader();
-if (!method_exists($reader, 'setRelaxNGSchema')) print "skip";
-?>
+<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
 <?php 
 /* $Id$ */
 
-$xmlstring = b'<TEI.2>hello</TEI.2>';
+$xmlstring = '<TEI.2>hello</TEI.2>';
 $relaxngfile = dirname(__FILE__) . '/relaxNG.rng'; 
 $file = dirname(__FILE__) . '/__007.xml';
 file_put_contents($file, $xmlstring);

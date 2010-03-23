@@ -1,5 +1,5 @@
 --TEST--
-Test sizeof() function : object functionality - objects without Countable interface 
+Test sizeof() function : object functionality - objects without Countable interface
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode] )
@@ -97,7 +97,7 @@ for($i = 0; $i < count($objects); $i++)
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sizeof() : object functionality ***
 --- Testing sizeof() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --

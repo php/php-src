@@ -26,13 +26,13 @@ $id = 1;
 oci_execute($stmt, OCI_DEFAULT);
 $fileimage->savefile(dirname(__FILE__)."/test.gif");
 $data = $fileimage->load();
-var_dump(md5((binary)$data));  // original md5
+var_dump(md5($data));  // original md5
 oci_commit($c);
 
 // New row with different data
 $id = 2;
 $data = strrev($data);
-var_dump(md5((binary)$data));
+var_dump(md5($data));
 oci_execute($stmt, OCI_DEFAULT);
 $fileimage->save($data);
 oci_commit($c);
@@ -82,34 +82,31 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-unicode(32) "614fcbba1effb7caa27ef0ef25c27fcf"
-unicode(32) "06d4f219d946c74d748d43932cd9dcb2"
+string(32) "614fcbba1effb7caa27ef0ef25c27fcf"
+string(32) "06d4f219d946c74d748d43932cd9dcb2"
 Test 1
 bool(true)
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 file md5:614fcbba1effb7caa27ef0ef25c27fcf
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 file md5:06d4f219d946c74d748d43932cd9dcb2
 Test 2
 bool(true)
 
-Warning: oci_fetch(): ORA-00932: inconsistent datatypes%s in %s on line %d
+Warning: oci_fetch(): ORA-00932: %s on line %d
 Test 3
 bool(true)
-
-Warning: md5(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received in %s on line %d
-file md5:
-
-Warning: md5(): Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received in %s on line %d
-file md5:
+file md5:614fcbba1effb7caa27ef0ef25c27fcf
+file md5:06d4f219d946c74d748d43932cd9dcb2
 Test 4
 bool(true)
 file md5:614fcbba1effb7caa27ef0ef25c27fcf
 file md5:06d4f219d946c74d748d43932cd9dcb2
 Done
+

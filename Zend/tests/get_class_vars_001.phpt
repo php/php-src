@@ -22,12 +22,12 @@ var_dump(get_class_vars('B'));
 ?>
 --EXPECT--
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"aa"]=>
+  ["aa"]=>
   int(4)
 }

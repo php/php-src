@@ -23,69 +23,69 @@ var_dump(exif_read_data(dirname(__FILE__).'/test3.jpg','',true,false));
 ?>
 --EXPECTF--
 array(5) {
-  [u"FILE"]=>
+  ["FILE"]=>
   array(6) {
-    [u"FileName"]=>
-    unicode(9) "test3.jpg"
-    [u"FileDateTime"]=>
+    ["FileName"]=>
+    string(9) "test3.jpg"
+    ["FileDateTime"]=>
     int(%s)
-    [u"FileSize"]=>
+    ["FileSize"]=>
     int(1240)
-    [u"FileType"]=>
+    ["FileType"]=>
     int(2)
-    [u"MimeType"]=>
-    unicode(10) "image/jpeg"
-    [u"SectionsFound"]=>
-    unicode(33) "ANY_TAG, IFD0, THUMBNAIL, COMMENT"
+    ["MimeType"]=>
+    string(10) "image/jpeg"
+    ["SectionsFound"]=>
+    string(33) "ANY_TAG, IFD0, THUMBNAIL, COMMENT"
   }
-  [u"COMPUTED"]=>
+  ["COMPUTED"]=>
   array(12) {
-    [u"html"]=>
-    unicode(20) "width="1" height="1""
-    [u"Height"]=>
+    ["html"]=>
+    string(20) "width="1" height="1""
+    ["Height"]=>
     int(1)
-    [u"Width"]=>
+    ["Width"]=>
     int(1)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
-    [u"ByteOrderMotorola"]=>
+    ["ByteOrderMotorola"]=>
     int(1)
-    [u"UserComment"]=>
-    unicode(7) "Ã„Ã–ÃœÃŸÃ¤Ã¶Ã¼"
-    [u"UserCommentEncoding"]=>
-    unicode(7) "UNICODE"
-    [u"Copyright"]=>
-    unicode(41) "Photo (c) M.Boerger, Edited by M.Boerger."
-    [u"Copyright.Photographer"]=>
-    unicode(19) "Photo (c) M.Boerger"
-    [u"Copyright.Editor"]=>
-    unicode(20) "Edited by M.Boerger."
-    [u"Thumbnail.FileType"]=>
+    ["UserComment"]=>
+    string(7) "ÄÖÜßäöü"
+    ["UserCommentEncoding"]=>
+    string(7) "UNICODE"
+    ["Copyright"]=>
+    string(41) "Photo (c) M.Boerger, Edited by M.Boerger."
+    ["Copyright.Photographer"]=>
+    string(19) "Photo (c) M.Boerger"
+    ["Copyright.Editor"]=>
+    string(20) "Edited by M.Boerger."
+    ["Thumbnail.FileType"]=>
     int(2)
-    [u"Thumbnail.MimeType"]=>
-    unicode(10) "image/jpeg"
+    ["Thumbnail.MimeType"]=>
+    string(10) "image/jpeg"
   }
-  [u"IFD0"]=>
+  ["IFD0"]=>
   array(2) {
-    [u"Copyright"]=>
-    unicode(19) "Photo (c) M.Boerger"
-    [u"UserComment"]=>
-    unicode(7) "UNICODE"
+    ["Copyright"]=>
+    string(19) "Photo (c) M.Boerger"
+    ["UserComment"]=>
+    string(7) "UNICODE"
   }
-  [u"THUMBNAIL"]=>
+  ["THUMBNAIL"]=>
   array(2) {
-    [u"JPEGInterchangeFormat"]=>
+    ["JPEGInterchangeFormat"]=>
     int(134)
-    [u"JPEGInterchangeFormatLength"]=>
+    ["JPEGInterchangeFormatLength"]=>
     int(523)
   }
-  [u"COMMENT"]=>
+  ["COMMENT"]=>
   array(3) {
     [0]=>
-    unicode(11) "Comment #1."
+    string(11) "Comment #1."
     [1]=>
-    unicode(11) "Comment #2."
+    string(11) "Comment #2."
     [2]=>
-    unicode(13) "Comment #3end"
+    string(13) "Comment #3end"
   }
 }

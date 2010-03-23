@@ -12,7 +12,7 @@ Test strncmp() function: usage variations - double quoted strings
 echo "*** Test strncmp() function: with double quoted strings ***\n";
 $strings = array(
   "Hello, World",
-  b"hello, world",
+  "hello, world",
   "HELLO, WORLD",
   "Hello, World\n",
   "Hello".chr(0)."World"
@@ -30,7 +30,7 @@ echo "*** Done ***\n";
 ?>
 --EXPECTREGEX--
 \*\*\* Test strncmp\(\) function: with double quoted strings \*\*\*
--- Iteration [1-9][0-9]* --
+-- Iteration 1 --
 int\(0\)
 int\(-[1-9][0-9]*\)
 int\([1-9][0-9]*\)

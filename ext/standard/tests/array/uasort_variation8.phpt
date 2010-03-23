@@ -19,7 +19,7 @@ $array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple", "p" => "Pine
 $builtin_fun_arg = $array_arg;
 $languageConstruct_fun_arg = $array_arg;
 
-// Testing library functions as comparison function
+// Testing library functions as comparison function 
 echo "-- Testing uasort() with built-in 'cmp_function': strcasecmp() --\n";
 var_dump( uasort($builtin_fun_arg, 'strcasecmp') );  // expecting: bool(true)
 var_dump($builtin_fun_arg);
@@ -42,30 +42,30 @@ echo "Done"
 -- Testing uasort() with built-in 'cmp_function': strcasecmp() --
 bool(true)
 array(5) {
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"b"]=>
-  unicode(6) "Banana"
-  [u"m"]=>
-  unicode(5) "Mango"
-  [u"o"]=>
-  unicode(6) "orange"
-  [u"p"]=>
-  unicode(9) "Pineapple"
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "Banana"
+  ["m"]=>
+  string(5) "Mango"
+  ["o"]=>
+  string(6) "orange"
+  ["p"]=>
+  string(9) "Pineapple"
 }
 -- Testing uasort() with built-in 'cmp_function': strcmp() --
 bool(true)
 array(5) {
-  [u"b"]=>
-  unicode(6) "Banana"
-  [u"m"]=>
-  unicode(5) "Mango"
-  [u"p"]=>
-  unicode(9) "Pineapple"
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"o"]=>
-  unicode(6) "orange"
+  ["b"]=>
+  string(6) "Banana"
+  ["m"]=>
+  string(5) "Mango"
+  ["p"]=>
+  string(9) "Pineapple"
+  ["a"]=>
+  string(5) "apple"
+  ["o"]=>
+  string(6) "orange"
 }
 -- Testing uasort() with language construct as 'cmp_function' --
 

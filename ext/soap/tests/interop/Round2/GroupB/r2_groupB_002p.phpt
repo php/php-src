@@ -2,6 +2,8 @@
 SOAP Interop Round2 groupB 002 (php/direct): echoSimpleTypesAsStruct
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+precision=14
 --FILE--
 <?php
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));

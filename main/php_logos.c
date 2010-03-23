@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -85,7 +85,7 @@ int php_info_logos(const char *logo_string TSRMLS_DC)
 	content_header[len] = '\0';
 	sapi_add_header(content_header, len, 0);
 
-	PHPWRITE((char*)logo_image->data, logo_image->size);
+	PHPWRITE(logo_image->data, logo_image->size);
 	return 1;
 }
 

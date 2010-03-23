@@ -11,7 +11,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
@@ -156,115 +156,115 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIAL
 
 ?>
 --EXPECTF--
-unicode(1) "3"
+string(1) "3"
 array(3) {
   [0]=>
-  unicode(8) "stdClass"
+  string(8) "stdClass"
   [1]=>
-  unicode(8) "TestBase"
+  string(8) "TestBase"
   [2]=>
-  unicode(11) "TestDerived"
+  string(11) "TestDerived"
 }
 ===TYPES===
 array(4) {
-  [u"stdClass"]=>
-  unicode(1) "0"
-  [u"TestBase"]=>
-  unicode(1) "1"
-  [u"TestDerived"]=>
-  unicode(1) "2"
-  [u"TestLeaf"]=>
+  ["stdClass"]=>
+  string(1) "0"
+  ["TestBase"]=>
+  string(1) "1"
+  ["TestDerived"]=>
+  string(1) "2"
+  ["TestLeaf"]=>
   NULL
 }
 ===INSERT===
 TestBase::serialize() = 'a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}'
 TestDerived::serialize()
-TestBase::serialize() = 'a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}'
+TestBase::serialize() = 'a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}'
 TestDerived::serialize()
-TestBase::serialize() = 'a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}'
+TestBase::serialize() = 'a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}'
 ===DATA===
 array(4) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
+  string(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   [2]=>
-  unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+  string(172) "a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   [3]=>
-  unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+  string(172) "a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
 }
 ===FAILURE===
 Exception:SQLSTATE[HY000]: General error: cannot unserialize class
 ===COUNT===
-unicode(1) "3"
+string(1) "3"
 ===DATABASE===
 array(3) {
   [0]=>
   array(2) {
-    [u"name"]=>
-    unicode(8) "TestBase"
-    [u"val"]=>
-    unicode(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
+    ["name"]=>
+    string(8) "TestBase"
+    ["val"]=>
+    string(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   }
   [1]=>
   array(2) {
-    [u"name"]=>
-    unicode(11) "TestDerived"
-    [u"val"]=>
-    unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+    ["name"]=>
+    string(11) "TestDerived"
+    ["val"]=>
+    string(172) "a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   }
   [2]=>
   array(2) {
-    [u"name"]=>
+    ["name"]=>
     NULL
-    [u"val"]=>
-    unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+    ["val"]=>
+    string(172) "a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   }
 }
 ===FETCHCLASS===
 TestBase::unserialize(a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";})
 TestDerived::unserialize()
-TestBase::unserialize(a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";})
+TestBase::unserialize(a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";})
 TestDerived::unserialize()
-TestBase::unserialize(a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";})
+TestBase::unserialize(a:5:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";s:7:"BasePri";s:7:"Private";})
 array(3) {
   [0]=>
   object(TestBase)#%d (3) {
-    [u"BasePub"]=>
-    unicode(7) "#Public"
-    [u"BasePro":protected]=>
-    unicode(10) "#Protected"
-    [u"BasePri":u"TestBase":private]=>
-    unicode(8) "#Private"
+    ["BasePub"]=>
+    string(7) "#Public"
+    ["BasePro":protected]=>
+    string(10) "#Protected"
+    ["BasePri":"TestBase":private]=>
+    string(8) "#Private"
   }
   [1]=>
   object(TestDerived)#%d (6) {
-    [u"BasePub"]=>
-    unicode(14) "#DerivedPublic"
-    [u"BasePro":protected]=>
-    unicode(17) "#DerivdeProtected"
-    [u"DerivedPub"]=>
-    unicode(7) "#Public"
-    [u"DerivedPro":protected]=>
-    unicode(10) "#Protected"
-    [u"DerivedPri":u"TestDerived":private]=>
-    unicode(7) "Private"
-    [u"BasePri":u"TestBase":private]=>
-    unicode(7) "Private"
+    ["BasePub"]=>
+    string(14) "#DerivedPublic"
+    ["BasePro":protected]=>
+    string(17) "#DerivdeProtected"
+    ["DerivedPub"]=>
+    string(7) "#Public"
+    ["DerivedPro":protected]=>
+    string(10) "#Protected"
+    ["DerivedPri":"TestDerived":private]=>
+    string(7) "Private"
+    ["BasePri":"TestBase":private]=>
+    string(8) "#Private"
   }
   [2]=>
   object(TestLeaf)#%d (6) {
-    [u"BasePub"]=>
-    unicode(14) "#DerivedPublic"
-    [u"BasePro":protected]=>
-    unicode(17) "#DerivdeProtected"
-    [u"DerivedPub"]=>
-    unicode(7) "#Public"
-    [u"DerivedPro":protected]=>
-    unicode(10) "#Protected"
-    [u"DerivedPri":u"TestDerived":private]=>
-    unicode(7) "Private"
-    [u"BasePri":u"TestBase":private]=>
-    unicode(7) "Private"
+    ["BasePub"]=>
+    string(14) "#DerivedPublic"
+    ["BasePro":protected]=>
+    string(17) "#DerivdeProtected"
+    ["DerivedPub"]=>
+    string(7) "#Public"
+    ["DerivedPro":protected]=>
+    string(10) "#Protected"
+    ["DerivedPri":"TestDerived":private]=>
+    string(7) "Private"
+    ["BasePri":"TestBase":private]=>
+    string(8) "#Private"
   }
 }

@@ -43,7 +43,7 @@ for($i =0; $i < count($values); $i ++)
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_fill() : variation ***
 *** Filling 2 dimensional array with all basic valid values ***
 -- Iteration 1 --
@@ -119,16 +119,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(2) "hi"
+    string(2) "hi"
     [1]=>
-    unicode(2) "hi"
+    string(2) "hi"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(2) "hi"
+    string(2) "hi"
     [1]=>
-    unicode(2) "hi"
+    string(2) "hi"
   }
 }
 -- Iteration 6 --
@@ -136,16 +136,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(2) "hi"
+    string(2) "hi"
     [1]=>
-    unicode(2) "hi"
+    string(2) "hi"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(2) "hi"
+    string(2) "hi"
     [1]=>
-    unicode(2) "hi"
+    string(2) "hi"
   }
 }
 -- Iteration 7 --
@@ -153,16 +153,16 @@ array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
     [1]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
     [1]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
   }
 }
 Done

@@ -61,7 +61,7 @@ Reflecting on method DerivedClass::foo()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(18)
@@ -75,7 +75,7 @@ Reflecting on method TestClass::stat()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(26)
@@ -89,7 +89,7 @@ Reflecting on method TestClass::priv()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(30)
@@ -103,7 +103,7 @@ Reflecting on method TestClass::prot()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(34)
@@ -117,7 +117,7 @@ Reflecting on method DerivedClass::prot()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(34)
@@ -131,7 +131,7 @@ Reflecting on method TestInterface::int()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(42)
@@ -159,7 +159,7 @@ Reflecting on method TestClass::__destruct()
 
 
 getFileName():
-unicode(%d) "%sReflectionMethod_basic4.php"
+string(%d) "%sReflectionMethod_basic4.php"
 
 getStartLine():
 int(36)

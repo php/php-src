@@ -61,7 +61,7 @@ unlink($file3);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing filetype() with various types ***
 -- Checking with files --
 file

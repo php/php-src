@@ -25,19 +25,17 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
-#include "zend_dtrace.h"
 
-ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
 	ALLOC_HASHTABLE(object->properties);
-	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	object->ce = ce;	
 	object->guards = NULL;
 }
-/* }}} */
 
-ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC) /* {{{ */
+ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 {
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
@@ -48,28 +46,11 @@ ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC) /* {{{ */
 		FREE_HASHTABLE(object->properties);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	zend_function *destructor = object ? object->ce->destructor : NULL;
 
-#ifdef HAVE_DTRACE
-	if (DTRACE_OBJECT_DESTROY_ENABLED()) {
-		char *s_classname, *filename;
-		int s_classname_len, lineno;
-
-		filename = dtrace_get_executed_filename(TSRMLS_C);
-		lineno = zend_get_executed_lineno(TSRMLS_C);
-		if (u_strlen(object->ce->name.u) > 0) {
-			zend_unicode_to_string(ZEND_U_CONVERTER(UG(utf8_conv)), &s_classname, &s_classname_len, object->ce->name.u, u_strlen(object->ce->name.u) TSRMLS_CC);
-		}
-		DTRACE_OBJECT_DESTROY(s_classname, filename, lineno);
-		if (s_classname != NULL) {
-			efree(s_classname);
-		}
-	}
-#endif /* HAVE_DTRACE */
 	if (destructor) {
 		zval *obj;
 		zend_object_store_bucket *obj_bucket;
@@ -81,10 +62,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
-						"Call to private %v::__destruct() from context '%v'%s",
-						ce->name,
-						EG(scope) ? EG(scope)->name : EMPTY_ZSTR,
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
+						"Call to private %s::__destruct() from context '%s'%s", 
+						ce->name, 
+						EG(scope) ? EG(scope)->name : "", 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -94,10 +75,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
-						"Call to protected %v::__destruct() from context '%v'%s",
-						ce->name,
-						EG(scope) ? EG(scope)->name : EMPTY_ZSTR,
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
+						"Call to protected %s::__destruct() from context '%s'%s", 
+						ce->name, 
+						EG(scope) ? EG(scope)->name : "", 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -127,22 +108,15 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		zval_ptr_dtor(&obj);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 {
-	if (object->guards) {
-		zend_hash_destroy(object->guards);
-		FREE_HASHTABLE(object->guards);
-	}
-	zend_hash_destroy(object->properties);
-	FREE_HASHTABLE(object->properties);
+	zend_object_std_dtor(object TSRMLS_CC);
 	efree(object);
 }
-/* }}} */
 
-ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC) /* {{{ */
-{
+ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
+{	
 	zend_object_value retval;
 
 	*object = emalloc(sizeof(zend_object));
@@ -152,23 +126,22 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	(*object)->guards = NULL;
 	return retval;
 }
-/* }}} */
 
-ZEND_API zend_object *zend_objects_get_address(const zval *zobject TSRMLS_DC) /* {{{ */
+ZEND_API zend_object *zend_objects_get_address(const zval *zobject TSRMLS_DC)
 {
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
-/* }}} */
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
 {
 	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+
 	if (old_object->ce->clone) {
 		zval *new_obj;
 
 		MAKE_STD_ZVAL(new_obj);
-		Z_TYPE_P(new_obj) = IS_OBJECT;
-		Z_OBJVAL_P(new_obj) = new_obj_val;
+		new_obj->type = IS_OBJECT;
+		new_obj->value.obj = new_obj_val;
 		zval_copy_ctor(new_obj);
 
 		zend_call_method_with_0_params(&new_obj, old_object->ce, &old_object->ce->clone, ZEND_CLONE_FUNC_NAME, NULL);
@@ -176,28 +149,26 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval_ptr_dtor(&new_obj);
 	}
 }
-/* }}} */
 
-ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC) /* {{{ */
+ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value new_obj_val;
 	zend_object *old_object;
 	zend_object *new_object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	/* assume that create isn't overwritten, so when clone depends on the
+	/* assume that create isn't overwritten, so when clone depends on the 
 	 * overwritten one then it must itself be overwritten */
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
 
 	ALLOC_HASHTABLE(new_object->properties);
-	zend_u_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
+	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
 
 	return new_obj_val;
 }
-/* }}} */
 
 /*
  * Local variables:

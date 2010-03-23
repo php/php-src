@@ -15,7 +15,7 @@ echo TestClass::getClassName() . "\n";
 echo ChildClass::getClassName() . "\n";
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 TestClass
 ChildClass
 ==DONE==

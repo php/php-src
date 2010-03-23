@@ -5,7 +5,7 @@ SimpleXML: Text data
 --FILE--
 <?php 
 
-$sxe = simplexml_load_string(b<<<EOF
+$sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -34,7 +34,7 @@ echo "---Done---\n";
 
 ?>
 --EXPECT--
-unicode(28) "Here we have some text data."
-unicode(19) "And here some more."
-unicode(15) "Wow once again."
+string(28) "Here we have some text data."
+string(19) "And here some more."
+string(15) "Wow once again."
 ---Done--- 

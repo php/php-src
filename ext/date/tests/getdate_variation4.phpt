@@ -37,104 +37,104 @@ foreach($inputs as $key =>$value) {
 
 --01 Jan 1970--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --01 Jan 1971--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(5)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1971)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(6) "Friday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(6) "Friday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(31536000)
 }
 
 --01 Jan 1972--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(6)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1972)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Saturday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Saturday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(63072000)
 }
 
 --01 Jan 1973--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(1)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1973)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(6) "Monday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(6) "Monday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(94694400)
 }

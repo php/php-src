@@ -146,22 +146,22 @@ bool(false)
 
 -- empty array --
 
-Warning: timezone_open() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: timezone_open() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: timezone_open() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: timezone_open() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -231,7 +231,7 @@ bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: timezone_open() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -246,6 +246,6 @@ bool(false)
 
 -- resource --
 
-Warning: timezone_open() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: timezone_open() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

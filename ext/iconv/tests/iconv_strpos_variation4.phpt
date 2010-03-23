@@ -103,8 +103,9 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
+
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***
 
@@ -201,6 +202,6 @@ int(7)
 
 -- Iteration 24 --
 
-Warning: iconv_strpos() expects parameter 4 to be binary string, resource given in %s on line %d
+Warning: iconv_strpos() expects parameter 4 to be string, resource given in %s on line %d
 bool(false)
-===DONE===
+Done

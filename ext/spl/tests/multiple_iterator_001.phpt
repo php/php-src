@@ -139,7 +139,7 @@ array(3) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 RuntimeException thrown: Called current() with non valid sub iterator
 RuntimeException thrown: Called key() with non valid sub iterator
@@ -176,7 +176,7 @@ array(3) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(3) {
   [0]=>
@@ -226,7 +226,7 @@ array(3) {
   [1]=>
   int(2)
   [2]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(3) {
   [0]=>
@@ -248,7 +248,7 @@ array(3) {
 InvalidArgumentException thrown: Sub-Iterator is associated with NULL
 -- Flags |= MultipleIterator::MIT_KEYS_ASSOC --
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(0)
   ["iter2"]=>
   int(0)
@@ -256,7 +256,7 @@ array(3) {
   int(0)
 }
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(1)
   ["iter2"]=>
   int(1)
@@ -265,7 +265,7 @@ array(3) {
   }
 }
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(1)
   ["iter2"]=>
   int(1)
@@ -273,15 +273,15 @@ array(3) {
   int(1)
 }
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(2)
   ["iter2"]=>
   int(2)
   [3]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(2)
   ["iter2"]=>
   int(2)
@@ -289,7 +289,7 @@ array(3) {
   int(2)
 }
 array(3) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(3)
   ["iter2"]=>
   int(3)
@@ -307,38 +307,38 @@ NULL
 int(2)
 bool(false)
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(0)
   [3]=>
   int(0)
 }
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(1)
   [3]=>
   object(stdClass)#%d (0) {
   }
 }
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(1)
   [3]=>
   int(1)
 }
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(2)
   [3]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(2)
   [3]=>
   int(2)
 }
 array(2) {
-  [u"iter1"]=>
+  ["iter1"]=>
   int(3)
   [3]=>
   int(3)

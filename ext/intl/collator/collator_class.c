@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,7 +88,6 @@ zend_object_value Collator_object_create(
        modify approptiate 'collator_XX_args' for
        the procedural API.
 */
-
 ZEND_BEGIN_ARG_INFO_EX( collator_0_args, 0, 0, 0 )
 ZEND_END_ARG_INFO()
 

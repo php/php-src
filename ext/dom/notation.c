@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -58,9 +58,9 @@ int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (nodep->ExternalID) {
-		ZVAL_XML_STRING(*retval, (char *) (nodep->ExternalID), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (nodep->ExternalID), 1);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 
 	return SUCCESS;
@@ -86,9 +86,9 @@ int dom_notation_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (nodep->SystemID) {
-		ZVAL_XML_STRING(*retval, (char *) (nodep->SystemID), ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, (char *) (nodep->SystemID), 1);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 
 	return SUCCESS;

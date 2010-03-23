@@ -31,6 +31,7 @@ if (!$zip->open($file)) {
 	exit('failed');
 }
 
+
 var_dump($zip->locateName('entry1.txt'));
 var_dump($zip->locateName('eNtry2.txt'));
 var_dump($zip->locateName('eNtry2.txt', ZIPARCHIVE::FL_NOCASE));

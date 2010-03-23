@@ -124,23 +124,23 @@ int(0)
 int(0)
 -- Iteration 11 --
 
-Warning: strncmp() expects parameter 3 to be long, array given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strncmp() expects parameter 3 to be long, array given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: strncmp() expects parameter 3 to be long, array given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: strncmp() expects parameter 3 to be long, array given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
 NULL
 -- Iteration 15 --
 
-Warning: strncmp() expects parameter 3 to be long, array given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, array given in%s on line %d
 NULL
 -- Iteration 16 --
 int(0)
@@ -156,11 +156,11 @@ int(0)
 int(0)
 -- Iteration 22 --
 
-Warning: strncmp() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, string given in%s on line %d
 NULL
 -- Iteration 23 --
 
-Warning: strncmp() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, string given in%s on line %d
 NULL
 -- Iteration 24 --
 int(0)
@@ -168,10 +168,10 @@ int(0)
 int(0)
 -- Iteration 26 --
 
-Warning: strncmp() expects parameter 3 to be long, resource given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, resource given in%s on line %d
 NULL
 -- Iteration 27 --
 
-Warning: strncmp() expects parameter 3 to be long, object given in %s on line %d
+Warning: strncmp() expects parameter 3 to be long, object given in%s on line %d
 NULL
 *** Done ***

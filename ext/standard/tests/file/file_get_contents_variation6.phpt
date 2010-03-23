@@ -1,7 +1,5 @@
 --TEST--
 Test file_get_contents() function : usage variation 
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -121,27 +119,27 @@ unlink($absFile);
 *** Testing file_get_contents() : usage variation ***
 
 --int 0--
-unicode(%d) ""
+string(%d) ""
 
 --int 1--
-unicode(%d) "c"
+string(%d) "c"
 
 --int 12345--
-unicode(%d) "contents read"
+string(%d) "contents read"
 
 --int -12345--
 Error: 2 - file_get_contents(): length must be greater than or equal to zero, %s(%d)
 bool(false)
 
 --float 10.5--
-unicode(%d) "contents r"
+string(%d) "contents r"
 
 --float -10.5--
 Error: 2 - file_get_contents(): length must be greater than or equal to zero, %s(%d)
 bool(false)
 
 --float .5--
-unicode(%d) ""
+string(%d) ""
 
 --empty array--
 Error: 2 - file_get_contents() expects parameter 5 to be long, array given, %s(%d)
@@ -160,45 +158,45 @@ Error: 2 - file_get_contents() expects parameter 5 to be long, array given, %s(%
 NULL
 
 --uppercase NULL--
-unicode(%d) ""
+string(%d) ""
 
 --lowercase null--
-unicode(%d) ""
+string(%d) ""
 
 --lowercase true--
-unicode(%d) "c"
+string(%d) "c"
 
 --lowercase false--
-unicode(%d) ""
+string(%d) ""
 
 --uppercase TRUE--
-unicode(%d) "c"
+string(%d) "c"
 
 --uppercase FALSE--
-unicode(%d) ""
+string(%d) ""
 
 --empty string DQ--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - file_get_contents() expects parameter 5 to be long, Unicode string given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 5 to be long, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
@@ -210,8 +208,8 @@ Error: 2 - file_get_contents() expects parameter 5 to be long, object given, %s(
 NULL
 
 --undefined var--
-unicode(%d) ""
+string(%d) ""
 
 --unset var--
-unicode(%d) ""
+string(%d) ""
 ===DONE===

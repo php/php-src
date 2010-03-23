@@ -82,23 +82,23 @@ echo "Done";
 
 Before serialization:
 object(A)#%d (3) {
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "A.AProt"
-  [u"APub"]=>
-  unicode(6) "A.APub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
+  ["AProt":protected]=>
+  string(7) "A.AProt"
+  ["APub"]=>
+  string(6) "A.APub"
 }
 Serialized form:
-unicode(98) "O:1:"A":3:{U:8:"\0A\0APriv";U:7:"A.APriv";U:8:"\0*\0AProt";U:7:"A.AProt";U:4:"APub";U:6:"A.APub";}"
+string(98) "O:1:"A":3:{s:8:"\0A\0APriv";s:7:"A.APriv";s:8:"\0*\0AProt";s:7:"A.AProt";s:4:"APub";s:6:"A.APub";}"
 Unserialized:
 object(A)#%d (3) {
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "A.AProt"
-  [u"APub"]=>
-  unicode(6) "A.APub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
+  ["AProt":protected]=>
+  string(7) "A.AProt"
+  ["APub"]=>
+  string(6) "A.APub"
 }
 Sanity check: bool(true)
 
@@ -108,35 +108,35 @@ Sanity check: bool(true)
 
 Before serialization:
 object(B)#%d (6) {
-  [u"BPriv":u"B":private]=>
-  unicode(7) "B.BPriv"
-  [u"BProt":protected]=>
-  unicode(7) "B.BProt"
-  [u"BPub"]=>
-  unicode(6) "B.BPub"
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "A.AProt"
-  [u"APub"]=>
-  unicode(6) "A.APub"
+  ["BPriv":"B":private]=>
+  string(7) "B.BPriv"
+  ["BProt":protected]=>
+  string(7) "B.BProt"
+  ["BPub"]=>
+  string(6) "B.BPub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
+  ["AProt":protected]=>
+  string(7) "A.AProt"
+  ["APub"]=>
+  string(6) "A.APub"
 }
 Serialized form:
-unicode(184) "O:1:"B":6:{U:8:"\0B\0BPriv";U:7:"B.BPriv";U:8:"\0*\0BProt";U:7:"B.BProt";U:4:"BPub";U:6:"B.BPub";U:8:"\0A\0APriv";U:7:"A.APriv";U:8:"\0*\0AProt";U:7:"A.AProt";U:4:"APub";U:6:"A.APub";}"
+string(184) "O:1:"B":6:{s:8:"\0B\0BPriv";s:7:"B.BPriv";s:8:"\0*\0BProt";s:7:"B.BProt";s:4:"BPub";s:6:"B.BPub";s:8:"\0A\0APriv";s:7:"A.APriv";s:8:"\0*\0AProt";s:7:"A.AProt";s:4:"APub";s:6:"A.APub";}"
 Unserialized:
 object(B)#%d (6) {
-  [u"BPriv":u"B":private]=>
-  unicode(7) "B.BPriv"
-  [u"BProt":protected]=>
-  unicode(7) "B.BProt"
-  [u"BPub"]=>
-  unicode(6) "B.BPub"
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "A.AProt"
-  [u"APub"]=>
-  unicode(6) "A.APub"
+  ["BPriv":"B":private]=>
+  string(7) "B.BPriv"
+  ["BProt":protected]=>
+  string(7) "B.BProt"
+  ["BPub"]=>
+  string(6) "B.BPub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
+  ["AProt":protected]=>
+  string(7) "A.AProt"
+  ["APub"]=>
+  string(6) "A.APub"
 }
 Sanity check: bool(true)
 
@@ -146,51 +146,51 @@ Sanity check: bool(true)
 
 Before serialization:
 object(C)#%d (10) {
-  [u"APriv":u"C":private]=>
-  unicode(7) "C.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "C.AProt"
-  [u"APub"]=>
-  unicode(6) "C.APub"
-  [u"CPriv":u"C":private]=>
-  unicode(7) "C.CPriv"
-  [u"CProt":protected]=>
-  unicode(7) "C.BProt"
-  [u"CPub"]=>
-  unicode(6) "C.CPub"
-  [u"BPriv":u"B":private]=>
-  unicode(7) "B.BPriv"
-  [u"BProt":protected]=>
-  unicode(7) "B.BProt"
-  [u"BPub"]=>
-  unicode(6) "B.BPub"
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
+  ["APriv":"C":private]=>
+  string(7) "C.APriv"
+  ["AProt":protected]=>
+  string(7) "C.AProt"
+  ["APub"]=>
+  string(6) "C.APub"
+  ["CPriv":"C":private]=>
+  string(7) "C.CPriv"
+  ["CProt":protected]=>
+  string(7) "C.BProt"
+  ["CPub"]=>
+  string(6) "C.CPub"
+  ["BPriv":"B":private]=>
+  string(7) "B.BPriv"
+  ["BProt":protected]=>
+  string(7) "B.BProt"
+  ["BPub"]=>
+  string(6) "B.BPub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
 }
 Serialized form:
-unicode(302) "O:1:"C":10:{U:8:"\0C\0APriv";U:7:"C.APriv";U:8:"\0*\0AProt";U:7:"C.AProt";U:4:"APub";U:6:"C.APub";U:8:"\0C\0CPriv";U:7:"C.CPriv";U:8:"\0*\0CProt";U:7:"C.BProt";U:4:"CPub";U:6:"C.CPub";U:8:"\0B\0BPriv";U:7:"B.BPriv";U:8:"\0*\0BProt";U:7:"B.BProt";U:4:"BPub";U:6:"B.BPub";U:8:"\0A\0APriv";U:7:"A.APriv";}"
+string(302) "O:1:"C":10:{s:8:"\0C\0APriv";s:7:"C.APriv";s:8:"\0*\0AProt";s:7:"C.AProt";s:4:"APub";s:6:"C.APub";s:8:"\0C\0CPriv";s:7:"C.CPriv";s:8:"\0*\0CProt";s:7:"C.BProt";s:4:"CPub";s:6:"C.CPub";s:8:"\0B\0BPriv";s:7:"B.BPriv";s:8:"\0*\0BProt";s:7:"B.BProt";s:4:"BPub";s:6:"B.BPub";s:8:"\0A\0APriv";s:7:"A.APriv";}"
 Unserialized:
 object(C)#%d (10) {
-  [u"APriv":u"C":private]=>
-  unicode(7) "C.APriv"
-  [u"AProt":protected]=>
-  unicode(7) "C.AProt"
-  [u"APub"]=>
-  unicode(6) "C.APub"
-  [u"CPriv":u"C":private]=>
-  unicode(7) "C.CPriv"
-  [u"CProt":protected]=>
-  unicode(7) "C.BProt"
-  [u"CPub"]=>
-  unicode(6) "C.CPub"
-  [u"BPriv":u"B":private]=>
-  unicode(7) "B.BPriv"
-  [u"BProt":protected]=>
-  unicode(7) "B.BProt"
-  [u"BPub"]=>
-  unicode(6) "B.BPub"
-  [u"APriv":u"A":private]=>
-  unicode(7) "A.APriv"
+  ["APriv":"C":private]=>
+  string(7) "C.APriv"
+  ["AProt":protected]=>
+  string(7) "C.AProt"
+  ["APub"]=>
+  string(6) "C.APub"
+  ["CPriv":"C":private]=>
+  string(7) "C.CPriv"
+  ["CProt":protected]=>
+  string(7) "C.BProt"
+  ["CPub"]=>
+  string(6) "C.CPub"
+  ["BPriv":"B":private]=>
+  string(7) "B.BPriv"
+  ["BProt":protected]=>
+  string(7) "B.BProt"
+  ["BPub"]=>
+  string(6) "B.BPub"
+  ["APriv":"A":private]=>
+  string(7) "A.APriv"
 }
 Sanity check: bool(true)
 Done

@@ -26,11 +26,11 @@ var_dump($a);
 ?>
 --EXPECT--
 array(1) {
-  [u"test"]=>
+  ["test"]=>
   &NULL
 }
 array(1) {
-  [u"test"]=>
+  ["test"]=>
   &NULL
 }
 

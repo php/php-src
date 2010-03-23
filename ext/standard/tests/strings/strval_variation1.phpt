@@ -96,95 +96,95 @@ foreach($values as $value) {
 *** Testing strval() : usage variations ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 3 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- Iteration 4 --
-unicode(6) "-12345"
+string(6) "-12345"
 
 -- Iteration 5 --
-unicode(1) "2"
+string(1) "2"
 
 -- Iteration 6 --
-unicode(1) "8"
+string(1) "8"
 
 -- Iteration 7 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- Iteration 8 --
-unicode(6) "-12345"
+string(6) "-12345"
 
 -- Iteration 9 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 10 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 11 --
-unicode(5) "43981"
+string(5) "43981"
 
 -- Iteration 12 --
-unicode(6) "-43981"
+string(6) "-43981"
 
 -- Iteration 13 --
-unicode(5) "100.5"
+string(5) "100.5"
 
 -- Iteration 14 --
-unicode(6) "-100.5"
+string(6) "-100.5"
 
 -- Iteration 15 --
-unicode(13) "1001234567000"
+string(13) "1001234567000"
 
 -- Iteration 16 --
-unicode(14) "1.007654321E-8"
+string(14) "1.007654321E-8"
 
 -- Iteration 17 --
-unicode(3) "0.5"
+string(3) "0.5"
 
 -- Iteration 18 --
-unicode(5) "Array"
+string(5) "Array"
 
 -- Iteration 19 --
-unicode(5) "Array"
+string(5) "Array"
 
 -- Iteration 20 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 22 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 23 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 24 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 25 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 26 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 27 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 28 --
-unicode(7) "MyClass"
+string(7) "MyClass"
 
 -- Iteration 29 --
-unicode(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 
 -- Iteration 30 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 31 --
-unicode(0) ""
+string(0) ""
 ===DONE===

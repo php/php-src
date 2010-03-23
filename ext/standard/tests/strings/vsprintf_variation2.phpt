@@ -97,31 +97,31 @@ echo "Done";
 *** Testing vsprintf() : with unexpected values for args argument ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 3 --
-unicode(5) "12345"
+string(5) "12345"
 
 -- Iteration 4 --
-unicode(5) "-2345"
+string(5) "-2345"
 
 -- Iteration 5 --
-unicode(4) "10.5"
+string(4) "10.5"
 
 -- Iteration 6 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 
 -- Iteration 7 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 
 -- Iteration 8 --
-unicode(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
 
 -- Iteration 9 --
-unicode(3) "0.5"
+string(3) "0.5"
 
 -- Iteration 10 --
 
@@ -134,28 +134,28 @@ Warning: vsprintf(): Too few arguments in %s on line %d
 bool(false)
 
 -- Iteration 12 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 13 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 14 --
-unicode(1) "1"
+string(1) "1"
 
 -- Iteration 15 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 17 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 18 --
-unicode(6) "string"
+string(6) "string"
 
 -- Iteration 19 --
-unicode(6) "string"
+string(6) "string"
 
 -- Iteration 20 --
 
@@ -173,5 +173,5 @@ Warning: vsprintf(): Too few arguments in %s on line %d
 bool(false)
 
 -- Iteration 23 --
-unicode(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 Done

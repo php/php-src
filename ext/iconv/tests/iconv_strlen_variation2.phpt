@@ -5,8 +5,6 @@ Test iconv_strlen() function : usage variations - Pass different data types as $
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in this build");
 ?>
---XFAIL--
-Will fail until bug #48538 fixed 
 --FILE--
 <?php
 /* Prototype  : int iconv_strlen(string str [, string charset])

@@ -97,78 +97,78 @@ foreach($inputs as $key =>$value) {
 
 --float 10.5--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(10)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(10)
 }
 
 --float -10.5--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(50)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(29)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(-10)
 }
 
 --float .5--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
@@ -195,188 +195,188 @@ bool(false)
 
 --uppercase NULL--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --lowercase null--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --lowercase true--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(1)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(1)
 }
 
 --lowercase false--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --uppercase TRUE--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(1)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(1)
 }
 
 --uppercase FALSE--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --empty string DQ--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: getdate() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: getdate() expects parameter 1 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -391,52 +391,52 @@ bool(false)
 
 --undefined var--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }
 
 --unset var--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(0)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(0)
 }

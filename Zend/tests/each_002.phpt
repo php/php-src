@@ -13,18 +13,18 @@ var_dump(each($a));
 
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 array(4) {
   [1]=>
   object(stdClass)#1 (0) {
   }
-  [u"value"]=>
+  ["value"]=>
   object(stdClass)#1 (0) {
   }
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }

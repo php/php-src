@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -70,6 +70,7 @@ PHP_FUNCTION(get_current_user);
 PHP_FUNCTION(set_time_limit);
 
 PHP_FUNCTION(get_cfg_var);
+PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
 
@@ -140,15 +141,10 @@ PHP_FUNCTION(stream_bucket_new);
 PHP_MINIT_FUNCTION(user_filters);
 PHP_RSHUTDOWN_FUNCTION(user_filters);
 
-/* Unicode-related */
-PHP_FUNCTION(request_set_encoding);
-PHP_FUNCTION(request_had_errors);
-
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
 PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *opt, char *headers TSRMLS_DC);
-PHPAPI char *php_get_current_user(void);
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, zstr var_name, int var_name_len, int var_name_type, zend_bool add_underscore TSRMLS_DC);
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC);
 
 #if SIZEOF_INT == 4
 /* Most 32-bit and 64-bit systems have 32-bit ints */
@@ -168,9 +164,9 @@ typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
 	zval *strtok_zval;
-	void *strtok_string;
+	char *strtok_string;
 	char *locale_string;
-	void *strtok_last;
+	char *strtok_last;
 	char strtok_table[256];
 	ulong strtok_len;
 	char str_ebuf[40];
@@ -206,6 +202,7 @@ typedef struct _php_basic_globals {
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
     
 	/* syslog.c */
+	int syslog_started;
 	char *syslog_device;
 
 	/* var.c */

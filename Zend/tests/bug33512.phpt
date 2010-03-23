@@ -58,7 +58,7 @@ class TheObj {
 	print $SomeObj->{'Virtual'.(3)}."\n";
 ?>
 --EXPECT--
-unicode(9) "somevalue"
+string(9) "somevalue"
 othervaluetoo
 int(-1)
 -1

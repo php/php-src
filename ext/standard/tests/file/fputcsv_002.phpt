@@ -24,9 +24,9 @@ array(7) {
   [1]=>
   int(2)
   [2]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [3]=>
-  unicode(4) "haha"
+  string(4) "haha"
   [4]=>
   array(3) {
     [0]=>

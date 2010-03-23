@@ -44,43 +44,43 @@ var_dump(count(get_extension_funcs("zend")));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: get_resource_type() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: get_resource_type() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: get_resource_type() expects parameter 1 to be resource, string given in %s on line %d
 NULL
-unicode(6) "stream"
-unicode(7) "Unknown"
-unicode(5) "array"
+string(6) "stream"
+string(7) "Unknown"
+string(5) "array"
 int(%d)
-unicode(5) "array"
-int(0)
+string(5) "array"
+int(%d)
 
 Warning: get_loaded_extensions() expects at most 1 parameter, 2 given in %s on line %d
 NULL
 
 Warning: get_defined_constants() expects at most 1 parameter, 2 given in %s on line %d
 NULL
-unicode(5) "array"
-unicode(5) "array"
+string(5) "array"
+string(5) "array"
 int(%d)
 
 Warning: get_defined_functions() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
-unicode(5) "array"
+string(5) "array"
 int(%d)
 
 Warning: get_declared_interfaces() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
-unicode(5) "array"
+string(5) "array"
 int(%d)
 
 Warning: get_extension_funcs() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 bool(false)
-unicode(5) "array"
+string(5) "array"
 int(%d)
-unicode(5) "array"
+string(5) "array"
 int(%d)
 Done

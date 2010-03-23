@@ -48,17 +48,17 @@ foreach($file_content_types as $file_content_type) {
        eof position, and data. */
     // writing 100 bytes
     var_dump( ftell($file_handle) );  // Expecting 0
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 100)); //int(100)
+    var_dump( fwrite($file_handle, $data_to_be_written, 100)); //int(100)
     var_dump( feof($file_handle) );  // expected : false
     var_dump( ftell($file_handle) );  //expected: 100
    
     // trying to write more than the available data, available 1024 bytes but trying 2048
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written, 2048)); //int(1024)
+    var_dump( fwrite($file_handle, $data_to_be_written, 2048)); //int(1024)
     var_dump( feof($file_handle) );  // expected : false
     var_dump( ftell($file_handle) );  // expected: 1124
 
     // fwrite() without length parameter
-    var_dump( fwrite($file_handle, (binary)$data_to_be_written)); //int(1024)
+    var_dump( fwrite($file_handle, $data_to_be_written)); //int(1024)
     var_dump( ftell($file_handle) );  // expected: 2148
     var_dump( feof($file_handle) );  // expected: false
 
@@ -70,12 +70,12 @@ foreach($file_content_types as $file_content_type) {
 
   } // end of inner for loop
 
-  // delete the file created 
+  // delete the file created : fwrite_basic.tmp
   delete_file($filename);
 } // end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fwrite() basic operations ***
 
 -- Testing fwrite() with file having data of type numeric --
@@ -92,7 +92,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 --  File opened in mode : wb --
 int(0)
 int(100)
@@ -106,7 +106,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 --  File opened in mode : wt --
 int(0)
 int(100)
@@ -120,7 +120,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 --  File opened in mode : w+ --
 int(0)
 int(100)
@@ -134,7 +134,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 --  File opened in mode : w+b --
 int(0)
 int(100)
@@ -148,7 +148,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 --  File opened in mode : w+t --
 int(0)
 int(100)
@@ -162,7 +162,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "04db34906fe2c56dcfbd649b7d916974"
+string(32) "04db34906fe2c56dcfbd649b7d916974"
 
 -- Testing fwrite() with file having data of type text --
 --  File opened in mode : w --
@@ -178,7 +178,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 --  File opened in mode : wb --
 int(0)
 int(100)
@@ -192,7 +192,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 --  File opened in mode : wt --
 int(0)
 int(100)
@@ -206,7 +206,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 --  File opened in mode : w+ --
 int(0)
 int(100)
@@ -220,7 +220,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 --  File opened in mode : w+b --
 int(0)
 int(100)
@@ -234,7 +234,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 --  File opened in mode : w+t --
 int(0)
 int(100)
@@ -248,7 +248,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "9c08ac77b7a93a84dd0b055900165e84"
+string(32) "9c08ac77b7a93a84dd0b055900165e84"
 
 -- Testing fwrite() with file having data of type text_with_new_line --
 --  File opened in mode : w --
@@ -264,7 +264,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "56a1963cc292d7f8245219116d9eca40"
+string(32) "56a1963cc292d7f8245219116d9eca40"
 --  File opened in mode : wb --
 int(0)
 int(100)
@@ -278,7 +278,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "56a1963cc292d7f8245219116d9eca40"
+string(32) "56a1963cc292d7f8245219116d9eca40"
 --  File opened in mode : wt --
 int(0)
 int(100)
@@ -292,7 +292,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2385)
-unicode(32) "62b09dac6d598bf54de7b02e0e68e5c7"
+string(32) "62b09dac6d598bf54de7b02e0e68e5c7"
 --  File opened in mode : w+ --
 int(0)
 int(100)
@@ -306,7 +306,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "56a1963cc292d7f8245219116d9eca40"
+string(32) "56a1963cc292d7f8245219116d9eca40"
 --  File opened in mode : w+b --
 int(0)
 int(100)
@@ -320,7 +320,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "56a1963cc292d7f8245219116d9eca40"
+string(32) "56a1963cc292d7f8245219116d9eca40"
 --  File opened in mode : w+t --
 int(0)
 int(100)
@@ -334,7 +334,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2385)
-unicode(32) "62b09dac6d598bf54de7b02e0e68e5c7"
+string(32) "62b09dac6d598bf54de7b02e0e68e5c7"
 
 -- Testing fwrite() with file having data of type alphanumeric --
 --  File opened in mode : w --
@@ -350,7 +350,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 --  File opened in mode : wb --
 int(0)
 int(100)
@@ -364,7 +364,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 --  File opened in mode : wt --
 int(0)
 int(100)
@@ -378,7 +378,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 --  File opened in mode : w+ --
 int(0)
 int(100)
@@ -392,7 +392,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 --  File opened in mode : w+b --
 int(0)
 int(100)
@@ -406,7 +406,7 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 --  File opened in mode : w+t --
 int(0)
 int(100)
@@ -420,5 +420,5 @@ int(2148)
 bool(false)
 bool(true)
 int(2148)
-unicode(32) "719e3329c19218c12d232f2ee81e100f"
+string(32) "719e3329c19218c12d232f2ee81e100f"
 Done

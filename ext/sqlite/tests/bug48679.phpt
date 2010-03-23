@@ -16,5 +16,5 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--	
-unicode(41) "Row count is not available for this query"
+string(41) "Row count is not available for this query"
 Done

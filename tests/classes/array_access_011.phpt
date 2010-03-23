@@ -107,73 +107,73 @@ var_dump($people[0]['name']);
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-unicode(3) "Foo"
-unicode(6) "FooBar"
-unicode(9) "FooBarBaz"
+string(3) "Foo"
+string(6) "FooBar"
+string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayAccessReferenceProxy::__construct(0)
 object(ArrayAccessReferenceProxy)#%d (3) {
-  [u"object":u"ArrayAccessReferenceProxy":private]=>
+  ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     &array(1) {
       [0]=>
       array(1) {
-        [u"name"]=>
-        unicode(3) "Foo"
+        ["name"]=>
+        string(3) "Foo"
       }
     }
   }
-  [u"oarray":u"ArrayAccessReferenceProxy":private]=>
+  ["oarray":"ArrayAccessReferenceProxy":private]=>
   &array(1) {
     [0]=>
     array(1) {
-      [u"name"]=>
-      unicode(3) "Foo"
+      ["name"]=>
+      string(3) "Foo"
     }
   }
-  [u"element":u"ArrayAccessReferenceProxy":private]=>
+  ["element":"ArrayAccessReferenceProxy":private]=>
   int(0)
 }
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
-unicode(3) "Foo"
+string(3) "Foo"
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetSet(0, name, FooBar)
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
-unicode(6) "FooBar"
+string(6) "FooBar"
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetSet(0, name, FooBarBar)
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
-unicode(9) "FooBarBar"
+string(9) "FooBarBar"
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
 ArrayAccessReferenceProxy::offsetSet(0, name, FooBarBarBaz)
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
-unicode(12) "FooBarBarBaz"
+string(12) "FooBarBarBaz"
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetUnset(0, name)
 ArrayAccessReferenceProxy::__construct(0)
 object(ArrayAccessReferenceProxy)#%d (3) {
-  [u"object":u"ArrayAccessReferenceProxy":private]=>
+  ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#%d (1) {
-    [u"person"]=>
+    ["person"]=>
     &array(1) {
       [0]=>
       array(0) {
       }
     }
   }
-  [u"oarray":u"ArrayAccessReferenceProxy":private]=>
+  ["oarray":"ArrayAccessReferenceProxy":private]=>
   &array(1) {
     [0]=>
     array(0) {
     }
   }
-  [u"element":u"ArrayAccessReferenceProxy":private]=>
+  ["element":"ArrayAccessReferenceProxy":private]=>
   int(0)
 }
 ArrayAccessReferenceProxy::__construct(0)
@@ -183,5 +183,5 @@ ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetSet(0, name, BlaBla)
 ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetGet(0, name)
-unicode(6) "BlaBla"
+string(6) "BlaBla"
 ===DONE===

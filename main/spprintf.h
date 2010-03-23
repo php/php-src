@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,9 +27,6 @@ the function can be used to calculate the required size of the buffer but for
 that purpose snprintf is faster. When both pbuf and the return value are 0
 than you are out of memory.
 
-All functions return the number of character printed (e.g. length), not the
-number of bytes.
-
 There is also snprintf: See difference explained in snprintf.h
 
 */
@@ -40,12 +37,9 @@ There is also snprintf: See difference explained in snprintf.h
 #include "snprintf.h"
 
 BEGIN_EXTERN_C()
-PHPAPI int spprintf(  char  **pbuf, size_t max_len, const char *format, ...);
-PHPAPI int vspprintf( char  **pbuf, size_t max_len, const char *format, va_list ap);
-PHPAPI int uspprintf( UChar **pbuf, size_t max_len, const char *format, ...);
-PHPAPI int vuspprintf(UChar **pbuf, size_t max_len, const char *format, va_list ap);
-PHPAPI int zspprintf( zend_uchar type, zstr *pbuf, size_t max_len, const char *format, ...);
-PHPAPI int vzspprintf(zend_uchar type, zstr *pbuf, size_t max_len, const char *format, va_list ap);
+PHPAPI int spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+
+PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 END_EXTERN_C()
 
 #endif /* SNPRINTF_H */

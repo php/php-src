@@ -1,11 +1,11 @@
 --TEST--
 mcrypt_cbf
 --SKIPIF--
-<?php if (!extension_loaded("mcrypt") || unicode_semantics()) print "skip"; ?>
+<?php if (!extension_loaded("mcrypt")) print "skip"; ?>
 --FILE--
 <?php
-$key      = b"FooBar";
-$secret   = b"PHP Testfest 2008";
+$key      = "FooBar";
+$secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;
 
 $iv       = mcrypt_create_iv(mcrypt_get_iv_size($cipher, MCRYPT_MODE_ECB), MCRYPT_RAND);
@@ -20,4 +20,4 @@ mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_cfb(): Attempt to use an empty IV, which is NOT recommended in %s on line %d
+Warning: mcrypt_cfb(): Attempt to use an empty IV, which is NOT recommend in %s on line %d

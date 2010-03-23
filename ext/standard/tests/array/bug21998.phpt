@@ -16,9 +16,9 @@ var_dump(key($a));
 ?>
 --EXPECT--
 int(0)
-unicode(1) "c"
+string(1) "c"
 int(0)
-unicode(1) "b"
+string(1) "b"
 int(0)
-unicode(1) "a"
+string(1) "a"
 NULL

@@ -12,11 +12,11 @@ foreach (($a = array('a' => array('a' => &$a))) as $a) {
 ?>
 --EXPECT--
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   &array(1) {
-    [u"a"]=>
+    ["a"]=>
     &array(1) {
-      [u"a"]=>
+      ["a"]=>
       *RECURSION*
     }
   }

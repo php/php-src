@@ -12,7 +12,7 @@
 /**
  * @brief   Iterates through recursive iterators
  * @author  Marcus Boerger
- * @version 1.3
+ * @version 1.2
  * @since PHP 5.0
  *
  * The objects of this class are created by instances of RecursiveIterator. 
@@ -32,11 +32,10 @@ class RecursiveIteratorIterator implements OuterIterator
 	 * to the next element. */
 	const CATCH_GET_CHILD	= 0x00000002;
 
-	private $ait   = array();
-	private $level = 0;
+	private $ait = array();
+	private $count = 0;
 	private $mode  = self::LEAVES_ONLY;
 	private $flags = 0;
-	private $max_depth = -1;
 
 	/** Construct from RecursiveIterator
 	 *
@@ -62,8 +61,8 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function rewind()
 	{
-		while ($this->level) {
-			unset($this->ait[$this->level--]);
+		while ($this->count) {
+			unset($this->ait[$this->count--]);
 			$this->endChildren();
 		}
 		$this->ait[0]->rewind();
@@ -75,13 +74,13 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function valid()
 	{
-		$level = $this->level;
-		while ($level >= 0) {
-			$it = $this->ait[$level];
+		$count = $this->count;
+		while ($count) {
+			$it = $this->ait[$count];
 			if ($it->valid()) {
 				return true;
 			}
-			$level--;
+			$count--;
 			$this->endChildren();
 		}
 		return false;
@@ -91,7 +90,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function key()
 	{
-		$it = $this->ait[$this->level];
+		$it = $this->ait[$this->count];
 		return $it->key();
 	}
 	
@@ -99,7 +98,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function current()
 	{
-		$it = $this->ait[$this->level];
+		$it = $this->ait[$this->count];
 		return $it->current();
 	}
 	
@@ -107,61 +106,46 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function next()
 	{
-		while ($this->level >= 0) {
-			$it = $this->ait[$this->level];
+		while ($this->count) {
+			$it = $this->ait[$this->count];
 			if ($it->valid()) {
 				if (!$it->recursed && callHasChildren()) {
-					if ($this->max_depth == -1 || $this->max_depth > $this->level) {
-						$it->recursed = true;
-						try
-						{
-							$sub = callGetChildren();
-						}
-						catch (Exception $e)
-						{
-							if (!($this->flags & self::CATCH_GET_CHILD))
-							{
-								throw $e;
-							}
-							$it->next();
-							continue;
-						}
-						$sub->recursed = false;
-						$sub->rewind();
-						if ($sub->valid()) {
-							$this->ait[++$this->level] = $sub;
-							if (!$sub instanceof RecursiveIterator) {
-								throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
-							}
-							$this->beginChildren();
-							return;
-						}
-						unset($sub);
-					}
-					else
+					$it->recursed = true;
+					try
 					{
-						/* do not recurse because of depth restriction */
-						if ($this->flages & self::LEVAES_ONLY)
-						{
-							$it->next();
-							continue;
-						}
-						else
-						{
-							return; // we want the parent
-						}
+						$sub = callGetChildren();
 					}
-					$it->next();
-					$it->recursed = false;
-					if ($it->valid()) {
+					catch (Exception $e)
+					{
+						if (!($this->flags & self::CATCH_GET_CHILD))
+						{
+							throw $e;
+						}
+						$it->next();
+						continue;
+					}
+					$sub->recursed = false;
+					$sub->rewind();
+					if ($sub->valid()) {
+						$this->ait[++$this->count] = $sub;
+						if (!$sub instanceof RecursiveIterator) {
+							throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
+						}
+						$this->beginChildren();
 						return;
 					}
-					$it->recursed = false;
+					unset($sub);
 				}
+				$it->next();
+				$it->recursed = false;
+				if ($it->valid()) {
+					return;
+				}
+				$it->recursed = false;
 			}
-			else if ($this->level > 0) {
-				unset($this->ait[$this->level--]);
-				$it = $this->ait[$this->level];
+			if ($this->count) {
+				unset($this->ait[$this->count--]);
+				$it = $this->ait[$this->count];
 				$this->endChildren();
 				callNextElement(false);
 			}
@@ -175,7 +159,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	function getSubIterator($level = NULL)
 	{
 		if (is_null($level)) {
-			$level = $this->level;
+			$level = $this->count;
 		}
 		return @$this->ait[$level];
 	}
@@ -200,7 +184,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function callHasChildren()
 	{
-		return $this->ait[$this->level]->hasChildren();
+		return $this->ait[$this->count]->hasChildren();
 	}
 
 	/** @return current sub iterators current children
@@ -208,7 +192,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function callGetChildren()
 	{
-		return $this->ait[$this->level]->getChildren();
+		return $this->ait[$this->count]->getChildren();
 	}
 
 	/** Called right after calling getChildren() and its rewind().
@@ -247,24 +231,6 @@ class RecursiveIteratorIterator implements OuterIterator
 	 */
 	function nextElement()
 	{
-	}
-
-	/** @param max_depth new maximum allowed depth or -1 for any depth
-	 */
-	function setMaxDepth($max_depth = -1)
-	{
-		$max_depth = (int)$max_depth;
-		if ($max_depth < -1) {
-			throw new OutOfRangeException('Parameter max_depth must be >= -1');
-		}
-		$this->max_depth = $max_depth;
-	}
-	
-	/** @return maximum allowed depth or false if any depth is allowed
-	 */
-	function getMaxDepth()
-	{
-		return $this->max_depth == -1 ? false : $this->max_depth;
 	}
 }
 

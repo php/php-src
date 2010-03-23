@@ -91,49 +91,49 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'str' ***
 -- Iteration 1 --
-unicode(1) "a"
+string(1) "a"
 -- Iteration 2 --
-unicode(1) "t"
+string(1) "t"
 -- Iteration 3 --
-unicode(2) "-m"
+string(2) "-m"
 -- Iteration 4 --
-unicode(4) "ta.5"
+string(4) "ta.5"
 -- Iteration 5 --
-unicode(5) "-ma.5"
+string(5) "-ma.5"
 -- Iteration 6 --
-unicode(12) "tatm34567aaa"
+string(12) "tatm34567aaa"
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
-unicode(1) "t"
+string(1) "t"
 -- Iteration 11 --
-unicode(0) ""
+string(0) ""
 -- Iteration 12 --
-unicode(1) "t"
+string(1) "t"
 -- Iteration 13 --
-unicode(0) ""
+string(0) ""
 -- Iteration 14 --
-unicode(0) ""
+string(0) ""
 -- Iteration 15 --
-unicode(0) ""
+string(0) ""
 -- Iteration 16 --
-unicode(13) "s02ple objec1"
+string(13) "s02ple objec1"
 -- Iteration 17 --
 
-Warning: strtr() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: strtr() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 -- Iteration 19 --
-unicode(0) ""
+string(0) ""
 ===DONE===

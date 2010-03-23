@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2005 The PHP Group                                |
+  | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -129,6 +129,8 @@ typedef struct {
 	PDO_ODBC_HENV	env;
 	PDO_ODBC_HDBC	dbc;
 	pdo_odbc_errinfo einfo;
+	unsigned assume_utf8:1;
+	unsigned _spare:31;
 } pdo_odbc_db_handle;
 
 typedef struct {
@@ -136,7 +138,10 @@ typedef struct {
 	unsigned long datalen;
 	long fetched_len;
 	SWORD	coltype;
-	char colname[32];
+	char colname[128];
+	unsigned is_long;
+	unsigned is_unicode:1;
+	unsigned _spare:31;
 } pdo_odbc_column;
 
 typedef struct {
@@ -144,12 +149,19 @@ typedef struct {
 	pdo_odbc_column *cols;
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
+	char *convbuf;
+	unsigned long convbufsize;
+	unsigned going_long:1;
+	unsigned assume_utf8:1;
+	unsigned _spare:30;
 } pdo_odbc_stmt;
 
 typedef struct {
 	SQLINTEGER len;
 	SQLSMALLINT paramtype;
 	char *outbuf;
+	unsigned is_unicode:1;
+	unsigned _spare:31;
 } pdo_odbc_param;
 	
 extern pdo_driver_t pdo_odbc_driver;
@@ -170,6 +182,7 @@ extern SQLUINTEGER pdo_odbc_pool_mode;
 
 enum {
 	PDO_ODBC_ATTR_USE_CURSOR_LIBRARY = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_ODBC_ATTR_ASSUME_UTF8 /* assume that input strings are UTF-8 when feeding data to unicode columns */
 };
 
 /*

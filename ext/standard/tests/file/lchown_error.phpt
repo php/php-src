@@ -12,9 +12,7 @@ if(fileowner($filename) == 0) {
         unlink ($filename);
         die('skip cannot be run as root');
 }
-
 unlink($filename);
-
 ?>
 --FILE--
 <?php
@@ -69,10 +67,10 @@ bool(true)
 Warning: lchown(): No such file or directory in %s on line %d
 bool(false)
 
-Warning: lchown() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: lchown() expects parameter 1 to be string, object given in %s on line %d
 bool(true)
 
-Warning: lchown() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: lchown() expects parameter 1 to be string, array given in %s on line %d
 bool(true)
 
 Warning: lchown(): Operation not permitted in %s on line %d

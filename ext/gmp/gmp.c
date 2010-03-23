@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -187,10 +187,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_gmp_com, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_gmp_nextprime, 0)
-	ZEND_ARG_INFO(0, a)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_xor, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, b)
@@ -229,6 +225,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_scan1, 0)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, start)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_nextprime, 0)
+	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -274,9 +274,9 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_xor,	arginfo_gmp_xor)
 	ZEND_FE(gmp_setbit,	arginfo_gmp_setbit)
 	ZEND_FE(gmp_clrbit,	arginfo_gmp_clrbit)
-	ZEND_FE(gmp_testbit,	arginfo_gmp_testbit)
-	ZEND_FE(gmp_scan0, arginfo_gmp_scan0)
-	ZEND_FE(gmp_scan1, arginfo_gmp_scan1)
+	ZEND_FE(gmp_scan0,  arginfo_gmp_scan0)
+	ZEND_FE(gmp_scan1,  arginfo_gmp_scan1)
+	ZEND_FE(gmp_testbit,arginfo_gmp_testbit)
 	ZEND_FE(gmp_popcount, arginfo_gmp_popcount)
 	ZEND_FE(gmp_hamdist, arginfo_gmp_hamdist)
 	ZEND_FE(gmp_nextprime, arginfo_gmp_nextprime)
@@ -436,9 +436,6 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base TSRMLS_DC)
 			mpz_init_set_si(**gmpnumber, Z_LVAL_PP(val));
 		}
 		break;
-	case IS_UNICODE:
-		convert_to_string_ex(val);
-		/* Fallthrough */
 	case IS_STRING:
 		{
 			char *numstr = Z_STRVAL_PP(val);
@@ -452,11 +449,6 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base TSRMLS_DC)
 						base = 2;
 						skip_lead = 1;
 					}
-					/* Note: tests/004.phpt and tests/005.phpt suggest that we should be
-					 * interpreting a leading zero as octal (when not followed by x or b)
-					 * Yet the docs, and the existing code (above), suggest otherwise.
-					 *
-					 * Possibly fix this by putting an:    else base = 8;    here */
 				}
 			}
 			ret = mpz_init_set_str(**gmpnumber, (skip_lead ? &numstr[2] : numstr), base);
@@ -749,7 +741,7 @@ static inline void _gmp_binary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_opl_
 }
 /* }}} */
 
-/* {{{ proto resource gmp_init(mixed number [, int base]) U
+/* {{{ proto resource gmp_init(mixed number [, int base])
    Initializes GMP number */
 ZEND_FUNCTION(gmp_init)
 {
@@ -761,7 +753,7 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-#if __GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2
+#if (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2)
 	if (base && (base < 2 || base > 62)) {
 #else
 	if (base && (base < 2 || base > 36)) {
@@ -779,7 +771,7 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-/* {{{ proto int gmp_intval(resource gmpnumber) U
+/* {{{ proto int gmp_intval(resource gmpnumber)
    Gets signed long value of GMP number */
 ZEND_FUNCTION(gmp_intval)
 {
@@ -800,13 +792,13 @@ ZEND_FUNCTION(gmp_intval)
 }
 /* }}} */
 
-/* {{{ proto string gmp_strval(resource gmpnumber [, int base]) U
+/* {{{ proto string gmp_strval(resource gmpnumber [, int base])
    Gets string representation of GMP number  */
 ZEND_FUNCTION(gmp_strval)
 {
 	zval **gmpnumber_arg;
-	long base=10;
 	int num_len;
+	long base = 10;
 	mpz_t * gmpnum;
 	char *out_string;
 	int temp_a;
@@ -848,11 +840,11 @@ ZEND_FUNCTION(gmp_strval)
 	} else {
 		out_string[num_len] = '\0';
 	}
-	RETVAL_RT_STRINGL(out_string, num_len, ZSTR_AUTOFREE);
+	RETVAL_STRINGL(out_string, num_len, 0);
 }
 /* }}} */
 
-/* {{{ proto resource gmp_add(resource a, resource b) U
+/* {{{ proto resource gmp_add(resource a, resource b)
    Add a and b */
 ZEND_FUNCTION(gmp_add)
 {
@@ -860,7 +852,7 @@ ZEND_FUNCTION(gmp_add)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_sub(resource a, resource b) U
+/* {{{ proto resource gmp_sub(resource a, resource b)
    Subtract b from a */
 ZEND_FUNCTION(gmp_sub)
 {
@@ -868,7 +860,7 @@ ZEND_FUNCTION(gmp_sub)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_mul(resource a, resource b) U
+/* {{{ proto resource gmp_mul(resource a, resource b)
    Multiply a and b */
 ZEND_FUNCTION(gmp_mul)
 {
@@ -876,7 +868,7 @@ ZEND_FUNCTION(gmp_mul)
 }
 /* }}} */
 
-/* {{{ proto array gmp_div_qr(resource a, resource b [, int round]) U
+/* {{{ proto array gmp_div_qr(resource a, resource b [, int round])
    Divide a by b, returns quotient and reminder */
 ZEND_FUNCTION(gmp_div_qr)
 {
@@ -902,7 +894,7 @@ ZEND_FUNCTION(gmp_div_qr)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_div_r(resource a, resource b [, int round]) U
+/* {{{ proto resource gmp_div_r(resource a, resource b [, int round])
    Divide a by b, returns reminder only */
 ZEND_FUNCTION(gmp_div_r)
 {
@@ -927,7 +919,7 @@ ZEND_FUNCTION(gmp_div_r)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_div_q(resource a, resource b [, int round]) U
+/* {{{ proto resource gmp_div_q(resource a, resource b [, int round])
    Divide a by b, returns quotient only */
 ZEND_FUNCTION(gmp_div_q)
 {
@@ -953,7 +945,7 @@ ZEND_FUNCTION(gmp_div_q)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_mod(resource a, resource b) U
+/* {{{ proto resource gmp_mod(resource a, resource b)
    Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)
 {
@@ -967,7 +959,7 @@ ZEND_FUNCTION(gmp_mod)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_divexact(resource a, resource b) U
+/* {{{ proto resource gmp_divexact(resource a, resource b)
    Divide a by b using exact division algorithm */
 ZEND_FUNCTION(gmp_divexact)
 {
@@ -981,7 +973,7 @@ ZEND_FUNCTION(gmp_divexact)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_neg(resource a) U
+/* {{{ proto resource gmp_neg(resource a)
    Negates a number */
 ZEND_FUNCTION(gmp_neg)
 {
@@ -989,7 +981,7 @@ ZEND_FUNCTION(gmp_neg)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_abs(resource a) U
+/* {{{ proto resource gmp_abs(resource a)
    Calculates absolute value */
 ZEND_FUNCTION(gmp_abs)
 {
@@ -997,7 +989,7 @@ ZEND_FUNCTION(gmp_abs)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_fact(int a) U
+/* {{{ proto resource gmp_fact(int a)
    Calculates factorial function */
 ZEND_FUNCTION(gmp_fact)
 {
@@ -1027,17 +1019,17 @@ ZEND_FUNCTION(gmp_fact)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_pow(resource base, int exp) U
+/* {{{ proto resource gmp_pow(resource base, int exp)
    Raise base to power exp */
 ZEND_FUNCTION(gmp_pow)
 {
 	zval **base_arg;
 	mpz_t *gmpnum_result, *gmpnum_base;
 	int use_ui = 0;
+	int temp_base;
 	long exp;
-	int temp_base = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &base_arg, &exp) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &base_arg, &exp) == FAILURE) {
 		return;
 	}
 
@@ -1048,7 +1040,7 @@ ZEND_FUNCTION(gmp_pow)
 	}
 
 	if (exp < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Negative exponent not supported");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Negative exponent not supported");
 		RETURN_FALSE;
 	}
 	
@@ -1057,20 +1049,20 @@ ZEND_FUNCTION(gmp_pow)
 		mpz_ui_pow_ui(*gmpnum_result, Z_LVAL_PP(base_arg), exp);
 	} else {
 		mpz_pow_ui(*gmpnum_result, *gmpnum_base, exp);
+		FREE_GMP_TEMP(temp_base);
 	}
-	FREE_GMP_TEMP(temp_base);
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
 /* }}} */
 
-/* {{{ proto resource gmp_powm(resource base, resource exp, resource mod) U
+/* {{{ proto resource gmp_powm(resource base, resource exp, resource mod)
    Raise base to power exp and take result modulo mod */
 ZEND_FUNCTION(gmp_powm)
 {
 	zval **base_arg, **exp_arg, **mod_arg;
 	mpz_t *gmpnum_base, *gmpnum_exp, *gmpnum_mod, *gmpnum_result;
 	int use_ui = 0;
-	int temp_base = 0, temp_exp = 0, temp_mod = 0;
+	int temp_base, temp_exp, temp_mod;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ", &base_arg, &exp_arg, &mod_arg) == FAILURE){
 		return;
@@ -1091,7 +1083,9 @@ ZEND_FUNCTION(gmp_powm)
 
 	if (!mpz_cmp_ui(*gmpnum_mod, 0)) {
 		FREE_GMP_TEMP(temp_base);
-		FREE_GMP_TEMP(temp_exp);
+		if (use_ui) {
+			FREE_GMP_TEMP(temp_exp);
+		}
 		FREE_GMP_TEMP(temp_mod);
 		RETURN_FALSE;
 	}
@@ -1101,10 +1095,10 @@ ZEND_FUNCTION(gmp_powm)
 		mpz_powm_ui(*gmpnum_result, *gmpnum_base, (unsigned long)Z_LVAL_PP(exp_arg), *gmpnum_mod);
 	} else {
 		mpz_powm(*gmpnum_result, *gmpnum_base, *gmpnum_exp, *gmpnum_mod);
+		FREE_GMP_TEMP(temp_exp);
 	}
 
 	FREE_GMP_TEMP(temp_base);
-	FREE_GMP_TEMP(temp_exp);
 	FREE_GMP_TEMP(temp_mod);
 
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
@@ -1112,7 +1106,7 @@ ZEND_FUNCTION(gmp_powm)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_sqrt(resource a) U
+/* {{{ proto resource gmp_sqrt(resource a)
    Takes integer part of square root of a */
 ZEND_FUNCTION(gmp_sqrt)
 {
@@ -1140,7 +1134,7 @@ ZEND_FUNCTION(gmp_sqrt)
 }
 /* }}} */
 
-/* {{{ proto array gmp_sqrtrem(resource a) U
+/* {{{ proto array gmp_sqrtrem(resource a)
    Square root with remainder */
 ZEND_FUNCTION(gmp_sqrtrem)
 {
@@ -1174,7 +1168,7 @@ ZEND_FUNCTION(gmp_sqrtrem)
 }
 /* }}} */
 
-/* {{{ proto bool gmp_perfect_square(resource a) U
+/* {{{ proto bool gmp_perfect_square(resource a)
    Checks if a is an exact square */
 ZEND_FUNCTION(gmp_perfect_square)
 {
@@ -1193,7 +1187,7 @@ ZEND_FUNCTION(gmp_perfect_square)
 }
 /* }}} */
 
-/* {{{ proto int gmp_prob_prime(resource a[, int reps]) U
+/* {{{ proto int gmp_prob_prime(resource a[, int reps])
    Checks if a is "probably prime" */
 ZEND_FUNCTION(gmp_prob_prime)
 {
@@ -1213,7 +1207,7 @@ ZEND_FUNCTION(gmp_prob_prime)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_gcd(resource a, resource b) U
+/* {{{ proto resource gmp_gcd(resource a, resource b)
    Computes greatest common denominator (gcd) of a and b */
 ZEND_FUNCTION(gmp_gcd)
 {
@@ -1227,7 +1221,7 @@ ZEND_FUNCTION(gmp_gcd)
 }
 /* }}} */
 
-/* {{{ proto array gmp_gcdext(resource a, resource b) U
+/* {{{ proto array gmp_gcdext(resource a, resource b)
    Computes G, S, and T, such that AS + BT = G = `gcd' (A, B) */
 ZEND_FUNCTION(gmp_gcdext)
 {
@@ -1254,15 +1248,15 @@ ZEND_FUNCTION(gmp_gcdext)
 	array_init(return_value);
 
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_g, le_gmp);
-	add_ascii_assoc_resource(return_value, "g", Z_LVAL(r));
+	add_assoc_resource(return_value, "g", Z_LVAL(r));
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_s, le_gmp);
-	add_ascii_assoc_resource(return_value, "s", Z_LVAL(r));
+	add_assoc_resource(return_value, "s", Z_LVAL(r));
 	ZEND_REGISTER_RESOURCE(&r, gmpnum_t, le_gmp);
-	add_ascii_assoc_resource(return_value, "t", Z_LVAL(r));
+	add_assoc_resource(return_value, "t", Z_LVAL(r));
 }
 /* }}} */
 
-/* {{{ proto resource gmp_invert(resource a, resource b) U
+/* {{{ proto resource gmp_invert(resource a, resource b)
    Computes the inverse of a modulo b */
 ZEND_FUNCTION(gmp_invert)
 {
@@ -1291,7 +1285,7 @@ ZEND_FUNCTION(gmp_invert)
 }
 /* }}} */
 
-/* {{{ proto int gmp_jacobi(resource a, resource b) U
+/* {{{ proto int gmp_jacobi(resource a, resource b)
    Computes Jacobi symbol */
 ZEND_FUNCTION(gmp_jacobi)
 {
@@ -1299,7 +1293,7 @@ ZEND_FUNCTION(gmp_jacobi)
 }
 /* }}} */
 
-/* {{{ proto int gmp_legendre(resource a, resource b) U
+/* {{{ proto int gmp_legendre(resource a, resource b)
    Computes Legendre symbol */
 ZEND_FUNCTION(gmp_legendre)
 {
@@ -1307,7 +1301,7 @@ ZEND_FUNCTION(gmp_legendre)
 }
 /* }}} */
 
-/* {{{ proto int gmp_cmp(resource a, resource b) U
+/* {{{ proto int gmp_cmp(resource a, resource b)
    Compares two numbers */
 ZEND_FUNCTION(gmp_cmp)
 {
@@ -1339,7 +1333,7 @@ ZEND_FUNCTION(gmp_cmp)
 }
 /* }}} */
 
-/* {{{ proto int gmp_sign(resource a) U
+/* {{{ proto int gmp_sign(resource a)
    Gets the sign of the number */
 ZEND_FUNCTION(gmp_sign)
 {
@@ -1358,7 +1352,7 @@ ZEND_FUNCTION(gmp_sign)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_random([int limiter]) U
+/* {{{ proto resource gmp_random([int limiter])
    Gets random number */
 ZEND_FUNCTION(gmp_random)
 {
@@ -1389,7 +1383,7 @@ ZEND_FUNCTION(gmp_random)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_and(resource a, resource b) U
+/* {{{ proto resource gmp_and(resource a, resource b)
    Calculates logical AND of a and b */
 ZEND_FUNCTION(gmp_and)
 {
@@ -1397,7 +1391,7 @@ ZEND_FUNCTION(gmp_and)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_or(resource a, resource b) U
+/* {{{ proto resource gmp_or(resource a, resource b)
    Calculates logical OR of a and b */
 ZEND_FUNCTION(gmp_or)
 {
@@ -1405,7 +1399,7 @@ ZEND_FUNCTION(gmp_or)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_com(resource a) U
+/* {{{ proto resource gmp_com(resource a)
    Calculates one's complement of a */
 ZEND_FUNCTION(gmp_com)
 {
@@ -1413,15 +1407,15 @@ ZEND_FUNCTION(gmp_com)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_nextprime(resource a) U
+/* {{{ proto resource gmp_nextprime(resource a)
    Finds next prime of a */
 ZEND_FUNCTION(gmp_nextprime)
 {
-	gmp_unary_op(mpz_nextprime);
+   gmp_unary_op(mpz_nextprime);
 }
 /* }}} */
 
-/* {{{ proto resource gmp_xor(resource a, resource b) U
+/* {{{ proto resource gmp_xor(resource a, resource b)
    Calculates logical exclusive OR of a and b */
 ZEND_FUNCTION(gmp_xor)
 {
@@ -1454,7 +1448,7 @@ ZEND_FUNCTION(gmp_xor)
 }
 /* }}} */
 
-/* {{{ proto void gmp_setbit(resource &a, int index[, bool set_clear]) U
+/* {{{ proto void gmp_setbit(resource &a, int index[, bool set_clear])
    Sets or clear bit in a */
 ZEND_FUNCTION(gmp_setbit)
 {
@@ -1482,7 +1476,7 @@ ZEND_FUNCTION(gmp_setbit)
 }
 /* }}} */
 
-/* {{{ proto void gmp_clrbit(resource &a, int index) U
+/* {{{ proto void gmp_clrbit(resource &a, int index)
    Clears bit in a */
 ZEND_FUNCTION(gmp_clrbit)
 {
@@ -1505,23 +1499,20 @@ ZEND_FUNCTION(gmp_clrbit)
 }
 /* }}} */
 
-/* {{{ proto bool gmp_testbit(resource a, int index) U
+/* {{{ proto bool gmp_testbit(resource a, int index)
    Tests if bit is set in a */
 ZEND_FUNCTION(gmp_testbit)
 {
-	zval *a_arg;
-	long ind_arg;
-	int index;
+	zval **a_arg;
+	long index;
 	mpz_t *gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &a_arg, &ind_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &a_arg, &index) == FAILURE){
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(gmpnum_a, mpz_t *, &a_arg, -1, GMP_RESOURCE_NAME, le_gmp);
+	ZEND_FETCH_RESOURCE(gmpnum_a, mpz_t *, a_arg, -1, GMP_RESOURCE_NAME, le_gmp);
 
-	index = ind_arg;
-	
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
 		RETURN_FALSE;
@@ -1534,7 +1525,7 @@ ZEND_FUNCTION(gmp_testbit)
 }
 /* }}} */
 
-/* {{{ proto int gmp_popcount(resource a) U
+/* {{{ proto int gmp_popcount(resource a)
    Calculates the population count of a */
 ZEND_FUNCTION(gmp_popcount)
 {
@@ -1553,7 +1544,7 @@ ZEND_FUNCTION(gmp_popcount)
 }
 /* }}} */
 
-/* {{{ proto int gmp_hamdist(resource a, resource b) U
+/* {{{ proto int gmp_hamdist(resource a, resource b)
    Calculates hamming distance between a and b */
 ZEND_FUNCTION(gmp_hamdist)
 {
@@ -1574,7 +1565,7 @@ ZEND_FUNCTION(gmp_hamdist)
 }
 /* }}} */
 
-/* {{{ proto int gmp_scan0(resource a, int start) U
+/* {{{ proto int gmp_scan0(resource a, int start)
    Finds first zero bit */
 ZEND_FUNCTION(gmp_scan0)
 {
@@ -1599,7 +1590,7 @@ ZEND_FUNCTION(gmp_scan0)
 }
 /* }}} */
 
-/* {{{ proto int gmp_scan1(resource a, int start) U
+/* {{{ proto int gmp_scan1(resource a, int start)
    Finds first non-zero bit */
 ZEND_FUNCTION(gmp_scan1)
 {

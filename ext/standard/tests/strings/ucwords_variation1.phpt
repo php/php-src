@@ -115,87 +115,87 @@ echo "Done\n";
 
 --- Testing ucwords() by supplying different values for 'str' argument ---
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 -- Iteration 2 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 3 --
-unicode(5) "12345"
+string(5) "12345"
 -- Iteration 4 --
-unicode(5) "-2345"
+string(5) "-2345"
 -- Iteration 5 --
-unicode(2) "16"
+string(2) "16"
 -- Iteration 6 --
-unicode(2) "32"
+string(2) "32"
 -- Iteration 7 --
-unicode(3) "170"
+string(3) "170"
 -- Iteration 8 --
-unicode(4) "-245"
+string(4) "-245"
 -- Iteration 9 --
-unicode(2) "83"
+string(2) "83"
 -- Iteration 10 --
-unicode(4) "-226"
+string(4) "-226"
 -- Iteration 11 --
-unicode(4) "10.5"
+string(4) "10.5"
 -- Iteration 12 --
-unicode(5) "-10.5"
+string(5) "-10.5"
 -- Iteration 13 --
-unicode(12) "101234567000"
+string(12) "101234567000"
 -- Iteration 14 --
-unicode(13) "1.07654321E-9"
+string(13) "1.07654321E-9"
 -- Iteration 15 --
-unicode(3) "0.5"
+string(3) "0.5"
 -- Iteration 16 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 21 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 22 --
-unicode(0) ""
+string(0) ""
 -- Iteration 23 --
-unicode(1) "1"
+string(1) "1"
 -- Iteration 24 --
-unicode(0) ""
+string(0) ""
 -- Iteration 25 --
-unicode(8) "MyString"
+string(8) "MyString"
 -- Iteration 26 --
-unicode(0) ""
+string(0) ""
 -- Iteration 27 --
-unicode(0) ""
+string(0) ""
 -- Iteration 28 --
-unicode(0) ""
+string(0) ""
 -- Iteration 29 --
-unicode(0) ""
+string(0) ""
 -- Iteration 30 --
-unicode(5) "0x123"
+string(5) "0x123"
 -- Iteration 31 --
-unicode(5) "0x123"
+string(5) "0x123"
 -- Iteration 32 --
-unicode(6) "0xFF12"
+string(6) "0xFF12"
 -- Iteration 33 --
-unicode(7) "-0xFF12"
+string(7) "-0xFF12"
 -- Iteration 34 --
-unicode(0) ""
+string(0) ""
 -- Iteration 35 --
-unicode(0) ""
+string(0) ""
 -- Iteration 36 --
 
-Warning: ucwords() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: ucwords() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

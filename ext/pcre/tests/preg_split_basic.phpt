@@ -17,59 +17,59 @@ var_dump(preg_split('/\w/', $string, -1, PREG_SPLIT_NO_EMPTY)); //every characte
 --EXPECT--
 array(7) {
   [0]=>
-  unicode(14) "this is a_list"
+  string(14) "this is a_list"
   [1]=>
-  unicode(7) " value1"
+  string(7) " value1"
   [2]=>
-  unicode(7) " Test__"
+  string(7) " Test__"
   [3]=>
-  unicode(7) " string"
+  string(7) " string"
   [4]=>
-  unicode(6) " Hello"
+  string(6) " Hello"
   [5]=>
-  unicode(8) " world!_"
+  string(8) " world!_"
   [6]=>
-  unicode(11) "parentheses"
+  string(11) "parentheses"
 }
 array(2) {
   [0]=>
-  unicode(14) "this is a_list"
+  string(14) "this is a_list"
   [1]=>
-  unicode(28) " Hello, world!_(parentheses)"
+  string(28) " Hello, world!_(parentheses)"
 }
 array(4) {
   [0]=>
-  unicode(54) "this is a_list: value1, Test__, string; Hello, world!_"
+  string(54) "this is a_list: value1, Test__, string; Hello, world!_"
   [1]=>
-  unicode(1) "("
+  string(1) "("
   [2]=>
-  unicode(11) "parentheses"
+  string(11) "parentheses"
   [3]=>
-  unicode(1) ")"
+  string(1) ")"
 }
 array(1) {
   [0]=>
-  unicode(67) "this is a_list: value1, Test__, string; Hello, world!_(parentheses)"
+  string(67) "this is a_list: value1, Test__, string; Hello, world!_(parentheses)"
 }
 array(10) {
   [0]=>
-  unicode(1) " "
+  string(1) " "
   [1]=>
-  unicode(1) " "
+  string(1) " "
   [2]=>
-  unicode(2) ": "
+  string(2) ": "
   [3]=>
-  unicode(2) ", "
+  string(2) ", "
   [4]=>
-  unicode(2) ", "
+  string(2) ", "
   [5]=>
-  unicode(2) "; "
+  string(2) "; "
   [6]=>
-  unicode(2) ", "
+  string(2) ", "
   [7]=>
-  unicode(1) "!"
+  string(1) "!"
   [8]=>
-  unicode(1) "("
+  string(1) "("
   [9]=>
-  unicode(1) ")"
+  string(1) ")"
 }

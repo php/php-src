@@ -57,16 +57,16 @@ array(2) {
 array(2) {
   [0]=>
   array(2) {
-    [u"one"]=>
+    ["one"]=>
     &int(1)
-    [u"two"]=>
+    ["two"]=>
     &int(2)
   }
   [1]=>
   array(2) {
-    [u"three"]=>
+    ["three"]=>
     &int(3)
-    [u"four"]=>
+    ["four"]=>
     &int(4)
   }
 }

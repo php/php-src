@@ -8,11 +8,12 @@ Test eregi() function : usage variations - pass non-variable as arg 3, which is 
  * Alias to functions: 
  */
 
-var_dump(eregi(b'l{2}', 'hello', str_repeat('x',1)));
+var_dump(eregi('l{2}', 'hello', str_repeat('x',1)));
 echo "Done";
 ?>
 --EXPECTF--
+Strict Standards: Only variables should be passed by reference in %s on line %d
 
-Strict Standards: Only variables should be passed by reference in %s on line 8
+Deprecated: Function eregi() is deprecated in %s on line %d
 int(2)
 Done

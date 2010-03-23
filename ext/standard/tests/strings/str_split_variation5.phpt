@@ -1,5 +1,5 @@
 --TEST--
-Test str_split() function : usage variations - different heredoc strings as 'str' argument(Bug#42866) 
+Test str_split() function : usage variations - different heredoc strings as 'str' argument 
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length] )
@@ -86,91 +86,91 @@ foreach($heredoc_array as $str) {
  
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing str_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 2 --
 array(1) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 -- Iteration 3 --
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 -- Iteration 4 --
 array(3) {
   [0]=>
-  unicode(10) "This is si"
+  string(10) "This is si"
   [1]=>
-  unicode(10) "mple hered"
+  string(10) "mple hered"
   [2]=>
-  unicode(9) "oc string"
+  string(9) "oc string"
 }
 -- Iteration 5 --
 array(6) {
   [0]=>
-  unicode(10) "This is to"
+  string(10) "This is to"
   [1]=>
-  unicode(10) " check str"
+  string(10) " check str"
   [2]=>
-  unicode(10) "_split
+  string(10) "_split
 fun"
   [3]=>
-  unicode(10) "ction with"
+  string(10) "ction with"
   [4]=>
-  unicode(10) " multiline"
+  string(10) " multiline"
   [5]=>
-  unicode(8) "
+  string(8) "
 heredoc"
 }
 -- Iteration 6 --
 array(4) {
   [0]=>
-  unicode(10) "This check"
+  string(10) "This check"
   [1]=>
-  unicode(10) "s heredoc "
+  string(10) "s heredoc "
   [2]=>
-  unicode(10) "with $, %,"
+  string(10) "with $, %,"
   [3]=>
-  unicode(9) " &, chars"
+  string(9) " &, chars"
 }
 -- Iteration 7 --
 array(4) {
   [0]=>
-  unicode(10) "This check"
+  string(10) "This check"
   [1]=>
-  unicode(10) "s	 str_spl"
+  string(10) "s	 str_spl"
   [2]=>
-  unicode(10) "it()
+  string(10) "it()
 Escap"
   [3]=>
-  unicode(7) "echars"
+  string(7) "echars"
 }
 -- Iteration 8 --
 array(8) {
   [0]=>
-  unicode(10) ""To check "
+  string(10) ""To check "
   [1]=>
-  unicode(10) "" in hered"
+  string(10) "" in hered"
   [2]=>
-  unicode(10) "oc"
+  string(10) "oc"
 I'm su"
   [3]=>
-  unicode(10) "re it'll w"
+  string(10) "re it'll w"
   [4]=>
-  unicode(10) "ork also w"
+  string(10) "ork also w"
   [5]=>
-  unicode(10) "ith \
+  string(10) "ith \
 whic"
   [6]=>
-  unicode(10) "h is singl"
+  string(10) "h is singl"
   [7]=>
-  unicode(7) "e slash"
+  string(7) "e slash"
 }
 Done

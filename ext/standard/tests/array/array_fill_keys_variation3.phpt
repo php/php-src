@@ -41,9 +41,9 @@ NULL
 
 -- Testing array_fill_keys() function with unusual second arguments --
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   resource(%d) of type (stream)
-  [u"two"]=>
+  ["two"]=>
   resource(%d) of type (stream)
 }
 

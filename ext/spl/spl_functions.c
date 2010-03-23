@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -83,10 +83,10 @@ void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_fl
 		size_t len = pce->name_length;
 		zval *tmp;
 
-		if (zend_u_hash_find(Z_ARRVAL_P(list), IS_UNICODE, pce->name, len+1, (void*)&tmp) == FAILURE) {
+		if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_UNICODEL(tmp, pce->name.u, pce->name_length, 1);
-			zend_u_hash_add(Z_ARRVAL_P(list), IS_UNICODE, pce->name, len+1, &tmp, sizeof(zval *), NULL);
+			ZVAL_STRINGL(tmp, pce->name, pce->name_length, 1);
+			zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
 		}
 	}
 }
@@ -121,14 +121,12 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 }
 /* }}} */
 
-zstr spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC) /* {{{ */
+char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC) /* {{{ */
 {
-	zstr rv;
-	zstr zprop;
+	char *rv;
 
-	zprop.u = zend_ascii_to_unicode(prop_name, prop_len + 1 ZEND_FILE_LINE_CC);
-	zend_u_mangle_property_name(&rv, name_len, IS_UNICODE, ce->name, ce->name_length, zprop, prop_len, 0);
-	efree(zprop.v);
+	zend_mangle_property_name(&rv, name_len, ce->name, ce->name_length, prop_name, prop_len, 0);
+
 	return rv;
 }
 /* }}} */

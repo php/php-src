@@ -23,6 +23,6 @@ unset($obj); // Derived::__destruct is being called not Base::__destruct
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 Derived::__destruct
 ===DONE===

@@ -10,8 +10,8 @@ if (!extension_loaded("zlib")) {
 <?php
 $f = "temp3.txt.gz";
 $h = gzopen($f, 'w'); 
-$str1 = b"This is the first line.";
-$str2 = b"This is the second line.";
+$str1 = "This is the first line.";
+$str2 = "This is the second line.";
 gzwrite($h, $str1);
 echo "tell=".gztell($h)."\n";
 
@@ -37,6 +37,6 @@ tell=67
 
 reading the output file
 This is the first line.
-unicode(40) "0000000000000000000000000000000000000000"
+string(40) "0000000000000000000000000000000000000000"
 This is the second line.
 ===DONE===

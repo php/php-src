@@ -123,10 +123,10 @@ int(12345678)
 int(0)
 
 -- Iteration 4 : null uppercase data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 5 : null lowercase data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 6 : bool lowercase data --
 int(1)
@@ -137,19 +137,19 @@ int(1)
 int(0)
 
 -- Iteration 8 : empty double quotes data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 9 : empty single quotes data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 10 : string data --
-unicode(7) "stringd"
-unicode(7) "strings"
-unicode(11) "hello world"
+string(7) "stringd"
+string(7) "strings"
+string(11) "hello world"
 
 -- Iteration 11 : undefined data --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 12 : unset data --
-unicode(0) ""
+string(0) ""
 ===DONE===

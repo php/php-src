@@ -22,36 +22,36 @@ array(2) {
   [0]=>
   array(7) {
     [0]=>
-    unicode(24) "unsigned int xpto = 124;"
+    string(24) "unsigned int xpto = 124;"
     [1]=>
-    unicode(12) "unsigned int"
+    string(12) "unsigned int"
     [2]=>
-    unicode(0) ""
+    string(0) ""
     [3]=>
-    unicode(0) ""
+    string(0) ""
     [4]=>
-    unicode(4) "xpto"
+    string(4) "xpto"
     [5]=>
-    unicode(1) "="
+    string(1) "="
     [6]=>
-    unicode(0) ""
+    string(0) ""
   }
   [1]=>
   array(7) {
     [0]=>
-    unicode(11) "short a, b;"
+    string(11) "short a, b;"
     [1]=>
-    unicode(5) "short"
+    string(5) "short"
     [2]=>
-    unicode(0) ""
+    string(0) ""
     [3]=>
-    unicode(0) ""
+    string(0) ""
     [4]=>
-    unicode(1) "a"
+    string(1) "a"
     [5]=>
-    unicode(0) ""
+    string(0) ""
     [6]=>
-    unicode(3) ", b"
+    string(3) ", b"
   }
 }
 int(3)
@@ -59,35 +59,35 @@ array(3) {
   [0]=>
   array(4) {
     [0]=>
-    unicode(3) "&a,"
+    string(3) "&a,"
     [1]=>
-    unicode(1) "&"
+    string(1) "&"
     [2]=>
-    unicode(1) "a"
+    string(1) "a"
     [3]=>
-    unicode(0) ""
+    string(0) ""
   }
   [1]=>
   array(4) {
     [0]=>
-    unicode(2) "b,"
+    string(2) "b,"
     [1]=>
-    unicode(0) ""
+    string(0) ""
     [2]=>
-    unicode(1) "b"
+    string(1) "b"
     [3]=>
-    unicode(0) ""
+    string(0) ""
   }
   [2]=>
   array(4) {
     [0]=>
-    unicode(2) "&c"
+    string(2) "&c"
     [1]=>
-    unicode(1) "&"
+    string(1) "&"
     [2]=>
-    unicode(1) "c"
+    string(1) "c"
     [3]=>
-    unicode(0) ""
+    string(0) ""
   }
 }
 int(1)
@@ -97,27 +97,27 @@ array(1) {
     [0]=>
     array(2) {
       [0]=>
-      unicode(46) "zend_parse_parameters( 0, "addd|s/", a, b, &c)"
+      string(46) "zend_parse_parameters( 0, "addd|s/", a, b, &c)"
       [1]=>
       int(0)
     }
     [1]=>
     array(2) {
       [0]=>
-      unicode(7) "addd|s/"
+      string(7) "addd|s/"
       [1]=>
       int(27)
     }
     [2]=>
     array(2) {
       [0]=>
-      unicode(9) "a, b, &c)"
+      string(9) "a, b, &c)"
       [1]=>
       int(37)
     }
   }
 }
-unicode(9) "hello
+string(9) "hello
 
 
 
@@ -126,21 +126,21 @@ array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
     [1]=>
     int(0)
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(13) "s, preg_match"
+    string(13) "s, preg_match"
     [1]=>
     int(13)
   }
   [2]=>
   array(2) {
     [0]=>
-    unicode(9) "
+    string(9) "
 {
 lalala"
     [1]=>

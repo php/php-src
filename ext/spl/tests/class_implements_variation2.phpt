@@ -117,56 +117,56 @@ fclose($res);
 
 --int 0--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --int 1--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --int 12345--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --int -12345--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --float 10.5--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --float -10.5--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --float 12.3456789000e10--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --float -12.3456789000e10--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --float .5--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --empty array--
@@ -187,50 +187,50 @@ bool(false)
 
 --uppercase NULL--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --lowercase null--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --lowercase true--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --lowercase false--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --uppercase TRUE--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --uppercase FALSE--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --empty string DQ--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --empty string SQ--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --instance of classWithToString--
@@ -243,14 +243,14 @@ bool(false)
 
 --undefined var--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --unset var--
 array(1) {
-  [u"Traversable"]=>
-  unicode(11) "Traversable"
+  ["Traversable"]=>
+  string(11) "Traversable"
 }
 
 --resource--

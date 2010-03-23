@@ -20,11 +20,11 @@ var_dump($function->getShortName());
 ?>
 --EXPECT--
 bool(false)
-unicode(8) "stdClass"
-unicode(0) ""
-unicode(8) "stdClass"
+string(8) "stdClass"
+string(0) ""
+string(8) "stdClass"
 bool(true)
-unicode(7) "A\B\Foo"
-unicode(3) "A\B"
-unicode(3) "Foo"
+string(7) "A\B\Foo"
+string(3) "A\B"
+string(3) "Foo"
 

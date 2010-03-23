@@ -39,20 +39,20 @@ var_dump($x);
 --EXPECTF--
 array(1) {
   [0]=>
-  unicode(71) "getContinentListResponse getContinentList(getContinentList $parameters)"
+  string(71) "getContinentListResponse getContinentList(getContinentList $parameters)"
 }
 array(3) {
   [0]=>
-  unicode(64) "struct getContinentList {
+  string(64) "struct getContinentList {
  int AFFILIATE_ID;
  string PASSWORD;
 }"
   [1]=>
-  unicode(83) "struct getContinentListResponse {
+  string(83) "struct getContinentListResponse {
  getContinentListResult getContinentListResult;
 }"
   [2]=>
-  unicode(66) "struct getContinentListResult {
+  string(66) "struct getContinentListResult {
  <anyXML> schema;
  <anyXML> any;
 }"
@@ -62,11 +62,11 @@ array(3) {
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://tempuri.org/PRWebServ/getOtherInformation"><SOAP-ENV:Body><ns1:getContinentListResponse><ns1:getContinentListResult><xsd:schema><element name="test" type="xsd:string"/></xsd:schema><test>Hello World!</test><test>Bye World!</test></ns1:getContinentListResult></ns1:getContinentListResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 object(stdClass)#%d (1) {
-  [u"getContinentListResult"]=>
+  ["getContinentListResult"]=>
   object(stdClass)#%d (2) {
-    [u"schema"]=>
-    unicode(65) "<xsd:schema><element name="test" type="xsd:string"/></xsd:schema>"
-    [u"any"]=>
-    unicode(48) "<test>Hello World!</test><test>Bye World!</test>"
+    ["schema"]=>
+    string(65) "<xsd:schema><element name="test" type="xsd:string"/></xsd:schema>"
+    ["any"]=>
+    string(48) "<test>Hello World!</test><test>Bye World!</test>"
   }
 }

@@ -24,8 +24,8 @@ var_dump(readlink($tmp_link2));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: readlink(): No such file or directory in %s on line %d
 bool(false)
-unicode(%d) "%sthere_is_no_such_file"
+string(%d) "%sthere_is_no_such_file"
 Done

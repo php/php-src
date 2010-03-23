@@ -194,5 +194,5 @@ class SOAP_Interop_GroupI {
 
 $server = new SoapServer(dirname(__FILE__)."/round4_groupI_xsd.wsdl");
 $server->setClass("SOAP_Interop_GroupI");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ?>

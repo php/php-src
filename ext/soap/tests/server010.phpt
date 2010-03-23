@@ -33,7 +33,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ob_clean();
 
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -51,7 +51,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ob_end_flush();
 echo "ok\n";
 ?>

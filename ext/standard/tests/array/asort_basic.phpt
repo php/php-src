@@ -56,18 +56,18 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing asort() : basic functionality ***
 
 -- Testing asort() by supplying string array, 'flag' value is default --
 bool(true)
 array(3) {
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"o"]=>
-  unicode(6) "orange"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
 }
 
 -- Testing asort() by supplying numeric array, 'flag' value is default --
@@ -86,12 +86,12 @@ array(4) {
 -- Testing asort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"o"]=>
-  unicode(6) "orange"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
 }
 
 -- Testing asort() by supplying numeric array, 'flag' = SORT_REGULAR --
@@ -110,12 +110,12 @@ array(4) {
 -- Testing asort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
 array(3) {
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemon"
-  [u"o"]=>
-  unicode(6) "orange"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemon"
+  ["o"]=>
+  string(6) "orange"
 }
 
 -- Testing asort() by supplying numeric array, 'flag' = SORT_NUMERIC --

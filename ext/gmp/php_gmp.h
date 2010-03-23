@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -64,9 +64,9 @@ ZEND_FUNCTION(gmp_xor);
 ZEND_FUNCTION(gmp_random);
 ZEND_FUNCTION(gmp_setbit);
 ZEND_FUNCTION(gmp_clrbit);
-ZEND_FUNCTION(gmp_testbit);
 ZEND_FUNCTION(gmp_scan0);
 ZEND_FUNCTION(gmp_scan1);
+ZEND_FUNCTION(gmp_testbit);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);

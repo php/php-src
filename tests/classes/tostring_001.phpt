@@ -1,7 +1,5 @@
 --TEST--
 ZE2 __toString()
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -81,8 +79,8 @@ echo $o;
 test1 Object
 (
 )
-unicode(54) "Object of class test1 could not be converted to string"
-unicode(0) ""
+string(54) "Object of class test1 could not be converted to string"
+string(0) ""
 object(test1)#%d (0) {
 }
 ====test2====
@@ -115,12 +113,12 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-unicode(19) "Illegal offset type"
+string(19) "Illegal offset type"
 ====test8====
 test2::__toString()
-unicode(9) "Converted"
+string(9) "Converted"
 test2::__toString()
-unicode(9) "Converted"
+string(9) "Converted"
 ====test9====
 test2::__toString()
 Converted
@@ -128,5 +126,5 @@ Converted
 object(test3)#%d (0) {
 }
 test3::__toString()
-unicode(53) "Method test3::__toString() must return a string value"
+string(53) "Method test3::__toString() must return a string value"
 ====DONE====

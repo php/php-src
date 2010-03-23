@@ -181,6 +181,6 @@ string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 
 -- Iteration 24 --
 
-Warning: mb_encode_mimeheader() expects parameter 3 to be binary string, resource given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, resource given in %s on line %d
 NULL
 Done

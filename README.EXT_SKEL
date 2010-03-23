@@ -96,29 +96,7 @@ OTHER OPTIONS
   function entries and definitions at the end of the file, for copying and
   pasting into an already existing module.
 
-    --assign-params
-    --string-lens
-
-  By default, function proto 'void foo(string bar)' creates the following:
-     ...
-     zval **bar;
-     ... (zend_get_parameters_ex() called in the middle...)
-     convert_to_string_ex(bar);
-
-  Specifying both of these options changes the generated code to:
-     ...
-     zval **bar_arg;
-     int bar_len;
-     char *bar = NULL;
-     ... (zend_get_parameters_ex() called in the middle...)
-     convert_to_string_ex(bar_arg);
-     bar = Z_STRVAL_PP(bar_arg);
-     bar_len = Z_STRLEN_PP(bar_arg);
-
-  You shouldn't have to ask what happens if you leave --string-lens out. If you
-  have to, it's questionable whether you should be reading this document.
-
-    --with-xml[=file]
+    --xml[=file]
 
   Creates the basics for phpdoc .xml file.
 
@@ -156,39 +134,32 @@ EXAMPLE
   question marks to be replaced by you, and you must of course add your own
   value definitions too):
 
-/* {{{ proto bool my_drawtext(resource image, string text, resource font, int x, int y[, int color])
+/* {{{ proto bool my_drawtext(resource image, string text, resource font, int x, int y [, int color])
     */
 PHP_FUNCTION(my_drawtext)
 {
-	zval **image, **text, **font, **x, **y, **color;
-	int argc;
-	int image_id = -1;
-	int font_id = -1;
+    char *text = NULL;
+    int argc = ZEND_NUM_ARGS();
+    int image_id = -1;
+    int text_len;
+    int font_id = -1;
+    long x;
+    long y;
+    long color;
+    zval *image = NULL;
+    zval *font = NULL;
 
-	argc = ZEND_NUM_ARGS();
-	if (argc < 5 || argc > 6 || zend_get_parameters_ex(argc, &image, &text, &font, &x, &y, &color) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+    if (zend_parse_parameters(argc TSRMLS_CC, "rsrll|l", &image, &text, &text_len, &font, &x, &y, &color) == FAILURE)
+        return;
 
-	ZEND_FETCH_RESOURCE(???, ???, image, image_id, "???", ???_rsrc_id);
-	ZEND_FETCH_RESOURCE(???, ???, font, font_id, "???", ???_rsrc_id);
+    if (image) {
+        ZEND_FETCH_RESOURCE(???, ???, image, image_id, "???", ???_rsrc_id);
+    }
+    if (font) {
+        ZEND_FETCH_RESOURCE(???, ???, font, font_id, "???", ???_rsrc_id);
+    }
 
-	switch (argc) {
-		case 6:
-			convert_to_long_ex(color);
-			/* Fall-through. */
-		case 5:
-			convert_to_long_ex(y);
-			convert_to_long_ex(x);
-			/* font: fetching resources already handled. */
-			convert_to_string_ex(text);
-			/* image: fetching resources already handled. */
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-	}
-
-	php_error(E_WARNING, "my_drawtext: not yet implemented");
+    php_error(E_WARNING, "my_drawtext: not yet implemented");
 }
 /* }}} */
 

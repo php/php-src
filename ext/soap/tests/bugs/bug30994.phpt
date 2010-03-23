@@ -40,7 +40,7 @@ function bassCall() {
 
 $x = new SoapServer(NULL, array("uri"=>"http://spock/kunta/kunta"));
 $x->addFunction("bassCall");
-$x->handle();
+$x->handle($HTTP_RAW_POST_DATA);
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

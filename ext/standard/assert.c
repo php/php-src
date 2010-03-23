@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -136,13 +136,12 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int assert(string|bool assertion) U
+/* {{{ proto int assert(string|bool assertion)
    Checks if assertion is false */
 PHP_FUNCTION(assert)
 {
 	zval **assertion;
-	zval tmp;
-	int val, free_tmp = 0;
+	int val;
 	char *myeval = NULL;
 	char *compiled_string_description;
 
@@ -154,22 +153,11 @@ PHP_FUNCTION(assert)
 		return;
 	}
 
-	if (Z_TYPE_PP(assertion) == IS_STRING || Z_TYPE_PP(assertion) == IS_UNICODE) {
+	if (Z_TYPE_PP(assertion) == IS_STRING) {
 		zval retval;
 		int old_error_reporting = 0; /* shut up gcc! */
-		int myeval_len;
 
-		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
-			tmp = **assertion;
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			myeval = Z_STRVAL(tmp);
-			myeval_len = Z_STRLEN(tmp);
-			free_tmp = 1;
-		} else {
-			myeval = Z_STRVAL_PP(assertion);
-			myeval_len = Z_STRLEN_PP(assertion);
-		}
+		myeval = Z_STRVAL_PP(assertion);
 
 		if (ASSERTG(quiet_eval)) {
 			old_error_reporting = EG(error_reporting);
@@ -177,12 +165,9 @@ PHP_FUNCTION(assert)
 		}
 
 		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
-		if (zend_eval_stringl(myeval, myeval_len, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
+		if (zend_eval_stringl(myeval, Z_STRLEN_PP(assertion), &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
-			if (free_tmp) {
-				zval_dtor(&tmp);
-			}
 			if (ASSERTG(bail)) {
 				zend_bailout();
 			}
@@ -202,9 +187,6 @@ PHP_FUNCTION(assert)
 	}
 
 	if (val) {
-		if (free_tmp) {
-			zval_dtor(&tmp);
-		}
 		RETURN_TRUE;
 	}
 
@@ -226,11 +208,7 @@ PHP_FUNCTION(assert)
 
 		ZVAL_STRING(args[0], SAFE_STRING(filename), 1);
 		ZVAL_LONG (args[1], lineno);
-		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
-			ZVAL_UNICODEL(args[2], Z_USTRVAL_PP(assertion), Z_USTRLEN_PP(assertion), 1);
-		} else {
-			ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
-		}
+		ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
 
 		MAKE_STD_ZVAL(retval);
 		ZVAL_FALSE(retval);
@@ -252,17 +230,13 @@ PHP_FUNCTION(assert)
 		}
 	}
 
-	if (free_tmp) {
-		zval_dtor(&tmp);
-	}
-
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed assert_options(int what [, mixed value]) U
+/* {{{ proto mixed assert_options(int what [, mixed value])
    Set/get the various assert flags */
 PHP_FUNCTION(assert_options)
 {

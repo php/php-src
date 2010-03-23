@@ -102,15 +102,15 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 bool(false)
@@ -128,7 +128,7 @@ bool(false)
 bool(false)
 -- Iteration 20 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: get_extension_funcs() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 bool(false)

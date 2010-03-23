@@ -20,14 +20,14 @@ array(1) {
     [0]=>
     array(2) {
       [0]=>
-      unicode(0) ""
+      string(0) ""
       [1]=>
       int(0)
     }
     [1]=>
     array(2) {
       [0]=>
-      unicode(0) ""
+      string(0) ""
       [1]=>
       int(1)
     }
@@ -35,53 +35,53 @@ array(1) {
 }
 array(3) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
   [2]=>
-  unicode(1) "'"
+  string(1) "'"
 }
 array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(0) ""
+    string(0) ""
     [1]=>
     int(0)
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
     int(0)
   }
   [2]=>
   array(2) {
     [0]=>
-    unicode(1) "'"
+    string(1) "'"
     [1]=>
     int(1)
   }
 }
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "'"
+  string(1) "'"
 }
 array(2) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
     [1]=>
     int(0)
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "'"
+    string(1) "'"
     [1]=>
     int(1)
   }

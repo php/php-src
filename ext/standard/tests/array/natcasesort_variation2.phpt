@@ -175,9 +175,9 @@ array(4) {
 bool(true)
 array(2) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [0]=>
-  unicode(0) ""
+  string(0) ""
 }
 
 -- Iteration 6 --
@@ -189,11 +189,11 @@ array(0) {
 bool(true)
 array(3) {
   [2]=>
-  unicode(11) "hello world"
+  string(11) "hello world"
   [1]=>
-  unicode(6) "string"
+  string(6) "string"
   [0]=>
-  unicode(6) "string"
+  string(6) "string"
 }
 
 -- Iteration 8 --

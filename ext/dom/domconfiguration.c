@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,8 +59,7 @@ const zend_function_entry php_dom_domconfiguration_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
-/* {{{ proto dom_void dom_domconfiguration_set_parameter(string name, domuserdata value) U
+/* {{{ proto dom_void dom_domconfiguration_set_parameter(string name, domuserdata value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-property
 Since: 
 */
@@ -70,8 +69,7 @@ PHP_FUNCTION(dom_domconfiguration_set_parameter)
 }
 /* }}} end dom_domconfiguration_set_parameter */
 
-
-/* {{{ proto domdomuserdata dom_domconfiguration_get_parameter(string name) U
+/* {{{ proto domdomuserdata dom_domconfiguration_get_parameter(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-getParameter
 Since: 
 */
@@ -81,8 +79,7 @@ PHP_FUNCTION(dom_domconfiguration_get_parameter)
 }
 /* }}} end dom_domconfiguration_get_parameter */
 
-
-/* {{{ proto boolean dom_domconfiguration_can_set_parameter(string name, domuserdata value) U
+/* {{{ proto boolean dom_domconfiguration_can_set_parameter(string name, domuserdata value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-canSetParameter
 Since: 
 */

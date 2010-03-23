@@ -52,9 +52,9 @@ bool(true)
 SELECTING results
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(23) "X'61626364656667006869'"
+  string(23) "X'61626364656667006869'"
 }
 Closing database
 bool(true)

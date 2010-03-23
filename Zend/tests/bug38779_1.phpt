@@ -1,7 +1,5 @@
 --TEST--
 Bug #38779 (engine crashes when require()'ing file with syntax error through userspace stream wrapper)
---INI--
-allow_url_include="*"
 --FILE--
 <?php
 
@@ -33,16 +31,15 @@ stream_wrapper_register('Loader', 'Loader');
 $fp = fopen ('Loader://qqq.php', 'r');
 
 $filename = dirname(__FILE__)."/bug38779.txt";
-$fp1 = fopen($filename, "wt");
+$fp1 = fopen($filename, "w");
 fwrite($fp1, "<"."?php blah blah?".">");
 fclose($fp1);
 
 include $filename;
+
+echo "Done\n";
 ?>
-===DONE===
---CLEAN--
-<?php unlink(dirname(__FILE__) . '/bug38779.txt'); ?>
---EXPECTF--
+--EXPECTF--	
 Parse error: %s error%sin %s on line %d
-unicode(6) "flush!"
-unicode(6) "close!"
+string(6) "flush!"
+string(6) "close!"

@@ -139,68 +139,69 @@ var_dump( str_replace("worldS", "FOUND", "{$str}S") );
 
 fclose($resource1);
 closedir($resource2);
+
 ?>
 ===DONE===
 --EXPECTF--	
 *** Testing Miscelleneous input data ***
-unicode(3) "qqq"
+string(3) "qqq"
 int(5)
 array(3) {
   [0]=>
-  unicode(3) "qqq"
+  string(3) "qqq"
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(3) "ccc"
+  string(3) "ccc"
 }
 int(6)
 
 -- Testing objects --
-unicode(12) "Hello, world"
+string(12) "Hello, world"
 int(1)
 
 -- Testing arrays --
-unicode(15) "multimultimulti"
+string(15) "multimultimulti"
 int(3)
-unicode(3) "qqq"
+string(3) "qqq"
 int(3)
 array(2) {
   [0]=>
-  unicode(3) "qqq"
+  string(3) "qqq"
   [1]=>
-  unicode(3) "ccc"
+  string(3) "ccc"
 }
 int(6)
 
 Notice: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
-  unicode(15) "ArrayArrayArray"
+  string(15) "ArrayArrayArray"
 }
 int(3)
 array(2) {
   [0]=>
-  unicode(3) "111"
+  string(3) "111"
   [1]=>
-  unicode(3) "bbb"
+  string(3) "bbb"
 }
 int(3)
 array(2) {
   [0]=>
-  unicode(4) "aaa3"
+  string(4) "aaa3"
   [1]=>
-  unicode(4) "2bbb"
+  string(4) "2bbb"
 }
 int(1)
 
 -- Testing Resources --
-unicode(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 int(0)
-unicode(%d) "Resource id #%d"
+string(%d) "Resource id #%d"
 int(0)
 
 -- Testing a longer and heredoc string --
-unicode(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
+string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
 FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
 FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
 FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
@@ -212,15 +213,15 @@ FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789"
 int(16)
 
 -- Testing a heredoc null string --
-unicode(0) ""
+string(0) ""
 int(0)
 
 -- Testing simple and complex syntax strings --
-unicode(5) "FOUND"
-unicode(5) "FOUND"
+string(5) "FOUND"
+string(5) "FOUND"
 
 Notice: Undefined variable: strS in %s on line %d
-unicode(0) ""
-unicode(5) "FOUND"
-unicode(5) "FOUND"
+string(0) ""
+string(5) "FOUND"
+string(5) "FOUND"
 ===DONE===

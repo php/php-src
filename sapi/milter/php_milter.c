@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -823,7 +823,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ milter_functions[]
 */
-static const zend_function_entry milter_functions[] = {
+const static zend_function_entry milter_functions[] = {
 	PHP_FE(smfi_setflags, 		arginfo_smfi_setflags)
 	PHP_FE(smfi_settimeout, 	arginfo_smfi_settimeout)
 	PHP_FE(smfi_getsymval, 		arginfo_smfi_getsymval)
@@ -1040,10 +1040,11 @@ int main(int argc, char *argv[])
 		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 			switch (c) {
 			case '?':
-				php_output_tearup();
+				php_output_startup();
+				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_milter_usage(argv[0]);
-				php_output_teardown();
+				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 				break;
 			}
@@ -1087,10 +1088,11 @@ int main(int argc, char *argv[])
 
 			case 'h': /* help & quit */
 			case '?':
-				php_output_tearup();
+				php_output_startup();
+				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_milter_usage(argv[0]);
-				php_output_teardown();
+				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 				break;
 
@@ -1110,7 +1112,7 @@ int main(int argc, char *argv[])
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2010 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-				php_output_teardown();
+				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 				break;
 

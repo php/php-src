@@ -36,29 +36,29 @@ var_dump(current($a));
 
 ?>
 --EXPECT--
-unicode(1) "a"
-unicode(1) "b"
-unicode(1) "c"
+string(1) "a"
+string(1) "b"
+string(1) "c"
 int(0)
-unicode(1) "a"
+string(1) "a"
 int(1)
-unicode(1) "b"
+string(1) "b"
 int(2)
-unicode(1) "c"
+string(1) "c"
 int(2)
-unicode(1) "c"
+string(1) "c"
 
-unicode(1) "d"
-unicode(1) "e"
-unicode(1) "f"
+string(1) "d"
+string(1) "e"
+string(1) "f"
 int(0)
-unicode(1) "d"
+string(1) "d"
 int(1)
-unicode(1) "e"
+string(1) "e"
 int(2)
-unicode(1) "f"
+string(1) "f"
 int(2)
-unicode(1) "f"
+string(1) "f"
 
 bool(false)
 bool(false)

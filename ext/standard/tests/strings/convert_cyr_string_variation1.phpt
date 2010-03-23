@@ -104,15 +104,15 @@ string(5) "-20.5"
 string(12) "101234567000"
 -- Iteration 10 --
 
-Warning: convert_cyr_string() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: convert_cyr_string() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: convert_cyr_string() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: convert_cyr_string() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: convert_cyr_string() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: convert_cyr_string() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(1) "1"
@@ -130,7 +130,7 @@ string(0) ""
 string(13) "sample object"
 -- Iteration 20 --
 
-Warning: convert_cyr_string() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: convert_cyr_string() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 string(0) ""

@@ -38,22 +38,22 @@ foreach($inputs as $key =>$value) {
 *** Testing gmdate() : usage variation ***
 
 --Day with leading zeros--
-unicode(%d) "%d"
-unicode(2) "08"
+string(%d) "%d"
+string(2) "08"
 
 --Day without leading zeros--
-unicode(%d) "%d"
-unicode(1) "8"
+string(%d) "%d"
+string(1) "8"
 
 --ISO representation--
-unicode(%d) "%d"
-unicode(1) "5"
+string(%d) "%d"
+string(1) "5"
 
 --Numeric representation of day--
-unicode(%d) "%d"
-unicode(1) "5"
+string(%d) "%d"
+string(1) "5"
 
 --Day of the year--
-unicode(%d) "%d"
-unicode(3) "220"
+string(%d) "%d"
+string(3) "220"
 ===DONE===

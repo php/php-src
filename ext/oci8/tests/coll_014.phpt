@@ -34,5 +34,5 @@ require dirname(__FILE__)."/drop_type.inc";
 --EXPECT--
 bool(true)
 bool(true)
-unicode(4) "blah"
+string(4) "blah"
 Done

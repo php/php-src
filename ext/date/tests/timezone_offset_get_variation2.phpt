@@ -197,32 +197,32 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, Unicode string given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTime, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --

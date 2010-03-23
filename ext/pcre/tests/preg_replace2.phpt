@@ -2,8 +2,8 @@
 preg_replace()
 --SKIPIF--
 <?php
-if (@preg_match_all('/./u', "", $matches) === false) {
-	die("skip no utf8 support in PCRE library");
+if (@preg_match('/./u', '') === false) {
+	die('skip no utf8 support in PCRE library');
 }
 ?>
 --FILE--
@@ -22,27 +22,27 @@ echo "==done==\n";
 
 ?>
 --EXPECTF--
-Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %s on line %d
+Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace2.php on line 3
 bool(false)
-unicode(1) "c"
+string(1) "c"
 array(3) {
   [0]=>
-  unicode(1) "x"
+  string(1) "x"
   [1]=>
-  unicode(2) "aA"
+  string(2) "aA"
   [2]=>
-  unicode(2) "vb"
+  string(2) "vb"
 }
 array(2) {
   [0]=>
-  unicode(1) "$"
+  string(1) "$"
   [1]=>
-  unicode(1) "$"
+  string(1) "$"
 }
 array(2) {
   [0]=>
-  unicode(3) "x$y"
+  string(3) "x$y"
   [1]=>
-  unicode(1) "$"
+  string(1) "$"
 }
 ==done==

@@ -75,9 +75,7 @@ Warning: readfile(): Filename cannot be empty in %s on line %d
 
 -- Filename: array() --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: readfile(Array): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile() expects parameter 1 to be string, array given in %s on line %d
 
 -- Filename: /no/such/file/dir --
 

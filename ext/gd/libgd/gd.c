@@ -1,4 +1,4 @@
-#include <stdio.h>
+
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1948,6 +1948,7 @@ skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
 	}
+
 	efree(stack);
 
 done:
@@ -2116,11 +2117,13 @@ void gdImageFilledRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int 
 		gdImageSetPixel(im, x1, y1, color);
 		return;
 	}
+
 	if (x1 > x2) {
 		x = x1;
 		x1 = x2;
 		x2 = x;
 	}
+
 	if (y1 > y2) {
 		y = y1;
 		y1 = y2;
@@ -2324,6 +2327,7 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
 				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
 
+
 				/* First look for an exact match */
 				nc = gdImageColorExact(dst, ncR, ncG, ncB);
 				if (nc == (-1)) {
@@ -2459,6 +2463,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 {
 	int x, y;
 	double sy1, sy2, sx1, sx2;
+
 	if (!dst->trueColor) {
 		gdImageCopyResized (dst, src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 		return;
@@ -3008,3 +3013,4 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 	*x2P = im->cx2;
 	*y2P = im->cy2;
 }
+

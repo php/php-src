@@ -37,17 +37,17 @@ for ($i = $length; $i > 0; $i--) {
 --EXPECTF--
 *** Testing prev() : basic functionality ***
 2 => two
-unicode(3) "one"
+string(3) "one"
 1 => one
-unicode(4) "zero"
+string(4) "zero"
 0 => zero
 bool(false)
 
 *** Testing an array with differing values/keys ***
-unicode(4) "val2"
+string(4) "val2"
 bool(false)
 int(3)
-unicode(4) "help"
-unicode(3) "one"
+string(4) "help"
+string(3) "one"
 bool(false)
 ===DONE===

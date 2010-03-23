@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -275,9 +275,8 @@ PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
 
-	if (stm == NULL) {
+	if (stm == NULL)
 		return NULL;
-	}
 
 	memset(stm, 0, sizeof(*stm));
 	stm->engine_thread = GetCurrentThreadId();
@@ -390,15 +389,17 @@ CPH_METHOD(SaveToFile)
 		}
 
 		if (filename) {
-			if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
+			fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+			if (!fullpath) {
 				RETURN_FALSE;
 			}
-
-			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+	
+			if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || 
+					php_check_open_basedir(fullpath TSRMLS_CC)) {
 				efree(fullpath);
 				RETURN_FALSE;
 			}
-			
+
 			olefilename = php_com_string_to_olestring(filename, strlen(fullpath), helper->codepage TSRMLS_CC);
 			efree(fullpath);
 		}
@@ -456,7 +457,8 @@ CPH_METHOD(LoadFromFile)
 			RETURN_FALSE;
 		}
 
-		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
+				php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			RETURN_FALSE;
 		}

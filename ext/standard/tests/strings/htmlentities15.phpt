@@ -4,8 +4,6 @@ htmlentities() test 15 (setlocale / KOI8-R)
 output_handler=
 default_charset=
 mbstring.internal_encoding=pass
-unicode.script_encoding=KOI-8
-unicode.output_encoding=KOI-8
 --SKIPIF--
 <?php
 $result = (bool)setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
@@ -19,7 +17,6 @@ setlocale(LC_CTYPE, "ru_RU.koi8r", "ru_RU.KOI8-R");
 $str = "роскошный";
 var_dump($str, htmlentities($str, ENT_QUOTES, ''));
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-unicode(9) "роскошный"
-unicode(9) "роскошный"
+--EXPECT--
+string(9) "роскошный"
+string(63) "&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"

@@ -77,5 +77,5 @@ class SOAP_Interop_Base {
 ini_set("soap.wsdl_cache_enabled",0);
 $server = new SoapServer(dirname(__FILE__)."/round2_base.wsdl");
 $server->setClass("SOAP_Interop_Base");
-$server->handle();
+$server->handle($HTTP_RAW_POST_DATA);
 ?>

@@ -27,11 +27,11 @@ echo "Ok\n";
 --EXPECT--
 test_class::__construct(1,2)
 object(test_class)#1 (3) {
-  [u"num"]=>
-  unicode(1) "0"
-  [u"str"]=>
-  unicode(3) "ABC"
-  [u"bin"]=>
+  ["num"]=>
+  string(1) "0"
+  ["str"]=>
+  string(3) "ABC"
+  ["bin"]=>
   NULL
 }
 Ok

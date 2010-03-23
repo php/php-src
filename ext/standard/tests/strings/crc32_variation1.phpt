@@ -134,27 +134,27 @@ int(-2036403827)
 
 -- Iteration 10 --
 
-Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 11 --
 
-Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 12 --
 
-Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: crc32() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
 -- Iteration 15 --
@@ -176,14 +176,10 @@ int(-2082672713)
 int(0)
 
 -- Iteration 21 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 22 --
-
-Warning: crc32() expects parameter 1 to be strictly a binary string, Unicode string given in %s on line %d
-NULL
+int(0)
 
 -- Iteration 23 --
 int(-1465013268)
@@ -196,6 +192,6 @@ int(0)
 
 -- Iteration 26 --
 
-Warning: crc32() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: crc32() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done

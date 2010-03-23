@@ -49,49 +49,30 @@ var_dump($d.$d);
 
 echo "Done\n";
 ?>
---EXPECTF--
-Notice: Array to string conversion in %s on line %d
-unicode(24) "Arraythis is test object"
-
-Notice: Array to string conversion in %s on line %d
-unicode(16) "Arraysome string"
-
-Notice: Array to string conversion in %s on line %d
-unicode(8) "Array222"
-
-Notice: Array to string conversion in %s on line %d
-unicode(13) "Array2323.444"
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-unicode(10) "ArrayArray"
-
-Notice: Array to string conversion in %s on line %d
-unicode(24) "this is test objectArray"
-unicode(30) "this is test objectsome string"
-unicode(22) "this is test object222"
-unicode(27) "this is test object2323.444"
-unicode(38) "this is test objectthis is test object"
-unicode(30) "some stringthis is test object"
-
-Notice: Array to string conversion in %s on line %d
-unicode(16) "some stringArray"
-unicode(14) "some string222"
-unicode(19) "some string2323.444"
-unicode(22) "some stringsome string"
-
-Notice: Array to string conversion in %s on line %d
-unicode(8) "222Array"
-unicode(22) "222this is test object"
-unicode(14) "222some string"
-unicode(11) "2222323.444"
-unicode(6) "222222"
-
-Notice: Array to string conversion in %s on line %d
-unicode(13) "2323.444Array"
-unicode(27) "2323.444this is test object"
-unicode(19) "2323.444some string"
-unicode(11) "2323.444222"
-unicode(16) "2323.4442323.444"
+--EXPECTF--	
+string(24) "Arraythis is test object"
+string(16) "Arraysome string"
+string(8) "Array222"
+string(13) "Array2323.444"
+string(10) "ArrayArray"
+string(24) "this is test objectArray"
+string(30) "this is test objectsome string"
+string(22) "this is test object222"
+string(27) "this is test object2323.444"
+string(38) "this is test objectthis is test object"
+string(30) "some stringthis is test object"
+string(16) "some stringArray"
+string(14) "some string222"
+string(19) "some string2323.444"
+string(22) "some stringsome string"
+string(8) "222Array"
+string(22) "222this is test object"
+string(14) "222some string"
+string(11) "2222323.444"
+string(6) "222222"
+string(13) "2323.444Array"
+string(27) "2323.444this is test object"
+string(19) "2323.444some string"
+string(11) "2323.444222"
+string(16) "2323.4442323.444"
 Done

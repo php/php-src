@@ -13,6 +13,6 @@ Ensure extends does trigger autoload.
   }
 ?>
 --EXPECTF--
-In autoload: unicode(9) "UndefBase"
+In autoload: string(9) "UndefBase"
 
 Fatal error: Class 'UndefBase' not found in %s on line %d

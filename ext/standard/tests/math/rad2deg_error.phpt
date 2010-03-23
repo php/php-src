@@ -22,10 +22,10 @@ var_dump(rad2deg());
 --EXPECTF--
 Too many arguments
 
-Warning: rad2deg() expects exactly 1 parameter, 2 given in %s on line 11
+Warning: rad2deg() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 Too few arguments
 
-Warning: rad2deg() expects exactly 1 parameter, 0 given in %s on line 14
+Warning: rad2deg() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

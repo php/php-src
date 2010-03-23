@@ -94,6 +94,9 @@ for($index = 0; $index < count($values); $index ++) {
   $counter ++;
 }
 
+// close the resources used
+fclose($fp);
+
 echo "Done\n";
 ?>
 --EXPECTF--

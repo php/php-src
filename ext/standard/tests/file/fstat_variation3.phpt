@@ -23,20 +23,20 @@ foreach ( $variation_array as $var ) {
 --EXPECTF--
 
 Warning: fstat() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: fstat() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
-
-Warning: fstat() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+Warning: fstat() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
+
+Warning: fstat() expects parameter 1 to be resource, null given in %s on line %d
+bool(false)
 ===DONE===

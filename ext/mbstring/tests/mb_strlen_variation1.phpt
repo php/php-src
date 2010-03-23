@@ -29,7 +29,7 @@ unset ($unset_var);
 class classA
 {
   public function __toString() {
-    return "Class A object";
+    return b"Class A object";
   }
 }
 
@@ -175,6 +175,6 @@ int(0)
 
 -- Iteration 24 --
 
-Warning: mb_strlen() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: mb_strlen() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 Done

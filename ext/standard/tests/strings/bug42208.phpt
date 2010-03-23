@@ -9,7 +9,7 @@ var_dump(substr_replace($a, 1, 1, $c));
 --EXPECT--
 array(2) {
   [0]=>
-  unicode(2) "11"
+  string(2) "11"
   [1]=>
-  unicode(2) "21"
+  string(2) "21"
 }

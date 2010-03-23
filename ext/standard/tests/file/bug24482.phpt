@@ -13,7 +13,7 @@ $globdirs = glob("*", GLOB_ONLYDIR);
 $dirs = array();
 $dh = opendir(".");
 while (is_string($file = readdir($dh))) {
-	if ($file{0} === ".") continue;
+	if ($file[0] === ".") continue;
 	if (!is_dir($file)) continue;
 	$dirs[] = $file;
 }

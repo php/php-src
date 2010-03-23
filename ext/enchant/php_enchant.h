@@ -45,8 +45,6 @@ PHP_FUNCTION(enchant_broker_free);
 PHP_FUNCTION(enchant_broker_get_error);
 PHP_FUNCTION(enchant_broker_set_dict_path);
 PHP_FUNCTION(enchant_broker_get_dict_path);
-PHP_FUNCTION(enchant_broker_set_dict_path);
-PHP_FUNCTION(enchant_broker_get_dict_path);
 PHP_FUNCTION(enchant_broker_list_dicts);
 PHP_FUNCTION(enchant_broker_request_dict);
 PHP_FUNCTION(enchant_broker_request_pwl_dict);

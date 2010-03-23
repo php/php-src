@@ -89,7 +89,7 @@ Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink() expects parameter 2 to be resource, Unicode string given in %s on line %d
+Warning: unlink() expects parameter 2 to be resource, string given in %s on line %d
 bool(false)
 
 Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d

@@ -1120,16 +1120,18 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 		  We have to call the appropriate use_result() or store_result() and
 		  clean.
 		*/
-		if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
-			DBG_INF("fetching result set header");
-			stmt->default_rset_handler(s TSRMLS_CC);
-			stmt->state = MYSQLND_STMT_USER_FETCHING;
-		}
+		do {
+			if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
+				DBG_INF("fetching result set header");
+				stmt->default_rset_handler(s TSRMLS_CC);
+				stmt->state = MYSQLND_STMT_USER_FETCHING;
+			}
 
-		if (stmt->result) {
-			DBG_INF("skipping result");
-			stmt->result->m.skip_result(stmt->result TSRMLS_CC);
-		}
+			if (stmt->result) {
+				DBG_INF("skipping result");
+				stmt->result->m.skip_result(stmt->result TSRMLS_CC);
+			}
+		} while (mysqlnd_stmt_more_results(s) && mysqlnd_stmt_next_result(s) == PASS);
 
 		/*
 		  Don't free now, let the result be usable. When the stmt will again be
@@ -2143,7 +2145,7 @@ MYSQLND_CLASS_METHODS_END;
 MYSQLND_STMT * _mysqlnd_stmt_init(MYSQLND * const conn TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_STMT * ret = mnd_pemalloc(alloc_size, conn->persistent);
+	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
 	MYSQLND_STMT_DATA * stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), conn->persistent);
 
 	DBG_ENTER("_mysqlnd_stmt_init");

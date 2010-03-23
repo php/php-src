@@ -24,26 +24,27 @@ var_dump(gd_info());
 --EXPECTF--
 *** Testing gd_info() : variation ***
 array(%d) {
-  [u"GD Version"]=>
-  unicode(%d) %a
-  [u"FreeType Support"]=>
+  ["GD Version"]=>
+  string(%d) %a
+  ["FreeType Support"]=>
   bool%a
-  [u"T1Lib Support"]=>
+  ["T1Lib Support"]=>
   bool%a
-  [u"GIF Read Support"]=>
+  ["GIF Read Support"]=>
   bool%a
-  [u"GIF Create Support"]=>
+  ["GIF Create Support"]=>
   bool%a
-  [u"JPEG Support"]=>
+  ["JPEG Support"]=>
   bool%a
-  [u"PNG Support"]=>
+  ["PNG Support"]=>
   bool%a
-  [u"WBMP Support"]=>
+  ["WBMP Support"]=>
   bool%a
-  [u"XPM Support"]=>
+  ["XPM Support"]=>
   bool%a
-  [u"XBM Support"]=>
+  ["XBM Support"]=>
   bool%a
-  [u"JIS-mapped Japanese Font Support"]=>
+  ["JIS-mapped Japanese Font Support"]=>
   bool%a
-===DONE===  	
+}
+===DONE===

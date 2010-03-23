@@ -10,7 +10,7 @@ Test krsort() function : usage variations - sort array with/without key values
 /*
  * Testing krsort() by providing arrays  with/without key values for $array argument
  * with following flag values:
- *  1.flag value as default
+ *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
  */
 
@@ -34,7 +34,7 @@ echo "\n-- Testing krsort() by supplying various arrays with/without key values 
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With default sort flag -\n";
+  echo "- With defualt sort flag -\n";
   $temp_array = $array;
   var_dump( krsort($temp_array) );
   var_dump($temp_array);
@@ -48,13 +48,13 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying various arrays with/without key values --
 
 -- Iteration 1 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(5) {
   [9]=>
@@ -84,29 +84,29 @@ array(5) {
 }
 
 -- Iteration 2 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(3) {
-  [u"c"]=>
-  unicode(5) "apple"
+  ["c"]=>
+  string(5) "apple"
   [0]=>
-  unicode(6) "banana"
-  [u"a"]=>
-  unicode(6) "orange"
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(3) {
-  [u"c"]=>
-  unicode(5) "apple"
+  ["c"]=>
+  string(5) "apple"
   [0]=>
-  unicode(6) "banana"
-  [u"a"]=>
-  unicode(6) "orange"
+  string(6) "banana"
+  ["a"]=>
+  string(6) "orange"
 }
 
 -- Iteration 3 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(6) {
   [5]=>
@@ -140,29 +140,29 @@ array(6) {
 }
 
 -- Iteration 4 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(3) {
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [1]=>
-  unicode(5) "third"
+  string(5) "third"
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(3) {
   [5]=>
-  unicode(6) "second"
+  string(6) "second"
   [1]=>
-  unicode(5) "third"
+  string(5) "third"
   [0]=>
-  unicode(5) "first"
+  string(5) "first"
 }
 
 -- Iteration 5 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(6) {
   [9]=>
@@ -196,62 +196,62 @@ array(6) {
 }
 
 -- Iteration 6 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1)
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(2) {
-  [u"foo"]=>
+  ["foo"]=>
   int(1)
-  [u"bar"]=>
-  unicode(3) "baz"
+  ["bar"]=>
+  string(3) "baz"
 }
 
 -- Iteration 7 --
-- With default sort flag -
+- With defualt sort flag -
 bool(true)
 array(4) {
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(4) {
-  [u"d"]=>
+  ["d"]=>
   int(5)
-  [u"c"]=>
+  ["c"]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
-  [u"b"]=>
+  ["b"]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 Done

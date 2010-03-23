@@ -10,7 +10,7 @@ Test token_get_all() function : error conditions
 echo "*** Testing token_get_all() : error conditions ***\n";
 
 // with zero arguments
-echo "-- Testing token_get_all() function with zero arguments --\n";
+echo "\n-- Testing token_get_all() function with zero arguments --\n";
 var_dump( token_get_all());
 
 // with one more than the expected number of arguments
@@ -23,6 +23,7 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing token_get_all() : error conditions ***
+
 -- Testing token_get_all() function with zero arguments --
 
 Warning: token_get_all() expects exactly 1 parameter, 0 given in %s on line %d

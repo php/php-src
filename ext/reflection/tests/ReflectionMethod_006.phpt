@@ -37,18 +37,18 @@ var_dump($rm->getName(1));
 --EXPECTF--
 Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 0 given in %s on line %d
 object(ReflectionMethod)#%d (2) {
-  [u"name"]=>
-  unicode(0) ""
-  [u"class"]=>
-  unicode(0) ""
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
 }
 
 Warning: ReflectionMethod::__construct() expects exactly 1 parameter, 3 given in %s on line %d
 object(ReflectionMethod)#%d (2) {
-  [u"name"]=>
-  unicode(0) ""
-  [u"class"]=>
-  unicode(0) ""
+  ["name"]=>
+  string(0) ""
+  ["class"]=>
+  string(0) ""
 }
 
 Warning: ReflectionMethod::isFinal() expects exactly 0 parameters, 1 given in %s on line %d

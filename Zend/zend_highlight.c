@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -25,9 +25,8 @@
 #include "zend_highlight.h"
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
-#include "zend_operators.h"
 
-ZEND_API void zend_html_putc(char c) /* {{{ */
+ZEND_API void zend_html_putc(char c)
 {
 	switch (c) {
 		case '\n':
@@ -53,11 +52,22 @@ ZEND_API void zend_html_putc(char c) /* {{{ */
 			break;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC) /* {{{ */
+
+ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const char *ptr=s, *end=s+len;
+
+#ifdef ZEND_MULTIBYTE
+	char *filtered;
+	int filtered_len;
+
+	if (LANG_SCNG(output_filter)) {
+		LANG_SCNG(output_filter)(&filtered, &filtered_len, s, len TSRMLS_CC);
+		ptr = filtered;
+		end = filtered + filtered_len;
+	}
+#endif /* ZEND_MULTIBYTE */
 
 	while (ptr<end) {
 		if (*ptr==' ') {
@@ -68,21 +78,26 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC) /* {{{ */
 			zend_html_putc(*ptr++);
 		}
 	}
-}
-/* }}} */
 
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC) /* {{{ */
+#ifdef ZEND_MULTIBYTE
+	if (LANG_SCNG(output_filter)) {
+		efree(filtered);
+	}
+#endif /* ZEND_MULTIBYTE */
+}
+
+
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
 {
 	zval token;
 	int token_type;
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
 
-	CG(literal_type) = IS_STRING;
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
-	Z_TYPE(token) = 0;
+	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
@@ -106,11 +121,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_WHITESPACE:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
-				Z_TYPE(token) = 0;
+				token.type = 0;
 				continue;
 				break;
 			default:
-				if (Z_TYPE(token) == 0) {
+				if (token.type == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
 					next_color = syntax_highlighter_ini->highlight_default;
@@ -130,8 +145,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
-		if (Z_TYPE(token) == IS_STRING ||
-			Z_TYPE(token) == IS_UNICODE) {
+		if (token.type == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -141,13 +155,13 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					efree(Z_UNIVAL(token).v);
+					efree(token.value.str.val);
 					break;
 			}
 		} else if (token_type == T_END_HEREDOC) {
-			efree(Z_UNIVAL(token).v);
+			efree(token.value.str.val);
 		}
-		Z_TYPE(token) = 0;
+		token.type = 0;
 	}
 
 	if (last_color != syntax_highlighter_ini->highlight_html) {
@@ -156,16 +170,14 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("</span>\n");
 	zend_printf("</code>");
 }
-/* }}} */
 
-ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
+ZEND_API void zend_strip(TSRMLS_D)
 {
 	zval token;
 	int token_type;
 	int prev_space = 0;
 
-	CG(literal_type) = IS_STRING;
-	Z_TYPE(token) = 0;
+	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_WHITESPACE:
@@ -176,19 +188,19 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 						/* lack of break; is intentional */
 			case T_COMMENT:
 			case T_DOC_COMMENT:
-				Z_TYPE(token) = 0;
+				token.type = 0;
 				continue;
-
+			
 			case T_END_HEREDOC:
 				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-				efree(Z_STRVAL(token));
+				efree(token.value.str.val);
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
 					zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
 				zend_write("\n", sizeof("\n") - 1);
 				prev_space = 1;
-				Z_TYPE(token) = 0;
+				token.type = 0;
 				continue;
 
 			default:
@@ -196,8 +208,7 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 				break;
 		}
 
-		if (Z_TYPE(token) == IS_STRING ||
-			Z_TYPE(token) == IS_UNICODE) {
+		if (token.type == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -208,14 +219,13 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
 					break;
 
 				default:
-					efree(Z_UNIVAL(token).v);
+					efree(token.value.str.val);
 					break;
 			}
 		}
-		prev_space = Z_TYPE(token) = 0;
+		prev_space = token.type = 0;
 	}
 }
-/* }}} */
 
 /*
  * Local variables:
@@ -224,3 +234,4 @@ ZEND_API void zend_strip(TSRMLS_D) /* {{{ */
  * indent-tabs-mode: t
  * End:
  */
+

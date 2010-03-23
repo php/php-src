@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -321,13 +321,13 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(const zval **object, zstr name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
 }
 
-static int saproxy_call_method(zstr method, INTERNAL_FUNCTION_PARAMETERS)
+static int saproxy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	return FAILURE;
 }
@@ -343,9 +343,9 @@ static zend_class_entry *saproxy_class_entry_get(const zval *object TSRMLS_DC)
 	return php_com_saproxy_class_entry;
 }
 
-static int saproxy_class_name_get(const zval *object, zstr *class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int saproxy_class_name_get(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	(*class_name).s = estrndup(php_com_saproxy_class_entry->name.s, php_com_saproxy_class_entry->name_length);
+	*class_name = estrndup(php_com_saproxy_class_entry->name, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;
 	return 0;
 }
@@ -355,7 +355,7 @@ static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static int saproxy_object_cast(zval *readobj, zval *writeobj, int type, void *extra TSRMLS_DC)
+static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	return FAILURE;
 }
@@ -519,7 +519,8 @@ static void saproxy_iter_get_data(zend_object_iterator *iter, zval ***data TSRML
 	*data = ptr_ptr;
 }
 
-static int saproxy_iter_get_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int saproxy_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
+	ulong *int_key TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
 

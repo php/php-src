@@ -33,6 +33,7 @@
 
 /* PHP Runtime Configuration */
 #define PHP_URL_FOPEN 1
+#define PHP_SAFE_MODE 0
 #define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
@@ -157,7 +158,7 @@
 /* Win32 support proc_open */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
 
-/* inet_ptop() & inet_nton() */
+/* inet_ntop() / inet_pton() */
 #define HAVE_INET_PTON 1
 #define HAVE_INET_NTOP 1
 
@@ -165,7 +166,7 @@
 
 #undef HAVE_ATOF_ACCEPTS_NAN
 #undef HAVE_ATOF_ACCEPTS_INF
-#define HAVE_HUGE_VAL_NAN 0 
+#define HAVE_HUGE_VAL_NAN 0
 
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch

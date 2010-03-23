@@ -20,8 +20,8 @@ var_dump(get_parent_class(new CasesensitivitytestCHILD));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing get_parent_class() : variation ***
-unicode(19) "caseSensitivityTest"
-unicode(19) "caseSensitivityTest"
+string(19) "caseSensitivityTest"
+string(19) "caseSensitivityTest"
 Done

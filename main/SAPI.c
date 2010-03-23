@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,6 +29,9 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
+#include "ext/pcre/php_pcre.h"
+#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -67,6 +70,7 @@ static void sapi_globals_dtor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 /* True globals (no need for thread safety) */
 SAPI_API sapi_module_struct sapi_module;
 
+
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
 	sf->ini_entries = NULL;
@@ -104,30 +108,23 @@ SAPI_API void sapi_shutdown(void)
 #endif
 }
 
+
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 {
 	efree(sapi_header->header);
 }
 
+
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
 	if (SG(request_info).post_entry && SG(request_info).content_type_dup) {
-		/*
-		 * We need to re-populate post_data from the stored raw POST data in case we had
-		 * any before, so that the handler can get to it.
-		 */
-		if (SG(request_info).post_data == NULL && SG(request_info).raw_post_data != NULL) {
-			SG(request_info).post_data = estrndup(SG(request_info).raw_post_data, SG(request_info).raw_post_data_length);
-		}
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg TSRMLS_CC);
 		if (SG(request_info).post_data) {
 			efree(SG(request_info).post_data);
 			SG(request_info).post_data = NULL;
 		}
-#if 0 /* UTODO see if this works */
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
-#endif
 	}
 }
 
@@ -139,6 +136,7 @@ static void sapi_read_post_data(TSRMLS_D)
 	char *p;
 	char oldchar=0;
 	void (*post_reader_func)(TSRMLS_D) = NULL;
+
 
 	/* dedicated implementation for increased performance:
 	 * - Make the content type lowercase
@@ -160,7 +158,8 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 
 	/* now try to find an appropriate POST content handler */
-	if (zend_hash_find(&SG(known_post_content_types), content_type, content_type_length + 1, (void **) &post_entry) == SUCCESS) {
+	if (zend_hash_find(&SG(known_post_content_types), content_type,
+			content_type_length+1, (void **) &post_entry) == SUCCESS) {
 		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
@@ -180,14 +179,15 @@ static void sapi_read_post_data(TSRMLS_D)
 
 	SG(request_info).content_type_dup = content_type;
 
-	if (post_reader_func) {
+	if(post_reader_func) {
 		post_reader_func(TSRMLS_C);
 	}
 
-	if (sapi_module.default_post_reader) {
+	if(sapi_module.default_post_reader) {
 		sapi_module.default_post_reader(TSRMLS_C);
 	}
 }
+
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
@@ -195,7 +195,8 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
+					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 	SG(request_info).post_data = emalloc(allocated_bytes);
@@ -218,35 +219,16 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			SG(request_info).post_data = erealloc(SG(request_info).post_data, allocated_bytes);
 		}
 	}
-	SG(request_info).post_data[SG(read_post_bytes)] = 0; /* terminating NULL */
+	SG(request_info).post_data[SG(read_post_bytes)] = 0;  /* terminating NULL */
 	SG(request_info).post_data_length = SG(read_post_bytes);
 }
 
-/* {{{ sapi_update_default_charset */
-SAPI_API void sapi_update_default_charset(TSRMLS_D)
-{
-	const char *canonical_name = NULL;
-	UErrorCode status = U_ZERO_ERROR;
-
-	canonical_name = ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status);
-	/*
-	 * UTODO handle NULL return which signifies that MIME standard has no
-	 * name for this converter
-	 */
-	SG(default_charset) = (char *)ucnv_getStandardName(canonical_name, "MIME", &status);
-}
-/* }}} */
 
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
 {
 	char *mimetype, *charset, *content_type;
 
 	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
-	/*
-	 * Apache SAPI may invoke this function directly, before php_request_startup() is
-	 * called, so we need to update the default charset explicitly.
-	 */
-	sapi_update_default_charset(TSRMLS_C);
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (strncasecmp(mimetype, "text/", 5) == 0 && *charset) {
@@ -258,6 +240,7 @@ SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
 	}
 	return content_type;
 }
+
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC)
 {
@@ -278,8 +261,8 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
  * there is not already a charset option in there.
  *
  * If "mimetype" is non-NULL, it should point to a pointer allocated
- * with emalloc(). If a charset is added, the string will be
- * re-allocated and the new length is returned. If mimetype is
+ * with emalloc().  If a charset is added, the string will be
+ * re-allocated and the new length is returned.  If mimetype is
  * unchanged, 0 is returned.
  *
  */
@@ -287,14 +270,13 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 {
 	char *charset, *newtype;
 	size_t newlen;
-
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (*mimetype != NULL) {
 		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
 			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
 			newtype = emalloc(newlen + 1);
-			PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
+	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
 			strlcat(newtype, ";charset=", newlen + 1);
 			strlcat(newtype, charset, newlen + 1);
 			efree(*mimetype);
@@ -307,14 +289,14 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 
 SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 {
-	if (SG(request_info).headers_read == 1) {
+	if (SG(request_info).headers_read == 1)
 		return;
-	}
 	SG(request_info).headers_read = 1;
-	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
+	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), 
+			(void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
-	/* SG(sapi_headers).http_response_code = 200; */
+	/* SG(sapi_headers).http_response_code = 200; */ 
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(read_post_bytes) = 0;
@@ -327,7 +309,7 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 	SG(global_request_time) = 0;
 
 	/*
-	 * It's possible to override this general case in the activate() callback,
+	 * It's possible to override this general case in the activate() callback, 
 	 * if necessary.
 	 */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
@@ -380,24 +362,23 @@ SAPI_API void sapi_activate(TSRMLS_D)
 		SG(request_info).headers_only = 0;
 	}
 	SG(rfc1867_uploaded_files) = NULL;
-	SG(rfc1867_vars) = NULL;
-	SG(rfc1867_files_vars) = NULL;
 
 	/* handle request mehtod */
 	if (SG(server_context)) {
-		if (SG(request_info).request_method) {
-			if (!strcmp(SG(request_info).request_method, "POST") &&
-				(SG(request_info).content_type)
-			) {
+		if ( SG(request_info).request_method) {
+			if(!strcmp(SG(request_info).request_method, "POST")
+			   && (SG(request_info).content_type)) {
 				/* HTTP POST -> may contain form data to be read into variables
-				 * depending on content type given */
+				   depending on content type given
+				*/
 				sapi_read_post_data(TSRMLS_C);
 			} else {
-				/* Any other method with content payload will fill
-				 * $HTTP_RAW_POST_DATA if enabled by always_populate_raw_post_data
-				 * it is up to the webserver to decide whether to allow a method or not */
+				/* any other method with content payload will fill 
+				   $HTTP_RAW_POST_DATA if enabled by always_populate_raw_post_data 
+				   it is up to the webserver to decide whether to allow a method or not
+				*/
 				SG(request_info).content_type_dup = NULL;
-				if (sapi_module.default_post_reader) {
+				if(sapi_module.default_post_reader) {
 					sapi_module.default_post_reader(TSRMLS_C);
 				}
 			}
@@ -416,6 +397,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	}
 }
 
+
 static void sapi_send_headers_free(TSRMLS_D)
 {
 	if (SG(sapi_headers).http_status_line) {
@@ -423,14 +405,14 @@ static void sapi_send_headers_free(TSRMLS_D)
 		SG(sapi_headers).http_status_line = NULL;
 	}
 }
-
+	
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
-	} else if (SG(server_context)) {
-		if (sapi_module.read_post) {
+	}  else 	if (SG(server_context)) {
+		if(sapi_module.read_post) { 
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
 			int read_bytes;
@@ -442,7 +424,7 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	}
 	if (SG(request_info).raw_post_data) {
 		efree(SG(request_info).raw_post_data);
-	}
+	} 
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
 	}
@@ -464,14 +446,6 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash(TSRMLS_C);
 	}
-	if (SG(rfc1867_vars)) {
-		zend_hash_destroy(SG(rfc1867_vars));
-		FREE_HASHTABLE(SG(rfc1867_vars));
-	}
-	if (SG(rfc1867_files_vars)) {
-		zend_hash_destroy(SG(rfc1867_files_vars));
-		FREE_HASHTABLE(SG(rfc1867_files_vars));
-	}
 	if (SG(sapi_headers).mimetype) {
 		efree(SG(sapi_headers).mimetype);
 		SG(sapi_headers).mimetype = NULL;
@@ -483,6 +457,7 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	SG(global_request_time) = 0;
 }
 
+
 SAPI_API void sapi_initialize_empty_request(TSRMLS_D)
 {
 	SG(server_context) = NULL;
@@ -490,6 +465,7 @@ SAPI_API void sapi_initialize_empty_request(TSRMLS_D)
 	SG(request_info).auth_digest = SG(request_info).auth_user = SG(request_info).auth_password = NULL;
 	SG(request_info).content_type_dup = NULL;
 }
+
 
 static int sapi_extract_response_code(const char *header_line)
 {
@@ -502,14 +478,15 @@ static int sapi_extract_response_code(const char *header_line)
 			break;
 		}
 	}
-
+	
 	return code;
 }
+
 
 static void sapi_update_response_code(int ncode TSRMLS_DC)
 {
 	/* if the status code did not change, we do not want
-	 * to change the status line, and no need to change the code */
+	   to change the status line, and no need to change the code */
 	if (SG(sapi_headers).http_response_code == ncode) {
 		return;
 	}
@@ -531,15 +508,16 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 {
 	sapi_header_line ctr = {0};
 	int r;
-
+	
 	ctr.line = header_line;
 	ctr.line_len = header_line_len;
 
-	r = sapi_header_op(replace ? SAPI_HEADER_REPLACE : SAPI_HEADER_ADD, &ctr TSRMLS_CC);
+	r = sapi_header_op(replace ? SAPI_HEADER_REPLACE : SAPI_HEADER_ADD,
+			&ctr TSRMLS_CC);
 
-	if (!duplicate) {
+	if (!duplicate)
 		efree(header_line);
-	}
+
 	return r;
 }
 
@@ -552,13 +530,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	char *header_line;
 	uint header_line_len;
 	int http_response_code;
-
+	
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
-		char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
-		int output_start_lineno = php_output_get_start_lineno(TSRMLS_C);
+		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
+		int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);
 
 		if (output_start_filename) {
-			sapi_module.sapi_error(E_WARNING, "Cannot modify header information - headers already sent by (output started at %s:%d)", output_start_filename, output_start_lineno);
+			sapi_module.sapi_error(E_WARNING, "Cannot modify header information - headers already sent by (output started at %s:%d)",
+				output_start_filename, output_start_lineno);
 		} else {
 			sapi_module.sapi_error(E_WARNING, "Cannot modify header information - headers already sent");
 		}
@@ -566,41 +545,41 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	}
 
 	switch (op) {
-	case SAPI_HEADER_SET_STATUS:
-		sapi_update_response_code((int)(zend_intptr_t) arg TSRMLS_CC);
-		return SUCCESS;
+		case SAPI_HEADER_SET_STATUS:
+			sapi_update_response_code((int)(zend_intptr_t) arg TSRMLS_CC);
+			return SUCCESS;
 
-	case SAPI_HEADER_ADD:
-	case SAPI_HEADER_REPLACE:
-	case SAPI_HEADER_DELETE: {
-		sapi_header_line *p = arg;
+		case SAPI_HEADER_ADD:
+		case SAPI_HEADER_REPLACE:
+		case SAPI_HEADER_DELETE: {
+				sapi_header_line *p = arg;
 
-		if (!p->line || !p->line_len) {
+				if (!p->line || !p->line_len) {
+					return FAILURE;
+				}
+				header_line = p->line;
+				header_line_len = p->line_len;
+				http_response_code = p->response_code;
+				break;
+			}
+
+		case SAPI_HEADER_DELETE_ALL:
+			if (sapi_module.header_handler) {
+				sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
+			}
+			zend_llist_clean(&SG(sapi_headers).headers);
+			return SUCCESS;
+
+		default:
 			return FAILURE;
-		}
-		header_line = p->line;
-		header_line_len = p->line_len;
-		http_response_code = p->response_code;
-		break;
-	}
-
-	case SAPI_HEADER_DELETE_ALL:
-		if (sapi_module.header_handler) {
-			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
-		}
-		zend_llist_clean(&SG(sapi_headers).headers);
-		return SUCCESS;
-
-	default:
-		return FAILURE;
 	}
 
 	header_line = estrndup(header_line, header_line_len);
 
 	/* cut of trailing spaces, linefeeds and carriage-returns */
-	while(header_line_len && isspace(header_line[header_line_len-1])) {
-		header_line[--header_line_len] = '\0';
-	}
+	while(header_line_len && isspace(header_line[header_line_len-1])) 
+		  header_line[--header_line_len]='\0';
+	
 	if (op == SAPI_HEADER_DELETE) {
 		if (strchr(header_line, ':')) {
 			efree(header_line);
@@ -634,7 +613,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	}
 
 	/* Check the header for a few cases that we have special support for in SAPI */
-	if (header_line_len >= 5 && !strncasecmp(header_line, "HTTP/", 5)) {
+	if (header_line_len>=5 
+		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
 		sapi_update_response_code(sapi_extract_response_code(header_line) TSRMLS_CC);
 		/* sapi_update_response_code doesn't free the status line if the code didn't change */
@@ -684,11 +664,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					/* Return a Found Redirect if one is not already specified */
 					if (http_response_code) { /* user specified redirect code */
 						sapi_update_response_code(http_response_code TSRMLS_CC);
-					} else if (SG(request_info).proto_num > 1000 &&
-						SG(request_info).request_method && 
-						strcmp(SG(request_info).request_method, "HEAD") &&
-						strcmp(SG(request_info).request_method, "GET")
-					) {
+					} else if (SG(request_info).proto_num > 1000 && 
+					   SG(request_info).request_method && 
+					   strcmp(SG(request_info).request_method, "HEAD") &&
+					   strcmp(SG(request_info).request_method, "GET")) {
 						sapi_update_response_code(303 TSRMLS_CC);
 					} else {
 						sapi_update_response_code(302 TSRMLS_CC);
@@ -698,9 +677,72 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 				sapi_update_response_code(401 TSRMLS_CC); /* authentication-required */
 
-				myuid = php_getuid();
-				efree(header_line);
-				sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
+				if(PG(safe_mode)) 
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
+				{
+					zval *repl_temp;
+					char *ptr = colon_offset+1, *result, *newheader;
+					int ptr_len=0, result_len = 0, newlen = 0;
+
+					/* skip white space */
+					while (isspace(*ptr)) {
+						ptr++;
+					}
+
+					myuid = php_getuid();
+
+					ptr_len = strlen(ptr);
+					MAKE_STD_ZVAL(repl_temp);
+					Z_TYPE_P(repl_temp) = IS_STRING;
+					Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\"\\1-%ld\"", myuid);
+					/* Modify quoted realm value */
+					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
+											 ptr, ptr_len,
+											 repl_temp,
+											 0, &result_len, -1, NULL TSRMLS_CC);
+					if(result_len==ptr_len) {
+						efree(result);
+						efree(Z_STRVAL_P(repl_temp));
+						Z_STRLEN_P(repl_temp) = spprintf(&Z_STRVAL_P(repl_temp), 0, "realm=\\1-%ld\\2", myuid);
+						/* modify unquoted realm value */
+						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
+											 	ptr, ptr_len,
+											 	repl_temp,
+											 	0, &result_len, -1, NULL TSRMLS_CC);
+						if(result_len==ptr_len) {
+							char *lower_temp = estrdup(ptr);	
+							char conv_temp[32];
+							int conv_len;
+
+							php_strtolower(lower_temp,strlen(lower_temp));
+							/* If there is no realm string at all, append one */
+							if(!strstr(lower_temp,"realm")) {
+								efree(result);
+								conv_len = slprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
+								result = emalloc(ptr_len+conv_len+1);
+								result_len = ptr_len+conv_len;
+								memcpy(result, ptr, ptr_len);	
+								memcpy(result+ptr_len, conv_temp, conv_len);
+								*(result+ptr_len+conv_len) = '\0';
+							}
+							efree(lower_temp);
+						}
+					}
+					newlen = spprintf(&newheader, 0, "WWW-Authenticate: %s", result);
+					efree(header_line);
+					sapi_header.header = newheader;
+					sapi_header.header_len = newlen;
+					efree(result);
+					efree(Z_STRVAL_P(repl_temp));
+					efree(repl_temp);
+				} 
+#else
+				{
+					myuid = php_getuid();
+					efree(header_line);
+					sapi_header.header_len = spprintf(&sapi_header.header, 0, "WWW-Authenticate: Basic realm=\"%ld\"", myuid);
+				}
+#endif
 			}
 			if (sapi_header.header==header_line) {
 				*colon_offset = ':';
@@ -735,6 +777,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	return SUCCESS;
 }
 
+
 SAPI_API int sapi_send_headers(TSRMLS_D)
 {
 	int retval;
@@ -744,8 +787,9 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		return SUCCESS;
 	}
 
-	/* Success-oriented. We set headers_sent to 1 here to avoid an infinite loop
-	 * in case of an error situation. */
+	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
+	 * in case of an error situation.
+	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
 		sapi_header_struct default_header;
 		sapi_get_default_content_type_header(&default_header TSRMLS_CC);
@@ -778,7 +822,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 				sapi_module.send_header(&http_status_line, SG(server_context) TSRMLS_CC);
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) sapi_module.send_header, SG(server_context) TSRMLS_CC);
-			if (SG(sapi_headers).send_default_content_type) {
+			if(SG(sapi_headers).send_default_content_type) {
 				sapi_header_struct default_header;
 
 				sapi_get_default_content_type_header(&default_header TSRMLS_CC);
@@ -793,10 +837,12 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 			ret = FAILURE;
 			break;
 	}
+
 	sapi_send_headers_free(TSRMLS_C);
 
 	return ret;
 }
+
 
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries TSRMLS_DC)
 {
@@ -811,13 +857,15 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries TSRMLS_DC)
 	return SUCCESS;
 }
 
+
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 {
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;
 	}
-
-	return zend_hash_add(&SG(known_post_content_types), post_entry->content_type, post_entry->content_type_len + 1, (void *) post_entry, sizeof(sapi_post_entry), NULL);
+	return zend_hash_add(&SG(known_post_content_types),
+			post_entry->content_type, post_entry->content_type_len+1,
+			(void *) post_entry, sizeof(sapi_post_entry), NULL);
 }
 
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
@@ -825,8 +873,10 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 	if (SG(sapi_started) && EG(in_execution)) {
 		return;
 	}
-	zend_hash_del(&SG(known_post_content_types), post_entry->content_type, post_entry->content_type_len+1);
+	zend_hash_del(&SG(known_post_content_types), post_entry->content_type,
+			post_entry->content_type_len+1);
 }
+
 
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D))
 {
@@ -837,6 +887,7 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 	sapi_module.default_post_reader = default_post_reader;
 	return SUCCESS;
 }
+
 
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC))
 {
@@ -883,9 +934,8 @@ SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-	if (sapi_module.getenv) {
+	if (sapi_module.getenv) { 
 		char *value, *tmp = sapi_module.getenv(name, name_len TSRMLS_CC);
-
 		if (tmp) {
 			value = estrdup(tmp);
 		} else {
@@ -915,6 +965,7 @@ SAPI_API int sapi_force_http_10(TSRMLS_D)
 	}
 }
 
+
 SAPI_API int sapi_get_target_uid(uid_t *obj TSRMLS_DC)
 {
 	if (sapi_module.get_target_uid) {
@@ -935,9 +986,8 @@ SAPI_API int sapi_get_target_gid(gid_t *obj TSRMLS_DC)
 
 SAPI_API time_t sapi_get_request_time(TSRMLS_D)
 {
-	if (SG(global_request_time)) {
-		return SG(global_request_time);
-	}
+	if(SG(global_request_time)) return SG(global_request_time);
+
 	if (sapi_module.get_request_time && SG(server_context)) {
 		SG(global_request_time) = sapi_module.get_request_time(TSRMLS_C);
 	} else {
@@ -946,8 +996,7 @@ SAPI_API time_t sapi_get_request_time(TSRMLS_D)
 	return SG(global_request_time);
 }
 
-SAPI_API void sapi_terminate_process(TSRMLS_D)
-{
+SAPI_API void sapi_terminate_process(TSRMLS_D) {
 	if (sapi_module.terminate_process) {
 		sapi_module.terminate_process(TSRMLS_C);
 	}

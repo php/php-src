@@ -34,7 +34,7 @@ var_dump(mb_substr_count($string_mb, $needle_mb2));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_substr_count() : basic functionality ***
 
 -- ASCII String --

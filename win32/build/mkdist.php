@@ -315,7 +315,7 @@ Add ADD_DLLS to add extra DLLs like dynamic dependencies for standard
 deps. For example, libenchant.dll loads libenchant_myspell.dll or
 libenchant_ispell.dll
 */
-$ICU_DLLS = $php_build_dir . '/icu*.dll';
+$ICU_DLLS = $php_build_dir . '/bin/icu*.dll';
 foreach (glob($ICU_DLLS) as $filename) {
 	copy($filename, "$dist_dir/" . basename($filename));
 }

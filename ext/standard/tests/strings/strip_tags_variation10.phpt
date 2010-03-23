@@ -38,18 +38,18 @@ foreach($single_quote_string as $string_value)
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-unicode(51) "<html> \$ -> This represents the dollar sign</html>"
+string(51) "<html> \$ -> This represents the dollar sign</html>"
 -- Iteration 2 --
-unicode(63) "<html>\t\r\v The quick brown fo\fx jumped over the lazy dog</p>"
+string(63) "<html>\t\r\v The quick brown fo\fx jumped over the lazy dog</p>"
 -- Iteration 3 --
-unicode(31) "<a>This is a hyper text tag</a>"
+string(31) "<a>This is a hyper text tag</a>"
 -- Iteration 4 --
-unicode(0) ""
+string(0) ""
 -- Iteration 5 --
-unicode(26) "<p>This is a paragraph</p>"
+string(26) "<p>This is a paragraph</p>"
 -- Iteration 6 --
-unicode(65) "<b>This is \ta text in bold letters\r\s\malong with slashes\n</b>"
+string(65) "<b>This is \ta text in bold letters\r\s\malong with slashes\n</b>"
 Done

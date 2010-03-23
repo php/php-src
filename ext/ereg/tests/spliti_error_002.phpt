@@ -14,23 +14,23 @@ Test spliti() function : error conditions - test bad regular expressions
 
 echo "*** Testing spliti() : error conditions ***\n";
 
-$regs = b'original';
+$regs = 'original';
 
-var_dump(spliti(b"", "hello"));
-var_dump(spliti(b"c(d", "hello"));
-var_dump(spliti(b"a[b", "hello"));
-var_dump(spliti(b"c(d", "hello"));
-var_dump(spliti(b"*", "hello"));
-var_dump(spliti(b"+", "hello"));
-var_dump(spliti(b"?", "hello"));
-var_dump(spliti(b"(+?*)", "hello", $regs));
-var_dump(spliti(b"h{256}", "hello"));
-var_dump(spliti(b"h|", "hello"));
-var_dump(spliti(b"h{0}", "hello"));
-var_dump(spliti(b"h{2,1}", "hello"));
-var_dump(spliti(b'[a-c-e]', 'd'));
-var_dump(spliti(b'\\', 'x'));
-var_dump(spliti(b'([9-0])', '1', $regs));
+var_dump(spliti("", "hello"));
+var_dump(spliti("c(d", "hello"));
+var_dump(spliti("a[b", "hello"));
+var_dump(spliti("c(d", "hello"));
+var_dump(spliti("*", "hello"));
+var_dump(spliti("+", "hello"));
+var_dump(spliti("?", "hello"));
+var_dump(spliti("(+?*)", "hello", $regs));
+var_dump(spliti("h{256}", "hello"));
+var_dump(spliti("h|", "hello"));
+var_dump(spliti("h{0}", "hello"));
+var_dump(spliti("h{2,1}", "hello"));
+var_dump(spliti('[a-c-e]', 'd'));
+var_dump(spliti('\\', 'x'));
+var_dump(spliti('([9-0])', '1', $regs));
 
 //ensure $regs unchanged
 var_dump($regs);
@@ -40,49 +40,79 @@ echo "Done";
 --EXPECTF--
 *** Testing spliti() : error conditions ***
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_EPAREN in %s on line %d
 bool(false)
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 
 Warning: spliti(): REG_EBRACK in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_EPAREN in %s on line %d
 bool(false)
 
-Warning: spliti(): REG_BADRPT in %s on line %d
-bool(false)
+Deprecated: Function spliti() is deprecated in %s on line %d
 
 Warning: spliti(): REG_BADRPT in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_BADRPT in %s on line %d
 bool(false)
 
-Warning: spliti() expects parameter 3 to be long, binary string given in %s on line %d
+Deprecated: Function spliti() is deprecated in %s on line %d
+
+Warning: spliti(): REG_BADRPT in %s on line %d
+bool(false)
+
+Deprecated: Function spliti() is deprecated in %s on line %d
+
+Warning: spliti() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_BADBR in %s on line %d
 bool(false)
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 
 Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_EMPTY in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_BADBR in %s on line %d
 bool(false)
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 
 Warning: spliti(): REG_ERANGE in %s on line %d
 bool(false)
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti(): REG_EESCAPE in %s on line %d
 bool(false)
 
-Warning: spliti() expects parameter 3 to be long, binary string given in %s on line %d
+Deprecated: Function spliti() is deprecated in %s on line %d
+
+Warning: spliti() expects parameter 3 to be long, string given in %s on line %d
 NULL
 string(8) "original"
 Done

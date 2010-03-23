@@ -146,22 +146,22 @@ string(8) "No error"
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_error_string() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 Arg value string 
 
-Warning: xml_error_string() expects parameter 1 to be long, Unicode string given in %s on line %d
+Warning: xml_error_string() expects parameter 1 to be long, string given in %s on line %d
 NULL
 
 Arg value Some Ascii Data 
@@ -175,4 +175,5 @@ string(8) "No error"
 Arg value  
 string(8) "No error"
 Done
+
 

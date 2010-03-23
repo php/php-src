@@ -84,9 +84,9 @@ echo "Done";
 --EXPECTF--
 *** Testing is_a() : usage variations ***
 
-Notice: Undefined variable: undefined_var in %s on line %d
+Notice: Undefined variable: undefined_var in %s on line 64
 
-Notice: Undefined variable: unset_var in %s on line %d
+Notice: Undefined variable: unset_var in %s on line 67
 
 Arg value 0 
 bool(false)
@@ -115,39 +115,29 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Notice: Array to string conversion in %s on line %d
-
 Arg value Array 
 
-Warning: is_a() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
 Arg value  

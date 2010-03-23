@@ -126,22 +126,22 @@ bool(false)
 
 --empty array--
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), array given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string, array given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --int indexed array--
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), array given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string, array given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --associative array--
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), array given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string, array given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --nested arrays--
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), array given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string, array given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --uppercase NULL--
@@ -173,7 +173,7 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: interface_exists() expects parameter 1 to be string (Unicode or binary), object given in %sinterface_exists_variation1.php on line %d
+Warning: interface_exists() expects parameter 1 to be string, object given in %sinterface_exists_variation1.php on line %d
 NULL
 
 --undefined var--

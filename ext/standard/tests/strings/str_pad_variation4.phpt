@@ -90,11 +90,11 @@ foreach($pad_types as $pad_type) {
 --EXPECTF--
 *** Testing str_pad() function: with unexpected inputs for 'pad_type' argument ***
 -- Iteration 1 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 2 --
-unicode(20) "Test string*********"
+string(20) "Test string*********"
 -- Iteration 3 --
-unicode(20) "****Test string*****"
+string(20) "****Test string*****"
 -- Iteration 4 --
 
 Warning: str_pad(): Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH in %s on line %d
@@ -121,18 +121,18 @@ Warning: str_pad(): Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_P
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be long, string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be long, string given in %s on line %d
 NULL
 -- Iteration 12 --
-unicode(20) "****Test string*****"
+string(20) "****Test string*****"
 -- Iteration 13 --
-unicode(20) "****Test string*****"
+string(20) "****Test string*****"
 -- Iteration 14 --
-unicode(20) "****Test string*****"
+string(20) "****Test string*****"
 -- Iteration 15 --
 
 Warning: str_pad() expects parameter 4 to be long, array given in %s on line %d
@@ -146,23 +146,23 @@ NULL
 Warning: str_pad() expects parameter 4 to be long, array given in %s on line %d
 NULL
 -- Iteration 18 --
-unicode(20) "Test string*********"
+string(20) "Test string*********"
 -- Iteration 19 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 20 --
-unicode(20) "Test string*********"
+string(20) "Test string*********"
 -- Iteration 21 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 22 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 23 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 24 --
 
 Warning: str_pad() expects parameter 4 to be long, object given in %s on line %d
 NULL
 -- Iteration 25 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 -- Iteration 26 --
-unicode(20) "*********Test string"
+string(20) "*********Test string"
 ===DONE===

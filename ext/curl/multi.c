@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@
 #include <unistd.h>
 #endif
 
-/* {{{ proto resource curl_multi_init(void) U
+/* {{{ proto resource curl_multi_init(void)
    Returns a new cURL multi handle */
 PHP_FUNCTION(curl_multi_init)
 {
@@ -68,7 +68,7 @@ PHP_FUNCTION(curl_multi_init)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_add_handle(resource mh, resource ch) U
+/* {{{ proto int curl_multi_add_handle(resource mh, resource ch)
    Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
 {
@@ -130,7 +130,7 @@ static int curl_compare_resources( zval *z1, zval **z2 ) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_remove_handle(resource mh, resource ch) U
+/* {{{ proto int curl_multi_remove_handle(resource mh, resource ch)
    Remove a multi handle from a set of cURL handles */
 PHP_FUNCTION(curl_multi_remove_handle)
 {
@@ -165,7 +165,7 @@ static void _make_timeval_struct(struct timeval *to, double timeout) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_select(resource mh[, double timeout]) U
+/* {{{ proto int curl_multi_select(resource mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
@@ -195,7 +195,7 @@ PHP_FUNCTION(curl_multi_select)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_exec(resource mh, int &still_running) U
+/* {{{ proto int curl_multi_exec(resource mh, int &still_running) 
    Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
 {
@@ -220,7 +220,7 @@ PHP_FUNCTION(curl_multi_exec)
 }
 /* }}} */
 
-/* {{{ proto string curl_multi_getcontent(resource ch) U
+/* {{{ proto string curl_multi_getcontent(resource ch)
    Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set */
 PHP_FUNCTION(curl_multi_getcontent)
 {
@@ -240,7 +240,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(resource mh [, long msgs_in_queue]) U
+/* {{{ proto array curl_multi_info_read(resource mh [, long msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {
@@ -303,7 +303,7 @@ PHP_FUNCTION(curl_multi_info_read)
 }
 /* }}} */
 
-/* {{{ proto void curl_multi_close(resource mh) U
+/* {{{ proto void curl_multi_close(resource mh)
    Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
 {

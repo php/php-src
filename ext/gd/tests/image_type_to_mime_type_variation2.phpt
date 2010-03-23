@@ -43,38 +43,38 @@ foreach($values as $value) {
 *** Testing image_type_to_mime_type() : usage variations ***
 
 -- Iteration 1 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 2 --
-unicode(9) "image/gif"
+string(9) "image/gif"
 
 -- Iteration 3 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 4 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 5 --
-unicode(10) "image/jpeg"
+string(10) "image/jpeg"
 
 -- Iteration 6 --
-unicode(10) "image/tiff"
+string(10) "image/tiff"
 
 -- Iteration 7 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 8 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 9 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 10 --
-unicode(9) "image/gif"
+string(9) "image/gif"
 
 -- Iteration 11 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 
 -- Iteration 12 --
-unicode(24) "application/octet-stream"
+string(24) "application/octet-stream"
 ===DONE===

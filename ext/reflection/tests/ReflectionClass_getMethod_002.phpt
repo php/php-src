@@ -67,8 +67,8 @@ Method 1 does not exist
 Method 1.5 does not exist
 Method 1 does not exist
 
-Warning: ReflectionClass::getMethod() expects parameter 1 to be string (Unicode or binary), array given in %s on line 39
+Warning: ReflectionClass::getMethod() expects parameter 1 to be string, array given in %s on line 39
 NULL
 
-Warning: ReflectionClass::getMethod() expects parameter 1 to be string (Unicode or binary), object given in %s on line 44
+Warning: ReflectionClass::getMethod() expects parameter 1 to be string, object given in %s on line 44
 NULL

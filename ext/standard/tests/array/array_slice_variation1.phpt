@@ -21,7 +21,7 @@ var_dump($a);
 
 ?>
 
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
   int(1)
@@ -58,4 +58,4 @@ array(0) {
 }
 array(0) {
 }
-unicode(3) "foo"
+string(3) "foo"

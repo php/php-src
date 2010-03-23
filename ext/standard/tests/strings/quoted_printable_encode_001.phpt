@@ -25,7 +25,7 @@ string(4) "test"
 Warning: quoted_printable_encode() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: quoted_printable_encode() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: quoted_printable_encode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 string(1) "1"
 string(0) ""

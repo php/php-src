@@ -1,7 +1,5 @@
 --TEST--
 Test fopen() function : variation: file uri, use include path = true
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--

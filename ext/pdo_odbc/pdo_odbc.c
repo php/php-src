@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2005 The PHP Group                                |
+  | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -60,7 +60,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_odbc),
-	"0.9",
+	"1.0.1",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -74,6 +74,13 @@ SQLUINTEGER pdo_odbc_pool_on = SQL_CP_OFF;
 SQLUINTEGER pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
+#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("pdo_odbc.db2_instance_name", NULL, PHP_INI_SYSTEM, NULL)
+PHP_INI_END()
+
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)
 {
@@ -84,6 +91,20 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	if (FAILURE == php_pdo_register_driver(&pdo_odbc_driver)) {
 		return FAILURE;
 	}
+
+#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+	REGISTER_INI_ENTRIES();
+	{
+		char *instance = INI_STR("pdo_odbc.db2_instance_name");
+		if (instance) {
+			char *env = malloc(sizeof("DB2INSTANCE=") + strlen(instance));
+			strcpy(env, "DB2INSTANCE=");
+			strcat(env, instance);
+			putenv(env);
+			/* after this point, we can't free env without breaking the environment */
+		}
+	}
+#endif
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	/* ugh, we don't really like .ini stuff in PDO, but since ODBC connection
@@ -113,6 +134,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 #endif
 
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
@@ -125,6 +147,9 @@ PHP_MINIT_FUNCTION(pdo_odbc)
  */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
+#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+	UNREGISTER_INI_ENTRIES();
+#endif
 	php_pdo_unregister_driver(&pdo_odbc_driver);
 	return SUCCESS;
 }
@@ -144,6 +169,9 @@ PHP_MINFO_FUNCTION(pdo_odbc)
 #endif
 	php_info_print_table_end();
 
+#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+	DISPLAY_INI_ENTRIES();
+#endif
 }
 /* }}} */
 

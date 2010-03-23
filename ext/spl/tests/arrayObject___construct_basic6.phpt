@@ -23,9 +23,9 @@ var_dump($ao);
 ?>
 --EXPECTF--
 object(ArrayObject)#1 (2) {
-  [u"p"]=>
+  ["p"]=>
   int(1)
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -36,9 +36,9 @@ object(ArrayObject)#1 (2) {
   }
 }
 object(ArrayObject)#2 (2) {
-  [u"p"]=>
+  ["p"]=>
   int(1)
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -49,11 +49,11 @@ object(ArrayObject)#2 (2) {
   }
 }
 object(MyArrayObject)#1 (3) {
-  [u"priv1":u"MyArrayObject":private]=>
-  unicode(7) "secret1"
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"storage":u"ArrayObject":private]=>
+  ["priv1":"MyArrayObject":private]=>
+  string(7) "secret1"
+  ["pub1"]=>
+  string(7) "public1"
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)
@@ -64,11 +64,11 @@ object(MyArrayObject)#1 (3) {
   }
 }
 object(MyArrayObject)#2 (3) {
-  [u"priv1":u"MyArrayObject":private]=>
-  unicode(7) "secret1"
-  [u"pub1"]=>
-  unicode(7) "public1"
-  [u"storage":u"ArrayObject":private]=>
+  ["priv1":"MyArrayObject":private]=>
+  string(7) "secret1"
+  ["pub1"]=>
+  string(7) "public1"
+  ["storage":"ArrayObject":private]=>
   array(3) {
     [0]=>
     int(1)

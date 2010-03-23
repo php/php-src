@@ -7,7 +7,7 @@ Test usleep() function
  * Source code: ext/standard/basic_functions.c
  */
  
-set_time_limit(20); 
+set_time_limit(20);
  
 echo "*** Testing usleep() : basic functionality ***\n";
 

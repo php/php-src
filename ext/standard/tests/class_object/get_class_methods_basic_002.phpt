@@ -1,5 +1,5 @@
 --TEST--
-Test get_class_methods() function : basic functionality 
+Test get_class_methods() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
@@ -66,113 +66,113 @@ X::testFromX();
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 Accessing D from global scope:
 array(4) {
   [0]=>
-  unicode(4) "pubD"
+  string(4) "pubD"
   [1]=>
-  unicode(9) "testFromD"
+  string(9) "testFromD"
   [2]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [3]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing C from C:
 array(4) {
   [0]=>
-  unicode(5) "privC"
+  string(5) "privC"
   [1]=>
-  unicode(5) "protC"
+  string(5) "protC"
   [2]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [3]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing D from C:
 array(7) {
   [0]=>
-  unicode(5) "protD"
+  string(5) "protD"
   [1]=>
-  unicode(4) "pubD"
+  string(4) "pubD"
   [2]=>
-  unicode(9) "testFromD"
+  string(9) "testFromD"
   [3]=>
-  unicode(5) "privC"
+  string(5) "privC"
   [4]=>
-  unicode(5) "protC"
+  string(5) "protC"
   [5]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [6]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing X from C:
 array(2) {
   [0]=>
-  unicode(4) "pubX"
+  string(4) "pubX"
   [1]=>
-  unicode(9) "testFromX"
+  string(9) "testFromX"
 }
 Accessing C from D:
 array(3) {
   [0]=>
-  unicode(5) "protC"
+  string(5) "protC"
   [1]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [2]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing D from D:
 array(7) {
   [0]=>
-  unicode(5) "privD"
+  string(5) "privD"
   [1]=>
-  unicode(5) "protD"
+  string(5) "protD"
   [2]=>
-  unicode(4) "pubD"
+  string(4) "pubD"
   [3]=>
-  unicode(9) "testFromD"
+  string(9) "testFromD"
   [4]=>
-  unicode(5) "protC"
+  string(5) "protC"
   [5]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [6]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing X from D:
 array(2) {
   [0]=>
-  unicode(4) "pubX"
+  string(4) "pubX"
   [1]=>
-  unicode(9) "testFromX"
+  string(9) "testFromX"
 }
 Accessing C from X:
 array(2) {
   [0]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [1]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing D from X:
 array(4) {
   [0]=>
-  unicode(4) "pubD"
+  string(4) "pubD"
   [1]=>
-  unicode(9) "testFromD"
+  string(9) "testFromD"
   [2]=>
-  unicode(4) "pubC"
+  string(4) "pubC"
   [3]=>
-  unicode(9) "testFromC"
+  string(9) "testFromC"
 }
 Accessing X from X:
 array(4) {
   [0]=>
-  unicode(5) "privX"
+  string(5) "privX"
   [1]=>
-  unicode(5) "protX"
+  string(5) "protX"
   [2]=>
-  unicode(4) "pubX"
+  string(4) "pubX"
   [3]=>
-  unicode(9) "testFromX"
+  string(9) "testFromX"
 }
 Done

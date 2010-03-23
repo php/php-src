@@ -46,24 +46,24 @@ array_walk ($data, 'echo_kv');
 --EXPECT--
 array(11) {
   [0]=>
-  unicode(3) "PHP"
+  string(3) "PHP"
   [1]=>
-  unicode(27) "PHP: Hypertext Preprocessor"
+  string(27) "PHP: Hypertext Preprocessor"
   [2]=>
-  unicode(4) "Test"
-  [u"test"]=>
+  string(4) "Test"
+  ["test"]=>
   int(27)
   [3]=>
-  unicode(4) "test"
+  string(4) "test"
   [4]=>
   array(2) {
     [0]=>
-    unicode(6) "banana"
+    string(6) "banana"
     [1]=>
-    unicode(6) "orange"
+    string(6) "orange"
   }
   [5]=>
-  unicode(6) "monkey"
+  string(6) "monkey"
   [6]=>
   float(-0.33333333333333)
   [7]=>
@@ -102,24 +102,24 @@ array(11) {
 }
  -- Testing array_walk() -- 
 int(0)
-unicode(3) "PHP"
+string(3) "PHP"
 int(1)
-unicode(27) "PHP: Hypertext Preprocessor"
+string(27) "PHP: Hypertext Preprocessor"
 int(2)
-unicode(4) "Test"
-unicode(4) "test"
+string(4) "Test"
+string(4) "test"
 int(27)
 int(3)
-unicode(4) "test"
+string(4) "test"
 int(4)
 array(2) {
   [0]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
 }
 int(5)
-unicode(6) "monkey"
+string(6) "monkey"
 int(6)
 float(-0.33333333333333)
 int(7)

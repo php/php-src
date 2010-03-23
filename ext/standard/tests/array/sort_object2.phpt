@@ -1,5 +1,5 @@
 --TEST--
-Test sort() function : object functionality - sorting objects with diff. accessibility of member vars 
+Test sort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
@@ -9,7 +9,7 @@ Test sort() function : object functionality - sorting objects with diff. accessi
 */
 
 /*
- * testing sort() by providing integer/string object arrays with flag values are default, SORT_REGULAR
+ * testing sort() by providing integer/string object arrays with flag values are defualt, SORT_REGULAR
 */
 
 echo "*** Testing sort() : object functionality ***\n";
@@ -44,7 +44,7 @@ class for_string_sort
 
   // return string value
   function __tostring() {
-    return (string)$this->value;
+   return (string)$this->value;
   }
 
 }
@@ -66,14 +66,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is default --\n";
+echo "\n-- Testing sort() by supplying various object arrays, 'flag' value is defualt --\n";
 
-// testing sort() function by supplying integer object array, flag value is default
+// testing sort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
 
-// testing sort() function by supplying string object array, flag value is default
+// testing sort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
 var_dump(sort($temp_array) );
 var_dump($temp_array);
@@ -94,43 +94,43 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sort() : object functionality ***
 
--- Testing sort() by supplying various object arrays, 'flag' value is default --
+-- Testing sort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
 array(4) {
   [0]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(-88)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(-5)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(5)
   }
   [1]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     float(0.001)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     float(99.5)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     float(0.1)
   }
   [2]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(11)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(33)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(30)
   }
   [3]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(66)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(44)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(4)
   }
 }
@@ -138,39 +138,39 @@ bool(true)
 array(4) {
   [0]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(3) "axx"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(3) "AXX"
-    [u"protected_class_value":protected]=>
-    unicode(3) "ass"
+    ["public_class_value"]=>
+    string(3) "axx"
+    ["private_class_value":"for_string_sort":private]=>
+    string(3) "AXX"
+    ["protected_class_value":protected]=>
+    string(3) "ass"
   }
   [1]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(2) "py"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(2) "PY"
-    [u"protected_class_value":protected]=>
-    unicode(2) "pt"
+    ["public_class_value"]=>
+    string(2) "py"
+    ["private_class_value":"for_string_sort":private]=>
+    string(2) "PY"
+    ["protected_class_value":protected]=>
+    string(2) "pt"
   }
   [2]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "t"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(3) "eee"
-    [u"protected_class_value":protected]=>
-    unicode(3) "abb"
+    ["public_class_value"]=>
+    string(1) "t"
+    ["private_class_value":"for_string_sort":private]=>
+    string(3) "eee"
+    ["protected_class_value":protected]=>
+    string(3) "abb"
   }
   [3]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "w"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(1) "W"
-    [u"protected_class_value":protected]=>
-    unicode(1) "c"
+    ["public_class_value"]=>
+    string(1) "w"
+    ["private_class_value":"for_string_sort":private]=>
+    string(1) "W"
+    ["protected_class_value":protected]=>
+    string(1) "c"
   }
 }
 
@@ -179,38 +179,38 @@ bool(true)
 array(4) {
   [0]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(-88)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(-5)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(5)
   }
   [1]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     float(0.001)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     float(99.5)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     float(0.1)
   }
   [2]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(11)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(33)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(30)
   }
   [3]=>
   object(for_integer_sort)#%d (3) {
-    [u"public_class_value"]=>
+    ["public_class_value"]=>
     int(66)
-    [u"private_class_value":u"for_integer_sort":private]=>
+    ["private_class_value":"for_integer_sort":private]=>
     int(44)
-    [u"protected_class_value":protected]=>
+    ["protected_class_value":protected]=>
     int(4)
   }
 }
@@ -218,39 +218,39 @@ bool(true)
 array(4) {
   [0]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(3) "axx"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(3) "AXX"
-    [u"protected_class_value":protected]=>
-    unicode(3) "ass"
+    ["public_class_value"]=>
+    string(3) "axx"
+    ["private_class_value":"for_string_sort":private]=>
+    string(3) "AXX"
+    ["protected_class_value":protected]=>
+    string(3) "ass"
   }
   [1]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(2) "py"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(2) "PY"
-    [u"protected_class_value":protected]=>
-    unicode(2) "pt"
+    ["public_class_value"]=>
+    string(2) "py"
+    ["private_class_value":"for_string_sort":private]=>
+    string(2) "PY"
+    ["protected_class_value":protected]=>
+    string(2) "pt"
   }
   [2]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "t"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(3) "eee"
-    [u"protected_class_value":protected]=>
-    unicode(3) "abb"
+    ["public_class_value"]=>
+    string(1) "t"
+    ["private_class_value":"for_string_sort":private]=>
+    string(3) "eee"
+    ["protected_class_value":protected]=>
+    string(3) "abb"
   }
   [3]=>
   object(for_string_sort)#%d (3) {
-    [u"public_class_value"]=>
-    unicode(1) "w"
-    [u"private_class_value":u"for_string_sort":private]=>
-    unicode(1) "W"
-    [u"protected_class_value":protected]=>
-    unicode(1) "c"
+    ["public_class_value"]=>
+    string(1) "w"
+    ["private_class_value":"for_string_sort":private]=>
+    string(1) "W"
+    ["protected_class_value":protected]=>
+    string(1) "c"
   }
 }
 Done

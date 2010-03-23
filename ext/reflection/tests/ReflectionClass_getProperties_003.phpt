@@ -42,148 +42,148 @@ No properties:array(0) {
 Public properties:array(4) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pub1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pub1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pub2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pub2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pubs"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pubs"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubs2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Private properties:array(4) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "priv1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "priv1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "priv2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "priv2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs1"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Public or static properties:array(6) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pub1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pub1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pub2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pub2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pubs"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pubs"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubs2"
+    ["class"]=>
+    string(1) "C"
   }
   [4]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs1"
+    ["class"]=>
+    string(1) "C"
   }
   [5]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Private or static properties:array(6) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "priv1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "priv1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "priv2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "priv2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(4) "pubs"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(4) "pubs"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubs2"
+    ["class"]=>
+    string(1) "C"
   }
   [4]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs1"
+    ["class"]=>
+    string(1) "C"
   }
   [5]=>
   &object(ReflectionProperty)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privs2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privs2"
+    ["class"]=>
+    string(1) "C"
   }
 }

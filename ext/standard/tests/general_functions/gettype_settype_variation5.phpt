@@ -179,7 +179,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -187,276 +187,276 @@ echo "Done\n";
 
 -- Setting type of data to resource --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 2: settype(): Cannot convert to resource type
 bool(false)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 2: settype(): Cannot convert to resource type
 bool(false)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 2: settype(): Cannot convert to resource type
 bool(false)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 2: settype(): Cannot convert to resource type
 bool(false)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) "Ã¿"
-unicode(7) "unicode"
+string(1) "ÿ"
+string(6) "string"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) "f"
-unicode(7) "unicode"
+string(1) "f"
+string(6) "string"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) "
+string(2) "
 3"
-unicode(7) "unicode"
+string(6) "string"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(0) ""
-unicode(7) "unicode"
+string(0) ""
+string(6) "string"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) " "
-unicode(7) "unicode"
+string(1) " "
+string(6) "string"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) " "
-unicode(7) "unicode"
+string(1) " "
+string(6) "string"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) "10"
-unicode(7) "unicode"
+string(2) "10"
+string(6) "string"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) "10"
-unicode(7) "unicode"
+string(2) "10"
+string(6) "string"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(8) "10string"
-unicode(7) "unicode"
+string(8) "10string"
+string(6) "string"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(8) "10string"
-unicode(7) "unicode"
+string(8) "10string"
+string(6) "string"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) "-1"
-unicode(7) "unicode"
+string(2) "-1"
+string(6) "string"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(3) "1e2"
-unicode(7) "unicode"
+string(3) "1e2"
+string(6) "string"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) " 1"
-unicode(7) "unicode"
+string(2) " 1"
+string(6) "string"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(22) "2974394749328742328432"
-unicode(7) "unicode"
+string(22) "2974394749328742328432"
+string(6) "string"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "-1e-2"
-unicode(7) "unicode"
+string(5) "-1e-2"
+string(6) "string"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(1) "1"
-unicode(7) "unicode"
+string(1) "1"
+string(6) "string"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) "-1"
-unicode(7) "unicode"
+string(2) "-1"
+string(6) "string"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(3) "1e2"
-unicode(7) "unicode"
+string(3) "1e2"
+string(6) "string"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(2) " 1"
-unicode(7) "unicode"
+string(2) " 1"
+string(6) "string"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(22) "2974394749328742328432"
-unicode(7) "unicode"
+string(22) "2974394749328742328432"
+string(6) "string"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "-1e-2"
-unicode(7) "unicode"
+string(5) "-1e-2"
+string(6) "string"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(4) "0xff"
-unicode(7) "unicode"
+string(4) "0xff"
+string(6) "string"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(4) "0x55"
-unicode(7) "unicode"
+string(4) "0x55"
+string(6) "string"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "0XA55"
-unicode(7) "unicode"
+string(5) "0XA55"
+string(6) "string"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "0X123"
-unicode(7) "unicode"
+string(5) "0X123"
+string(6) "string"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(4) "0123"
-unicode(7) "unicode"
+string(4) "0123"
+string(6) "string"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(4) "0123"
-unicode(7) "unicode"
+string(4) "0123"
+string(6) "string"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "-0123"
-unicode(7) "unicode"
+string(5) "-0123"
+string(6) "string"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "+0123"
-unicode(7) "unicode"
+string(5) "+0123"
+string(6) "string"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "-0123"
-unicode(7) "unicode"
+string(5) "-0123"
+string(6) "string"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(5) "+0123"
-unicode(7) "unicode"
+string(5) "+0123"
+string(6) "string"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(8) "-0x80001"
-unicode(7) "unicode"
+string(8) "-0x80001"
+string(6) "string"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(8) "+0x80001"
-unicode(7) "unicode"
+string(8) "+0x80001"
+string(6) "string"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(10) "-0x80001.5"
-unicode(7) "unicode"
+string(10) "-0x80001.5"
+string(6) "string"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(9) "0x80001.5"
-unicode(7) "unicode"
+string(9) "0x80001.5"
+string(6) "string"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-unicode(12) "@$%#$%^$%^&^"
-unicode(7) "unicode"
+string(12) "@$%#$%^$%^&^"
+string(6) "string"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 2: settype(): Cannot convert to resource type
 bool(false)
 array(0) {
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 2: settype(): Cannot convert to resource type
 bool(false)
 array(1) {
   [0]=>
   NULL
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 2: settype(): Cannot convert to resource type
 bool(false)
 array(4) {
@@ -469,24 +469,24 @@ array(4) {
   [3]=>
   int(4)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 2: settype(): Cannot convert to resource type
 bool(false)
 array(4) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
-  [u"four"]=>
+  string(5) "three"
+  ["four"]=>
   int(4)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 2: settype(): Cannot convert to resource type
 bool(false)
 array(3) {
@@ -497,218 +497,218 @@ array(3) {
   [2]=>
   float(6500000)
 }
-unicode(5) "array"
+string(5) "array"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-2147483648)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(2147483647)
-unicode(7) "integer"
+string(7) "integer"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(2147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(1232147483649)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(85)
-unicode(7) "integer"
+string(7) "integer"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(1058513956921)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(-21903)
-unicode(7) "integer"
+string(7) "integer"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(365)
-unicode(7) "integer"
+string(7) "integer"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(-365)
-unicode(7) "integer"
+string(7) "integer"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(80561044571754)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-100000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-1.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-0.5)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-5.0E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-500000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(5.12E-7)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 2: settype(): Cannot convert to resource type
 bool(false)
 float(-512000)
-unicode(6) "double"
+string(6) "double"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
 object(point)#1 (2) {
-  [u"x"]=>
+  ["x"]=>
   NULL
-  [u"y"]=>
+  ["y"]=>
   NULL
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
 object(point)#2 (2) {
-  [u"x"]=>
+  ["x"]=>
   float(2.5)
-  [u"y"]=>
+  ["y"]=>
   float(40.5)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 2: settype(): Cannot convert to resource type
 bool(false)
 object(point)#3 (2) {
-  [u"x"]=>
+  ["x"]=>
   int(0)
-  [u"y"]=>
+  ["y"]=>
   int(0)
 }
-unicode(6) "object"
+string(6) "object"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 2: settype(): Cannot convert to resource type
 bool(false)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 2: settype(): Cannot convert to resource type
 bool(false)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 Done

@@ -24,6 +24,6 @@ Deprecated: Assigning the return value of new by reference is deprecated in %sbu
 
 Deprecated: Assigning the return value of new by reference is deprecated in %sbug45178.php on line 15
 object(Bar)#%d (1) {
-  [u"_rme2"]=>
+  ["_rme2"]=>
   int(0)
 }

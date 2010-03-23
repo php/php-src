@@ -17,7 +17,7 @@ throw new test();
 
 echo "Done\n";
 ?>
---EXPECT--
-unicode(12) "test thrown!"
+--EXPECTF--	
+string(12) "test thrown!"
 
 Fatal error: Exception thrown without a stack frame in Unknown on line 0

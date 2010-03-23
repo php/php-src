@@ -22,7 +22,7 @@ $string_array = array(
 		       "hel/lo/t/world",
                        "one:$:two:!:three:#:four",
 		       "\rhello/r/wor\rrld",
-		       chr(0),
+	               chr(0),
                        chr(0).chr(0),
                        chr(0).'hello'.chr(0),
                        'hello'.chr(0).'world'
@@ -35,10 +35,10 @@ $token_array = array(
 		      '/t',
 		      ":",
 		      "\r",
-                      "\0",		
-                      "\0",		
-                      "\0",		
-                      "\0"
+		      "\0",
+		      "\0",
+		      "\0",
+		      "\0",
  		    );
 
 // loop through each element of the array and check the working of strtok()
@@ -57,11 +57,11 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtok() : with miscellaneous inputs ***
 
 --- Iteration 1 ---
-unicode(11) "HELLO WORLD"
+string(11) "HELLO WORLD"
 bool(false)
 bool(false)
 bool(false)
@@ -77,40 +77,40 @@ bool(false)
 bool(false)
 
 --- Iteration 3 ---
-unicode(5) "HELLO"
-unicode(5) "WORLD"
+string(5) "HELLO"
+string(5) "WORLD"
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 4 ---
-unicode(5) "hello"
-unicode(3) "wor"
-unicode(2) "ld"
+string(5) "hello"
+string(3) "wor"
+string(2) "ld"
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 5 ---
-unicode(3) "hel"
-unicode(2) "lo"
-unicode(5) "world"
+string(3) "hel"
+string(2) "lo"
+string(5) "world"
 bool(false)
 bool(false)
 bool(false)
 
 --- Iteration 6 ---
-unicode(3) "one"
-unicode(1) "$"
-unicode(3) "two"
-unicode(1) "!"
-unicode(5) "three"
-unicode(1) "#"
+string(3) "one"
+string(1) "$"
+string(3) "two"
+string(1) "!"
+string(5) "three"
+string(1) "#"
 
 --- Iteration 7 ---
-unicode(11) "hello/r/wor"
-unicode(3) "rld"
+string(11) "hello/r/wor"
+string(3) "rld"
 bool(false)
 bool(false)
 bool(false)
@@ -133,7 +133,7 @@ bool(false)
 bool(false)
 
 --- Iteration 10 ---
-unicode(5) "hello"
+string(5) "hello"
 bool(false)
 bool(false)
 bool(false)
@@ -141,8 +141,8 @@ bool(false)
 bool(false)
 
 --- Iteration 11 ---
-unicode(5) "hello"
-unicode(5) "world"
+string(5) "hello"
+string(5) "world"
 bool(false)
 bool(false)
 bool(false)

@@ -71,8 +71,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			} else {
 				spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			}
-			efree(arch);
 			efree(entry);
+			efree(arch);
 			if (zcontext) {
 				context = php_stream_context_from_zval(zcontext, 0);
 			}
@@ -646,8 +646,8 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
-				efree(entry);
 				efree(arch);
+				efree(entry);
 				goto skip_phar;
 			}
 splitted:

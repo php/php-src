@@ -10,4 +10,5 @@ abstract class TestClass
 ===DONE===
 --EXPECTF--
 
-Fatal error: Static function TestClass::getName() cannot be abstract in %sabstract-static.php on line %d
+Strict Standards: Static function TestClass::getName() should not be abstract in %sabstract-static.php on line %d
+===DONE===

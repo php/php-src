@@ -27,10 +27,10 @@ try {
 
 ?>
 --EXPECTF--
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
-unicode(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 
 Fatal error: Uncaught exception 'Exception' in %s:%d
 Stack trace:

@@ -28,8 +28,8 @@ var_dump($rs1);
 array(1) {
   [0]=>
   array(1) {
-    [u"DUMMY"]=>
-    unicode(1) "X"
+    ["DUMMY"]=>
+    string(1) "X"
   }
 }
 array(0) {
@@ -37,8 +37,8 @@ array(0) {
 array(1) {
   [0]=>
   array(1) {
-    [u"DUMMY"]=>
-    unicode(1) "X"
+    ["DUMMY"]=>
+    string(1) "X"
   }
 }
 

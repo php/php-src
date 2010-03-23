@@ -28,21 +28,21 @@ float(0.2)
 --- testing: '-7.7' ---
 float(-8.7)
 --- testing: 'abc' ---
-unicode(3) "abc"
+string(3) "abc"
 --- testing: '123abc' ---
-unicode(6) "123abc"
+string(6) "123abc"
 --- testing: '123e5' ---
 float(12299999)
 --- testing: '123e5xyz' ---
-unicode(8) "123e5xyz"
+string(8) "123e5xyz"
 --- testing: ' 123abc' ---
-unicode(7) " 123abc"
+string(7) " 123abc"
 --- testing: '123 abc' ---
-unicode(7) "123 abc"
+string(7) "123 abc"
 --- testing: '123abc ' ---
-unicode(7) "123abc "
+string(7) "123abc "
 --- testing: '3.4a' ---
-unicode(4) "3.4a"
+string(4) "3.4a"
 --- testing: 'a5.9' ---
-unicode(4) "a5.9"
+string(4) "a5.9"
 ===DONE===

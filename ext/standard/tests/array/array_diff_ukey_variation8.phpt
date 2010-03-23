@@ -33,10 +33,10 @@ array(0) {
 }
 array(3) {
   [-10]=>
-  unicode(3) "-10"
-  [u"true"]=>
+  string(3) "-10"
+  ["true"]=>
   int(1)
-  [u"false"]=>
+  ["false"]=>
   int(0)
 }
 ===DONE===

@@ -2,7 +2,7 @@
 gmp_divexact() tests
 --SKIPIF--
 <?php 
-if (!extension_loaded("gmp")) die ("skip");
+if (!extension_loaded("gmp")) die ("skip"); 
 if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
 	die("skip your GMP is too old and will crash");
 }
@@ -38,19 +38,19 @@ var_dump(gmp_strval($r));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: gmp_divexact() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
-unicode(1) "0"
+string(1) "0"
 
 Warning: gmp_divexact(): Zero operand not allowed in %s on line %d
-unicode(1) "0"
-unicode(2) "10"
-unicode(3) "512"
-unicode(19) "5000000000000000000"
-unicode(18) "200000000000000000"
-unicode(9) "-10000000"
+string(1) "0"
+string(2) "10"
+string(3) "512"
+string(19) "5000000000000000000"
+string(18) "200000000000000000"
+string(9) "-10000000"
 Done

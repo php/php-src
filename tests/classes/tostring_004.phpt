@@ -34,10 +34,10 @@ echo "\nTry 2:\n";
 printf($obj . "\n");
 
 ?>
---EXPECT--
+--EXPECTF--
 Object with no __toString():
 Try 1:
-Error: 4096 - Object of class stdClass could not be converted to Unicode string
+Error: 4096 - Object of class stdClass could not be converted to string
 Error: 8 - Object of class stdClass to string conversion
 Object
 
@@ -53,3 +53,4 @@ Error: 4096 - Method badToString::__toString() must return a string value
 
 Try 2:
 Error: 4096 - Method badToString::__toString() must return a string value
+

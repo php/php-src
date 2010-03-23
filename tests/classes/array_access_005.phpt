@@ -54,24 +54,24 @@ var_dump($people[0]['name']);
 ?>
 ===DONE===
 --EXPECTF--
-unicode(3) "Joe"
-unicode(6) "JoeFoo"
-unicode(9) "JoeFooBar"
+string(3) "Joe"
+string(6) "JoeFoo"
+string(9) "JoeFooBar"
 ---ArrayOverloading---
 array(1) {
-  [u"name"]=>
-  unicode(3) "Joe"
+  ["name"]=>
+  string(3) "Joe"
 }
-unicode(3) "Joe"
-unicode(6) "JoeFoo"
+string(3) "Joe"
+string(6) "JoeFoo"
 array(1) {
-  [u"name"]=>
-  unicode(6) "JoeFoo"
+  ["name"]=>
+  string(6) "JoeFoo"
 }
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 46
-unicode(6) "JoeFoo"
+string(6) "JoeFoo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 48
-unicode(6) "JoeFoo"
+string(6) "JoeFoo"
 ===DONE===

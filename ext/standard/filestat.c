@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -19,9 +19,9 @@
 /* $Id$ */
 
 #include "php.h"
+#include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
-#include "ext/standard/file.h"
 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -228,39 +228,24 @@ static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float disk_total_space(string path) U
+/* {{{ proto float disk_total_space(string path)
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
+	double bytestotal;
 	char *path;
 	int path_len;
-	zend_uchar path_type;
-	double bytestotal;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
 		return;
 	}
 
-	if (path_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, (UChar*)path, path_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
-	}
-
 	if (php_check_open_basedir(path TSRMLS_CC)) {
-		goto totalspace_failure;
+		RETURN_FALSE;
 	}
 
 	if (php_disk_total_space(path, &bytestotal TSRMLS_CC) == SUCCESS) {
-		if (path_type == IS_UNICODE) {
-			efree(path);
-		}
 		RETURN_DOUBLE(bytestotal);
-	}
-
-totalspace_failure:
-	if (path_type == IS_UNICODE) {
-		efree(path);
 	}
 	RETURN_FALSE;
 }
@@ -378,40 +363,24 @@ static int php_disk_free_space(char *path, double *space TSRMLS_DC) /* {{{ */
 /* }}} */
 /* }}} */
 
-
-/* {{{ proto float disk_free_space(string path) U
+/* {{{ proto float disk_free_space(string path)
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {
+	double bytesfree;
 	char *path;
 	int path_len;
-	zend_uchar path_type;
-	double bytesfree;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &path, &path_len, &path_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
 		return;
 	}
 
-	if (path_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &path, &path_len, (UChar*)path, path_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
-	}
-
 	if (php_check_open_basedir(path TSRMLS_CC)) {
-		goto freespace_failure;
+		RETURN_FALSE;
 	}
 
 	if (php_disk_free_space(path, &bytesfree TSRMLS_CC) == SUCCESS) {
-		if (path_type == IS_UNICODE) {
-			efree(path);
-		}
 		RETURN_DOUBLE(bytesfree);
-	}
-
-freespace_failure:
-	if (path_type == IS_UNICODE) {
-		efree(path);
 	}
 	RETURN_FALSE;
 }
@@ -422,70 +391,55 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	zval *group;
 	gid_t gid;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/", &filename, &filename_len, &filename_type, &group) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(group) == IS_LONG) {
 		gid = (gid_t)Z_LVAL_P(group);
-	} else if (Z_TYPE_P(group) == IS_STRING ||
-		   Z_TYPE_P(group) == IS_UNICODE
-	) {
-		if (Z_TYPE_P(group) == IS_UNICODE) {
-			zval_unicode_to_string(group TSRMLS_CC);
-		}
+	} else if (Z_TYPE_P(group) == IS_STRING) {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
-		{
-			struct group gr;
-			struct group *retgrptr;
-			long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-			char *grbuf;
+		struct group gr;
+		struct group *retgrptr;
+		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+		char *grbuf;
 
-			if (grbuflen < 1) {
-				RETURN_FALSE;
-			}
+		if (grbuflen < 1) {
+			RETURN_FALSE;
+		}
 
-			grbuf = emalloc(grbuflen);
-			if (getgrnam_r(Z_STRVAL_P(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
-				efree(grbuf);
-				RETURN_FALSE;
-			}
+		grbuf = emalloc(grbuflen);
+		if (getgrnam_r(Z_STRVAL_P(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
 			efree(grbuf);
-			gid = gr.gr_gid;
+			RETURN_FALSE;
 		}
+		efree(grbuf);
+		gid = gr.gr_gid;
 #else
-		{
-				struct group *gr = getgrnam(Z_STRVAL_P(group));
+		struct group *gr = getgrnam(Z_STRVAL_P(group));
 
-				if (!gr) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
-					RETURN_FALSE;
-				}
-				gid = gr->gr_gid;
+		if (!gr) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+			RETURN_FALSE;
 		}
+		gid = gr->gr_gid;
 #endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
 		RETURN_FALSE;
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
@@ -496,11 +450,6 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	} else {
 		ret = VCWD_CHOWN(filename, -1, gid);
 	}
-
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
-
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -511,7 +460,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 #endif
 
 #ifndef NETWARE
-/* {{{ proto bool chgrp(string filename, mixed group) U
+/* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
 PHP_FUNCTION(chgrp)
 {
@@ -523,7 +472,7 @@ PHP_FUNCTION(chgrp)
 }
 /* }}} */
 
-/* {{{ proto bool lchgrp(string filename, mixed group) U
+/* {{{ proto bool lchgrp(string filename, mixed group)
    Change symlink group */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
@@ -543,70 +492,55 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	zval *user;
 	uid_t uid;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tz/", &filename, &filename_len, &filename_type, &user) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t) Z_LVAL_P(user);
-	} else if (Z_TYPE_P(user) == IS_STRING ||
-		   Z_TYPE_P(user) == IS_UNICODE
-	) {
-		if (Z_TYPE_P(user) == IS_UNICODE) {
-			zval_unicode_to_string(user TSRMLS_CC);
-		}
+		uid = (uid_t)Z_LVAL_P(user);
+	} else if (Z_TYPE_P(user) == IS_STRING) {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
-		{
-			struct passwd pw;
-			struct passwd *retpwptr = NULL;
-			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-			char *pwbuf;
+		struct passwd pw;
+		struct passwd *retpwptr = NULL;
+		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		char *pwbuf;
 
-			if (pwbuflen < 1) {
-				RETURN_FALSE;
-			}
+		if (pwbuflen < 1) {
+			RETURN_FALSE;
+		}
 
-			pwbuf = emalloc(pwbuflen);
-			if (getpwnam_r(Z_STRVAL_P(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
-				efree(pwbuf);
-				RETURN_FALSE;
-			}
+		pwbuf = emalloc(pwbuflen);
+		if (getpwnam_r(Z_STRVAL_P(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			efree(pwbuf);
-			uid = pw.pw_uid;
+			RETURN_FALSE;
 		}
+		efree(pwbuf);
+		uid = pw.pw_uid;
 #else
-		{
-			struct passwd *pw = getpwnam(Z_STRVAL_P(user));
+		struct passwd *pw = getpwnam(Z_STRVAL_P(user));
 
-			if (!pw) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
-				RETURN_FALSE;
-			}
-			uid = pw->pw_uid;
+		if (!pw) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
+			RETURN_FALSE;
 		}
+		uid = pw->pw_uid;
 #endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
 		RETURN_FALSE;
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
@@ -617,10 +551,6 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	} else {
 		ret = VCWD_CHOWN(filename, uid, -1);
 	}
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
-
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -630,7 +560,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 #endif
 
 #ifndef NETWARE
-/* {{{ proto bool chown (string filename, mixed user) U
+/* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
@@ -643,7 +573,7 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-/* {{{ proto bool lchown (string filename, mixed user) U
+/* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
@@ -659,42 +589,52 @@ PHP_FUNCTION(lchown)
 /* }}} */
 #endif /* !NETWARE */
 
-/* {{{ proto bool chmod(string filename, int mode) U
+/* {{{ proto bool chmod(string filename, int mode)
    Change file mode */
 PHP_FUNCTION(chmod)
 {
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	long mode;
 	int ret;
 	mode_t imode;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl", &filename, &filename_len, &filename_type, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
 	imode = (mode_t) mode;
+	/* In safe mode, do not allow to setuid files.
+	 * Setuiding files could allow users to gain privileges
+	 * that safe mode doesn't give them. */
 
-	ret = VCWD_CHMOD(filename, imode);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
+	if (PG(safe_mode)) {
+		php_stream_statbuf ssb;
+		if (php_stream_stat_path_ex(filename, 0, &ssb, NULL)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stat failed for %s", filename);
+			RETURN_FALSE;
+		}
+		if ((imode & 04000) != 0 && (ssb.sb.st_mode & 04000) == 0) {
+			imode ^= 04000;
+		}
+		if ((imode & 02000) != 0 && (ssb.sb.st_mode & 02000) == 0) {
+			imode ^= 02000;
+		}
+		if ((imode & 01000) != 0 && (ssb.sb.st_mode & 01000) == 0) {
+			imode ^= 01000;
+		}
 	}
 
+	ret = VCWD_CHMOD(filename, imode);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -704,20 +644,19 @@ PHP_FUNCTION(chmod)
 /* }}} */
 
 #if HAVE_UTIME
-/* {{{ proto bool touch(string filename [, int time [, int atime]]) U
+/* {{{ proto bool touch(string filename [, int time [, int atime]])
    Set modification time of file */
 PHP_FUNCTION(touch)
 {
 	char *filename;
 	int filename_len;
-	zend_uchar filename_type;
 	long filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "t|ll", &filename, &filename_len, &filename_type, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 
@@ -741,17 +680,13 @@ PHP_FUNCTION(touch)
 			WRONG_PARAM_COUNT;
 	}
 
-	if (filename_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
+	/* Safe-mode */
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		if (filename_type == IS_UNICODE) {
-			efree(filename);
-		}
 		RETURN_FALSE;
 	}
 
@@ -760,19 +695,12 @@ PHP_FUNCTION(touch)
 		file = VCWD_FOPEN(filename, "w");
 		if (file == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create file %s because %s", filename, strerror(errno));
-			if (filename_type == IS_UNICODE) {
-				efree(filename);
-			}
 			RETURN_FALSE;
 		}
 		fclose(file);
 	}
 
 	ret = VCWD_UTIME(filename, newtime);
-	if (filename_type == IS_UNICODE) {
-		efree(filename);
-	}
-
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Utime failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -811,26 +739,15 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	zend_bool   clear_realpath_cache = 0;
-	char       *filename             = NULL;
-	zend_uchar  filename_type        = 0;
-	int         filename_len         = 0;
+	zend_bool  clear_realpath_cache = 0;
+	char      *filename             = NULL;
+	int        filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bt", &clear_realpath_cache, &filename, &filename_len, &filename_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bs", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
-	if (filename && filename_type == IS_UNICODE) {
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) {
-			RETURN_FALSE;
-		}
-	}
-
 	php_clear_stat_cache(clear_realpath_cache, filename, filename_len TSRMLS_CC);
-
-	if (filename && filename_type == IS_UNICODE) {
-		efree(filename);
-	}
 }
 /* }}} */
 
@@ -838,22 +755,6 @@ PHP_FUNCTION(clearstatcache)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
-
-PHPAPI void php_u_stat(zend_uchar filename_type, const zstr filename, php_stat_len filename_length, int type, php_stream_context *context, zval *return_value TSRMLS_DC) /* {{{ */
-{
-	char *fn;
-
-	if (filename_type == IS_STRING) {
-		php_stat(filename.s, filename_length, type, return_value TSRMLS_CC);
-	} else {
-		if (FAILURE == php_stream_path_encode(NULL, &fn, &filename_length, filename.u, filename_length, REPORT_ERRORS, context)) {
-			RETURN_FALSE;
-		}
-		php_stat(fn, filename_length, type, return_value TSRMLS_CC);
-		efree(fn);
-	}
-}
-/* }}} */
 
 /* {{{ php_stat
  */
@@ -870,6 +771,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	};
 	char *local;
 	php_stream_wrapper *wrapper;
+	char safe_mode_buf[MAXPATHLEN];
 
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -878,6 +780,18 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper) {
 		if (php_check_open_basedir(local TSRMLS_CC)) {
 			RETURN_FALSE;
+		} else if (PG(safe_mode)) {
+			if (type == FS_IS_X) {
+				if (strstr(local, "..")) {
+					RETURN_FALSE;
+				} else {
+					char *b = strrchr(local, PHP_DIR_SEPARATOR);
+					snprintf(safe_mode_buf, MAXPATHLEN, "%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : local));
+					local = (char *)&safe_mode_buf;
+				}
+			} else if (!php_checkuid_ex(local, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS, CHECKUID_NO_ERRORS)) {
+				RETURN_FALSE;
+			}
 		}
 	}
 
@@ -992,20 +906,20 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_LONG((long)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
-			RETURN_ASCII_STRING("link", 1);
+			RETURN_STRING("link", 1);
 		}
 		switch(ssb.sb.st_mode & S_IFMT) {
-		case S_IFIFO: RETURN_ASCII_STRING("fifo", 1);
-		case S_IFCHR: RETURN_ASCII_STRING("char", 1);
-		case S_IFDIR: RETURN_ASCII_STRING("dir", 1);
-		case S_IFBLK: RETURN_ASCII_STRING("block", 1);
-		case S_IFREG: RETURN_ASCII_STRING("file", 1);
+		case S_IFIFO: RETURN_STRING("fifo", 1);
+		case S_IFCHR: RETURN_STRING("char", 1);
+		case S_IFDIR: RETURN_STRING("dir", 1);
+		case S_IFBLK: RETURN_STRING("block", 1);
+		case S_IFREG: RETURN_STRING("file", 1);
 #if defined(S_IFSOCK) && !defined(ZEND_WIN32)&&!defined(__BEOS__)
-		case S_IFSOCK: RETURN_ASCII_STRING("socket", 1);
+		case S_IFSOCK: RETURN_STRING("socket", 1);
 #endif
 		}
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", ssb.sb.st_mode&S_IFMT);
-		RETURN_ASCII_STRING("unknown", 1);
+		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		RETURN_BOOL((ssb.sb.st_mode & wmask) != 0);
 	case FS_IS_R:
@@ -1067,19 +981,19 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
 
 		/* Store string indexes referencing the same zval*/
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *) &stat_dev, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *) &stat_ino, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *) &stat_mode, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *) &stat_nlink, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *) &stat_uid, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *) &stat_gid, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *) &stat_rdev, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *) &stat_size, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *) &stat_atime, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *) &stat_mtime, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *) &stat_ctime, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *) &stat_blksize, sizeof(zval *), NULL);
-		zend_ascii_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *) &stat_blocks, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *) &stat_dev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *) &stat_ino, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *) &stat_mode, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *) &stat_nlink, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *) &stat_uid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *) &stat_gid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *) &stat_rdev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *) &stat_size, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *) &stat_atime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *) &stat_mtime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *) &stat_ctime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *) &stat_blksize, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *) &stat_blocks, sizeof(zval *), NULL);
 
 		return;
 	}
@@ -1094,112 +1008,101 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
 	int filename_len; \
-	zend_uchar filename_type; \
 	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &filename, &filename_len, &filename_type) == FAILURE) { \
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) { \
 		return; \
 	} \
 	\
-	if (filename_type == IS_UNICODE) { \
-		if (FAILURE == php_stream_path_encode(NULL, &filename, &filename_len, (UChar*)filename, filename_len, REPORT_ERRORS, FG(default_context))) { \
-			RETURN_FALSE; \
-		} \
-	} \
-	\
 	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value TSRMLS_CC); \
-	\
-	if (filename_type == IS_UNICODE) { \
-		efree(filename); \
-	} \
 }
 /* }}} */
 
-/* {{{ proto int fileperms(string filename) U
+/* {{{ proto int fileperms(string filename)
    Get file permissions */
 FileFunction(PHP_FN(fileperms), FS_PERMS)
 /* }}} */
 
-/* {{{ proto int fileinode(string filename) U
+/* {{{ proto int fileinode(string filename)
    Get file inode */
 FileFunction(PHP_FN(fileinode), FS_INODE)
 /* }}} */
 
-/* {{{ proto int filesize(string filename) U
+/* {{{ proto int filesize(string filename)
    Get file size */
 FileFunction(PHP_FN(filesize), FS_SIZE)
 /* }}} */
 
-/* {{{ proto int fileowner(string filename) U
+/* {{{ proto int fileowner(string filename)
    Get file owner */
 FileFunction(PHP_FN(fileowner), FS_OWNER)
 /* }}} */
 
-/* {{{ proto int filegroup(string filename) U
+/* {{{ proto int filegroup(string filename)
    Get file group */
 FileFunction(PHP_FN(filegroup), FS_GROUP)
 /* }}} */
 
-/* {{{ proto int fileatime(string filename) U
+/* {{{ proto int fileatime(string filename)
    Get last access time of file */
 FileFunction(PHP_FN(fileatime), FS_ATIME)
 /* }}} */
 
-/* {{{ proto int filemtime(string filename) U
+/* {{{ proto int filemtime(string filename)
    Get last modification time of file */
 FileFunction(PHP_FN(filemtime), FS_MTIME)
 /* }}} */
 
-/* {{{ proto int filectime(string filename) U
+/* {{{ proto int filectime(string filename)
    Get inode modification time of file */
 FileFunction(PHP_FN(filectime), FS_CTIME)
 /* }}} */
 
-/* {{{ proto string filetype(string filename) U
+/* {{{ proto string filetype(string filename)
    Get file type */
 FileFunction(PHP_FN(filetype), FS_TYPE)
 /* }}} */
 
-/* {{{ proto bool is_writable(string filename) U
+/* {{{ proto bool is_writable(string filename)
    Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
-/* {{{ proto bool is_readable(string filename) U
+/* {{{ proto bool is_readable(string filename)
    Returns true if file can be read */
 FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
-/* {{{ proto bool is_executable(string filename) U
+/* {{{ proto bool is_executable(string filename)
    Returns true if file is executable */
 FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
 
-/* {{{ proto bool is_file(string filename) U
+/* {{{ proto bool is_file(string filename)
    Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file), FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto bool is_dir(string filename) U
+/* {{{ proto bool is_dir(string filename)
    Returns true if file is directory */
 FileFunction(PHP_FN(is_dir), FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto bool is_link(string filename) U
+/* {{{ proto bool is_link(string filename)
    Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link), FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto bool file_exists(string filename) U
+/* {{{ proto bool file_exists(string filename)
    Returns true if filename exists */
 FileFunction(PHP_FN(file_exists), FS_EXISTS)
 /* }}} */
 
-/* {{{ proto array lstat(string filename) U
+/* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
 FileFunction(php_if_lstat, FS_LSTAT)
 /* }}} */
 
-/* {{{ proto array stat(string filename) U
+/* {{{ proto array stat(string filename)
    Give information about a file */
 FileFunction(php_if_stat, FS_STAT)
 /* }}} */

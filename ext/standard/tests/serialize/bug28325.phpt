@@ -19,17 +19,17 @@ var_dump(unserialize(serialize($a)));
 ?>
 --EXPECTF--
 object(a)#%d (1) {
-  [u"b"]=>
+  ["b"]=>
   object(b)#%d (1) {
-    [u"c"]=>
+    ["c"]=>
     object(c)#%d (1) {
-      [u"d"]=>
+      ["d"]=>
       object(a)#%d (1) {
-        [u"b"]=>
+        ["b"]=>
         object(b)#%d (1) {
-          [u"c"]=>
+          ["c"]=>
           object(c)#%d (1) {
-            [u"d"]=>
+            ["d"]=>
             *RECURSION*
           }
         }

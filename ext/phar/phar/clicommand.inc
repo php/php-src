@@ -58,15 +58,15 @@ abstract class CLICommand
 				}
 			}
 
-			if (isset($this->args[b''])) {
+			if (isset($this->args[''])) {
 				if ($i >= $argc) {
-					if (isset($this->args[b'']['require']) && $this->args[b'']['require']) {
+					if (isset($this->args['']['require']) && $this->args['']['require']) {
 						self::error("Missing default trailing arguments to command $command, check ${argv[0]} help\n");
 					}
 				} else {
-					$this->args[b'']['val'] = array();
+					$this->args['']['val'] = array();
 					while($i < $argc) {
-						$this->args[b'']['val'][] = $argv[$i++];
+						$this->args['']['val'][] = $argv[$i++];
 					}
 				}
 			} else if ($i < $argc) {
@@ -122,10 +122,10 @@ abstract class CLICommand
 					$func = $prefix . $sub . '_' . $what;
 					$what = str_replace('_', '-', $what);
 					if ($r->hasMethod($func)) {
-						if (!isset($a[(binary)$what])) {
-							$a[(binary)$what] = array();
+						if (!isset($a[$what])) {
+							$a[$what] = array();
 						}
-						$a[(binary)$what][$sub] = /*$m->class . '::' .*/ $func;
+						$a[$what][$sub] = /*$m->class . '::' .*/ $func;
 					}
 				}
 			}

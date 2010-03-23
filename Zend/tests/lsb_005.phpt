@@ -36,7 +36,7 @@ TestA::test();
 
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 TestA
 TestB
 TestC

@@ -91,102 +91,102 @@ array(0) {
 -- Iterator 3 --
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iterator 4 --
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(1) {
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 -- Iterator 5 --
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 array(1) {
   [2]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 -- Iterator 6 --
 array(1) {
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 array(1) {
   [33333333]=>
-  unicode(2) "f4"
+  string(2) "f4"
 }
 -- Iterator 7 --
 array(2) {
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
 }
 array(2) {
-  [u"re\td"]=>
-  unicode(5) "color"
-  [u"\v\fworld"]=>
+  ["re\td"]=>
+  string(5) "color"
+  ["\v\fworld"]=>
   float(2.2)
 }
 -- Iterator 8 --
 array(2) {
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
 }
 array(2) {
-  [u"re	d"]=>
-  unicode(5) "color"
-  [u"world"]=>
+  ["re	d"]=>
+  string(5) "color"
+  ["world"]=>
   float(2.2)
 }
 -- Iterator 9 --
 array(2) {
   [0]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 array(2) {
   [0]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(6) "string"
+  string(5) "hello"
+  ["Hello world"]=>
+  string(6) "string"
 }
 -- Iterator 10 --
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 array(1) {
-  [u""]=>
-  unicode(5) "hello"
+  [""]=>
+  string(5) "hello"
 }
 -- Iterator 11 --
 array(3) {
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
-  [u"fruit"]=>
+  ["fruit"]=>
   float(2.2)
   [444]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 array(3) {
-  [u"hello"]=>
+  ["hello"]=>
   int(1)
-  [u"fruit"]=>
+  ["fruit"]=>
   float(2.2)
   [444]=>
-  unicode(5) "float"
+  string(5) "float"
 }
 Done

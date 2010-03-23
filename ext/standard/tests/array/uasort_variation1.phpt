@@ -1,5 +1,5 @@
 --TEST--
-Test uasort() function : usage variations - unexpected values for 'array_arg'
+Test uasort() function : usage variations - unexpected values for 'array_arg' argument
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
@@ -19,7 +19,7 @@ echo "*** Testing uasort() : unexpected values for 'array_arg' ***\n";
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
 {
@@ -159,19 +159,19 @@ Warning: uasort() expects parameter 1 to be array, boolean given in %s on line %
 NULL
 -- Iteration 16 --
 
-Warning: uasort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: uasort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: uasort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: uasort() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, string given in %s on line %d
 NULL
 -- Iteration 20 --
 

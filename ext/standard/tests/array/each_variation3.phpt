@@ -110,144 +110,144 @@ echo "Done";
 -- Iteration 1: int data --
 array(4) {
   [1]=>
-  unicode(4) "zero"
-  [u"value"]=>
-  unicode(4) "zero"
+  string(4) "zero"
+  ["value"]=>
+  string(4) "zero"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
 -- Iteration 2: float data --
 array(4) {
   [1]=>
-  unicode(8) "positive"
-  [u"value"]=>
-  unicode(8) "positive"
+  string(8) "positive"
+  ["value"]=>
+  string(8) "positive"
   [0]=>
   int(10)
-  [u"key"]=>
+  ["key"]=>
   int(10)
 }
 
 -- Iteration 3: extreme floats data --
 array(4) {
   [1]=>
-  unicode(5) "large"
-  [u"value"]=>
-  unicode(5) "large"
+  string(5) "large"
+  ["value"]=>
+  string(5) "large"
   [0]=>
   int(12345678)
-  [u"key"]=>
+  ["key"]=>
   int(12345678)
 }
 
 -- Iteration 4: null uppercase data --
 array(4) {
   [1]=>
-  unicode(6) "null 1"
-  [u"value"]=>
-  unicode(6) "null 1"
+  string(6) "null 1"
+  ["value"]=>
+  string(6) "null 1"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 
 -- Iteration 5: null lowercase data --
 array(4) {
   [1]=>
-  unicode(6) "null 2"
-  [u"value"]=>
-  unicode(6) "null 2"
+  string(6) "null 2"
+  ["value"]=>
+  string(6) "null 2"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 
 -- Iteration 6: bool lowercase data --
 array(4) {
   [1]=>
-  unicode(6) "lowert"
-  [u"value"]=>
-  unicode(6) "lowert"
+  string(6) "lowert"
+  ["value"]=>
+  string(6) "lowert"
   [0]=>
   int(1)
-  [u"key"]=>
+  ["key"]=>
   int(1)
 }
 
 -- Iteration 7: bool uppercase data --
 array(4) {
   [1]=>
-  unicode(6) "uppert"
-  [u"value"]=>
-  unicode(6) "uppert"
+  string(6) "uppert"
+  ["value"]=>
+  string(6) "uppert"
   [0]=>
   int(1)
-  [u"key"]=>
+  ["key"]=>
   int(1)
 }
 
 -- Iteration 8: empty double quotes data --
 array(4) {
   [1]=>
-  unicode(6) "emptyd"
-  [u"value"]=>
-  unicode(6) "emptyd"
+  string(6) "emptyd"
+  ["value"]=>
+  string(6) "emptyd"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 
 -- Iteration 9: empty single quotes data --
 array(4) {
   [1]=>
-  unicode(6) "emptys"
-  [u"value"]=>
-  unicode(6) "emptys"
+  string(6) "emptys"
+  ["value"]=>
+  string(6) "emptys"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 
 -- Iteration 10: string data --
 array(4) {
   [1]=>
-  unicode(7) "stringd"
-  [u"value"]=>
-  unicode(7) "stringd"
+  string(7) "stringd"
+  ["value"]=>
+  string(7) "stringd"
   [0]=>
-  unicode(7) "stringd"
-  [u"key"]=>
-  unicode(7) "stringd"
+  string(7) "stringd"
+  ["key"]=>
+  string(7) "stringd"
 }
 
 -- Iteration 11: undefined data --
 array(4) {
   [1]=>
-  unicode(9) "undefined"
-  [u"value"]=>
-  unicode(9) "undefined"
+  string(9) "undefined"
+  ["value"]=>
+  string(9) "undefined"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 
 -- Iteration 12: unset data --
 array(4) {
   [1]=>
-  unicode(5) "unset"
-  [u"value"]=>
-  unicode(5) "unset"
+  string(5) "unset"
+  ["value"]=>
+  string(5) "unset"
   [0]=>
-  unicode(0) ""
-  [u"key"]=>
-  unicode(0) ""
+  string(0) ""
+  ["key"]=>
+  string(0) ""
 }
 Done

@@ -188,6 +188,6 @@ int(0)
 
 --resource--
 
-Warning: iconv_strlen() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: iconv_strlen() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

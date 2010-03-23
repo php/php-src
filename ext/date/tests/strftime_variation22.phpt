@@ -5,6 +5,9 @@ Test strftime() function : usage variation - Checking Preferred date and time re
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     die("skip Test is not valid for Windows");
 }
+if(!setlocale(LC_ALL, "en_US.utf8", "en_US")) {
+	die("skip Locale en_US.utf8 or en_US is  needed by test and is not available");
+}
 ?>
 --FILE--
 <?php
@@ -17,7 +20,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US.utf8", "en_US");
 date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
@@ -42,14 +45,14 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Preferred date and time representation--
-unicode(%d) "%s %s %d %d:%d:%d %d"
-unicode(24) "Fri Aug  8 08:08:08 2008"
+string(%d) "%s %d %s %d %d:%d:%d %s %s"
+string(31) "Fri 08 Aug 2008 08:08:08 AM IST"
 
 --Preferred date representation--
-unicode(%d) "%d/%d/%d"
-unicode(8) "08/08/08"
+string(%d) "%d/%d/%d"
+string(10) "08/08/2008"
 
 --Preferred time representation--
-unicode(%d) "%d:%d:%d"
-unicode(8) "08:08:08"
+string(%d) "%d:%d:%d %s"
+string(11) "08:08:08 AM"
 ===DONE===

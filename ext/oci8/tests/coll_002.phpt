@@ -20,7 +20,7 @@ require dirname(__FILE__)."/drop_type.inc";
 ?>
 --EXPECTF--
 object(OCI-Collection)#%d (1) {
-  [u"collection"]=>
+  ["collection"]=>
   resource(%d) of type (oci8 collection)
 }
 bool(true)

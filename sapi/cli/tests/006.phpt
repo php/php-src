@@ -50,7 +50,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
     Constant [ integer PREG_RECURSION_LIMIT_ERROR ] { 3 }
     Constant [ integer PREG_BAD_UTF8_ERROR ] { 4 }
     Constant [ integer PREG_BAD_UTF8_OFFSET_ERROR ] { 5 }
-    Constant [ %string PCRE_VERSION ] { %s }
+    Constant [ string PCRE_VERSION ] { %s }
   }
 
   - Functions {

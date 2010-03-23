@@ -154,13 +154,12 @@ var_dump( is_numeric() );
 var_dump( is_numeric("10", "20") );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_numeric() with valid numeric values ***
 -- Iteration 1 --

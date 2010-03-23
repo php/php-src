@@ -101,12 +101,12 @@ foreach($inputs as $key =>$value) {
 *** Testing date_sunrise() : usage variation ***
 
 --int 0--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --int 1--
-unicode(5) "01:09"
+string(5) "01:09"
 float(1.155%d)
 int(1218177558)
 
@@ -165,99 +165,99 @@ Warning: date_sunrise() expects parameter 3 to be double, array given in %s on l
 bool(false)
 
 --uppercase NULL--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --lowercase null--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --lowercase true--
-unicode(5) "01:09"
+string(5) "01:09"
 float(1.155%d)
 int(1218177558)
 
 --lowercase false--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --uppercase TRUE--
-unicode(5) "01:09"
+string(5) "01:09"
 float(1.155%d)
 int(1218177558)
 
 --uppercase FALSE--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --empty string DQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
-Warning: date_sunrise() expects parameter 3 to be double, Unicode string given in %s on line %d
+Warning: date_sunrise() expects parameter 3 to be double, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -283,12 +283,12 @@ Warning: date_sunrise() expects parameter 3 to be double, object given in %s on 
 bool(false)
 
 --undefined var--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 
 --unset var--
-unicode(5) "01:10"
+string(5) "01:10"
 float(1.174%d)
 int(1218177627)
 ===DONE===

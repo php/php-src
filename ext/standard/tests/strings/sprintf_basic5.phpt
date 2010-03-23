@@ -33,10 +33,10 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : basic functionality - using char format ***
-unicode(6) "format"
-unicode(1) "A"
-unicode(3) "A B"
-unicode(5) "A B C"
+string(6) "format"
+string(1) "A"
+string(3) "A B"
+string(5) "A B C"
 Done

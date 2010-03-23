@@ -39,7 +39,7 @@ unset ($unset_var);
 class classWithToString
 {
 	public function __toString() {
-		return "Class A object";
+		return b"Class A object";
 	}
 }
 
@@ -124,89 +124,87 @@ fclose($fp);
 *** Testing mcrypt_ecb() : usage variation ***
 
 --int 0--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --int 1--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --int 12345--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --int -12345--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --float 10.5--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --float -10.5--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --float 12.3456789000e10--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --float -12.3456789000e10--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --float .5--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --empty array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
 
 --int indexed array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
 
 --associative array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
 
 --nested arrays--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, array given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
+string(0) ""
 
 --uppercase NULL--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --lowercase null--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --lowercase true--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --lowercase false--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --uppercase TRUE--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --uppercase FALSE--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --empty string DQ--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be strictly a binary string, Unicode string given, %s(%d)
-unicode(0) ""
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --empty string SQ--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be strictly a binary string, Unicode string given, %s(%d)
-unicode(0) ""
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --instance of classWithToString--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, object given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, object given, %s(%d)
+string(0) ""
 
 --undefined var--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --unset var--
-unicode(32) "6438db90653c4d300909aa02fd6163c2"
+string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --resource--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be binary string, resource given, %s(%d)
-unicode(0) ""
+Error: 2 - mcrypt_ecb() expects parameter 5 to be string, resource given, %s(%d)
+string(0) ""
 ===DONE===
 

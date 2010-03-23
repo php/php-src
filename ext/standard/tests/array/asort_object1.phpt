@@ -1,5 +1,5 @@
 --TEST--
-Test asort() function : object functionality - sort objects 
+Test asort() function : object functionality - sort objects  
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $asort_flags] )
@@ -10,7 +10,7 @@ Test asort() function : object functionality - sort objects
 
 /*
  * testing asort() by providing integer/string object arrays with following flag values 
- * 1. default flag value
+ * 1. Defualt flag value
  * 2. SORT_REGULAR - compare items normally
 */
 
@@ -24,6 +24,7 @@ class for_integer_asort
   function __construct($value){
     $this->class_value = $value;
   }
+
 }
 
 // class declaration for string objects
@@ -33,12 +34,13 @@ class for_string_asort
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-  }
+   }
 
   // return string value
   function __tostring() {
    return (string)$this->value;
   }
+
 }
 
 // array of integer objects
@@ -57,14 +59,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is default --\n";
+echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is defualt --\n";
 
-// testing asort() function by supplying integer object array, flag value is default
+// testing asort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
 
-// testing asort() function by supplying string object array, flag value is default
+// testing asort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
@@ -85,81 +87,81 @@ echo "Done\n";
 --EXPECTF--
 *** Testing asort() : object functionality ***
 
--- Testing asort() by supplying various object arrays, 'flag' value is default --
+-- Testing asort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
 array(6) {
   [4]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
   [6]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [5]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [1]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [3]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [2]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
 }
 bool(true)
 array(8) {
-  [u"g"]=>
+  ["g"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
-  [u"f"]=>
+  ["f"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
-  [u"h"]=>
+  ["h"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
-  [u"e"]=>
+  ["e"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
-  [u"a"]=>
+  ["a"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
-  [u"d"]=>
+  ["d"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
-  [u"b"]=>
+  ["b"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
-  [u"c"]=>
+  ["c"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
 }
 
@@ -168,76 +170,76 @@ bool(true)
 array(6) {
   [4]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
   [6]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [5]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [1]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [3]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [2]=>
   object(for_integer_asort)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
 }
 bool(true)
 array(8) {
-  [u"g"]=>
+  ["g"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
-  [u"f"]=>
+  ["f"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
-  [u"h"]=>
+  ["h"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
-  [u"e"]=>
+  ["e"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
-  [u"a"]=>
+  ["a"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
-  [u"d"]=>
+  ["d"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
-  [u"b"]=>
+  ["b"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
-  [u"c"]=>
+  ["c"]=>
   object(for_string_asort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
 }
 Done

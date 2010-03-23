@@ -26,26 +26,26 @@ image_type_to_mime_type()
 ?>
 --EXPECT--
 array(11) {
-  [u"test1pix.bmp"]=>
-  unicode(14) "image/x-ms-bmp"
-  [u"test1pix.jp2"]=>
-  unicode(9) "image/jp2"
-  [u"test1pix.jpc"]=>
-  unicode(24) "application/octet-stream"
-  [u"test1pix.jpg"]=>
-  unicode(10) "image/jpeg"
-  [u"test2pix.gif"]=>
-  unicode(9) "image/gif"
-  [u"test4pix.gif"]=>
-  unicode(9) "image/gif"
-  [u"test4pix.iff"]=>
-  unicode(9) "image/iff"
-  [u"test4pix.png"]=>
-  unicode(9) "image/png"
-  [u"test4pix.psd"]=>
-  unicode(9) "image/psd"
-  [u"test4pix.swf"]=>
-  unicode(29) "application/x-shockwave-flash"
-  [u"test4pix.tif"]=>
-  unicode(10) "image/tiff"
+  ["test1pix.bmp"]=>
+  string(14) "image/x-ms-bmp"
+  ["test1pix.jp2"]=>
+  string(9) "image/jp2"
+  ["test1pix.jpc"]=>
+  string(24) "application/octet-stream"
+  ["test1pix.jpg"]=>
+  string(10) "image/jpeg"
+  ["test2pix.gif"]=>
+  string(9) "image/gif"
+  ["test4pix.gif"]=>
+  string(9) "image/gif"
+  ["test4pix.iff"]=>
+  string(9) "image/iff"
+  ["test4pix.png"]=>
+  string(9) "image/png"
+  ["test4pix.psd"]=>
+  string(9) "image/psd"
+  ["test4pix.swf"]=>
+  string(29) "application/x-shockwave-flash"
+  ["test4pix.tif"]=>
+  string(10) "image/tiff"
 }

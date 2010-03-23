@@ -10,8 +10,10 @@ ab cd ef 123 test
 --FILE--
 <?php 
 
-$argc = $_SERVER['argc'];
-$argv = $_SERVER['argv'];
+if (!ini_get('register_globals')) {
+	$argc = $_SERVER['argc'];
+	$argv = $_SERVER['argv'];
+}
 
 for ($i=1; $i<$argc; $i++) {
 	echo ($i-1).": ".$argv[$i]."\n";

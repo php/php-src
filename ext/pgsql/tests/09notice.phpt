@@ -21,6 +21,7 @@ if ($msg === FALSE) {
 }
 echo $msg."\n";
 echo "pg_last_notice() is Ok\n";
+
 ?>
 --EXPECTF--
 Notice: pg_query(): %s already a transaction in progress in %s on line %d

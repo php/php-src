@@ -23,16 +23,16 @@ array(3) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(33) " an_attribute="simpleValueInside""
+    string(33) " an_attribute="simpleValueInside""
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(12) "an_attribute"
+    string(12) "an_attribute"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(19) ""simpleValueInside""
+    string(19) ""simpleValueInside""
   }
 }

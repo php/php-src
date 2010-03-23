@@ -45,7 +45,7 @@ database handler: flatfile
 Warning: dba_sync() expects exactly 1 parameter, 0 given in %sdba_sync.php on line %d
 NULL
 
-Warning: dba_sync() expects parameter 1 to be resource, Unicode string given in %sdba_sync.php on line %d
+Warning: dba_sync() expects parameter 1 to be resource, string given in %sdba_sync.php on line %d
 NULL
 bool(true)
 ===DONE===

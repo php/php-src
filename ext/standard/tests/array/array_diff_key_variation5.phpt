@@ -25,9 +25,9 @@ var_dump( array_diff_key($float_indx_array, $input_array) );
 -- Testing array_diff_key() function with float indexed array --
 array(2) {
   [20]=>
-  unicode(2) "20"
+  string(2) "20"
   [-20]=>
-  unicode(3) "-20"
+  string(3) "-20"
 }
 array(0) {
 }

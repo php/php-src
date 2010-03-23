@@ -3,7 +3,7 @@ imagecreatefromstring
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromstring')) die("skip gd extension not available\n");
-		if (!function_exists('imagepng')) die("skip no imagpng()\n");
+        if (!function_exists('imagepng')) die("skip no imagpng()\n");
 ?>
 --FILE--
 <?php
@@ -51,9 +51,9 @@ unlink($dir . '/p.png');
 
 
 //empty string
-$im = imagecreatefromstring(b'');
+$im = imagecreatefromstring('');
 //random string > 8
-$im = imagecreatefromstring(b' asdf jklp');
+$im = imagecreatefromstring(' asdf jklp');
 ?>
 --EXPECTF--
 createfromstring truecolor png: ok

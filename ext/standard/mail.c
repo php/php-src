@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -41,6 +41,7 @@
 
 #include "php_mail.h"
 #include "php_ini.h"
+#include "safe_mode.h"
 #include "exec.h"
 
 #ifdef PHP_WIN32
@@ -70,7 +71,7 @@
 
 extern long php_getuid(void);
 
-/* {{{ proto int ezmlm_hash(string addr) U
+/* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
 PHP_FUNCTION(ezmlm_hash)
 {
@@ -78,7 +79,7 @@ PHP_FUNCTION(ezmlm_hash)
 	unsigned int h = 5381;
 	int j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&", &str, &str_len, UG(ascii_conv)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -103,6 +104,11 @@ PHP_FUNCTION(mail)
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
+
+	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE");
+		RETURN_FALSE;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len,
 																	&headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE
@@ -232,7 +238,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		char *f;
 		size_t f_len;
 
-		php_basename(tmp, strlen(tmp), NULL, 0, &f, &f_len TSRMLS_CC);
+		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(), f, headers);

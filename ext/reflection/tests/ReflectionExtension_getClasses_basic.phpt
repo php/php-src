@@ -8,62 +8,62 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 array(11) {
-  [%s"ReflectionException"]=>
+  ["ReflectionException"]=>
   &object(ReflectionClass)#2 (1) {
-    [%s"name"]=>
-    unicode(19) "ReflectionException"
+    ["name"]=>
+    string(19) "ReflectionException"
   }
-  [%s"Reflection"]=>
+  ["Reflection"]=>
   &object(ReflectionClass)#3 (1) {
-    [%s"name"]=>
-    unicode(10) "Reflection"
+    ["name"]=>
+    string(10) "Reflection"
   }
-  [%s"Reflector"]=>
+  ["Reflector"]=>
   &object(ReflectionClass)#4 (1) {
-    [%s"name"]=>
-    unicode(9) "Reflector"
+    ["name"]=>
+    string(9) "Reflector"
   }
-  [%s"ReflectionFunctionAbstract"]=>
+  ["ReflectionFunctionAbstract"]=>
   &object(ReflectionClass)#5 (1) {
-    [%s"name"]=>
-    unicode(26) "ReflectionFunctionAbstract"
+    ["name"]=>
+    string(26) "ReflectionFunctionAbstract"
   }
-  [%s"ReflectionFunction"]=>
+  ["ReflectionFunction"]=>
   &object(ReflectionClass)#6 (1) {
-    [%s"name"]=>
-    unicode(18) "ReflectionFunction"
+    ["name"]=>
+    string(18) "ReflectionFunction"
   }
-  [%s"ReflectionParameter"]=>
+  ["ReflectionParameter"]=>
   &object(ReflectionClass)#7 (1) {
-    [%s"name"]=>
-    unicode(19) "ReflectionParameter"
+    ["name"]=>
+    string(19) "ReflectionParameter"
   }
-  [%s"ReflectionMethod"]=>
+  ["ReflectionMethod"]=>
   &object(ReflectionClass)#8 (1) {
-    [%s"name"]=>
-    unicode(16) "ReflectionMethod"
+    ["name"]=>
+    string(16) "ReflectionMethod"
   }
-  [%s"ReflectionClass"]=>
+  ["ReflectionClass"]=>
   &object(ReflectionClass)#9 (1) {
-    [%s"name"]=>
-    unicode(15) "ReflectionClass"
+    ["name"]=>
+    string(15) "ReflectionClass"
   }
-  [%s"ReflectionObject"]=>
+  ["ReflectionObject"]=>
   &object(ReflectionClass)#10 (1) {
-    [%s"name"]=>
-    unicode(16) "ReflectionObject"
+    ["name"]=>
+    string(16) "ReflectionObject"
   }
-  [%s"ReflectionProperty"]=>
+  ["ReflectionProperty"]=>
   &object(ReflectionClass)#11 (1) {
-    [%s"name"]=>
-    unicode(18) "ReflectionProperty"
+    ["name"]=>
+    string(18) "ReflectionProperty"
   }
-  [%s"ReflectionExtension"]=>
+  ["ReflectionExtension"]=>
   &object(ReflectionClass)#12 (1) {
-    [%s"name"]=>
-    unicode(19) "ReflectionExtension"
+    ["name"]=>
+    string(19) "ReflectionExtension"
   }
 }
 ==DONE==

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,7 +24,6 @@
 #include <stdlib.h>
 
 #include "php.h"
-
 #if HAVE_CRYPT
 
 #if HAVE_UNISTD_H
@@ -141,7 +140,7 @@ static void php_to64(char *s, long v, int n) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto string crypt(string str [, string salt]) U
+/* {{{ proto string crypt(string str [, string salt])
    Hash a string */
 PHP_FUNCTION(crypt)
 {
@@ -155,7 +154,7 @@ PHP_FUNCTION(crypt)
 	 * available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
 		return;
 	}
 

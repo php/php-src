@@ -10,7 +10,7 @@ Test arsort() function : usage variations - unexpected values for 'array_arg' ar
 
 /*
  * testing arsort() by providing different unexpected values for array argument with following flag values.
- * 1. flag value as default
+ * 1. flag value as defualt
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
@@ -76,7 +76,7 @@ $unexpected_values = array (
 // loop though each element of the array and check the working of arsort()
 // when $array arugment is supplied with different values from $unexpected_values
 echo "\n-- Testing arsort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are default, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {
@@ -96,7 +96,7 @@ echo "Done";
 
 -- Testing arsort() by supplying different unexpected values for 'array' argument --
 
--- Flag values are default, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --
+-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --
 -- Iteration 1 --
 
 Warning: arsort() expects parameter 1 to be array, integer given in %sarsort_variation1.php on line %d
@@ -294,55 +294,55 @@ Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_var
 bool(false)
 -- Iteration 16 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 18 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 19 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 20 --
 
@@ -359,29 +359,29 @@ Warning: arsort() expects parameter 1 to be array, object given in %sarsort_vari
 bool(false)
 -- Iteration 21 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 22 --
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, Unicode string given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, string given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 23 --
 

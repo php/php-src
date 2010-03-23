@@ -30,11 +30,11 @@ echo "Done";
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
 
-Warning: is_subclass_of() expects exactly 2 parameters, 3 given in %s on line %d
+Warning: is_subclass_of() expects exactly 2 parameters, 3 given in %s on line 16
 NULL
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
 
-Warning: is_subclass_of() expects exactly 2 parameters, 1 given in %s on line %d
+Warning: is_subclass_of() expects exactly 2 parameters, 1 given in %s on line 21
 NULL
 Done

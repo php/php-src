@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,18 +22,21 @@
 
 #include "php_intl.h"
 #include "formatter_class.h"
+#include "intl_convert.h"
 
 /* {{{ */
 static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*       locale;
-	UChar*      pattern = NULL;
+	char*       pattern = NULL;
 	int         locale_len = 0, pattern_len = 0;
 	long        style;
+	UChar*      spattern     = NULL;
+	int         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|u",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -42,15 +45,26 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_NULL();
 	}
 
-	object = return_value;
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	object = return_value;
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	if(locale_len == 0) {
-		locale = UG(default_locale);
+	/* Convert pattern (if specified) to UTF-16. */
+	if(pattern && pattern_len) {
+		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(nfo));
+		INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: error converting pattern to UTF-16");
 	}
 
-	FORMATTER_OBJECT(nfo) = unum_open(style, pattern, pattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+	if(locale_len == 0) {
+		locale = INTL_G(default_locale);
+	}
+
+	/* Create an ICU number formatter. */
+	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
+
+	if(spattern) {
+		efree(spattern);
+	}
 
 	INTL_CTOR_CHECK_STATUS(nfo, "numfmt_create: number formatter creation failed");
 }
@@ -85,7 +99,7 @@ PHP_METHOD( NumberFormatter, __construct )
  */
 PHP_FUNCTION( numfmt_get_error_code )
 {
-	FORMATTER_METHOD_INIT_VARS;
+	FORMATTER_METHOD_INIT_VARS
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
@@ -124,7 +138,6 @@ PHP_FUNCTION( numfmt_get_error_message )
 		RETURN_FALSE;
 	}
 
-	/* Create an ICU number formatter. */
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	/* Return last error message. */

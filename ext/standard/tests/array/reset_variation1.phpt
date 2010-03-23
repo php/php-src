@@ -173,12 +173,12 @@ NULL
 
 -- Iteration 16 --
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -186,17 +186,17 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: reset() expects parameter 1 to be array, Unicode string given in %s on line %d
+Warning: reset() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -217,4 +217,3 @@ NULL
 Warning: reset() expects parameter 1 to be array, resource given in %s on line %d
 NULL
 ===DONE===
-

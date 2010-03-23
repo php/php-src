@@ -2,8 +2,6 @@
 Test get_browser() function : error functionality 
 --INI--
 browscap={PWD}/browscap.ini
-unicode.runtime_encoding = utf-8
-unicode.output_encoding = utf-8
 --SKIPIF--
 <?php
 	/**
@@ -27,17 +25,10 @@ unicode.output_encoding = utf-8
 
 $browsers = include dirname(__FILE__) . DIRECTORY_SEPARATOR . 'browsernames.inc';
 
-/* Needed for the unicode_decode() call later */
-unicode_set_error_mode( TO_UNICODE, U_CONV_ERROR_ESCAPE_UNICODE );
-
 echo "*** Testing get_browser() : error functionality ***\n";
 
 /* Unknown browser uses defaults. */
-$result = @get_browser( 'foobar', true );
-foreach( $result as $k => $val ) {
-	$result[$k] = unicode_decode( $val, 'UTF-8' );
-}
-var_dump( $result );
+var_dump( get_browser( 'foobar', true ) );
 
 /* More than expected arguments */
 var_dump( get_browser( 'foobar', true, 15 ) );
@@ -51,73 +42,73 @@ var_dump( get_browser( null, 'foobar' ) );
 *** Testing get_browser() : error functionality ***
 array(34) {
   ["browser_name_regex"]=>
-  unicode(12) "%XA7^.*$%XA7"
+  string(6) "§^.*$§"
   ["browser_name_pattern"]=>
-  unicode(1) "*"
+  string(1) "*"
   ["browser"]=>
-  unicode(15) "Default Browser"
+  string(15) "Default Browser"
   ["version"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["majorver"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["minorver"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["platform"]=>
-  unicode(7) "unknown"
+  string(7) "unknown"
   ["alpha"]=>
-  unicode(0) ""
+  string(0) ""
   ["beta"]=>
-  unicode(0) ""
+  string(0) ""
   ["win16"]=>
-  unicode(0) ""
+  string(0) ""
   ["win32"]=>
-  unicode(0) ""
+  string(0) ""
   ["win64"]=>
-  unicode(0) ""
+  string(0) ""
   ["frames"]=>
-  unicode(1) "1"
+  string(1) "1"
   ["iframes"]=>
-  unicode(0) ""
+  string(0) ""
   ["tables"]=>
-  unicode(1) "1"
+  string(1) "1"
   ["cookies"]=>
-  unicode(0) ""
+  string(0) ""
   ["backgroundsounds"]=>
-  unicode(0) ""
+  string(0) ""
   ["authenticodeupdate"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["cdf"]=>
-  unicode(0) ""
+  string(0) ""
   ["vbscript"]=>
-  unicode(0) ""
+  string(0) ""
   ["javaapplets"]=>
-  unicode(0) ""
+  string(0) ""
   ["javascript"]=>
-  unicode(0) ""
+  string(0) ""
   ["activexcontrols"]=>
-  unicode(0) ""
+  string(0) ""
   ["stripper"]=>
-  unicode(0) ""
+  string(0) ""
   ["isbanned"]=>
-  unicode(0) ""
+  string(0) ""
   ["wap"]=>
-  unicode(0) ""
+  string(0) ""
   ["ismobiledevice"]=>
-  unicode(0) ""
+  string(0) ""
   ["issyndicationreader"]=>
-  unicode(0) ""
+  string(0) ""
   ["crawler"]=>
-  unicode(0) ""
+  string(0) ""
   ["css"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["cssversion"]=>
-  unicode(1) "0"
+  string(1) "0"
   ["supportscss"]=>
-  unicode(0) ""
+  string(0) ""
   ["aol"]=>
-  unicode(0) ""
+  string(0) ""
   ["aolversion"]=>
-  unicode(1) "0"
+  string(1) "0"
 }
 
 Warning: get_browser() expects at most 2 parameters, 3 given in %s on line %d

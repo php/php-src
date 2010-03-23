@@ -1,7 +1,5 @@
 --TEST--
 Test imap_fetchbody() function : basic functionality
---XFAIL--
-Expected to fail - missing unicode implementation
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__).'/skipif.inc');

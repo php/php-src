@@ -17,22 +17,20 @@ echo "Done";
 
 ?>
 --EXPECT--
-array(8) {
-  [u"stream_type"]=>
-  unicode(5) "STDIO"
-  [u"mode"]=>
-  unicode(2) "rb"
-  [u"unread_bytes"]=>
+array(7) {
+  ["stream_type"]=>
+  string(5) "STDIO"
+  ["mode"]=>
+  string(2) "rb"
+  ["unread_bytes"]=>
   int(0)
-  [u"unread_chars"]=>
-  int(0)
-  [u"seekable"]=>
+  ["seekable"]=>
   bool(false)
-  [u"timed_out"]=>
+  ["timed_out"]=>
   bool(false)
-  [u"blocked"]=>
+  ["blocked"]=>
   bool(true)
-  [u"eof"]=>
+  ["eof"]=>
   bool(false)
 }
 Done

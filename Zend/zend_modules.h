@@ -33,8 +33,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-
-#define ZEND_MODULE_API_NO 20070729
+#define ZEND_MODULE_API_NO 20090626
 #ifdef ZTS
 #define USING_ZTS 1
 #else
@@ -85,7 +84,7 @@ struct _zend_module_entry {
 	int (*request_startup_func)(INIT_FUNC_ARGS);
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
-	char *version;
+	const char *version;
 	size_t globals_size;
 #ifdef ZTS
 	ts_rsrc_id* globals_id_ptr;
@@ -115,10 +114,10 @@ struct _zend_module_entry {
 #define ZEND_MOD_OPTIONAL(name)		ZEND_MOD_OPTIONAL_EX(name, NULL, NULL)
 
 struct _zend_module_dep {
-	char *name;			/* module name */
-	char *rel;			/* version relationship: NULL (exists), lt|le|eq|ge|gt (to given version) */
-	char *version;		/* version */
-	unsigned char type;	/* dependency type */
+	const char *name;		/* module name */
+	const char *rel;		/* version relationship: NULL (exists), lt|le|eq|ge|gt (to given version) */
+	const char *version;	/* version */
+	unsigned char type;		/* dependency type */
 };
 
 extern ZEND_API HashTable module_registry;

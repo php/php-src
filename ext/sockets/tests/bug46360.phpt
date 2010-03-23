@@ -14,4 +14,4 @@ fa@php.net
     var_dump('TCP_NODELAY');
 ?>
 --EXPECT--
-unicode(11) "TCP_NODELAY"
+string(11) "TCP_NODELAY"

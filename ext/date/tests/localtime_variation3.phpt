@@ -52,23 +52,23 @@ array\(9\) {
   int\(0\)
 }
 array\(9\) {
-  \[u"tm_sec"\]=>
+  \["tm_sec"\]=>
   int\((16|0)\)
-  \[u"tm_min"\]=>
+  \["tm_min"\]=>
   int\((50|30)\)
-  \[u"tm_hour"\]=>
+  \["tm_hour"\]=>
   int\((4|0)\)
-  \[u"tm_mday"\]=>
+  \["tm_mday"\]=>
   int\((26|11)\)
-  \[u"tm_mon"\]=>
+  \["tm_mon"\]=>
   int\(2\)
-  \[u"tm_year"\]=>
+  \["tm_year"\]=>
   int\((35|3982)\)
-  \[u"tm_wday"\]=>
+  \["tm_wday"\]=>
   int\((2|6)\)
-  \[u"tm_yday"\]=>
+  \["tm_yday"\]=>
   int\((84|69)\)
-  \[u"tm_isdst"\]=>
+  \["tm_isdst"\]=>
   int\(0\)
 }
 
@@ -94,23 +94,23 @@ array\(9\) {
   int\(0\)
 }
 array\(9\) {
-  \[u"tm_sec"\]=>
+  \["tm_sec"\]=>
   int\((44|52|0)\)
-  \[u"tm_min"\]=>
+  \["tm_min"\]=>
   int\((9|45|30)\)
-  \[u"tm_hour"\]=>
+  \["tm_hour"\]=>
   int\((19|20|23)\)
-  \[u"tm_mday"\]=>
+  \["tm_mday"\]=>
   int\((8|13|22)\)
-  \[u"tm_mon"\]=>
+  \["tm_mon"\]=>
   int\((9|11)\)
-  \[u"tm_year"\]=>
+  \["tm_year"\]=>
   int\((104|1|-3843)\)
-  \[u"tm_wday"\]=>
+  \["tm_wday"\]=>
   int\((5|-5)\)
-  \[u"tm_yday"\]=>
+  \["tm_yday"\]=>
   int\((281|346|294)\)
-  \[u"tm_isdst"\]=>
+  \["tm_isdst"\]=>
   int\(0\)
 }
 ===DONE===

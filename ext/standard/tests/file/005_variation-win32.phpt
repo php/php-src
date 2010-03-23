@@ -3,7 +3,7 @@ Test fileatime(), filemtime(), filectime() & touch() functions : usage variation
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip Do not run on Linux');
+    die('skip Windows-only test');
 }
 ?>
 --FILE--

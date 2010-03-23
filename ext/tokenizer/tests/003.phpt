@@ -13,11 +13,11 @@ var_dump(token_get_all(-1));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: token_get_all() expects parameter 1 to be binary string, array given in %s on line %d
+--EXPECTF--	
+Warning: token_get_all() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Warning: token_get_all() expects parameter 1 to be binary string, object given in %s on line %d
+Warning: token_get_all() expects parameter 1 to be string, object given in %s on line %d
 NULL
 array(0) {
 }
@@ -25,7 +25,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(%d)
     [1]=>
     string(1) "0"
     [2]=>
@@ -36,7 +36,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(%d)
     [1]=>
     string(2) "-1"
     [2]=>

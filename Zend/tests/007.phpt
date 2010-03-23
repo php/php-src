@@ -21,7 +21,7 @@ var_dump(each($a));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: each() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
@@ -33,31 +33,31 @@ NULL
 array(4) {
   [1]=>
   int(1)
-  [u"value"]=>
+  ["value"]=>
   int(1)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 array(4) {
   [1]=>
   int(1)
-  [u"value"]=>
+  ["value"]=>
   int(1)
   [0]=>
-  unicode(1) "a"
-  [u"key"]=>
-  unicode(1) "a"
+  string(1) "a"
+  ["key"]=>
+  string(1) "a"
 }
 array(4) {
   [1]=>
   int(1)
-  [u"value"]=>
+  ["value"]=>
   int(1)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 Done

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -201,22 +201,22 @@ static void php_str2num(bc_num *num, char *str TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto string bcadd(string left_operand, string right_operand [, int scale]) U
+/* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
 {
 	char *left, *right;
-	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second, result;
+	int left_len, right_len;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -224,36 +224,38 @@ PHP_FUNCTION(bcadd)
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
-
-	bc_add(first, second, &result, scale);
+	bc_add (first, second, &result, scale);
+	
 	if (result->n_scale > scale) {
 		result->n_scale = scale;
 	}
-
-	RETVAL_STRING(bc_num2str(result), 0);
-
+	
+	Z_STRVAL_P(return_value) = bc_num2str(result);
+	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcsub(string left_operand, string right_operand [, int scale]) U
+/* {{{ proto string bcsub(string left_operand, string right_operand [, int scale])
    Returns the difference between two arbitrary precision numbers */
 PHP_FUNCTION(bcsub)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second, result;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -261,98 +263,107 @@ PHP_FUNCTION(bcsub)
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
+	bc_sub (first, second, &result, scale);
 
-	bc_sub(first, second, &result, scale);
 	if (result->n_scale > scale) {
 		result->n_scale = scale;
 	}
 
-	RETVAL_STRING(bc_num2str(result), 0);
-
+	Z_STRVAL_P(return_value) = bc_num2str(result);
+	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcmul(string left_operand, string right_operand [, int scale]) U
+/* {{{ proto string bcmul(string left_operand, string right_operand [, int scale])
    Returns the multiplication of two arbitrary precision numbers */
 PHP_FUNCTION(bcmul)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second, result;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
-
+	
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
+	bc_multiply (first, second, &result, scale TSRMLS_CC);
 
-	bc_multiply(first, second, &result, scale TSRMLS_CC);
 	if (result->n_scale > scale) {
 		result->n_scale = scale;
 	}
 
-	RETVAL_STRING(bc_num2str(result), 0);
-
+	Z_STRVAL_P(return_value) = bc_num2str(result);
+	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcdiv(string left_operand, string right_operand [, int scale]) U
+/* {{{ proto string bcdiv(string left_operand, string right_operand [, int scale])
    Returns the quotient of two arbitrary precision numbers (division) */
 PHP_FUNCTION(bcdiv)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second, result;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
-
+	
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
 
-	if (bc_divide(first, second, &result, scale TSRMLS_CC) == 0) {
-		if (result->n_scale > scale) {
-			result->n_scale = scale;
-		}
-		RETVAL_STRING(bc_num2str(result), 0);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
-		RETVAL_NULL();
+	switch (bc_divide(first, second, &result, scale TSRMLS_CC)) {
+		case 0: /* OK */
+			if (result->n_scale > scale) {
+				result->n_scale = scale;
+			}
+			Z_STRVAL_P(return_value) = bc_num2str(result);
+			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
+			break;
+		case -1: /* division by zero */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
+			break;
 	}
 
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcmod(string left_operand, string right_operand) U
+/* {{{ proto string bcmod(string left_operand, string right_operand)
    Returns the modulus of the two arbitrary precision operands */
 PHP_FUNCTION(bcmod)
 {
@@ -363,27 +374,32 @@ PHP_FUNCTION(bcmod)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &left, &left_len, &right, &right_len) == FAILURE) {
 		return;
 	}
-
+	
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
 	bc_init_num(&result TSRMLS_CC);
-	php_str2num(&first, left TSRMLS_CC);
-	php_str2num(&second, right TSRMLS_CC);
-
-	if (bc_modulo(first, second, &result, 0 TSRMLS_CC) == 0) {
-		RETVAL_STRING(bc_num2str(result), 0);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
-		RETVAL_NULL();
+	bc_str2num(&first, left, 0 TSRMLS_CC);
+	bc_str2num(&second, right, 0 TSRMLS_CC);
+	
+	switch (bc_modulo(first, second, &result, 0 TSRMLS_CC)) {
+		case 0:
+			Z_STRVAL_P(return_value) = bc_num2str(result);
+			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+			Z_TYPE_P(return_value) = IS_STRING;
+			break;
+		case -1:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
+			break;
 	}
-
+	
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcpowmod(string x, string y, string mod [, int scale]) U
+/* {{{ proto string bcpowmod(string x, string y, string mod [, int scale])
    Returns the value of an arbitrary precision number raised to the power of another reduced by a modulous */
 PHP_FUNCTION(bcpowmod)
 {
@@ -391,14 +407,10 @@ PHP_FUNCTION(bcpowmod)
 	int left_len, right_len, modulous_len;
 	bc_num first, second, mod, result;
 	long scale = BCG(bc_precision);
+	int scale_int;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
 		return;
-	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -408,40 +420,44 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
 	php_str2num(&mod, modulous TSRMLS_CC);
-	if (bc_raisemod(first, second, mod, &result, scale TSRMLS_CC) == 0) {
+
+	scale_int = (int) ((int)scale < 0) ? 0 : scale;
+
+	if (bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC) != -1) {
 		if (result->n_scale > scale) {
 			result->n_scale = scale;
 		}
-		RETVAL_STRING(bc_num2str(result), 0);
+		Z_STRVAL_P(return_value) = bc_num2str(result);
+		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Division by zero");
-		RETVAL_NULL();
+		RETVAL_FALSE;
 	}
-
-
+	
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&mod);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcpow(string x, string y [, int scale]) U
+/* {{{ proto string bcpow(string x, string y [, int scale])
    Returns the value of an arbitrary precision number raised to the power of another */
 PHP_FUNCTION(bcpow)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second, result;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -449,71 +465,75 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
-
 	bc_raise (first, second, &result, scale TSRMLS_CC);
-	if (result->n_scale > scale) {
-		result->n_scale = scale;
-	}
-	if (result->n_scale > scale) {
-		result->n_scale = scale;
-	}
-	RETVAL_STRING(bc_num2str(result), 0);
 
+	if (result->n_scale > scale) {
+		result->n_scale = scale;
+	}
+
+	Z_STRVAL_P(return_value) = bc_num2str(result);
+	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
 	bc_free_num(&first);
 	bc_free_num(&second);
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto string bcsqrt(string operand [, int scale]) U
+/* {{{ proto string bcsqrt(string operand [, int scale])
    Returns the square root of an arbitray precision number */
 PHP_FUNCTION(bcsqrt)
 {
-	char *operand;
-	int operand_len;
-	long scale = BCG(bc_precision);
+	char *left;
+	int left_len;
+	long scale_param = 0;
 	bc_num result;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &operand, &operand_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|l", &left, &left_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 2) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
 
 	bc_init_num(&result TSRMLS_CC);
-	php_str2num(&result, operand TSRMLS_CC);
+	php_str2num(&result, left TSRMLS_CC);
+	
 	if (bc_sqrt (&result, scale TSRMLS_CC) != 0) {
 		if (result->n_scale > scale) {
 			result->n_scale = scale;
 		}
-		RETVAL_STRING(bc_num2str(result), 0);
+		Z_STRVAL_P(return_value) = bc_num2str(result);
+		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Square root of negative number");
-		RETVAL_NULL();
 	}
+
 	bc_free_num(&result);
+	return;
 }
 /* }}} */
 
-/* {{{ proto int bccomp(string left_operand, string right_operand [, int scale]) U
+/* {{{ proto int bccomp(string left_operand, string right_operand [, int scale])
    Compares two arbitrary precision numbers */
 PHP_FUNCTION(bccomp)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale = BCG(bc_precision);
+	long scale_param = 0;
 	bc_num first, second;
+	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		scale = 0;
+	
+	if (argc == 3) {
+		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -521,30 +541,26 @@ PHP_FUNCTION(bccomp)
 
 	bc_str2num(&first, left, scale TSRMLS_CC);
 	bc_str2num(&second, right, scale TSRMLS_CC);
-
-	RETVAL_LONG(bc_compare(first, second));
+	Z_LVAL_P(return_value) = bc_compare(first, second);
+	Z_TYPE_P(return_value) = IS_LONG;
 
 	bc_free_num(&first);
 	bc_free_num(&second);
+	return;
 }
 /* }}} */
 
-/* {{{ proto bool bcscale(int scale) U
+/* {{{ proto bool bcscale(int scale)
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
-	long scale;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &scale) == FAILURE) {
+	long new_scale;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_scale) == FAILURE) {
 		return;
 	}
 
-	if ((int)scale < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Invalid scale given, using zero");
-		RETURN_FALSE;
-	}
-	
-	BCG(bc_precision) = scale;
+	BCG(bc_precision) = (new_scale < 0) ? 0 : new_scale;
 
 	RETURN_TRUE;
 }

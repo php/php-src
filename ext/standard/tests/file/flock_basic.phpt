@@ -30,7 +30,7 @@ rmdir("$file_path/dir");
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--	
 *** Testing flock() fun with file and dir ***
 bool(true)
 bool(true)

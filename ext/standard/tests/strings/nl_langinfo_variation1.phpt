@@ -38,7 +38,7 @@ $items =  array (
 		  // integer values
 /*1*/	  0,
 		  10,
-		  2147483647,
+	      2147483647,
 		  -2147483648,
 		
 		  // float values
@@ -93,53 +93,35 @@ setlocale(LC_ALL, $original);
 ===DONE===
 --EXPECTF--
 *** Testing nl_langinfo() : with unexpected inputs for 'item' argument ***
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 -- Iteration 1 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '10' is not valid in %s on line %d
 bool(false)
 -- Iteration 3 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '2147483647' is not valid in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '-2147483648' is not valid in %s on line %d
 bool(false)
 -- Iteration 5 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '10' is not valid in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '20' is not valid in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '-20' is not valid in %s on line %d
 bool(false)
 -- Iteration 8 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '1012345' is not valid in %s on line %d
 bool(false)
@@ -157,37 +139,25 @@ Warning: nl_langinfo() expects parameter 1 to be long, array given in %s on line
 NULL
 -- Iteration 12 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '1' is not valid in %s on line %d
 bool(false)
 -- Iteration 13 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '1' is not valid in %s on line %d
 bool(false)
 -- Iteration 15 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
 -- Iteration 16 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
 -- Iteration 17 --
-
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
@@ -201,16 +171,10 @@ Warning: nl_langinfo() expects parameter 1 to be long, resource given in %s on l
 NULL
 -- Iteration 20 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Deprecated: nl_langinfo(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
-
 Warning: nl_langinfo(): Item '0' is not valid in %s on line %d
 bool(false)
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 ===DONE===

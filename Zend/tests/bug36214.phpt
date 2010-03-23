@@ -47,7 +47,7 @@ array(2) {
   int(2)
 }
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(2) {
     [0]=>
     int(1)

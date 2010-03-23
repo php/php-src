@@ -51,15 +51,9 @@ bool(false)
 -- Iteration 12 --
 bool(false)
 -- Iteration 13 --
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 14 --
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 -- Iteration 15 --
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 *** Done ***

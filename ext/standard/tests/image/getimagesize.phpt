@@ -24,7 +24,7 @@ GetImageSize()
 ?>
 --EXPECT--
 array(11) {
-  [u"test1pix.bmp"]=>
+  ["test1pix.bmp"]=>
   array(6) {
     [0]=>
     int(1)
@@ -33,13 +33,13 @@ array(11) {
     [2]=>
     int(6)
     [3]=>
-    unicode(20) "width="1" height="1""
-    [u"bits"]=>
+    string(20) "width="1" height="1""
+    ["bits"]=>
     int(24)
-    [u"mime"]=>
-    unicode(14) "image/x-ms-bmp"
+    ["mime"]=>
+    string(14) "image/x-ms-bmp"
   }
-  [u"test1pix.jp2"]=>
+  ["test1pix.jp2"]=>
   array(7) {
     [0]=>
     int(1)
@@ -48,15 +48,15 @@ array(11) {
     [2]=>
     int(10)
     [3]=>
-    unicode(20) "width="1" height="1""
-    [u"bits"]=>
+    string(20) "width="1" height="1""
+    ["bits"]=>
     int(8)
-    [u"channels"]=>
+    ["channels"]=>
     int(3)
-    [u"mime"]=>
-    unicode(9) "image/jp2"
+    ["mime"]=>
+    string(9) "image/jp2"
   }
-  [u"test1pix.jpc"]=>
+  ["test1pix.jpc"]=>
   array(7) {
     [0]=>
     int(1)
@@ -65,15 +65,15 @@ array(11) {
     [2]=>
     int(9)
     [3]=>
-    unicode(20) "width="1" height="1""
-    [u"bits"]=>
+    string(20) "width="1" height="1""
+    ["bits"]=>
     int(8)
-    [u"channels"]=>
+    ["channels"]=>
     int(3)
-    [u"mime"]=>
-    unicode(24) "application/octet-stream"
+    ["mime"]=>
+    string(24) "application/octet-stream"
   }
-  [u"test1pix.jpg"]=>
+  ["test1pix.jpg"]=>
   array(7) {
     [0]=>
     int(1)
@@ -82,15 +82,15 @@ array(11) {
     [2]=>
     int(2)
     [3]=>
-    unicode(20) "width="1" height="1""
-    [u"bits"]=>
+    string(20) "width="1" height="1""
+    ["bits"]=>
     int(8)
-    [u"channels"]=>
+    ["channels"]=>
     int(3)
-    [u"mime"]=>
-    unicode(10) "image/jpeg"
+    ["mime"]=>
+    string(10) "image/jpeg"
   }
-  [u"test2pix.gif"]=>
+  ["test2pix.gif"]=>
   array(7) {
     [0]=>
     int(2)
@@ -99,15 +99,15 @@ array(11) {
     [2]=>
     int(1)
     [3]=>
-    unicode(20) "width="2" height="1""
-    [u"bits"]=>
+    string(20) "width="2" height="1""
+    ["bits"]=>
     int(1)
-    [u"channels"]=>
+    ["channels"]=>
     int(3)
-    [u"mime"]=>
-    unicode(9) "image/gif"
+    ["mime"]=>
+    string(9) "image/gif"
   }
-  [u"test4pix.gif"]=>
+  ["test4pix.gif"]=>
   array(7) {
     [0]=>
     int(4)
@@ -116,15 +116,15 @@ array(11) {
     [2]=>
     int(1)
     [3]=>
-    unicode(20) "width="4" height="1""
-    [u"bits"]=>
+    string(20) "width="4" height="1""
+    ["bits"]=>
     int(2)
-    [u"channels"]=>
+    ["channels"]=>
     int(3)
-    [u"mime"]=>
-    unicode(9) "image/gif"
+    ["mime"]=>
+    string(9) "image/gif"
   }
-  [u"test4pix.iff"]=>
+  ["test4pix.iff"]=>
   array(6) {
     [0]=>
     int(4)
@@ -133,13 +133,13 @@ array(11) {
     [2]=>
     int(14)
     [3]=>
-    unicode(20) "width="4" height="1""
-    [u"bits"]=>
+    string(20) "width="4" height="1""
+    ["bits"]=>
     int(4)
-    [u"mime"]=>
-    unicode(9) "image/iff"
+    ["mime"]=>
+    string(9) "image/iff"
   }
-  [u"test4pix.png"]=>
+  ["test4pix.png"]=>
   array(6) {
     [0]=>
     int(4)
@@ -148,13 +148,13 @@ array(11) {
     [2]=>
     int(3)
     [3]=>
-    unicode(20) "width="4" height="1""
-    [u"bits"]=>
+    string(20) "width="4" height="1""
+    ["bits"]=>
     int(4)
-    [u"mime"]=>
-    unicode(9) "image/png"
+    ["mime"]=>
+    string(9) "image/png"
   }
-  [u"test4pix.psd"]=>
+  ["test4pix.psd"]=>
   array(5) {
     [0]=>
     int(4)
@@ -163,11 +163,11 @@ array(11) {
     [2]=>
     int(5)
     [3]=>
-    unicode(20) "width="4" height="1""
-    [u"mime"]=>
-    unicode(9) "image/psd"
+    string(20) "width="4" height="1""
+    ["mime"]=>
+    string(9) "image/psd"
   }
-  [u"test4pix.swf"]=>
+  ["test4pix.swf"]=>
   array(5) {
     [0]=>
     int(550)
@@ -176,11 +176,11 @@ array(11) {
     [2]=>
     int(4)
     [3]=>
-    unicode(24) "width="550" height="400""
-    [u"mime"]=>
-    unicode(29) "application/x-shockwave-flash"
+    string(24) "width="550" height="400""
+    ["mime"]=>
+    string(29) "application/x-shockwave-flash"
   }
-  [u"test4pix.tif"]=>
+  ["test4pix.tif"]=>
   array(5) {
     [0]=>
     int(4)
@@ -189,8 +189,8 @@ array(11) {
     [2]=>
     int(7)
     [3]=>
-    unicode(20) "width="4" height="1""
-    [u"mime"]=>
-    unicode(10) "image/tiff"
+    string(20) "width="4" height="1""
+    ["mime"]=>
+    string(10) "image/tiff"
   }
 }

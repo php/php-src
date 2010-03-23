@@ -1,7 +1,5 @@
 --TEST--
 Test fgets() function : usage variations - closed handle
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --FILE--
 <?php
 /*

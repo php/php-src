@@ -29,14 +29,14 @@ var_dump($res, $part, $length, $width, $depth);
 *** Testing sscanf() : basic functionality -- using float format ***
 
 -- Try sccanf() WITHOUT optional args --
-unicode(6) "Widget"
+string(6) "Widget"
 float(111.53)
 float(22.345)
 float(12.4)
 
 -- Try sccanf() WITH optional args --
 int(4)
-unicode(6) "Widget"
+string(6) "Widget"
 float(111.53)
 float(22.345)
 float(12.4)

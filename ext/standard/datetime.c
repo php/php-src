@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -90,67 +90,38 @@ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 char *strptime(const char *s, const char *format, struct tm *tm);
 #endif
 
-/* {{{ proto string strptime(string timestamp, string format) U
+/* {{{ proto string strptime(string timestamp, string format)
    Parse a time/date generated with strftime() */
 PHP_FUNCTION(strptime)
 {
-	zstr       ts;
+	char      *ts;
 	int        ts_length;
-	zstr       format;
+	char      *format;
 	int        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
-	zend_uchar type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT",  &ts, &ts_length, &type, &format, &format_length, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
 		return;
-	}
-
-	if (type == IS_UNICODE) {
-		char *temp;
-		int temp_len;
-
-		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, ts.u, ts_length TSRMLS_CC) == FAILURE) {
-			RETURN_FALSE;
-		}
-		ts.s = temp;
-		ts_length = temp_len;
-
-		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, format.u, format_length TSRMLS_CC) == FAILURE) {
-			RETURN_FALSE;
-		}
-		format.s = temp;
-		format_length = temp_len;
 	}
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
 
-	unparsed_part = strptime(ts.s, format.s, &parsed_time);
+	unparsed_part = strptime(ts, format, &parsed_time);
 	if (unparsed_part == NULL) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
-	add_ascii_assoc_long(return_value, "tm_sec",   parsed_time.tm_sec);
-	add_ascii_assoc_long(return_value, "tm_min",   parsed_time.tm_min);
-	add_ascii_assoc_long(return_value, "tm_hour",  parsed_time.tm_hour);
-	add_ascii_assoc_long(return_value, "tm_mday",  parsed_time.tm_mday);
-	add_ascii_assoc_long(return_value, "tm_mon",   parsed_time.tm_mon);
-	add_ascii_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
-	add_ascii_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
-	add_ascii_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
-	if (type == IS_UNICODE) {
-		UChar *temp;
-		int temp_len;
-
-		zend_string_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &temp, &temp_len, unparsed_part, strlen(unparsed_part) TSRMLS_CC);
-		add_ascii_assoc_unicodel(return_value, "unparsed", temp, temp_len, 0);
-
-		efree(ts.s);
-		efree(format.s);
-	} else {
-		add_ascii_assoc_string(return_value, "unparsed", unparsed_part, 1);
-	}
+	add_assoc_long(return_value, "tm_sec",   parsed_time.tm_sec);
+	add_assoc_long(return_value, "tm_min",   parsed_time.tm_min);
+	add_assoc_long(return_value, "tm_hour",  parsed_time.tm_hour);
+	add_assoc_long(return_value, "tm_mday",  parsed_time.tm_mday);
+	add_assoc_long(return_value, "tm_mon",   parsed_time.tm_mon);
+	add_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
+	add_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
+	add_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
+	add_assoc_string(return_value, "unparsed", unparsed_part, 1);
 }
 /* }}} */
 

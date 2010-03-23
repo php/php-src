@@ -166,7 +166,7 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: session_id() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: session_id() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
 

@@ -44,7 +44,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing sub-arrays with array_search() ***
 int(4)
-unicode(5) "three"
+string(5) "three"
 int(5)
 
 *** Testing objects with array_search() ***

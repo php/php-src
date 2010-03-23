@@ -43,25 +43,23 @@ static const char rcsid[] = "#(@) $Id$";
  *   9/1999 - 10/2000
  * HISTORY
  *   $Log$
- *   Revision 1.13  2008/09/10 00:05:26  felipe
+ *   Revision 1.8.4.3.2.1  2008/09/10 00:07:44  felipe
+ *   MFH:
  *   - Merged fix from SF project (Import Jeff Lawsons patches for XML datetime bug fixes)
  *     Fixed bugs:
  *     #45226 (xmlrpc_set_type() segfaults with valid ISO8601 date string)
  *     #18916 (xmlrpc_set_type() "not working")
  *
- *   Revision 1.12  2007/09/18 19:52:27  iliaa
+ *   Revision 1.8.4.3  2007/09/18 19:49:53  iliaa
  *
- *   MFB: Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
- *   values).
+ *   Fixed bug #42189 (xmlrpc_set_type() crashes php on invalid datetime
+ *     values).
  *
- *   Revision 1.11  2007/06/07 09:07:12  tony2001
- *   php_localtime_r() checks
+ *   Revision 1.8.4.2  2007/06/07 09:07:36  tony2001
+ *   MFH: php_localtime_r() checks
  *
- *   Revision 1.10  2007/01/01 09:29:33  sebastian
- *   Bump year.
- *
- *   Revision 1.9  2007/11/30 16:38:53  iliaa
- *   zts fixes
+ *   Revision 1.8.4.1  2006/11/30 16:38:37  iliaa
+ *   last set of zts fixes
  *
  *   Revision 1.8  2005/03/28 00:07:24  edink
  *   Reshufle includes to make it compile on windows

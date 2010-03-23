@@ -19,11 +19,11 @@ $absfile = __FILE__.'.tmp';
 $relfile = "gzopen_variation6.tmp";
 
 $h = gzopen($absfile, "w");
-gzwrite($h, b"This is an absolute file");
+gzwrite($h, "This is an absolute file");
 gzclose($h);
 
 $h = gzopen($relfile, "w");
-gzwrite($h, b"This is a relative file");
+gzwrite($h, "This is a relative file");
 gzclose($h);
 
 $h = gzopen($absfile, "r");

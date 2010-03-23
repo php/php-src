@@ -18,7 +18,7 @@ echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $timestamp = gmmktime(14, 8, 8, 8, 8, 2008);
-locale_set_default("en_US");
+setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
@@ -42,14 +42,14 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Time in a.m/p.m notation--
-unicode(%d) "%d:%d:%d %s"
-unicode(11) "02:08:08 PM"
+string(%d) "%d:%d:%d %s"
+string(11) "02:08:08 PM"
 
 --Time in 24 hour notation--
-unicode(%d) "%d:%d"
-unicode(5) "14:08"
+string(%d) "%d:%d"
+string(5) "14:08"
 
 --Current time %H:%M:%S format--
-unicode(%d) "%d:%d:%d"
-unicode(8) "14:08:08"
+string(%d) "%d:%d:%d"
+string(8) "14:08:08"
 ===DONE===

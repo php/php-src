@@ -84,55 +84,55 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing ltrim() function: with unexpected inputs for 'charlist' argument ***
 -- Iteration 1 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 2 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 3 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 4 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 5 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 6 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 7 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 8 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 9 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 10 --
 
-Warning: ltrim() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: ltrim() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: ltrim() expects parameter 2 to be string (Unicode or binary), array given in %s on line %d
+Warning: ltrim() expects parameter 2 to be string, array given in %s on line %d
 NULL
 -- Iteration 13 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 14 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 15 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 16 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 17 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 18 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 19 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 20 --
 
-Warning: ltrim() expects parameter 2 to be string (Unicode or binary), resource given in %s on line %d
+Warning: ltrim() expects parameter 2 to be string, resource given in %s on line %d
 NULL
 -- Iteration 21 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 -- Iteration 22 --
-unicode(19) "!---Hello World---!"
+string(19) "!---Hello World---!"
 ===DONE===

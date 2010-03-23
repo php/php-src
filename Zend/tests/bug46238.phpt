@@ -32,16 +32,16 @@ $a::$b();
 --EXPECT--
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
   }
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -51,7 +51,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -60,7 +60,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -69,23 +69,23 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(0) {
   }
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "a"
+    string(1) "a"
   }
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -95,7 +95,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -104,7 +104,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(1) {
     [0]=>
@@ -113,7 +113,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
   array(0) {
   }

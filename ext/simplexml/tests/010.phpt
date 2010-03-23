@@ -9,7 +9,7 @@ class simplexml_inherited extends SimpleXMLElement
 {
 }
 
-$xml =b<<<EOF
+$xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
 <sxe id="elem1">
@@ -32,28 +32,28 @@ var_dump(simplexml_load_string($xml, 'simplexml_inherited'));
 ===DONE===
 --EXPECTF--
 object(simplexml_inherited)#%d (2) {
-  [u"@attributes"]=>
+  ["@attributes"]=>
   array(1) {
-    [u"id"]=>
-    unicode(5) "elem1"
+    ["id"]=>
+    string(5) "elem1"
   }
-  [u"elem1"]=>
+  ["elem1"]=>
   object(simplexml_inherited)#%d (3) {
-    [u"@attributes"]=>
+    ["@attributes"]=>
     array(1) {
-      [u"attr1"]=>
-      unicode(5) "first"
+      ["attr1"]=>
+      string(5) "first"
     }
-    [u"comment"]=>
+    ["comment"]=>
     object(simplexml_inherited)#%d (0) {
     }
-    [u"elem2"]=>
+    ["elem2"]=>
     object(simplexml_inherited)#%d (1) {
-      [u"elem3"]=>
+      ["elem3"]=>
       object(simplexml_inherited)#%d (1) {
-        [u"elem4"]=>
+        ["elem4"]=>
         object(simplexml_inherited)#%d (1) {
-          [u"test"]=>
+          ["test"]=>
           object(simplexml_inherited)#%d (0) {
           }
         }

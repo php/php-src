@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -131,10 +131,6 @@ typedef struct _sapi_globals_struct {
 	zend_bool sapi_started;
 	time_t global_request_time;
 	HashTable known_post_content_types;
-
-	/* raw POST and FILES variables from RFC1867 handler */
-	HashTable *rfc1867_vars;
-	HashTable *rfc1867_files_vars;
 } sapi_globals_struct;
 
 
@@ -205,7 +201,6 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC);
-SAPI_API void sapi_update_default_charset(TSRMLS_D);
 SAPI_API void sapi_activate_headers_only(TSRMLS_D);
 
 SAPI_API int sapi_get_fd(int *fd TSRMLS_DC);

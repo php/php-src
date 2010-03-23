@@ -25,15 +25,15 @@ var_dump(gmp_and(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(6) "106502"
-unicode(5) "40994"
-unicode(3) "515"
-unicode(4) "3333"
-unicode(4) "4544"
-unicode(1) "0"
-unicode(4) "1536"
-unicode(15) "424703623692768"
+--EXPECTF--	
+string(6) "106502"
+string(5) "40994"
+string(3) "515"
+string(4) "3333"
+string(4) "4544"
+string(1) "0"
+string(4) "1536"
+string(15) "424703623692768"
 
 Warning: gmp_and() expects exactly 2 parameters, 3 given in %s on line %d
 NULL

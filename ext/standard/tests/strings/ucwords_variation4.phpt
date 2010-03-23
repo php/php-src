@@ -47,7 +47,7 @@ $str_array = array(
   //using special chars in sentence
   "t@@#$% %test ^test &test *test +test -test",
   "!test ~test `test` =test= @test@test.com",
-  "/test/r\test\ ucwords\t\y\y\3 \yy\ /uu/",
+  "/test/r\test\ucwords\t\y\y\u\3 \yy\ /uu/",
   
   //only special chars
   "!@#$%^&*()_+=-`~"
@@ -63,62 +63,62 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
-unicode(18) "Testing    Ucwords"
+string(18) "Testing    Ucwords"
 -- Iteration 2 --
-unicode(30) "T E S T I N G   U C W O R D S "
+string(30) "T E S T I N G   U C W O R D S "
 -- Iteration 3 --
-unicode(25) "Testing Function(ucwords)"
+string(25) "Testing Function(ucwords)"
 -- Iteration 4 --
-unicode(38) "(testing ( Function (ucwords) )a )test"
+string(38) "(testing ( Function (ucwords) )a )test"
 -- Iteration 5 --
-unicode(3) "(t)"
+string(3) "(t)"
 -- Iteration 6 --
-unicode(7) " ( T )t"
+string(7) " ( T )t"
 -- Iteration 7 --
-unicode(24) ""testing",ucwords,"test""
+string(24) ""testing",ucwords,"test""
 -- Iteration 8 --
-unicode(14) ""t""t",test, T"
+string(14) ""t""t",test, T"
 -- Iteration 9 --
-unicode(14) "\'t \'t\',test"
+string(14) "\'t \'t\',test"
 -- Iteration 10 --
-unicode(10) "Jack's Pen"
+string(10) "Jack's Pen"
 -- Iteration 11 --
-unicode(14) "P't'y 't It's "
+string(14) "P't'y 't It's "
 -- Iteration 12 --
-unicode(24) "	Testing	Testing	Ucwords"
+string(24) "	Testing	Testing	Ucwords"
 -- Iteration 13 --
-unicode(26) "\ttesting\ttesting	Ucwords"
+string(26) "\ttesting\ttesting	Ucwords"
 -- Iteration 14 --
-unicode(31) "TestingUcwords Testing Ucwords"
+string(31) "TestingUcwords Testing Ucwords"
 -- Iteration 15 --
-unicode(32) "Testing\rucwords Testing Ucwords"
+string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --
-unicode(34) "TestingUcwords  Testing 
+string(34) "TestingUcwords  Testing 
 Ucwords"
 -- Iteration 17 --
-unicode(36) "Testing\fucwords \f Testing 
+string(36) "Testing\fucwords \f Testing 
 Ucwords"
 -- Iteration 18 --
-unicode(35) "
+string(35) "
 Testing
 Ucwords
  Testing 
  Ucwords"
 -- Iteration 19 --
-unicode(39) "\ntesting\nucwords\n Testing \n Ucwords"
+string(39) "\ntesting\nucwords\n Testing \n Ucwords"
 -- Iteration 20 --
-unicode(18) "UsingVerticalTab"
+string(18) "UsingVerticalTab"
 -- Iteration 21 --
-unicode(20) "Using\vvertical\vtab"
+string(20) "Using\vvertical\vtab"
 -- Iteration 22 --
-unicode(42) "T@@#$% %test ^test &test *test +test -test"
+string(42) "T@@#$% %test ^test &test *test +test -test"
 -- Iteration 23 --
-unicode(40) "!test ~test `test` =test= @test@test.com"
+string(40) "!test ~test `test` =test= @test@test.com"
 -- Iteration 24 --
-unicode(36) "/test/r	Est\ Ucwords	\y\y \yy\ /uu/"
+string(37) "/test/r	Est\ucwords	\y\y\u \yy\ /uu/"
 -- Iteration 25 --
-unicode(16) "!@#$%^&*()_+=-`~"
+string(16) "!@#$%^&*()_+=-`~"
 Done

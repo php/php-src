@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -54,16 +54,28 @@ typedef struct _arg_separators {
 } arg_separators;
 
 struct _php_core_globals {
+	zend_bool magic_quotes_gpc;
+	zend_bool magic_quotes_runtime;
+	zend_bool magic_quotes_sybase;
+
+	zend_bool safe_mode;
+
+	zend_bool allow_call_time_pass_reference;
 	zend_bool implicit_flush;
 
 	long output_buffering;
 
+	char *safe_mode_include_dir;
+	zend_bool safe_mode_gid;
 	zend_bool sql_safe_mode;
+	zend_bool enable_dl;
 
 	char *output_handler;
 
 	char *unserialize_callback_func;
 	long serialize_precision;
+
+	char *safe_mode_exec_dir;
 
 	long memory_limit;
 	long max_input_time;
@@ -110,6 +122,8 @@ struct _php_core_globals {
 
 	zend_bool expose_php;
 
+	zend_bool register_globals;
+	zend_bool register_long_arrays;
 	zend_bool register_argc_argv;
 	zend_bool auto_globals_jit;
 
@@ -128,8 +142,7 @@ struct _php_core_globals {
 	zend_bool modules_activated;
 	zend_bool file_uploads;
 	zend_bool during_request_startup;
-	char *allow_url_fopen_list;
-	char *allow_url_include_list;
+	zend_bool allow_url_fopen;
 	zend_bool always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 
@@ -140,6 +153,7 @@ struct _php_core_globals {
 
 	char *disable_functions;
 	char *disable_classes;
+	zend_bool allow_url_include;
 	zend_bool exit_on_timeout;
 #ifdef PHP_WIN32
 	zend_bool com_initialized;
@@ -155,7 +169,6 @@ struct _php_core_globals {
 	zend_bool mail_x_header;
 	char *mail_log;
 
-	zend_bool request_decoding_error;
 	zend_bool in_error_log;
 };
 

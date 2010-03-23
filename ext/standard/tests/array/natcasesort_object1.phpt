@@ -57,43 +57,43 @@ bool(true)
 array(8) {
   [4]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
   [7]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
   [0]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
   [6]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
   [5]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
   [3]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
   [1]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
   [2]=>
   object(for_string_natcasesort)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
 }
 Done

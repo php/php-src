@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -39,6 +39,7 @@
 #include <sys/param.h>
 #endif
 #include "ext/standard/head.h"
+#include "safe_mode.h"
 #include "php_string.h"
 #include "pack.h"
 #if HAVE_PWD_H
@@ -54,7 +55,7 @@
 #endif
 
 #define INC_OUTPUTPOS(a,b) \
-	if ((a) < 0 || ((INT_MAX - outputpos)/(b)) < (a)) { \
+	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		efree(argv);	\
 		efree(formatcodes);	\
 		efree(formatargs);	\
@@ -101,12 +102,12 @@ static void php_pack(zval **val, int size, int *map, char *output)
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
-/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]]) U
+/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
    Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
-	zval ***argv;
-	int argc, i;
+	zval ***argv = NULL;
+	int num_args, i;
 	int currentarg;
 	char *format;
 	int formatlen;
@@ -116,15 +117,19 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	char *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&*", &format,
-							  &formatlen, UG(ascii_conv), &argv, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &argv, &num_args) == FAILURE) {
 		return;
 	}
+
+	convert_to_string_ex(argv[0]);
+
+	format = Z_STRVAL_PP(argv[0]);
+	formatlen = Z_STRLEN_PP(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
 	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
-	currentarg = 0;
+	currentarg = 1;
 
 	/* Preprocess format into formatcodes and formatargs */
 	for (i = 0; i < formatlen; formatcount++) {
@@ -165,7 +170,7 @@ PHP_FUNCTION(pack)
 			case 'A': 
 			case 'h': 
 			case 'H':
-				if (currentarg >= argc) {
+				if (currentarg >= num_args) {
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
@@ -197,12 +202,12 @@ PHP_FUNCTION(pack)
 			case 'f': 
 			case 'd': 
 				if (arg < 0) {
-					arg = argc - currentarg;
+					arg = num_args - currentarg;
 				}
 
 				currentarg += arg;
 
-				if (currentarg > argc) {
+				if (currentarg > num_args) {
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
@@ -223,8 +228,8 @@ PHP_FUNCTION(pack)
 		formatargs[formatcount] = arg;
 	}
 
-	if (currentarg < argc) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (argc - currentarg));
+	if (currentarg < num_args) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (num_args - currentarg));
 	}
 
 	/* Calculate output length and upper bound while processing*/
@@ -255,7 +260,7 @@ PHP_FUNCTION(pack)
 
 			case 'i': 
 			case 'I':
-				INC_OUTPUTPOS((unsigned int) arg, sizeof(int))
+				INC_OUTPUTPOS(arg,sizeof(int))
 				break;
 
 			case 'l': 
@@ -266,11 +271,11 @@ PHP_FUNCTION(pack)
 				break;
 
 			case 'f':
-				INC_OUTPUTPOS((unsigned int) arg, sizeof(float))
+				INC_OUTPUTPOS(arg,sizeof(float))
 				break;
 
 			case 'd':
-				INC_OUTPUTPOS((unsigned int) arg, sizeof(double))
+				INC_OUTPUTPOS(arg,sizeof(double))
 				break;
 
 			case 'X':
@@ -294,7 +299,7 @@ PHP_FUNCTION(pack)
 
 	output = emalloc(outputsize + 1);
 	outputpos = 0;
-	currentarg = 0;
+	currentarg = 1;
 
 	/* Do actual packing */
 	for (i = 0; i < formatcount; i++) {
@@ -497,21 +502,23 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * f and d will return doubles.
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
-/* {{{ proto array unpack(string format, string input) U
+/* {{{ proto array unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	char *format;
-	char *input;
-	int formatlen;
-	int inputpos, inputlen;
-	int i;
+	char *format, *input, *formatarg, *inputarg;
+	int formatlen, formatarg_len, inputarg_len;
+	int inputpos, inputlen, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s&s", &format,
-							  &formatlen, UG(ascii_conv), &input, &inputlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &formatarg, &formatarg_len,
+		&inputarg, &inputarg_len) == FAILURE) {
 		return;
 	}
 
+	format = formatarg;
+	formatlen = formatarg_len;
+	input = inputarg;
+	inputlen = inputarg_len;
 	inputpos = 0;
 
 	array_init(return_value);
@@ -662,7 +669,7 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_rt_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
 						break;
 					}
 					
@@ -704,7 +711,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						buf[len] = '\0';
-						add_rt_assoc_stringl(return_value, n, buf, len, 1);
+						add_assoc_stringl(return_value, n, buf, len, 1);
 						efree(buf);
 						break;
 					}
@@ -713,7 +720,7 @@ PHP_FUNCTION(unpack)
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
 						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
-						add_rt_assoc_long(return_value, n, v);
+						add_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -734,7 +741,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v = php_unpack(&input[inputpos], 2, issigned, map);
-						add_rt_assoc_long(return_value, n, v);
+						add_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -750,7 +757,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						v |= php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
-						add_rt_assoc_long(return_value, n, v);
+						add_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -784,7 +791,7 @@ PHP_FUNCTION(unpack)
 								v = (unsigned int) v;
 							}
 						}
-						add_rt_assoc_long(return_value, n, v);
+						add_assoc_long(return_value, n, v);
 						break;
 					}
 
@@ -792,7 +799,7 @@ PHP_FUNCTION(unpack)
 						float v;
 
 						memcpy(&v, &input[inputpos], sizeof(float));
-						add_rt_assoc_double(return_value, n, (double)v);
+						add_assoc_double(return_value, n, (double)v);
 						break;
 					}
 
@@ -800,7 +807,7 @@ PHP_FUNCTION(unpack)
 						double v;
 
 						memcpy(&v, &input[inputpos], sizeof(double));
-						add_rt_assoc_double(return_value, n, v);
+						add_assoc_double(return_value, n, v);
 						break;
 					}
 

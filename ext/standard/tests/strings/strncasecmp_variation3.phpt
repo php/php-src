@@ -7,7 +7,7 @@ Test strncasecmp() function: usage variations - various lengths
  * Source code: Zend/zend_builtin_functions.c
 */
 
-/* Test strncasecmp() with various length values */
+/* Test strncasecmp() with various lengths */
 
 echo "*** Test strncasecmp() function: with different lengths ***\n";
 /* definitions of required variables */
@@ -20,7 +20,7 @@ for($len = strlen($str1); $len >= 0; $len--) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--	
 *** Test strncasecmp() function: with different lengths ***
 int(0)
 int(0)

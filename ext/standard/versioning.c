@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -79,7 +79,6 @@ php_canonicalize_version(const char *version)
 }
 
 /* }}} */
-
 /* {{{ compare_special_version_forms() */
 
 typedef struct {
@@ -122,7 +121,6 @@ compare_special_version_forms(char *form1, char *form2)
 }
 
 /* }}} */
-
 /* {{{ php_version_compare() */
 
 PHPAPI int
@@ -207,8 +205,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 }
 
 /* }}} */
-
-/* {{{ proto int version_compare(string ver1, string ver2 [, string oper]) U
+/* {{{ proto int version_compare(string ver1, string ver2 [, string oper])
   Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)

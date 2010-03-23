@@ -191,12 +191,10 @@ Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
 bool(false)
 
 --empty string DQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
-bool(false)
+bool(true)
 
 --empty string SQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
-bool(false)
+bool(true)
 
 --string DQ--
 Error: 2 - mb_substitute_character(): Unknown character., %s(%d)

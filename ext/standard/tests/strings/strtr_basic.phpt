@@ -22,7 +22,7 @@ var_dump( strtr($heredoc_str, "t", "T") );
 
 //translating set of chars
 //$from and $to are of same length
-var_dump( strtr(b"test strtr", b"test", b"TEST") );
+var_dump( strtr("test strtr", "test", "TEST") );
 var_dump( strtr('test strtr', 'test', 'TEST') );
 var_dump( strtr($heredoc_str, "test", "TEST") );
 
@@ -37,18 +37,18 @@ var_dump( strtr('test strtr', $trans2_arr) );
 var_dump( strtr($heredoc_str, $trans1_arr) );
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtr() : basic functionality ***
-unicode(10) "TesT sTrTr"
-unicode(10) "TesT sTrTr"
-unicode(10) "TesT sTrTr"
+string(10) "TesT sTrTr"
+string(10) "TesT sTrTr"
+string(10) "TesT sTrTr"
 string(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
-unicode(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
+string(10) "TEST STrTr"
 *** Done ***

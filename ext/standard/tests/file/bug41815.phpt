@@ -22,6 +22,6 @@ fclose($reader);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 OK
 Done

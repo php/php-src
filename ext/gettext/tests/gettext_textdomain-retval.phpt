@@ -12,9 +12,6 @@ Check if textdomain() returns the new domain
 --FILE--
 <?php
 
-// Using deprectated setlocale() in PHP6. The test needs to be changed
-// when there is an alternative available.
-
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain ("messages", "./locale");
@@ -22,8 +19,8 @@ echo textdomain('test'), "\n";
 echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s.php on line %d
+--EXPECT--
+
 test
 test
 foo

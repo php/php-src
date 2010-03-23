@@ -13,12 +13,11 @@ output_handler=
 --FILE--
 <?php
 mb_internal_encoding('cp1251');
-$str = b"\x88\xa9\xf0\xee\xf1\xea\xee\xf8\xed\xfb\xe9";
-var_dump(bin2hex($str));
-var_dump(htmlentities($str, ENT_QUOTES, ''));
+$str = "\x88\xa9\xf0\xee\xf1\xea\xee\xf8\xed\xfb\xe9";
+var_dump(bin2hex($str), htmlentities($str, ENT_QUOTES, ''));
 ?>
 ===DONE===
 --EXPECT--
-unicode(22) "88a9f0eef1eaeef8edfbe9"
+string(22) "88a9f0eef1eaeef8edfbe9"
 string(75) "&euro;&copy;&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"
 ===DONE===

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -632,7 +632,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 	
 	if (num > 0 && save_indexes) {
 		zval **element, *value;
-		zstr str_index;
+		char *str_index;
 		ulong num_index, max_index = 0;
 		long tmp;
 
@@ -878,7 +878,7 @@ static void spl_fixedarray_it_get_current_data(zend_object_iterator *iter, zval 
 }
 /* }}} */
 
-static int spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zstr *str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static int spl_fixedarray_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
 	spl_fixedarray_object *intern   = iterator->object;

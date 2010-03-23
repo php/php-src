@@ -33,31 +33,31 @@ foreach($input_arrays as $key =>$value) {
 
 --null indexed--
 array(1) {
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 array(1) {
-  [u""]=>
-  unicode(6) "null 2"
+  [""]=>
+  string(6) "null 2"
 }
 
 --undefined indexed--
 array(1) {
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 array(1) {
-  [u""]=>
-  unicode(9) "undefined"
+  [""]=>
+  string(9) "undefined"
 }
 
 --unset  indexed--
 array(1) {
-  [u""]=>
-  unicode(4) "null"
+  [""]=>
+  string(4) "null"
 }
 array(1) {
-  [u""]=>
-  unicode(5) "unset"
+  [""]=>
+  string(5) "unset"
 }
 ===DONE===

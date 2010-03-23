@@ -2,7 +2,7 @@
 Test usort() function : object functionality - Different types of classes
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -135,30 +135,30 @@ bool(true)
 array(4) {
   [0]=>
   object(ChildClass)#%d (2) {
-    [u"child_value"]=>
+    ["child_value"]=>
     int(15)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [1]=>
   object(ChildClass)#%d (2) {
-    [u"child_value"]=>
+    ["child_value"]=>
     int(20)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    [u"child_value"]=>
+    ["child_value"]=>
     int(500)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
   [3]=>
   object(ChildClass)#%d (2) {
-    [u"child_value"]=>
+    ["child_value"]=>
     int(700)
-    [u"pub_value"]=>
+    ["pub_value"]=>
     NULL
   }
 }

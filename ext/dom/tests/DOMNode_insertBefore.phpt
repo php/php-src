@@ -23,7 +23,7 @@ $e2->parentNode->insertBefore($e1, $e2);
 echo $dom->saveXML();
 
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0"?>
 <root/>
 Add new node B

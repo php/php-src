@@ -173,32 +173,32 @@ NULL
 
 --empty string DQ--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --string DQ--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --string SQ--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --heredoc--
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_variation5.php on line %d
 NULL
 
 --instance of classWithToString--

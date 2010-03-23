@@ -51,12 +51,12 @@ foreach ($csv_lists as $csv_list) {
     $delimiter = $csv_list[0];
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
-    @fwrite($file_handle, $csv_field . "\n");
+    fwrite($file_handle, $csv_field . "\n");
     // write another line of text and a blank line
     // this will be used to test, if the fgetcsv() read more than a line and its
     // working when only a blan line is read
-    @fwrite($file_handle, "This is line of text without csv fields\n");
-    @fwrite($file_handle, "\n"); // blank line
+    fwrite($file_handle, "This is line of text without csv fields\n");
+    fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
     // else rewind the file pointer to begining of the file 
@@ -116,9 +116,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 int(14)
 bool(false)
@@ -146,9 +146,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 int(14)
 bool(false)
@@ -176,9 +176,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 int(14)
 bool(false)
@@ -206,9 +206,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 int(14)
 bool(false)
@@ -236,9 +236,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
 }
 int(14)
 bool(false)
@@ -266,9 +266,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(7) ""fruit""
+  string(7) ""fruit""
 }
 int(16)
 bool(false)
@@ -296,9 +296,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(7) ""fruit""
+  string(7) ""fruit""
 }
 int(16)
 bool(false)
@@ -326,9 +326,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(7) ""fruit""
+  string(7) ""fruit""
 }
 int(16)
 bool(false)
@@ -356,9 +356,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(7) ""fruit""
+  string(7) ""fruit""
 }
 int(16)
 bool(false)
@@ -386,9 +386,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(2) {
   [0]=>
-  unicode(7) ""water""
+  string(7) ""water""
   [1]=>
-  unicode(7) ""fruit""
+  string(7) ""fruit""
 }
 int(16)
 bool(false)
@@ -416,9 +416,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(2) {
   [0]=>
-  unicode(7) "^water^"
+  string(7) "^water^"
   [1]=>
-  unicode(7) "^fruit^"
+  string(7) "^fruit^"
 }
 int(16)
 bool(false)
@@ -446,9 +446,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(2) {
   [0]=>
-  unicode(7) "^water^"
+  string(7) "^water^"
   [1]=>
-  unicode(7) "^fruit^"
+  string(7) "^fruit^"
 }
 int(16)
 bool(false)
@@ -476,9 +476,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(2) {
   [0]=>
-  unicode(7) "^water^"
+  string(7) "^water^"
   [1]=>
-  unicode(7) "^fruit^"
+  string(7) "^fruit^"
 }
 int(16)
 bool(false)
@@ -506,9 +506,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(2) {
   [0]=>
-  unicode(7) "^water^"
+  string(7) "^water^"
   [1]=>
-  unicode(7) "^fruit^"
+  string(7) "^fruit^"
 }
 int(16)
 bool(false)
@@ -536,9 +536,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(2) {
   [0]=>
-  unicode(7) "^water^"
+  string(7) "^water^"
   [1]=>
-  unicode(7) "^fruit^"
+  string(7) "^fruit^"
 }
 int(16)
 bool(false)
@@ -566,9 +566,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(2) {
   [0]=>
-  unicode(7) "&water&"
+  string(7) "&water&"
   [1]=>
-  unicode(7) "&fruit&"
+  string(7) "&fruit&"
 }
 int(16)
 bool(false)
@@ -596,9 +596,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(2) {
   [0]=>
-  unicode(7) "&water&"
+  string(7) "&water&"
   [1]=>
-  unicode(7) "&fruit&"
+  string(7) "&fruit&"
 }
 int(16)
 bool(false)
@@ -626,9 +626,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(2) {
   [0]=>
-  unicode(7) "&water&"
+  string(7) "&water&"
   [1]=>
-  unicode(7) "&fruit&"
+  string(7) "&fruit&"
 }
 int(16)
 bool(false)
@@ -656,9 +656,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(2) {
   [0]=>
-  unicode(7) "&water&"
+  string(7) "&water&"
   [1]=>
-  unicode(7) "&fruit&"
+  string(7) "&fruit&"
 }
 int(16)
 bool(false)
@@ -686,9 +686,9 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(2) {
   [0]=>
-  unicode(7) "&water&"
+  string(7) "&water&"
   [1]=>
-  unicode(7) "&fruit&"
+  string(7) "&fruit&"
 }
 int(16)
 bool(false)
@@ -732,15 +732,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
   string(0) ""
 }
@@ -786,15 +786,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
   string(0) ""
 }
@@ -840,15 +840,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
   string(0) ""
 }
@@ -894,15 +894,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
   string(0) ""
 }
@@ -948,15 +948,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(6) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
   string(0) ""
 }
@@ -998,15 +998,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [4]=>
-  unicode(3) "air"
+  string(3) "air"
 }
 int(18)
 bool(false)
@@ -1046,15 +1046,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [4]=>
-  unicode(3) "air"
+  string(3) "air"
 }
 int(18)
 bool(false)
@@ -1094,15 +1094,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [4]=>
-  unicode(3) "air"
+  string(3) "air"
 }
 int(18)
 bool(false)
@@ -1142,15 +1142,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [4]=>
-  unicode(3) "air"
+  string(3) "air"
 }
 int(18)
 bool(false)
@@ -1190,15 +1190,15 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(5) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [4]=>
-  unicode(3) "air"
+  string(3) "air"
 }
 int(18)
 bool(false)
@@ -1254,21 +1254,21 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(9) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(0) ""
+  string(0) ""
   [7]=>
-  unicode(3) "air"
+  string(3) "air"
   [8]=>
   string(0) ""
 }
@@ -1326,21 +1326,21 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(9) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(0) ""
+  string(0) ""
   [7]=>
-  unicode(3) "air"
+  string(3) "air"
   [8]=>
   string(0) ""
 }
@@ -1398,21 +1398,21 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(9) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(0) ""
+  string(0) ""
   [7]=>
-  unicode(3) "air"
+  string(3) "air"
   [8]=>
   string(0) ""
 }
@@ -1470,21 +1470,21 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(9) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(0) ""
+  string(0) ""
   [7]=>
-  unicode(3) "air"
+  string(3) "air"
   [8]=>
   string(0) ""
 }
@@ -1542,21 +1542,21 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(9) {
   [0]=>
-  unicode(0) ""
+  string(0) ""
   [1]=>
-  unicode(5) "water"
+  string(5) "water"
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
-  unicode(0) ""
+  string(0) ""
   [4]=>
-  unicode(5) "fruit"
+  string(5) "fruit"
   [5]=>
-  unicode(0) ""
+  string(0) ""
   [6]=>
-  unicode(0) ""
+  string(0) ""
   [7]=>
-  unicode(3) "air"
+  string(3) "air"
   [8]=>
   string(0) ""
 }
@@ -1602,17 +1602,17 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(6) {
   [0]=>
-  unicode(6) "&""""&"
+  string(6) "&""""&"
   [1]=>
-  unicode(3) "&"&"
+  string(3) "&"&"
   [2]=>
-  unicode(1) ","
+  string(1) ","
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(3) "&,&"
+  string(3) "&,&"
   [5]=>
-  unicode(4) ",,,,"
+  string(4) ",,,,"
 }
 int(24)
 bool(false)
@@ -1656,17 +1656,17 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(6) {
   [0]=>
-  unicode(6) "&""""&"
+  string(6) "&""""&"
   [1]=>
-  unicode(3) "&"&"
+  string(3) "&"&"
   [2]=>
-  unicode(1) ","
+  string(1) ","
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(3) "&,&"
+  string(3) "&,&"
   [5]=>
-  unicode(4) ",,,,"
+  string(4) ",,,,"
 }
 int(24)
 bool(false)
@@ -1710,17 +1710,17 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(6) {
   [0]=>
-  unicode(6) "&""""&"
+  string(6) "&""""&"
   [1]=>
-  unicode(3) "&"&"
+  string(3) "&"&"
   [2]=>
-  unicode(1) ","
+  string(1) ","
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(3) "&,&"
+  string(3) "&,&"
   [5]=>
-  unicode(4) ",,,,"
+  string(4) ",,,,"
 }
 int(24)
 bool(false)
@@ -1764,17 +1764,17 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(6) {
   [0]=>
-  unicode(6) "&""""&"
+  string(6) "&""""&"
   [1]=>
-  unicode(3) "&"&"
+  string(3) "&"&"
   [2]=>
-  unicode(1) ","
+  string(1) ","
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(3) "&,&"
+  string(3) "&,&"
   [5]=>
-  unicode(4) ",,,,"
+  string(4) ",,,,"
 }
 int(24)
 bool(false)
@@ -1818,17 +1818,17 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(6) {
   [0]=>
-  unicode(6) "&""""&"
+  string(6) "&""""&"
   [1]=>
-  unicode(3) "&"&"
+  string(3) "&"&"
   [2]=>
-  unicode(1) ","
+  string(1) ","
   [3]=>
-  unicode(1) """
+  string(1) """
   [4]=>
-  unicode(3) "&,&"
+  string(3) "&,&"
   [5]=>
-  unicode(4) ",,,,"
+  string(4) ",,,,"
 }
 int(24)
 bool(false)

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -55,7 +55,7 @@ struct php_sqlite3_fci {
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
 
-	const UChar *func_name;
+	const char *func_name;
 	int argc;
 
 	zval *func, *step, *fini;
@@ -113,6 +113,7 @@ struct _php_sqlite3_stmt_object  {
 };
 
 #endif
+
 
 /*
  * Local variables:

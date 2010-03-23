@@ -114,8 +114,8 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_mime_decode_headers() : usage variations ***
 
@@ -406,27 +406,27 @@ array(5) {
 
 -- Iteration 16 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -476,4 +476,4 @@ array(5) {
 
 Warning: iconv_mime_decode_headers() expects parameter 2 to be long, resource given in %s on line %d
 bool(false)
-===DONE===
+Done

@@ -27,17 +27,17 @@ new B;
 Strict Standards: Redefining already defined constructor for class B in %s on line %d
 array(2) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 array(4) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(11) "__construct"
+  string(11) "__construct"
   [3]=>
-  unicode(10) "__destruct"
+  string(10) "__destruct"
 }

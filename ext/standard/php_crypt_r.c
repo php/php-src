@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -217,7 +217,6 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 	strcat(passwd, "$");
 #endif
-
 	dwHashLen = 16;
 
 	/* Fetch the ctx hash value */

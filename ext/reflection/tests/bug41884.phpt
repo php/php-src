@@ -17,9 +17,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(2) {
-  [u"fooStatic"]=>
-  unicode(3) "foo"
-  [u"foo"]=>
-  unicode(3) "foo"
+  ["fooStatic"]=>
+  string(3) "foo"
+  ["foo"]=>
+  string(3) "foo"
 }
 Done

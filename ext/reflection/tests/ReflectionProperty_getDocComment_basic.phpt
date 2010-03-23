@@ -42,7 +42,7 @@ foreach(array('A', 'B') as $class) {
 --EXPECTF--
 
 ---> Doc comment for A::$a:
-unicode(47) "/**
+string(%d) "/**
      * My Doc Comment for $a
      *
      */"
@@ -57,7 +57,7 @@ bool(false)
 
 
 ---> Doc comment for A::$d:
-unicode(40) "/**
+string(%d) "/**
      * My Doc Comment for $d
      */"
 
@@ -67,7 +67,7 @@ bool(false)
 
 
 ---> Doc comment for A::$f:
-unicode(37) "/**
+string(%d) "/**
      * Doc comment for $f
      */"
 
@@ -77,7 +77,7 @@ bool(false)
 
 
 ---> Doc comment for B::$b:
-unicode(27) "/** A doc comment for $b */"
+string(%d) "/** A doc comment for $b */"
 
 
 ---> Doc comment for B::$c:
@@ -85,16 +85,16 @@ bool(false)
 
 
 ---> Doc comment for B::$e:
-unicode(27) "/** A doc comment for $e */"
+string(%d) "/** A doc comment for $e */"
 
 
 ---> Doc comment for B::$d:
-unicode(40) "/**
+string(%d) "/**
      * My Doc Comment for $d
      */"
 
 
 ---> Doc comment for B::$f:
-unicode(37) "/**
+string(%d) "/**
      * Doc comment for $f
      */"

@@ -96,347 +96,347 @@ echo "Done\n";
 Notice: Undefined variable: fp in %s on line %d
 -- Iteration 1 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) "0"
-  [%u|b%"filename"]=>
-  %unicode|string%(1) "0"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "0"
+  ["filename"]=>
+  string(1) "0"
 }
-%unicode|string%(1) "."
-%unicode|string%(1) "0"
-%unicode|string%(0) ""
-%unicode|string%(1) "0"
+string(1) "."
+string(1) "0"
+string(0) ""
+string(1) "0"
 -- Iteration 2 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(4) "1234"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "1234"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(4) "1234"
+  ["filename"]=>
+  string(4) "1234"
 }
-%unicode|string%(1) "."
-%unicode|string%(4) "1234"
-%unicode|string%(0) ""
-%unicode|string%(4) "1234"
+string(1) "."
+string(4) "1234"
+string(0) ""
+string(4) "1234"
 -- Iteration 3 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "-1234"
-  [%u|b%"filename"]=>
-  %unicode|string%(5) "-1234"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(5) "-1234"
+  ["filename"]=>
+  string(5) "-1234"
 }
-%unicode|string%(1) "."
-%unicode|string%(5) "-1234"
-%unicode|string%(0) ""
-%unicode|string%(5) "-1234"
+string(1) "."
+string(5) "-1234"
+string(0) ""
+string(5) "-1234"
 -- Iteration 4 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(6) "2.3456"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "3456"
-  [%u|b%"filename"]=>
-  %unicode|string%(1) "2"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(6) "2.3456"
+  ["extension"]=>
+  string(4) "3456"
+  ["filename"]=>
+  string(1) "2"
 }
-%unicode|string%(1) "."
-%unicode|string%(6) "2.3456"
-%unicode|string%(4) "3456"
-%unicode|string%(1) "2"
+string(1) "."
+string(6) "2.3456"
+string(4) "3456"
+string(1) "2"
 -- Iteration 5 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"filename"]=>
-  %unicode|string%(1) "1"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "1"
+  ["filename"]=>
+  string(1) "1"
 }
-%unicode|string%(1) "."
-%unicode|string%(1) "1"
-%unicode|string%(0) ""
-%unicode|string%(1) "1"
+string(1) "."
+string(1) "1"
+string(0) ""
+string(1) "1"
 -- Iteration 6 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 7 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(11) "array(1, 2)"
-  [%u|b%"filename"]=>
-  %unicode|string%(11) "array(1, 2)"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(11) "array(1, 2)"
+  ["filename"]=>
+  string(11) "array(1, 2)"
 }
-%unicode|string%(1) "."
-%unicode|string%(11) "array(1, 2)"
-%unicode|string%(0) ""
-%unicode|string%(11) "array(1, 2)"
+string(1) "."
+string(11) "array(1, 2)"
+string(0) ""
+string(11) "array(1, 2)"
 -- Iteration 8 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(21) "array( array(), null)"
-  [%u|b%"filename"]=>
-  %unicode|string%(21) "array( array(), null)"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(21) "array( array(), null)"
+  ["filename"]=>
+  string(21) "array( array(), null)"
 }
-%unicode|string%(1) "."
-%unicode|string%(21) "array( array(), null)"
-%unicode|string%(0) ""
-%unicode|string%(21) "array( array(), null)"
+string(1) "."
+string(21) "array( array(), null)"
+string(0) ""
+string(21) "array( array(), null)"
 -- Iteration 9 --
 
-Warning: pathinfo() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: pathinfo() expects parameter 1 to be string (Unicode or binary), object given in %s on line %d
+Warning: pathinfo() expects parameter 1 to be string, object given in %s on line %d
 NULL
 -- Iteration 10 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) " "
-  [%u|b%"filename"]=>
-  %unicode|string%(1) " "
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) " "
+  ["filename"]=>
+  string(1) " "
 }
-%unicode|string%(1) "."
-%unicode|string%(1) " "
-%unicode|string%(0) ""
-%unicode|string%(1) " "
+string(1) "."
+string(1) " "
+string(0) ""
+string(1) " "
 -- Iteration 11 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) " "
-  [%u|b%"filename"]=>
-  %unicode|string%(1) " "
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) " "
+  ["filename"]=>
+  string(1) " "
 }
-%unicode|string%(1) "."
-%unicode|string%(1) " "
-%unicode|string%(0) ""
-%unicode|string%(1) " "
+string(1) "."
+string(1) " "
+string(0) ""
+string(1) " "
 -- Iteration 12 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 13 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 14 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 15 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 16 --
 array(2) {
-  [%u|b%"basename"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["basename"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
+string(0) ""
 -- Iteration 17 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(11) "www.foo.com"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "com"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "www.foo"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(11) "www.foo.com"
+  ["extension"]=>
+  string(3) "com"
+  ["filename"]=>
+  string(7) "www.foo"
 }
-%unicode|string%(1) "."
-%unicode|string%(11) "www.foo.com"
-%unicode|string%(3) "com"
-%unicode|string%(7) "www.foo"
+string(1) "."
+string(11) "www.foo.com"
+string(3) "com"
+string(7) "www.foo"
 -- Iteration 18 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(17) "/var/html/testdir"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "example.html"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "html"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "example"
+  ["dirname"]=>
+  string(17) "/var/html/testdir"
+  ["basename"]=>
+  string(12) "example.html"
+  ["extension"]=>
+  string(4) "html"
+  ["filename"]=>
+  string(7) "example"
 }
-%unicode|string%(17) "/var/html/testdir"
-%unicode|string%(12) "example.html"
-%unicode|string%(4) "html"
-%unicode|string%(7) "example"
+string(17) "/var/html/testdir"
+string(12) "example.html"
+string(4) "html"
+string(7) "example"
 -- Iteration 19 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(12) "/testdir/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(4) "test"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "test"
+  ["dirname"]=>
+  string(12) "/testdir/foo"
+  ["basename"]=>
+  string(4) "test"
+  ["filename"]=>
+  string(4) "test"
 }
-%unicode|string%(12) "/testdir/foo"
-%unicode|string%(4) "test"
-%unicode|string%(0) ""
-%unicode|string%(4) "test"
+string(12) "/testdir/foo"
+string(4) "test"
+string(0) ""
+string(4) "test"
 -- Iteration 20 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(4) "/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(4) "/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
-%unicode|string%(4) "/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(4) "/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 -- Iteration 21 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "12345"
-  [%u|b%"filename"]=>
-  %unicode|string%(5) "12345"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(5) "12345"
+  ["filename"]=>
+  string(5) "12345"
 }
-%unicode|string%(1) "."
-%unicode|string%(5) "12345"
-%unicode|string%(0) ""
-%unicode|string%(5) "12345"
+string(1) "."
+string(5) "12345"
+string(0) ""
+string(5) "12345"
 -- Iteration 22 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(15) "www.example.com"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "com"
-  [%u|b%"filename"]=>
-  %unicode|string%(11) "www.example"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(15) "www.example.com"
+  ["extension"]=>
+  string(3) "com"
+  ["filename"]=>
+  string(11) "www.example"
 }
-%unicode|string%(1) "."
-%unicode|string%(15) "www.example.com"
-%unicode|string%(3) "com"
-%unicode|string%(11) "www.example"
+string(1) "."
+string(15) "www.example.com"
+string(3) "com"
+string(11) "www.example"
 -- Iteration 23 --
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(12) "/testdir/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(4) "test"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "test"
+  ["dirname"]=>
+  string(12) "/testdir/foo"
+  ["basename"]=>
+  string(4) "test"
+  ["filename"]=>
+  string(4) "test"
 }
-%unicode|string%(12) "/testdir/foo"
-%unicode|string%(4) "test"
-%unicode|string%(0) ""
-%unicode|string%(4) "test"
+string(12) "/testdir/foo"
+string(4) "test"
+string(0) ""
+string(4) "test"
 -- Iteration 24 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(6) "../foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(9) "test.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "test"
+  ["dirname"]=>
+  string(6) "../foo"
+  ["basename"]=>
+  string(9) "test.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(4) "test"
 }
-%unicode|string%(6) "../foo"
-%unicode|string%(9) "test.link"
-%unicode|string%(4) "link"
-%unicode|string%(4) "test"
+string(6) "../foo"
+string(9) "test.link"
+string(4) "link"
+string(4) "test"
 -- Iteration 25 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(76) "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6"
-  [%u|b%"basename"]=>
-  %unicode|string%(8) "test.tmp"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "tmp"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "test"
+  ["dirname"]=>
+  string(76) "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6"
+  ["basename"]=>
+  string(8) "test.tmp"
+  ["extension"]=>
+  string(3) "tmp"
+  ["filename"]=>
+  string(4) "test"
 }
-%unicode|string%(76) "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6"
-%unicode|string%(8) "test.tmp"
-%unicode|string%(3) "tmp"
-%unicode|string%(4) "test"
+string(76) "./test/work/scratch/mydir/yourdir/ourdir/test1/test2/test3/test4/test5/test6"
+string(8) "test.tmp"
+string(3) "tmp"
+string(4) "test"
 -- Iteration 26 --
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "2.345"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "345"
-  [%u|b%"filename"]=>
-  %unicode|string%(1) "2"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(5) "2.345"
+  ["extension"]=>
+  string(3) "345"
+  ["filename"]=>
+  string(1) "2"
 }
-%unicode|string%(1) "."
-%unicode|string%(5) "2.345"
-%unicode|string%(3) "345"
-%unicode|string%(1) "2"
+string(1) "."
+string(5) "2.345"
+string(3) "345"
+string(1) "2"
 Done

@@ -11,80 +11,80 @@ var_dump(exif_read_data(dirname(__FILE__).'/image011.jpg'));
 ?>
 --EXPECTF--
 array(28) {
-  [u"FileName"]=>
-  unicode(12) "image011.jpg"
-  [u"FileDateTime"]=>
+  ["FileName"]=>
+  string(12) "image011.jpg"
+  ["FileDateTime"]=>
   int(%d)
-  [u"FileSize"]=>
+  ["FileSize"]=>
   int(%d)
-  [u"FileType"]=>
+  ["FileType"]=>
   int(2)
-  [u"MimeType"]=>
-  unicode(10) "image/jpeg"
-  [u"SectionsFound"]=>
-  unicode(19) "ANY_TAG, IFD0, EXIF"
-  [u"COMPUTED"]=>
+  ["MimeType"]=>
+  string(10) "image/jpeg"
+  ["SectionsFound"]=>
+  string(19) "ANY_TAG, IFD0, EXIF"
+  ["COMPUTED"]=>
   array(9) {
-    [u"html"]=>
-    unicode(20) "width="1" height="1""
-    [u"Height"]=>
+    ["html"]=>
+    string(20) "width="1" height="1""
+    ["Height"]=>
     int(1)
-    [u"Width"]=>
+    ["Width"]=>
     int(1)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
-    [u"ByteOrderMotorola"]=>
+    ["ByteOrderMotorola"]=>
     int(1)
-    [u"ApertureFNumber"]=>
-    unicode(5) "f/8.0"
-    [u"Copyright"]=>
-    unicode(24) "Eric Stewart, Hex Editor"
-    [u"Copyright.Photographer"]=>
-    unicode(12) "Eric Stewart"
-    [u"Copyright.Editor"]=>
-    unicode(10) "Hex Editor"
+    ["ApertureFNumber"]=>
+    string(5) "f/8.0"
+    ["Copyright"]=>
+    string(24) "Eric Stewart, Hex Editor"
+    ["Copyright.Photographer"]=>
+    string(12) "Eric Stewart"
+    ["Copyright.Editor"]=>
+    string(10) "Hex Editor"
   }
-  [u"ImageDescription"]=>
-  unicode(15) "My description."
-  [u"Make"]=>
-  unicode(11) "OpenShutter"
-  [u"Model"]=>
-  unicode(8) "OS 1.0.0"
-  [u"XResolution"]=>
-  unicode(4) "72/1"
-  [u"YResolution"]=>
-  unicode(4) "72/1"
-  [u"ResolutionUnit"]=>
+  ["ImageDescription"]=>
+  string(15) "My description."
+  ["Make"]=>
+  string(11) "OpenShutter"
+  ["Model"]=>
+  string(8) "OS 1.0.0"
+  ["XResolution"]=>
+  string(4) "72/1"
+  ["YResolution"]=>
+  string(4) "72/1"
+  ["ResolutionUnit"]=>
   int(2)
-  [u"DateTime"]=>
-  unicode(%d) "%s"
-  [u"Artist"]=>
-  unicode(12) "Eric Stewart"
-  [u"Copyright"]=>
-  unicode(12) "Eric Stewart"
-  [u"Exif_IFD_Pointer"]=>
+  ["DateTime"]=>
+  string(19) "2008:06:19 01:47:53"
+  ["Artist"]=>
+  string(12) "Eric Stewart"
+  ["Copyright"]=>
+  string(12) "Eric Stewart"
+  ["Exif_IFD_Pointer"]=>
   int(246)
-  [u"ExposureTime"]=>
-  unicode(5) "1/125"
-  [u"FNumber"]=>
-  unicode(3) "8/1"
-  [u"ISOSpeedRatings"]=>
+  ["ExposureTime"]=>
+  string(5) "1/125"
+  ["FNumber"]=>
+  string(3) "8/1"
+  ["ISOSpeedRatings"]=>
   int(80)
-  [u"DateTimeOriginal"]=>
-  unicode(%d) "%s"
-  [u"DateTimeDigitized"]=>
-  unicode(%d) "%s"
-  [u"MeteringMode"]=>
+  ["DateTimeOriginal"]=>
+  string(19) "2008:06:19 01:47:53"
+  ["DateTimeDigitized"]=>
+  string(19) "2008:06:19 01:47:53"
+  ["MeteringMode"]=>
   int(5)
-  [u"LightSource"]=>
+  ["LightSource"]=>
   int(4)
-  [u"Flash"]=>
+  ["Flash"]=>
   int(7)
-  [u"FocalLength"]=>
-  unicode(4) "29/5"
-  [u"ExifImageWidth"]=>
+  ["FocalLength"]=>
+  string(4) "29/5"
+  ["ExifImageWidth"]=>
   int(1)
-  [u"ExifImageLength"]=>
+  ["ExifImageLength"]=>
   int(1)
 }
 --CREDIT--

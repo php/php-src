@@ -35,68 +35,65 @@ setlocale(LC_ALL, $orig);
 ?>
 ===DONE===
 --EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 *** Testing strptime() : basic functionality ***
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(10)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(2)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(6)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(63)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(2)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(182)
-  [u"unparsed"]=>
-  unicode(3) "GMT"
+  ["unparsed"]=>
+  string(3) "GMT"
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(10)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(2)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(6)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(163)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(1)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(182)
-  [u"unparsed"]=>
-  unicode(0) ""
+  ["unparsed"]=>
+  string(0) ""
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(10)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(2)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(6)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(0)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(2)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(182)
-  [u"unparsed"]=>
-  unicode(0) ""
+  ["unparsed"]=>
+  string(0) ""
 }
-
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s on line %d
 ===DONE===

@@ -34,12 +34,12 @@ var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : basic functionality - using float format ***
-unicode(9) "11.110000"
-unicode(9) "11.110000"
-unicode(19) "11.110000 22.220000"
-unicode(19) "11.110000 22.220000"
-unicode(29) "11.110000 22.220000 33.330000"
-unicode(29) "11.110000 22.220000 33.330000"
+string(9) "11.110000"
+string(9) "11.110000"
+string(19) "11.110000 22.220000"
+string(19) "11.110000 22.220000"
+string(29) "11.110000 22.220000 33.330000"
+string(29) "11.110000 22.220000 33.330000"
 Done

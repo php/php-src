@@ -97,13 +97,13 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --float 10.5--
-unicode(20) "Jan 01 1970 05:30:10"
+string(20) "Jan 01 1970 05:30:10"
 
 --float -10.5--
-unicode(20) "Jan 01 1970 05:29:50"
+string(20) "Jan 01 1970 05:29:50"
 
 --float .5--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --empty array--
 
@@ -126,51 +126,51 @@ Warning: strftime() expects parameter 2 to be long, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --lowercase null--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --lowercase true--
-unicode(20) "Jan 01 1970 05:30:01"
+string(20) "Jan 01 1970 05:30:01"
 
 --lowercase false--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --uppercase TRUE--
-unicode(20) "Jan 01 1970 05:30:01"
+string(20) "Jan 01 1970 05:30:01"
 
 --uppercase FALSE--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --empty string DQ--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: strftime() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
@@ -184,8 +184,8 @@ Warning: strftime() expects parameter 2 to be long, object given in %s on line %
 bool(false)
 
 --undefined var--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 
 --unset var--
-unicode(20) "Jan 01 1970 05:30:00"
+string(20) "Jan 01 1970 05:30:00"
 ===DONE===

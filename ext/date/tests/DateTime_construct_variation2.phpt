@@ -169,22 +169,22 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean 
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
 
 -- empty string DQ --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- empty string SQ --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- string DQ --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- string SQ --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- mixed case string --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- heredoc --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, Unicode string given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given
 
 -- instance of classWithToString --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object given
@@ -201,3 +201,4 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, null giv
 -- resource --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, resource given
 ===DONE===
+

@@ -36,28 +36,30 @@ var_dump(sprintf("%s", $tempstring, $tempstring, $tempstring));
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : with  typical format strings ***
 
 -- Testing for '%%%.2f' as the format parameter --
-unicode(15) "%12345678900.00"
+string(15) "%12345678900.00"
 
 -- Testing for '%%' as the format parameter --
-unicode(1) "%"
+string(1) "%"
 
 -- Testing for precision value more than maximum --
-unicode(52) "12345678900.0000000000000000000000000000000000000000"
+
+Notice: sprintf(): Requested precision of 988 digits was truncated to PHP maximum of %d digits in %s on line %d
+string(52) "12345678900.0000000000000000000000000000000000000000"
 
 -- Testing for invalid width(-15) specifier --
-unicode(3) "15s"
+string(3) "15s"
 
 -- Testing for '%X' as the format parameter --
-unicode(1) "C"
+string(1) "C"
 
 -- Testing for multiple format parameters --
-unicode(39) "12345  abcdefghjklmnpqrstuvwxyz  12345
+string(39) "12345  abcdefghjklmnpqrstuvwxyz  12345
 "
 
 -- Testing for excess of mixed type arguments  --
-unicode(24) "abcdefghjklmnpqrstuvwxyz"
+string(24) "abcdefghjklmnpqrstuvwxyz"
 Done

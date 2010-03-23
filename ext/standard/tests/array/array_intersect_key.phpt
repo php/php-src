@@ -59,7 +59,7 @@ function comp_func($a, $b) {
 
 }
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [2]=>
   int(4)

@@ -3,7 +3,7 @@ Test fileperms() & chmod() functions: basic functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {
- die('skip Not on Windows');
+    die('skip Not on Windows');
 }
 // Skip if being run by root
 $filename = dirname(__FILE__)."/006_root_check.tmp";
@@ -42,14 +42,14 @@ printf("%o", fileperms($path."/perm") );
 echo "\n";
 clearstatcache();
 
-echo "Done";
+echo "Done\n";
 ?>
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/perm.tmp");
 rmdir(dirname(__FILE__)."/perm");
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fileperms(), chmod() with files and dirs ***
 bool(true)
 100755

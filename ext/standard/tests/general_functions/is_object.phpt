@@ -146,13 +146,12 @@ var_dump( is_object() );
 var_dump( is_object($myClass_object, $myClass_object) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources used
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_object() with valid objects ***
 -- Iteration 1 --
@@ -221,8 +220,8 @@ bool(false)
 *** Testing error conditions ***
 
 Warning: is_object() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_object() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 Done

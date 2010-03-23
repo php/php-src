@@ -75,94 +75,94 @@ echo "\n-- From a child's static context --\n";
 Child::testStatic();
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing get_class_vars() : testing visibility
 
 -- From global context --
 array(2) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["pubs"]=>
+  string(17) "public static var"
 }
 
 -- From inside an object instance --
 array(6) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"priv"]=>
-  unicode(11) "private var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
-  [u"privs"]=>
-  unicode(18) "private static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["priv"]=>
+  string(11) "private var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+  ["privs"]=>
+  string(18) "private static var"
 }
 
 -- From  a static context --
 array(6) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"priv"]=>
-  unicode(11) "private var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
-  [u"privs"]=>
-  unicode(18) "private static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["priv"]=>
+  string(11) "private var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
+  ["privs"]=>
+  string(18) "private static var"
 }
 
 -- From inside an  parent object instance --
 array(4) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
 }
 
 -- From a parents static context --
 array(4) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
 }
 
 -- From inside a child object instance --
 array(4) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
 }
 
 -- From a child's static context --
 array(4) {
-  [u"pub"]=>
-  unicode(10) "public var"
-  [u"prot"]=>
-  unicode(13) "protected var"
-  [u"pubs"]=>
-  unicode(17) "public static var"
-  [u"prots"]=>
-  unicode(20) "protected static var"
+  ["pub"]=>
+  string(10) "public var"
+  ["prot"]=>
+  string(13) "protected var"
+  ["pubs"]=>
+  string(17) "public static var"
+  ["prots"]=>
+  string(20) "protected static var"
 }
 ===DONE===

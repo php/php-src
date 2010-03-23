@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1215,8 +1215,10 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(IMAPG(imap_password));
 	}
 
-	/* local filename, need to perform open_basedir checks */
-	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
+	/* local filename, need to perform open_basedir and safe_mode checks */
+	if (mailbox[0] != '{' &&
+			(php_check_open_basedir(mailbox TSRMLS_CC) ||
+			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
 		RETURN_FALSE;
 	}
 
@@ -1290,8 +1292,10 @@ PHP_FUNCTION(imap_reopen)
 		mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
 	}
 #endif
-	/* local filename, need to perform open_basedir checks */
-	if (mailbox[0] != '{' && php_check_open_basedir(mailbox TSRMLS_CC)) {
+	/* local filename, need to perform open_basedir and safe_mode checks */
+	if (mailbox[0] != '{' &&
+			(php_check_open_basedir(mailbox TSRMLS_CC) ||
+			(PG(safe_mode) && !php_checkuid(mailbox, NULL, CHECKUID_CHECK_FILE_AND_DIR)))) {
 		RETURN_FALSE;
 	}
 
@@ -1305,7 +1309,7 @@ PHP_FUNCTION(imap_reopen)
 }
 /* }}} */
 
-/* {{{ proto bool imap_append(resource stream_id, string folder, string message [, string options])
+/* {{{ proto bool imap_append(resource stream_id, string folder, string message [, string options [, string internal_date]])
    Append a new message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
@@ -1314,27 +1318,25 @@ PHP_FUNCTION(imap_append)
 	int folder_len, message_len, internal_date_len = 0, flags_len = 0;
 	pils *imap_le_struct;
 	STRING st;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|ss", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len, &internal_date, &internal_date_len) == FAILURE) {
-		return;
-	}
-
-	zend_uchar unicode_date = (zend_uchar) internal_date;
-	char* regex = "/[ 0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/";
-	int regex_len = strlen(regex);
+	char* regex = "/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/";
+	const int regex_len = strlen(regex);
 	pcre_cache_entry *pce;				/* Compiled regex */
 	zval *subpats = NULL;				/* Parts (not used) */
 	long regex_flags = 0;				/* Flags (not used) */
 	long start_offset = 0;				/* Start offset (not used) */
 	int global = 0;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|ss", &streamind, &folder, &folder_len, &message, &message_len, &flags, &flags_len, &internal_date, &internal_date_len) == FAILURE) {
+		return;
+	}
+
 	if (internal_date) {
-		/* Make sure the given internal_date string matches the RFC specified format */
-		if ((pce = pcre_get_compiled_regex_cache(unicode_date, regex, regex_len TSRMLS_CC)) == NULL) {
+		/* Make sure the given internal_date string matches the RFC specifiedformat */
+		if ((pce = pcre_get_compiled_regex_cache(regex, regex_len TSRMLS_CC))== NULL) {
 			RETURN_FALSE;
 		}
 
-		php_pcre_match_impl(pce, unicode_date, internal_date, internal_date_len, return_value, subpats, global,
+		php_pcre_match_impl(pce, internal_date, internal_date_len, return_value, subpats, global,
 			0, regex_flags, start_offset TSRMLS_CC);
 
 		if (!Z_LVAL_P(return_value)) {
@@ -1342,7 +1344,6 @@ PHP_FUNCTION(imap_append)
 			internal_date = NULL;
 		}
 	}
-
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, &streamind, -1, "imap", le_imap);
 
@@ -2963,37 +2964,24 @@ static void php_imap_mutf7(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	int in_len;
 	unsigned char *out;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in, &in_len) == FAILURE) {
+		return;
+	}
+
+	if (in_len < 1) {
+		RETURN_EMPTY_STRING();
+	}
+
 	if (mode == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in, &in_len, UG(utf8_conv)) == FAILURE) {
-			return;
-		}
-
-		if (in_len < 1) {
-			RETURN_EMPTY_STRING();
-		}
-
 		out = utf8_to_mutf7((unsigned char *) in);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in, &in_len) == FAILURE) {
-			return;
-		}
-
-		if (in_len < 1) {
-			RETURN_EMPTY_UNICODE();
-		}
-
 		out = utf8_from_mutf7((unsigned char *) in);
 	}
 
 	if (out == NIL) {
 		RETURN_FALSE;
-		return;
-	}
-
-	if (mode == 0) {
-		RETURN_STRING((char *)out, 1);
 	} else {
-		RETURN_UTF8_STRING(out, ZSTR_DUPLICATE);
+		RETURN_STRING((char *)out, 1);
 	}
 }
 /* }}} */
@@ -3444,7 +3432,7 @@ PHP_FUNCTION(imap_fetch_overview)
 PHP_FUNCTION(imap_mail_compose)
 {
 	zval *envelope, *body;
-	zstr key;
+	char *key;
 	zval **data, **pvalue, **disp_data, **env_data;
 	ulong ind;
 	char *cookie = NIL;
@@ -3558,7 +3546,7 @@ PHP_FUNCTION(imap_mail_compose)
 				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 					disp_param = mail_newbody_parameter();
 					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-					disp_param->attribute = cpystr(key.s);
+					disp_param->attribute = cpystr(key);
 					convert_to_string_ex(disp_data);
 					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -3592,7 +3580,7 @@ PHP_FUNCTION(imap_mail_compose)
 				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 					disp_param = mail_newbody_parameter();
 					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-					disp_param->attribute = cpystr(key.s);
+					disp_param->attribute = cpystr(key);
 					convert_to_string_ex(disp_data);
 					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -3671,7 +3659,7 @@ PHP_FUNCTION(imap_mail_compose)
 					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 						disp_param = mail_newbody_parameter();
 						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-						disp_param->attribute = cpystr(key.s);
+						disp_param->attribute = cpystr(key);
 						convert_to_string_ex(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -3705,7 +3693,7 @@ PHP_FUNCTION(imap_mail_compose)
 					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 						disp_param = mail_newbody_parameter();
 						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-						disp_param->attribute = cpystr(key.s);
+						disp_param->attribute = cpystr(key);
 						convert_to_string_ex(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);

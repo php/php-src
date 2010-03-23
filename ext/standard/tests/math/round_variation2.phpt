@@ -141,12 +141,12 @@ float(123)
 
 -- Iteration 17 --
 
-Warning: round() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: round() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: round() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: round() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -156,17 +156,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: round() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: round() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: round() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: round() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: round() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: round() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 23 --

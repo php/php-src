@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,10 +32,7 @@ PHP_FUNCTION(is_bool);
 PHP_FUNCTION(is_long);
 PHP_FUNCTION(is_float);
 PHP_FUNCTION(is_numeric);
-PHP_FUNCTION(is_binary);
 PHP_FUNCTION(is_string);
-PHP_FUNCTION(is_unicode);
-PHP_FUNCTION(is_buffer);
 PHP_FUNCTION(is_array);
 PHP_FUNCTION(is_object);
 PHP_FUNCTION(is_scalar);

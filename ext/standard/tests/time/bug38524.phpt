@@ -9,23 +9,23 @@ Bug #38524 (strptime() does not initialize the internal date storage structure)
 ===DONE===
 --EXPECTF--
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(20)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(7)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(106)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(0)
-  [u"tm_yday"]=>
-  int(231)
-  [u"unparsed"]=>
-  unicode(0) ""
+  ["tm_yday"]=>
+  int(%d)
+  ["unparsed"]=>
+  string(0) ""
 }
 ===DONE===

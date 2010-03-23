@@ -164,7 +164,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: date_default_timezone_set() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: date_default_timezone_set() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -195,6 +195,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: date_default_timezone_set() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: date_default_timezone_set() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===Done===

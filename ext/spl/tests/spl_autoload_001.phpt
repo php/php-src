@@ -105,7 +105,7 @@ catch(Exception $e)
 <?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
-unicode(9) ".inc,.php"
+string(9) ".inc,.php"
 %stestclass.inc
 Exception: Class TestClass could not be loaded
 ===()===
@@ -120,7 +120,7 @@ Exception: Class TestClass could not be loaded
 Exception: Class TestClass could not be loaded
 Exception: Class TestClass could not be loaded
 ===SPL_AUTOLOAD()===
-unicode(4) ".inc"
+string(4) ".inc"
 Exception: Class TestClass could not be loaded
 ===REGISTER===
 TestFunc1(TestClass)

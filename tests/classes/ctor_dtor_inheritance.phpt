@@ -54,7 +54,7 @@ unset($t);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Testing class base
 base::__construct
 base Object

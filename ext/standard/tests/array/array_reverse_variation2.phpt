@@ -101,137 +101,137 @@ echo "Done";
 -- Iteration 1 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 2 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 3 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 4 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 5 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 6 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 7 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 8 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 9 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 10 --
 
@@ -256,122 +256,122 @@ NULL
 -- Iteration 15 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 16 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 17 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 18 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 19 --
 array(6) {
   [4]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [3]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [1]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [0]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 20 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 21 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 22 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 23 --
 
@@ -380,32 +380,32 @@ NULL
 -- Iteration 24 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 25 --
 array(6) {
   [0]=>
-  unicode(4) "pink"
+  string(4) "pink"
   [1]=>
-  unicode(6) "orange"
+  string(6) "orange"
   [2]=>
-  unicode(3) "red"
+  string(3) "red"
   [3]=>
-  unicode(4) "blue"
+  string(4) "blue"
   [4]=>
-  unicode(3) "red"
-  [u"a"]=>
-  unicode(5) "green"
+  string(3) "red"
+  ["a"]=>
+  string(5) "green"
 }
 -- Iteration 26 --
 

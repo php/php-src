@@ -24,22 +24,22 @@ var_dump($str[$arr]);
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(1) "i"
-unicode(1) "S"
-unicode(1) "S"
-unicode(1) "S"
-unicode(1) "i"
-unicode(1) "S"
+--EXPECTF--	
+string(1) "i"
+string(1) "S"
+string(1) "S"
+string(1) "S"
+string(1) "i"
+string(1) "S"
 
 Warning: Illegal offset type in %s on line %d
-unicode(1) "%s"
+string(1) "%s"
 
 Warning: Illegal offset type in %s on line %d
 
 Notice: Object of class stdClass could not be converted to int in %s on line %d
-unicode(1) "%s"
+string(1) "%s"
 
 Warning: Illegal offset type in %s on line %d
-unicode(1) "i"
+string(1) "i"
 Done

@@ -108,79 +108,79 @@ array(4) {
 }
 -- Iteration 5 --
 array(1) {
-  [u"2.3333"]=>
+  ["2.3333"]=>
   float(2.3333)
 }
 -- Iteration 6 --
 array(4) {
-  [u"1.2"]=>
+  ["1.2"]=>
   float(1.2)
-  [u"3.33"]=>
+  ["3.33"]=>
   float(3.33)
-  [u"4.8999992284"]=>
+  ["4.8999992284"]=>
   float(4.8999992284)
-  [u"33333333.333"]=>
+  ["33333333.333"]=>
   float(33333333.333)
 }
 -- Iteration 7 --
 array(4) {
-  [u"	Hello"]=>
-  unicode(6) "	Hello"
-  [u"col	or"]=>
-  unicode(6) "col	or"
-  [u"world"]=>
-  unicode(7) "world"
-  [u"pen
+  ["	Hello"]=>
+  string(6) "	Hello"
+  ["col	or"]=>
+  string(6) "col	or"
+  ["world"]=>
+  string(7) "world"
+  ["pen
 "]=>
-  unicode(4) "pen
+  string(4) "pen
 "
 }
 -- Iteration 8 --
 array(4) {
-  [u"\tHello"]=>
-  unicode(7) "\tHello"
-  [u"col\tor"]=>
-  unicode(7) "col\tor"
-  [u"\v\fworld"]=>
-  unicode(9) "\v\fworld"
-  [u"pen\n"]=>
-  unicode(5) "pen\n"
+  ["\tHello"]=>
+  string(7) "\tHello"
+  ["col\tor"]=>
+  string(7) "col\tor"
+  ["\v\fworld"]=>
+  string(9) "\v\fworld"
+  ["pen\n"]=>
+  string(5) "pen\n"
 }
 -- Iteration 9 --
 array(2) {
-  [u"hello"]=>
-  unicode(5) "hello"
-  [u"Hello world"]=>
-  unicode(11) "Hello world"
+  ["hello"]=>
+  string(5) "hello"
+  ["Hello world"]=>
+  string(11) "Hello world"
 }
 -- Iteration 10 --
 array(3) {
-  [u"Class A object"]=>
+  ["Class A object"]=>
   object(classA)#%d (0) {
   }
-  [u""]=>
+  [""]=>
   NULL
-  [u"Resource id #%d"]=>
+  ["Resource id #%d"]=>
   resource(%d) of type (stream)
 }
 -- Iteration 11 --
 array(8) {
-  [u"hello"]=>
-  unicode(5) "hello"
-  [u"Class A object"]=>
+  ["hello"]=>
+  string(5) "hello"
+  ["Class A object"]=>
   object(classA)#%d (0) {
   }
-  [u"fruit"]=>
-  unicode(5) "fruit"
-  [u"Resource id #%d"]=>
+  ["fruit"]=>
+  string(5) "fruit"
+  ["Resource id #%d"]=>
   resource(%d) of type (stream)
   [133]=>
   int(133)
-  [u"444.432"]=>
+  ["444.432"]=>
   float(444.432)
-  [u""]=>
+  [""]=>
   NULL
-  [u"Hello world"]=>
-  unicode(11) "Hello world"
+  ["Hello world"]=>
+  string(11) "Hello world"
 }
 Done

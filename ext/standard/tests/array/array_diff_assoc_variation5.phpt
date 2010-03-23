@@ -47,26 +47,26 @@ var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 
 *** Testing array_diff_assoc() : usage variations ***
 -- Result of comparing integers and floating point numbers: --
 array(1) {
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(1) {
   [3]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 -- Result of comparing integers and strings containing an integers : --
 array(1) {
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(1) {
   [3]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 -- Result of comparing integers and strings containing floating points : --
 array(4) {
@@ -77,26 +77,26 @@ array(4) {
   [2]=>
   int(3)
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(4) {
   [0]=>
-  unicode(4) "1.00"
-  [u"1.00"]=>
-  unicode(4) "2.00"
-  [u"2.00"]=>
-  unicode(4) "3.00"
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
+  ["2.00"]=>
+  string(4) "3.00"
   [1]=>
-  unicode(1) "d"
+  string(1) "d"
 }
 -- Result of comparing floating points and strings containing integers : --
 array(1) {
   [3]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 array(1) {
   [3]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 -- Result of comparing floating points and strings containing floating point: --
 array(4) {
@@ -107,42 +107,42 @@ array(4) {
   [2]=>
   float(3)
   [3]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 array(4) {
   [0]=>
-  unicode(4) "1.00"
-  [u"1.00"]=>
-  unicode(4) "2.00"
-  [u"2.00"]=>
-  unicode(4) "3.00"
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
+  ["2.00"]=>
+  string(4) "3.00"
   [1]=>
-  unicode(1) "d"
+  string(1) "d"
 }
 -- Result of comparing strings containing integers and strings containing floating points : --
 array(4) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
   [1]=>
-  unicode(1) "2"
+  string(1) "2"
   [2]=>
-  unicode(1) "3"
+  string(1) "3"
   [3]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 array(4) {
   [0]=>
-  unicode(4) "1.00"
-  [u"1.00"]=>
-  unicode(4) "2.00"
-  [u"2.00"]=>
-  unicode(4) "3.00"
+  string(4) "1.00"
+  ["1.00"]=>
+  string(4) "2.00"
+  ["2.00"]=>
+  string(4) "3.00"
   [1]=>
-  unicode(1) "d"
+  string(1) "d"
 }
 -- Result of comparing more than two arrays: --
 array(1) {
   [3]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 Done

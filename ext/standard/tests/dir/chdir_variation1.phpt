@@ -201,9 +201,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: chdir(): %s (errno %d) in %s on line %d
+Warning: chdir() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
@@ -232,6 +230,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: chdir(): %s (errno %d) in %s on line %d
+Warning: chdir() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 ===DONE===

@@ -31,7 +31,7 @@ var_dump( array_pad($input, -$pad_size, $pad_value) );  // negative 'pad_value'
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_pad() : Passing 2-d array to $pad_value argument ***
 array(5) {
   [0]=>
@@ -50,15 +50,15 @@ array(5) {
     [1]=>
     array(2) {
       [0]=>
-      unicode(5) "hello"
+      string(5) "hello"
       [1]=>
-      unicode(5) "world"
+      string(5) "world"
     }
     [2]=>
     array(2) {
-      [u"one"]=>
+      ["one"]=>
       int(1)
-      [u"two"]=>
+      ["two"]=>
       int(2)
     }
   }
@@ -72,15 +72,15 @@ array(5) {
     [1]=>
     array(2) {
       [0]=>
-      unicode(5) "hello"
+      string(5) "hello"
       [1]=>
-      unicode(5) "world"
+      string(5) "world"
     }
     [2]=>
     array(2) {
-      [u"one"]=>
+      ["one"]=>
       int(1)
-      [u"two"]=>
+      ["two"]=>
       int(2)
     }
   }
@@ -96,15 +96,15 @@ array(5) {
     [1]=>
     array(2) {
       [0]=>
-      unicode(5) "hello"
+      string(5) "hello"
       [1]=>
-      unicode(5) "world"
+      string(5) "world"
     }
     [2]=>
     array(2) {
-      [u"one"]=>
+      ["one"]=>
       int(1)
-      [u"two"]=>
+      ["two"]=>
       int(2)
     }
   }
@@ -118,15 +118,15 @@ array(5) {
     [1]=>
     array(2) {
       [0]=>
-      unicode(5) "hello"
+      string(5) "hello"
       [1]=>
-      unicode(5) "world"
+      string(5) "world"
     }
     [2]=>
     array(2) {
-      [u"one"]=>
+      ["one"]=>
       int(1)
-      [u"two"]=>
+      ["two"]=>
       int(2)
     }
   }

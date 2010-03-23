@@ -12,11 +12,11 @@ var_dump(strrchr("test".chr(0)."string", "t"));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 bool(false)
 bool(false)
 bool(false)
-unicode(3) "abc"
-unicode(5) " test"
-unicode(5) "tring"
+string(3) "abc"
+string(5) " test"
+string(5) "tring"
 Done

@@ -21,12 +21,12 @@ foreach (new RecursiveIteratorIterator($rai) as $t) {
 }
 ?>
 --EXPECTF--
-unicode(1) "z"
+string(1) "z"
 object(stdClass)#1 (0) {
 }
-unicode(1) "q"
-unicode(1) "s"
+string(1) "q"
+string(1) "s"
 Second:
-unicode(1) "z"
-unicode(1) "q"
-unicode(1) "s"
+string(1) "z"
+string(1) "q"
+string(1) "s"

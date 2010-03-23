@@ -138,12 +138,12 @@ int(%i)
 
 -- Iteration 17 --
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -153,17 +153,17 @@ NULL
 
 -- Iteration 20 --
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: mt_rand() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: mt_rand() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 23 --

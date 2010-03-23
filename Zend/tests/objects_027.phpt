@@ -40,3 +40,5 @@ Strict Standards: call_user_func() expects parameter 1 to be a valid callback, n
 Strict Standards: Non-static method bar::show() should not be called statically in %s on line %d
 object(foo)#%d (0) {
 }
+
+

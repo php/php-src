@@ -59,79 +59,79 @@ echo "Done";
 
 **-- Offset is: -60 --**
 -- ASCII String --
-unicode(8) "2b497320"
+string(8) "2b497320"
 --Multibyte String --
-unicode(24) "e697a5e69cace8aa9ee38386"
+string(24) "e697a5e69cace8aa9ee38386"
 
 **-- Offset is: -50 --**
 -- ASCII String --
-unicode(8) "2b497320"
+string(8) "2b497320"
 --Multibyte String --
-unicode(24) "e697a5e69cace8aa9ee38386"
+string(24) "e697a5e69cace8aa9ee38386"
 
 **-- Offset is: -40 --**
 -- ASCII String --
-unicode(8) "2b497320"
+string(8) "2b497320"
 --Multibyte String --
-unicode(24) "e697a5e69cace8aa9ee38386"
+string(24) "e697a5e69cace8aa9ee38386"
 
 **-- Offset is: -30 --**
 -- ASCII String --
-unicode(8) "2b497320"
+string(8) "2b497320"
 --Multibyte String --
-unicode(24) "e697a5e69cace8aa9ee38386"
+string(24) "e697a5e69cace8aa9ee38386"
 
 **-- Offset is: -20 --**
 -- ASCII String --
-unicode(8) "49732061"
+string(8) "49732061"
 --Multibyte String --
-unicode(24) "e69cace8aa9ee38386e382ad"
+string(24) "e69cace8aa9ee38386e382ad"
 
 **-- Offset is: -10 --**
 -- ASCII String --
-unicode(8) "69736820"
+string(8) "69736820"
 --Multibyte String --
-unicode(8) "31323334"
+string(8) "31323334"
 
 **-- Offset is: 0 --**
 -- ASCII String --
-unicode(8) "2b497320"
+string(8) "2b497320"
 --Multibyte String --
-unicode(24) "e697a5e69cace8aa9ee38386"
+string(24) "e697a5e69cace8aa9ee38386"
 
 **-- Offset is: 10 --**
 -- ASCII String --
-unicode(8) "6c697368"
+string(8) "6c697368"
 --Multibyte String --
-unicode(8) "30313233"
+string(8) "30313233"
 
 **-- Offset is: 20 --**
 -- ASCII String --
-unicode(2) "67"
+string(2) "67"
 --Multibyte String --
-unicode(6) "e38082"
+string(6) "e38082"
 
 **-- Offset is: 30 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: 40 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: 50 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 
 **-- Offset is: 60 --**
 -- ASCII String --
-unicode(0) ""
+string(0) ""
 --Multibyte String --
-unicode(0) ""
+string(0) ""
 Done

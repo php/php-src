@@ -23,25 +23,25 @@ $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj, $a);
 ?>
---EXPECT--
+--EXPECTF--
 array(0) {
 }
 array(2) {
-  [u"ref"]=>
-  &unicode(10) "original.a"
-  [u"val"]=>
-  unicode(10) "original.a"
+  ["ref"]=>
+  &string(10) "original.a"
+  ["val"]=>
+  string(10) "original.a"
 }
 array(2) {
-  [u"ref"]=>
-  &unicode(11) "changed.ref"
-  [u"val"]=>
-  unicode(11) "changed.val"
+  ["ref"]=>
+  &string(11) "changed.ref"
+  ["val"]=>
+  string(11) "changed.val"
 }
 object(stdClass)#1 (2) {
-  [u"ref"]=>
-  &unicode(11) "changed.ref"
-  [u"val"]=>
-  unicode(10) "original.a"
+  ["ref"]=>
+  &string(11) "changed.ref"
+  ["val"]=>
+  string(10) "original.a"
 }
-unicode(11) "changed.ref"
+string(11) "changed.ref"

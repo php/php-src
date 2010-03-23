@@ -180,7 +180,7 @@ $var_values = array (
   b"10string"
 );
 
-// test conversion to these types
+// test conversion to these types                 
 $types = array(
   "boolean",
   "bool"
@@ -209,7 +209,7 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -217,985 +217,985 @@ echo "Done\n";
 
 -- Setting type of data to boolean --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 43 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 44 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 48 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 49 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 50 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 54 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 56 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 57 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 58 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 59 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 76 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 77 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 78 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 79 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 80 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 81 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 82 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 83 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 84 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 85 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 86 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 87 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 88 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 89 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 90 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 91 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 92 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 93 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 94 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 95 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 96 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 97 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 98 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 
 -- Setting type of data to bool --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 43 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 44 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 48 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 49 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 50 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 54 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 56 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 57 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 58 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 59 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 76 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 77 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 78 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 79 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 80 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 81 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 82 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 83 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 84 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 85 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 86 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 87 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(false)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 88 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 89 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 90 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 91 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 92 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 93 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 94 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 95 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 96 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 97 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 -- Iteration 98 --
-unicode(6) "string"
+string(6) "string"
 bool(true)
 bool(true)
-unicode(7) "boolean"
+string(7) "boolean"
 Done

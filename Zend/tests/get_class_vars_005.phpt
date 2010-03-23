@@ -28,12 +28,12 @@ array(0) {
 array(0) {
 }
 array(1) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }
 array(2) {
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"a"]=>
+  ["a"]=>
   int(1)
 }

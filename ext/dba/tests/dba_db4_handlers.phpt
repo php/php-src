@@ -42,8 +42,6 @@ foreach ($h as $key => $val) {
 <?php 
 require(dirname(__FILE__) .'/clean.inc'); 
 ?>
---XFAIL--
-Memory leak in this branch only
 --EXPECTREGEX--
 database handler: db4
 Test 1

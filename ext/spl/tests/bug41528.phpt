@@ -20,17 +20,17 @@ var_dump($classOne->a);
 ?>
 --EXPECT--
 object(ClassOne)#1 (2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }
 int(1)
 object(ClassOne)#2 (2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(0) {
   }
 }

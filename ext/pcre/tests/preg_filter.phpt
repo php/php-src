@@ -14,16 +14,16 @@ var_dump(preg_filter($pattern, $replace, $subject));
 --EXPECT--
 array(6) {
   [0]=>
-  unicode(5) "A:C:1"
+  string(5) "A:C:1"
   [1]=>
-  unicode(5) "B:C:a"
+  string(5) "B:C:a"
   [2]=>
-  unicode(3) "A:2"
+  string(3) "A:2"
   [3]=>
-  unicode(3) "B:b"
+  string(3) "B:b"
   [4]=>
-  unicode(3) "A:3"
+  string(3) "A:3"
   [7]=>
-  unicode(3) "A:4"
+  string(3) "A:4"
 }
 ===DONE===

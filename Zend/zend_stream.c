@@ -39,16 +39,14 @@ ZEND_DLIMPORT int isatty(int fd);
 static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
 	return fread(buf, 1, len, (FILE*)handle);
-}
-/* }}} */
+} /* }}} */
 
 static void zend_stream_stdio_closer(void *handle TSRMLS_DC) /* {{{ */
 {
 	if (handle && (FILE*)handle != stdin) {
 		fclose((FILE*)handle);
 	}
-}
-/* }}} */
+} /* }}} */
 
 static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
@@ -62,8 +60,7 @@ static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 		return buf.st_size;
 	}
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 static void zend_stream_unmap(zend_stream *stream TSRMLS_DC) { /* {{{ */
 #if HAVE_MMAP
@@ -126,20 +123,19 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	handle->filename = (char *)filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
-
+	
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
-}
-/* }}} */
+} /* }}} */
 
-ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
+static int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
 	char buf;
+
 	if (file_handle->handle.stream.reader(file_handle->handle.stream.handle, &buf, sizeof(buf) TSRMLS_CC)) {
 		return (int)buf;
 	}
 	return EOF;
-}
-/* }}} */
+} /* }}} */
 
 static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC) /* {{{ */
 {
@@ -166,8 +162,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 		return n;
 	}
 	return file_handle->handle.stream.reader(file_handle->handle.stream.handle, buf, len TSRMLS_CC);
-}
-/* }}} */
+} /* }}} */
 
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len TSRMLS_DC) /* {{{ */
 {
@@ -274,9 +269,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
 
-#if HAVE_MMAP
 return_mapped:
-#endif
 	file_handle->type = ZEND_HANDLE_MAPPED;
 	file_handle->handle.stream.mmap.pos        = 0;
 	file_handle->handle.stream.mmap.old_handle = file_handle->handle.stream.handle;
@@ -288,11 +281,10 @@ return_mapped:
 	*len = file_handle->handle.stream.mmap.len;
 
 	return SUCCESS;
-}
-/* }}} */
+} /* }}} */
 
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC) /* {{{ */
- {
+{
 	switch (fh->type) {
 		case ZEND_HANDLE_FD:
 			/* nothing to do */
@@ -325,7 +317,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC) /* {{{ */
 /* }}} */
 
 ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2) /* {{{ */
- {
+{
 	if (fh1->type != fh2->type) {
 		return 0;
 	}
@@ -345,13 +337,4 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 			return 0;
 	}
 	return 0;
-}
-/* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
+} /* }}} */

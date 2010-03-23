@@ -28,17 +28,17 @@ var_dump($c);
 natcasesort success!
 array(6) {
   [0]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [1]=>
-  unicode(2) "aa"
+  string(2) "aa"
   [3]=>
-  unicode(2) "bb"
+  string(2) "bb"
   [2]=>
-  unicode(2) "bb"
+  string(2) "bb"
   [5]=>
-  unicode(2) "cc"
+  string(2) "cc"
   [6]=>
-  unicode(2) "cc"
+  string(2) "cc"
 }
 Array
 (
@@ -56,7 +56,7 @@ array(6) {
   [1]=>
   int(0)
   [5]=>
-  unicode(3) "foo"
+  string(3) "foo"
   [6]=>
-  unicode(3) "bar"
+  string(3) "bar"
 }

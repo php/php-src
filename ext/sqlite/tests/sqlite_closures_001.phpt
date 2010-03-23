@@ -49,6 +49,6 @@ echo "DONE!\n";
 --EXPECT--
 array(1) {
   [0]=>
-  unicode(11) "onetwothree"
+  string(11) "onetwothree"
 }
 DONE!

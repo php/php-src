@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,9 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@php.net>                               |
-  |          Andrey Hristov <andrey@php.net>                             |
-  |          Ulf Wendel <uw@php.net>                                     |
+  | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -29,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
-/* {{{ proto bool mysqli_report(int flags) U
+/* {{{ proto bool mysqli_report(int flags)
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {

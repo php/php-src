@@ -19,7 +19,7 @@ echo "Above test directory\n";
 try {
 	$db = new SQLite3('../bad' . $file);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+	echo $e . "\n";
 }
 
 echo "Done\n";
@@ -32,5 +32,8 @@ bool(true)
 Above test directory
 
 Warning: SQLite3::__construct(): open_basedir restriction in effect. File(%s) is not within the allowed path(s): (.) in %ssqlite3_21_security.php on line %d
-open_basedir prohibits opening %s
+exception 'Exception' with message 'open_basedir prohibits opening %s' in %ssqlite3_21_security.php:%d
+Stack trace:
+#0 %ssqlite3_21_security.php(%d): SQLite3->__construct('%s')
+#1 {main}
 Done

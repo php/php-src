@@ -80,7 +80,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-int(64)
+int(32)
 
 Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
 bool(false)
@@ -102,7 +102,7 @@ bool(false)
 array(2) {
   [0]=>
   string(0) ""
-  [u"BLOB"]=>
+  ["BLOB"]=>
   string(0) ""
 }
 Done

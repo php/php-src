@@ -105,7 +105,7 @@ File permissions are => 100600
 File created in => directory specified
 -- Iteration 7 --
 
-Notice: Array to string conversion in %sp on line %d
+Warning: tempnam() expects parameter 2 to be string, array given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): %s in %s on line %d

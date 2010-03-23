@@ -49,13 +49,13 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 UPDATING results
 bool(true)
@@ -64,13 +64,13 @@ array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
 }
 array(2) {
   [0]=>
   int(%d)
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
 }
 Closing database
 bool(true)

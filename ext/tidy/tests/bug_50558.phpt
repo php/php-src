@@ -21,8 +21,8 @@ doSomething($o);
 --EXPECTF--
 bool(true)
 object(MyTidy)#%d (%d) {
-  [%c"errorBuffer"]=>
+  ["errorBuffer"]=>
   NULL
-  [%c"value"]=>
+  ["value"]=>
   NULL
 }

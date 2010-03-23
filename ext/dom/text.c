@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@ const zend_function_entry php_dom_text_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMText::__construct([string value]) U */
+/* {{{ proto void DOMText::__construct([string value]); */
 PHP_METHOD(domtext, __construct)
 {
 
@@ -73,12 +73,12 @@ PHP_METHOD(domtext, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s&", &id, dom_text_class_entry, &value, &value_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s", &id, dom_text_class_entry, &value, &value_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
-	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 	nodep = xmlNewText((xmlChar *) value);
 
 	if (!nodep) {
@@ -127,7 +127,7 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (wholetext != NULL) {
-		ZVAL_XML_STRING(*retval, wholetext, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, wholetext, 1);
 		xmlFree(wholetext);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
@@ -138,7 +138,7 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto DOMText dom_text_split_text(int offset) U
+/* {{{ proto DOMText dom_text_split_text(int offset);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since: 
 */
@@ -200,7 +200,7 @@ PHP_FUNCTION(dom_text_split_text)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto boolean dom_text_is_whitespace_in_element_content() U
+/* {{{ proto boolean dom_text_is_whitespace_in_element_content();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
@@ -223,7 +223,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 
-/* {{{ proto DOMText dom_text_replace_whole_text(string content) U
+/* {{{ proto DOMText dom_text_replace_whole_text(string content);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
 Since: DOM Level 3
 */

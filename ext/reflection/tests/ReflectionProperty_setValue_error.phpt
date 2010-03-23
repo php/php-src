@@ -82,20 +82,19 @@ NULL
 
 Static property / too few args:
 NULL
-unicode(11) "A new value"
+string(11) "A new value"
 
 Warning: ReflectionProperty::setValue() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
-unicode(11) "A new value"
+string(11) "A new value"
 
 Static property / wrong type of arg:
 NULL
-unicode(17) "Another new value"
+string(17) "Another new value"
 
 Protected property:
 Cannot access non-public member TestClass::prot
 
 Instance without property:
 NULL
-unicode(8) "NewValue"
-  
+string(8) "NewValue"

@@ -18,7 +18,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 
 echo "*** Testing vsprintf() : octal formats with octal values ***\n";
 
-
 // defining array of octal formats
 $formats = array(
   "%o",
@@ -57,30 +56,30 @@ foreach($formats as $format) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : octal formats with octal values ***
 
 -- Iteration 1 --
-unicode(1) "0"
+string(1) "0"
 
 -- Iteration 2 --
-unicode(14) "37777777777 1 "
+string(14) "37777777777 1 "
 
 -- Iteration 3 --
-unicode(38) "20000000000 o, 17777777777 20000000001"
+string(38) "20000000000 o, 17777777777 20000000001"
 
 -- Iteration 4 --
-unicode(38) "                      37776543211 0000"
+string(38) "                      37776543211 0000"
 
 -- Iteration 5 --
-unicode(32) "111 2222 37777444445 37733333334"
+string(32) "111 2222 37777444445 37733333334"
 
 -- Iteration 6 --
-unicode(17) "11073 7653 123 12"
+string(17) "11073 7653 123 12"
 
 -- Iteration 7 --
-unicode(6) "% %o o"
+string(6) "% %o o"
 
 -- Iteration 8 --
-unicode(7) "1 2 3 4"
+string(7) "1 2 3 4"
 Done

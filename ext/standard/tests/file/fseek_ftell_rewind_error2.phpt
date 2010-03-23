@@ -56,40 +56,40 @@ echo "Done\n";
 -- Testing ftell() with zero argument --
 
 Warning: ftell() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing ftell() with more than expected number of arguments --
 
 Warning: ftell() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 -- Testing ftell() with invalid arguments --
 -- Iteration 1 --
 
-Warning: ftell() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: ftell() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: ftell() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: ftell() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: ftell() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: ftell() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: ftell() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing ftell with closed/unset file handle --
 Warning: ftell(): %d is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: ftell() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 Done

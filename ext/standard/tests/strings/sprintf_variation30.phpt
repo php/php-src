@@ -22,7 +22,7 @@ $resource_values = array (
 // array of octal formats
 $octal_formats = array( 
   "%o", "%ho", "%lo", 
-  "%Lo", " %o", "%o ",
+  "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
 );
@@ -47,32 +47,32 @@ echo "Done";
 *** Testing sprintf() : octal formats with resource values ***
 
 -- Iteration 1 --
-unicode(%d) "%d"
-unicode(1) "o"
-unicode(%d) "%d"
-unicode(1) "o"
-unicode(%d) " %d"
-unicode(%d) "%d "
-unicode(%d) "	%d"
-unicode(%d) "
+string(%d) "%d"
+string(1) "o"
+string(%d) "%d"
+string(1) "o"
+string(%d) " %d"
+string(%d) "%d "
+string(%d) "	%d"
+string(%d) "
 %d"
-unicode(%d) "%s%d"
-unicode(%d) "%s%d"
-unicode(%d) "0-7]"
-unicode(1) "o"
+string(4) "%s%d"
+string(30) "%s%d"
+string(4) "0-7]"
+string(1) "o"
 
 -- Iteration 2 --
-unicode(%d) "%d"
-unicode(1) "o"
-unicode(%d) "%d"
-unicode(1) "o"
-unicode(%d) " %d"
-unicode(%d) "%d "
-unicode(%d) "	%d"
-unicode(%d) "
+string(%d) "%d"
+string(1) "o"
+string(%d) "%d"
+string(1) "o"
+string(%d) " %d"
+string(%d) "%d "
+string(%d) "	%d"
+string(%d) "
 %d"
-unicode(%d) "%s%d"
-unicode(%d) "%s%d"
-unicode(%d) "0-7]"
-unicode(1) "o"
+string(4) "%s%d"
+string(30) "%s%d"
+string(4) "0-7]"
+string(1) "o"
 Done

@@ -33,7 +33,7 @@ var_dump( array_filter($input, create_function('$input', null) ) );
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_filter() : usage variations - Anonymous callback functions ***
 Anonymous callback function with regular parameter and statement
 array(3) {
@@ -51,7 +51,7 @@ array(4) {
   [2]=>
   int(-1)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
 }
@@ -70,7 +70,7 @@ array(8) {
   [5]=>
   int(1000)
   [6]=>
-  unicode(5) "Hello"
+  string(5) "Hello"
   [7]=>
   NULL
 }

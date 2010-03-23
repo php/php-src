@@ -24,9 +24,9 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : basic functionality - using bool format ***
-unicode(1) "1"
-unicode(3) "1 0"
-unicode(5) "1 0 1"
+string(1) "1"
+string(3) "1 0"
+string(5) "1 0 1"
 Done

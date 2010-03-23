@@ -33,7 +33,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fprintf() for unsigned integers ***
 
 0

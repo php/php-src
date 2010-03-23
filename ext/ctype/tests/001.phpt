@@ -1,7 +1,7 @@
 --TEST--
 ctype on integers
 --SKIPIF--
-<?php if (!extension_loaded("ctype")) print "skip"; ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php 
   setlocale(LC_ALL,"C"); 
@@ -25,8 +25,7 @@ ctype_test_001("ctype_punct");
 ctype_test_001("ctype_space");
 ctype_test_001("ctype_xdigit");
 ?>
---EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s001.php on line %d
+--EXPECT--
 ctype_lower 26
 ctype_upper 26
 ctype_alpha 52

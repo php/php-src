@@ -5,6 +5,7 @@ session object serialization
 --INI--
 session.use_cookies=0
 session.cache_limiter=
+register_globals=1
 session.serialize_handler=php
 session.save_handler=files
 --FILE--
@@ -22,12 +23,18 @@ $baz->method();
 
 $arr[3] = new foo;
 $arr[3]->method();
-session_start();
-$_SESSION["baz"] = $baz;
-$_SESSION["arr"] = $arr;
-var_dump(session_encode());
+
+session_register("baz");
+session_register("arr");
+
+print session_encode()."\n";
+
 session_destroy();
-?>
---EXPECT--
-unicode(126) "baz|O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";U:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{U:3:"bar";U:2:"ok";U:3:"yes";U:4:"done";}}"
+--EXPECTF--
+Warning: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+
+Deprecated: Function session_register() is deprecated in %s on line %d
+baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";s:4:"done";}}
 

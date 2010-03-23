@@ -20,10 +20,11 @@ var_dump($methodInfo->getDeclaringClass());
 ?> 
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(1) "A"
+  ["name"]=>
+  string(1) "A"
 }
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(1) "B"
+  ["name"]=>
+  string(1) "B"
 }
+

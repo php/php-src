@@ -36,78 +36,78 @@ foreach($inputs as $key =>$value) {
 
 --hexadcimal 0x5--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(5)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(30)
-  [u"hours"]=>
+  ["hours"]=>
   int(5)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(5)
 }
 
 --hexadcimal 0xCAFE--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(6)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(56)
-  [u"hours"]=>
+  ["hours"]=>
   int(19)
-  [u"mday"]=>
+  ["mday"]=>
   int(1)
-  [u"wday"]=>
+  ["wday"]=>
   int(4)
-  [u"mon"]=>
+  ["mon"]=>
   int(1)
-  [u"year"]=>
+  ["year"]=>
   int(1970)
-  [u"yday"]=>
+  ["yday"]=>
   int(0)
-  [u"weekday"]=>
-  unicode(8) "Thursday"
-  [u"month"]=>
-  unicode(7) "January"
+  ["weekday"]=>
+  string(8) "Thursday"
+  ["month"]=>
+  string(7) "January"
   [0]=>
   int(51966)
 }
 
 --octal -0xCAFE--
 array(11) {
-  [u"seconds"]=>
+  ["seconds"]=>
   int(54)
-  [u"minutes"]=>
+  ["minutes"]=>
   int(3)
-  [u"hours"]=>
+  ["hours"]=>
   int(15)
-  [u"mday"]=>
+  ["mday"]=>
   int(31)
-  [u"wday"]=>
+  ["wday"]=>
   int(3)
-  [u"mon"]=>
+  ["mon"]=>
   int(12)
-  [u"year"]=>
+  ["year"]=>
   int(1969)
-  [u"yday"]=>
+  ["yday"]=>
   int(364)
-  [u"weekday"]=>
-  unicode(9) "Wednesday"
-  [u"month"]=>
-  unicode(8) "December"
+  ["weekday"]=>
+  string(9) "Wednesday"
+  ["month"]=>
+  string(8) "December"
   [0]=>
   int(-51966)
 }

@@ -17,6 +17,6 @@ Ensure the ReflectionProperty constructor triggers autoload.
       echo $e->getMessage();
   }
 ?>
---EXPECT--
-In autoload: unicode(6) "UndefC"
+--EXPECTF--
+In autoload: string(6) "UndefC"
 Class UndefC does not exist

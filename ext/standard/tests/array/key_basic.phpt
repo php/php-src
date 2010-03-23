@@ -40,7 +40,7 @@ int(0)
 int(99)
 
 -- End Position: --
-unicode(5) "three"
+string(5) "three"
 
 -- Past end of the array --
 NULL

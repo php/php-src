@@ -14,17 +14,14 @@ echo "*** Test strncasecmp() function: with null terminated strings and binary i
 /* A binary function should not expect a null terminated string, and it should treat input as a raw stream of data */
 $str1 = "Hello\0world";
 $str2 = "Hello\0";
-$str3 = b"Hello\0";
-$str4 = "Hello,".chr(0)."world";
-var_dump( strncasecmp($str1, $str2, 12) ); 
-var_dump( strncasecmp($str2, $str3, 12) );
-var_dump( strncasecmp($str4, "Hello,world", 12) );
+$str3 = "Hello,".chr(0)."world";
+var_dump( strncasecmp($str1, $str2, 12) );
+var_dump( strncasecmp($str3, "Hello,world", 12) );
 
 echo "*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Test strncasecmp() function: with null terminated strings and binary inputs ***
-int(1)
-int(0)
-int(-1)
+int(5)
+int(-119)
 *** Done ***

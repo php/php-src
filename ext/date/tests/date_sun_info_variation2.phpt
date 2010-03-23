@@ -83,342 +83,342 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 2 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894254)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937695)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892911)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939038)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891344)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940606)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889771)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942179)
 }
 
 -- Iteration 3 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   bool(true)
-  [u"sunset"]=>
+  ["sunset"]=>
   bool(true)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   bool(true)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   bool(true)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165883331)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165948619)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165890260)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165941690)
 }
 
 -- Iteration 4 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894085)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937865)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165895431)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165936519)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165896998)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165934952)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165898564)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165933386)
 }
 
 -- Iteration 5 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165895237)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165936713)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165893873)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165938077)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165892293)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165939656)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165890721)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165941229)
 }
 
 -- Iteration 6 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165893058)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165938891)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165891680)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165940269)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165890055)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165941895)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165888402)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165943548)
 }
 
 -- Iteration 7 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 8 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 9 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894203)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937747)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892860)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939090)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891292)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940658)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889717)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942233)
 }
 
 -- Iteration 10 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 11 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 12 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894254)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937695)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892911)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939038)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891344)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940606)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889771)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942179)
 }
 
 -- Iteration 13 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 14 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894254)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937695)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892911)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939038)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891344)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940606)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889771)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942179)
 }
 
 -- Iteration 15 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
@@ -428,60 +428,60 @@ bool(false)
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 2 to be double, Unicode string given in %s on line %d
+Warning: date_sun_info() expects parameter 2 to be double, string given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 
 -- Iteration 23 --
 array(9) {
-  [u"sunrise"]=>
+  ["sunrise"]=>
   int(1165894152)
-  [u"sunset"]=>
+  ["sunset"]=>
   int(1165937798)
-  [u"transit"]=>
+  ["transit"]=>
   int(1165915975)
-  [u"civil_twilight_begin"]=>
+  ["civil_twilight_begin"]=>
   int(1165892809)
-  [u"civil_twilight_end"]=>
+  ["civil_twilight_end"]=>
   int(1165939141)
-  [u"nautical_twilight_begin"]=>
+  ["nautical_twilight_begin"]=>
   int(1165891239)
-  [u"nautical_twilight_end"]=>
+  ["nautical_twilight_end"]=>
   int(1165940710)
-  [u"astronomical_twilight_begin"]=>
+  ["astronomical_twilight_begin"]=>
   int(1165889663)
-  [u"astronomical_twilight_end"]=>
+  ["astronomical_twilight_end"]=>
   int(1165942287)
 }
 

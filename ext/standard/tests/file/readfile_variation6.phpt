@@ -1,7 +1,5 @@
 --TEST--
 Test readfile() function : variation - test include path
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--

@@ -54,18 +54,18 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(5) "array"
-unicode(7) "unicode"
-unicode(5) "array"
-unicode(7) "integer"
-unicode(6) "double"
-unicode(4) "NULL"
-unicode(7) "boolean"
-unicode(7) "unicode"
-unicode(12) "unknown type"
-unicode(8) "resource"
-unicode(6) "object"
+--EXPECTF--	
+string(5) "array"
+string(6) "string"
+string(5) "array"
+string(7) "integer"
+string(6) "double"
+string(4) "NULL"
+string(7) "boolean"
+string(6) "string"
+string(12) "unknown type"
+string(8) "resource"
+string(6) "object"
 bool(true)
 NULL
 bool(true)
@@ -105,10 +105,10 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-int(%d)
+int(5)
 bool(true)
-int(%d)
-unicode(54) "Object of class stdClass could not be converted to int"
+int(6)
+string(54) "Object of class stdClass could not be converted to int"
 bool(true)
 int(%d)
 bool(true)
@@ -128,10 +128,10 @@ float(0)
 bool(true)
 float(0)
 bool(true)
-float(%d)
+float(5)
 bool(true)
-float(%d)
-unicode(57) "Object of class stdClass could not be converted to double"
+float(6)
+string(57) "Object of class stdClass could not be converted to double"
 bool(true)
 float(%d)
 bool(true)
@@ -156,7 +156,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 array(3) {
   [0]=>
@@ -166,10 +166,10 @@ array(3) {
   [2]=>
   int(3)
 }
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
-unicode(14) "another string"
-unicode(42) "settype(): Cannot convert to resource type"
+string(14) "another string"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 array(3) {
   [0]=>
@@ -179,28 +179,28 @@ array(3) {
   [2]=>
   int(4)
 }
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 int(1)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 float(2)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 NULL
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 bool(false)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
-unicode(11) "some string"
-unicode(42) "settype(): Cannot convert to resource type"
+string(11) "some string"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 resource(%d) of type (Unknown)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 resource(%d) of type (stream)
-unicode(42) "settype(): Cannot convert to resource type"
+string(42) "settype(): Cannot convert to resource type"
 bool(false)
 object(stdClass)#%d (0) {
 }
@@ -216,7 +216,7 @@ array(3) {
 bool(true)
 array(1) {
   [0]=>
-  unicode(14) "another string"
+  string(14) "another string"
 }
 bool(true)
 array(3) {
@@ -248,7 +248,7 @@ array(1) {
 bool(true)
 array(1) {
   [0]=>
-  unicode(11) "some string"
+  string(11) "some string"
 }
 bool(true)
 array(1) {
@@ -274,8 +274,8 @@ object(stdClass)#%d (3) {
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
-  unicode(14) "another string"
+  ["scalar"]=>
+  string(14) "another string"
 }
 bool(true)
 object(stdClass)#%d (3) {
@@ -288,12 +288,12 @@ object(stdClass)#%d (3) {
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   int(1)
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   float(2)
 }
 bool(true)
@@ -301,51 +301,51 @@ object(stdClass)#%d (0) {
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   bool(false)
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
-  unicode(11) "some string"
+  ["scalar"]=>
+  string(11) "some string"
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   resource(%d) of type (Unknown)
 }
 bool(true)
 object(stdClass)#%d (1) {
-  [u"scalar"]=>
+  ["scalar"]=>
   resource(%d) of type (stream)
 }
 bool(true)
 object(stdClass)#%d (0) {
 }
-unicode(26) "Array to string conversion"
+string(26) "Array to string conversion"
 bool(true)
-unicode(5) "Array"
+string(5) "Array"
 bool(true)
-unicode(14) "another string"
-unicode(26) "Array to string conversion"
+string(14) "another string"
+string(26) "Array to string conversion"
 bool(true)
-unicode(5) "Array"
+string(5) "Array"
 bool(true)
-unicode(1) "1"
+string(1) "1"
 bool(true)
-unicode(1) "2"
+string(1) "2"
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
-unicode(0) ""
+string(0) ""
 bool(true)
-unicode(11) "some string"
+string(11) "some string"
 bool(true)
-unicode(14) "Resource id #%d"
+string(14) "Resource id #%d"
 bool(true)
-unicode(14) "Resource id #%d"
-unicode(65) "Object of class stdClass could not be converted to Unicode string"
-unicode(45) "Object of class stdClass to string conversion"
+string(14) "Resource id #%d"
+string(57) "Object of class stdClass could not be converted to string"
+string(45) "Object of class stdClass to string conversion"
 bool(true)
-unicode(6) "Object"
+string(6) "Object"
 Done

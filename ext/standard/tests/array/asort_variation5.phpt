@@ -1,5 +1,5 @@
 --TEST--
-Test asort() function : usage variations - sort strings  
+Test asort() function : usage variations - sort strings 
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $asort_flags] )
@@ -10,7 +10,7 @@ Test asort() function : usage variations - sort strings
 
 /*
  * testing asort() by providing different string arrays for $array argument with following flag values
- *  flag value as default
+ *  flag value as defualt
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */
@@ -57,7 +57,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying various string arrays --
@@ -66,177 +66,177 @@ echo "Done\n";
 - With default sort_flag -
 bool(true)
 array(12) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u"	"]=>
-  unicode(1) "	"
-  [u"
+  ["	"]=>
+  string(1) "	"
+  ["
 "]=>
-  unicode(1) "
+  string(1) "
 "
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u"\a"]=>
-  unicode(2) "\a"
-  [u"\cx"]=>
-  unicode(3) "\cx"
-  [u"\ddd"]=>
-  unicode(4) "\ddd"
-  [u"\e"]=>
-  unicode(2) "\e"
-  [u"\xhh"]=>
-  unicode(4) "\xhh"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\e"]=>
+  string(2) "\e"
+  ["\xhh"]=>
+  string(4) "\xhh"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(12) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u"	"]=>
-  unicode(1) "	"
-  [u"
+  ["	"]=>
+  string(1) "	"
+  ["
 "]=>
-  unicode(1) "
+  string(1) "
 "
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u"\a"]=>
-  unicode(2) "\a"
-  [u"\cx"]=>
-  unicode(3) "\cx"
-  [u"\ddd"]=>
-  unicode(4) "\ddd"
-  [u"\e"]=>
-  unicode(2) "\e"
-  [u"\xhh"]=>
-  unicode(4) "\xhh"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\e"]=>
+  string(2) "\e"
+  ["\xhh"]=>
+  string(4) "\xhh"
 }
 - Sort_flag = SORT_STRING -
 bool(true)
 array(12) {
-  [u"null"]=>
+  ["null"]=>
   NULL
-  [u"NULL"]=>
+  ["NULL"]=>
   NULL
-  [u"	"]=>
-  unicode(1) "	"
-  [u"
+  ["	"]=>
+  string(1) "	"
+  ["
 "]=>
-  unicode(1) "
+  string(1) "
 "
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u""]=>
-  unicode(1) ""
-  [u"\a"]=>
-  unicode(2) "\a"
-  [u"\cx"]=>
-  unicode(3) "\cx"
-  [u"\ddd"]=>
-  unicode(4) "\ddd"
-  [u"\e"]=>
-  unicode(2) "\e"
-  [u"\xhh"]=>
-  unicode(4) "\xhh"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  ["\a"]=>
+  string(2) "\a"
+  ["\cx"]=>
+  string(3) "\cx"
+  ["\ddd"]=>
+  string(4) "\ddd"
+  ["\e"]=>
+  string(2) "\e"
+  ["\xhh"]=>
+  string(4) "\xhh"
 }
 
 -- Iteration 2 --
 - With default sort_flag -
 bool(true)
 array(12) {
-  [u"B"]=>
-  unicode(6) "BANANA"
-  [u"O"]=>
-  unicode(6) "Orange"
-  [u"T"]=>
-  unicode(4) "TTTT"
-  [u"Te"]=>
-  unicode(4) "Test"
-  [u"X"]=>
-  unicode(1) "X"
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemoN"
-  [u"o"]=>
-  unicode(6) "oraNGe"
-  [u"t"]=>
-  unicode(3) "ttt"
-  [u"w"]=>
-  unicode(2) "ww"
-  [u"x"]=>
-  unicode(1) "x"
+  ["B"]=>
+  string(6) "BANANA"
+  ["O"]=>
+  string(6) "Orange"
+  ["T"]=>
+  string(4) "TTTT"
+  ["Te"]=>
+  string(4) "Test"
+  ["X"]=>
+  string(1) "X"
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemoN"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["t"]=>
+  string(3) "ttt"
+  ["w"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(12) {
-  [u"B"]=>
-  unicode(6) "BANANA"
-  [u"O"]=>
-  unicode(6) "Orange"
-  [u"T"]=>
-  unicode(4) "TTTT"
-  [u"Te"]=>
-  unicode(4) "Test"
-  [u"X"]=>
-  unicode(1) "X"
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemoN"
-  [u"o"]=>
-  unicode(6) "oraNGe"
-  [u"t"]=>
-  unicode(3) "ttt"
-  [u"w"]=>
-  unicode(2) "ww"
-  [u"x"]=>
-  unicode(1) "x"
+  ["B"]=>
+  string(6) "BANANA"
+  ["O"]=>
+  string(6) "Orange"
+  ["T"]=>
+  string(4) "TTTT"
+  ["Te"]=>
+  string(4) "Test"
+  ["X"]=>
+  string(1) "X"
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemoN"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["t"]=>
+  string(3) "ttt"
+  ["w"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
 }
 - Sort_flag = SORT_STRING -
 bool(true)
 array(12) {
-  [u"B"]=>
-  unicode(6) "BANANA"
-  [u"O"]=>
-  unicode(6) "Orange"
-  [u"T"]=>
-  unicode(4) "TTTT"
-  [u"Te"]=>
-  unicode(4) "Test"
-  [u"X"]=>
-  unicode(1) "X"
-  [u"a"]=>
-  unicode(5) "apple"
-  [u"b"]=>
-  unicode(6) "banana"
-  [u"l"]=>
-  unicode(5) "lemoN"
-  [u"o"]=>
-  unicode(6) "oraNGe"
-  [u"t"]=>
-  unicode(3) "ttt"
-  [u"w"]=>
-  unicode(2) "ww"
-  [u"x"]=>
-  unicode(1) "x"
+  ["B"]=>
+  string(6) "BANANA"
+  ["O"]=>
+  string(6) "Orange"
+  ["T"]=>
+  string(4) "TTTT"
+  ["Te"]=>
+  string(4) "Test"
+  ["X"]=>
+  string(1) "X"
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["l"]=>
+  string(5) "lemoN"
+  ["o"]=>
+  string(6) "oraNGe"
+  ["t"]=>
+  string(3) "ttt"
+  ["w"]=>
+  string(2) "ww"
+  ["x"]=>
+  string(1) "x"
 }
 Done

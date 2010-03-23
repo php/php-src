@@ -1,7 +1,5 @@
 --TEST--
 Check for exif_read_data, baseline JPEG with no IFD, EXIF, GPS or Interoperability data in Intel byte-order.
---CREDIT--
-Eric Stewart <ericleestewart@gmail.com>
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
@@ -13,28 +11,29 @@ var_dump(exif_read_data(dirname(__FILE__).'/image007.jpg'));
 ?>
 --EXPECTF--
 array(7) {
-  [u"FileName"]=>
-  unicode(12) "image007.jpg"
-  [u"FileDateTime"]=>
+  ["FileName"]=>
+  string(12) "image007.jpg"
+  ["FileDateTime"]=>
   int(%d)
-  [u"FileSize"]=>
+  ["FileSize"]=>
   int(%d)
-  [u"FileType"]=>
+  ["FileType"]=>
   int(2)
-  [u"MimeType"]=>
-  unicode(10) "image/jpeg"
-  [u"SectionsFound"]=>
-  unicode(0) ""
-  [u"COMPUTED"]=>
+  ["MimeType"]=>
+  string(10) "image/jpeg"
+  ["SectionsFound"]=>
+  string(0) ""
+  ["COMPUTED"]=>
   array(4) {
-    [u"html"]=>
-    unicode(20) "width="1" height="1""
-    [u"Height"]=>
+    ["html"]=>
+    string(20) "width="1" height="1""
+    ["Height"]=>
     int(1)
-    [u"Width"]=>
+    ["Width"]=>
     int(1)
-    [u"IsColor"]=>
+    ["IsColor"]=>
     int(1)
   }
 }
-
+--CREDIT--
+Eric Stewart <ericleestewart@gmail.com>

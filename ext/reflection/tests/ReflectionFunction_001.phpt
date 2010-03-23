@@ -38,27 +38,27 @@ dumpFuncInfo('extract');
 
 ?>
 --EXPECT--
-unicode(3) "foo"
+string(3) "foo"
 bool(false)
 bool(true)
 int(6)
 int(11)
 array(3) {
-  [u"c"]=>
+  ["c"]=>
   NULL
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
-  unicode(5) "hello"
+  ["b"]=>
+  string(5) "hello"
 }
-unicode(3) "bar"
+string(3) "bar"
 bool(false)
 bool(true)
 int(16)
 int(16)
 array(0) {
 }
-unicode(7) "extract"
+string(7) "extract"
 bool(true)
 bool(false)
 bool(false)

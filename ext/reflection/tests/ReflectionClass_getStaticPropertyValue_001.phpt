@@ -50,17 +50,17 @@ try {
 ?>
 --EXPECTF--
 Retrieving static values from A:
-unicode(13) "default value"
-unicode(16) "original private"
-unicode(13) "default value"
-unicode(18) "original protected"
-unicode(15) "original public"
+string(13) "default value"
+string(16) "original private"
+string(13) "default value"
+string(18) "original protected"
+string(15) "original public"
 
 Retrieving static values from B:
-unicode(16) "original private"
-unicode(15) "changed private"
-unicode(17) "changed protected"
-unicode(14) "changed public"
+string(16) "original private"
+string(15) "changed private"
+string(17) "changed protected"
+string(14) "changed public"
 
 Retrieving non-existent values from A with no default value:
 Class A does not have a property named protectedOverridden

@@ -27,9 +27,9 @@ var_dump(next($array));
 --EXPECTF--
 *** Testing next() : basic functionality ***
 0 => zero
-unicode(3) "one"
+string(3) "one"
 1 => one
-unicode(3) "two"
+string(3) "two"
 2 => two
 bool(false)
 ===DONE===

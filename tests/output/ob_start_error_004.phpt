@@ -15,6 +15,4 @@ var_dump(ob_start(array($c, 'f')));
 echo "done"
 ?>
 --EXPECTF--
-Notice: ob_start(): failed to create buffer in %s on line 11
-bool(false)
-done
+Catchable fatal error: Object of class C could not be converted to string in %s on line 11

@@ -32,10 +32,10 @@ $smallstring = "A small string to compress\n";
 // Compressing a big string
 for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
-    $output = gzencode(b"$data", $i);
+    $output = gzencode($data, $i);
     
     // Clear OS byte before encode 
-	$output[9] = b"\x00";
+	$output[9] = "\x00";
 	
     var_dump(md5($output));
 }
@@ -43,73 +43,60 @@ for($i = -1; $i < 10; $i++) {
 // Compressing a smaller string
 for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
-    $output = gzencode(b"$smallstring", $i);
+    $output = gzencode($smallstring, $i);
     
     // Clear OS byte before encode 
-	$output[9] = b"\x00";
+	$output[9] = "\x00";
 	
     var_dump(md5($output));
 }
-
-// Calling gzencode() with mandatory arguments
-echo "\n-- Testing with no specified compression level --\n";
-var_dump(bin2hex(gzencode(b"$smallstring")));
-
-echo "\n-- Testing gzencode with mode specified --\n";
-var_dump(bin2hex(gzencode(b"$smallstring", -1, FORCE_GZIP)));
 
 ?>
 ===Done===
 --EXPECTF--
 *** Testing gzencode() : basic functionality ***
 -- Compression level -1 --
-unicode(32) "d9ede02415ce91d21e5a94274e2b9c42"
+string(32) "d9ede02415ce91d21e5a94274e2b9c42"
 -- Compression level 0 --
-unicode(32) "bbf32d5508e5f1f4e6d42790489dae15"
+string(32) "67aaf60426bb2cbd86d7fe530cb12306"
 -- Compression level 1 --
-unicode(32) "0bfaaa7a5a57f8fb533074fca6c85eeb"
+string(32) "bce9c439cf767c1988ff4881b287d1ce"
 -- Compression level 2 --
-unicode(32) "7ddbfed63a76c42808722b66f1c133fc"
+string(32) "7ddbfed63a76c42808722b66f1c133fc"
 -- Compression level 3 --
-unicode(32) "ca2b85d194dfa2a4e8a162b646c99265"
+string(32) "ca2b85d194dfa2a4e8a162b646c99265"
 -- Compression level 4 --
-unicode(32) "cfe28033eaf260bc33ddc04b53d3ba39"
+string(32) "cfe28033eaf260bc33ddc04b53d3ba39"
 -- Compression level 5 --
-unicode(32) "ae357fada2b515422f8bea0aa3bcc48f"
+string(32) "ae357fada2b515422f8bea0aa3bcc48f"
 -- Compression level 6 --
-unicode(32) "d9ede02415ce91d21e5a94274e2b9c42"
+string(32) "d9ede02415ce91d21e5a94274e2b9c42"
 -- Compression level 7 --
-unicode(32) "d9ede02415ce91d21e5a94274e2b9c42"
+string(32) "d9ede02415ce91d21e5a94274e2b9c42"
 -- Compression level 8 --
-unicode(32) "d9ede02415ce91d21e5a94274e2b9c42"
+string(32) "d9ede02415ce91d21e5a94274e2b9c42"
 -- Compression level 9 --
-unicode(32) "0f220a09e9895bcb3a1308d2bc99cfdf"
+string(32) "d9ede02415ce91d21e5a94274e2b9c42"
 -- Compression level -1 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 0 --
-unicode(32) "9c5005db88490d6fe102ea2c233b2872"
+string(32) "36220d650930849b67e8e0622f9bf270"
 -- Compression level 1 --
-unicode(32) "d24ff7c4c20cef69b9c3abd603368db9"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 2 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 3 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 4 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 5 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 6 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 7 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 8 --
-unicode(32) "f77bd31e1e4dd11d12828fb661a08010"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 -- Compression level 9 --
-unicode(32) "8849e9a1543c04b3f882b5ce20839ed2"
-
--- Testing with no specified compression level --
-unicode(94) "1f8b08000000000000%c%c735428ce4dccc951282e29cacc4b5728c95748cecf2d284a2d2ee60200edc4e40b1b000000"
-
--- Testing gzencode with mode specified --
-unicode(94) "1f8b08000000000000%c%c735428ce4dccc951282e29cacc4b5728c95748cecf2d284a2d2ee60200edc4e40b1b000000"
+string(32) "f77bd31e1e4dd11d12828fb661a08010"
 ===Done===

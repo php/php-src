@@ -5,6 +5,7 @@ Test fgets() function : usage variations - read when file pointer at EOF
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
+?>
 --FILE--
 <?php
 /*
@@ -60,7 +61,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --

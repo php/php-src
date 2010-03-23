@@ -30,11 +30,11 @@ $x->d->e[0]->f = 2;
 
 ?>
 --EXPECT--
-unicode(1) "a"
+string(1) "a"
 int(1)
-unicode(1) "b"
-unicode(1) "c"
+string(1) "b"
+string(1) "c"
 int(1)
-unicode(1) "d"
-unicode(1) "f"
+string(1) "d"
+string(1) "f"
 int(2)

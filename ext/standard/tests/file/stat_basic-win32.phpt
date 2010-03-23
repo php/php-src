@@ -103,31 +103,31 @@ array(26) {
   int(-1)
   [12]=>
   int(-1)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(0)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(0)
-  [u"gid"]=>
+  ["gid"]=>
   int(0)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(-1)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(-1)
 }
 array(26) {
@@ -157,31 +157,31 @@ array(26) {
   int(-1)
   [12]=>
   int(-1)
-  [u"dev"]=>
+  ["dev"]=>
   int(%d)
-  [u"ino"]=>
+  ["ino"]=>
   int(%d)
-  [u"mode"]=>
+  ["mode"]=>
   int(%d)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%d)
-  [u"uid"]=>
+  ["uid"]=>
   int(%d)
-  [u"gid"]=>
+  ["gid"]=>
   int(%d)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%d)
-  [u"size"]=>
+  ["size"]=>
   int(%d)
-  [u"atime"]=>
+  ["atime"]=>
   int(%d)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%d)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%d)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(-1)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(-1)
 }
 bool(true)
@@ -189,3 +189,4 @@ bool(true)
 bool(true)
 
 ---Done---
+

@@ -10,13 +10,13 @@ $o['plop'] = $o;
 var_dump($o);
 --EXPECTF--
 object(AO)#1 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    [u"plop"]=>
+    ["plop"]=>
     object(AO)#1 (1) {
-      [u"storage":u"ArrayObject":private]=>
+      ["storage":"ArrayObject":private]=>
       array(1) {
-        [u"plop"]=>
+        ["plop"]=>
         *RECURSION*
       }
     }

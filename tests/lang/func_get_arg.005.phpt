@@ -15,5 +15,5 @@ $ref =& $a;
 refVal($a);
 ?>
 --EXPECTF--
-unicode(10) "original.a"
-unicode(10) "original.a"
+string(10) "original.a"
+string(10) "original.a"

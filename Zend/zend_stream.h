@@ -13,6 +13,9 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Wez Furlong <wez@thebrainroom.com>                          |
+   |          Scott MacVicar <scottmac@php.net>                           |
+   |          Nuno Lopes <nlopess@php.net>                                |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -24,7 +27,6 @@
 /* Lightweight stream implementation for the ZE scanners.
  * These functions are private to the engine.
  * */
-
 typedef size_t (*zend_stream_fsizer_t)(void* handle TSRMLS_DC);
 typedef size_t (*zend_stream_reader_t)(void* handle, char *buf, size_t len TSRMLS_DC);
 typedef void   (*zend_stream_closer_t)(void* handle TSRMLS_DC);

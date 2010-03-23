@@ -71,19 +71,19 @@ ut_run();
 loc_range:de-de 
 lang_tags: de-DEVA,de-DE-1996,de-DE,zh_Hans,de-CH-1996,sl_IT,sl_IT_nedis-a-kirti-x-xyz,sl_IT_rozaj,sl_IT_NEDIS_ROJAZ_1901,i-enochian,sgn-CH-de,art-lojban,i-lux,art-lojban,jbo,en_sl_IT,zh-Hant-CN-x-prv1-prv2
 
-lookup result:de_de
+lookup result:de-DE
 Canonical lookup result:de_de
 --------------
 loc_range:sl_IT 
 lang_tags: de-DEVA,de-DE-1996,de-DE,zh_Hans,de-CH-1996,sl_IT,sl_IT_nedis-a-kirti-x-xyz,sl_IT_rozaj,sl_IT_NEDIS_ROJAZ_1901,i-enochian,sgn-CH-de,art-lojban,i-lux,art-lojban,jbo,en_sl_IT,zh-Hant-CN-x-prv1-prv2
 
-lookup result:sl_it
+lookup result:sl_IT
 Canonical lookup result:sl_it
 --------------
 loc_range:sl_IT_Nedis 
 lang_tags: de-DEVA,de-DE-1996,de-DE,zh_Hans,de-CH-1996,sl_IT,sl_IT_nedis-a-kirti-x-xyz,sl_IT_rozaj,sl_IT_NEDIS_ROJAZ_1901,i-enochian,sgn-CH-de,art-lojban,i-lux,art-lojban,jbo,en_sl_IT,zh-Hant-CN-x-prv1-prv2
 
-lookup result:sl_it
+lookup result:sl_IT
 Canonical lookup result:sl_it
 --------------
 loc_range:jbo 
@@ -95,5 +95,5 @@ Canonical lookup result:jbo
 loc_range:art-lojban 
 lang_tags: de-DEVA,de-DE-1996,de-DE,zh_Hans,de-CH-1996,sl_IT,sl_IT_nedis-a-kirti-x-xyz,sl_IT_rozaj,sl_IT_NEDIS_ROJAZ_1901,i-enochian,sgn-CH-de,art-lojban,i-lux,art-lojban,jbo,en_sl_IT,zh-Hant-CN-x-prv1-prv2
 
-lookup result:art_lojban
+lookup result:art-lojban
 Canonical lookup result:jbo

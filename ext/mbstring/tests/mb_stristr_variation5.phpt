@@ -52,18 +52,18 @@ var_dump(bin2hex(mb_stristr($string_mb, $needle_mb_mixed, true)));
 *** Testing mb_stristr() : basic functionality ***
 
 -- ASCII string: needle exists --
-unicode(24) "6263446566207a4263447978"
-unicode(2) "61"
-unicode(24) "6263446566207a4263447978"
-unicode(2) "61"
-unicode(24) "6263446566207a4263447978"
-unicode(2) "61"
+string(24) "6263446566207a4263447978"
+string(2) "61"
+string(24) "6263446566207a4263447978"
+string(2) "61"
+string(24) "6263446566207a4263447978"
+string(2) "61"
 
 -- Multibyte string: needle exists --
-unicode(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
-unicode(8) "cebacebb"
-unicode(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
-unicode(8) "cebacebb"
-unicode(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
-unicode(8) "cebacebb"
+string(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
+string(8) "cebacebb"
+string(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
+string(8) "cebacebb"
+string(54) "cebccebdcebece9fcea0cea120cebacebbce9cce9dcebecebfcea0"
+string(8) "cebacebb"
 ===DONE===

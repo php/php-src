@@ -17,7 +17,7 @@ imagesetthickness($image, $image);
 
 ?>
 --EXPECTF--
-Warning: imagesetthickness() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: imagesetthickness() expects parameter 2 to be long, string given in %s on line %d
 
 Warning: imagesetthickness() expects parameter 2 to be long, array given in %s on line %d
 

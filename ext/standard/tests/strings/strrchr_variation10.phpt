@@ -60,7 +60,7 @@ $haystacks =  array (
   '',
 
   //resource variable in string form
-  "$file_handle",
+  "\$file_handle",
 
   //undefined variable in string form
   @"$undefined_var",
@@ -79,8 +79,8 @@ $needles =  array (
   // float values
   10.5,
   -10.5,
-  10.5e10,
-  10.6E-10,
+  10.1234567e10,
+  10.7654321E-10,
   .5,
 
   // array values
@@ -138,18 +138,12 @@ bool(false)
 -- Iteration 3 --
 bool(false)
 -- Iteration 4 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 7 --
-
-Warning: Needle argument codepoint value out of range (0 - 0x10FFFF) in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)
@@ -196,7 +190,9 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-%s
+
+Warning: strrchr(): needle is not a string or an integer in %s on line %d
+bool(false)
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

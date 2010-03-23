@@ -1,9 +1,8 @@
 --TEST--
 localtime() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 $t = mktime(0,0,0, 6, 27, 2006);
 var_dump(localtime(1,1,1));
@@ -15,7 +14,7 @@ var_dump(localtime($t, false));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: localtime() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 array(9) {
@@ -59,23 +58,23 @@ array(9) {
   int(0)
 }
 array(9) {
-  [u"tm_sec"]=>
+  ["tm_sec"]=>
   int(0)
-  [u"tm_min"]=>
+  ["tm_min"]=>
   int(0)
-  [u"tm_hour"]=>
+  ["tm_hour"]=>
   int(0)
-  [u"tm_mday"]=>
+  ["tm_mday"]=>
   int(27)
-  [u"tm_mon"]=>
+  ["tm_mon"]=>
   int(5)
-  [u"tm_year"]=>
+  ["tm_year"]=>
   int(106)
-  [u"tm_wday"]=>
+  ["tm_wday"]=>
   int(2)
-  [u"tm_yday"]=>
+  ["tm_yday"]=>
   int(177)
-  [u"tm_isdst"]=>
+  ["tm_isdst"]=>
   int(0)
 }
 array(9) {

@@ -1,20 +1,14 @@
 --TEST--
 SOAP Server 19: compressed request (gzip)
 --SKIPIF--
-<?php require_once('skipif.inc'); 
-  if (!extension_loaded('zlib')) die('skip zlib extension not available');
+<?php 
+	if (php_sapi_name()=='cli') echo 'skip';
+	require_once('skipif.inc'); 
+	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
---FILE--
-<?php
-function test() {
-  return "Hello World";
-}
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
-
-$HTTP_RAW_POST_DATA = gzencode(
-b'<?xml version="1.0" encoding="ISO-8859-1"?>
+--INI--
+precision=14
+--POST--
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
@@ -25,8 +19,16 @@ b'<?xml version="1.0" encoding="ISO-8859-1"?>
     <ns1:test xmlns:ns1="http://testuri.org" />
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
-', 9, FORCE_GZIP);
-$_SERVER['HTTP_CONTENT_ENCODING'] = "gzip";
+--GZIP_POST--
+1
+--FILE--
+<?php
+function test() {
+  return "Hello World";
+}
+
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+$server->addfunction("test");
 $server->handle();
 echo "ok\n";
 ?>

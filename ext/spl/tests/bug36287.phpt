@@ -22,11 +22,11 @@ foreach($it as $file)
 ===DONE===
 --EXPECTF--
 First
-unicode(%d) "%s"
+string(%d) "%s"
 Second
-unicode(%d) "%s"
+string(%d) "%s"
 First
-unicode(%d) "%s"
+string(%d) "%s"
 Second
-unicode(%d) "%s"
+string(%d) "%s"
 ===DONE===

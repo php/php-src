@@ -33,52 +33,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2009-10-06</date>
+ <date>2010-02-11</date>
  <time>15:00:00</time>
 
  <version>
-  <release>1.4.0</release>
-  <api>1.4.0</api>
+  <release>1.4.1</release>
+  <api>1.4.1</api>
  </version>
  <stability>
-  <release>alpha</release>
-  <api>alpha</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-    1. Introduce connection attribute functions:
-
-         oci_set_module_name
-         oci_set_action
-         oci_set_client_info
-         oci_set_client_identifier
-      
-       These set values that are visible/used by the database.  They
-       are useful for tracing, authentication and auditing.
-
-    2. Introduce connection attribute function:
-
-         oci_set_edition
-
-       Oracle 11g R2 "editions" allow multiple versions of DB objects
-       to exist at one time.  By setting different editions, two
-       different versions of an application can run concurrently,
-       making upgrading easier and faster.
-
-    3. Set the DRIVER_NAME attribute of Oracle Database 11gR2
-       connections to aid application tracing.  The value used is to
-       "PHP OCI8" followed by the OCI8 version number.  Note the
-       version number may get truncated in DB views such as
-       v$session_connect_info.
-
-    4. Allow the oci_set_prefetch value to be 0.  This is important in
-       some cases using REF CURSORS in Oracle 11gR2.
-
-    5. Introduce OCI_NO_AUTO_COMMIT as an alias for the OCI_DEFAULT
-       constant (which is not the default value) used by oci_execute().
-
-    6. Generate an error if an invalid resource type is used in
-       oci_bind_by_name
+Fixed bug #49560 (Using LOBs causes slow PHP shutdown)
+Fixed bug #47281 ($php_errormsg is limited in size of characters)
  </notes>
  <contents>
   <dir name="/">
@@ -126,6 +95,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
     <file name="bug36096.phpt" role="test" />
+    <file name="bug36403.phpt" role="test" />
     <file name="bug37220.phpt" role="test" />
     <file name="bug37581.phpt" role="test" />
     <file name="bug38161.phpt" role="test" />
@@ -148,6 +118,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bug45458.phpt" role="test" />
     <file name="bug46994.phpt" role="test" />
     <file name="bug47189.phpt" role="test" />
+    <file name="bug47281.phpt" role="test" />
     <file name="bug6109.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -258,12 +229,15 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="extauth_04.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
+    <file name="fetch_all4.phpt" role="test" />
+    <file name="fetch_all5.phpt" role="test" />
     <file name="fetch_all.phpt" role="test" />
     <file name="fetch_array.phpt" role="test" />
     <file name="fetch_assoc.phpt" role="test" />
     <file name="fetch_into1.phpt" role="test" />
     <file name="fetch_into2.phpt" role="test" />
     <file name="fetch_into.phpt" role="test" />
+    <file name="fetch_object_2.phpt" role="test" />
     <file name="fetch_object.phpt" role="test" />
     <file name="fetch.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
@@ -315,6 +289,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="lob_040.phpt" role="test" />
     <file name="lob_041.phpt" role="test" />
     <file name="lob_042.phpt" role="test" />
+    <file name="lob_043.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
@@ -394,6 +369,56 @@ http://pear.php.net/dtd/package-2.0.xsd">
 
 <release>
  <version>
+  <release>1.4.0</release>
+  <api>1.4.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+    1. Introduce connection attribute functions:
+
+         oci_set_module_name
+         oci_set_action
+         oci_set_client_info
+         oci_set_client_identifier
+      
+       These set values that are visible/used by the database.  They
+       are useful for tracing, authentication and auditing.
+
+    2. Introduce connection attribute function:
+
+         oci_set_edition
+
+       Oracle 11g R2 "editions" allow multiple versions of DB objects
+       to exist at one time.  By setting different editions, two
+       different versions of an application can run concurrently,
+       making upgrading easier and faster.
+
+    3. Set the DRIVER_NAME attribute of Oracle Database 11gR2
+       connections to aid application tracing.  The value used is to
+       "PHP OCI8" followed by the OCI8 version number.  Note the
+       version number may get truncated in DB views such as
+       v$session_connect_info.
+
+    4. Allow the oci_set_prefetch value to be 0.  This is important in
+       some cases using REF CURSORS in Oracle 11gR2.
+
+    5. Introduce OCI_NO_AUTO_COMMIT as an alias for the OCI_DEFAULT
+       constant (which is not the default value) used by oci_execute().
+
+    6. Generate an error if an invalid resource type is used in
+       oci_bind_by_name
+
+    7. Bug fixes:
+       PECL bug #16842 (oci_error returns false when NO_DATA_FOUND is raised) 
+ </notes>
+</release>
+
+<release>
+ <version>
   <release>1.3.5</release>
   <api>1.3.4</api>
  </version>
@@ -403,13 +428,13 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-Fixed Bug #47243 (Crash at end of request shutdown on Windows)
-Fixed Bug #46994 (CLOB size does not update when using CLOB IN OUT param in stored procedure)
-Fixed Bug #46623 (phpinfo doesn't show compile time ORACLE_HOME with phpize)
+Fixed bug #47243 (Crash at end of request shutdown on Windows)
+Fixed bug #46994 (CLOB size does not update when using CLOB IN OUT param in stored procedure)
+Fixed bug #46623 (phpinfo doesn't show compile time ORACLE_HOME with phpize)
 Fixed bug #45458 (Numeric keys for associative arrays are not handled properly) Note: not fixed when building with PHP 4 due to lack of PHP internal helper.
-Fixed PECL Bug #16035 (oci_connect without ORACLE_HOME defined causes segfault)
-Fixed PECL Bug #15988 (sqlnet.ora isn't read with older Oracle libraries)
-Fixed PECL Bug #14268 (Allow "pecl install oci8" command to "autodetect" an Instant Client RPM install)
+Fixed PECL bug #16035 (oci_connect without ORACLE_HOME defined causes segfault)
+Fixed PECL bug #15988 (sqlnet.ora isn't read with older Oracle libraries)
+Fixed PECL bug #14268 (Allow "pecl install oci8" command to "autodetect" an Instant Client RPM install)
  </notes>
 </release>
 

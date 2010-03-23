@@ -82,7 +82,7 @@ foreach($inputs as $input) {
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 --
@@ -91,13 +91,13 @@ array(0) {
 
 -- Iteration 2 --
 array(1) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 3 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -109,7 +109,7 @@ array(0) {
 
 -- Iteration 5 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -121,7 +121,7 @@ array(0) {
 
 -- Iteration 7 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -137,7 +137,7 @@ array(0) {
 
 -- Iteration 10 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -145,7 +145,7 @@ array(2) {
 
 -- Iteration 11 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -153,7 +153,7 @@ array(2) {
 
 -- Iteration 12 --
 array(1) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
@@ -163,7 +163,7 @@ array(0) {
 
 -- Iteration 14 --
 array(1) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
@@ -197,7 +197,7 @@ array(0) {
 
 -- Iteration 22 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)
@@ -205,7 +205,7 @@ array(2) {
 
 -- Iteration 23 --
 array(2) {
-  [u"three"]=>
+  ["three"]=>
   int(3)
   [0]=>
   int(4)

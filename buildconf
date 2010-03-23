@@ -32,7 +32,7 @@ if test "$dev" = "0" -a "$devok" = "0"; then
   echo "use buildconf --force to override this check."
   exit 1
 fi
-
+ 
 rm -f generated_lists
 
 if test "$debug" = "yes"; then

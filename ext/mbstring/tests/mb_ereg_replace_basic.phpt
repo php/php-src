@@ -49,14 +49,14 @@ echo "Done";
 *** Testing mb_ereg_replace() : basic functionality ***
 
 -- ASCII string 1 --
-unicode(16) "6162632020313233"
+string(16) "6162632020313233"
 
 -- ASCII string 2 --
-unicode(14) "61626320646566"
+string(14) "61626320646566"
 
 -- Multibyte string 1 --
-unicode(72) "e697a5e69cace8aa9e5f5f5f5f5f31323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(72) "e697a5e69cace8aa9e5f5f5f5f5f31323334efbc95efbc96efbc97efbc98efbc99e38082"
 
 -- Multibyte string 2 --
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
 Done

@@ -14,11 +14,7 @@ if(!$dom) {
 }
 
 $node = $dom->documentElement;
-$node2 = $node->firstChild->parentNode;
-
-if ($node2->isSameNode($node)) {
-	echo "Tag Name: ".$node->tagName."\n";
-}
+echo "Tag Name: ".$node->tagName."\n";
 
 
 $node->setAttribute('num', '1');

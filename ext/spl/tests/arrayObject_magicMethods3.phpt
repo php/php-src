@@ -71,67 +71,67 @@ var_dump($ao);
 --> Write existent, non-existent and dynamic:
   Original wrapped object:
 object(UsesMagic)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"UsesMagic":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"UsesMagic":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(UsesMagic)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"UsesMagic":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"UsesMagic":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
 --> Read existent, non-existent and dynamic:
-unicode(7) "changed"
+string(7) "changed"
 
 Notice: Undefined index:  nonexistent in %s on line 42
 NULL
-unicode(11) "new.changed"
+string(11) "new.changed"
   Original wrapped object:
 object(UsesMagic)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"UsesMagic":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"UsesMagic":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(UsesMagic)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"UsesMagic":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"UsesMagic":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
@@ -141,31 +141,31 @@ bool(false)
 bool(true)
   Original wrapped object:
 object(UsesMagic)#1 (5) {
-  [u"a"]=>
-  unicode(7) "changed"
-  [u"b"]=>
+  ["a"]=>
+  string(7) "changed"
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"UsesMagic":private]=>
-  unicode(6) "secret"
-  [u"dynamic"]=>
-  unicode(11) "new.changed"
+  ["priv":"UsesMagic":private]=>
+  string(6) "secret"
+  ["dynamic"]=>
+  string(11) "new.changed"
 }
   Wrapping ArrayObject:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(UsesMagic)#1 (5) {
-    [u"a"]=>
-    unicode(7) "changed"
-    [u"b"]=>
+    ["a"]=>
+    string(7) "changed"
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"UsesMagic":private]=>
-    unicode(6) "secret"
-    [u"dynamic"]=>
-    unicode(11) "new.changed"
+    ["priv":"UsesMagic":private]=>
+    string(6) "secret"
+    ["dynamic"]=>
+    string(11) "new.changed"
   }
 }
 
@@ -174,22 +174,22 @@ object(ArrayObject)#2 (1) {
 Notice: Undefined index:  nonexistent in %s on line 60
   Original wrapped object:
 object(UsesMagic)#1 (3) {
-  [u"b"]=>
+  ["b"]=>
   int(2)
-  [u"c"]=>
+  ["c"]=>
   int(3)
-  [u"priv":u"UsesMagic":private]=>
-  unicode(6) "secret"
+  ["priv":"UsesMagic":private]=>
+  string(6) "secret"
 }
   Wrapping ArrayObject:
 object(ArrayObject)#2 (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   object(UsesMagic)#1 (3) {
-    [u"b"]=>
+    ["b"]=>
     int(2)
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"priv":u"UsesMagic":private]=>
-    unicode(6) "secret"
+    ["priv":"UsesMagic":private]=>
+    string(6) "secret"
   }
 }

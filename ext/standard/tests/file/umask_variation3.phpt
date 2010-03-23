@@ -1,7 +1,5 @@
 --TEST--
 Test umask() function : usage variation
---XFAIL--
-Return values are inconsistent (and have changed from previous versions)
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -189,32 +187,32 @@ int(0)
 int(0)
 
 --empty string DQ--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 
 --empty string SQ--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 
 --string DQ--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 
 --string SQ--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 
 --mixed case string--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 
 --heredoc--
-Error: 2 - umask() expects parameter 1 to be long, Unicode string given, %s(%d)
+Error: 2 - umask() expects parameter 1 to be long, string given, %s(%d)
 bool(false)
 int(63)
 

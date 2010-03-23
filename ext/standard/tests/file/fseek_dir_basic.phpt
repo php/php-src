@@ -47,15 +47,15 @@ array(6) {
   [0]=>
   bool(false)
   [1]=>
-  unicode(1) "."
+  string(1) "."
   [2]=>
-  unicode(2) ".."
+  string(2) ".."
   [3]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [4]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [5]=>
-  unicode(9) "file3.tmp"
+  string(9) "file3.tmp"
 }
 
 call fseek() on directory resource:
@@ -65,15 +65,15 @@ array(6) {
   [0]=>
   bool(false)
   [1]=>
-  unicode(1) "."
+  string(1) "."
   [2]=>
-  unicode(2) ".."
+  string(2) ".."
   [3]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [4]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [5]=>
-  unicode(9) "file3.tmp"
+  string(9) "file3.tmp"
 }
 
 call fseek() with different arguments on directory resource:
@@ -83,14 +83,14 @@ array(6) {
   [0]=>
   bool(false)
   [1]=>
-  unicode(1) "."
+  string(1) "."
   [2]=>
-  unicode(2) ".."
+  string(2) ".."
   [3]=>
-  unicode(9) "file1.tmp"
+  string(9) "file1.tmp"
   [4]=>
-  unicode(9) "file2.tmp"
+  string(9) "file2.tmp"
   [5]=>
-  unicode(9) "file3.tmp"
+  string(9) "file3.tmp"
 }
 bool(true)

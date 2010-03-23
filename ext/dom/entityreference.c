@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMEntityReference::__construct(string name) U */
+/* {{{ proto void DOMEntityReference::__construct(string name); */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id;
@@ -57,10 +57,11 @@ PHP_METHOD(domentityreference, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&", &id, dom_entityreference_class_entry, &name, &name_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
+
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);

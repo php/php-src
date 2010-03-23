@@ -77,17 +77,17 @@ echo "Done\n";
 --EXPECTF--
 Test 1 - oci_pconnect
 array(1) {
-  [u"C1"]=>
+  ["C1"]=>
   array(0) {
   }
 }
 array(1) {
-  [u"C1"]=>
+  ["C1"]=>
   array(2) {
     [0]=>
-    unicode(1) "1"
+    string(1) "1"
     [1]=>
-    unicode(1) "1"
+    string(1) "1"
   }
 }
 Done

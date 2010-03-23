@@ -100,92 +100,92 @@ fclose($file_handle);
 *** Testing quoted_printable_decode() : with unexpected values for 'str' argument ***
 
 -- Iteration 1 --
-unicode(2) "30"
+string(2) "30"
 
 -- Iteration 2 --
-unicode(2) "31"
+string(2) "31"
 
 -- Iteration 3 --
-unicode(10) "3132333435"
+string(10) "3132333435"
 
 -- Iteration 4 --
-unicode(10) "2d32333435"
+string(10) "2d32333435"
 
 -- Iteration 5 --
-unicode(8) "31302e35"
+string(8) "31302e35"
 
 -- Iteration 6 --
-unicode(10) "2d31302e35"
+string(10) "2d31302e35"
 
 -- Iteration 7 --
-unicode(24) "313031323334353637303030"
+string(24) "313031323334353637303030"
 
 -- Iteration 8 --
-unicode(26) "312e3037363534333231452d39"
+string(26) "312e3037363534333231452d39"
 
 -- Iteration 9 --
-unicode(6) "302e35"
+string(6) "302e35"
 
 -- Iteration 10 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, array given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 
 -- Iteration 11 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, array given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 
 -- Iteration 12 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, array given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 
 -- Iteration 13 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, array given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 
 -- Iteration 14 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, array given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s on line %d
+string(0) ""
 
 -- Iteration 15 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 16 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 17 --
-unicode(2) "31"
+string(2) "31"
 
 -- Iteration 18 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 19 --
-unicode(2) "31"
+string(2) "31"
 
 -- Iteration 20 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 21 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 22 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 23 --
-unicode(12) "4f626a656374"
+string(12) "4f626a656374"
 
 -- Iteration 24 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 25 --
-unicode(0) ""
+string(0) ""
 
 -- Iteration 26 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be binary string, resource given in %s on line %d
-unicode(0) ""
+Warning: quoted_printable_decode() expects parameter 1 to be string, resource given in %s on line %d
+string(0) ""
 ===DONE===

@@ -37,12 +37,12 @@ echo "Done";
 -- Call to each(): --
 array(4) {
   [1]=>
-  unicode(4) "zero"
-  [u"value"]=>
-  unicode(4) "zero"
+  string(4) "zero"
+  ["value"]=>
+  string(4) "zero"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 

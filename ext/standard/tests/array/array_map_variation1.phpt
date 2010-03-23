@@ -21,35 +21,36 @@ var_dump( array_map(null,  $arr));
 var_dump( array_map(null, $arr, $arr));
 echo "Done";
 ?>
+
 --EXPECT--
 *** Testing array_map() : string keys ***
 array(1) {
-  [u"stringkey"]=>
+  ["stringkey"]=>
   array(1) {
     [0]=>
-    unicode(5) "value"
+    string(5) "value"
   }
 }
 array(1) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(5) "value"
+    string(5) "value"
     [1]=>
-    unicode(5) "value"
+    string(5) "value"
   }
 }
 array(1) {
-  [u"stringkey"]=>
-  unicode(5) "value"
+  ["stringkey"]=>
+  string(5) "value"
 }
 array(1) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(5) "value"
+    string(5) "value"
     [1]=>
-    unicode(5) "value"
+    string(5) "value"
   }
 }
 Done

@@ -211,7 +211,6 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: session_module_name() expects parameter 1 to be binary string, resource given in %s on line %d
+Warning: session_module_name() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 Done
-

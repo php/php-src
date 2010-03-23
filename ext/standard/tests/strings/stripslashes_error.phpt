@@ -39,5 +39,5 @@ NULL
 
 Warning: stripslashes() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
-unicode(18) "\"hello\"\"world\""
+string(18) "\"hello\"\"world\""
 Done

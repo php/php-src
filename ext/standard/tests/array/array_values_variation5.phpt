@@ -26,17 +26,17 @@ echo key($input) . " => " . current ($input) . "\n";
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_values() : usage variations ***
 
 -- Call array_values() --
 array(3) {
   [0]=>
-  unicode(2) "un"
+  string(2) "un"
   [1]=>
-  unicode(4) "deux"
+  string(4) "deux"
   [2]=>
-  unicode(5) "trois"
+  string(5) "trois"
 }
 -- Position of Internal Pointer in Result: --
 0 => un

@@ -44,148 +44,148 @@ No methods:array(0) {
 Public methods:array(4) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubf1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubf2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Private methods:array(4) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privf1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privf2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Public or static methods:array(6) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubf1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(5) "pubf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(5) "pubf2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf2"
+    ["class"]=>
+    string(1) "C"
   }
   [4]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [5]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf2"
+    ["class"]=>
+    string(1) "C"
   }
 }
 Private or static methods:array(6) {
   [0]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privf1"
+    ["class"]=>
+    string(1) "C"
   }
   [1]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "privf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "privf2"
+    ["class"]=>
+    string(1) "C"
   }
   [2]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [3]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(6) "pubsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(6) "pubsf2"
+    ["class"]=>
+    string(1) "C"
   }
   [4]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf1"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf1"
+    ["class"]=>
+    string(1) "C"
   }
   [5]=>
   &object(ReflectionMethod)#%d (2) {
-    [u"name"]=>
-    unicode(7) "privsf2"
-    [u"class"]=>
-    unicode(1) "C"
+    ["name"]=>
+    string(7) "privsf2"
+    ["class"]=>
+    string(1) "C"
   }
 }

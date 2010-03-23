@@ -26,11 +26,10 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : basic functionality ***
-unicode(5) "files"
-unicode(5) "files"
+string(%d) "%s"
+string(5) "files"
 bool(true)
-unicode(5) "files"
+string(5) "files"
 bool(true)
-unicode(5) "files"
+string(5) "files"
 Done
-

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,11 @@
 #include "msgformat_format.h"
 #include "msgformat_data.h"
 #include "msgformat_helpers.h"
+#include "intl_convert.h"
+
+#ifndef Z_ADDREF_P
+#define Z_ADDREF_P(z) ((z)->refcount++)
+#endif
 
 /* {{{ */
 static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC) 
@@ -71,7 +76,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	}
 
 	INTL_METHOD_CHECK_STATUS( mfo, "Number formatting failed" );
-	RETURN_UNICODEL(formatted, formatted_len, 0);
+	INTL_METHOD_RETVAL_UTF8( mfo, formatted, formatted_len, 1 );
 }
 /* }}} */
 
@@ -113,15 +118,16 @@ PHP_FUNCTION( msgfmt_format_message )
 	zval       *args;
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
+	char       *pattern = NULL;
+	int         pattern_len = 0;
 	char       *slocale = NULL;
 	int         slocale_len = 0;
-	int free_pattern = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "sua",
-		  &slocale, &slocale_len, &spattern, &spattern_len, &args ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "ssa",
+		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"msgfmt_format_message: unable to parse input params", 0 TSRMLS_CC );
@@ -131,11 +137,24 @@ PHP_FUNCTION( msgfmt_format_message )
 
 	msgformat_data_init(&mfo->mf_data TSRMLS_CC);
 
-	if(slocale_len == 0) {
-		slocale = UG(default_locale);
+	if(pattern && pattern_len) {
+		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
+		if( U_FAILURE(INTL_DATA_ERROR_CODE((mfo))) )
+		{
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+				"msgfmt_format_message: error converting pattern to UTF-16", 0 TSRMLS_CC );
+			RETURN_FALSE;
+		}
+	} else {
+		spattern_len = 0;
+		spattern = NULL;
 	}
 
-	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo), &free_pattern) != SUCCESS) {
+	if(slocale_len == 0) {
+		slocale = INTL_G(default_locale);
+	}
+
+	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
 		RETURN_FALSE;
@@ -143,7 +162,7 @@ PHP_FUNCTION( msgfmt_format_message )
 
 	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));
-	if(free_pattern) {
+	if(spattern && spattern_len) {
 		efree(spattern);
 	}
 	INTL_METHOD_CHECK_STATUS(mfo, "Creating message formatter failed");

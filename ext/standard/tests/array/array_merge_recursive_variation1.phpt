@@ -107,7 +107,6 @@ fclose($fp);
 echo "Done";
 ?>
 --EXPECTF--
-
 *** Testing array_merge_recursive() : Passing non array values to $arr1 argument ***
 
 -- Iteration 1 --

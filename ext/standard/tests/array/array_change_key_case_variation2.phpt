@@ -88,162 +88,162 @@ echo "Done";
 
 -- Iteration 1 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 2 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 3 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 4 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 5 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 6 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 7 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 8 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 9 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 10 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 11 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 12 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 13 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 14 --
 array(3) {
-  [u"ONE"]=>
+  ["ONE"]=>
   int(1)
-  [u"TWO"]=>
+  ["TWO"]=>
   int(2)
-  [u"THREE"]=>
+  ["THREE"]=>
   int(3)
 }
 
 -- Iteration 15 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 16 --
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
@@ -253,36 +253,36 @@ NULL
 
 -- Iteration 19 --
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_change_key_case() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 
 -- Iteration 23 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 Done

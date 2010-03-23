@@ -1,8 +1,5 @@
 --TEST--
 foreach with iteratorAggregate
---INI--
-unicode.script_encoding=ISO-8859-1
-unicode.runtime_encoding=ISO-8859-1
 --FILE--
 <?php
 class EnglishMealIterator implements Iterator {
@@ -134,34 +131,34 @@ foreach ($f as $k=>$v) {
 ===DONE===
 --EXPECTF--
 object(EuropeanMeals)#%d (2) {
-  [u"storedEnglishMealIterator":u"EuropeanMeals":private]=>
+  ["storedEnglishMealIterator":"EuropeanMeals":private]=>
   object(EnglishMealIterator)#%d (2) {
-    [u"pos":u"EnglishMealIterator":private]=>
+    ["pos":"EnglishMealIterator":private]=>
     int(0)
-    [u"myContent":u"EnglishMealIterator":private]=>
+    ["myContent":"EnglishMealIterator":private]=>
     array(3) {
       [0]=>
-      unicode(9) "breakfast"
+      string(9) "breakfast"
       [1]=>
-      unicode(6) "dinner"
+      string(6) "dinner"
       [2]=>
-      unicode(3) "tea"
+      string(3) "tea"
     }
   }
-  [u"storedFrenchMealIterator":u"EuropeanMeals":private]=>
+  ["storedFrenchMealIterator":"EuropeanMeals":private]=>
   object(FrenchMealIterator)#%d (2) {
-    [u"pos":u"FrenchMealIterator":private]=>
+    ["pos":"FrenchMealIterator":private]=>
     int(0)
-    [u"myContent":u"FrenchMealIterator":private]=>
+    ["myContent":"FrenchMealIterator":private]=>
     array(4) {
       [0]=>
-      unicode(14) "petit dejeuner"
+      string(14) "petit dejeuner"
       [1]=>
-      unicode(8) "dejeuner"
+      string(8) "dejeuner"
       [2]=>
-      unicode(6) "gouter"
+      string(6) "gouter"
       [3]=>
-      unicode(6) "dinner"
+      string(6) "dinner"
     }
   }
 }

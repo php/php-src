@@ -35,14 +35,14 @@ var_dump( gmdate(DATE_ISO8601, $timestamp) );
 \*\*\* Testing gmdate\(\) : usage variation \*\*\*
 
 -- Testing gmdate\(\) function with minimum range of timestamp --
-unicode\(24\) "1901-12-13T20:45:54\+0000"
+string\(24\) "1901-12-13T20:45:54\+0000"
 
 -- Testing gmdate\(\) function with less than the range of timestamp --
-unicode\(24\) "(1970-01-01T00:00:00\+0000|1901-12-13T20:45:50\+0000)"
+string\(24\) "(1970-01-01T00:00:00\+0000|1901-12-13T20:45:50\+0000)"
 
 -- Testing gmdate\(\) function with maximum range of timestamp --
-unicode\(24\) "2038-01-19T03:14:07\+0000"
+string\(24\) "2038-01-19T03:14:07\+0000"
 
 -- Testing gmdate\(\) function with greater than the range of timestamp --
-unicode\(24\) "(1970-01-01T00:00:00\+0000|2038-01-19T03:14:10\+0000)"
+string\(24\) "(1970-01-01T00:00:00\+0000|2038-01-19T03:14:10\+0000)"
 ===DONE===

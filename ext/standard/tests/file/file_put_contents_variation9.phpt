@@ -1,7 +1,5 @@
 --TEST--
 est file_put_contents() function : usage variation - linked files
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -70,4 +68,3 @@ int(11)
 Here is some data, more data
 
 *** Done ***
-

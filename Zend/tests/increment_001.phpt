@@ -32,7 +32,7 @@ foreach ($a as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 array(3) {
   [0]=>
   int(1)
@@ -41,11 +41,11 @@ array(3) {
   [2]=>
   int(3)
 }
-unicode(1) "1"
+string(1) "1"
 int(2)
 float(3.5)
 int(1)
-unicode(6) "strinh"
+string(6) "strinh"
 int(124)
 float(3.5)
 int(1)

@@ -51,7 +51,6 @@ var_dump(fgetss($fp,10,$allowable_tags));
 $file_handle = fopen(__FILE__, "r");
 unset($file_handle); //unset file handle
 var_dump( fgetss(@$file_handle,10));
-var_dump(fclose(@$file_handle));
 
 echo "Done\n";
 ?>
@@ -60,11 +59,11 @@ echo "Done\n";
 -- Testing fgetss() with zero argument --
 
 Warning: fgetss() expects at least 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 -- Testing fgetss() with more than expected number of arguments --
 
 Warning: fgetss() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+bool(false)
 -- Testing fgetss() with invalid length arguments --
 
 Warning: fgetss(): Length parameter must be greater than 0 in %s on line %d
@@ -76,35 +75,32 @@ bool(false)
 -- Testing fgetss() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fgetss() expects parameter 1 to be resource, Unicode string given in %s on line %d
-NULL
+Warning: fgetss() expects parameter 1 to be resource, string given in %s on line %d
+bool(false)
 -- Iteration 2 --
 
 Warning: fgetss() expects parameter 1 to be resource, integer given in %s on line %d
-NULL
+bool(false)
 -- Iteration 3 --
 
 Warning: fgetss() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 -- Iteration 4 --
 
 Warning: fgetss() expects parameter 1 to be resource, boolean given in %s on line %d
-NULL
+bool(false)
 -- Iteration 5 --
 
 Warning: fgetss() expects parameter 1 to be resource, array given in %s on line %d
-NULL
+bool(false)
 -- Iteration 6 --
 
 Warning: fgetss() expects parameter 1 to be resource, object given in %s on line %d
-NULL
+bool(false)
 -- Testing fgetss() with closed/unset file handle --
 Warning: fgetss(): 5 is not a valid stream resource in %s on line %d
 bool(false)
 
 Warning: fgetss() expects parameter 1 to be resource, null given in %s on line %d
-NULL
-
-Warning: fclose() expects parameter 1 to be resource, null given in %s on line %d
-NULL
+bool(false)
 Done

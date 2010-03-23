@@ -18,12 +18,12 @@ var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde')
 bool(false)
 array(4) {
   [0]=>
-  unicode(5) "abcde"
+  string(5) "abcde"
   [1]=>
-  unicode(2) "ab"
+  string(2) "ab"
   [2]=>
-  unicode(2) "cd"
+  string(2) "cd"
   [3]=>
-  unicode(1) "e"
+  string(1) "e"
 }
-unicode(4) "yes!"
+string(4) "yes!"

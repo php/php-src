@@ -20,7 +20,7 @@ echo "*** Testing gzopen() : basic functionality ***\n";
 // Initialise all required variables
 $filename = "temp.txt.gz";
 $modes = array('w', 'w+');
-$data = b"This was the information that was written";
+$data = "This was the information that was written";
 
 foreach($modes as $mode) {
    echo "testing mode -- $mode --\n";

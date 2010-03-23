@@ -6,7 +6,6 @@ function dump_entries_name($z) {
 	    echo $i . ' ' . $sb['name'] . "\n";
 	}
 }
-
 /* recursively remove a directoryy */
 function rmdir_rf($dir) {
 	if ($handle = opendir($dir)) {

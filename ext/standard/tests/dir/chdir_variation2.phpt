@@ -72,33 +72,33 @@ rmdir("$file_path/level_one");
 -- $directory = './level_one': --
 bool(true)
 bool(true)
-unicode(%d) "%slevel_one"
+string(%d) "%slevel_one"
 
 -- $directory = 'level_one/level_two': --
 bool(true)
 bool(true)
-unicode(%d) "%slevel_one%elevel_two"
+string(%d) "%slevel_one%elevel_two"
 
 -- $directory = '..': --
 bool(true)
-unicode(%d) "%slevel_one"
+string(%d) "%slevel_one"
 
 -- $directory = 'level_two', '.': --
 bool(true)
 bool(true)
-unicode(%d) "%slevel_one%elevel_two"
+string(%d) "%slevel_one%elevel_two"
 
 -- $directory = '../': --
 bool(true)
-unicode(%d) "%slevel_one"
+string(%d) "%slevel_one"
 
 -- $directory = './': --
 bool(true)
 bool(true)
-unicode(%d) "%slevel_one%elevel_two"
+string(%d) "%slevel_one%elevel_two"
 
 -- $directory = '../../'level_one': --
 bool(true)
 bool(true)
-unicode(%d) "%slevel_one"
+string(%d) "%slevel_one"
 ===DONE===

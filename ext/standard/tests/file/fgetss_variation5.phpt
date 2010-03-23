@@ -44,7 +44,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
-  fwrite($file_handle,(binary)$string_with_tags); //writing data to the file
+  fwrite($file_handle,$string_with_tags); //writing data to the file
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
     exit();
@@ -77,7 +77,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgetss() : usage variations ***
 
 -- Testing fgetss() with file opened using w+ mode --

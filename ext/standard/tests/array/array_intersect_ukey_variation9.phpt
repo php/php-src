@@ -39,23 +39,23 @@ var_dump( array_intersect_ukey($array1, $array2, array($obj,'class_compare_func'
 
 -- Testing array_intersect_ukey() function using class with static method as callback --
 array(2) {
-  [u"blue"]=>
+  ["blue"]=>
   int(1)
-  [u"green"]=>
+  ["green"]=>
   int(3)
 }
 array(2) {
-  [u"blue"]=>
+  ["blue"]=>
   int(1)
-  [u"green"]=>
+  ["green"]=>
   int(3)
 }
 
 -- Testing array_intersect_uassoc() function using class with regular method as callback --
 array(2) {
-  [u"blue"]=>
+  ["blue"]=>
   int(1)
-  [u"green"]=>
+  ["green"]=>
   int(3)
 }
 ===DONE===

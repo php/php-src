@@ -31,12 +31,12 @@ var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') )
 -- Testing array_diff_ukey() function with float indexed array --
 array(1) {
   [-30]=>
-  unicode(5) "-30.5"
+  string(5) "-30.5"
 }
 array(2) {
   [-10]=>
-  unicode(3) "-10"
+  string(3) "-10"
   [20]=>
-  unicode(2) "20"
+  string(2) "20"
 }
 ===DONE===

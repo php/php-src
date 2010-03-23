@@ -6,4 +6,4 @@ namespace test\foo;
 
 var_dump(__NAMESPACE__);
 --EXPECT--
-unicode(8) "test\foo"
+string(8) "test\foo"

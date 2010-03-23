@@ -17,6 +17,5 @@ class test {
 
 $str='a:2:{i:0;O:4:"test":0:{}junk';
 var_dump(unserialize($str));
-?>
 --EXPECT--
 bool(false)

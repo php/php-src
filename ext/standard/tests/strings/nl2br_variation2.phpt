@@ -3,7 +3,7 @@ Test nl2br() function : usage variations - single quoted strings for 'str' argum
 --FILE--
 <?php
 /* Prototype  : string nl2br(string $str);
- * Description: Inserts HTML line breaks before all newlines in a string.
+ * Description: Inserts HTML line breaks before all newlines in a string
  * Source code: ext/standard/string.c
 */
 
@@ -43,28 +43,28 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
-unicode(2) "\n"
+string(2) "\n"
 -- Iteration 2 --
-unicode(2) "\r"
+string(2) "\r"
 -- Iteration 3 --
-unicode(4) "\r\n"
+string(4) "\r\n"
 -- Iteration 4 --
-unicode(12) "Hello\nWorld"
+string(12) "Hello\nWorld"
 -- Iteration 5 --
-unicode(12) "Hello\rWorld"
+string(12) "Hello\rWorld"
 -- Iteration 6 --
-unicode(14) "Hello\r\nWorld"
+string(14) "Hello\r\nWorld"
 -- Iteration 7 --
-unicode(7) "<br />
+string(7) "<br />
 "
 -- Iteration 8 --
-unicode(14) "<br />
+string(14) "<br />
 <br />
 "
 -- Iteration 9 --
-unicode(17) "Hello<br />
+string(17) "Hello<br />
 World"
 Done

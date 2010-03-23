@@ -1,5 +1,5 @@
 --TEST--
-Test money_format() function : basic functionality
+Test money_format() function : basic functionality using national currency symbols
 --SKIPIF--
 <?php
 	if (!function_exists('money_format')) {
@@ -56,24 +56,25 @@ echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing money_format() : basic functionality***
 Format values with 14 positions, 8 digits to left, 2 to right using national format
-unicode
-unicode
+string
+string
 Format again but with ( for negative values
-unicode
-unicode
+string
+string
 Format with 0 for padding character
-unicode
-unicode
+string
+string
 Format again with * for padding character
-unicode
-unicode
+string
+string
 Format again but disable grouping character
-unicode
-unicode
+string
+string
 Format again suppress currency symbol
-unicode
-unicode
+string
+string
 ===DONE===
+

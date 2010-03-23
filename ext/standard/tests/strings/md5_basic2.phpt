@@ -25,6 +25,6 @@ if (strcmp(bin2hex($md5_raw), $md5) == 0 ) {
 ===DONE===
 --EXPECT--
 *** Testing md5() : basic functionality - with raw output***
-unicode(32) "b10a8db164e0754105b7a99be72e3fe5"
+string(32) "b10a8db164e0754105b7a99be72e3fe5"
 TEST PASSED
 ===DONE===

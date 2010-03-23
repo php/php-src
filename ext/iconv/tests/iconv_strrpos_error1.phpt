@@ -32,8 +32,8 @@ echo "\n-- Testing iconv_strrpos() function with less than expected no. of argum
 $haystack = 'string_val';
 var_dump( iconv_strrpos($haystack) );
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_strrpos() : error conditions ***
 
@@ -46,4 +46,4 @@ bool(false)
 
 Warning: iconv_strrpos() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
-===DONE===
+Done

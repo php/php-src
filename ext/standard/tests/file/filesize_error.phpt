@@ -23,7 +23,7 @@ echo "\n";
 
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 *** Testing filesize(): error conditions ***
 Warning: filesize(): stat failed for /no/such/file in %s on line %d
 bool(false)
@@ -38,3 +38,4 @@ Warning: filesize() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 *** Done ***
+

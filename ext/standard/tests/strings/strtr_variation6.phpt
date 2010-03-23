@@ -90,47 +90,47 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
-unicode(6) "a12atm"
+string(6) "a12atm"
 -- Iteration 2 --
-unicode(6) "0a2atm"
+string(6) "0a2atm"
 -- Iteration 3 --
-unicode(6) "01tatm"
+string(6) "01tatm"
 -- Iteration 4 --
-unicode(6) "ta2atm"
+string(6) "ta2atm"
 -- Iteration 5 --
-unicode(6) "m1tatm"
+string(6) "m1tatm"
 -- Iteration 6 --
-unicode(6) "tm0atm"
+string(6) "tm0atm"
 -- Iteration 7 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(6) "0120tm"
+string(6) "0120tm"
 -- Iteration 8 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(6) "0120tm"
+string(6) "0120tm"
 -- Iteration 9 --
 
 Notice: Array to string conversion in %s on line %d
-unicode(6) "0120tm"
+string(6) "0120tm"
 -- Iteration 10 --
-unicode(6) "0a2atm"
+string(6) "0a2atm"
 -- Iteration 11 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 12 --
-unicode(6) "0a2atm"
+string(6) "0a2atm"
 -- Iteration 13 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 14 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 15 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 16 --
-unicode(6) "012ttm"
+string(6) "012ttm"
 -- Iteration 17 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 18 --
-unicode(6) "012atm"
+string(6) "012atm"
 -- Iteration 19 --
-unicode(6) "012atm"
+string(6) "012atm"
 ===DONE===

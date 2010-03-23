@@ -111,8 +111,8 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_mime_decode() : usage variations ***
 
@@ -162,10 +162,10 @@ Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `0.5' is no
 bool(false)
 
 -- Iteration 10 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 11 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 12 --
 
@@ -173,7 +173,7 @@ Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1' is not 
 bool(false)
 
 -- Iteration 13 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 14 --
 
@@ -181,13 +181,13 @@ Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1' is not 
 bool(false)
 
 -- Iteration 15 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 16 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 17 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 18 --
 
@@ -210,13 +210,13 @@ Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `Class A ob
 bool(false)
 
 -- Iteration 22 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 23 --
-unicode(44) "5375626a6563743a20412053616d706c652054657374"
+string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 24 --
 
-Warning: iconv_mime_decode() expects parameter 3 to be binary string, resource given in %s on line %d
+Warning: iconv_mime_decode() expects parameter 3 to be string, resource given in %s on line %d
 bool(false)
-===DONE===
+Done

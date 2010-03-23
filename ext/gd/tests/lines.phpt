@@ -106,7 +106,7 @@ if ($p3) {
 ?>
 --EXPECTF--
 
-Warning: imageline() expects exactly %d parameters, %d given in %s on line %d
+Warning: imageline() expects exactly 6 parameters, 5 given in %s on line %d
 Horizontal: ok
 Vertical: ok
 Diagonal: ok

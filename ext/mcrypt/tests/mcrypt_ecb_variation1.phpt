@@ -160,19 +160,19 @@ Error: 2 - mcrypt_ecb(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -212,7 +212,7 @@ Error: 2 - mcrypt_ecb(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, object given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
@@ -224,7 +224,7 @@ Error: 2 - mcrypt_ecb(): Module initialization failed, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - mcrypt_ecb() expects parameter 1 to be binary string, resource given, %s(%d)
+Error: 2 - mcrypt_ecb() expects parameter 1 to be string, resource given, %s(%d)
 NULL
 ===DONE===
 

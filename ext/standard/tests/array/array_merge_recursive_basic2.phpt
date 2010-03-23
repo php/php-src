@@ -25,13 +25,12 @@ var_dump( array_merge_recursive($arr1,$arr2,$arr3) );
 
 echo "Done";
 ?>
---EXPECT--
-
+--EXPECTF--
 *** Testing array_merge_recursive() : associative arrays ***
 -- With default argument --
 array(2) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   array(2) {
     [0]=>
@@ -43,7 +42,7 @@ array(2) {
 -- With more arguments --
 array(4) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   array(2) {
     [0]=>
@@ -52,18 +51,18 @@ array(4) {
     int(2)
   }
   [2]=>
-  unicode(5) "three"
-  [u"four"]=>
+  string(5) "three"
+  ["four"]=>
   array(2) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
   }
 }
 array(5) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   array(2) {
     [0]=>
@@ -72,17 +71,17 @@ array(5) {
     int(2)
   }
   [2]=>
-  unicode(5) "three"
-  [u"four"]=>
+  string(5) "three"
+  ["four"]=>
   array(4) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
+    string(5) "world"
     [2]=>
-    unicode(4) "str1"
+    string(4) "str1"
     [3]=>
-    unicode(4) "str2"
+    string(4) "str2"
   }
   [3]=>
   array(2) {

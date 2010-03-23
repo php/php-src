@@ -1,7 +1,5 @@
 --TEST--
 Test file_put_contents() function : usage variation - different types for context.
---XFAIL--
-Pending completion of Unicode streams
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
@@ -206,27 +204,27 @@ Error: 2 - file_put_contents() expects parameter 4 to be resource, boolean given
 NULL
 
 --empty string DQ--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, string given, %s(%d)
 NULL
 
 --instance of classWithToString--

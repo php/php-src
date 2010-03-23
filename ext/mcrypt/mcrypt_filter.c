@@ -1,16 +1,16 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Sara Golemon <pollita@php.net>                               |
   +----------------------------------------------------------------------+
@@ -55,11 +55,6 @@ static php_stream_filter_status_t php_mcrypt_filter(
 	while(buckets_in->head) {
 		bucket = buckets_in->head;
 
-		if (bucket->buf_type == IS_UNICODE) {
-			/* inflation not allowed for unicode data */
-			return PSFS_ERR_FATAL;
-		}
-
 		consumed += bucket->buflen;
 
 		if (data->blocksize) {
@@ -72,7 +67,7 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			if (data->block_used) {
 				memcpy(outchunk, data->block_buffer, data->block_used);
 			}
-			memcpy(outchunk + data->block_used, bucket->buf.s, bucket->buflen);
+			memcpy(outchunk + data->block_used, bucket->buf, bucket->buflen);
 
 			for(n=0; (n + data->blocksize) <= chunklen; n += data->blocksize) {
 
@@ -96,9 +91,9 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			/* Stream cipher */
 			php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 			if (data->encrypt) {
-				mcrypt_generic(data->module, bucket->buf.s, bucket->buflen);
+				mcrypt_generic(data->module, bucket->buf, bucket->buflen);
 			} else {
-				mdecrypt_generic(data->module, bucket->buf.s, bucket->buflen);
+				mdecrypt_generic(data->module, bucket->buf, bucket->buflen);
 			}
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 
@@ -148,8 +143,7 @@ static void php_mcrypt_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops php_mcrypt_filter_ops = {
     php_mcrypt_filter,
     php_mcrypt_filter_dtor,
-    "mcrypt.*",
-	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
+    "mcrypt.*"
 };
 
 /* {{{ php_mcrypt_filter_create
@@ -180,7 +174,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		return NULL;
 	}
 
-	if (zend_ascii_hash_find(HASH_OF(filterparams), "mode", sizeof("mode"), (void**)&tmpzval) == SUCCESS) {
+	if (zend_hash_find(HASH_OF(filterparams), "mode", sizeof("mode"), (void**)&tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
 			mode = Z_STRVAL_PP(tmpzval);
 		} else {
@@ -188,7 +182,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if (zend_ascii_hash_find(HASH_OF(filterparams), "algorithms_dir", sizeof("algorithms_dir"), (void**)&tmpzval) == SUCCESS) {
+	if (zend_hash_find(HASH_OF(filterparams), "algorithms_dir", sizeof("algorithms_dir"), (void**)&tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
 			algo_dir = Z_STRVAL_PP(tmpzval);
 		} else {
@@ -196,7 +190,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if (zend_ascii_hash_find(HASH_OF(filterparams), "modes_dir", sizeof("modes_dir"), (void**)&tmpzval) == SUCCESS) {
+	if (zend_hash_find(HASH_OF(filterparams), "modes_dir", sizeof("modes_dir"), (void**)&tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING) {
 			mode_dir = Z_STRVAL_PP(tmpzval);
 		} else {
@@ -204,7 +198,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		}
 	}
 
-	if (zend_ascii_hash_find(HASH_OF(filterparams), "key", sizeof("key"), (void**)&tmpzval) == SUCCESS &&
+	if (zend_hash_find(HASH_OF(filterparams), "key", sizeof("key"), (void**)&tmpzval) == SUCCESS &&
 		Z_TYPE_PP(tmpzval) == IS_STRING) {
 		key = Z_STRVAL_PP(tmpzval);
 		key_len = Z_STRLEN_PP(tmpzval);
@@ -224,7 +218,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 		key_len = keyl;
 	}
 
-	if (zend_ascii_hash_find(HASH_OF(filterparams), "iv", sizeof("iv"), (void**) &tmpzval) == FAILURE ||
+	if (zend_hash_find(HASH_OF(filterparams), "iv", sizeof("iv"), (void**) &tmpzval) == FAILURE ||
 		Z_TYPE_PP(tmpzval) != IS_STRING) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter parameter[iv] not provided or not of type: string");
 		mcrypt_module_close(mcrypt_module);

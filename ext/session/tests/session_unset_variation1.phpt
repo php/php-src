@@ -34,14 +34,14 @@ bool(false)
 bool(true)
 NULL
 array(1) {
-  [u"foo"]=>
-  unicode(12) "Hello World!"
+  ["foo"]=>
+  string(12) "Hello World!"
 }
 bool(true)
 bool(false)
 array(1) {
-  [u"foo"]=>
-  unicode(12) "Hello World!"
+  ["foo"]=>
+  string(12) "Hello World!"
 }
 bool(false)
 Done

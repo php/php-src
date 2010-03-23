@@ -56,7 +56,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_map() : different arrays for 'arr1' argument ***
 -- Iteration 1 --
 array(2) {
@@ -103,34 +103,34 @@ array(1) {
 -- Iteration 7 --
 array(6) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(4) "aaaa"
+  string(4) "aaaa"
   [2]=>
-  unicode(1) "b"
+  string(1) "b"
   [3]=>
-  unicode(4) "bbbb"
+  string(4) "bbbb"
   [4]=>
-  unicode(1) "c"
+  string(1) "c"
   [5]=>
-  unicode(5) "ccccc"
+  string(5) "ccccc"
 }
 -- Iteration 8 --
 array(3) {
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [3]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 -- Iteration 9 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 -- Iteration 10 --
@@ -146,57 +146,57 @@ array(4) {
 }
 -- Iteration 11 --
 array(3) {
-  [u"one"]=>
-  unicode(3) "ten"
-  [u"two"]=>
-  unicode(6) "twenty"
-  [u"three"]=>
-  unicode(6) "thirty"
+  ["one"]=>
+  string(3) "ten"
+  ["two"]=>
+  string(6) "twenty"
+  ["three"]=>
+  string(6) "thirty"
 }
 -- Iteration 12 --
 array(3) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
   [2]=>
-  unicode(3) "two"
+  string(3) "two"
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 -- Iteration 13 --
 array(3) {
-  [u""]=>
-  unicode(4) "null"
-  [u"NULL"]=>
+  [""]=>
+  string(4) "null"
+  ["NULL"]=>
   NULL
-  [u"null"]=>
+  ["null"]=>
   NULL
 }
 -- Iteration 14 --
 array(4) {
   [1]=>
-  unicode(4) "true"
+  string(4) "true"
   [0]=>
-  unicode(5) "false"
-  [u"false"]=>
+  string(5) "false"
+  ["false"]=>
   bool(false)
-  [u"true"]=>
+  ["true"]=>
   bool(true)
 }
 -- Iteration 15 --
 array(3) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
-  [u"emptys"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
+  ["emptys"]=>
+  string(0) ""
 }
 -- Iteration 16 --
 array(6) {
   [1]=>
-  unicode(0) ""
+  string(0) ""
   [2]=>
-  unicode(0) ""
+  string(0) ""
   [3]=>
   NULL
   [4]=>
@@ -208,7 +208,7 @@ array(6) {
 }
 -- Iteration 17 --
 array(3) {
-  [u""]=>
+  [""]=>
   int(4)
   [0]=>
   int(5)
@@ -217,11 +217,11 @@ array(3) {
 }
 -- Iteration 18 --
 array(3) {
-  [u"One"]=>
+  ["One"]=>
   int(10)
-  [u"two"]=>
+  ["two"]=>
   int(20)
-  [u"three"]=>
+  ["three"]=>
   int(3)
 }
 Done

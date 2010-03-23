@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -23,7 +23,7 @@
 #include "zend_llist.h"
 #include "zend_qsort.h"
 
-ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent) /* {{{ */
+ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent)
 {
 	l->head  = NULL;
 	l->tail  = NULL;
@@ -32,9 +32,9 @@ ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor
 	l->dtor  = dtor;
 	l->persistent = persistent;
 }
-/* }}} */
 
-ZEND_API void zend_llist_add_element(zend_llist *l, void *element) /* {{{ */
+
+ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
@@ -50,9 +50,9 @@ ZEND_API void zend_llist_add_element(zend_llist *l, void *element) /* {{{ */
 
 	++l->count;
 }
-/* }}} */
 
-ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element) /* {{{ */
+
+ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 {
 	zend_llist_element *tmp = pemalloc(sizeof(zend_llist_element)+l->size-1, l->persistent);
 
@@ -68,7 +68,7 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element) /* {{{ */
 
 	++l->count;
 }
-/* }}} */
+
 
 #define DEL_LLIST_ELEMENT(current, l) \
 			if ((current)->prev) {\
@@ -88,7 +88,7 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element) /* {{{ */
 			--l->count;
 
 
-ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2)) /* {{{ */
+ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2))
 {
 	zend_llist_element *current=l->head;
 	zend_llist_element *next;
@@ -102,12 +102,12 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare
 		current = next;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_llist_destroy(zend_llist *l) /* {{{ */
+
+ZEND_API void zend_llist_destroy(zend_llist *l)
 {
 	zend_llist_element *current=l->head, *next;
-
+	
 	while (current) {
 		next = current->next;
 		if (l->dtor) {
@@ -119,16 +119,16 @@ ZEND_API void zend_llist_destroy(zend_llist *l) /* {{{ */
 
 	l->count = 0;
 }
-/* }}} */
 
-ZEND_API void zend_llist_clean(zend_llist *l) /* {{{ */
+
+ZEND_API void zend_llist_clean(zend_llist *l)
 {
 	zend_llist_destroy(l);
 	l->head = l->tail = NULL;
 }
-/* }}} */
 
-ZEND_API void *zend_llist_remove_tail(zend_llist *l) /* {{{ */
+
+ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 {
 	zend_llist_element *old_tail;
 	void *data;
@@ -139,7 +139,7 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l) /* {{{ */
 		} else {
 			l->head = NULL;
 		}
-
+        
 		data = old_tail->data;
 
 		l->tail = old_tail->prev;
@@ -155,9 +155,9 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l) /* {{{ */
 
 	return NULL;
 }
-/* }}} */
 
-ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src) /* {{{ */
+
+ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src)
 {
 	zend_llist_element *ptr;
 
@@ -168,9 +168,9 @@ ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src) /* {{{ */
 		ptr = ptr->next;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data)) /* {{{ */
+
+ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
 {
 	zend_llist_element *element, *next;
 
@@ -183,9 +183,9 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data)) 
 		element = next;
 	}
 }
-/* }}} */
 
-ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC) /* {{{ */
+
+ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 {
 	zend_llist_element *element;
 
@@ -193,9 +193,8 @@ ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 		func(element->data TSRMLS_CC);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC) /* {{{ */
+ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC)
 {
 	size_t i;
 
@@ -227,9 +226,9 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRM
 	l->tail = elements[i-1];
 	efree(elements);
 }
-/* }}} */
 
-ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC) /* {{{ */
+
+ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC)
 {
 	zend_llist_element *element;
 
@@ -237,9 +236,9 @@ ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg
 		func(element->data, arg TSRMLS_CC);
 	}
 }
-/* }}} */
 
-ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...) /* {{{ */
+
+ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...)
 {
 	zend_llist_element *element;
 	va_list args;
@@ -250,15 +249,15 @@ ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_ar
 	}
 	va_end(args);
 }
-/* }}} */
 
-ZEND_API int zend_llist_count(zend_llist *l) /* {{{ */
+
+ZEND_API int zend_llist_count(zend_llist *l)
 {
 	return l->count;
 }
-/* }}} */
 
-ZEND_API void *zend_llist_get_first_ex(zend_llist *l, zend_llist_position *pos) /* {{{ */
+
+ZEND_API void *zend_llist_get_first_ex(zend_llist *l, zend_llist_position *pos)
 {
 	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
 
@@ -269,9 +268,9 @@ ZEND_API void *zend_llist_get_first_ex(zend_llist *l, zend_llist_position *pos) 
 		return NULL;
 	}
 }
-/* }}} */
 
-ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos) /* {{{ */
+
+ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos)
 {
 	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
 
@@ -282,9 +281,9 @@ ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos) /
 		return NULL;
 	}
 }
-/* }}} */
 
-ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos) /* {{{ */
+
+ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos)
 {
 	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
 
@@ -296,9 +295,9 @@ ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos) /
 	}
 	return NULL;
 }
-/* }}} */
 
-ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos) /* {{{ */
+
+ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos)
 {
 	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
 
@@ -310,7 +309,6 @@ ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos) /
 	}
 	return NULL;
 }
-/* }}} */
 
 /*
  * Local variables:

@@ -16,5 +16,5 @@ var_dump(get_resource_type($res));
 ===DONE===
 --EXPECT--
 *** Testing get_resource_type() : basic functionality ***
-unicode(6) "stream"
+string(6) "stream"
 ===DONE===

@@ -38,13 +38,13 @@ echo "Done";
 bool(true)
 array(4) {
   [3]=>
-  unicode(4) "img1"
+  string(4) "img1"
   [2]=>
-  unicode(4) "img2"
+  string(4) "img2"
   [0]=>
-  unicode(5) "img13"
+  string(5) "img13"
   [1]=>
-  unicode(5) "img20"
+  string(5) "img20"
 }
 
 -- Position of Internal Pointer in Passed Array: --

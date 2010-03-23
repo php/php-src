@@ -29,20 +29,20 @@ var_dump(get_class($f2));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
-unicode(3) "foo"
+string(3) "foo"
 
 Strict Standards: Non-static method foo::bar() should not be called statically in %s on line %d
-unicode(3) "foo"
-unicode(3) "foo"
-unicode(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
 
 Warning: get_class() called without object from outside a class in %s on line %d
 bool(false)
 
-Warning: get_class() expects parameter 1 to be object, Unicode string given in %s on line %d
+Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
 bool(false)
-unicode(3) "foo"
-unicode(4) "foo2"
+string(3) "foo"
+string(4) "foo2"
 Done

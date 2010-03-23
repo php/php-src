@@ -109,99 +109,99 @@ echo "Done";
 -- Iteration 1 --
 
 Warning: mb_convert_encoding(): Unknown encoding "0" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 2 --
 
 Warning: mb_convert_encoding(): Unknown encoding "1" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 3 --
 
 Warning: mb_convert_encoding(): Unknown encoding "12345" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 4 --
 
 Warning: mb_convert_encoding(): Unknown encoding "-2345" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 5 --
 
 Warning: mb_convert_encoding(): Unknown encoding "10.5" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 6 --
 
 Warning: mb_convert_encoding(): Unknown encoding "-10.5" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 7 --
 
 Warning: mb_convert_encoding(): Unknown encoding "123456789000" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 8 --
 
 Warning: mb_convert_encoding(): Unknown encoding "1.23456789E-9" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 9 --
 
 Warning: mb_convert_encoding(): Unknown encoding "0.5" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 10 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 11 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 12 --
 
 Warning: mb_convert_encoding(): Unknown encoding "1" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 13 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 14 --
 
 Warning: mb_convert_encoding(): Unknown encoding "1" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 15 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 16 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 17 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 18 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 19 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 20 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 21 --
 
 Warning: mb_convert_encoding(): Unknown encoding "Class A object" in %s on line %d
-unicode(0) ""
+string(0) ""
 
 -- Iteration 22 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 23 --
-unicode(24) "68656c6c6f2c20776f726c64"
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 24 --
 
-Warning: mb_convert_encoding() expects parameter 2 to be binary string, resource given in %s on line %d
-unicode(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, resource given in %s on line %d
+string(0) ""
 Done
 

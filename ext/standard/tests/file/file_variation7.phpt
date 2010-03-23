@@ -23,8 +23,7 @@ var_dump(file($filepath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
 unlink($filepath);
 
 ?>
---EXPECTF--
-Notice: fwrite(): 20 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
+--EXPECT--
 file():
 array(5) {
   [0]=>

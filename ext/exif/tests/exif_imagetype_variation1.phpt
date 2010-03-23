@@ -93,6 +93,8 @@ fclose($file_handle);
 
 echo "Done\n";
 ?>
+
+?>
 ===Done===
 --EXPECTF--
 *** Testing exif_imagetype() : different types for filename argument ***
@@ -140,34 +142,24 @@ Warning: exif_imagetype(0.5): failed to open stream: No such file or directory i
 bool(false)
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: exif_imagetype(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: exif_imagetype(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: exif_imagetype(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: exif_imagetype(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
-
-Warning: exif_imagetype(Array): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, array given in %s on line %d
+NULL
 -- Iteration 15 --
 
 Warning: exif_imagetype(1): failed to open stream: No such file or directory in %s on line %d
@@ -206,8 +198,8 @@ Warning: exif_imagetype(obj'ct): failed to open stream: No such file or director
 bool(false)
 -- Iteration 24 --
 
-Warning: exif_imagetype(Resource id #%d): failed to open stream: No such file or directory in %s on line %d
-bool(false)
+Warning: exif_imagetype() expects parameter 1 to be string, resource given in %s on line %d
+NULL
 -- Iteration 25 --
 
 Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
@@ -217,4 +209,6 @@ bool(false)
 Warning: exif_imagetype(): Filename cannot be empty in %s on line %d
 bool(false)
 Done
+
+?>
 ===Done===

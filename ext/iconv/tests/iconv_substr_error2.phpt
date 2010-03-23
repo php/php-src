@@ -5,8 +5,6 @@ Test iconv_substr() function : error conditions - Pass an unknown encoding
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_substr') or die("skip iconv_substr() is not available in this build");
 ?>
---XFAIL--
-Will fail until bug #48538 fixed 
 --FILE--
 <?php
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])

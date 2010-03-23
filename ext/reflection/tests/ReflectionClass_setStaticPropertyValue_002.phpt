@@ -56,5 +56,5 @@ NULL
 Class C does not have a property named 
 Class C does not have a property named 1.5
 
-Warning: ReflectionClass::setStaticPropertyValue() expects parameter 1 to be string (Unicode or binary), array given in %s on line 33
+Warning: ReflectionClass::setStaticPropertyValue() expects parameter 1 to be string, array given in %s on line 33
 NULL

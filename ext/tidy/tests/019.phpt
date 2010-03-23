@@ -21,20 +21,22 @@ tidy_repair_file($a, $a, $a, $a);
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: tidy_repair_string(): Could not load configuration file '1' in %s019.php on line 7
+--EXPECTF--	
+Warning: tidy_repair_string(): Could not load configuration file '1' in %s on line %d
 
-Warning: tidy_repair_string(): Could not set encoding '1' in %s019.php on line 7
+Warning: tidy_repair_string(): Could not set encoding '1' in %s on line %d
 
-Warning: tidy_repair_string() expects parameter 4 to be boolean, Unicode string given in %s019.php on line 8
+Warning: tidy_repair_string(): Could not load configuration file '' in %s on line %d
 
-Warning: tidy_repair_string(): Could not load configuration file '1' in %s019.php on line 9
+Warning: tidy_repair_string(): Could not load configuration file '1' in %s on line %d
 
-Warning: tidy_repair_string(): Could not set encoding '1' in %s019.php on line 9
+Warning: tidy_repair_string(): Could not set encoding '1' in %s on line %d
 
-Warning: tidy_repair_string() expects parameter 1 to be binary string, array given in %s019.php on line 10
+Warning: tidy_repair_string() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: tidy_repair_file() expects parameter 4 to be boolean, Unicode string given in %s019.php on line 13
+Warning: tidy_repair_file(): Filename cannot be empty in %s on line %d
 
-Warning: tidy_repair_file() expects parameter 1 to be binary string, array given in %s019.php on line 15
+Warning: tidy_repair_file(): Filename cannot be empty in %s on line %d
+
+Warning: tidy_repair_file() expects parameter 1 to be string, array given in %s on line %d
 Done

@@ -47,17 +47,17 @@ var_dump(mb_strrchr($string_mb, $needle2));
 *** Testing mb_strrchr() : basic functionality ***
 
 -- ASCII string: needle exists --
-unicode(6) "646566"
-unicode(6) "646566"
-unicode(8) "61626320"
+string(6) "646566"
+string(6) "646566"
+string(8) "61626320"
 
 -- ASCII string: needle doesn't exist --
 bool(false)
 
 -- Multibyte string: needle exists --
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
-unicode(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
-unicode(0) ""
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(106) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e380823031323334efbc95efbc96efbc97efbc98efbc99e38082"
+string(0) ""
 
 -- Multibyte string: needle doesn't exist --
 bool(false)

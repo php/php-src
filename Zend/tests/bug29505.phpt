@@ -14,15 +14,15 @@ var_dump(get_class_vars('Test'));
 ===DONE===
 --EXPECT--
 array(2) {
-  [u"empty"]=>
+  ["empty"]=>
   array(0) {
   }
-  [u"three"]=>
+  ["three"]=>
   array(3) {
     [0]=>
     int(1)
-    [u"b"]=>
-    unicode(1) "c"
+    ["b"]=>
+    string(1) "c"
     [3]=>
     array(0) {
     }

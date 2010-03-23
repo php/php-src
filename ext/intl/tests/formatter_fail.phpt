@@ -63,13 +63,13 @@ Warning: NumberFormatter::create() expects at least 2 parameters, 0 given in %s 
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-Warning: NumberFormatter::__construct() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: NumberFormatter::create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: NumberFormatter::create() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
-Warning: numfmt_create() expects parameter 1 to be binary string, array given in %s on line %d
+Warning: numfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'

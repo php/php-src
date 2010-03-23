@@ -29,7 +29,7 @@ unset($foo);
 unset($fooChild);
 
 ?>
---EXPECT--
+--EXPECTF--
 Foo::__construct
 FooChild::__construct
 Foo::__destruct

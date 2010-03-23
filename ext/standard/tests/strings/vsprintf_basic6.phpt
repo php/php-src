@@ -24,9 +24,9 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : basic functionality - using exponential format ***
-unicode(11) "1.000000e+3"
-unicode(23) "1.000000e+3 2.000000e+3"
-unicode(35) "1.000000e+3 2.000000e+3 3.000000e+3"
+string(11) "1.000000e+3"
+string(23) "1.000000e+3 2.000000e+3"
+string(35) "1.000000e+3 2.000000e+3 3.000000e+3"
 Done

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -160,7 +160,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 	
 	for (i = 0; i < sizeof(user_flags); ++i) {
 		if (args[i] != NULL) {
-			int chunk = snprintf(&buf[spb_len], sizeof(buf) - spb_len, "%c%c%c%s",
+			int chunk = slprintf(&buf[spb_len], sizeof(buf) - spb_len, "%c%c%c%s",
 				user_flags[i], (char)args_len[i], (char)(args_len[i] >> 8), args[i]);
 			
 			if ((spb_len + chunk) > sizeof(buf) || chunk <= 0) {
@@ -224,7 +224,7 @@ PHP_FUNCTION(ibase_service_attach)
 	}
 
 	/* construct the spb, hack the service name into it as well */
-	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%s" "%s:service_mgr",
+	spb_len = slprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%s" "%s:service_mgr",
 		isc_spb_version, isc_spb_current_version, isc_spb_user_name, (char)ulen,
 		user, isc_spb_password, (char)plen, pass, host);
 
@@ -321,7 +321,7 @@ query_loop:
 					heap_p = heap_buf + res_size;
 				}
 				result += 2;
-				snprintf(heap_p, sizeof(heap_buf_size), "%s\n", result);
+				snprintf(heap_p, heap_buf_size - (heap_buf - heap_p), "%s\n", result);
 				heap_p += line_len +2;
 				goto query_loop; /* repeat until result is exhausted */
 
@@ -440,7 +440,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 		"Interbase service manager handle", le_service);
 
 	/* fill the param buffer */
-	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%s%c%c%c%c%c",
+	spb_len = slprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%s%c%c%c%c%c",
 		operation, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db,
 		isc_spb_bkp_file, (char)bklen, (char)(bklen >> 8), bk, isc_spb_options,
 		(char)opts,(char)(opts >> 8), (char)(opts >> 16), (char)(opts >> 24));
@@ -542,7 +542,7 @@ options_argument:
 			case isc_spb_prp_deny_new_transactions:
 			case isc_spb_prp_deny_new_attachments:
 			case isc_spb_prp_set_sql_dialect:
-				spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%c%c",
+				spb_len = slprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%c%c",
 					svc_action, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db,
 					(char)action, (char)argument, (char)(argument >> 8), (char)(argument >> 16),
 					(char)(argument >> 24));
@@ -551,7 +551,7 @@ options_argument:
 			case isc_spb_prp_reserve_space:
 			case isc_spb_prp_write_mode:
 			case isc_spb_prp_access_mode:
-				spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c",
+				spb_len = slprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c",
 					isc_action_svc_properties, isc_spb_dbname, (char)dblen, (char)(dblen >> 8),
 					db, (char)action, (char)argument);
 		}

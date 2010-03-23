@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -55,6 +55,7 @@ PHP_MSHUTDOWN_FUNCTION(miconv);
 PHP_MINFO_FUNCTION(miconv);
 
 PHP_NAMED_FUNCTION(php_if_iconv);
+PHP_FUNCTION(ob_iconv_handler);
 PHP_FUNCTION(iconv_get_encoding);
 PHP_FUNCTION(iconv_set_encoding);
 PHP_FUNCTION(iconv_strlen);
@@ -92,7 +93,7 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #endif
 
 #ifndef ICONV_CSNMAXLEN
-# define ICONV_CSNMAXLEN 64
+#define ICONV_CSNMAXLEN 64
 #endif
 
 /* {{{ typedef enum php_iconv_err_t */

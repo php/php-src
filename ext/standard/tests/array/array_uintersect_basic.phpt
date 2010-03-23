@@ -23,19 +23,19 @@ var_dump($result);
 ?>
 --EXPECTF--
 array(3) {
-  [u"0.1"]=>
+  ["0.1"]=>
   object(cr)#%d (1) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(9)
   }
   [1]=>
   object(cr)#%d (1) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(4)
   }
   [2]=>
   object(cr)#%d (1) {
-    [u"priv_member":u"cr":private]=>
+    ["priv_member":"cr":private]=>
     int(-15)
   }
 }

@@ -88,53 +88,53 @@ fclose($file_handle);  //closing the file handle
 --EXPECTF--
 *** Testing str_pad() function: with unexpected inputs for 'input' argument ***
 -- Iteration 1 --
-unicode(20) "0                   "
+string(20) "0                   "
 -- Iteration 2 --
-unicode(20) "1                   "
+string(20) "1                   "
 -- Iteration 3 --
-unicode(20) "-2                  "
+string(20) "-2                  "
 -- Iteration 4 --
-unicode(20) "2147483647          "
+string(20) "2147483647          "
 -- Iteration 5 --
-unicode(20) "-2147483648         "
+string(20) "-2147483648         "
 -- Iteration 6 --
-unicode(20) "10.5                "
+string(20) "10.5                "
 -- Iteration 7 --
-unicode(20) "-20.5               "
+string(20) "-20.5               "
 -- Iteration 8 --
-unicode(20) "101234567000        "
+string(20) "101234567000        "
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: str_pad() expects parameter 1 to be string, array given in %s on line %d
 NULL
 -- Iteration 12 --
-unicode(20) "1                   "
+string(20) "1                   "
 -- Iteration 13 --
-unicode(20) "                    "
+string(20) "                    "
 -- Iteration 14 --
-unicode(20) "1                   "
+string(20) "1                   "
 -- Iteration 15 --
-unicode(20) "                    "
+string(20) "                    "
 -- Iteration 16 --
-unicode(20) "                    "
+string(20) "                    "
 -- Iteration 17 --
-unicode(20) "                    "
+string(20) "                    "
 -- Iteration 18 --
-unicode(20) "sample object       "
+string(20) "sample object       "
 -- Iteration 19 --
 
-Warning: str_pad() expects parameter 1 to be string (Unicode or binary), resource given in %s on line %d
+Warning: str_pad() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 20 --
-unicode(20) "                    "
+string(20) "                    "
 -- Iteration 21 --
-unicode(20) "                    "
+string(20) "                    "
 ===DONE===

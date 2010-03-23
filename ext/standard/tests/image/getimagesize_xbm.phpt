@@ -30,9 +30,9 @@ array(5) {
   [2]=>
   int(16)
   [3]=>
-  unicode(22) "width="75" height="50""
-  [u"mime"]=>
-  unicode(9) "image/xbm"
+  string(22) "width="75" height="50""
+  ["mime"]=>
+  string(9) "image/xbm"
 }
 array(0) {
 }

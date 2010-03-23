@@ -30,11 +30,11 @@ function ut_main()
         $str_res .= "\nLocale is: $locale\n";
         $fmt = ut_msgfmt_create( $locale, $pattern );
 		if(!$fmt) {
-			$str_res .= dump_str(intl_get_error_message())."\n";
+			$str_res .= dump(intl_get_error_message())."\n";
 			continue;
 		}
-        $str_res .= dump_str( ut_msgfmt_format( $fmt, array($m, $t, $m/$t) ) ) . "\n";
-		$str_res .= dump_str( ut_msgfmt_format_message($locale, $pattern, array($m, $t, $m/$t))) . "\n";
+        $str_res .= dump( ut_msgfmt_format( $fmt, array($m, $t, $m/$t) ) ) . "\n";
+		$str_res .= dump( ut_msgfmt_format_message($locale, $pattern, array($m, $t, $m/$t))) . "\n";
     }
     return $str_res;
 }
@@ -66,5 +66,5 @@ Locale is: root
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 Locale is: fr
-'C'est la vie!'
-'C'est la vie!'
+'C\'est la vie!'
+'C\'est la vie!'

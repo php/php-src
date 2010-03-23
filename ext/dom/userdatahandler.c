@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,6 +27,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+
 /*
 * class domuserdatahandler 
 *
@@ -41,8 +42,7 @@ const zend_function_entry php_dom_userdatahandler_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-
-/* {{{ proto dom_void dom_userdatahandler_handle(short operation, string key, domobject data, node src, node dst) U
+/* {{{ proto dom_void dom_userdatahandler_handle(short operation, string key, domobject data, node src, node dst);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-handleUserDataEvent
 Since: 
 */

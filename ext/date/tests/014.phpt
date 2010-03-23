@@ -1,9 +1,8 @@
 --TEST--
 timezone_offset_get() tests
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 
 $dto = date_create("2006-12-12");
 var_dump($dto);
@@ -18,14 +17,14 @@ var_dump(timezone_offset_get($dto, $dtz));
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECTF-- 
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "2006-12-12 00:00:00"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "2006-12-12 00:00:00"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(3) "UTC"
+  ["timezone"]=>
+  string(3) "UTC"
 }
 object(DateTimeZone)#%d (0) {
 }

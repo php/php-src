@@ -82,9 +82,7 @@ foreach($inputs as $input) {
 --EXPECTF--
 *** Testing count_chars() function: with unexpected inputs for 'mode' argument ***
 -- Iteration 1 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 2 --
 bool(true)
 -- Iteration 3 --
@@ -100,9 +98,7 @@ bool(false)
 Warning: count_chars(): Unknown mode in %s on line %d
 bool(false)
 -- Iteration 6 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 7 --
 bool(true)
 -- Iteration 8 --
@@ -128,30 +124,22 @@ bool(false)
 -- Iteration 13 --
 bool(true)
 -- Iteration 14 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 15 --
 bool(true)
 -- Iteration 16 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 17 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 18 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 19 --
 
-Warning: count_chars() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
@@ -168,11 +156,7 @@ bool(false)
 Warning: count_chars() expects parameter 2 to be long, object given in %s on line %d
 bool(false)
 -- Iteration 24 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 -- Iteration 25 --
-
-Warning: count_chars(): Only mode=1 is supported with Unicode strings in %s on line %d
-bool(false)
+bool(true)
 ===DONE===

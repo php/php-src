@@ -4,7 +4,6 @@ Verbose  tidy_getopt()
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --INI--
 tidy.default_config=
-unicode.script_encoding=latin1
 --FILE--
 <?php
 		$a = new tidy(dirname(__FILE__)."/007.html");
@@ -20,11 +19,11 @@ unicode.script_encoding=latin1
 ?>
 --EXPECTF--
 Current Value of 'tidy-mark': bool(false)
-Current Value of 'error-file': unicode(0) ""
+Current Value of 'error-file': string(0) ""
 Current Value of 'tab-size': int(8)
 
 Warning: tidy::getOpt(): Unknown Tidy Configuration Option 'bogus-opt' in %s007.php on line 10
 bool(false)
 
-Warning: Could not convert Unicode string to binary string (converter US-ASCII failed on character {U+00E0} at offset 17) in %s007.php on line 11
+Warning: tidy_getopt(): Unknown Tidy Configuration Option 'non-ASCII string рсч' in %s007.php on line 11
 bool(false)

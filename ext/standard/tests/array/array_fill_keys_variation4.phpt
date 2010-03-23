@@ -52,32 +52,32 @@ echo "Done";
 
 -- Testing array_fill_keys() function with float --
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   float(2.4)
 }
 
 -- Testing array_fill_keys() function with null --
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   NULL
 }
 
 -- Testing array_fill_keys() function with object --
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   object(classA)#%d (0) {
   }
 }
 
 -- Testing array_fill_keys() function with boolean --
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   bool(false)
 }
 
 -- Testing array_fill_keys() function with resource --
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   resource(%d) of type (stream)
 }
 
@@ -85,7 +85,7 @@ array(1) {
 
 Notice: Undefined variable: unset_var in %sarray_fill_keys_variation4.php on line %d
 array(1) {
-  [u"one"]=>
+  ["one"]=>
   NULL
 }
 Done

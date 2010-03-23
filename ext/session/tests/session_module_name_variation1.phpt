@@ -29,8 +29,7 @@ ob_end_flush();
 Warning: session_module_name(): Cannot find named PHP session module (blah) in %s on line %d
 bool(false)
 bool(true)
-unicode(5) "files"
+string(%d) "%s"
 bool(true)
-unicode(5) "files"
+string(%d) "%s"
 Done
-

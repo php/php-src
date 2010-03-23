@@ -7,3 +7,4 @@ class test implements a {
 ?>
 --EXPECTF--
 Fatal error: Interface 'a' not found in %sbug30519.php on line 2
+

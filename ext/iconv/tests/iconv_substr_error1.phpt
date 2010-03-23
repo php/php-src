@@ -32,8 +32,8 @@ echo "\n-- Testing iconv_substr() function with less than expected no. of argume
 $str = 'string_val';
 var_dump( iconv_substr($str) );
 
+echo "Done";
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_substr() : error conditions ***
 
@@ -46,4 +46,5 @@ bool(false)
 
 Warning: iconv_substr() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
-===DONE===
+Done
+

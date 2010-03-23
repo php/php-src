@@ -1,5 +1,5 @@
 --TEST--
-Test strrpos() function : usage variations - checking binary safe with 'needle' argument
+Test strrpos() function : usage variations - checking bianry safe with 'needle' argument
 --FILE--
 <?php
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
@@ -39,12 +39,8 @@ bool(false)
 int(12)
 int(12)
 bool(false)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 bool(false)
-
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
 bool(false)
 int(0)
 bool(false)

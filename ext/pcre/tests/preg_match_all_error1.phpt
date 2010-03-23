@@ -56,7 +56,7 @@ NULL
 
 Arg value is Array
 
-Warning: preg_match_all() expects parameter 1 to be string (Unicode or binary), array given in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all() expects parameter 1 to be string, array given in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 
@@ -66,16 +66,16 @@ array(1) {
   [0]=>
   array(4) {
     [0]=>
-    unicode(1) "t"
+    string(1) "t"
     [1]=>
-    unicode(1) "e"
+    string(1) "e"
     [2]=>
-    unicode(1) "s"
+    string(1) "s"
     [3]=>
-    unicode(1) "t"
+    string(1) "t"
   }
 }
 
-Warning: preg_match_all() expects parameter 1 to be string (Unicode or binary), object given in %spreg_match_all_error1.php on line %d
+Warning: preg_match_all() expects parameter 1 to be string, object given in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL

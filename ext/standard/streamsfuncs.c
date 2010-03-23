@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 /* Streams based network functions */
 
 #if HAVE_SOCKETPAIR
-/* {{{ proto array stream_socket_pair(int domain, int type, int protocol) U
+/* {{{ proto array stream_socket_pair(int domain, int type, int protocol)
    Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
@@ -81,7 +81,7 @@ PHP_FUNCTION(stream_socket_pair)
 /* }}} */
 #endif
 
-/* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode [, string &errstring [, double timeout [, long flags [, resource context]]]]]) U
+/* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode [, string &errstring [, double timeout [, long flags [, resource context]]]]])
    Open a client connection to a remote address */
 PHP_FUNCTION(stream_socket_client)
 {
@@ -116,19 +116,19 @@ PHP_FUNCTION(stream_socket_client)
 	
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-	tv.tv_sec = (long) (conv / 1000000);
+	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
-	if (zerrno) {
+	if (zerrno)	{
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_EMPTY_UNICODE(zerrstr);
+		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
+	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
@@ -152,10 +152,9 @@ PHP_FUNCTION(stream_socket_client)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* errstr is emalloc'd, either assign it to STRVAL if !UG(unicode)
-			 * Or free it post-conversion if UG(unicode) */
+			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			ZVAL_RT_STRING(zerrstr, errstr, ZSTR_AUTOFREE);
+			ZVAL_STRING(zerrstr, errstr, 0);
 		} else if (errstr) {
 			efree(errstr);
 		}
@@ -171,7 +170,7 @@ PHP_FUNCTION(stream_socket_client)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_server(string localaddress [, long &errcode [, string &errstring [, long flags [, resource context]]]]) U
+/* {{{ proto resource stream_socket_server(string localaddress [, long &errcode [, string &errstring [, long flags [, resource context]]]])
    Create a server socket bound to localaddress */
 PHP_FUNCTION(stream_socket_server)
 {
@@ -202,10 +201,10 @@ PHP_FUNCTION(stream_socket_server)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_EMPTY_UNICODE(zerrstr);
+		ZVAL_STRING(zerrstr, "", 1);
 	}
 
-	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
+	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			STREAM_XPORT_SERVER | flags,
 			NULL, NULL, context, &errstr, &err);
 			
@@ -219,10 +218,9 @@ PHP_FUNCTION(stream_socket_server)
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			/* errstr is emalloc'd, either assign it to STRVAL if !UG(unicode)
-			 * Or free it post-conversion if UG(unicode) */
+			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			ZVAL_RT_STRING(zerrstr, errstr, ZSTR_AUTOFREE);
+			ZVAL_STRING(zerrstr, errstr, 0);
 		} else if (errstr) {
 			efree(errstr);
 		}
@@ -237,7 +235,7 @@ PHP_FUNCTION(stream_socket_server)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout [, string &peername ]]) U
+/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout [, string &peername ]])
    Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
@@ -260,7 +258,7 @@ PHP_FUNCTION(stream_socket_accept)
 	
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-	tv.tv_sec = (long) (conv / 1000000);
+	tv.tv_sec = conv / 1000000;
 	tv.tv_usec = conv % 1000000;
 
 	if (zpeername) {
@@ -276,7 +274,7 @@ PHP_FUNCTION(stream_socket_accept)
 				TSRMLS_CC) && clistream) {
 		
 		if (peername) {
-			ZVAL_RT_STRINGL(zpeername, peername, peername_len, ZSTR_AUTOFREE);
+			ZVAL_STRINGL(zpeername, peername, peername_len, 0);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -290,7 +288,7 @@ PHP_FUNCTION(stream_socket_accept)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer) U
+/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer)
    Returns either the locally bound or remote name for a socket stream */
 PHP_FUNCTION(stream_socket_get_name)
 {
@@ -314,11 +312,11 @@ PHP_FUNCTION(stream_socket_get_name)
 		RETURN_FALSE;
 	}
 
-	RETURN_RT_STRINGL(name, name_len, ZSTR_AUTOFREE);
+	RETURN_STRINGL(name, name_len, 0);
 }
 /* }}} */
 
-/* {{{ proto long stream_socket_sendto(resouce stream, string data [, long flags [, string target_addr]]) U
+/* {{{ proto long stream_socket_sendto(resouce stream, string data [, long flags [, string target_addr]])
    Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
 {
@@ -330,7 +328,6 @@ PHP_FUNCTION(stream_socket_sendto)
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
 	
-	/* Typically we'll be sending binary data, but implicit RT conversion from unicode is acceptable */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -348,7 +345,7 @@ PHP_FUNCTION(stream_socket_sendto)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_recvfrom(resource stream, long amount [, long flags [, string &remote_addr]]) U
+/* {{{ proto string stream_socket_recvfrom(resource stream, long amount [, long flags [, string &remote_addr]])
    Receives data from a socket stream */
 PHP_FUNCTION(stream_socket_recvfrom)
 {
@@ -386,11 +383,17 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	if (recvd >= 0) {
 		if (zremote) {
-			ZVAL_RT_STRINGL(zremote, remote_addr, remote_addr_len, ZSTR_AUTOFREE);
+			ZVAL_STRINGL(zremote, remote_addr, remote_addr_len, 0);
 		}
 		read_buf[recvd] = '\0';
 
-		RETURN_RT_STRINGL(read_buf, recvd, ZSTR_AUTOFREE);
+		if (PG(magic_quotes_runtime)) {
+			Z_TYPE_P(return_value) = IS_STRING;
+			Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+			return;
+		} else {
+			RETURN_STRINGL(read_buf, recvd, 0);
+		}
 	}
 
 	efree(read_buf);
@@ -398,15 +401,15 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]]) U
+/* {{{ proto string stream_get_contents(resource source [, long maxlen [, long offset]])
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
 	zval *zsrc;
-	long maxlen = PHP_STREAM_COPY_ALL, pos = 0, real_maxlen;
-	int len;
-	void *contents = NULL;
+	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	int len, newlen;
+	char *contents = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &pos) == FAILURE) {
 		RETURN_FALSE;
@@ -419,39 +422,21 @@ PHP_FUNCTION(stream_get_contents)
 		RETURN_FALSE;
 	}
 
-	if (maxlen <= 0 || stream->readbuf_type == IS_STRING) {
-		real_maxlen = maxlen;
-	} else {
-		/* Allows worst case scenario of each input char being turned into two UChars
-		 * UTODO: Have this take converter into account, since many never generate surrogate pairs */
-		real_maxlen = maxlen * 2;
-	}
-
-	len = php_stream_copy_to_mem_ex(stream, stream->readbuf_type, &contents, real_maxlen, maxlen, 0);
-
-	if (stream->readbuf_type == IS_STRING) {
-		if (len > 0) {
-			RETVAL_STRINGL(contents, len, 0);
-		} else {
-			if (contents) {
-				efree(contents);
-			}
-			RETVAL_EMPTY_STRING();
+	len = php_stream_copy_to_mem(stream, &contents, maxlen, 0);
+	
+	if (contents) {
+		if (len && PG(magic_quotes_runtime)) {
+			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
+			len = newlen;
 		}
+		RETVAL_STRINGL(contents, len, 0);
 	} else {
-		if (len > 0) {
-			RETVAL_UNICODEL(contents, len, 0);
-		} else {
-			if (contents) {
-				efree(contents);
-			}
-			RETVAL_EMPTY_UNICODE();
-		}
+		RETVAL_EMPTY_STRING();
 	}
 }
 /* }}} */
 
-/* {{{ proto long stream_copy_to_stream(resource source, resource dest [, long maxlen [, long pos]]) U
+/* {{{ proto long stream_copy_to_stream(resource source, resource dest [, long maxlen [, long pos]])
    Reads up to maxlen bytes from source stream and writes them to dest stream. */
 PHP_FUNCTION(stream_copy_to_stream)
 {
@@ -482,7 +467,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_meta_data(resource fp) U
+/* {{{ proto array stream_get_meta_data(resource fp)
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
@@ -501,78 +486,53 @@ PHP_FUNCTION(stream_get_meta_data)
 		MAKE_STD_ZVAL(newval);
 		MAKE_COPY_ZVAL(&stream->wrapperdata, newval);
 
-		add_ascii_assoc_zval(return_value, "wrapper_data", newval);
+		add_assoc_zval(return_value, "wrapper_data", newval);
 	}
 	if (stream->wrapper) {
-		add_ascii_assoc_rt_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, ZSTR_DUPLICATE);
+		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
 	}
-	add_ascii_assoc_rt_string(return_value, "stream_type", (char *)stream->ops->label, ZSTR_DUPLICATE);
+	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
 
-	add_ascii_assoc_rt_string(return_value, "mode", stream->mode, ZSTR_DUPLICATE);
+	add_assoc_string(return_value, "mode", stream->mode, 1);
 	
-	if (stream->readfilters.head) {
+#if 0	/* TODO: needs updating for new filter API */
+	if (stream->filterhead) {
 		php_stream_filter *filter;
 		
 		MAKE_STD_ZVAL(newval);
 		array_init(newval);
 		
-		for (filter = stream->readfilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_rt_string(newval, filter->name, ZSTR_DUPLICATE);
+		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
+			add_next_index_string(newval, (char *)filter->fops->label, 1);
 		}
 
-		add_ascii_assoc_zval(return_value, "read_filters", newval);
+		add_assoc_zval(return_value, "filters", newval);
 	}
-
-	if (stream->writefilters.head) {
-		php_stream_filter *filter;
-		
-		MAKE_STD_ZVAL(newval);
-		array_init(newval);
-		
-		for (filter = stream->writefilters.head; filter != NULL; filter = filter->next) {
-			add_next_index_rt_string(newval, filter->name, ZSTR_DUPLICATE);
-		}
-
-		add_ascii_assoc_zval(return_value, "write_filters", newval);
-	}
+#endif
 	
-	if (stream->readbuf_type == IS_UNICODE) {
-		int readbuf_len = u_countChar32(stream->readbuf.u + stream->readpos, stream->writepos - stream->readpos);
-		add_ascii_assoc_long(return_value, "unread_bytes", UBYTES(stream->writepos - stream->readpos));
-		add_ascii_assoc_long(return_value, "unread_chars", readbuf_len);
-	} else { /* IS_STRING */
-		add_ascii_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
-		add_ascii_assoc_long(return_value, "unread_chars", stream->writepos - stream->readpos);
-	}
+	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 
-	add_ascii_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
+	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
-		UChar *decoded_path = NULL;
-		int decoded_path_len = 0;
-
-		if (SUCCESS == php_stream_path_decode(stream->wrapper, &decoded_path, &decoded_path_len, stream->orig_path, strlen(stream->orig_path), REPORT_ERRORS, stream->context)) {
-			add_ascii_assoc_unicodel(return_value, "uri", decoded_path, decoded_path_len, 0);
-		} else {
-			add_ascii_assoc_null(return_value, "uri");
-		}
+		add_assoc_string(return_value, "uri", stream->orig_path, 1);
 	}
 
 	if (!php_stream_populate_meta_data(stream, return_value)) {
-		add_ascii_assoc_bool(return_value, "timed_out", 0);
-		add_ascii_assoc_bool(return_value, "blocked", 1);
-		add_ascii_assoc_bool(return_value, "eof", php_stream_eof(stream));
+		add_assoc_bool(return_value, "timed_out", 0);
+		add_assoc_bool(return_value, "blocked", 1);
+		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
 	}
 
 }
 /* }}} */
 
-/* {{{ proto array stream_get_transports() U
+/* {{{ proto array stream_get_transports()
    Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
-	zstr stream_xport;
-	uint stream_xport_len;
+	char *stream_xport;
+	int stream_xport_len;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -586,7 +546,7 @@ PHP_FUNCTION(stream_get_transports)
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
 					&num_key, 0, &pos) == HASH_KEY_IS_STRING) {
-			add_next_index_rt_stringl(return_value, stream_xport.s, stream_xport_len - 1, ZSTR_DUPLICATE);
+			add_next_index_stringl(return_value, stream_xport, stream_xport_len - 1, 1);
 			zend_hash_move_forward_ex(stream_xport_hash, &pos);
 		}
 	} else {
@@ -595,13 +555,13 @@ PHP_FUNCTION(stream_get_transports)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_wrappers() U
+/* {{{ proto array stream_get_wrappers()
     Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
-	zstr stream_protocol;
-	uint key_flags, stream_protocol_len = 0;
+	char *stream_protocol;
+	int key_flags, stream_protocol_len = 0;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -615,7 +575,7 @@ PHP_FUNCTION(stream_get_wrappers)
 			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
-					add_next_index_rt_stringl(return_value, stream_protocol.s, stream_protocol_len - 1, ZSTR_DUPLICATE);
+					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len - 1, 1);
 				}
 		}
 	} else {
@@ -764,7 +724,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec]) U
+/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
@@ -890,7 +850,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(ps[0], notifycode);
 	ZVAL_LONG(ps[1], severity);
 	if (xmsg) {
-		ZVAL_RT_STRING(ps[2], xmsg, ZSTR_DUPLICATE);
+		ZVAL_STRING(ps[2], xmsg, 1);
 	} else {
 		ZVAL_NULL(ps[2]);
 	}
@@ -921,50 +881,25 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 {
 	HashPosition pos, opos;
 	zval **wval, **oval;
-	zstr wkey, okey;
-	uint wkey_len, okey_len;
+	char *wkey, *okey;
+	int wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
 	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void**)&wval, &pos)) {
-		int wtype = zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, &num_key, 0, &pos);
-		if (((HASH_KEY_IS_STRING == wtype) || (HASH_KEY_IS_UNICODE == wtype))
+		if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, &num_key, 0, &pos)
 				&& Z_TYPE_PP(wval) == IS_ARRAY) {
-			if (HASH_KEY_IS_UNICODE == wtype) {
-				/* fold to string */
-				UErrorCode errCode = 0;
-				char *tmp;
-				int tmp_len;
-
-				zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &tmp, &tmp_len, wkey.u, wkey_len, &errCode);
-				wkey.s = tmp;
-				wkey_len = tmp_len;
-			}
 
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(wval), &opos);
 			while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(wval), (void**)&oval, &opos)) {
-				int otype = zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, &num_key, 0, &opos);
-				if (HASH_KEY_IS_UNICODE == otype) {
-					/* fold to string */
-					UErrorCode errCode = 0;
-					char *tmp;
-					int tmp_len;
-	
-					zend_unicode_to_string_ex(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &tmp, &tmp_len, okey.u, okey_len, &errCode);
-					okey.s = tmp;
-					okey_len = tmp_len;
-					php_stream_context_set_option(context, wkey.s, okey.s, *oval);
-					efree(okey.v);
-				}
-				if (HASH_KEY_IS_STRING == otype) {
-					php_stream_context_set_option(context, wkey.s, okey.s, *oval);
+
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, &num_key, 0, &opos)) {
+					php_stream_context_set_option(context, wkey, okey, *oval);
 				}
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
 			}
-			if (wtype == HASH_KEY_IS_UNICODE) {
-				efree(wkey.v);
-			}
+
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
 		}
@@ -979,7 +914,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 	int ret = SUCCESS;
 	zval **tmp;
 
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
 		
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -992,57 +927,14 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		Z_ADDREF_P(*tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
 			parse_context_options(context, *tmp TSRMLS_CC);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter");
 		}
 	}
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "encoding", sizeof("encoding"), (void**)&tmp)) {
-		zval strval = **tmp;
-
-		if (context->input_encoding) {
-			efree(context->input_encoding);
-		}
-		if (context->output_encoding) {
-			efree(context->output_encoding);
-		}
-		zval_copy_ctor(&strval);
-		convert_to_string(&strval);
-		context->input_encoding = Z_STRVAL(strval);
-		context->output_encoding = estrdup(Z_STRVAL(strval));
-	}
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "input_encoding", sizeof("input_encoding"), (void**)&tmp)) {
-		zval strval = **tmp;
-
-		if (context->input_encoding) {
-			efree(context->input_encoding);
-		}
-
-		zval_copy_ctor(&strval);
-		convert_to_string(&strval);
-		context->input_encoding = Z_STRVAL(strval);
-	}
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "output_encoding", sizeof("output_encoding"), (void**)&tmp)) {
-		zval strval = **tmp;
-
-		if (context->output_encoding) {
-			efree(context->output_encoding);
-		}
-
-		zval_copy_ctor(&strval);
-		convert_to_string(&strval);
-		context->output_encoding = Z_STRVAL(strval);
-	}
-	if (SUCCESS == zend_ascii_hash_find(Z_ARRVAL_P(params), "default_mode", sizeof("default_mode"), (void**)&tmp)) {
-		zval longval = **tmp;
-
-		zval_copy_ctor(&longval);
-		convert_to_long(&longval);
-		context->default_mode = Z_LVAL(longval);
-		zval_dtor(&longval);
-	}
+	
 	return ret;
 }
 
@@ -1075,7 +967,7 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array stream_context_get_options(resource context|resource stream) U
+/* {{{ proto array stream_context_get_options(resource context|resource stream)
    Retrieve options for a stream/wrapper/context */
 PHP_FUNCTION(stream_context_get_options)
 {
@@ -1095,9 +987,8 @@ PHP_FUNCTION(stream_context_get_options)
 }
 /* }}} */
 
-/* {{{ proto bool stream_context_set_option(resource context|resource stream, string wrappername, string optionname, mixed value) U
- * Overloaded form: stream_context_set_option(resource context|resource stream, array options)
- * Set an option (or several options) for a wrapper */
+/* {{{ proto bool stream_context_set_option(resource context|resource stream, string wrappername, string optionname, mixed value)
+   Set an option for a wrapper */
 PHP_FUNCTION(stream_context_set_option)
 {
 	zval *options = NULL, *zcontext = NULL, *zvalue = NULL;
@@ -1132,7 +1023,7 @@ PHP_FUNCTION(stream_context_set_option)
 }
 /* }}} */
 
-/* {{{ proto bool stream_context_set_params(resource context|resource stream, array options) U
+/* {{{ proto bool stream_context_set_params(resource context|resource stream, array options)
    Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
 {
@@ -1153,7 +1044,7 @@ PHP_FUNCTION(stream_context_set_params)
 }
 /* }}} */
 
-/* {{{ proto array stream_context_get_params(resource context|resource stream) U
+/* {{{ proto array stream_context_get_params(resource context|resource stream)
    Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
 {
@@ -1172,17 +1063,16 @@ PHP_FUNCTION(stream_context_get_params)
 
 	array_init(return_value);
 	if (context->notifier && context->notifier->ptr && context->notifier->func == user_space_stream_notifier) {
-		add_ascii_assoc_zval_ex(return_value, ZEND_STRS("notification"), context->notifier->ptr);
+		add_assoc_zval_ex(return_value, ZEND_STRS("notification"), context->notifier->ptr);
 		Z_ADDREF_P(context->notifier->ptr);
 	}
 	ALLOC_INIT_ZVAL(options);
 	ZVAL_ZVAL(options, context->options, 1, 0);
-	add_ascii_assoc_zval_ex(return_value, ZEND_STRS("options"), options);
+	add_assoc_zval_ex(return_value, ZEND_STRS("options"), options);
 }
 /* }}} */
 
-
-/* {{{ proto resource stream_context_get_default([array options]) U
+/* {{{ proto resource stream_context_get_default([array options])
    Get a handle on the default file/stream context and optionally set parameters */
 PHP_FUNCTION(stream_context_get_default)
 {
@@ -1206,7 +1096,7 @@ PHP_FUNCTION(stream_context_get_default)
 }
 /* }}} */
 
-/* {{{ proto resource stream_context_set_default(array options) U
+/* {{{ proto resource stream_context_set_default(array options)
    Set default file/stream context, returns the context as a resource */
 PHP_FUNCTION(stream_context_set_default)
 {
@@ -1228,7 +1118,7 @@ PHP_FUNCTION(stream_context_set_default)
 }
 /* }}} */
 
-/* {{{ proto resource stream_context_create([array options[, array params]]) U
+/* {{{ proto resource stream_context_create([array options[, array params]])
    Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
 {
@@ -1292,7 +1182,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_FALSE;
 		}
 
-		if (append) {
+		if (append) { 
 			ret = php_stream_filter_append_ex(&stream->readfilters, filter TSRMLS_CC);
 		} else {
 			ret = php_stream_filter_prepend_ex(&stream->readfilters, filter TSRMLS_CC);
@@ -1300,9 +1190,6 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (ret != SUCCESS) {
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			RETURN_FALSE;
-		}
-		if (FAILURE == php_stream_filter_check_chain(&stream->readfilters)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Readfilter chain unstable -- unresolvable unicode/string conversion conflict");
 		}
 	}
 
@@ -1321,9 +1208,6 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			RETURN_FALSE;
 		}
-		if (FAILURE == php_stream_filter_check_chain(&stream->writefilters)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writefilter chain unstable -- unresolvable unicode/string conversion conflict");
-		}
 	}
 
 	if (filter) {
@@ -1334,7 +1218,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, mixed filterparams]]) U
+/* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
    Prepend a filter to a stream */
 PHP_FUNCTION(stream_filter_prepend)
 {
@@ -1342,7 +1226,7 @@ PHP_FUNCTION(stream_filter_prepend)
 }
 /* }}} */
 
-/* {{{ proto resource stream_filter_append(resource stream, string filtername[, int read_write[, mixed filterparams]]) U
+/* {{{ proto resource stream_filter_append(resource stream, string filtername[, int read_write[, string filterparams]])
    Append a filter to a stream */
 PHP_FUNCTION(stream_filter_append)
 {
@@ -1350,7 +1234,7 @@ PHP_FUNCTION(stream_filter_append)
 }
 /* }}} */
 
-/* {{{ proto bool stream_filter_remove(resource stream_filter) U
+/* {{{ proto bool stream_filter_remove(resource stream_filter)
 	Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource */
 PHP_FUNCTION(stream_filter_remove)
 {
@@ -1376,27 +1260,25 @@ PHP_FUNCTION(stream_filter_remove)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not invalidate filter, not removing");
 		RETURN_FALSE;
 	} else {
-		if (FAILURE == php_stream_filter_check_chain(filter->chain)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filterchain unstable -- unresolvable unicode/string conversion conflict");
-		}
-
 		php_stream_filter_remove(filter, 1 TSRMLS_CC);
 		RETURN_TRUE;
 	}
 }
 /* }}} */
 
-/* {{{ proto string stream_get_line(resource stream, int maxlen [, string ending]) U
+/* {{{ proto string stream_get_line(resource stream, int maxlen [, string ending])
    Read up to maxlen bytes from a stream or until the ending string is found */
 PHP_FUNCTION(stream_get_line)
 {
+	char *str = NULL;
+	int str_len = 0;
 	long max_length;
 	zval *zstream;
+	char *buf;
 	size_t buf_size;
 	php_stream *stream;
-	zval **delim = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|Z", &zstream, &max_length, &delim) == FAILURE) {
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|s", &zstream, &max_length, &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1410,54 +1292,22 @@ PHP_FUNCTION(stream_get_line)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (stream->readbuf_type == IS_UNICODE) {
-		UChar *buf;
-		UChar *d = NULL;
-		int dlen = 0;
-
-		if (delim) {
-			convert_to_unicode_ex(delim);
-			d = Z_USTRVAL_PP(delim);
-			dlen = Z_USTRLEN_PP(delim);
-		}
-
-		/* maxchars == maxlength will prevent the otherwise generous maxlen == max_length * 2
-		   from allocating beyond what's requested */
-		buf = php_stream_get_record_unicode(stream, max_length * 2, max_length, &buf_size, d, dlen TSRMLS_CC);
-		if (!buf) {
-			RETURN_FALSE;
-		}
-
-		RETURN_UNICODEL(buf, buf_size, 0);
-	} else { /* IS_STRING */
-		char *buf;
-		char *d = NULL;
-		int dlen = 0;
-
-		if (delim) {
-			convert_to_string_ex(delim);
-			d = Z_STRVAL_PP(delim);
-			dlen = Z_STRLEN_PP(delim);
-		}
-
-		buf = php_stream_get_record(stream, max_length, &buf_size, d, dlen TSRMLS_CC);
-		if (!buf) {
-			RETURN_FALSE;
-		}
-
+	if ((buf = php_stream_get_record(stream, max_length, &buf_size, str, str_len TSRMLS_CC))) {
 		RETURN_STRINGL(buf, buf_size, 0);
+	} else {
+		RETURN_FALSE;
 	}
 }
 
 /* }}} */
 
-/* {{{ proto bool stream_set_blocking(resource socket, int mode) U
+/* {{{ proto bool stream_set_blocking(resource socket, int mode)
    Set blocking/non-blocking mode on a socket or stream */
 PHP_FUNCTION(stream_set_blocking)
 {
 	zval *arg1;
-	long arg2;
 	int block;
+	long arg2;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
@@ -1471,12 +1321,13 @@ PHP_FUNCTION(stream_set_blocking)
 	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1) {
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 
 /* }}} */
 
-/* {{{ proto bool stream_set_timeout(resource stream, int seconds [, int microseconds]) U
+/* {{{ proto bool stream_set_timeout(resource stream, int seconds [, int microseconds])
    Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
@@ -1511,22 +1362,30 @@ PHP_FUNCTION(stream_set_timeout)
 #endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
 /* }}} */
 
-/* {{{ proto int stream_set_write_buffer(resource fp, int buffer) U
+/* {{{ proto int stream_set_write_buffer(resource fp, int buffer)
    Set file write buffer */
 PHP_FUNCTION(stream_set_write_buffer)
 {
 	zval *arg1;
-	long arg2;
 	int ret;
+	long arg2;
 	size_t buff;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
-		return;
+	switch (ZEND_NUM_ARGS()) {
+	case 2:
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+			RETURN_FALSE;
+		}
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		/* NOTREACHED */
+		break;
 	}
 	
 	php_stream_from_zval(stream, &arg1);
-	
+
 	buff = arg2;
 
 	/* if buff is 0 then set to non-buffered */
@@ -1540,7 +1399,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 }
 /* }}} */
 
-/* {{{ proto int stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind [, resource sessionstream]]) U
+/* {{{ proto int stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind [, resource sessionstream]])
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
@@ -1583,116 +1442,21 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 }
 /* }}} */
 
-/* {{{ proto bool stream_default_encoding(string encoding) U
-Convenience wrapper for ini_set('unicode.stream_encoding', $encoding) */
-PHP_FUNCTION(stream_default_encoding)
-{
-	char *encoding;
-	int encoding_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &encoding, &encoding_len) == FAILURE) {
-		return;
-	}
-
-	RETURN_BOOL(SUCCESS == zend_alter_ini_entry("unicode.stream_encoding", sizeof("unicode.stream_encoding"),
-							encoding, encoding_len, PHP_INI_ALL, PHP_INI_STAGE_RUNTIME));
-}
-/* }}} */
-
-/* {{{ proto void stream_encoding(resource stream[, string encoding]) U
-Set character set for stream encoding
-UTODO: Return current encoding charset
-*/
-PHP_FUNCTION(stream_encoding)
-{
-	zval *zstream;
-	php_stream *stream;
-	char *encoding = NULL;
-	int encoding_len = 0;
-	int remove_read_tail = 0, remove_write_tail = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|s", &zstream, &encoding, &encoding_len) == FAILURE) {
-		return;
-	}
-
-	php_stream_from_zval(stream, &zstream);
-
-	/* Double check that the target encoding is legal before attempting anything */
-
-	if (stream->readfilters.tail) {
-		if (stream->readfilters.tail->fops == &php_unicode_from_string_filter_ops) {
-			/* Remove the current unicode.from.* filter, 
-               the filter layer will transcode anything in the read buffer back to binary 
-               or invalidate the read buffer */
-			remove_read_tail = 1;
-		} else if (stream->readbuf_type == IS_UNICODE) {
-			/* There's an encoding on the stream already, but then there's filtering happening after that point
-			   It's asking too much for PHP to figure out what the user wants, throw an error back in their face */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot change encoding on filtered stream");
-			RETURN_FALSE;
-		}
-	}
-
-	if (stream->writefilters.tail) {
-		if (stream->writefilters.tail->fops == &php_unicode_to_string_filter_ops) {
-			/* Remove the current unicode.to.* filter */
-			remove_write_tail = 1;
-		} else if ((stream->writefilters.tail->fops->flags & PSFO_FLAG_OUTPUTS_UNICODE) == 0) {
-			/* conversion to binary is happening, them another filter is doing something
-			   bailout for same reason as read filters */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot change encoding on filtered stream");
-			RETURN_FALSE;
-		}
-	}
-
-	if (remove_read_tail) {
-		php_stream_filter_remove(stream->readfilters.tail, 1 TSRMLS_CC);
-	}
-	if (remove_write_tail) {
-		php_stream_filter_remove(stream->writefilters.tail, 1 TSRMLS_CC);
-	}
-	
-	if (encoding_len == 0) {
-		if (UG(stream_encoding) == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The stream_encoding must be defined");
-			RETURN_FALSE;
-		}
-		encoding = UG(stream_encoding);
-	}
-
-	/* UTODO: Allow overriding error handling for converters */
-	php_stream_encoding_apply(stream, 1, encoding, UG(from_error_mode), UG(from_subst_char));
-	php_stream_encoding_apply(stream, 0, encoding, UG(to_error_mode), NULL);
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto string stream_resolve_include_path(string filename [, resource context]) U
+/* {{{ proto string stream_resolve_include_path(string filename)
 Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
-	zval **ppz_filename, *pz_context = NULL;
-	char *filename, *resolved_path;
+	char *filename, *resolved_path; 
 	int filename_len;
-	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppz_filename, &pz_context) == FAILURE ||
-		php_stream_path_param_encode(ppz_filename, &filename, &filename_len, REPORT_ERRORS, context = php_stream_context_from_zval(pz_context, 0)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	resolved_path = zend_resolve_path(filename, filename_len TSRMLS_CC);
 
 	if (resolved_path) {
-		UChar *ustr;
-		int ulen;
-		if (SUCCESS == zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, resolved_path, strlen(resolved_path) TSRMLS_CC)) {
-			efree(resolved_path);
-			RETURN_UNICODEL(ustr, ulen, 0);
-		} else {
-			RETURN_STRINGL(resolved_path, strlen(resolved_path), 0);
-		}
+		RETURN_STRING(resolved_path, 0);
 	}
 	RETURN_FALSE;
 }
@@ -1751,7 +1515,7 @@ PHP_FUNCTION(stream_supports_lock)
 }
 
 #ifdef HAVE_SHUTDOWN
-/* {{{ proto int stream_socket_shutdown(resource stream, int how) U
+/* {{{ proto int stream_socket_shutdown(resource stream, int how)
 	causes all or part of a full-duplex connection on the socket associated
 	with stream to be shut down.  If how is SHUT_RD,  further receptions will
 	be disallowed. If how is SHUT_WR, further transmissions will be disallowed.

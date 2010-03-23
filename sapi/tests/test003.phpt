@@ -9,9 +9,9 @@ PATH_INFO=/path/info
 END;
 --ENV--
 return <<<END
-PATH_TRANSLATED=$filename/path/info
-PATH_INFO=$scriptname/path/info
-SCRIPT_NAME=$scriptname
+PATH_TRANSLATED=/path/bla
+PATH_INFO=/path/info
+SCRIPT_NAME=path
 END;
 --FILE--
 <?php

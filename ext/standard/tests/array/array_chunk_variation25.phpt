@@ -14,18 +14,18 @@ for ($i = 0; $i < (sizeof($array) + 1); $i++) {
 ?>
 --EXPECT--
 array(6) {
-  [u"p"]=>
-  unicode(1) "A"
-  [u"q"]=>
-  unicode(1) "B"
-  [u"r"]=>
-  unicode(1) "C"
-  [u"s"]=>
-  unicode(1) "D"
-  [u"u"]=>
-  unicode(1) "E"
-  [u"v"]=>
-  unicode(1) "F"
+  ["p"]=>
+  string(1) "A"
+  ["q"]=>
+  string(1) "B"
+  ["r"]=>
+  string(1) "C"
+  ["s"]=>
+  string(1) "D"
+  ["u"]=>
+  string(1) "E"
+  ["v"]=>
+  string(1) "F"
 }
 [0]
 NULL
@@ -37,96 +37,96 @@ array(6) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [3]=>
   array(1) {
     [0]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [4]=>
   array(1) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
   }
   [5]=>
   array(1) {
     [0]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(6) {
   [0]=>
   array(1) {
-    [u"p"]=>
-    unicode(1) "A"
+    ["p"]=>
+    string(1) "A"
   }
   [1]=>
   array(1) {
-    [u"q"]=>
-    unicode(1) "B"
+    ["q"]=>
+    string(1) "B"
   }
   [2]=>
   array(1) {
-    [u"r"]=>
-    unicode(1) "C"
+    ["r"]=>
+    string(1) "C"
   }
   [3]=>
   array(1) {
-    [u"s"]=>
-    unicode(1) "D"
+    ["s"]=>
+    string(1) "D"
   }
   [4]=>
   array(1) {
-    [u"u"]=>
-    unicode(1) "E"
+    ["u"]=>
+    string(1) "E"
   }
   [5]=>
   array(1) {
-    [u"v"]=>
-    unicode(1) "F"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(6) {
   [0]=>
   array(1) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [2]=>
   array(1) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [3]=>
   array(1) {
     [0]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [4]=>
   array(1) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
   }
   [5]=>
   array(1) {
     [0]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 
@@ -135,69 +135,69 @@ array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
     [1]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [2]=>
   array(2) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
     [1]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(3) {
   [0]=>
   array(2) {
-    [u"p"]=>
-    unicode(1) "A"
-    [u"q"]=>
-    unicode(1) "B"
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
   }
   [1]=>
   array(2) {
-    [u"r"]=>
-    unicode(1) "C"
-    [u"s"]=>
-    unicode(1) "D"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
   }
   [2]=>
   array(2) {
-    [u"u"]=>
-    unicode(1) "E"
-    [u"v"]=>
-    unicode(1) "F"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(3) {
   [0]=>
   array(2) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "C"
+    string(1) "C"
     [1]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [2]=>
   array(2) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
     [1]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 
@@ -206,60 +206,60 @@ array(2) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [1]=>
   array(3) {
     [0]=>
-    unicode(1) "D"
+    string(1) "D"
     [1]=>
-    unicode(1) "E"
+    string(1) "E"
     [2]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(3) {
-    [u"p"]=>
-    unicode(1) "A"
-    [u"q"]=>
-    unicode(1) "B"
-    [u"r"]=>
-    unicode(1) "C"
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
   }
   [1]=>
   array(3) {
-    [u"s"]=>
-    unicode(1) "D"
-    [u"u"]=>
-    unicode(1) "E"
-    [u"v"]=>
-    unicode(1) "F"
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
   }
   [1]=>
   array(3) {
     [0]=>
-    unicode(1) "D"
+    string(1) "D"
     [1]=>
-    unicode(1) "E"
+    string(1) "E"
     [2]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 
@@ -268,60 +268,60 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
     [1]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(4) {
-    [u"p"]=>
-    unicode(1) "A"
-    [u"q"]=>
-    unicode(1) "B"
-    [u"r"]=>
-    unicode(1) "C"
-    [u"s"]=>
-    unicode(1) "D"
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
   }
   [1]=>
   array(2) {
-    [u"u"]=>
-    unicode(1) "E"
-    [u"v"]=>
-    unicode(1) "F"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(4) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
   }
   [1]=>
   array(2) {
     [0]=>
-    unicode(1) "E"
+    string(1) "E"
     [1]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 
@@ -330,60 +330,60 @@ array(2) {
   [0]=>
   array(5) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
     [4]=>
-    unicode(1) "E"
+    string(1) "E"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(5) {
-    [u"p"]=>
-    unicode(1) "A"
-    [u"q"]=>
-    unicode(1) "B"
-    [u"r"]=>
-    unicode(1) "C"
-    [u"s"]=>
-    unicode(1) "D"
-    [u"u"]=>
-    unicode(1) "E"
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
   }
   [1]=>
   array(1) {
-    [u"v"]=>
-    unicode(1) "F"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(2) {
   [0]=>
   array(5) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
     [4]=>
-    unicode(1) "E"
+    string(1) "E"
   }
   [1]=>
   array(1) {
     [0]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 
@@ -392,50 +392,50 @@ array(1) {
   [0]=>
   array(6) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
     [4]=>
-    unicode(1) "E"
+    string(1) "E"
     [5]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }
 array(1) {
   [0]=>
   array(6) {
-    [u"p"]=>
-    unicode(1) "A"
-    [u"q"]=>
-    unicode(1) "B"
-    [u"r"]=>
-    unicode(1) "C"
-    [u"s"]=>
-    unicode(1) "D"
-    [u"u"]=>
-    unicode(1) "E"
-    [u"v"]=>
-    unicode(1) "F"
+    ["p"]=>
+    string(1) "A"
+    ["q"]=>
+    string(1) "B"
+    ["r"]=>
+    string(1) "C"
+    ["s"]=>
+    string(1) "D"
+    ["u"]=>
+    string(1) "E"
+    ["v"]=>
+    string(1) "F"
   }
 }
 array(1) {
   [0]=>
   array(6) {
     [0]=>
-    unicode(1) "A"
+    string(1) "A"
     [1]=>
-    unicode(1) "B"
+    string(1) "B"
     [2]=>
-    unicode(1) "C"
+    string(1) "C"
     [3]=>
-    unicode(1) "D"
+    string(1) "D"
     [4]=>
-    unicode(1) "E"
+    string(1) "E"
     [5]=>
-    unicode(1) "F"
+    string(1) "F"
   }
 }

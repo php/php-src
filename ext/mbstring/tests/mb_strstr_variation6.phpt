@@ -55,11 +55,11 @@ var_dump(mb_strstr($string_mb, $needle_mb_mixed));
 --EXPECT--
 *** Testing mb_strstr() : variation ***
 -- Ascii data --
-unicode(10) "6263646566"
+string(10) "6263646566"
 bool(false)
 bool(false)
 -- mb data in utf-8 --
-unicode(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
+string(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
 bool(false)
 bool(false)
 ===DONE===

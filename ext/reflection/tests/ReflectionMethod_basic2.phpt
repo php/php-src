@@ -54,14 +54,14 @@ reflectMethod("TestClass", "__destruct");
 Reflecting on method DerivedClass::foo()
 
 __toString():
-unicode(%d) "Method [ <user, inherits TestClass> public method foo ] {
-  @@ %sReflectionMethod_basic2.php 16 - 18
+string(%d) "Method [ <user, inherits TestClass> public method foo ] {
+  @@ %s 16 - 18
 }
 "
 
 export():
-unicode(%d) "Method [ <user, inherits TestClass> public method foo ] {
-  @@ %sReflectionMethod_basic2.php 16 - 18
+string(%d) "Method [ <user, inherits TestClass> public method foo ] {
+  @@ %s 16 - 18
 }
 "
 
@@ -70,14 +70,14 @@ unicode(%d) "Method [ <user, inherits TestClass> public method foo ] {
 Reflecting on method TestClass::stat()
 
 __toString():
-unicode(%d) "Method [ <user> static public method stat ] {
-  @@ %sReflectionMethod_basic2.php 20 - 22
+string(%d) "Method [ <user> static public method stat ] {
+  @@ %s 20 - 22
 }
 "
 
 export():
-unicode(%d) "Method [ <user> static public method stat ] {
-  @@ %sReflectionMethod_basic2.php 20 - 22
+string(%d) "Method [ <user> static public method stat ] {
+  @@ %s 20 - 22
 }
 "
 
@@ -86,14 +86,14 @@ unicode(%d) "Method [ <user> static public method stat ] {
 Reflecting on method TestClass::priv()
 
 __toString():
-unicode(%d) "Method [ <user> private method priv ] {
-  @@ %sReflectionMethod_basic2.php 24 - 26
+string(%d) "Method [ <user> private method priv ] {
+  @@ %s 24 - 26
 }
 "
 
 export():
-unicode(%d) "Method [ <user> private method priv ] {
-  @@ %sReflectionMethod_basic2.php 24 - 26
+string(%d) "Method [ <user> private method priv ] {
+  @@ %s 24 - 26
 }
 "
 
@@ -102,14 +102,14 @@ unicode(%d) "Method [ <user> private method priv ] {
 Reflecting on method TestClass::prot()
 
 __toString():
-unicode(%d) "Method [ <user> protected method prot ] {
-  @@ %sReflectionMethod_basic2.php 28 - 28
+string(%d) "Method [ <user> protected method prot ] {
+  @@ %s 28 - 28
 }
 "
 
 export():
-unicode(%d) "Method [ <user> protected method prot ] {
-  @@ %sReflectionMethod_basic2.php 28 - 28
+string(%d) "Method [ <user> protected method prot ] {
+  @@ %s 28 - 28
 }
 "
 
@@ -118,14 +118,14 @@ unicode(%d) "Method [ <user> protected method prot ] {
 Reflecting on method DerivedClass::prot()
 
 __toString():
-unicode(%d) "Method [ <user, inherits TestClass> protected method prot ] {
-  @@ %sReflectionMethod_basic2.php 28 - 28
+string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
+  @@ %s 28 - 28
 }
 "
 
 export():
-unicode(%d) "Method [ <user, inherits TestClass> protected method prot ] {
-  @@ %sReflectionMethod_basic2.php 28 - 28
+string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
+  @@ %s 28 - 28
 }
 "
 
@@ -134,14 +134,14 @@ unicode(%d) "Method [ <user, inherits TestClass> protected method prot ] {
 Reflecting on method TestInterface::int()
 
 __toString():
-unicode(%d) "Method [ <user> abstract public method int ] {
-  @@ %sReflectionMethod_basic2.php 36 - 36
+string(%d) "Method [ <user> abstract public method int ] {
+  @@ %s 36 - 36
 }
 "
 
 export():
-unicode(%d) "Method [ <user> abstract public method int ] {
-  @@ %sReflectionMethod_basic2.php 36 - 36
+string(%d) "Method [ <user> abstract public method int ] {
+  @@ %s 36 - 36
 }
 "
 
@@ -150,7 +150,7 @@ unicode(%d) "Method [ <user> abstract public method int ] {
 Reflecting on method ReflectionProperty::__construct()
 
 __toString():
-unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
+string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $class ]
@@ -160,7 +160,7 @@ unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 "
 
 export():
-unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
+string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $class ]
@@ -174,14 +174,14 @@ unicode(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 Reflecting on method TestClass::__destruct()
 
 __toString():
-unicode(%d) "Method [ <user, dtor> public method __destruct ] {
-  @@ %sReflectionMethod_basic2.php 30 - 30
+string(%d) "Method [ <user, dtor> public method __destruct ] {
+  @@ %s 30 - 30
 }
 "
 
 export():
-unicode(%d) "Method [ <user, dtor> public method __destruct ] {
-  @@ %sReflectionMethod_basic2.php 30 - 30
+string(%d) "Method [ <user, dtor> public method __destruct ] {
+  @@ %s 30 - 30
 }
 "
 

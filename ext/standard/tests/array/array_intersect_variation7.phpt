@@ -110,75 +110,75 @@ array(1) {
 }
 -- Iterator 4 --
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(2) {
-  [u"one"]=>
+  ["one"]=>
   int(1)
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 -- Iterator 5 --
 array(1) {
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 array(1) {
-  [u"float"]=>
+  ["float"]=>
   float(2.3333)
 }
 -- Iterator 6 --
 array(1) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
 }
 array(1) {
-  [u"f1"]=>
+  ["f1"]=>
   float(1.2)
 }
 -- Iterator 7 --
 array(1) {
-  [u"red"]=>
-  unicode(6) "col	or"
+  ["red"]=>
+  string(6) "col	or"
 }
 array(1) {
-  [u"red"]=>
-  unicode(6) "col	or"
+  ["red"]=>
+  string(6) "col	or"
 }
 -- Iterator 8 --
 array(1) {
   [2]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
 }
 array(1) {
   [2]=>
-  unicode(9) "\v\fworld"
+  string(9) "\v\fworld"
 }
 -- Iterator 9 --
 array(1) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 array(1) {
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 -- Iterator 10 --
 array(2) {
   [11]=>
   object(classA)#%d (0) {
   }
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
 }
 array(2) {
   [11]=>
   object(classA)#%d (0) {
   }
-  [u"resource"]=>
+  ["resource"]=>
   resource(%d) of type (stream)
 }
 -- Iterator 11 --
@@ -187,25 +187,25 @@ array(5) {
   object(classA)#%d (0) {
   }
   [222]=>
-  unicode(5) "fruit"
-  [u"resource"]=>
+  string(5) "fruit"
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 array(5) {
   [2]=>
   object(classA)#%d (0) {
   }
   [222]=>
-  unicode(5) "fruit"
-  [u"resource"]=>
+  string(5) "fruit"
+  ["resource"]=>
   resource(%d) of type (stream)
-  [u"float"]=>
+  ["float"]=>
   float(444.432)
-  [u"heredoc"]=>
-  unicode(11) "Hello world"
+  ["heredoc"]=>
+  string(11) "Hello world"
 }
 Done

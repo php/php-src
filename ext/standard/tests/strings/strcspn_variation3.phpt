@@ -187,34 +187,34 @@ int(0)
 
 -- Iteration with start value as "" --
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "" --
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
-NULL
-
--- Iteration with start value as "string" --
-
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
-NULL
-
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "string" --
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
-Warning: strcspn() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
+NULL
+
+-- Iteration with start value as "string" --
+
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
+NULL
+
+Warning: strcspn() expects parameter 3 to be long, string given in %s on line %d
 NULL
 
 -- Iteration with start value as "object" --

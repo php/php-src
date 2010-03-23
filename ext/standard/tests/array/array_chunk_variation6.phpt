@@ -47,7 +47,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying various arrays --
@@ -103,16 +103,16 @@ array(2) {
 array(2) {
   [0]=>
   array(2) {
-    [u"a"]=>
+    ["a"]=>
     int(4)
-    [u"b"]=>
+    ["b"]=>
     int(2)
   }
   [1]=>
   array(2) {
-    [u"c"]=>
+    ["c"]=>
     int(3)
-    [u"d"]=>
+    ["d"]=>
     int(5)
   }
 }

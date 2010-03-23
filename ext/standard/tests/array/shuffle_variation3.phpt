@@ -140,15 +140,15 @@ bool(true)
 The output array is:
 array(5) {
   [0]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [1]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [2]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [3]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
   [4]=>
-  unicode(%d) "%s"
+  string(%d) "%s"
 }
 
 -- Iteration 6 --
@@ -230,3 +230,4 @@ array(3) {
   int(-%d)
 }
 Done
+

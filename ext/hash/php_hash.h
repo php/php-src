@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -23,10 +23,6 @@
 
 #include "php.h"
 #include "php_hash_types.h"
-
-#ifndef slprintf
-#	define slprintf snprintf
-#endif
 
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_EXTVER		"1.0"

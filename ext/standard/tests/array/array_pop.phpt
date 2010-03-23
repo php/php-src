@@ -42,7 +42,7 @@ foreach( $mixed_array as $sub_array )
 
 echo"\nDone";
 ?>
---EXPECT--
+--EXPECTF--
 *** Normal testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --
@@ -81,7 +81,7 @@ Array
 )
 
 Output after Pop is :
-unicode(4) "Five"
+string(4) "Five"
 
 -- Input Array for Iteration 4 is --
 Array
@@ -97,7 +97,7 @@ Array
 )
 
 Output after Pop is :
-unicode(4) "nine"
+string(4) "nine"
 
 -- Input Array for Iteration 5 is --
 Array
@@ -110,7 +110,7 @@ Array
 )
 
 Output after Pop is :
-unicode(3) "eee"
+string(3) "eee"
 
 -- Input Array for Iteration 6 is --
 Array
@@ -123,7 +123,7 @@ Array
 )
 
 Output after Pop is :
-unicode(4) "five"
+string(4) "five"
 
 -- Input Array for Iteration 7 is --
 Array
@@ -136,7 +136,7 @@ Array
 )
 
 Output after Pop is :
-unicode(4) "five"
+string(4) "five"
 
 -- Input Array for Iteration 8 is --
 Array
@@ -168,7 +168,7 @@ Array
 )
 
 Output after Pop is :
-unicode(2) "45"
+string(2) "45"
 
 -- Input Array for Iteration 10 is --
 Array

@@ -1,5 +1,6 @@
 --TEST--
 Test fgetcsv() : usage variations - with line without any csv fields
+
 --FILE--
 <?php
 /* 
@@ -11,6 +12,7 @@ Test fgetcsv() : usage variations - with line without any csv fields
 
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
 
+
 $filename = dirname(__FILE__) . '/fgetcsv_variation13.tmp';
 @unlink($filename);
 
@@ -21,7 +23,7 @@ $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
 
 $loop_counter = 1;
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
-    // create the file
+    // create the file and add the content with has csv fields
     if ( strstr($file_modes[$mode_counter], "r") ) {
       $file_handle = fopen($filename, "w");
     } else {
@@ -31,11 +33,8 @@ $loop_counter = 1;
       echo "Error: failed to create file $filename!\n";
       exit();
     }
-    // write line of text with no csv field and a blank line
-    // this will be used to test, if the fgetcsv() read more than a line and its
-    // working when only a blan line is read
-    @fwrite($file_handle, "This is line of text without csv fields\n");
-    @fwrite($file_handle, "\n"); // blank line
+    // write line of text
+    fwrite($file_handle, "This is line of text without csv fields\n");
 
     // close the file if the mode to be used is read mode  and re-open using read mode
     // else rewind the file pointer to begining of the file 
@@ -49,11 +48,10 @@ $loop_counter = 1;
       
     echo "\n-- Testing fgetcsv() with file opened using $file_modes[$mode_counter] mode --\n"; 
 
-    // call fgetcsv() to parse csv fields
      
     // read the line which is without csv fields, provide delimiter and see the working of fgetcsv
     $fp_pos = ftell($file_handle);
-    var_dump( fgetcsv($file_handle, 1024) );
+    var_dump( fgetcsv($file_handle) );
     // check the file pointer position and if eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
@@ -88,7 +86,7 @@ bool(false)
 -- Testing fgetcsv() with file opened using rt mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
@@ -112,7 +110,7 @@ bool(false)
 -- Testing fgetcsv() with file opened using r+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
@@ -136,7 +134,7 @@ bool(false)
 -- Testing fgetcsv() with file opened using a+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
@@ -160,7 +158,7 @@ bool(false)
 -- Testing fgetcsv() with file opened using w+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)
@@ -184,7 +182,7 @@ bool(false)
 -- Testing fgetcsv() with file opened using x+t mode --
 array(1) {
   [0]=>
-  unicode(39) "This is line of text without csv fields"
+  string(39) "This is line of text without csv fields"
 }
 int(40)
 bool(false)

@@ -115,8 +115,7 @@ Test 1.4: Type: AFC:  Length: strlen
     :2008-04-20:
 Test 1.5: Type: AFC.  Length: strlen-1
   Querying:
-    :1:
-    :2008-04-20:
+    Oci_execute error ORA-1460 Exiting Query
 Test 1.6: Type: AFC.  Length: strlen+1
   Querying:
     :1:

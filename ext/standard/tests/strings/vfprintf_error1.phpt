@@ -1,5 +1,7 @@
 --TEST--
 Test vfprintf() function : error conditions (more than expected arguments) 
+--CREDITS--
+Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
 precision=14
 --FILE--
@@ -13,9 +15,6 @@ precision=14
 // Open handle
 $file = 'vfprintf_test.txt';
 $fp = fopen( $file, "a+" );
-
-// Set unicode encoding
-stream_encoding( $fp, 'unicode' );
 
 echo "\n-- Testing vfprintf() function with more than expected no. of arguments --\n";
 $format = 'string_val';
@@ -32,7 +31,7 @@ fclose($fp);
 --CLEAN--
 <?php
 
-$file = 'vfprintf_text.txt';
+$file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>

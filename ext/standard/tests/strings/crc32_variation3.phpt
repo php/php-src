@@ -21,35 +21,37 @@ echo "*** Testing crc32() : with different strings in double quotes ***\n";
 
 // defining an array of strings
 $string_array = array(
-  b"",
-  b" ",
-  b"hello world",
-  b"HELLO WORLD",
-  b" helloworld ",
+  "",
+  " ",
+  "hello world",
+  "HELLO WORLD",
+  " helloworld ",
 
-  b"(hello world)",
-  b"hello(world)",
-  b"helloworld()",
-  b"hello()(world",
+  "(hello world)",
+  "hello(world)",
+  "helloworld()",
+  "hello()(world",
 
-  b"'hello' world",
-  b"hello 'world'",
-  b"hello''world",
+  "'hello' world",
+  "hello 'world'",
+  "hello''world",
 
-  b"hello\tworld",
-  b"hellowor\\tld",
-  b"\thello world\t",
-  b"hello\nworld",
-  b"hellowor\\nld",
-  b"\nhello world\n",
-  b"\n\thelloworld",
-  b"hel\tlo\n world",
+  "hello\tworld",
+  "hellowor\\tld",
+  "\thello world\t",
+  "helloworld",
+  "hellowor\\ld",
+  "hello\nworld",
+  "hellowor\\nld",
+  "\nhello world\n",
+  "\n\thelloworld",
+  "hel\tlo\n world",
 
-  b"!@#$%&",
-  b"#hello@world.com",
-  b"$hello$world",
+  "!@#$%&",
+  "#hello@world.com",
+  "$hello$world",
 
-  b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbb
    cccccccccccccccccccccccccccccccccddddddddddddddddddddddddddddddddd
    eeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffff
    gggggggggggggggggggggggggggggggggggggggggghhhhhhhhhhhhhhhhhhhhhhhh
@@ -125,29 +127,35 @@ int(243585859)
 int(-986324846)
 
 -- Iteration 16 --
-int(-1417857067)
+int(-102031187)
 
 -- Iteration 17 --
-int(523630053)
+int(-588181215)
 
 -- Iteration 18 --
-int(-503915034)
+int(-1417857067)
 
 -- Iteration 19 --
-int(-254912432)
+int(523630053)
 
 -- Iteration 20 --
-int(-1581578467)
+int(-503915034)
 
 -- Iteration 21 --
-int(-1828940657)
+int(-254912432)
 
 -- Iteration 22 --
-int(-1654468652)
+int(-1581578467)
 
 -- Iteration 23 --
-int(0)
+int(-1828940657)
 
 -- Iteration 24 --
+int(-1654468652)
+
+-- Iteration 25 --
+int(0)
+
+-- Iteration 26 --
 int(1431761713)
 Done

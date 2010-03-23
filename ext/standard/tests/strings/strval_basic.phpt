@@ -51,27 +51,27 @@ foreach($values as $value) {
 *** Testing strval() : basic variations ***
 
 -- Iteration 1 --
-unicode(11) "Hello World"
+string(11) "Hello World"
 
 -- Iteration 2 --
-unicode(11) "Hello World"
+string(11) "Hello World"
 
 -- Iteration 3 --
-unicode(32) "String
+string(32) "String
 with
 control
 characters
 "
 
 -- Iteration 4 --
-unicode(20) "String with "quotes""
+string(20) "String with "quotes""
 
 -- Iteration 5 --
-unicode(6) "123456"
+string(6) "123456"
 
 -- Iteration 6 --
-unicode(5) "0xABC"
+string(5) "0xABC"
 
 -- Iteration 7 --
-unicode(21) "Simple HEREDOC string"
+string(21) "Simple HEREDOC string"
 ===DONE===

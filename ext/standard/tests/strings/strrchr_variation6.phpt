@@ -17,17 +17,12 @@ $quote_char_str = <<<EOD
 'things' 'in' 'single' 'quote'
 EOD;
 
-$heredoc_needle = <<<EOD
-quote
-EOD;
-
 $needles = array(
   "things",
   "\"things\"",
   "\'things\'",
   "in",
   "quote",
-  $heredoc_needle, //needle as heredoc string
   $quote_char_str //needle as haystack
 );
 
@@ -37,15 +32,14 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
-unicode(3) "te'"
-unicode(32) ""
+string(3) "te'"
+string(32) ""
 'things' 'in' 'single' 'quote'"
 bool(false)
-unicode(14) "ingle' 'quote'"
-unicode(6) "quote'"
-unicode(6) "quote'"
-unicode(32) ""
+string(14) "ingle' 'quote'"
+string(6) "quote'"
+string(32) ""
 'things' 'in' 'single' 'quote'"
 *** Done ***

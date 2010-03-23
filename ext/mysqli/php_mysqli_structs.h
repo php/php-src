@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -63,9 +63,6 @@
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 
-#define MYSQLI_UC_UTF8	1
-#define MYSQLI_UC_UCS2	2
-
 #define MYSQLI_VERSION_ID		101009
 
 enum mysqli_status {
@@ -74,13 +71,6 @@ enum mysqli_status {
 	MYSQLI_STATUS_INITIALIZED,
 	MYSQLI_STATUS_VALID
 };
-
-typedef struct {
-	void			*buf;		/* buffer: binary or unicode data */	
-	unsigned int	buflen;		/* buffer length */
-	zend_uchar		buftype;	/* buffer type */
-	UErrorCode		status;		/* error code */
-} MYSQLI_STRING;
 
 typedef struct {
 	char		*val;
@@ -109,7 +99,6 @@ typedef struct {
 	zval			*li_read;
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
-	UConverter		*conv;
 	zend_bool		persistent;
 #if defined(MYSQLI_USE_MYSQLND)
 	int				async_result_fetch_type;				
@@ -153,7 +142,7 @@ typedef struct _mysqli_property_entry {
 #if !defined(MYSQLI_USE_MYSQLND)
 typedef struct {
 	char	error_msg[LOCAL_INFILE_ERROR_LEN];
-	void	*userdata;
+  	void	*userdata;
 } mysqli_local_infile;
 #endif
 
@@ -228,8 +217,6 @@ extern void php_mysqli_dtor_p_elements(void *data);
 
 extern void php_mysqli_close(MY_MYSQL * mysql, int close_type TSRMLS_DC);
 
-extern void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
-
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -278,12 +265,12 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %v", intern->zo.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %v\n", intern->zo.ce->name); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
 		RETURN_NULL();\
 	}\
 }
@@ -350,6 +337,8 @@ if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
 }
 
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);
+
+void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
@@ -449,7 +438,7 @@ PHP_FUNCTION(mysqli_next_result);
 PHP_FUNCTION(mysqli_num_fields);
 PHP_FUNCTION(mysqli_num_rows);
 PHP_FUNCTION(mysqli_options);
-PHP_FUNCTION(mysqli_ping);			
+PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_poll);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);

@@ -15,16 +15,16 @@ precision=14
    Description: Set the type of variable var to type 
 */
 
-/* Test usage variation of gettype() and settype() functions:
-         settype() to null type.
+/* Test usage variation of gettype() and settype() functions: 
+         settype() to null type. 
    Set type of the data to "null" and verify using gettype
    Following are performed in the listed sequence:
-     get the current type of the variable
+     get the current type of the variable 
      set the type of the variable to "null type"
      dump the variable to see its new data
      get the new type of the variable
 */
-
+     
 /* function to handle catchable errors */
 function foo($errno, $errstr, $errfile, $errline) {
 //	var_dump($errstr);
@@ -152,23 +152,10 @@ $var_values = array (
 
   /* undefined/unset vars */
   $unset_var,
-  $undef_var,
-
-  /* binary strings */
-  b"10string",
-  b'10string',
-  b"+0123",
-  b'-0123',
-  b"0xff",
-  b'0x55',
-  b'1e2',
-  b'2974394749328742328432',
-  b"1e2",
-  b'10string',
-  b"10string"
+  $undef_var
 );
 
-/* test conversion to null type */
+/* test conversion to null type */                
 $type = "null";
 
 echo "\n*** Testing gettype() & settype() functions : usage variations ***\n";
@@ -192,7 +179,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 
@@ -200,458 +187,403 @@ echo "Done\n";
 
 -- Setting type of data to null --
 -- Iteration 1 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 2 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 3 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 4 --
-unicode(7) "boolean"
+string(7) "boolean"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 5 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 6 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 7 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 8 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 9 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 10 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 11 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 12 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 13 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 14 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 15 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 16 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 17 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 18 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 19 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 20 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 21 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 22 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 23 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 24 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 25 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 26 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 27 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 28 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 29 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 30 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 31 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 32 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 33 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 34 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 35 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 36 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 37 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 38 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 39 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 40 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 41 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 42 --
-unicode(7) "unicode"
+string(6) "string"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 43 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 44 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 45 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 46 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 47 --
-unicode(5) "array"
+string(5) "array"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 48 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 49 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 50 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 51 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 52 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 53 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 54 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 55 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 56 --
-unicode(7) "integer"
+string(7) "integer"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 57 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 58 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 59 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 60 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 61 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 62 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 63 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 64 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 65 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 66 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 67 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 68 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 69 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 70 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 71 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 72 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 73 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 74 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 75 --
-unicode(6) "double"
+string(6) "double"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 76 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 77 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 78 --
-unicode(6) "object"
+string(6) "object"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 79 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 NULL
-unicode(4) "NULL"
+string(4) "NULL"
 -- Iteration 80 --
-unicode(4) "NULL"
+string(4) "NULL"
 bool(true)
 NULL
-unicode(4) "NULL"
--- Iteration 81 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 82 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 83 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 84 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 85 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 86 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 87 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 88 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 89 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 90 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
--- Iteration 91 --
-unicode(6) "string"
-bool(true)
-NULL
-unicode(4) "NULL"
+string(4) "NULL"
 Done

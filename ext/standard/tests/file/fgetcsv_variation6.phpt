@@ -1,5 +1,5 @@
 --TEST--
-Test fgetcsv() : usage variations - with length less than line size (Bug #42219)
+Test fgetcsv() : usage variations - with length less than line size
 --FILE--
 <?php
 /* 
@@ -53,12 +53,12 @@ foreach ($csv_lists as $csv_list) {
     $delimiter = $csv_list[0];
     $enclosure = $csv_list[1];
     $csv_field = $csv_list[2];
-    @fwrite($file_handle, $csv_field . "\n");
+    fwrite($file_handle, $csv_field . "\n");
     // write another line of text and a blank line
     // this will be used to test, if the fgetcsv() read more than a line and its
     // working when only a blan line is read
-    @fwrite($file_handle, "This is line of text without csv fields\n");
-    @fwrite($file_handle, "\n"); // blank line
+    fwrite($file_handle, "This is line of text without csv fields\n");
+    fwrite($file_handle, "\n"); // blank line
 
     // close the file if the mode to be used is read mode  and re-open using read mode
     // else rewind the file pointer to begining of the file 

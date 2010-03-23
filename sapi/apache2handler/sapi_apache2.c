@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php6-script"
+#define PHP_SCRIPT "php5-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -256,21 +256,19 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
+	int new_val_len;
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
 			val = "";
 		}
-		if (php_register_variable_with_conv(conv, key, strlen(key), val, strlen(val),
-											track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
-			php_error(E_WARNING, "Failed to decode _SERVER array entry");
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (php_register_variable_with_conv(conv, ZEND_STRL("PHP_SELF"), ctx->r->uri,
-										strlen(ctx->r->uri), track_vars_array, PARSE_SERVER TSRMLS_CC) == FAILURE) {
-		php_error(E_WARNING, "Failed to decode _SERVER array entry");
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
+		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }
 
@@ -367,7 +365,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 	php_apache_sapi_get_request_time,		/* Request Time */
-	NULL,						/* Child terminate */
+	NULL,						/* Child Terminate */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -478,12 +476,17 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(r->headers_out, "Last-Modified");
 	apr_table_unset(r->headers_out, "Expires");
 	apr_table_unset(r->headers_out, "ETag");
-	auth = apr_table_get(r->headers_in, "Authorization");
-	php_handle_auth_data(auth TSRMLS_CC);
-	if (SG(request_info).auth_user == NULL && r->user) {
-		SG(request_info).auth_user = estrdup(r->user);
+	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(r))) {
+		auth = apr_table_get(r->headers_in, "Authorization");
+		php_handle_auth_data(auth TSRMLS_CC);
+		if (SG(request_info).auth_user == NULL && r->user) {
+			SG(request_info).auth_user = estrdup(r->user);
+		}
+		ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
+	} else {
+		SG(request_info).auth_user = NULL;
+		SG(request_info).auth_password = NULL;
 	}
-	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
 	return php_request_startup(TSRMLS_C);
 }
 
@@ -500,15 +503,15 @@ static void php_apache_ini_dtor(request_rec *r, request_rec *p TSRMLS_DC)
 typedef struct {
 	HashTable config;
 } php_conf_rec;
-		zstr str;
+		char *str;
 		uint str_len;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php6_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
 
 		for (zend_hash_internal_pointer_reset(&c->config);
 			zend_hash_get_current_key_ex(&c->config, &str, &str_len, NULL, 0,  NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&c->config)
 		) {
-			zend_restore_ini_entry(str.s, str_len, ZEND_INI_STAGE_SHUTDOWN);
+			zend_restore_ini_entry(str, str_len, ZEND_INI_STAGE_SHUTDOWN);
 		}
 	}
 	if (p) {
@@ -530,7 +533,7 @@ static int php_handler(request_rec *r)
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 
-	conf = ap_get_module_config(r->per_dir_config, &php6_module);
+	conf = ap_get_module_config(r->per_dir_config, &php5_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);

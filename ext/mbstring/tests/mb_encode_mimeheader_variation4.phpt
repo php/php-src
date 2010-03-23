@@ -182,6 +182,6 @@ string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 24 --
 
-Warning: mb_encode_mimeheader() expects parameter 4 to be binary string, resource given in %s on line %d
+Warning: mb_encode_mimeheader() expects parameter 4 to be string, resource given in %s on line %d
 NULL
 Done

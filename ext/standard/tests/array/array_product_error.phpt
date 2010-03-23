@@ -40,6 +40,6 @@ NULL
 
 -- Testing array_product() function incorrect argument type --
 
-Warning: array_product() expects parameter 1 to be array, Unicode string given in %sarray_product_error.php on line %d
+Warning: array_product() expects parameter 1 to be array, string given in %sarray_product_error.php on line %d
 NULL
 ===DONE===

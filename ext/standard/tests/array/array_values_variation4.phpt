@@ -32,15 +32,15 @@ var_dump(array_values($input));
 echo "Done";
 ?>
 
---EXPECT--
+--EXPECTF--
 *** Testing array_values() : usage variations ***
 
 -- Array values of a two-dimensional array --
 array(3) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   array(3) {
     [0]=>
@@ -65,9 +65,9 @@ array(3) {
 -- Array values of an infinitely recursive array --
 array(4) {
   [0]=>
-  unicode(4) "zero"
+  string(4) "zero"
   [1]=>
-  unicode(3) "one"
+  string(3) "one"
   [2]=>
   array(3) {
     [0]=>
@@ -79,11 +79,11 @@ array(4) {
   }
   [3]=>
   &array(4) {
-    [u"zero"]=>
-    unicode(4) "zero"
-    [u"un"]=>
-    unicode(3) "one"
-    [u"sub"]=>
+    ["zero"]=>
+    string(4) "zero"
+    ["un"]=>
+    string(3) "one"
+    ["sub"]=>
     array(3) {
       [0]=>
       int(1)
@@ -94,11 +94,11 @@ array(4) {
     }
     [0]=>
     &array(4) {
-      [u"zero"]=>
-      unicode(4) "zero"
-      [u"un"]=>
-      unicode(3) "one"
-      [u"sub"]=>
+      ["zero"]=>
+      string(4) "zero"
+      ["un"]=>
+      string(3) "one"
+      ["sub"]=>
       array(3) {
         [0]=>
         int(1)

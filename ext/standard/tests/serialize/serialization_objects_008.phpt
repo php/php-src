@@ -22,7 +22,7 @@ echo "Done";
 
 Warning: unserialize(): defined (Nonexistent) but not found in %s on line 14
 object(__PHP_Incomplete_Class)#%d (1) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(3) "FOO"
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(3) "FOO"
 }
 Done

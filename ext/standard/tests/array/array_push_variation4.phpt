@@ -1,5 +1,7 @@
 --TEST--
 Test array_push() function : usage variations - referenced variables
+--INI--
+allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
@@ -25,7 +27,6 @@ $var6 = 'z';
 $array = array(1, 2, 3);
 
 echo "\n-- Pass array_push referenced varialbes as \$var arguments --\n";
-
 var_dump(array_push($array, &$var1, &$var2, &$var3, &$var4, &$var5, &$var6));
 var_dump($array);
 
@@ -36,19 +37,6 @@ var_dump($array);
 echo "Done";
 ?>
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
-
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 *** Testing array_push() : usage variations ***
 
 -- Pass array_push referenced varialbes as $var arguments --
@@ -61,17 +49,17 @@ array(9) {
   [2]=>
   int(3)
   [3]=>
-  &unicode(1) "a"
+  &string(1) "a"
   [4]=>
-  &unicode(1) "b"
+  &string(1) "b"
   [5]=>
-  &unicode(1) "c"
+  &string(1) "c"
   [6]=>
-  &unicode(1) "x"
+  &string(1) "x"
   [7]=>
-  &unicode(1) "y"
+  &string(1) "y"
   [8]=>
-  &unicode(1) "z"
+  &string(1) "z"
 }
 
 -- Pass $var argument which is a reference to $stack argument --
@@ -84,17 +72,17 @@ array(10) {
   [2]=>
   int(3)
   [3]=>
-  &unicode(1) "a"
+  &string(1) "a"
   [4]=>
-  &unicode(1) "b"
+  &string(1) "b"
   [5]=>
-  &unicode(1) "c"
+  &string(1) "c"
   [6]=>
-  &unicode(1) "x"
+  &string(1) "x"
   [7]=>
-  &unicode(1) "y"
+  &string(1) "y"
   [8]=>
-  &unicode(1) "z"
+  &string(1) "z"
   [9]=>
   &array(10) {
     [0]=>
@@ -104,17 +92,17 @@ array(10) {
     [2]=>
     int(3)
     [3]=>
-    &unicode(1) "a"
+    &string(1) "a"
     [4]=>
-    &unicode(1) "b"
+    &string(1) "b"
     [5]=>
-    &unicode(1) "c"
+    &string(1) "c"
     [6]=>
-    &unicode(1) "x"
+    &string(1) "x"
     [7]=>
-    &unicode(1) "y"
+    &string(1) "y"
     [8]=>
-    &unicode(1) "z"
+    &string(1) "z"
     [9]=>
     &array(10) {
       [0]=>
@@ -124,17 +112,17 @@ array(10) {
       [2]=>
       int(3)
       [3]=>
-      &unicode(1) "a"
+      &string(1) "a"
       [4]=>
-      &unicode(1) "b"
+      &string(1) "b"
       [5]=>
-      &unicode(1) "c"
+      &string(1) "c"
       [6]=>
-      &unicode(1) "x"
+      &string(1) "x"
       [7]=>
-      &unicode(1) "y"
+      &string(1) "y"
       [8]=>
-      &unicode(1) "z"
+      &string(1) "z"
       [9]=>
       *RECURSION*
     }

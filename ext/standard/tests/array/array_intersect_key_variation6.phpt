@@ -24,14 +24,14 @@ var_dump( array_intersect_key($boolean_indx_array,$input_array ) );
 -- Testing array_intersect_key() function with boolean indexed array --
 array(2) {
   [0]=>
-  unicode(1) "0"
+  string(1) "0"
   [1]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(2) {
   [1]=>
-  unicode(5) "boolT"
+  string(5) "boolT"
   [0]=>
-  unicode(5) "boolF"
+  string(5) "boolF"
 }
 ===DONE===

@@ -62,7 +62,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_unicode($value)) {
+			if (is_string($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -86,13 +86,13 @@ Regex encoding set to utf-8
 int(4)
 array(1) {
   [0]=>
-  string(4) "This"
+  string(8) "VGhpcw=="
 }
 -- Multibyte String: --
 int(27)
 array(1) {
   [0]=>
-  string(27) "日本語テキストです"
+  string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
 }
 
 --** Pattern is: \W+ **--
@@ -100,13 +100,13 @@ array(1) {
 int(1)
 array(1) {
   [0]=>
-  string(1) " "
+  string(4) "IA=="
 }
 -- Multibyte String: --
 int(3)
 array(1) {
   [0]=>
-  string(3) "。"
+  string(4) "44CC"
 }
 
 --** Pattern is: \s+ **--
@@ -114,7 +114,7 @@ array(1) {
 int(1)
 array(1) {
   [0]=>
-  string(1) " "
+  string(4) "IA=="
 }
 -- Multibyte String: --
 bool(false)
@@ -125,13 +125,13 @@ NULL
 int(4)
 array(1) {
   [0]=>
-  string(4) "This"
+  string(8) "VGhpcw=="
 }
 -- Multibyte String: --
 int(53)
 array(1) {
   [0]=>
-  string(53) "日本語テキストです。01234５６７８９。"
+  string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 
 --** Pattern is: \d+ **--
@@ -139,13 +139,13 @@ array(1) {
 int(10)
 array(1) {
   [0]=>
-  string(10) "0123456789"
+  string(16) "MDEyMzQ1Njc4OQ=="
 }
 -- Multibyte String: --
 int(20)
 array(1) {
   [0]=>
-  string(20) "01234５６７８９"
+  string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
 }
 
 --** Pattern is: \D+ **--
@@ -153,13 +153,13 @@ array(1) {
 int(27)
 array(1) {
   [0]=>
-  string(27) "This is an English string. "
+  string(36) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4g"
 }
 -- Multibyte String: --
 int(30)
 array(1) {
   [0]=>
-  string(30) "日本語テキストです。"
+  string(40) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC"
 }
 
 --** Pattern is: \b **--
@@ -190,4 +190,3 @@ array(1) {
   bool(false)
 }
 Done
-

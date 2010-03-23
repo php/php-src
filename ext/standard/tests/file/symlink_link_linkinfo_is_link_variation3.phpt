@@ -43,7 +43,7 @@ $link_stat = lstat($linkname);  // lstat of link
 $link_size = $link_stat[7];  // size of soft link
 
 // fill data into file
-fwrite($file, (binary)str_repeat("text", 20) );
+fwrite($file, str_repeat("text", 20) );
 fclose($file);
 
 echo "\n-- Access data of the file through the soft link --\n";
@@ -65,7 +65,7 @@ else
 echo "\n-- Updating file with data through soft link --\n";
 // append link with data
 $fp = fopen($linkname, "a");  // open in append mode
-fwrite($fp, (binary)"Hello World");
+fwrite($fp, "Hello World");
 fclose($fp);
 
 // now check temp file for data; it should append "Hello World"
@@ -87,7 +87,7 @@ else
 echo "\n-- Updating file with data and check data through soft link --\n";
 // write to temp file
 $file = fopen($filename, "w");
-fwrite($file, (binary)"Hello World");
+fwrite($file, "Hello World");
 fclose($file);
 
 // now check link for data; it should echo "Hello World"
@@ -113,7 +113,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Accessing and updating data of file through soft link ***
 bool(true)
 

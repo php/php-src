@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,16 +80,16 @@ zend_object_value NumberFormatter_object_create(
  */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX( number_parse_arginfo, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, string )
-	ZEND_ARG_INFO( 0, type )
-	ZEND_ARG_INFO( 1, position )
+ZEND_BEGIN_ARG_INFO_EX(number_parse_arginfo, 0, 0, 1)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( number_parse_currency_arginfo, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, string )
-	ZEND_ARG_INFO( 1, currency )
-	ZEND_ARG_INFO( 1, position )
+ZEND_BEGIN_ARG_INFO_EX(number_parse_currency_arginfo, 0, 0, 2)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(1, currency)
+	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_getattribute, 0, 0, 1)
@@ -99,10 +99,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_setattribute, 0, 0, 2)
 	ZEND_ARG_INFO(0, attr)
 	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_getsymbol, 0, 0, 1)
-	ZEND_ARG_INFO(0, attr)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numberformatter_setsymbol, 0, 0, 2)
@@ -153,7 +149,7 @@ static function_entry NumberFormatter_class_functions[] = {
 	PHP_NAMED_FE( setTextAttribute, ZEND_FN( numfmt_set_text_attribute ), arginfo_numberformatter_setattribute )
 	PHP_NAMED_FE( getTextAttribute, ZEND_FN( numfmt_get_text_attribute ), arginfo_numberformatter_getattribute )
 	PHP_NAMED_FE( setSymbol, ZEND_FN( numfmt_set_symbol ), arginfo_numberformatter_setsymbol )
-	PHP_NAMED_FE( getSymbol, ZEND_FN( numfmt_get_symbol ), arginfo_numberformatter_getsymbol )
+	PHP_NAMED_FE( getSymbol, ZEND_FN( numfmt_get_symbol ), arginfo_numberformatter_getattribute )
 	PHP_NAMED_FE( setPattern, ZEND_FN( numfmt_set_pattern ), arginfo_numberformatter_setpattern )
 	PHP_NAMED_FE( getPattern, ZEND_FN( numfmt_get_pattern ), arginfo_numberformatter_getpattern )
 	PHP_NAMED_FE( getLocale, ZEND_FN( numfmt_get_locale ), arginfo_numberformatter_getlocale )

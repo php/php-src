@@ -22,40 +22,12 @@ $input = array(
   array(1, 2, 3, 1)
 );
 
-var_dump( array_unique($input) );
+var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_unique() : two dimensional array for $input argument ***
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
   array(4) {

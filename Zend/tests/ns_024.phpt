@@ -4,4 +4,4 @@
 <?php
 var_dump(__NAMESPACE__);
 --EXPECT--
-unicode(0) ""
+string(0) ""

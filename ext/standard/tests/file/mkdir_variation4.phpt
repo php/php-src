@@ -185,22 +185,22 @@ Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
 Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
 
 --empty string DQ--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --empty string SQ--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --string DQ--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --string SQ--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --mixed case string--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --heredoc--
-Error: 2 - mkdir() expects parameter 4 to be resource, Unicode string given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)
 
 --instance of classWithToString--
 Error: 2 - mkdir() expects parameter 4 to be resource, object given, %s(%d)

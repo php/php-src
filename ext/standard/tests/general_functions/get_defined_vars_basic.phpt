@@ -74,18 +74,18 @@ Simple testcase for get_defined_vars() function
 
 -- ..define some local variables --
 array(6) {
-  [u"vars"]=>
+  ["vars"]=>
   array(0) {
   }
-  [u"i"]=>
+  ["i"]=>
   int(123)
-  [u"f"]=>
+  ["f"]=>
   float(123.456)
-  [u"b"]=>
+  ["b"]=>
   bool(false)
-  [u"s"]=>
-  unicode(11) "Hello World"
-  [u"arr"]=>
+  ["s"]=>
+  string(11) "Hello World"
+  ["arr"]=>
   array(4) {
     [0]=>
     int(1)
@@ -102,51 +102,51 @@ array(6) {
 
 -- ...define some variables --
 array(6) {
-  [u"vars"]=>
+  ["vars"]=>
   array(0) {
   }
-  [u"i"]=>
+  ["i"]=>
   int(456)
-  [u"f"]=>
+  ["f"]=>
   float(456.678)
-  [u"b"]=>
+  ["b"]=>
   bool(true)
-  [u"s"]=>
-  unicode(9) "Goodnight"
-  [u"arr"]=>
+  ["s"]=>
+  string(9) "Goodnight"
+  ["arr"]=>
   array(2) {
     [0]=>
-    unicode(3) "foo"
+    string(3) "foo"
     [1]=>
-    unicode(3) "bar"
+    string(3) "bar"
   }
 }
 
 -- ...define some more variables --
 array(9) {
-  [u"vars"]=>
+  ["vars"]=>
   array(0) {
   }
-  [u"i"]=>
+  ["i"]=>
   int(456)
-  [u"f"]=>
+  ["f"]=>
   float(456.678)
-  [u"b"]=>
+  ["b"]=>
   bool(true)
-  [u"s"]=>
-  unicode(9) "Goodnight"
-  [u"arr"]=>
+  ["s"]=>
+  string(9) "Goodnight"
+  ["arr"]=>
   array(2) {
     [0]=>
-    unicode(3) "foo"
+    string(3) "foo"
     [1]=>
-    unicode(3) "bar"
+    string(3) "bar"
   }
-  [u"i1"]=>
+  ["i1"]=>
   int(456)
-  [u"f1"]=>
+  ["f1"]=>
   float(456.678)
-  [u"b1"]=>
+  ["b1"]=>
   bool(true)
 }
 ===DONE===

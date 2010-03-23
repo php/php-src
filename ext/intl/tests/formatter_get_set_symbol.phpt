@@ -47,7 +47,7 @@ function ut_main()
         $res_str .= "\nSymbol '$symb_name'\n";
 
         // Get original symbol value.
-        $orig_val = dump_str( ut_nfmt_get_symbol( $fmt, $symb ), false );
+        $orig_val = ut_nfmt_get_symbol( $fmt, $symb );
         $res_str .= "Default symbol: [$orig_val]\n";
 
         // Set a new symbol value.
@@ -56,7 +56,7 @@ function ut_main()
             $res_str .= "set_symbol() error: " . ut_nfmt_get_error_message( $fmt ) . "\n";
 
         // Get the symbol value back.
-        $new_val_check = dump_str( ut_nfmt_get_symbol( $fmt, $symb ), false );
+        $new_val_check = ut_nfmt_get_symbol( $fmt, $symb );
         if( !$new_val_check )
             $res_str .= "get_symbol() error: " . ut_nfmt_get_error_message( $fmt ) . "\n";
 

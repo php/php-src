@@ -39,7 +39,7 @@ echo "Done"
 
 -- Testing get_headers() function with format argument as type string --
 
-Warning: get_headers() expects parameter 2 to be long, Unicode string given in %s on line 13
+Warning: get_headers() expects parameter 2 to be long, string given in %s on line 13
 NULL
 
 -- Testing get_headers() function with format argument as type array --

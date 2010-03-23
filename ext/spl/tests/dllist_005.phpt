@@ -1,5 +1,7 @@
 --TEST--
 SPL: DoublyLinkedList: Queues
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 $queue = new SplQueue();
@@ -51,7 +53,6 @@ echo count($queue)."\n";
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Deprecated: Call-time pass-by-reference has been deprecated in %s on line %d
 Exception: Can't shift from an empty datastructure
 Exception: Can't shift from an empty datastructure
 2

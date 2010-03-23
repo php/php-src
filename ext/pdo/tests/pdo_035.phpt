@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDORow and get_parent_class()
+PDO Common: PDORow + get_parent_class()
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_sqlite')) die ("skip Need PDO_SQlite support");

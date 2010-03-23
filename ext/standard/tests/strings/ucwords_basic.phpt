@@ -41,43 +41,43 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing ucwords() : basic functionality ***
 -- Iteration 1 --
-unicode(15) "Testing Ucwords"
+string(15) "Testing Ucwords"
 -- Iteration 2 --
-unicode(15) "Testing Ucwords"
+string(15) "Testing Ucwords"
 -- Iteration 3 --
-unicode(16) "Testing\tucwords"
+string(16) "Testing\tucwords"
 -- Iteration 4 --
-unicode(15) "Testing	Ucwords"
+string(15) "Testing	Ucwords"
 -- Iteration 5 --
-unicode(15) "Testing
+string(15) "Testing
 Ucwords"
 -- Iteration 6 --
-unicode(16) "Testing\nucwords"
+string(16) "Testing\nucwords"
 -- Iteration 7 --
-unicode(15) "TestingUcwords"
+string(15) "TestingUcwords"
 -- Iteration 8 --
-unicode(16) "Testing\vucwords"
+string(16) "Testing\vucwords"
 -- Iteration 9 --
-unicode(7) "Testing"
+string(7) "Testing"
 -- Iteration 10 --
-unicode(7) "Testing"
+string(7) "Testing"
 -- Iteration 11 --
-unicode(8) " Testing"
+string(8) " Testing"
 -- Iteration 12 --
-unicode(8) " Testing"
+string(8) " Testing"
 -- Iteration 13 --
-unicode(16) "Testing  Ucwords"
+string(16) "Testing  Ucwords"
 -- Iteration 14 --
-unicode(16) "Testing  Ucwords"
+string(16) "Testing  Ucwords"
 -- Iteration 15 --
-unicode(16) "Testing\rucwords"
+string(16) "Testing\rucwords"
 -- Iteration 16 --
-unicode(15) "TestingUcwords"
+string(15) "TestingUcwords"
 -- Iteration 17 --
-unicode(16) "Testing\fucwords"
+string(16) "Testing\fucwords"
 -- Iteration 18 --
-unicode(15) "TestingUcwords"
+string(15) "TestingUcwords"
 Done

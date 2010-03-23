@@ -13,9 +13,9 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 array(2) {
-  [u"a"]=>
+  ["a"]=>
   int(1)
-  [u"b"]=>
+  ["b"]=>
   int(2)
 }
 Done

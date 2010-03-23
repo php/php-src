@@ -29,4 +29,5 @@ bool(true)
 --- child 0 ---
 object(DOMComment)#%d (0) {
 }
-unicode(14) " Hello World! "
+string(14) " Hello World! "
+

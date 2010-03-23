@@ -19,7 +19,7 @@ imagetruecolortopalette($image, true, null);
 
 ?>
 --EXPECTF--
-Warning: imagetruecolortopalette() expects parameter 3 to be long, Unicode string given in %s on line %d
+Warning: imagetruecolortopalette() expects parameter 3 to be long, string given in %s on line %d
 
 Warning: imagetruecolortopalette() expects parameter 3 to be long, resource given in %s on line %d
 

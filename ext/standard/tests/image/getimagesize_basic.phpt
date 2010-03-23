@@ -58,13 +58,13 @@ array(7) {
   [2]=>
   int(1)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"bits"]=>
+  string(24) "width="200" height="100""
+  ["bits"]=>
   int(8)
-  [u"channels"]=>
+  ["channels"]=>
   int(3)
-  [u"mime"]=>
-  unicode(9) "image/gif"
+  ["mime"]=>
+  string(9) "image/gif"
 }
 array(0) {
 }
@@ -78,17 +78,17 @@ array(7) {
   [2]=>
   int(2)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"bits"]=>
+  string(24) "width="200" height="100""
+  ["bits"]=>
   int(8)
-  [u"channels"]=>
+  ["channels"]=>
   int(3)
-  [u"mime"]=>
-  unicode(10) "image/jpeg"
+  ["mime"]=>
+  string(10) "image/jpeg"
 }
 array(1) {
-  [u"APP0"]=>
-  unicode(14) "JFIF%s"
+  ["APP0"]=>
+  string(%d)%s
 }
 
 -- PNG image file (200x100.png) --
@@ -100,11 +100,11 @@ array(6) {
   [2]=>
   int(3)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"bits"]=>
+  string(24) "width="200" height="100""
+  ["bits"]=>
   int(8)
-  [u"mime"]=>
-  unicode(9) "image/png"
+  ["mime"]=>
+  string(9) "image/png"
 }
 array(0) {
 }
@@ -118,9 +118,9 @@ array(5) {
   [2]=>
   int(4)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"mime"]=>
-  unicode(29) "application/x-shockwave-flash"
+  string(24) "width="200" height="100""
+  ["mime"]=>
+  string(29) "application/x-shockwave-flash"
 }
 array(0) {
 }
@@ -134,11 +134,11 @@ array(6) {
   [2]=>
   int(6)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"bits"]=>
+  string(24) "width="200" height="100""
+  ["bits"]=>
   int(24)
-  [u"mime"]=>
-  unicode(14) "image/x-ms-bmp"
+  ["mime"]=>
+  string(14) "image/x-ms-bmp"
 }
 array(0) {
 }
@@ -152,9 +152,9 @@ array(5) {
   [2]=>
   int(7)
   [3]=>
-  unicode(24) "width="200" height="100""
-  [u"mime"]=>
-  unicode(10) "image/tiff"
+  string(24) "width="200" height="100""
+  ["mime"]=>
+  string(10) "image/tiff"
 }
 array(0) {
 }
@@ -168,13 +168,13 @@ array(7) {
   [2]=>
   int(9)
   [3]=>
-  unicode(20) "width="1" height="1""
-  [u"bits"]=>
+  string(20) "width="1" height="1""
+  ["bits"]=>
   int(8)
-  [u"channels"]=>
+  ["channels"]=>
   int(3)
-  [u"mime"]=>
-  unicode(24) "application/octet-stream"
+  ["mime"]=>
+  string(24) "application/octet-stream"
 }
 array(0) {
 }
@@ -188,13 +188,13 @@ array(7) {
   [2]=>
   int(10)
   [3]=>
-  unicode(20) "width="1" height="1""
-  [u"bits"]=>
+  string(20) "width="1" height="1""
+  ["bits"]=>
   int(8)
-  [u"channels"]=>
+  ["channels"]=>
   int(3)
-  [u"mime"]=>
-  unicode(9) "image/jp2"
+  ["mime"]=>
+  string(9) "image/jp2"
 }
 array(0) {
 }
@@ -208,11 +208,11 @@ array(6) {
   [2]=>
   int(14)
   [3]=>
-  unicode(20) "width="4" height="1""
-  [u"bits"]=>
+  string(20) "width="4" height="1""
+  ["bits"]=>
   int(4)
-  [u"mime"]=>
-  unicode(9) "image/iff"
+  ["mime"]=>
+  string(9) "image/iff"
 }
 array(0) {
 }

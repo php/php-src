@@ -19,17 +19,17 @@ foreach ( $variation_array as $var ) {
 --EXPECTF--
 
 Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 
 Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
-NULL
+bool(false)
 ===DONE===

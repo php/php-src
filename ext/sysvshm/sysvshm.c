@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -50,6 +50,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_detach, 0, 0, 1)
 	ZEND_ARG_INFO(0, shm_identifier)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_has_var, 0, 0, 2)
+	ZEND_ARG_INFO(0, id)
+	ZEND_ARG_INFO(0, variable_key)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove, 0, 0, 1)
 	ZEND_ARG_INFO(0, shm_identifier)
 ZEND_END_ARG_INFO()
@@ -61,11 +66,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_put_var, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_get_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_has_var, 0, 0, 2)
 	ZEND_ARG_INFO(0, id)
 	ZEND_ARG_INFO(0, variable_key)
 ZEND_END_ARG_INFO()
@@ -83,7 +83,7 @@ const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_remove,		arginfo_shm_detach)
 	PHP_FE(shm_detach, 		arginfo_shm_remove)
 	PHP_FE(shm_put_var,		arginfo_shm_put_var)
-	PHP_FE(shm_has_var, 	arginfo_shm_has_var)
+	PHP_FE(shm_has_var,		arginfo_shm_has_var)
 	PHP_FE(shm_get_var,		arginfo_shm_get_var)
 	PHP_FE(shm_remove_var,	arginfo_shm_remove_var)
 	{NULL, NULL, NULL}	
@@ -95,7 +95,7 @@ const zend_function_entry sysvshm_functions[] = {
 zend_module_entry sysvshm_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvshm",
-	sysvshm_functions,
+	sysvshm_functions, 
 	PHP_MINIT(sysvshm),
 	NULL,
 	NULL,
@@ -143,7 +143,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 }
 /* }}} */
 
-/* {{{ proto resource shm_attach(int key [, int memsize [, int perm]]) U
+/* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
    Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
@@ -201,7 +201,7 @@ PHP_FUNCTION(shm_attach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_detach(resource shm_identifier) U
+/* {{{ proto bool shm_detach(resource shm_identifier)
    Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
@@ -216,7 +216,7 @@ PHP_FUNCTION(shm_detach)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove(resource shm_identifier) U
+/* {{{ proto bool shm_remove(resource shm_identifier)
    Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
@@ -237,7 +237,7 @@ PHP_FUNCTION(shm_remove)
 }
 /* }}} */
 
-/* {{{ proto bool shm_put_var(resource shm_identifier, int variable_key, mixed variable) U
+/* {{{ proto bool shm_put_var(resource shm_identifier, int variable_key, mixed variable)
    Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
@@ -272,7 +272,7 @@ PHP_FUNCTION(shm_put_var)
 }
 /* }}} */
 
-/* {{{ proto mixed shm_get_var(resource id, int variable_key) U
+/* {{{ proto mixed shm_get_var(resource id, int variable_key)
    Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
@@ -309,7 +309,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_has_var(resource id, int variable_key) U
+/* {{{ proto bool shm_has_var(resource id, int variable_key)
 	Checks whether a specific entry exists */
 PHP_FUNCTION(shm_has_var)
 {
@@ -325,7 +325,7 @@ PHP_FUNCTION(shm_has_var)
 }
 /* }}} */
 
-/* {{{ proto bool shm_remove_var(resource id, int variable_key) U
+/* {{{ proto bool shm_remove_var(resource id, int variable_key)
    Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
@@ -367,11 +367,11 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, const char *data,
 		return -1; /* not enough memory */
 	}
 
-	shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);
+	shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);	
 	shm_var->key = key;
 	shm_var->length = len;
-	shm_var->next = total_size;
-	memcpy(&(shm_var->mem), data, len);
+	shm_var->next = total_size;   
+	memcpy(&(shm_var->mem), data, len);	
 	ptr->end += total_size;
 	ptr->free -= total_size;
 	return 0;
@@ -386,7 +386,7 @@ static long php_check_shm_data(sysvshm_chunk_head *ptr, long key)
 	sysvshm_chunk *shm_var;
 
 	pos = ptr->start;
-	
+			
 	for (;;) {
 		if (pos >= ptr->end) {
 			return -1;
@@ -394,7 +394,7 @@ static long php_check_shm_data(sysvshm_chunk_head *ptr, long key)
 		shm_var = (sysvshm_chunk*) ((char *) ptr + pos);
 		if (shm_var->key == key) {
 			return pos;
-		}
+		}	
 		pos += shm_var->next;
 
 		if (shm_var->next <= 0 || pos < ptr->start) {

@@ -57,28 +57,28 @@ echo "====DONE!====\n";
 ====TRAVERSE====
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====REVERSE====
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 ====UNBUFFERED====
 ====TRAVERSE====
@@ -86,15 +86,15 @@ array(1) {
 Warning: sqlite_rewind(): Cannot rewind an unbuffered result set in %ssqlite_023.php on line %d
 array(1) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
 }
 array(1) {
   [0]=>
-  unicode(3) "two"
+  string(3) "two"
 }
 array(1) {
   [0]=>
-  unicode(5) "three"
+  string(5) "three"
 }
 ====REVERSE====
 

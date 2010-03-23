@@ -77,7 +77,7 @@ Start cloneNode test
 node 0
 Course: new title3:object(DOMElement)#6 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c1n1
 			c1n2
@@ -86,7 +86,7 @@ Course: new title3:object(DOMElement)#6 (0) {
 node 1
 Course: two:object(DOMElement)#3 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c2n1
 			c2n2
@@ -95,11 +95,11 @@ Course: two:object(DOMElement)#3 (0) {
 node 2
 Course: new title default:object(DOMElement)#4 (0) {
 }
-~unicode(0) ""
+~string(0) ""
 node 3
 Course: new title true:object(DOMElement)#7 (0) {
 }
-~unicode(24) "
+~string(24) "
 		
 			c1n1
 			c1n2
@@ -108,4 +108,4 @@ Course: new title true:object(DOMElement)#7 (0) {
 node 4
 Course: new title false:object(DOMElement)#8 (0) {
 }
-~unicode(0) ""
+~string(0) ""

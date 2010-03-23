@@ -111,22 +111,22 @@ fclose( $file_handle );
 *** Testing timezone_name_from_abbr() : usage variation -  unexpected values to second argument $gmtOffset***
 
 -- int 0 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- int 12345 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- int -12345 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- float 10.5 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- float -10.5 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- float .5 --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- empty array --
 
@@ -149,51 +149,51 @@ Warning: timezone_name_from_abbr() expects parameter 2 to be long, array given i
 bool(false)
 
 -- uppercase NULL --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- lowercase null --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- lowercase true --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- lowercase false --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- uppercase TRUE --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- uppercase FALSE --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- empty string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: timezone_name_from_abbr() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
@@ -207,10 +207,10 @@ Warning: timezone_name_from_abbr() expects parameter 2 to be long, object given 
 bool(false)
 
 -- undefined var --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- unset var --
-unicode(3) "UTC"
+string(3) "UTC"
 
 -- resource --
 

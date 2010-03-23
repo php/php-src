@@ -6,7 +6,7 @@ if (!function_exists("inet_ntop")) die("skip no inet_ntop()");
 if (!function_exists("inet_pton")) die("skip no inet_pton()"); 
 
 $packed = str_repeat(chr(0), 15) . chr(1);
-if (@inet_ntop((binary)$packed) === false) {
+if (@inet_ntop($packed) === false) {
 	die("skip no IPv6 support");
 }
 if (stristr(PHP_OS, "darwin") !== false) die("skip MacOS has broken inet_*() funcs");
@@ -33,18 +33,18 @@ foreach ($a as $address) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(3) "::1"
-unicode(3) "::2"
-unicode(4) "::35"
-unicode(5) "::255"
-unicode(6) "::1024"
+--EXPECTF--	
+string(3) "::1"
+string(3) "::2"
+string(4) "::35"
+string(5) "::255"
+string(6) "::1024"
 
 Warning: inet_pton(): Unrecognized address  in %s on line %d
 
 Warning: inet_ntop(): Invalid in_addr value in %s on line %d
 bool(false)
-unicode(36) "2001:db8:85a3:8d3:1319:8a2e:370:7344"
-unicode(15) "2001:db8:1234::"
-unicode(38) "2001:db8:1234:ffff:ffff:ffff:ffff:ffff"
+string(36) "2001:db8:85a3:8d3:1319:8a2e:370:7344"
+string(15) "2001:db8:1234::"
+string(38) "2001:db8:1234:ffff:ffff:ffff:ffff:ffff"
 Done

@@ -33,18 +33,17 @@ var_dump($would);
 var_dump(flock($fp, -1));
 var_dump(flock($fp, 0));
 
+@unlink($file);
+echo "Done\n";
 ?>
-===DONE===
---CLEAN--
-<?php unlink(dirname(__FILE__)."/flock.dat"); ?>
---EXPECTF--
+--EXPECTF--	
 Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: flock() expects parameter 1 to be resource, Unicode string given in %s on line %d
+Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Warning: flock(): 5 is not a valid stream resource in %s on line %d
+Warning: flock(): %d is not a valid stream resource in %s on line %d
 bool(false)
 bool(true)
 bool(true)
@@ -62,4 +61,4 @@ bool(true)
 
 Warning: flock(): Illegal operation argument in %s on line %d
 bool(false)
-===DONE===
+Done

@@ -5,8 +5,6 @@ Check various LOB error messages
 --FILE--
 <?php
 
-// test some LOB error messages
-	
 require(dirname(__FILE__).'/connect.inc');
 require(dirname(__FILE__).'/create_table.inc');
 
@@ -44,13 +42,13 @@ echo "Done\n";
 ?>
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
-  [u"descriptor"]=>
+  ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
 
 Warning: OCI-Lob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
 bool(false)
-int(12)
+int(6)
 bool(true)
 bool(true)
 

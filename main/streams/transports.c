@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 6                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2010 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -107,7 +107,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 	if (protocol) {
 		char *tmp = estrndup(protocol, n);
-		if (FAILURE == zend_hash_find(&xport_hash, tmp, n + 1, (void**)&factory)) {
+		if (FAILURE == zend_hash_find(&xport_hash, (char*)tmp, n + 1, (void**)&factory)) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -134,7 +134,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 			context STREAMS_REL_CC TSRMLS_CC);
 
 	if (stream) {
-		php_stream_context_set(stream, context TSRMLS_CC);
+		php_stream_context_set(stream, context);
 
 		if ((flags & STREAM_XPORT_SERVER) == 0) {
 			/* client */

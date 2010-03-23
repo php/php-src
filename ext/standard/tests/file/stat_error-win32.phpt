@@ -49,6 +49,7 @@ bool(false)
 Warning: stat(): stat failed for 22 in %s on line %d
 bool(false)
 
-Warning: stat() expects parameter 1 to be string (Unicode or binary), array given in %s on line %d
+Warning: stat() expects parameter 1 to be string, array given in %s on line %d
 NULL
 Done
+

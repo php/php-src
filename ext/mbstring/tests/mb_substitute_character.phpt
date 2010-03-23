@@ -5,7 +5,7 @@ mb_substitute_character()
 --FILE--
 <?php
 //$debug = true;
-ini_set('include_path','.');
+ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
 
 // Note: It does not return TRUE/FALSE for setting char
@@ -31,15 +31,15 @@ var_dump(mb_substitute_character('BAD_NAME'));
 --EXPECT--
 bool(true)
 int(12356)
-unicode(8) "82a282a0"
+string(8) "82a282a0"
 bool(true)
-unicode(4) "long"
-unicode(16) "552b3236363082a0"
+string(4) "long"
+string(16) "552b3236363082a0"
 bool(true)
-unicode(4) "none"
-unicode(4) "82a0"
+string(4) "none"
+string(4) "82a0"
 bool(true)
-unicode(6) "entity"
-unicode(20) "262378323636303b82a0"
+string(6) "entity"
+string(20) "262378323636303b82a0"
 ERR: Warning
 bool(false)

@@ -30,12 +30,11 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
-unicode(5) "/blah"
+string(5) "/blah"
 
 Warning: session_start(): open(%s, O_RDWR) failed: No such file or directory (2) in %s on line %d
 bool(true)
-unicode(5) "/blah"
+string(5) "/blah"
 bool(true)
-unicode(5) "/blah"
+string(5) "/blah"
 Done
-

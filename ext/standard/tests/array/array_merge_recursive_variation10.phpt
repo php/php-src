@@ -39,8 +39,7 @@ var_dump( array_merge_recursive($arr1["array"], $arr2["array"]) );
 
 echo "Done";
 ?>
---EXPECT--
-
+--EXPECTF--
 *** Testing array_merge_recursive() : two dimensional array for $arr1 argument ***
 -- Passing the entire 2-d array --
 -- With default argument --
@@ -56,27 +55,27 @@ array(4) {
     [3]=>
     int(1)
   }
-  [u"array"]=>
+  ["array"]=>
   array(4) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
-    [u"str1"]=>
-    unicode(5) "hello"
-    [u"str2"]=>
-    unicode(5) "world"
+    string(5) "world"
+    ["str1"]=>
+    string(5) "hello"
+    ["str2"]=>
+    string(5) "world"
   }
   [1]=>
   array(4) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
     [3]=>
-    unicode(3) "one"
+    string(3) "one"
     [4]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [2]=>
   array(4) {
@@ -103,31 +102,31 @@ array(6) {
     [3]=>
     int(1)
   }
-  [u"array"]=>
+  ["array"]=>
   array(6) {
     [0]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [1]=>
-    unicode(5) "world"
-    [u"str1"]=>
-    unicode(5) "hello"
-    [u"str2"]=>
-    unicode(5) "world"
+    string(5) "world"
+    ["str1"]=>
+    string(5) "hello"
+    ["str2"]=>
+    string(5) "world"
     [2]=>
-    unicode(5) "hello"
+    string(5) "hello"
     [3]=>
-    unicode(5) "world"
+    string(5) "world"
   }
   [1]=>
   array(4) {
     [1]=>
-    unicode(3) "one"
+    string(3) "one"
     [2]=>
-    unicode(3) "two"
+    string(3) "two"
     [3]=>
-    unicode(3) "one"
+    string(3) "one"
     [4]=>
-    unicode(3) "two"
+    string(3) "two"
   }
   [2]=>
   array(4) {
@@ -143,33 +142,33 @@ array(6) {
   [3]=>
   int(1)
   [4]=>
-  unicode(5) "hello"
+  string(5) "hello"
 }
 -- Passing the sub-array --
 -- With default argument --
 array(4) {
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [1]=>
-  unicode(5) "world"
-  [u"str1"]=>
-  unicode(5) "hello"
-  [u"str2"]=>
-  unicode(5) "world"
+  string(5) "world"
+  ["str1"]=>
+  string(5) "hello"
+  ["str2"]=>
+  string(5) "world"
 }
 -- With more arguments --
 array(6) {
   [0]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [1]=>
-  unicode(5) "world"
-  [u"str1"]=>
-  unicode(5) "hello"
-  [u"str2"]=>
-  unicode(5) "world"
+  string(5) "world"
+  ["str1"]=>
+  string(5) "hello"
+  ["str2"]=>
+  string(5) "world"
   [2]=>
-  unicode(5) "hello"
+  string(5) "hello"
   [3]=>
-  unicode(5) "world"
+  string(5) "world"
 }
 Done

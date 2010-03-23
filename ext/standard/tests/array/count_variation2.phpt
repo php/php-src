@@ -146,27 +146,27 @@ int(3)
 
 -- Iteration 16 --
 
-Warning: count() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: count() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: count() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: count() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: count() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: count() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
 -- Iteration 21 --

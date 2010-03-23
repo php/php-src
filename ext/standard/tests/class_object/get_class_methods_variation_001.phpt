@@ -113,23 +113,18 @@ NULL
 
 Arg value 0.5 
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
 NULL
-Error: 8 - Array to string conversion, %s(76)
 
 Arg value Array 
 NULL

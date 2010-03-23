@@ -44,8 +44,8 @@ getModifiers():
 int(256)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(9) "TestClass"
+  ["name"]=>
+  string(9) "TestClass"
 }
 getDocComment():
 bool(false)
@@ -60,8 +60,8 @@ getModifiers():
 int(257)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(9) "TestClass"
+  ["name"]=>
+  string(9) "TestClass"
 }
 getDocComment():
 bool(false)
@@ -76,11 +76,11 @@ getModifiers():
 int(512)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(9) "TestClass"
+  ["name"]=>
+  string(9) "TestClass"
 }
 getDocComment():
-unicode(47) "/**
+string(%d) "/**
      * This property has a comment.
      */"
 
@@ -94,8 +94,8 @@ getModifiers():
 int(1024)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
-  [u"name"]=>
-  unicode(9) "TestClass"
+  ["name"]=>
+  string(9) "TestClass"
 }
 getDocComment():
 bool(false)

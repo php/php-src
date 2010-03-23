@@ -31,10 +31,14 @@ echo "Done";
 
 -- Testing spliti() function with more than expected no. of arguments --
 
+Deprecated: Function spliti() is deprecated in %s on line %d
+
 Warning: spliti() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 -- Testing spliti() function with less than expected no. of arguments --
+
+Deprecated: Function spliti() is deprecated in %s on line %d
 
 Warning: spliti() expects at least 2 parameters, 1 given in %s on line %d
 NULL

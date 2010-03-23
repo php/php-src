@@ -64,31 +64,31 @@ echo "Done";
 --> http://www.php.net/index.php?&foo   : NULL
 --> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI   : NULL
 --> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
---> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(6) "secret"
---> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(6) "secret"
+--> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
+--> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
---> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(6) "secret"
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(14) "secret@hideout"
---> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : unicode(6) "secret"
+--> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(14) "secret@hideout"
+--> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
 --> nntp://news.php.net   : NULL
 --> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz   : NULL
 --> zlib:http://foo@bar   : NULL
 --> zlib:filename.txt   : NULL
 --> zlib:/path/to/my/file/file.txt   : NULL
---> foo://foo@bar   : unicode(3) "foo"
+--> foo://foo@bar   : string(3) "foo"
 --> mailto:me@mydomain.com   : NULL
 --> /foo.php?a=b&c=d   : NULL
 --> foo.php?a=b&c=d   : NULL
---> http://user:passwd@www.example.com:8080?bar=1&boom=0   : unicode(4) "user"
+--> http://user:passwd@www.example.com:8080?bar=1&boom=0   : string(4) "user"
 --> file:///path/to/file   : NULL
 --> file://path/to/file   : NULL
 --> file:/path/to/file   : NULL
 --> http://1.2.3.4:/abc.asp?a=1&b=2   : NULL
 --> http://foo.com#bar   : NULL
 --> scheme:   : NULL
---> foo+bar://baz@bang/bla   : unicode(3) "baz"
+--> foo+bar://baz@bang/bla   : string(3) "baz"
 --> gg:9130731   : NULL
---> http://user:@pass@host/path?argument?value#etc   : unicode(4) "user"
+--> http://user:@pass@host/path?argument?value#etc   : string(4) "user"
 --> http://10.10.10.10/:80   : NULL
 --> http://x:?   : NULL
 --> x:blah.com   : NULL
@@ -97,7 +97,7 @@ echo "Done";
 --> http://::?   : NULL
 --> x://::6.5   : NULL
 --> http://?:/   : NULL
---> http://@?:/   : unicode(0) ""
+--> http://@?:/   : string(0) ""
 --> file:///:   : NULL
 --> file:///a:/   : NULL
 --> file:///ab:/   : NULL

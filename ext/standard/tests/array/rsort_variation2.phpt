@@ -335,7 +335,7 @@ array(5) {
 
 -- Iteration 16 --
 
-Warning: rsort() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 array(5) {
   [0]=>
@@ -352,7 +352,7 @@ array(5) {
 
 -- Iteration 17 --
 
-Warning: rsort() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 array(5) {
   [0]=>
@@ -369,7 +369,7 @@ array(5) {
 
 -- Iteration 18 --
 
-Warning: rsort() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 array(5) {
   [0]=>
@@ -386,7 +386,7 @@ array(5) {
 
 -- Iteration 19 --
 
-Warning: rsort() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 array(5) {
   [0]=>
@@ -403,7 +403,7 @@ array(5) {
 
 -- Iteration 20 --
 
-Warning: rsort() expects parameter 2 to be long, Unicode string given in %s on line %d
+Warning: rsort() expects parameter 2 to be long, string given in %s on line %d
 bool(false)
 array(5) {
   [0]=>

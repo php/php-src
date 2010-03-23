@@ -29,7 +29,25 @@ var_dump(session_id());
 
 @session_start();
 var_dump(session_id());
+var_dump(session_id("£$%^&*()"));
+var_dump(session_id());
+@session_destroy();
+
+@session_start();
+var_dump(session_id());
 var_dump(session_id("\r\n"));
+var_dump(session_id());
+@session_destroy();
+
+@session_start();
+var_dump(session_id());
+var_dump(session_id("\0"));
+var_dump(session_id());
+@session_destroy();
+
+@session_start();
+var_dump(session_id());
+var_dump(session_id("¬``@~:{>?><,./[]+--"));
 var_dump(session_id());
 @session_destroy();
 
@@ -38,15 +56,24 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_id() : error functionality ***
-string(32) "%s"
-string(32) "%s"
+string(%d) "%s"
+string(%d) "%s"
 string(1) "!"
-string(32) "%s"
-string(32) "%s"
+string(%d) "%s"
+string(%d) "%s"
 string(3) "?><"
-string(32) "%s"
-string(32) "%s"
+string(%d) "%s"
+string(%d) "%s"
+string(8) "£$%^&*()"
+string(%d) "%s"
+string(%d) "%s"
 string(2) "
 "
+string(%d) "%s"
+string(%d) "%s"
+string(0) ""
+string(%d) "%s"
+string(%d) "%s"
+string(19) "¬``@~:{>?><,./[]+--"
 Done
 

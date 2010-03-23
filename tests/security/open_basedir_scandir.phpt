@@ -84,27 +84,27 @@ Warning: scandir(): (errno 1): %s in %s on line %d
 bool(false)
 array(3) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(6) "ok.txt"
+  string(6) "ok.txt"
 }
 array(3) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(6) "ok.txt"
+  string(6) "ok.txt"
 }
 array(3) {
   [0]=>
-  unicode(1) "."
+  string(1) "."
   [1]=>
-  unicode(2) ".."
+  string(2) ".."
   [2]=>
-  unicode(6) "ok.txt"
+  string(6) "ok.txt"
 }
 *** Finished testing open_basedir configuration [scandir] ***
 

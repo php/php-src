@@ -114,72 +114,72 @@ fclose( $file_handle );
 
 -- int 0 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int 1 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-07-01 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-07-01 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int 12345 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1997-04-17 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1997-04-17 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- int -12345 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1929-09-11 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1929-09-11 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float 10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-07-10 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-07-10 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float -10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-20 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-20 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float .5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty array --
@@ -204,92 +204,92 @@ bool(false)
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase null --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase true --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-07-01 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-07-01 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase false --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-07-01 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-07-01 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string DQ --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date_date_set() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: date_date_set() expects parameter 4 to be long, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
@@ -304,22 +304,22 @@ bool(false)
 
 -- undefined var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- unset var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "1963-06-30 08:34:10"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "1963-06-30 08:34:10"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- resource --

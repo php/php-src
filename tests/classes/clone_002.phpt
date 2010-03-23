@@ -26,20 +26,20 @@ echo "Done\n";
 --EXPECT--
 Object
 object(test)#1 (3) {
-  [u"p1"]=>
+  ["p1"]=>
   int(1)
-  [u"p2"]=>
-  unicode(1) "A"
-  [u"p3"]=>
-  unicode(1) "B"
+  ["p2"]=>
+  string(1) "A"
+  ["p3"]=>
+  string(1) "B"
 }
 Clown
 object(test)#2 (3) {
-  [u"p1"]=>
+  ["p1"]=>
   int(1)
-  [u"p2"]=>
-  unicode(1) "A"
-  [u"p3"]=>
-  unicode(1) "C"
+  ["p2"]=>
+  string(1) "A"
+  ["p3"]=>
+  string(1) "C"
 }
 Done

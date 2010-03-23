@@ -10,7 +10,7 @@ import_request_variables("g","_");
 echo $_x;
 echo "\nok\n";
 ?>
---EXPECT--
+--EXPECTF--
 1
 2
 ok

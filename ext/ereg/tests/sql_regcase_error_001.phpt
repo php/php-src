@@ -27,11 +27,15 @@ echo "Done";
 
 -- Testing sql_regcase() function with Zero arguments --
 
-Warning: Wrong parameter count for sql_regcase() in %s on line 12
+Deprecated: Function sql_regcase() is deprecated in %s on line %d
+
+Warning: sql_regcase() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing sql_regcase() function with more than expected no. of arguments --
 
-Warning: Wrong parameter count for sql_regcase() in %s on line 18
+Deprecated: Function sql_regcase() is deprecated in %s on line %d
+
+Warning: sql_regcase() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 Done

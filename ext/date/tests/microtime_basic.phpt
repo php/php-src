@@ -14,7 +14,7 @@ var_dump(microtime(false));
 ?>
 ===DONE===
 --EXPECTF--
-unicode(%d) "%s %s"
+string(%d) "%s %s"
 float(%s)
-unicode(%d) "%s %s"
+string(%d) "%s %s"
 ===DONE===

@@ -18,6 +18,6 @@ var_dump(in_array("cos", $result));
 ===DONE===
 --EXPECTF--
 Simple testcase for get_extension_funcs() function
-unicode(5) "array"
+string(5) "array"
 bool(true)
 ===DONE===

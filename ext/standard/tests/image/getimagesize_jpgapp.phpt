@@ -25,7 +25,7 @@ $arr['APP1'] = "and this too";
 getimagesize( dirname(__FILE__)."/testAPP.jpg", $arr);
 
 foreach ($arr as $key => $value) {
-	echo "$key - length: ". strlen($value) ."; md5: " . md5((binary)$value) .  "\n" ;
+	echo "$key - length: ". strlen($value) ."; md5: " . md5($value) .  "\n" ;
 }
 
 ?>

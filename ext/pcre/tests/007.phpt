@@ -26,58 +26,34 @@ var_dump(preg_last_error() == PREG_BAD_UTF8_ERROR);
 
 echo "Done!\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
-  unicode(1) "o"
+  string(1) "o"
 }
 array(1) {
   [0]=>
-  unicode(1) "l"
+  string(1) "l"
 }
 array(1) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 array(1) {
   [0]=>
-  unicode(1) "1"
+  string(1) "1"
 }
 array(1) {
   [0]=>
-  unicode(1) "2"
+  string(1) "2"
 }
 array(1) {
   [0]=>
-  unicode(1) "3"
+  string(1) "3"
 }
-unicode(6) "ola123"
-unicode(6) "ola%r\x{ff}%r23"
+string(6) "ola123"
+string(6) "olaÿ23"
 bool(true)
-array(1) {
-  [0]=>
-  unicode(1) "o"
-}
-array(1) {
-  [0]=>
-  unicode(1) "l"
-}
-array(1) {
-  [0]=>
-  unicode(1) "a"
-}
-array(1) {
-  [0]=>
-  unicode(1) "%r\x{ff}%r"
-}
-array(1) {
-  [0]=>
-  unicode(1) "2"
-}
-array(1) {
-  [0]=>
-  unicode(1) "3"
-}
-unicode(6) "ola%r\x{ff}%r23"
-bool(false)
+NULL
+bool(true)
 Done!

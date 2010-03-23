@@ -3,7 +3,7 @@ testing @ and error_reporting - 1
 --FILE--
 <?php
 
-error_reporting(E_ALL & ~E_STRICT);
+error_reporting(E_ALL);
 
 function foo($arg) {
 }
@@ -21,6 +21,6 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECT--	
 int(30719)
 Done

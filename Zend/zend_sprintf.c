@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        | 
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include <stdio.h>
+
 #include "zend.h"
 
 #ifdef HAVE_STDARG_H
@@ -27,7 +28,7 @@
 #endif
 
 #if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...) /* {{{ */
+int zend_sprintf(char *buffer, const char *format, ...)
 {
 	va_list args;
 
@@ -37,7 +38,6 @@ int zend_sprintf(char *buffer, const char *format, ...) /* {{{ */
 
 	return strlen(buffer);
 }
-/* }}} */
 #endif
 
 /*

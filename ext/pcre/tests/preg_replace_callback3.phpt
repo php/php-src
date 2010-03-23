@@ -36,7 +36,7 @@ int(3)
 Warning: preg_replace_callback(): Requires argument 2, '2', to be a valid callback in %s on line %d
 int(3)
 
-Warning: preg_replace_callback() expects parameter 4 to be long, Unicode string given in %s on line %d
+Warning: preg_replace_callback() expects parameter 4 to be long, string given in %s on line %d
 NULL
 
 Warning: preg_replace_callback() expects parameter 4 to be long, array given in %s on line %d

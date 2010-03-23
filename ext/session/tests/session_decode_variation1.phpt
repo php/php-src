@@ -36,7 +36,7 @@ ob_end_flush();
 bool(true)
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -45,7 +45,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -54,37 +54,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-}
-bool(true)
-array(3) {
-  [u"foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  [u"guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  [u"blah"]=>
+  ["blah"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -96,7 +66,7 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -105,7 +75,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -114,37 +84,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-}
-bool(true)
-array(3) {
-  [u"foo"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  [u"guff"]=>
-  &array(3) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-    [2]=>
-    int(3)
-  }
-  [u"blah"]=>
+  ["blah"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -156,7 +96,7 @@ array(3) {
 }
 bool(true)
 array(3) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -165,7 +105,7 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"guff"]=>
+  ["guff"]=>
   &array(3) {
     [0]=>
     int(1)
@@ -174,7 +114,67 @@ array(3) {
     [2]=>
     int(3)
   }
-  [u"blah"]=>
+  ["blah"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+bool(true)
+array(3) {
+  ["foo"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["guff"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["blah"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+bool(true)
+array(3) {
+  ["foo"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["guff"]=>
+  &array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+  ["blah"]=>
   &array(3) {
     [0]=>
     int(1)

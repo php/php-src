@@ -18,7 +18,7 @@ Test uasort() function : usage variations - sort different numeric values
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp_function($value1, $value2)
 {
@@ -67,7 +67,7 @@ var_dump($empty_array);
 
 echo "Done"
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing uasort() : different numeric arrays as 'array_arg' ***
 -- Sorting Integer array --
 bool(true)

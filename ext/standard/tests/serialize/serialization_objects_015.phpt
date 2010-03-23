@@ -73,460 +73,460 @@ echo "Done";
 --EXPECTF--
 --- a refs container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     int(1)
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";R:1;U:1:"b";i:1;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";i:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     int(1)
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  int(1)
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- a eqs container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     int(1)
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";r:1;U:1:"b";i:1;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";i:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     int(1)
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   int(1)
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  int(1)
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  int(1)
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- a,b ref container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";R:1;U:1:"b";R:1;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- a,b eq container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
-unicode(55) "O:8:"stdClass":3:{U:1:"a";r:1;U:1:"b";r:1;U:1:"c";i:1;}"
+string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";i:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"b"]=>
+  ["b"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     int(1)
   }
-  [u"c"]=>
-  int(1)
-}
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  object(stdClass)#%d (3) {
-    [u"a"]=>
-    unicode(14) "obj->a.changed"
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
-    int(1)
-  }
-  [u"c"]=>
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  object(stdClass)#%d (3) {
+    ["a"]=>
+    string(14) "obj->a.changed"
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    int(1)
+  }
+  ["c"]=>
   int(1)
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  int(1)
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 
 
 --- a,b,c ref container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
-  [u"b"]=>
+  ["b"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
-  [u"c"]=>
+  ["c"]=>
   &object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-}
-unicode(55) "O:8:"stdClass":3:{U:1:"a";R:1;U:1:"b";R:1;U:1:"c";R:1;}"
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  &object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-  [u"b"]=>
-  &object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-  [u"c"]=>
-  &object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
 }
+string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";R:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->a.changed"
-  [u"b"]=>
-  &unicode(14) "obj->a.changed"
-  [u"c"]=>
-  &unicode(14) "obj->a.changed"
+  ["a"]=>
+  &object(stdClass)#%d (3) {
+    ["a"]=>
+    *RECURSION*
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    *RECURSION*
+  }
+  ["b"]=>
+  &object(stdClass)#%d (3) {
+    ["a"]=>
+    *RECURSION*
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    *RECURSION*
+  }
+  ["c"]=>
+  &object(stdClass)#%d (3) {
+    ["a"]=>
+    *RECURSION*
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    *RECURSION*
+  }
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->b.changed"
-  [u"b"]=>
-  &unicode(14) "obj->b.changed"
-  [u"c"]=>
-  &unicode(14) "obj->b.changed"
+  ["a"]=>
+  &string(14) "obj->a.changed"
+  ["b"]=>
+  &string(14) "obj->a.changed"
+  ["c"]=>
+  &string(14) "obj->a.changed"
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  &unicode(14) "obj->c.changed"
-  [u"b"]=>
-  &unicode(14) "obj->c.changed"
-  [u"c"]=>
-  &unicode(14) "obj->c.changed"
+  ["a"]=>
+  &string(14) "obj->b.changed"
+  ["b"]=>
+  &string(14) "obj->b.changed"
+  ["c"]=>
+  &string(14) "obj->b.changed"
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  &string(14) "obj->c.changed"
+  ["b"]=>
+  &string(14) "obj->c.changed"
+  ["c"]=>
+  &string(14) "obj->c.changed"
 }
 
 
 --- a,b,c eq container:
 object(stdClass)#%d (3) {
-  [u"a"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
-  [u"b"]=>
+  ["b"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
-  [u"c"]=>
+  ["c"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
+    ["a"]=>
     *RECURSION*
-    [u"b"]=>
+    ["b"]=>
     *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-}
-unicode(55) "O:8:"stdClass":3:{U:1:"a";r:1;U:1:"b";r:1;U:1:"c";r:1;}"
-object(stdClass)#%d (3) {
-  [u"a"]=>
-  object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-  [u"b"]=>
-  object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
-    *RECURSION*
-  }
-  [u"c"]=>
-  object(stdClass)#%d (3) {
-    [u"a"]=>
-    *RECURSION*
-    [u"b"]=>
-    *RECURSION*
-    [u"c"]=>
+    ["c"]=>
     *RECURSION*
   }
 }
+string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";r:1;}"
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
+  ["a"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
-    unicode(14) "obj->a.changed"
-    [u"b"]=>
+    ["a"]=>
     *RECURSION*
-    [u"c"]=>
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
     *RECURSION*
   }
-  [u"c"]=>
+  ["b"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
-    unicode(14) "obj->a.changed"
-    [u"b"]=>
+    ["a"]=>
     *RECURSION*
-    [u"c"]=>
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    *RECURSION*
+  }
+  ["c"]=>
+  object(stdClass)#%d (3) {
+    ["a"]=>
+    *RECURSION*
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
     *RECURSION*
   }
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
   object(stdClass)#%d (3) {
-    [u"a"]=>
-    unicode(14) "obj->a.changed"
-    [u"b"]=>
-    unicode(14) "obj->b.changed"
-    [u"c"]=>
+    ["a"]=>
+    string(14) "obj->a.changed"
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
+    *RECURSION*
+  }
+  ["c"]=>
+  object(stdClass)#%d (3) {
+    ["a"]=>
+    string(14) "obj->a.changed"
+    ["b"]=>
+    *RECURSION*
+    ["c"]=>
     *RECURSION*
   }
 }
 object(stdClass)#%d (3) {
-  [u"a"]=>
-  unicode(14) "obj->a.changed"
-  [u"b"]=>
-  unicode(14) "obj->b.changed"
-  [u"c"]=>
-  unicode(14) "obj->c.changed"
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  object(stdClass)#%d (3) {
+    ["a"]=>
+    string(14) "obj->a.changed"
+    ["b"]=>
+    string(14) "obj->b.changed"
+    ["c"]=>
+    *RECURSION*
+  }
+}
+object(stdClass)#%d (3) {
+  ["a"]=>
+  string(14) "obj->a.changed"
+  ["b"]=>
+  string(14) "obj->b.changed"
+  ["c"]=>
+  string(14) "obj->c.changed"
 }
 Done

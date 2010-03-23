@@ -141,20 +141,20 @@ FAILED: DateTime::__construct(): Failed to parse time string (-12345) at positio
 
 -- float 10.5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- float -10.5 --
@@ -163,72 +163,72 @@ FAILED: DateTime::__construct(): Failed to parse time string (-10.5) at position
 
 -- float .5 --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty array --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
 
 -- int indexed array --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
 
 -- associative array --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
 
 -- nested arrays --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
+FAILED: DateTime::__construct() expects parameter 1 to be string, array given
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTime)#6 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase null --
-object(DateTime)#6 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTime)#6 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- lowercase true --
@@ -236,21 +236,21 @@ FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (
 FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (1): Unexpected character
 
 -- lowercase false --
-object(DateTime)#5 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTime)#5 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- uppercase TRUE --
@@ -258,57 +258,57 @@ FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (
 FAILED: DateTime::__construct(): Failed to parse time string (1) at position 0 (1): Unexpected character
 
 -- uppercase FALSE --
-object(DateTime)#4 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTime)#4 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string DQ --
-object(DateTime)#4 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
-object(DateTime)#4 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- empty string SQ --
-object(DateTime)#4 (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+object(DateTime)#%d (3) {
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- string DQ --
@@ -332,46 +332,46 @@ FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at
 FAILED: DateTime::__construct(): Failed to parse time string (Class A object) at position 0 (C): The timezone could not be found in the database
 
 -- instance of classWithoutToString --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, object given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, object given
+FAILED: DateTime::__construct() expects parameter 1 to be string, object given
+FAILED: DateTime::__construct() expects parameter 1 to be string, object given
 
 -- undefined var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- unset var --
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 object(DateTime)#%d (3) {
-  [u"date"]=>
-  unicode(19) "%s"
-  [u"timezone_type"]=>
+  ["date"]=>
+  string(19) "%s"
+  ["timezone_type"]=>
   int(3)
-  [u"timezone"]=>
-  unicode(13) "Europe/London"
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- resource --
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, resource given
-FAILED: DateTime::__construct() expects parameter 1 to be binary string, resource given
+FAILED: DateTime::__construct() expects parameter 1 to be string, resource given
+FAILED: DateTime::__construct() expects parameter 1 to be string, resource given
 ===DONE===

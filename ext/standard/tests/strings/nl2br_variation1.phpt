@@ -3,7 +3,7 @@ Test nl2br() function : usage variations - double quoted strings for 'str' argum
 --FILE--
 <?php
 /* Prototype  : string nl2br(string $str);
- * Description: Inserts HTML line breaks before all newlines in a string.
+ * Description: Inserts HTML line breaks before all newlines in a string
  * Source code: ext/standard/string.c
 */
 
@@ -15,7 +15,7 @@ echo "*** Testing nl2br() : usage variations ***\n";
 
 $strings = array(
   //new line chars embedded in strings
-  b"Hello\nWorld",  //binary input
+  "Hello\nWorld",
   "\nHello\nWorld\n",
   "Hello\rWorld",
   "\rHello\rWorld\r",
@@ -45,36 +45,36 @@ foreach( $strings as $str ){
 }
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing nl2br() : usage variations ***
 -- Iteration 1 --
 string(17) "Hello<br />
 World"
 -- Iteration 2 --
-unicode(31) "<br />
+string(31) "<br />
 Hello<br />
 World<br />
 "
 -- Iteration 3 --
-unicode(17) "Hello<br />World"
+string(17) "Hello<br />World"
 -- Iteration 4 --
-unicode(31) "<br />Hello<br />World<br />"
+string(31) "<br />Hello<br />World<br />"
 -- Iteration 5 --
-unicode(18) "Hello<br />
+string(18) "Hello<br />
 World"
 -- Iteration 6 --
-unicode(34) "<br />
+string(34) "<br />
 Hello<br />
 World<br />
 "
 -- Iteration 7 --
-unicode(7) "<br />
+string(7) "<br />
 "
 -- Iteration 8 --
-unicode(14) "<br />
+string(14) "<br />
 <br />
 "
 -- Iteration 9 --
-unicode(17) "Hello<br />
+string(17) "Hello<br />
 World"
 Done

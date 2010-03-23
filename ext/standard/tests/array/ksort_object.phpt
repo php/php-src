@@ -55,14 +55,14 @@ $unsorted_str_obj = array (
   "apple" => new String("apple"), "Orange" => new String("Orange"),
   "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
 );
-echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is default --\n";
+echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --\n";
 
-// testing ksort() function by supplying integer object array, flag value is default
+// testing ksort() function by supplying integer object array, flag value is defualt
 $temp_array = $unsorted_int_obj;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
 
-// testing ksort() function by supplying string object array, flag value is default
+// testing ksort() function by supplying string object array, flag value is defualt
 $temp_array = $unsorted_str_obj;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
@@ -83,81 +83,81 @@ echo "Done\n";
 --EXPECTF--
 *** Testing ksort() : object functionality ***
 
--- Testing ksort() by supplying various object arrays, 'flag' value is default --
+-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
 array(6) {
   [-5]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
   [0]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [1]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [11]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [23]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [66]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
 }
 bool(true)
 array(8) {
-  [u"Lemon"]=>
+  ["Lemon"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
-  [u"Orange"]=>
+  ["Orange"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
-  [u"aPPle"]=>
+  ["aPPle"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
-  [u"apple"]=>
+  ["apple"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
-  [u"axx"]=>
+  ["axx"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
-  [u"py"]=>
+  ["py"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
-  [u"t"]=>
+  ["t"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
-  [u"w"]=>
+  ["w"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
 }
 
@@ -166,76 +166,76 @@ bool(true)
 array(6) {
   [-5]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(-5)
   }
   [0]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(0)
   }
   [1]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     float(0.001)
   }
   [11]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(11)
   }
   [23]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(23)
   }
   [66]=>
   object(Integer)#%d (1) {
-    [u"class_value"]=>
+    ["class_value"]=>
     int(66)
   }
 }
 bool(true)
 array(8) {
-  [u"Lemon"]=>
+  ["Lemon"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "Lemon"
+    ["class_value"]=>
+    string(5) "Lemon"
   }
-  [u"Orange"]=>
+  ["Orange"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(6) "Orange"
+    ["class_value"]=>
+    string(6) "Orange"
   }
-  [u"aPPle"]=>
+  ["aPPle"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "aPPle"
+    ["class_value"]=>
+    string(5) "aPPle"
   }
-  [u"apple"]=>
+  ["apple"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(5) "apple"
+    ["class_value"]=>
+    string(5) "apple"
   }
-  [u"axx"]=>
+  ["axx"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(3) "axx"
+    ["class_value"]=>
+    string(3) "axx"
   }
-  [u"py"]=>
+  ["py"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(2) "py"
+    ["class_value"]=>
+    string(2) "py"
   }
-  [u"t"]=>
+  ["t"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "t"
+    ["class_value"]=>
+    string(1) "t"
   }
-  [u"w"]=>
+  ["w"]=>
   object(String)#%d (1) {
-    [u"class_value"]=>
-    unicode(1) "w"
+    ["class_value"]=>
+    string(1) "w"
   }
 }
 Done

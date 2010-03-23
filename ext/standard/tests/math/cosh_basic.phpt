@@ -14,6 +14,7 @@ require($file_path."/allowed_rounding_error.inc");
 
 echo "cosh .5  = ";
 var_dump(cosh(0.5));
+
 if (allowed_rounding_error(cosh(0.5),1.1276259652064)){
 	echo "Pass\n";
 }

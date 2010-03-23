@@ -32,25 +32,25 @@ echo "Done";
 -- Slice a two-dimensional array --
 array(3) {
   [0]=>
-  unicode(3) "one"
+  string(3) "one"
   [1]=>
   array(3) {
     [0]=>
-    unicode(4) "zero"
+    string(4) "zero"
     [1]=>
-    unicode(2) "un"
+    string(2) "un"
     [2]=>
-    unicode(4) "deux"
+    string(4) "deux"
   }
   [2]=>
-  unicode(4) "nine"
+  string(4) "nine"
 }
 
 -- $input is a sub-array --
 array(2) {
   [0]=>
-  unicode(2) "un"
+  string(2) "un"
   [1]=>
-  unicode(4) "deux"
+  string(4) "deux"
 }
 Done

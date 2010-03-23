@@ -19,7 +19,7 @@ var_dump(max(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 Warning: max() expects at least 1 parameter, 0 given in %s on line 3
 NULL
 
@@ -33,7 +33,7 @@ Warning: max(): When only one parameter is given, it must be an array in %s on l
 NULL
 int(2)
 float(2.11)
-unicode(1) "t"
+string(1) "t"
 bool(true)
 bool(true)
 int(1)

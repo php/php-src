@@ -51,89 +51,89 @@ dump_methodModifierNames('y');
 ?>
 ==DONE==
 --EXPECT--
-unicode(1) "a"
+string(1) "a"
 array(0) {
 }
-unicode(1) "b"
+string(1) "b"
 array(1) {
   [0]=>
-  unicode(8) "abstract"
+  string(8) "abstract"
 }
-unicode(1) "c"
+string(1) "c"
 array(1) {
   [0]=>
-  unicode(5) "final"
+  string(5) "final"
 }
-unicode(14) "x::__construct"
+string(14) "x::__construct"
 array(1) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(13) "x::__destruct"
+string(13) "x::__destruct"
 array(1) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(4) "x::a"
+string(4) "x::a"
 array(1) {
   [0]=>
-  unicode(7) "private"
+  string(7) "private"
 }
-unicode(4) "x::b"
+string(4) "x::b"
 array(2) {
   [0]=>
-  unicode(7) "private"
+  string(7) "private"
   [1]=>
-  unicode(6) "static"
+  string(6) "static"
 }
-unicode(4) "x::c"
+string(4) "x::c"
 array(1) {
   [0]=>
-  unicode(9) "protected"
+  string(9) "protected"
 }
-unicode(4) "x::d"
+string(4) "x::d"
 array(2) {
   [0]=>
-  unicode(9) "protected"
+  string(9) "protected"
   [1]=>
-  unicode(6) "static"
+  string(6) "static"
 }
-unicode(4) "x::e"
+string(4) "x::e"
 array(1) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(4) "x::f"
+string(4) "x::f"
 array(2) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
   [1]=>
-  unicode(6) "static"
+  string(6) "static"
 }
-unicode(4) "x::g"
+string(4) "x::g"
 array(2) {
   [0]=>
-  unicode(5) "final"
+  string(5) "final"
   [1]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(4) "x::h"
+string(4) "x::h"
 array(1) {
   [0]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(4) "y::a"
+string(4) "y::a"
 array(2) {
   [0]=>
-  unicode(8) "abstract"
+  string(8) "abstract"
   [1]=>
-  unicode(6) "public"
+  string(6) "public"
 }
-unicode(4) "y::b"
+string(4) "y::b"
 array(2) {
   [0]=>
-  unicode(8) "abstract"
+  string(8) "abstract"
   [1]=>
-  unicode(9) "protected"
+  string(9) "protected"
 }
 ==DONE==

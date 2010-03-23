@@ -18,8 +18,6 @@ ORACLE_HOME=""
 
 require dirname(__FILE__)."/details.inc";
 
-putenv('ORACLE_HOME=""');
-
 if (!empty($dbase)) {
 	var_dump(ocilogon($user, $password, $dbase));
 }

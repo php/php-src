@@ -10,10 +10,6 @@ if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
 }
 --FILE--
 <?php
-
-// Using deprectated setlocale() in PHP6. The test needs to be changed
-// when there is an alternative available.
-
 $base_dir = dirname(__FILE__);
 chdir($base_dir);
 setlocale(LC_ALL, 'en_US.UTF-8');
@@ -24,7 +20,6 @@ var_dump(gettext('Basic test'));
 
 ?>
 --EXPECTF--
-Deprecated: setlocale(): deprecated in Unicode mode, please use ICU locale functions in %s.php on line %d
 string(10) "Basic test"
 string(12) "A basic test"
 --CREDIT--

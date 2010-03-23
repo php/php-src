@@ -4,10 +4,9 @@ Test date_add() function : basic functionality
 Felix De Vliegher <felix.devliegher@gmail.com>
 --SKIPIF--
 <?php if (!function_exists('date_add')) echo "skip: date_add() function not found!"; ?>
---INI--
-date.timezone=UTC
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 /* Prototype  : void date_add(DateTime object, DateInterval interval)
  * Description: Adds an interval to the current date in object.
  * Source code: ext/date/php_date.c
@@ -38,9 +37,9 @@ foreach($intervals as $interval) {
 ===DONE===
 --EXPECTF--
 *** Testing date_add() : basic functionality ***
-unicode(19) "2008-01-01 12:25:00"
-unicode(19) "2011-07-06 00:55:05"
-unicode(19) "2011-07-06 00:55:05"
-unicode(19) "2011-07-08 00:56:05"
-unicode(19) "2012-09-09 00:41:35"
+string(19) "2008-01-01 12:25:00"
+string(19) "2011-07-06 00:55:05"
+string(19) "2011-07-06 00:55:05"
+string(19) "2011-07-08 00:56:05"
+string(19) "2012-09-09 00:41:35"
 ===DONE===

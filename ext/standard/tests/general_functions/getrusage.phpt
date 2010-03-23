@@ -13,10 +13,10 @@ var_dump(getrusage(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--
-unicode(5) "array"
-unicode(5) "array"
-unicode(5) "array"
+--EXPECTF--	
+string(5) "array"
+string(5) "array"
+string(5) "array"
 
 Warning: getrusage() expects parameter 1 to be long, array given in %s on line %d
 NULL

@@ -63,8 +63,6 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/passthru.tmp");
 ?>
 --EXPECTF--
-
-Notice: fwrite(): 133 character unicode buffer downcoded for binary stream runtime_encoding in %s on line %d
 *** Test basic functionality of fpassthru() function ***
 
 -- Before seek operation --

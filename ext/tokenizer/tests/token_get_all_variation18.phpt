@@ -9,7 +9,7 @@ Test token_get_all() function : usage variations - with HTML code
 
 /*
  * Testing token_get_all() with source string containing HTML code with PHP
- *   HTML tags are considered to be T_INLINE_HTML
+ *   HTML tags are considered to be T_INLINE_HTML(311)
 */
 
 echo "*** Testing token_get_all() : 'source' string with HTML tags ***\n";
@@ -34,7 +34,7 @@ array(9) {
   [0]=>
   array(3) {
     [0]=>
-    int(313)
+    int(311)
     [1]=>
     string(48) "
 <html>
@@ -50,7 +50,7 @@ array(9) {
   [1]=>
   array(3) {
     [0]=>
-    int(370)
+    int(368)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -59,7 +59,7 @@ array(9) {
   [2]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(3) "
   "
@@ -69,7 +69,7 @@ array(9) {
   [3]=>
   array(3) {
     [0]=>
-    int(318)
+    int(316)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -78,7 +78,7 @@ array(9) {
   [4]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) " "
     [2]=>
@@ -87,7 +87,7 @@ array(9) {
   [5]=>
   array(3) {
     [0]=>
-    int(317)
+    int(315)
     [1]=>
     string(20) ""php code with HTML""
     [2]=>
@@ -98,7 +98,7 @@ array(9) {
   [7]=>
   array(3) {
     [0]=>
-    int(373)
+    int(371)
     [1]=>
     string(1) "
 "
@@ -108,7 +108,7 @@ array(9) {
   [8]=>
   array(3) {
     [0]=>
-    int(372)
+    int(370)
     [1]=>
     string(2) "?>"
     [2]=>

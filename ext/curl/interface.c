@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -152,10 +152,10 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-#define CAAL(s, v) add_ascii_assoc_long_ex(return_value, s, sizeof(s), (long) v);
-#define CAAD(s, v) add_ascii_assoc_double_ex(return_value, s, sizeof(s), (double) v);
-#define CAAS(s, v) add_ascii_assoc_string(return_value, s, (v ? v : ""), 1);
-#define CAAZ(s, v) add_ascii_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
+#define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s), (long) v);
+#define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s), (double) v);
+#define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) (v ? v : ""), 1);
+#define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
 # define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
@@ -172,7 +172,7 @@ static int php_curl_option_url(php_curl *ch, const char *url, const int len) /* 
 	TSRMLS_FETCH();
 
 	/* Disable file:// if open_basedir or safe_mode are used */
-	if ((PG(open_basedir) && *PG(open_basedir))) {
+	if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
 #if LIBCURL_VERSION_NUM >= 0x071304
 		error = curl_easy_setopt(ch->cp, CURLOPT_PROTOCOLS, CURLPROTO_ALL & ~CURLPROTO_FILE);
 #else
@@ -750,6 +750,7 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM > 0x071301
 	REGISTER_CURL_CONSTANT(CURLOPT_CERTINFO);
+	REGISTER_CURL_CONSTANT(CURLOPT_POSTREDIR);
 #endif
 
 /* SSH support works in 7.19.0+ using libssh2 */
@@ -766,10 +767,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PRIVATE_KEYFILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5);
 	REGISTER_CURL_CONSTANT(CURLE_SSH);
-#endif
-
-#if LIBCURL_VERSION_NUM > 0x071301
-	REGISTER_CURL_CONSTANT(CURLOPT_POSTREDIR);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071304
@@ -1235,17 +1232,14 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
-	} else if (Z_TYPE_P(retval) == IS_STRING || Z_TYPE_P(retval) == IS_UNICODE) {
-		if (Z_TYPE_P(retval) == IS_UNICODE) {
-			convert_to_string_ex(&retval);
-		}
+	} else if (Z_TYPE_P(retval) == IS_STRING) {
 		if (Z_STRLEN_P(retval) > buflen) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
 		} else {
 			strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%v' did not return a string", func);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string", Z_STRVAL_P(func));
 	}
 
 	zval_ptr_dtor(&argv[0]);
@@ -1284,7 +1278,7 @@ static void curl_free_slist(void **slist)
 }
 /* }}} */
 
-/* {{{ proto array curl_version([int version]) U
+/* {{{ proto array curl_version([int version])
    Return cURL version information. */
 PHP_FUNCTION(curl_version)
 {
@@ -1319,7 +1313,7 @@ PHP_FUNCTION(curl_version)
 		array_init(protocol_list);
 
 		while (*p != NULL) {
-			add_next_index_ascii_string(protocol_list, *p, 1);
+			add_next_index_string(protocol_list, *p, 1);
 			p++;
 		}
 		CAAZ("protocols", protocol_list);
@@ -1361,15 +1355,15 @@ static void split_certinfo(char *string, zval *hash)
 	char *split;
 
 	if(org) {
-		do {
+        do {
 			char *key;
 			char *val;
 			char *tmp;
 
-			split = strstr(s, "; ");
-			if(split)
-				*split = '\0';
-
+            split = strstr(s, "; ");
+            if(split)
+                *split = '\0';
+			
 			key = s;
 			tmp = memchr(key, '=', 64);
 			if(tmp) {
@@ -1428,27 +1422,18 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 /* }}} */
 #endif
 
-/* {{{ proto resource curl_init([string url]) U
+/* {{{ proto resource curl_init([string url])
    Initialize a cURL session */
 PHP_FUNCTION(curl_init)
 {
 	php_curl	*ch;
 	CURL		*cp;
- 	zval		*clone;
-	zstr		url = NULL_ZSTR;
+	zval		*clone;
+	char		*url = NULL;
 	int		url_len = 0;
-	zend_uchar	url_type = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|t", &url, &url_len, &url_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &url, &url_len) == FAILURE) {
 		return;
-	}
-
-	if (url.v && url_type == IS_UNICODE) {
-		url.s = zend_unicode_to_ascii((UChar*)url.u, url_len TSRMLS_CC);
-		if (!url.s) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Binary or ASCII-Unicode string expected, non-ASCII-Unicode string received");
-			RETURN_FALSE;
-		}
 	}
 
 	cp = curl_easy_init();
@@ -1488,8 +1473,8 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_NOSIGNAL, 1);
 #endif
 
-	if (url.v) {
-		if (!php_curl_option_url(ch, url.s, url_len)) {
+	if (url) {
+		if (!php_curl_option_url(ch, url, url_len)) {
 			_php_curl_close_ex(ch TSRMLS_CC);
 			RETURN_FALSE;
 		}
@@ -1497,14 +1482,10 @@ PHP_FUNCTION(curl_init)
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
 	ch->id = Z_LVAL_P(return_value);
-
-	if (url_type == IS_UNICODE) {
-		efree(url.s);
-	}
 }
 /* }}} */
 
-/* {{{ proto resource curl_copy_handle(resource ch) U
+/* {{{ proto resource curl_copy_handle(resource ch)
    Copy a cURL handle along with all of it's preferences */
 PHP_FUNCTION(curl_copy_handle)
 {
@@ -1684,9 +1665,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 			convert_to_long_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
-			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) && 
-				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when open_basedir is set");
+			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
+				((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when in safe_mode or an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 			}
@@ -1695,9 +1676,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 			break;
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
-			if (PG(open_basedir) && *PG(open_basedir)) {
+			if ((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when open_basedir is set");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when in safe_mode or an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 				}
@@ -1749,7 +1730,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				option == CURLOPT_SSH_PUBLIC_KEYFILE || option == CURLOPT_SSH_PRIVATE_KEYFILE
 
 			) {
-				if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
+				if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 					RETVAL_FALSE;
 					return 1;
 				}
@@ -1923,11 +1904,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 				struct HttpPost  *first = NULL;
 				struct HttpPost  *last  = NULL;
 				char             *postval;
-				zstr              string_key;
-				char             *key;
+				char             *string_key = NULL;
 				ulong             num_key;
 				uint              string_key_len;
-				int               type = -1;
 
 				postfields = HASH_OF(*zvalue);
 				if (!postfields) {
@@ -1940,58 +1919,13 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					 zend_hash_get_current_data(postfields, (void **) &current) == SUCCESS;
 					 zend_hash_move_forward(postfields)
 				) {
-					int ntype;
-					int l;
-					UErrorCode status = U_ZERO_ERROR;
-					uint data_len;
-
-					switch (Z_TYPE_PP(current)) {
-						case IS_UNICODE:
-							ntype = HASH_KEY_IS_UNICODE;
-							break;
-						case IS_STRING:
-							ntype = HASH_KEY_IS_STRING;
-							break;
-						default:
-							if (type != -1) {
-								ntype = type;
-							} else {
-								ntype = HASH_KEY_IS_STRING;
-							}
-							break;
-					}
-
-					if (type == -1) {
-						type = ntype;
-					} else if (type != ntype) {
-						goto type_conflict;
-					}
 
 					SEPARATE_ZVAL(current);
-					convert_to_string_with_converter_ex(current, UG(utf8_conv));
+					convert_to_string_ex(current);
+
+					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
+
 					postval = Z_STRVAL_PP(current);
-					data_len = Z_STRLEN_PP(current);
-
-					ntype = zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
-					if (type != ntype && ntype != HASH_KEY_IS_LONG) {
-type_conflict:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Form parameters must either be all unicode or all binary");
-						continue;
-					}
-
-					switch (ntype) {
-						case HASH_KEY_IS_UNICODE:
-							zend_unicode_to_string_ex(UG(utf8_conv), &key, &l, string_key.u, string_key_len, &status);
-							break;
-						case HASH_KEY_IS_STRING:
-							key = string_key.s;
-							l = string_key_len - 1;
-							break;
-						case HASH_KEY_IS_LONG:
-							key = NULL;
-							l = 0;
-							break;
-					}
 
 					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
 					 * must be explicitly cast to long in curl_formadd
@@ -2006,8 +1940,8 @@ type_conflict:
 						if ((filename = php_memnstr(postval, ";filename=", sizeof(";filename=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*filename = '\0';
 						}
-						/* open_basedir check */
-						if (php_check_open_basedir(postval TSRMLS_CC)) {
+						/* safe_mode / open_basedir check */
+						if (php_check_open_basedir(postval TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(postval, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 							RETVAL_FALSE;
 							return 1;
 						}
@@ -2026,14 +1960,11 @@ type_conflict:
 						}
 					} else {
 						error = curl_formadd(&first, &last,
-											 CURLFORM_COPYNAME, key,
-											 CURLFORM_NAMELENGTH, l,
+											 CURLFORM_COPYNAME, string_key,
+											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_COPYCONTENTS, postval,
-											 CURLFORM_CONTENTSLENGTH, (long)data_len,
+											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
 											 CURLFORM_END);
-					}
-					if (ntype == HASH_KEY_IS_UNICODE) {
-						efree(key);
 					}
 				}
 
@@ -2099,7 +2030,7 @@ type_conflict:
 
 			break;
 		}
-		/* the following options deal with files, therefore open_basedir checks
+		/* the following options deal with files, therefor safe_mode & open_basedir checks
 		 * are required.
 		 */
 		case CURLOPT_COOKIEJAR:
@@ -2112,7 +2043,7 @@ type_conflict:
 
 			convert_to_string_ex(zvalue);
 
-			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
+			if (php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(zvalue), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 				RETVAL_FALSE;
 				return 1;
 			}
@@ -2150,7 +2081,7 @@ type_conflict:
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt(resource ch, int option, mixed value) U
+/* {{{ proto bool curl_setopt(resource ch, int option, mixed value)
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
@@ -2177,7 +2108,7 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt_array(resource ch, array options) U
+/* {{{ proto bool curl_setopt_array(resource ch, array options)
    Set an array of option for a cURL transfer */
 PHP_FUNCTION(curl_setopt_array)
 {
@@ -2185,7 +2116,7 @@ PHP_FUNCTION(curl_setopt_array)
 	php_curl	*ch;
 	ulong		option;
 	HashPosition	pos;
-	zstr		string_key;
+	char		*string_key;
 	uint		str_key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &zid, &arr) == FAILURE) {
@@ -2226,7 +2157,7 @@ void _php_curl_cleanup_handle(php_curl *ch)
 }
 /* }}} */
 
-/* {{{ proto bool curl_exec(resource ch) U
+/* {{{ proto bool curl_exec(resource ch)
    Perform a cURL session */
 PHP_FUNCTION(curl_exec)
 {
@@ -2273,7 +2204,7 @@ PHP_FUNCTION(curl_exec)
 }
 /* }}} */
 
-/* {{{ proto mixed curl_getinfo(resource ch [, int option]) U
+/* {{{ proto mixed curl_getinfo(resource ch [, int option])
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
@@ -2384,7 +2315,7 @@ PHP_FUNCTION(curl_getinfo)
 				char *s_code = NULL;
 
 				if (curl_easy_getinfo(ch->cp, option, &s_code) == CURLE_OK && s_code) {
-					RETURN_ASCII_STRING(s_code, 1);
+					RETURN_STRING(s_code, 1);
 				} else {
 					RETURN_FALSE;
 				}
@@ -2451,7 +2382,7 @@ PHP_FUNCTION(curl_getinfo)
 }
 /* }}} */
 
-/* {{{ proto string curl_error(resource ch) U
+/* {{{ proto string curl_error(resource ch)
    Return a string contain the last error for the current session */
 PHP_FUNCTION(curl_error)
 {
@@ -2465,11 +2396,11 @@ PHP_FUNCTION(curl_error)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
 	ch->err.str[CURL_ERROR_SIZE] = 0;
-	RETURN_ASCII_STRING(ch->err.str, 1);
+	RETURN_STRING(ch->err.str, 1);
 }
 /* }}} */
 
-/* {{{ proto int curl_errno(resource ch) U
+/* {{{ proto int curl_errno(resource ch)
    Return an integer containing the last error number */
 PHP_FUNCTION(curl_errno)
 {
@@ -2486,7 +2417,7 @@ PHP_FUNCTION(curl_errno)
 }
 /* }}} */
 
-/* {{{ proto void curl_close(resource ch) U
+/* {{{ proto void curl_close(resource ch)
    Close a cURL session */
 PHP_FUNCTION(curl_close)
 {

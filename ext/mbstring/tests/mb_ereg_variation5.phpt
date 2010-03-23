@@ -49,7 +49,7 @@ function base64_encode_var_dump($regs) {
 		echo "array(" . count($regs) . ") {\n";
 		foreach ($regs as $key => $value) {
 			echo "  [$key]=>\n  ";
-			if (is_unicode($value)) {
+			if (is_string($value)) {
 				var_dump(base64_encode($value));
 			} else {
 				var_dump($value);
@@ -69,7 +69,7 @@ ASCII String with $regs arg:
 int(38)
 array(1) {
   [0]=>
-  string(38) "This is an English string. 0123456789."
+  string(52) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4OS4="
 }
 
 Multibyte String without $regs arg:	int(1)
@@ -77,7 +77,6 @@ Multubyte String with $regs arg:
 int(53)
 array(1) {
   [0]=>
-  string(53) "日本語テキストです。01234５６７８９。"
+  string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
 }
 Done
-

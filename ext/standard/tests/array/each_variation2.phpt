@@ -125,11 +125,11 @@ echo "Done";
 array(4) {
   [1]=>
   int(0)
-  [u"value"]=>
+  ["value"]=>
   int(0)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -137,11 +137,11 @@ array(4) {
 array(4) {
   [1]=>
   float(10.5)
-  [u"value"]=>
+  ["value"]=>
   float(10.5)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -149,11 +149,11 @@ array(4) {
 array(4) {
   [1]=>
   NULL
-  [u"value"]=>
+  ["value"]=>
   NULL
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -161,23 +161,23 @@ array(4) {
 array(4) {
   [1]=>
   bool(true)
-  [u"value"]=>
+  ["value"]=>
   bool(true)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
 -- Iteration 5: empty string data --
 array(4) {
   [1]=>
-  unicode(0) ""
-  [u"value"]=>
-  unicode(0) ""
+  string(0) ""
+  ["value"]=>
+  string(0) ""
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -187,12 +187,12 @@ bool(false)
 -- Iteration 7: string data --
 array(4) {
   [1]=>
-  unicode(6) "string"
-  [u"value"]=>
-  unicode(6) "string"
+  string(6) "string"
+  ["value"]=>
+  string(6) "string"
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -201,12 +201,12 @@ array(4) {
   [1]=>
   object(classA)#%d (0) {
   }
-  [u"value"]=>
+  ["value"]=>
   object(classA)#%d (0) {
   }
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -214,11 +214,11 @@ array(4) {
 array(4) {
   [1]=>
   NULL
-  [u"value"]=>
+  ["value"]=>
   NULL
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -226,11 +226,11 @@ array(4) {
 array(4) {
   [1]=>
   NULL
-  [u"value"]=>
+  ["value"]=>
   NULL
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 
@@ -238,11 +238,11 @@ array(4) {
 array(4) {
   [1]=>
   resource(%d) of type (stream)
-  [u"value"]=>
+  ["value"]=>
   resource(%d) of type (stream)
   [0]=>
   int(0)
-  [u"key"]=>
+  ["key"]=>
   int(0)
 }
 Done

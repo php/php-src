@@ -20,7 +20,7 @@ var_dump(implode(",",$arr));
 var_dump($arr)
 ?>
 --EXPECTF--
-unicode(13) "Object,Object"
+string(13) "Object,Object"
 array(2) {
   [0]=>
   &object(foo)#%d (0) {

@@ -48,7 +48,7 @@ var_dump( range("abcd", "mnop", 2) );
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing range() function on basic operations ***
 
 -- Integers as Low and High --
@@ -153,113 +153,113 @@ array(10) {
 -- An array of elements from low to high --
 array(26) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "b"
+  string(1) "b"
   [2]=>
-  unicode(1) "c"
+  string(1) "c"
   [3]=>
-  unicode(1) "d"
+  string(1) "d"
   [4]=>
-  unicode(1) "e"
+  string(1) "e"
   [5]=>
-  unicode(1) "f"
+  string(1) "f"
   [6]=>
-  unicode(1) "g"
+  string(1) "g"
   [7]=>
-  unicode(1) "h"
+  string(1) "h"
   [8]=>
-  unicode(1) "i"
+  string(1) "i"
   [9]=>
-  unicode(1) "j"
+  string(1) "j"
   [10]=>
-  unicode(1) "k"
+  string(1) "k"
   [11]=>
-  unicode(1) "l"
+  string(1) "l"
   [12]=>
-  unicode(1) "m"
+  string(1) "m"
   [13]=>
-  unicode(1) "n"
+  string(1) "n"
   [14]=>
-  unicode(1) "o"
+  string(1) "o"
   [15]=>
-  unicode(1) "p"
+  string(1) "p"
   [16]=>
-  unicode(1) "q"
+  string(1) "q"
   [17]=>
-  unicode(1) "r"
+  string(1) "r"
   [18]=>
-  unicode(1) "s"
+  string(1) "s"
   [19]=>
-  unicode(1) "t"
+  string(1) "t"
   [20]=>
-  unicode(1) "u"
+  string(1) "u"
   [21]=>
-  unicode(1) "v"
+  string(1) "v"
   [22]=>
-  unicode(1) "w"
+  string(1) "w"
   [23]=>
-  unicode(1) "x"
+  string(1) "x"
   [24]=>
-  unicode(1) "y"
+  string(1) "y"
   [25]=>
-  unicode(1) "z"
+  string(1) "z"
 }
 
 -- An array of elements from high to low --
 array(26) {
   [0]=>
-  unicode(1) "z"
+  string(1) "z"
   [1]=>
-  unicode(1) "y"
+  string(1) "y"
   [2]=>
-  unicode(1) "x"
+  string(1) "x"
   [3]=>
-  unicode(1) "w"
+  string(1) "w"
   [4]=>
-  unicode(1) "v"
+  string(1) "v"
   [5]=>
-  unicode(1) "u"
+  string(1) "u"
   [6]=>
-  unicode(1) "t"
+  string(1) "t"
   [7]=>
-  unicode(1) "s"
+  string(1) "s"
   [8]=>
-  unicode(1) "r"
+  string(1) "r"
   [9]=>
-  unicode(1) "q"
+  string(1) "q"
   [10]=>
-  unicode(1) "p"
+  string(1) "p"
   [11]=>
-  unicode(1) "o"
+  string(1) "o"
   [12]=>
-  unicode(1) "n"
+  string(1) "n"
   [13]=>
-  unicode(1) "m"
+  string(1) "m"
   [14]=>
-  unicode(1) "l"
+  string(1) "l"
   [15]=>
-  unicode(1) "k"
+  string(1) "k"
   [16]=>
-  unicode(1) "j"
+  string(1) "j"
   [17]=>
-  unicode(1) "i"
+  string(1) "i"
   [18]=>
-  unicode(1) "h"
+  string(1) "h"
   [19]=>
-  unicode(1) "g"
+  string(1) "g"
   [20]=>
-  unicode(1) "f"
+  string(1) "f"
   [21]=>
-  unicode(1) "e"
+  string(1) "e"
   [22]=>
-  unicode(1) "d"
+  string(1) "d"
   [23]=>
-  unicode(1) "c"
+  string(1) "c"
   [24]=>
-  unicode(1) "b"
+  string(1) "b"
   [25]=>
-  unicode(1) "a"
+  string(1) "a"
 }
 
 -- Low and High are equal --
@@ -269,7 +269,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  unicode(1) "q"
+  string(1) "q"
 }
 
 -- floats as Low and High --
@@ -431,18 +431,18 @@ array(11) {
 -- Testing basic string with step --
 array(7) {
   [0]=>
-  unicode(1) "a"
+  string(1) "a"
   [1]=>
-  unicode(1) "c"
+  string(1) "c"
   [2]=>
-  unicode(1) "e"
+  string(1) "e"
   [3]=>
-  unicode(1) "g"
+  string(1) "g"
   [4]=>
-  unicode(1) "i"
+  string(1) "i"
   [5]=>
-  unicode(1) "k"
+  string(1) "k"
   [6]=>
-  unicode(1) "m"
+  string(1) "m"
 }
 Done

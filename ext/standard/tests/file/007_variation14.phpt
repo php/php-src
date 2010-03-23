@@ -48,15 +48,15 @@ unlink(dirname(__FILE__)."/007_variation14.tmp");
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'a+t' mode ***
 resource(%d) of type (stream)
-unicode(6) "stream"
+string(6) "stream"
 int(37)
-unicode(57) "line
+string(57) "line
 line of text
 liabcdefghij
 mnopqrst	uvwxyz
 0123456789"
 int(57)
 bool(true)
-unicode(7) "Unknown"
+string(7) "Unknown"
 bool(true)
 *** Done ***

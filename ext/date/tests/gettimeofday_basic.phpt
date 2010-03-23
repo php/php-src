@@ -33,23 +33,23 @@ var_dump( gettimeofday($get_as_float) );
 *** Testing gettimeofday() : basic functionality ***
 float(%f)
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(-330)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }
 ===DONE===

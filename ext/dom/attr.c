@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -52,7 +52,7 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DOMAttr::__construct(string name, [string value]) U */
+/* {{{ proto void DOMAttr::__construct(string name, [string value]); */
 PHP_METHOD(domattr, __construct)
 {
 
@@ -65,12 +65,12 @@ PHP_METHOD(domattr, __construct)
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os&|s&", &id, dom_attr_class_entry, &name, &name_len, UG(utf8_conv), &value, &value_len, UG(utf8_conv)) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
-	zend_restore_error_handling(&error_handling TSRMLS_CC);
 
+	zend_restore_error_handling(&error_handling TSRMLS_CC);
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
@@ -79,7 +79,7 @@ PHP_METHOD(domattr, __construct)
 		RETURN_FALSE;
 	}
 
-	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
+	nodep = xmlNewProp(NULL, (xmlChar *) name, value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
@@ -114,7 +114,7 @@ int dom_attr_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(*retval);
-	ZVAL_XML_STRING(*retval, (char *) (attrp->name), ZSTR_DUPLICATE);
+	ZVAL_STRING(*retval, (char *) (attrp->name), 1);
 
 	return SUCCESS;
 }
@@ -157,10 +157,10 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_XML_STRING(*retval, (char *)content, ZSTR_DUPLICATE);
+		ZVAL_STRING(*retval, content, 1);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_UNICODE(*retval);
+		ZVAL_EMPTY_STRING(*retval);
 	}
 
 	return SUCCESS;
@@ -189,10 +189,10 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 			zval_copy_ctor(&value_copy);
 			newval = &value_copy;
 		}
-		convert_to_string_with_converter(newval, UG(utf8_conv));
+		convert_to_string(newval);
 	}
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 
 	if (newval == &value_copy) {
 		zval_dtor(newval);
@@ -253,7 +253,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto boolean dom_attr_is_id() U
+/* {{{ proto boolean dom_attr_is_id();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */

@@ -109,20 +109,20 @@ array(3) {
   [1]=>
   array(3) {
     [0]=>
-    unicode(5) "first"
+    string(5) "first"
     [5]=>
-    unicode(6) "second"
+    string(6) "second"
     [6]=>
-    unicode(5) "third"
+    string(5) "third"
   }
   [2]=>
   array(3) {
-    [u"a"]=>
-    unicode(6) "orange"
-    [u"b"]=>
-    unicode(6) "banana"
-    [u"c"]=>
-    unicode(5) "apple"
+    ["a"]=>
+    string(6) "orange"
+    ["b"]=>
+    string(6) "banana"
+    ["c"]=>
+    string(5) "apple"
   }
 }
 -- Sort flag = SORT_REGULAR --
@@ -146,20 +146,20 @@ array(3) {
   [1]=>
   array(3) {
     [0]=>
-    unicode(5) "first"
+    string(5) "first"
     [5]=>
-    unicode(6) "second"
+    string(6) "second"
     [6]=>
-    unicode(5) "third"
+    string(5) "third"
   }
   [2]=>
   array(3) {
-    [u"a"]=>
-    unicode(6) "orange"
-    [u"b"]=>
-    unicode(6) "banana"
-    [u"c"]=>
-    unicode(5) "apple"
+    ["a"]=>
+    string(6) "orange"
+    ["b"]=>
+    string(6) "banana"
+    ["c"]=>
+    string(5) "apple"
   }
 }
 
@@ -204,7 +204,7 @@ array(2) {
   [0]=>
   int(1)
   [1]=>
-  unicode(3) "baz"
+  string(3) "baz"
 }
 -- Sort flag = SORT_REGULAR --
 bool(true)
@@ -212,7 +212,7 @@ array(2) {
   [0]=>
   int(1)
   [1]=>
-  unicode(3) "baz"
+  string(3) "baz"
 }
 
 -- Iteration 5 --
@@ -221,14 +221,14 @@ bool(true)
 array(4) {
   [0]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
   [1]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
   [2]=>
@@ -241,14 +241,14 @@ bool(true)
 array(4) {
   [0]=>
   array(2) {
-    [u"e"]=>
+    ["e"]=>
     int(2)
-    [u"f"]=>
+    ["f"]=>
     int(3)
   }
   [1]=>
   array(1) {
-    [u"g"]=>
+    ["g"]=>
     int(4)
   }
   [2]=>

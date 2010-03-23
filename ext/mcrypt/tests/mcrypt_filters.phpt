@@ -16,11 +16,11 @@ $passphrase = 'My secret';
 $iv = substr(md5('iv'.$passphrase, true), 0, 8);
 $key = substr(md5('pass1'.$passphrase, true) . 
                md5('pass2'.$passphrase, true), 0, 24);
-$opts = array('iv'=>$iv,'key'=>$key);
+$opts = array('iv'=>$iv, 'key'=>$key);
 
 $fp = fopen($secretfile, 'wb');
 stream_filter_append($fp, 'mcrypt.tripledes', STREAM_FILTER_WRITE, $opts);
-fwrite($fp, b'Secret secret secret data');
+fwrite($fp, 'Secret secret secret data');
 fclose($fp);
 
 echo md5_file($secretfile)."\n";

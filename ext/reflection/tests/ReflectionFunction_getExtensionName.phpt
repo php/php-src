@@ -11,6 +11,6 @@ $function = new ReflectionFunction('foo');
 var_dump($function->getExtensionName());
 ?>
 --EXPECT--
-unicode(8) "standard"
+string(8) "standard"
 bool(false)
 

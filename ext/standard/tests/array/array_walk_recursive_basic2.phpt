@@ -57,49 +57,49 @@ echo "Done";
 --EXPECT--
 *** Testing array_walk_recursive() : basic functionality ***
 -- Using array_walk_recursive with default parameters to show array contents --
-unicode(5) "lemon"
-unicode(1) "a"
+string(5) "lemon"
+string(1) "a"
 
-unicode(6) "orange"
-unicode(1) "c"
+string(6) "orange"
+string(1) "c"
 
-unicode(6) "banana"
-unicode(1) "d"
+string(6) "banana"
+string(1) "d"
 
-unicode(5) "apple"
-unicode(1) "f"
+string(5) "apple"
+string(1) "f"
 
 bool(true)
 -- Using array_walk_recursive with one optional parameter to modify contents --
-unicode(5) "lemon"
-unicode(1) "a"
-unicode(5) "fruit"
+string(5) "lemon"
+string(1) "a"
+string(5) "fruit"
 
-unicode(6) "orange"
-unicode(1) "c"
-unicode(5) "fruit"
+string(6) "orange"
+string(1) "c"
+string(5) "fruit"
 
-unicode(6) "banana"
-unicode(1) "d"
-unicode(5) "fruit"
+string(6) "banana"
+string(1) "d"
+string(5) "fruit"
 
-unicode(5) "apple"
-unicode(1) "f"
-unicode(5) "fruit"
+string(5) "apple"
+string(1) "f"
+string(5) "fruit"
 
 bool(true)
 -- Using array_walk_recursive with default parameters to show modified array contents --
-unicode(5) "lemon"
-unicode(1) "a"
+string(5) "lemon"
+string(1) "a"
 
-unicode(6) "orange"
-unicode(1) "c"
+string(6) "orange"
+string(1) "c"
 
-unicode(6) "banana"
-unicode(1) "d"
+string(6) "banana"
+string(1) "d"
 
-unicode(5) "apple"
-unicode(1) "f"
+string(5) "apple"
+string(1) "f"
 
 bool(true)
 Done

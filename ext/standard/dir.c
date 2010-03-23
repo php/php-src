@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -203,34 +203,22 @@ PHP_MINIT_FUNCTION(dir)
 /* {{{ internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
-	zval **ppdir;
-	UChar *udir = NULL;
-	char *dir;
-	int dir_len, udir_len;
+	char *dirname;
+	int dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|r", &ppdir, &zcontext) == FAILURE) {
-		return;
-	}
-
-	RETVAL_FALSE;
-
-	if (createobject && Z_TYPE_PP(ppdir) == IS_UNICODE) {
-		/* Save for later */
-		udir = eustrndup(Z_USTRVAL_PP(ppdir), Z_USTRLEN_PP(ppdir));
-		udir_len = Z_USTRLEN_PP(ppdir);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dirname, &dir_len, &zcontext) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	if (FAILURE == php_stream_path_param_encode(ppdir, &dir, &dir_len, REPORT_ERRORS, context)) {
-		goto opendir_cleanup;
-	}
+	
+	dirp = php_stream_opendir(dirname, ENFORCE_SAFE_MODE|REPORT_ERRORS, context);
 
-	dirp = php_stream_opendir(dir, REPORT_ERRORS, context);
 	if (dirp == NULL) {
-		goto opendir_cleanup;
+		RETURN_FALSE;
 	}
 
 	dirp->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
@@ -239,28 +227,16 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		if (udir) {
-			add_property_unicodel(return_value, "path", udir, udir_len, 0);
-
-			/* Avoid auto-cleanup */
-			udir = NULL;
-		} else {
-			add_property_stringl(return_value, "path", dir, dir_len, 1);
-		}
+		add_property_stringl(return_value, "path", dirname, dir_len, 1);
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
 		php_stream_to_zval(dirp, return_value);
 	}
-
-opendir_cleanup:
-	if (udir) {
-		efree(udir);
-	}
 }
 /* }}} */
 
-/* {{{ proto mixed opendir(string path[, resource context]) U
+/* {{{ proto mixed opendir(string path[, resource context])
    Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
@@ -268,7 +244,7 @@ PHP_FUNCTION(opendir)
 }
 /* }}} */
 
-/* {{{ proto object dir(string directory[, resource context]) U
+/* {{{ proto object dir(string directory[, resource context])
    Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
@@ -276,7 +252,7 @@ PHP_FUNCTION(getdir)
 }
 /* }}} */
 
-/* {{{ proto void closedir([resource dir_handle]) U
+/* {{{ proto void closedir([resource dir_handle])
    Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
@@ -301,17 +277,15 @@ PHP_FUNCTION(closedir)
 /* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-/* {{{ proto bool chroot(string directory) U
+/* {{{ proto bool chroot(string directory)
    Change root directory */
 PHP_FUNCTION(chroot)
 {
-	zval **ppstr;
 	char *str;
 	int ret, str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppstr) == FAILURE ||
-		php_stream_path_param_encode(ppstr, &str, &str_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 	
 	ret = chroot(str);
@@ -334,22 +308,22 @@ PHP_FUNCTION(chroot)
 /* }}} */
 #endif
 
-/* {{{ proto bool chdir(string directory) U
+/* {{{ proto bool chdir(string directory)
    Change the current directory */
 PHP_FUNCTION(chdir)
 {
-	zval **ppstr;
 	char *str;
 	int ret, str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &ppstr) == FAILURE ||
-		php_stream_path_param_encode(ppstr, &str, &str_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
 	}
-	if (php_check_open_basedir(str TSRMLS_CC)) {
-  		RETURN_FALSE;
-  	}
+
+	if ((PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir(str TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	ret = VCWD_CHDIR(str);
+	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
@@ -368,7 +342,7 @@ PHP_FUNCTION(chdir)
 }
 /* }}} */
 
-/* {{{ proto mixed getcwd(void) U
+/* {{{ proto mixed getcwd(void)
    Gets the current directory */
 PHP_FUNCTION(getcwd)
 {
@@ -386,14 +360,14 @@ PHP_FUNCTION(getcwd)
 #endif
 
 	if (ret) {
-		RETURN_RT_STRING(path, ZSTR_DUPLICATE);
+		RETURN_STRING(path, 1);
 	} else {
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void rewinddir([resource dir_handle]) U
+/* {{{ proto void rewinddir([resource dir_handle])
    Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
@@ -411,7 +385,7 @@ PHP_FUNCTION(rewinddir)
 }
 /* }}} */
 
-/* {{{ proto string readdir([resource dir_handle]) U
+/* {{{ proto string readdir([resource dir_handle])
    Read directory entry from dir_handle */
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
@@ -427,14 +401,14 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	}
 
 	if (php_stream_readdir(dirp, &entry)) {
-		RETURN_RT_STRINGL(entry.d_name, strlen(entry.d_name), ZSTR_DUPLICATE);
+		RETURN_STRINGL(entry.d_name, strlen(entry.d_name), 1);
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto array glob(string pattern [, int flags]) U
+/* {{{ proto array glob(string pattern [, int flags])
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
@@ -444,16 +418,15 @@ PHP_FUNCTION(glob)
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
-	zval **pppattern;
 	char *pattern = NULL;
 	int pattern_len;
 	long flags = 0;
 	glob_t globbuf;
-	int ret, n;
+	int n;
+	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &pppattern, &flags) == FAILURE ||
-		php_stream_path_param_encode(pppattern, &pattern, &pattern_len, REPORT_ERRORS, FG(default_context)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -485,6 +458,7 @@ PHP_FUNCTION(glob)
 	} 
 #endif
 
+	
 	memset(&globbuf, 0, sizeof(glob_t));
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
@@ -507,7 +481,7 @@ PHP_FUNCTION(glob)
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 no_results:
-		if (PG(open_basedir) && *PG(open_basedir)) {
+		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
 			struct stat s;
 
 			if (0 != VCWD_STAT(pattern, &s) || S_IFDIR != (s.st_mode & S_IFMT)) {
@@ -520,11 +494,11 @@ no_results:
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		UChar *path;
-		int path_len;
-		
-		if (PG(open_basedir) && *PG(open_basedir)) {
-			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
+		if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+			if (PG(safe_mode) && (!php_checkuid_ex(globbuf.gl_pathv[n], NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS))) {
+				basedir_limit = 1;
+				continue;
+			} else if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0 TSRMLS_CC)) {
 				basedir_limit = 1;
 				continue;
 			}
@@ -548,14 +522,7 @@ no_results:
 				continue;
 			}
 		}
-
-		if (SUCCESS == php_stream_path_decode(&php_plain_files_wrapper, &path, &path_len, globbuf.gl_pathv[n]+cwd_skip, 
-							strlen(globbuf.gl_pathv[n]+cwd_skip), REPORT_ERRORS, FG(default_context))) {
-			add_next_index_unicodel(return_value, path, path_len, 0);
-		} else {
-			/* Fallback on string version, path_decode will emit warning */
-			add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
-		}
+		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 	}
 
 	globfree(&globbuf);
@@ -568,11 +535,10 @@ no_results:
 /* }}} */
 #endif 
 
-/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]]) U
+/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]])
    List files & directories inside the specified path */
 PHP_FUNCTION(scandir)
 {
-	zval **ppdirn;
 	char *dirn;
 	int dirn_len;
 	long flags = 0;
@@ -581,16 +547,17 @@ PHP_FUNCTION(scandir)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lr", &ppdirn, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
+	}
+
+	if (dirn_len < 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Directory name cannot be empty");
+		RETURN_FALSE;
 	}
 
 	if (zcontext) {
 		context = php_stream_context_from_zval(zcontext, 0);
-	}
-
-	if (FAILURE == php_stream_path_param_encode(ppdirn, &dirn, &dirn_len, REPORT_ERRORS, context)) {
-		RETURN_FALSE;
 	}
 
 	if (!flags) {
@@ -606,16 +573,7 @@ PHP_FUNCTION(scandir)
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		UChar *path;
-		int path_len;
-
-		if (SUCCESS == php_stream_path_decode(NULL, &path, &path_len, namelist[i], strlen(namelist[i]), REPORT_ERRORS, context)) {
-			add_next_index_unicodel(return_value, path, path_len, 0);
-			efree(namelist[i]);
-		} else {
-			/* Fallback on using the non-unicode version, path_decode will emit the warning for us */
-			add_next_index_string(return_value, namelist[i], 0);
-		}
+		add_next_index_string(return_value, namelist[i], 0);
 	}
 
 	if (n) {

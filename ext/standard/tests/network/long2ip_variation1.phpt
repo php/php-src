@@ -117,80 +117,80 @@ fclose($res);
 *** Testing long2ip() : usage variation ***
 
 --float 10.5--
-unicode(8) "0.0.0.10"
+string(8) "0.0.0.10"
 
 --float -10.5--
-unicode(15) "255.255.255.246"
+string(15) "255.255.255.246"
 
 --float .5--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --empty array--
-Error: 2 - long2ip() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - long2ip() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - long2ip() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - long2ip() expects parameter 1 to be binary string, array given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, array given, %s(%d)
 NULL
 
 --uppercase NULL--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --lowercase null--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --lowercase true--
-unicode(7) "0.0.0.1"
+string(7) "0.0.0.1"
 
 --lowercase false--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --uppercase TRUE--
-unicode(7) "0.0.0.1"
+string(7) "0.0.0.1"
 
 --uppercase FALSE--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --empty string DQ--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --empty string SQ--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --string DQ--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --string SQ--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --mixed case string--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --heredoc--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --instance of classWithToString--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --instance of classWithoutToString--
-Error: 2 - long2ip() expects parameter 1 to be binary string, object given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, object given, %s(%d)
 NULL
 
 --undefined var--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --unset var--
-unicode(7) "0.0.0.0"
+string(7) "0.0.0.0"
 
 --resource--
-Error: 2 - long2ip() expects parameter 1 to be binary string, resource given, %s(%d)
+Error: 2 - long2ip() expects parameter 1 to be string, resource given, %s(%d)
 NULL
 ===DONE===

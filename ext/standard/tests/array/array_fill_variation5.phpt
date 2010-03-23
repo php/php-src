@@ -52,7 +52,7 @@ for($i = 0; $i < count($values); $i++)
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_fill() : usage variations ***
 --- Testing array_fill() with different types of array values for 'val' argument ---
 -- Iteration 1 --
@@ -94,16 +94,16 @@ array(2) {
   [0]=>
   array(2) {
     [1]=>
-    unicode(2) "Hi"
+    string(2) "Hi"
     [2]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
   }
   [1]=>
   array(2) {
     [1]=>
-    unicode(2) "Hi"
+    string(2) "Hi"
     [2]=>
-    unicode(5) "Hello"
+    string(5) "Hello"
   }
 }
 -- Iteration 4 --
@@ -111,71 +111,71 @@ array(2) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(7) "Saffron"
+    string(7) "Saffron"
     [1]=>
-    unicode(5) "White"
+    string(5) "White"
     [2]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
   [1]=>
   array(3) {
     [0]=>
-    unicode(7) "Saffron"
+    string(7) "Saffron"
     [1]=>
-    unicode(5) "White"
+    string(5) "White"
     [2]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
 }
 -- Iteration 5 --
 array(2) {
   [0]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
 }
 -- Iteration 6 --
 array(2) {
   [0]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
+    ["color"]=>
+    string(3) "red"
     [2]=>
-    unicode(6) "green "
+    string(6) "green "
   }
   [1]=>
   array(2) {
-    [u"color"]=>
-    unicode(3) "red"
+    ["color"]=>
+    string(3) "red"
     [2]=>
-    unicode(6) "green "
+    string(6) "green "
   }
 }
 -- Iteration 7 --
 array(2) {
   [0]=>
   array(2) {
-    [u"colour"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["colour"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
   array(2) {
-    [u"colour"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    ["colour"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
 }
 -- Iteration 8 --
@@ -183,16 +183,16 @@ array(2) {
   [0]=>
   array(2) {
     [1]=>
-    unicode(3) "red"
+    string(3) "red"
     [0]=>
-    unicode(5) "green"
+    string(5) "green"
   }
   [1]=>
   array(2) {
     [1]=>
-    unicode(3) "red"
+    string(3) "red"
     [0]=>
-    unicode(5) "green"
+    string(5) "green"
   }
 }
 -- Iteration 9 --
@@ -200,16 +200,16 @@ array(2) {
   [0]=>
   array(2) {
     [1]=>
-    unicode(3) "red"
+    string(3) "red"
     [0]=>
-    unicode(5) "green"
+    string(5) "green"
   }
   [1]=>
   array(2) {
     [1]=>
-    unicode(3) "red"
+    string(3) "red"
     [0]=>
-    unicode(5) "green"
+    string(5) "green"
   }
 }
 -- Iteration 10 --
@@ -217,54 +217,54 @@ array(2) {
   [0]=>
   array(3) {
     [1]=>
-    unicode(2) "Hi"
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    string(2) "Hi"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
   [1]=>
   array(3) {
     [1]=>
-    unicode(2) "Hi"
-    [u"color"]=>
-    unicode(3) "red"
-    [u"item"]=>
-    unicode(3) "pen"
+    string(2) "Hi"
+    ["color"]=>
+    string(3) "red"
+    ["item"]=>
+    string(3) "pen"
   }
 }
 -- Iteration 11 --
 array(2) {
   [0]=>
   array(2) {
-    [u""]=>
-    unicode(2) "Hi"
+    [""]=>
+    string(2) "Hi"
     [1]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
   [1]=>
   array(2) {
-    [u""]=>
-    unicode(2) "Hi"
+    [""]=>
+    string(2) "Hi"
     [1]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
 }
 -- Iteration 12 --
 array(2) {
   [0]=>
   array(2) {
-    [u""]=>
+    [""]=>
     int(1)
-    [u"color"]=>
-    unicode(5) "green"
+    ["color"]=>
+    string(5) "green"
   }
   [1]=>
   array(2) {
-    [u""]=>
+    [""]=>
     int(1)
-    [u"color"]=>
-    unicode(5) "green"
+    ["color"]=>
+    string(5) "green"
   }
 }
 -- Iteration 13 --
@@ -272,20 +272,20 @@ array(2) {
   [0]=>
   array(3) {
     [0]=>
-    unicode(7) "Saffron"
+    string(7) "Saffron"
     [1]=>
-    unicode(5) "White"
+    string(5) "White"
     [2]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
   [1]=>
   array(3) {
     [0]=>
-    unicode(7) "Saffron"
+    string(7) "Saffron"
     [1]=>
-    unicode(5) "White"
+    string(5) "White"
     [2]=>
-    unicode(5) "Green"
+    string(5) "Green"
   }
 }
 Done

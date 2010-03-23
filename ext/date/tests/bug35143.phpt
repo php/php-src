@@ -8,14 +8,14 @@ var_dump(date_default_timezone_get());
 var_dump(gettimeofday());
 ?>
 --EXPECTF--
-unicode(3) "UTC"
+string(3) "UTC"
 array(4) {
-  [u"sec"]=>
+  ["sec"]=>
   int(%d)
-  [u"usec"]=>
+  ["usec"]=>
   int(%d)
-  [u"minuteswest"]=>
+  ["minuteswest"]=>
   int(0)
-  [u"dsttime"]=>
+  ["dsttime"]=>
   int(0)
 }

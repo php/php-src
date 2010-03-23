@@ -16,6 +16,7 @@ $valid_ints = array(
   0,
   1,
   -1,
+  -2147483648, // max negative integer value
   -2147483647, 
   2147483647,  // max positive integer value
   2147483640,
@@ -23,10 +24,12 @@ $valid_ints = array(
   0x12ab,
   0Xfff,
   0XFA,
+  -0x80000000, // max negative integer as hexadecimal
   0x7fffffff,  // max postive integer as hexadecimal
   0x7FFFFFFF,  // max postive integer as hexadecimal
   0123,        // integer as octal
   01912,       // should be quivalent to octal 1
+  -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
 );
 /* loop to check that is_int() recognizes different 
@@ -141,13 +144,12 @@ var_dump( is_integer(TRUE, FALSE) );
 var_dump( is_long(TRUE, FALSE) );
  
 echo "Done\n";
-?>
 
---CLEAN--
 // close the resources
 fclose($fp);
 closedir($dfp);
 
+?>
 --EXPECTF--
 *** Testing is_int(), is_integer() & is_long()  with valid integer values ***
 --Iteration 1--
@@ -163,9 +165,9 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 4--
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 --Iteration 5--
 bool(true)
 bool(true)
@@ -195,9 +197,9 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 12--
-bool(true)
-bool(true)
-bool(true)
+bool(false)
+bool(false)
+bool(false)
 --Iteration 13--
 bool(true)
 bool(true)
@@ -207,6 +209,18 @@ bool(true)
 bool(true)
 bool(true)
 --Iteration 15--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 16--
+bool(true)
+bool(true)
+bool(true)
+--Iteration 17--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 18--
 bool(true)
 bool(true)
 bool(true)
@@ -432,20 +446,20 @@ bool(false)
 *** Testing error conditions ***
 
 Warning: is_int() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_integer() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_long() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_int() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_integer() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 
 Warning: is_long() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+bool(false)
 Done

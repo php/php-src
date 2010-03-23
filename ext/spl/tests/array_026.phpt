@@ -8,16 +8,16 @@ $test['d1']['d3'] = 'world';
 var_dump($test, $test3['mmmmm']);
 ?>
 --EXPECTF--
-Notice: Undefined variable: test3 in %s%earray_026.php on line 5
+Notice: Undefined variable: test3 in %s%earray_026.php on line %d
 object(ArrayObject)#%d (1) {
-  [u"storage":u"ArrayObject":private]=>
+  ["storage":"ArrayObject":private]=>
   array(1) {
-    [u"d1"]=>
+    ["d1"]=>
     array(2) {
-      [u"d2"]=>
-      unicode(5) "hello"
-      [u"d3"]=>
-      unicode(5) "world"
+      ["d2"]=>
+      string(5) "hello"
+      ["d3"]=>
+      string(5) "world"
     }
   }
 }

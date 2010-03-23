@@ -121,31 +121,31 @@ array(26) {
   int(%i)
   [12]=>
   int(%i)
-  [u"dev"]=>
+  ["dev"]=>
   int(%i)
-  [u"ino"]=>
+  ["ino"]=>
   int(%i)
-  [u"mode"]=>
+  ["mode"]=>
   int(%i)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%i)
-  [u"uid"]=>
+  ["uid"]=>
   int(%i)
-  [u"gid"]=>
+  ["gid"]=>
   int(%i)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%i)
-  [u"size"]=>
+  ["size"]=>
   int(%i)
-  [u"atime"]=>
+  ["atime"]=>
   int(%i)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%i)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%i)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%i)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%i)
 }
 array(26) {
@@ -175,31 +175,31 @@ array(26) {
   int(%i)
   [12]=>
   int(%i)
-  [u"dev"]=>
+  ["dev"]=>
   int(%i)
-  [u"ino"]=>
+  ["ino"]=>
   int(%i)
-  [u"mode"]=>
+  ["mode"]=>
   int(%i)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%i)
-  [u"uid"]=>
+  ["uid"]=>
   int(%i)
-  [u"gid"]=>
+  ["gid"]=>
   int(%i)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%i)
-  [u"size"]=>
+  ["size"]=>
   int(%i)
-  [u"atime"]=>
+  ["atime"]=>
   int(%i)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%i)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%i)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%i)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%i)
 }
 bool(true)
@@ -231,31 +231,31 @@ array(26) {
   int(%i)
   [12]=>
   int(%i)
-  [u"dev"]=>
+  ["dev"]=>
   int(%i)
-  [u"ino"]=>
+  ["ino"]=>
   int(%i)
-  [u"mode"]=>
+  ["mode"]=>
   int(%i)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%i)
-  [u"uid"]=>
+  ["uid"]=>
   int(%i)
-  [u"gid"]=>
+  ["gid"]=>
   int(%i)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%i)
-  [u"size"]=>
+  ["size"]=>
   int(%i)
-  [u"atime"]=>
+  ["atime"]=>
   int(%i)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%i)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%i)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%i)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%i)
 }
 array(26) {
@@ -285,31 +285,31 @@ array(26) {
   int(%i)
   [12]=>
   int(%i)
-  [u"dev"]=>
+  ["dev"]=>
   int(%i)
-  [u"ino"]=>
+  ["ino"]=>
   int(%i)
-  [u"mode"]=>
+  ["mode"]=>
   int(%i)
-  [u"nlink"]=>
+  ["nlink"]=>
   int(%i)
-  [u"uid"]=>
+  ["uid"]=>
   int(%i)
-  [u"gid"]=>
+  ["gid"]=>
   int(%i)
-  [u"rdev"]=>
+  ["rdev"]=>
   int(%i)
-  [u"size"]=>
+  ["size"]=>
   int(%i)
-  [u"atime"]=>
+  ["atime"]=>
   int(%i)
-  [u"mtime"]=>
+  ["mtime"]=>
   int(%i)
-  [u"ctime"]=>
+  ["ctime"]=>
   int(%i)
-  [u"blksize"]=>
+  ["blksize"]=>
   int(%i)
-  [u"blocks"]=>
+  ["blocks"]=>
   int(%i)
 }
 bool(true)

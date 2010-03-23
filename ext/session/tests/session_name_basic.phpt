@@ -30,11 +30,11 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_name() : error functionality ***
-unicode(9) "PHPSESSID"
-unicode(9) "PHPSESSID"
+string(9) "PHPSESSID"
+string(9) "PHPSESSID"
 bool(true)
-unicode(4) "blah"
+string(4) "blah"
 bool(true)
-unicode(4) "blah"
+string(4) "blah"
 Done
 

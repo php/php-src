@@ -2,7 +2,7 @@
 Test usort() function : usage variations - duplicate keys and values
 --FILE--
 <?php
-/* Prototype  : bool usort(array $array_arg, Unicode string $cmp_function)
+/* Prototype  : bool usort(array $array_arg, string $cmp_function)
  * Description: Sort an array by values using a user-defined comparison function 
  * Source code: ext/standard/array.c
  */
@@ -68,12 +68,12 @@ array(7) {
 bool(true)
 array(4) {
   [0]=>
-  unicode(5) "Apple"
+  string(5) "Apple"
   [1]=>
-  unicode(6) "Banana"
+  string(6) "Banana"
   [2]=>
-  unicode(5) "Mango"
+  string(5) "Mango"
   [3]=>
-  unicode(9) "Pineapple"
+  string(9) "Pineapple"
 }
 ===DONE===

@@ -11,5 +11,5 @@ $inis = $ext->getINIEntries();
 var_dump($inis["user_agent"]);
 ?>
 --EXPECT--	
-unicode(3) "php"
+string(3) "php"
 

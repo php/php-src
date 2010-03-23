@@ -101,7 +101,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_intersect_assoc() : Passing different types of arrays to $arr1 argument ***
 -- Iteration 1 --
 array(1) {
@@ -140,23 +140,23 @@ array(0) {
 -- Iteration 7 --
 array(1) {
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
 }
 array(1) {
   [1]=>
-  unicode(6) "aaaa\r"
+  string(6) "aaaa\r"
 }
 -- Iteration 8 --
 array(1) {
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 array(1) {
-  [u"h3"]=>
-  unicode(88) "hello world	
+  ["h3"]=>
+  string(88) "hello world	
 1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
@@ -168,11 +168,11 @@ array(0) {
 }
 -- Iteration 10 --
 array(1) {
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 array(1) {
-  [u"two"]=>
+  ["two"]=>
   int(2)
 }
 -- Iteration 11 --
@@ -182,21 +182,21 @@ array(0) {
 }
 -- Iteration 12 --
 array(1) {
-  [u"one"]=>
-  unicode(3) "ten"
+  ["one"]=>
+  string(3) "ten"
 }
 array(1) {
-  [u"one"]=>
-  unicode(3) "ten"
+  ["one"]=>
+  string(3) "ten"
 }
 -- Iteration 13 --
 array(1) {
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 array(1) {
   [4]=>
-  unicode(4) "four"
+  string(4) "four"
 }
 -- Iteration 14 --
 array(0) {
@@ -210,16 +210,16 @@ array(0) {
 }
 -- Iteration 16 --
 array(2) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
 array(2) {
-  [u""]=>
-  unicode(6) "emptys"
-  [u"emptyd"]=>
-  unicode(0) ""
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
 -- Iteration 17 --
 array(1) {

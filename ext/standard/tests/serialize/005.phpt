@@ -135,17 +135,17 @@ var_dump(unserialize('O:22:"autoload_not_available":0:{}'));
 --EXPECTF--
 ===O1===
 TestOld::__sleep()
-unicode(18) "O:7:"TestOld":0:{}"
+string(18) "O:7:"TestOld":0:{}"
 TestOld::__wakeup()
 object(TestOld)#%d (0) {
 }
 ===N1===
 TestNew::serialize()
-unicode(2) "N;"
+string(2) "N;"
 NULL
 ===N2===
 TestNew::serialize()
-unicode(21) "C:7:"TestNew":1:U:{2}"
+string(19) "C:7:"TestNew":1:{2}"
 TestNew::unserialize()
 object(TestNew)#%d (0) {
 }
@@ -180,7 +180,7 @@ do_autoload(autoload_not_available)
 
 Warning: unserialize(): Function unserializer() hasn't defined the class it was called for in %s005.php on line %d
 object(__PHP_Incomplete_Class)#%d (1) {
-  [u"__PHP_Incomplete_Class_Name"]=>
-  unicode(22) "autoload_not_available"
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(22) "autoload_not_available"
 }
 ===DONE===

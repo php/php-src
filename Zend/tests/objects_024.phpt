@@ -50,3 +50,4 @@ object(foo)#%d (0) {
 int(3)
 object(foo)#%d (0) {
 }
+

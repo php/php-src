@@ -63,24 +63,25 @@ foreach (array('A', 'B') as $class) {
 ?>
 --EXPECTF--
 
+
 ---> Doc comment for A::f():
-unicode(%s) "/**
+string(%d) "/**
      * My Doc Comment for A::f
      */"
 
 
 ---> Doc comment for A::privf():
-unicode(%s) "/**
+string(%d) "/**
      * My Doc Comment for A::privf
      */"
 
 
 ---> Doc comment for A::protStatf():
-unicode(%s) "/** My Doc Comment for A::protStatf */"
+string(%d) "/** My Doc Comment for A::protStatf */"
 
 
 ---> Doc comment for A::finalStatPubf():
-unicode(%s) "/**
+string(%d) "/**
 
      * My Doc Comment for A::finalStatPubf
      */"
@@ -91,13 +92,13 @@ bool(false)
 
 
 ---> Doc comment for B::privf():
-unicode(%s) "/** *
+string(%d) "/** *
      * My Doc Comment for B::privf
      */"
 
 
 ---> Doc comment for B::protStatf():
-unicode(%s) "/** My Doc Comment for B::protStatf 
+string(%d) "/** My Doc Comment for B::protStatf 
 
 
 
@@ -106,7 +107,7 @@ unicode(%s) "/** My Doc Comment for B::protStatf
 
 
 ---> Doc comment for B::finalStatPubf():
-unicode(%s) "/**
+string(%d) "/**
 
      * My Doc Comment for A::finalStatPubf
      */"

@@ -74,9 +74,7 @@ class userstream {
 				return false;
 		}
 	}
-
-	function stream_stat()
-	{
+	function stream_stat() {
 		return array('size' => strlen($this->data));
 	}
 }

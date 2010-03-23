@@ -23,18 +23,15 @@ function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR
 
     foreach( $test_arrays as $test_array )
     {
-        // Convert strings to UTF-16 if needed.
-        $u_test_array = u( $test_array );
-
         // Try to sort test data.
-        $res_val = ut_coll_asort( $coll, $u_test_array, $sort_flag );
+        $res_val = ut_coll_asort( $coll, $test_array, $sort_flag );
 
         // Return output data.
-        $res_dump = "\n" . dump_array( $u_test_array ) .
-                    "\n Result: " . dump_str( $res_val );
+        $res_dump = "\n" . dump( $test_array ) .
+                    "\n Result: " . dump( $res_val );
 
 		// Preppend test signature to output string
-             $md5 = md5( unicode_encode( $res_dump, 'utf-8' ) );
+        $md5 = md5( $res_dump );
 
         global $test_num;
         

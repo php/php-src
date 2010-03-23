@@ -19,15 +19,15 @@ PHP Testfest Berlin 2009-05-10
 ===DONE===
 --EXPECTF--
 array(5) {
-  [u"ticks"]=>
+  ["ticks"]=>
   int(%i)
-  [u"utime"]=>
+  ["utime"]=>
   int(%d)
-  [u"stime"]=>
+  ["stime"]=>
   int(%d)
-  [u"cutime"]=>
+  ["cutime"]=>
   int(%d)
-  [u"cstime"]=>
+  ["cstime"]=>
   int(%d)
 }
 ===DONE===

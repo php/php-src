@@ -26,15 +26,15 @@ f();
 --EXPECTF--
 *** Testing compact() : usage variations  - variables outside of current scope ***
 array(2) {
-  [u"b"]=>
-  unicode(3) "f.b"
-  [u"c"]=>
-  unicode(3) "f.c"
+  ["b"]=>
+  string(3) "f.b"
+  ["c"]=>
+  string(3) "f.c"
 }
 array(2) {
-  [u"b"]=>
-  unicode(3) "f.b"
-  [u"c"]=>
-  unicode(3) "f.c"
+  ["b"]=>
+  string(3) "f.b"
+  ["c"]=>
+  string(3) "f.c"
 }
 ==Done==

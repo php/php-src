@@ -1,5 +1,5 @@
 --TEST--
-Bug # 32615: (Replacing and inserting Fragments)
+Bug #32615 (Replacing and inserting Fragments)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

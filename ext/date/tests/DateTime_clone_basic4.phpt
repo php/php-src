@@ -27,5 +27,5 @@ var_dump( $d1_clone->format( "m.d.y") );
 --EXPECTF--
 *** Testing clone of objects derived from DateTime class with __clone magic method***
 -- DateTimeExt1 __clone magic method called --
-unicode(8) "02.03.09"
+string(8) "02.03.09"
 ===DONE===

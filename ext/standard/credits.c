@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 6                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,10 +23,7 @@
 #include "info.h"
 #include "SAPI.h"
 
-/* NOTE: keep utf8 */
-
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
-#define CREDIT_PUTS(s) php_output_write_utf8((s), strlen(s) TSRMLS_CC)
 
 PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 {
@@ -35,9 +32,9 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 	}
 
 	if (!sapi_module.phpinfo_as_text) {
-		CREDIT_PUTS("<h1>PHP Credits</h1>\n");
+		PUTS("<h1>PHP Credits</h1>\n");
 	} else {
-		CREDIT_PUTS("PHP Credits\n");
+		PUTS("PHP Credits\n");
 	}
 
 	if (flag & PHP_CREDITS_GROUP) {
@@ -71,14 +68,6 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Streams Abstraction Layer", "Wez Furlong, Sara Golemon");
 		CREDIT_LINE("PHP Data Objects Layer", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky");
-		php_info_print_table_end();
-
-		/* Unicode support */
-		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "Unicode Support");
-		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("Design and Architecture", "Andrei Zmievski");
-		CREDIT_LINE("Zend Engine implementation", "Andrei Zmievski, Dmitry Stogov");
 		php_info_print_table_end();
 	}
 
@@ -135,7 +124,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 	}
 
 	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		CREDIT_PUTS("</div></body></html>\n");
+		PUTS("</div></body></html>\n");
 	}
 }
 /* }}} */

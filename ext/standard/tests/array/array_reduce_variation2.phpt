@@ -27,7 +27,7 @@ var_dump(array_reduce(new stdClass(), "max"));
 Warning: array_reduce() expects parameter 2 to be a valid callback, function 'bogusbogus' not found or invalid function name in %sarray_reduce_variation2.php on line %d
 NULL
 
-Warning: array_reduce() expects parameter 1 to be array, Unicode string given in %sarray_reduce_variation2.php on line %d
+Warning: array_reduce() expects parameter 1 to be array, string given in %sarray_reduce_variation2.php on line %d
 NULL
 
 Warning: array_reduce() expects parameter 1 to be array, object given in %sarray_reduce_variation2.php on line %d

@@ -9,7 +9,7 @@ Test parse_ini_file() function
 
 $file_path = dirname(__FILE__);
 
-$parse_string = (binary) <<<EOD
+$parse_string = <<<EOD
 ; Comment starts with semi-colon(;)
 ; Section starts with [<section name>]
 
@@ -217,7 +217,7 @@ echo "*** Done **\n";
 <?php
 unlink(dirname(__FILE__)."/parse.ini");
 ?>
---EXPECT--
+--EXPECTF--
 *** Test parse_ini_file() function:  with various keys and values given in parse.ini file ***
 -- ini file without process_sections optional arg --
 Array

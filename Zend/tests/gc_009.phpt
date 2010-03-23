@@ -16,11 +16,11 @@ echo "ok\n"
 ?>
 --EXPECT--
 object(stdClass)#1 (1) {
-  [u"a"]=>
+  ["a"]=>
   array(1) {
     [0]=>
     &object(stdClass)#1 (1) {
-      [u"a"]=>
+      ["a"]=>
       array(1) {
         [0]=>
         *RECURSION*

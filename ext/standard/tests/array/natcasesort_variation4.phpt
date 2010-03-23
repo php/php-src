@@ -36,52 +36,51 @@ array(11) {
   NULL
   [1]=>
   NULL
-  [7]=>
-  unicode(1) "	"
   [6]=>
-  unicode(1) "
+  string(1) "
 "
   [10]=>
-  unicode(1) ""
+  string(1) ""
+  [7]=>
+  string(1) "	"
   [5]=>
-  unicode(1) ""
+  string(1) ""
   [2]=>
-  unicode(2) "\a"
+  string(2) "\a"
   [3]=>
-  unicode(3) "\cx"
+  string(3) "\cx"
   [9]=>
-  unicode(4) "\ddd"
+  string(4) "\ddd"
   [4]=>
-  unicode(2) "\e"
+  string(2) "\e"
   [8]=>
-  unicode(4) "\xhh"
+  string(4) "\xhh"
 }
 bool(true)
 array(12) {
   [3]=>
-  unicode(5) "apple"
+  string(5) "apple"
   [11]=>
-  unicode(6) "BANANA"
+  string(6) "BANANA"
   [2]=>
-  unicode(6) "banana"
+  string(6) "banana"
   [0]=>
-  unicode(5) "lemoN"
+  string(5) "lemoN"
   [10]=>
-  unicode(6) "oraNGe"
+  string(6) "oraNGe"
   [1]=>
-  unicode(6) "Orange"
+  string(6) "Orange"
   [4]=>
-  unicode(4) "Test"
+  string(4) "Test"
   [6]=>
-  unicode(3) "ttt"
+  string(3) "ttt"
   [5]=>
-  unicode(4) "TTTT"
+  string(4) "TTTT"
   [7]=>
-  unicode(2) "ww"
+  string(2) "ww"
   [8]=>
-  unicode(1) "x"
+  string(1) "x"
   [9]=>
-  unicode(1) "X"
+  string(1) "X"
 }
 Done
-

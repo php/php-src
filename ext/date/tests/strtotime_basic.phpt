@@ -1,11 +1,10 @@
 --TEST--
 strtotime() function - a test to show the difference in behaviour between 'first' and '1', "second" and "2"...
---INI--
-date.timezone="UTC"
 --SKIPIF--
 <?php if (!function_exists('strtotime')) echo "SKIP"; ?>
 --FILE--
 <?php
+date_default_timezone_set('UTC');
 /*
  * The first of December 2008 is a Monday.
  * The term "Monday December 2008" will be parsed as the first Monday in December 2008.

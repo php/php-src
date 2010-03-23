@@ -1,7 +1,7 @@
 --TEST--
 ZE2 ArrayAccess::offsetGet ambiguties
 --INI--
-error_reporting=8191
+error_reporting=4095
 --FILE--
 <?php
 class object implements ArrayAccess {
@@ -48,7 +48,7 @@ var_dump($obj[2]);
 ===DONE===
 --EXPECTF--
 object::offsetGet(1)
-unicode(6) "fooBar"
+string(6) "fooBar"
 object::offsetGet(2)
 int(1)
 object::offsetGet(2)

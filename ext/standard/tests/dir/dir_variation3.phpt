@@ -95,110 +95,110 @@ rmdir($dir_path);
 -- Iteration 1 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 2 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 3 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 4 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 5 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 6 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 7 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 8 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 9 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 
 -- Iteration 10 --
 bool(true)
 object(Directory)#%d (2) {
-  [u"path"]=>
-  unicode(%d) "%s/dir_variation3"
-  [u"handle"]=>
+  ["path"]=>
+  string(%d) "%s/dir_variation3"
+  ["handle"]=>
   resource(%d) of type (stream)
 }
 -- reading contents --
-unicode(%d) "%s"
+string(%d) "%s"
 Done

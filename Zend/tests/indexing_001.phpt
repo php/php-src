@@ -41,7 +41,7 @@ echo "\nDone";
 --EXPECTF--
 *** Indexing - Testing value assignment with key ***
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(1) {
     [0]=>
     int(1)
@@ -57,14 +57,14 @@ int(1)
 Warning: Cannot use a scalar value as an array in %s on line %d
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(1) {
     [0]=>
     int(1)
@@ -72,12 +72,12 @@ array(1) {
 }
 
 Notice: Array to string conversion in %s on line %d
-unicode(1) "A"
+string(1) "A"
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 float(0.1)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   array(1) {
     [0]=>
     int(1)
@@ -86,7 +86,7 @@ array(1) {
 
 *** Indexing - Testing reference assignment with key ***
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(1) {
     [0]=>
     int(1)
@@ -102,14 +102,14 @@ int(1)
 Warning: Cannot use a scalar value as an array in %s on line %d
 bool(true)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(1) {
     [0]=>
     int(1)
   }
 }
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(1) {
     [0]=>
     int(1)
@@ -119,7 +119,7 @@ array(1) {
 Warning: Cannot use a scalar value as an array in %s on line %d
 float(0.1)
 array(1) {
-  [u"foo"]=>
+  ["foo"]=>
   &array(1) {
     [0]=>
     int(1)

@@ -53,17 +53,17 @@ var_dump(mb_stristr($string_mb, $needle2));
 *** Testing mb_stristr() : basic functionality ***
 
 -- ASCII string: needle exists --
-unicode(10) "6263646566"
-unicode(10) "6263646566"
-unicode(2) "61"
+string(10) "6263646566"
+string(10) "6263646566"
+string(2) "61"
 
 -- ASCII string: needle doesn't exist --
 bool(false)
 
 -- Multibyte string: needle exists --
-unicode(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
-unicode(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
-unicode(44) "ceb1ceb2ceb3ceb4ceb5ceb6ceb7ceb8ceb9cebacebb"
+string(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
+string(52) "cebccebdcebecebfcf80cf81cf83cf84cf85cf86cf87cf88cf89"
+string(44) "ceb1ceb2ceb3ceb4ceb5ceb6ceb7ceb8ceb9cebacebb"
 
 -- Multibyte string: needle doesn't exist --
 bool(false)

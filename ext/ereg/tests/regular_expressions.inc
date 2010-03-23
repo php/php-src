@@ -6,19 +6,19 @@
  */ 
 $expressions = array(
   //array(pattern, string to match)
-    array(b'..(a|b|c)(a|b|c)..', '--- ab ---'),
-    array(b'()', ''),
-    array(b'()', 'abcdef'),
-    array(b'[x]|[^x]', 'abcdef'),
-    array(b'(a{1})(a{1,}) (b{1,3}) (c+) (d?ddd|e)', '--- aaa bbb ccc ddd ---'),
-    array(b'\\\\\`\^\.\[\$\(\)\|\*\+\?\{\\\'', '\\`^.[$()|*+?{\''),
-    array(b'\\a', 'a'),
-    array(b'[0-9][^0-9]', '2a'),
-    array(b'^[[:alnum:]]{62,62}$', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
-    array(b'^[[:digit:]]{5}', '0123456789'),
-	array(b'[[:digit:]]{5}$', '0123456789'),
-	array(b'[[:blank:]]{1,10}', "\n \t"),
-	array(b'[[:print:]]{3}', " a "),
+    array('..(a|b|c)(a|b|c)..', '--- ab ---'),
+    array('()', ''),
+    array('()', 'abcdef'),
+    array('[x]|[^x]', 'abcdef'),
+    array('(a{1})(a{1,}) (b{1,3}) (c+) (d?ddd|e)', '--- aaa bbb ccc ddd ---'),
+    array('\\\\\`\^\.\[\$\(\)\|\*\+\?\{\\\'', '\\`^.[$()|*+?{\''),
+    array('\\a', 'a'),
+    array('[0-9][^0-9]', '2a'),
+    array('^[[:alnum:]]{62,62}$', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+    array('^[[:digit:]]{5}', '0123456789'),
+	array('[[:digit:]]{5}$', '0123456789'),
+	array('[[:blank:]]{1,10}', "\n \t"),
+	array('[[:print:]]{3}', " a "),
 );
 
 ?>

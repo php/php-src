@@ -1,5 +1,5 @@
 --TEST--
-Test fgetss() function : Basic functionality - read modes only(bug#42126/42125)
+Test fgetss() function : Basic functionality - read modes only
 --FILE--
 <?php
 /*
@@ -91,12 +91,12 @@ bool(false)
 
 -- Testing fgetss() with file opened using rt mode --
 -- fgetss() with default length, file pointer at 0 --
-unicode(27) "Testing fgetss() functions
+string(27) "Testing fgetss() functions
 "
 int(40)
 bool(false)
 -- fgets() with length = 30, file pointer at 0 --
-unicode(23) "Testing fgetss() functi"
+string(23) "Testing fgetss() functi"
 int(29)
 bool(false)
 
@@ -124,12 +124,12 @@ bool(false)
 
 -- Testing fgetss() with file opened using r+t mode --
 -- fgetss() with default length, file pointer at 0 --
-unicode(27) "Testing fgetss() functions
+string(27) "Testing fgetss() functions
 "
 int(40)
 bool(false)
 -- fgets() with length = 30, file pointer at 0 --
-unicode(23) "Testing fgetss() functi"
+string(23) "Testing fgetss() functi"
 int(29)
 bool(false)
 Done

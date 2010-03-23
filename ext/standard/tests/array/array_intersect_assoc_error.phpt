@@ -1,5 +1,5 @@
 --TEST--
-Test array_intersect_assoc() function : error conditions
+Test array_intersect_assoc() function : error conditions(Bug#43197)
 --FILE--
 <?php
 /* Prototype  : array array_intersect_assoc(array $arr1, array $arr2 [, array $...])
