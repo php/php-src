@@ -76,9 +76,9 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"SNEFRU256", "snefru256", 27},
 	{"MD2", "md2", 28},
 	{"FNV132", "fnv132", 29},
-	{"FNV1a32", "fnv1a32", 30},
+	{"FNV1A32", "fnv1a32", 30},
 	{"FNV164", "fnv164", 31},
-	{"FNV1a64", "fnv1a64", 32},
+	{"FNV1A64", "fnv1a64", 32},
 };
 #endif
 

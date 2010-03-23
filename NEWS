@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.99
+- Added FNV-1 hash support to ext/hash. (Michael Maclean)
 - default_charset if not specified is now UTF-8 instead of ISO-8859-1. (Rasmus)
 	
 ?? ??? 20??, PHP 5.3.3
