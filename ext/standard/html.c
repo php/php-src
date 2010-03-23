@@ -711,17 +711,17 @@ inline static unsigned int get_next_char(enum entity_charset charset,
 
 /* {{{ entity_charset determine_charset
  * returns the charset identifier based on current locale or a hint.
- * defaults to iso-8859-1 */
+ * defaults to UTF-8 */
 static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 {
 	int i;
-	enum entity_charset charset = cs_8859_1;
+	enum entity_charset charset = cs_utf_8;
 	int len = 0;
 	zval *uf_result = NULL;
 
-	/* Guarantee default behaviour for backwards compatibility */
+	/* Default is now UTF-8 */
 	if (charset_hint == NULL)
-		return cs_8859_1;
+		return cs_utf_8;
 
 	if ((len = strlen(charset_hint)) != 0) {
 		goto det_charset;
@@ -855,7 +855,7 @@ det_charset:
 			}
 		}
 		if (!found) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "charset `%s' not supported, assuming iso-8859-1",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "charset `%s' not supported, assuming utf-8",
 					charset_hint);
 		}
 	}
