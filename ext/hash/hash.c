@@ -74,7 +74,11 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 	{"RIPEMD320", "ripemd320", 25},
 	{NULL, NULL, 26}, /* support needs to be added for snefru 128 */
 	{"SNEFRU256", "snefru256", 27},
-	{"MD2", "md2", 28}
+	{"MD2", "md2", 28},
+	{"FNV132", "fnv132", 29},
+	{"FNV1a32", "fnv1a32", 30},
+	{"FNV164", "fnv164", 31},
+	{"FNV1a64", "fnv1a64", 32},
 };
 #endif
 
@@ -841,6 +845,8 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);
 	php_hash_register_algo("salsa10",		&php_hash_salsa10_ops);
 	php_hash_register_algo("salsa20",		&php_hash_salsa20_ops);
+	php_hash_register_algo("fnv132",		&php_hash_fnv132_ops);
+	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);
